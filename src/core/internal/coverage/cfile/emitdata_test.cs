@@ -5,7 +5,6 @@ namespace go.@internal.coverage;
 
 using fmt = fmt_package;
 using coverage = go.@internal.coverage_package;
-using goexperiment = go.@internal.goexperiment_package;
 using platform = go.@internal.platform_package;
 using testenv = go.@internal.testenv_package;
 using os = os_package;
@@ -43,9 +42,6 @@ internal static readonly @string emitToWriterNonAtomicˢ = "emitToWriterNonAtomi
 public static void TestCoverageApis(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skipf("skipping test: too long for short mode"u8);
-    }
-    if (!goexperiment.CoverageRedesign) {
-        Ꮡt.Skipf("skipping new coverage tests (experiment not enabled)"u8);
     }
     testenv.MustHaveGoBuild(new cfile_internal_test_package.testing_TжTB(Ꮡt));
     @string dir = Ꮡt.TempDir();
@@ -145,11 +141,13 @@ internal static readonly @string harnessGoˢ = "harness.go"u8;
 
 // buildHarness builds the helper program "harness.exe".
 internal static @string buildHarness(ж<testing.T> Ꮡt, @string dir, slice<@string> opts) {
+    var argsᴷ = new stackAppend<@string>();
+
     @string harnessPath = filepath.Join(dir, harnessExeˢ);
     @string harnessSrc = filepath.Join(testdataˢ, harnessGoˢ);
     var args = new @string[]{"build"u8, "-o"u8, harnessPath}.slice();
     args = appendꓸꓸꓸ(args, opts);
-    args = append(args, harnessSrc);
+    args = append(argsᴷ, args, harnessSrc);
     //t.Logf("harness build: go %+v\n", args)
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(Ꮡt)), args.ꓸꓸꓸ);
     {
@@ -542,9 +540,6 @@ internal static readonly @string issue56006ˢ = "issue56006"u8;
 public static void TestIssue56006EmitDataRaceCoverRunningGoroutine(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skipf("skipping test: too long for short mode"u8);
-    }
-    if (!goexperiment.CoverageRedesign) {
-        Ꮡt.Skipf("skipping new coverage tests (experiment not enabled)"u8);
     }
 
     // This test requires "go test -race -cover", meaning that we need

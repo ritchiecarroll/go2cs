@@ -36,7 +36,7 @@ internal static class Go2CsTestHost
         registry.Add("TestCopyReadErrWriteErr", io_test_package.TestCopyReadErrWriteErr, "io_test.go", 138);
         registry.Add("TestCopyReadFrom", io_test_package.TestCopyReadFrom, "io_test.go", 73);
         registry.Add("TestCopyWriteTo", io_test_package.TestCopyWriteTo, "io_test.go", 83);
-        registry.Add("TestInterleavedMultiReader", io_test_package.TestInterleavedMultiReader, "multi_test.go", 357);
+        registry.Add("TestInterleavedMultiReader", io_test_package.TestInterleavedMultiReader, "multi_test.go", 355);
         registry.Add("TestMultiReader", io_test_package.TestMultiReader, "multi_test.go", 19);
         registry.Add("TestMultiReaderAsWriterTo", io_test_package.TestMultiReaderAsWriterTo, "multi_test.go", 66);
         registry.Add("TestMultiReaderCopy", io_test_package.TestMultiReaderCopy, "multi_test.go", 219);

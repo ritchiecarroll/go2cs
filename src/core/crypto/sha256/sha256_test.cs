@@ -213,6 +213,56 @@ internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void TestLarge(ж<testing.T> Ꮡt) {
+    UntypedInt N = 10000;
+    UntypedInt offsets = 4;
+    @string ok = "4c207598af7a20db0e3334dd044399a40e467cb81b37f7ba05a4f76dcbd8fd59"u8; // sha256sum of "0123456789" * 1000
+    var block = new slice<byte>(N + offsets);
+    var c = New();
+    for (nint offset = 0; offset < offsets; offset++) {
+        for (nint i = 0; i < N; i++) {
+            block[offset + i] = (byte)((rune)'0' + (byte)(i % 10));
+        }
+        for (nint blockSize = 10; blockSize <= N; blockSize *= 10) {
+            nint blocks = (nint)N / blockSize;
+            var b = block.slice(offset, offset + blockSize);
+            c.Reset();
+            for (nint i = 0; i < blocks; i++) {
+                c.Write(b);
+            }
+            @string s = fmt.Sprintf("%x"u8, c.Sum(default!));
+            if (s != ok) {
+                Ꮡt.Fatalf("sha256 TestLarge offset=%d, blockSize=%d = %s want %s"u8, offset, blockSize, s, ok);
+            }
+        }
+    }
+}
+
+public static void TestExtraLarge(ж<testing.T> Ꮡt) {
+    UntypedInt N = 100000;
+    UntypedInt offsets = 4;
+    @string ok = "aca9e593cc629cbaa94cd5a07dc029424aad93e5129e5d11f8dcd2f139c16cc0"u8; // sha256sum of "0123456789" * 10000
+    var block = new slice<byte>(N + offsets);
+    var c = New();
+    for (nint offset = 0; offset < offsets; offset++) {
+        for (nint i = 0; i < N; i++) {
+            block[offset + i] = (byte)((rune)'0' + (byte)(i % 10));
+        }
+        for (nint blockSize = 10; blockSize <= N; blockSize *= 10) {
+            nint blocks = (nint)N / blockSize;
+            var b = block.slice(offset, offset + blockSize);
+            c.Reset();
+            for (nint i = 0; i < blocks; i++) {
+                c.Write(b);
+            }
+            @string s = fmt.Sprintf("%x"u8, c.Sum(default!));
+            if (s != ok) {
+                Ꮡt.Fatalf("sha256 TestExtraLarge offset=%d, blockSize=%d = %s want %s"u8, offset, blockSize, s, ok);
+            }
+        }
+    }
+}
+
 public static void TestMarshalTypeMismatch(ж<testing.T> Ꮡt) {
     var h1 = New();
     var h2 = New224();
@@ -389,9 +439,39 @@ public static void TestHash(ж<testing.T> Ꮡt) {
     });
 }
 
-internal static hash.Hash bench = New();
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string marshalBinaryˢ = "MarshalBinary"u8;
+internal static readonly @string unmarshalBinaryˢ = "UnmarshalBinary"u8;
+internal static readonly @string appendBinaryˢ = "AppendBinary"u8;
 
-internal static slice<byte> buf = new slice<byte>(8192);
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    Ꮡt.Run(sha224ˢ, (ж<testing.T> tΔ1) => {
+        cryptotest.TestAllImplementations(tΔ1, sha256ˢ, (ж<testing.T> tΔ2) => {
+            var h = maybeCloner(New224());
+            cryptotest.NoExtraMethods(tΔ2, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+    Ꮡt.Run(sha256ˢ2, (ж<testing.T> tΔ3) => {
+        cryptotest.TestAllImplementations(tΔ3, sha256ˢ, (ж<testing.T> tΔ4) => {
+            var h = maybeCloner(New());
+            cryptotest.NoExtraMethods(tΔ4, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+}
+
+internal static any maybeCloner(hash.Hash hʗp) {
+    ref var h = ref heap(hʗp, out var Ꮡh);
+
+    {
+        ref var c = ref heap<hash.Cloner>(out var Ꮡc);
+        (c, var ok) = h._<hash.Cloner>(ᐧ); if (ok) {
+            return Ꮡc;
+        }
+    }
+    return Ꮡh;
+}
+
+internal static hash.Hash bench = New();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string newˢ = "New"u8;
@@ -399,29 +479,33 @@ internal static readonly @string sum224ˢ = "Sum224"u8;
 internal static readonly @string sum256ˢ = "Sum256"u8;
 
 internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
+    var buf = new slice<byte>(size);
     var sum = new slice<byte>(bench.Size());
+    var bufʗ1 = buf;
     var sumʗ1 = sum;
     Ꮡb.Run(newˢ, (ж<testing.B> bΔ1) => {
         bΔ1.ReportAllocs();
         bΔ1.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ1).N; i++) {
             bench.Reset();
-            bench.Write(buf.slice(0, size));
+            bench.Write(bufʗ1);
             bench.Sum(sumʗ1[..0]);
         }
     });
+    var bufʗ2 = buf;
     Ꮡb.Run(sum224ˢ, (ж<testing.B> bΔ2) => {
         bΔ2.ReportAllocs();
         bΔ2.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            Sum224(buf.slice(0, size));
+            Sum224(bufʗ2);
         }
     });
+    var bufʗ3 = buf;
     Ꮡb.Run(sum256ˢ, (ж<testing.B> bΔ3) => {
         bΔ3.ReportAllocs();
         bΔ3.SetBytes((int64)size);
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            Sum256(buf.slice(0, size));
+            Sum256(bufʗ3);
         }
     });
 }
@@ -436,6 +520,28 @@ public static void BenchmarkHash1K(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkHash8K(ж<testing.B> Ꮡb) {
     benchmarkSize(Ꮡb, 8192);
+}
+
+public static void BenchmarkHash256K(ж<testing.B> Ꮡb) {
+    benchmarkSize(Ꮡb, 256 * 1024);
+}
+
+public static void BenchmarkHash1M(ж<testing.B> Ꮡb) {
+    benchmarkSize(Ꮡb, 1024 * 1024);
+}
+
+public static void TestAllocatonsWithTypeAsserts(ж<testing.T> Ꮡt) {
+    cryptotest.SkipTestAllocations(Ꮡt);
+    var allocs = testing.AllocsPerRun(100, () => {
+        var h = New();
+        h.Write(new byte[]{1, 2, 3}.slice());
+        var (marshaled, _) = h._<encoding.BinaryMarshaler>().MarshalBinary();
+        (marshaled, _) = h._<encoding.BinaryAppender>().AppendBinary(marshaled[..0]);
+        h._<encoding.BinaryUnmarshaler>().UnmarshalBinary(marshaled);
+    });
+    if (allocs != 0D) {
+        Ꮡt.Fatalf("allocs = %v; want = 0"u8, allocs);
+    }
 }
 
 } // end sha256_internal_test_package

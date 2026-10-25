@@ -9,6 +9,8 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("crypto/internal/fips140test", new string[]
         {
+            "acvp_fips140v1.0_test.go",
+            "acvp_fips140v1.26_test.go",
             "acvp_test.go",
             "alias_test.go",
             "cast_test.go",
@@ -16,33 +18,49 @@ internal static class Go2CsTestHost
             "cmac_test.go",
             "ctrdrbg_test.go",
             "edwards25519_test.go",
+            "entropy_test.go",
+            "fips140v1.0_test.go",
+            "fips140v1.26_test.go",
             "fips_test.go",
             "indicator_test.go",
+            "mldsa_test.go",
             "nistec_ordinv_test.go",
             "nistec_test.go",
             "sshkdf_test.go",
             "xaes_test.go",
         });
-        registry.Add("TestACVP", fipstest_internal_test_package.TestACVP, "acvp_test.go", 588);
+        registry.Add("TestACVP", fipstest_internal_test_package.TestACVP, "acvp_test.go", 2105);
         registry.Add("TestAliasing", fipstest_internal_test_package.TestAliasing, "alias_test.go", 44);
-        registry.Add("TestAllCASTs", fipstest_internal_test_package.TestAllCASTs, "cast_test.go", 64);
-        registry.Add("TestCASTFailures", fipstest_internal_test_package.TestCASTFailures, "cast_test.go", 160);
-        registry.Add("TestCASTPasses", fipstest_internal_test_package.TestCASTPasses, "cast_test.go", 135);
+        registry.Add("TestAllCASTs", fipstest_internal_test_package.TestAllCASTs, "cast_test.go", 75);
+        registry.Add("TestCASTFailures", fipstest_internal_test_package.TestCASTFailures, "cast_test.go", 185);
+        registry.Add("TestCASTPasses", fipstest_internal_test_package.TestCASTPasses, "cast_test.go", 162);
         registry.Add("TestCMAC", fipstest_internal_test_package.TestCMAC, "cmac_test.go", 14);
-        registry.Add("TestConditionals", fipstest_internal_test_package.TestConditionals, "cast_test.go", 106);
+        registry.Add("TestConditionals", fipstest_internal_test_package.TestConditionals, "cast_test.go", 117);
         registry.Add("TestCounterDRBG", fipstest_internal_test_package.TestCounterDRBG, "ctrdrbg_test.go", 14);
         registry.Add("TestEdwards25519Allocations", fipstest_internal_test_package.TestEdwards25519Allocations, "edwards25519_test.go", 15);
+        registry.Add("TestEntropyAdaptiveProportionTest", fipstest_internal_test_package.TestEntropyAdaptiveProportionTest, "entropy_test.go", 200);
+        registry.Add("TestEntropyRace", fipstest_internal_test_package.TestEntropyRace, "entropy_test.go", 255);
+        registry.Add("TestEntropyRepetitionCountTest", fipstest_internal_test_package.TestEntropyRepetitionCountTest, "entropy_test.go", 180);
+        registry.Add("TestEntropySHA384", fipstest_internal_test_package.TestEntropySHA384, "entropy_test.go", 158);
+        registry.Add("TestEntropySamples", fipstest_internal_test_package.TestEntropySamples, "entropy_test.go", 33);
+        registry.Add("TestEntropyUnchanged", fipstest_internal_test_package.TestEntropyUnchanged, "entropy_test.go", 221);
         registry.Add("TestEquivalents", fipstest_internal_test_package.TestEquivalents, "nistec_test.go", 108);
-        registry.Add("TestFIPSCheckInfo", fipstest_internal_test_package.TestFIPSCheckInfo, "check_test.go", 50);
-        registry.Add("TestFIPSCheckVerify", fipstest_internal_test_package.TestFIPSCheckVerify, "check_test.go", 23);
-        registry.Add("TestGetConfig", fipstest_internal_test_package.TestGetConfig, "acvp_test.go", 704);
+        registry.Add("TestFIPS140", fipstest_internal_test_package.TestFIPS140, "fips_test.go", 91);
+        registry.Add("TestGetConfig", fipstest_internal_test_package.TestGetConfig, "acvp_test.go", 2221);
         registry.Add("TestIndicator", fipstest_internal_test_package.TestIndicator, "indicator_test.go", 12);
+        registry.Add("TestIntegrityCheck", fipstest_internal_test_package.TestIntegrityCheck, "check_test.go", 24);
+        registry.Add("TestIntegrityCheckFailure", fipstest_internal_test_package.TestIntegrityCheckFailure, "check_test.go", 45);
+        registry.Add("TestIntegrityCheckInfo", fipstest_internal_test_package.TestIntegrityCheckInfo, "check_test.go", 87);
+        registry.Add("TestMLDSAAccumulated", fipstest_internal_test_package.TestMLDSAAccumulated, "mldsa_test.go", 31);
+        registry.Add("TestMLDSAAllocations", fipstest_internal_test_package.TestMLDSAAllocations, "mldsa_test.go", 144);
+        registry.Add("TestMLDSAGenerateKey", fipstest_internal_test_package.TestMLDSAGenerateKey, "mldsa_test.go", 117);
         registry.Add("TestNISTECAllocations", fipstest_internal_test_package.TestNISTECAllocations, "nistec_test.go", 18);
-        registry.Add("TestSSHACVPVector", fipstest_internal_test_package.TestSSHACVPVector, "sshkdf_test.go", 15);
+        registry.Add("TestSSHACVPVector", fipstest_internal_test_package.TestSSHACVPVector, "sshkdf_test.go", 14);
         registry.Add("TestScalarMult", fipstest_internal_test_package.TestScalarMult, "nistec_test.go", 160);
-        registry.Add("TestSha2256", fipstest_internal_test_package.TestSha2256, "acvp_test.go", 721);
-        registry.Add("TestTooFewArgs", fipstest_internal_test_package.TestTooFewArgs, "acvp_test.go", 659);
-        registry.Add("TestTooManyArgs", fipstest_internal_test_package.TestTooManyArgs, "acvp_test.go", 681);
+        registry.Add("TestSha2256", fipstest_internal_test_package.TestSha2256, "acvp_test.go", 2238);
+        registry.Add("TestTooFewArgs", fipstest_internal_test_package.TestTooFewArgs, "acvp_test.go", 2176);
+        registry.Add("TestTooManyArgs", fipstest_internal_test_package.TestTooManyArgs, "acvp_test.go", 2198);
+        registry.Add("TestVersion", fipstest_internal_test_package.TestVersion, "fips_test.go", 67);
         registry.Add("TestXAES", fipstest_internal_test_package.TestXAES, "xaes_test.go", 39);
         registry.Add("TestXAESAccumulated", fipstest_internal_test_package.TestXAESAccumulated, "xaes_test.go", 117);
         registry.Add("TestXAESAllocations", fipstest_internal_test_package.TestXAESAllocations, "xaes_test.go", 19);

@@ -291,6 +291,7 @@ internal static slice<unQuoteTest> unquotetests = new unQuoteTest[]{
     new(@"""\U0001011111"""u8, "\U0001011111"u8),
     new(@"""\a\b\f\n\r\t\v\\\"""""u8, "\a\b\f\n\r\t\v\\\""u8),
     new(@"""'"""u8, "'"u8),
+
     new(@"'a'"u8, "a"u8),
     new(@"'☹'"u8, "☹"u8),
     new(@"'\a'"u8, "\a"u8),
@@ -302,6 +303,7 @@ internal static slice<unQuoteTest> unquotetests = new unQuoteTest[]{
     new(@"' '"u8, " "u8),
     new(@"'\''"u8, "'"u8),
     new(@"'""'"u8, "\""u8),
+
     new("``"u8, @""u8),
     new("`a`"u8, @"a"u8),
     new("`abc`"u8, @"abc"u8),

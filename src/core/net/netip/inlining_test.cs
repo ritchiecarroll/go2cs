@@ -23,6 +23,8 @@ internal static readonly @string canInlineˢ = " can inline "u8;
 internal static readonly @string funcˢ = ".func"u8;
 
 public static void TestInlining(ж<testing.T> Ꮡt) {
+    var wantInlinableᴷ = new stackAppend<@string>();
+
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
     var (@out, err) = exec.Command(
@@ -87,7 +89,7 @@ public static void TestInlining(ж<testing.T> Ꮡt) {
     var exprᴛ1 = runtime.GOARCH;
     if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
         // These don't inline on 32-bit.
-        wantInlinable = append(wantInlinable,
+        wantInlinable = append(wantInlinableᴷ, wantInlinable,
             "Addr.AsSlice"u8,
             "Addr.Next",
             "Addr.Prev");

@@ -41,7 +41,7 @@ using static go.crypto.sha3_test_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<SHA3, go.crypto.@internal.fips140_package.Hash>(Pointer = true)]
+[assembly: GoImplement<SHA3, hash_package.Cloner>(Pointer = true, Production = true)]
 [assembly: GoImplement<SHA3, hash_package.Hash>(Pointer = true, Production = true)]
 [assembly: GoImplement<SHAKE, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<SHAKE, io_package.Writer>(Pointer = true)]
@@ -49,6 +49,12 @@ using static go.crypto.sha3_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,8 +64,8 @@ using static go.crypto.sha3_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIABxKSqJKokqiSqJKokqiSqJKokqiSqJKokqiSAAcSkqiSAAIQ0gACENKssqyyqJKokqiSqJKokg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
-[assembly: go.GoPositionMap("crypto/sha3/sha3_test.go", "sha3_test.cs", "ABswAA0SAAcakoKClNqipoKCgoKCgoKCpoKigIKkgqaCgsqCgoKUgoKCgqaCooCCpIKmgoLMkqaClKaCgoKCgoCC3JKmgoKCgoKCgILMoqaCgoKCgpSCgoKCgoKClIIABBbigoKClKaC5oKClJSCgqaCgpSCAAwOgoKCgIKCgoKCgpS2goCCgoKCgoKUtoKAgoKClLaCgIKCgpQACQoAK1iCgqaC3IKCgoKCgoKClIKClIKClIKCpoKCgILIgtaCgqiSgoKCgoKCAAoWgoCCAAwIgoKAkoCSgJKAkoCSgJKAkoDKsoKCgoKCgoKCgpSCgIKkgoKCurKCgoKCgoKCgoKClIKAgqSCgoKCurKCgoKClIKCgpSUgqrCgoKClIKUgoKClLiAooCigKKApICigKKAooCkgA==", "225-236:1;226-233:1.1;237-248:2;238-245:2.1;249-257:3;250-254:3.1;258-266:4;259-263:4.1;313-322:1;314-317:1.1;318-321:1.2;390-399:1;391-391:1.1;392-392:1.2;393-393:1.3;394-394:1.4;395-395:1.5;396-396:1.6;397-397:1.7;398-398:1.8")]
+[assembly: go.GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJKmgoK6soKokoKokoKokoKokoKokoKokoKokoKokpIACBKCgrqSqJIAAhDSAAIQ0qzSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
+[assembly: go.GoPositionMap("crypto/sha3/sha3_test.go", "sha3_test.cs", "ABswAA4UAAsagoKCkgAGEKKmgoKCgoKCgoKmgqKAgqSCpoKCyoKCgpSCgoKCpoKigIKkgqaCgsySpoKUpoKCgoKCgILckqaCgoKCgoKAgsyipoKCgoKClIKCgoKCgoKUggAEFuKCgoKUpoLmgoKUlIKCpoKClIIADA6CgoKAgoKCgoKClLaCgIKCgoKCgpS2goCCgoKUtoKAgoKClAAJCgArWIKCpoLcgoKCgoKCgoKUgoKUgoKUgoKmgoKAgsiC1oKCqJKCgoKCgoIAChaCgIIADAiCgoCSgJKAkoCSgJKAkoCSgMqygoKCgoKCgoKClIKAgqSCgoK6soKCgoKCgoKCgoKUgoCCpIKCgoK6soKCgoKUgoKClJSCqsKCgoKUgpSCgoKUuICigKKAooCkgKKAooCigKSA", "48-54:1;50-52:1.1;51-51:1.1.1;228-239:1;229-236:1.1;240-251:2;241-248:2.1;252-260:3;253-257:3.1;261-269:4;262-266:4.1;316-325:1;317-320:1.1;321-324:1.2;393-402:1;394-394:1.1;395-395:1.2;396-396:1.3;397-397:1.4;398-398:1.5;399-399:1.6;400-400:1.7;401-401:1.8")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -88,7 +94,6 @@ public static partial class sha3_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcrypto() => builtin.initPackage(typeof(crypto_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha3() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha3_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸhex() => builtin.initPackage(typeof(encoding.hex_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));

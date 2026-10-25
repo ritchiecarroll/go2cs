@@ -16,7 +16,8 @@ using fmt = fmt_package;
 using token = global::go.go.token_package;
 using asan = @internal.asan_package;
 using goarch = @internal.goarch_package;
-using goexperiment = @internal.goexperiment_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δio = io_package;
 using Δmath = math_package;
@@ -45,6 +46,7 @@ using global::go.math;
 using global::go.reflect.@internal;
 using global::go.runtime;
 using global::go.sync;
+using iter = iter_package;
 using static global::go.reflect_internal_test_package;
 using Δreflect = reflect_package;
 using ꓸꓸꓸPoint = Span<reflect_test_package.Point>;
@@ -59,7 +61,7 @@ internal static any sink;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object valueOfTrueBoolFalseˢ = (@string)"ValueOf(true).Bool() = false"u8;
 
-public static void TestBool(ж<Δtesting.T> Ꮡt) {
+public static partial void TestBool(ж<Δtesting.T> Ꮡt) {
     var v = ValueOf(true);
     if (v.Bool() != true) {
         Ꮡt.Fatal(valueOfTrueBoolFalseˢ);
@@ -82,7 +84,7 @@ partial struct pair {
     internal @string s;
 }
 
-internal static void assert(ж<Δtesting.T> Ꮡt, @string s, @string want) {
+internal static partial void assert(ж<Δtesting.T> Ꮡt, @string s, @string want) {
     if (s != want) {
         Ꮡt.Errorf("have %#q want %#q"u8, s, want);
     }
@@ -361,7 +363,7 @@ internal static ж<slice<pair>> ᏑvalueTests = new StandardBox<slice<pair>>(new
 }.slice());
 internal static ref slice<pair> valueTests => ref ᏑvalueTests.ValueSlot;
 
-internal static void testType(ж<Δtesting.T> Ꮡt, nint i, reflectꓸType typ, @string want) {
+internal static partial void testType(ж<Δtesting.T> Ꮡt, nint i, reflectꓸType typ, @string want) {
     @string s = typ.String();
     if (s != want) {
         Ꮡt.Errorf("#%d: have %#q, want %#q"u8, i, s, want);
@@ -579,7 +581,7 @@ public static void TestCanIntUintFloatComplex(ж<Δtesting.T> Ꮡt) {
 
     slice<TestCanIntUintFloatComplex_type> testCases = new TestCanIntUintFloatComplex_type[]{
         // signed integer
-        new((nint)(132), new bool[]{true, false, false, false}.array()),
+        new((nint)132, new bool[]{true, false, false, false}.array()),
         new((int8)8, new bool[]{true, false, false, false}.array()),
         new((int16)16, new bool[]{true, false, false, false}.array()),
         new((int32)32, new bool[]{true, false, false, false}.array()),
@@ -598,10 +600,10 @@ public static void TestCanIntUintFloatComplex(ж<Δtesting.T> Ꮡt) {
         new((complex64)(532.125F + 10F.i()), new bool[]{false, false, false, true}.array()),
         new((complex128)(564.25D + 1D.i()), new bool[]{false, false, false, true}.array()),
         // underlying
-        new(((TestCanIntUintFloatComplex_integer)(-132)), new bool[]{true, false, false, false}.array()),
-        new(((TestCanIntUintFloatComplex_uinteger)132), new bool[]{false, true, false, false}.array()),
-        new(((TestCanIntUintFloatComplex_float)256.25D), new bool[]{false, false, true, false}.array()),
-        new(((TestCanIntUintFloatComplex_complex)(532.125D + 10D.i())), new bool[]{false, false, false, true}.array()),
+        new((TestCanIntUintFloatComplex_integer)(-132), new bool[]{true, false, false, false}.array()),
+        new((TestCanIntUintFloatComplex_uinteger)132, new bool[]{false, true, false, false}.array()),
+        new((TestCanIntUintFloatComplex_float)256.25D, new bool[]{false, false, true, false}.array()),
+        new((TestCanIntUintFloatComplex_complex)(532.125D + 10D.i()), new bool[]{false, false, false, true}.array()),
         // not-acceptable
         new((@string)"hello world"u8, new bool[]{false, false, false, false}.array()),
         new(@new<nint>(), new bool[]{false, false, false, false}.array()),
@@ -622,7 +624,7 @@ public static void TestCanIntUintFloatComplex(ж<Δtesting.T> Ꮡt) {
         var v = ValueOf(tc.i);
         var got = new bool[]{v.CanInt(), v.CanUint(), v.CanFloat(), v.CanComplex()}.array();
 
-        foreach (var (j, _) in tc.want) {
+        foreach (var j in range(tc.want)) {
             if (got[j] != tc.want[j]) {
                 Ꮡt.Errorf(
                     "#%d: v.%s() returned %t for type %T, want %t"u8,
@@ -647,25 +649,25 @@ internal partial struct TestCanSetField_Embed /*dyn*/ {
 }
 
 internal partial struct TestCanSetField_S1 /*dyn*/ {
-    internal partial ref TestCanSetField_embed embed { get; }
+    /*embed*/ internal TestCanSetField_embed embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S2 /*dyn*/ {
-    internal partial ref ж<TestCanSetField_embed> embed { get; }
+    /*embed*/ internal ж<TestCanSetField_embed> embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S3 /*dyn*/ {
-    public partial ref TestCanSetField_Embed Embed { get; }
+    /*embed*/ public TestCanSetField_Embed Embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S4 /*dyn*/ {
-    public partial ref ж<TestCanSetField_Embed> Embed { get; }
+    /*embed*/ public ж<TestCanSetField_Embed> Embed;
     internal nint x;
     public nint X;
 }
@@ -783,7 +785,7 @@ internal static ж<nint> Ꮡ_i = new StandardBox<nint>(7);
 internal static ref nint _i => ref Ꮡ_i.Value;
 
 internal static slice<pair> valueToStringTests = new pair[]{
-    new((nint)(123), "123"u8),
+    new((nint)123, "123"u8),
     new(123.5D, "123.5"u8),
     new((byte)123, "123"u8),
     new((@string)"abc"u8, "abc"u8),
@@ -890,9 +892,9 @@ internal partial struct TestAll_i /*dyn*/ {
 
 public static void TestAll(ж<Δtesting.T> Ꮡt) {
     testType(Ꮡt, 1, TypeOf((int8)0), int8ˢ);
-    testType(Ꮡt, 2, TypeOf(((ж<int8>)nil)).Elem(), int8ˢ);
+    testType(Ꮡt, 2, TypeOf((ж<int8>)nil).Elem(), int8ˢ);
 
-    var typ = TypeOf(((ж<typeᴛ22_x>)nil));
+    var typ = TypeOf((ж<typeᴛ22_x>)nil);
     testType(Ꮡt, 3, typ, structCChanInt32DFloat32ˢ);
     var etyp = typ.Elem();
     testType(Ꮡt, 4, etyp, structCChanInt32DFloat32ˢ2);
@@ -915,7 +917,7 @@ public static void TestAll(ж<Δtesting.T> Ꮡt) {
     testType(Ꮡt, 7, typ, int32ˢ);
     testType(Ꮡt, 8, typ.Elem(), int32ˢ2);
 
-    typ = TypeOf(((map<@string, ж<int32>>)default!));
+    typ = TypeOf((map<@string, ж<int32>>)default!);
     testType(Ꮡt, 9, typ, mapStringInt32ˢ);
     var mtyp = typ;
     testType(Ꮡt, 10, mtyp.Key(), stringˢ);
@@ -1378,7 +1380,7 @@ partial struct structWithSelfPtr {
 internal static slice<DeepEqualTest> deepEqualTests = new DeepEqualTest[]{
     // Equalities
     new(default!, default!, true),
-    new((nint)(1), (nint)(1), true),
+    new((nint)1, (nint)1, true),
     new((int32)1, (int32)1, true),
     new(0.5D, 0.5D, true),
     new((float32)0.5F, (float32)0.5F, true),
@@ -1386,7 +1388,7 @@ internal static slice<DeepEqualTest> deepEqualTests = new DeepEqualTest[]{
     new(new slice<nint>(10), new slice<nint>(10), true),
     new(Ꮡ(new nint[]{1, 2, 3}.array()), Ꮡ(new nint[]{1, 2, 3}.array()), true),
     new(new Basic(1, 0.5F), new Basic(1, 0.5F), true),
-    new(((error)default!), ((error)default!), true),
+    new((error)default!, (error)default!, true),
     new(new map<nint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, true),
     new((fn1).OrTypedNilFunc(), (fn2).OrTypedNilFunc(), true),
     new(new byte[]{1, 2, 3}.slice(), new byte[]{1, 2, 3}.slice(), true),
@@ -1394,7 +1396,7 @@ internal static slice<DeepEqualTest> deepEqualTests = new DeepEqualTest[]{
     new(new MyBytes(new byte[]{1, 2, 3}.slice()), new MyBytes(new byte[]{1, 2, 3}.slice()), true),
 
     // Inequalities
-    new((nint)(1), (nint)(2), false),
+    new((nint)1, (nint)2, false),
     new((int32)1, (int32)2, false),
     new(0.5D, 0.6D, false),
     new((float32)0.5F, (float32)0.6F, false),
@@ -1407,8 +1409,8 @@ internal static slice<DeepEqualTest> deepEqualTests = new DeepEqualTest[]{
     new(new map<nint, @string>{[1] = "one"u8, [2] = "txo"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[1] = "one"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, new map<nint, @string>{[1] = "one"u8}, false),
-    new(default!, (nint)(1), false),
-    new((nint)(1), default!, false),
+    new(default!, (nint)1, false),
+    new((nint)1, default!, false),
     new((fn1).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new((fn3).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new(new slice<nint>[]{new nint[]{1}.slice()}.slice(), new slice<nint>[]{new nint[]{2}.slice()}.slice(), false),
@@ -1427,16 +1429,16 @@ internal static slice<DeepEqualTest> deepEqualTests = new DeepEqualTest[]{
     new(new nint[]{}.slice(), slice<nint>(default!), false),
     new(new nint[]{}.slice(), new nint[]{}.slice(), true),
     new(slice<nint>(default!), slice<nint>(default!), true),
-    new(new map<nint, nint>{}, ((map<nint, nint>)default!), false),
+    new(new map<nint, nint>{}, (map<nint, nint>)default!, false),
     new(new map<nint, nint>{}, new map<nint, nint>{}, true),
-    new(((map<nint, nint>)default!), ((map<nint, nint>)default!), true),
+    new((map<nint, nint>)default!, (map<nint, nint>)default!, true),
 
     // Mismatched types
-    new((nint)(1), 1.0D, false),
+    new((nint)1, 1.0D, false),
     new((int32)1, (int64)1, false),
     new(0.5D, (@string)"hello"u8, false),
     new(new nint[]{1, 2, 3}.slice(), new nint[]{1, 2, 3}.array(), false),
-    new(Ꮡ(new any[]{(nint)(1), (nint)(2), (nint)(4)}.array()), Ꮡ(new any[]{(nint)(1), (nint)(2), (@string)"s"u8}.array()), false),
+    new(Ꮡ(new any[]{(nint)1, (nint)2, (nint)4}.array()), Ꮡ(new any[]{(nint)1, (nint)2, (@string)"s"u8}.array()), false),
     new(new Basic(1, 0.5F), new NotBasic(new Basic(1, 0.5F)), false),
     new(new map<nuint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new byte[]{1, 2, 3}.slice(), new MyByte[]{1, 2, 3}.slice(), false),
@@ -1588,6 +1590,7 @@ internal static slice<deepEqualPerfTestsᴛ1> deepEqualPerfTests = new deepEqual
     new(x: new int64[]{99}.slice(), y: new int64[]{99}.slice()),
     new(x: (nint)999999, y: (nint)999999),
     new(x: new nint[]{999999}.slice(), y: new nint[]{999999}.slice()),
+
     new(x: (uint8)99, y: (uint8)99),
     new(x: new uint8[]{99}.slice(), y: new uint8[]{99}.slice()),
     new(x: (uint16)99, y: (uint16)99),
@@ -1600,20 +1603,26 @@ internal static slice<deepEqualPerfTestsᴛ1> deepEqualPerfTests = new deepEqual
     new(x: new nuint[]{999999}.slice(), y: new nuint[]{999999}.slice()),
     new(x: (uintptr)999999, y: (uintptr)999999),
     new(x: new uintptr[]{999999}.slice(), y: new uintptr[]{999999}.slice()),
+
     new(x: (float32)1.414F, y: (float32)1.414F),
     new(x: new float32[]{1.414F}.slice(), y: new float32[]{1.414F}.slice()),
     new(x: (float64)1.414D, y: (float64)1.414D),
     new(x: new float64[]{1.414D}.slice(), y: new float64[]{1.414D}.slice()),
+
     new(x: (complex64)1.414F, y: (complex64)1.414F),
     new(x: new complex64[]{1.414F}.slice(), y: new complex64[]{1.414F}.slice()),
     new(x: (complex128)1.414D, y: (complex128)1.414D),
     new(x: new complex128[]{1.414D}.slice(), y: new complex128[]{1.414D}.slice()),
+
     new(x: true, y: true),
     new(x: new bool[]{true}.slice(), y: new bool[]{true}.slice()),
+
     new(x: (@string)"abcdef"u8, y: (@string)"abcdef"u8),
     new(x: new @string[]{"abcdef"u8}.slice(), y: new @string[]{"abcdef"u8}.slice()),
+
     new(x: slice<byte>("abcdef"u8), y: slice<byte>("abcdef"u8)),
     new(x: new slice<byte>[]{slice<byte>("abcdef"u8)}.slice(), y: new slice<byte>[]{slice<byte>("abcdef"u8)}.slice()),
+
     new(x: new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'a', (rune)'b', (rune)'c'}.array(), y: new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'a', (rune)'b', (rune)'c'}.array()),
     new(x: GoReflect.WithElemDims(new array<byte>[]{new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'a', (rune)'b', (rune)'c'}.array()}.slice(), 6), y: GoReflect.WithElemDims(new array<byte>[]{new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'a', (rune)'b', (rune)'c'}.array()}.slice(), 6))
 }.slice();
@@ -1622,10 +1631,6 @@ internal static slice<deepEqualPerfTestsᴛ1> deepEqualPerfTests = new deepEqual
 internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocates more with -asan; see #70079"u8;
 
 public static void TestDeepEqualAllocs(ж<Δtesting.T> Ꮡt) {
-    // TODO(prattmic): maps on stack
-    if (goexperiment.SwissMap) {
-        Ꮡt.Skipf("Maps on stack not yet implemented"u8);
-    }
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesMoreWithˢ);
     }
@@ -1665,7 +1670,7 @@ internal partial struct TestAlignment_T1inner /*dyn*/ {
 }
 
 internal partial struct TestAlignment_T1 /*dyn*/ {
-    public partial ref TestAlignment_T1inner T1inner { get; }
+    /*embed*/ public TestAlignment_T1inner T1inner;
     internal nint f;
 }
 
@@ -1674,7 +1679,7 @@ internal partial struct TestAlignment_T2inner /*dyn*/ {
 }
 
 internal partial struct TestAlignment_T2 /*dyn*/ {
-    public partial ref TestAlignment_T2inner T2inner { get; }
+    /*embed*/ public TestAlignment_T2inner T2inner;
     internal nint f;
 }
 
@@ -1690,14 +1695,14 @@ public static void TestAlignment(ж<Δtesting.T> Ꮡt) {
     check2ndField(x1, (uintptr)Ꮡx1.of(TestAlignment_T2.Ꮡf) - (uintptr)Ꮡx1, Ꮡt);
 }
 
-public static void Nil(any a, ж<Δtesting.T> Ꮡt) {
+public static partial void Nil(any a, ж<Δtesting.T> Ꮡt) {
     var n = ValueOf(a).Field(0);
     if (!n.IsNil()) {
         Ꮡt.Errorf("%v should be nil"u8, a);
     }
 }
 
-public static void NotNil(any a, ж<Δtesting.T> Ꮡt) {
+public static partial void NotNil(any a, ж<Δtesting.T> Ꮡt) {
     var n = ValueOf(a).Field(0);
     if (n.IsNil()) {
         Ꮡt.Errorf("value of type %v should not be nil"u8, ValueOf(a).Type().String());
@@ -1781,7 +1786,7 @@ public static void TestIsNil(ж<Δtesting.T> Ꮡt) {
 
     TestIsNil_doNilᴛ1 ii = default!;
     Nil(ii, Ꮡt);
-    ii.x = (nint)(2);
+    ii.x = (nint)2;
     NotNil(ii, Ꮡt);
 
     TestIsNil_fi fi = default!;
@@ -1814,7 +1819,7 @@ internal partial struct TestIsZero_typeᴛ2 /*dyn*/ {
 }
 
 internal partial struct TestIsZero_typeᴛ3 /*dyn*/ {
-    public partial ref reflect_package.ΔValue Value { get; }
+    /*embed*/ public reflect_package.ΔValue Value;
 }
 
 internal partial struct TestIsZero_typeᴛ4 /*dyn*/ {
@@ -1897,7 +1902,7 @@ public static void TestIsZero(ж<Δtesting.T> Ꮡt) {
         new(new TestIsZero_typeᴛ1[]{}.array(1), true),
         new(new TestIsZero_typeᴛ1[]{new(@new<nint>())}.array(), false),
         new(new reflectꓸValue[]{}.array(3, () => new(nil)), true),
-        new(new reflectꓸValue[]{new(), ValueOf((nint)(0)), new()}.array(), false),
+        new(new reflectꓸValue[]{new(), ValueOf((nint)0), new()}.array(), false),
         // Chan
         new((channel<@string>)(default!), true),
         new(new channel<@string>(0), false),
@@ -1907,14 +1912,14 @@ public static void TestIsZero(ж<Δtesting.T> Ꮡt) {
         new(New, false),
         // Interface
         new(New(TypeOf(@new<error>()).Elem()).Elem(), true),
-        new(((Δio.Reader)new reflect_test_package.strings_ReaderжReader(strings.NewReader(""u8))), false),
+        new((Δio.Reader)new reflect_test_package.strings_ReaderжReader(strings.NewReader(""u8)), false),
         // Map
-        new(((map<@string, @string>)default!), true),
+        new((map<@string, @string>)default!, true),
         new(new map<@string, @string>{}, false),
         new(new map<@string, @string>(), false),
         // Pointer
-        new(((ж<Action>)nil), true),
-        new(((ж<nint>)nil), true),
+        new((ж<Action>)nil, true),
+        new((ж<nint>)nil, true),
         new(@new<nint>(), false),
         // Slice
         new(new @string[]{}.slice(), false),
@@ -1931,11 +1936,11 @@ public static void TestIsZero(ж<Δtesting.T> Ꮡt) {
         new(new TestIsZero_typeᴛ2(), true), // incomparable struct
         new(new TestIsZero_typeᴛ2(new nint[]{1}.slice()), false), // incomparable struct
         new(new TestIsZero_typeᴛ3(), true),
-        new(new TestIsZero_typeᴛ3(ValueOf((nint)(0))), false),
+        new(new TestIsZero_typeᴛ3(ValueOf((nint)0)), false),
         new(new TestIsZero_typeᴛ4(), true), // comparable struct with blank fields
-        new(setField(new TestIsZero_typeᴛ4(), 0 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), true),
-        new(setField(new TestIsZero_typeᴛ4(), 1 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), false),
-        new(setField(new TestIsZero_typeᴛ4(), 2 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), true),
+        new(setField<TestIsZero_typeᴛ4, nint>(new TestIsZero_typeᴛ4(), 0 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), true),
+        new(setField<TestIsZero_typeᴛ4, nint>(new TestIsZero_typeᴛ4(), 1 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), false),
+        new(setField<TestIsZero_typeᴛ4, nint>(new TestIsZero_typeᴛ4(), 2 * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8, 1), true),
         new(new TestIsZero_typeᴛ5(), true), // incomparable struct with blank fields
         new(setField(new TestIsZero_typeᴛ5(), 0 * /* unsafe.Sizeof((func())(nil)) */ (uintptr)8, () => {
         }), true),
@@ -2108,11 +2113,11 @@ public static void TestMap(ж<Δtesting.T> Ꮡt) {
     }
     var mvʗ1 = mv;
     shouldPanic(notAssignableˢ, () => {
-        mvʗ1.MapIndex(ValueOf(((TestMap_S)(@string)keyˢ)));
+        mvʗ1.MapIndex(ValueOf((TestMap_S)(@string)keyˢ));
     });
     var mvʗ2 = mv;
     shouldPanic(notAssignableˢ, () => {
-        mvʗ2.SetMapIndex(ValueOf(((TestMap_S)(@string)keyˢ)), ValueOf((nint)(0)));
+        mvʗ2.SetMapIndex(ValueOf((TestMap_S)(@string)keyˢ), ValueOf((nint)0));
     });
 }
 
@@ -2162,7 +2167,7 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
         }}
 
         // Send
-        cvΔ1.Send(ValueOf((nint)(2)));
+        cvΔ1.Send(ValueOf((nint)2));
         {
             nint iΔ1 = ᐸꟷ(cΔ1); if (iΔ1 != 2) {
                 Ꮡt.Errorf("reflect Send 2, native recv %d"u8, iΔ1);
@@ -2197,14 +2202,14 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
 
         // TrySend fail
         cΔ1.ᐸꟷ(100);
-        ok = cvΔ1.TrySend(ValueOf((nint)(5)));
+        ok = cvΔ1.TrySend(ValueOf((nint)5));
         nint i = ᐸꟷ(cΔ1);
         if (ok) {
             Ꮡt.Errorf("TrySend on full chan succeeded: value %d"u8, i);
         }
 
         // TrySend success
-        ok = cvΔ1.TrySend(ValueOf((nint)(6)));
+        ok = cvΔ1.TrySend(ValueOf((nint)6));
         if (!ok){
             Ꮡt.Errorf("TrySend on empty chan failed"u8);
             var selᴛ1 = cΔ1;
@@ -2249,7 +2254,7 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
     channel<nint> c = default!;
     var cv = MakeChan(TypeOf(c), 0);
     c = cv.Interface()._<channel<nint>>();
-    if (cv.TrySend(ValueOf((nint)(7)))) {
+    if (cv.TrySend(ValueOf((nint)7))) {
         Ꮡt.Errorf("TrySend on sync chan succeeded"u8);
     }
     {
@@ -2285,6 +2290,8 @@ partial struct caseInfo {
 internal static ж<bool> allselect = flag.Bool("allselect"u8, false, "exhaustive select test"u8);
 
 public static void TestSelect(ж<Δtesting.T> Ꮡt) {
+    var helpersᴷ = new stackAppend<nint>();
+
     ᏑselectWatch.of(selectWatchᴛ1.Ꮡonce).Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(selectWatcher);
     });
@@ -2390,7 +2397,7 @@ public static void TestSelect(ж<Δtesting.T> Ꮡt) {
             // Maybe include value to send.
             reflectꓸValue val = new(nil);
             if (x.Maybe()) {
-                val = ValueOf((nint)(100));
+                val = ValueOf((nint)100);
             }
             cases = append(cases, new SelectCase(
                 Dir: SelectSend,
@@ -2412,7 +2419,7 @@ public static void TestSelect(ж<Δtesting.T> Ꮡt) {
             cases = append(cases, new SelectCase(
                 Dir: SelectSend,
                 Chan: ValueOf((channel<nint>)(default!)),
-                Send: ValueOf((nint)(101))
+                Send: ValueOf((nint)101)
             ));
             info = append(info, new caseInfo(desc: "nil Chan send"u8));
         }
@@ -2433,7 +2440,7 @@ public static void TestSelect(ж<Δtesting.T> Ꮡt) {
             cases = append(cases, new SelectCase(
                 Dir: SelectSend,
                 Chan: ValueOf(ch),
-                Send: ValueOf((nint)(101))
+                Send: ValueOf((nint)101)
             ));
             info = append(info, new caseInfo(desc: "closed Chan send"u8, canSelect: true, panic: true));
         }
@@ -2471,7 +2478,7 @@ public static void TestSelect(ж<Δtesting.T> Ꮡt) {
             } else 
             if (c.helper != default!) {
                 canProceed = true;
-                helpers = append(helpers, iΔ1);
+                helpers = append(helpersᴷ, helpers, iΔ1);
             }
         }
         if (!canProceed || x.Maybe()){
@@ -2593,7 +2600,7 @@ public static void TestSelectMaxCases(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestSelectNop(ж<Δtesting.T> Ꮡt) {
+public static partial void TestSelectNop(ж<Δtesting.T> Ꮡt) {
     // "select { default: }" should always return the default case.
     var (chosen, _, _) = Select(new Δreflect.SelectCase[]{new(Dir: SelectDefault)}.slice());
     if (chosen != 0) {
@@ -2605,7 +2612,7 @@ public static void TestSelectNop(ж<Δtesting.T> Ꮡt) {
 // If the selectWatcher notices that the select has been blocked for >1 second, it prints
 // an error describing the select and panics the entire test binary.
 partial struct selectWatchᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal Δsync.Once once;
     internal time.Time now;
     internal slice<caseInfo> info;
@@ -2689,7 +2696,7 @@ internal static (byte i, nint j, byte k, two l, byte m, float32 n, byte o) dummy
 public static void TestFunc(ж<Δtesting.T> Ꮡt) {
     var ret = ValueOf(dummy).Call(new reflectꓸValue[]{
         ValueOf((byte)10),
-        ValueOf((nint)(20)),
+        ValueOf((nint)20),
         ValueOf((byte)30),
         ValueOf(new two(new uintptr[]{40, 50}.array())),
         ValueOf((byte)60),
@@ -2759,38 +2766,38 @@ public static void TestCallWithStruct(ж<Δtesting.T> Ꮡt) {
     if (len(r) != 0) {
         Ꮡt.Errorf("takesEmpty returned values: %#v"u8, r);
     }
-    r = ValueOf(returnNonEmpty).Call(new reflectꓸValue[]{ValueOf((nint)(42))}.slice());
+    r = ValueOf(returnNonEmpty).Call(new reflectꓸValue[]{ValueOf((nint)42)}.slice());
     if (len(r) != 1 || !AreEqual(r[0].Type(), TypeOf(new nonEmptyStruct(nil))) || r[0].Field(0).Int() != 42) {
         Ꮡt.Errorf("returnNonEmpty returned %#v"u8, r);
     }
     r = ValueOf(takesNonEmpty).Call(new reflectꓸValue[]{ValueOf(new nonEmptyStruct(member: 42))}.slice());
-    if (len(r) != 1 || !AreEqual(r[0].Type(), TypeOf((nint)(1))) || r[0].Int() != 42) {
+    if (len(r) != 1 || !AreEqual(r[0].Type(), TypeOf((nint)1)) || r[0].Int() != 42) {
         Ꮡt.Errorf("takesNonEmpty returned %#v"u8, r);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object finalizerDidNotRunˢ = (@string)"finalizer did not run"u8;
+internal static readonly object cleanupDidNotRunˢ = (@string)"cleanup did not run"u8;
 
 public static void TestCallReturnsEmpty(ж<Δtesting.T> Ꮡt) {
     // Issue 21717: past-the-end pointer write in Call with
     // nonzero-sized frame and zero-sized return value.
     Δruntime.GC();
-    ref var finalized = ref heap(new uint32(), out var Ꮡfinalized);
+    ref var cleanedUp = ref heap(new atomic.Uint32(), out var ᏑcleanedUp);
     var f = () => {
-        var i = Ꮡ(new array<int64>(2)); // big enough to not be tinyalloc'd, so finalizer always runs when i dies
-        Δruntime.SetFinalizer(i.OrTypedNil(), ([GoArrayDims(2)] ж<array<int64>> _) => {
-            atomic.StoreUint32(Ꮡfinalized, 1);
-        });
+        var i = Ꮡ(new array<int64>(2)); // big enough to not be tinyalloc'd, so cleanup always runs when i dies
+        Δruntime.AddCleanup(i, (ж<atomic.Uint32> cu) => {
+            cu.Store((uint32)1);
+        }, ᏑcleanedUp);
         return (new emptyStruct(nil), i);
     };
-    var v = ValueOf((f).OrTypedNilFunc()).Call(default!)[0]; // out[0] should not alias out[1]'s memory, so the finalizer should run.
+    var v = ValueOf((f).OrTypedNilFunc()).Call(default!)[0]; // out[0] should not alias out[1]'s memory, so the cleanup should run.
     var timeout = time.After((time.Duration)(5000000000L));
-    while (atomic.LoadUint32(Ꮡfinalized) == 0) {
+    while (ᏑcleanedUp.Load() == 0) {
         var selᴛ2 = timeout;
         switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ2.ꟷᐳ(out _): {
-            Ꮡt.Fatal(finalizerDidNotRunˢ);
+            Ꮡt.Fatal(cleanupDidNotRunˢ);
             break;
         }
         default: {
@@ -2833,7 +2840,7 @@ public static void TestMakeFuncInterface(ж<Δtesting.T> Ꮡt) {
         }
     }
     {
-        var r = fv.Call(new reflectꓸValue[]{ValueOf((nint)(14))}.slice())[0].Int(); if (r != 15) {
+        var r = fv.Call(new reflectꓸValue[]{ValueOf((nint)14)}.slice())[0].Int(); if (r != 15) {
             Ꮡt.Errorf("Call returned %d, want 15"u8, r);
         }
     }
@@ -2864,12 +2871,12 @@ public static void TestMakeFuncVariadic(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("Call returned [%v, %v]; want 2, 3"u8, r[0], r[1]);
     }
 
-    r = fv.Call(new reflectꓸValue[]{ValueOf((nint)(1)), ValueOf((nint)(2)), ValueOf((nint)(3))}.slice())[0].Interface()._<slice<nint>>();
+    r = fv.Call(new reflectꓸValue[]{ValueOf((nint)1), ValueOf((nint)2), ValueOf((nint)3)}.slice())[0].Interface()._<slice<nint>>();
     if (r[0] != 2 || r[1] != 3) {
         Ꮡt.Errorf("Call returned [%v, %v]; want 2, 3"u8, r[0], r[1]);
     }
 
-    r = fv.CallSlice(new reflectꓸValue[]{ValueOf((nint)(1)), ValueOf(new nint[]{2, 3}.slice())}.slice())[0].Interface()._<slice<nint>>();
+    r = fv.CallSlice(new reflectꓸValue[]{ValueOf((nint)1), ValueOf(new nint[]{2, 3}.slice())}.slice())[0].Interface()._<slice<nint>>();
     if (r[0] != 2 || r[1] != 3) {
         Ꮡt.Errorf("Call returned [%v, %v]; want 2, 3"u8, r[0], r[1]);
     }
@@ -2910,6 +2917,7 @@ internal partial struct TestMakeFuncValidReturnAssignments_i /*dyn*/ {
 public static void TestMakeFuncValidReturnAssignments(ж<Δtesting.T> Ꮡt) {
     // reflect.Values returned from the wrapped function should be assignment-converted
     // to the types returned by the result of MakeFunc.
+
     // Concrete types should be promotable to interfaces they implement.
     Func<error> f = default!;
     f = MakeFunc(TypeOf((f).OrTypedNilFunc()), (slice<reflectꓸValue> _) => new reflectꓸValue[]{ValueOf(Δio.EOF)}.slice()).Interface()._<Func<error>>();
@@ -3038,7 +3046,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
     // Non-curried method of type.
     ref var p = ref heap<Point>(out var Ꮡp);
     p = new Point(3, 4);
-    var i = TypeOf(p).Method(1).Func.Call(new reflectꓸValue[]{ValueOf(p), ValueOf((nint)(10))}.slice())[0].Int();
+    var i = TypeOf(p).Method(1).Func.Call(new reflectꓸValue[]{ValueOf(p), ValueOf((nint)10)}.slice())[0].Int();
     if (i != 250) {
         Ꮡt.Errorf("Type Method returned %d; want 250"u8, i);
     }
@@ -3047,7 +3055,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
     if (!ok) {
         Ꮡt.Fatalf("method by name failed"u8);
     }
-    i = m.Func.Call(new reflectꓸValue[]{ValueOf(p), ValueOf((nint)(11))}.slice())[0].Int();
+    i = m.Func.Call(new reflectꓸValue[]{ValueOf(p), ValueOf((nint)11)}.slice())[0].Int();
     if (i != 275) {
         Ꮡt.Errorf("Type MethodByName returned %d; want 275"u8, i);
     }
@@ -3061,7 +3069,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("NoArgs returned %d values; want 0"u8, n);
     }
 
-    i = TypeOf(Ꮡp).Method(1).Func.Call(new reflectꓸValue[]{ValueOf(Ꮡp), ValueOf((nint)(12))}.slice())[0].Int();
+    i = TypeOf(Ꮡp).Method(1).Func.Call(new reflectꓸValue[]{ValueOf(Ꮡp), ValueOf((nint)12)}.slice())[0].Int();
     if (i != 300) {
         Ꮡt.Errorf("Pointer Type Method returned %d; want 300"u8, i);
     }
@@ -3070,7 +3078,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
     if (!ok) {
         Ꮡt.Fatalf("ptr method by name failed"u8);
     }
-    i = m.Func.Call(new reflectꓸValue[]{ValueOf(Ꮡp), ValueOf((nint)(13))}.slice())[0].Int();
+    i = m.Func.Call(new reflectꓸValue[]{ValueOf(Ꮡp), ValueOf((nint)13)}.slice())[0].Int();
     if (i != 325) {
         Ꮡt.Errorf("Pointer Type MethodByName returned %d; want 325"u8, i);
     }
@@ -3102,7 +3110,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Value Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(14))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)14)}.slice())[0].Int();
     if (i != 350) {
         Ꮡt.Errorf("Value Method returned %d; want 350"u8, i);
     }
@@ -3112,7 +3120,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Value MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(15))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)15)}.slice())[0].Int();
     if (i != 375) {
         Ꮡt.Errorf("Value MethodByName returned %d; want 375"u8, i);
     }
@@ -3126,7 +3134,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Value Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(16))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)16)}.slice())[0].Int();
     if (i != 400) {
         Ꮡt.Errorf("Pointer Value Method returned %d; want 400"u8, i);
     }
@@ -3136,7 +3144,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Value MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(17))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)17)}.slice())[0].Int();
     if (i != 425) {
         Ꮡt.Errorf("Pointer Value MethodByName returned %d; want 425"u8, i);
     }
@@ -3157,7 +3165,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Interface Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(18))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)18)}.slice())[0].Int();
     if (i != 450) {
         Ꮡt.Errorf("Interface Method returned %d; want 450"u8, i);
     }
@@ -3167,7 +3175,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Interface MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = v.Call(new reflectꓸValue[]{ValueOf((nint)(19))}.slice())[0].Int();
+    i = v.Call(new reflectꓸValue[]{ValueOf((nint)19)}.slice())[0].Int();
     if (i != 475) {
         Ꮡt.Errorf("Interface MethodByName returned %d; want 475"u8, i);
     }
@@ -3201,7 +3209,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Value Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(10))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)10)}.slice())[0].Int();
     if (i != 250) {
         Ꮡt.Errorf("Value Method returned %d; want 250"u8, i);
     }
@@ -3211,7 +3219,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Value MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(11))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)11)}.slice())[0].Int();
     if (i != 275) {
         Ꮡt.Errorf("Value MethodByName returned %d; want 275"u8, i);
     }
@@ -3226,7 +3234,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Value Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(12))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)12)}.slice())[0].Int();
     if (i != 300) {
         Ꮡt.Errorf("Pointer Value Method returned %d; want 300"u8, i);
     }
@@ -3236,7 +3244,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Value MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(13))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)13)}.slice())[0].Int();
     if (i != 325) {
         Ꮡt.Errorf("Pointer Value MethodByName returned %d; want 325"u8, i);
     }
@@ -3253,7 +3261,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Pointer Value Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(14))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)14)}.slice())[0].Int();
     if (i != 350) {
         Ꮡt.Errorf("Pointer Pointer Value Method returned %d; want 350"u8, i);
     }
@@ -3263,7 +3271,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Pointer Pointer Value MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(15))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)15)}.slice())[0].Int();
     if (i != 375) {
         Ꮡt.Errorf("Pointer Pointer Value MethodByName returned %d; want 375"u8, i);
     }
@@ -3280,7 +3288,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Interface Method Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(16))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)16)}.slice())[0].Int();
     if (i != 400) {
         Ꮡt.Errorf("Interface Method returned %d; want 400"u8, i);
     }
@@ -3290,7 +3298,7 @@ public static void TestMethodValue(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("Interface MethodByName Type is %s; want %s"u8, tt, tfunc);
         }
     }
-    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(17))}.slice())[0].Int();
+    i = ValueOf(v.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)17)}.slice())[0].Int();
     if (i != 425) {
         Ꮡt.Errorf("Interface MethodByName returned %d; want 425"u8, i);
     }
@@ -3445,15 +3453,15 @@ partial interface tinter {
 
 // Embedding via pointer.
 partial struct Tm1 {
-    public partial ref Tm2 Tm2 { get; }
+    /*embed*/ public Tm2 Tm2;
 }
 
 partial struct Tm2 {
-    public partial ref ж<Tm3> Tm3 { get; }
+    /*embed*/ public ж<Tm3> Tm3;
 }
 
 partial struct Tm3 {
-    public partial ref ж<Tm4> Tm4 { get; }
+    /*embed*/ public ж<Tm4> Tm4;
 }
 
 partial struct Tm4 {
@@ -3476,7 +3484,7 @@ public static void TestMethod5(ж<Δtesting.T> Ꮡt) {
 
     var CheckFʗ1 = CheckF;
     void CheckV(@string name, reflectꓸValue i, nint inc) {
-        var bx = i.Method(0).Call(new reflectꓸValue[]{ValueOf((nint)(1000)), ValueOf((byte)99)}.slice());
+        var bx = i.Method(0).Call(new reflectꓸValue[]{ValueOf((nint)1000), ValueOf((byte)99)}.slice());
         var b = bx[0].Interface();
         var x = bx[1].Interface();
         if (!AreEqual(b, (byte)99) || !AreEqual(x, 1000 + inc)) {
@@ -3497,21 +3505,21 @@ public static void TestMethod5(ж<Δtesting.T> Ꮡt) {
     }
 
     ref var sv = ref heap<Tsmallv>(out var Ꮡsv);
-    sv = ((Tsmallv)1);
+    sv = (Tsmallv)1;
     CheckI("sv"u8, sv, 1);
     CheckI("&sv"u8, Ꮡsv, 1);
 
     ref var sp = ref heap<Tsmallp>(out var Ꮡsp);
-    sp = ((Tsmallp)2);
+    sp = (Tsmallp)2;
     CheckI("&sp"u8, Ꮡsp, 2);
 
     ref var wv = ref heap<Twordv>(out var Ꮡwv);
-    wv = ((Twordv)3);
+    wv = (Twordv)3;
     CheckI("wv"u8, wv, 3);
     CheckI("&wv"u8, Ꮡwv, 3);
 
     ref var wp = ref heap<Twordp>(out var Ꮡwp);
-    wp = ((Twordp)4);
+    wp = (Twordp)4;
     CheckI("&wp"u8, Ꮡwp, 4);
 
     ref var bv = ref heap<Tbigv>(out var Ꮡbv);
@@ -3574,7 +3582,7 @@ public static void TestInterfaceSet(ж<Δtesting.T> Ꮡt) {
         }
     }
 
-    var i = pv.Method(0).Call(new reflectꓸValue[]{ValueOf((nint)(10))}.slice())[0].Int();
+    var i = pv.Method(0).Call(new reflectꓸValue[]{ValueOf((nint)10)}.slice())[0].Int();
     if (i != 250) {
         Ꮡt.Errorf("Interface Method returned %d; want 250"u8, i);
     }
@@ -3622,45 +3630,45 @@ partial struct D2 {
 
 partial struct S0 {
     public nint A, B, C;
-    public partial ref D1 D1 { get; }
-    public partial ref D2 D2 { get; }
+    /*embed*/ public D1 D1;
+    /*embed*/ public D2 D2;
 }
 
 partial struct S1 {
     public nint B;
-    public partial ref S0 S0 { get; }
+    /*embed*/ public S0 S0;
 }
 
 partial struct S2 {
     public nint A;
-    public partial ref ж<S1> S1 { get; }
+    /*embed*/ public ж<S1> S1;
 }
 
 partial struct S1x {
-    public partial ref S1 S1 { get; }
+    /*embed*/ public S1 S1;
 }
 
 partial struct S1y {
-    public partial ref S1 S1 { get; }
+    /*embed*/ public S1 S1;
 }
 
 partial struct S3 {
-    public partial ref S1x S1x { get; }
-    public partial ref S2 S2 { get; }
+    /*embed*/ public S1x S1x;
+    /*embed*/ public S2 S2;
     public nint D, E;
-    public partial ref ж<S1y> S1y { get; }
+    /*embed*/ public ж<S1y> S1y;
 }
 
 partial struct S4 {
-    public partial ref ж<S4> ΔS4 { get; }
+    /*embed*/ public ж<S4> ΔS4;
     public nint A;
 }
 
 // The X in S6 and S7 annihilate, but they also block the X in S8.S9.
 partial struct S5 {
-    public partial ref S6 S6 { get; }
-    public partial ref S7 S7 { get; }
-    public partial ref S8 S8 { get; }
+    /*embed*/ public S6 S6;
+    /*embed*/ public S7 S7;
+    /*embed*/ public S8 S8;
 }
 
 partial struct S6 {
@@ -3670,7 +3678,7 @@ partial struct S6 {
 partial struct S7 /*S6*/;
 
 partial struct S8 {
-    public partial ref S9 S9 { get; }
+    /*embed*/ public S9 S9;
 }
 
 partial struct S9 {
@@ -3680,35 +3688,35 @@ partial struct S9 {
 
 // The X in S11.S6 and S12.S6 annihilate, but they also block the X in S13.S8.S9.
 partial struct S10 {
-    public partial ref S11 S11 { get; }
-    public partial ref S12 S12 { get; }
-    public partial ref S13 S13 { get; }
+    /*embed*/ public S11 S11;
+    /*embed*/ public S12 S12;
+    /*embed*/ public S13 S13;
 }
 
 partial struct S11 {
-    public partial ref S6 S6 { get; }
+    /*embed*/ public S6 S6;
 }
 
 partial struct S12 {
-    public partial ref S6 S6 { get; }
+    /*embed*/ public S6 S6;
 }
 
 partial struct S13 {
-    public partial ref S8 S8 { get; }
+    /*embed*/ public S8 S8;
 }
 
 // The X in S15.S11.S1 and S16.S11.S1 annihilate.
 partial struct S14 {
-    public partial ref S15 S15 { get; }
-    public partial ref S16 S16 { get; }
+    /*embed*/ public S15 S15;
+    /*embed*/ public S16 S16;
 }
 
 partial struct S15 {
-    public partial ref S11 S11 { get; }
+    /*embed*/ public S11 S11;
 }
 
 partial struct S16 {
-    public partial ref S11 S11 { get; }
+    /*embed*/ public S11 S11;
 }
 
 internal static slice<FTest> fieldTests = new FTest[]{
@@ -3847,15 +3855,15 @@ public static void TestImportPath(ж<Δtesting.T> Ꮡt) {
         new(TypeOf((rune)0), ""u8),
         new(TypeOf(slice<byte>(default!)), ""u8),
         new(TypeOf(slice<rune>(default!)), ""u8),
-        new(TypeOf(((@string)""u8)), ""u8),
-        new(TypeOf(((ж<any>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<byte>)nil)), ""u8),
-        new(TypeOf(((ж<rune>)nil)), ""u8),
-        new(TypeOf(((ж<int64>)nil)), ""u8),
+        new(TypeOf((@string)""u8), ""u8),
+        new(TypeOf((ж<any>)nil).Elem(), ""u8),
+        new(TypeOf((ж<byte>)nil), ""u8),
+        new(TypeOf((ж<rune>)nil), ""u8),
+        new(TypeOf((ж<int64>)nil), ""u8),
         new(TypeOf(new map<@string, nint>{}), ""u8),
-        new(TypeOf(((ж<error>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<Point>)nil)), ""u8),
-        new(TypeOf(((ж<Point>)nil)).Elem(), "reflect_test"u8)
+        new(TypeOf((ж<error>)nil).Elem(), ""u8),
+        new(TypeOf((ж<Point>)nil), ""u8),
+        new(TypeOf((ж<Point>)nil).Elem(), "reflect_test"u8)
     }.slice();
     foreach (var (_, test) in tests) {
         {
@@ -3875,9 +3883,9 @@ internal partial struct TestFieldPkgPath_x /*num:nint*/;
 internal partial struct TestFieldPkgPath_i /*dyn*/ {
     public @string Exported;
     internal @string unexported;
-    public partial ref global::go.reflect_internal_test_package.OtherPkgFields OtherPkgFields { get; }
+    /*embed*/ public global::go.reflect_internal_test_package.OtherPkgFields OtherPkgFields;
     /*embed*/ internal nint @int; // issue 21702
-    internal partial ref ж<TestFieldPkgPath_x> x { get; } // issue 21122
+    /*embed*/ internal ж<TestFieldPkgPath_x> x; // issue 21122
 }
 
 internal partial struct TestFieldPkgPath_pkgpathTest /*dyn*/ {
@@ -3950,7 +3958,7 @@ internal partial struct TestMethodPkgPath_tests /*dyn*/ {
 }
 
 public static void TestMethodPkgPath(ж<Δtesting.T> Ꮡt) {
-    var typ = TypeOf(((ж<TestMethodPkgPath_i>)nil)).Elem();
+    var typ = TypeOf((ж<TestMethodPkgPath_i>)nil).Elem();
 
     var tests = new TestMethodPkgPath_tests[]{
         new("X"u8, ""u8, true),
@@ -4004,7 +4012,7 @@ partial struct inner {
 
 partial struct outer {
     internal nint y;
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 internal static void M(this ref inner _) {
@@ -4016,7 +4024,7 @@ internal static void M(this ref outer _) {
 public static void TestNestedMethods(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var typ = TypeOf(((ж<outer>)nil));
+    var typ = TypeOf((ж<outer>)nil);
     if (typ.NumMethod() != 1 || (uintptr)typ.Method(0).Func.UnsafePointer() != (uintptr)ValueOf(((Action<ж<outer>>)(M))).UnsafePointer()) {
         Ꮡt.Errorf("Wrong method table for outer: (M=%p)"u8, ((Action<ж<outer>>)(M)));
         for (nint i = 0; i < typ.NumMethod(); i++) {
@@ -4049,7 +4057,7 @@ public static void TestUnexportedMethods(ж<Δtesting.T> Ꮡt) {
         }
     }
 
-    typ = TypeOf(((ж<unexpI>)nil));
+    typ = TypeOf((ж<unexpI>)nil);
     {
         nint got = typ.Elem().NumMethod(); if (got != 1) {
             Ꮡt.Errorf("NumMethod=%d, want 1 satisfied methods"u8, got);
@@ -4063,7 +4071,7 @@ partial struct InnerInt {
 
 partial struct OuterInt {
     public nint Y;
-    public partial ref InnerInt InnerInt { get; }
+    /*embed*/ public InnerInt InnerInt;
 }
 
 public static nint M(this ref InnerInt i) {
@@ -4073,7 +4081,7 @@ public static nint M(this ref InnerInt i) {
 public static void TestEmbeddedMethods(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var typ = TypeOf(((ж<OuterInt>)nil));
+    var typ = TypeOf((ж<OuterInt>)nil);
     if (typ.NumMethod() != 1 || (uintptr)typ.Method(0).Func.UnsafePointer() != (uintptr)ValueOf(((Func<ж<OuterInt>, nint>)(M))).UnsafePointer()) {
         Ꮡt.Errorf("Wrong method table for OuterInt: (m=%p)"u8, ((Func<ж<OuterInt>, nint>)(M)));
         for (nint iΔ1 = 0; iΔ1 < typ.NumMethod(); iΔ1++) {
@@ -4145,7 +4153,9 @@ public static void TestPtrTo(ж<Δtesting.T> Ꮡt) {
 internal partial class TestPtrToGC_T /*ж<uintptr>*/;
 
 public static void TestPtrToGC(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestPtrToGC_T)nil));
+    var xᴷ = new stackAppend<any>(moves: true);
+
+    var tt = TypeOf((TestPtrToGC_T)nil);
     var pt = PointerTo(tt);
     const nint n = 100;
     slice<any> x = default!;
@@ -4155,10 +4165,11 @@ public static void TestPtrToGC(ж<Δtesting.T> Ꮡt) {
         p.ValueSlot = @new<uintptr>();
         (p.ValueSlot).Value = (uintptr)i;
         v.Elem().Set(ValueOf(p.OrTypedNil()).Convert(pt));
-        x = append(x, v.Interface());
+        x = append(xᴷ, x, v.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var k = ValueOf(xi).Elem().Elem().Elem().Interface()._<uintptr>();
         if (k != (uintptr)i) {
@@ -4508,13 +4519,13 @@ public static void TestVariadic(ж<Δtesting.T> Ꮡt) {
     var V = ValueOf;
 
     b.Reset();
-    V(fmt.Fprintfᶠ).Call(new reflectꓸValue[]{V(Ꮡb), V(sDWorldˢ), V(helloˢ), V((nint)(42))}.slice());
+    V(fmt.Fprintfᶠ).Call(new reflectꓸValue[]{V(Ꮡb), V(sDWorldˢ), V(helloˢ), V((nint)42)}.slice());
     if (b.String() != "hello, 42 world"u8) {
         Ꮡt.Errorf("after Fprintf Call: %q != %q"u8, b.String(), hello42Worldˢ);
     }
 
     b.Reset();
-    V(fmt.Fprintfᶠ).CallSlice(new reflectꓸValue[]{V(Ꮡb), V(sDWorldˢ), V(new any[]{(@string)"hello"u8, (nint)(42)}.slice())}.slice());
+    V(fmt.Fprintfᶠ).CallSlice(new reflectꓸValue[]{V(Ꮡb), V(sDWorldˢ), V(new any[]{(@string)"hello"u8, (nint)42}.slice())}.slice());
     if (b.String() != "hello, 42 world"u8) {
         Ꮡt.Errorf("after Fprintf CallSlice: %q != %q"u8, b.String(), hello42Worldˢ);
     }
@@ -4523,7 +4534,7 @@ public static void TestVariadic(ж<Δtesting.T> Ꮡt) {
 public static void TestFuncArg(ж<Δtesting.T> Ꮡt) {
     var f1 = (nint i, Func<nint, nint> f) => f(i);
     var f2 = (nint i) => i + 1;
-    var r = ValueOf((f1).OrTypedNilFunc()).Call(new reflectꓸValue[]{ValueOf((nint)(100)), ValueOf((f2).OrTypedNilFunc())}.slice());
+    var r = ValueOf((f1).OrTypedNilFunc()).Call(new reflectꓸValue[]{ValueOf((nint)100), ValueOf((f2).OrTypedNilFunc())}.slice());
     if (r[0].Int() != 101) {
         Ꮡt.Errorf("function returned %d, want 101"u8, r[0].Int());
     }
@@ -4593,7 +4604,7 @@ internal partial struct TestBytes_AB /*[4]TestBytes_B*/;
 
 public static void TestBytes(ж<Δtesting.T> Ꮡt) {
     shouldPanic(onIntValueˢ, () => {
-        ValueOf((nint)(0)).Bytes();
+        ValueOf((nint)0).Bytes();
     });
     shouldPanic(ofNonByteSliceˢ, () => {
         ValueOf(new @string[]{}.slice()).Bytes();
@@ -4664,7 +4675,7 @@ internal static void P(this ref @private p) {
 partial struct Public {
     public nint X;
     public ж<ж<nint>> Y;
-    internal partial ref @private @private { get; }
+    /*embed*/ internal @private @private;
 }
 
 public static void M(this ref Public p) {
@@ -4738,7 +4749,7 @@ internal partial struct TestSetPanic_t0 /*dyn*/ {
 
 internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
-    internal partial ref TestSetPanic_t0 t0 { get; }
+    /*embed*/ internal TestSetPanic_t0 t0;
 }
 
 internal partial struct TestSetPanic_T2 /*dyn*/ {
@@ -4748,8 +4759,8 @@ internal partial struct TestSetPanic_T2 /*dyn*/ {
 
 internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
-    internal partial ref TestSetPanic_t1 t1 { get; }
-    public partial ref TestSetPanic_T2 T2 { get; }
+    /*embed*/ internal TestSetPanic_t1 t1;
+    /*embed*/ public TestSetPanic_T2 T2;
     public TestSetPanic_t1 NamedT1;
     public TestSetPanic_T2 NamedT2;
     internal TestSetPanic_t1 namedT1;
@@ -5032,7 +5043,7 @@ public static void TestCallPanic(ж<Δtesting.T> Ꮡt) {
         vΔ1.Call(default!);
     }
 
-    timp i = ((timp)0);
+    timp i = (timp)0;
     ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
     v = ValueOf(new TestCallPanic_T(i, i, i, i, new TestCallPanic_T2(i, i), i, i, new TestCallPanic_T2(i, i)));
     var callʗ1 = call;
@@ -5250,7 +5261,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     var vo = ValueOf;
     var voʗ1 = vo;
     shouldPanic(reflectValueAddrOfˢ, () => {
-        voʗ1((nint)(0)).Addr();
+        voʗ1((nint)0).Addr();
     });
     var voʗ2 = vo;
     shouldPanic(callOfReflectValueBoolOnˢ, () => {
@@ -5266,7 +5277,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     });
     var voʗ5 = vo;
     shouldPanic(callOfReflectValueˢ, () => {
-        voʗ5((nint)(0)).CallSlice(default!);
+        voʗ5((nint)0).CallSlice(default!);
     });
     var voʗ6 = vo;
     shouldPanic(callOfReflectValueCloseˢ, () => {
@@ -5282,7 +5293,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     });
     var voʗ9 = vo;
     shouldPanic(callOfReflectValueFieldˢ, () => {
-        voʗ9((nint)(0)).Field(0);
+        voʗ9((nint)0).Field(0);
     });
     var voʗ10 = vo;
     shouldPanic(callOfReflectValueFloatˢ, () => {
@@ -5298,7 +5309,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     });
     var voʗ13 = vo;
     shouldPanic(callOfReflectValueIsNilˢ, () => {
-        voʗ13((nint)(0)).IsNil();
+        voʗ13((nint)0).IsNil();
     });
     var voʗ14 = vo;
     shouldPanic(callOfReflectValueLenOnˢ, () => {
@@ -5314,7 +5325,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     });
     var voʗ17 = vo;
     shouldPanic(callOfReflectValueˢ5, () => {
-        voʗ17((nint)(0)).MapRange();
+        voʗ17((nint)0).MapRange();
     });
     var voʗ18 = vo;
     shouldPanic(callOfReflectValueMethodˢ, () => {
@@ -5398,7 +5409,7 @@ public static void TestValuePanic(ж<Δtesting.T> Ꮡt) {
     });
     var voʗ38 = vo;
     shouldPanic(callOfReflectValueSlice3ˢ, () => {
-        voʗ38((nint)(0)).Slice3(1, 2, 3);
+        voʗ38((nint)0).Slice3(1, 2, 3);
     });
     var voʗ39 = vo;
     shouldPanic(callOfReflectValueˢ16, () => {
@@ -5472,7 +5483,7 @@ internal static readonly @string worldˢ = "world"u8;
 
 public static void TestAlias(ж<Δtesting.T> Ꮡt) {
     ref var x = ref heap<@string>(out var Ꮡx);
-    x = ((@string)"hello"u8);
+    x = (@string)"hello"u8;
     var v = ValueOf(Ꮡx).Elem();
     var oldvalue = v.Interface();
     v.SetString(worldˢ);
@@ -5779,84 +5790,84 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V((complex128)4D.i()), V((complex128)4D.i())),
 
     // string
-    new(V(((@string)"hello"u8)), V(((@string)"hello"u8))),
-    new(V(((@string)"bytes1"u8)), V(slice<byte>("bytes1"u8))),
-    new(V(slice<byte>("bytes2"u8)), V(((@string)"bytes2"u8))),
+    new(V((@string)"hello"u8), V((@string)"hello"u8)),
+    new(V((@string)"bytes1"u8), V(slice<byte>("bytes1"u8))),
+    new(V(slice<byte>("bytes2"u8)), V((@string)"bytes2"u8)),
     new(V(slice<byte>("bytes3"u8)), V(slice<byte>("bytes3"u8))),
-    new(V(((@string)"runes♝"u8)), V(slice<rune>((@string)"runes♝"))),
-    new(V(slice<rune>((@string)"runes♕")), V(((@string)"runes♕"u8))),
+    new(V((@string)"runes♝"u8), V(slice<rune>((@string)"runes♝"))),
+    new(V(slice<rune>((@string)"runes♕")), V((@string)"runes♕"u8)),
     new(V(slice<rune>((@string)"runes🙈🙉🙊")), V(slice<rune>((@string)"runes🙈🙉🙊"))),
-    new(V((nint)(rune)'a'), V(((@string)"a"u8))),
-    new(V((int8)(rune)'a'), V(((@string)"a"u8))),
-    new(V((int16)(rune)'a'), V(((@string)"a"u8))),
-    new(V((int32)(rune)'a'), V(((@string)"a"u8))),
-    new(V((int64)(rune)'a'), V(((@string)"a"u8))),
-    new(V((nuint)(rune)'a'), V(((@string)"a"u8))),
-    new(V((uint8)(rune)'a'), V(((@string)"a"u8))),
-    new(V((uint16)(rune)'a'), V(((@string)"a"u8))),
-    new(V((uint32)(rune)'a'), V(((@string)"a"u8))),
-    new(V((uint64)(rune)'a'), V(((@string)"a"u8))),
-    new(V((uintptr)(rune)'a'), V(((@string)"a"u8))),
-    new(V((nint)(-1)), V(((@string)"\uFFFD"u8))),
-    new(V((int8)(-2)), V(((@string)"\uFFFD"u8))),
-    new(V((int16)(-3)), V(((@string)"\uFFFD"u8))),
-    new(V((int32)(-4)), V(((@string)"\uFFFD"u8))),
-    new(V((int64)(-5)), V(((@string)"\uFFFD"u8))),
-    new(V((int64)(-4294967296L)), V(((@string)"\uFFFD"u8))),
-    new(V((int64)(4294967296L)), V(((@string)"\uFFFD"u8))),
-    new(V((nuint)0x110001), V(((@string)"\uFFFD"u8))),
-    new(V((uint32)0x110002), V(((@string)"\uFFFD"u8))),
-    new(V((uint64)0x110003), V(((@string)"\uFFFD"u8))),
-    new(V((uint64)(((uint64)1 << (int)(32)))), V(((@string)"\uFFFD"u8))),
-    new(V((uintptr)0x110004), V(((@string)"\uFFFD"u8))),
+    new(V((nint)(rune)'a'), V((@string)"a"u8)),
+    new(V((int8)(rune)'a'), V((@string)"a"u8)),
+    new(V((int16)(rune)'a'), V((@string)"a"u8)),
+    new(V((int32)(rune)'a'), V((@string)"a"u8)),
+    new(V((int64)(rune)'a'), V((@string)"a"u8)),
+    new(V((nuint)(rune)'a'), V((@string)"a"u8)),
+    new(V((uint8)(rune)'a'), V((@string)"a"u8)),
+    new(V((uint16)(rune)'a'), V((@string)"a"u8)),
+    new(V((uint32)(rune)'a'), V((@string)"a"u8)),
+    new(V((uint64)(rune)'a'), V((@string)"a"u8)),
+    new(V((uintptr)(rune)'a'), V((@string)"a"u8)),
+    new(V((nint)(-1)), V((@string)"\uFFFD"u8)),
+    new(V((int8)(-2)), V((@string)"\uFFFD"u8)),
+    new(V((int16)(-3)), V((@string)"\uFFFD"u8)),
+    new(V((int32)(-4)), V((@string)"\uFFFD"u8)),
+    new(V((int64)(-5)), V((@string)"\uFFFD"u8)),
+    new(V((int64)(-4294967296L)), V((@string)"\uFFFD"u8)),
+    new(V((int64)(4294967296L)), V((@string)"\uFFFD"u8)),
+    new(V((nuint)0x110001), V((@string)"\uFFFD"u8)),
+    new(V((uint32)0x110002), V((@string)"\uFFFD"u8)),
+    new(V((uint64)0x110003), V((@string)"\uFFFD"u8)),
+    new(V((uint64)((uint64)1 << 32)), V((@string)"\uFFFD"u8)),
+    new(V((uintptr)0x110004), V((@string)"\uFFFD"u8)),
 
     // named string
-    new(V(((MyString)(@string)"hello"u8)), V(((@string)"hello"u8))),
-    new(V(((@string)"hello"u8)), V(((MyString)(@string)"hello"u8))),
-    new(V(((@string)"hello"u8)), V(((@string)"hello"u8))),
-    new(V(((MyString)(@string)"hello"u8)), V(((MyString)(@string)"hello"u8))),
-    new(V(((MyString)(@string)"bytes1"u8)), V(slice<byte>("bytes1"u8))),
-    new(V(slice<byte>("bytes2"u8)), V(((MyString)(@string)"bytes2"u8))),
+    new(V((MyString)(@string)"hello"u8), V((@string)"hello"u8)),
+    new(V((@string)"hello"u8), V((MyString)(@string)"hello"u8)),
+    new(V((@string)"hello"u8), V((@string)"hello"u8)),
+    new(V((MyString)(@string)"hello"u8), V((MyString)(@string)"hello"u8)),
+    new(V((MyString)(@string)"bytes1"u8), V(slice<byte>("bytes1"u8))),
+    new(V(slice<byte>("bytes2"u8)), V((MyString)(@string)"bytes2"u8)),
     new(V(slice<byte>("bytes3"u8)), V(slice<byte>("bytes3"u8))),
-    new(V(((MyString)(@string)"runes♝"u8)), V(slice<rune>((@string)"runes♝"))),
-    new(V(slice<rune>((@string)"runes♕")), V(((MyString)(@string)"runes♕"u8))),
+    new(V((MyString)(@string)"runes♝"u8), V(slice<rune>((@string)"runes♝"))),
+    new(V(slice<rune>((@string)"runes♕")), V((MyString)(@string)"runes♕"u8)),
     new(V(slice<rune>((@string)"runes🙈🙉🙊")), V(slice<rune>((@string)"runes🙈🙉🙊"))),
-    new(V(slice<rune>((@string)"runes🙈🙉🙊")), V(((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8)))),
-    new(V(((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8))), V(slice<rune>((@string)"runes🙈🙉🙊"))),
-    new(V((nint)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((int8)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((int16)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((int32)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((int64)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((nuint)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((uint8)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((uint16)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((uint32)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((uint64)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((uintptr)(rune)'a'), V(((MyString)(@string)"a"u8))),
-    new(V((nint)(-1)), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((int8)(-2)), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((int16)(-3)), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((int32)(-4)), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((int64)(-5)), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((nuint)0x110001), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((uint32)0x110002), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((uint64)0x110003), V(((MyString)(@string)"\uFFFD"u8))),
-    new(V((uintptr)0x110004), V(((MyString)(@string)"\uFFFD"u8))),
+    new(V(slice<rune>((@string)"runes🙈🙉🙊")), V((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8))),
+    new(V((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8)), V(slice<rune>((@string)"runes🙈🙉🙊"))),
+    new(V((nint)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((int8)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((int16)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((int32)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((int64)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((nuint)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((uint8)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((uint16)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((uint32)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((uint64)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((uintptr)(rune)'a'), V((MyString)(@string)"a"u8)),
+    new(V((nint)(-1)), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((int8)(-2)), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((int16)(-3)), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((int32)(-4)), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((int64)(-5)), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((nuint)0x110001), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((uint32)0x110002), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((uint64)0x110003), V((MyString)(@string)"\uFFFD"u8)),
+    new(V((uintptr)0x110004), V((MyString)(@string)"\uFFFD"u8)),
 
     // named []byte
-    new(V(((@string)"bytes1"u8)), V(((MyBytes)slice<byte>((@string)"bytes1"u8)))),
-    new(V(((MyBytes)slice<byte>((@string)"bytes2"u8))), V(((@string)"bytes2"u8))),
-    new(V(((MyBytes)slice<byte>((@string)"bytes3"u8))), V(((MyBytes)slice<byte>((@string)"bytes3"u8)))),
-    new(V(((MyString)(@string)"bytes1"u8)), V(((MyBytes)slice<byte>((@string)"bytes1"u8)))),
-    new(V(((MyBytes)slice<byte>((@string)"bytes2"u8))), V(((MyString)(@string)"bytes2"u8))),
+    new(V((@string)"bytes1"u8), V((MyBytes)slice<byte>((@string)"bytes1"u8))),
+    new(V((MyBytes)slice<byte>((@string)"bytes2"u8)), V((@string)"bytes2"u8)),
+    new(V((MyBytes)slice<byte>((@string)"bytes3"u8)), V((MyBytes)slice<byte>((@string)"bytes3"u8))),
+    new(V((MyString)(@string)"bytes1"u8), V((MyBytes)slice<byte>((@string)"bytes1"u8))),
+    new(V((MyBytes)slice<byte>((@string)"bytes2"u8)), V((MyString)(@string)"bytes2"u8)),
 
     // named []rune
-    new(V(((@string)"runes♝"u8)), V(((MyRunes)slice<int32>((@string)"runes♝"u8)))),
-    new(V(((MyRunes)slice<int32>((@string)"runes♕"u8))), V(((@string)"runes♕"u8))),
-    new(V(((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8))), V(((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8)))),
-    new(V(((MyString)(@string)"runes♝"u8)), V(((MyRunes)slice<int32>((@string)"runes♝"u8)))),
-    new(V(((MyRunes)slice<int32>((@string)"runes♕"u8))), V(((MyString)(@string)"runes♕"u8))),
+    new(V((@string)"runes♝"u8), V((MyRunes)slice<int32>((@string)"runes♝"u8))),
+    new(V((MyRunes)slice<int32>((@string)"runes♕"u8)), V((@string)"runes♕"u8)),
+    new(V((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8)), V((MyRunes)slice<int32>((@string)"runes🙈🙉🙊"u8))),
+    new(V((MyString)(@string)"runes♝"u8), V((MyRunes)slice<int32>((@string)"runes♝"u8))),
+    new(V((MyRunes)slice<int32>((@string)"runes♕"u8)), V((MyString)(@string)"runes♕"u8)),
 
     // slice to array
     new(V(slice<byte>(default!)), V(new byte[]{}.array())),
@@ -5864,15 +5875,15 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V(new byte[]{1}.slice()), V(new byte[]{1}.array())),
     new(V(new byte[]{1, 2}.slice()), V(new byte[]{1, 2}.array())),
     new(V(new byte[]{1, 2, 3}.slice()), V(new byte[]{1, 2, 3}.array())),
-    new(V(((MyBytes)slice<byte>(default!))), V(new byte[]{}.array())),
+    new(V((MyBytes)slice<byte>(default!)), V(new byte[]{}.array())),
     new(V(new MyBytes(new byte[]{}.slice())), V(new byte[]{}.array())),
     new(V(new MyBytes(new byte[]{1}.slice())), V(new byte[]{1}.array())),
     new(V(new MyBytes(new byte[]{1, 2}.slice())), V(new byte[]{1, 2}.array())),
     new(V(new MyBytes(new byte[]{1, 2, 3}.slice())), V(new byte[]{1, 2, 3}.array())),
     new(V(slice<byte>(default!)), V(new MyBytesArray0(new byte[]{}.array()))),
-    new(V(new byte[]{}.slice()), V(((MyBytesArray0)new byte[]{}.array()))),
+    new(V(new byte[]{}.slice()), V((MyBytesArray0)new byte[]{}.array())),
     new(V(new byte[]{1, 2, 3, 4}.slice()), V(((MyBytesArray)new byte[]{1, 2, 3, 4}.array()))),
-    new(V(new MyBytes(new byte[]{}.slice())), V(((MyBytesArray0)new byte[]{}.array()))),
+    new(V(new MyBytes(new byte[]{}.slice())), V((MyBytesArray0)new byte[]{}.array())),
     new(V(new MyBytes(new byte[]{5, 6, 7, 8}.slice())), V(((MyBytesArray)new byte[]{5, 6, 7, 8}.array()))),
     new(V(new MyByte[]{}.slice()), V(new MyByte[]{}.array())),
     new(V(new MyByte[]{1, 2}.slice()), V(new MyByte[]{1, 2}.array())),
@@ -5881,24 +5892,25 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V(slice<byte>(default!)), V(ж<array<byte>>.NilBoxOfDims(0L))),
     new(V(new byte[]{}.slice()), V(Ꮡ(new array<byte>(0)))),
     new(V(new byte[]{7}.slice()), V(Ꮡ(new byte[]{7}.array()))),
-    new(V(((MyBytes)slice<byte>(default!))), V(ж<array<byte>>.NilBoxOfDims(0L))),
-    new(V(((MyBytes)new byte[]{}.slice())), V(Ꮡ(new array<byte>(0)))),
-    new(V(((MyBytes)new byte[]{9}.slice())), V(Ꮡ(new byte[]{9}.array()))),
-    new(V(slice<byte>(default!)), V(((MyBytesArrayPtr0)nil))),
+    new(V((MyBytes)slice<byte>(default!)), V(ж<array<byte>>.NilBoxOfDims(0L))),
+    new(V((MyBytes)new byte[]{}.slice()), V(Ꮡ(new array<byte>(0)))),
+    new(V((MyBytes)new byte[]{9}.slice()), V(Ꮡ(new byte[]{9}.array()))),
+    new(V(slice<byte>(default!)), V((MyBytesArrayPtr0)nil)),
     new(V(new byte[]{}.slice()), V(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))),
     new(V(new byte[]{1, 2, 3, 4}.slice()), V(new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())))),
-    new(V(((MyBytes)new byte[]{}.slice())), V(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))),
+    new(V((MyBytes)new byte[]{}.slice()), V(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))),
     new(V(((MyBytes)new byte[]{5, 6, 7, 8}.slice())), V(new MyBytesArrayPtr(Ꮡ(new byte[]{5, 6, 7, 8}.array())))),
+
     new(V(slice<byte>(default!)), V(ж<MyBytesArray0>.NilBoxOfDims(0L))),
     new(V(new byte[]{}.slice()), V(Ꮡ(new MyBytesArray0(new array<byte>(0))))),
     new(V(new byte[]{1, 2, 3, 4}.slice()), V(Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())))),
-    new(V(((MyBytes)slice<byte>(default!))), V(ж<MyBytesArray0>.NilBoxOfDims(0L))),
-    new(V(((MyBytes)new byte[]{}.slice())), V(Ꮡ(new MyBytesArray0(new array<byte>(0))))),
+    new(V((MyBytes)slice<byte>(default!)), V(ж<MyBytesArray0>.NilBoxOfDims(0L))),
+    new(V((MyBytes)new byte[]{}.slice()), V(Ꮡ(new MyBytesArray0(new array<byte>(0))))),
     new(V(((MyBytes)new byte[]{5, 6, 7, 8}.slice())), V(Ꮡ(new MyBytesArray(new byte[]{5, 6, 7, 8}.array())))),
     new(V(Ꮡ(new array<byte>(0))), V(@new<MyBytesArray0>())),
     new(V(@new<MyBytesArray0>()), V(Ꮡ(new array<byte>(0)))),
-    new(V(((MyBytesArrayPtr0)nil)), V(ж<array<byte>>.NilBoxOfDims(0L))),
-    new(V(ж<array<byte>>.NilBoxOfDims(0L)), V(((MyBytesArrayPtr0)nil))),
+    new(V((MyBytesArrayPtr0)nil), V(ж<array<byte>>.NilBoxOfDims(0L))),
+    new(V(ж<array<byte>>.NilBoxOfDims(0L)), V((MyBytesArrayPtr0)nil)),
 
     // named types and equal underlying types
     new(V(@new<nint>()), V(@new<integer>())),
@@ -5915,17 +5927,23 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
 
     // structs with different tags
     new(V(new iᴛ1()), V(new iᴛ2())),
+
     new(V(new iᴛ2()), V(new iᴛ1())),
+
     new(V(new MyStruct(nil)), V(new iᴛ1())),
+
     new(V(new iᴛ1()), V(new MyStruct(nil))),
+
     new(V(new MyStruct(nil)), V(new iᴛ2())),
+
     new(V(new iᴛ2()), V(new MyStruct(nil))),
+
     new(V(new MyStruct1(nil)), V(new MyStruct2(nil))),
     new(V(new MyStruct2(nil)), V(new MyStruct1(nil))),
 
     // can convert *byte and *MyByte
-    new(V(((ж<byte>)nil)), V(((ж<MyByte>)nil))),
-    new(V(((ж<MyByte>)nil)), V(((ж<byte>)nil))),
+    new(V((ж<byte>)nil), V((ж<MyByte>)nil)),
+    new(V((ж<MyByte>)nil), V((ж<byte>)nil)),
 
     // cannot convert mismatched array sizes
     new(V(new byte[]{}.array(2)), V(new byte[]{}.array(2))),
@@ -5934,29 +5952,29 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V(new byte[]{}.array()), V(new MyBytesArray0(new byte[]{}.array()))),
 
     // cannot convert other instances
-    new(V(((ж<ж<byte>>)nil)), V(((ж<ж<byte>>)nil))),
-    new(V(((ж<ж<MyByte>>)nil)), V(((ж<ж<MyByte>>)nil))),
+    new(V((ж<ж<byte>>)nil), V((ж<ж<byte>>)nil)),
+    new(V((ж<ж<MyByte>>)nil), V((ж<ж<MyByte>>)nil)),
     new(V((channel<byte>)(default!)), V((channel<byte>)(default!))),
     new(V((channel<MyByte>)(default!)), V((channel<MyByte>)(default!))),
     new(V((slice<byte>)(default!)), V((slice<byte>)(default!))),
     new(V((slice<MyByte>)(default!)), V((slice<MyByte>)(default!))),
-    new(V(((map<nint, byte>)default!)), V(((map<nint, byte>)default!))),
-    new(V(((map<nint, MyByte>)default!)), V(((map<nint, MyByte>)default!))),
-    new(V(((map<byte, nint>)default!)), V(((map<byte, nint>)default!))),
-    new(V(((map<MyByte, nint>)default!)), V(((map<MyByte, nint>)default!))),
+    new(V((map<nint, byte>)default!), V((map<nint, byte>)default!)),
+    new(V((map<nint, MyByte>)default!), V((map<nint, MyByte>)default!)),
+    new(V((map<byte, nint>)default!), V((map<byte, nint>)default!)),
+    new(V((map<MyByte, nint>)default!), V((map<MyByte, nint>)default!)),
     new(V(new byte[]{}.array(2)), V(new byte[]{}.array(2))),
     new(V(new MyByte[]{}.array(2)), V(new MyByte[]{}.array(2))),
 
     // other
-    new(V(((ж<ж<ж<nint>>>)nil)), V(((ж<ж<ж<nint>>>)nil))),
-    new(V(((ж<ж<ж<byte>>>)nil)), V(((ж<ж<ж<byte>>>)nil))),
-    new(V(((ж<ж<ж<int32>>>)nil)), V(((ж<ж<ж<int32>>>)nil))),
-    new(V(((ж<ж<ж<int64>>>)nil)), V(((ж<ж<ж<int64>>>)nil))),
+    new(V((ж<ж<ж<nint>>>)nil), V((ж<ж<ж<nint>>>)nil)),
+    new(V((ж<ж<ж<byte>>>)nil), V((ж<ж<ж<byte>>>)nil)),
+    new(V((ж<ж<ж<int32>>>)nil), V((ж<ж<ж<int32>>>)nil)),
+    new(V((ж<ж<ж<int64>>>)nil), V((ж<ж<ж<int64>>>)nil)),
     new(V((channel<byte>)(default!)), V((channel<byte>)(default!))),
     new(V((channel<MyByte>)(default!)), V((channel<MyByte>)(default!))),
-    new(V(((map<nint, bool>)default!)), V(((map<nint, bool>)default!))),
-    new(V(((map<nint, byte>)default!)), V(((map<nint, byte>)default!))),
-    new(V(((map<nuint, bool>)default!)), V(((map<nuint, bool>)default!))),
+    new(V((map<nint, bool>)default!), V((map<nint, bool>)default!)),
+    new(V((map<nint, byte>)default!), V((map<nint, byte>)default!)),
+    new(V((map<nuint, bool>)default!), V((map<nuint, bool>)default!)),
     new(V(slice<nuint>(default!)), V(slice<nuint>(default!))),
     new(V(slice<nint>(default!)), V(slice<nint>(default!))),
     new(V(@new<any>()), V(@new<any>())),
@@ -5964,42 +5982,42 @@ internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V(@new<Δio.Writer>()), V(@new<Δio.Writer>())),
 
     // channels
-    new(V(((IntChan)default!)), V(channel/*<-*/<nint>.SendOnly)),
-    new(V(((IntChan)default!)), V(/*<-*/channel<nint>.RecvOnly)),
-    new(V((channel<nint>)(default!)), V(((IntChanRecv)default!))),
-    new(V((channel<nint>)(default!)), V(((IntChanSend)default!))),
-    new(V(((IntChanRecv)default!)), V(/*<-*/channel<nint>.RecvOnly)),
-    new(V(/*<-*/channel<nint>.RecvOnly), V(((IntChanRecv)default!))),
-    new(V(((IntChanSend)default!)), V(channel/*<-*/<nint>.SendOnly)),
-    new(V(channel/*<-*/<nint>.SendOnly), V(((IntChanSend)default!))),
-    new(V(((IntChan)default!)), V((channel<nint>)(default!))),
-    new(V((channel<nint>)(default!)), V(((IntChan)default!))),
+    new(V((IntChan)default!), V(channel/*<-*/<nint>.SendOnly)),
+    new(V((IntChan)default!), V(/*<-*/channel<nint>.RecvOnly)),
+    new(V((channel<nint>)(default!)), V((IntChanRecv)default!)),
+    new(V((channel<nint>)(default!)), V((IntChanSend)default!)),
+    new(V((IntChanRecv)default!), V(/*<-*/channel<nint>.RecvOnly)),
+    new(V(/*<-*/channel<nint>.RecvOnly), V((IntChanRecv)default!)),
+    new(V((IntChanSend)default!), V(channel/*<-*/<nint>.SendOnly)),
+    new(V(channel/*<-*/<nint>.SendOnly), V((IntChanSend)default!)),
+    new(V((IntChan)default!), V((channel<nint>)(default!))),
+    new(V((channel<nint>)(default!)), V((IntChan)default!)),
     new(V((channel<nint>)(default!)), V(/*<-*/channel<nint>.RecvOnly)),
     new(V((channel<nint>)(default!)), V(channel/*<-*/<nint>.SendOnly)),
-    new(V(((BytesChan)default!)), V(channel/*<-*/<slice<byte>>.SendOnly)),
-    new(V(((BytesChan)default!)), V(/*<-*/channel<slice<byte>>.RecvOnly)),
-    new(V((channel<slice<byte>>)(default!)), V(((BytesChanRecv)default!))),
-    new(V((channel<slice<byte>>)(default!)), V(((BytesChanSend)default!))),
-    new(V(((BytesChanRecv)default!)), V(/*<-*/channel<slice<byte>>.RecvOnly)),
-    new(V(/*<-*/channel<slice<byte>>.RecvOnly), V(((BytesChanRecv)default!))),
-    new(V(((BytesChanSend)default!)), V(channel/*<-*/<slice<byte>>.SendOnly)),
-    new(V(channel/*<-*/<slice<byte>>.SendOnly), V(((BytesChanSend)default!))),
-    new(V(((BytesChan)default!)), V((channel<slice<byte>>)(default!))),
-    new(V((channel<slice<byte>>)(default!)), V(((BytesChan)default!))),
+    new(V((BytesChan)default!), V(channel/*<-*/<slice<byte>>.SendOnly)),
+    new(V((BytesChan)default!), V(/*<-*/channel<slice<byte>>.RecvOnly)),
+    new(V((channel<slice<byte>>)(default!)), V((BytesChanRecv)default!)),
+    new(V((channel<slice<byte>>)(default!)), V((BytesChanSend)default!)),
+    new(V((BytesChanRecv)default!), V(/*<-*/channel<slice<byte>>.RecvOnly)),
+    new(V(/*<-*/channel<slice<byte>>.RecvOnly), V((BytesChanRecv)default!)),
+    new(V((BytesChanSend)default!), V(channel/*<-*/<slice<byte>>.SendOnly)),
+    new(V(channel/*<-*/<slice<byte>>.SendOnly), V((BytesChanSend)default!)),
+    new(V((BytesChan)default!), V((channel<slice<byte>>)(default!))),
+    new(V((channel<slice<byte>>)(default!)), V((BytesChan)default!)),
     new(V((channel<slice<byte>>)(default!)), V(/*<-*/channel<slice<byte>>.RecvOnly)),
     new(V((channel<slice<byte>>)(default!)), V(channel/*<-*/<slice<byte>>.SendOnly)),
 
     // cannot convert other instances (channels)
-    new(V(((IntChan)default!)), V(((IntChan)default!))),
-    new(V(((IntChanRecv)default!)), V(((IntChanRecv)default!))),
-    new(V(((IntChanSend)default!)), V(((IntChanSend)default!))),
-    new(V(((BytesChan)default!)), V(((BytesChan)default!))),
-    new(V(((BytesChanRecv)default!)), V(((BytesChanRecv)default!))),
-    new(V(((BytesChanSend)default!)), V(((BytesChanSend)default!))),
+    new(V((IntChan)default!), V((IntChan)default!)),
+    new(V((IntChanRecv)default!), V((IntChanRecv)default!)),
+    new(V((IntChanSend)default!), V((IntChanSend)default!)),
+    new(V((BytesChan)default!), V((BytesChan)default!)),
+    new(V((BytesChanRecv)default!), V((BytesChanRecv)default!)),
+    new(V((BytesChanSend)default!), V((BytesChanSend)default!)),
 
     // interfaces
     new(V((nint)1), EmptyInterfaceV((nint)1)),
-    new(V(((@string)"hello"u8)), EmptyInterfaceV(((@string)"hello"u8))),
+    new(V((@string)"hello"u8), EmptyInterfaceV((@string)"hello"u8)),
     new(V(@new<bytes.Buffer>()), ReaderV(new reflect_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))),
     new(ReadWriterV(new reflect_test_package.bytes_BufferжReadWriter(@new<bytes.Buffer>())), ReaderV(new reflect_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))),
     new(V(@new<bytes.Buffer>()), ReadWriterV(new reflect_test_package.bytes_BufferжReadWriter(@new<bytes.Buffer>())))
@@ -6141,10 +6159,10 @@ public static void TestConvertSlice2Array(ж<Δtesting.T> Ꮡt) {
     if (v.CanAddr()) {
         Ꮡt.Fatalf("convert slice to non-empty array returns an addressable copy array"u8);
     }
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         ov.Index(i).Set(ValueOf(i + 1));
     }
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         if (v.Index(i).Int() != 0) {
             Ꮡt.Fatalf("slice (%v) mutation visible in converted result (%v)"u8, ov, v);
         }
@@ -6168,7 +6186,7 @@ public static void TestConvertNaNs(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("store/load of sNaN not faithful, got %x want %x"u8, got, snan);
         }
     }
-    var x = V(((TestConvertNaNs_myFloat32)Δmath.Float32frombits(snan)));
+    var x = V((TestConvertNaNs_myFloat32)Δmath.Float32frombits(snan));
     var y = x.Convert(TypeOf((float32)0F));
     var z = y.Interface()._<float32>();
     {
@@ -6192,7 +6210,7 @@ partial struct comparableTestsᴛ1 /*dyn*/ {
     internal bool ok;
 }
 internal static slice<comparableTestsᴛ1> comparableTests = new comparableTestsᴛ1[]{
-    new(TypeOf((nint)(1)), true),
+    new(TypeOf((nint)1), true),
     new(TypeOf((@string)"hello"u8), true),
     new(TypeOf(@new<byte>()), true),
     new(TypeOf(((Action)(default!)).OrTypedNilFunc()), false),
@@ -6251,8 +6269,8 @@ public static void TestValueOverflow(ж<Δtesting.T> Ꮡt) {
         }
     }
     {
-        var ovf = V((int32)0).OverflowInt(((int64)(-1) << (int)(31))); if (ovf) {
-            Ꮡt.Errorf("%v wrongly overflows int32"u8, (-(int64)1 << (int)(31)));
+        var ovf = V((int32)0).OverflowInt((int64)(-1) << 31); if (ovf) {
+            Ꮡt.Errorf("%v wrongly overflows int32"u8, -(int64)1 << 31);
         }
     }
     var ovfInt32 = (int64)(2147483648L);
@@ -6268,7 +6286,7 @@ public static void TestValueOverflow(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%v wrongly overflows uint32"u8, maxUint32);
         }
     }
-    var ovfUint32 = (uint64)(((uint64)1 << (int)(32)));
+    var ovfUint32 = (uint64)((uint64)1 << 32);
     {
         var ovf = V((uint32)0).OverflowUint(ovfUint32); if (!ovf) {
             Ꮡt.Errorf("%v should overflow uint32"u8, ovfUint32);
@@ -6308,8 +6326,8 @@ public static void TestTypeOverflow(ж<Δtesting.T> Ꮡt) {
         }
     }
     {
-        var ovf = TypeFor<int32>().OverflowInt(((int64)(-1) << (int)(31))); if (ovf) {
-            Ꮡt.Errorf("%v wrongly overflows int32"u8, (-(int64)1 << (int)(31)));
+        var ovf = TypeFor<int32>().OverflowInt((int64)(-1) << 31); if (ovf) {
+            Ꮡt.Errorf("%v wrongly overflows int32"u8, -(int64)1 << 31);
         }
     }
     var ovfInt32 = (int64)(2147483648L);
@@ -6325,7 +6343,7 @@ public static void TestTypeOverflow(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%v wrongly overflows uint32"u8, maxUint32);
         }
     }
-    var ovfUint32 = (uint64)(((uint64)1 << (int)(32)));
+    var ovfUint32 = (uint64)((uint64)1 << 32);
     {
         var ovf = TypeFor<uint32>().OverflowUint(ovfUint32); if (!ovf) {
             Ꮡt.Errorf("%v should overflow uint32"u8, ovfUint32);
@@ -6333,7 +6351,7 @@ public static void TestTypeOverflow(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-internal static void checkSameType(ж<Δtesting.T> Ꮡt, reflectꓸType x, any y) {
+internal static partial void checkSameType(ж<Δtesting.T> Ꮡt, reflectꓸType x, any y) {
     if (!AreEqual(x, TypeOf(y)) || !AreEqual(TypeOf(Zero(x).Interface()), TypeOf(y))) {
         Ꮡt.Errorf("did not find preexisting type for %s (vs %s)"u8, TypeOf(x), TypeOf(y));
     }
@@ -6388,7 +6406,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 0,
             value: (nint i) => {
-                return ((TestArrayOf_Tint)i);
+                return (TestArrayOf_Tint)i;
             },
             comparable: true,
             want: "[]"u8
@@ -6396,7 +6414,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 10,
             value: (nint i) => {
-                return ((TestArrayOf_Tintᴛ1)i);
+                return (TestArrayOf_Tintᴛ1)i;
             },
             comparable: true,
             want: "[0 1 2 3 4 5 6 7 8 9]"u8
@@ -6404,7 +6422,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 10,
             value: (nint i) => {
-                return ((TestArrayOf_Tfloat)(float64)i);
+                return (TestArrayOf_Tfloat)(float64)i;
             },
             comparable: true,
             want: "[0 1 2 3 4 5 6 7 8 9]"u8
@@ -6412,7 +6430,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 10,
             value: (nint i) => {
-                return ((TestArrayOf_Tstring)strconv.Itoa(i));
+                return (TestArrayOf_Tstring)strconv.Itoa(i);
             },
             comparable: true,
             want: "[0 1 2 3 4 5 6 7 8 9]"u8
@@ -6428,7 +6446,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 10,
             value: (nint i) => {
-                return new TestArrayOf_Tintᴛ2[]{((TestArrayOf_Tintᴛ2)i)}.slice();
+                return new TestArrayOf_Tintᴛ2[]{(TestArrayOf_Tintᴛ2)i}.slice();
             },
             comparable: false,
             want: "[[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]]"u8
@@ -6436,7 +6454,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
         new(
             n: 10,
             value: (nint i) => {
-                return new TestArrayOf_Tintᴛ3[]{((TestArrayOf_Tintᴛ3)i)}.array();
+                return new TestArrayOf_Tintᴛ3[]{(TestArrayOf_Tintᴛ3)i}.array();
             },
             comparable: true,
             want: "[[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]]"u8
@@ -6512,13 +6530,15 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
             }
         }
     }
-    checkSameType(Ꮡt, ArrayOf(5, TypeOf(((TestArrayOf_T)1))), new TestArrayOf_T[]{}.array(5));
+    checkSameType(Ꮡt, ArrayOf(5, TypeOf((TestArrayOf_T)1)), new TestArrayOf_T[]{}.array(5));
 }
 
 internal partial class TestArrayOfGC_T /*ж<uintptr>*/;
 
 public static void TestArrayOfGC(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestArrayOfGC_T)nil));
+    var xᴷ = new stackAppend<any>(moves: true);
+
+    var tt = TypeOf((TestArrayOfGC_T)nil);
     const nint n = 100;
     slice<any> x = default!;
     for (nint i = 0; i < n; i++) {
@@ -6528,10 +6548,11 @@ public static void TestArrayOfGC(ж<Δtesting.T> Ꮡt) {
             p.Value = (uintptr)(i * n + j);
             v.Index(j).Set(ValueOf(p.OrTypedNil()).Convert(tt));
         }
-        x = append(x, v.Interface());
+        x = append(xᴷ, x, v.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var v = ValueOf(xi);
         for (nint j = 0; j < v.Len(); j++) {
@@ -6571,7 +6592,7 @@ internal static readonly @string abcˢ = "abc"u8;
 internal static readonly object efgˢ = (@string)"efg"u8;
 
 public static void TestArrayOfGenericAlg(ж<Δtesting.T> Ꮡt) {
-    var at1 = ArrayOf(5, TypeOf(((@string)""u8)));
+    var at1 = ArrayOf(5, TypeOf((@string)""u8));
     var at = ArrayOf(6, at1);
     var v1 = New(at).Elem();
     var v2 = New(at).Elem();
@@ -6597,7 +6618,7 @@ public static void TestArrayOfGenericAlg(ж<Δtesting.T> Ꮡt) {
 
     // Test hash
     var m = MakeMap(MapOf(at, TypeOf((nint)0)));
-    m.SetMapIndex(v1, ValueOf((nint)(1)));
+    m.SetMapIndex(v1, ValueOf((nint)1));
     {
         var (i1, i2) = (v1.Interface(), v2.Interface()); if (!m.MapIndex(v2).IsValid()) {
             Ꮡt.Errorf("constructed arrays %v and %v have different hashes"u8, i1, i2);
@@ -6671,7 +6692,7 @@ internal partial struct TestSliceOf_T /*num:nint*/;
 internal partial struct TestSliceOf_T1 /*num:nint*/;
 
 public static void TestSliceOf(ж<Δtesting.T> Ꮡt) {
-    var st = SliceOf(TypeOf(((TestSliceOf_T)1)));
+    var st = SliceOf(TypeOf((TestSliceOf_T)1));
     {
         @string got = st.String();
         @string wantΔ1 = reflectTestTˢ; if (got != wantΔ1) {
@@ -6681,7 +6702,7 @@ public static void TestSliceOf(ж<Δtesting.T> Ꮡt) {
     var v = MakeSlice(st, 10, 10);
     Δruntime.GC();
     for (nint i = 0; i < v.Len(); i++) {
-        v.Index(i).Set(ValueOf(((TestSliceOf_T)i)));
+        v.Index(i).Set(ValueOf((TestSliceOf_T)i));
         Δruntime.GC();
     }
     @string s = fmt.Sprint(v.Interface());
@@ -6689,7 +6710,7 @@ public static void TestSliceOf(ж<Δtesting.T> Ꮡt) {
     if (s != want) {
         Ꮡt.Errorf("constructed slice = %s, want %s"u8, s, want);
     }
-    checkSameType(Ꮡt, SliceOf(TypeOf(((TestSliceOf_T1)1))), new TestSliceOf_T1[]{}.slice());
+    checkSameType(Ꮡt, SliceOf(TypeOf((TestSliceOf_T1)1)), new TestSliceOf_T1[]{}.slice());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -6723,7 +6744,9 @@ public static void TestSliceOverflow(ж<Δtesting.T> Ꮡt) {
 internal partial class TestSliceOfGC_T /*ж<uintptr>*/;
 
 public static void TestSliceOfGC(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestSliceOfGC_T)nil));
+    var xᴷ = new stackAppend<any>(moves: true);
+
+    var tt = TypeOf((TestSliceOfGC_T)nil);
     var st = SliceOf(tt);
     const nint n = 100;
     slice<any> x = default!;
@@ -6734,10 +6757,11 @@ public static void TestSliceOfGC(ж<Δtesting.T> Ꮡt) {
             p.Value = (uintptr)(i * n + j);
             v.Index(j).Set(ValueOf(p.OrTypedNil()).Convert(tt));
         }
-        x = append(x, v.Interface());
+        x = append(xᴷ, x, v.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var v = ValueOf(xi);
         for (nint j = 0; j < v.Len(); j++) {
@@ -6949,7 +6973,7 @@ public static void TestStructOf(ж<Δtesting.T> Ꮡt) {
         StructOf(new Δreflect.StructField[]{
             new(
                 Name: "F"u8,
-                Type: TypeOf(((ж<TestStructOf_structFieldType>)nil)).Elem()
+                Type: TypeOf((ж<TestStructOf_structFieldType>)nil).Elem()
             )
         }.slice()),
         new TestStructOf_yᴛ1());
@@ -6998,7 +7022,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             exported: true
         ),
         new(
-            field: new StructField(Name: "S1"u8, Anonymous: true, Type: TypeOf(((ж<TestStructOfExportRules_S1>)nil))),
+            field: new StructField(Name: "S1"u8, Anonymous: true, Type: TypeOf((ж<TestStructOfExportRules_S1>)nil)),
             exported: true
         ),
         new(
@@ -7006,7 +7030,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "s2"u8, Anonymous: true, Type: TypeOf(((ж<TestStructOfExportRules_s2>)nil))),
+            field: new StructField(Name: "s2"u8, Anonymous: true, Type: TypeOf((ж<TestStructOfExportRules_s2>)nil)),
             mustPanic: true
         ),
         new(
@@ -7022,7 +7046,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "S1"u8, Anonymous: true, Type: TypeOf(((ж<TestStructOfExportRules_S1>)nil)), PkgPath: "other/pkg"u8),
+            field: new StructField(Name: "S1"u8, Anonymous: true, Type: TypeOf((ж<TestStructOfExportRules_S1>)nil), PkgPath: "other/pkg"u8),
             mustPanic: true
         ),
         new(
@@ -7030,7 +7054,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "s2"u8, Anonymous: true, Type: TypeOf(((ж<TestStructOfExportRules_s2>)nil)), PkgPath: "other/pkg"u8),
+            field: new StructField(Name: "s2"u8, Anonymous: true, Type: TypeOf((ж<TestStructOfExportRules_s2>)nil), PkgPath: "other/pkg"u8),
             mustPanic: true
         ),
         new(
@@ -7044,7 +7068,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             exported: true
         ),
         new(
-            field: new StructField(Name: "S"u8, Type: TypeOf(((ж<TestStructOfExportRules_S1>)nil))),
+            field: new StructField(Name: "S"u8, Type: TypeOf((ж<TestStructOfExportRules_S1>)nil)),
             exported: true
         ),
         new(
@@ -7052,7 +7076,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             exported: true
         ),
         new(
-            field: new StructField(Name: "S"u8, Type: TypeOf(((ж<TestStructOfExportRules_s2>)nil))),
+            field: new StructField(Name: "S"u8, Type: TypeOf((ж<TestStructOfExportRules_s2>)nil)),
             exported: true
         ),
         new(
@@ -7060,7 +7084,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "s"u8, Type: TypeOf(((ж<TestStructOfExportRules_S1>)nil))),
+            field: new StructField(Name: "s"u8, Type: TypeOf((ж<TestStructOfExportRules_S1>)nil)),
             mustPanic: true
         ),
         new(
@@ -7068,20 +7092,20 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "s"u8, Type: TypeOf(((ж<TestStructOfExportRules_s2>)nil))),
+            field: new StructField(Name: "s"u8, Type: TypeOf((ж<TestStructOfExportRules_s2>)nil)),
             mustPanic: true
         ),
         new(
             field: new StructField(Name: "s"u8, Type: TypeOf(new TestStructOfExportRules_S1(nil)), PkgPath: "other/pkg"u8)
         ),
         new(
-            field: new StructField(Name: "s"u8, Type: TypeOf(((ж<TestStructOfExportRules_S1>)nil)), PkgPath: "other/pkg"u8)
+            field: new StructField(Name: "s"u8, Type: TypeOf((ж<TestStructOfExportRules_S1>)nil), PkgPath: "other/pkg"u8)
         ),
         new(
             field: new StructField(Name: "s"u8, Type: TypeOf(new TestStructOfExportRules_s2(nil)), PkgPath: "other/pkg"u8)
         ),
         new(
-            field: new StructField(Name: "s"u8, Type: TypeOf(((ж<TestStructOfExportRules_s2>)nil)), PkgPath: "other/pkg"u8)
+            field: new StructField(Name: "s"u8, Type: TypeOf((ж<TestStructOfExportRules_s2>)nil), PkgPath: "other/pkg"u8)
         ),
         new(
             field: new StructField(Name: ""u8, Type: TypeOf(new TestStructOfExportRules_ΦType(nil))),
@@ -7092,11 +7116,11 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
             mustPanic: true
         ),
         new(
-            field: new StructField(Name: "Φ"u8, Type: TypeOf((nint)(0))),
+            field: new StructField(Name: "Φ"u8, Type: TypeOf((nint)0)),
             exported: true
         ),
         new(
-            field: new StructField(Name: "φ"u8, Type: TypeOf((nint)(0))),
+            field: new StructField(Name: "φ"u8, Type: TypeOf((nint)0)),
             exported: false
         )
     }.slice();
@@ -7131,7 +7155,9 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
 internal partial class TestStructOfGC_T /*ж<uintptr>*/;
 
 public static void TestStructOfGC(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestStructOfGC_T)nil));
+    var xᴷ = new stackAppend<any>(moves: true);
+
+    var tt = TypeOf((TestStructOfGC_T)nil);
     var fields = new Δreflect.StructField[]{
         new(Name: "X"u8, Type: tt),
         new(Name: "Y"u8, Type: tt)
@@ -7147,10 +7173,11 @@ public static void TestStructOfGC(ж<Δtesting.T> Ꮡt) {
             p.Value = (uintptr)(i * n + j);
             v.Field(j).Set(ValueOf(p.OrTypedNil()).Convert(tt));
         }
-        x = append(x, v.Interface());
+        x = append(xᴷ, x, v.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var v = ValueOf(xi);
         for (nint j = 0; j < v.NumField(); j++) {
@@ -7196,7 +7223,7 @@ internal partial struct TestStructOfGenericAlg_tests /*dyn*/ {
 public static void TestStructOfGenericAlg(ж<Δtesting.T> Ꮡt) {
     var st1 = StructOf(new Δreflect.StructField[]{
         new(Name: "X"u8, Tag: "x"u8, Type: TypeOf((int64)0)),
-        new(Name: "Y"u8, Type: TypeOf(((@string)""u8)))
+        new(Name: "Y"u8, Type: TypeOf((@string)""u8))
     }.slice());
     var st = StructOf(new Δreflect.StructField[]{
         new(Name: "S0"u8, Type: st1),
@@ -7304,7 +7331,7 @@ public static void TestStructOfGenericAlg(ж<Δtesting.T> Ꮡt) {
 
         // Test hash
         var m = MakeMap(MapOf(table.rt, TypeOf((nint)0)));
-        m.SetMapIndex(v1, ValueOf((nint)(1)));
+        m.SetMapIndex(v1, ValueOf((nint)1));
         {
             var (i1, i2) = (v1.Interface(), v2.Interface()); if (!m.MapIndex(v2).IsValid()) {
                 Ꮡt.Errorf("constructed structs %#v and %#v have different hashes"u8, i1, i2);
@@ -7345,7 +7372,7 @@ public static void TestStructOfDirectIface(ж<Δtesting.T> Ꮡt) {
         i2 = Zero(StructOf(new Δreflect.StructField[]{
             new(
                 Name: "X"u8,
-                Type: ArrayOf(1, TypeOf(((ж<int8>)nil)))
+                Type: ArrayOf(1, TypeOf((ж<int8>)nil))
             )
         }.slice())).Interface();
         var v2 = ValueOf(Ꮡi2).Elem();
@@ -7369,7 +7396,7 @@ public static void TestStructOfDirectIface(ж<Δtesting.T> Ꮡt) {
         i2 = Zero(StructOf(new Δreflect.StructField[]{
             new(
                 Name: "X"u8,
-                Type: ArrayOf(0, TypeOf(((ж<int8>)nil)))
+                Type: ArrayOf(0, TypeOf((ж<int8>)nil))
             )
         }.slice())).Interface();
         var v2 = ValueOf(Ꮡi2).Elem();
@@ -7440,34 +7467,34 @@ public static void TestStructOfWithInterface(ж<Δtesting.T> Ꮡt) {
     var tests = new TestStructOfWithInterface_tests[]{
         new(
             name: "StructI"u8,
-            typ: TypeOf(((StructI)want)),
-            val: ValueOf(((StructI)want)),
+            typ: TypeOf((StructI)want),
+            val: ValueOf((StructI)want),
             impl: true
         ),
         new(
             name: "StructI"u8,
-            typ: PointerTo(TypeOf(((StructI)want))),
+            typ: PointerTo(TypeOf((StructI)want)),
             val: ValueOf(((Func<any>)(() => {
                 ref var v = ref heap<StructI>(out var Ꮡv);
-                v = ((StructI)want);
+                v = (StructI)want;
                 return Ꮡv;
             }))()),
             impl: true
         ),
         new(
             name: "StructIPtr"u8,
-            typ: PointerTo(TypeOf(((StructIPtr)want))),
+            typ: PointerTo(TypeOf((StructIPtr)want)),
             val: ValueOf(((Func<any>)(() => {
                 ref var v = ref heap<StructIPtr>(out var Ꮡv);
-                v = ((StructIPtr)want);
+                v = (StructIPtr)want;
                 return Ꮡv;
             }))()),
             impl: true
         ),
         new(
             name: "StructIPtr"u8,
-            typ: TypeOf(((StructIPtr)want)),
-            val: ValueOf(((StructIPtr)want)),
+            typ: TypeOf((StructIPtr)want),
+            val: ValueOf((StructIPtr)want),
             impl: false
         )
         // {
@@ -7557,7 +7584,7 @@ public static void TestStructOfWithInterface(ж<Δtesting.T> Ꮡt) {
     fields = new Δreflect.StructField[]{new(
         Name: "StructIPtr"u8,
         Anonymous: true,
-        Type: PointerTo(TypeOf(((StructIPtr)want)))
+        Type: PointerTo(TypeOf((StructIPtr)want))
     )
     }.slice();
     var rt = StructOf(fields);
@@ -7678,8 +7705,8 @@ public static void TestStructOfTooLarge(ж<Δtesting.T> Ꮡt) {
 
     // 2^64-3 sized type (or 2^32-3 on 32-bit archs)
     var bigType = StructOf(new Δreflect.StructField[]{
-        new(Name: "F1"u8, Type: ArrayOf((nint)((~(uintptr)0 >> (int)(1))), t1)),
-        new(Name: "F2"u8, Type: ArrayOf((nint)((~(uintptr)0 >> (int)(1)) - 1), t1))
+        new(Name: "F1"u8, Type: ArrayOf((nint)(~(uintptr)0 >> 1), t1)),
+        new(Name: "F2"u8, Type: ArrayOf((nint)((~(uintptr)0 >> 1) - 1), t1))
     }.slice());
 
     var tests = new TestStructOfTooLarge_test[]{
@@ -7757,7 +7784,7 @@ public static void TestStructOfTooLarge(ж<Δtesting.T> Ꮡt) {
 }
 
 internal partial struct TestStructOfAnonymous_type /*dyn*/ {
-    public partial ref D1 D1 { get; }
+    /*embed*/ public D1 D1;
 }
 
 public static void TestStructOfAnonymous(ж<Δtesting.T> Ꮡt) {
@@ -7781,12 +7808,12 @@ internal partial struct TestChanOf_T /*@string*/;
 internal partial struct TestChanOf_T1 /*num:nint*/;
 
 public static void TestChanOf(ж<Δtesting.T> Ꮡt) {
-    var ct = ChanOf(BothDir, TypeOf(((TestChanOf_T)(@string)""u8)));
+    var ct = ChanOf(BothDir, TypeOf((TestChanOf_T)(@string)""u8));
     var v = MakeChan(ct, 2);
     Δruntime.GC();
-    v.Send(ValueOf(((TestChanOf_T)(@string)helloˢ)));
+    v.Send(ValueOf((TestChanOf_T)(@string)helloˢ));
     Δruntime.GC();
-    v.Send(ValueOf(((TestChanOf_T)(@string)worldˢ)));
+    v.Send(ValueOf((TestChanOf_T)(@string)worldˢ));
     Δruntime.GC();
 
     var (sv1, _) = v.Recv();
@@ -7796,13 +7823,13 @@ public static void TestChanOf(ж<Δtesting.T> Ꮡt) {
     if (s1 != "hello"u8 || s2 != "world"u8) {
         Ꮡt.Errorf("constructed chan: have %q, %q, want %q, %q"u8, s1, s2, helloˢ, worldˢ);
     }
-    checkSameType(Ꮡt, ChanOf(BothDir, TypeOf(((TestChanOf_T1)1))), (channel<TestChanOf_T1>)(default!));
+    checkSameType(Ꮡt, ChanOf(BothDir, TypeOf((TestChanOf_T1)1)), (channel<TestChanOf_T1>)(default!));
 
     // Check arrow token association in undefined chan types.
     channel/*<-*/<channel<TestChanOf_T>> left = channel/*<-*/<channel<TestChanOf_T>>.SendOnly;
     channel</*<-*/channel<TestChanOf_T>> right = channel</*<-*/channel<TestChanOf_T>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Both, GoChanDir.Recv }, null));
-    var tLeft = ChanOf(SendDir, ChanOf(BothDir, TypeOf(((TestChanOf_T)(@string)""u8))));
-    var tRight = ChanOf(BothDir, ChanOf(RecvDir, TypeOf(((TestChanOf_T)(@string)""u8))));
+    var tLeft = ChanOf(SendDir, ChanOf(BothDir, TypeOf((TestChanOf_T)(@string)""u8)));
+    var tRight = ChanOf(BothDir, ChanOf(RecvDir, TypeOf((TestChanOf_T)(@string)""u8)));
     if (!AreEqual(tLeft, TypeOf(left))) {
         Ꮡt.Errorf("chan<-chan: have %s, want %T"u8, tLeft, left);
     }
@@ -7822,10 +7849,10 @@ internal partial struct TestChanOfDir_T /*@string*/;
 internal partial struct TestChanOfDir_T1 /*num:nint*/;
 
 public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
-    var crt = ChanOf(RecvDir, TypeOf(((TestChanOfDir_T)(@string)""u8)));
-    var cst = ChanOf(SendDir, TypeOf(((TestChanOfDir_T)(@string)""u8)));
-    checkSameType(Ꮡt, ChanOf(RecvDir, TypeOf(((TestChanOfDir_T1)1))), /*<-*/channel<TestChanOfDir_T1>.RecvOnly);
-    checkSameType(Ꮡt, ChanOf(SendDir, TypeOf(((TestChanOfDir_T1)1))), channel/*<-*/<TestChanOfDir_T1>.SendOnly);
+    var crt = ChanOf(RecvDir, TypeOf((TestChanOfDir_T)(@string)""u8));
+    var cst = ChanOf(SendDir, TypeOf((TestChanOfDir_T)(@string)""u8));
+    checkSameType(Ꮡt, ChanOf(RecvDir, TypeOf((TestChanOfDir_T1)1)), /*<-*/channel<TestChanOfDir_T1>.RecvOnly);
+    checkSameType(Ꮡt, ChanOf(SendDir, TypeOf((TestChanOfDir_T1)1)), channel/*<-*/<TestChanOfDir_T1>.SendOnly);
 
     // check String form of ChanDir
     if (crt.ChanDir().String() != "<-chan"u8) {
@@ -7838,62 +7865,41 @@ public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
 
 internal partial class TestChanOfGC_T /*ж<uintptr>*/;
 
-public static partial void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        var done = new channel<bool>(1);
-        var doneʗ1 = done;
-        goǃ(() => {
-            var selᴛ3 = doneʗ1;
-            var selᴛ4 = time.After((time.Duration)(5000000000L));
-            switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-            case 0 when selᴛ3.ꟷᐳ(out _): {
-                break;
-            }
-            case 1 when selᴛ4.ꟷᐳ(out _): {
-                throw panic("deadlock in TestChanOfGC");
-                break;
-            }}
-        });
+public static void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
+    var xᴷ = new stackAppend<any>(moves: true);
 
-        var doneʗ2 = done;
-        defer(() => {
-            doneʗ2.ᐸꟷ(true);
-        }, ref ᒐ);
-        var tt = TypeOf(((TestChanOfGC_T)nil));
-        var ct = ChanOf(BothDir, tt);
+    var tt = TypeOf((TestChanOfGC_T)nil);
+    var ct = ChanOf(BothDir, tt);
 
-        // NOTE: The garbage collector handles allocated channels specially,
-        // so we have to save pointers to channels in x; the pointer code will
-        // use the gc info in the newly constructed chan type.
-        const nint n = 100;
-        slice<any> x = default!;
-        for (nint i = 0; i < n; i++) {
-            var v = MakeChan(ct, n);
-            for (nint j = 0; j < n; j++) {
-                var p = @new<uintptr>();
-                p.Value = (uintptr)(i * n + j);
-                v.Send(ValueOf(p.OrTypedNil()).Convert(tt));
-            }
-            var pv = New(ct);
-            pv.Elem().Set(v);
-            x = append(x, pv.Interface());
+    // NOTE: The garbage collector handles allocated channels specially,
+    // so we have to save pointers to channels in x; the pointer code will
+    // use the gc info in the newly constructed chan type.
+    const nint n = 100;
+    slice<any> x = default!;
+    for (nint i = 0; i < n; i++) {
+        var v = MakeChan(ct, n);
+        for (nint j = 0; j < n; j++) {
+            var p = @new<uintptr>();
+            p.Value = (uintptr)(i * n + j);
+            v.Send(ValueOf(p.OrTypedNil()).Convert(tt));
         }
-        Δruntime.GC();
+        var pv = New(ct);
+        pv.Elem().Set(v);
+        x = append(xᴷ, x, pv.Interface());
+    }
+    Δruntime.GC();
 
-        foreach (var (i, xi) in x) {
-            var v = ValueOf(xi).Elem();
-            for (nint j = 0; j < n; j++) {
-                var (pv, _) = v.Recv();
-                var k = pv.Elem().Interface();
-                if (!AreEqual(k, (uintptr)(i * n + j))) {
-                    Ꮡt.Errorf("lost x[%d][%d] = %d, want %d"u8, i, j, k, i * n + j);
-                }
+    x = move2heap(xᴷ, x);
+    foreach (var (i, xi) in x) {
+        var v = ValueOf(xi).Elem();
+        for (nint j = 0; j < n; j++) {
+            var (pv, _) = v.Recv();
+            var k = pv.Elem().Interface();
+            if (!AreEqual(k, (uintptr)(i * n + j))) {
+                Ꮡt.Errorf("lost x[%d][%d] = %d, want %d"u8, i, j, k, i * n + j);
             }
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -7906,9 +7912,9 @@ internal partial struct TestMapOf_K /*@string*/;
 internal partial struct TestMapOf_V /*num:float64*/;
 
 public static void TestMapOf(ж<Δtesting.T> Ꮡt) {
-    var v = MakeMap(MapOf(TypeOf(((TestMapOf_K)(@string)""u8)), TypeOf(((TestMapOf_V)0D))));
+    var v = MakeMap(MapOf(TypeOf((TestMapOf_K)(@string)""u8), TypeOf((TestMapOf_V)0D)));
     Δruntime.GC();
-    v.SetMapIndex(ValueOf(((TestMapOf_K)(@string)"a"u8)), ValueOf(((TestMapOf_V)1D)));
+    v.SetMapIndex(ValueOf((TestMapOf_K)(@string)"a"u8), ValueOf((TestMapOf_V)1D));
     Δruntime.GC();
 
     @string s = fmt.Sprint(v.Interface());
@@ -7918,7 +7924,7 @@ public static void TestMapOf(ж<Δtesting.T> Ꮡt) {
     }
 
     // check that type already in binary is found
-    checkSameType(Ꮡt, MapOf(TypeOf(((TestMapOf_V)0D)), TypeOf(((TestMapOf_K)(@string)""u8))), ((map<TestMapOf_V, TestMapOf_K>)default!));
+    checkSameType(Ꮡt, MapOf(TypeOf((TestMapOf_V)0D), TypeOf((TestMapOf_K)(@string)""u8)), (map<TestMapOf_V, TestMapOf_K>)default!);
 
     // check that invalid key type panics
     shouldPanic(invalidKeyTypeˢ, () => {
@@ -7929,7 +7935,10 @@ public static void TestMapOf(ж<Δtesting.T> Ꮡt) {
 internal partial class TestMapOfGCKeys_T /*ж<uintptr>*/;
 
 public static void TestMapOfGCKeys(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestMapOfGCKeys_T)nil));
+    var xᴷ = new stackAppend<any>(moves: true);
+    var outᴷ = new stackAppend<nint>();
+
+    var tt = TypeOf((TestMapOfGCKeys_T)nil);
     var mt = MapOf(tt, TypeOf(false));
 
     // NOTE: The garbage collector handles allocated maps specially,
@@ -7946,15 +7955,16 @@ public static void TestMapOfGCKeys(ж<Δtesting.T> Ꮡt) {
         }
         var pv = New(mt);
         pv.Elem().Set(v);
-        x = append(x, pv.Interface());
+        x = append(xᴷ, x, pv.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var v = ValueOf(xi).Elem();
         slice<nint> @out = default!;
         foreach (var (_, kv) in v.MapKeys()) {
-            @out = append(@out, (nint)(kv.Elem().Interface()._<uintptr>()));
+            @out = append(outᴷ, @out, (nint)(kv.Elem().Interface()._<uintptr>()));
         }
         slices.Sort<slice<nint>, nint>(@out);
         foreach (var (j, k) in @out) {
@@ -7994,8 +8004,10 @@ public static void TestMapOfGCBigKey(ж<Δtesting.T> Ꮡt) {
 internal partial class TestMapOfGCValues_T /*ж<uintptr>*/;
 
 public static void TestMapOfGCValues(ж<Δtesting.T> Ꮡt) {
-    var tt = TypeOf(((TestMapOfGCValues_T)nil));
-    var mt = MapOf(TypeOf((nint)(1)), tt);
+    var xᴷ = new stackAppend<any>(moves: true);
+
+    var tt = TypeOf((TestMapOfGCValues_T)nil);
+    var mt = MapOf(TypeOf((nint)1), tt);
 
     // NOTE: The garbage collector handles allocated maps specially,
     // so we have to save pointers to maps in x; the pointer code will
@@ -8011,10 +8023,11 @@ public static void TestMapOfGCValues(ж<Δtesting.T> Ꮡt) {
         }
         var pv = New(mt);
         pv.Elem().Set(v);
-        x = append(x, pv.Interface());
+        x = append(xᴷ, x, pv.Interface());
     }
     Δruntime.GC();
 
+    x = move2heap(xᴷ, x);
     foreach (var (i, xi) in x) {
         var v = ValueOf(xi).Elem();
         for (nint j = 0; j < n; j++) {
@@ -8055,33 +8068,35 @@ internal partial struct TestFuncOf_testCases /*dyn*/ {
 }
 
 public static void TestFuncOf(ж<Δtesting.T> Ꮡt) {
+    var inᴷ = new stackAppend<reflectꓸType>();
+
     var fn = (slice<reflectꓸValue> args) => {
         if (len(args) != 1){
             Ꮡt.Errorf("args == %v, want exactly one arg"u8, args);
         } else 
-        if (!AreEqual(args[0].Type(), TypeOf(((TestFuncOf_K)(@string)""u8)))){
-            Ꮡt.Errorf("args[0] is type %v, want %v"u8, args[0].Type(), TypeOf(((TestFuncOf_K)(@string)""u8)));
+        if (!AreEqual(args[0].Type(), TypeOf((TestFuncOf_K)(@string)""u8))){
+            Ꮡt.Errorf("args[0] is type %v, want %v"u8, args[0].Type(), TypeOf((TestFuncOf_K)(@string)""u8));
         } else 
         if (args[0].String() != "gopher"u8) {
             Ꮡt.Errorf("args[0] = %q, want %q"u8, args[0].String(), gopherˢ);
         }
-        return new reflectꓸValue[]{ValueOf(((TestFuncOf_V)3.14D))}.slice();
+        return new reflectꓸValue[]{ValueOf((TestFuncOf_V)3.14D)}.slice();
     };
-    var v = MakeFunc(FuncOf(new reflectꓸType[]{TypeOf(((TestFuncOf_K)(@string)""u8))}.slice(), new reflectꓸType[]{TypeOf(((TestFuncOf_V)0D))}.slice(), false), fn);
+    var v = MakeFunc(FuncOf(new reflectꓸType[]{TypeOf((TestFuncOf_K)(@string)""u8)}.slice(), new reflectꓸType[]{TypeOf((TestFuncOf_V)0D)}.slice(), false), fn);
 
-    var outs = v.Call(new reflectꓸValue[]{ValueOf(((TestFuncOf_K)(@string)gopherˢ))}.slice());
+    var outs = v.Call(new reflectꓸValue[]{ValueOf((TestFuncOf_K)(@string)gopherˢ)}.slice());
     if (len(outs) != 1){
         Ꮡt.Fatalf("v.Call returned %v, want exactly one result"u8, outs);
     } else 
-    if (!AreEqual(outs[0].Type(), TypeOf(((TestFuncOf_V)0D)))) {
-        Ꮡt.Fatalf("c.Call[0] is type %v, want %v"u8, outs[0].Type(), TypeOf(((TestFuncOf_V)0D)));
+    if (!AreEqual(outs[0].Type(), TypeOf((TestFuncOf_V)0D))) {
+        Ꮡt.Fatalf("c.Call[0] is type %v, want %v"u8, outs[0].Type(), TypeOf((TestFuncOf_V)0D));
     }
     var f = outs[0].Float();
     if (f != 3.14D) {
         Ꮡt.Errorf("constructed func returned %f, want %f"u8, f, 3.14D);
     }
     var testCases = new TestFuncOf_testCases[]{
-        new(@in: new reflectꓸType[]{TypeOf(((TestFuncOf_T1)0))}.slice(), want: ((Action<TestFuncOf_T1>)(default!)).OrTypedNilFunc()),
+        new(@in: new reflectꓸType[]{TypeOf((TestFuncOf_T1)0)}.slice(), want: ((Action<TestFuncOf_T1>)(default!)).OrTypedNilFunc()),
         new(@in: new reflectꓸType[]{TypeOf((nint)0)}.slice(), want: ((Action<nint>)(default!)).OrTypedNilFunc()),
         new(@in: new reflectꓸType[]{SliceOf(TypeOf((nint)0))}.slice(), variadic: true, want: (((Actionꓸꓸꓸ<nint>)((Actionꓸꓸꓸ<nint>)(default!)))).OrTypedNilFunc()),
         new(@in: new reflectꓸType[]{TypeOf((nint)0)}.slice(), @out: new reflectꓸType[]{TypeOf(false)}.slice(), want: ((Func<nint, bool>)(default!)).OrTypedNilFunc()),
@@ -8092,9 +8107,9 @@ public static void TestFuncOf(ж<Δtesting.T> Ꮡt) {
     }
 
     // check that variadic requires last element be a slice.
-    FuncOf(new reflectꓸType[]{TypeOf((nint)(1)), TypeOf((@string)""u8), SliceOf(TypeOf(false))}.slice(), default!, true);
+    FuncOf(new reflectꓸType[]{TypeOf((nint)1), TypeOf((@string)""u8), SliceOf(TypeOf(false))}.slice(), default!, true);
     shouldPanic(mustBeSliceˢ, () => {
-        FuncOf(new reflectꓸType[]{TypeOf((nint)(0)), TypeOf((@string)""u8), TypeOf(false)}.slice(), default!, true);
+        FuncOf(new reflectꓸType[]{TypeOf((nint)0), TypeOf((@string)""u8), TypeOf(false)}.slice(), default!, true);
     });
     shouldPanic(mustBeSliceˢ, () => {
         FuncOf(default!, default!, true);
@@ -8103,23 +8118,23 @@ public static void TestFuncOf(ж<Δtesting.T> Ꮡt) {
     //testcase for  #54669
     slice<reflectꓸType> @in = default!;
     for (nint i = 0; i < 51; i++) {
-        @in = append(@in, TypeOf((nint)(1)));
+        @in = append(inᴷ, @in, TypeOf((nint)1));
     }
     FuncOf(@in, default!, false);
 }
 
 partial struct R0 {
-    public partial ref ж<R1> R1 { get; }
-    public partial ref ж<R2> R2 { get; }
-    public partial ref ж<R3> R3 { get; }
-    public partial ref ж<R4> R4 { get; }
+    /*embed*/ public ж<R1> R1;
+    /*embed*/ public ж<R2> R2;
+    /*embed*/ public ж<R3> R3;
+    /*embed*/ public ж<R4> R4;
 }
 
 partial struct R1 {
-    public partial ref ж<R5> R5 { get; }
-    public partial ref ж<R6> R6 { get; }
-    public partial ref ж<R7> R7 { get; }
-    public partial ref ж<R8> R8 { get; }
+    /*embed*/ public ж<R5> R5;
+    /*embed*/ public ж<R6> R6;
+    /*embed*/ public ж<R7> R7;
+    /*embed*/ public ж<R8> R8;
 }
 
 partial struct R2 /*R1*/;
@@ -8129,10 +8144,10 @@ partial struct R3 /*R1*/;
 partial struct R4 /*R1*/;
 
 partial struct R5 {
-    public partial ref ж<R9> R9 { get; }
-    public partial ref ж<R10> R10 { get; }
-    public partial ref ж<R11> R11 { get; }
-    public partial ref ж<R12> R12 { get; }
+    /*embed*/ public ж<R9> R9;
+    /*embed*/ public ж<R10> R10;
+    /*embed*/ public ж<R11> R11;
+    /*embed*/ public ж<R12> R12;
 }
 
 partial struct R6 /*R5*/;
@@ -8142,10 +8157,10 @@ partial struct R7 /*R5*/;
 partial struct R8 /*R5*/;
 
 partial struct R9 {
-    public partial ref ж<R13> R13 { get; }
-    public partial ref ж<R14> R14 { get; }
-    public partial ref ж<R15> R15 { get; }
-    public partial ref ж<R16> R16 { get; }
+    /*embed*/ public ж<R13> R13;
+    /*embed*/ public ж<R14> R14;
+    /*embed*/ public ж<R15> R15;
+    /*embed*/ public ж<R16> R16;
 }
 
 partial struct R10 /*R9*/;
@@ -8155,10 +8170,10 @@ partial struct R11 /*R9*/;
 partial struct R12 /*R9*/;
 
 partial struct R13 {
-    public partial ref ж<R17> R17 { get; }
-    public partial ref ж<R18> R18 { get; }
-    public partial ref ж<R19> R19 { get; }
-    public partial ref ж<R20> R20 { get; }
+    /*embed*/ public ж<R17> R17;
+    /*embed*/ public ж<R18> R18;
+    /*embed*/ public ж<R19> R19;
+    /*embed*/ public ж<R20> R20;
 }
 
 partial struct R14 /*R13*/;
@@ -8168,10 +8183,10 @@ partial struct R15 /*R13*/;
 partial struct R16 /*R13*/;
 
 partial struct R17 {
-    public partial ref ж<R21> R21 { get; }
-    public partial ref ж<R22> R22 { get; }
-    public partial ref ж<R23> R23 { get; }
-    public partial ref ж<R24> R24 { get; }
+    /*embed*/ public ж<R21> R21;
+    /*embed*/ public ж<R22> R22;
+    /*embed*/ public ж<R23> R23;
+    /*embed*/ public ж<R24> R24;
 }
 
 partial struct R18 /*R17*/;
@@ -8340,7 +8355,7 @@ internal static readonly @string gcMethodˢ = "GCMethod"u8;
 public static void TestReflectMethodTraceback(ж<Δtesting.T> Ꮡt) {
     var p = new Point(3, 4);
     var m = ValueOf(p).MethodByName(gcMethodˢ);
-    var i = ValueOf(m.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)(5))}.slice())[0].Int();
+    var i = ValueOf(m.Interface()).Call(new reflectꓸValue[]{ValueOf((nint)5)}.slice())[0].Int();
     if (i != 8) {
         Ꮡt.Errorf("Call returned %d; want 8"u8, i);
     }
@@ -8405,7 +8420,7 @@ internal partial struct TestFieldByIndexNil_P /*dyn*/ {
 }
 
 internal partial struct TestFieldByIndexNil_T /*dyn*/ {
-    public partial ref ж<TestFieldByIndexNil_P> P { get; }
+    /*embed*/ public ж<TestFieldByIndexNil_P> P;
 }
 
 public static void TestFieldByIndexNil(ж<Δtesting.T> Ꮡt) {
@@ -8474,7 +8489,7 @@ public static void TestFieldByIndexNil(ж<Δtesting.T> Ꮡt) {
 //
 // This came up in a real program in issue 7725.
 partial struct Outer {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
     public Δio.Reader R;
 }
 
@@ -8546,7 +8561,7 @@ public static void TestMakeFuncStackCopy(ж<Δtesting.T> Ꮡt) {
     var target = (slice<reflectꓸValue> @in) => {
         Δruntime.GC();
         useStack(16);
-        return new reflectꓸValue[]{ValueOf((nint)(9))}.slice();
+        return new reflectꓸValue[]{ValueOf((nint)9)}.slice();
     };
 
     ref var concrete = ref heap<Func<ж<nint>, nint, nint>>(out var Ꮡconcrete);
@@ -8554,7 +8569,7 @@ public static void TestMakeFuncStackCopy(ж<Δtesting.T> Ꮡt) {
     ValueOf(Ꮡconcrete).Elem().Set(fn);
     nint x = concrete(nil, 7);
     if (x != 9) {
-        Ꮡt.Errorf("have %#q want 9"u8, x);
+        Ꮡt.Errorf("have %d want 9"u8, x);
     }
 }
 
@@ -8643,7 +8658,7 @@ public static void TestTypeFieldOutOfRangePanic(ж<Δtesting.T> Ꮡt) {
         [0] = new(-2, true),
         [1] = new(0, false),
         [2] = new(1, true),
-        [3] = new((1 << (int)(10)), true)
+        [3] = new(1 << 10, true)
     };
     foreach (var (i, tt) in testIndices.ΔRangeSnapshot()) {
         var recoveredErr = fieldIndexRecover(typ, tt.i);
@@ -8743,7 +8758,7 @@ public static void TestKeepFuncLive(ж<Δtesting.T> Ꮡt) {
         MakeFunc(typʗ2, fʗ1).Interface()._<Action<nint>>()(i);
         return default!;
     };
-    MakeFunc(typ, f).Call(new reflectꓸValue[]{ValueOf((nint)(10))}.slice());
+    MakeFunc(typ, f).Call(new reflectꓸValue[]{ValueOf((nint)10)}.slice());
 }
 
 partial struct UnExportedFirst /*num:nint*/;
@@ -8766,7 +8781,7 @@ public static void TestMethodByNameUnExportedFirst(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("should not panic"u8);
             }
         }, ref ᒐ);
-        var typ = TypeOf(((UnExportedFirst)0));
+        var typ = TypeOf((UnExportedFirst)0);
         var (m, _) = typ.MethodByName(exportedˢ);
         if (m.Name != "ΦExported"u8) {
             Ꮡt.Errorf("got %s, expected ΦExported"u8, m.Name);
@@ -8874,7 +8889,7 @@ public static void TestFuncLayout(ж<Δtesting.T> Ꮡt) {
             gc: new byte[]{0, 0, 1, 1}.slice()
         ),
         new(
-            rcvr: ValueOf(((ж<byte>)nil)).Type(),
+            rcvr: ValueOf((ж<byte>)nil).Type(),
             typ: ValueOf((uintptr a, ж<nint> b) => {
             }).Type(),
             size: 3 * goarch.PtrSize,
@@ -9079,7 +9094,7 @@ internal partial struct init_Int64 /*num:int64*/;
 
 [GoInit] internal static void initΔ1() {
     Tscalar = TypeOf(new init_Scalar(nil));
-    Tint64 = TypeOf(((init_Int64)0));
+    Tint64 = TypeOf((init_Int64)0);
     Tptr = TypeOf(new init_Ptr(nil));
     Tscalarptr = TypeOf(new init_Scalarptr(nil));
     Tptrscalar = TypeOf(new init_Ptrscalar(nil));
@@ -9089,7 +9104,7 @@ internal partial struct init_Int64 /*num:int64*/;
 internal static slice<byte> empty = new byte[]{}.slice();
 
 public static void TestGCBits(ж<Δtesting.T> Ꮡt) {
-    verifyGCBits(Ꮡt, TypeOf(((ж<byte>)nil)), new byte[]{1}.slice());
+    verifyGCBits(Ꮡt, TypeOf((ж<byte>)nil), new byte[]{1}.slice());
 
     verifyGCBits(Ꮡt, TypeOf(new Xscalar(nil)), empty);
     verifyGCBits(Ꮡt, Tscalar, empty);
@@ -9160,7 +9175,7 @@ public static void TestGCBits(ж<Δtesting.T> Ꮡt) {
     verifyGCBits(Ꮡt, TypeOf(((Action<array<Xscalarptr>>)(default!)).OrTypedNilFunc()), lit(1));
     verifyGCBits(Ꮡt, FuncOf(new reflectꓸType[]{ArrayOf(10000, Tscalarptr)}.slice(), default!, false), lit(1));
 
-    verifyGCBits(Ꮡt, TypeOf(((map<array<Xscalarptr>, Xscalar>)default!)), lit(1));
+    verifyGCBits(Ꮡt, TypeOf((map<array<Xscalarptr>, Xscalar>)default!), lit(1));
     verifyGCBits(Ꮡt, MapOf(ArrayOf(10000, Tscalarptr), Tscalar), lit(1));
 
     verifyGCBits(Ꮡt, TypeOf(ж<array<Xscalar>>.NilBoxOfDims(10000L)), lit(1));
@@ -9169,7 +9184,8 @@ public static void TestGCBits(ж<Δtesting.T> Ꮡt) {
     verifyGCBits(Ꮡt, TypeOf((slice<array<Xscalar>>)(default!)), lit(1));
     verifyGCBits(Ꮡt, SliceOf(ArrayOf(10000, Tscalar)), lit(1));
 
-    testGCBitsMap(Ꮡt);
+    // For maps, we don't manually construct GC data, instead using the
+    // public reflect API in groupAndSlotOf.
 }
 
 internal static slice<byte> rep(nint n, slice<byte> b) {
@@ -9234,7 +9250,7 @@ public static @string String(this ref XM _) {
 internal static readonly object doesNotImplementStringerˢ = (@string)"does not implement Stringer, but should"u8;
 
 internal partial struct TestPtrToMethods_y /*dyn*/ {
-    public partial ref XM XM { get; }
+    /*embed*/ public XM XM;
 }
 
 public static void TestPtrToMethods(ж<Δtesting.T> Ꮡt) {
@@ -9253,9 +9269,9 @@ public static void TestMapAlloc(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap<reflectꓸValue>(out var Ꮡm);
     m = ValueOf(new map<nint, nint>(10));
     ref var k = ref heap<reflectꓸValue>(out var Ꮡk);
-    k = ValueOf((nint)(5));
+    k = ValueOf((nint)5);
     ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = ValueOf((nint)(7));
+    v = ValueOf((nint)7);
     var kʗ1 = k;
     var mʗ1 = m;
     var vʗ1 = v;
@@ -9324,16 +9340,16 @@ partial struct nameTest {
             void F();
         }
 internal static slice<nameTest> nameTests = new nameTest[]{
-    new(((ж<int32>)nil), "int32"u8),
-    new(((ж<D1>)nil), "D1"u8),
-    new(((ж<slice<D1>>)nil), ""u8),
-    new(((ж<channel<D1>>)nil), ""u8),
-    new(((ж<Func<D1>>)nil), ""u8),
-    new(((ж</*<-*/channel<D1>>)nil), ""u8),
-    new(((ж<channel/*<-*/<D1>>)nil), ""u8),
-    new(((ж<any>)nil), ""u8),
-    new(((ж<Δtypeᴛ35>)nil), ""u8),
-    new(((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil), "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8)
+    new((ж<int32>)nil, "int32"u8),
+    new((ж<D1>)nil, "D1"u8),
+    new((ж<slice<D1>>)nil, ""u8),
+    new((ж<channel<D1>>)nil, ""u8),
+    new((ж<Func<D1>>)nil, ""u8),
+    new((ж</*<-*/channel<D1>>)nil, ""u8),
+    new((ж<channel/*<-*/<D1>>)nil, ""u8),
+    new((ж<any>)nil, ""u8),
+    new((ж<Δtypeᴛ35>)nil, ""u8),
+    new((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil, "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8)
 }.slice();
 
 public static void TestNames(ж<Δtesting.T> Ꮡt) {
@@ -9371,17 +9387,17 @@ internal partial struct TestExported_exportTest /*dyn*/ {
 public static void TestExported(ж<Δtesting.T> Ꮡt) {
     var exportTests = new TestExported_exportTest[]{
         new(new D1(nil), true),
-        new(((ж<D1>)nil), true),
+        new((ж<D1>)nil, true),
         new(new big(nil), false),
-        new(((ж<big>)nil), false),
-        new(((TestExported_BigP)nil), true),
-        new(((ж<TestExported_BigP>)nil), true),
+        new((ж<big>)nil, false),
+        new((TestExported_BigP)nil, true),
+        new((ж<TestExported_BigP>)nil, true),
         new(new TestExported_ΦExported(nil), true),
         new(new TestExported_φUnexported(nil), false),
-        new(((TestExported_P)0), true),
-        new(((TestExported_p)nil), false),
-        new(((TestExported_P2)nil), true),
-        new(((TestExported_p3)nil), false)
+        new((TestExported_P)0, true),
+        new((TestExported_p)nil, false),
+        new((TestExported_P2)nil, true),
+        new((TestExported_p3)nil, false)
     }.slice();
 
     foreach (var (i, test) in exportTests) {
@@ -9426,12 +9442,12 @@ public static void TestTypeStrings(ж<Δtesting.T> Ꮡt) {
 
 public static partial void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
-    for (nint i = 0; i < 4; i++) {
-        nint iΔ1 = i;
+    for (nint iᴛ1 = 0; iᴛ1 < 4; iᴛ1++) {
+        var i = iᴛ1;
         Ꮡwg.Add(1);
         goǃ(() => {
             for (nint j = 0; j < 50; j++) {
-                reflect_internal_test_package.ResolveReflectName(fmt.Sprintf("OffsetLockName:%d:%d"u8, iΔ1, j));
+                reflect_internal_test_package.ResolveReflectName(fmt.Sprintf("OffsetLockName:%d:%d"u8, i, j));
             }
             Ꮡwg.Done();
         });
@@ -9563,7 +9579,7 @@ partial struct Talias1 {
 }
 
 partial struct Talias2 {
-    public partial ref Tint Tint { get; }
+    /*embed*/ public Tint Tint;
     /*embed*/ public Tint2 Tint2;
 }
 
@@ -9594,7 +9610,7 @@ internal partial struct TestIssue22031_s /*dyn*/ {
 internal partial struct TestIssue22031_sᴛ1 /*[]TestIssue22031_s*/;
 
 internal partial struct TestIssue22031_t1 /*dyn*/ {
-    internal partial ref TestIssue22031_sᴛ1 s { get; }
+    /*embed*/ internal TestIssue22031_sᴛ1 s;
 }
 
 internal partial struct TestIssue22031_t2 /*dyn*/ {
@@ -9624,7 +9640,7 @@ internal static nint nonexported(this NonExportedFirst i) {
 }
 
 public static void TestIssue22073(ж<Δtesting.T> Ꮡt) {
-    var m = ValueOf(((NonExportedFirst)0)).Method(0);
+    var m = ValueOf((NonExportedFirst)0).Method(0);
 
     {
         nint got = m.Type().NumOut(); if (got != 0) {
@@ -9721,9 +9737,9 @@ public static void TestMapIterReset(ж<Δtesting.T> Ꮡt) {
 
     // Check that Reset, Next, and SetKey/SetValue play nicely together.
     var m3 = new map<uint64, uint64>{
-        [((uint64)1 << (int)(0))] = ((uint64)1 << (int)(1)),
-        [((uint64)1 << (int)(1))] = ((uint64)1 << (int)(2)),
-        [((uint64)1 << (int)(2))] = ((uint64)1 << (int)(3))
+        [((uint64)1 << 0)] = ((uint64)1 << 1),
+        [((uint64)1 << 1)] = ((uint64)1 << 2),
+        [((uint64)1 << 2)] = ((uint64)1 << 3)
     };
     var kv = New(TypeOf((uint64)0)).Elem();
     for (nint i = 0; i < 5; i++) {
@@ -9737,10 +9753,10 @@ public static void TestMapIterReset(ж<Δtesting.T> Ꮡt) {
             seenv ^= (uint64)(kv.Uint());
         }
         if (seenk != 0b111) {
-            Ꮡt.Errorf("iteration yielded keys %b, want %b"u8, seenk, (nint)(0b111));
+            Ꮡt.Errorf("iteration yielded keys %b, want %b"u8, seenk, (nint)0b111);
         }
         if (seenv != 0b1110) {
-            Ꮡt.Errorf("iteration yielded values %b, want %b"u8, seenv, (nint)(0b1110));
+            Ꮡt.Errorf("iteration yielded values %b, want %b"u8, seenv, (nint)0b1110);
         }
     }
 
@@ -9912,12 +9928,14 @@ public static void TestMapIterDelete0(ж<Δtesting.T> Ꮡt) {
 }
 
 public static void TestMapIterDelete1(ж<Δtesting.T> Ꮡt) {
+    var gotᴷ = new stackAppend<@string>();
+
     // Delete all elements after first iteration.
     var m = new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2, ["three"u8] = 3};
     var iter = ValueOf(m).MapRange();
     slice<@string> got = default!;
     while (iter.Next()) {
-        got = append(got, fmt.Sprint(iter.Key(), iter.Value()));
+        got = append(gotᴷ, got, fmt.Sprint(iter.Key(), iter.Value()));
         delete(m, "one"u8);
         delete(m, "two"u8);
         delete(m, "three"u8);
@@ -9930,10 +9948,12 @@ public static void TestMapIterDelete1(ж<Δtesting.T> Ꮡt) {
 // iterateToString returns the set of elements
 // returned by an iterator in readable form.
 internal static @string iterateToString(ж<Δreflect.MapIter> Ꮡit) {
+    var gotᴷ = new stackAppend<@string>();
+
     slice<@string> got = default!;
     while (Ꮡit.Next()) {
         @string line = fmt.Sprintf("%v: %v"u8, Ꮡit.Key(), Ꮡit.Value());
-        got = append(got, line);
+        got = append(gotᴷ, got, line);
     }
     slices.Sort<slice<@string>, @string>(got);
     return "["u8 + strings.Join(got, ", "u8) + "]"u8;
@@ -9984,7 +10004,7 @@ public static void TestSetIter(ж<Δtesting.T> Ꮡt) {
     ref var k = ref heap<reflectꓸValue>(out var Ꮡk);
     k = New(TypeOf((@string)""u8)).Elem();
     ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = New(TypeOf((nint)(0))).Elem();
+    v = New(TypeOf((nint)0)).Elem();
     var kʗ1 = k;
     shouldPanic(valueSetIterKeyCalledˢ, () => {
         kʗ1.SetIterKey(Ꮡi.ValueSlot);
@@ -10017,10 +10037,10 @@ public static void TestSetIter(ж<Δtesting.T> Ꮡt) {
         ValueOf((@string)""u8).SetIterKey(Ꮡi.ValueSlot);
     });
     shouldPanic(valueSetIterValueUsingˢ, () => {
-        ValueOf((nint)(0)).SetIterValue(Ꮡi.ValueSlot);
+        ValueOf((nint)0).SetIterValue(Ꮡi.ValueSlot);
     });
     shouldPanic(valueOfTypeStringIsNotˢ2, () => {
-        New(TypeOf((nint)(0))).Elem().SetIterKey(Ꮡi.ValueSlot);
+        New(TypeOf((nint)0)).Elem().SetIterKey(Ꮡi.ValueSlot);
     });
     shouldPanic(valueOfTypeIntIsNotˢ, () => {
         New(TypeOf((@string)""u8)).Elem().SetIterValue(Ꮡi.ValueSlot);
@@ -10254,10 +10274,10 @@ public static void TestValue_Comparable(ж<Δtesting.T> Ꮡt) {
     iSlice = s;
     ref var iArrayFalse = ref heap<any>(out var ᏑiArrayFalse);
 
-    iArrayFalse = new any[]{(nint)(1), new map<nint, nint>{}}.array();
+    iArrayFalse = new any[]{(nint)1, new map<nint, nint>{}}.array();
     ref var iArrayTrue = ref heap<any>(out var ᏑiArrayTrue);
 
-    iArrayTrue = new any[]{(nint)(1), new TestValue_Comparable_type((nint)(1))}.array();
+    iArrayTrue = new any[]{(nint)1, new TestValue_Comparable_type((nint)1)}.array();
     slice<TestValue_Comparable_typeᴛ1> testcases = new TestValue_Comparable_typeᴛ1[]{
         new(
             ValueOf(ᏑiNil),
@@ -10265,7 +10285,7 @@ public static void TestValue_Comparable(ж<Δtesting.T> Ꮡt) {
             true
         ),
         new(
-            ValueOf((nint)(32)),
+            ValueOf((nint)32),
             true,
             false
         ),
@@ -10390,17 +10410,17 @@ public static void TestValue_Comparable(ж<Δtesting.T> Ꮡt) {
             false
         ),
         new(
-            ValueOf(new TestValue_Comparable_type[]{new((nint)(1)), new((nint)(1))}.array()),
+            ValueOf(new TestValue_Comparable_type[]{new((nint)1), new((nint)1)}.array()),
             true,
             false
         ),
         new(
-            ValueOf(new TestValue_Comparable_type[]{new(new nint[]{}.slice()), new((nint)(1))}.array()),
+            ValueOf(new TestValue_Comparable_type[]{new(new nint[]{}.slice()), new((nint)1)}.array()),
             false,
             false
         ),
         new(
-            ValueOf(new any[]{(nint)(1), new TestValue_Comparable_typeᴛ2(1)}.array()),
+            ValueOf(new any[]{(nint)1, new TestValue_Comparable_typeᴛ2(1)}.array()),
             true,
             false
         ),
@@ -10439,7 +10459,7 @@ partial struct ValueEqualTest {
     internal bool vDeref, uDeref;
 }
 
-internal static ж<any> ᏑequalI = new StandardBox<any>((nint)(1));
+internal static ж<any> ᏑequalI = new StandardBox<any>((nint)1);
 internal static ref any equalI => ref ᏑequalI.ValueSlot;
 
 internal static any equalSlice = new nint[]{1}.slice();
@@ -10464,7 +10484,7 @@ internal static slice<ValueEqualTest> valueEqualTests = new ValueEqualTest[]{
         false, false
     ),
     new(
-        (nint)(1), (nint)(1),
+        (nint)1, (nint)1,
         true,
         false, false
     ),
@@ -10540,7 +10560,7 @@ internal static slice<ValueEqualTest> valueEqualTests = new ValueEqualTest[]{
         false, false
     ),
     new(
-        ᏑequalI, (nint)(1),
+        ᏑequalI, (nint)1,
         true,
         true, false
     ),
@@ -10575,7 +10595,7 @@ internal static slice<ValueEqualTest> valueEqualTests = new ValueEqualTest[]{
         true, true
     ),
     new(
-        (nint)(1), ValueOf(new Δtypeᴛ36(1)).Field(0),
+        (nint)1, ValueOf(new Δtypeᴛ36(1)).Field(0),
         true,
         false, false
     )
@@ -10635,7 +10655,7 @@ public static void TestValue_EqualNonComparable(ж<Δtesting.T> Ꮡt) {
         ValueOf((new nint[]{}.slice())),
 
         // Value of map is non-comparable.
-        ValueOf(((map<nint, nint>)default!)),
+        ValueOf((map<nint, nint>)default!),
         ValueOf((new map<nint, nint>{})),
 
         // Value of func is non-comparable.
@@ -10682,8 +10702,7 @@ public static partial void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var ipT = TypeOf(new Δnet.IP(new byte[]{}.slice()));
-                for (nint iΔ1 = 0; iΔ1 < ipT.NumMethod(); iΔ1++) {
-                    _ = ipT.Method(iΔ1);
+                foreach (var _ᴛ1 in range<reflectꓸMethod>(ipT.Methods().Invoke)) {
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -10713,7 +10732,7 @@ public static void TestClear(ж<Δtesting.T> Ꮡt) {
     };
 
     var s = new slice<ж<pair>>(len(valueTests));
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = Ꮡ(valueTests, i);
     }
     var sliceTestFn = (reflectꓸValue v) => {
@@ -10738,14 +10757,15 @@ public static void TestClear(ж<Δtesting.T> Ꮡt) {
         new("map"u8, ValueOf(m), mapTestFn),
         new("slice no pointer"u8, ValueOf(new nint[]{1, 2, 3, 4, 5}.slice()), sliceTestFn),
         new("slice has pointer"u8, ValueOf(s), sliceTestFn),
-        new("non-map/slice"u8, ValueOf((nint)(1)), panicTestFn)
+        new("non-map/slice"u8, ValueOf((nint)1), panicTestFn)
     }.slice();
 
-    foreach (var (_, tc) in tests) {
-        ref var tcΔ1 = ref heap<TestClear_tests>(out var ᏑtcΔ1);
-        tcΔ1 = tc;
-        var tcʗ1 = tcΔ1;
-        Ꮡt.Run(tcΔ1.name, (ж<Δtesting.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tc = ref heap(new TestClear_tests(), out var Ꮡtc);
+        tc = vᴛ1;
+
+        var tcʗ1 = tc;
+        Ꮡt.Run(tc.name, (ж<Δtesting.T> tΔ1) => {
             tΔ1.Parallel();
             if (!tcʗ1.testFunc(tcʗ1.value)) {
                 tΔ1.Errorf("unexpected result for value.Clear(): %v"u8, tcʗ1.value);
@@ -10786,11 +10806,12 @@ public static void TestValuePointerAndUnsafePointer(ж<Δtesting.T> Ꮡt) {
         new("string"u8, ValueOf(s), @unsafe.Pointer.FromPinnedBox(@unsafe.StringData(s)))
     }.slice();
 
-    foreach (var (_, tc) in tests) {
-        ref var tcΔ1 = ref heap<TestValuePointerAndUnsafePointer_tests>(out var ᏑtcΔ1);
-        tcΔ1 = tc;
-        var tcʗ1 = tcΔ1;
-        Ꮡt.Run(tcΔ1.name, (ж<Δtesting.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tc = ref heap(new TestValuePointerAndUnsafePointer_tests(), out var Ꮡtc);
+        tc = vᴛ1;
+
+        var tcʗ1 = tc;
+        Ꮡt.Run(tc.name, (ж<Δtesting.T> tΔ1) => {
             {
                 var got = tcʗ1.val.Pointer(); if (got != (uintptr)tcʗ1.wantUnsafePointer) {
                     tΔ1.Errorf("unexpected uintptr result, got %#x, want %#x"u8, got, (uintptr)tcʗ1.wantUnsafePointer);
@@ -10827,15 +10848,15 @@ public static void TestSliceAt(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Fatalf("unexpected len or cap, len: %d, cap: %d, want: %d"u8, s.Len(), s.Cap(), len(p));
     }
 
-    typ = TypeOf((nint)(0));
-    if (!SliceAt(typ, @unsafe.Pointer.FromPinnedBox(((ж<nint>)nil)), 0).IsNil()) {
+    typ = TypeOf((nint)0);
+    if (!SliceAt(typ, @unsafe.Pointer.FromPinnedBox((ж<nint>)nil), 0).IsNil()) {
         Ꮡt.Fatal(nilPointerWithZeroLengthˢ);
     }
 
     // nil pointer with positive length panics
     var typʗ1 = typ;
     shouldPanic(""u8, () => {
-        _ = SliceAt(typʗ1, @unsafe.Pointer.FromPinnedBox(((ж<nint>)nil)), 1);
+        _ = SliceAt(typʗ1, @unsafe.Pointer.FromPinnedBox((ж<nint>)nil), 1);
     });
 
     // negative length
@@ -10917,6 +10938,193 @@ public static void TestMapOfKeyPanic(ж<Δtesting.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string testValueˢ = "test value"u8;
+
+internal partial interface TestTypeAssert_type /*dyn*/ {
+    void A();
+}
+
+public static void TestTypeAssert(ж<Δtesting.T> Ꮡt) {
+    testTypeAssert<nint, nint, nint>(Ꮡt, (nint)123456789, (nint)123456789, true);
+    testTypeAssert<nint, nint, nint>(Ꮡt, (nint)(-123456789), (nint)(-123456789), true);
+    testTypeAssert<int32, int32, int32>(Ꮡt, (int32)123456789, (int32)123456789, true);
+    testTypeAssert<int8, int8, int8>(Ꮡt, (int8)(-123), (int8)(-123), true);
+    testTypeAssert<array<nint>, array<nint>, array<nint>>(Ꮡt, new nint[]{1234, -5678}.array(), new nint[]{1234, -5678}.array(), true);
+    testTypeAssert<@string, @string, @string>(Ꮡt, testValueˢ, testValueˢ, true);
+    testTypeAssert<any, any, any>(Ꮡt, (any)(@string)("test value"u8), (any)(@string)("test value"u8), true);
+
+    ref var v = ref heap<nint>(out var Ꮡv);
+    v = 123456789;
+    testTypeAssert<ж<nint>, ж<nint>, ж<nint>>(Ꮡt, Ꮡv, Ꮡv, true);
+
+    testTypeAssert<nuint, nint, nuint>(Ꮡt, (nint)123, (nuint)0, false);
+
+    testTypeAssert<any, nint, any>(Ꮡt, 1, (nint)1, true);
+    testTypeAssert<fmt.Stringer, nint, fmt.Stringer>(Ꮡt, 1, default!, false);
+
+    ref var vv = ref heap<testTypeWithMethod>(out var Ꮡvv);
+    vv = new testTypeWithMethod("test"u8);
+    testTypeAssert<any, testTypeWithMethod, any>(Ꮡt, vv, vv, true);
+    testTypeAssert<any, ж<testTypeWithMethod>, any>(Ꮡt, Ꮡvv, Ꮡvv, true);
+    testTypeAssert<fmt.Stringer, testTypeWithMethod, fmt.Stringer>(Ꮡt, vv, vv, true);
+    testTypeAssert<fmt.Stringer, ж<testTypeWithMethod>, fmt.Stringer>(Ꮡt, Ꮡvv, new reflect_test_package.testTypeWithMethodжStringer(Ꮡvv), true);
+    testTypeAssert<TestTypeAssert_type, testTypeWithMethod, TestTypeAssert_type>(Ꮡt, vv, default!, false);
+    testTypeAssert<TestTypeAssert_type, ж<testTypeWithMethod>, TestTypeAssert_type>(Ꮡt, Ꮡvv, default!, false);
+    testTypeAssert<any, any, any>(Ꮡt, (any)vv, (any)vv, true);
+    testTypeAssert<fmt.Stringer, fmt.Stringer, fmt.Stringer>(Ꮡt, (fmt.Stringer)vv, (fmt.Stringer)vv, true);
+
+    testTypeAssert<any, fmt.Stringer, any>(Ꮡt, (fmt.Stringer)vv, (any)vv, true);
+    testTypeAssert<fmt.Stringer, any, fmt.Stringer>(Ꮡt, (any)vv, (fmt.Stringer)vv, true);
+    testTypeAssert<packIfaceValueIntoEmptyIface_type, fmt.Stringer, packIfaceValueIntoEmptyIface_type>(Ꮡt, (fmt.Stringer)vv, (packIfaceValueIntoEmptyIface_type)(vv), true);
+    testTypeAssert<fmt.Stringer, packIfaceValueIntoEmptyIface_type, fmt.Stringer>(Ꮡt, (packIfaceValueIntoEmptyIface_type)(vv), (fmt.Stringer)vv, true);
+
+    testTypeAssert<nint, any, nint>(Ꮡt, (any)(nint)1, (nint)1, true);
+    testTypeAssert<byte, any, byte>(Ꮡt, (any)(nint)1, (byte)0, false);
+    testTypeAssert<testTypeWithMethod, fmt.Stringer, testTypeWithMethod>(Ꮡt, (fmt.Stringer)vv, vv, true);
+
+    testTypeAssert<any, any, any>(Ꮡt, (any)default!, (any)default!, false);
+    testTypeAssert<error, any, error>(Ꮡt, (any)default!, (error)default!, false);
+    testTypeAssert<any, error, any>(Ꮡt, (error)default!, (any)default!, false);
+    testTypeAssert<error, error, error>(Ꮡt, (error)default!, (error)default!, false);
+}
+
+internal static void testTypeAssert<T, V, Tᴺ>(ж<Δtesting.T> Ꮡt, V valʗp, T wantVal, bool wantOk) {
+    ref var val = ref heap(valʗp, out var Ꮡval);
+
+    Ꮡt.Helper();
+
+    var (v, ok) = TypeAssert<T>(ValueOf(Ꮡval).Elem());
+    if (!AreEqual(v, wantVal) || ok != wantOk) {
+        Ꮡt.Errorf("TypeAssert[%v](%#v) = (%#v, %v); want = (%#v, %v)"u8, TypeFor<Tᴺ>(), (val).OrTypedNilOf(), (v).OrTypedNilOf(), ok, (wantVal).OrTypedNilOf(), wantOk);
+    }
+
+    // Additionally make sure that TypeAssert[T](v) behaves in the same way as v.Interface().(T).
+    var (v2, ok2) = ValueOf(Ꮡval).Elem().Interface()._<T>(ᐧ);
+    if (!AreEqual(v, v2) || ok != ok2) {
+        Ꮡt.Errorf("reflect.ValueOf(%#v).Interface().(%v) = (%#v, %v); want = (%#v, %v)"u8, (val).OrTypedNilOf(), TypeFor<Tᴺ>(), (v2).OrTypedNilOf(), ok2, (v).OrTypedNilOf(), ok);
+    }
+}
+
+partial struct testTypeWithMethod {
+    internal @string val;
+}
+
+internal static @string String(this testTypeWithMethod v) {
+    return v.val;
+}
+
+internal static void M(this testTypeWithMethod v) {
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string stringˢ2 = "String"u8;
+
+public static void TestTypeAssertMethod(ж<Δtesting.T> Ꮡt) {
+    var method = ValueOf(Ꮡ(new testTypeWithMethod(val: "test value"u8))).MethodByName(stringˢ2);
+    var (f, ok) = TypeAssert<Func<@string>>(method);
+    if (!ok) {
+        Ꮡt.Fatalf(@"TypeAssert[func() string](method) = (,false); want = (,true)"u8);
+    }
+
+    @string @out = f();
+    if (@out != "test value"u8) {
+        Ꮡt.Fatalf(@"TypeAssert[func() string](method)() = %q; want ""test value"""u8, @out);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string zeroValˢ = "zero val"u8;
+internal static readonly @string readOnlyˢ = "read only"u8;
+internal static readonly @string valˢ = "val"u8;
+
+public static void TestTypeAssertPanic(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Run(zeroValˢ, (ж<Δtesting.T> tΔ1) => {
+        GoFrame ᒐ = default;
+        try {
+            defer(() => {
+                recover();
+            }, ref ᒐ);
+            TypeAssert<nint>(new reflectꓸValue(nil));
+            tΔ1.Fatalf("TypeAssert did not panic"u8);
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+    Ꮡt.Run(readOnlyˢ, (ж<Δtesting.T> tΔ2) => {
+        GoFrame ᒐ = default;
+        try {
+            defer(() => {
+                recover();
+            }, ref ᒐ);
+            TypeAssert<nint>(ValueOf(Ꮡ(new testTypeWithMethod(nil))).FieldByName(valˢ));
+            tΔ2.Fatalf("TypeAssert did not panic"u8);
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object instrumentationBreaksˢ = (@string)"instrumentation breaks this optimization"u8;
+
+internal partial interface TestTypeAssertAllocs_I /*dyn*/ {
+    void foo();
+}
+
+public static void TestTypeAssertAllocs(ж<Δtesting.T> Ꮡt) {
+    if (race.Enabled || asan.Enabled || msan.Enabled) {
+        Ꮡt.Skip(instrumentationBreaksˢ);
+    }
+    typeAssertAllocs<array<nint>, array<nint>>(Ꮡt, ValueOf(new nint[]{}.array(128)), 0);
+    typeAssertAllocs<any, any>(Ꮡt, ValueOf(new nint[]{}.array(128)), 0);
+
+    ref var val = ref heap<nint>(out var Ꮡval);
+    val = 123;
+    typeAssertAllocs<any, any>(Ꮡt, ValueOf(val), 0);
+    typeAssertAllocs<any, any>(Ꮡt, ValueOf(Ꮡval).Elem(), 1); // must allocate, so that Set() does not modify the returned inner iface value.
+    typeAssertAllocs<nint, nint>(Ꮡt, ValueOf(val), 0);
+    typeAssertAllocs<nint, nint>(Ꮡt, ValueOf(Ꮡval).Elem(), 0);
+
+    typeAssertAllocs<time.Time, time.Time>(Ꮡt, ValueOf(@new<time.Time>()).Elem(), 0);
+    typeAssertAllocs<time.Time, time.Time>(Ꮡt, ValueOf(@new<time.Time>().Value), 0);
+    typeAssertAllocs<TestTypeAssertAllocs_I, TestTypeAssertAllocs_I>(Ꮡt, ValueOf(@new<@string>()).Elem(), 0); // assert fail doesn't alloc
+}
+
+internal static void typeAssertAllocs<T, Tᴺ>(ж<Δtesting.T> Ꮡt, reflectꓸValue val, nint wantAllocs) {
+    Ꮡt.Helper();
+    var valʗ1 = val;
+    var allocs = Δtesting.AllocsPerRun(10, () => {
+        TypeAssert<T>(valʗ1);
+    });
+    if (allocs != (float64)wantAllocs) {
+        Ꮡt.Errorf("TypeAssert[%v](%v) unexpected amount of allocations = %v; want = %v"u8, TypeFor<Tᴺ>(), val.Type(), allocs, wantAllocs);
+    }
+}
+
+public static void BenchmarkTypeAssert(ж<Δtesting.B> Ꮡb) {
+    benchmarkTypeAssert<nint, nint>(Ꮡb, ValueOf((nint)1));
+    benchmarkTypeAssert<byte, byte>(Ꮡb, ValueOf((nint)1));
+
+    benchmarkTypeAssert<fmt.Stringer, fmt.Stringer>(Ꮡb, ValueOf(new testTypeWithMethod(nil)));
+    benchmarkTypeAssert<fmt.Stringer, fmt.Stringer>(Ꮡb, ValueOf(Ꮡ(new testTypeWithMethod(nil))));
+    benchmarkTypeAssert<any, any>(Ꮡb, ValueOf((nint)1));
+    benchmarkTypeAssert<any, any>(Ꮡb, ValueOf(new testTypeWithMethod(nil)));
+
+    benchmarkTypeAssert<time.Time, time.Time>(Ꮡb, ValueOf(@new<time.Time>().Value));
+
+    benchmarkTypeAssert<Func<@string>, Func<@string>>(Ꮡb, ValueOf(time.Now()).MethodByName(stringˢ2));
+}
+
+internal static void benchmarkTypeAssert<T, Tᴺ>(ж<Δtesting.B> Ꮡb, reflectꓸValue val) {
+    var valʗ1 = val;
+    Ꮡb.Run(fmt.Sprintf("TypeAssert[%v](%v)"u8, TypeFor<Tᴺ>(), val.Type()), (ж<Δtesting.B> bΔ1) => {
+        while (bΔ1.Loop()) {
+            TypeAssert<T>(valʗ1);
+        }
+    });
 }
 
 } // end reflect_test_package

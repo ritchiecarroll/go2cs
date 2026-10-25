@@ -157,6 +157,9 @@ public static void BenchmarkTypeForError(ж<Δtesting.B> Ꮡb) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string nonSeqˢ = "NonSeq"u8;
+
 internal partial struct TestType_CanSeq_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸType tr;
@@ -169,6 +172,8 @@ public static void TestType_CanSeq(ж<Δtesting.T> Ꮡt) {
         }), true),
         new("func(func(int))"u8, Δreflect.TypeOf((Action<nint> _) => {
         }), false),
+        new("methodIter.Seq"u8, Δreflect.ValueOf(new methodIter(nil)).MethodByName(seqˢ).Type(), true),
+        new("methodIter.NonSeq"u8, Δreflect.ValueOf(new methodIter(nil)).MethodByName(nonSeqˢ).Type(), false),
         new("int64"u8, Δreflect.TypeOf((int64)1), true),
         new("uint64"u8, Δreflect.TypeOf((uint64)1), true),
         new("*[4]int"u8, Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),
@@ -192,6 +197,9 @@ public static void TestType_CanSeq(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string nonSeq2ˢ = "NonSeq2"u8;
+
 internal partial struct TestType_CanSeq2_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸType tr;
@@ -204,6 +212,8 @@ public static void TestType_CanSeq2(ж<Δtesting.T> Ꮡt) {
         }), true),
         new("func(func(int, int))"u8, Δreflect.TypeOf((Action<nint, nint> _) => {
         }), false),
+        new("methodIter2.Seq2"u8, Δreflect.ValueOf(new methodIter2(nil)).MethodByName(seq2ˢ).Type(), true),
+        new("methodIter2.NonSeq2"u8, Δreflect.ValueOf(new methodIter2(nil)).MethodByName(nonSeq2ˢ).Type(), false),
         new("int64"u8, Δreflect.TypeOf((int64)1), false),
         new("uint64"u8, Δreflect.TypeOf((uint64)1), false),
         new("*[4]int"u8, Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),

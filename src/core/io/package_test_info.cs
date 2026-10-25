@@ -72,6 +72,12 @@ using static global::go.io_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -80,9 +86,9 @@ using static global::go.io_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/io_test.go", "io_test.cs", "ACA4koKCgoKC6IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKSggAHEILuguyygoKCgriCgoKCgoK4goKCgoKCuIKCgoKCgriigoKClIKCuKKCgoKUgoIABxCCAAgKgtaolIKCpoKCpoKCpoKCpoKCpoKCuIKCAAkUsoKClKaCgoKmgoKCpoKCgoKClIKUgoKUgpSCgpSClIKClIKUgoKCgIKkgpSCuIKCgoKCgoCCpIKUgpSAgqSCgoKCgIIAEQiCggANLIKCgoKAgqSAgtqUgpSCgoKCgu6CgqaCggAICIIABBCCgoKAggAICoKCgoKCgpSCgpSAggAKFILWgoKCgoKAgraCgoKCgIIADgiiAAMUlIKCggAQCqKCgoKUkqaSgoKCgu6SgoKCggAHEJIACBqCgoLq1IKCgpSigoKClKSClIKCopSCgoKUoqSmgoKClIKCxpKCgvqigoKCgpS2lIKCgoK0AAoEgoKClIKCgoKUlJSCgoKUgoLKgoLmgpKCgoKmuIKCkoKiyILCgpKCog==", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4")]
-[assembly: go.GoPositionMap("io/multi_test.go", "multi_test.cs", "ABsmgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA0IiIKUgoKUgqaCpoKCpoLugqiSgoKCgqKCgqaUgqaClILKgoaCgpSCgoLqkoKCgoKCupKCgoKCgoKUgu6CqLKCgoKClNiSgoKCgqKCgriCppSCAAgSgqaUgtiSgoKUgoK+soKCgoLogoK4koKCgpK4goCCtoLmtoCCyIKClIKUuIKAgtqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-338:1;335-337:1.1", "", "79=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
-[assembly: go.GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKSgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgpKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSAgtySgoKCgoKC7JKygoKClJSCgoKClIKUgpSAgtySgoKCgoKCuIKCkoKUgoKmgoKSgpSCgqaigpKCgqKCgpSCgqaCgoKClIKUgpSCtAAKBIKIgoCCpIKAgraCgoCCpIKAggAKCIK8gpSCkoKAgtqCgoCC7IKCgriClIKCooKCgIKkuIKAguyCgpSCgoKCyoKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1")]
+[assembly: go.GoPositionMap("io/io_test.go", "io_test.cs", "ACA4koKCgoKC6IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKSggAHEILuguyygoKCgriCgoKCgoK4goKCgoKCuIKCgoKCgriigoKClIKCuKKCgoKUgoIABxCCAAgKgta4lIKCpoKCpoKCpoKCpoKCpoKCuIKCAAkUsoKClKaCgoKmgoKCpoKCgoKClIKUgoKUgpSCgpSClIKClIKUgoKCgIKkgpSCuIKCgoKCgoCCpIKUgpSAgqSCgoKCgIIAEQiCggANLIKCgoKAgqSAgtqUgpSCgoKCgu6CgqaCggAICIIABBCCgoKAggAICoKCgoKCgpSCgpSAggAKFILWgoKCgoKAgraCgoKCgIIADgiiAAMUlIKCggAQCqKCgoKUkqaSgoKCgu6SgoKCggAHEJIACBqCgoLq1IKCgpSigoKClKSClIKCopSCgoKUoqSmgoKClIKCxpKCgvqigoKCgpS2lIKCgoK0AAoEgoKClIKCgoKUlJSCgoKUgoLKgoLmgpKCgoKmuIKCkoKiyILCgpKCog==", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4")]
+[assembly: go.GoPositionMap("io/multi_test.go", "multi_test.cs", "ABsmgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA0IiIKUgoKUgqaCpoKCpoLugqiSgoKCgqKCgqaUgqaClILKgoaCgpSCgoLqkoKCgoKCupKCgoKCgoKUgu6CqLKCgoKClNiSgoKCgqKCgriCppSCAAgSgqaUgtiSgoKUgoK+soKCgoLogoK4koKCgoC2goCCtoLmtoCCyIKClIKUuIKAgtqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-336:1;335-335:1.1", "", "79=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
+[assembly: go.GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKSgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgpKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSAgtySgoKCgoKC7JKygoKClJSCgoKClIKUgpSAgtySgoKCgoKCuIKCkoKUgoKmgoKSgpSCgqaigpKCgqKCgpSCgqaCgoKClIKUgpSCtAAKBIKIgoCCpIKAgraCgoCCpIKAggAKCIK8gpSCkoKAgtqCgoCC7IKCgriClIKCooKCgIKkuIKAguyCgpSCgoKCyqKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

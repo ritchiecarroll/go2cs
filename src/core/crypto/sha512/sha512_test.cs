@@ -1026,6 +1026,50 @@ public static void TestHash(ж<testing.T> Ꮡt) {
     });
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string marshalBinaryˢ = "MarshalBinary"u8;
+internal static readonly @string unmarshalBinaryˢ = "UnmarshalBinary"u8;
+internal static readonly @string appendBinaryˢ = "AppendBinary"u8;
+
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    Ꮡt.Run(sha384ˢ, (ж<testing.T> tΔ1) => {
+        cryptotest.TestAllImplementations(tΔ1, sha512ˢ, (ж<testing.T> tΔ2) => {
+            var h = maybeCloner(New384());
+            cryptotest.NoExtraMethods(tΔ2, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+    Ꮡt.Run(sha512224ˢ, (ж<testing.T> tΔ3) => {
+        cryptotest.TestAllImplementations(tΔ3, sha512ˢ, (ж<testing.T> tΔ4) => {
+            var h = maybeCloner(New512_224());
+            cryptotest.NoExtraMethods(tΔ4, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+    Ꮡt.Run(sha512256ˢ, (ж<testing.T> tΔ5) => {
+        cryptotest.TestAllImplementations(tΔ5, sha512ˢ, (ж<testing.T> tΔ6) => {
+            var h = maybeCloner(New512_256());
+            cryptotest.NoExtraMethods(tΔ6, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+    Ꮡt.Run(sha512ˢ2, (ж<testing.T> tΔ7) => {
+        cryptotest.TestAllImplementations(tΔ7, sha512ˢ, (ж<testing.T> tΔ8) => {
+            var h = maybeCloner(New());
+            cryptotest.NoExtraMethods(tΔ8, h, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+        });
+    });
+}
+
+internal static any maybeCloner(hash.Hash hʗp) {
+    ref var h = ref heap(hʗp, out var Ꮡh);
+
+    {
+        ref var c = ref heap<hash.Cloner>(out var Ꮡc);
+        (c, var ok) = h._<hash.Cloner>(ᐧ); if (ok) {
+            return Ꮡc;
+        }
+    }
+    return Ꮡh;
+}
+
 internal static hash.Hash bench = New();
 
 internal static slice<byte> buf = new slice<byte>(8192);
