@@ -79,57 +79,57 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
             runSubTestUserArenaNew(tΔ1, spm, true);
 
             var mse = @new<mediumScalarEven>();
-            foreach (var (i, _) in mse.Value) {
+            foreach (var i in range(mse, 8192)) {
                 mse.Value[i] = 121;
             }
             runSubTestUserArenaNew(tΔ1, mse, true);
 
             var mso = @new<mediumScalarOdd>();
-            foreach (var (i, _) in mso.Value) {
+            foreach (var i in range(mso, 3321)) {
                 mso.Value[i] = 122;
             }
             runSubTestUserArenaNew(tΔ1, mso, true);
 
             var mpe = @new<mediumPointerEven>();
-            foreach (var (i, _) in mpe.Value) {
+            foreach (var i in range(mpe, 1024)) {
                 mpe.Value[i] = sp;
             }
             runSubTestUserArenaNew(tΔ1, mpe, true);
 
             var mpo = @new<mediumPointerOdd>();
-            foreach (var (i, _) in mpo.Value) {
+            foreach (var i in range(mpo, 1023)) {
                 mpo.Value[i] = sp;
             }
             runSubTestUserArenaNew(tΔ1, mpo, true);
 
             var ls = @new<largeScalar>();
-            foreach (var (i, _) in ls.Value) {
+            foreach (var i in range(ls, 4194305)) {
                 ls.Value[i] = 123;
             }
             // Not in parallel because we don't want to hold this large allocation live.
             runSubTestUserArenaNew(tΔ1, ls, false);
 
             var lp = @new<largePointer>();
-            foreach (var (i, _) in lp.Value) {
+            foreach (var i in range(lp, 524289)) {
                 lp.Value[i] = sp;
             }
             // Not in parallel because we don't want to hold this large allocation live.
             runSubTestUserArenaNew(tΔ1, lp, false);
 
             var sss = new slice<smallScalar>(25);
-            foreach (var (i, _) in sss) {
+            foreach (var i in range(sss)) {
                 sss[i] = new smallScalar(12);
             }
             runSubTestUserArenaSlice(tΔ1, sss, true);
 
             var mpos = GoReflect.WithElemDims(new slice<mediumPointerOdd>(5), 1023);
-            foreach (var (i, _) in mpos) {
+            foreach (var i in range(mpos)) {
                 mpos[i] = mpo.Value.Clone();
             }
             runSubTestUserArenaSlice(tΔ1, mpos, true);
 
             var sps = new slice<smallPointer>((nint)(runtime_internal_test_package.UserArenaChunkBytes / /* unsafe.Sizeof(smallPointer{}) */ (uintptr)8 + 1));
-            foreach (var (i, _) in sps) {
+            foreach (var i in range(sps)) {
                 sps[i] = sp.Value;
             }
             // Not in parallel because we don't want to hold this large allocation live.
@@ -185,6 +185,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
 
 internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalue, bool parallel) {
     Ꮡt.Run(reflect.TypeOf(Ꮡvalue.OrTypedNil()).Elem().Name(), (ж<testing.T> tΔ1) => {
+        var arenaValuesᴷ = new stackAppend<ж<S>>();
         if (parallel) {
             tΔ1.Parallel();
         }
@@ -208,7 +209,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
             arena.New(Ꮡx);
             var s = x._<ж<S>>();
             s.ValueSlot = Ꮡvalue.ValueSlot;
-            arenaValues = append(arenaValues, s);
+            arenaValues = append(arenaValuesᴷ, arenaValues, s);
         }
         // Check integrity of allocated data.
         foreach (var (_, s) in arenaValues) {
@@ -225,6 +226,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
 internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> value, bool parallel) {
     var valueʗ1 = value;
     Ꮡt.Run("[]"u8 + reflect.TypeOf(value).Elem().Name(), (ж<testing.T> tΔ1) => {
+        var arenaValuesᴷ = new stackAppend<slice<S>>();
         if (parallel) {
             tΔ1.Parallel();
         }
@@ -246,11 +248,11 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
             ref var sl = ref heap<slice<S>>(out var Ꮡsl);
             arena.Slice(Ꮡsl, cap(valueʗ1));
             copy(sl, valueʗ1);
-            arenaValues = append(arenaValues, sl);
+            arenaValues = append(arenaValuesᴷ, arenaValues, sl);
         }
         // Check integrity of allocated data.
         foreach (var (_, sl) in arenaValues) {
-            foreach (var (i, _) in sl) {
+            foreach (var i in range(sl)) {
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
@@ -547,7 +549,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     if (len(b) != len(bCopy)){
         Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(b), len(bCopy));
     } else {
-        foreach (var (i, _) in b) {
+        foreach (var i in range(b)) {
             if (b[i] != bCopy[i]) {
                 Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, b[i], bCopy[i]);
             }
@@ -563,7 +565,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     if (len(bSub) != len(bSubCopy)){
         Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(bSub), len(bSubCopy));
     } else {
-        foreach (var (i, _) in bSub) {
+        foreach (var i in range(bSub)) {
             if (bSub[i] != bSubCopy[i]) {
                 Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, bSub[i], bSubCopy[i]);
             }

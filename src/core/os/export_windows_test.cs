@@ -15,5 +15,6 @@ internal static void initᴛNewConsoleFile() { NewConsoleFile = newConsoleFile; 
 public static Func<@string, slice<@string>> CommandLineToArgv = commandLineToArgv;
 public static ж<bool> AllowReadDirFileID;
 internal static void initᴛAllowReadDirFileID() { AllowReadDirFileID = ᏑallowReadDirFileID; }
+public static Func<@string, (@string, @string)> SplitPath = splitPath;
 
 } // end os_internal_test_package

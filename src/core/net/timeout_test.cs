@@ -18,7 +18,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoInit] internal static void initΔ2() {
+[GoInit] internal static void initΔ1() {
     // Install a hook to ensure that a 1ns timeout will always
     // be exceeded by the time Dial gets to the relevant system call.
     //
@@ -44,6 +44,7 @@ internal static slice<dialTimeoutTestsᴛ1> dialTimeoutTests = new dialTimeoutTe
     new((time.Duration)(-5000000000L), (time.Duration)(5000000000L)), // timeout over deadline
     new((time.Duration)(-9223372036854775808L), 0),
     new(0, (time.Duration)(-9223372036854775808L)),
+
     new(1 * time.Millisecond, 0),
     new(0, 1 * time.Millisecond),
     new(1 * time.Millisecond, (time.Duration)(5000000000L)) // timeout over deadline
@@ -221,8 +222,7 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
     }.slice();
 
     foreach (var (_, timeout) in timeouts) {
-        var timeoutΔ1 = timeout;
-        Ꮡt.Run(fmt.Sprintf("%v"u8, timeoutΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("%v"u8, timeout), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 tΔ1.Parallel();
@@ -231,7 +231,7 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
 
-                if (timeoutΔ1 >= 0){
+                if (timeout >= 0){
                     // Don't dial the listener at all, so that Accept will hang.
                 } else {
                     // A deadline in the past should cause Accept to fail even if there are
@@ -284,11 +284,11 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
                 }
 
                 {
-                    var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(timeoutΔ1)); if (errΔ2 != default!) {
+                    var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(timeout)); if (errΔ2 != default!) {
                         tΔ1.Fatal(errΔ2);
                     }
                 }
-                tΔ1.Logf("ln.SetDeadline(time.Now().Add(%v))"u8, timeoutΔ1);
+                tΔ1.Logf("ln.SetDeadline(time.Now().Add(%v))"u8, timeout);
 
                 var (c, err) = ln.Accept();
                 if (err == default!) {
@@ -422,6 +422,7 @@ internal static slice<readTimeoutTestsᴛ1> readTimeoutTests = new readTimeoutTe
     // Tests that read deadlines work, even if there's data ready
     // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
+
     new(50 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
 
@@ -587,6 +588,7 @@ internal static slice<readTimeoutTestsᴛ1> readFromTimeoutTests = new readTimeo
     // Tests that read deadlines work, even if there's data ready
     // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
+
     new(50 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
 
@@ -668,6 +670,7 @@ internal static slice<readTimeoutTestsᴛ1> writeTimeoutTests = new readTimeoutT
     // Tests that write deadlines work, even if there's buffer
     // space available to write.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
+
     new(10 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
 
@@ -946,10 +949,7 @@ internal static (time.Duration next, bool ok) nextTimeout(time.Duration actual) 
     // duration by any significant margin. Try the next attempt with an arbitrary
     // factor above that, so that our growth curve is at least exponential.
     next = actual * 5 / 4;
-    if (next > maxDynamicTimeout) {
-        return (maxDynamicTimeout, true);
-    }
-    return (next, true);
+    return (min(next, maxDynamicTimeout), true);
 }
 
 // There is a very similar copy of this in os/timeout_test.go.

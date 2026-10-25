@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -110,6 +117,7 @@
     <Compile Include="executable_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="export_windows_test.cs" />
+    <Compile Include="file_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="os_test.cs" />
     <Compile Include="os_windows_test.cs" />
@@ -126,6 +134,8 @@
     <Compile Include="root_windows_test.cs" />
     <Compile Include="stat_test.cs" />
     <Compile Include="tempfile_test.cs" />
+    <Compile Include="timeout_test.cs" />
+    <Compile Include="timeout_windows_test.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -159,6 +169,7 @@
     <None Include="exec.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="exec_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="exec_nohandle.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="exec_nohandle_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="exec_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="exec_posix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="exec_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -191,6 +202,7 @@
     <None Include="file_open_wasip1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="file_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="file_posix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="file_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="file_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="file_wasip1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="file_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -224,6 +236,8 @@
     <None Include="removeall_at.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="removeall_noat.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="removeall_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="removeall_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="removeall_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_js.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_nonwindows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -232,6 +246,7 @@
     <None Include="root_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="root_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="root_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="stat.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -249,6 +264,9 @@
     <None Include="stat_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="stat_wasip1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="stat_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="statat.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="statat_other.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="statat_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sticky_bsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sticky_notbsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -271,6 +289,8 @@
     <None Include="testdata/issue37161/b" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="testdata/issue37161/c" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="timeout_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="timeout_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="timeout_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="types.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="types_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="types_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -301,13 +321,17 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/registry/internal.syscall.windows.registry.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
+    <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/v2/math.rand.v2.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />

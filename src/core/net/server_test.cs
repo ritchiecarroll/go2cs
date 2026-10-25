@@ -22,27 +22,35 @@ internal static slice<tcpServerTestsᴛ1> tcpServerTests = new tcpServerTestsᴛ
     new(snet: "tcp"u8, saddr: "0.0.0.0:0"u8, tnet: "tcp"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "tcp"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::]:0"u8, tnet: "tcp"u8, taddr: "::1"u8),
+
     new(snet: "tcp"u8, saddr: ":0"u8, tnet: "tcp"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "0.0.0.0:0"u8, tnet: "tcp"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "tcp"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "[::]:0"u8, tnet: "tcp"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "tcp"u8, saddr: ":0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "0.0.0.0:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::]:0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
+
     new(snet: "tcp"u8, saddr: ":0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "0.0.0.0:0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
     new(snet: "tcp"u8, saddr: "[::]:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "tcp"u8, saddr: "127.0.0.1:0"u8, tnet: "tcp"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::ffff:127.0.0.1]:0"u8, tnet: "tcp"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp"u8, saddr: "[::1]:0"u8, tnet: "tcp"u8, taddr: "::1"u8),
+
     new(snet: "tcp4"u8, saddr: ":0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp4"u8, saddr: "0.0.0.0:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "tcp4"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "tcp4"u8, saddr: "127.0.0.1:0"u8, tnet: "tcp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "tcp6"u8, saddr: ":0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
     new(snet: "tcp6"u8, saddr: "[::]:0"u8, tnet: "tcp6"u8, taddr: "::1"u8),
+
     new(snet: "tcp6"u8, saddr: "[::1]:0"u8, tnet: "tcp6"u8, taddr: "::1"u8)
 }.slice();
 
@@ -61,6 +69,8 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
         Ꮡt.Run(tt.snet + " "u8 + tt.saddr + "<-"u8 + tt.taddr, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
+                var tpchsᴷ = new stackAppend<channel<error>>(moves: true);
+                var trchsᴷ = new stackAppend<channel<error>>(moves: true);
                 if (!testableListenArgs(ttʗ1.snet, ttʗ1.saddr, ttʗ1.taddr)) {
                     tΔ1.Skip(notTestableˢ);
                 }
@@ -85,7 +95,7 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
                 for (nint iΔ1 = 0; iΔ1 < N; iΔ1++) {
                     var ls = (Ꮡ(new streamListener(Listener: ln))).newLocalServer();
                     Ꮡlss.ValueSlot = append(Ꮡlss.ValueSlot, ls);
-                    tpchs = append(tpchs, new channel<error>(1));
+                    tpchs = append(tpchsᴷ, tpchs, new channel<error>(1));
                 }
                 for (nint iΔ2 = 0; iΔ2 < N; iΔ2++) {
                     var ch = tpchs[iΔ2];
@@ -119,15 +129,17 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
                     }
                     var cʗ1 = c;
                     defer(() => cʗ1.Close(), ref ᒐ);
-                    trchs = append(trchs, new channel<error>(1));
+                    trchs = append(trchsᴷ, trchs, new channel<error>(1));
                     goǃ(transceiver, c, slice<byte>("TCP SERVER TEST"u8), trchs[iΔ3].WithDirection(GoChanDir.Send));
                 }
 
+                trchs = move2heap(trchsᴷ, trchs);
                 foreach (var (_, ch) in trchs) {
                     foreach (var errΔ3 in ch) {
                         tΔ1.Errorf("#%d: %v"u8, i, errΔ3);
                     }
                 }
+                tpchs = move2heap(tpchsᴷ, tpchs);
                 foreach (var (_, ch) in tpchs) {
                     foreach (var errΔ4 in ch) {
                         tΔ1.Errorf("#%d: %v"u8, i, errΔ4);
@@ -145,9 +157,13 @@ public static void TestTCPServer(ж<testing.T> Ꮡt) {
 public static partial void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var tpchsᴷ = new stackAppend<channel<error>>(moves: true);
+        var trchsᴷ = new stackAppend<channel<error>>(moves: true);
+
         slice<prohibitionaryDialArgTestsᴛ1> unixAndUnixpacketServerTests = new prohibitionaryDialArgTestsᴛ1[]{
             new("unix"u8, testUnixAddr(new net_test_package.testing_TжTB(Ꮡt))),
             new("unix"u8, "@nettest/go/unix"u8),
+
             new("unixpacket"u8, testUnixAddr(new net_test_package.testing_TжTB(Ꮡt))),
             new("unixpacket"u8, "@nettest/go/unixpacket"u8)
         }.slice();
@@ -180,7 +196,7 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
             for (nint iΔ1 = 0; iΔ1 < N; iΔ1++) {
                 var ls = (Ꮡ(new streamListener(Listener: ln))).newLocalServer();
                 lss = append(lss, ls);
-                tpchs = append(tpchs, new channel<error>(1));
+                tpchs = append(tpchsᴷ, tpchs, new channel<error>(1));
             }
             for (nint iΔ2 = 0; iΔ2 < N; iΔ2++) {
                 var ch = tpchs[iΔ2];
@@ -217,15 +233,17 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
 
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
-                trchs = append(trchs, new channel<error>(1));
+                trchs = append(trchsᴷ, trchs, new channel<error>(1));
                 goǃ(transceiver, c, slice<byte>("UNIX AND UNIXPACKET SERVER TEST"u8), trchs[iΔ3].WithDirection(GoChanDir.Send));
             }
 
+            trchs = move2heap(trchsᴷ, trchs);
             foreach (var (_, ch) in trchs) {
                 foreach (var errΔ3 in ch) {
                     Ꮡt.Errorf("#%d: %v"u8, i, errΔ3);
                 }
             }
+            tpchs = move2heap(tpchsᴷ, tpchs);
             foreach (var (_, ch) in tpchs) {
                 foreach (var errΔ4 in ch) {
                     Ꮡt.Errorf("#%d: %v"u8, i, errΔ4);
@@ -247,39 +265,49 @@ internal static slice<udpServerTestsᴛ1> udpServerTests = new udpServerTestsᴛ
     new(snet: "udp"u8, saddr: "0.0.0.0:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::]:0"u8, tnet: "udp"u8, taddr: "::1"u8),
+
     new(snet: "udp"u8, saddr: ":0"u8, tnet: "udp"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "0.0.0.0:0"u8, tnet: "udp"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "udp"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "[::]:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "udp"u8, saddr: ":0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "0.0.0.0:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::]:0"u8, tnet: "udp6"u8, taddr: "::1"u8),
+
     new(snet: "udp"u8, saddr: ":0"u8, tnet: "udp6"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "0.0.0.0:0"u8, tnet: "udp6"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "udp6"u8, taddr: "::1"u8),
     new(snet: "udp"u8, saddr: "[::]:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "udp"u8, saddr: "127.0.0.1:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::ffff:127.0.0.1]:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp"u8, saddr: "[::1]:0"u8, tnet: "udp"u8, taddr: "::1"u8),
+
     new(snet: "udp4"u8, saddr: ":0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp4"u8, saddr: "0.0.0.0:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
     new(snet: "udp4"u8, saddr: "[::ffff:0.0.0.0]:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "udp4"u8, saddr: "127.0.0.1:0"u8, tnet: "udp4"u8, taddr: "127.0.0.1"u8),
+
     new(snet: "udp6"u8, saddr: ":0"u8, tnet: "udp6"u8, taddr: "::1"u8),
     new(snet: "udp6"u8, saddr: "[::]:0"u8, tnet: "udp6"u8, taddr: "::1"u8),
+
     new(snet: "udp6"u8, saddr: "[::1]:0"u8, tnet: "udp6"u8, taddr: "::1"u8),
+
     new(snet: "udp"u8, saddr: "127.0.0.1:0"u8, tnet: "udp"u8, taddr: "127.0.0.1"u8, dial: true),
+
     new(snet: "udp"u8, saddr: "[::1]:0"u8, tnet: "udp"u8, taddr: "::1"u8, dial: true)
 }.slice();
 
 public static void TestUDPServer(ж<testing.T> Ꮡt) {
-    foreach (var (i, tt) in udpServerTests) {
-        nint iΔ1 = i;
-        ref var ttΔ1 = ref heap<udpServerTestsᴛ1>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+    foreach (var (i, vᴛ1) in udpServerTests) {
+        ref var tt = ref heap(new udpServerTestsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(fmt.Sprint(i), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableListenArgs(ttʗ1.snet, ttʗ1.saddr, ttʗ1.taddr)) {
@@ -390,15 +418,16 @@ public static void TestUnixgramServer(ж<testing.T> Ꮡt) {
     slice<TestUnixgramServer_type> unixgramServerTests = new TestUnixgramServer_type[]{
         new(saddr: testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)), caddr: testUnixAddr(new net_test_package.testing_TжTB(Ꮡt))),
         new(saddr: testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)), caddr: testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)), dial: true),
+
         new(saddr: "@nettest/go/unixgram/server"u8, caddr: "@nettest/go/unixgram/client"u8)
     }.slice();
 
-    foreach (var (i, tt) in unixgramServerTests) {
-        nint iΔ1 = i;
-        ref var ttΔ1 = ref heap<TestUnixgramServer_type>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+    foreach (var (i, vᴛ1) in unixgramServerTests) {
+        ref var tt = ref heap(new TestUnixgramServer_type(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(fmt.Sprint(i), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableListenArgs(unixgramˢ, ttʗ1.saddr, ""u8)) {

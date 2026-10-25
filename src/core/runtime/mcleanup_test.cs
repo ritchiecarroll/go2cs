@@ -40,7 +40,7 @@ public static partial void TestCleanup(ж<testing.T> Ꮡt) {
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531);
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
         v = default!;
         doneʗ1.ᐸꟷ(true);
     });
@@ -73,9 +73,9 @@ public static partial void TestCleanupMultiple(ж<testing.T> Ꮡt) {
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531);
-        Δruntime.AddCleanup(v, cleanup, 97531);
-        Δruntime.AddCleanup(v, cleanup, 97531);
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
         v = default!;
         doneʗ1.ᐸꟷ(true);
     });
@@ -123,7 +123,7 @@ public static partial void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
             }
             chʗ3.ᐸꟷ(2);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531);
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
         Δruntime.SetFinalizer(v.OrTypedNil(), (finalizer).OrTypedNilFunc());
         v = default!;
         doneʗ1.ᐸꟷ(true);
@@ -171,9 +171,9 @@ public static partial void TestCleanupInteriorPointer(ж<testing.T> Ꮡt) {
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡa), cleanup, 97531);
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡb), cleanup, 97531);
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡc), cleanup, 97531);
+        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡa), cleanup, 97531, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡb), cleanup, 97531, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡc), cleanup, 97531, new object?[] { Ꮡt.Value });
         ts = default!;
         doneʗ1.ᐸꟷ(true);
     });
@@ -205,7 +205,7 @@ public static partial void TestCleanupStop(ж<testing.T> Ꮡt) {
             Ꮡt.Error(cleanupCalledWantNoˢ);
         };
         ref var c = ref heap<Δruntime.Cleanup>(out var Ꮡc);
-        c = Δruntime.AddCleanup(v, cleanup, 97531);
+        c = Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
         c.Stop();
         v = default!;
         doneʗ1.ᐸꟷ(true);
@@ -232,7 +232,7 @@ public static partial void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
             Ꮡt.Error(cleanupCalledWantNoˢ);
         };
         ref var c = ref heap<Δruntime.Cleanup>(out var Ꮡc);
-        c = Δruntime.AddCleanup(v, cleanup, 97531);
+        c = Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
         c.Stop();
         c.Stop();
         c.Stop();
@@ -266,11 +266,11 @@ public static partial void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 1);
-        Δruntime.AddCleanup(v, cleanup, 2).Stop();
-        Δruntime.AddCleanup(v, cleanup, 1);
-        Δruntime.AddCleanup(v, cleanup, 2).Stop();
-        Δruntime.AddCleanup(v, cleanup, 1);
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { Ꮡt.Value }).Stop();
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { Ꮡt.Value }).Stop();
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
         v = default!;
         doneʗ1.ᐸꟷ(true);
     });
@@ -416,6 +416,8 @@ internal partial struct TestCleanupUnreachablePointer_T /*dyn*/ {
 public static void TestCleanupUnreachablePointer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        ref var t = ref Ꮡt.DerefOrNull();
+
         defer(() => {
             if (recover() == default!) {
                 Ꮡt.Error(addCleanupFailedToDetectˢ);
@@ -424,7 +426,7 @@ public static void TestCleanupUnreachablePointer(ж<testing.T> Ꮡt) {
         var v = Ꮡ(new TestCleanupUnreachablePointer_T(nil));
         Δruntime.AddCleanup(v, (ж<nint> _) => {
             Ꮡt.Error(cleanupRanUnexpectedlyˢ);
-        }, v.of(TestCleanupUnreachablePointer_T.Ꮡf));
+        }, v.of(TestCleanupUnreachablePointer_T.Ꮡf), new object?[] { t });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -441,6 +443,8 @@ internal partial struct TestCleanupUnreachableClosure_T /*dyn*/ {
 public static void TestCleanupUnreachableClosure(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        ref var t = ref Ꮡt.DerefOrNull();
+
         defer(() => {
             if (recover() == default!) {
                 Ꮡt.Error(addCleanupFailedToDetectˢ2);
@@ -451,7 +455,7 @@ public static void TestCleanupUnreachableClosure(ж<testing.T> Ꮡt) {
         Δruntime.AddCleanup(v, (nint _) => {
             Ꮡt.Log((~vʗ1).f);
             Ꮡt.Error(cleanupRanUnexpectedlyˢ);
-        }, 0);
+        }, 0, new object?[] { t, v });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

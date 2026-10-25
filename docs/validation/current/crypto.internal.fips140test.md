@@ -6,81 +6,93 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/internal/fips140test` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**2260 matched · 7 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**2270 matched · 8 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/internal/fips140test`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140test).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+
+Both runtimes skip 6 of the matched tests identically.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
-| `TestACVP` | pass | pass |
+| `TestACVP` | fail | fail |
 | `TestAliasing` | pass | pass |
 | `TestAllCASTs` | pass | pass |
-| `TestCASTFailures` | pass | pass |
-| `TestCASTFailures/AES-CBC` | pass | pass |
-| `TestCASTFailures/CTR_DRBG` | pass | pass |
-| `TestCASTFailures/CounterKDF` | pass | pass |
-| `TestCASTFailures/DetECDSA_P-256_SHA2-512_sign` | pass | pass |
-| `TestCASTFailures/ECDH_PCT` | pass | pass |
-| `TestCASTFailures/ECDSA_P-256_SHA2-512_sign_and_verify` | pass | pass |
-| `TestCASTFailures/ECDSA_PCT` | pass | pass |
-| `TestCASTFailures/Ed25519_sign_and_verify` | pass | pass |
-| `TestCASTFailures/Ed25519_sign_and_verify_PCT` | pass | pass |
-| `TestCASTFailures/HKDF-SHA2-256` | pass | pass |
-| `TestCASTFailures/HMAC-SHA2-256` | pass | pass |
-| `TestCASTFailures/KAS-ECC-SSC_P-256` | pass | pass |
-| `TestCASTFailures/ML-KEM-768` | pass | pass |
-| `TestCASTFailures/ML-KEM_PCT` | pass | pass |
-| `TestCASTFailures/ML-KEM_PCT#01` | pass | pass |
-| `TestCASTFailures/PBKDF2` | pass | pass |
-| `TestCASTFailures/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify` | pass | pass |
-| `TestCASTFailures/RSA_sign_and_verify_PCT` | pass | pass |
-| `TestCASTFailures/SHA2-256` | pass | pass |
-| `TestCASTFailures/SHA2-512` | pass | pass |
-| `TestCASTFailures/TLSv1.2-SHA2-256` | pass | pass |
-| `TestCASTFailures/TLSv1.3-SHA2-256` | pass | pass |
-| `TestCASTFailures/cSHAKE128` | pass | pass |
-| `TestCASTPasses` | pass | pass |
-| `TestCASTPasses/AES-CBC` | pass | pass |
-| `TestCASTPasses/CTR_DRBG` | pass | pass |
-| `TestCASTPasses/CounterKDF` | pass | pass |
-| `TestCASTPasses/DetECDSA_P-256_SHA2-512_sign` | pass | pass |
-| `TestCASTPasses/ECDH_PCT` | pass | pass |
-| `TestCASTPasses/ECDSA_P-256_SHA2-512_sign_and_verify` | pass | pass |
-| `TestCASTPasses/ECDSA_PCT` | pass | pass |
-| `TestCASTPasses/Ed25519_sign_and_verify` | pass | pass |
-| `TestCASTPasses/Ed25519_sign_and_verify_PCT` | pass | pass |
-| `TestCASTPasses/HKDF-SHA2-256` | pass | pass |
-| `TestCASTPasses/HMAC-SHA2-256` | pass | pass |
-| `TestCASTPasses/KAS-ECC-SSC_P-256` | pass | pass |
-| `TestCASTPasses/ML-KEM-768` | pass | pass |
-| `TestCASTPasses/ML-KEM_PCT` | pass | pass |
-| `TestCASTPasses/ML-KEM_PCT#01` | pass | pass |
-| `TestCASTPasses/PBKDF2` | pass | pass |
-| `TestCASTPasses/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify` | pass | pass |
-| `TestCASTPasses/RSA_sign_and_verify_PCT` | pass | pass |
-| `TestCASTPasses/SHA2-256` | pass | pass |
-| `TestCASTPasses/SHA2-512` | pass | pass |
-| `TestCASTPasses/TLSv1.2-SHA2-256` | pass | pass |
-| `TestCASTPasses/TLSv1.3-SHA2-256` | pass | pass |
-| `TestCASTPasses/cSHAKE128` | pass | pass |
+| `TestCASTFailures` | skip | skip |
+| `TestCASTPasses` | skip | skip |
 | `TestCMAC` | pass | pass |
 | `TestConditionals` | pass | pass |
 | `TestCounterDRBG` | pass | pass |
 | `TestEdwards25519Allocations` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestEntropyAdaptiveProportionTest` | pass | pass |
+| `TestEntropyRace` | pass | pass |
+| `TestEntropyRepetitionCountTest` | pass | pass |
+| `TestEntropySHA384` | pass | pass |
+| `TestEntropySamples` | skip | skip |
+| `TestEntropyUnchanged` | pass | pass |
 | `TestEquivalents` | pass | pass |
 | `TestEquivalents/P224` | pass | pass |
 | `TestEquivalents/P256` | pass | pass |
 | `TestEquivalents/P384` | pass | pass |
 | `TestEquivalents/P521` | pass | pass |
-| `TestFIPSCheckInfo` | fail | fail |
-| `TestFIPSCheckVerify` | fail | fail |
+| `TestFIPS140` | pass | pass |
+| `TestFIPS140/AES-CBC` | pass | pass |
+| `TestFIPS140/AES-CTR` | pass | pass |
+| `TestFIPS140/AES-GCM` | pass | pass |
+| `TestFIPS140/Counter_KDF` | pass | pass |
+| `TestFIPS140/ECDSA_KeyGen,_SigGen,_SigVer` | pass | pass |
+| `TestFIPS140/EDDSA_KeyGen,_SigGen,_SigVer` | pass | pass |
+| `TestFIPS140/Feedback_KDF` | pass | pass |
+| `TestFIPS140/HMAC` | pass | pass |
+| `TestFIPS140/KAS-ECC-SSC_ephemeralUnified` | pass | pass |
+| `TestFIPS140/KDA_HKDF` | pass | pass |
+| `TestFIPS140/KDA_OneStepNoCounter` | pass | pass |
+| `TestFIPS140/KDF_TLS_v1.2_CVL` | pass | pass |
+| `TestFIPS140/KDF_TLS_v1.3_CVL` | pass | pass |
+| `TestFIPS140/KTS_IFC_OAEP` | pass | pass |
+| `TestFIPS140/ML-DSA_KeyGen,_SigGen,_SigVer` | pass | pass |
+| `TestFIPS140/ML-KEM_KeyGen,_Encap,_Decap` | pass | pass |
+| `TestFIPS140/PBKDF` | pass | pass |
+| `TestFIPS140/RSA_KeyGen` | pass | pass |
+| `TestFIPS140/RSA_KeyGen_w/_small_key_[NOT_APPROVED]` | pass | pass |
+| `TestFIPS140/RSA_SigGen,_SigVer_PKCS_1.5` | pass | pass |
+| `TestFIPS140/RSA_SigGen,_SigVer_PSS` | pass | pass |
+| `TestFIPS140/SHA2-224` | pass | pass |
+| `TestFIPS140/SHA2-256` | pass | pass |
+| `TestFIPS140/SHA2-384` | pass | pass |
+| `TestFIPS140/SHA2-512` | pass | pass |
+| `TestFIPS140/SHA2-512/224` | pass | pass |
+| `TestFIPS140/SHA2-512/256` | pass | pass |
+| `TestFIPS140/SHA3-224` | pass | pass |
+| `TestFIPS140/SHA3-256` | pass | pass |
+| `TestFIPS140/SHA3-384` | pass | pass |
+| `TestFIPS140/SHA3-512` | pass | pass |
+| `TestFIPS140/SHAKE-128` | pass | pass |
+| `TestFIPS140/SHAKE-256` | pass | pass |
+| `TestFIPS140/cSHAKE-128` | pass | pass |
+| `TestFIPS140/cSHAKE-256` | pass | pass |
+| `TestFIPS140/ctrDRBG` | pass | pass |
 | `TestGetConfig` | pass | pass |
 | `TestIndicator` | pass | pass |
+| `TestIntegrityCheck` | skip | skip |
+| `TestIntegrityCheckFailure` | skip | skip |
+| `TestIntegrityCheckInfo` | skip | skip |
+| `TestMLDSAAccumulated` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-44/100` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-44/10k` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-65/100` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-65/10k` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-87/100` | pass | pass |
+| `TestMLDSAAccumulated/ML-DSA-87/10k` | pass | pass |
+| `TestMLDSAAllocations` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestMLDSAGenerateKey` | pass | pass |
+| `TestMLDSAGenerateKey/ML-DSA-44` | pass | pass |
+| `TestMLDSAGenerateKey/ML-DSA-65` | pass | pass |
+| `TestMLDSAGenerateKey/ML-DSA-87` | pass | pass |
 | `TestNISTECAllocations` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestNISTECAllocations/P224` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestNISTECAllocations/P256` | pass | fail ([disclosed](#disclosed-divergences)) |
@@ -2280,6 +2292,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestSha2256` | pass | pass |
 | `TestTooFewArgs` | pass | pass |
 | `TestTooManyArgs` | pass | pass |
+| `TestVersion` | pass | pass |
 | `TestXAES` | pass | pass |
 | `TestXAESAccumulated` | pass | pass |
 | `TestXAESAllocations` | pass | fail ([disclosed](#disclosed-divergences)) |
@@ -2298,12 +2311,13 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestEdwards25519Allocations` | `deferred` | want-zero AllocsPerRun assert over a point addition plus scalar/point encode round-trips: Go's escape analysis proves every Point, Scalar and field-element temporary non-escaping (even NewIdentityPoint()/NewGeneratorPoint() stay on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/edwards25519.TestAllocations: the H10 relocation moves the declaration into crypto/internal/fips140test under this name, and the roster's relocation record expects `class` and `signature` to survive VERBATIM -- they do, which is the zero-re-signs measurement holding for the right reason, the signature never having moved. Re-measured at the pass-2 tip: the run reports `counted 7,500 go2cs-runtime object allocations (698,400 bytes) over 100 run(s)` = 75 per run, an allocation COUNT in Go's own units (the go2cs counter SAW them), which is the COUNT arm of the 2026-09-05 ladder; the proof above is the stated floor that makes it structural rather than deferred. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
+| `TestEdwards25519Allocations` | `deferred` | want-zero AllocsPerRun assert over a point addition plus scalar/point encode round-trips: Go's escape analysis proves every Point, Scalar and field-element temporary non-escaping (even NewIdentityPoint()/NewGeneratorPoint() stay on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/edwards25519.TestAllocations: the H10 relocation moves the declaration into crypto/internal/fips140test under this name, and the roster's relocation record expects `class` and `signature` to survive VERBATIM -- they do, which is the zero-re-signs measurement holding for the right reason, the signature never having moved. Re-measured at the pass-2 tip: the run reports `counted 7,500 go2cs-runtime object allocations (698,400 bytes) over 100 run(s)` = 75 per run, an allocation COUNT in Go's own units (the go2cs counter SAW them), which is the COUNT arm of the 2026-09-05 ladder; the proof above is the stated floor that makes it structural rather than deferred. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 75 per run at go1.24.13 to 73 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestMLDSAAllocations` | `deferred` | AllocsPerRun(100, ...) over an ML-DSA-44 round trip, new at go1.26.10: GenerateKey44, PrivateKey.Bytes, NewPrivateKey44, Equal, PublicKey().Bytes, NewPublicKey44, Sign, Verify. Go allows at most 5 allocations per run -- by the test's own comment, the PrivateKey structs k and kk, the PublicKey struct pk, and the pkBytes and sig byte slices -- and 6 when fips140.Enabled adds the PCT's signature. The converted count varies run to run, so the reading is a RANGE over three readings per OS, never one count (plan §6; the batch-24 "rise" in docs/phase4/DATA-hop126-rollup-disclosures.md was withdrawn as run-to-run variance). |
 | `TestNISTECAllocations` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
-| `TestNISTECAllocations/P224` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP224Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P224, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 84800 go2cs-runtime object allocations over 10 run(s)` = 8,480 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
-| `TestNISTECAllocations/P256` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP256Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P256, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 161490 go2cs-runtime object allocations over 10 run(s)` = 16,149 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
-| `TestNISTECAllocations/P384` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP384Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P384, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 125680 go2cs-runtime object allocations over 10 run(s)` = 12,568 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
-| `TestNISTECAllocations/P521` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP521Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P521, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 170860 go2cs-runtime object allocations over 10 run(s)` = 17,086 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
+| `TestNISTECAllocations/P224` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP224Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P224, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 84800 go2cs-runtime object allocations over 10 run(s)` = 8,480 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 8,480 per run at go1.24.13 to 8,490 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestNISTECAllocations/P256` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP256Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P256, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 161490 go2cs-runtime object allocations over 10 run(s)` = 16,149 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 16,149 per run at go1.24.13 to 7,331 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestNISTECAllocations/P384` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP384Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P384, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 125680 go2cs-runtime object allocations over 10 run(s)` = 12,568 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 12,568 per run at go1.24.13 to 12,578 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestNISTECAllocations/P521` | `deferred` | want-zero AllocsPerRun assert over two full scalar multiplications plus point encode/decode round-trips: Go's escape analysis proves every point and fiat field-element temporary in the ladder non-escaping (even NewP521Point() stays on the stack), while the managed model heap-boxes each one, so zero is structurally unreachable. RE-PINNED AT 1.24.13 from crypto/internal/nistec.TestAllocations/P521, class and signature verbatim per the roster's relocation record. Re-measured at the pass-2 tip: `counted 170860 go2cs-runtime object allocations over 10 run(s)` = 17,086 per run, a COUNT in Go's own units. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 17,086 per run at go1.24.13 to 17,096 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
 | `TestXAESAllocations` | `deferred` | want-zero AllocsPerRun assert over an xaesSeal + xaesOpen round trip (xaes_test.go:19-37). The measured closure allocates five local slices per run -- key 32, nonce 24, plaintext 16, aad 16, ciphertext cap 32 -- plus the per-call AES/GCM and XAES-KDF state, none of which escapes, so Go's escape analysis keeps every one off the heap while golib necessarily boxes them. Reading: `counted 1,990 go2cs-runtime object allocations (157,600 bytes) over 10 run(s)` = 199 per run, and the run's own note states the figure is an allocation COUNT per run from go2cs's runtime counter, the structural mirror of runtime.MemStats.Mallocs, over golib sites only and therefore a LOWER BOUND. STRUCTURAL rather than deferred: no named mechanism removes those allocations (golib has no stack allocation for a slice) and a lower bound can only rise, never approach the want. This is the pin authored in C1's classing record (docs/phase4/CENSUS-fips140test-divergence-classing.md) and is reused here verbatim. RELABEL 2026-09-23 (C1): alloc-profile -> structural, as ruled (edwards25519 and nistec pre-ruled, XAES ruled 2026-09-22). The proof and the pass-2 readings above are unchanged; this row was outside the i7 reading run because its readings were already recorded here. REVERSED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 X(3)): structural -> deferred, no floor. COORD reverses its own acceptances of 00:43 (769fc17fb) and 11:24 (eeed65f66d, XAES): the proof above -- Go keeps these temporaries off the heap while the managed model heap-allocates them -- is exactly the basis the Reference forbids for structural (ConversionStrategies-Reference.md:21461-21464), the signed-off zh-box §6 names mechanisms for both residual classes (DESIGN-zh-box-reduction.md:513-532), and the edwards residual was ruled 'an optimization target, not an impossibility' on 2026-08-20 (BOARD:15220-15232). Keeping these structural beside crypto/ed25519 and crypto/rand, both deferred over the same temporaries, would close H10 on contradictory live labels. |
 
 ## Excluded declarations
@@ -2314,4 +2328,8 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkEntropySeed (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMLDSAKeygen (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMLDSASign (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMLDSAVerify (benchmark): benchmark execution is deferred to Phase 4D
 - TestP256OrdInverse (test): requires the native implementation flavor: nistec_ordinv_test.go is excluded by the conversion's build tags (purego,math_big_pure_go), and the corpus reproduces the pure-Go flavor

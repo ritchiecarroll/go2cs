@@ -22,6 +22,7 @@ public static void TestSpuriousENOTAVAIL(ж<testing.T> Ꮡt) {
         new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall"u8, Err: syscall.EADDRNOTAVAIL))), true),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op"u8, Err: syscall.EADDRNOTAVAIL))), true),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op"u8, Err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall"u8, Err: syscall.EADDRNOTAVAIL)))))), true),
+
         new(syscall.EINVAL, false),
         new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall"u8, Err: syscall.EINVAL))), false),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op"u8, Err: syscall.EINVAL))), false),

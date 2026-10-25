@@ -1,12 +1,13 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using static strconv_package;
+using static go.@internal.strconv_package;
 using testing = testing_package;
-using static go.strconv_internal_test_package;
-using strconv = strconv_package;
+using go.@internal;
+using static go.@internal.strconv_internal_test_package;
+using strconv = go.@internal.strconv_package;
 
 partial class strconv_test_package {
 
@@ -58,9 +59,11 @@ internal static ж<slice<roundTest>> Ꮡroundtests = new StandardBox<slice<round
     new(23454999, 4, "23450000"u8, "23450000"u8, "23460000"u8, 23450000),
     new(23455000, 4, "23450000"u8, "23460000"u8, "23460000"u8, 23460000),
     new(23455001, 4, "23450000"u8, "23460000"u8, "23460000"u8, 23460000),
+
     new(99994999, 4, "99990000"u8, "99990000"u8, "100000000"u8, 99990000),
     new(99995000, 4, "99990000"u8, "100000000"u8, "100000000"u8, 100000000),
     new(99999999, 4, "99990000"u8, "100000000"u8, "100000000"u8, 100000000),
+
     new(12994999, 4, "12990000"u8, "12990000"u8, "13000000"u8, 12990000),
     new(12995000, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000),
     new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000)

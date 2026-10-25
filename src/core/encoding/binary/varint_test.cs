@@ -153,7 +153,7 @@ public static void TestBufferTooBigWithOverflow(ж<testing.T> Ꮡt) {
             name: "invalid: 1000 bytes"u8,
             @in: ((Func<slice<byte>>)(() => {
                 var b = new slice<byte>(1000);
-                foreach (var (i, _) in b) {
+                foreach (var i in range(b)) {
                     b[i] = 0xff;
                 }
                 b[999] = 0;
@@ -182,11 +182,12 @@ public static void TestBufferTooBigWithOverflow(ж<testing.T> Ꮡt) {
         )
     }.slice();
 
-    foreach (var (_, tt) in tests) {
-        ref var ttΔ1 = ref heap<TestBufferTooBigWithOverflow_tests>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestBufferTooBigWithOverflow_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             var (value, n) = Uvarint(ttʗ1.@in);
             {
                 nint g = n;

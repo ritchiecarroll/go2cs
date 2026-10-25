@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `database/sql` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**140 matched · 2 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**141 matched · 2 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/database/sql`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/database/sql).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -21,6 +21,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestBogusPreboundParameters` | pass | pass |
 | `TestCloseConnBeforeStmts` | pass | pass |
 | `TestCloseStmtBeforeRows` | pass | pass |
+| `TestColumnConverterWithUnknownInputCount` | pass | pass |
 | `TestConcurrency` | pass | pass |
 | `TestConcurrency/Exec` | pass | pass |
 | `TestConcurrency/Query` | pass | pass |
@@ -173,8 +174,8 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestGrabConnAllocs` | `alloc-count-semantics` | want-zero AllocsPerRun assert: four golib-counted objects per run where Go allocates none — the interior field pointers the emission mints to reach c.done, c.releaseConnOnce and c.closemu (Go's &c.field is an address, not an allocation) plus the display class the sync.Once closure needs on every call, even though the cached releaseConnCache method value it installs is built once. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off; claude/coord-h10-readings ac9f8251ee): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- 96 B/run, 96,000 bytes over 1,000 runs, golib's counter charging none of it (the test printed `Conn.grabConn allocated 96 objects; want 0`) -- so at this tree golib charges NONE of the objects this reason names; which change moved the interior field pointers off golib's charged sites is not attributed here. What remains is outside the counter, so no object count exists to compare with the want: the ladder's incomparable-unit arm. Nothing to retire and no plan. The relabel census's RULING OWED for this entry (a deferred-with-floor proposal) is superseded by the unit. |
-| `TestRawBytesAllocs` | `deferred` | want-zero AllocsPerRun assert: fifteen golib-counted objects per run where Go allocates none — each convertAssign round materializes the managed backing for the formatted value and boxes the any-typed source, where Go's escape analysis proves the temporaries non-escaping and appends into the pre-sized RawBytes in place. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. 28 per run = two per call over fourteen cases. The census's floor (any-boxing) is withdrawn: boxing is uncounted. Between b6026b9246 (where 15 was recorded) and bb54ff0920 -- 3,134 commits (1,152 first-parent), counted by COORD on a full clone, the go1.24.13 reconvert among them; C1's earlier 734 was an artifact of a SHALLOW clone and is withdrawn -- this path's emission changed at formatBits' append form (itoa.cs) and the time.Time arm (convert.cs:326); neither is shown to be the cause. |
+| `TestGrabConnAllocs` | `alloc-count-semantics` | want-zero AllocsPerRun assert: four golib-counted objects per run where Go allocates none — the interior field pointers the emission mints to reach c.done, c.releaseConnOnce and c.closemu (Go's &c.field is an address, not an allocation) plus the display class the sync.Once closure needs on every call, even though the cached releaseConnCache method value it installs is built once. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off; claude/coord-h10-readings ac9f8251ee): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- 96 B/run, 96,000 bytes over 1,000 runs, golib's counter charging none of it (the test printed `Conn.grabConn allocated 96 objects; want 0`) -- so at this tree golib charges NONE of the objects this reason names; which change moved the interior field pointers off golib's charged sites is not attributed here. What remains is outside the counter, so no object count exists to compare with the want: the ladder's incomparable-unit arm. Nothing to retire and no plan. The relabel census's RULING OWED for this entry (a deferred-with-floor proposal) is superseded by the unit. READ AT go1.26.10 (2026-10-25, G): 96 bytes per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 96,000 bytes over 1,000 runs, no object charged to golib's counter, alloc-units-windows.tsv line 43 (claude/g-pass2-plan 966562828d); linux: 96,000 bytes over 1,000 runs, no object charged to golib's counter, alloc-units-linux.tsv line 29 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit BYTES: golib's counter charged no object on this path, so bytes is the measurable figure. |
+| `TestRawBytesAllocs` | `deferred` | want-zero AllocsPerRun assert: fifteen golib-counted objects per run where Go allocates none — each convertAssign round materializes the managed backing for the formatted value and boxes the any-typed source, where Go's escape analysis proves the temporaries non-escaping and appends into the pre-sized RawBytes in place. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. 28 per run = two per call over fourteen cases. The census's floor (any-boxing) is withdrawn: boxing is uncounted. Between b6026b9246 (where 15 was recorded) and bb54ff0920 -- 3,134 commits (1,152 first-parent), counted by COORD on a full clone, the go1.24.13 reconvert among them; C1's earlier 734 was an artifact of a SHALLOW clone and is withdrawn -- this path's emission changed at formatBits' append form (itoa.cs) and the time.Time arm (convert.cs:326); neither is shown to be the cause. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 28 per run at go1.24.13 to 11 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 

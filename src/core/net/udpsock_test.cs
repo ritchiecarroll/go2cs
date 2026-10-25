@@ -6,6 +6,7 @@ namespace go;
 using errors = errors_package;
 using fmt = fmt_package;
 using asan = @internal.asan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using netip = net.netip_package;
 using Δos = os_package;
@@ -84,20 +85,27 @@ internal static slice<resolveUDPAddrTest> resolveUDPAddrTests;
 internal static void initᴛresolveUDPAddrTests() { resolveUDPAddrTests = new resolveUDPAddrTest[]{
     new("udp"u8, "127.0.0.1:0"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!),
     new("udp4"u8, "127.0.0.1:65535"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 65535)), default!),
+
     new("udp"u8, "[::1]:0"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 0)), default!),
     new("udp6"u8, "[::1]:65535"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 65535)), default!),
+
     new("udp"u8, "[::1%en0]:1"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 1, Zone: "en0"u8)), default!),
     new("udp6"u8, "[::1%911]:2"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 2, Zone: "911"u8)), default!),
+
     new(""u8, "127.0.0.1:0"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!), // Go 1.0 behavior
     new(""u8, "[::1]:0"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 0)), default!), // Go 1.0 behavior
+
     new("udp"u8, ":12345"u8, Ꮡ(new UDPAddr(Port: 12345)), default!),
+
     new("http"u8, "127.0.0.1:0"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"http"u8))),
+
     new("udp"u8, "127.0.0.1:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("127.0.0.1"u8), Port: 53)), default!),
     new("udp"u8, "[::ffff:127.0.0.1]:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("::ffff:127.0.0.1"u8), Port: 53)), default!),
     new("udp"u8, "[2001:db8::1]:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("2001:db8::1"u8), Port: 53)), default!),
     new("udp4"u8, "127.0.0.1:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("127.0.0.1"u8), Port: 53)), default!),
     new("udp4"u8, "[::ffff:127.0.0.1]:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("127.0.0.1"u8), Port: 53)), default!),
     new("udp6"u8, "[2001:db8::1]:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("2001:db8::1"u8), Port: 53)), default!),
+
     new("udp4"u8, "[2001:db8::1]:domain"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1"u8)))),
     new("udp6"u8, "127.0.0.1:domain"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "127.0.0.1"u8)))),
     new("udp6"u8, "[::ffff:127.0.0.1]:domain"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "::ffff:127.0.0.1"u8))))
@@ -171,36 +179,39 @@ internal static void testWriteToConn(ж<testing.T> Ꮡt, @string raddr) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+        var rap = ra.AddrPort();
+
+        void assertErrWriteToConnected(ж<testing.T> tΔ1, error errΔ1) {
+            tΔ1.Helper();
+            {
+                var (e, ok) = errΔ1._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual((~e).Err, ErrWriteToConnected)) {
+                    tΔ1.Errorf("got %v; want ErrWriteToConnected"u8, errΔ1);
+                }
+            }
+        }
 
         var b = slice<byte>("CONNECTED-MODE SOCKET"u8);
+        (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteToUDPAddrPort(b, rap);
+        assertErrWriteToConnected(Ꮡt, err);
         (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteToUDP(b, ra);
-        if (err == default!) {
-            Ꮡt.Fatal(shouldFailˢ);
-        }
-        if (err != default! && !AreEqual((~err._<ж<global::go.net_package.OpError>>()).Err, ErrWriteToConnected)) {
-            Ꮡt.Fatalf("should fail as ErrWriteToConnected: %v"u8, err);
-        }
+        assertErrWriteToConnected(Ꮡt, err);
         (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteTo(b, new global::go.net_package.UDPAddrжΔAddr(ra));
-        if (err == default!) {
-            Ꮡt.Fatal(shouldFailˢ);
-        }
-        if (err != default! && !AreEqual((~err._<ж<global::go.net_package.OpError>>()).Err, ErrWriteToConnected)) {
-            Ꮡt.Fatalf("should fail as ErrWriteToConnected: %v"u8, err);
-        }
+        assertErrWriteToConnected(Ꮡt, err);
         (_, err) = c.Write(b);
         if (err != default!) {
-            Ꮡt.Fatal(err);
+            Ꮡt.Errorf("c.Write(b) = %v; want nil"u8, err);
         }
         (_, _, err) = c._<ж<global::go.net_package.UDPConn>>().WriteMsgUDP(b, default!, ra);
-        if (err == default!) {
-            Ꮡt.Fatal(shouldFailˢ);
-        }
-        if (err != default! && !AreEqual((~err._<ж<global::go.net_package.OpError>>()).Err, ErrWriteToConnected)) {
-            Ꮡt.Fatalf("should fail as ErrWriteToConnected: %v"u8, err);
-        }
+        assertErrWriteToConnected(Ꮡt, err);
         (_, _, err) = c._<ж<global::go.net_package.UDPConn>>().WriteMsgUDP(b, default!, nil);
         if (err != default!) {
-            Ꮡt.Fatal(err);
+            Ꮡt.Errorf("c.WriteMsgUDP(b, nil, nil) = %v; want nil"u8, err);
+        }
+        (_, _, err) = c._<ж<global::go.net_package.UDPConn>>().WriteMsgUDPAddrPort(b, default!, rap);
+        assertErrWriteToConnected(Ꮡt, err);
+        (_, _, err) = c._<ж<global::go.net_package.UDPConn>>().WriteMsgUDPAddrPort(b, default!, new netip.AddrPort(nil));
+        if (err != default!) {
+            Ꮡt.Errorf("c.WriteMsgUDPAddrPort(b, nil, netip.AddrPort{}) = %v; want nil"u8, err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -607,6 +618,7 @@ public static void TestUDPReadTimeout(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestInRaceˢ = (@string)"skipping test in race"u8;
 internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocates more with -asan; see #70079"u8;
 
 public static void TestAllocs(ж<testing.T> Ꮡt) {
@@ -616,6 +628,13 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
             // These implementations have not been optimized.
             Ꮡt.Skipf("skipping on %v"u8, Δruntime.GOOS);
+        }
+        else if (exprᴛ1 == "windows"u8) {
+            if (race.Enabled) {
+                // The Windows implementation make use of sync.Pool,
+                // which randomly drops cached items when race is enabled.
+                Ꮡt.Skip(skippingTestInRaceˢ);
+            }
         }
         if (!testableNetwork(udp4ˢ)) {
             Ꮡt.Skipf("skipping: udp4 not available"u8);
@@ -938,6 +957,54 @@ public static void TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion(ж<testing.T> 
             (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr6); if (err == default!) {
                 Ꮡt.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr6) should have failed, but got no error"u8);
             }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// TestReadWriteMsgUDPAddrPortEmptyCmsg verifies that ReadMsgUDPAddrPort and
+// WriteMsgUDPAddrPort won't fail when the cmsg buffer (the oob parameter) is
+// non-nil but empty.
+//
+// This is a regression test for https://golang.org/issue/77875.
+public static void TestReadWriteMsgUDPAddrPortEmptyCmsg(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var exprᴛ1 = Δruntime.GOOS;
+        if (exprᴛ1 == "plan9"u8) {
+            Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
+        }
+
+        if (!testableNetwork(udp4ˢ)) {
+            Ꮡt.Skipf("skipping: udp4 not available"u8);
+        }
+
+        var (conn, err) = ListenUDP(udp4ˢ, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1))));
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var connʗ1 = conn;
+        defer(() => connʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
+
+        var buf = new slice<byte>(8);
+        var cmsgBuf = new slice<byte>(8)[..0];
+        var daddr = conn.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>().AddrPort();
+
+        (_, var cmsgn, err) = conn.WriteMsgUDPAddrPort(buf, cmsgBuf, daddr);
+        if (err != default!) {
+            Ꮡt.Fatalf("WriteMsgUDPAddrPort failed: %v"u8, err);
+        }
+        if (cmsgn != 0) {
+            Ꮡt.Errorf("WriteMsgUDPAddrPort wrote %d cmsg bytes; want 0"u8, cmsgn);
+        }
+
+        (_, cmsgn, _, _, err) = conn.ReadMsgUDPAddrPort(buf, cmsgBuf);
+        if (err != default!) {
+            Ꮡt.Fatalf("ReadMsgUDPAddrPort failed: %v"u8, err);
+        }
+        if (cmsgn != 0) {
+            Ꮡt.Errorf("ReadMsgUDPAddrPort read %d cmsg bytes; want 0"u8, cmsgn);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

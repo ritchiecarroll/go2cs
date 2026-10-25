@@ -26,6 +26,7 @@ using static global::go.runtime_package;
 using ꓸꓸꓸAddrRange = Span<runtime_internal_test_package.AddrRange>;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
 
+[GoFieldAccess(typeof(global::go.runtime_package.Δsliceᴛ))]
 partial class runtime_internal_test_package {
 
 public static Func<uint64, uint64, uint64> Fadd64 = fadd64;
@@ -281,7 +282,7 @@ public static void MemclrBytes(slice<byte> bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
     var s = Ꮡb.Reinterpret<slice<byte>, global::go.runtime_package.Δsliceᴛ>();
-    memclrNoHeapPointers((~s).Δarray, (uintptr)(~s).len);
+    memclrNoHeapPointers(s.Δarray, (uintptr)s.len);
 }
 
 public const float32 HashLoad = /* hashLoad */ 0.875f;
@@ -504,7 +505,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
 
         slow.TotalAlloc = slow.Alloc + m.largeFree + smallFree;
 
-        foreach (var (i, _) in slow.BySize) {
+        foreach (var i in range(slow.BySize)) {
             slow.BySize[i].Mallocs = bySize[i].Mallocs;
             slow.BySize[i].Frees = bySize[i].Frees;
         }
@@ -698,6 +699,7 @@ public static partial void RunGetgThreadSwitchTest() {
     // may cache the address of the TLS variable, which
     // will become invalid after a thread switch. This test
     // checks that the bad caching doesn't happen.
+
     var ch = new channel<nint>(0);
     goǃ((channel<nint> chΔ1) => {
         chΔ1.ᐸꟷ(5);
@@ -1274,7 +1276,7 @@ public static void FreePageAlloc(ж<PageAlloc> Ꮡpp) {
     sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ((~Δp).scav.index.chunks, 0)), (uintptr)cap((~Δp).scav.index.chunks) * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8);
 
     // Free the mapped space for chunks.
-    foreach (var (i, _) in (~Δp).chunks) {
+    foreach (var i in range((~Δp).chunks)) {
         {
             var x = (~Δp).chunks[i]; if (x != nil) {
                 Δp.Value.chunks[i] = ж<array<global::go.runtime_package.pallocData>>.NilBoxOfDims(8192L);

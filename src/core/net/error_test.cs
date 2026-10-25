@@ -163,11 +163,13 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> dialErrorTests = new prohi
     new("tcp"u8, "127.0.0.1:☺"u8),
     new("tcp"u8, "no-such-name:80"u8),
     new("tcp"u8, "mh/astro/r70:http"u8),
+
     new("tcp"u8, JoinHostPort("127.0.0.1"u8, "-1"u8)),
     new("tcp"u8, JoinHostPort("127.0.0.1"u8, "123456789"u8)),
     new("udp"u8, JoinHostPort("127.0.0.1"u8, "-1"u8)),
     new("udp"u8, JoinHostPort("127.0.0.1"u8, "123456789"u8)),
     new("ip:icmp"u8, "127.0.0.1"u8),
+
     new("unix"u8, "/path/to/somewhere"u8),
     new("unixgram"u8, "/path/to/somewhere"u8),
     new("unixpacket"u8, "/path/to/somewhere"u8)
@@ -192,12 +194,12 @@ public static void TestDialError(ж<testing.T> Ꮡt) {
 
         ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
         d = new Dialer(Timeout: someTimeout);
-        foreach (var (i, tt) in dialErrorTests) {
-            nint iΔ1 = i;
-            ref var ttΔ1 = ref heap<prohibitionaryDialArgTestsᴛ1>(out var ᏑttΔ1);
-            ttΔ1 = tt;
-            var ttʗ1 = ttΔ1;
-            Ꮡt.Run(fmt.Sprint(iΔ1), (ж<testing.T> tΔ1) => {
+        foreach (var (i, vᴛ1) in dialErrorTests) {
+            ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
+            tt = vᴛ1;
+
+            var ttʗ1 = tt;
+            Ꮡt.Run(fmt.Sprint(i), (ж<testing.T> tΔ1) => {
                 var (c, err) = Ꮡd.Dial(ttʗ1.network, ttʗ1.address);
                 if (err == default!) {
                     tΔ1.Errorf("should fail; %s:%s->%s"u8, c.LocalAddr().Network(), c.LocalAddr(), c.RemoteAddr());
@@ -347,8 +349,10 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> listenErrorTests = new pro
     new("tcp"u8, "127.0.0.1:☺"u8),
     new("tcp"u8, "no-such-name:80"u8),
     new("tcp"u8, "mh/astro/r70:http"u8),
+
     new("tcp"u8, JoinHostPort("127.0.0.1"u8, "-1"u8)),
     new("tcp"u8, JoinHostPort("127.0.0.1"u8, "123456789"u8)),
+
     new("unix"u8, "/path/to/somewhere"u8),
     new("unixpacket"u8, "/path/to/somewhere"u8)
 }.slice();
@@ -420,6 +424,7 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> listenPacketErrorTests = n
     new("udp"u8, "127.0.0.1:☺"u8),
     new("udp"u8, "no-such-name:80"u8),
     new("udp"u8, "mh/astro/r70:http"u8),
+
     new("udp"u8, JoinHostPort("127.0.0.1"u8, "-1"u8)),
     new("udp"u8, JoinHostPort("127.0.0.1"u8, "123456789"u8))
 }.slice();
@@ -900,11 +905,6 @@ internal static readonly object shouldFailˢ = (@string)"should fail"u8;
 public static void TestFileError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "windows"u8) {
-            Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-        }
-
         var (f, err) = Δos.CreateTemp(""u8, goNettestˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);

@@ -34,6 +34,8 @@ internal static readonly @string runtimeˢ = "runtime"u8;
 // Check that 64-bit fields on which we apply atomic operations
 // are aligned to 8 bytes. This can be a problem on 32-bit systems.
 public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt)); // go command needed to resolve std .a files for importer.Default().
 
     // Read the code making the tables above, to see which fields and
@@ -90,7 +92,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     slice<ж<ast.File>> files = default!;
     foreach (var (fname, f) in (~pkg).Files) {
         if (fileMap[fname]) {
-            files = append(files, f);
+            files = append(filesᴷ, files, f);
         }
     }
 

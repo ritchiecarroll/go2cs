@@ -36,7 +36,7 @@ partial class runtime_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object debugLogTestsDisabledToˢ = (@string)"debug log tests disabled to avoid collisions with real debug logs"u8;
 
-internal static void skipDebugLog(ж<testing.T> Ꮡt) {
+internal static partial void skipDebugLog(ж<testing.T> Ꮡt) {
     if (runtime_internal_test_package.DlogEnabled) {
         Ꮡt.Skip(debugLogTestsDisabledToˢ);
     }
