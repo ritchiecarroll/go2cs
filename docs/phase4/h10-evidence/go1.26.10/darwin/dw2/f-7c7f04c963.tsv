@@ -1,0 +1,11 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-7c7f04c963	math/big	osx-arm64	251	247	3	4	1	failing	yes	248	3	231/0/True	yes
+f-7c7f04c963	math/big	osx-x64	251	247	3	4	1	failing	yes	248	3	231/0/True	yes
+f-7c7f04c963	internal/zstd	osx-arm64	536	535	1	1	0	validated	yes	536	0	535/1/True	yes
+f-7c7f04c963	internal/zstd	osx-x64	536	535	1	1	0	validated	yes	536	0	535/1/True	yes
+f-7c7f04c963	reflect	osx-arm64	466	445	21	21	0	validated	yes	445	21	396/22/True	no
+f-7c7f04c963	reflect	osx-x64	466	445	21	21	0	validated	yes	445	21	396/22/True	no
+f-7c7f04c963	slices	osx-arm64	124	122	2	2	0	validated	yes	122	2	121/2/True	no
+f-7c7f04c963	slices	osx-x64	124	122	2	2	0	validated	yes	122	2	121/2/True	no
+f-7c7f04c963	internal/strconv	osx-arm64	47	47	0	0	0	validated	yes	47	0	3/0/True	no
+f-7c7f04c963	internal/strconv	osx-x64	47	47	0	0	0	validated	yes	47	0	3/0/True	no
