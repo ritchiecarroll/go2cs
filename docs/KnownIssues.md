@@ -103,8 +103,11 @@ and a publish without Native AOT are not affected.
 
 A converted program's project turns ReadyToRun on for `dotnet publish`. Adding `-p:PublishSingleFile=true`
 to that publish ran the ReadyToRun compiler, crossgen2, to about 10 GB of memory on a linux-x64 machine,
-where it failed with `Insufficient memory` and left the build hanging. A single-file publish with
-ReadyToRun turned off succeeds:
+where it failed with `Insufficient memory` and left the build hanging. The publish profiles go2cs writes
+beside a converted program (`-p:PublishProfile=linux-x64` and the others) turn ReadyToRun off, so a profile
+publish is not affected. A program converted before that change keeps the profiles it already has, since
+go2cs never overwrites one; add `<PublishReadyToRun>false</PublishReadyToRun>` to them. On the command line,
+turn ReadyToRun off yourself:
 
 ```
 dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=false
