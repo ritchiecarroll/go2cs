@@ -92,7 +92,7 @@ public class TailCallFrameGuardTests
         // The compiler half: the flag on the methods that carry the attribute, written three ways -- by hand in golib's
         // own probe above, by hand on runtime's Callers and testing's reporting members, and by go2cs-gen on a converted
         // no-inline carrier (runtime.Caller's generated declaring part).
-        static bool Flagged(MethodInfo? method) => method is not null && (method.Attributes & MethodAttributes.RequireSecObject) != 0;
+        static bool Flagged(MethodInfo method) => method is not null && (method.Attributes & MethodAttributes.RequireSecObject) != 0;
 
         Assert.IsTrue(Flagged(typeof(TailCallFrameGuardTests).GetMethod(nameof(Marked), BindingFlags.NonPublic | BindingFlags.Static)),
             "the C# compiler no longer writes RequireSecObject for [System.Security.DynamicSecurityMethod]");
