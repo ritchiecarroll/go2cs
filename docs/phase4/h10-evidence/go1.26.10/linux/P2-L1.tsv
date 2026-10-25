@@ -1,0 +1,2 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	matched	disclosed
+internal/syscall/unix	PASS	9	313	1	0	0	linux/amd64	b5fc1294db3b5b625e8a840b1a786dc768a82d95	313	0	9	0
