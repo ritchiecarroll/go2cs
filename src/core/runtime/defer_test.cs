@@ -530,7 +530,7 @@ internal static void rec1(nint max) {
 public static void TestIssue43921(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             expect(Ꮡt, 1, recover());
         }, ref ᒐ);
         ((Action)(() => {
@@ -546,7 +546,7 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
                 defer(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(() => {
+                        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                             expect(Ꮡt, 4, recover());
                         }, ref ᒐ);
                         throw panic((nint)4);
@@ -564,7 +564,7 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void expect(ж<testing.T> Ꮡt, nint n, any err) {
+internal static partial void expect(ж<testing.T> Ꮡt, nint n, any err) {
     if (!AreEqual(n, err)) {
         Ꮡt.Fatalf("have %v, want %v"u8, err, n);
     }
@@ -575,7 +575,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
     try {
         ref var steps = ref heap(new nint(), out var Ꮡsteps);
 
-        defer(() => {
+        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             expect(Ꮡt, 1, recover());
         }, ref ᒐ);
         defer(() => {
@@ -584,7 +584,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
                 defer(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(() => {
+                        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                             expect(Ꮡt, 5, recover());
                         }, ref ᒐ);
                         defer(ᴛ1 => throw panic(ᴛ1), (nint)5, ref ᒐ);
@@ -595,7 +595,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 }, ref ᒐ);
-                defer(() => {
+                defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                     expect(Ꮡt, 3, recover());
                 }, ref ᒐ);
                 defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
@@ -617,7 +617,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void step(ж<testing.T> Ꮡt, ж<nint> Ꮡsteps, nint want) {
+internal static partial void step(ж<testing.T> Ꮡt, ж<nint> Ꮡsteps, nint want) {
     ref var steps = ref Ꮡsteps.DerefOrNull();
 
     steps++;
@@ -644,7 +644,7 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                         defer(() => {
                             GoFrame ᒐ = default;
                             try {
-                                defer(() => {
+                                defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                                     expect(Ꮡt, 3, recover());
                                 }, ref ᒐ);
                                 defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
@@ -653,7 +653,7 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                             finally { ᒐ.Run(); }
                         }, ref ᒐ);
-                        defer(() => {
+                        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                             expect(Ꮡt, 1, recover());
                         }, ref ᒐ);
                         defer(ᴛ1 => throw panic(ᴛ1), (nint)1, ref ᒐ);

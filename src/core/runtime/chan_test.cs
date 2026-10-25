@@ -1507,6 +1507,7 @@ public static void BenchmarkChanSem(ж<testing.B> Ꮡb) {
 
 public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var aᴷ = new stackAppend<channel<bool>>();
 
     const nint n = 1000;
     var c = new channel<bool>(0);
@@ -1515,7 +1516,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
     Ꮡwg.Add(n);
     for (nint j = 0; j < n; j++) {
         var d = new channel<bool>(0);
-        a = append(a, d);
+        a = append(aᴷ, a, d);
         var cʗ1 = c;
         var dʗ1 = d;
         goǃ(() => {

@@ -13,6 +13,7 @@ internal static class Go2CsTestHost
             "bufio_test.go",
             "example_test.go",
             "export_test.go",
+            "net_test.go",
             "scan.go",
             "scan_test.go",
         });

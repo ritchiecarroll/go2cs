@@ -157,19 +157,24 @@ public static void TestLineNumber(ж<testing.T> Ꮡt) {
         new("compLit[1].lineB"u8, compLit[1].lineB, 13),
         new("compLit[2].lineA"u8, compLit[2].lineA, 17),
         new("compLit[2].lineB"u8, compLit[2].lineB, 16),
+
         new("arrayLit[0]"u8, arrayLit[0], 20),
         new("arrayLit[1]"u8, arrayLit[1], 21),
         new("arrayLit[2]"u8, arrayLit[2], 21),
         new("arrayLit[3]"u8, arrayLit[3], 22),
+
         new("sliceLit[0]"u8, sliceLit[0], 24),
         new("sliceLit[1]"u8, sliceLit[1], 25),
         new("sliceLit[2]"u8, sliceLit[2], 25),
         new("sliceLit[3]"u8, sliceLit[3], 26),
+
         new("mapLit[29]"u8, mapLit[29], 29),
         new("mapLit[30]"u8, mapLit[30], 30),
         new("mapLit[31]"u8, mapLit[31 + firstLine] + firstLine, 31), // nb it's the key not the value
         new("mapLit[32]"u8, mapLit[32 + firstLine] + firstLine, 32), // nb it's the key not the value
+
         new("intLit"u8, intLit - 2 * firstLine, 34 + 35 + 36),
+
         new("l38"u8, l38, 38),
         new("l39"u8, l39, 39),
         new("l40"u8, l40, 40)

@@ -854,6 +854,7 @@ internal static readonly @string missingˢ = "missing ("u8;
 // check the result.
 internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string tb) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var tbsᴷ = new stackAppend<ж<traceback>>(moves: true);
 
     //lines := strings.Split(tb, "\n")
     //nLines := len(lines)
@@ -889,7 +890,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, goroutineˢ2): {
             cur = Ꮡ(new traceback(nil));
-            tbs = append(tbs, cur);
+            tbs = append(tbsᴷ, tbs, cur);
             break;
         }
         case {} when line == ""u8: {
@@ -926,6 +927,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             break;
         }}
     }
+    tbs = move2heap(tbsᴷ, tbs);
     return tbs;
 }
 
