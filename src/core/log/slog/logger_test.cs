@@ -50,7 +50,7 @@ internal static readonly @string levelWarn1MsgWA1BTwoˢ = @"level=WARN\+1 msg=w 
 internal static readonly @string levelInfo1MsgABCA1BTwoˢ = @"level=INFO\+1 msg=""a b c"" a=1 b=two"u8;
 internal static readonly @string levelInfoMsgInfoAI1ˢ = @"level=INFO msg=info a.i=1"u8;
 
-public static void TestLogTextHandler(ж<testing.T> Ꮡt) {
+public static partial void TestLogTextHandler(ж<testing.T> Ꮡt) {
     var ctx = context.Background();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
@@ -209,7 +209,7 @@ internal static error Handle(this wrappingHandler h, context.Context ctx, global
     return h.h.Handle(ctx, r);
 }
 
-public static void TestAttrs(ж<testing.T> Ꮡt) {
+public static partial void TestAttrs(ж<testing.T> Ꮡt) {
     void check(slice<global::go.log.slog_package.Attr> got, params Span<global::go.log.slog_package.Attr> wantʗp) {
         var want = wantʗp.slice();
         Ꮡt.Helper();
@@ -235,7 +235,7 @@ internal static readonly @string wantFuncᶜ = "log/slog.TestCallDepth"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantFileᶜ = "logger_test.go"u8;
 
-public static void TestCallDepth(ж<testing.T> Ꮡt) {
+public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var ctx = context.Background();

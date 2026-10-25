@@ -8,6 +8,8 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.log.slog_package;
 
 partial class slog_internal_test_package {
@@ -91,7 +93,7 @@ public static void TestRecordSource(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestAliasingAndClone(ж<testing.T> Ꮡt) {
+public static partial void TestAliasingAndClone(ж<testing.T> Ꮡt) {
     slice<global::go.log.slog_package.Attr> intAttrs(nint from, nint to) {
         slice<global::go.log.slog_package.Attr> @as = default!;
         for (nint i = from; i < to; i++) {

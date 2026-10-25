@@ -19,6 +19,8 @@ using testenv = go.@internal.testenv_package;
 using io = io_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using exec = go.os.exec_package;
 using go.@internal;
@@ -904,7 +906,7 @@ public static void TestGCMNoncesFIPSV1(ж<testing.T> Ꮡt) {
 
     var expectOKʗ1 = expectOK;
     var expectPanicʗ1 = expectPanic;
-    Ꮡt.Run(newGCMWithCounterNonceˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(newGCMWithCounterNonceˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         cipher.AEAD newGCM() {
             var key = new slice<byte>(16);
             var (block, _) = fipsaes.New(key);
@@ -954,7 +956,7 @@ public static void TestGCMNoncesFIPSV1(ж<testing.T> Ꮡt) {
 
     var expectOKʗ2 = expectOK;
     var expectPanicʗ2 = expectPanic;
-    Ꮡt.Run(newGCMForSSHˢ, (ж<testing.T> tΔ4) => {
+    Ꮡt.Run(newGCMForSSHˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4) => {
         cipher.AEAD newGCM() {
             var key = new slice<byte>(16);
             var (block, _) = fipsaes.New(key);
