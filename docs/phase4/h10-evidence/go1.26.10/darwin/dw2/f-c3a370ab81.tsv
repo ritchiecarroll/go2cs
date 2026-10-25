@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-c3a370ab81	runtime	osx-arm64	11122	10850	41	272	237	failing	NO	11080	66	-	yes
+f-c3a370ab81	runtime	osx-x64	11122	10853	41	269	234	failing	NO	11080	66	-	yes
+f-c3a370ab81	bufio	osx-arm64	82	81	1	1	0	validated	yes	80	1	80/1/True	yes
+f-c3a370ab81	bufio	osx-x64	82	81	1	1	0	validated	yes	80	1	80/1/True	yes
+f-c3a370ab81	bytes	osx-arm64	90	84	6	6	0	validated	yes	84	6	83/6/True	no
+f-c3a370ab81	bytes	osx-x64	90	84	6	6	0	validated	yes	84	6	83/6/True	no
+f-c3a370ab81	context	osx-arm64	62	62	0	0	0	validated	yes	62	0	-	no
+f-c3a370ab81	context	osx-x64	62	62	0	0	0	validated	yes	62	0	-	no
+f-c3a370ab81	unicode/utf16	osx-arm64	9	8	1	1	0	validated	yes	8	1	8/1/True	no
+f-c3a370ab81	unicode/utf16	osx-x64	9	8	1	1	0	validated	yes	8	1	8/1/True	no
+f-c3a370ab81	unicode/utf8	osx-arm64	15	14	1	1	0	validated	yes	14	1	14/1/True	no
+f-c3a370ab81	unicode/utf8	osx-x64	15	14	1	1	0	validated	yes	14	1	14/1/True	no
