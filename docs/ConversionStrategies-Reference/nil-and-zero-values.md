@@ -72,8 +72,9 @@ that were never dereferences in Go's semantics at all, which no nil-policy acces
 but it is not selected at an entry alias, where nothing can know whether the body will dereference
 and the nil-policy question is the only one being asked.
 
-**There used to be a fourth, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
-`default(T)` slot — and its retirement (2026-08-02) is what collapsed the set.** It was admitted
+**A fourth accessor, `.DerefOrNil()` — a nil-SAFE accessor handing back a shared
+`default(T)` slot — was retired, which is what collapsed the set to three.**
+<!-- retired 2026-08-02 --> It was admitted
 by a body ANALYSIS: a pointer param the body nil-compares, one passed the untyped `nil` at a
 same-package call site, or one whose first mentioning statement re-points it without dereferencing
 (`l = l.get()` normalization). Wherever that analysis was RIGHT the silent zero was unobservable;
@@ -124,7 +125,7 @@ is built out of exactly that shape and lost both halves of it: `e.p.Store(&i)` w
 dropped the entry outright (`load()`'s `p == nil` then reported not-ok, so `Range` skipped it and
 `CompareAndSwap` failed against it), and the `expunged = new(any)` sentinel — a real address holding a
 nil interface — became indistinguishable from nil, so a *deleted* entry could not be told from an
-*expunged* one and the whole dirty/expunge protocol degenerated. The predicate is now
+*expunged* one and the whole dirty/expunge protocol degenerated. The predicate is
 `ж<T>.IsNilPointer`. The same conflation applied to `atomic.Pointer[error]`, `atomic.Pointer[func()]`
 and any `**T` slot (`atomic.Pointer[*T]`), all present in the corpus. (Guarded by
 `AtomicPointerToNil`: `Load`/`Store`/`Swap`/`CompareAndSwap` over a pointer to a nil `any`, two
@@ -140,7 +141,7 @@ A target written as a pointer to a composite **type literal** — `(*[]byte)(nil
 `(*map[string]int)(nil)`, `(*struct{ r int })(nil)` — reaches the same rendering by a different
 route. `isTypeConversion` resolves a star target through its `types.Object`, which a type literal
 does not have, so these shapes fell through to the regular call path and emitted a bare cast of
-`default!` (`(ж<slice<byte>>)(default!)`) — a **null reference**, type erased. They are now claimed
+`default!` (`(ж<slice<byte>>)(default!)`) — a **null reference**, type erased. They are claimed
 as conversions, and the typed-nil interception renders the target through `convStarExpr` rather than
 the resolved name, because an **anonymous** struct/interface element must be LIFTED to a named C#
 type and `convStarExpr` is the site that performs that lift (the plain name path emits an
@@ -164,8 +165,7 @@ internal static typeId tReserved7 = bootstrapType("_reserved1"u8, (ж<eᴛ1>)nil
 
 Guarded by `TypedNilInterface` (extended with the slice/map/anonymous-struct type-literal targets),
 `PointerToNilPointerIdentity`, and `NamedPointerReinterpret` (the canonical singleton keeps its
-`object`-reference nil compare working); part of the reflection-bridge Phase-3 chip (see
-`docs/phase4/DESIGN-reflection-bridge.md`).
+`object`-reference nil compare working). Design: `docs/phase4/DESIGN-reflection-bridge.md`.
 
 **A nil converted to an unnamed MAP type is a cast, not an invocation.** The star form above is one
 half of the type-literal problem; `map[string]int(nil)` — no pointer, the map type literal written
@@ -201,7 +201,7 @@ broken one — appears in **no** standard-library production source; its GOROOT 
 PARENTHESIZED `(map[K]V)(nil)` reaches the conversion fork through `convParenExpr` instead and was
 already emitting a cast, so its one production site — `reflect/type.go`'s
 `var imap any = (map[unsafe.Pointer]unsafe.Pointer)(nil)` — compiled all along. Claiming the shape
-in `isTypeConversion` now routes that site through the ordinary renderer too, which changes its
+in `isTypeConversion` routes that site through the ordinary renderer too, which changes its
 parentheses (`(map<…>)(default!)` → `((map<…>)default!)`) and nothing else. So this is a
 converted-test and end-user fix whose only corpus footprint is one line of re-parenthesization.
 (Guarded by the `UnnamedMapNilConversion` behavioral test — four unnamed-map nil conversions
@@ -235,7 +235,7 @@ genuine null would itself throw. **The ADDRESS arm needs the same predicate as t
 only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer where the caller meant
 nil — a quietly wrong call rather than a crash.
 
-Measured 2026-09-02, corpus-wide over every tracked `.cs` under `src/core`, and the split was total:
+Measured corpus-wide over every tracked `.cs` under `src/core`, the split was total: <!-- 2026-09-02 -->
 every site in `syscall/linux/structclass_linux_impl.cs` and
 `syscall/linux/zsyscall_linux_amd64_impl.cs` carried the one-sided form, while every
 `syscall/windows/*` site used the predicate — one hand-own family written
@@ -300,11 +300,12 @@ with a non-nil sibling so a blanket substitution fails as loudly as the erasure 
 `Elem()` of a typed nil as still **invalid** (how a walker tells a typed nil from a pointer to a zero
 value).
 
-⚠ **The emission side is a separate, open question.** A typed nil crossing into an interface in
-ordinary converted code — not through reflection — still collapses, because the pointer slot really
-does hold `null` and the conversion site is not always able to see that it needs the box. Closing
-that changes what `== nil` means for every converted interface and is a design decision, not a fix;
-`encoding/gob`'s own `TestNilPointerInsideInterface` is its standing witness.
+**The emission side** — a typed nil crossing into an interface in ordinary converted code, not through
+reflection — is covered by the rule in the next section: the pointer box is carried at the boundary.
+<!-- history: this paragraph once called the emission side an open design question, with encoding/gob's
+     TestNilPointerInsideInterface as its witness; the boundary treatment (OrTypedNil) closed the emission side, and
+     that test was re-rooted to the reflection bridge (docs/phase4/BOARD-next-validation-candidates.md, the
+     typed-nil identity row). -->
 
 ## A pointer crossing into an interface carries its static type, however the pointer was produced
 The rule the boxing above is a special case of:
@@ -413,14 +414,16 @@ func assignDescriber(h *holder, s *Setting) {
     h.d = s
 }
 ```
+<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:25-27 -->
 ```csharp
-internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
-    ref var h = ref Ꮡh.Value;
-    ref var s = ref Ꮡs.Value;
-
+internal static void assignDescriber(ref holder h, ж<Setting> Ꮡs) {
     h.d = new SettingжDescriber(Ꮡs);
 }
 ```
+
+(`h` is used only through dereferences, so it arrives as a `ref holder` and the caller passes
+`ref (h).DerefOrNull()`; see
+[the ж-box ref-lowering](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering).)
 
 This is intentionally keyed on selector/index expression type instead of the root identifier, so struct fields such as `go/types`' `operand.expr ast.Expr` and ordinary behavioral fields both take the same path. Guarded by `PointerInterfaceStructField`, including the assignment case after the struct-literal cases.
 

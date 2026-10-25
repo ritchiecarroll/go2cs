@@ -153,7 +153,7 @@ itself, through `using go;`, always works and reads a little noisier:
 | `func (b *Builder) WriteString(s string) (int, error)` | `public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s)` |
 | `func (uuid *UUID) UnmarshalText(data []byte) error` | `public static error UnmarshalText(this ref UUID uuid, slice<byte> data)` |
 | `type Duration int64` | `partial struct Duration` |
-| `const Second Duration = 1000 * Millisecond` | `public static Duration ΔSecond` |
+| `const Second Duration = 1000 * Millisecond` | `public static Duration ΔSecond => 1000000000` |
 | `var ErrSyntax = errors.New("invalid syntax")` | `public static error ErrSyntax` |
 | `type Writer interface { Write(p []byte) (n int, err error) }` | `partial interface Writer { (nint n, error err) Write(slice<byte> p); }` |
 
@@ -251,9 +251,16 @@ delegate) keeps its .NET text. A value of a generic Go type prints its fields or
 `*big.Float` prints its `String()`, 10 significant digits, where `%v` calls its `Format` method and prints the
 shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
-still print a named value's raw number and a pointer's address, as in Go. One gap: in converted generic code,
-`println` of a type-parameter value prints its `String()`, where Go prints the raw value, because the converter can
-pass the raw value only for a concrete named type. No converted standard-library code does this.
+print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
+type-parameter value in generic code too.
+<!-- A pointer: src/core/golib/builtin.cs:3171 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3172 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+     The run-time unwrap of a named basic type:
+     src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
+     Guard:
+     src/tests/GolibTests/PrintFloatArgumentTests.cs:78 (`ANamedBasicTypePrintsItsUnderlyingValueNeverItsStringMethod`).
+     Probe at 3e3f18925a: func show[T any](v T) { println(v) } emits println((v).OrTypedNilOf()), which passes the
+     boxed value to that unwrap; go1.26.10 prints 1000000000 for show(time.Second). -->
 
 A debugger display also calls `ToString()`, so it runs the type's `String()`. A `String()` that blocks or runs long
 hits the debugger's evaluation timeout.

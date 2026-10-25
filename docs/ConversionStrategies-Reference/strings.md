@@ -68,11 +68,11 @@ var names = []string{"stdin", "stdout"}
 internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
 ```
 
-golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted as before and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil).
+golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted on each evaluation and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil).
 
 The plain form covers returns, assignments, `string` and `...string` arguments, struct fields (keyed or positional), typed slice, array and map elements and keys, package-level `var` initializers, and function-local string constants. A plain literal claims no field, so it adds no initialization-order dependency, and `func init()` bodies and init-reachable functions take it too.
 
-A slot where a bare C# string would bind the wrong C# type keeps the form it had before:
+A slot where a bare C# string would bind the wrong C# type keeps a typed form:
 
 | Slot | Kept form | Why |
 |:--|:--|:--|
@@ -84,7 +84,7 @@ A slot where a bare C# string would bind the wrong C# type keeps the form it had
 | a multi-line raw string | `"""…"""u8.Raw()` | `Raw()` must strip the checkout's CRs |
 | a literal with raw non-UTF-8 bytes | the byte-array form | a C# string cannot hold the bytes |
 
-Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` span, as they always have. A package `var` initialized by an inferred generic call follows the call's argument rule.
+Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` span. A package `var` initialized by an inferred generic call follows the call's argument rule.
 
 **The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation.
 
