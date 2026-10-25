@@ -25,6 +25,8 @@ using os = os_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.crypto;
 using go.crypto.@internal;
@@ -465,7 +467,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 internal static readonly @string insecureˢ = "insecure"u8;
 
-public static void TestKeyTooSmall(ж<testing.T> Ꮡt) {
+public static partial void TestKeyTooSmall(ж<testing.T> Ꮡt) {
     void checkErr(error err) {
         Ꮡt.Helper();
         if (err == default!) {
@@ -476,7 +478,7 @@ public static void TestKeyTooSmall(ж<testing.T> Ꮡt) {
         }
     }
     var checkErrʗ1 = checkErr;
-    void checkErr2(slice<byte> _, error err) {
+    [MethodImpl(MethodImplOptions.NoInlining)] void checkErr2(slice<byte> _, error err) {
         Ꮡt.Helper();
         checkErrʗ1(err);
     }

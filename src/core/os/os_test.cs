@@ -1646,7 +1646,7 @@ public static void TestTruncate(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nonexistentˢ = "nonexistent"u8;
 
-public static void TestTruncateNonexistentFile(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTruncateNonexistentFile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
 
     void assertPathError(Δtesting.TB tΔ1, @string pathΔ1, error errΔ1) {

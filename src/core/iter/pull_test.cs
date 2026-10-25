@@ -36,7 +36,7 @@ internal static iter.Seq2<nint, int64> squares(nint n) {
 public static void TestPull(ж<testing.T> Ꮡt) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {
@@ -81,7 +81,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
 public static void TestPull2(ж<testing.T> Ꮡt) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {

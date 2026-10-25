@@ -547,3 +547,33 @@ func TestQuickJitForLoopsOptInShipsCommentedInTheExecutableGroupOnly(t *testing.
 		t.Errorf("test-csproj-template.xml mentions TieredCompilationQuickJitForLoops; the test hosts are the fleet's instrument and carry no opt-in")
 	}
 }
+
+// TestSingleFileProfilesTurnReadyToRunOff pins every embedded publish profile that publishes a single
+// file to ReadyToRun off. csproj-template.xml turns ReadyToRun on for an executable, and a single-file
+// ReadyToRun publish ran crossgen2 out of memory on linux-x64 (docs/KnownIssues.md). The SDK imports a
+// profile after the project body, so a condition in the template cannot see the profile's
+// PublishSingleFile: the override has to live in the profile.
+func TestSingleFileProfilesTurnReadyToRunOff(t *testing.T) {
+	entries, err := publishProfiles.ReadDir("profiles")
+	if err != nil {
+		t.Fatalf("reading the embedded profiles: %v", err)
+	}
+	singleFile := 0
+	for _, entry := range entries {
+		data, err := publishProfiles.ReadFile("profiles/" + entry.Name())
+		if err != nil {
+			t.Fatalf("reading %s: %v", entry.Name(), err)
+		}
+		text := string(data)
+		if !strings.Contains(text, "<PublishSingleFile>true</PublishSingleFile>") {
+			continue
+		}
+		singleFile++
+		if !strings.Contains(text, "<PublishReadyToRun>false</PublishReadyToRun>") {
+			t.Errorf("%s publishes a single file with the template's ReadyToRun still on", entry.Name())
+		}
+	}
+	if singleFile == 0 {
+		t.Fatal("no embedded profile publishes a single file: re-read the profiles before trusting this test")
+	}
+}

@@ -369,7 +369,7 @@ internal static readonly @string bssˢ = "bss"u8;
 internal static readonly @string dataˢ = "data"u8;
 internal static readonly @string otherˢ = "other"u8;
 
-public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
+public static partial void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     if (asan.Enabled) {
         Ꮡt.Skip(extraAllocationsCauseˢ);
     }

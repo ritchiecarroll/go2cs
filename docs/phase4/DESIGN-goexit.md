@@ -119,3 +119,6 @@ hand-owned `runtime.Goexit`. No converter emission change; no golden re-baseline
 
 **Option A (faithful main-goroutine Goexit) remains available** and unblocked: the honest gate makes
 the deferral visible, and the `OnGoroutine` flag is the hook a live-goroutine registry would build on.
+
+> **Amended 2026-10-25 (lane C2):** option A has a PROPOSED design, [Goexit from the main goroutine](../DESIGN-goexit-main.md),
+> ruled for the first .2 seat. Until it lands, option C above is the shape golib ships.
