@@ -769,15 +769,15 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(r
 
     // extract the top Word of bits from A and B
     nuint h = nlz(A.abs[n - 1]);
-    a1 = (Word)(A.abs[n - 1] << (int)(h) | A.abs[n - 2] >> (int)((nuint)_W - h));
+    a1 = (Word)(A.abs[n - 1] << h | A.abs[n - 2] >> ((nuint)_W - h));
     // B may have implicit zero words in the high bits if the lengths differ
     switch (ᐧ) {
     case {} when n == m: {
-        a2 = (Word)(B.abs[n - 1] << (int)(h) | B.abs[n - 2] >> (int)((nuint)_W - h));
+        a2 = (Word)(B.abs[n - 1] << h | B.abs[n - 2] >> ((nuint)_W - h));
         break;
     }
     case {} when n == m + 1: {
-        a2 = B.abs[n - 2] >> (int)((nuint)_W - h);
+        a2 = B.abs[n - 2] >> ((nuint)_W - h);
         break;
     }
     default: {

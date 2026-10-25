@@ -49,13 +49,17 @@ the width, but the converter narrowed an unbounded count to `int` on the way in.
 present at 1.24.13.7 too). `NumericTypeTemplate` now gives every integer wrapper `uint64` and `int64` count
 overloads of `<<` and `>>` beside the `int` one, routed to `Lsh` and `Rsh`; C# 11 allows a non-`int` shift
 count. The converter passes an unbounded count with the guard's own widening, binary and compound alike:
-`w << s`, `w << (int64)(n)`, `w <<= s`. A literal or provably in-range count keeps the `int` form.
+`w << s`, `w << (int64)(n)`, `w <<= s`. A literal or provably in-range count keeps the `int` form, and so does an
+untyped constant LEFT operand with a named result (`m & (1 << uint(32-1-i))` on io/fs's `FileMode`): the shift arm
+re-types it through the underlying, `(FileMode)((uint32)1 << (int)(…))`, so its `<<` is C#'s native operator, whose
+count must be `int`. That shape still masks its count; the BOARD row of 2026-10-25 carries it to after the publish.
 <!-- src/go2cs/convBinaryExpr.go namedShiftWidth / compoundShiftWide, the binary site `if _, width, named :=
 v.namedShiftWidth(binaryExpr); named && v.shiftCountGuarded(binaryExpr.Y, width) {`; src/go2cs/visitAssignStmt.go
 shiftAssignWide at both compound sites; src/gen/go2cs-gen/Templates/InheritedType/NumericTypeTemplate.cs
 `operator <<({targetTypeName} value, uint64 shift)` and its int64 and `>>` twins. Census (std+tests, purego,
-CGO_ENABLED=0) of the non-constant-count shifts on a named integer left operand that shiftCountGuarded cannot
-bound: windows and linux 42, darwin 46; math/big's Word 30 of them. -->
+CGO_ENABLED=0) of the non-constant-count shifts on a named integer left operand, constant left operands excluded,
+that shiftCountGuarded cannot bound: windows and darwin 33 (30 production, math/big's Word 27 of them; 3 test). The
+first cut also widened the constant-left shape, and io/fs's emission failed CS0019; that is the exclusion. -->
 (Guarded by the converter's `TestNamedShiftCountIsWidened`, GenTests' `NamedShiftCountOverloadTests`, and
 `GoShiftSemantics`, extended with `1 << 32`, `1<<32 + 1`, a compound form and a negative count under
 `recover`.)

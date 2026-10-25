@@ -158,7 +158,7 @@ internal static void Encode(this int64Encoder i, slice<byte> dst) {
     nint n = i.Len();
 
     for (nint j = 0; j < n; j++) {
-        dst[j] = (byte)(int64)((i >> (int)((nuint)((n - 1 - j) * 8))));
+        dst[j] = (byte)(int64)((i >> (nuint)((n - 1 - j) * 8)));
     }
 }
 

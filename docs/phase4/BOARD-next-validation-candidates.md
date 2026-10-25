@@ -28478,4 +28478,32 @@ unscoped with the reason stated. darwin's reading decides whether `["linux", "da
 
 — G (2026-10-25)
 
+## 2026-10-25 — H (COORD's ruling, the named-shift-count seat): an untyped-constant LEFT shift with a NAMED result still masks its count — POST-PUBLISH, with the literal-count cleanup
+
+**What happens.** Go's `m & (1 << uint(32-1-i))` on io/fs's `FileMode` has an untyped constant left operand that
+takes the named type from context. The converter's shift arm re-types such an operand through the named type's
+UNDERLYING basic and casts the result: `(FileMode)((uint32)1 << (int)((nuint)(32 - 1 - i)))`. So the `<<` is C#'s
+native `uint32` operator, which needs an `int` count and MASKS it (`n & 31`). It is not the wrapper's generated
+operator, which guards the width, and not golib's guard, which the converter applies to an UNNAMED shift node. A
+count that reaches the width therefore answers the masked value where Go answers 0, and a negative signed count
+answers without Go's "negative shift amount" panic.
+
+**Why the named-shift-count seat leaves it.** That seat widens an unbounded count on a NAMED left operand into the
+wrapper's `uint64`/`int64` overloads, and it excludes exactly this re-typing branch
+(`isUntypedNumericConstArg || tightenedNarrowConstRef`). Its first cut did not exclude it, so it removed the `(int)`
+there too, and io/fs's moved emission failed to build, CS0019 (`uint << nuint`). The corpus sites are
+io/fs fs.go:217/228 (`1<<uint(32-1-i)`, `1<<uint(9-1-i)`), math/big nat.go:598/841 and natconv.go:319, net/http
+h2_bundle.go:1809/1816, net interface.go:63, runtime os_darwin.go:454/458 (darwin), and the tests crypto/tls
+handshake_client_test.go:257 and internal/routebsd route_test.go:62/215 (darwin).
+
+**Bounded in practice, not by proof.** Every corpus count is computed below the width by its own loop or by
+construction (`32-1-i` over a 32-entry string, a digit position), so no banked suite reads a wrong value today. The
+converter cannot prove it, though, which is the same unprovable-count class the guard exists for.
+
+**The fix direction.** Route the re-typed constant-left shift through golib's guard on the underlying basic when its
+count is unbounded, `(FileMode)(((uint32)1).Lsh(count))`, the guard taking the count widened, as the unnamed path
+does. Pair it with the literal-count `(int)` cleanup, since both edit the same shift arm.
+
+— H (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

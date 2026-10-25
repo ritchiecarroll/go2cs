@@ -217,11 +217,11 @@ internal static Word /*c*/ lshVU_g(slice<Word> z, slice<Word> x, nuint s) {
     s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
     nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1); // ditto
-    c = x[len(z) - 1] >> (int)(ŝ);
+    c = x[len(z) - 1] >> ŝ;
     for (nint i = len(z) - 1; i > 0; i--) {
-        z[i] = (Word)(x[i] << (int)(s) | x[i - 1] >> (int)(ŝ));
+        z[i] = (Word)(x[i] << s | x[i - 1] >> ŝ);
     }
-    z[0] = x[0] << (int)(s);
+    z[0] = x[0] << s;
     return c;
 }
 
@@ -242,11 +242,11 @@ internal static Word /*c*/ rshVU_g(slice<Word> z, slice<Word> x, nuint s) {
     s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
     nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1); // ditto
-    c = x[0] << (int)(ŝ);
+    c = x[0] << ŝ;
     for (nint i = 1; i < len(z); i++) {
-        z[i - 1] = (Word)(x[i - 1] >> (int)(s) | x[i] << (int)(ŝ));
+        z[i - 1] = (Word)(x[i - 1] >> s | x[i] << ŝ);
     }
-    z[len(z) - 1] = x[len(z) - 1] >> (int)(s);
+    z[len(z) - 1] = x[len(z) - 1] >> s;
     return c;
 }
 
@@ -286,9 +286,9 @@ internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word
 internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
     nuint s = nlz(y);
     if (s != 0) {
-        x1 = (Word)(x1 << (int)(s) | x0 >> (int)((nuint)_W - s));
-        x0 <<= (int)(s);
-        y <<= (int)(s);
+        x1 = (Word)(x1 << s | x0 >> ((nuint)_W - s));
+        x0 <<= s;
+        y <<= s;
     }
     nuint d = (nuint)y;
     // We know that
@@ -344,7 +344,7 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
 internal static Word reciprocalWord(Word d1) {
-    nuint u = (nuint)(d1 << (int)(nlz(d1)));
+    nuint u = (nuint)(d1 << nlz(d1));
     nuint x1 = ~u;
     nuint x0 = (nuint)_M;
     var (rec, _) = bits.Div(x1, x0, u); // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U

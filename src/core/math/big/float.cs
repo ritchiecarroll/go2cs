@@ -464,7 +464,7 @@ internal static void round(this ж<Float> Ꮡz, nuint sbit) {
 
     // determine number of trailing zero bits (ntz) and compute lsb mask of mantissa's least-significant word
     var ntz = n * (uint32)_W - z.prec; // 0 <= ntz < _W
-    Word lsb = ((Word)1) << (int)(ntz);
+    Word lsb = ((Word)1) << (uint64)(ntz);
 
     // round if result is inexact
     if ((rbit | sbit) != 0) {

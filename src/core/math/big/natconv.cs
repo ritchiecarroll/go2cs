@@ -358,7 +358,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                     while (nbits >= shift) {
                         i--;
                         s[i] = digits[(Word)(w & mask)];
-                        w >>= (int)(shift);
+                        w >>= shift;
                         nbits -= shift;
                     }
 
@@ -369,12 +369,12 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                         nbits = _W;
                     } else {
                         // partial digit in current word w (== x[k-1]) and next word x[k]
-                        w |= (Word)((x[k] << (int)(nbits)));
+                        w |= (Word)((x[k] << nbits));
                         i--;
                         s[i] = digits[(Word)(w & mask)];
 
                         // advance
-                        w = x[k] >> (int)(shift - nbits);
+                        w = x[k] >> (shift - nbits);
                         nbits = (nuint)_W - (shift - nbits);
                     }
                 }
@@ -383,7 +383,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                 while (w != 0) {
                     i--;
                     s[i] = digits[(Word)(w & mask)];
-                    w >>= (int)(shift);
+                    w >>= shift;
                 }
             } else {
                 var stk = getStack();
