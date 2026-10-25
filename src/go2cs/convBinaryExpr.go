@@ -540,11 +540,14 @@ func (v *Visitor) compoundShiftGuarded(assignStmt *ast.AssignStmt) bool {
 }
 
 // namedShiftWidth is shiftGuardWidth for a NAMED integer left operand, which shifts through its wrapper's
-// generated operator rather than golib's guard: the width of its underlying basic, or (nil, 0, false).
+// generated operator rather than golib's guard: the width of its underlying basic, or (nil, 0, false). An
+// UNTYPED constant left operand (`m & (1 << uint(31 - i))` on io/fs's FileMode) is out of scope: the shift arm
+// re-types it through the UNDERLYING basic, `(FileMode)((uint32)1 << …)`, so its `<<` is the native operator,
+// whose count must stay `int` (CS0019 on a `nuint` count) -- the same predicate as that re-typing branch.
 func (v *Visitor) namedShiftWidth(binaryExpr *ast.BinaryExpr) (*types.Basic, int, bool) {
 	tv, ok := v.info.Types[binaryExpr]
 
-	if !ok || tv.Type == nil {
+	if !ok || tv.Type == nil || v.isUntypedNumericConstArg(binaryExpr.X) || v.tightenedNarrowConstRef(binaryExpr.X) {
 		return nil, 0, false
 	}
 

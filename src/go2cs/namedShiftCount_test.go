@@ -10,7 +10,9 @@
 // WIDENED, as the unnamed guard's count is (shiftCountUint64Operand), never narrowed by an `(int)` cast. An unsigned
 // count keeps its full magnitude (Go's `w << (1 << 32)` is 0) and a signed one widens to int64, whose overload
 // raises Go's negative-shift panic, in the binary and the compound form alike. The controls keep their emission: a
-// literal count, a count masked into range, and an unnamed operand, which takes golib's guard.
+// literal count, a count masked into range, an unnamed operand, which takes golib's guard, and an UNTYPED
+// constant left operand with a named result (io/fs's `m&(1<<uint(31-i))`), which shifts through the underlying
+// basic's native operator and so keeps its `int` count.
 
 package main
 
@@ -41,10 +43,11 @@ func compoundSigned(w W, n int) W   { w >>= n; return w }
 func literalCount(w W) W           { return w << 3 }
 func maskedCount(w W, s uint) W    { return w << (s & 31) }
 func unnamed(u uint32, s uint) uint32 { return u << s }
+func constLeft(m W, i int) bool       { return m&(1<<uint(31-i)) != 0 }
 
 func main() {
 	fmt.Println(unsignedCount(1, 1), wideCount(1, 1), intCount(1, 1), compoundUnsigned(1, 1), compoundSigned(1, 1),
-		literalCount(1), maskedCount(1, 1), unnamed(1, 1))
+		literalCount(1), maskedCount(1, 1), unnamed(1, 1), constLeft(1, 1))
 }
 `)
 
@@ -68,6 +71,7 @@ func main() {
 		{"literalCount(", "w << 3"},
 		{"maskedCount(", "w << (int)(s & 31)"},
 		{"unnamed(", "u.Lsh(s)"},
+		{"constLeft(", "(uint32)1 << (int)("},
 	} {
 		if body := funcBody(t, cs, kept.fn); !strings.Contains(body, kept.form) {
 			t.Errorf("a control left its emission in %s (want %q):\n%s", kept.fn, kept.form, body)
