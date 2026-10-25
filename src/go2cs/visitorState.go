@@ -390,6 +390,8 @@ type Visitor struct {
 	// fieldAccessLocalCache memoizes fieldAccessLocal per local (fieldAccess.go), on the same per-object
 	// reasoning: the pointee struct type of a local the provenance rule admits, or nil.
 	fieldAccessLocalCache map[types.Object]types.Type
+	// fieldAccessResultCache memoizes fieldAccessReturnsReinterpret per callee result (fieldAccess.go).
+	fieldAccessResultCache map[fieldAccessResult]bool
 	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
 	// through a provenance-scoped local, for its `[GoFieldAccess(…)]` record (fieldAccess.go).
 	fieldAccessTypes []string

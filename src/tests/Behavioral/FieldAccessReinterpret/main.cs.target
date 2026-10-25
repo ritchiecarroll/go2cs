@@ -1,10 +1,12 @@
 namespace go;
 
+using errors = errors_package;
 using fmt = fmt_package;
+using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 
-[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4))]
+[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4), typeof(reparse))]
 partial class main_package {
 
 partial struct tail {
@@ -17,6 +19,32 @@ partial struct record {
     public uint16 Off;
     public array<uint16> Path = new(4);
     /*embed*/ internal tail tail;
+}
+
+partial struct reparse {
+    public uint32 Tag;
+    public uint16 Length, Reserved;
+    public uint32 Flags;
+    public array<uint16> Path = new(1);
+}
+
+internal static slice<byte> sink;
+
+internal static (ж<reparse>, error) readReparse(uint32 flags, bool fail) {
+    ref var buf = ref heap(new array<byte>(64), out var Ꮡbuf);
+
+    if (fail) {
+        return (default!, errors.New("no record"));
+    }
+
+    (buf[8], buf[9]) = ((byte)flags, (byte)(flags >> 8));
+    buf[12] = (rune)'x';
+    var rec = Ꮡbuf.at<byte>(0).Reinterpret<byte, reparse>();
+    return (rec, default!);
+}
+
+internal static ж<reparse> viewReparse(slice<byte> blob) {
+    return Ꮡ(blob, 8).Reinterpret<byte, reparse>();
 }
 
 internal static void Main() {
@@ -41,6 +69,34 @@ internal static void Main() {
     var sa = Ꮡ(raw, 0).Reinterpret<byte, syscall.RawSockaddrInet4>();
     sa.Port = 0x901f;
     fmt.Println("port bytes:", raw[2], raw[3], "port:", sa.Port);
+
+    var (got, err) = readReparse(0x0201, false);
+
+    for (nint i = 0; i < 1000; i++) {
+        sink = new slice<byte>(1024);
+    }
+
+    runtime.GC();
+    fmt.Println("returned:", got.Flags, got.of(reparse.ᏑPath).ElementRef(0), err);
+
+    var view = viewReparse(blob);
+    view.Flags = 0x0d0c0b0a;
+    fmt.Println("view bytes:", blob[16..20]);
+
+    ((Action)(() => {
+        GoFrame ᒐ = default;
+        try {
+            defer(() => {
+                fmt.Println("nil record:", recover());
+            }, ref ᒐ);
+
+            var (missing, errΔ1) = readReparse(0, true);
+            fmt.Println("error:", errΔ1);
+            fmt.Println(missing.Flags);
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    }))();
 }
 
 } // end main_package

@@ -182,6 +182,7 @@
     <None Include="$(MSBuildThisFileDirectory)fieldAccess.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessCollisions.txt" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessReturn_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />

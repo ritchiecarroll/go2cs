@@ -116,6 +116,15 @@ func main() {
 	writeModuleFile(t, filepath.Join(appDir, "frozen.go"), "package main\n\ntype frame struct {\n\tName  string\n\tCount uint16\n}\n")
 	writeModuleFile(t, filepath.Join(root, "out", "src", "example.com", "fieldaccess", "frozen.cs"), "[module: go.GoManualConversion]\n\nnamespace go;\n")
 
+	return readGenerated(t, filepath.Join(convertFieldAccessModule(t, root), "main.cs"))
+}
+
+// convertFieldAccessModule converts the fixture module under root/app (example.com/fieldaccess) into root/out and
+// answers the module's output directory.
+func convertFieldAccessModule(t *testing.T, root string) string {
+	t.Helper()
+
+	appDir := filepath.Join(root, "app")
 	goRoot := build.Default.GOROOT
 
 	if goRoot == "" {
@@ -140,7 +149,7 @@ func main() {
 		t.Fatalf("ConvertModule: %v", err)
 	}
 
-	return readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "fieldaccess", "main.cs"))
+	return filepath.Join(options.go2csPath, "src", "example.com", "fieldaccess")
 }
 
 // TestFieldAccessReadsThroughTheFieldProperty requires the scoped sites to read as Go spells them, the collision,
