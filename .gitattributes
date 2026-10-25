@@ -121,6 +121,8 @@ docs/phase4/hopA-inputs/*.tsv text eol=lf
 # 2026-10-24, the go1.26.10 re-bank plan: its shard deal and eligibility lists sit one directory down, where the two
 # lines above do not reach (a `*` never crosses `/`). The deal's sha256 is taken over these LF bytes.
 docs/phase4/data/rebank-go1.26.10/* text eol=lf
+# 2026-10-25: the alloc-units reading run's inputs sit one directory further down, for the same reason.
+docs/phase4/data/rebank-go1.26.10/alloc-reading/* text eol=lf
 
 # ---------------------------------------------------------------------------
 # LF pin for the converter's embedded stdlib metadata asset
