@@ -29,12 +29,11 @@ public static void TestFlag(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
 
     foreach (var (_, flag) in new @string[]{""u8, "-test.v"u8, "-test.v=test2json"u8}.slice()) {
-        @string flagΔ1 = flag;
-        Ꮡt.Run(flagΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(flag, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
-            var cmd = exec.Command(testenv.Executable(new testing_TжTB(tΔ1)), testRunTestFlagˢ, "-test_flag_arg=" + flagΔ1);
-            if (flagΔ1 != ""u8) {
-                cmd.Value.Args = append((~cmd).Args, flagΔ1);
+            var cmd = exec.Command(testenv.Executable(new testing_TжTB(tΔ1)), testRunTestFlagˢ, "-test_flag_arg=" + flag);
+            if (flag != ""u8) {
+                cmd.Value.Args = append((~cmd).Args, flag);
             }
             cmd.Value.Env = append(cmd.Environ(), flagTestEnv + "=1");
             var (b, err) = cmd.CombinedOutput();

@@ -78,6 +78,8 @@ internal static readonly @string bA98FEDC0123456789abcdefˢ3 = """
 """u8.Raw();
 
 public static void TestHexdumper(ж<testing.T> Ꮡt) {
+    var partialsᴷ = new stackAppend<slice<byte>>();
+
     void check(@string label, @string got, @string want) {
         got = strings.TrimRight(got, "\n"u8);
         want = strings.TrimPrefix(want, "\n"u8);
@@ -88,7 +90,7 @@ public static void TestHexdumper(ж<testing.T> Ꮡt) {
     }
 
     var data = new slice<byte>(32);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)(0x10 + (byte)i);
     }
 
@@ -110,7 +112,7 @@ public static void TestHexdumper(ж<testing.T> Ꮡt) {
     // Partial data full of annoying boundaries.
     var partials = new slice<slice<byte>>(0);
     for (nint i = 0; i < len(data); i += 2) {
-        partials = append(partials, data.slice(i, i + 2));
+        partials = append(partialsᴷ, partials, data.slice(i, i + 2));
     }
     check(partialsˢ, runtime_internal_test_package.Hexdumper(1, 1, default!, partials.ꓸꓸꓸ), aBCDEF0123456789abcdefˢ2);
 
@@ -162,7 +164,7 @@ public static void TestHexdumpWords(ж<testing.T> Ꮡt) {
         @string pcStr = fmt.Sprintf("%016x"u8, pc);
         pcStr = pcStr[..8] + " " + pcStr[8..]; // Add middle space
         var ascii = new slice<byte>(8);
-        foreach (var (i, _) in ascii) {
+        foreach (var i in range(ascii)) {
             var b = (byte)(pc.Rsh((int64)(8 * i)));
             if (b >= (rune)' ' && b <= (rune)'~'){
                 ascii[i] = b;

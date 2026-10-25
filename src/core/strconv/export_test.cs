@@ -7,9 +7,7 @@ using static go.strconv_package;
 
 partial class strconv_internal_test_package {
 
-public static Func<@string, @string, nint, ж<global::go.strconv_package.NumError>> BitSizeError;
-internal static void initᴛBitSizeError() { BitSizeError = bitSizeError; }
-public static Func<@string, @string, nint, ж<global::go.strconv_package.NumError>> BaseError;
-internal static void initᴛBaseError() { BaseError = baseError; }
+public static Func<@string, @string, nint, ж<global::go.strconv_package.NumError>> BaseError = baseError;
+public static Func<@string, @string, nint, ж<global::go.strconv_package.NumError>> BitSizeError = bitSizeError;
 
 } // end strconv_internal_test_package

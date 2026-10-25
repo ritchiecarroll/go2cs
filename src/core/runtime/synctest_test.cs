@@ -7,6 +7,8 @@ using synctest = @internal.synctest_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -27,7 +29,7 @@ internal static readonly object mismatchRuntimeˢ = (@string)"mismatch: runtime.
 
 // TestSynctestAssocConsts verifies that constants defined
 // in both runtime and internal/synctest match.
-public static void TestSynctestAssocConsts(ж<testing.T> Ꮡt) {
+public static partial void TestSynctestAssocConsts(ж<testing.T> Ꮡt) {
     if (runtime_internal_test_package.BubbleAssocUnbubbled != synctest.Unbubbled || runtime_internal_test_package.BubbleAssocCurrentBubble != synctest.CurrentBubble || runtime_internal_test_package.BubbleAssocOtherBubble != synctest.OtherBubble) {
         Ꮡt.Fatal(mismatchRuntimeˢ);
     }

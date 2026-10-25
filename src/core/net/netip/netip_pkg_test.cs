@@ -31,12 +31,14 @@ public static void TestPrefixValid(ж<testing.T> Ꮡt) {
         new(PrefixFrom(v4, 0), true),
         new(PrefixFrom(v4, 32), true),
         new(PrefixFrom(v4, 33), false),
+
         new(PrefixFrom(v6, -2), false),
         new(PrefixFrom(v6, -1), false),
         new(PrefixFrom(v6, 0), true),
         new(PrefixFrom(v6, 32), true),
         new(PrefixFrom(v6, 128), true),
         new(PrefixFrom(v6, 129), false),
+
         new(PrefixFrom(new ΔAddr(nil), -2), false),
         new(PrefixFrom(new ΔAddr(nil), -1), false),
         new(PrefixFrom(new ΔAddr(nil), 0), false),
@@ -90,7 +92,7 @@ public static void TestIPNextPrev(ж<testing.T> Ꮡt) {
     }
 
     array<byte> allFF = new(16);
-    foreach (var (i, _) in allFF) {
+    foreach (var i in range(allFF)) {
         allFF[i] = 0xff;
     }
 
@@ -396,11 +398,11 @@ internal static void testAppendToMarshal(ж<testing.T> Ꮡt, appendMarshaler x) 
 
 public static void TestIPv6Accessor(ж<testing.T> Ꮡt) {
     array<byte> a = new(16);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = (byte)((uint8)i + 1);
     }
     var ip = AddrFrom16(a);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         {
             var (got, want) = (ip.v6((uint8)i), (uint8)((uint8)i + 1)); if (got != want) {
                 Ꮡt.Errorf("v6(%v) = %v; want %v"u8, i, got, want);

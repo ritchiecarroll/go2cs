@@ -4,10 +4,14 @@
 namespace go;
 
 // These tests are too simple.
+using bufio = bufio_package;
 using bytes = bytes_package;
+using errors = errors_package;
 using fmt = fmt_package;
+using testenv = go.@internal.testenv_package;
 using Δio = io_package;
-using os = os_package;
+using Δos = os_package;
+using exec = go.os.exec_package;
 using Δregexp = regexp_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
@@ -16,6 +20,8 @@ using testing = testing_package;
 using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using go.@internal;
+using go.os;
 using static go.log_package;
 
 partial class log_internal_test_package {
@@ -23,9 +29,9 @@ partial class log_internal_test_package {
 public static readonly @string Rdate = @"[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]"u8;
 public static readonly @string Rtime = @"[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"u8;
 public static readonly @string Rmicroseconds = @"\.[0-9][0-9][0-9][0-9][0-9][0-9]"u8;
-public static readonly @string Rline = @"(63|65):"u8; // must update if the calls to l.Printf / l.Print below move
-public static readonly @string Rlongfile = ".*/[A-Za-z0-9_\\-]+\\.go:(63|65):";
-public static readonly @string Rshortfile = "[A-Za-z0-9_\\-]+\\.go:(63|65):";
+public static readonly @string Rline = @"(67|69):"u8; // must update if the calls to l.Printf / l.Print below move
+public static readonly @string Rlongfile = ".*/[A-Za-z0-9_\\-]+\\.go:(67|69):";
+public static readonly @string Rshortfile = "[A-Za-z0-9_\\-]+\\.go:(67|69):";
 
 internal partial struct tester {
     internal nint flag;
@@ -64,9 +70,9 @@ internal static void testPrint(ж<testing.T> Ꮡt, nint flag, @string prefix, @s
     SetFlags(flag);
     SetPrefix(prefix);
     if (useFormat){
-        Printf("hello %d world"u8, (nint)(23));
+        Printf("hello %d world"u8, (nint)23);
     } else {
-        Println(helloˢ, (nint)(23), worldˢ);
+        Println(helloˢ, (nint)23, worldˢ);
     }
     @string line = buf.String();
     line = line.slice(0, len(line) - 1);
@@ -78,10 +84,10 @@ internal static void testPrint(ж<testing.T> Ꮡt, nint flag, @string prefix, @s
     if (!matched) {
         Ꮡt.Errorf("log output should match %q is %q"u8, pattern, line);
     }
-    SetOutput(new os.FileжWriter(os.Stderr));
+    SetOutput(new Δos.FileжWriter(Δos.Stderr));
 }
 
-public static void TestDefault(ж<testing.T> Ꮡt) {
+public static partial void TestDefault(ж<testing.T> Ꮡt) {
     {
         var got = Default(); if (got != std) {
             Ꮡt.Errorf("Default [%p] should be std [%p]"u8, got.OrTypedNil(), std.OrTypedNil());
@@ -150,7 +156,7 @@ public static void TestFlagAndPrefixSetting(ж<testing.T> Ꮡt) {
     if (f != LstdFlags) {
         Ꮡt.Errorf("Flags 1: expected %x got %x"u8, (nint)(LstdFlags), f);
     }
-    l.SetFlags((nint)(f | (nint)Lmicroseconds));
+    l.SetFlags(f | (nint)Lmicroseconds);
     f = l.Flags();
     if (f != (nint)((nint)LstdFlags | (nint)Lmicroseconds)) {
         Ꮡt.Errorf("Flags 2: expected %x got %x"u8, (nint)((nint)LstdFlags | (nint)Lmicroseconds), f);
@@ -248,6 +254,136 @@ public static void TestDiscard(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode"u8;
+internal static readonly object fatalˢ = (@string)"Fatal"u8;
+internal static readonly object fatallnˢ = (@string)"Fatalln"u8;
+internal static readonly @string outputˢ = "Output"u8;
+internal static readonly object panicˢ = (@string)"Panic"u8;
+internal static readonly object defaultFatalˢ = (@string)"Default.Fatal"u8;
+internal static readonly object defaultFatallnˢ = (@string)"Default.Fatalln"u8;
+internal static readonly @string defaultOutputˢ = "Default.Output"u8;
+internal static readonly object defaultPanicˢ = (@string)"Default.Panic"u8;
+internal static readonly @string testCount1ˢ = "-test.count=1"u8;
+
+internal partial struct TestCallDepth_tests /*dyn*/ {
+    internal @string name;
+    internal Action log;
+}
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envVarᶜ = "LOGTEST_CALL_DEPTH"u8;
+
+public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (testing.Short()) {
+        Ꮡt.Skip(skippingTestInShortModeˢ);
+    }
+
+    testenv.MustHaveExec(new log_test_package.testing_TжTB(Ꮡt));
+    var (ep, err) = Δos.Executable();
+    if (err != default!) {
+        Ꮡt.Fatalf("Executable failed: %v"u8, err);
+    }
+
+    var tests = new TestCallDepth_tests[]{
+        new("Fatal"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Fatal(fatalˢ);
+        }),
+        new("Fatalf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Fatalf("Fatalf"u8);
+        }),
+        new("Fatalln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Fatalln(fatallnˢ);
+        }),
+        new("Output"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Output(1, outputˢ);
+        }),
+        new("Panic"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Panic(panicˢ);
+        }),
+        new("Panicf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Panicf("Panicf"u8);
+        }),
+        new("Panicln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Panicf("Panicln"u8);
+        }),
+        new("Default.Fatal"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Fatal(defaultFatalˢ);
+        }),
+        new("Default.Fatalf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Fatalf("Default.Fatalf"u8);
+        }),
+        new("Default.Fatalln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Fatalln(defaultFatallnˢ);
+        }),
+        new("Default.Output"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Output(1, defaultOutputˢ);
+        }),
+        new("Default.Panic"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Panic(defaultPanicˢ);
+        }),
+        new("Default.Panicf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Panicf("Default.Panicf"u8);
+        }),
+        new("Default.Panicln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Panicf("Default.Panicln"u8);
+        })
+    }.slice();
+
+    // calculate the line offset until the first test case
+    var (_, _, line, ok) = Δruntime.Caller(0);
+    if (!ok) {
+        Ꮡt.Fatalf("runtime.Caller failed"u8);
+    }
+    line -= len(tests) + 3;
+
+    foreach (var (i, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestCallDepth_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            // some of these calls uses os.Exit() to spawn a command and capture output
+            @string envVar = envVarᶜ;
+            if (Δos.Getenv(envVar) == "1"u8) {
+                SetFlags(Lshortfile);
+                ttʗ1.log();
+                Δos.Exit(1);
+            }
+
+            // spawn test executable
+            var cmd = testenv.Command(new log_test_package.testing_TжTB(tΔ1), ep,
+                "-test.run=^"u8 + Δregexp.QuoteMeta(tΔ1.Name()) + "$"u8,
+                testCount1ˢ);
+            cmd.Value.Env = append(cmd.Environ(), envVar + "=1");
+
+            var (@out, errΔ1) = cmd.CombinedOutput();
+            {
+                var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
+                    tΔ1.Fatalf("expected exec.ExitError: %v"u8, errΔ1);
+                }
+            }
+
+            (_, var firstLine, errΔ1) = bufio.ScanLines(@out, true);
+            if (errΔ1 != default!) {
+                tΔ1.Fatalf("failed to split line: %v"u8, errΔ1);
+            }
+            @string got = (@string)firstLine;
+
+            @string want = fmt.Sprintf(
+                "log_test.go:%d: %s"u8,
+                line + i, ttʗ1.name);
+            if (got != want) {
+                tΔ1.Errorf(
+                    "output from %s() mismatch:\n\t got: %s\n\twant: %s"u8,
+                    ttʗ1.name, got, want);
+            }
+        });
+    }
+}
+
 public static void BenchmarkItoa(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -340,7 +476,7 @@ public static void BenchmarkDiscard(ж<testing.B> Ꮡb) {
     var l = New(Δio.Discard, ""u8, (nint)((nint)LstdFlags | (nint)Lshortfile));
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
-        l.Printf("processing %d objects from bucket %q"u8, (nint)(1234), fizzbuzzˢ);
+        l.Printf("processing %d objects from bucket %q"u8, (nint)1234, fizzbuzzˢ);
     }
 }
 

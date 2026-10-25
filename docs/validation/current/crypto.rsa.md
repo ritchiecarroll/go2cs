@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/rsa` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**568 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**590 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/rsa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/rsa).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -571,8 +571,30 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestKeyGeneration/4096` | pass | pass |
 | `TestKeyGeneration/512` | pass | pass |
 | `TestKeyTooSmall` | pass | pass |
+| `TestLargeSizeDifference` | pass | pass |
+| `TestModifiedPrivateKey` | pass | pass |
+| `TestModifiedPrivateKey/D+2` | pass | pass |
+| `TestModifiedPrivateKey/D=0` | pass | pass |
+| `TestModifiedPrivateKey/D_is_nil` | pass | pass |
+| `TestModifiedPrivateKey/E+2` | pass | pass |
+| `TestModifiedPrivateKey/E=0` | pass | pass |
+| `TestModifiedPrivateKey/N+2` | pass | pass |
+| `TestModifiedPrivateKey/N=0` | pass | pass |
+| `TestModifiedPrivateKey/N_is_nil` | pass | pass |
+| `TestModifiedPrivateKey/P+2` | pass | pass |
+| `TestModifiedPrivateKey/P=0` | pass | pass |
+| `TestModifiedPrivateKey/P_is_nil` | pass | pass |
+| `TestModifiedPrivateKey/Precomputed_mismatch` | pass | pass |
+| `TestModifiedPrivateKey/PublicKey_mismatch` | pass | pass |
+| `TestModifiedPrivateKey/Q+2` | pass | pass |
+| `TestModifiedPrivateKey/Q=0` | pass | pass |
+| `TestModifiedPrivateKey/Q_is_nil` | pass | pass |
 | `TestNPrimeKeyGeneration` | pass | pass |
 | `TestNonZeroRandomBytes` | pass | pass |
+| `TestNotPrecomputed` | pass | pass |
+| `TestNotPrecomputed/AllValues` | pass | pass |
+| `TestNotPrecomputed/OnlyD` | pass | pass |
+| `TestNotPrecomputed/Primes` | pass | pass |
 | `TestOverlongMessagePKCS1v15` | pass | pass |
 | `TestPSS513` | pass | pass |
 | `TestPSSGolden` | pass | pass |

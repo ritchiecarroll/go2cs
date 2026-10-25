@@ -240,6 +240,7 @@ internal static readonly @string fooˢ = "foo"u8;
 public static void TestCopyNEOF(ж<testing.T> Ꮡt) {
     // Test that EOF behavior is the same regardless of whether
     // argument to CopyN has ReadFrom.
+
     var b = @new<bytes.Buffer>();
 
     var (n, err) = CopyN(new io_test_package.noReadFromжWriter(Ꮡ(new noReadFrom(new io_test_package.bytes_BufferжWriter(b)))), new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)), 3);

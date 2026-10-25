@@ -37,22 +37,20 @@ internal static readonly @string defaultˢ = "default/"u8;
 
 internal static void testLookup(ж<testing.T> Ꮡt, Action<ж<testing.T>, ж<global::go.net_package.Resolver>, @string> fn) {
     foreach (var (_, def) in new bool[]{true, false}.slice()) {
-        var defΔ1 = def;
         foreach (var (_, server) in nslookupTestServers) {
-            @string serverΔ1 = server;
             @string name = default!;
-            if (defΔ1){
+            if (def){
                 name = defaultˢ;
             } else {
                 name = "go/"u8;
             }
-            Ꮡt.Run(name + serverΔ1, (ж<testing.T> tΔ1) => {
+            Ꮡt.Run(name + server, (ж<testing.T> tΔ1) => {
                 tΔ1.Parallel();
                 var r = DefaultResolver;
-                if (!defΔ1) {
+                if (!def) {
                     r = Ꮡ(new Resolver(PreferGo: true));
                 }
-                fn(tΔ1, r, serverΔ1);
+                fn(tΔ1, r, server);
             });
         }
     }

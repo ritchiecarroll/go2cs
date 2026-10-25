@@ -14,6 +14,8 @@ using Δtesting = testing_package;
 using time = time_package;
 using Δunicode = unicode_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fmt = fmt_package;
 using static go.fmt_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
@@ -74,7 +76,7 @@ internal static ref nint intVar => ref ᏑintVar.Value;
 
 internal static ж<array<nint>> ᏑΔarray = new StandardBox<array<nint>>(new nint[]{1, 2, 3, 4, 5}.array());
 internal static ref array<nint> Δarray => ref ᏑΔarray.Value;
-internal static ж<array<any>> Ꮡiarray = new StandardBox<array<any>>(new any[]{(nint)(1), (@string)"hello"u8, 2.5D, default!}.array());
+internal static ж<array<any>> Ꮡiarray = new StandardBox<array<any>>(new any[]{(nint)1, (@string)"hello"u8, 2.5D, default!}.array());
 internal static ref array<any> iarray => ref Ꮡiarray.Value;
 internal static ж<slice<nint>> ᏑΔslice = new StandardBox<slice<nint>>(Δarray[..]);
 internal static ref slice<nint> Δslice => ref ᏑΔslice.ValueSlot;
@@ -101,7 +103,7 @@ partial struct B {
 
 partial struct C {
     internal nint i;
-    public partial ref B B { get; }
+    /*embed*/ public B B;
 }
 
 partial struct F /*num:nint*/;
@@ -191,8 +193,8 @@ partial struct fmtTestsᴛ1 /*dyn*/ {
     internal @string @out;
 }
 internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
-    new("%d"u8, (nint)(12345), "12345"u8),
-    new("%v"u8, (nint)(12345), "12345"u8),
+    new("%d"u8, (nint)12345, "12345"u8),
+    new("%v"u8, (nint)12345, "12345"u8),
     new("%t"u8, true, "true"u8),
 
     // basic string
@@ -283,15 +285,15 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%#q"u8, (@string)"\U0010ffff"u8, "`􏿿`"u8),
     new("%#+q"u8, (@string)"\U0010ffff"u8, "`􏿿`"u8),
     // Runes that are not valid.
-    new("%q"u8, ((@string)(rune)0x110000), @"""�"""u8),
-    new("%+q"u8, ((@string)(rune)0x110000), @"""\ufffd"""u8),
-    new("%#q"u8, ((@string)(rune)0x110000), "`�`"u8),
-    new("%#+q"u8, ((@string)(rune)0x110000), "`�`"u8),
+    new("%q"u8, (@string)(rune)0x110000, @"""�"""u8),
+    new("%+q"u8, (@string)(rune)0x110000, @"""\ufffd"""u8),
+    new("%#q"u8, (@string)(rune)0x110000, "`�`"u8),
+    new("%#+q"u8, (@string)(rune)0x110000, "`�`"u8),
 
     // characters
     new("%c"u8, (nuint)(rune)'x', "x"u8),
-    new("%c"u8, (nint)(0xe4), "ä"u8),
-    new("%c"u8, (nint)(0x672c), "本"u8),
+    new("%c"u8, (nint)0xe4, "ä"u8),
+    new("%c"u8, (nint)0x672c, "本"u8),
     new("%c"u8, (rune)'日', "日"u8),
     new("%.0c"u8, (rune)'⌘', "⌘"u8), // Specifying precision should have no effect.
     new("%3c"u8, (rune)'⌘', "  ⌘"u8),
@@ -302,7 +304,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%c"u8, (rune)0x10FFFF, "\U0010ffff"u8),
     // Runes that are not valid.
     new("%c"u8, (nint)(-1), "�"u8),
-    new("%c"u8, (nint)(0xDC80), "�"u8),
+    new("%c"u8, (nint)0xDC80, "�"u8),
     new("%c"u8, (rune)0x110000, "�"u8),
     new("%c"u8, (int64)0xFFFFFFFFFL, "�"u8),
     new("%c"u8, (uint64)0xFFFFFFFFFUL, "�"u8),
@@ -339,7 +341,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%q"u8, (rune)0x10FFFF, @"'\U0010ffff'"u8),
     // Runes that are not valid.
     new("%q"u8, (int32)(-1), @"'�'"u8),
-    new("%q"u8, (nint)(0xDC80), @"'�'"u8),
+    new("%q"u8, (nint)0xDC80, @"'�'"u8),
     new("%q"u8, (rune)0x110000, @"'�'"u8),
     new("%q"u8, (int64)0xFFFFFFFFFL, @"'�'"u8),
     new("%q"u8, (uint64)0xFFFFFFFFFUL, @"'�'"u8),
@@ -389,64 +391,64 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%d"u8, unchecked((uint16)(~(uint16)0)), "65535"u8),
     new("%d"u8, ~(uint32)0, "4294967295"u8),
     new("%d"u8, ~(uint64)0, "18446744073709551615"u8),
-    new("%d"u8, (int8)((int8)(-1 << (int)(7))), "-128"u8),
-    new("%d"u8, (int16)((int16)(-1 << (int)(15))), "-32768"u8),
-    new("%d"u8, (int32)((int32)(-1 << (int)(31))), "-2147483648"u8),
+    new("%d"u8, (int8)((int8)(-1 << 7)), "-128"u8),
+    new("%d"u8, (int16)((int16)(-1 << 15)), "-32768"u8),
+    new("%d"u8, (int32)((int32)(-1 << 31)), "-2147483648"u8),
     new("%d"u8, (int64)(-9223372036854775808L), "-9223372036854775808"u8),
-    new("%.d"u8, (nint)(0), ""u8),
-    new("%.0d"u8, (nint)(0), ""u8),
-    new("%6.0d"u8, (nint)(0), "      "u8),
-    new("%06.0d"u8, (nint)(0), "      "u8),
-    new("% d"u8, (nint)(12345), " 12345"u8),
-    new("%+d"u8, (nint)(12345), "+12345"u8),
+    new("%.d"u8, (nint)0, ""u8),
+    new("%.0d"u8, (nint)0, ""u8),
+    new("%6.0d"u8, (nint)0, "      "u8),
+    new("%06.0d"u8, (nint)0, "      "u8),
+    new("% d"u8, (nint)12345, " 12345"u8),
+    new("%+d"u8, (nint)12345, "+12345"u8),
     new("%+d"u8, (nint)(-12345), "-12345"u8),
-    new("%b"u8, (nint)(7), "111"u8),
+    new("%b"u8, (nint)7, "111"u8),
     new("%b"u8, (nint)(-6), "-110"u8),
-    new("%#b"u8, (nint)(7), "0b111"u8),
+    new("%#b"u8, (nint)7, "0b111"u8),
     new("%#b"u8, (nint)(-6), "-0b110"u8),
     new("%b"u8, ~(uint32)0, "11111111111111111111111111111111"u8),
     new("%b"u8, ~(uint64)0, "1111111111111111111111111111111111111111111111111111111111111111"u8),
     new("%b"u8, (int64)(-9223372036854775808L), zeroFill("-1"u8, 63, ""u8)),
-    new("%o"u8, (nint)(668), "1234"u8),
+    new("%o"u8, (nint)668, "1234"u8),
     new("%o"u8, (nint)(-668), "-1234"u8),
-    new("%#o"u8, (nint)(668), "01234"u8),
+    new("%#o"u8, (nint)668, "01234"u8),
     new("%#o"u8, (nint)(-668), "-01234"u8),
-    new("%O"u8, (nint)(668), "0o1234"u8),
+    new("%O"u8, (nint)668, "0o1234"u8),
     new("%O"u8, (nint)(-668), "-0o1234"u8),
     new("%o"u8, ~(uint32)0, "37777777777"u8),
     new("%o"u8, ~(uint64)0, "1777777777777777777777"u8),
-    new("%#X"u8, (nint)(0), "0X0"u8),
-    new("%x"u8, (nint)(0x12abcdef), "12abcdef"u8),
-    new("%X"u8, (nint)(0x12abcdef), "12ABCDEF"u8),
+    new("%#X"u8, (nint)0, "0X0"u8),
+    new("%x"u8, (nint)0x12abcdef, "12abcdef"u8),
+    new("%X"u8, (nint)0x12abcdef, "12ABCDEF"u8),
     new("%x"u8, ~(uint32)0, "ffffffff"u8),
     new("%X"u8, ~(uint64)0, "FFFFFFFFFFFFFFFF"u8),
-    new("%.20b"u8, (nint)(7), "00000000000000000111"u8),
-    new("%10d"u8, (nint)(12345), "     12345"u8),
+    new("%.20b"u8, (nint)7, "00000000000000000111"u8),
+    new("%10d"u8, (nint)12345, "     12345"u8),
     new("%10d"u8, (nint)(-12345), "    -12345"u8),
-    new("%+10d"u8, (nint)(12345), "    +12345"u8),
-    new("%010d"u8, (nint)(12345), "0000012345"u8),
+    new("%+10d"u8, (nint)12345, "    +12345"u8),
+    new("%010d"u8, (nint)12345, "0000012345"u8),
     new("%010d"u8, (nint)(-12345), "-000012345"u8),
-    new("%20.8d"u8, (nint)(1234), "            00001234"u8),
+    new("%20.8d"u8, (nint)1234, "            00001234"u8),
     new("%20.8d"u8, (nint)(-1234), "           -00001234"u8),
-    new("%020.8d"u8, (nint)(1234), "            00001234"u8),
+    new("%020.8d"u8, (nint)1234, "            00001234"u8),
     new("%020.8d"u8, (nint)(-1234), "           -00001234"u8),
-    new("%-20.8d"u8, (nint)(1234), "00001234            "u8),
+    new("%-20.8d"u8, (nint)1234, "00001234            "u8),
     new("%-20.8d"u8, (nint)(-1234), "-00001234           "u8),
-    new("%-#20.8x"u8, (nint)(0x1234abc), "0x01234abc          "u8),
-    new("%-#20.8X"u8, (nint)(0x1234abc), "0X01234ABC          "u8),
-    new("%-#20.8o"u8, (nint)(668), "00001234            "u8),
+    new("%-#20.8x"u8, (nint)0x1234abc, "0x01234abc          "u8),
+    new("%-#20.8X"u8, (nint)0x1234abc, "0X01234ABC          "u8),
+    new("%-#20.8o"u8, (nint)668, "00001234            "u8),
 
     // Test correct f.intbuf overflow checks.
-    new("%068d"u8, (nint)(1), zeroFill(""u8, 68, "1"u8)),
+    new("%068d"u8, (nint)1, zeroFill(""u8, 68, "1"u8)),
     new("%068d"u8, (nint)(-1), zeroFill("-"u8, 67, "1"u8)),
-    new("%#.68x"u8, (nint)(42), zeroFill("0x"u8, 68, "2a"u8)),
+    new("%#.68x"u8, (nint)42, zeroFill("0x"u8, 68, "2a"u8)),
     new("%.68d"u8, (nint)(-42), zeroFill("-"u8, 68, "42"u8)),
-    new("%+.68d"u8, (nint)(42), zeroFill("+"u8, 68, "42"u8)),
-    new("% .68d"u8, (nint)(42), zeroFill(" "u8, 68, "42"u8)),
-    new("% +.68d"u8, (nint)(42), zeroFill("+"u8, 68, "42"u8)),
+    new("%+.68d"u8, (nint)42, zeroFill("+"u8, 68, "42"u8)),
+    new("% .68d"u8, (nint)42, zeroFill(" "u8, 68, "42"u8)),
+    new("% +.68d"u8, (nint)42, zeroFill("+"u8, 68, "42"u8)),
 
     // unicode format
-    new("%U"u8, (nint)(0), "U+0000"u8),
+    new("%U"u8, (nint)0, "U+0000"u8),
     new("%U"u8, (nint)(-1), "U+FFFFFFFFFFFFFFFF"u8),
     new("%U"u8, (rune)'\n', @"U+000A"u8),
     new("%#U"u8, (rune)'\n', @"U+000A"u8),
@@ -748,22 +750,22 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%+v"u8, new C(1, new B(2, 3)), @"{i:1 B:{I:<2> j:3}}"u8),
 
     // other formats on Stringable items
-    new("%s"u8, ((I)23), @"<23>"u8),
-    new("%q"u8, ((I)23), @"""<23>"""u8),
-    new("%x"u8, ((I)23), @"3c32333e"u8),
-    new("%#x"u8, ((I)23), @"0x3c32333e"u8),
-    new("%# x"u8, ((I)23), @"0x3c 0x32 0x33 0x3e"u8),
+    new("%s"u8, (I)23, @"<23>"u8),
+    new("%q"u8, (I)23, @"""<23>"""u8),
+    new("%x"u8, (I)23, @"3c32333e"u8),
+    new("%#x"u8, (I)23, @"0x3c32333e"u8),
+    new("%# x"u8, (I)23, @"0x3c 0x32 0x33 0x3e"u8),
     // Stringer applies only to string formats.
-    new("%d"u8, ((I)23), @"23"u8),
+    new("%d"u8, (I)23, @"23"u8),
     // Stringer applies to the extracted value.
-    new("%s"u8, reflect.ValueOf(((I)23)), @"<23>"u8),
+    new("%s"u8, reflect.ValueOf((I)23), @"<23>"u8),
 
     // go syntax
     new("%#v"u8, new A(1, 2, "a"u8, new nint[]{1, 2}.slice()), @"fmt_test.A{i:1, j:0x2, s:""a"", x:[]int{1, 2}}"u8),
     new("%#v"u8, @new<byte>(), "(*uint8)(0xPTR)"u8),
     new("%#v"u8, new channel<nint>(0), "(chan int)(0xPTR)"u8),
     new("%#v"u8, (uint64)(18446744073709551615UL), "0xffffffffffffffff"u8),
-    new("%#v"u8, (nint)(1000000000), "1000000000"u8),
+    new("%#v"u8, (nint)1000000000, "1000000000"u8),
     new("%#v"u8, new map<@string, nint>{["a"u8] = 1}, @"map[string]int{""a"":1}"u8),
     new("%#v"u8, new map<@string, B>{["a"u8] = new(1, 2)}, @"map[string]fmt_test.B{""a"":fmt_test.B{I:1, j:2}}"u8),
     new("%#v"u8, new @string[]{"a"u8, "b"u8}.slice(), @"[]string{""a"", ""b""}"u8),
@@ -774,7 +776,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%#v"u8, ᏑΔarray, @"&[5]int{1, 2, 3, 4, 5}"u8),
     new("%#v"u8, iarray.Clone(), @"[4]interface {}{1, ""hello"", 2.5, interface {}(nil)}"u8),
     new("%#v"u8, Ꮡiarray, @"&[4]interface {}{1, ""hello"", 2.5, interface {}(nil)}"u8),
-    new("%#v"u8, ((map<nint, byte>)default!), @"map[int]uint8(nil)"u8),
+    new("%#v"u8, (map<nint, byte>)default!, @"map[int]uint8(nil)"u8),
     new("%#v"u8, new map<nint, byte>{}, @"map[int]uint8{}"u8),
     new("%#v"u8, (@string)"foo"u8, @"""foo"""u8),
     new("%#v"u8, barray.Clone(), @"[5]fmt_test.renamedUint8{0x1, 0x2, 0x3, 0x4, 0x5}"u8),
@@ -790,7 +792,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%v"u8, reflect.ValueOf(((Func<G, @string>)(GoString))), "0xPTR"u8),
     new("%v"u8, () => ((G)23).GoString(), "0xPTR"u8), // method value
     new("%v"u8, reflect.ValueOf(() => ((G)23).GoString()), "0xPTR"u8),
-    new("%v"u8, reflect.ValueOf(((G)23)).Method(0), "0xPTR"u8),
+    new("%v"u8, reflect.ValueOf((G)23).Method(0), "0xPTR"u8),
     new("%v"u8, ((Func<Fn, @string>)(String)), "0xPTR"u8), // method of function type
     new("%v"u8, reflect.ValueOf(((Func<Fn, @string>)(String))), "0xPTR"u8),
     new("%v"u8, (fnValue).OrTypedNilFunc(), "String(fn)"u8), // variable of function type with String method
@@ -814,7 +816,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%#v"u8, reflect.ValueOf(((Func<G, @string>)(GoString))), "(func(fmt_test.G) string)(0xPTR)"u8),
     new("%#v"u8, () => ((G)23).GoString(), "(func() string)(0xPTR)"u8), // method value
     new("%#v"u8, reflect.ValueOf(() => ((G)23).GoString()), "(func() string)(0xPTR)"u8),
-    new("%#v"u8, reflect.ValueOf(((G)23)).Method(0), "(func() string)(0xPTR)"u8),
+    new("%#v"u8, reflect.ValueOf((G)23).Method(0), "(func() string)(0xPTR)"u8),
     new("%#v"u8, ((Func<Fn, @string>)(String)), "(func(fmt_test.Fn) string)(0xPTR)"u8), // method of function type
     new("%#v"u8, reflect.ValueOf(((Func<Fn, @string>)(String))), "(func(fmt_test.Fn) string)(0xPTR)"u8),
     new("%#v"u8, (fnValue).OrTypedNilFunc(), "(fmt_test.Fn)(nil)"u8), // variable of function type with String method
@@ -914,65 +916,65 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%# -010X"u8, ((@string)(new byte[]{0xab, 0xcd})), "0XAB 0XCD "u8),
 
     // renamings
-    new("%v"u8, ((renamedBool)true), "true"u8),
-    new("%d"u8, ((renamedBool)true), "%!d(fmt_test.renamedBool=true)"u8),
-    new("%o"u8, ((renamedInt)8), "10"u8),
-    new("%d"u8, ((renamedInt8)(-9)), "-9"u8),
-    new("%v"u8, ((renamedInt16)10), "10"u8),
-    new("%v"u8, ((renamedInt32)(-11)), "-11"u8),
-    new("%X"u8, ((renamedInt64)255), "FF"u8),
-    new("%v"u8, ((renamedUint)13), "13"u8),
-    new("%o"u8, ((renamedUint8)14), "16"u8),
-    new("%X"u8, ((renamedUint16)15), "F"u8),
-    new("%d"u8, ((renamedUint32)16), "16"u8),
-    new("%X"u8, ((renamedUint64)17), "11"u8),
-    new("%o"u8, ((renamedUintptr)18), "22"u8),
-    new("%x"u8, ((renamedString)(@string)"thing"u8), "7468696e67"u8),
+    new("%v"u8, (renamedBool)true, "true"u8),
+    new("%d"u8, (renamedBool)true, "%!d(fmt_test.renamedBool=true)"u8),
+    new("%o"u8, (renamedInt)8, "10"u8),
+    new("%d"u8, (renamedInt8)(-9), "-9"u8),
+    new("%v"u8, (renamedInt16)10, "10"u8),
+    new("%v"u8, (renamedInt32)(-11), "-11"u8),
+    new("%X"u8, (renamedInt64)255, "FF"u8),
+    new("%v"u8, (renamedUint)13, "13"u8),
+    new("%o"u8, (renamedUint8)14, "16"u8),
+    new("%X"u8, (renamedUint16)15, "F"u8),
+    new("%d"u8, (renamedUint32)16, "16"u8),
+    new("%X"u8, (renamedUint64)17, "11"u8),
+    new("%o"u8, (renamedUintptr)18, "22"u8),
+    new("%x"u8, (renamedString)(@string)"thing"u8, "7468696e67"u8),
     new("%d"u8, ((renamedBytes)new byte[]{1, 2, 15}.slice()), @"[1 2 15]"u8),
-    new("%q"u8, ((renamedBytes)slice<byte>("hello"u8)), @"""hello"""u8),
+    new("%q"u8, (renamedBytes)slice<byte>("hello"u8), @"""hello"""u8),
     new("%x"u8, new renamedUint8[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice(), "68656c6c6f"u8),
     new("%X"u8, new renamedUint8[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice(), "68656C6C6F"u8),
     new("%s"u8, new renamedUint8[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice(), "hello"u8),
     new("%q"u8, new renamedUint8[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice(), @"""hello"""u8),
-    new("%v"u8, ((renamedFloat32)22F), "22"u8),
-    new("%v"u8, ((renamedFloat64)33D), "33"u8),
-    new("%v"u8, ((renamedComplex64)(3F + 4F.i())), "(3+4i)"u8),
-    new("%v"u8, ((renamedComplex128)(4D + -3D.i())), "(4-3i)"u8),
+    new("%v"u8, (renamedFloat32)22F, "22"u8),
+    new("%v"u8, (renamedFloat64)33D, "33"u8),
+    new("%v"u8, (renamedComplex64)(3F + 4F.i()), "(3+4i)"u8),
+    new("%v"u8, (renamedComplex128)(4D + -3D.i()), "(4-3i)"u8),
 
     // Formatter
-    new("%x"u8, ((F)1), "<x=F(1)>"u8),
-    new("%x"u8, ((G)2), "2"u8),
-    new("%+v"u8, new S(((F)4), ((G)5)), "{F:<v=F(4)> G:5}"u8),
+    new("%x"u8, (F)1, "<x=F(1)>"u8),
+    new("%x"u8, (G)2, "2"u8),
+    new("%+v"u8, new S((F)4, (G)5), "{F:<v=F(4)> G:5}"u8),
 
     // GoStringer
-    new("%#v"u8, ((G)6), "GoString(6)"u8),
-    new("%#v"u8, new S(((F)7), ((G)8)), "fmt_test.S{F:<v=F(7)>, G:GoString(8)}"u8),
+    new("%#v"u8, (G)6, "GoString(6)"u8),
+    new("%#v"u8, new S((F)7, (G)8), "fmt_test.S{F:<v=F(7)>, G:GoString(8)}"u8),
 
     // %T
     new("%T"u8, (byte)0, "uint8"u8),
     new("%T"u8, reflect.ValueOf(default!), "reflect.Value"u8),
     new("%T"u8, (4D + -3D.i()), "complex128"u8),
-    new("%T"u8, ((renamedComplex128)(4D + -3D.i())), "fmt_test.renamedComplex128"u8),
+    new("%T"u8, (renamedComplex128)(4D + -3D.i()), "fmt_test.renamedComplex128"u8),
     new("%T"u8, intVar, "int"u8),
     new("%6T"u8, ᏑintVar, "  *int"u8),
     new("%10T"u8, default!, "     <nil>"u8),
     new("%-10T"u8, default!, "<nil>     "u8),
 
     // %p with pointers
-    new("%p"u8, ((ж<nint>)nil), "0x0"u8),
-    new("%#p"u8, ((ж<nint>)nil), "0"u8),
+    new("%p"u8, (ж<nint>)nil, "0x0"u8),
+    new("%#p"u8, (ж<nint>)nil, "0"u8),
     new("%p"u8, ᏑintVar, "0xPTR"u8),
     new("%#p"u8, ᏑintVar, "PTR"u8),
     new("%p"u8, ᏑΔarray, "0xPTR"u8),
     new("%p"u8, ᏑΔslice, "0xPTR"u8),
-    new("%8.2p"u8, ((ж<nint>)nil), "    0x00"u8),
+    new("%8.2p"u8, (ж<nint>)nil, "    0x00"u8),
     new("%-20.16p"u8, ᏑintVar, "0xPTR  "u8),
     // %p on non-pointers
     new("%p"u8, new channel<nint>(0), "0xPTR"u8),
     new("%p"u8, new map<nint, nint>(), "0xPTR"u8),
     new("%p"u8, () => {
     }, "0xPTR"u8),
-    new("%p"u8, (nint)(27), "%!p(int=27)"u8), // not a pointer at all
+    new("%p"u8, (nint)27, "%!p(int=27)"u8), // not a pointer at all
     new("%p"u8, default!, "%!p(<nil>)"u8), // nil on its own has no type ...
     new("%#p"u8, default!, "%!p(<nil>)"u8), // ... and hence is not a pointer type.
     // pointers with specified base
@@ -984,11 +986,11 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     // %v on pointers
     new("%v"u8, default!, "<nil>"u8),
     new("%#v"u8, default!, "<nil>"u8),
-    new("%v"u8, ((ж<nint>)nil), "<nil>"u8),
-    new("%#v"u8, ((ж<nint>)nil), "(*int)(nil)"u8),
+    new("%v"u8, (ж<nint>)nil, "<nil>"u8),
+    new("%#v"u8, (ж<nint>)nil, "(*int)(nil)"u8),
     new("%v"u8, ᏑintVar, "0xPTR"u8),
     new("%#v"u8, ᏑintVar, "(*int)(0xPTR)"u8),
-    new("%8.2v"u8, ((ж<nint>)nil), "   <nil>"u8),
+    new("%8.2v"u8, (ж<nint>)nil, "   <nil>"u8),
     new("%-20.16v"u8, ᏑintVar, "0xPTR  "u8),
     // string method on pointer
     new("%s"u8, ᏑpValue, "String(p)"u8), // String method...
@@ -1000,12 +1002,12 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
 
     // erroneous things
     new(""u8, default!, "%!(EXTRA <nil>)"u8),
-    new(""u8, (nint)(2), "%!(EXTRA int=2)"u8),
+    new(""u8, (nint)2, "%!(EXTRA int=2)"u8),
     new("no args"u8, (@string)"hello"u8, "no args%!(EXTRA string=hello)"u8),
     new("%s %"u8, (@string)"hello"u8, "hello %!(NOVERB)"u8),
     new("%s %.2"u8, (@string)"hello"u8, "hello %!(NOVERB)"u8),
-    new("%017091901790959340919092959340919017929593813360"u8, (nint)(0), "%!(NOVERB)%!(EXTRA int=0)"u8),
-    new("%184467440737095516170v"u8, (nint)(0), "%!(NOVERB)%!(EXTRA int=0)"u8),
+    new("%017091901790959340919092959340919017929593813360"u8, (nint)0, "%!(NOVERB)%!(EXTRA int=0)"u8),
+    new("%184467440737095516170v"u8, (nint)0, "%!(NOVERB)%!(EXTRA int=0)"u8),
     // Extra argument errors should format without flags set.
     new("%010.2"u8, (@string)"12345"u8, "%!(NOVERB)%!(EXTRA string=12345)"u8),
 
@@ -1089,14 +1091,14 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
 
     // float and complex formatting should not change the padding width
     // for other elements. See issue 14642.
-    new("%06v"u8, new any[]{+10.0D, (nint)(10)}.slice(), "[000010 000010]"u8),
-    new("%06v"u8, new any[]{-10.0D, (nint)(10)}.slice(), "[-00010 000010]"u8),
-    new("%06v"u8, new any[]{10D + 10D.i(), (nint)(10)}.slice(), "[(000010+00010i) 000010]"u8),
-    new("%06v"u8, new any[]{-10D + 10D.i(), (nint)(10)}.slice(), "[(-00010+00010i) 000010]"u8),
+    new("%06v"u8, new any[]{+10.0D, (nint)10}.slice(), "[000010 000010]"u8),
+    new("%06v"u8, new any[]{-10.0D, (nint)10}.slice(), "[-00010 000010]"u8),
+    new("%06v"u8, new any[]{10D + 10D.i(), (nint)10}.slice(), "[(000010+00010i) 000010]"u8),
+    new("%06v"u8, new any[]{-10D + 10D.i(), (nint)10}.slice(), "[(-00010+00010i) 000010]"u8),
 
     // integer formatting should not alter padding for other elements.
-    new("%03.6v"u8, new any[]{(nint)(1), 2.0D, (@string)"x"u8}.slice(), "[000001 002 00x]"u8),
-    new("%03.0v"u8, new any[]{(nint)(0), 2.0D, (@string)"x"u8}.slice(), "[    002 000]"u8),
+    new("%03.6v"u8, new any[]{(nint)1, 2.0D, (@string)"x"u8}.slice(), "[000001 002 00x]"u8),
+    new("%03.0v"u8, new any[]{(nint)0, 2.0D, (@string)"x"u8}.slice(), "[    002 000]"u8),
 
     // Complex fmt used to leave the plus flag set for future entries in the array
     // causing +2+0i and +3+0i instead of 2+0i and 3+0i.
@@ -1104,7 +1106,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%v"u8, new complex128[]{1D, 2D, 3D}.slice(), "[(1+0i) (2+0i) (3+0i)]"u8),
 
     // Incomplete format specification caused crash.
-    new("%."u8, (nint)(3), "%!.(int=3)"u8),
+    new("%."u8, (nint)3, "%!.(int=3)"u8),
 
     // Padding for complex numbers. Has been bad, then fixed, then bad again.
     new("%+10.2f"u8, 104.66D + 440.51D.i(), "(   +104.66   +440.51i)"u8),
@@ -1134,9 +1136,9 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%#v"u8, byteFormatterSlice, "[]fmt_test.byteFormatter{X, X, X, X, X}"u8),
 
     // pp.WriteString
-    new("%s"u8, ((writeStringFormatter)(@string)""u8), "******"u8),
-    new("%s"u8, ((writeStringFormatter)(@string)"xyz"u8), "***xyz***"u8),
-    new("%s"u8, ((writeStringFormatter)(@string)"⌘/⌘"u8), "***⌘/⌘***"u8),
+    new("%s"u8, (writeStringFormatter)(@string)""u8, "******"u8),
+    new("%s"u8, (writeStringFormatter)(@string)"xyz"u8, "***xyz***"u8),
+    new("%s"u8, (writeStringFormatter)(@string)"⌘/⌘"u8, "***⌘/⌘***"u8),
 
     // reflect.Value handled specially in Go 1.5, making it possible to
     // see inside non-exported fields (which cannot be accessed with Interface()).
@@ -1147,7 +1149,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     // verbs apply to the extracted value too.
     new("%s"u8, reflect.ValueOf((@string)"hello"u8), "hello"u8),
     new("%q"u8, reflect.ValueOf((@string)"hello"u8), @"""hello"""u8),
-    new("%#04x"u8, reflect.ValueOf((nint)(256)), "0x0100"u8),
+    new("%#04x"u8, reflect.ValueOf((nint)256), "0x0100"u8),
 
     // invalid reflect.Value doesn't crash.
     new("%v"u8, new reflectꓸValue(nil), "<invalid reflect.Value>"u8),
@@ -1156,7 +1158,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
 
     // Tests to check that not supported verbs generate an error string.
     new("%☠"u8, default!, "%!☠(<nil>)"u8),
-    new("%☠"u8, ((any)default!), "%!☠(<nil>)"u8),
+    new("%☠"u8, (any)default!, "%!☠(<nil>)"u8),
     new("%☠"u8, (nint)0, "%!☠(int=0)"u8),
     new("%☠"u8, (nuint)0, "%!☠(uint=0)"u8),
     new("%☠"u8, new byte[]{0, 1}.slice(), "[%!☠(uint8=0) %!☠(uint8=1)]"u8),
@@ -1172,10 +1174,10 @@ internal static slice<fmtTestsᴛ1> fmtTests = new fmtTestsᴛ1[]{
     new("%☠"u8, new channel<nint>(0), "%!☠(chan int=0xPTR)"u8),
     new("%☠"u8, () => {
     }, "%!☠(func()=0xPTR)"u8),
-    new("%☠"u8, reflect.ValueOf(((renamedInt)0)), "%!☠(fmt_test.renamedInt=0)"u8),
-    new("%☠"u8, new SI(((renamedInt)0)), "{%!☠(fmt_test.renamedInt=0)}"u8),
-    new("%☠"u8, Ꮡ(new any[]{((I)1), ((G)2)}.slice()), "&[%!☠(fmt_test.I=1) %!☠(fmt_test.G=2)]"u8),
-    new("%☠"u8, new SI(Ꮡ(new any[]{((I)1), ((G)2)}.slice())), "{%!☠(*[]interface {}=&[1 2])}"u8),
+    new("%☠"u8, reflect.ValueOf((renamedInt)0), "%!☠(fmt_test.renamedInt=0)"u8),
+    new("%☠"u8, new SI((renamedInt)0), "{%!☠(fmt_test.renamedInt=0)}"u8),
+    new("%☠"u8, Ꮡ(new any[]{(I)1, (G)2}.slice()), "&[%!☠(fmt_test.I=1) %!☠(fmt_test.G=2)]"u8),
+    new("%☠"u8, new SI(Ꮡ(new any[]{(I)1, (G)2}.slice())), "{%!☠(*[]interface {}=&[1 2])}"u8),
     new("%☠"u8, new reflectꓸValue(nil), "<invalid reflect.Value>"u8),
     new("%☠"u8, new map<float64, nint>{[NaN] = 1}, "map[%!☠(float64=NaN):%!☠(int=1)]"u8)
 }.slice();
@@ -1307,41 +1309,41 @@ partial struct reorderTestsᴛ1 /*dyn*/ {
     internal @string @out;
 }
 internal static slice<reorderTestsᴛ1> reorderTests = new reorderTestsᴛ1[]{
-    new("%[1]d"u8, new SE(new any[]{(nint)(1)}.slice()), "1"u8),
-    new("%[2]d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "1"u8),
-    new("%[2]d %[1]d"u8, new SE(new any[]{(nint)(1), (nint)(2)}.slice()), "2 1"u8),
-    new("%[2]*[1]d"u8, new SE(new any[]{(nint)(2), (nint)(5)}.slice()), "    2"u8),
+    new("%[1]d"u8, new SE(new any[]{(nint)1}.slice()), "1"u8),
+    new("%[2]d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "1"u8),
+    new("%[2]d %[1]d"u8, new SE(new any[]{(nint)1, (nint)2}.slice()), "2 1"u8),
+    new("%[2]*[1]d"u8, new SE(new any[]{(nint)2, (nint)5}.slice()), "    2"u8),
     new("%6.2f"u8, new SE(new any[]{12.0D}.slice()), " 12.00"u8), // Explicit version of next line.
-    new("%[3]*.[2]*[1]f"u8, new SE(new any[]{12.0D, (nint)(2), (nint)(6)}.slice()), " 12.00"u8),
-    new("%[1]*.[2]*[3]f"u8, new SE(new any[]{(nint)(6), (nint)(2), 12.0D}.slice()), " 12.00"u8),
+    new("%[3]*.[2]*[1]f"u8, new SE(new any[]{12.0D, (nint)2, (nint)6}.slice()), " 12.00"u8),
+    new("%[1]*.[2]*[3]f"u8, new SE(new any[]{(nint)6, (nint)2, 12.0D}.slice()), " 12.00"u8),
     new("%10f"u8, new SE(new any[]{12.0D}.slice()), " 12.000000"u8),
-    new("%[1]*[3]f"u8, new SE(new any[]{(nint)(10), (nint)(99), 12.0D}.slice()), " 12.000000"u8),
+    new("%[1]*[3]f"u8, new SE(new any[]{(nint)10, (nint)99, 12.0D}.slice()), " 12.000000"u8),
     new("%.6f"u8, new SE(new any[]{12.0D}.slice()), "12.000000"u8), // Explicit version of next line.
-    new("%.[1]*[3]f"u8, new SE(new any[]{(nint)(6), (nint)(99), 12.0D}.slice()), "12.000000"u8),
+    new("%.[1]*[3]f"u8, new SE(new any[]{(nint)6, (nint)99, 12.0D}.slice()), "12.000000"u8),
     new("%6.f"u8, new SE(new any[]{12.0D}.slice()), "    12"u8), //  // Explicit version of next line; empty precision means zero.
-    new("%[1]*.[3]f"u8, new SE(new any[]{(nint)(6), (nint)(3), 12.0D}.slice()), "    12"u8),
+    new("%[1]*.[3]f"u8, new SE(new any[]{(nint)6, (nint)3, 12.0D}.slice()), "    12"u8),
     // An actual use! Print the same arguments twice.
-    new("%d %d %d %#[1]o %#o %#o"u8, new SE(new any[]{(nint)(11), (nint)(12), (nint)(13)}.slice()), "11 12 13 013 014 015"u8),
+    new("%d %d %d %#[1]o %#o %#o"u8, new SE(new any[]{(nint)11, (nint)12, (nint)13}.slice()), "11 12 13 013 014 015"u8),
 
     // Erroneous cases.
-    new("%[d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!d(BADINDEX)"u8),
-    new("%]d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!](int=2)d%!(EXTRA int=1)"u8),
-    new("%[]d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!d(BADINDEX)"u8),
-    new("%[-3]d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!d(BADINDEX)"u8),
-    new("%[99]d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!d(BADINDEX)"u8),
-    new("%[3]"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!(NOVERB)"u8),
-    new("%[1].2d"u8, new SE(new any[]{(nint)(5), (nint)(6)}.slice()), "%!d(BADINDEX)"u8),
-    new("%[1]2d"u8, new SE(new any[]{(nint)(2), (nint)(1)}.slice()), "%!d(BADINDEX)"u8),
-    new("%3.[2]d"u8, new SE(new any[]{(nint)(7)}.slice()), "%!d(BADINDEX)"u8),
-    new("%.[2]d"u8, new SE(new any[]{(nint)(7)}.slice()), "%!d(BADINDEX)"u8),
-    new("%d %d %d %#[1]o %#o %#o %#o"u8, new SE(new any[]{(nint)(11), (nint)(12), (nint)(13)}.slice()), "11 12 13 013 014 015 %!o(MISSING)"u8),
-    new("%[5]d %[2]d %d"u8, new SE(new any[]{(nint)(1), (nint)(2), (nint)(3)}.slice()), "%!d(BADINDEX) 2 3"u8),
-    new("%d %[3]d %d"u8, new SE(new any[]{(nint)(1), (nint)(2)}.slice()), "1 %!d(BADINDEX) 2"u8), // Erroneous index does not affect sequence.
+    new("%[d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!d(BADINDEX)"u8),
+    new("%]d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!](int=2)d%!(EXTRA int=1)"u8),
+    new("%[]d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!d(BADINDEX)"u8),
+    new("%[-3]d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!d(BADINDEX)"u8),
+    new("%[99]d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!d(BADINDEX)"u8),
+    new("%[3]"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!(NOVERB)"u8),
+    new("%[1].2d"u8, new SE(new any[]{(nint)5, (nint)6}.slice()), "%!d(BADINDEX)"u8),
+    new("%[1]2d"u8, new SE(new any[]{(nint)2, (nint)1}.slice()), "%!d(BADINDEX)"u8),
+    new("%3.[2]d"u8, new SE(new any[]{(nint)7}.slice()), "%!d(BADINDEX)"u8),
+    new("%.[2]d"u8, new SE(new any[]{(nint)7}.slice()), "%!d(BADINDEX)"u8),
+    new("%d %d %d %#[1]o %#o %#o %#o"u8, new SE(new any[]{(nint)11, (nint)12, (nint)13}.slice()), "11 12 13 013 014 015 %!o(MISSING)"u8),
+    new("%[5]d %[2]d %d"u8, new SE(new any[]{(nint)1, (nint)2, (nint)3}.slice()), "%!d(BADINDEX) 2 3"u8),
+    new("%d %[3]d %d"u8, new SE(new any[]{(nint)1, (nint)2}.slice()), "1 %!d(BADINDEX) 2"u8), // Erroneous index does not affect sequence.
     new("%.[]"u8, new SE(new any[]{}.slice()), "%!](BADINDEX)"u8), // Issue 10675
-    new("%.-3d"u8, new SE(new any[]{(nint)(42)}.slice()), "%!-(int=42)3d"u8), // TODO: Should this set return better error messages?
-    new("%2147483648d"u8, new SE(new any[]{(nint)(42)}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8),
-    new("%-2147483648d"u8, new SE(new any[]{(nint)(42)}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8),
-    new("%.2147483648d"u8, new SE(new any[]{(nint)(42)}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8)
+    new("%.-3d"u8, new SE(new any[]{(nint)42}.slice()), "%!-(int=42)3d"u8), // TODO: Should this set return better error messages?
+    new("%2147483648d"u8, new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8),
+    new("%-2147483648d"u8, new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8),
+    new("%.2147483648d"u8, new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)"u8)
 }.slice();
 
 public static void TestReorder(ж<Δtesting.T> Ꮡt) {
@@ -1417,7 +1419,7 @@ public static void BenchmarkSprintfQuoteString(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkSprintfInt(ж<Δtesting.B> Ꮡb) {
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            _ = Sprintf("%d"u8, (nint)(5));
+            _ = Sprintf("%d"u8, (nint)5);
         }
     });
 }
@@ -1425,7 +1427,7 @@ public static void BenchmarkSprintfInt(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkSprintfIntInt(ж<Δtesting.B> Ꮡb) {
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            _ = Sprintf("%d %d"u8, (nint)(5), (nint)(6));
+            _ = Sprintf("%d %d"u8, (nint)5, (nint)6);
         }
     });
 }
@@ -1433,7 +1435,7 @@ public static void BenchmarkSprintfIntInt(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkSprintfPrefixedInt(ж<Δtesting.B> Ꮡb) {
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            _ = Sprintf("This is some meaningless prefix text that needs to be scanned %d"u8, (nint)(6));
+            _ = Sprintf("This is some meaningless prefix text that needs to be scanned %d"u8, (nint)6);
         }
     });
 }
@@ -1491,7 +1493,7 @@ public static void BenchmarkSprintfBytes(ж<Δtesting.B> Ꮡb) {
 }
 
 public static void BenchmarkSprintfStringer(ж<Δtesting.B> Ꮡb) {
-    I stringer = ((I)12345);
+    I stringer = (I)12345;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             _ = Sprintf("%v"u8, stringer);
@@ -1500,7 +1502,7 @@ public static void BenchmarkSprintfStringer(ж<Δtesting.B> Ꮡb) {
 }
 
 public static void BenchmarkSprintfStructure(ж<Δtesting.B> Ꮡb) {
-    var s = Ꮡ(new any[]{new SI((nint)(12345)), new map<nint, @string>{[0] = "hello"u8}}.slice());
+    var s = Ꮡ(new any[]{new SI((nint)12345), new map<nint, @string>{[0] = "hello"u8}}.slice());
     var sʗ1 = s;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
@@ -1517,7 +1519,7 @@ public static void BenchmarkManyArgs(ж<Δtesting.B> Ꮡb) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         while (pb.Next()) {
             buf.Reset();
-            Fprintf(new fmt_test_package.bytes_BufferжWriter(Ꮡbuf), "%2d/%2d/%2d %d:%d:%d %s %s\n"u8, (nint)(3), (nint)(4), (nint)(5), (nint)(11), (nint)(12), (nint)(13), helloˢ, worldˢ);
+            Fprintf(new fmt_test_package.bytes_BufferжWriter(Ꮡbuf), "%2d/%2d/%2d %d:%d:%d %s %s\n"u8, (nint)3, (nint)4, (nint)5, (nint)11, (nint)12, (nint)13, helloˢ, worldˢ);
         }
     });
 }
@@ -1528,14 +1530,14 @@ public static void BenchmarkFprintInt(ж<Δtesting.B> Ꮡb) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 0; i < b.N; i++) {
         buf.Reset();
-        Fprint(new fmt_test_package.bytes_BufferжWriter(Ꮡbuf), (nint)(123456));
+        Fprint(new fmt_test_package.bytes_BufferжWriter(Ꮡbuf), (nint)123456);
     }
 }
 
 public static void BenchmarkFprintfBytes(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var data = slice<byte>(((@string)"0123456789"u8));
+    var data = slice<byte>((@string)"0123456789"u8);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 0; i < b.N; i++) {
         buf.Reset();
@@ -1546,7 +1548,7 @@ public static void BenchmarkFprintfBytes(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkFprintIntNoAlloc(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    any x = (nint)(123456);
+    any x = (nint)123456;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 0; i < b.N; i++) {
         buf.Reset();
@@ -1559,6 +1561,8 @@ internal static ref bytes.Buffer mallocBuf => ref ᏑmallocBuf.Value;
 
 internal static ж<nint> mallocPointer; // A pointer so we know the interface value won't allocate.
 
+internal static any sink;
+
 partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
     internal @string desc;
@@ -1566,6 +1570,10 @@ partial struct mallocTestᴛ1 /*dyn*/ {
 }
 
 internal partial struct mallocTest_P /*dyn*/ {
+    internal nint x, y;
+}
+
+internal partial struct mallocTest_Pᴛ1 /*dyn*/ {
     internal nint x, y;
 }
 internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
@@ -1576,10 +1584,10 @@ internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
         _ = Sprintf("xxx"u8);
     }),
     new(0, @"Sprintf(""%x"")"u8, () => {
-        _ = Sprintf("%x"u8, (nint)(7));
+        _ = Sprintf("%x"u8, (nint)7);
     }),
     new(1, @"Sprintf(""%x"")"u8, () => {
-        _ = Sprintf("%x"u8, (nint)((1 << (int)(16))));
+        _ = Sprintf("%x"u8, (nint)(1 << 16));
     }),
     new(3, @"Sprintf(""%80000s"")"u8, () => {
         _ = Sprintf("%80000s"u8, (@string)"hello"u8);
@@ -1588,7 +1596,7 @@ internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
         _ = Sprintf("%s"u8, (@string)"hello"u8);
     }),
     new(1, @"Sprintf(""%x %x"")"u8, () => {
-        _ = Sprintf("%x %x"u8, (nint)(7), (nint)(112));
+        _ = Sprintf("%x %x"u8, (nint)7, (nint)112);
     }),
     new(1, @"Sprintf(""%g"")"u8, () => {
         _ = Sprintf("%g"u8, (float32)3.14159F);
@@ -1597,27 +1605,46 @@ internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
         mallocBuf.Reset();
         Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%s"u8, (@string)"hello"u8);
     }),
-    new(0, @"Fprintf(buf, ""%x"")"u8, () => {
+    new(0, @"Fprintf(buf, ""%s"")"u8, () => {
         mallocBuf.Reset();
-        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, (nint)(7));
+        @string s = "hello"u8;
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%s"u8, s);
+    }),
+    new(1, @"Fprintf(buf, ""%s"")"u8, () => {
+        mallocBuf.Reset();
+        @string s = "hello"u8;
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%s"u8, noliteral(s));
     }),
     new(0, @"Fprintf(buf, ""%x"")"u8, () => {
         mallocBuf.Reset();
-        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, (nint)((1 << (int)(16))));
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, (nint)7);
+    }),
+    new(0, @"Fprintf(buf, ""%x"")"u8, () => {
+        mallocBuf.Reset();
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, (nint)(1 << 16));
+    }),
+    new(0, @"Fprintf(buf, ""%x"")"u8, () => {
+        mallocBuf.Reset();
+        nint i = 1 << 16;
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, i);
     }),
     new(1, @"Fprintf(buf, ""%x"")"u8, () => {
         mallocBuf.Reset();
-        nint i = (1 << (int)(16));
-        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, i);
-    }), // not constant
+        nint i = 1 << 16;
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x"u8, noliteral(i));
+    }),
     new(4, @"Fprintf(buf, ""%v"")"u8, () => {
         mallocBuf.Reset();
         var s = new nint[]{1, 2}.slice();
         Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%v"u8, s);
     }),
-    new(1, @"Fprintf(buf, ""%v"")"u8, () => {
+    new(0, @"Fprintf(buf, ""%v"")"u8, () => {
         mallocBuf.Reset();
         Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%v"u8, new mallocTest_P(1, 2));
+    }),
+    new(1, @"Fprintf(buf, ""%v"")"u8, () => {
+        mallocBuf.Reset();
+        Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%v"u8, noliteral(new mallocTest_Pᴛ1(1, 2)));
     }),
     new(2, @"Fprintf(buf, ""%80000s"")"u8, () => {
         mallocBuf.Reset();
@@ -1627,6 +1654,18 @@ internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
     new(0, @"Fprintf(buf, ""%x %x %x"")"u8, () => {
         mallocBuf.Reset();
         Fprintf(new fmt_test_package.bytes_BufferжWriter(ᏑmallocBuf), "%x %x %x"u8, mallocPointer.OrTypedNil(), mallocPointer.OrTypedNil(), mallocPointer.OrTypedNil());
+    }),
+    new(0, @"Errorf(""hello"")"u8, () => {
+        _ = Errorf("hello"u8);
+    }),
+    new(2, @"Errorf(""hello: %x"")"u8, () => {
+        _ = Errorf("hello: %x"u8, mallocPointer.OrTypedNil());
+    }),
+    new(1, @"sink = Errorf(""hello"")"u8, () => {
+        sink = Errorf("hello"u8);
+    }),
+    new(2, @"sink = Errorf(""hello: %x"")"u8, () => {
+        sink = Errorf("hello: %x"u8, mallocPointer.OrTypedNil());
     })
 }.slice();
 
@@ -1649,8 +1688,8 @@ public static void TestCountMallocs(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, mt) in mallocTest) {
         var mallocs = Δtesting.AllocsPerRun(100, mt.fn);
         {
-            var (got, max) = (mallocs, (float64)mt.count); if (got > max) {
-                Ꮡt.Errorf("%s: got %v allocs, want <=%v"u8, mt.desc, got, max);
+            var (got, max) = (mallocs, (float64)mt.count); if (got != max) {
+                Ꮡt.Errorf("%s: got %v allocs, want %v"u8, mt.desc, got, max);
             }
         }
     }
@@ -1824,7 +1863,7 @@ public static void TestEmptyMap(ж<Δtesting.T> Ꮡt) {
 // TestBlank checks that Sprint (and hence Print, Fprint) puts spaces in the
 // right places, that is, between arg pairs in which neither is a string.
 public static void TestBlank(ж<Δtesting.T> Ꮡt) {
-    @string got = Sprint((@string)"<"u8, (nint)(1), (@string)">:"u8, (nint)(1), (nint)(2), (nint)(3), (@string)"!"u8);
+    @string got = Sprint((@string)"<"u8, (nint)1, (@string)">:"u8, (nint)1, (nint)2, (nint)3, (@string)"!"u8);
     @string expect = "<1>:1 2 3!"u8;
     if (got != expect) {
         Ꮡt.Errorf("got %q expected %q"u8, got, expect);
@@ -1834,7 +1873,7 @@ public static void TestBlank(ж<Δtesting.T> Ꮡt) {
 // TestBlankln checks that Sprintln (and hence Println, Fprintln) puts spaces in
 // the right places, that is, between all arg pairs.
 public static void TestBlankln(ж<Δtesting.T> Ꮡt) {
-    @string got = Sprintln((@string)"<"u8, (nint)(1), (@string)">:"u8, (nint)(1), (nint)(2), (nint)(3), (@string)"!"u8);
+    @string got = Sprintln((@string)"<"u8, (nint)1, (@string)">:"u8, (nint)1, (nint)2, (nint)3, (@string)"!"u8);
     @string expect = "< 1 >: 1 2 3 !\n"u8;
     if (got != expect) {
         Ꮡt.Errorf("got %q expected %q"u8, got, expect);
@@ -1846,7 +1885,7 @@ internal static readonly @string vF1ˢ = "<v=F(1)>\n"u8;
 
 // TestFormatterPrintln checks Formatter with Sprint, Sprintln, Sprintf.
 public static void TestFormatterPrintln(ж<Δtesting.T> Ꮡt) {
-    F f = ((F)1);
+    F f = (F)1;
     @string expect = vF1ˢ;
     @string s = Sprint(f, (@string)"\n"u8);
     if (s != expect) {
@@ -1874,32 +1913,32 @@ partial struct startestsᴛ1 /*dyn*/ {
     internal @string @out;
 }
 internal static slice<startestsᴛ1> startests = new startestsᴛ1[]{
-    new("%*d"u8, args((nint)(4), (nint)(42)), "  42"u8),
-    new("%-*d"u8, args((nint)(4), (nint)(42)), "42  "u8),
-    new("%*d"u8, args((nint)(-4), (nint)(42)), "42  "u8),
-    new("%-*d"u8, args((nint)(-4), (nint)(42)), "42  "u8),
-    new("%.*d"u8, args((nint)(4), (nint)(42)), "0042"u8),
-    new("%*.*d"u8, args((nint)(8), (nint)(4), (nint)(42)), "    0042"u8),
-    new("%0*d"u8, args((nint)(4), (nint)(42)), "0042"u8),
+    new("%*d"u8, args((nint)4, (nint)42), "  42"u8),
+    new("%-*d"u8, args((nint)4, (nint)42), "42  "u8),
+    new("%*d"u8, args((nint)(-4), (nint)42), "42  "u8),
+    new("%-*d"u8, args((nint)(-4), (nint)42), "42  "u8),
+    new("%.*d"u8, args((nint)4, (nint)42), "0042"u8),
+    new("%*.*d"u8, args((nint)8, (nint)4, (nint)42), "    0042"u8),
+    new("%0*d"u8, args((nint)4, (nint)42), "0042"u8),
     // Some non-int types for width. (Issue 10732).
-    new("%0*d"u8, args((nuint)4, (nint)(42)), "0042"u8),
-    new("%0*d"u8, args((uint64)4, (nint)(42)), "0042"u8),
-    new("%0*d"u8, args((rune)'\x04', (nint)(42)), "0042"u8),
-    new("%0*d"u8, args((uintptr)4, (nint)(42)), "0042"u8),
+    new("%0*d"u8, args((nuint)4, (nint)42), "0042"u8),
+    new("%0*d"u8, args((uint64)4, (nint)42), "0042"u8),
+    new("%0*d"u8, args((rune)'\x04', (nint)42), "0042"u8),
+    new("%0*d"u8, args((uintptr)4, (nint)42), "0042"u8),
 
     // erroneous
-    new("%*d"u8, args((any)(default!), (nint)(42)), "%!(BADWIDTH)42"u8),
-    new("%*d"u8, args((nint)10000000, (nint)(42)), "%!(BADWIDTH)42"u8),
-    new("%*d"u8, args((nint)(-10000000), (nint)(42)), "%!(BADWIDTH)42"u8),
-    new("%.*d"u8, args((any)(default!), (nint)(42)), "%!(BADPREC)42"u8),
-    new("%.*d"u8, args((nint)(-1), (nint)(42)), "%!(BADPREC)42"u8),
-    new("%.*d"u8, args((nint)10000000, (nint)(42)), "%!(BADPREC)42"u8),
-    new("%.*d"u8, args((nuint)10000000, (nint)(42)), "%!(BADPREC)42"u8),
-    new("%.*d"u8, args((uint64)(((uint64)1 << (int)(63))), (nint)(42)), "%!(BADPREC)42"u8), // Huge negative (-inf).
-    new("%.*d"u8, args((uint64)(18446744073709551615UL), (nint)(42)), "%!(BADPREC)42"u8), // Small negative (-1).
-    new("%*d"u8, args((nint)(5), (@string)"foo"u8), "%!d(string=  foo)"u8),
-    new("%*% %d"u8, args((nint)(20), (nint)(5)), "% 5"u8),
-    new("%*"u8, args((nint)(4)), "%!(NOVERB)"u8)
+    new("%*d"u8, args((any)(default!), (nint)42), "%!(BADWIDTH)42"u8),
+    new("%*d"u8, args((nint)10000000, (nint)42), "%!(BADWIDTH)42"u8),
+    new("%*d"u8, args((nint)(-10000000), (nint)42), "%!(BADWIDTH)42"u8),
+    new("%.*d"u8, args((any)(default!), (nint)42), "%!(BADPREC)42"u8),
+    new("%.*d"u8, args((nint)(-1), (nint)42), "%!(BADPREC)42"u8),
+    new("%.*d"u8, args((nint)10000000, (nint)42), "%!(BADPREC)42"u8),
+    new("%.*d"u8, args((nuint)10000000, (nint)42), "%!(BADPREC)42"u8),
+    new("%.*d"u8, args((uint64)((uint64)1 << 63), (nint)42), "%!(BADPREC)42"u8), // Huge negative (-inf).
+    new("%.*d"u8, args((uint64)(18446744073709551615UL), (nint)42), "%!(BADPREC)42"u8), // Small negative (-1).
+    new("%*d"u8, args((nint)5, (@string)"foo"u8), "%!d(string=  foo)"u8),
+    new("%*% %d"u8, args((nint)20, (nint)5), "% 5"u8),
+    new("%*"u8, args((nint)4), "%!(NOVERB)"u8)
 }.slice();
 
 public static void TestWidthAndPrecision(ж<Δtesting.T> Ꮡt) {
@@ -1948,19 +1987,19 @@ partial struct panictestsᴛ1 /*dyn*/ {
 }
 internal static slice<panictestsᴛ1> panictests = new panictestsᴛ1[]{
     // String
-    new("%s"u8, ((ж<PanicS>)nil), "<nil>"u8), // nil pointer special case
+    new("%s"u8, (ж<PanicS>)nil, "<nil>"u8), // nil pointer special case
     new("%s"u8, new PanicS(Δio.ErrUnexpectedEOF), "%!s(PANIC=String method: unexpected EOF)"u8),
-    new("%s"u8, new PanicS((nint)(3)), "%!s(PANIC=String method: 3)"u8),
+    new("%s"u8, new PanicS((nint)3), "%!s(PANIC=String method: 3)"u8),
     // GoString
-    new("%#v"u8, ((ж<PanicGo>)nil), "<nil>"u8), // nil pointer special case
+    new("%#v"u8, (ж<PanicGo>)nil, "<nil>"u8), // nil pointer special case
     new("%#v"u8, new PanicGo(Δio.ErrUnexpectedEOF), "%!v(PANIC=GoString method: unexpected EOF)"u8),
-    new("%#v"u8, new PanicGo((nint)(3)), "%!v(PANIC=GoString method: 3)"u8),
+    new("%#v"u8, new PanicGo((nint)3), "%!v(PANIC=GoString method: 3)"u8),
     // Issue 18282. catchPanic should not clear fmtFlags permanently.
-    new("%#v"u8, new any[]{new PanicGo((nint)(3)), new PanicGo((nint)(3))}.slice(), "[]interface {}{%!v(PANIC=GoString method: 3), %!v(PANIC=GoString method: 3)}"u8),
+    new("%#v"u8, new any[]{new PanicGo((nint)3), new PanicGo((nint)3)}.slice(), "[]interface {}{%!v(PANIC=GoString method: 3), %!v(PANIC=GoString method: 3)}"u8),
     // Format
-    new("%s"u8, ((ж<PanicF>)nil), "<nil>"u8), // nil pointer special case
+    new("%s"u8, (ж<PanicF>)nil, "<nil>"u8), // nil pointer special case
     new("%s"u8, new PanicF(Δio.ErrUnexpectedEOF), "%!s(PANIC=Format method: unexpected EOF)"u8),
-    new("%s"u8, new PanicF((nint)(3)), "%!s(PANIC=Format method: 3)"u8)
+    new("%s"u8, new PanicF((nint)3), "%!s(PANIC=Format method: 3)"u8)
 }.slice();
 
 public static void TestPanics(ж<Δtesting.T> Ꮡt) {
@@ -2166,7 +2205,7 @@ internal static readonly @string hello = "hello "u8;
 public static void TestAppendf(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
     b = b.slice(0, copy(b, hello));
-    var got = Appendf(b, "world, %d"u8, (nint)(23));
+    var got = Appendf(b, "world, %d"u8, (nint)23);
     if (((sstring)got) != appendResult) {
         Ꮡt.Fatalf("Appendf returns %q not %q"u8, got, appendResult);
     }
@@ -2178,7 +2217,7 @@ public static void TestAppendf(ж<Δtesting.T> Ꮡt) {
 public static void TestAppend(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
     b = b.slice(0, copy(b, hello));
-    var got = Append(b, worldˢ, (@string)", "u8, (nint)(23));
+    var got = Append(b, worldˢ, (@string)", "u8, (nint)23);
     if (((sstring)got) != appendResult) {
         Ꮡt.Fatalf("Append returns %q not %q"u8, got, appendResult);
     }
@@ -2193,13 +2232,20 @@ internal static readonly object worldˢ2 = (@string)"world,"u8;
 public static void TestAppendln(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(100);
     b = b.slice(0, copy(b, hello));
-    var got = Appendln(b, worldˢ2, (nint)(23));
+    var got = Appendln(b, worldˢ2, (nint)23);
     if (((@string)got) != appendResult + "\n") {
         Ꮡt.Fatalf("Appendln returns %q not %q"u8, got, appendResult + "\n");
     }
     if (Ꮡ(b, 0) != Ꮡ(got, 0)) {
         Ꮡt.Fatalf("Appendln allocated a new slice"u8);
     }
+}
+
+// noliteral prevents escape analysis from recognizing a literal value.
+//
+//go:noinline
+internal static partial T noliteral<T>(T t) {
+    return t;
 }
 
 } // end fmt_test_package

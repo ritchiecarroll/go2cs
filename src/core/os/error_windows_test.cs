@@ -19,12 +19,15 @@ partial class os_test_package {
         new isExistTest(err: new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: syscall.ERROR_FILE_NOT_FOUND))), @is: false, isnot: true),
         new isExistTest(err: new Δos.LinkErrorжerror(Ꮡ(new Δos.LinkError(Err: syscall.ERROR_FILE_NOT_FOUND))), @is: false, isnot: true),
         new isExistTest(err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: syscall.ERROR_FILE_NOT_FOUND))), @is: false, isnot: true),
+
         new isExistTest(err: new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: _ERROR_BAD_NETPATH))), @is: false, isnot: true),
         new isExistTest(err: new Δos.LinkErrorжerror(Ꮡ(new Δos.LinkError(Err: _ERROR_BAD_NETPATH))), @is: false, isnot: true),
         new isExistTest(err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: _ERROR_BAD_NETPATH))), @is: false, isnot: true),
+
         new isExistTest(err: new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: syscall.ERROR_PATH_NOT_FOUND))), @is: false, isnot: true),
         new isExistTest(err: new Δos.LinkErrorжerror(Ꮡ(new Δos.LinkError(Err: syscall.ERROR_PATH_NOT_FOUND))), @is: false, isnot: true),
         new isExistTest(err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: syscall.ERROR_PATH_NOT_FOUND))), @is: false, isnot: true),
+
         new isExistTest(err: new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: syscall.ERROR_DIR_NOT_EMPTY))), @is: true, isnot: false),
         new isExistTest(err: new Δos.LinkErrorжerror(Ꮡ(new Δos.LinkError(Err: syscall.ERROR_DIR_NOT_EMPTY))), @is: true, isnot: false),
         new isExistTest(err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: syscall.ERROR_DIR_NOT_EMPTY))), @is: true, isnot: false));

@@ -20,7 +20,6 @@ partial class big_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
 internal static readonly @string xGoˢ = "x.go"u8;
-internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string xExeˢ = "x.exe"u8;
 internal static readonly @string toolˢ = "tool"u8;
 

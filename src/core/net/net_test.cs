@@ -9,11 +9,13 @@ using Δio = io_package;
 using socktest = net.@internal.socktest_package;
 using Δos = os_package;
 using Δruntime = runtime_package;
+using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using net.@internal;
+using netip = net.netip_package;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -26,17 +28,16 @@ public static void TestCloseRead(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
 
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
-                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
-                var exprᴛ2 = networkΔ1;
+                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
+                var exprᴛ2 = network;
                 if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                 }
@@ -47,7 +48,7 @@ public static void TestCloseRead(ж<testing.T> Ꮡt) {
                 if (err != default!) {
                     tΔ1.Fatal(err);
                 }
-                var exprᴛ3 = networkΔ1;
+                var exprᴛ3 = network;
                 if (exprᴛ3 == "unix"u8 || exprᴛ3 == "unixpacket"u8) {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                 }
@@ -100,13 +101,12 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
     }
 
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        @string networkΔ1 = network;
         var deadlineʗ1 = deadline;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
@@ -121,12 +121,12 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                         }
 
                         // Workaround for https://go.dev/issue/49352.
-                        // On arm64 macOS (current as of macOS 12.4),
+                        // On Windows and arm64 macOS (current as of macOS 12.4),
                         // reading from a socket at the same time as the client
                         // is closing it occasionally hangs for 60 seconds before
                         // returning ECONNRESET. Sleep for a bit to give the
                         // socket time to close before trying to read from it.
-                        if (Δruntime.GOOS == "darwin"u8 && Δruntime.GOARCH == "arm64"u8) {
+                        if (Δruntime.GOOS == "windows"u8 || (Δruntime.GOOS == "darwin"u8 && Δruntime.GOARCH == "arm64"u8)) {
                             time.Sleep(10 * time.Millisecond);
                         }
 
@@ -170,7 +170,7 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                     finally { ᒐ.Run(); }
                 };
 
-                var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
+                var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), network);
                 var lsʗ1 = ls;
                 defer(() => lsʗ1.teardown(), ref ᒐ);
                 {
@@ -186,7 +186,7 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                 if (!deadlineʗ1.IsZero()) {
                     c.SetDeadline(deadlineʗ1);
                 }
-                var exprᴛ2 = networkΔ1;
+                var exprᴛ2 = network;
                 if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                 }
@@ -229,17 +229,16 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
 public static void TestConnClose(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
-                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
-                var exprᴛ1 = networkΔ1;
+                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
+                var exprᴛ1 = network;
                 if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                 }
@@ -250,7 +249,7 @@ public static void TestConnClose(ж<testing.T> Ꮡt) {
                 if (err != default!) {
                     tΔ1.Fatal(err);
                 }
-                var exprᴛ2 = networkΔ1;
+                var exprᴛ2 = network;
                 if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                 }
@@ -282,17 +281,16 @@ public static void TestConnClose(ж<testing.T> Ꮡt) {
 public static void TestListenerClose(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
-                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
-                var exprᴛ1 = networkΔ1;
+                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
+                var exprᴛ1 = network;
                 if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                 }
@@ -329,17 +327,16 @@ public static void TestListenerClose(ж<testing.T> Ꮡt) {
 public static void TestPacketConnClose(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     foreach (var (_, network) in new @string[]{"udp"u8, "unixgram"u8}.slice()) {
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
-                var c = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
-                var exprᴛ1 = networkΔ1;
+                var c = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ1), network);
+                var exprᴛ1 = network;
                 if (exprᴛ1 == "unixgram"u8) {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                 }
@@ -448,16 +445,15 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> Ꮡt
 public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     foreach (var (_, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("network %s is not testable on the current platform"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("network %s is not testable on the current platform"u8, network);
                 }
                 tΔ1.Parallel();
 
-                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
+                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
                 var connc = new channel<global::go.net_package.Conn>(1);
                 var conncʗ1 = connc;
                 var lnʗ1 = ln;
@@ -484,7 +480,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 });
-                var (c, err) = Dial(networkΔ1, ln.Addr().String());
+                var (c, err) = Dial(network, ln.Addr().String());
                 if (err != default!) {
                     tΔ1.Fatal(err);
                 }
@@ -506,7 +502,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
 
                 (var n, err) = c.Read(default!);
                 if (n != 0 || err != default!) {
-                    tΔ1.Errorf("%s: zero byte client read = %v, %v; want 0, nil"u8, networkΔ1, n, err);
+                    tΔ1.Errorf("%s: zero byte client read = %v, %v; want 0, nil"u8, network, n, err);
                 }
 
                 if (Δruntime.GOOS == "windows"u8) {
@@ -515,7 +511,7 @@ public static void TestZeroByteRead(ж<testing.T> Ꮡt) {
                 }
                 (n, err) = sc.Read(default!);
                 if (n != 0 || err != default!) {
-                    tΔ1.Errorf("%s: zero byte server read = %v, %v; want 0, nil"u8, networkΔ1, n, err);
+                    tΔ1.Errorf("%s: zero byte server read = %v, %v; want 0, nil"u8, network, n, err);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -629,7 +625,7 @@ public static void TestReadTimeoutUnblocksRead(ж<testing.T> Ꮡt) {
     // Do nothing in the client. Never write. Just wait for the
     // server's half to be done.
     var serverDoneʗ2 = serverDone;
-    var client = error (ж<global::go.net_package.TCPConn> _) => {
+    var client = error (ж<global::go.net_package.TCPConn> _Δp0) => {
         ᐸꟷ(serverDoneʗ2);
         return default!;
     };
@@ -653,6 +649,61 @@ public static void TestCloseUnblocksRead(ж<testing.T> Ꮡt) {
         return default!;
     };
     withTCPConnPair(Ꮡt, client, server);
+}
+
+// Issue 72770: verify that a blocked UDP read is woken up by a Close.
+public static void TestCloseUnblocksReadUDP(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        Ꮡt.Parallel();
+        ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
+        bool done = default!;
+        defer(() => {
+            GoFrame ᒐ = default;
+            try {
+                Ꮡmu.Lock();
+                defer(Ꮡmu.Unlock, ref ᒐ);
+                done = true;
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        }, ref ᒐ);
+        var (pc, err) = ListenPacket(udpˢ, "127.0.0.1:0"u8);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var pcʗ1 = pc;
+        time.AfterFunc(250 * time.Millisecond, () => {
+            GoFrame ᒐ = default;
+            try {
+                Ꮡmu.Lock();
+                defer(Ꮡmu.Unlock, ref ᒐ);
+                if (done) {
+                    return;
+                }
+                Ꮡt.Logf("closing conn..."u8);
+                pcʗ1.Close();
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+        var timer = time.AfterFunc((time.Duration)(10000000000L), () => {
+            throw panic("timeout waiting for Close");
+        });
+        var timerʗ1 = timer;
+        defer(() => timerʗ1.Stop(), ref ᒐ);
+
+        (var n, var src, err) = pc._<ж<global::go.net_package.UDPConn>>().ReadFromUDPAddrPort(new byte[]{}.slice());
+
+        // Check for n > 0. Checking err == nil alone isn't enough;
+        // on macOS, it returns (n=0, src=0.0.0.0:0, err=nil).
+        if (n > 0) {
+            Ꮡt.Fatalf("unexpected Read success from ReadFromUDPAddrPort; read %d bytes from %v, err=%v"u8, n, src, err);
+        }
+        Ꮡt.Logf("got expected UDP read error"u8);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

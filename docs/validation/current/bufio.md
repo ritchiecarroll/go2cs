@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `bufio` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**80 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**80 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/bufio`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/bufio).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -112,7 +112,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestReadStringAllocs` | `deferred` | at-most-one AllocsPerRun assert: ReadString returns a Go string built over the reader's buffered bytes, which in the managed model materializes a fresh byte[] for the @string plus the collectSlices/append working state — Go's single allocation is the string body alone, produced by a runtime concatenation the CLR has no equivalent for. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: read at src/core/bufio/bufio.cs:516, ReadString's `var buf strings.Builder` is emitted `heap(new strings.Builder(), out var Ꮡbuf)` because Builder.copyCheck stores its own address, so the path mints a ж<Builder> beside the one buffer Go allocates -- the reading of 2. This supersedes the working-state attribution above, which was never read at a site. RE-SIGNED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): the attribution above is CORRECTED -- the two counted objects are ReadString's ж<strings.Builder> box (bufio.cs:516) and String()'s ElemRefBox; the buffer is uncounted. The zh-box plan is dropped. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. |
+| `TestReadStringAllocs` | `deferred` | at-most-one AllocsPerRun assert: ReadString returns a Go string built over the reader's buffered bytes, which in the managed model materializes a fresh byte[] for the @string plus the collectSlices/append working state — Go's single allocation is the string body alone, produced by a runtime concatenation the CLR has no equivalent for. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: read at src/core/bufio/bufio.cs:516, ReadString's `var buf strings.Builder` is emitted `heap(new strings.Builder(), out var Ꮡbuf)` because Builder.copyCheck stores its own address, so the path mints a ж<Builder> beside the one buffer Go allocates -- the reading of 2. This supersedes the working-state attribution above, which was never read at a site. RE-SIGNED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): the attribution above is CORRECTED -- the two counted objects are ReadString's ж<strings.Builder> box (bufio.cs:516) and String()'s ElemRefBox; the buffer is uncounted. The zh-box plan is dropped. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 2 per run at go1.24.13 to 3 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 

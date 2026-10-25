@@ -109,7 +109,7 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var b = new slice<byte>(r.Intn(4));
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (byte)((rune)'a' + (byte)rand.Intn(26));
     }
     return (@string)b;
@@ -127,10 +127,11 @@ internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> Ꮡr, nin
 internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapInterface m, slice<mapCall> calls) {
     slice<mapResult> results = default!;
     map<any, any> final = default!;
+    var resultsᴷ = new stackAppend<mapResult>(moves: true);
 
     foreach (var (_, c) in calls) {
         var (v, ok) = c.apply(m);
-        results = append(results, new mapResult(v, ok));
+        results = append(resultsᴷ, results, new mapResult(v, ok));
     }
 
     final = new map<any, any>();
@@ -140,6 +141,7 @@ internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapIn
         return true;
     });
 
+    results = move2heap(resultsᴷ, results);
     return (results, final);
 }
 
@@ -159,7 +161,7 @@ internal static (slice<mapResult>, map<any, any>) applyHashTrieMap(slice<mapCall
     return applyCalls(new sync_test_package.sync_HashTrieMapжmapInterface(@new<isync.HashTrieMap<any, any>>()), calls);
 }
 
-public static void TestMapMatchesRWMutex(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesRWMutex(ж<Δtesting.T> Ꮡt) {
     {
         var err = quick.CheckEqual(applyMap, applyRWMutexMap, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -167,7 +169,7 @@ public static void TestMapMatchesRWMutex(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestMapMatchesDeepCopy(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesDeepCopy(ж<Δtesting.T> Ꮡt) {
     {
         var err = quick.CheckEqual(applyMap, applyDeepCopyMap, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -175,7 +177,7 @@ public static void TestMapMatchesDeepCopy(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestMapMatchesHashTrieMap(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesHashTrieMap(ж<Δtesting.T> Ꮡt) {
     {
         var err = quick.CheckEqual(applyMap, applyHashTrieMap, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -190,7 +192,7 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
 
         var m = @new<Δsync.Map>();
         for (var n = (int64)1; n <= mapSize; n++) {
-            m.Store(n, (int64)n);
+            m.Store(n, n);
         }
 
         var done = new channel<EmptyStruct>(0);
@@ -270,15 +272,15 @@ public static void TestIssue40999(ж<Δtesting.T> Ꮡt) {
     // add an initial entry to bias len(m.dirty) above the miss count.
     Ꮡm.Store(default!, new EmptyStruct());
 
-    ref var finalized = ref heap(new uint32(), out var Ꮡfinalized);
+    ref var cleanedUp = ref heap(new uint32(), out var ᏑcleanedUp);
 
-    // Set finalizers that count for collected keys. A non-zero count
+    // Add cleanups that count for collected keys. A non-zero count
     // indicates that keys have not been leaked.
-    while (atomic.LoadUint32(Ꮡfinalized) == 0) {
+    while (atomic.LoadUint32(ᏑcleanedUp) == 0) {
         var p = @new<nint>();
-        Δruntime.SetFinalizer(p.OrTypedNil(), (ж<nint> _) => {
-            atomic.AddUint32(Ꮡfinalized, 1);
-        });
+        Δruntime.AddCleanup(p, (ж<uint32> c) => {
+            atomic.AddUint32(c, 1);
+        }, ᏑcleanedUp);
         Ꮡm.Store(p.OrTypedNil(), new EmptyStruct());
         Ꮡm.Delete(p.OrTypedNil());
         Δruntime.GC();
@@ -346,7 +348,7 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> Ꮡt) {
     var m = Ꮡ(new Δsync.Map(nil));
     if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)42)) {
         // See https://go.dev/issue/51972#issuecomment-1126408637.

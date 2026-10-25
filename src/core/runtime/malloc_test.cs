@@ -181,7 +181,7 @@ public static void TestTinyAlloc(ж<testing.T> Ꮡt) {
     }
     UntypedInt N = 16;
     array<@unsafe.Pointer> v = new(16); /* N */
-    foreach (var (i, _) in v) {
+    foreach (var i in range(v)) {
         v[i] = @unsafe.Pointer.FromPinnedBox(@new<byte>());
     }
 
@@ -463,6 +463,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
         var allocʗ8 = alloc;
         var freeʗ6 = free;
         t.Run(freeManyˢ, (ж<testing.T> tΔ6) => {
+            var sᴷ = new stackAppend<ж<T>>();
             // Confirm we are graceful if we have more freed elements at once
             // than the max free list size.
             var s = new slice<ж<T>>(0, 1000);
@@ -471,7 +472,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 s = s[..0];
                 foreach (var _ᴛ7 in range(1000)) {
                     var p = allocʗ8();
-                    s = append(s, p);
+                    s = append(sᴷ, s, p);
                 }
                 foreach (var (_, p) in s) {
                     freeʗ6(p);
@@ -482,6 +483,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
         var allocʗ9 = alloc;
         var freeʗ7 = free;
         t.Run(duplicateCheckˢ, (ж<testing.T> tΔ7) => {
+            var sᴷ = new stackAppend<ж<T>>(moves: true);
             // A simple duplicate allocation test. We track what should be the set
             // of live pointers in a map across a series of allocs and frees,
             // and fail if a live pointer value is returned by an allocation.
@@ -497,10 +499,11 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                         tΔ7.Fatalf("found duplicate pointer (0x%x). i: %d j: %d"u8, uptr, i, j);
                     }
                     live[uptr] = true;
-                    s = append(s, p);
+                    s = append(sᴷ, s, p);
                 }
                 // Explicitly free those pointers, removing them from the live map.
-                foreach (var (k, _) in s) {
+                s = move2heap(sᴷ, s);
+                foreach (var k in range(s)) {
                     var p = s[k];
                     s[k] = default!;
                     var uptr = (uintptr)p;
@@ -743,6 +746,8 @@ internal static readonly @string tooManyAddressSpaceˢ = "too many address space
 internal static readonly object ranOutOfArenaHintsˢ = (@string)"ran out of arena hints"u8;
 
 public static void TestArenaCollision(ж<testing.T> Ꮡt) {
+    var disallowedᴷ = new stackAppend<array<uintptr>>();
+
     // Test that mheap.sysAlloc handles collisions with other
     // memory mappings.
     if (Δos.Getenv(testArenaCollisionˢ) != "1"u8) {
@@ -780,7 +785,7 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("failed to reserve memory at next arena hint [%#x, %#x)"u8, start, end);
         }
         Ꮡt.Logf("reserved [%#x, %#x)"u8, start, end);
-        disallowed = append(disallowed, new uintptr[]{start, end}.array());
+        disallowed = append(disallowedᴷ, disallowed, new uintptr[]{start, end}.array());
 
         (var hint, ok) = runtime_internal_test_package.NextArenaHint();
         if (!ok) {
@@ -946,7 +951,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new slice<channel<EmptyStruct>>(n);
-    foreach (var (i, _) in m) {
+    foreach (var i in range(m)) {
         m[i] = new channel<EmptyStruct>(1);
         goǃ(read, m[i]);
     }

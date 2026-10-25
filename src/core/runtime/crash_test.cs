@@ -119,7 +119,7 @@ internal static @string runTestProg(ж<testing.T> Ꮡt, @string binary, @string 
     return runBuiltTestProg(Ꮡt, exe, name, env.ꓸꓸꓸ);
 }
 
-internal static @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
+internal static partial @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
     var env = envʗp.sslice();
 
     Ꮡt.Helper();
@@ -242,7 +242,7 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
             //
             // TODO(vsaioc): Remove `goroutineleakprofile` once the feature is no longer experimental.
             var edited = false;
-            foreach (var (i, _) in (~cmd).Env) {
+            foreach (var i in range((~cmd).Env)) {
                 @string e = (~cmd).Env[i];
                 {
                     var (_, vars, okΔ1) = strings.Cut(e, goexperimentˢ); if (okΔ1) {
@@ -806,7 +806,7 @@ public static void TestPanicTraceback(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void testPanicDeadlock(ж<testing.T> Ꮡt, @string name, @string want) {
+internal static partial void testPanicDeadlock(ж<testing.T> Ꮡt, @string name, @string want) {
     // test issue 14432
     @string output = runTestProg(Ꮡt, testprogˢ, name);
     if (!strings.HasPrefix(output, want)) {
@@ -818,7 +818,7 @@ internal static void testPanicDeadlock(ж<testing.T> Ꮡt, @string name, @string
 internal static readonly @string goschedInPanicˢ = "GoschedInPanic"u8;
 internal static readonly @string panicErrorThatGoschedˢ = "panic: errorThatGosched\n\n"u8;
 
-public static void TestPanicDeadlockGosched(ж<testing.T> Ꮡt) {
+public static partial void TestPanicDeadlockGosched(ж<testing.T> Ꮡt) {
     testPanicDeadlock(Ꮡt, goschedInPanicˢ, panicErrorThatGoschedˢ);
 }
 
@@ -826,7 +826,7 @@ public static void TestPanicDeadlockGosched(ж<testing.T> Ꮡt) {
 internal static readonly @string syscallInPanicˢ = "SyscallInPanic"u8;
 internal static readonly @string panic3ˢ = "1\n2\npanic: 3\n\n"u8;
 
-public static void TestPanicDeadlockSyscall(ж<testing.T> Ꮡt) {
+public static partial void TestPanicDeadlockSyscall(ж<testing.T> Ꮡt) {
     testPanicDeadlock(Ꮡt, syscallInPanicˢ, panic3ˢ);
 }
 

@@ -31,13 +31,13 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestAlloc", zstd_internal_test_package.TestAlloc, "zstd_test.go", 255);
-        registry.Add("TestFileSamples", zstd_internal_test_package.TestFileSamples, "zstd_test.go", 274);
-        registry.Add("TestLarge", zstd_internal_test_package.TestLarge, "zstd_test.go", 213);
+        registry.Add("TestAlloc", zstd_internal_test_package.TestAlloc, "zstd_test.go", 253);
+        registry.Add("TestFileSamples", zstd_internal_test_package.TestFileSamples, "zstd_test.go", 272);
+        registry.Add("TestLarge", zstd_internal_test_package.TestLarge, "zstd_test.go", 211);
         registry.Add("TestLargeXXHash", zstd_internal_test_package.TestLargeXXHash, "xxhash_test.go", 40);
         registry.Add("TestPredefinedTables", zstd_internal_test_package.TestPredefinedTables, "fse_test.go", 40);
-        registry.Add("TestReaderBad", zstd_internal_test_package.TestReaderBad, "zstd_test.go", 307);
-        registry.Add("TestReset", zstd_internal_test_package.TestReset, "zstd_test.go", 130);
+        registry.Add("TestReaderBad", zstd_internal_test_package.TestReaderBad, "zstd_test.go", 305);
+        registry.Add("TestReset", zstd_internal_test_package.TestReset, "zstd_test.go", 129);
         registry.Add("TestSamples", zstd_internal_test_package.TestSamples, "zstd_test.go", 113);
         registry.Add("TestWindow", zstd_internal_test_package.TestWindow, "window_test.go", 20);
         registry.Add("TestXXHash", zstd_internal_test_package.TestXXHash, "xxhash_test.go", 29);

@@ -11,6 +11,8 @@ using big = math.big_package;
 using mathrand = math.rand_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using math;
 using static go.crypto.rand_internal_test_package;
@@ -36,7 +38,7 @@ public static void TestPrimeSmall(ж<testing.T> Ꮡt) {
 }
 
 // Test that passing bits < 2 causes Prime to return nil, error
-public static void TestPrimeBitsLt2(ж<testing.T> Ꮡt) {
+public static partial void TestPrimeBitsLt2(ж<testing.T> Ꮡt) {
     {
         var (p, err) = rand.Prime(rand.Reader, 1); if (p != nil || err == default!) {
             Ꮡt.Errorf("Prime should return nil, error when called with bits < 2"u8);

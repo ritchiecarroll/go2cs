@@ -1,11 +1,11 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using static strconv_package;
+using static go.@internal.strconv_package;
 using testing = testing_package;
-using static go.strconv_internal_test_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 

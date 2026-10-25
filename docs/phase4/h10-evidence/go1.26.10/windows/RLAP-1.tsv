@@ -1,0 +1,3 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s
+net/http	PASS	1526	665	1	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	665	1
+crypto/tls	DIVERGED	1394	940	0	1	1	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	940	1

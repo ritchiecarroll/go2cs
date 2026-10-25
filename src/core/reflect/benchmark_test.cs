@@ -7,6 +7,8 @@ using fmt = fmt_package;
 using static reflect_package;
 using strconv = strconv_package;
 using Δtesting = testing_package;
+using time = time_package;
+using iter = iter_package;
 using static global::go.reflect_internal_test_package;
 using Δreflect = reflect_package;
 
@@ -194,13 +196,13 @@ public static void BenchmarkIsZero(ж<Δtesting.B> Ꮡb) {
     s.ArrayInt_1024_NoZero[512] = 1;
     var source = ValueOf(s);
 
-    for (nint i = 0; i < source.NumField(); i++) {
-        @string name = source.Type().Field(i).Name;
-        ref var value = ref heap<reflectꓸValue>(out var Ꮡvalue);
-        value = source.Field(i);
+    foreach (var (field, vᴛ1) in range<Δreflect.StructField, reflectꓸValue>(source.Fields().Invoke)) {
+        ref var value = ref heap(new reflectꓸValue(), out var Ꮡvalue);
+        value = vᴛ1;
+
         var valueʗ1 = value;
-        Ꮡb.Run(name, (ж<Δtesting.B> bΔ1) => {
-            for (nint iΔ1 = 0; iΔ1 < (~bΔ1).N; iΔ1++) {
+        Ꮡb.Run(field.Name, (ж<Δtesting.B> bΔ1) => {
+            for (nint i = 0; i < (~bΔ1).N; i++) {
                 sink = valueʗ1.IsZero();
             }
         });
@@ -231,29 +233,101 @@ internal partial struct BenchmarkSetZero_type /*dyn*/ {
 public static void BenchmarkSetZero(ж<Δtesting.B> Ꮡb) {
     var source = ValueOf(@new<BenchmarkSetZero_type>()).Elem();
 
-    for (nint i = 0; i < source.NumField(); i++) {
-        @string name = source.Type().Field(i).Name;
-        ref var value = ref heap<reflectꓸValue>(out var Ꮡvalue);
-        value = source.Field(i);
+    foreach (var (field, vᴛ1) in range<Δreflect.StructField, reflectꓸValue>(source.Fields().Invoke)) {
+        ref var value = ref heap(new reflectꓸValue(), out var Ꮡvalue);
+        value = vᴛ1;
+
+        @string name = field.Name;
         ref var zero = ref heap<reflectꓸValue>(out var Ꮡzero);
         zero = Zero(value.Type());
         var valueʗ1 = value;
         Ꮡb.Run(name + "/Direct"u8, (ж<Δtesting.B> bΔ1) => {
-            for (nint iΔ1 = 0; iΔ1 < (~bΔ1).N; iΔ1++) {
+            for (nint i = 0; i < (~bΔ1).N; i++) {
                 valueʗ1.SetZero();
             }
         });
         var valueʗ2 = value;
         var zeroʗ1 = zero;
         Ꮡb.Run(name + "/CachedZero"u8, (ж<Δtesting.B> bΔ2) => {
-            for (nint iΔ2 = 0; iΔ2 < (~bΔ2).N; iΔ2++) {
+            for (nint i = 0; i < (~bΔ2).N; i++) {
                 valueʗ2.Set(zeroʗ1);
             }
         });
         var valueʗ3 = value;
         Ꮡb.Run(name + "/NewZero"u8, (ж<Δtesting.B> bΔ3) => {
-            for (nint iΔ3 = 0; iΔ3 < (~bΔ3).N; iΔ3++) {
+            for (nint i = 0; i < (~bΔ3).N; i++) {
                 valueʗ3.Set(Zero(valueʗ3.Type()));
+            }
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string byteArrayˢ = "ByteArray"u8;
+internal static readonly @string bigStructˢ = "BigStruct"u8;
+internal static readonly @string smallStructˢ = "SmallStruct"u8;
+internal static readonly @string smallStructArrayˢ = "SmallStructArray"u8;
+internal static readonly @string timeˢ = "Time"u8;
+
+internal partial struct BenchmarkZero_bm /*dyn*/ {
+    internal @string name;
+    internal reflectꓸValue zero;
+    internal reflectꓸValue nonZero;
+    internal nint size;
+}
+
+internal partial struct BenchmarkZero_Small /*dyn*/ {
+    public int64 A;
+    public bool B, C;
+}
+
+internal partial struct BenchmarkZero_Big /*dyn*/ {
+    public int64 A;
+    public bool B, C;
+    public array<byte> D = new(1008);
+}
+
+// BenchmarkZero overlaps some with BenchmarkSetZero,
+// but the inputs are set up differently to exercise
+// different optimizations.
+public static void BenchmarkZero(ж<Δtesting.B> Ꮡb) {
+    BenchmarkZero_bm entry(@string name, any zero, any nonZero) => new BenchmarkZero_bm(name, ValueOf(zero), ValueOf(nonZero).Elem(), (nint)TypeOf(zero).Size());
+    ж<time.Time> nonZeroTime() {
+        ref var t = ref heap<time.Time>(out var Ꮡt);
+        t = time.Now();
+        return Ꮡt;
+    }
+
+    var bms = new BenchmarkZero_bm[]{
+        entry(byteArrayˢ, new byte[]{}.array(16), Ꮡ(new byte[]{1}.array(16))),
+        entry(byteArrayˢ, new byte[]{}.array(64), Ꮡ(new byte[]{1}.array(64))),
+        entry(byteArrayˢ, new byte[]{}.array(1024), Ꮡ(new byte[]{1}.array(1024))),
+        entry(bigStructˢ, new BenchmarkZero_Big(nil), Ꮡ(new BenchmarkZero_Big(A: 1))),
+        entry(smallStructˢ, new BenchmarkZero_Small(nil), Ꮡ(new BenchmarkZero_Small(A: 1))),
+        entry(smallStructArrayˢ, new BenchmarkZero_Small[]{}.array(4), Ꮡ(new array<BenchmarkZero_Small>(4){[0] = new(A: 1)})),
+        entry(smallStructArrayˢ, new BenchmarkZero_Small[]{}.array(64), Ꮡ(new array<BenchmarkZero_Small>(64){[0] = new(A: 1)})),
+        entry(timeˢ, new time.Time(nil), nonZeroTime().OrTypedNil())
+    }.slice();
+
+    foreach (var (_, vᴛ1) in bms) {
+        ref var bm = ref heap(new BenchmarkZero_bm(), out var Ꮡbm);
+        bm = vᴛ1;
+
+        var bmʗ1 = bm;
+        Ꮡb.Run(fmt.Sprintf("IsZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ1) => {
+            for (nint i = 0; i < (~bΔ1).N; i++) {
+                bmʗ1.zero.IsZero();
+            }
+        });
+    }
+    foreach (var (_, vᴛ2) in bms) {
+        ref var bm = ref heap(new BenchmarkZero_bm(), out var Ꮡbm);
+        bm = vᴛ2;
+
+        var bmʗ2 = bm;
+        Ꮡb.Run(fmt.Sprintf("SetZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ2) => {
+            for (nint i = 0; i < (~bΔ2).N; i++) {
+                bmʗ2.nonZero.Set(bmʗ2.zero);
             }
         });
     }

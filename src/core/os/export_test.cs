@@ -12,20 +12,33 @@ partial class os_internal_test_package {
 // Export for testing.
 public static Func<fs.FileInfo, time.Time> Atime = atime;
 
-public static ж<Func<@string, (fs.FileInfo, error)>> LstatP;
-internal static void initᴛLstatP() { LstatP = Ꮡlstat; }
-
 public static error ErrWriteAtInAppendMode;
 internal static void initᴛErrWriteAtInAppendMode() { ErrWriteAtInAppendMode = errWriteAtInAppendMode; }
-
-public static ж<bool> TestingForceReadDirLstat;
-internal static void initᴛTestingForceReadDirLstat() { TestingForceReadDirLstat = ᏑtestingForceReadDirLstat; }
 
 public static error ErrPatternHasSeparator;
 internal static void initᴛErrPatternHasSeparator() { ErrPatternHasSeparator = errPatternHasSeparator; }
 
+public static error ErrPathEscapes;
+internal static void initᴛErrPathEscapes() { ErrPathEscapes = errPathEscapes; }
+
 [GoInit] internal static void init() {
     checkWrapErr = true;
+}
+
+public static Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)> ExportReadFileContents = readFileContents;
+
+// cleanuper stands in for *testing.T, since we can't import testing in os.
+public partial interface cleanuper {
+    void Cleanup(Action _);
+}
+
+public static void SetStatHook(cleanuper t, Func<ж<global::go.os_package.File>, @string, (fs.FileInfo, error)> f) {
+    var oldstathook = stathook;
+    var oldstathookʗ1 = oldstathook;
+    t.Cleanup(() => {
+        stathook = oldstathookʗ1;
+    });
+    stathook = f;
 }
 
 } // end os_internal_test_package

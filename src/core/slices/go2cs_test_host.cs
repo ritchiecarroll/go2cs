@@ -58,10 +58,11 @@ internal static class Go2CsTestHost
         registry.Add("TestInsertGrowthRate", slices_test_package.TestInsertGrowthRate, "slices_test.go", 1229);
         registry.Add("TestInsertOverlap", slices_test_package.TestInsertOverlap, "slices_test.go", 517);
         registry.Add("TestInsertPanics", slices_test_package.TestInsertPanics, "slices_test.go", 542);
-        registry.Add("TestIssue68488", slices_test_package.TestIssue68488, "slices_test.go", 1457);
+        registry.Add("TestIssue68488", slices_test_package.TestIssue68488, "slices_test.go", 1459);
         registry.Add("TestMinMax", slices_test_package.TestMinMax, "sort_test.go", 174);
         registry.Add("TestMinMaxNaNs", slices_test_package.TestMinMaxNaNs, "sort_test.go", 236);
         registry.Add("TestMinMaxPanics", slices_test_package.TestMinMaxPanics, "sort_test.go", 263);
+        registry.Add("TestNilness", slices_test_package.TestNilness, "slices_test.go", 1473);
         registry.Add("TestRepeat", slices_test_package.TestRepeat, "slices_test.go", 1383);
         registry.Add("TestRepeatPanics", slices_test_package.TestRepeatPanics, "slices_test.go", 1441);
         registry.Add("TestReplace", slices_test_package.TestReplace, "slices_test.go", 1028);

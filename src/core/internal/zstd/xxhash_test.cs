@@ -6,8 +6,9 @@ namespace go.@internal;
 using bytes = bytes_package;
 using os = os_package;
 using exec = go.os.exec_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using testing = testing_package;
+using go;
 using go.os;
 using static go.@internal.zstd_package;
 

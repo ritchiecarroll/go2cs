@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `64128bb0b`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**476 matched · 3 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**505 matched · 3 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 44 of the matched tests identically.
+Both runtimes skip 38 of the matched tests identically.
 
 ## Verdicts
 
@@ -50,24 +50,25 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestCloseError/udp` | pass | pass |
 | `TestCloseRead` | pass | pass |
 | `TestCloseRead/tcp` | pass | pass |
-| `TestCloseRead/unix` | skip | skip |
+| `TestCloseRead/unix` | pass | pass |
 | `TestCloseRead/unixpacket` | skip | skip |
 | `TestCloseUnblocksRead` | pass | pass |
+| `TestCloseUnblocksReadUDP` | pass | pass |
 | `TestCloseWrite` | pass | pass |
 | `TestCloseWrite/tcp` | pass | pass |
-| `TestCloseWrite/unix` | skip | skip |
+| `TestCloseWrite/unix` | pass | pass |
 | `TestCloseWrite/unixpacket` | skip | skip |
 | `TestClosingListener` | pass | pass |
 | `TestConcurrentPreferGoResolversDial` | pass | pass |
 | `TestConcurrentSetDeadline` | pass | pass |
 | `TestConnAndListener` | pass | pass |
 | `TestConnAndListener/tcp` | pass | pass |
-| `TestConnAndListener/unix` | skip | skip |
+| `TestConnAndListener/unix` | pass | pass |
 | `TestConnAndListener/unixpacket` | skip | skip |
 | `TestConnAndPacketConn` | pass | pass |
 | `TestConnClose` | pass | pass |
 | `TestConnClose/tcp` | pass | pass |
-| `TestConnClose/unix` | skip | skip |
+| `TestConnClose/unix` | pass | pass |
 | `TestConnClose/unixpacket` | skip | skip |
 | `TestContextError` | pass | pass |
 | `TestCopyPipeIntoTCP` | pass | pass |
@@ -85,6 +86,9 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestDialClosedPortFailFast/tcp` | pass | pass |
 | `TestDialClosedPortFailFast/tcp4` | pass | pass |
 | `TestDialClosedPortFailFast/tcp6` | pass | pass |
+| `TestDialContext` | pass | pass |
+| `TestDialContext/PacketDial` | pass | pass |
+| `TestDialContext/StreamDial` | pass | pass |
 | `TestDialError` | pass | pass |
 | `TestDialError/0` | pass | pass |
 | `TestDialError/1` | pass | pass |
@@ -142,7 +146,7 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestDialerControlContext/StreamDial/tcp` | pass | pass |
 | `TestDialerControlContext/StreamDial/tcp4` | pass | pass |
 | `TestDialerControlContext/StreamDial/tcp6` | pass | pass |
-| `TestDialerControlContext/StreamDial/unix` | skip | skip |
+| `TestDialerControlContext/StreamDial/unix` | pass | pass |
 | `TestDialerControlContext/StreamDial/unixpacket` | skip | skip |
 | `TestDialerDualStack` | skip | skip |
 | `TestDialerDualStackFDLeak` | skip | skip |
@@ -154,11 +158,20 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestDualStackTCPListener` | pass | pass |
 | `TestDualStackUDPListener` | pass | pass |
 | `TestErrors` | pass | pass |
-| `TestFileCloseRace` | skip | skip |
-| `TestFileConn` | skip | skip |
-| `TestFileError` | skip | skip |
-| `TestFileListener` | skip | skip |
-| `TestFilePacketConn` | skip | skip |
+| `TestFileCloseRace` | pass | pass |
+| `TestFileConn` | pass | pass |
+| `TestFileConn/tcp` | pass | pass |
+| `TestFileConn/udp` | pass | pass |
+| `TestFileConn/unix` | pass | pass |
+| `TestFileConn/unixpacket` | skip | skip |
+| `TestFileError` | pass | pass |
+| `TestFileListener` | pass | pass |
+| `TestFileListener/tcp` | pass | pass |
+| `TestFileListener/unix` | pass | pass |
+| `TestFileListener/unixpacket` | skip | skip |
+| `TestFilePacketConn` | pass | pass |
+| `TestFilePacketConn/udp` | pass | pass |
+| `TestFilePacketConn/unixgram` | skip | skip |
 | `TestForceCgoDNS` | pass | pass |
 | `TestForceGoDNS` | pass | pass |
 | `TestHostCacheModification` | pass | pass |
@@ -178,7 +191,7 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion` | pass | pass |
 | `TestIPv6LinkLocalUnicastTCP` | pass | pass |
 | `TestIPv6LinkLocalUnicastUDP` | pass | pass |
-| `TestIPv6MulticastListener` | skip | skip |
+| `TestIPv6MulticastListener` | pass | pass |
 | `TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion` | pass | pass |
 | `TestInterfaceAddrs` | pass | pass |
 | `TestInterfaceAddrsWithNetsh` | pass | pass |
@@ -213,9 +226,9 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestListenPacketError/udp_no-such-name:80` | pass | pass |
 | `TestListenerClose` | pass | pass |
 | `TestListenerClose/tcp` | pass | pass |
-| `TestListenerClose/unix` | skip | skip |
+| `TestListenerClose/unix` | pass | pass |
 | `TestListenerClose/unixpacket` | skip | skip |
-| `TestLookupCNAME` | fail | fail |
+| `TestLookupCNAME` | pass | pass |
 | `TestLookupContextCancel` | pass | pass |
 | `TestLookupDotsWithLocalSource` | pass | pass |
 | `TestLookupDotsWithRemoteSource` | pass | pass |
@@ -362,7 +375,9 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestReadTimeoutFluctuation` | pass | pass |
 | `TestReadTimeoutMustNotReturn` | pass | pass |
 | `TestReadTimeoutUnblocksRead` | pass | pass |
+| `TestReadUnixgramWithUnnamedSocket` | skip | skip |
 | `TestReadWriteDeadlineRace` | pass | pass |
+| `TestReadWriteMsgUDPAddrPortEmptyCmsg` | pass | pass |
 | `TestReadWriteProlongedTimeout` | pass | pass |
 | `TestResolveGoogle` | skip | skip |
 | `TestResolveIPAddr` | pass | pass |
@@ -472,14 +487,28 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestUDPServer/9` | pass | pass |
 | `TestUDPZeroByteBuffer` | pass | pass |
 | `TestUDPZeroBytePayload` | pass | pass |
+| `TestUnixAbstractLongNameNulStart` | pass | pass |
 | `TestUnixAndUnixpacketServer` | pass | pass |
+| `TestUnixConnLocalAndRemoteNames` | pass | pass |
 | `TestUnixConnLocalWindows` | pass | pass |
 | `TestUnixConnSpecificMethods` | skip | skip |
-| `TestUnixListenerSpecificMethods` | skip | skip |
+| `TestUnixListenerSpecificMethods` | pass | pass |
+| `TestUnixUnlink` | pass | pass |
+| `TestUnixUnlink/FileListener` | pass | pass |
+| `TestUnixUnlink/FileListener/SetUnlinkOnClose(false)` | pass | pass |
+| `TestUnixUnlink/FileListener/SetUnlinkOnClose(true)` | pass | pass |
+| `TestUnixUnlink/Listen` | pass | pass |
+| `TestUnixUnlink/Listen/SetUnlinkOnClose(false)` | pass | pass |
+| `TestUnixUnlink/Listen/SetUnlinkOnClose(true)` | pass | pass |
+| `TestUnixUnlink/SecondClose` | pass | pass |
+| `TestUnixgramConnLocalAndRemoteNames` | skip | skip |
 | `TestUnixgramServer` | pass | pass |
 | `TestUnixgramServer/0` | skip | skip |
 | `TestUnixgramServer/1` | skip | skip |
 | `TestUnixgramServer/2` | skip | skip |
+| `TestUnixgramWrite` | skip | skip |
+| `TestUnixgramZeroByteBuffer` | skip | skip |
+| `TestUnixgramZeroBytePayload` | skip | skip |
 | `TestVariousDeadlines` | pass | pass |
 | `TestVariousDeadlines1Proc` | pass | pass |
 | `TestVariousDeadlines4Proc` | pass | pass |
@@ -496,7 +525,7 @@ Both runtimes skip 44 of the matched tests identically.
 | `TestWritevError` | skip | skip |
 | `TestZeroByteRead` | pass | pass |
 | `TestZeroByteRead/tcp` | pass | pass |
-| `TestZeroByteRead/unix` | skip | skip |
+| `TestZeroByteRead/unix` | pass | pass |
 | `TestZeroByteRead/unixpacket` | skip | skip |
 
 ## Disclosed divergences
@@ -512,9 +541,9 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAllocs` | `deferred` | zero-alloc assert over the UDP hot path: the test runs WriteMsgUDPAddrPort/ReadMsgUDPAddrPort 1,000 times and requires the steady-state allocation count to be zero, and it is guarded by testenv.SkipIfOptimizationOff precisely because that outcome depends on Go's optimizer. Go reaches zero because escape analysis keeps the 8-byte buffer, the netFD argument shuffle and the AddrPort value stack-resident, and its syscall path writes through a pinned slice header without boxing. The converted path cannot: golib's slice<T> is a struct over a heap T[], every []byte crossing the Conn/PacketConn interface surface is a managed object, and the msghdr marshalling allocates its own buffers per call — so the counter reports ~71 allocations per run (71,000 over 1,000) rather than 0. Structural to the managed runtime, not to net: the CLR publishes no in-process malloc counter, so go2cs's own runtime counter (golib's allocation sites, the structural mirror of runtime.MemStats.Mallocs) is what the host reports, and its counter line is the stable pin. RELABEL 2026-09-23 (C1, as ruled -- COORD's net-reading ruling, 2026-09-23): RULING OWED -> deferred. The shell and marshalling proof above is WITHDRAWN (O2's rule): the reading is COUNT, and golib's counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so the counted objects are golib's. The '~71 allocations per run' above is STALE: the i7 read 35 on this leg. |
+| `TestAllocs` | `deferred` | zero-alloc assert over the UDP hot path: the test runs WriteMsgUDPAddrPort/ReadMsgUDPAddrPort 1,000 times and requires the steady-state allocation count to be zero, and it is guarded by testenv.SkipIfOptimizationOff precisely because that outcome depends on Go's optimizer. Go reaches zero because escape analysis keeps the 8-byte buffer, the netFD argument shuffle and the AddrPort value stack-resident, and its syscall path writes through a pinned slice header without boxing. The converted path cannot: golib's slice<T> is a struct over a heap T[], every []byte crossing the Conn/PacketConn interface surface is a managed object, and the msghdr marshalling allocates its own buffers per call — so the counter reports ~71 allocations per run (71,000 over 1,000) rather than 0. Structural to the managed runtime, not to net: the CLR publishes no in-process malloc counter, so go2cs's own runtime counter (golib's allocation sites, the structural mirror of runtime.MemStats.Mallocs) is what the host reports, and its counter line is the stable pin. RELABEL 2026-09-23 (C1, as ruled -- COORD's net-reading ruling, 2026-09-23): RULING OWED -> deferred. The shell and marshalling proof above is WITHDRAWN (O2's rule): the reading is COUNT, and golib's counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so the counted objects are golib's. The '~71 allocations per run' above is STALE: the i7 read 35 on this leg. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 35 per run at go1.24.13 to 46 per run on windows, 28 on linux; the test body changed between go1.24.13 and go1.26.10. |
 | `TestIPAppendTextNoAllocs` | `deferred` | NEW at go1.24 (net/ip_test.go:285-296): a want-0 AllocsPerRun over IP.AppendText into a fresh 64-byte buffer, for every address in ipStringTests but the invalid one. Go keeps the buffer and the netip value on the stack; the converted path counts the test's make and the net/netip append path IP.AppendText reaches (net/ip.cs:342-343: netip.AddrFromSlice(ip).AppendTo(b)). DEFERRED as ruled (2026-09-22 21:09, and COORD's net-reading ruling 2026-09-23): the reading is COUNT, and it is a REC-B member by X(2). It diverged UNDISCLOSED in the i7 net reading, the row's one divergence; this entry is what lets net bank. The signature is the test's own count-free failure text. |
-| `TestTCPReadWriteAllocs` | `deferred` | the same zero-alloc assert over the TCP hot path: Read/Write on a loopback conn, 1,000 runs, required to allocate nothing. Go's Read/Write reach the netFD with no heap traffic at all; the converted equivalents allocate through the same three structural sites as TestAllocs — slice<T> over a heap T[], the Conn interface surface, and the per-call syscall argument marshalling — reporting ~35 allocations per run (35,000 over 1,000). Lower than TestAllocs because the TCP path marshals no msghdr and carries no address value, which is itself evidence the count tracks the converted call shape rather than any defect in net. RELABEL 2026-09-23 (C1, as ruled -- COORD's net-reading ruling, 2026-09-23): RULING OWED -> deferred. The three 'structural sites' above are WITHDRAWN as a proof (O2's rule): the reading is COUNT and names golib objects, read below. The '~35 allocations per run' above is STALE: the i7 read 2. |
+| `TestTCPReadWriteAllocs` | `deferred` | the same zero-alloc assert over the TCP hot path: Read/Write on a loopback conn, 1,000 runs, required to allocate nothing. Go's Read/Write reach the netFD with no heap traffic at all; the converted equivalents allocate through the same three structural sites as TestAllocs — slice<T> over a heap T[], the Conn interface surface, and the per-call syscall argument marshalling — reporting ~35 allocations per run (35,000 over 1,000). Lower than TestAllocs because the TCP path marshals no msghdr and carries no address value, which is itself evidence the count tracks the converted call shape rather than any defect in net. RELABEL 2026-09-23 (C1, as ruled -- COORD's net-reading ruling, 2026-09-23): RULING OWED -> deferred. The three 'structural sites' above are WITHDRAWN as a proof (O2's rule): the reading is COUNT and names golib objects, read below. The '~35 allocations per run' above is STALE: the i7 read 2. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 2 per run at go1.24.13 to 16 per run on windows, 6 on linux; the test body changed between go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 
