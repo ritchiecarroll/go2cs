@@ -414,7 +414,7 @@ internal static bool equal(slice<global::go.text.template.parse_package.item> i1
     if (len(i1) != len(i2)) {
         return false;
     }
-    foreach (var (k, _) in i1) {
+    foreach (var k in range(i1)) {
         if (i1[k].typ != i2[k].typ) {
             return false;
         }
@@ -594,7 +594,7 @@ public static void TestPos(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: got\n\t%v\nexpected\n\t%v"u8, test.name, items, test.items);
             if (len(items) == len(test.items)) {
                 // Detailed print; avoid item.String() to expose the position value.
-                foreach (var (i, _) in items) {
+                foreach (var i in range(items)) {
                     if (!equal(items.slice(i, i + 1), test.items.slice(i, i + 1), true)) {
                         var i1 = items[i];
                         var i2 = test.items[i];
@@ -605,29 +605,6 @@ public static void TestPos(ж<testing.T> Ꮡt) {
             }
         }
     }
-}
-
-// parseLexer is a local version of parse that lets us pass in the lexer instead of building it.
-// We expect an error, so the tree set and funcs list are explicitly nil.
-internal static (ж<global::go.text.template.parse_package.Tree> tree, error err) parseLexer(this ж<global::go.text.template.parse_package.Tree> Ꮡt, ж<global::go.text.template.parse_package.lexer> Ꮡlex) {
-    ж<global::go.text.template.parse_package.Tree> tree = default!;
-    heap<error>(out var Ꮡerr);
-    GoFrame ᒐ = default;
-    try {
-        ref var t = ref Ꮡt.DerefOrNull();
-        ref var err = ref Ꮡerr.ValueSlot;
-
-        defer(Ꮡt.recover, Ꮡerr, ref ᒐ);
-        t.ParseName = t.Name;
-        t.startParse(default!, Ꮡlex, new map<@string, ж<global::go.text.template.parse_package.Tree>>{});
-        Ꮡt.parse();
-        Ꮡt.add();
-        t.stopParse();
-        (tree, err) = (Ꮡt, default!);
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-    return (tree, Ꮡerr.ValueSlot);
 }
 
 } // end parse_internal_test_package

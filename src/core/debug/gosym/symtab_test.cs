@@ -5,11 +5,13 @@ namespace go.debug;
 
 using fmt = fmt_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.debug.gosym_package;
 
 partial class gosym_internal_test_package {
 
-internal static void assertString(ж<testing.T> Ꮡt, @string dsc, @string @out, @string tgt) {
+internal static partial void assertString(ж<testing.T> Ꮡt, @string dsc, @string @out, @string tgt) {
     if (@out != tgt) {
         Ꮡt.Fatalf("Expected: %q Actual: %q for %s"u8, tgt, @out, dsc);
     }

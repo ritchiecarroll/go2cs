@@ -39,6 +39,7 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup("interface{m()}"u8),
     dup("interface{m() string; n(x int)}"u8),
     dup("interface{~int}"u8),
+
     dup("map[string]int"u8),
     dup("chan E"u8),
     dup("<-chan E"u8),
@@ -63,33 +64,42 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup("(x)"u8),
     dup("x.f"u8),
     dup("a[i]"u8),
+
     dup("s[:]"u8),
     dup("s[i:]"u8),
     dup("s[:j]"u8),
     dup("s[i:j]"u8),
     dup("s[:j:k]"u8),
     dup("s[i:j:k]"u8),
+
     dup("x.(T)"u8),
+
     dup("x.([10]int)"u8),
     dup("x.([...]int)"u8),
+
     dup("x.(struct{})"u8),
     dup("x.(struct{x int; y, z float32; E})"u8),
+
     dup("x.(func())"u8),
     dup("x.(func(x int))"u8),
     dup("x.(func() int)"u8),
     dup("x.(func(x, y int, z float32) (r int))"u8),
     dup("x.(func(a, b, c int))"u8),
     dup("x.(func(x ...T))"u8),
+
     dup("x.(interface{})"u8),
     dup("x.(interface{m(); n(x int); E})"u8),
     dup("x.(interface{m(); n(x int) T; E; F})"u8),
+
     dup("x.(map[K]V)"u8),
+
     dup("x.(chan E)"u8),
     dup("x.(<-chan E)"u8),
     dup("x.(chan<- chan int)"u8),
     dup("x.(chan<- <-chan int)"u8),
     dup("x.(<-chan chan int)"u8),
     dup("x.(chan (<-chan int))"u8),
+
     dup("f()"u8),
     dup("f(x)"u8),
     dup("int(x)"u8),
@@ -102,6 +112,7 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup("f[T](T)"u8),
     dup("f[T, T1]()"u8),
     dup("f[T, T1](T, T1)"u8),
+
     dup("*x"u8),
     dup("&x"u8),
     dup("x + y"u8),

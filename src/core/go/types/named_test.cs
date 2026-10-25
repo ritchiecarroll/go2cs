@@ -20,7 +20,7 @@ internal static readonly @string underlyingˢ = "Underlying"u8;
 internal static readonly @string newMethodSetˢ = "NewMethodSet"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ32 = """
+internal static readonly @string srcᶜ33 = """
 
 package p
 
@@ -48,7 +48,7 @@ internal partial struct BenchmarkNamed_tests /*dyn*/ {
 }
 
 public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
-    @string src = srcᶜ32;
+    @string src = srcᶜ33;
     var pkg = mustTypecheck(src, nil, nil);
 
     typesꓸType T = pkg.Scope().Lookup("T"u8).Type();
@@ -111,7 +111,7 @@ internal static typesꓸType mustInstantiate(testing.TB tb, typesꓸType orig, p
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ33 = """
+internal static readonly @string srcᶜ34 = """
 
 package p
 
@@ -133,7 +133,7 @@ type Inst = *Tree[int]
 
 // Test that types do not expand infinitely, as in go.dev/issue/52715.
 public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ33;
+    @string src = srcᶜ34;
 
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
@@ -158,7 +158,7 @@ public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ34 = """
+internal static readonly @string srcᶜ35 = """
 
 package p
 
@@ -174,7 +174,7 @@ func (T) b() {}
 // a named type remain the same as long as the same source and AddMethod calls
 // are presented to the type checker in the same order (go.dev/issue/61298).
 public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ34;
+    @string src = srcᶜ35;
     // should get the same method order each time
     slice<@string> methods = default!;
     for (nint i = 0; i < 5; i++) {
@@ -192,7 +192,7 @@ public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
         if (i == 0){
             // first round: collect methods in given order
             methods = new slice<@string>(T.NumMethods());
-            foreach (var (j, _) in methods) {
+            foreach (var j in range(methods)) {
                 methods[j] = T.Method(j).Name();
             }
         } else {

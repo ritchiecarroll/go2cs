@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http/httputil` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**53 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**62 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/http/httputil`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/httputil).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -27,6 +27,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestModifyResponseClosesBody` | pass | pass |
 | `TestNilBody` | pass | pass |
 | `TestReverseProxy` | pass | pass |
+| `TestReverseProxyCONNECT` | pass | pass |
 | `TestReverseProxyCancellation` | pass | pass |
 | `TestReverseProxyErrorHandler` | pass | pass |
 | `TestReverseProxyErrorHandler/default` | pass | pass |
@@ -36,6 +37,8 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestReverseProxyFlushInterval` | pass | pass |
 | `TestReverseProxyFlushIntervalHeaders` | pass | pass |
 | `TestReverseProxyGetPutBuffer` | pass | pass |
+| `TestReverseProxyHijackCopyError` | pass | pass |
+| `TestReverseProxyInvalidUpstream100ContinueDoNotHang` | pass | pass |
 | `TestReverseProxyModifyResponse` | pass | pass |
 | `TestReverseProxyQuery` | pass | pass |
 | `TestReverseProxyQueryParameterSmugglingDirectorDoesNotParseForm` | pass | pass |
@@ -47,8 +50,14 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestReverseProxyRewriteStripsForwarded` | pass | pass |
 | `TestReverseProxyStripEmptyConnection` | pass | pass |
 | `TestReverseProxyStripHeadersPresentInConnection` | pass | pass |
+| `TestReverseProxyUpgradeNoCloseWrite` | pass | pass |
 | `TestReverseProxyWebSocket` | pass | pass |
 | `TestReverseProxyWebSocketCancellation` | pass | pass |
+| `TestReverseProxyWebSocketHalfTCP` | pass | pass |
+| `TestReverseProxyWebSocketHalfTCP/client_close_read` | pass | pass |
+| `TestReverseProxyWebSocketHalfTCP/client_close_write` | pass | pass |
+| `TestReverseProxyWebSocketHalfTCP/server_close_read` | pass | pass |
+| `TestReverseProxyWebSocketHalfTCP/server_close_write` | pass | pass |
 | `TestReverseProxy_AllocatedHeader` | pass | pass |
 | `TestReverseProxy_CopyBuffer` | pass | pass |
 | `TestReverseProxy_NilBody` | pass | pass |

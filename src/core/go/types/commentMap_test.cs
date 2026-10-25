@@ -77,7 +77,7 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
 internal static readonly @string errorˢ2 = "^ ERROR "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ14 = """
+internal static readonly @string srcᶜ15 = """
 /* ERROR "0:0" */ /* ERROR "0:0" */ // ERROR "0:0"
 // ERROR "0:0"
 x /* ERROR "3:1" */                // ignore automatically inserted semicolon here
@@ -90,7 +90,7 @@ x /* ERROR "3:1" */                // ignore automatically inserted semicolon he
 """u8.Raw();
 
 public static void TestCommentMap(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ14;
+    @string src = srcᶜ15;
     var m = commentMap(slice<byte>(src), regexp.MustCompile(errorˢ2));
     nint found = 0; // number of errors found
     foreach (var (line, errlist) in m) {

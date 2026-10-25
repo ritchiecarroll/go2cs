@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using aes = crypto.aes_package;
-using cipher = crypto.cipher_package;
-using rc4 = crypto.rc4_package;
+using aes = global::go.crypto.aes_package;
+using cipher = global::go.crypto.cipher_package;
+using rc4 = global::go.crypto.rc4_package;
 using testing = testing_package;
-using crypto;
+using global::go.crypto;
 
 partial class crypto_test_package {
 

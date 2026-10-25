@@ -12,9 +12,10 @@ internal static class Go2CsTestHost
             "aes.go",
             "aes_test.go",
         });
-        registry.Add("TestAESBlock", aes_internal_test_package.TestAESBlock, "aes_test.go", 101);
-        registry.Add("TestCipherDecrypt", aes_internal_test_package.TestCipherDecrypt, "aes_test.go", 78);
-        registry.Add("TestCipherEncrypt", aes_internal_test_package.TestCipherEncrypt, "aes_test.go", 55);
+        registry.Add("TestAESBlock", aes_internal_test_package.TestAESBlock, "aes_test.go", 102);
+        registry.Add("TestCipherDecrypt", aes_internal_test_package.TestCipherDecrypt, "aes_test.go", 79);
+        registry.Add("TestCipherEncrypt", aes_internal_test_package.TestCipherEncrypt, "aes_test.go", 56);
+        registry.Add("TestExtraMethods", aes_internal_test_package.TestExtraMethods, "aes_test.go", 114);
         return TestHost.Run(registry, args);
     }
 }

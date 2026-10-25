@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `hash/maphash` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `f9a4b088f`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**59 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**66 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/hash/maphash`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/hash/maphash).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -42,6 +42,13 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestHashBytesVsString` | pass | pass |
 | `TestHashGrouping` | pass | pass |
 | `TestHashHighBytes` | pass | pass |
+| `TestHashInterface` | pass | pass |
+| `TestHashInterface/Clone` | pass | pass |
+| `TestHashInterface/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/ResetState` | pass | pass |
+| `TestHashInterface/StatefulWrite` | pass | pass |
+| `TestHashInterface/SumAppend` | pass | pass |
+| `TestHashInterface/WriteWithoutError` | pass | pass |
 | `TestRepeat` | pass | pass |
 | `TestSeedFromFlush` | pass | pass |
 | `TestSeedFromReset` | pass | pass |

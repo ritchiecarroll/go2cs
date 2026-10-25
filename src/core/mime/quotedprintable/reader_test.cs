@@ -27,6 +27,8 @@ internal partial struct TestReader_tests /*dyn*/ {
 }
 
 public static void TestReader(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
     var tests = new TestReader_tests[]{
         new(@in: ""u8, want: ""u8),
         new(@in: "foo bar"u8, want: "foo bar"u8),
@@ -70,7 +72,11 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         new(@in: "Now's the time =\n"u8 + "for all folk to come=\n"u8 + " to the aid of their country."u8,
             want: "Now's the time for all folk to come to the aid of their country."u8),
         new(@in: "accept UTF-8 right quotation mark: ’"u8,
-            want: "accept UTF-8 right quotation mark: ’"u8)
+            want: "accept UTF-8 right quotation mark: ’"u8),
+
+        // Transport padding
+        new(@in: "foo= \r\nbar"u8, want: "foobar"u8),
+        new(@in: "foo=\t \r\nbar"u8, want: "foobar"u8)
     }.slice();
     foreach (var (_, tt) in tests) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -124,20 +130,22 @@ internal static readonly @string invalidBytesAfterˢ = "invalid bytes after =:"u
 internal static readonly @string invalidBytesAfterˢ2 = "invalid bytes after ="u8;
 internal static readonly @string invalidHexByteˢ = "invalid hex byte "u8;
 internal static readonly @string unexpectedEofˢ = "unexpected EOF"u8;
-internal static readonly @string ok28934InvalidBytesAfterˢ = """
-OK: 28934
-invalid bytes after =: 3949
-quotedprintable: invalid hex byte 0x0d: 2048
+internal static readonly @string ok30638InvalidBytesAfterˢ = """
+OK: 30638
+invalid bytes after =: 2243
+quotedprintable: invalid hex byte 0x0d: 2050
 unexpected EOF: 194
 """u8.Raw();
-internal static readonly @string ok896InvalidBytesAfterˢ = """
-OK: 896
-invalid bytes after =: 100
+internal static readonly @string ok935InvalidBytesAfter61ˢ = """
+OK: 935
+invalid bytes after =: 61
 quotedprintable: invalid hex byte 0x0d: 26
 unexpected EOF: 3
 """u8.Raw();
 
 public static void TestExhaustive(ж<testing.T> Ꮡt) {
+    var outcomesᴷ = new stackAppend<@string>();
+
     if (useQprint.Value) {
         var (_, err) = exec.LookPath(qprintˢ);
         if (err != default!) {
@@ -240,13 +248,13 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
     });
     slice<@string> outcomes = default!;
     foreach (var (k, v) in res) {
-        outcomes = append(outcomes, fmt.Sprintf("%v: %d"u8, k, v));
+        outcomes = append(outcomesᴷ, outcomes, fmt.Sprintf("%v: %d"u8, k, v));
     }
     slices.Sort<slice<@string>, @string>(outcomes);
     @string got = strings.Join(outcomes, "\n"u8);
-    @string want = ok28934InvalidBytesAfterˢ;
+    @string want = ok30638InvalidBytesAfterˢ;
     if (testing.Short()) {
-        want = ok896InvalidBytesAfterˢ;
+        want = ok935InvalidBytesAfter61ˢ;
     }
 
     if (got != want) {

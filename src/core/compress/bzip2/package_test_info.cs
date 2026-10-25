@@ -27,6 +27,12 @@ using static global::go.compress.bzip2_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -35,7 +41,7 @@ using static global::go.compress.bzip2_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/bzip2/bzip2_test.go", "bzip2_test.cs", "ABAggoKClKaCgoKUpoKCgpQAEQaCAB94goKUABQ6goKUgIKClLaCAAoKggALIIKCgoKAgoKUtoIACQqCAAcWgoKCgoLKgoKCgILKgoKWtIKCpoKClIKCuICigKKA", "100-106:1")]
+[assembly: go.GoPositionMap("compress/bzip2/bzip2_test.go", "bzip2_test.cs", "ABMkgoKClKaCgoKClKaCgpSmgoKClAARBoIAH3iCgpQAFDqCgpSAgoKUtoIACgqCAAsggoKCgoCCgpS2ggAJCoIABxaCgoKCgsqCgoKAgsqCgpa0goKmgoKUgoK4gKKAooA=", "110-116:1")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
@@ -62,8 +68,10 @@ public static partial class bzip2_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸhex() => builtin.initPackage(typeof(encoding.hex_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸobscuretestdata() => builtin.initPackage(typeof(@internal.obscuretestdata_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
     // Go runs every `init` in the package under test - the production files' included -

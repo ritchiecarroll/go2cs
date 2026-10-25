@@ -11,6 +11,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using log = log_package;
+using net = net_package;
 using http = go.net.http_package;
 using httptest = go.net.http.httptest_package;
 using httptrace = go.net.http.httptrace_package;
@@ -19,6 +20,7 @@ using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using os = os_package;
 using reflect = reflect_package;
+using runtime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
@@ -30,7 +32,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using go.net;
 using go.net.http;
 using go.net.http.@internal;
-using net = net_package;
+using iter = iter_package;
 using static go.net.http.httputil_package;
 
 partial class httputil_internal_test_package {
@@ -194,7 +196,7 @@ public static void TestReverseProxy(ж<testing.T> Ꮡt) {
         }
         var (bodyBytes, _) = io.ReadAll((~res).Body);
         {
-            @string g = ((@string)bodyBytes);
+            @string g = (@string)bodyBytes;
             @string e = backendResponse; if (g != e) {
                 Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
             }
@@ -296,9 +298,8 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
             var c = (~r).Header[connectionˢ];
             slice<@string> cf = default!;
             foreach (var (_, f) in c) {
-                foreach (var (_, vᴛ1) in strings.Split(f, ","u8)) {
-                    var sf = vᴛ1;
-
+                foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ","u8).Invoke)) {
+                    var sf = iᴛ1;
                     {
                         sf = strings.TrimSpace(sf); if (sf != ""u8) {
                             cf = append(cf, sf);
@@ -332,7 +333,7 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
             Ꮡt.Fatalf("reading body: %v"u8, err);
         }
         {
-            @string got = ((@string)bodyBytes);
+            @string got = (@string)bodyBytes;
             @string want = backendResponse; if (got != want) {
                 Ꮡt.Errorf("got body %q; want %q"u8, got, want);
             }
@@ -423,7 +424,7 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("reading body: %v"u8, err);
         }
         {
-            @string got = ((@string)bodyBytes);
+            @string got = (@string)bodyBytes;
             @string want = backendResponse; if (got != want) {
                 Ꮡt.Errorf("got body %q; want %q"u8, got, want);
             }
@@ -499,7 +500,7 @@ public static void TestXForwardedFor(ж<testing.T> Ꮡt) {
         }
         var (bodyBytes, _) = io.ReadAll((~res).Body);
         {
-            @string g = ((@string)bodyBytes);
+            @string g = (@string)bodyBytes;
             @string e = backendResponse; if (g != e) {
                 Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
             }
@@ -1101,7 +1102,7 @@ public static void TestReverseProxy_Post(ж<testing.T> Ꮡt) {
     try {
         @string backendResponse = backendResponseᶜ5;
         const nint backendStatus = 200;
-        slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
+        slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
         var requestBodyʗ1 = requestBody;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             var (slurp, errΔ1) = io.ReadAll((~r).Body);
@@ -1142,7 +1143,7 @@ public static void TestReverseProxy_Post(ж<testing.T> Ꮡt) {
         }
         var (bodyBytes, _) = io.ReadAll((~res).Body);
         {
-            @string g = ((@string)bodyBytes);
+            @string g = (@string)bodyBytes;
             @string e = backendResponse; if (g != e) {
                 Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
             }
@@ -2128,6 +2129,267 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string serverSendsˢ = "server sends"u8;
+internal static readonly @string clientSendsˢ = "client sends"u8;
+internal static readonly object connIsNotATCPConnˢ = (@string)"conn is not a TCPConn"u8;
+internal static readonly @string tcpˢ = "tcp"u8;
+
+public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> Ꮡt) {
+    // Issue #35892: support TCP half-close when HTTP is upgraded in the ReverseProxy.
+    // Specifically testing:
+    // - the communication through the reverse proxy when the client or server closes
+    //   either the read or write streams
+    // - that closing the write stream is propagated through the proxy and results in reading
+    //   EOF at the other end of the connection
+
+    var exprᴛ1 = runtime.GOOS;
+    if (exprᴛ1 == "plan9"u8) {
+        Ꮡt.Skipf("not supported on %s"u8, runtime.GOOS);
+    }
+
+    void mustRead(ж<testing.T> tΔ1, ж<net.TCPConn> conn, @string msg) {
+        var b = new slice<byte>(len(msg));
+        {
+            var (_, err) = conn.Read(b); if (err != default!) {
+                tΔ1.Errorf("failed to read: %v"u8, err);
+            }
+        }
+
+        {
+            @string got = (@string)b;
+            @string want = msg; if (got != want) {
+                tΔ1.Errorf("got %#q, want %#q"u8, got, want);
+            }
+        }
+    }
+
+    void mustReadError(ж<testing.T> tΔ2, ж<net.TCPConn> conn, error e) {
+        var b = new slice<byte>(1);
+        {
+            var (_, err) = conn.Read(b); if (!errors.Is(err, e)) {
+                tΔ2.Errorf("failed to read error: %v"u8, err);
+            }
+        }
+    }
+
+    void mustWrite(ж<testing.T> tΔ3, ж<net.TCPConn> conn, @string msg) {
+        {
+            var (_, err) = conn.Write(slice<byte>(msg)); if (err != default!) {
+                tΔ3.Errorf("failed to write: %v"u8, err);
+            }
+        }
+    }
+
+    void mustCloseRead(ж<testing.T> tΔ4, ж<net.TCPConn> conn) {
+        {
+            var err = conn.CloseRead(); if (err != default!) {
+                tΔ4.Errorf("failed to CloseRead: %v"u8, err);
+            }
+        }
+    }
+
+    void mustCloseWrite(ж<testing.T> tΔ5, ж<net.TCPConn> conn) {
+        {
+            var err = conn.CloseWrite(); if (err != default!) {
+                tΔ5.Errorf("failed to CloseWrite: %v"u8, err);
+            }
+        }
+    }
+
+        var mustCloseReadʗ1 = mustCloseRead;
+        var mustReadʗ1 = mustRead;
+        var mustWriteʗ1 = mustWrite;
+
+        var mustCloseWriteʗ1 = mustCloseWrite;
+        var mustReadʗ2 = mustRead;
+        var mustReadErrorʗ1 = mustReadError;
+        var mustWriteʗ2 = mustWrite;
+
+        var mustCloseReadʗ2 = mustCloseRead;
+        var mustReadʗ3 = mustRead;
+        var mustWriteʗ3 = mustWrite;
+
+        var mustCloseWriteʗ2 = mustCloseWrite;
+        var mustReadʗ4 = mustRead;
+        var mustReadErrorʗ2 = mustReadError;
+        var mustWriteʗ4 = mustWrite;
+    var tests = new map<@string, Action<ж<testing.T>, ж<net.TCPConn>, ж<net.TCPConn>>>{
+        ["server close read"u8] = (ж<testing.T> tΔ6, ж<net.TCPConn> cli, ж<net.TCPConn> srv) => {
+            mustCloseReadʗ1(tΔ6, srv);
+            mustWriteʗ1(tΔ6, srv, serverSendsˢ);
+            mustReadʗ1(tΔ6, cli, serverSendsˢ);
+        },
+        ["server close write"u8] = (ж<testing.T> tΔ7, ж<net.TCPConn> cli, ж<net.TCPConn> srv) => {
+            mustCloseWriteʗ1(tΔ7, srv);
+            mustWriteʗ2(tΔ7, cli, clientSendsˢ);
+            mustReadʗ2(tΔ7, srv, clientSendsˢ);
+            mustReadErrorʗ1(tΔ7, cli, io.EOF);
+        },
+        ["client close read"u8] = (ж<testing.T> tΔ8, ж<net.TCPConn> cli, ж<net.TCPConn> srv) => {
+            mustCloseReadʗ2(tΔ8, cli);
+            mustWriteʗ3(tΔ8, cli, clientSendsˢ);
+            mustReadʗ3(tΔ8, srv, clientSendsˢ);
+        },
+        ["client close write"u8] = (ж<testing.T> tΔ9, ж<net.TCPConn> cli, ж<net.TCPConn> srv) => {
+            mustCloseWriteʗ2(tΔ9, cli);
+            mustWriteʗ4(tΔ9, srv, serverSendsˢ);
+            mustReadʗ4(tΔ9, cli, serverSendsˢ);
+            mustReadErrorʗ2(tΔ9, srv, io.EOF);
+        }
+    };
+
+    foreach (var (name, test) in tests) {
+        var testʗ1 = test;
+        Ꮡt.Run(name, (ж<testing.T> tΔ10) => {
+            GoFrame ᒐ = default;
+            try {
+                ref var srv = ref heap<ж<net.TCPConn>>(out var Ꮡsrv);
+
+                var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+                    {
+                        @string g = upgradeType((~r).Header);
+                        @string ws = websocketˢ; if (g != ws) {
+                            tΔ10.Fatalf("Unexpected upgrade type %q, want %q"u8, g, ws);
+                        }
+                    }
+
+                    var (conn, _, errΔ1) = w._<http.Hijacker>().Hijack();
+                    if (errΔ1 != default!) {
+                        conn.Close();
+                        tΔ10.Fatalf("hijack failed: %v"u8, errΔ1);
+                    }
+
+                    bool ok = default!;
+                    {
+                        (Ꮡsrv.ValueSlot, ok) = conn._<ж<net.TCPConn>>(ᐧ); if (!ok) {
+                            conn.Close();
+                            tΔ10.Fatal(connIsNotATCPConnˢ);
+                        }
+                    }
+
+                    @string upgradeMsg = http11101Switchingˢ;
+                    {
+                        var (_, errΔ2) = io.WriteString(new httputil_test_package.net_TCPConnжWriter(Ꮡsrv.ValueSlot), upgradeMsg); if (errΔ2 != default!) {
+                            Ꮡsrv.ValueSlot.Close();
+                            tΔ10.Fatalf("backend upgrade failed: %v"u8, errΔ2);
+                        }
+                    }
+                })));
+                var backendServerʗ1 = backendServer;
+                defer(backendServerʗ1.Close, ref ᒐ);
+
+                var (backendURL, _) = url.Parse((~backendServer).URL);
+                var rproxy = NewSingleHostReverseProxy(backendURL);
+                rproxy.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
+                var rproxyʗ1 = rproxy;
+                var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
+                    rproxyʗ1.ServeHTTP(rw, reqΔ1);
+                })));
+                var frontendProxyʗ1 = frontendProxy;
+                defer(frontendProxyʗ1.Close, ref ᒐ);
+
+                var (frontendURL, _) = url.Parse((~frontendProxy).URL);
+                var (addr, err) = net.ResolveTCPAddr(tcpˢ, (~frontendURL).Host);
+                if (err != default!) {
+                    tΔ10.Fatalf("failed to resolve TCP address: %v"u8, err);
+                }
+                (var cli, err) = net.DialTCP(tcpˢ, nil, addr);
+                if (err != default!) {
+                    tΔ10.Fatalf("failed to dial TCP address: %v"u8, err);
+                }
+                var cliʗ1 = cli;
+                defer(() => cliʗ1.Close(), ref ᒐ);
+
+                var (req, _) = http.NewRequest(getˢ, (~frontendProxy).URL, default!);
+                (~req).Header.Set(connectionˢ, upgradeˢ);
+                (~req).Header.Set(upgradeˢ, websocketˢ);
+                {
+                    var errΔ1 = req.Write(new httputil_test_package.net_TCPConnжWriter(cli)); if (errΔ1 != default!) {
+                        tΔ10.Fatalf("failed to write request: %v"u8, errΔ1);
+                    }
+                }
+
+                var br = bufio.NewReader(new httputil_test_package.net_TCPConnжReader(cli));
+                (var resp, err) = http.ReadResponse(br, Ꮡ(new http.Request(Method: "GET"u8)));
+                if (err != default!) {
+                    tΔ10.Fatalf("failed to read response: %v"u8, err);
+                }
+                if ((~resp).StatusCode != 101) {
+                    tΔ10.Fatalf("status code not 101: %v"u8, (~resp).StatusCode);
+                }
+                if (strings.ToLower((~resp).Header.Get(upgradeˢ)) != "websocket"u8 || strings.ToLower((~resp).Header.Get(connectionˢ)) != "upgrade"u8) {
+                    tΔ10.Fatalf("frontend upgrade failed"u8);
+                }
+                defer(() => Ꮡsrv.ValueSlot.Close(), ref ᒐ);
+
+                testʗ1(tΔ10, cli, Ꮡsrv.ValueSlot);
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string upgradeˢ2 = "upgrade"u8;
+
+internal partial struct TestReverseProxyUpgradeNoCloseWrite_readWriteCloserOnly /*dyn*/ {
+    /*embed*/ public io_package.ReadWriteCloser ReadWriteCloser;
+}
+
+public static void TestReverseProxyUpgradeNoCloseWrite(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // The backend hijacks the connection,
+        // reads all data from the client,
+        // and returns.
+        var backendDone = new channel<EmptyStruct>(0);
+        var backendDoneʗ1 = backendDone;
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+            w.Header().Set(connectionˢ, upgradeˢ2);
+            w.Header().Set(upgradeˢ, "u"u8);
+            w.WriteHeader(101);
+            var (conn, _, errΔ1) = http.NewResponseController(w).Hijack();
+            if (errΔ1 != default!) {
+                Ꮡt.Errorf("Hijack: %v"u8, errΔ1);
+            }
+            io.Copy(io.Discard, new httputil_test_package.net_ConnᴠReader(conn));
+            close(backendDoneʗ1);
+        })));
+        var (backendURL, err) = url.Parse((~backend).URL);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+
+        // The proxy includes a ModifyResponse function which replaces the response body
+        // with its own wrapper, dropping the original body's CloseWrite method.
+        var proxyHandler = NewSingleHostReverseProxy(backendURL);
+        proxyHandler.Value.ModifyResponse = error (ж<http.Response> respΔ1) => {
+            respΔ1.Value.Body = new TestReverseProxyUpgradeNoCloseWrite_readWriteCloserOnly((~respΔ1).Body._<io.ReadWriteCloser>());
+            return default!;
+        };
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontendʗ1 = frontend;
+        defer(frontendʗ1.Close, ref ᒐ);
+
+        // The client sends a request and closes the connection.
+        var (req, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
+        (~req).Header.Set(connectionˢ, upgradeˢ2);
+        (~req).Header.Set(upgradeˢ, "u"u8);
+        (var resp, err) = frontend.Client().Do(req);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        (~resp).Body.Close();
+
+        // We expect that the client's closure of the connection is propagated to the backend.
+        ᐸꟷ(backendDone);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
 public static void TestUnannouncedTrailer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -2203,7 +2465,7 @@ public static void TestSetURL(ж<testing.T> Ꮡt) {
         }
 
         {
-            @string got = ((@string)body);
+            @string got = (@string)body;
             @string want = backendURL.Value.Host; if (got != want) {
                 Ꮡt.Errorf("backend got Host %q, want %q"u8, got, want);
             }
@@ -2299,7 +2561,7 @@ public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> Ꮡt) {
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         var (body, _) = io.ReadAll((~res).Body);
         {
-            @string got = ((@string)body);
+            @string got = (@string)body;
             @string want = content; if (got != want) {
                 Ꮡt.Errorf("got response %q, want %q"u8, got, want);
             }
@@ -2409,7 +2671,7 @@ public static void Test1xxResponses(ж<testing.T> Ꮡt) {
                 tΔ1.Errorf("Expected %d link headers; got %d"u8, len(expected), len(got));
             }
 
-            foreach (var (i, _) in expected) {
+            foreach (var i in range(expected)) {
                 if (i >= len(got)) {
                     tΔ1.Errorf("Expected %q link header; got nothing"u8, expected[i]);
 
@@ -2549,6 +2811,12 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt,
         ), new(
             rawQuery: "a=1&a=%zz&b=3"u8,
             cleanQuery: "a=1&b=3"u8
+        ), new(
+            rawQuery: "a=%zz"u8,
+            cleanQuery: ""u8
+        ), new(
+            rawQuery: strings.Repeat("a=1&"u8, 10000) + "a=1"u8,
+            cleanQuery: ""u8
         )
         }.slice()) {
             var (res, errΔ1) = frontend.Client().Get((~frontend).URL + "?"u8 + test.rawQuery);
@@ -2563,10 +2831,116 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt,
                 wantQuery = test.cleanQuery;
             }
             {
-                @string got = ((@string)body);
+                @string got = (@string)body;
                 @string want = wantQuery; if (got != want) {
                     Ꮡt.Errorf("proxy forwarded raw query %q as %q, want %q"u8, test.rawQuery, got, want);
                 }
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string someprotoˢ = "someproto"u8;
+internal static readonly @string readErrorˢ = "read error"u8;
+internal static readonly @string httpExampleTldˢ = "http://example.tld/"u8;
+
+// Issue #72954: We should not call WriteHeader on a ResponseWriter after hijacking
+// the connection.
+public static void TestReverseProxyHijackCopyError(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+            w.Header().Set(upgradeˢ, someprotoˢ);
+            w.WriteHeader(http.StatusSwitchingProtocols);
+        })));
+        var backendʗ1 = backend;
+        defer(backendʗ1.Close, ref ᒐ);
+        var (backendURL, err) = url.Parse((~backend).URL);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+            var backendURLʗ1 = backendURL;
+
+        var proxyHandler = Ꮡ(new ReverseProxy(
+            Rewrite: (ж<global::go.net.http.httputil_package.ProxyRequest> r) => {
+                r.SetURL(backendURLʗ1);
+            },
+            ModifyResponse: (ж<http.Response> resp) => {
+                resp.Value.Body = new httputil_internal_test_package.testReadWriteCloserжReadCloser(Ꮡ(new testReadWriteCloser(
+                    read: (slice<byte> _Δp0) => (0, errors.New(readErrorˢ))
+                )));
+                return default!;
+            }
+        ));
+
+        var hijacked = false;
+
+        var rw = Ꮡ(new testResponseWriter(
+            writeHeader: (nint statusCode) => {
+                if (hijacked) {
+                    Ꮡt.Errorf("WriteHeader(%v) called after Hijack"u8, statusCode);
+                }
+            },
+            hijack: [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                hijacked = true;
+                var (cli, srv) = net.Pipe();
+                goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), io.Discard, new httputil_test_package.net_ConnᴠReader(cli));
+                return (srv, bufio.NewReadWriter(bufio.NewReader(new httputil_test_package.net_ConnᴠReader(srv)), bufio.NewWriter(new httputil_test_package.net_ConnᴠWriter(srv))), default!);
+            }
+        ));
+        var (req, _) = http.NewRequest(getˢ, httpExampleTldˢ, default!);
+        (~req).Header.Set(upgradeˢ, someprotoˢ);
+        proxyHandler.ServeHTTP(new httputil_internal_test_package.testResponseWriterжResponseWriter(rw), req);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string doesnotexist12345ˢ = "doesnotexist:12345"u8;
+internal static readonly @string testDataˢ = @"{""test"": ""data""}"u8;
+
+// https://go.dev/issue/75933.
+public static void TestReverseProxyInvalidUpstream100ContinueDoNotHang(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        ref var proxy = ref heap<global::go.net.http.httputil_package.ReverseProxy>(out var Ꮡproxy);
+        proxy = new ReverseProxy(
+            Transport: new http.TransportжRoundTripper(Ꮡ(new http.Transport(DisableKeepAlives: true, ExpectContinueTimeout: (time.Duration)(60000000000L)))),
+            Director: (ж<http.Request> request) => {
+                request.Value.URL.Value.Scheme = httpˢ;
+                request.Value.URL.Value.Host = doesnotexist12345ˢ; // non-existent upstream
+            }
+        );
+        var handler = new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter w, ж<http.Request> r) => {
+            Ꮡproxy.ServeHTTP(w, r);
+        });
+        var upstreamServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
+        var upstreamServerʗ1 = upstreamServer;
+        defer(upstreamServerʗ1.Close, ref ᒐ);
+
+        var (conn, err) = net.Dial(tcpˢ, (~upstreamServer).Listener.Addr().String());
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var connʗ1 = conn;
+        defer(() => connʗ1.Close(), ref ᒐ);
+
+        @string requestBody = testDataˢ;
+        @string initialRequest = fmt.Sprintf("POST %s/test-expect HTTP/1.1\r\n"u8 + "Host: %s\r\n"u8 + "Content-Type: application/json\r\n"u8 + "Content-Length: %d\r\n"u8 + "Expect: 100-continue\r\n"u8 + "\r\n"u8, (~upstreamServer).URL, (~upstreamServer).Listener.Addr().String(), len(requestBody));
+
+        {
+            var (_, errΔ1) = conn.Write(slice<byte>(initialRequest)); if (errΔ1 != default!) {
+                log.Fatal(errΔ1);
+            }
+        }
+        var buff = new slice<byte>(1024);
+        {
+            var (_, errΔ2) = conn.Read(buff); if (errΔ2 != default!) {
+                log.Fatal(errΔ2);
             }
         }
     }
@@ -2578,6 +2952,7 @@ internal partial struct testResponseWriter {
     internal httpꓸHeader h;
     internal Action<nint> writeHeader;
     internal Func<slice<byte>, (nint, error)> write;
+    internal Func<(net.Conn, ж<bufio.ReadWriter>, error)> hijack;
 }
 
 internal static httpꓸHeader Header(this ref testResponseWriter rw) {
@@ -2598,6 +2973,77 @@ internal static (nint, error) Write(this ref testResponseWriter rw, slice<byte> 
         return rw.write(p);
     }
     return (len(p), default!);
+}
+
+internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref testResponseWriter rw) {
+    if (rw.hijack != default!) {
+        return rw.hijack();
+    }
+    return (default!, default!, errors.ErrUnsupported);
+}
+
+internal partial struct testReadWriteCloser {
+    internal Func<slice<byte>, (nint, error)> read;
+    internal Func<slice<byte>, (nint, error)> write;
+    internal Func<error> close;
+}
+
+internal static (nint, error) Read(this ref testReadWriteCloser rc, slice<byte> p) {
+    if (rc.read != default!) {
+        return rc.read(p);
+    }
+    return (0, io.EOF);
+}
+
+internal static (nint, error) Write(this ref testReadWriteCloser rc, slice<byte> p) {
+    if (rc.write != default!) {
+        return rc.write(p);
+    }
+    return (len(p), default!);
+}
+
+internal static error Close(this ref testReadWriteCloser rc) {
+    if (rc.close != default!) {
+        return rc.close();
+    }
+    return default!;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string httpBackendTldˢ = "http://backend.tld/"u8;
+internal static readonly @string connectˢ = "CONNECT"u8;
+internal static readonly @string bodyˢ = "body"u8;
+
+public static void TestReverseProxyCONNECT(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var proxy = Ꮡ(new ReverseProxy(
+            Rewrite: (ж<global::go.net.http.httputil_package.ProxyRequest> r) => {
+                var (backendURL, _) = url.Parse(httpBackendTldˢ);
+                r.SetURL(backendURL);
+            }
+        ));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxy));
+        var frontendʗ1 = frontend;
+        defer(frontendʗ1.Close, ref ᒐ);
+
+        var (req, _) = http.NewRequest(connectˢ, (~frontend).URL, new httputil_test_package.strings_ReaderжReader(strings.NewReader(bodyˢ)));
+        var (resp, err) = frontend.Client().Do(req);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var respʗ1 = resp;
+        defer(() => (~respʗ1).Body.Close(), ref ᒐ);
+
+        {
+            nint got = resp.Value.StatusCode;
+            nint want = http.StatusMethodNotAllowed; if (got != want) {
+                Ꮡt.Errorf("on response to CONNECT: got status %v, want %v"u8, got, want);
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 } // end httputil_internal_test_package

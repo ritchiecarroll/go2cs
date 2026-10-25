@@ -14,6 +14,8 @@ using slices = slices_package;
 using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.math;
 using io = io_package;
@@ -249,7 +251,7 @@ internal static slice<byte> at(this ref index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 
-internal static void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
+internal static partial void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
     if (!sort.IsSorted(new suffixarray_internal_test_package.indexжInterface(Ꮡx.Reinterpret<global::go.index.suffixarray_package.Index, index>()))) {

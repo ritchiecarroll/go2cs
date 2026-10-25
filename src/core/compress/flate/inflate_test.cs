@@ -35,7 +35,7 @@ public static void TestReset(ж<testing.T> Ꮡt) {
 
     foreach (var (i, s) in ss) {
         if (s != Ꮡ(inflated, i).String()) {
-            Ꮡt.Errorf("inflated[%d]:\ngot  %q\nwant %q"u8, i, inflated[i], s);
+            Ꮡt.Errorf("inflated[%d]:\ngot  %q\nwant %q"u8, i, Ꮡ(inflated, i), s);
         }
     }
 }
@@ -88,7 +88,7 @@ public static void TestResetDict(ж<testing.T> Ꮡt) {
     var inflated = new slice<bytes.Buffer>(len(ss));
 
     var f = NewReader(default!);
-    foreach (var (i, _) in inflated) {
+    foreach (var i in range(inflated)) {
         f._<Resetter>().Reset(new flate_test_package.bytes_BufferжReader(Ꮡ(deflated, i)), dict);
         io.Copy(new flate_test_package.bytes_BufferжWriter(Ꮡ(inflated, i)), f);
     }
@@ -96,7 +96,7 @@ public static void TestResetDict(ж<testing.T> Ꮡt) {
 
     foreach (var (i, s) in ss) {
         if (s != Ꮡ(inflated, i).String()) {
-            Ꮡt.Errorf("inflated[%d]:\ngot  %q\nwant %q"u8, i, inflated[i], s);
+            Ꮡt.Errorf("inflated[%d]:\ngot  %q\nwant %q"u8, i, Ꮡ(inflated, i), s);
         }
     }
 }

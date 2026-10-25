@@ -37,6 +37,8 @@ internal static readonly @string dstDir = "/src/go/types/"u8;
 // counterpart. If -write is set, this test actually writes the expected
 // content to go/types; otherwise, it just compares with the existing content.
 public static void TestGenerate(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<@string>();
+
     // If filesToWrite is set, write the generated content to disk.
     // In the special case of "all", write all files in filemap.
     var write = filesToWrite.Value != ""u8;
@@ -45,7 +47,7 @@ public static void TestGenerate(ж<testing.T> Ꮡt) {
         files = strings.Split(filesToWrite.Value, ","u8);
     } else {
         foreach (var (@file, _) in filemap) {
-            files = append(files, @file);
+            files = append(filesᴷ, files, @file);
         }
     }
 
@@ -137,6 +139,11 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     ["context.go"u8] = default!,
     ["context_test.go"u8] = default!,
     ["conversions.go"u8] = default!,
+    ["cycles.go"u8] = (ж<ast.File> f) => {
+        renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
+        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "rhs.Value->rhs.Name");
+        renameSelectors(f, "Trace->_Trace"u8);
+    },
     ["errors_test.go"u8] = (ж<ast.File> f) => {
         renameIdents(f, "nopos->noposn"u8);
     },
@@ -170,9 +177,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
         renameIdents(f, "syntax->ast"u8);
         renameSelectors(f, "ElemList->Elts"u8);
     },
-    ["lookup.go"u8] = (ж<ast.File> f) => {
-        fixTokenPos(f);
-    },
+    ["lookup.go"u8] = fixTokenPos,
     ["main_test.go"u8] = default!,
     ["map.go"u8] = default!,
     ["mono.go"u8] = (ж<ast.File> f) => {
@@ -204,6 +209,11 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     ["package.go"u8] = default!,
     ["pointer.go"u8] = default!,
     ["predicates.go"u8] = default!,
+    ["range.go"u8] = (ж<ast.File> f) => {
+        renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
+        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "syntax.ForStmt->ast.RangeStmt", "ident.Value->ident.Name"); // must happen before renaming identifiers
+        renameIdents(f, "syntax->ast"u8, "poser->positioner");
+    },
     ["recording.go"u8] = (ж<ast.File> f) => {
         renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
         renameSelectorExprs(f, "syntax.Name->ast.Ident"u8); // must happen before renaming identifiers

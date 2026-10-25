@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using gob = encoding.gob_package;
 using json = encoding.json_package;
 using fmt = fmt_package;
+using goexperiment = @internal.goexperiment_package;
 using Δmath = math_package;
 using big = go.math.big_package;
 using rand = go.math.rand_package;
@@ -18,6 +19,7 @@ using Δsync = sync_package;
 using Δtesting = testing_package;
 using quick = go.testing.quick_package;
 using static time_package;
+using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
@@ -709,6 +711,7 @@ internal static slice<dateTestsᴛ1> dateTests = new dateTestsᴛ1[]{
     new(2011, 11, 6, 1, 0, 0, 0, ΔLocal, 1320566400), // 1:00:00 PDT
     new(2011, 11, 6, 1, 59, 59, 0, ΔLocal, 1320569999), // 1:59:59 PDT
     new(2011, 11, 6, 2, 0, 0, 0, ΔLocal, 1320573600), // 2:00:00 PST
+
     new(2011, 3, 13, 1, 0, 0, 0, ΔLocal, 1300006800), // 1:00:00 PST
     new(2011, 3, 13, 1, 59, 59, 0, ΔLocal, 1300010399), // 1:59:59 PST
     new(2011, 3, 13, 3, 0, 0, 0, ΔLocal, 1300010400), // 3:00:00 PDT
@@ -728,6 +731,7 @@ internal static slice<dateTestsᴛ1> dateTests = new dateTestsᴛ1[]{
     new(2012, (nint)(January - 2), 18, 7, 56, 35, 0, ΔLocal, 1321631795), // (Jan-2) 18 7:56:35 2012
     new(2010, (nint)(December + 11), 18, 7, 56, 35, 0, ΔLocal, 1321631795), // (Dec+11) 18 7:56:35 2010
     new(1970, 1, 15297, 7, 56, 35, 0, ΔLocal, 1321631795), // large number of days
+
     new(1970, 1, -25508, 0, 0, 0, 0, ΔLocal, -2203948800L) // negative Unix time
 }.slice();
 
@@ -934,6 +938,11 @@ public static void TestTimeJSON(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string jsonCannotUnmarshalJsonˢ = "json: cannot unmarshal JSON object into Go type time.Time"u8;
+internal static readonly @string timeUnmarshalJSONInputIsˢ = "Time.UnmarshalJSON: input is not a JSON string"u8;
+internal static readonly @string jsonCannotUnmarshalJsonˢ2 = "json: cannot unmarshal JSON array into Go type time.Time"u8;
+
 internal partial struct TestUnmarshalInvalidTimes_tests /*dyn*/ {
     internal @string @in;
     internal @string want;
@@ -941,8 +950,20 @@ internal partial struct TestUnmarshalInvalidTimes_tests /*dyn*/ {
 
 public static void TestUnmarshalInvalidTimes(ж<Δtesting.T> Ꮡt) {
     var tests = new TestUnmarshalInvalidTimes_tests[]{
-        new(@"{}"u8, "Time.UnmarshalJSON: input is not a JSON string"u8),
-        new(@"[]"u8, "Time.UnmarshalJSON: input is not a JSON string"u8),
+        new(@"{}"u8, ((Func<@string>)(() => {
+            if (goexperiment.JSONv2){
+                return jsonCannotUnmarshalJsonˢ;
+            } else {
+                return timeUnmarshalJSONInputIsˢ;
+            }
+        }))()),
+        new(@"[]"u8, ((Func<@string>)(() => {
+            if (goexperiment.JSONv2){
+                return jsonCannotUnmarshalJsonˢ2;
+            } else {
+                return timeUnmarshalJSONInputIsˢ;
+            }
+        }))()),
         new(@"""2000-01-01T1:12:34Z"""u8, @"<nil>"u8),
         new(@"""2000-01-01T00:00:00,000Z"""u8, @"<nil>"u8),
         new(@"""2000-01-01T00:00:00+24:00"""u8, @"<nil>"u8),
@@ -1489,6 +1510,7 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = new defaultLocTests
     new("Before"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Before(t2) == t2.Before(t1)),
     new("Equal"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Equal(t2) == t2.Equal(t1)),
     new("Compare"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Compare(t2) == t2.Compare(t1)),
+
     new("IsZero"u8, (Δtime.Time t1, Δtime.Time t2) => t1.IsZero() == t2.IsZero()),
     new("Date"u8, (Δtime.Time t1, Δtime.Time t2) => {
         var (a1, b1, c1) = t1.Date();
@@ -1521,19 +1543,23 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = new defaultLocTests
 
     // Original cause for this test case bug 15852
     new("AddDate"u8, (Δtime.Time t1, Δtime.Time t2) => t1.AddDate(1991, 9, 3) == t2.AddDate(1991, 9, 3)),
+
     new("UTC"u8, (Δtime.Time t1, Δtime.Time t2) => t1.UTC() == t2.UTC()),
     new("Local"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Local() == t2.Local()),
     new("In"u8, (Δtime.Time t1, Δtime.Time t2) => t1.In(ΔUTC) == t2.In(ΔUTC)),
+
     new("Local"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Local() == t2.Local()),
     new("Zone"u8, (Δtime.Time t1, Δtime.Time t2) => {
         var (a1, b1) = t1.Zone();
         var (a2, b2) = t2.Zone();
         return a1 == a2 && b1 == b2;
     }),
+
     new("Unix"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Unix() == t2.Unix()),
     new("UnixNano"u8, (Δtime.Time t1, Δtime.Time t2) => t1.UnixNano() == t2.UnixNano()),
     new("UnixMilli"u8, (Δtime.Time t1, Δtime.Time t2) => t1.UnixMilli() == t2.UnixMilli()),
     new("UnixMicro"u8, (Δtime.Time t1, Δtime.Time t2) => t1.UnixMicro() == t2.UnixMicro()),
+
     new("AppendBinary"u8, (Δtime.Time t1, Δtime.Time t2) => {
         var buf1 = new slice<byte>(4, 32);
         var buf2 = new slice<byte>(4, 32);
@@ -1569,8 +1595,10 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = new defaultLocTests
         var (a2, b2) = t2.MarshalText();
         return bytes.Equal(a1, a2) && AreEqual(b1, b2);
     }),
+
     new("Truncate"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Truncate(ΔHour).Equal(t2.Truncate(ΔHour))),
     new("Round"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Round(ΔHour).Equal(t2.Round(ΔHour))),
+
     new("== Time{}"u8, (Δtime.Time t1, Δtime.Time t2) => (t1 == new Time(nil)) == (t2 == new Time(nil)))
 }.slice();
 
@@ -1615,6 +1643,20 @@ public static void BenchmarkNowUnixMicro(ж<Δtesting.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         u = Now().UnixMicro();
+    }
+}
+
+public static void BenchmarkSince(ж<Δtesting.B> Ꮡb) {
+    var start = Now();
+    while (Ꮡb.Loop()) {
+        u = (int64)Since(start);
+    }
+}
+
+public static void BenchmarkUntil(ж<Δtesting.B> Ꮡb) {
+    var end = Now().Add((Δtime.Duration)(3600000000000L));
+    while (Ꮡb.Loop()) {
+        u = (int64)Until(end);
     }
 }
 
@@ -1740,6 +1782,15 @@ public static void BenchmarkParseDuration(ж<Δtesting.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         ParseDuration("9007199254.740993ms"u8);
         ParseDuration("9007199254740993ns"u8);
+    }
+}
+
+public static void BenchmarkParseDurationError(ж<Δtesting.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    for (nint i = 0; i < b.N; i++) {
+        ParseDuration("9223372036854775810ns"u8); // overflow
+        ParseDuration("9007199254.740993"u8); // missing unit
     }
 }
 
@@ -1912,7 +1963,7 @@ public static void TestUnmarshalTextAllocations(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string month0ˢ = "%!Month(0)"u8;
 
 // Issue 17720: Zero value of time.Month fails to print
-public static void TestZeroMonthString(ж<Δtesting.T> Ꮡt) {
+public static partial void TestZeroMonthString(ж<Δtesting.T> Ꮡt) {
     {
         @string got = ((timeꓸMonth)0).String();
         @string want = month0ˢ; if (got != want) {

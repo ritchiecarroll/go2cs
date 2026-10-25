@@ -514,7 +514,7 @@ internal static slice<Δunicode.Range16> fakeTable(nint n) {
 }
 
 internal static bool linear(slice<Δunicode.Range16> ranges, uint16 r) {
-    foreach (var (i, _) in ranges) {
+    foreach (var i in range(ranges)) {
         var range_ = Ꮡ(ranges, i);
         if (r < (~range_).Lo) {
             return false;

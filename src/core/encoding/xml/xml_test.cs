@@ -10,6 +10,8 @@ using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.unicode;
 using static go.encoding.xml_package;
 
@@ -359,7 +361,7 @@ internal static (byte c, error err) ReadByte(this ref downCaser d) {
     return (c, err);
 }
 
-internal static (nint, error) Read(this ref downCaser d, slice<byte> p) {
+internal static partial (nint, error) Read(this ref downCaser d, slice<byte> p) {
     d.t.Fatalf("unexpected Read call on downCaser reader"u8);
     throw panic("unreachable");
 }
@@ -524,7 +526,7 @@ public static void TestToken(ж<testing.T> Ꮡt) {
 }
 
 public static void TestSyntax(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in xmlInput) {
+    foreach (var i in range(xmlInput)) {
         var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(xmlInput[i])));
         error err = default!;
         for ((_, err) = d.Token(); err == default!; (_, err) = d.Token()) {
@@ -1623,6 +1625,8 @@ public static void BenchmarkHTMLAutoClose(ж<testing.B> Ꮡb) {
 }
 
 public static void TestHTMLAutoClose(ж<testing.T> Ꮡt) {
+    var haveTokensᴷ = new stackAppend<ΔToken>();
+
     var wantTokens = new ΔToken[]{
         new ProcInst("xml"u8, slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -1677,7 +1681,7 @@ public static void TestHTMLAutoClose(ж<testing.T> Ꮡt) {
             }
             Ꮡt.Fatalf("unexpected error: %v"u8, err);
         }
-        haveTokens = append(haveTokens, CopyToken(tok));
+        haveTokens = append(haveTokensᴷ, haveTokens, CopyToken(tok));
     }
     if (len(haveTokens) != len(wantTokens)) {
         Ꮡt.Errorf("tokens count mismatch: have %d, want %d"u8, len(haveTokens), len(wantTokens));

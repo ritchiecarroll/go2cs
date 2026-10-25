@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `time` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `272122c0a`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**178 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**178 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/time`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/time).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 2 of the matched tests identically.
 
@@ -230,6 +230,7 @@ the capability it needs.
 - BenchmarkParallelTimerLatency (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParse (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseDuration (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkParseDurationError (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseRFC3339TZ (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseRFC3339TZBytes (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseRFC3339UTC (benchmark): benchmark execution is deferred to Phase 4D
@@ -237,6 +238,7 @@ the capability it needs.
 - BenchmarkReset (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSecond (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSimultaneousAfterFunc1000 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSince (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSleep1000 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkStaggeredTickerLatency (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkStartStop1000 (benchmark): benchmark execution is deferred to Phase 4D
@@ -245,6 +247,7 @@ the capability it needs.
 - BenchmarkTickerReset (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkTickerResetNaive (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkUnmarshalText (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkUntil (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkYear (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkYearDay (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleAfter (example): example execution is deferred to Phase 4D
@@ -274,7 +277,9 @@ the capability it needs.
 - ExampleTime_Add (example): example execution is deferred to Phase 4D
 - ExampleTime_AddDate (example): example execution is deferred to Phase 4D
 - ExampleTime_After (example): example execution is deferred to Phase 4D
+- ExampleTime_AppendBinary (example): example execution is deferred to Phase 4D
 - ExampleTime_AppendFormat (example): example execution is deferred to Phase 4D
+- ExampleTime_AppendText (example): example execution is deferred to Phase 4D
 - ExampleTime_Before (example): example execution is deferred to Phase 4D
 - ExampleTime_Date (example): example execution is deferred to Phase 4D
 - ExampleTime_Day (example): example execution is deferred to Phase 4D

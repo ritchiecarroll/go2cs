@@ -243,6 +243,7 @@ internal static readonly @string cloneText1 = @"{{define ""a""}}{{template ""b""
 internal static readonly @string cloneText2 = @"{{define ""b""}}b{{end}}"u8;
 internal static readonly @string cloneText3 = @"{{define ""c""}}root{{end}}"u8;
 internal static readonly @string cloneText4 = @"{{define ""c""}}clone{{end}}"u8;
+internal static readonly @string cloneText5 = @"{{define ""e""}}{{.Foo}}{{end}}"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cloneDoesNotContainRootˢ = (@string)"clone does not contain root"u8;
@@ -250,6 +251,8 @@ internal static readonly object brootˢ = (@string)"broot"u8;
 internal static readonly object bcloneˢ = (@string)"bclone"u8;
 
 public static void TestClone(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
     // Create some templates and clone the root.
     var (root, err) = New(rootˢ).Parse(cloneText1);
     if (err != default!) {
@@ -259,6 +262,8 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+    root.Parse(cloneText5);
+    root.Option(missingkeyErrorˢ);
     var (ᴛ1, ᴛ2) = root.Clone();
     var clone = Must(ᴛ1, ᴛ2);
     // Add variants to both.
@@ -296,6 +301,18 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     }
     if (b.String() != "bclone"u8) {
         Ꮡt.Errorf("expected %q got %q"u8, bcloneˢ, b.String());
+    }
+    b.Reset();
+    var rootErr = root.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "e"u8, new map<@string, any>{});
+    var cloneErr = clone.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "e"u8, new map<@string, any>{});
+    if (cloneErr == default!){
+        Ꮡt.Errorf("expected error from missing key in cloned template"u8);
+    } else 
+    {
+        @string got = cloneErr.Error();
+        @string want = rootErr.Error(); if (got != want) {
+            Ꮡt.Errorf("got %q, wan t %q"u8, got, want);
+        }
     }
 }
 

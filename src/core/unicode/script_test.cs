@@ -51,7 +51,11 @@ internal static slice<T> inCategoryTest = new T[]{
     new(0x0031, "N"u8),
     new(0x00bb, "P"u8),
     new(0x00a2, "S"u8),
-    new(0x00a0, "Z"u8)
+    new(0x00a0, "Z"u8),
+    new(0x0065, "LC"u8),
+    // Unassigned
+    new(0x0378, "Cn"u8),
+    new(0x0378, "C"u8)
 }.slice();
 
 internal static slice<T> inPropTest = new T[]{

@@ -246,12 +246,12 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
         m = 1000;
         n = 1000;
     }
-    for (var i = (uint64)0; i < m * n; i += n) {
-        var iΔ1 = i;
+    for (var iᴛ1 = (uint64)0; iᴛ1 < m * n; iᴛ1 += n) {
+        var i = iᴛ1;
         Ꮡg.Add(1);
         goǃ(() => {
             uint64 c = default!;
-            for (var @new = iΔ1; @new < iΔ1 + n; @new++) {
+            for (var @new = i; @new < i + n; @new++) {
                 {
                     var old = Ꮡv.Swap(@new); if (old != default!) {
                         c += old._<uint64>();
@@ -342,11 +342,11 @@ public static partial void TestValueCompareAndSwapConcurrent(ж<testing.T> Ꮡt)
         m = 100;
         n = 100;
     }
-    for (nint i = 0; i < m; i++) {
-        nint iΔ1 = i;
+    for (nint iᴛ1 = 0; iᴛ1 < m; iᴛ1++) {
+        var i = iᴛ1;
         Ꮡw.Add(1);
         goǃ(() => {
-            for (nint j = iΔ1; j < m * n; runtime.Gosched()) {
+            for (nint j = i; j < m * n; runtime.Gosched()) {
                 if (Ꮡv.CompareAndSwap(j, j + 1)) {
                     j += m;
                 }

@@ -596,7 +596,7 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> Ꮡt) {
 internal partial struct neverendingReader /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverendingReader r, slice<byte> p) {
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = (byte)r;
     }
     return (len(p), default!);

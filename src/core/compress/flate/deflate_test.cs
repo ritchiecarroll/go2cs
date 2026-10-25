@@ -81,7 +81,7 @@ internal static slice<ж<reverseBitsTest>> reverseBitsTests = new ж<reverseBits
 
 internal static slice<byte> largeDataChunk() {
     var result = new slice<byte>(100000);
-    foreach (var (i, _) in result) {
+    foreach (var i in range(result)) {
         result[i] = (byte)(i * i & 0xFF);
     }
     return result;
@@ -97,7 +97,7 @@ public static void TestBulkHash4(ж<testing.T> Ꮡt) {
         for (nint j = 4; j < len(y); j++) {
             var yΔ1 = y.slice(0, j);
             var dst = new slice<uint32>(len(yΔ1) - (nint)minMatchLength + 1);
-            foreach (var (i, _) in dst) {
+            foreach (var i in range(dst)) {
                 dst[i] = (uint32)(i + 100);
             }
             bulkHash4(yΔ1, dst);
@@ -194,7 +194,7 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
         n -= (nint)(cur - r.l);
         cur = r.l;
     }
-    foreach (var (i, _) in b.slice(0, n)) {
+    foreach (var i in range(b.slice(0, n))) {
         if (r.cur + (int64)i >= r.l - ((int64)1 << 16)){
             b[i] = 1;
         } else {
@@ -700,7 +700,7 @@ public static void TestBestSpeed(ж<testing.T> Ꮡt) {
 
     Ꮡt.Parallel();
     var abc = new slice<byte>(128);
-    foreach (var (i, _) in abc) {
+    foreach (var i in range(abc)) {
         abc[i] = (byte)i;
     }
     var abcabc = bytes.Repeat(abc, 131072 / len(abc));
@@ -1108,7 +1108,7 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> Ꮡt) {
     // testData may not generate internal matches.
     var testData = new slice<byte>(32);
     var rng = rand.New(rand.NewSource(0));
-    foreach (var (i, _) in testData) {
+    foreach (var i in range(testData)) {
         testData[i] = (byte)rng.Uint32();
     }
 

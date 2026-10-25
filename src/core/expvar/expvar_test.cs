@@ -411,9 +411,9 @@ public static void BenchmarkMapSetDifferent(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var (i, _) in procKeys) {
+    foreach (var i in range(procKeys)) {
         var keys = new slice<@string>(4);
-        foreach (var (j, _) in keys) {
+        foreach (var j in range(keys)) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -446,7 +446,7 @@ public static void BenchmarkMapSetDifferentRandom(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var keys = new slice<@string>(100);
-    foreach (var (i, _) in keys) {
+    foreach (var i in range(keys)) {
         keys[i] = fmt.Sprintf("%x"u8, sha1.Sum(slice<byte>(fmt.Sprint(i))));
     }
 
@@ -495,9 +495,9 @@ public static void BenchmarkMapAddDifferent(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var (i, _) in procKeys) {
+    foreach (var i in range(procKeys)) {
         var keys = new slice<@string>(4);
-        foreach (var (j, _) in keys) {
+        foreach (var j in range(keys)) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -527,7 +527,7 @@ public static void BenchmarkMapAddDifferentRandom(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var keys = new slice<@string>(100);
-    foreach (var (i, _) in keys) {
+    foreach (var i in range(keys)) {
         keys[i] = fmt.Sprintf("%x"u8, sha1.Sum(slice<byte>(fmt.Sprint(i))));
     }
 
@@ -555,9 +555,9 @@ public static void BenchmarkMapAddDifferentSteadyState(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var (i, _) in procKeys) {
+    foreach (var i in range(procKeys)) {
         var keys = new slice<@string>(4);
-        foreach (var (j, _) in keys) {
+        foreach (var j in range(keys)) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -844,10 +844,11 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
 
 public static void TestAppendJSONQuote(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var bᴷ = new stackAppend<byte>();
 
     slice<byte> b = default!;
     for (nint i = 0; i < 128; i++) {
-        b = append(b, (byte)i);
+        b = append(bᴷ, b, (byte)i);
     }
     b = append(b, ((@string)"\u2028\u2029"u8).ꓸꓸꓸ);
     @string got = (@string)appendJSONQuote(default!, (@string)(b[..]));

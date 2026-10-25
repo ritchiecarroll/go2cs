@@ -34,7 +34,7 @@ internal static class Go2CsTestHost
         registry.Add("TestInvalid", reflectlite_test_package.TestInvalid, "all_test.go", 941);
         registry.Add("TestIsNil", reflectlite_test_package.TestIsNil, "all_test.go", 624);
         registry.Add("TestMapSetNil", reflectlite_test_package.TestMapSetNil, "all_test.go", 401);
-        registry.Add("TestMirrorWithReflect", reflectlite_test_package.TestMirrorWithReflect, "reflect_mirror_test.go", 88);
+        registry.Add("TestMirrorWithReflect", reflectlite_test_package.TestMirrorWithReflect, "reflect_mirror_test.go", 84);
         registry.Add("TestNames", reflectlite_test_package.TestNames, "all_test.go", 982);
         registry.Add("TestNilPtrValueSub", reflectlite_test_package.TestNilPtrValueSub, "all_test.go", 696);
         registry.Add("TestPtrSetNil", reflectlite_test_package.TestPtrSetNil, "all_test.go", 391);

@@ -72,6 +72,12 @@ public static void TestNextJsCtx(ж<testing.T> Ꮡt) {
         new(jsCtxRegexp, "return\t"u8),
         new(jsCtxRegexp, "return\n"u8),
         new(jsCtxRegexp, "return\u2028"u8),
+        new(jsCtxRegexp, "yield"u8),
+        // A keyword after property access is a property name.
+        new(jsCtxDivOp, "x.yield"u8),
+        new(jsCtxDivOp, "x?.yield"u8),
+        new(jsCtxDivOp, "x.\nyield"u8),
+        new(jsCtxDivOp, "x.in"u8),
         // Identifiers can be divided and cannot validly be preceded by
         // a regular expressions. Semicolon insertion cannot happen
         // between an identifier and a regular expression on a new line

@@ -32,19 +32,19 @@ public static void TestSizeof(ж<testing.T> Ꮡt) {
         new(new Interface(nil), 40, 80),
         new(new Map(nil), 16, 32),
         new(new Chan(nil), 12, 24),
-        new(new Named(nil), 60, 112),
+        new(new Named(nil), 68, 128),
         new(new TypeParam(nil), 28, 48),
         new(new Δterm(nil), 12, 24),
 
         // Objects
-        new(new PkgName(nil), 44, 80),
-        new(new Const(nil), 48, 88),
-        new(new TypeName(nil), 40, 72),
-        new(new Var(nil), 48, 88),
-        new(new Func(nil), 48, 88),
-        new(new Label(nil), 44, 80),
-        new(new Builtin(nil), 44, 80),
-        new(new Nil(nil), 40, 72),
+        new(new PkgName(nil), 40, 80),
+        new(new Const(nil), 44, 88),
+        new(new TypeName(nil), 36, 72),
+        new(new Var(nil), 44, 88),
+        new(new Func(nil), 44, 88),
+        new(new Label(nil), 40, 80),
+        new(new Builtin(nil), 40, 80),
+        new(new Nil(nil), 36, 72),
 
         // Misc
         new(new ΔScope(nil), 44, 88),

@@ -15,6 +15,7 @@ internal static ж<Feed> atomValue = Ꮡ(new Feed(
     Updated: ParseTime("2003-12-13T18:30:02Z"u8),
     Author: new Person(Name: "John Doe"u8),
     ID: "urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6"u8,
+
     Entry: new Entry[]{
         new(
             Title: "Atom-Powered Robots Run Amok"u8,

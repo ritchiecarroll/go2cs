@@ -95,6 +95,8 @@ public static void TestEvalArith(ж<testing.T> Ꮡt) {
 internal static readonly @string interfaceRReadˢ = "interface{R}.Read"u8;
 
 public static void TestEvalPos(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
 
     // The contents of /*-style comments are of the form
@@ -198,7 +200,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
             }
         }
 
-        files = append(files, @file);
+        files = append(filesᴷ, files, @file);
     }
 
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -223,7 +225,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 }
 
 // gotypesalias controls the use of Alias types.
-internal static ж<godebug.Setting> gotypesalias = godebug.New("#gotypesalias"u8);
+internal static ж<godebug.Setting> gotypesalias = godebug.New("gotypesalias"u8);
 
 // split splits string s at the first occurrence of s, trimming spaces.
 internal static (@string, @string) split(@string s, @string sep) {
@@ -235,7 +237,7 @@ internal static (@string, @string) split(@string s, @string sep) {
 internal static readonly @string evalˢ = "eval"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ15 = """
+internal static readonly @string srcᶜ16 = """
 
 package p
 
@@ -271,7 +273,7 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
     // expr is an identifier or selector expression that is passed
     // to CheckExpr at the position of the comment, and object is
     // the string form of the object it denotes.
-    @string src = srcᶜ15;
+    @string src = srcᶜ16;
 
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, "p"u8, src, parser.ParseComments);
@@ -352,7 +354,7 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
 internal static readonly @string undefinedˢ = "undefined"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ16 = """
+internal static readonly @string srcᶜ17 = """
 
 package p
 func _[A any](A) {}
@@ -360,7 +362,7 @@ func _[A any](A) {}
 """u8.Raw();
 
 public static void TestIssue65898(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ16;
+    @string src = srcᶜ17;
 
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);

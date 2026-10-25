@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/cipher` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**27272 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**27289 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/cipher`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/cipher).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 30 of the matched tests identically.
+Both runtimes skip 33 of the matched tests identically.
 
 ## Verdicts
 
@@ -113,6 +113,7 @@ Both runtimes skip 30 of the matched tests identically.
 | `TestCBCBlockMode/DES/Roundtrip` | pass | pass |
 | `TestCBCDecrypterAES` | pass | pass |
 | `TestCBCEncrypterAES` | pass | pass |
+| `TestCBCExtraMethods` | pass | pass |
 | `TestCFBInverse` | pass | pass |
 | `TestCFBStream` | pass | pass |
 | `TestCFBStream/AES-128` | pass | pass |
@@ -498,6 +499,7 @@ Both runtimes skip 30 of the matched tests identically.
 | `TestCFBVectors` | pass | pass |
 | `TestCTR` | pass | pass |
 | `TestCTRAble` | pass | pass |
+| `TestCTRExtraMethods` | pass | pass |
 | `TestCTRStream` | pass | pass |
 | `TestCTRStream/AES-128` | pass | pass |
 | `TestCTRStream/AES-128/BlockModeStream` | pass | pass |
@@ -800,6 +802,11 @@ Both runtimes skip 30 of the matched tests identically.
 | `TestCTRStream/DES/BlockModeStream/XORSemantics/Roundtrip/BuffLength=8` | pass | pass |
 | `TestCTRStream/DES/WrongIVLen` | skip | skip |
 | `TestCTR_AES` | pass | pass |
+| `TestCTR_AES_blocks8FastPathMatchesGeneric` | pass | pass |
+| `TestCTR_AES_blocks8FastPathMatchesGeneric/NearOverflowMinus6` | pass | pass |
+| `TestCTR_AES_blocks8FastPathMatchesGeneric/NearOverflowMinus7` | pass | pass |
+| `TestCTR_AES_blocks8FastPathMatchesGeneric/Overflow` | pass | pass |
+| `TestCTR_AES_blocks8FastPathMatchesGeneric/Zero` | pass | pass |
 | `TestCTR_AES_multiblock_XORKeyStreamAt` | pass | pass |
 | `TestCTR_AES_multiblock_XORKeyStreamAt/keySize=16` | pass | pass |
 | `TestCTR_AES_multiblock_XORKeyStreamAt/keySize=24` | pass | pass |
@@ -16718,7 +16725,6 @@ Both runtimes skip 30 of the matched tests identically.
 | `TestCTR_AES_multiblock_random_IV/keySize=32/part1=99` | pass | pass |
 | `TestCTR_AES_multiblock_random_IV/keySize=32/part1=99/part2=0` | pass | pass |
 | `TestCTR_AES_multiblock_random_IV/keySize=32/part1=99/part2=1` | pass | pass |
-| `TestFIPSServiceIndicator` | pass | pass |
 | `TestGCM` | pass | pass |
 | `TestGCMAEAD` | pass | pass |
 | `TestGCMAEAD/AES-128` | pass | pass |
@@ -26982,9 +26988,20 @@ Both runtimes skip 30 of the matched tests identically.
 | `TestGCMAsm` | pass | pass |
 | `TestGCMCounterWrap` | pass | pass |
 | `TestGCMCounterWrap/Fallback` | pass | pass |
-| `TestGCMForSSH` | pass | pass |
+| `TestGCMExtraMethods` | pass | pass |
+| `TestGCMExtraMethods/Fallback` | pass | pass |
+| `TestGCMExtraMethods/Fallback/NewGCM` | pass | pass |
+| `TestGCMExtraMethods/Fallback/NewGCMWithNonceSize` | pass | pass |
+| `TestGCMExtraMethods/Fallback/NewGCMWithRandomNonce` | skip | skip |
+| `TestGCMExtraMethods/Fallback/NewGCMWithTagSize` | pass | pass |
+| `TestGCMExtraMethods/NewGCM` | pass | pass |
+| `TestGCMExtraMethods/NewGCMWithNonceSize` | pass | pass |
+| `TestGCMExtraMethods/NewGCMWithRandomNonce` | pass | pass |
+| `TestGCMExtraMethods/NewGCMWithTagSize` | pass | pass |
 | `TestGCMInvalidTagSize` | pass | pass |
 | `TestGCMInvalidTagSize/Fallback` | pass | pass |
+| `TestGCMNoncesFIPSV1` | skip | skip |
+| `TestGCMNoncesFIPSV126` | skip | skip |
 | `TestNoExtraMethods` | pass | pass |
 | `TestNoExtraMethods/Fallback` | pass | pass |
 | `TestOFB` | pass | pass |

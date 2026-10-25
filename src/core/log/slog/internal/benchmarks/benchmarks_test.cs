@@ -29,6 +29,7 @@ internal static readonly @string statusˢ = "status"u8;
 internal static readonly @string durationˢ = "duration"u8;
 internal static readonly @string timeˢ2 = "time"u8;
 internal static readonly @string errorˢ = "error"u8;
+internal static readonly @string eventˢ = "event"u8;
 
 internal partial struct BenchmarkAttrs_type /*dyn*/ {
     internal @string name;
@@ -107,12 +108,12 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError));
+                            slog.Any(eventˢ, testEvent));
                     }
                 ),
                 new(
@@ -129,37 +130,37 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError),
+                            slog.Any(eventˢ, testEvent),
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
                             slog.Time(timeˢ2, testTime),
-                            slog.Any(errorˢ, testError));
+                            slog.Any(eventˢ, testEvent));
                     }
                 )
             }.slice()) {

@@ -130,13 +130,16 @@ internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, ci
 }
 
 internal static slice<@string> exportedMethods(any x) {
+    var methodsᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> methods = default!;
     var v = reflect.ValueOf(x);
     for (nint i = 0; i < v.NumMethod(); i++) {
         if (v.Type().Method(i).IsExported()) {
-            methods = append(methods, v.Type().Method(i).Name);
+            methods = append(methodsᴷ, methods, v.Type().Method(i).Name);
         }
     }
+    methods = move2heap(methodsᴷ, methods);
     return methods;
 }
 
