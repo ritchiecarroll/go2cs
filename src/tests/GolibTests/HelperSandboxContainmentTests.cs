@@ -121,4 +121,63 @@ public class HelperSandboxContainmentTests
         // A path that does not exist resolves to nothing and answers through the lexical test alone.
         Assert.IsFalse(TestHost.IsWithinCanonical(Path.Combine(realParent, "missing", "x"), root.LogicalRun), "an unresolvable path is not contained");
     }
+
+    // THE SAME CLASS, ONE PACKAGE OVER: PackageAncestry's staged-toolchain composer starts a `go` child that
+    // starts inside the staged ancestry in the REAL GOROOT directory it stands for. With cmd.Dir empty its
+    // directory is the host's getcwd() (physical), measured against the run root's GetTempPath spelling, and
+    // on darwin math/big's TestEscape child stayed in the staged copy (go1.26.10 D-W2, both RIDs).
+    //
+    // RED-FIRST, 2026-10-25, on linux: with the composer's realpath arm planted out,
+    // AToolchainChildInAPhysicalSpellingOfTheStagedRootStartsInRealGorootOnUnix fails; restored, it passes.
+
+    private sealed class StagedToolchain
+    {
+        public readonly string RealGoroot;
+        public readonly string GoTool;
+
+        public StagedToolchain(SymlinkedRoot root)
+        {
+            RealGoroot = Path.Combine(root.Base, "goroot");
+            Directory.CreateDirectory(Path.Combine(RealGoroot, "src", "math", "big"));
+            Directory.CreateDirectory(Path.Combine(root.PhysicalRun, "src", "math", "big"));
+            GoTool = Path.GetFullPath(Path.Combine(RealGoroot, "bin", "go"));
+        }
+
+        public string Compose(SymlinkedRoot root, string executable, string directory) =>
+            PackageAncestry.ComposeStagedToolchainDirectory(GoTool, Path.GetFullPath(root.LogicalRun), RealGoroot, executable, directory);
+    }
+
+    [TestMethod]
+    public void AToolchainChildInAPhysicalSpellingOfTheStagedRootStartsInRealGorootOnUnix()
+    {
+        using SymlinkedRoot root = new();
+        StagedToolchain toolchain = new(root);
+
+        string composed = toolchain.Compose(root, toolchain.GoTool, Path.Combine(root.PhysicalRun, "src", "math", "big"));
+
+        if (OperatingSystem.IsWindows())
+            Assert.IsNull(composed, "windows keeps the LEXICAL relative-path test (COORD's ruling), so a symlink spelling must not widen it there");
+        else
+            Assert.AreEqual(Path.Combine(toolchain.RealGoroot, "src", "math", "big"), composed,
+                "a go child started in the physical spelling of the staged math/big directory must start in the real GOROOT's -- math/big TestEscape's darwin shape");
+    }
+
+    [TestMethod]
+    public void TheComposersLexicalAnswersAndPolarityAreUnchanged()
+    {
+        using SymlinkedRoot root = new();
+        StagedToolchain toolchain = new(root);
+        string expected = Path.Combine(toolchain.RealGoroot, "src", "math", "big");
+
+        // The lexical answer, on every OS: a child spelled like the staged root.
+        Assert.AreEqual(expected, toolchain.Compose(root, toolchain.GoTool, Path.Combine(root.LogicalRun, "src", "math", "big")), "a child spelled like its staged root");
+
+        // The polarity: a sibling run under either spelling, an executable that is not this GOROOT's go, and a
+        // directory with no real counterpart all stay "unchanged".
+        string realParent = Path.GetDirectoryName(root.PhysicalRun)!;
+        Assert.IsNull(toolchain.Compose(root, toolchain.GoTool, Path.Combine(realParent, "run2", "src")), "a sibling run (physical) is not inside the staged root");
+        Assert.IsNull(toolchain.Compose(root, toolchain.GoTool, Path.Combine(root.Base, "link", "runX", "src")), "a prefix-sharing sibling (logical) is not inside the staged root");
+        Assert.IsNull(toolchain.Compose(root, Path.Combine(root.Base, "other", "go"), Path.Combine(root.PhysicalRun, "src", "math", "big")), "only this GOROOT's own go binary qualifies");
+        Assert.IsNull(toolchain.Compose(root, toolchain.GoTool, Path.Combine(root.PhysicalRun, "src", "net", "http", "cgi")), "no real counterpart, no composed directory");
+    }
 }

@@ -949,8 +949,9 @@ public static class TestHost
         return canonicalCandidate is not null && canonicalRoot is not null && IsWithin(canonicalCandidate, canonicalRoot);
     }
 
-    // realpath(3) with a NULL buffer: libc allocates the result, which is freed here. Null on any failure.
-    private static string? RealPath(string path)
+    // realpath(3) with a NULL buffer: libc allocates the result, which is freed here. Null on any failure,
+    // and on windows, where it is never called. INTERNAL for PackageAncestry's toolchain-child composer.
+    internal static string? RealPath(string path)
     {
         try
         {

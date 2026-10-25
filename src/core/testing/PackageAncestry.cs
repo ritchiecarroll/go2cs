@@ -1094,21 +1094,44 @@ internal static class PackageAncestry
     }
 
     // Returns null for "unchanged": not the toolchain, not inside the staged root, or no real counterpart.
-    private static string? ComposeStagedToolchainDirectory(string goTool, string stagedRoot, string realRoot, string executable, string directory)
+    //
+    // Both tests are asked lexically first and, on unix only, again through realpath(3) (TestHost.RealPath),
+    // the widening TestHost.IsWithinCanonical states: a child's directory, when cmd.Dir is empty, is the
+    // host's getcwd(), which is PHYSICAL, while stagedRoot is the run root's Path.GetTempPath() spelling. On
+    // darwin those differ by the /var -> /private/var symlink, the relative path came out "../../private/…",
+    // and math/big's TestEscape child ran in the staged copy (cmd/go: "package std/math/big … use of internal
+    // package internal/byteorder not allowed") on both mac RIDs (go1.26.10 D-W2). Every answer the lexical
+    // test gave is kept; the realpath arm admits only a symlink spelling of a directory inside the staged
+    // root, never a sibling. Guarded by GolibTests' HelperSandboxContainmentTests.
+    internal static string? ComposeStagedToolchainDirectory(string goTool, string stagedRoot, string realRoot, string executable, string directory)
     {
         StringComparison paths = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-        if (!string.Equals(Path.GetFullPath(executable), goTool, paths))
+        if (!string.Equals(Path.GetFullPath(executable), goTool, paths) &&
+            (OperatingSystem.IsWindows() || TestHost.RealPath(executable) is not { } realExecutable ||
+             TestHost.RealPath(goTool) is not { } realGoTool || !string.Equals(realExecutable, realGoTool, paths)))
+        {
             return null;
+        }
 
-        string relative = Path.GetRelativePath(stagedRoot, Path.GetFullPath(directory));
+        string full = Path.GetFullPath(directory);
+        string relative = Path.GetRelativePath(stagedRoot, full);
 
-        if (relative == ".." || relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) || Path.IsPathRooted(relative))
+        if (EscapesRoot(relative) && !OperatingSystem.IsWindows() &&
+            TestHost.RealPath(stagedRoot) is { } canonicalRoot && TestHost.RealPath(full) is { } canonicalDirectory)
+        {
+            relative = Path.GetRelativePath(canonicalRoot, canonicalDirectory);
+        }
+
+        if (EscapesRoot(relative))
             return null;
 
         string real = relative == "." ? realRoot : Path.Combine(realRoot, relative);
 
         return Directory.Exists(real) ? real : null;
+
+        static bool EscapesRoot(string relative) =>
+            relative == ".." || relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) || Path.IsPathRooted(relative);
     }
 
     // The GODEBUG this run displaced, captured once on the first apply and owed back at teardown.
