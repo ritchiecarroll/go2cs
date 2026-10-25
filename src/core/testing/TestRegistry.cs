@@ -81,7 +81,7 @@ public sealed record RegisteredTest(
 /// compiles; a regenerated one always passes it.
 /// </para>
 /// </remarks>
-public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null, string? modulePath = null)
+public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures, IReadOnlyList<string>? fixtureDirectories = null, IReadOnlyList<string>? fixtureLinks = null, string? modulePath = null, IReadOnlyList<string>? moduleDependencies = null)
 {
     private readonly List<RegisteredTest> m_tests = [];
 
@@ -115,6 +115,14 @@ public sealed class TestRegistry(string package, IReadOnlyList<string> fixtures,
     /// never lands in an emitted host. Defaulted so every standard-library host stays byte-identical.
     /// </summary>
     public string ModulePath { get; } = modulePath ?? "";
+
+    /// <summary>
+    /// The <c>dep</c> lines of a MAIN package's test binary, which copies the package's own build info: one module per
+    /// entry, its fields joined by tabs (path, version and the go.sum hash; no hash for a replaced module), for
+    /// <c>runtime/debug.ReadBuildInfo</c>. Go's test binary of any other package lists none, and neither does its host.
+    /// Defaulted and omitted when empty, so every standard-library host is unchanged.
+    /// </summary>
+    public IReadOnlyList<string> ModuleDependencies { get; } = moduleDependencies ?? [];
 
     public IReadOnlyList<RegisteredTest> Tests => m_tests;
 

@@ -329,10 +329,10 @@ Overload discriminators: the comma-ok overloads take a `bool _` whose value is u
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:179-190#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:22#ee6601).
-_ΔpN: src/go2cs/visitFuncDecl.go:1369-1383#03b3c7 and :2830-2838#701c82; :56-64#c625cd and :1921#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
+_ΔpN: src/go2cs/visitFuncDecl.go:1373-1387#03b3c7 and :2834-2842#701c82; :56-64#c625cd and :1925#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:507#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
-The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:72-76#b0ed6c and :121#941a6a.
+The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:75-79#b0ed6c and :124#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals). -->
 
 **A first example.** This Go program declares a struct type, a method with a pointer receiver, and a
@@ -528,7 +528,7 @@ A method is `public` only when both its own name and its receiver type's name ar
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
-<!-- receiver clamp: src/go2cs/visitFuncDecl.go:866-874#d781c1 (receiverAccess from :1921-1938#fc124b; getAccess at src/go2cs/identifierNaming.go:380#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
+<!-- receiver clamp: src/go2cs/visitFuncDecl.go:870-878#d781c1 (receiverAccess from :1925-1942#fc124b; getAccess at src/go2cs/identifierNaming.go:380#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:134 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:39#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
 <!-- new accum(nil): the generated NilType constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2141#653c7a; "an empty named-type literal passes nil" is the Struct Types section's rule. Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
@@ -1002,9 +1002,14 @@ standard library live. The standard library can also come from NuGet
 **A `main` package's project also carries the program's build info.** Go links a program's module lines into
 the binary for `runtime/debug.ReadBuildInfo`. The converter writes the same lines into the `main` project as a
 `GoModInfo` assembly attribute: `path`, `mod <module> (devel)`, and under `-recurse` one `dep` line per
-third-party module with its `go.sum` hash. golib adds the build settings the program itself knows, its
+third-party module the program links, with its `go.sum` hash. golib adds the build settings the program itself knows, its
 `DefaultGODEBUG` when one is set, `CGO_ENABLED`, `GOARCH` and `GOOS`, so `ReadBuildInfo` reports the program's
-build info as Go's does. A converted test program registers its own `path` and `mod` lines when it starts.
+build info as Go's does. A converted test program registers its own `path` and `mod` lines when it starts, as a Go
+test binary carries them. A test of a `main` package also lists that package's `dep` lines, because Go's test binary
+copies the package's own build info there; a test of any other package lists none, as Go's does.
+<!-- Go side measured at go1.26.10 on linux/amd64: `go test` of a module package importing golang.org/x/sync reports
+no Deps, and of a main package importing it reports the one dep with its sum. The host's half:
+src/go2cs/buildInfoStamp.go:116 (`func testBinaryDependencies(production *packages.Package, mainModulePath string, sums map[string]string) []string {`). -->
 Settings with no managed value (`-compiler`, `-buildmode`, `GOAMD64`, `vcs.*`) are never reported, a program
 converted outside a module carries no stamp, and a replaced dependency is reported without its replacement,
 which can be a local path:
@@ -1015,8 +1020,8 @@ which can be a local path:
       <_Parameter1>path&#9;go2cs/BuildInfoSettings&#10;mod&#9;go2cs/BuildInfoSettings&#9;(devel)&#9;&#10;</_Parameter1>
     </AssemblyAttribute>
 ```
-<!-- the lines: src/go2cs/buildInfoStamp.go:39 `func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule, sums map[string]string) string {`;
-     the run-time half: src/core/golib/GoModInfoAttribute.cs:103 `public static @string Compose(string goos, string goarch, bool cgoEnabled)`.
+<!-- the lines: src/go2cs/buildInfoStamp.go:41 `func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule, sums map[string]string) string {`;
+     the run-time half: src/core/golib/GoModInfoAttribute.cs:111 `public static @string Compose(string goos, string goarch, bool cgoEnabled)`.
      Guards: src/go2cs/buildInfoStamp_test.go, GolibTests GoModInfoComposeTests, and the BuildInfoSettings behavioral
      test (ok, Path, Main.Path, Main.Version, GOOS and GOARCH, compared with Go's). -->
 
@@ -10966,7 +10971,7 @@ internal static void Main() {
 Each pointer in a chain gets its own `~`. Go's `b.next.data` passes through two pointers, `b` and
 `b.next`. So `(~b).next` reads `b`'s value and takes its `next` box, and the outer `~` reads that box's
 value: `(~(~b).next).data`.
-<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:100-105#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:52#3e66ab ((~(~a).next).data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 43#6706ab. -->
+<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:103-108#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:52#3e66ab ((~(~a).next).data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 43#6706ab. -->
 
 **Full detail:** [Reference → Implicit Pointer Dereferencing](ConversionStrategies-Reference/implicit-dereferencing.md#implicit-pointer-dereferencing) — how the converter decides that a selector base needs a dereference, promoted fields through a pointer local, nested and indexed write targets, and `*p.field` through parameters and receivers.
 
@@ -11487,8 +11492,8 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:4626 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
-     the printed form :1940 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+<!-- src/core/runtime/managed_impl.cs:4630 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+     the printed form :1942 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
 
@@ -11806,9 +11811,9 @@ targets are themselves assembly. So it forwards only to targets on a list, kept 
 functions known to have one. Any other pull keeps the throwing stub described at the end of this section.
 A target on the list can be converted Go, as here, or hand-written C#: `testing/cryptotest` pulls
 `testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
-<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2310 (`"time.registerLoadFromEmbeddedTZData": true`),
-     :2318 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
-     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:999
+<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2314 (`"time.registerLoadFromEmbeddedTZData": true`),
+     :2322 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
+     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1003
      (`public static void checkParallel(ж<T> t)`). -->
 
 The target in `time` is ordinary Go, marked with the one-argument directive. Each converted package is its

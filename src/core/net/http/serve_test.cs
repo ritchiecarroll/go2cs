@@ -5715,7 +5715,7 @@ internal partial struct testServerConnState_stateLog /*dyn*/ {
     internal channel/*<-*/<EmptyStruct> complete = channel/*<-*/<EmptyStruct>.SendOnly; // If non-nil, closed when either 'got' is equal to 'want', or 'got' is no longer a prefix of 'want'.
 }
 
-internal static void testServerConnState(ж<testing.T> Ꮡt, testMode mode) {
+internal static partial void testServerConnState(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var handler = new map<@string, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>{
@@ -5833,27 +5833,27 @@ internal static void testServerConnState(ж<testing.T> Ꮡt, testMode mode) {
 
         var mustGetʗ1 = mustGet;
         var tsʗ2 = ts;
-        wantLog(() => {
+        wantLog([MethodImpl(MethodImplOptions.NoInlining)] () => {
             mustGetʗ1((~tsʗ2).URL + "/"u8);
             mustGetʗ1((~tsʗ2).URL + "/close"u8);
         }, StateNew, StateActive, StateIdle, StateActive, StateClosed);
 
         var mustGetʗ2 = mustGet;
         var tsʗ3 = ts;
-        wantLog(() => {
+        wantLog([MethodImpl(MethodImplOptions.NoInlining)] () => {
             mustGetʗ2((~tsʗ3).URL + "/"u8);
             mustGetʗ2((~tsʗ3).URL + "/"u8, connectionˢ, closeˢ);
         }, StateNew, StateActive, StateIdle, StateActive, StateClosed);
 
         var mustGetʗ3 = mustGet;
         var tsʗ4 = ts;
-        wantLog(() => {
+        wantLog([MethodImpl(MethodImplOptions.NoInlining)] () => {
             mustGetʗ3((~tsʗ4).URL + "/hijack"u8);
         }, StateNew, StateActive, StateHijacked);
 
         var mustGetʗ4 = mustGet;
         var tsʗ5 = ts;
-        wantLog(() => {
+        wantLog([MethodImpl(MethodImplOptions.NoInlining)] () => {
             mustGetʗ4((~tsʗ5).URL + "/hijack-panic"u8);
         }, StateNew, StateActive, StateHijacked);
 

@@ -71,6 +71,7 @@ on:
         default: 10.0.x
         options:
           - 10.0.x
+          - 10.0.402
       published_version:
         description: 'release-smoke only: a go.* version ALREADY on nuget.org (e.g. 1.24.13.4). Blank packs this tree and consumes that pack (the pre-publish gate). Set, it skips the pack and every leg restores that version from nuget.org: the post-publish smoke.'
         type: string

@@ -114,6 +114,22 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **The address of another package's variable is the address of a copy.** When code takes the address of a
+  variable that a different package exports and that is not itself a pointer, the pointer it gets refers to a
+  copy, so writes through it never reach the variable. That covers `&otherpkg.V`, a pointer-receiver method
+  value used as a value (`f := otherpkg.V.Reset`), and the common `flag.BoolVar(&otherpkg.Debug, "debug", false,
+  "...")`, where parsing the flag leaves `otherpkg.Debug` unchanged. Calling the method directly
+  (`otherpkg.V.Reset()`) and reading the variable both work, and inside one package all of these work. To avoid it,
+  keep the variable and the code that takes its address in the same package, or have the package export a pointer
+  (`var V = &T{}`) or an accessor function instead of the value.
+  <!-- Diagnosed by lane R on windows/amd64 and linux/amd64 at 9b0269c2e8 (COORD inbox, 2026-10-25T19:24:56Z):
+       `f := lib.G.Inc` emits `Ꮡ(lib.G).Inc`, a box of a copy (Go prints 1, converted 0); `&lib.G2` and
+       `bump(&lib.Count)` likewise. An importer binds the owner's own box only when the owner boxes the variable, which
+       it decides from its own syntax: src/go2cs/globalAddressOperations.go:378 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`),
+       with exported variables boxed only for a box-only pointer method at
+       :329 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
+       value is fixed for the 1.26 publication (R's seat F1); the cross-package case is ruled a documented limitation
+       (owner, 2026-10-25), with the fix in the BOARD row of that date. -->
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
@@ -125,15 +141,16 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   profile with no samples (profile with .NET's tools). `debug.ReadBuildInfo()` reports the program's
   module, its dependencies and its `GOOS`, `GOARCH`, `CGO_ENABLED` and `DefaultGODEBUG`, but no
   `-compiler`, `-buildmode`, `GOAMD64` or `vcs.*` settings. A replaced dependency shows without its
-  replacement, a converted test program lists no dependencies, and a program converted outside a module
+  replacement, and a program converted outside a module
   reports nothing ([how](ConversionStrategies.md#package-conversion)). On Windows,
   `time.LoadLocation("Europe/Berlin")` fails until you import `time/tzdata` (or set `ZONEINFO`).
   <!-- Goroutine dump: docs/ConversionStrategies-Reference/manual-conversions.md, "runtime.Stack(all: true) enumerates
        every goroutine" (another goroutine prints `[stack unavailable: ...]`). CPU samples need the opt-in companion
        src/core/go2cs.CpuProfiler, which only generated test projects set and which is not packaged
        (src/core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj:31 `<IsPackable>false</IsPackable>`). Build info:
-       docs/ConversionStrategies.md, "A main package's project also carries the program's build info"; the test host's
-       missing dep lines and the missing => lines are BOARD rows of 2026-10-22 (H). -->
+       docs/ConversionStrategies.md, "A main package's project also carries the program's build info"; the missing => lines
+       are a BOARD row of 2026-10-22 (H); a test host lists a main package's dep lines and none for any other package,
+       as Go's test binary does. -->
 * **A few quiet ones**, each rare, where converted code gives a different answer and says nothing:
   * A variadic function that keeps, returns or captures its `...T` parameter, or `append`s or `copy`s
     into it, works on a private copy: after `f(s...)`, its writes are not the caller's `s`.
@@ -224,7 +241,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:3917 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:3927 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :793
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

@@ -346,7 +346,11 @@ func (v *Visitor) noInliningPrefix(fnObj types.Object) string {
 func (v *Visitor) litNoInliningPrefix(funcLit *ast.FuncLit) string {
 	needsIt := literalCallsSkipCountedRuntimeCaller(v.info, funcLit) ||
 		(funcLit.Body != nil && callsSkipCountedWalker(v.info, funcLit.Body)) ||
-		executesGoStatement(funcLit.Body)
+		executesGoStatement(funcLit.Body) ||
+		// A literal ending in a call through a function value whose target observes its caller (`func(t *testing.T) {
+		// check(t, x) }` where check is a t.Helper closure) keeps its frame against the tail call, as a declaration
+		// does (markTailCalledObservingValues; the tail-call seat's lever B).
+		tailCallsObservingValue(v.info, funcLit.Body, v.needsNoInlining)
 
 	if !needsIt {
 		if target := thinForwarderTarget(v.info, v.pkg, funcLit.Body); target != nil {

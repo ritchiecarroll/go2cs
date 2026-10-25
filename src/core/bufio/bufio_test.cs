@@ -1760,7 +1760,7 @@ internal static readonly @string barBarˢ = "bar bar"u8;
 internal static readonly @string recurˢ = "recur"u8;
 internal static readonly @string recur2ˢ = "recur2"u8;
 
-public static void TestReaderReset(ж<Δtesting.T> Ꮡt) {
+public static partial void TestReaderReset(ж<Δtesting.T> Ꮡt) {
     void checkAll(ж<bufio.Reader> rΔ1, @string want) {
         Ꮡt.Helper();
         var (all, err) = Δio.ReadAll(new bufio_test_package.bufio_ReaderжReader(rΔ1));

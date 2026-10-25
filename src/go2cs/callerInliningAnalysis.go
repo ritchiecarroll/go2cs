@@ -97,10 +97,6 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	// runtimeCallerParamSkips), and bodies = every declaration's body, walked after the files for the
 	// same-package call sites that pass such a parameter a constant -- see THE PARAMETER-CARRIED WINDOW.
 	paramSkips := map[types.Object][]paramSkip{}
-	type declBody struct {
-		obj  types.Object
-		body *ast.BlockStmt
-	}
 	var bodies []declBody
 	// fixedSkipUsers and smallBodies feed the fixed-skip path closure (moduleScope only), applied after
 	// the walk because a path's callers can be declared in any file.
@@ -337,7 +333,230 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		seed[obj] = true
 	}
 
+	// THE TAIL-CALLED FUNCTION VALUE (the tail-call seat's lever B, G 2026-10-25): Go never tail-calls, the optimizing
+	// JIT does, and a frame erased by a tail call is as gone as an inlined one. A callee that observes its caller is
+	// protected from its own side (go2cs-gen writes [DynamicSecurityMethod] beside every no-inline mark), but not when
+	// it is reached through a FUNCTION VALUE: the call's exact callee is then the delegate's Invoke, which carries no
+	// mark. So the CALLER keeps its frame instead: a [MethodImpl(NoInlining)] method makes no implicit tail call (measured
+	// on linux/amd64 for direct, delegate and lambda shapes). testing's TestTBHelper is the measured case: testHelper
+	// ends `genericIntHelper(t, "GenericInt")`, a package var holding genericHelper[int], whose t.Helper names
+	// testHelper's line; on linux the tail call erased testHelper and the record named its caller. The marks go on the
+	// function VALUES first (a *types.Var key in this same map, which no declaration lookup can collide with), so a func
+	// literal's tail call is judged by the same entry (litNoInliningPrefix).
+	markTailCalledObservingValues(files, info, pkg, bodies, seed)
+
 	return seed
+}
+
+// declBody is one package-scope function declaration and its body, as computeNoInliningClosure walks them.
+type declBody struct {
+	obj  types.Object
+	body *ast.BlockStmt
+}
+
+// observesCaller reports whether a body, as a frame of its own, makes its CALLER's frame part of what Go reports: it
+// calls runtime.Caller/Callers with a counted skip, a skip-counted walker, or testing's Helper, which makes every record
+// it writes name its caller. A body that only calls t.Errorf, t.Log or t.Run is not one: those name the body's OWN line,
+// so its caller's frame is not reported (measured, 2026-10-25: the decorator set would have marked 139 test sites where
+// Helper and the runtime walkers mark the census's 60).
+func observesCaller(info *types.Info, body *ast.BlockStmt) bool {
+	return body != nil && (callsSkipCountedRuntimeCaller(info, body) || callsSkipCountedWalker(info, body) || callsTestingHelper(info, body))
+}
+
+// callsTestingHelper reports whether body itself (a nested *ast.FuncLit is a frame of its own) calls testing's Helper on
+// one of the decorating receivers (callsTestingDecorator's scope, narrowed to the one method that names the CALLER).
+func callsTestingHelper(info *types.Info, body *ast.BlockStmt) bool {
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		callee, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || callee.Pkg() == nil || callee.Pkg().Path() != "testing" || callee.Name() != "Helper" {
+			return true
+		}
+
+		if sig, ok := callee.Type().(*types.Signature); ok && sig.Recv() != nil && testingDecoratorReceivers[testingReceiverName(sig.Recv().Type())] {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
+// tailCall is the call a body ends with: its last statement is the call, or returns exactly that call's result.
+func tailCall(body *ast.BlockStmt) *ast.CallExpr {
+	if body == nil || len(body.List) == 0 {
+		return nil
+	}
+
+	switch stmt := body.List[len(body.List)-1].(type) {
+	case *ast.ExprStmt:
+		call, _ := ast.Unparen(stmt.X).(*ast.CallExpr)
+		return call
+	case *ast.ReturnStmt:
+		if len(stmt.Results) == 1 {
+			call, _ := ast.Unparen(stmt.Results[0]).(*ast.CallExpr)
+			return call
+		}
+	}
+
+	return nil
+}
+
+// tailCallsObservingValue reports whether body ends with a call through a function VALUE that marked records as
+// reaching a caller-observing target (markTailCalledObservingValues).
+func tailCallsObservingValue(info *types.Info, body *ast.BlockStmt, marked map[types.Object]bool) bool {
+	call := tailCall(body)
+
+	if call == nil {
+		return false
+	}
+
+	ident, ok := ast.Unparen(call.Fun).(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	value, ok := info.Uses[ident].(*types.Var)
+
+	return ok && marked[value]
+}
+
+// markTailCalledObservingValues marks, in seed, every function VALUE whose static target observes its caller -- a
+// package-level var whose initializer names a declaration of this package that observesCaller or already keeps its
+// frame (seed), and a local var assigned a func literal that observesCaller -- and then every declaration whose LAST
+// statement calls through one. Deliberately narrow: a value with no static target is not judged, and a call through an
+// interface method is not either (a census of std, 2026-10-25: 922 function-value and 528 interface tail calls in all,
+// of which 60 reach a caller-observing static target -- the BOARD row's broad rule is post-publish).
+func markTailCalledObservingValues(files []FileEntry, info *types.Info, pkg *types.Package, bodies []declBody, seed map[types.Object]bool) {
+	bodyOf := map[types.Object]*ast.BlockStmt{}
+
+	for _, entry := range bodies {
+		bodyOf[entry.obj] = entry.body
+	}
+
+	observing := func(target types.Object) bool {
+		if target == nil || target.Pkg() != pkg {
+			return false
+		}
+
+		return seed[target] || observesCaller(info, bodyOf[target])
+	}
+
+	marked := false
+
+	for _, entry := range files {
+		if entry.file == nil {
+			continue
+		}
+
+		for _, decl := range entry.file.Decls {
+			gen, ok := decl.(*ast.GenDecl)
+
+			if !ok || gen.Tok != token.VAR {
+				continue
+			}
+
+			for _, spec := range gen.Specs {
+				value, ok := spec.(*ast.ValueSpec)
+
+				if !ok || len(value.Values) != len(value.Names) {
+					continue
+				}
+
+				for i, name := range value.Names {
+					if variable, ok := info.Defs[name].(*types.Var); ok && observing(namedFunction(info, value.Values[i])) {
+						seed[variable] = true
+						marked = true
+					}
+				}
+			}
+		}
+
+		ast.Inspect(entry.file, func(n ast.Node) bool {
+			assign, ok := n.(*ast.AssignStmt)
+
+			if !ok || len(assign.Lhs) != len(assign.Rhs) {
+				return true
+			}
+
+			for i, lhs := range assign.Lhs {
+				ident, isIdent := lhs.(*ast.Ident)
+				literal, isLiteral := ast.Unparen(assign.Rhs[i]).(*ast.FuncLit)
+
+				if !isIdent || !isLiteral || !observesCaller(info, literal.Body) {
+					continue
+				}
+
+				object := info.Defs[ident]
+
+				if object == nil {
+					object = info.Uses[ident]
+				}
+
+				if variable, ok := object.(*types.Var); ok {
+					seed[variable] = true
+					marked = true
+				}
+			}
+
+			return true
+		})
+	}
+
+	if !marked {
+		return
+	}
+
+	for _, entry := range bodies {
+		if tailCallsObservingValue(info, entry.body, seed) {
+			seed[entry.obj] = true
+		}
+	}
+}
+
+// namedFunction is the declaration an initializer names, through an instantiation (`genericHelper[int]`) or a
+// package qualifier; nil for anything else.
+func namedFunction(info *types.Info, expr ast.Expr) types.Object {
+	switch e := ast.Unparen(expr).(type) {
+	case *ast.IndexExpr:
+		return namedFunction(info, e.X)
+	case *ast.IndexListExpr:
+		return namedFunction(info, e.X)
+	case *ast.Ident:
+		if function, ok := info.Uses[e].(*types.Func); ok {
+			return function
+		}
+	case *ast.SelectorExpr:
+		if function, ok := info.Uses[e.Sel].(*types.Func); ok {
+			return function
+		}
+	}
+
+	return nil
 }
 
 // executesGoStatement reports whether body ITSELF executes a `go` statement -- one not inside a nested

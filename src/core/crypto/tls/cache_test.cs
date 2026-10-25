@@ -7,6 +7,8 @@ using pem = encoding.pem_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using static go.crypto.tls_package;
 using Δx509 = go.crypto.x509_package;
@@ -19,7 +21,7 @@ internal static readonly object newCertReturnedAUniqueˢ = (@string)"newCert ret
 internal static readonly object cacheDoesNotContainˢ = (@string)"cache does not contain expected entry"u8;
 internal static readonly object timedOutWaitingForˢ = (@string)"timed out waiting for expected ref count"u8;
 
-public static void TestWeakCertCache(ж<testing.T> Ꮡt) {
+public static partial void TestWeakCertCache(ж<testing.T> Ꮡt) {
     ref var wcc = ref heap<global::go.crypto.tls_package.weakCertCache>(out var Ꮡwcc);
     wcc = new weakCertCache(nil);
     var (p, _) = pem.Decode(slice<byte>(rsaCertPEM));

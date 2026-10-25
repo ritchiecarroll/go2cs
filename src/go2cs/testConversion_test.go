@@ -1487,7 +1487,7 @@ func TestWriteTestHostUsesCSharpClassOverride(t *testing.T) {
 		Name: "TestInternal", Kind: "test", PackageName: "value", CSharpClassName: "value_internal_test_package",
 		Source: "value_test.go", Line: 12, Status: "included",
 	}}
-	if err := writeTestHost(dir, "go", "example/value", declarations, nil, nil, nil, nil, "", ""); err != nil {
+	if err := writeTestHost(dir, "go", "example/value", declarations, nil, nil, nil, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, testHostFileName))
@@ -1528,7 +1528,7 @@ func TestFixtureDirectoriesStagePackageShape(t *testing.T) {
 	}
 
 	out := t.TempDir()
-	if err := writeTestHost(out, "go", "os", nil, nil, []string{"read_test.go"}, directories, nil, "", ""); err != nil {
+	if err := writeTestHost(out, "go", "os", nil, nil, []string{"read_test.go"}, directories, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(out, testHostFileName))
@@ -1555,7 +1555,7 @@ func TestFixtureDirectoriesStagePackageShape(t *testing.T) {
 	// array, so its host stays byte-identical to one generated before this capability existed —
 	// which is what keeps a banked host out of the diff for a run environment that did not change.
 	bare := t.TempDir()
-	if err := writeTestHost(bare, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, "", ""); err != nil {
+	if err := writeTestHost(bare, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err = os.ReadFile(filepath.Join(bare, testHostFileName))
