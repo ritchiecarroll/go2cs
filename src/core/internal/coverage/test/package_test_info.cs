@@ -42,8 +42,8 @@ using static global::go.@internal.coverage.test_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABgsgoKAgramggAJDqLKgoKCpqbKlISmgoKCgriCgpSCgoCCpICCpJaSgpKAgsiClICCpIKCgoKUgoKUgoCCkoKkgoKCpoKAgpKC1tSigoKCgqamgoKCgoKCgoKCgoKCgpSUlJSCgpSCgIK2gILIgIK4koKSgILIgpSAgqSCgpSCpoKAgpS2goCCkoLIgoKCgIKSgqSCgoLY", "45-52:1;91-95:2;187-191:1", "", "64=mkfunc/1/3/1,mkfunc/2/3/2,mkfunc/3/3/3")]
-[assembly: go.GoPositionMap("internal/coverage/test/roundtrip_test.go", "roundtrip_test.cs", "ABYmgoKCgpTmpoKCgoKClIKCgoKClIKClIKClIKClIKCAAgIlIKCgoKClAAHEIKCpgAIEoKCuIKmgoKClIKCpoKClIKCpoKCgoCCpIKCyoKCgoKCgriUypTWgoKCgqaCgpSCgqaCgoKU1oKmgoKCpoKCgoKCgpSAgtqClIKCppSCgpSCgIKkgILIgoKUgoKUgoKClIKCgqaCgoKCgoKUgoKCpoKCgIK2goK4uKiCgoKCgpSCgoKCgoIABxCCuIKmgoKClIKClIKCgIKkgoI=", "", "", "163=Sprintf/1/2/1,Sprintf/2/2/2")]
+[assembly: go.GoPositionMap("internal/coverage/test/counter_test.go", "counter_test.cs", "ABgsgoKAgramggAJDqLKgoKCpqbKlISmgoKCgriCgpSCgoCCpICCpJaSgpKAgsiClICCpIKCgoKUgoKUgoCCkoKkgoKCpoKAgpKC1tTSgoKCgqamgoKCgoKCgoKCgoKCgpSUlJSCgpSCgIK2gILIgIK4koKSgILIgpSAgqSCgpSCpoKAgpS2goCCkoLIgoKCgIKSgqSCgoLY", "45-52:1;91-95:2;187-191:1", "", "64=mkfunc/1/3/1,mkfunc/2/3/2,mkfunc/3/3/3")]
+[assembly: go.GoPositionMap("internal/coverage/test/roundtrip_test.go", "roundtrip_test.cs", "ABYmgoKCgpTmpoKCgoKClIKCgoKClIKClIKClIKClIKCAAgIlIKCgoKClAAHEIKCpgAIEoKCuIKmgoKClIKCpoKClIKCpoKCgoCCpIKCyoKCgoKCgriUypTWgoKCgqaCgpSCgqaigoKU5oKmgoKCpoKCgoKCgpSAgtqClIKCppSCgpSCgIKkgILIgoKUgoKUgoKClIKCgqaCgoKCgoKUgoKCpoKCgIK2goK4uKiCgoKCgpSCgoKCgoIABxCCuIKmgoKClIKClIKCgIKkgoI=", "", "", "163=Sprintf/1/2/1,Sprintf/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

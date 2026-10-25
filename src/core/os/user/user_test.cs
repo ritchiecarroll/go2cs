@@ -4,7 +4,10 @@
 namespace go.os;
 
 using os = os_package;
+using slices = slices_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.os.user_package;
 
 partial class user_internal_test_package {
@@ -16,7 +19,7 @@ internal static bool hasHOME = os.Getenv("HOME"u8) != ""u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userNotImplementedˢ = (@string)"user: not implemented; skipping tests"u8;
 
-internal static void checkUser(ж<testing.T> Ꮡt) {
+internal static partial void checkUser(ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
     if (!userImplemented) {
         Ꮡt.Skip(userNotImplementedˢ);
@@ -126,7 +129,7 @@ public static void TestLookupId(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userGroupNotImplementedˢ = (@string)"user: group not implemented; skipping test"u8;
 
-internal static void checkGroup(ж<testing.T> Ꮡt) {
+internal static partial void checkGroup(ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
     if (!groupImplemented) {
         Ꮡt.Skip(userGroupNotImplementedˢ);
@@ -179,7 +182,7 @@ public static void TestLookupGroup(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userGroupListNotˢ = (@string)"user: group list not implemented; skipping test"u8;
 
-internal static void checkGroupList(ж<testing.T> Ꮡt) {
+internal static partial void checkGroupList(ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
     if (!groupListImplemented) {
         Ꮡt.Skip(userGroupListNotˢ);
@@ -202,18 +205,9 @@ public static void TestGroupIds(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("%+v.GroupIds(): %v"u8, user.OrTypedNil(), err);
     }
-    if (!containsID(gids, (~user).Gid)) {
+    if (!slices.Contains(gids, (~user).Gid)) {
         Ꮡt.Errorf("%+v.GroupIds() = %v; does not contain user GID %s"u8, user.OrTypedNil(), gids, (~user).Gid);
     }
-}
-
-internal static bool containsID(slice<@string> ids, @string id) {
-    foreach (var (_, x) in ids) {
-        if (x == id) {
-            return true;
-        }
-    }
-    return false;
 }
 
 } // end user_internal_test_package

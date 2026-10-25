@@ -529,7 +529,7 @@ Found:
     }
 }
 
-public static void TestNilStream(ж<testing.T> Ꮡt) {
+public static partial void TestNilStream(ж<testing.T> Ꮡt) {
     // Go liberally interprets RFC 1952 section 2.2 to mean that a gzip file
     // consist of zero or more members. Thus, we test that a nil stream is okay.
     var (_, err) = NewReader(new gzip_test_package.bytes_ReaderжReader(bytes.NewReader(default!)));

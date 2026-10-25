@@ -28,6 +28,9 @@ internal static class Go2CsTestHost
             "testdata/cycle.c",
             "testdata/cycle.elf",
             "testdata/debug_rnglists",
+            "testdata/issue57046-clang.elf5",
+            "testdata/issue57046_part1.c",
+            "testdata/issue57046_part2.c",
             "testdata/line-clang-dwarf5.elf",
             "testdata/line-clang.elf",
             "testdata/line-gcc-dwarf5.elf",
@@ -57,7 +60,7 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("Test64Bit", dwarf_test_package.Test64Bit, "entry_test.go", 211);
+        registry.Add("Test64Bit", dwarf_test_package.Test64Bit, "entry_test.go", 212);
         registry.Add("TestBitFieldZeroArrayIssue50685", dwarf_test_package.TestBitFieldZeroArrayIssue50685, "type_test.go", 332);
         registry.Add("TestBitOffsetsELF", dwarf_test_package.TestBitOffsetsELF, "type_test.go", 246);
         registry.Add("TestBitOffsetsELFDwarf4", dwarf_test_package.TestBitOffsetsELFDwarf4, "type_test.go", 261);
@@ -65,8 +68,9 @@ internal static class Go2CsTestHost
         registry.Add("TestBitOffsetsMachO", dwarf_test_package.TestBitOffsetsMachO, "type_test.go", 251);
         registry.Add("TestBitOffsetsMachO4", dwarf_test_package.TestBitOffsetsMachO4, "type_test.go", 256);
         registry.Add("TestDwarf5Ranges", dwarf_internal_test_package.TestDwarf5Ranges, "dwarf5ranges_test.go", 14);
-        registry.Add("TestIssue51758", dwarf_test_package.TestIssue51758, "entry_test.go", 325);
-        registry.Add("TestIssue52045", dwarf_test_package.TestIssue52045, "entry_test.go", 446);
+        registry.Add("TestIssue51758", dwarf_test_package.TestIssue51758, "entry_test.go", 326);
+        registry.Add("TestIssue52045", dwarf_test_package.TestIssue52045, "entry_test.go", 447);
+        registry.Add("TestIssue57046", dwarf_test_package.TestIssue57046, "entry_test.go", 462);
         registry.Add("TestLineELFClang", dwarf_test_package.TestLineELFClang, "line_test.go", 130);
         registry.Add("TestLineELFGCC", dwarf_test_package.TestLineELFGCC, "line_test.go", 20);
         registry.Add("TestLineELFGCCZstd", dwarf_test_package.TestLineELFGCCZstd, "line_test.go", 51);
@@ -75,16 +79,16 @@ internal static class Go2CsTestHost
         registry.Add("TestLineSeek", dwarf_test_package.TestLineSeek, "line_test.go", 181);
         registry.Add("TestPathJoin", dwarf_test_package.TestPathJoin, "line_test.go", 426);
         registry.Add("TestPathLineReaderMalformed", dwarf_test_package.TestPathLineReaderMalformed, "line_test.go", 435);
-        registry.Add("TestRangesRnglistx", dwarf_test_package.TestRangesRnglistx, "entry_test.go", 93);
-        registry.Add("TestRangesSection", dwarf_test_package.TestRangesSection, "entry_test.go", 80);
-        registry.Add("TestReaderRanges", dwarf_test_package.TestReaderRanges, "entry_test.go", 132);
-        registry.Add("TestReaderSeek", dwarf_test_package.TestReaderSeek, "entry_test.go", 48);
-        registry.Add("TestSplit", dwarf_test_package.TestSplit, "entry_test.go", 15);
+        registry.Add("TestRangesRnglistx", dwarf_test_package.TestRangesRnglistx, "entry_test.go", 94);
+        registry.Add("TestRangesSection", dwarf_test_package.TestRangesSection, "entry_test.go", 81);
+        registry.Add("TestReaderRanges", dwarf_test_package.TestReaderRanges, "entry_test.go", 133);
+        registry.Add("TestReaderSeek", dwarf_test_package.TestReaderSeek, "entry_test.go", 49);
+        registry.Add("TestSplit", dwarf_test_package.TestSplit, "entry_test.go", 16);
         registry.Add("TestTypedefCycle", dwarf_test_package.TestTypedefCycle, "type_test.go", 144);
         registry.Add("TestTypedefsELF", dwarf_test_package.TestTypedefsELF, "type_test.go", 86);
         registry.Add("TestTypedefsELFDwarf4", dwarf_test_package.TestTypedefsELFDwarf4, "type_test.go", 94);
         registry.Add("TestTypedefsMachO", dwarf_test_package.TestTypedefsMachO, "type_test.go", 90);
-        registry.Add("TestUnitIteration", dwarf_test_package.TestUnitIteration, "entry_test.go", 284);
+        registry.Add("TestUnitIteration", dwarf_test_package.TestUnitIteration, "entry_test.go", 285);
         registry.Add("TestUnsupportedTypes", dwarf_test_package.TestUnsupportedTypes, "type_test.go", 184);
         return TestHost.Run(registry, args);
     }

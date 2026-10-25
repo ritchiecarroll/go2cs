@@ -27,34 +27,34 @@ internal static class Go2CsTestHost
             "symlink_unix.go",
             "symlink_windows.go",
         });
-        registry.Add("TestAbs", filepath_test_package.TestAbs, "path_test.go", 1384);
-        registry.Add("TestAbsEmptyString", filepath_test_package.TestAbsEmptyString, "path_test.go", 1445);
+        registry.Add("TestAbs", filepath_test_package.TestAbs, "path_test.go", 1383);
+        registry.Add("TestAbsEmptyString", filepath_test_package.TestAbsEmptyString, "path_test.go", 1444);
         registry.Add("TestAbsWindows", filepath_test_package.TestAbsWindows, "path_windows_test.go", 686);
-        registry.Add("TestBase", filepath_test_package.TestBase, "path_test.go", 991);
+        registry.Add("TestBase", filepath_test_package.TestBase, "path_test.go", 990);
         registry.Add("TestBug3486", filepath_test_package.TestBug3486, "path_test.go", 1638);
-        registry.Add("TestCVE202230632", filepath_test_package.TestCVE202230632, "match_test.go", 147);
+        registry.Add("TestCVE202230632", filepath_test_package.TestCVE202230632, "match_test.go", 164);
         registry.Add("TestClean", filepath_test_package.TestClean, "path_test.go", 125);
-        registry.Add("TestDir", filepath_test_package.TestDir, "path_test.go", 1039);
+        registry.Add("TestDir", filepath_test_package.TestDir, "path_test.go", 1038);
         registry.Add("TestDriveLetterInEvalSymlinks", filepath_test_package.TestDriveLetterInEvalSymlinks, "path_test.go", 1615);
         registry.Add("TestEscaping", filepath_test_package.TestEscaping, "path_test.go", 1856);
-        registry.Add("TestEvalSymlinks", filepath_test_package.TestEvalSymlinks, "path_test.go", 1186);
+        registry.Add("TestEvalSymlinks", filepath_test_package.TestEvalSymlinks, "path_test.go", 1185);
         registry.Add("TestEvalSymlinksAboveRoot", filepath_test_package.TestEvalSymlinksAboveRoot, "path_test.go", 1736);
         registry.Add("TestEvalSymlinksAboveRootChdir", filepath_test_package.TestEvalSymlinksAboveRootChdir, "path_test.go", 1787);
         registry.Add("TestEvalSymlinksCanonicalNames", filepath_test_package.TestEvalSymlinksCanonicalNames, "path_windows_test.go", 148);
         registry.Add("TestEvalSymlinksCanonicalNamesWith8dot3Disabled", filepath_test_package.TestEvalSymlinksCanonicalNamesWith8dot3Disabled, "path_windows_test.go", 270);
-        registry.Add("TestEvalSymlinksIsNotExist", filepath_test_package.TestEvalSymlinksIsNotExist, "path_test.go", 1247);
+        registry.Add("TestEvalSymlinksIsNotExist", filepath_test_package.TestEvalSymlinksIsNotExist, "path_test.go", 1246);
         registry.Add("TestEvalSymlinksJunctionToVolumeID", filepath_test_package.TestEvalSymlinksJunctionToVolumeID, "path_windows_test.go", 530);
         registry.Add("TestEvalSymlinksMountPointRecursion", filepath_test_package.TestEvalSymlinksMountPointRecursion, "path_windows_test.go", 562);
         registry.Add("TestEvalSymlinksTooManyLinks", filepath_test_package.TestEvalSymlinksTooManyLinks, "path_test.go", 1880);
         registry.Add("TestExt", filepath_test_package.TestExt, "path_test.go", 507);
         registry.Add("TestFromAndToSlash", filepath_test_package.TestFromAndToSlash, "path_test.go", 315);
-        registry.Add("TestGlob", filepath_test_package.TestGlob, "match_test.go", 118);
-        registry.Add("TestGlobError", filepath_test_package.TestGlobError, "match_test.go", 157);
-        registry.Add("TestGlobSymlink", filepath_test_package.TestGlobSymlink, "match_test.go", 180);
-        registry.Add("TestGlobUNC", filepath_test_package.TestGlobUNC, "match_test.go", 166);
-        registry.Add("TestIsAbs", filepath_test_package.TestIsAbs, "path_test.go", 1093);
+        registry.Add("TestGlob", filepath_test_package.TestGlob, "match_test.go", 135);
+        registry.Add("TestGlobError", filepath_test_package.TestGlobError, "match_test.go", 174);
+        registry.Add("TestGlobSymlink", filepath_test_package.TestGlobSymlink, "match_test.go", 197);
+        registry.Add("TestGlobUNC", filepath_test_package.TestGlobUNC, "match_test.go", 183);
+        registry.Add("TestIsAbs", filepath_test_package.TestIsAbs, "path_test.go", 1092);
         registry.Add("TestIsLocal", filepath_test_package.TestIsLocal, "path_test.go", 224);
-        registry.Add("TestIssue13582", filepath_test_package.TestIssue13582, "path_test.go", 1268);
+        registry.Add("TestIssue13582", filepath_test_package.TestIssue13582, "path_test.go", 1267);
         registry.Add("TestIssue29372", filepath_test_package.TestIssue29372, "path_test.go", 1708);
         registry.Add("TestIssue51617", filepath_test_package.TestIssue51617, "path_test.go", 1821);
         registry.Add("TestIssue52476", filepath_test_package.TestIssue52476, "path_windows_test.go", 660);
@@ -62,9 +62,9 @@ internal static class Go2CsTestHost
         registry.Add("TestLocalize", filepath_test_package.TestLocalize, "path_test.go", 281);
         registry.Add("TestMatch", filepath_test_package.TestMatch, "match_test.go", 90);
         registry.Add("TestNTNamespaceSymlink", filepath_test_package.TestNTNamespaceSymlink, "path_windows_test.go", 589);
-        registry.Add("TestNonWindowsGlobEscape", filepath_test_package.TestNonWindowsGlobEscape, "match_test.go", 346);
+        registry.Add("TestNonWindowsGlobEscape", filepath_test_package.TestNonWindowsGlobEscape, "match_test.go", 363);
         registry.Add("TestRel", filepath_test_package.TestRel, "path_test.go", 1528);
-        registry.Add("TestRelativeSymlinkToAbsolute", filepath_test_package.TestRelativeSymlinkToAbsolute, "path_test.go", 1328);
+        registry.Add("TestRelativeSymlinkToAbsolute", filepath_test_package.TestRelativeSymlinkToAbsolute, "path_test.go", 1327);
         registry.Add("TestSplit", filepath_test_package.TestSplit, "path_test.go", 398);
         registry.Add("TestSplitList", filepath_test_package.TestSplitList, "path_test.go", 361);
         registry.Add("TestToNorm", filepath_test_package.TestToNorm, "path_windows_test.go", 304);
@@ -81,7 +81,7 @@ internal static class Go2CsTestHost
         registry.Add("TestWalkSymlinkRoot", filepath_test_package.TestWalkSymlinkRoot, "path_test.go", 865);
         registry.Add("TestWinSplitListTestsAreValid", filepath_test_package.TestWinSplitListTestsAreValid, "path_windows_test.go", 22);
         registry.Add("TestWindowsEvalSymlinks", filepath_test_package.TestWindowsEvalSymlinks, "path_windows_test.go", 99);
-        registry.Add("TestWindowsGlob", filepath_test_package.TestWindowsGlob, "match_test.go", 259);
+        registry.Add("TestWindowsGlob", filepath_test_package.TestWindowsGlob, "match_test.go", 276);
         return TestHost.Run(registry, args);
     }
 }

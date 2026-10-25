@@ -13,6 +13,8 @@ using static go.@internal.trace_package;
 partial class trace_internal_test_package {
 
 public static void TestHeap(ж<testing.T> Ꮡt) {
+    var removedᴷ = new stackAppend<ж<global::go.@internal.trace_package.batchCursor>>();
+
     slice<ж<global::go.@internal.trace_package.batchCursor>> heap = default!;
 
     // Insert a bunch of values into the heap.
@@ -25,7 +27,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     }
 
     // Update an element in the middle to be the new minimum.
-    foreach (var (i, _) in heap) {
+    foreach (var i in range(heap)) {
         if ((~heap[i]).ev.time == 5) {
             heap[i].Value.ev.time = -21;
             heapUpdate(heap, i);
@@ -62,14 +64,14 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     }
 
     // Remove an element in the middle.
-    foreach (var (i, _) in heap) {
+    foreach (var i in range(heap)) {
         if ((~heap[i]).ev.time == 5) {
             heap = heapRemove(heap, i);
             break;
         }
     }
     checkHeap(Ꮡt, heap);
-    foreach (var (i, _) in heap) {
+    foreach (var i in range(heap)) {
         if ((~heap[i]).ev.time == 5) {
             Ꮡt.Fatalf("failed to remove heap elem with time %d: %s"u8, (nint)5, heapDebugString(heap));
         }
@@ -83,7 +85,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     nint l = len(heap);
     slice<ж<global::go.@internal.trace_package.batchCursor>> removed = default!;
     for (nint i = 0; i < l; i++) {
-        removed = builtin.append(removed, heap[0]);
+        removed = builtin.append(removedᴷ, removed, heap[0]);
         heap = heapRemove(heap, 0);
         checkHeap(Ꮡt, heap);
     }
@@ -99,7 +101,7 @@ internal static ж<global::go.@internal.trace_package.batchCursor> makeBatchCurs
 internal static @string heapDebugString(slice<ж<global::go.@internal.trace_package.batchCursor>> heap) {
     ref var sb = ref builtin.heap(new strings.Builder(), out var Ꮡsb);
     fmt.Fprintf(new trace_test_package.strings_BuilderжWriter(Ꮡsb), "["u8);
-    foreach (var (i, _) in heap) {
+    foreach (var i in range(heap)) {
         if (i != 0) {
             fmt.Fprintf(new trace_test_package.strings_BuilderжWriter(Ꮡsb), ", "u8);
         }
@@ -112,7 +114,7 @@ internal static @string heapDebugString(slice<ж<global::go.@internal.trace_pack
 internal static void checkHeap(ж<testing.T> Ꮡt, slice<ж<global::go.@internal.trace_package.batchCursor>> heap) {
     Ꮡt.Helper();
 
-    foreach (var (i, _) in heap) {
+    foreach (var i in range(heap)) {
         if (i == 0) {
             continue;
         }

@@ -27,6 +27,7 @@ internal static readonly @string truncatedˢ = "truncated"u8;
 
 public static void TestRegress(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var argsᴷ = new stackAppend<reflectꓸValue>();
 
     slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
     slice<int64> int64s = new int64[]{1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
@@ -88,7 +89,7 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("unexpected argument type for r.%s"u8, m.Name);
                 }
                 argstr = fmt.Sprint(x);
-                args = append(args, reflect.ValueOf(x));
+                args = append(argsᴷ, args, reflect.ValueOf(x));
             }
 
             any @out = default!;

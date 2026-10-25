@@ -17,12 +17,14 @@ internal static class Go2CsTestHost
             "server.go",
             "server_test.go",
         });
+        registry.Add("TestBodyNotAllowed", httptest_internal_test_package.TestBodyNotAllowed, "recorder_test.go", 314);
+        registry.Add("TestClientExampleCom", httptest_internal_test_package.TestClientExampleCom, "server_test.go", 297);
         registry.Add("TestCloseHijackedConnection", httptest_internal_test_package.TestCloseHijackedConnection, "server_test.go", 210);
         registry.Add("TestNewRequest", httptest_internal_test_package.TestNewRequest, "httptest_test.go", 18);
         registry.Add("TestNewRequestWithContext", httptest_internal_test_package.TestNewRequestWithContext, "httptest_test.go", 38);
-        registry.Add("TestParseContentLength", httptest_internal_test_package.TestParseContentLength, "recorder_test.go", 313);
-        registry.Add("TestRecorder", httptest_internal_test_package.TestRecorder, "recorder_test.go", 14);
-        registry.Add("TestRecorderPanicsOnNonXXXStatusCode", httptest_internal_test_package.TestRecorderPanicsOnNonXXXStatusCode, "recorder_test.go", 350);
+        registry.Add("TestParseContentLength", httptest_internal_test_package.TestParseContentLength, "recorder_test.go", 335);
+        registry.Add("TestRecorder", httptest_internal_test_package.TestRecorder, "recorder_test.go", 16);
+        registry.Add("TestRecorderPanicsOnNonXXXStatusCode", httptest_internal_test_package.TestRecorderPanicsOnNonXXXStatusCode, "recorder_test.go", 372);
         registry.Add("TestServer", httptest_internal_test_package.TestServer, "server_test.go", 36);
         registry.Add("TestServerZeroValueClose", httptest_internal_test_package.TestServerZeroValueClose, "server_test.go", 199);
         registry.Add("TestTLSServerWithHTTP2", httptest_internal_test_package.TestTLSServerWithHTTP2, "server_test.go", 261);

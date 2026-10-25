@@ -16,23 +16,23 @@ internal static class Go2CsTestHost
             "punycode.go",
             "punycode_test.go",
         });
-        registry.Add("TestBasics", cookiejar_internal_test_package.TestBasics, "jar_test.go", 666);
+        registry.Add("TestBasics", cookiejar_internal_test_package.TestBasics, "jar_test.go", 722);
         registry.Add("TestCanonicalHost", cookiejar_internal_test_package.TestCanonicalHost, "jar_test.go", 152);
-        registry.Add("TestChromiumBasics", cookiejar_internal_test_package.TestChromiumBasics, "jar_test.go", 1054);
-        registry.Add("TestChromiumDeletion", cookiejar_internal_test_package.TestChromiumDeletion, "jar_test.go", 1183);
-        registry.Add("TestChromiumDomain", cookiejar_internal_test_package.TestChromiumDomain, "jar_test.go", 1115);
+        registry.Add("TestChromiumBasics", cookiejar_internal_test_package.TestChromiumBasics, "jar_test.go", 1110);
+        registry.Add("TestChromiumDeletion", cookiejar_internal_test_package.TestChromiumDeletion, "jar_test.go", 1239);
+        registry.Add("TestChromiumDomain", cookiejar_internal_test_package.TestChromiumDomain, "jar_test.go", 1171);
         registry.Add("TestDefaultPath", cookiejar_internal_test_package.TestDefaultPath, "jar_test.go", 285);
         registry.Add("TestDomainAndType", cookiejar_internal_test_package.TestDomainAndType, "jar_test.go", 327);
-        registry.Add("TestDomainHandling", cookiejar_internal_test_package.TestDomainHandling, "jar_test.go", 1357);
-        registry.Add("TestExpiration", cookiejar_internal_test_package.TestExpiration, "jar_test.go", 822);
+        registry.Add("TestDomainHandling", cookiejar_internal_test_package.TestDomainHandling, "jar_test.go", 1413);
+        registry.Add("TestExpiration", cookiejar_internal_test_package.TestExpiration, "jar_test.go", 878);
         registry.Add("TestHasDotSuffix", cookiejar_internal_test_package.TestHasDotSuffix, "jar_test.go", 117);
         registry.Add("TestHasPort", cookiejar_internal_test_package.TestHasPort, "jar_test.go", 181);
         registry.Add("TestIsIP", cookiejar_internal_test_package.TestIsIP, "jar_test.go", 262);
-        registry.Add("TestIssue19384", cookiejar_internal_test_package.TestIssue19384, "jar_test.go", 1364);
+        registry.Add("TestIssue19384", cookiejar_internal_test_package.TestIssue19384, "jar_test.go", 1420);
         registry.Add("TestJarKey", cookiejar_internal_test_package.TestJarKey, "jar_test.go", 213);
         registry.Add("TestJarKeyNilPSL", cookiejar_internal_test_package.TestJarKeyNilPSL, "jar_test.go", 243);
         registry.Add("TestPunycode", cookiejar_internal_test_package.TestPunycode, "punycode_test.go", 153);
-        registry.Add("TestUpdateAndDelete", cookiejar_internal_test_package.TestUpdateAndDelete, "jar_test.go", 815);
+        registry.Add("TestUpdateAndDelete", cookiejar_internal_test_package.TestUpdateAndDelete, "jar_test.go", 871);
         return TestHost.Run(registry, args);
     }
 }

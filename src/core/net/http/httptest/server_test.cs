@@ -415,4 +415,60 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string requestedHostnameˢ = "requested-hostname"u8;
+
+internal partial struct TestClientExampleCom_modes /*dyn*/ {
+    internal @string proto;
+    internal @string host;
+}
+
+public static void TestClientExampleCom(ж<testing.T> Ꮡt) {
+    var modes = new TestClientExampleCom_modes[]{
+        new("http"u8, "example.com"u8),
+        new("http"u8, "foo.example.com"u8),
+        new("https"u8, "example.com"u8),
+        new("https"u8, "foo.example.com"u8)
+    }.slice();
+
+    foreach (var (_, vᴛ1) in modes) {
+        ref var tt = ref heap(new TestClientExampleCom_modes(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.proto + " "u8 + tt.host, (ж<testing.T> tΔ1) => {
+            GoFrame ᒐ = default;
+            try {
+                var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+                    w.Header().Set(requestedHostnameˢ, (~r).Host);
+                })));
+                var exprᴛ1 = ttʗ1.proto;
+                if (exprᴛ1 == "https"u8) {
+                    cst.Value.EnableHTTP2 = true;
+                    cst.StartTLS();
+                }
+                else { /* default: */
+                    cst.Start();
+                }
+
+                var cstʗ1 = cst;
+                defer(cstʗ1.Close, ref ᒐ);
+
+                var (res, err) = cst.Client().Get(ttʗ1.proto + "://"u8 + ttʗ1.host);
+                if (err != default!) {
+                    tΔ1.Fatalf("Failed to make request: %v"u8, err);
+                }
+                {
+                    @string got = (~res).Header.Get(requestedHostnameˢ);
+                    @string want = ttʗ1.host; if (got != want) {
+                        tΔ1.Fatalf("Requested hostname mismatch\ngot: %q\nwant: %q"u8, got, want);
+                    }
+                }
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+    }
+}
+
 } // end httptest_internal_test_package

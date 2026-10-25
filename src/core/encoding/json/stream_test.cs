@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -221,7 +222,7 @@ internal partial struct TestEncoderSetEscapeHTML_stringOption /*dyn*/ {
 }
 
 internal partial struct TestEncoderSetEscapeHTML_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any v;
     internal @string wantEscape;
     internal @string want;
@@ -310,7 +311,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
         }
         var @out = new slice<any>(i);
         var dec = NewDecoder(new json_test_package.bytes_BufferжReader(Ꮡbuf));
-        foreach (var (j, _) in @out) {
+        foreach (var j in range(@out)) {
             {
                 var err = dec.Decode(Ꮡ(@out, j)); if (err != default!) {
                     Ꮡt.Fatalf("decode #%d/%d error: %v"u8, j, i, err);
@@ -319,7 +320,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
         }
         if (!reflect.DeepEqual(@out, streamTest.slice(0, i))) {
             Ꮡt.Errorf("decoding %d items: mismatch:"u8, i);
-            foreach (var (j, _) in @out) {
+            foreach (var j in range(@out)) {
                 if (!reflect.DeepEqual(@out[j], streamTest[j])) {
                     Ꮡt.Errorf("#%d:\n\tgot:  %v\n\twant: %v"u8, j, @out[j], streamTest[j]);
                 }
@@ -444,7 +445,7 @@ public static void TestNullRawMessage(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestBlocking_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
 }
 
@@ -482,7 +483,7 @@ internal partial struct decodeThis {
 }
 
 internal partial struct TestDecodeInStream_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string json;
     internal slice<any> expTokens;
 }
@@ -530,6 +531,7 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8, (global::go.encoding.json_package.Delim)(rune)'[',
             new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
             (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
+
         new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}"u8, expTokens: new any[]{
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8,
             new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
@@ -556,6 +558,9 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
         }.slice()),
         new(CaseName: Name(""u8), json: @" \a"u8, expTokens: new any[]{
             Ꮡ(new SyntaxError("invalid character '\\\\' looking for beginning of value"u8, 1))
+        }.slice()),
+        new(CaseName: Name(""u8), json: @","u8, expTokens: new any[]{
+            Ꮡ(new SyntaxError("invalid character ',' looking for beginning of value"u8, 0))
         }.slice())
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
@@ -570,6 +575,17 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
 
                 ref var got = ref heap<any>(out var Ꮡgot);
                 error err = default!;
+
+                var wantMore = true;
+                var exprᴛ1 = want;
+                if (AreEqual(exprᴛ1, ((global::go.encoding.json_package.Delim)(rune)']')) || AreEqual(exprᴛ1, ((global::go.encoding.json_package.Delim)(rune)'}'))) {
+                    wantMore = false;
+                }
+                {
+                    var gotΔ1 = dec.More(); if (gotΔ1 != wantMore) {
+                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tdec.More() = %v, want %v (next token: %T(%v))"u8, ttʗ1.Where, ttʗ1.json, gotΔ1, wantMore, want, want);
+                    }
+                }
 
                 {
                     var (dt, ok) = want._<decodeThis>(ᐧ); if (ok){
@@ -643,6 +659,124 @@ public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+internal partial struct TestTokenTruncation_tests /*dyn*/ {
+    internal @string @in;
+    internal error err;
+}
+
+public static void TestTokenTruncation(ж<testing.T> Ꮡt) {
+    var tests = new TestTokenTruncation_tests[]{
+        new(@in: @""u8, err: io.EOF),
+        new(@in: @"{"u8, err: io.EOF),
+        new(@in: @"{"""u8, err: io.ErrUnexpectedEOF),
+        new(@in: @"{""k"""u8, err: io.EOF),
+        new(@in: @"{""k"":"u8, err: io.EOF),
+        new(@in: @"{""k"","u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ',' after object key"u8, (int64)len(@"{""k"""))))),
+        new(@in: @"{""k""}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key"u8, (int64)len(@"{""k"""))))),
+        new(@in: @" [0"u8, err: io.EOF),
+        new(@in: @"[0."u8, err: io.ErrUnexpectedEOF),
+        new(@in: @"[0. "u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' after decimal point in numeric literal"u8, (int64)len(@"[0."))))),
+        new(@in: @"[0,"u8, err: io.EOF),
+        new(@in: @"[0:"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ':' after array element"u8, (int64)len(@"[0"))))),
+        new(@in: @"n"u8, err: io.ErrUnexpectedEOF),
+        new(@in: @"nul"u8, err: io.ErrUnexpectedEOF),
+        new(@in: @"fal "u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' in literal false (expecting 's')"u8, (int64)len(@"fal "))))),
+        new(@in: @"false"u8, err: io.EOF)
+    }.slice();
+    foreach (var (_, tt) in tests) {
+        var d = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
+        for (nint i = 0; true; i++) {
+            {
+                var (_, err) = d.Token(); if (err != default!) {
+                    if (!reflect.DeepEqual(err, tt.err)) {
+                        Ꮡt.Errorf("`%s`: %d.Token error = %#v, want %v"u8, tt.@in, i, err, tt.err);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object unconsumedTestdataˢ = (@string)"unconsumed testdata"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string inputᶜ1 = """
+ [
+		[ ] , [ "one" ] , [ "one" , "two" ] ,
+		{ } , { "alpha" : "bravo" } , { "alpha" : "bravo" , "fizz" : "buzz" }
+	] 
+"""u8.Raw();
+
+public static void TestDecoderInputOffset(ж<testing.T> Ꮡt) {
+    @string input = inputᶜ1;
+    ref var wantOffsets = ref heap<slice<int64>>(out var ᏑwantOffsets);
+    wantOffsets = new int64[]{
+        0, 1, 2, 5, 6, 7, 8, 9, 12, 13, 18, 19, 20, 21, 24, 25, 30, 31,
+        38, 39, 40, 41, 46, 47, 48, 49, 52, 53, 60, 61, 70, 71, 72, 73,
+        76, 77, 84, 85, 94, 95, 103, 104, 112, 113, 114, 116, 117, 117,
+        117, 117
+    }.slice();
+    ref var wantMores = ref heap<slice<bool>>(out var ᏑwantMores);
+    wantMores = new bool[]{
+        true, true, false, true, true, false, true, true, true, false,
+        true, false, true, true, true, false, true, true, true, true,
+        true, false, false, false, false
+    }.slice();
+
+    var d = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(input)));
+    var dʗ1 = d;
+    void checkOffset() {
+        Ꮡt.Helper();
+        var got = dʗ1.InputOffset();
+        if (len(ᏑwantOffsets.ValueSlot) == 0) {
+            Ꮡt.Fatalf("InputOffset = %d, want nil"u8, got);
+        }
+        var want = ᏑwantOffsets.ValueSlot[0];
+        if (got != want) {
+            Ꮡt.Fatalf("InputOffset = %d, want %d"u8, got, want);
+        }
+        ᏑwantOffsets.ValueSlot = ᏑwantOffsets.ValueSlot[1..];
+    }
+    var dʗ2 = d;
+    void checkMore() {
+        Ꮡt.Helper();
+        var got = dʗ2.More();
+        if (len(ᏑwantMores.ValueSlot) == 0) {
+            Ꮡt.Fatalf("More = %v, want nil"u8, got);
+        }
+        var want = ᏑwantMores.ValueSlot[0];
+        if (got != want) {
+            Ꮡt.Fatalf("More = %v, want %v"u8, got, want);
+        }
+        ᏑwantMores.ValueSlot = ᏑwantMores.ValueSlot[1..];
+    }
+    checkOffset();
+    checkMore();
+    checkOffset();
+    while (ᐧ) {
+        {
+            var (_, err) = d.Token(); if (AreEqual(err, io.EOF)){
+                break;
+            } else 
+            if (err != default!) {
+                Ꮡt.Fatalf("Token error: %v"u8, err);
+            }
+        }
+        checkOffset();
+        checkMore();
+        checkOffset();
+    }
+    checkOffset();
+    checkMore();
+    checkOffset();
+
+    if (len(wantOffsets) + len(wantMores) > 0) {
+        Ꮡt.Fatal(unconsumedTestdataˢ);
+    }
 }
 
 } // end json_internal_test_package

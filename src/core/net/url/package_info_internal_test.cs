@@ -37,7 +37,7 @@ using static go.net.url_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/url_test.go", "url_test.cs", "ABs0ANsEugmykoKCgIK2uKKCgoKCgoKUgpSCgoKUgoCC2oKCgoKClIIACg4ANHSCgoKCkoK4goKUgvgAIkyCgoKCgpSCgpSCgriigIIADwqCADNwsoKSgJIADBgARogBgoKCgqaCgoKCgoKUgoKClIK4goLKAB44goKCgriCgsoAJUyCgoKCuIKCAA4gAAsYgoKAggAICgAOIoKCgoL6ooKC6ACHAY4CgoKCgpSUgoKCgoKAgraCpoKCkoCCkpS2goKmgoKSgpKUAAwKooKCgpSAkraAkqSAkqSAkqSAgqSAgqSAgqSAgqSCgJIAChQAWKoBgrKSgoKCgpSUgpSCgoKClIKClIKAggAREIIAEiyCgoKCgpSCgpSCgoCCpIKUgJIAChQAdOoBgoKCgvqEkoKCggAICIIAJ1yCgoKClJSCzJKCgpSAkgAKFAA3cIKCggALEoCigAAJDICigAAKDoD0ACZWkoKCgoKUgoKUggAKCoIAGj6CgpKClILKkpLEgoKClIKCAAkUgoKClIK4goKClIKCgqaCgoKUguiigoCCyJSCpoCCtoCCtoCCxNSCgoCS+ILKgoKCgILagIIACQoAG0aCspKCgoKUgoLegrKSgoKClIKC3oKykoKCgpSCgt6CspKCgoKUgoIADw6CAHj6AYKCgpSAgqSCgoKClII=", "880-884:1;1290-1296:1;1467-1495:1;2008-2012:1;2098-2109:1;2115-2126:1;2132-2143:1;2149-2160:1", "", "28=User/1/3/48,User/2/3/59,User/3/3/180,UserPassword/1/5/203,UserPassword/2/5/213,UserPassword/3/5/223,UserPassword/4/5/232,UserPassword/5/5/315;848=UserPassword/1/2/11,User/1/1/21,UserPassword/2/2/31;2238=Repeat/1/3/29,Repeat/2/3/30,Repeat/3/3/31")]
+[assembly: go.GoPositionMap("net/url/url_test.go", "url_test.cs", "ABw2APAE5AmykoKCgIK2uKKCgoKCgoKUgpSCgoKUgoCC2oKCgoKClIIACg4AOXqCgoKCkoK4goKUgvgAIkyCgoKCgpSCgpSCgriigIIADwqCADNwspKAkgAMGABGiAGCgoKCpoKCgoKCgpSCgoKUgriCgsoAHjiCgoKCuIKCygAlTIKCgoK4goIADiAAFi6CgoCC2oKykoKCAAgMAA4igoKCggAKCqKCgqaCgoKCgqaCgoKCgvoAhwGOAoKCgoKUlIKCgoKCgIK2gqaCgpKAgpKUtoKCpoKCkoKSlAAMCqKCgoKUgJK2gJKkgJKkgJKkgIKkgIKkgIKkgIKkgoCSAAoUAFiqAYKykoKCgoKUlIKUgoKCgpSCgpSCgIIAERCCABIsgoKCgoKUgoKUgoKAgqSClICSAAoUAHTqAYKCgoL6hJKCgoIACAiCADBogoKCgpSUgsySgoKUgJIAChQAN3CCgoIACxKAooAACQyAooAACg6A9AAmVpKCgoKClIKClIIACgqCABo+goKSgpSCypKSxIKCgpSCggAJFIKCgpSCuIKCgpSCgoKmgoKClILoooKAgsiUgqaAgraAgraAgsTUgoKAkviCyoKCgoCC2oCCAAkKAB5GgrKSgoKClIKC3oKykoKCgpSCgt6CspKCgoKUgoLegrKSgoKClIKCAA8OggB3+AGigoKUgoKmgoKClJSUlIKCAAsKgpQABRCykoKC", "904-908:1;1158-1163:1;1194-1198:1;1199-1206:2;1207-1214:3;1353-1359:1;1530-1558:1;2077-2081:1;2167-2178:1;2184-2195:1;2201-2212:1;2218-2229:1;2398-2403:1", "", "29=User/1/3/48,User/2/3/59,User/3/3/180,UserPassword/1/7/203,UserPassword/2/7/213,UserPassword/3/7/223,UserPassword/4/7/232,UserPassword/5/7/315,UserPassword/6/7/607,UserPassword/7/7/617;875=UserPassword/1/2/11,User/1/1/21,UserPassword/2/2/31;2319=Repeat/1/3/29,Repeat/2/3/30,Repeat/3/3/31")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -70,6 +70,7 @@ public static partial class url_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸurl() => builtin.initPackage(typeof(go.net.url_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

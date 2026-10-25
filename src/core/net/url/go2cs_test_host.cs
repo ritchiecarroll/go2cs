@@ -9,36 +9,39 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("net/url", new string[]
         {
+            "encoding_table.go",
             "example_test.go",
+            "gen_encoding_table.go",
             "url.go",
             "url_test.go",
         });
-        registry.Add("TestEncodeQuery", url_internal_test_package.TestEncodeQuery, "url_test.go", 1113);
-        registry.Add("TestGob", url_internal_test_package.TestGob, "url_test.go", 1986);
-        registry.Add("TestInvalidUserPassword", url_internal_test_package.TestInvalidUserPassword, "url_test.go", 2033);
-        registry.Add("TestJSON", url_internal_test_package.TestJSON, "url_test.go", 1959);
-        registry.Add("TestJoinPath", url_internal_test_package.TestJoinPath, "url_test.go", 2164);
-        registry.Add("TestNilUser", url_internal_test_package.TestNilUser, "url_test.go", 2007);
-        registry.Add("TestParse", url_internal_test_package.TestParse, "url_test.go", 667);
-        registry.Add("TestParseErrors", url_internal_test_package.TestParseErrors, "url_test.go", 1688);
-        registry.Add("TestParseFailure", url_internal_test_package.TestParseFailure, "url_test.go", 1678);
-        registry.Add("TestParseQuery", url_internal_test_package.TestParseQuery, "url_test.go", 1465);
-        registry.Add("TestParseQueryLimits", url_internal_test_package.TestParseQueryLimits, "url_test.go", 1499);
-        registry.Add("TestParseRequestURI", url_internal_test_package.TestParseRequestURI, "url_test.go", 740);
-        registry.Add("TestPathEscape", url_internal_test_package.TestPathEscape, "url_test.go", 1075);
-        registry.Add("TestQueryEscape", url_internal_test_package.TestQueryEscape, "url_test.go", 1022);
-        registry.Add("TestQueryValues", url_internal_test_package.TestQueryValues, "url_test.go", 1337);
-        registry.Add("TestRejectControlCharacters", url_internal_test_package.TestRejectControlCharacters, "url_test.go", 2040);
-        registry.Add("TestRequestURI", url_internal_test_package.TestRequestURI, "url_test.go", 1669);
-        registry.Add("TestResolvePath", url_internal_test_package.TestResolvePath, "url_test.go", 1138);
-        registry.Add("TestResolveReference", url_internal_test_package.TestResolveReference, "url_test.go", 1289);
-        registry.Add("TestShouldEscape", url_internal_test_package.TestShouldEscape, "url_test.go", 1822);
-        registry.Add("TestStarRequest", url_internal_test_package.TestStarRequest, "url_test.go", 1750);
-        registry.Add("TestURLErrorImplementsNetError", url_internal_test_package.TestURLErrorImplementsNetError, "url_test.go", 1894);
-        registry.Add("TestURLHostnameAndPort", url_internal_test_package.TestURLHostnameAndPort, "url_test.go", 1911);
-        registry.Add("TestURLRedacted", url_internal_test_package.TestURLRedacted, "url_test.go", 821);
-        registry.Add("TestURLString", url_internal_test_package.TestURLString, "url_test.go", 797);
-        registry.Add("TestUnescape", url_internal_test_package.TestUnescape, "url_test.go", 962);
+        registry.Add("TestEncodeQuery", url_internal_test_package.TestEncodeQuery, "url_test.go", 1148);
+        registry.Add("TestGob", url_internal_test_package.TestGob, "url_test.go", 2055);
+        registry.Add("TestInvalidUserPassword", url_internal_test_package.TestInvalidUserPassword, "url_test.go", 2102);
+        registry.Add("TestJSON", url_internal_test_package.TestJSON, "url_test.go", 2028);
+        registry.Add("TestJoinPath", url_internal_test_package.TestJoinPath, "url_test.go", 2233);
+        registry.Add("TestNilUser", url_internal_test_package.TestNilUser, "url_test.go", 2076);
+        registry.Add("TestParse", url_internal_test_package.TestParse, "url_test.go", 689);
+        registry.Add("TestParseErrors", url_internal_test_package.TestParseErrors, "url_test.go", 1751);
+        registry.Add("TestParseFailure", url_internal_test_package.TestParseFailure, "url_test.go", 1741);
+        registry.Add("TestParseQuery", url_internal_test_package.TestParseQuery, "url_test.go", 1528);
+        registry.Add("TestParseQueryLimits", url_internal_test_package.TestParseQueryLimits, "url_test.go", 1562);
+        registry.Add("TestParseRequestURI", url_internal_test_package.TestParseRequestURI, "url_test.go", 765);
+        registry.Add("TestParseStrictIpv6", url_internal_test_package.TestParseStrictIpv6, "url_test.go", 2386);
+        registry.Add("TestPathEscape", url_internal_test_package.TestPathEscape, "url_test.go", 1099);
+        registry.Add("TestQueryEscape", url_internal_test_package.TestQueryEscape, "url_test.go", 1046);
+        registry.Add("TestQueryValues", url_internal_test_package.TestQueryValues, "url_test.go", 1400);
+        registry.Add("TestRejectControlCharacters", url_internal_test_package.TestRejectControlCharacters, "url_test.go", 2109);
+        registry.Add("TestRequestURI", url_internal_test_package.TestRequestURI, "url_test.go", 1732);
+        registry.Add("TestResolvePath", url_internal_test_package.TestResolvePath, "url_test.go", 1184);
+        registry.Add("TestResolveReference", url_internal_test_package.TestResolveReference, "url_test.go", 1352);
+        registry.Add("TestShouldEscape", url_internal_test_package.TestShouldEscape, "url_test.go", 1891);
+        registry.Add("TestStarRequest", url_internal_test_package.TestStarRequest, "url_test.go", 1819);
+        registry.Add("TestURLErrorImplementsNetError", url_internal_test_package.TestURLErrorImplementsNetError, "url_test.go", 1963);
+        registry.Add("TestURLHostnameAndPort", url_internal_test_package.TestURLHostnameAndPort, "url_test.go", 1980);
+        registry.Add("TestURLRedacted", url_internal_test_package.TestURLRedacted, "url_test.go", 846);
+        registry.Add("TestURLString", url_internal_test_package.TestURLString, "url_test.go", 822);
+        registry.Add("TestUnescape", url_internal_test_package.TestUnescape, "url_test.go", 986);
         return TestHost.Run(registry, args);
     }
 }

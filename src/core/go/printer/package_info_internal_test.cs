@@ -31,7 +31,7 @@ using static go.go.printer_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABo6goCC+pKUgoKmgoKmgoKCpoKUuICCgoLcooKUgoKCuKKClIKCgg==")]
-[assembly: global::go.GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AB84lAAJHsSCgriCgriSgpSCqJKAgsiCgIK2qJKCgpSokoKUpoKCgoKmgoKCuIKAgqS4goKCuICCgra4goKClICC2pSCkoK4xgAOGAAYMoKCgoKCgoKCAA8UspyCgoKmgoKUgoKCuIKCgrqSgoKAgsiAggANCpKCgoKClIKCgrzSgoKCpoCCpICCyAAaDrKCAAEigoKmgpKCpoKCgsqCgIKkqJKCkoKUqJKCgpQAFgyyAAIcgoKokoKCyoKC7oKCgpSCuIKClIK4goKCuIIAJAyiAAEWAAIcgoKokoKClKaCuNyCgoKCpoKCgqaCgsrcgoKCgqaCgoKmgoL6ooiygoKmgoKmgpKigoKUgoKClIKClIKmggAOEqIACBSCgIKklJqC7rIACRSCgIKkgJIACRKygoKCgpSCAAkIkoKCgoKUgoKUooKCgqaCAA0OooiCggAiCIIABSqCgoKmlIKCpoKmlIKCpoIACQiCgoKCgqaCgoKCgriCguykkoKCgqiSgoKUpoKUgoKClJSCAA8Moo6CgoK4goKUgoCCpIKAggAICN6CgoKCgqa4goCCpIK+wrKCgoKCgg==", "151-154:1;203-208:1;347-350:1;552-574:1")]
+[assembly: global::go.GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AB84lAAJHsSCgriCgriSgpSCqJKAgsiCgIK2qJKCgpSokoKUpoKCgoKmgoKCuIKAgqS4goKCuICCgra4goKClICC2pSCkoK4xgAOGAAYMoKCgoKCgoKCAA8UspyCgoKmgoKUgoKCuIKCgrqSgoKAgsiAggANCpKCgoKClIKCgrzSgoKCpoCCpICCyAAaDrKCAAEigoKmgpKCpoKCgsqCgIKkqJKCkoKUqJKCgpQAFgyyAAIcgoKokoKCyoKC7oKCgpSCuIKClIK4goKCuIIAJAyiAAEWAAIcgoKokoKClKaCuNyCgoKCpoKCgqaCgsrcgoKCgqaCgoKmgoL6ooiygoKmgoKmoqKCgpSCgoKUgoKUgqaCAA8SogAIFIKAgqSUmoLusgAJFIKAgqSAkgAJErKCgoKClIIACQiSgoKCgpSCgpSigoKCpoIADQ6iiIKCACIIggAFKoKCgqaUgoKmgqaUgoKmggAJCIKCgoKCpoKCgoKCuIKC7KSSgoKCqJKCgpSmgpSCgoKUlIIADwyijoKCgriCgpSCgIKkgoCCAAgI7oKCgoKCpriCgIKkgr7CsoKCgoKC", "151-154:1;203-208:1;347-350:1;551-573:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -63,7 +63,7 @@ public static partial class printer_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸprinter() => builtin.initPackage(typeof(global::go.go.printer_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(@internal.diff_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(global::go.@internal.diff_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));

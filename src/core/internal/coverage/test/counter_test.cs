@@ -124,7 +124,7 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
             if (aWant != aGot) {
                 Ꮡt.Errorf("reading decoded args, got %s want %s"u8, aGot, aWant);
             }
-            foreach (var (i, _) in funcs) {
+            foreach (var i in range(funcs)) {
                 if (isDead(funcs[i])) {
                     continue;
                 }
@@ -164,6 +164,9 @@ internal static readonly @string covcountersHash20ˢ = "covcounters.hash2.0"u8;
 public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var ctrsᴷ = new stackAppend<uint32>();
+        var allfuncsᴷ = new stackAppend<slice<decodecounter.FuncPayload>>();
+
         @string d = Ꮡt.TempDir();
         @string cfpath = filepath.Join(d, covcountersHash20ˢ);
         var (of, err) = os.OpenFile(cfpath, (nint)((nint)(nint)(os.O_WRONLY | os.O_CREATE) | os.O_TRUNC), 438);
@@ -173,7 +176,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
 
         UntypedInt numSegments = 2;
 
-        // Write a counter with with multiple segments.
+        // Write a counter with multiple segments.
         var args = new map<@string, @string>{["argc"u8] = "1"u8, ["argv0"u8] = "prog.exe"u8};
         var allfuncs = new slice<decodecounter.FuncPayload>[]{}.slice();
         var ctrs = new uint32[]{}.slice();
@@ -182,14 +185,14 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
         for (nint idx = 0; idx < numSegments; idx++) {
             args[fmt.Sprintf("seg%d"u8, idx)] = "x"u8;
             q += 7;
-            ctrs = append(ctrs, q);
+            ctrs = append(ctrsᴷ, ctrs, q);
             var funcs = new decodecounter.FuncPayload[]{}.slice();
             for (nint k = 0; k < idx + 1; k++) {
                 var c = new slice<uint32>(len(ctrs));
                 copy(c, ctrs);
                 funcs = append(funcs, mkfunc((uint32)idx, (uint32)k, c));
             }
-            allfuncs = append(allfuncs, funcs);
+            allfuncs = append(allfuncsᴷ, allfuncs, funcs);
 
             var writeVisitor = Ꮡ(new ctrVis(funcs: funcs));
 
@@ -268,7 +271,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
                 }
             }
             var funcs = allfuncs[sidx];
-            foreach (var (i, _) in funcs) {
+            foreach (var i in range(funcs)) {
                 ref var fp = ref heap(new decodecounter.FuncPayload(), out var Ꮡfp);
                 {
                     var (ok, errΔ7) = cdr.NextFunc(Ꮡfp); if (errΔ7 != default!){

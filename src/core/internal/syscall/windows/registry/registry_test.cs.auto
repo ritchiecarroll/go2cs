@@ -13,6 +13,7 @@ namespace go.@internal.syscall.windows;
 using bytes = bytes_package;
 using rand = crypto.rand_package;
 using os = os_package;
+using slices = slices_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
@@ -48,6 +49,7 @@ public static void TestReadSubKeyNames(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         (var names, err) = k.ReadSubKeyNames();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -79,32 +81,40 @@ public static void TestCreateOpenDeleteKey(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         @string testKName = randKeyName(testCreateOpenDeleteKeyˢ);
+
         (var testK, var exist, err) = registry.CreateKey(k, testKName, registry.CREATE_SUB_KEY);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => testK.Close(), ref ᒐ);
+
         if (exist) {
             Ꮡt.Fatalf("key %q already exists"u8, testKName);
         }
+
         (var testKAgain, exist, err) = registry.CreateKey(k, testKName, registry.CREATE_SUB_KEY);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => testKAgain.Close(), ref ᒐ);
+
         if (!exist) {
             Ꮡt.Fatalf("key %q should already exist"u8, testKName);
         }
+
         (var testKOpened, err) = registry.OpenKey(k, testKName, registry.ENUMERATE_SUB_KEYS);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => testKOpened.Close(), ref ᒐ);
+
         err = registry.DeleteKey(k, testKName);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var testKOpenedAgain, err) = registry.OpenKey(k, testKName, registry.ENUMERATE_SUB_KEYS);
         if (err == default!) {
             defer(() => testKOpenedAgain.Close(), ref ᒐ);
@@ -118,22 +128,7 @@ public static void TestCreateOpenDeleteKey(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static bool equalStringSlice(slice<@string> a, slice<@string> b) {
-    if (len(a) != len(b)) {
-        return false;
-    }
-    if (a == default!) {
-        return true;
-    }
-    foreach (var (i, _) in a) {
-        if (a[i] != b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-[GoType] partial struct ValueTest {
+partial struct ValueTest {
     public uint32 Type;
     public @string Name;
     public any Value;
@@ -201,7 +196,6 @@ internal static void setValues(ж<testing.T> Ꮡt, registry.Key k) {
         else { /* default: */
             Ꮡt.Fatalf("unsupported type %d for %s value"u8, test.Type, test.Name);
         }
-
         if (test.WillFail){
             if (err == default!) {
                 Ꮡt.Fatalf("setting %s value %q should fail, but succeeded"u8, test.Name, test.Value);
@@ -329,7 +323,7 @@ internal static void testGetStringsValue(ж<testing.T> Ꮡt, registry.Key k, Val
         Ꮡt.Errorf("GetStringsValue(%s) failed: %v"u8, test.Name, err);
         return;
     }
-    if (!equalStringSlice(got, test.Value._<slice<@string>>())) {
+    if (!slices.Equal<slice<@string>, @string>(got, test.Value._<slice<@string>>())) {
         Ꮡt.Errorf("want %s value %#v, got %#v"u8, test.Name, test.Value, got);
         return;
     }
@@ -463,7 +457,6 @@ internal static void testValues(ж<testing.T> Ꮡt, registry.Key k) {
             Ꮡt.Errorf("unsupported type %d for %s value"u8, test.Type, test.Name);
             continue;
         }
-
     }
 }
 
@@ -481,7 +474,9 @@ internal static void testStat(ж<testing.T> Ꮡt, registry.Key k) {
             return;
         }
         defer(() => subk.Close(), ref ᒐ);
+
         defer(registry.DeleteKey, k, subkeyˢ, ref ᒐ);
+
         (var ki, err) = k.Stat();
         if (err != default!) {
             Ꮡt.Error(err);
@@ -539,20 +534,29 @@ public static void TestValues(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(() => softwareK.Close(), ref ᒐ);
+
         @string testKName = randKeyName(testValuesˢ);
+
         (var k, var exist, err) = registry.CreateKey(softwareK, testKName, (uint32)((UntypedInt)(registry.CREATE_SUB_KEY | registry.QUERY_VALUE) | (uint32)registry.SET_VALUE));
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         if (exist) {
             Ꮡt.Fatalf("key %q already exists"u8, testKName);
         }
+
         defer(registry.DeleteKey, softwareK, testKName, ref ᒐ);
+
         setValues(Ꮡt, k);
+
         enumerateValues(Ꮡt, k);
+
         testValues(Ꮡt, k);
+
         testStat(Ꮡt, k);
+
         deleteValues(Ꮡt, k);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -577,7 +581,7 @@ public static void TestExpandString(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testInvalidValuesˢ = "TestInvalidValues_"u8;
 
-[GoType("dyn")] internal partial struct TestInvalidValues_type {
+internal partial struct TestInvalidValues_type /*dyn*/ {
     public uint32 Type;
     public @string Name;
     public slice<byte> Data;
@@ -591,16 +595,21 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(() => softwareK.Close(), ref ᒐ);
+
         @string testKName = randKeyName(testInvalidValuesˢ);
+
         (var k, var exist, err) = registry.CreateKey(softwareK, testKName, (uint32)((UntypedInt)(registry.CREATE_SUB_KEY | registry.QUERY_VALUE) | (uint32)registry.SET_VALUE));
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         if (exist) {
             Ꮡt.Fatalf("key %q already exists"u8, testKName);
         }
+
         defer(registry.DeleteKey, softwareK, testKName, ref ᒐ);
+
         slice<TestInvalidValues_type> tests = new TestInvalidValues_type[]{
             new(registry.DWORD, "Dword1"u8, default!),
             new(registry.DWORD, "Dword2"u8, new byte[]{1, 2, 3}.slice()),
@@ -613,12 +622,14 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
             new(registry.MULTI_SZ, "MultiString4"u8, new byte[]{(rune)'a', 0, 0, (rune)'b', 0}.slice()),
             new(registry.MULTI_SZ, "MultiString5"u8, new byte[]{(rune)'a', 0, 0}.slice())
         }.slice();
+
         foreach (var (_, test) in tests) {
             var errΔ1 = k.SetValue(test.Name, test.Type, test.Data);
             if (errΔ1 != default!) {
                 Ꮡt.Fatalf("SetValue for %q failed: %v"u8, test.Name, errΔ1);
             }
         }
+
         foreach (var (_, test) in tests) {
             var exprᴛ1 = test.Type;
             if (exprᴛ1 == registry.DWORD || exprᴛ1 == registry.QWORD) {
@@ -638,7 +649,6 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
             else { /* default: */
                 Ꮡt.Errorf("unsupported type %d for %s value"u8, test.Type, test.Name);
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -648,7 +658,7 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object getMUIStringValueˢ = (@string)"GetMUIStringValue:"u8;
 
-[GoType("dyn")] [GoLocalName("testType")] internal partial struct TestGetMUIStringValue_testType {
+[GoLocalName("testType")] internal partial struct TestGetMUIStringValue_testType /*dyn*/ {
     internal @string name;
     internal @string want;
 }
@@ -656,6 +666,8 @@ internal static readonly object getMUIStringValueˢ = (@string)"GetMUIStringValu
 public static void TestGetMUIStringValue(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var testsᴷ = new stackAppend<TestGetMUIStringValue_testType>();
+
         ref var dtzi = ref heap(new DynamicTimezoneinformation(), out var Ꮡdtzi);
         {
             var (_, errΔ1) = GetDynamicTimeZoneInformation(Ꮡdtzi); if (errΔ1 != default!) {
@@ -673,13 +685,15 @@ public static void TestGetMUIStringValue(ж<testing.T> Ꮡt) {
             new("MUI_Std"u8, syscall.UTF16ToString(dtzi.StandardName[..]))
         }.slice();
         if (dtzi.DynamicDaylightTimeDisabled == 0) {
-            tests = append(tests, new TestGetMUIStringValue_testType("MUI_Dlt"u8, syscall.UTF16ToString(dtzi.DaylightName[..])));
+            tests = append(testsᴷ, tests, new TestGetMUIStringValue_testType("MUI_Dlt"u8, syscall.UTF16ToString(dtzi.DaylightName[..])));
         }
+
         foreach (var (_, test) in tests) {
             var (got, errΔ2) = timezoneK.GetMUIStringValue(test.name);
             if (errΔ2 != default!) {
                 Ꮡt.Error(getMUIStringValueˢ, errΔ2);
             }
+
             if (got != test.want) {
                 Ꮡt.Errorf("GetMUIStringValue: %s: Got %q, want %q"u8, test.name, got, test.want);
             }
@@ -689,7 +703,7 @@ public static void TestGetMUIStringValue(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] [GoValueClone("StandardName", "DaylightName", "TimeZoneKeyName")] partial struct DynamicTimezoneinformation {
+[GoValueClone("StandardName", "DaylightName", "TimeZoneKeyName")] partial struct DynamicTimezoneinformation {
     public int32 Bias;
     public array<uint16> StandardName = new(32);
     public syscall.Systemtime StandardDate;
@@ -702,6 +716,7 @@ public static void TestGetMUIStringValue(ж<testing.T> Ꮡt) {
 }
 
 internal static ж<syscall.LazyDLL> modkernel32 = syscall.NewLazyDLL("kernel32.dll"u8);
+
 internal static ж<syscall.LazyProc> procGetDynamicTimeZoneInformation = modkernel32.NewProc("GetDynamicTimeZoneInformation"u8);
 
 public static (uint32 rc, error err) GetDynamicTimeZoneInformation(ж<DynamicTimezoneinformation> Ꮡdtzi) {

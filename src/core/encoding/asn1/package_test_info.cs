@@ -24,10 +24,10 @@ using go;
 using static global::go.encoding.asn1_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("7374727563747b6465636f64656420737472696e673b20656e636f64656448657820737472696e677d", "bmpStringTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e205b5d627974653b206f6b20626f6f6c3b2062617365313020737472696e677d", "bigIntTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e205b5d627974653b206f757420616e797d", "unmarshalTestDataᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e205b5d627974653b206f757420656e636f64696e672f61736e312e6578706c6963697454616767656454696d65546573747d", "explicitTaggedTimeTestDataᴛ1")]
+[assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b206465636f64656420737472696e673b20656e636f64656448657820737472696e673b20696e76616c696420626f6f6c7d", "bmpStringTestsᴛ1")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -35,6 +35,12 @@ using static global::go.encoding.asn1_internal_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -44,8 +50,8 @@ using static global::go.encoding.asn1_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/asn1/asn1_test.go", "asn1_test.cs", "ABw2AAcQgoKCgpSCAAoWAA4egoKCgpSCAAoWAA4egoKCgpSCAAkKAAsggoKCgpSCgpSCgoKUgoKCAAwaAAgSgoKCgpSCggANDIKCgpSClIKUgpSClIIACRQACBKCgoKCggAKFgAIEoKCgoKUgoLKgIIAChQAJESCgoKCgpSUgoKUgoKCgsoAHDqCgoKClIKCAAsYABw6goKCgpSCAAkUoKSgpKCkoKQAEiaCgoKCACZGABc2goKCgoKClIIACgqCAAUUgoKCgpSAkgArVoSSgIKkguiogoCCAAkSgoKUgoKClIKClIKUggAJFAARJKKCgILaADZuAC1cAH+AAu6CgoKCpoKCgqaCAAwSAAYUpoKCgoKUggAIEsqCgoCCpICCAAsQlO6CgIIADhCCgoKUgoKSgviCuIKAggAPHoKUgoKmgoKUgoKCuIKCgpSCppKAgraClKaCAAgIgoqCgqaCgIK2goKCABAIgo6UAAcWgoKAgriSgIIACQoABxaCgoKCppSCgqaCgsqCgoKUgoKCuKKCggAJCMqCgpSUgoKClIqCgqaCuII=", "", "", "282=FixedZone/1/2/1,Date/1/5/1,FixedZone/2/2/2,Date/2/5/2,Date/3/5/3,Date/4/5/4,Date/5/5/5;341=Date/1/4/1,Date/2/4/3,FixedZone/1/2/7,Date/3/4/7,FixedZone/2/2/8,Date/4/4/8;460=newInt64/1/3/12,newInt/1/3/13,newInt64/2/3/14,newInt/2/3/14,newInt64/3/3/15,newInt/3/3/15;522=newInt/1/2/4,newInt/2/2/9,newString/1/4/10,newString/2/4/11,newString/3/4/13,newBool/1/2/19,newBool/2/2/20,NewInt/1/1/22,newString/4/4/24;715=Date/1/2/14,Date/2/2/15;978=Date/1/2/5,FixedZone/1/1/7,Date/2/2/7")]
-[assembly: go.GoPositionMap("encoding/asn1/marshal_test.go", "marshal_test.cs", "AGPEAe6CgoKUpgA3kAGigoKClIKCAAoY3KKCgoKUgoIACRbugoKCgoKmgsqCgoK4ou6CgoKUgoLKgoKUgoKClIKCpoKCgqaCgqaCgoKClIK4goKCgoKmgoKCgpSCyqKUgoIACwqCAAYSgoKmgoaCgpSClILYgsyCgqaCgoKClIKUggAICKKEioKCgoKU3IKCgg==", "", "", "115=NewInt/1/1/7,Unix/1/4/15,UTC/1/3/15,Unix/2/4/16,UTC/2/3/16,Unix/3/4/17,In/1/1/17,farFuture/1/1/18,Unix/4/4/19,UTC/3/3/19")]
+[assembly: go.GoPositionMap("encoding/asn1/asn1_test.go", "asn1_test.cs", "ABw2AAcQgoKCgpSCAAoWAA4egoKCgpSCAAoWAA4egoKCgpSCAAkKAAsggoKCgpSCgpSCgoKUgoKCAAwaAAgSgoKCgpSCggANDIKCgpSClIKUgpSClIIACRQACBKCgoKCggAKFgAIEoKCgoKUgoLKgIIAChQAJESCgoKCgpSUgoKUgoKCgsoAHDqCgoKClIKCAAsYABw6goKCgpSCAAkUoKSgpKCkoKQAEiaCgoKCACZGABg4goKCgoKClIIACgqCAAUUgoKCgpSAkgArVoSSgIKkgui4goCCAAkSgoKUgoKClIKClIKUggAJFAARJKKCgILaADZuAC1cAH+AAu6CgoKCpoKCgqaCAAwSAAYUpoKCgoKUggAIEsqCgoCCpICCAAsQlO6CgIIADhCCgoKUgoKSgviCuIKAggAPHoKUgoKmgoKUgoKCuIKCgpSCppKAgraClKaCAAgIgoqCgqaCgIK2goKCABAIgo6UAAcWgoKAgriSgIIACwoADySCspKCgqaUgpKCpoLcgoKClIKCgriigoIADAiCAAcggoKUgoCCtoIACQjKgoKUlIKCgpSKgoKmgriCAAoIgoaCpoKCgpSCgpSmkoKCgILIkoKCgoKUgJIACRCyioKmgoKClIKClKaSgoKAgsiSgoKCgpSAkg==", "1151-1168:1;1266-1276:1;1278-1284:2;1286-1296:3;1312-1322:1;1324-1330:2;1332-1342:3", "", "282=FixedZone/1/2/1,Date/1/5/1,FixedZone/2/2/2,Date/2/5/2,Date/3/5/3,Date/4/5/4,Date/5/5/5;341=Date/1/4/1,Date/2/4/3,FixedZone/1/2/7,Date/3/4/7,FixedZone/2/2/8,Date/4/4/8;460=newInt64/1/3/12,newInt/1/3/13,newInt64/2/3/14,newInt/2/3/14,newInt64/3/3/15,newInt/3/3/15;522=newInt/1/2/4,newInt/2/2/9,newString/1/5/10,newString/2/5/11,newString/3/5/13,newBool/1/2/19,newBool/2/2/20,NewInt/1/1/22,newString/4/5/24,newString/5/5/25;717=Date/1/2/14,Date/2/2/15;980=Date/1/2/5,FixedZone/1/1/7,Date/2/2/7")]
+[assembly: go.GoPositionMap("encoding/asn1/marshal_test.go", "marshal_test.cs", "AGXEAe6CgoKUpgA3kAGigoKClIKCAAoY3KKCgoKUgoIACRbugoKCgoKmgsqCgoK4ou6CgoKUgoLKgoKUgoKClIKCpoKCgqaCgqaCgoKClIK4goKCgoKmgoKCgpSCyqKUgoIACwqCAAYSgoKmgoaCgpSClILYgsyCgqaCgoKClIKUggAICKKEioKCgoKU3IKCgg==", "", "", "117=NewInt/1/1/7,Unix/1/4/15,UTC/1/3/15,Unix/2/4/16,UTC/2/3/16,Unix/3/4/17,In/1/1/17,farFuture/1/1/18,Unix/4/4/19,UTC/3/3/19")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -62,9 +68,12 @@ public static partial class asn1_internal_test_package
     // <TypeAccessibility>
     [GoLocalName("testCase")] partial struct BenchmarkUnmarshal_testCase {}
     [GoLocalName("foo")] partial struct TestExplicitTagRawValueStruct_foo {}
+    [GoLocalName("tagged")] partial struct TestImplicitTypeRoundtrip_tagged {}
     [GoLocalName("testSetSET")] partial struct TestSetEncoderSETSliceSuffix_testSetSET {}
     [GoLocalName("taggedRawValue")] partial struct TestTaggedRawValue_taggedRawValue {}
     [GoLocalName("untaggedRawValue")] partial struct TestTaggedRawValue_untaggedRawValue {}
+    [GoLocalName("Recursive")] partial struct TestUnmarshalNestingLimitSlice_Recursive {}
+    [GoLocalName("Recursive")] partial struct TestUnmarshalNestingLimitStruct_Recursive {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

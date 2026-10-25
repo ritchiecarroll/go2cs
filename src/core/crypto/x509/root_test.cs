@@ -105,8 +105,10 @@ public static void TestFallback(ж<testing.T> Ꮡt) {
 
             var tcʗ1 = tc;
             Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+                useFallbackRoots = false;
                 fallbacksSet = false;
                 systemRoots = tcʗ1.systemRoots;
+
                 if (systemRoots != nil) {
                     systemRoots.Value.systemPool = tcʗ1.systemPool;
                 }

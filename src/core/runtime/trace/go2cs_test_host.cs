@@ -11,12 +11,29 @@ internal static class Go2CsTestHost
         {
             "annotation.go",
             "annotation_test.go",
+            "batch.go",
+            "encoding.go",
             "example_test.go",
+            "flightrecorder.go",
+            "flightrecorder_test.go",
+            "recorder.go",
+            "subscribe.go",
+            "subscribe_test.go",
             "trace.go",
             "trace_test.go",
         });
-        registry.Add("TestTraceDoubleStart", trace_test_package.TestTraceDoubleStart, "trace_test.go", 38);
-        registry.Add("TestTraceStartStop", trace_test_package.TestTraceStartStop, "trace_test.go", 18);
+        registry.Add("TestFlightRecorder", trace_test_package.TestFlightRecorder, "flightrecorder_test.go", 126);
+        registry.Add("TestFlightRecorderConcurrentWriteTo", trace_test_package.TestFlightRecorderConcurrentWriteTo, "flightrecorder_test.go", 66);
+        registry.Add("TestFlightRecorderDoubleStart", trace_test_package.TestFlightRecorderDoubleStart, "flightrecorder_test.go", 21);
+        registry.Add("TestFlightRecorderEnabled", trace_test_package.TestFlightRecorderEnabled, "flightrecorder_test.go", 32);
+        registry.Add("TestFlightRecorderGenerationCount", trace_test_package.TestFlightRecorderGenerationCount, "flightrecorder_test.go", 173);
+        registry.Add("TestFlightRecorderLog", trace_test_package.TestFlightRecorderLog, "flightrecorder_test.go", 141);
+        registry.Add("TestFlightRecorderStartStop", trace_test_package.TestFlightRecorderStartStop, "flightrecorder_test.go", 132);
+        registry.Add("TestFlightRecorderWriteToDisabled", trace_test_package.TestFlightRecorderWriteToDisabled, "flightrecorder_test.go", 50);
+        registry.Add("TestSubscribers", trace_test_package.TestSubscribers, "subscribe_test.go", 18);
+        registry.Add("TestTraceAndFlightRecorder", trace_test_package.TestTraceAndFlightRecorder, "flightrecorder_test.go", 300);
+        registry.Add("TestTraceDoubleStart", trace_test_package.TestTraceDoubleStart, "trace_test.go", 40);
+        registry.Add("TestTraceStartStop", trace_test_package.TestTraceStartStop, "trace_test.go", 21);
         return TestHost.Run(registry, args);
     }
 }

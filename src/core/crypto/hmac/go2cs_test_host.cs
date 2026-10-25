@@ -12,10 +12,12 @@ internal static class Go2CsTestHost
             "hmac.go",
             "hmac_test.go",
         });
-        registry.Add("TestEqual", hmac_internal_test_package.TestEqual, "hmac_test.go", 605);
-        registry.Add("TestHMAC", hmac_internal_test_package.TestHMAC, "hmac_test.go", 550);
-        registry.Add("TestHMACHash", hmac_internal_test_package.TestHMACHash, "hmac_test.go", 624);
-        registry.Add("TestNonUniqueHash", hmac_internal_test_package.TestNonUniqueHash, "hmac_test.go", 586);
+        registry.Add("TestEqual", hmac_internal_test_package.TestEqual, "hmac_test.go", 618);
+        registry.Add("TestExtraMethods", hmac_internal_test_package.TestExtraMethods, "hmac_test.go", 648);
+        registry.Add("TestHMAC", hmac_internal_test_package.TestHMAC, "hmac_test.go", 551);
+        registry.Add("TestHMACHash", hmac_internal_test_package.TestHMACHash, "hmac_test.go", 637);
+        registry.Add("TestNoClone", hmac_internal_test_package.TestNoClone, "hmac_test.go", 587);
+        registry.Add("TestNonUniqueHash", hmac_internal_test_package.TestNonUniqueHash, "hmac_test.go", 599);
         return TestHost.Run(registry, args);
     }
 }

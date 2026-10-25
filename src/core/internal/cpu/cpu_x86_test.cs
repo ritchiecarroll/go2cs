@@ -7,30 +7,32 @@ namespace go.@internal;
 using static go.@internal.cpu_package;
 using godebug = go.@internal.godebug_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using static go.@internal.cpu_internal_test_package;
 
 partial class cpu_test_package {
 
-public static void TestX86ifAVX2hasAVX(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX2hasAVX(ж<testing.T> Ꮡt) {
     if (X86.HasAVX2 && !X86.HasAVX) {
         Ꮡt.Fatalf("HasAVX expected true when HasAVX2 is true, got false"u8);
     }
 }
 
-public static void TestX86ifAVX512FhasAVX2(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512FhasAVX2(ж<testing.T> Ꮡt) {
     if (X86.HasAVX512F && !X86.HasAVX2) {
         Ꮡt.Fatalf("HasAVX2 expected true when HasAVX512F is true, got false"u8);
     }
 }
 
-public static void TestX86ifAVX512BWhasAVX512F(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512BWhasAVX512F(ж<testing.T> Ꮡt) {
     if (X86.HasAVX512BW && !X86.HasAVX512F) {
         Ꮡt.Fatalf("HasAVX512F expected true when HasAVX512BW is true, got false"u8);
     }
 }
 
-public static void TestX86ifAVX512VLhasAVX512F(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512VLhasAVX512F(ж<testing.T> Ꮡt) {
     if (X86.HasAVX512VL && !X86.HasAVX512F) {
         Ꮡt.Fatalf("HasAVX512F expected true when HasAVX512VL is true, got false"u8);
     }
@@ -41,7 +43,7 @@ internal static readonly object skippingTestCanTRunOnˢ = (@string)"skipping tes
 internal static readonly @string testSSE3DebugOptionˢ = "TestSSE3DebugOption"u8;
 internal static readonly @string cpuSse3Offˢ = "cpu.sse3=off"u8;
 
-public static void TestDisableSSE3(ж<testing.T> Ꮡt) {
+public static partial void TestDisableSSE3(ж<testing.T> Ꮡt) {
     if (cpu_internal_test_package.GetGOAMD64level() > 1) {
         Ꮡt.Skip(skippingTestCanTRunOnˢ);
     }

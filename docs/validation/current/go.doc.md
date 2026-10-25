@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/doc` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**86 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**90 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/doc`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/doc).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -36,6 +36,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `Test/AllDecls/issue16153` | pass | pass |
 | `Test/AllDecls/issue17788` | pass | pass |
 | `Test/AllDecls/issue22856` | pass | pass |
+| `Test/AllDecls/issue62640` | pass | pass |
 | `Test/AllDecls/predeclared` | pass | pass |
 | `Test/AllDecls/testing` | pass | pass |
 | `Test/AllMethods` | pass | pass |
@@ -56,6 +57,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `Test/AllMethods/issue16153` | pass | pass |
 | `Test/AllMethods/issue17788` | pass | pass |
 | `Test/AllMethods/issue22856` | pass | pass |
+| `Test/AllMethods/issue62640` | pass | pass |
 | `Test/AllMethods/predeclared` | pass | pass |
 | `Test/AllMethods/testing` | pass | pass |
 | `Test/default` | pass | pass |
@@ -76,6 +78,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `Test/default/issue16153` | pass | pass |
 | `Test/default/issue17788` | pass | pass |
 | `Test/default/issue22856` | pass | pass |
+| `Test/default/issue62640` | pass | pass |
 | `Test/default/predeclared` | pass | pass |
 | `Test/default/testing` | pass | pass |
 | `TestClassifyExamples` | pass | pass |
@@ -88,6 +91,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestExamples/inspect_signature` | pass | pass |
 | `TestExamples/iota` | pass | pass |
 | `TestExamples/issue43658` | pass | pass |
+| `TestExamples/major_version` | pass | pass |
 | `TestExamples/multiple` | pass | pass |
 | `TestExamples/shadow_predeclared` | pass | pass |
 | `TestExamples/values` | pass | pass |

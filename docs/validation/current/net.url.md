@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/url` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**49 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**53 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/url`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/url).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -46,6 +46,10 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestParseQuery/ascii=%3Ckey%3A+0x90%3E` | pass | pass |
 | `TestParseQueryLimits` | pass | pass |
 | `TestParseRequestURI` | pass | pass |
+| `TestParseStrictIpv6` | pass | pass |
+| `TestParseStrictIpv6/0` | pass | pass |
+| `TestParseStrictIpv6/1` | pass | pass |
+| `TestParseStrictIpv6/2` | pass | pass |
 | `TestPathEscape` | pass | pass |
 | `TestQueryEscape` | pass | pass |
 | `TestQueryValues` | pass | pass |
@@ -75,6 +79,7 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkEncodeQuery (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkPathEscape (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkPathUnescape (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkQueryEscape (benchmark): benchmark execution is deferred to Phase 4D

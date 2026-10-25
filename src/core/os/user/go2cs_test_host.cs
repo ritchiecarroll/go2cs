@@ -13,7 +13,7 @@ internal static class Go2CsTestHost
             "cgo_lookup_cgo.go",
             "cgo_lookup_syscall.go",
             "cgo_lookup_unix.go",
-            "cgo_unix_test.go",
+            "cgo_lookup_unix_test.go",
             "cgo_user_test.go",
             "getgrouplist_syscall.go",
             "getgrouplist_unix.go",
@@ -31,19 +31,19 @@ internal static class Go2CsTestHost
             "user_test.go",
             "user_windows_test.go",
         });
-        registry.Add("TestCurrent", user_internal_test_package.TestCurrent, "user_test.go", 25);
-        registry.Add("TestCurrentNetapi32", user_internal_test_package.TestCurrentNetapi32, "user_windows_test.go", 215);
-        registry.Add("TestGroupIds", user_internal_test_package.TestGroupIds, "user_test.go", 165);
-        registry.Add("TestGroupIdsTestUser", user_internal_test_package.TestGroupIdsTestUser, "user_windows_test.go", 246);
-        registry.Add("TestImpersonated", user_internal_test_package.TestImpersonated, "user_windows_test.go", 184);
-        registry.Add("TestImpersonatedSelf", user_internal_test_package.TestImpersonatedSelf, "user_windows_test.go", 145);
-        registry.Add("TestLookup", user_internal_test_package.TestLookup, "user_test.go", 72);
-        registry.Add("TestLookupGroup", user_internal_test_package.TestLookupGroup, "user_test.go", 120);
-        registry.Add("TestLookupGroupIdServiceAccount", user_internal_test_package.TestLookupGroupIdServiceAccount, "user_windows_test.go", 317);
-        registry.Add("TestLookupGroupServiceAccount", user_internal_test_package.TestLookupGroupServiceAccount, "user_windows_test.go", 303);
-        registry.Add("TestLookupId", user_internal_test_package.TestLookupId, "user_test.go", 94);
-        registry.Add("TestLookupIdServiceAccount", user_internal_test_package.TestLookupIdServiceAccount, "user_windows_test.go", 286);
-        registry.Add("TestLookupServiceAccount", user_internal_test_package.TestLookupServiceAccount, "user_windows_test.go", 272);
+        registry.Add("TestCurrent", user_internal_test_package.TestCurrent, "user_test.go", 26);
+        registry.Add("TestCurrentNetapi32", user_internal_test_package.TestCurrentNetapi32, "user_windows_test.go", 217);
+        registry.Add("TestGroupIds", user_internal_test_package.TestGroupIds, "user_test.go", 166);
+        registry.Add("TestGroupIdsTestUser", user_internal_test_package.TestGroupIdsTestUser, "user_windows_test.go", 248);
+        registry.Add("TestImpersonated", user_internal_test_package.TestImpersonated, "user_windows_test.go", 186);
+        registry.Add("TestImpersonatedSelf", user_internal_test_package.TestImpersonatedSelf, "user_windows_test.go", 147);
+        registry.Add("TestLookup", user_internal_test_package.TestLookup, "user_test.go", 73);
+        registry.Add("TestLookupGroup", user_internal_test_package.TestLookupGroup, "user_test.go", 121);
+        registry.Add("TestLookupGroupIdServiceAccount", user_internal_test_package.TestLookupGroupIdServiceAccount, "user_windows_test.go", 348);
+        registry.Add("TestLookupGroupServiceAccount", user_internal_test_package.TestLookupGroupServiceAccount, "user_windows_test.go", 328);
+        registry.Add("TestLookupId", user_internal_test_package.TestLookupId, "user_test.go", 95);
+        registry.Add("TestLookupIdServiceAccount", user_internal_test_package.TestLookupIdServiceAccount, "user_windows_test.go", 307);
+        registry.Add("TestLookupServiceAccount", user_internal_test_package.TestLookupServiceAccount, "user_windows_test.go", 286);
         return TestHost.Run(registry, args);
     }
 }

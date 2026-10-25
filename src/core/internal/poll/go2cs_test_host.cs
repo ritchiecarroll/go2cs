@@ -20,7 +20,6 @@ internal static class Go2CsTestHost
             "export_linux_test.go",
             "export_posix_test.go",
             "export_test.go",
-            "export_windows_test.go",
             "fd.go",
             "fd_fsync_darwin.go",
             "fd_fsync_posix.go",
@@ -42,6 +41,7 @@ internal static class Go2CsTestHost
             "fd_writev_libc.go",
             "fd_writev_unix.go",
             "file_plan9.go",
+            "fstatat_unix.go",
             "hook_cloexec.go",
             "hook_unix.go",
             "hook_windows.go",
@@ -67,7 +67,6 @@ internal static class Go2CsTestHost
         });
         registry.Add("TestConsume", poll_test_package.TestConsume, "writev_test.go", 13);
         registry.Add("TestEOFError", poll_test_package.TestEOFError, "fd_posix_test.go", 36);
-        registry.Add("TestFileFdsAreInitialised", poll_test_package.TestFileFdsAreInitialised, "fd_windows_test.go", 69);
         registry.Add("TestMutexClose", poll_test_package.TestMutexClose, "fd_mutex_test.go", 41);
         registry.Add("TestMutexCloseUnblock", poll_test_package.TestMutexCloseUnblock, "fd_mutex_test.go", 61);
         registry.Add("TestMutexLock", poll_test_package.TestMutexLock, "fd_mutex_test.go", 16);
@@ -76,8 +75,7 @@ internal static class Go2CsTestHost
         registry.Add("TestMutexStress", poll_test_package.TestMutexStress, "fd_mutex_test.go", 146);
         registry.Add("TestRead", poll_test_package.TestRead, "read_test.go", 15);
         registry.Add("TestReadError", poll_test_package.TestReadError, "error_test.go", 16);
-        registry.Add("TestSerialFdsAreInitialised", poll_test_package.TestSerialFdsAreInitialised, "fd_windows_test.go", 86);
-        registry.Add("TestWSASocketConflict", poll_test_package.TestWSASocketConflict, "fd_windows_test.go", 118);
+        registry.Add("TestWSASocketConflict", poll_test_package.TestWSASocketConflict, "fd_windows_test.go", 23);
         return TestHost.Run(registry, args);
     }
 }

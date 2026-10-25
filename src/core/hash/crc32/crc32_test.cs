@@ -6,9 +6,12 @@ namespace go.hash;
 using encoding = encoding_package;
 using fmt = fmt_package;
 using hash = hash_package;
+using testhash = @internal.testhash_package;
 using io = io_package;
 using rand = math.rand_package;
+using strings = strings_package;
 using testing = testing_package;
+using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math;
@@ -24,6 +27,10 @@ public static partial void TestCastagnoliRace(ж<testing.T> Ꮡt) {
     var ieee = NewIEEE();
     goǃ(ᴛ1 => MakeTable(ᴛ1), (uint32)(Castagnoli));
     ieee.Write(slice<byte>("hello"u8));
+}
+
+public static void TestHashInterface(ж<testing.T> Ꮡt) {
+    testhash.TestHash(Ꮡt, () => NewIEEE());
 }
 
 internal partial struct test {
@@ -64,7 +71,9 @@ internal static slice<test> golden = new test[]{
     new(0x7d0a377f, 0xde2e65c5U, "C is as portable as Stonehedge!!"u8, ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0xf7, 0xd6, 0x00, 0xd5})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x64, 0x65, 0x5c, 0xf8}))),
     new(0x8c79fd79U, 0x297a88ed, "Even if I could be Shakespeare, I think I should still choose to be Faraday. - A. Huxley"u8, ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0x6c, 0x2b, 0xb8, 0xa7})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0xbf, 0xd6, 0x53, 0xdd}))),
     new(0xa20b7167U, 0x66ed1d8b, "The fugacity of a constituent in a mixture of gases at a given temperature is proportional to its mole fraction.  Lewis-Randall Rule"u8, ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0x3c, 0x6c, 0x52, 0x5b})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x7b, 0xac, 0x6f, 0xb1}))),
-    new(0x8e0bb443U, 0xdcded527U, "How can you write a big system without C++?  -Paul Glick"u8, ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0x0e, 0x88, 0x89, 0xed})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x33, 0xd7, 0x43, 0x7f})))
+    new(0x8e0bb443U, 0xdcded527U, "How can you write a big system without C++?  -Paul Glick"u8, ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0x0e, 0x88, 0x89, 0xed})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x33, 0xd7, 0x43, 0x7f}))),
+    new(0x1010dab0, 0x8a11661fU, strings.Repeat("01234567"u8, 1024), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0x92, 0xe5, 0xba, 0xf3})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x1a, 0x02, 0x88, 0x59}))),
+    new(0x772d04d7, 0x5a6f5c45, strings.Repeat("a"u8, 1024 + 65), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0xca, 0x87, 0x91, 0x4d, 0xe7, 0xd0, 0x89, 0xd1})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x01, 0x77, 0x42, 0x84, 0x81, 0x95, 0x42, 0xa9, 0x28})))
 }.slice();
 
 // testGoldenIEEE verifies that the given function returns
@@ -338,7 +347,7 @@ internal static readonly @string polyIeeeˢ = "poly=IEEE"u8;
 internal static readonly @string polyCastagnoliˢ = "poly=Castagnoli"u8;
 internal static readonly @string polyKoopmanˢ = "poly=Koopman"u8;
 
-public static void BenchmarkCRC32(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkCRC32(ж<testing.B> Ꮡb) {
     Ꮡb.Run(polyIeeeˢ, benchmarkAll(NewIEEE()));
     Ꮡb.Run(polyCastagnoliˢ, benchmarkAll(New(MakeTable(Castagnoli))));
     Ꮡb.Run(polyKoopmanˢ, benchmarkAll(New(MakeTable(Koopman))));
@@ -369,7 +378,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, hash.Hash32 h, int64 n, int64
     b.SetBytes(n);
     var data = new slice<byte>((nint)(n + alignment));
     data = data.slice((nint)(alignment));
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
     var @in = new slice<byte>(0, h.Size());
