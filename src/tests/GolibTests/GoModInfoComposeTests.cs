@@ -153,6 +153,31 @@ public class GoModInfoComposeTests
         StringAssert.Contains(System.Text.Encoding.UTF8.GetString(third.ToSpan()), "path\texample.test/twice.test\n");
     }
 
+    /// <summary>
+    /// A main package's test binary carries the package's own dep lines, as Go's test main copies its build info: the host
+    /// passes each dep line's fields, and the registration writes them after the <c>mod</c> line, in order. A replaced
+    /// module carries no sum column. <c>ReadBuildInfo</c> then reports them as <c>Deps</c>.
+    /// </summary>
+    [TestMethod]
+    public void RegisteredDependenciesAnswerReadBuildInfoDeps()
+    {
+        GoModInfoAttribute.Register("example.test/m/cmd/p", "example.test/m", mainPackage: true,
+            ["golang.org/x/sync\tv0.24.0\th1:sync=", "golang.org/x/text\tv0.3.0"]);
+
+        Assert.AreEqual("path\texample.test/m/cmd/p\nmod\texample.test/m\t(devel)\t\n" +
+            "dep\tgolang.org/x/sync\tv0.24.0\th1:sync=\ndep\tgolang.org/x/text\tv0.3.0\n", GoModInfoAttribute.Registered);
+
+        var (bi, ok) = Δdebug.ReadBuildInfo();
+
+        Assert.IsTrue(ok, "ReadBuildInfo reported no build info after a registration with dependencies");
+        Assert.AreEqual(2, (int)len(bi.Value.Deps));
+        Assert.AreEqual("golang.org/x/sync", bi.Value.Deps[0].Value.Path.ToString());
+        Assert.AreEqual("v0.24.0", bi.Value.Deps[0].Value.Version.ToString());
+        Assert.AreEqual("h1:sync=", bi.Value.Deps[0].Value.Sum.ToString());
+        Assert.AreEqual("golang.org/x/text", bi.Value.Deps[1].Value.Path.ToString());
+        Assert.AreEqual("", bi.Value.Deps[1].Value.Sum.ToString());
+    }
+
     /// <summary>No stamp and no registration is no build info: "", so <c>ReadBuildInfo</c> reports <c>ok == false</c>.</summary>
     [TestMethod]
     public void AbsentModulesComposeToEmpty()

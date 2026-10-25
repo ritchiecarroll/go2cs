@@ -17,6 +17,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // modInfoLineKeys is the set of first fields of a build-info stamp's lines.
@@ -285,5 +287,100 @@ func TestMainProgramsCarryTheirModInfo(t *testing.T) {
 
 	if want := "path\texample.test/prog\nmod\texample.test/prog\t(devel)\t\n"; !ok || singleStamp != want {
 		t.Errorf("single-package program stamp = %q (found %v), want %q", singleStamp, ok, want)
+	}
+}
+
+// A Go test binary of a MAIN package copies the package's own build info, so it lists the modules the package's
+// production import closure links, outside the main module, once each, sorted (cmd/go setBuildInfo). A test of any
+// other package lists none (go1.26.10). The converted host gives the same answer: a standard-library package has no
+// module and is skipped, a module reached twice is listed once, a test-only import is not linked into the copied
+// build info, and a replaced module keeps Go's dep line without the sum column (the `=>` line is not stamped).
+func TestTestBinaryDependenciesFollowGoTestMain(t *testing.T) {
+	main := &packages.Module{Path: "example.com/m", Main: true}
+	sync := &packages.Module{Path: "golang.org/x/sync", Version: "v0.24.0"}
+	text := &packages.Module{Path: "golang.org/x/text", Version: "v0.3.0", Replace: &packages.Module{Path: "../text"}}
+
+	stdlib := &packages.Package{PkgPath: "fmt"}
+	textPkg := &packages.Package{PkgPath: "golang.org/x/text/language", Module: text, Imports: map[string]*packages.Package{"fmt": stdlib}}
+	syncPkg := &packages.Package{PkgPath: "golang.org/x/sync/errgroup", Module: sync, Imports: map[string]*packages.Package{"golang.org/x/text/language": textPkg}}
+	internal := &packages.Package{PkgPath: "example.com/m/internal", Module: main, Imports: map[string]*packages.Package{"golang.org/x/sync/errgroup": syncPkg}}
+	program := &packages.Package{Name: "main", PkgPath: "example.com/m/cmd/p", Module: main, Imports: map[string]*packages.Package{"example.com/m/internal": internal, "fmt": stdlib, "golang.org/x/text/language": textPkg}}
+
+	sums := map[string]string{"golang.org/x/sync v0.24.0": "h1:sync=", "golang.org/x/text v0.3.0": "h1:text="}
+
+	got := testBinaryDependencies(program, "example.com/m", sums)
+	want := []string{"golang.org/x/sync\tv0.24.0\th1:sync=", "golang.org/x/text\tv0.3.0"}
+
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("dependencies = %q, want %q", got, want)
+	}
+
+	library := &packages.Package{Name: "m", PkgPath: "example.com/m", Module: main, Imports: map[string]*packages.Package{"example.com/m/internal": internal}}
+
+	if deps := testBinaryDependencies(library, "example.com/m", sums); len(deps) != 0 {
+		t.Fatalf("a non-main package's test binary lists no deps in Go, got %q", deps)
+	}
+
+	if deps := testBinaryDependencies(&packages.Package{Name: "main", PkgPath: "cmd/x", Imports: map[string]*packages.Package{"fmt": stdlib}}, "", nil); len(deps) != 0 {
+		t.Fatalf("a standard-library test binary links no module, got %q", deps)
+	}
+}
+
+// A module package's test host carries its dependency lines as the registry's last argument, each field separated by
+// a C# `\t` escape (a raw tab or newline cannot sit in a C# string literal), so ReadBuildInfo reports Go's Deps. A host
+// with no dependencies keeps exactly the shape it had, which is every standard-library host.
+func TestTestHostCarriesModuleDependencies(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := writeTestHost(dir, "go", "example.com/m", nil, nil, []string{"m_test.go"}, nil, nil, "example.com/m", []string{"golang.org/x/sync\tv0.24.0\th1:sync="}, ""); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(dir, testHostFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents := string(data)
+
+	if !strings.Contains(contents, "        }, \"example.com/m\", new string[]\r\n        {\r\n            \"golang.org/x/sync\\tv0.24.0\\th1:sync=\",\r\n        });\r\n") {
+		t.Fatalf("the module host must pass its dependency lines after its module path:\n%s", contents)
+	}
+
+	if strings.ContainsRune(contents, '\t') {
+		t.Fatalf("a raw tab reached the host's C# source:\n%s", contents)
+	}
+
+	bare := t.TempDir()
+
+	if err := writeTestHost(bare, "go", "example.com/m", nil, nil, []string{"m_test.go"}, nil, nil, "example.com/m", nil, ""); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err = os.ReadFile(filepath.Join(bare, testHostFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.Contains(string(data), "        }, \"example.com/m\");\r\n") || strings.Count(string(data), "new string[]") != 3 {
+		t.Fatalf("a module host with no dependencies must keep its shape:\n%s", data)
+	}
+}
+
+// A MAIN package's tests convert like any other's: go/packages returns the package itself (ID = its import path),
+// its test variant (`p [p.test]`) and the synthetic test main (`p.test`), and all three are package main. The
+// production package is the bare one; only the synthetic `.test` main and the bracketed variants are skipped. A filter
+// on the package NAME skipped the real main package too, and a module with a tested main package failed its -tests run.
+func TestFindProductionPackageKeepsAMainPackage(t *testing.T) {
+	dir := t.TempDir()
+	production := &packages.Package{ID: "example.com/m/cmd/p", Name: "main", PkgPath: "example.com/m/cmd/p", Dir: dir}
+	loaded := []*packages.Package{
+		{ID: "example.com/m/cmd/p.test", Name: "main", PkgPath: "example.com/m/cmd/p.test", Dir: dir},
+		{ID: "example.com/m/cmd/p [example.com/m/cmd/p.test]", Name: "main", PkgPath: "example.com/m/cmd/p", Dir: dir},
+		production,
+	}
+
+	if got := findProductionPackage(loaded, dir); got != production {
+		t.Fatalf("production package = %v, want the bare main package %q", got, production.ID)
 	}
 }
