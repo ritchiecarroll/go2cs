@@ -1,3 +1,5 @@
 row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
 net	36306723aeeddd706a04eac90a7fcff3e176b156	36306723aeeddd706a04eac90a7fcff3e176b156	1792947136	PASS	0	2026-10-25T17:02:12Z
 runtime	36306723aeeddd706a04eac90a7fcff3e176b156	36306723aeeddd706a04eac90a7fcff3e176b156	1792947136	DIVERGED	1	2026-10-25T18:03:41Z
+go/internal/gcimporter	36306723aeeddd706a04eac90a7fcff3e176b156	36306723aeeddd706a04eac90a7fcff3e176b156	1792952403	PASS	0	2026-10-25T18:34:11Z
+# go/internal/gcimporter (COORD 2026-10-25 18:15Z re-read): GOROOT test/ was ALREADY PRESENT in the WSL go1.26.10 GOROOT, byte-identical to the windows go1.26.10 test/ (3458 files, tree manifest sha256 e08357e35a79bd8eee9bc381c942ed63da31686e8d73599929845697c6ee320f on both); nothing was added. TestImportTypeparamTests pass/pass. This line is the row's linux reading of record.
