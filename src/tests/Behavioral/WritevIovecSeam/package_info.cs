@@ -58,7 +58,7 @@ using static go.main_package;
 
 namespace go;
 
-[GoPlatformExclusive("linux")]
+[GoPlatformExclusive("linux", "darwin")]
 [GoTestMatchingConsoleOutput]
 [GoPackage("main")]
 public static partial class main_package

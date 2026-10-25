@@ -532,3 +532,35 @@ func TestWSASendtoIsScopedToWindowsOnly(t *testing.T) {
 		}
 	}
 }
+
+// TestDarwinPointerArgumentMirrorsAreScopedToDarwin pins writev and Getdirentries (2026-10-25) to the
+// one flavor that hand-owns them. Go's linux and windows syscall sources declare neither name, so an
+// entry reaching them would be inert today and a trap the moment one grows a same-named helper; and
+// a darwin scope with no darwin body behind it is a placeholder with nothing to link against. The
+// witness is the marked hand-own text under src/core/syscall/darwin, as for the sockaddr family.
+func TestDarwinPointerArgumentMirrorsAreScopedToDarwin(t *testing.T) {
+	handOwns := handOwnSourcesByFlavor(t, "syscall")
+
+	for _, name := range []string{"writev", "Getdirentries"} {
+		scope, listed := manualConversionFuncs["syscall"][name]
+
+		if !listed {
+			t.Errorf("syscall.%s is no longer registered; darwin's generated body hands libc a token for a pointer-holding argument", name)
+			continue
+		}
+
+		if !scope.includes("darwin") {
+			t.Errorf("syscall.%s must be displaced on darwin, where its native mirror lives", name)
+		}
+
+		for _, goos := range []string{"windows", "linux"} {
+			if scope.includes(goos) {
+				t.Errorf("syscall.%s must NOT be displaced on %s: Go declares it only in its BSD sources", name, goos)
+			}
+		}
+
+		if !strings.Contains(handOwns["darwin"], " "+name+"(") {
+			t.Errorf("syscall.%s is scoped to darwin but no marked hand-own under src/core/syscall/darwin declares it", name)
+		}
+	}
+}
