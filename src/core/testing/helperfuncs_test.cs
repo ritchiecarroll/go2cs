@@ -45,7 +45,7 @@ private static readonly @string subˢ = "sub"u8;
 private static readonly @string genericFloat64ˢ = "GenericFloat64"u8;
 private static readonly @string genericIntˢ = "GenericInt"u8;
 
-internal static void testHelper(ж<testing.T> Ꮡt) {
+internal static partial void testHelper(ж<testing.T> Ꮡt) {
     // Check combinations of directly and indirectly
     // calling helper functions.
     notHelper(Ꮡt, "0"u8);

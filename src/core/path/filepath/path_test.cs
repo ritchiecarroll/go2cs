@@ -16,6 +16,8 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.path;
 using io;
 using static go.path.filepath_internal_test_package;
@@ -809,7 +811,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
 
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
-    Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
         var Walk = (@string root) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
         checkʗ1(tΔ2, Walk, td);
@@ -817,7 +819,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
     });
     var checkʗ2 = check;
     var walkDirFnʗ1 = walkDirFn;
-    Ꮡt.Run(walkDirˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
         var WalkDir = (@string root) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
         checkʗ2(tΔ3, WalkDir, td);
@@ -886,7 +888,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
 
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
-    Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
         var Walk = (@string _) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
         checkʗ1(tΔ2, Walk, td);
@@ -894,7 +896,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
     });
     var checkʗ2 = check;
     var walkDirFnʗ1 = walkDirFn;
-    Ꮡt.Run(walkDirˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
         var WalkDir = (@string _) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
         checkʗ2(tΔ3, WalkDir, td);

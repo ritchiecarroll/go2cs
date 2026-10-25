@@ -6263,7 +6263,7 @@ public static void TestConnRequestSet(ж<testing.T> Ꮡt) {
 
     var resetʗ1 = reset;
     var wantLenʗ1 = wantLen;
-    Ꮡt.Run(addDeleteˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(addDeleteˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         resetʗ1();
         wantLenʗ1(0);
         var dh = Ꮡs.Value.Add(default!);
