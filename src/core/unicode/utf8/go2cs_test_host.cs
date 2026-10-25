@@ -13,19 +13,19 @@ internal static class Go2CsTestHost
             "utf8.go",
             "utf8_test.go",
         });
-        registry.Add("TestAppendRune", utf8_test_package.TestAppendRune, "utf8_test.go", 131);
-        registry.Add("TestConstants", utf8_test_package.TestConstants, "utf8_test.go", 26);
-        registry.Add("TestDecodeInvalidSequence", utf8_test_package.TestDecodeInvalidSequence, "utf8_test.go", 321);
-        registry.Add("TestDecodeRune", utf8_test_package.TestDecodeRune, "utf8_test.go", 142);
-        registry.Add("TestDecodeSurrogateRune", utf8_test_package.TestDecodeSurrogateRune, "utf8_test.go", 200);
-        registry.Add("TestEncodeRune", utf8_test_package.TestEncodeRune, "utf8_test.go", 119);
-        registry.Add("TestFullRune", utf8_test_package.TestFullRune, "utf8_test.go", 89);
-        registry.Add("TestNegativeRune", utf8_test_package.TestNegativeRune, "utf8_test.go", 406);
-        registry.Add("TestRuneCount", utf8_test_package.TestRuneCount, "utf8_test.go", 430);
-        registry.Add("TestRuneCountNonASCIIAllocation", utf8_test_package.TestRuneCountNonASCIIAllocation, "utf8_test.go", 441);
-        registry.Add("TestRuneLen", utf8_test_package.TestRuneLen, "utf8_test.go", 468);
-        registry.Add("TestRuntimeConversion", utf8_test_package.TestRuntimeConversion, "utf8_test.go", 235);
-        registry.Add("TestSequencing", utf8_test_package.TestSequencing, "utf8_test.go", 217);
+        registry.Add("TestAppendRune", utf8_test_package.TestAppendRune, "utf8_test.go", 121);
+        registry.Add("TestConstants", utf8_test_package.TestConstants, "utf8_test.go", 16);
+        registry.Add("TestDecodeInvalidSequence", utf8_test_package.TestDecodeInvalidSequence, "utf8_test.go", 311);
+        registry.Add("TestDecodeRune", utf8_test_package.TestDecodeRune, "utf8_test.go", 132);
+        registry.Add("TestDecodeSurrogateRune", utf8_test_package.TestDecodeSurrogateRune, "utf8_test.go", 190);
+        registry.Add("TestEncodeRune", utf8_test_package.TestEncodeRune, "utf8_test.go", 109);
+        registry.Add("TestFullRune", utf8_test_package.TestFullRune, "utf8_test.go", 79);
+        registry.Add("TestNegativeRune", utf8_test_package.TestNegativeRune, "utf8_test.go", 396);
+        registry.Add("TestRuneCount", utf8_test_package.TestRuneCount, "utf8_test.go", 420);
+        registry.Add("TestRuneCountNonASCIIAllocation", utf8_test_package.TestRuneCountNonASCIIAllocation, "utf8_test.go", 431);
+        registry.Add("TestRuneLen", utf8_test_package.TestRuneLen, "utf8_test.go", 458);
+        registry.Add("TestRuntimeConversion", utf8_test_package.TestRuntimeConversion, "utf8_test.go", 225);
+        registry.Add("TestSequencing", utf8_test_package.TestSequencing, "utf8_test.go", 207);
         registry.Add("TestValid", utf8_test_package.TestValid, "utf8_test.go", 502);
         registry.Add("TestValidRune", utf8_test_package.TestValidRune, "utf8_test.go", 533);
         return TestHost.Run(registry, args);

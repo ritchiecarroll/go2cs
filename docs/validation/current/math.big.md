@@ -6,18 +6,22 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `math/big` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-24 · converter `0bf466fae`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**231 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**248 matched · 3 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/math/big`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/big).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
 | `TestAbsZ` | pass | pass |
+| `TestAdd` | pass | pass |
+| `TestAddMulVVWW` | pass | pass |
+| `TestAddVV` | pass | pass |
+| `TestAddVW` | pass | pass |
 | `TestAliasing` | pass | pass |
 | `TestAliasing/Abs` | pass | pass |
 | `TestAliasing/Add` | pass | pass |
@@ -30,6 +34,9 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestAliasing/GCD` | pass | pass |
 | `TestAliasing/GCD-X` | pass | pass |
 | `TestAliasing/GCD-Y` | pass | pass |
+| `TestAliasing/Issue72043a` | pass | pass |
+| `TestAliasing/Issue72043b` | pass | pass |
+| `TestAliasing/Issue72043c` | pass | pass |
 | `TestAliasing/Lsh` | pass | pass |
 | `TestAliasing/Mod` | pass | pass |
 | `TestAliasing/ModInverse` | pass | pass |
@@ -55,6 +62,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestBits` | pass | pass |
 | `TestBitwise` | pass | pass |
 | `TestBytes` | pass | pass |
+| `TestCalibrate` | pass | pass |
 | `TestCmp` | pass | pass |
 | `TestCmpAbs` | pass | pass |
 | `TestDecimalInit` | pass | pass |
@@ -63,6 +71,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestDenomRace` | pass | pass |
 | `TestDivWW` | pass | pass |
 | `TestDivisionSigns` | pass | pass |
+| `TestEscape` | pass | pass |
 | `TestExp` | pass | pass |
 | `TestExpNN` | pass | pass |
 | `TestFibo` | pass | pass |
@@ -137,10 +146,6 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestFloatZeroValue` | pass | pass |
 | `TestFormat` | pass | pass |
 | `TestFromBits` | pass | pass |
-| `TestFunNN` | pass | pass |
-| `TestFunVV` | pass | pass |
-| `TestFunVW` | pass | pass |
-| `TestFunVWExt` | pass | pass |
 | `TestFunVWW` | pass | pass |
 | `TestGcd` | pass | pass |
 | `TestGetString` | pass | pass |
@@ -178,6 +183,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestLsh` | pass | pass |
 | `TestLshRsh` | pass | pass |
 | `TestLshSelf` | pass | pass |
+| `TestLshVU` | pass | pass |
 | `TestLucasPseudoprimes` | pass | pass |
 | `TestMaxBase` | pass | pass |
 | `TestMillerRabinPseudoprimes` | pass | pass |
@@ -186,19 +192,29 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestModW` | pass | pass |
 | `TestMontgomery` | pass | pass |
 | `TestMul` | pass | pass |
+| `TestMulAddVWW` | pass | pass |
 | `TestMulAddWWW` | pass | pass |
+| `TestMulAlloc` | pass | pass |
 | `TestMulBits` | pass | pass |
 | `TestMulRangeN` | pass | pass |
 | `TestMulRangeZ` | pass | pass |
-| `TestMulUnbalanced` | pass | pass |
+| `TestMulUnbalanced` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestMulWW` | pass | pass |
 | `TestNLZ` | pass | pass |
 | `TestNatDiv` | pass | pass |
+| `TestNatMul` | pass | pass |
+| `TestNatMul/Basic` | pass | pass |
+| `TestNatMul/Karatsuba` | pass | pass |
+| `TestNatMul/Mul` | pass | pass |
+| `TestNatSqr` | pass | pass |
+| `TestNatSqr/Basic` | pass | pass |
+| `TestNatSqr/Karatsuba` | pass | pass |
+| `TestNatSqr/Sqr` | pass | pass |
 | `TestNatSubMod2N` | pass | pass |
 | `TestNatSubMod2N/aliasX` | pass | pass |
 | `TestNatSubMod2N/aliasY` | pass | pass |
 | `TestNatSubMod2N/noalias` | pass | pass |
-| `TestNewIntAllocs` | fail | fail |
+| `TestNewIntAllocs` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestNewIntMinInt64` | pass | pass |
 | `TestNormBits` | pass | pass |
 | `TestNot` | pass | pass |
@@ -225,6 +241,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestRatXMLEncoding` | pass | pass |
 | `TestRsh` | pass | pass |
 | `TestRshSelf` | pass | pass |
+| `TestRshVU` | pass | pass |
 | `TestScan` | pass | pass |
 | `TestScanBase` | pass | pass |
 | `TestScanExponent` | pass | pass |
@@ -239,15 +256,35 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestShiftOverlap` | pass | pass |
 | `TestShiftRight` | pass | pass |
 | `TestSignZ` | pass | pass |
-| `TestSqr` | pass | pass |
+| `TestSqrAlloc` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestSqrt` | pass | pass |
 | `TestSticky` | pass | pass |
 | `TestString` | pass | pass |
 | `TestStringPowers` | pass | pass |
+| `TestSub` | pass | pass |
+| `TestSubVV` | pass | pass |
+| `TestSubVW` | pass | pass |
 | `TestSumZZ` | pass | pass |
 | `TestTrailingZeroBits` | pass | pass |
 | `TestUint64` | pass | pass |
 | `TestZeroRat` | pass | pass |
+
+## Disclosed divergences
+
+A disclosed divergence is a specific Go assertion this conversion does not satisfy — not
+a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's
+hand-owned [`go2cs_test_disclosures.json`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/math/big/go2cs_test_disclosures.json);
+a disclosed test that fails any *other* way is still a hard mismatch.
+
+The **Class** column says which kind each one is: a `deferred` entry is an assertion the managed
+CLR *can* meet, pinned against the named plan that will retire it; every other class is one it
+*provably cannot* satisfy.
+
+| Test | Class | Pinned reason |
+|:--|:--|:--|
+| `TestMulUnbalanced` | `deferred` | A MemStats BYTES meter, not an AllocsPerRun one: allocBytes reads runtime.MemStats.TotalAlloc around one nat.mul of a 50,000-word by a 40-word operand and asserts the bytes stay under 10 times the inputs' size. It read pass\|pass at go1.24.13; go1.26.10 hands nat.mul a preallocated getStack() stack, which is how Go stays near 1x (its one ~400 KB result). ROOTED by G at f8fe15c97e, with a thread-precise probe inside the converted test (scratch, never committed). The stack is reused correctly: save, nat and restore cost 0 bytes. The excess is about 4.2 KB in each of the ~1,249 40x40 products. 74% of it is one converted construct: an element address-of whose only use is an identity compare. alias()'s `&x[cap-1] == &y[cap-1]` mints two 184-byte element boxes per call and nat.mul calls it twice, across four mul frames per product (2,944 B); addVW's `&z[0] != &x[0]` adds 144 B. Another 21% is karatsuba's nine non-escaping `&Int{...}` locals at 96 B each (864 B, the REC-B class). The rest is karatsuba's defer (~216 B) and basicMul (56 B). Go allocates none of these. |
+| `TestNewIntAllocs` | `deferred` | A want-zero AllocsPerRun assert over `x.Add(x, NewInt(n))`: NewInt is arranged to inline so that its `&Int{...}` and its one-word abs slice live on Go's stack. The divergence is an ORACLE-side change, not a C# regression. The test body, NewInt and Int.Add are byte-for-byte the same at go1.24.13 and go1.26.10, and the go1.24.13 page reads `fail` on both sides: Go failed this test too, so it matched. At go1.26.10 Go passes it, and C# still allocates, so it now reads Go=pass / C#=fail. |
+| `TestSqrAlloc` | `deferred` | AllocsPerRun assert new at go1.26.10 (escape_test.go:43-50): squaring an 80-word nat through Mul(x, x) must allocate at most once (the result). go1.26.10's multiplication takes its scratch from a stack (natmul.go, getStack), which Go keeps off the heap; the converted side heap-allocates that scratch and reads 4.00 objects per run on both OSes. Same Go-side change as the TestMulUnbalanced entry beside it. |
 
 ## Excluded declarations
 
@@ -257,15 +294,16 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
-- BenchmarkAddMulVVW (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkAddMulVVWW (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAddVV (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAddVW (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAddVWext (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkArithVV (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkBinomial (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkBitset (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkBitsetNeg (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkBitsetNegOrig (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkBitsetOrig (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyVV (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDecimalConversion (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDiv (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDivWVW (benchmark): benchmark execution is deferred to Phase 4D
@@ -299,22 +337,22 @@ the capability it needs.
 - BenchmarkHilbert (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkIntSqr (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkLeafSize (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkLshVU (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkModInverse (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkModSqrt225_3Mod4 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkModSqrt225_Tonelli (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkModSqrt231_5Mod8 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkModSqrt231_Tonelli (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkMul (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMulAddVWW (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkNatMul (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkNatSetBytes (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkNatSqr (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkNonZeroShifts (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseFloatLargeExp (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkParseFloatSmallExp (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkProbablyPrime (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkQuoRem (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRatCmp (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkRshVU (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkScan (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkScanPi (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSqrt (benchmark): benchmark execution is deferred to Phase 4D
@@ -322,7 +360,6 @@ the capability it needs.
 - BenchmarkStringPiParallel (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSubVV (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSubVW (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkSubVWext (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkZeroShifts (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleFloat_Add (example): example execution is deferred to Phase 4D
 - ExampleFloat_Cmp (example): example execution is deferred to Phase 4D
@@ -339,18 +376,4 @@ the capability it needs.
 - Example_fibonacci (example): example execution is deferred to Phase 4D
 - Example_sqrt2 (example): example execution is deferred to Phase 4D
 - FuzzExpMont (fuzz): fuzz execution is deferred to Phase 4D
-- TestCalibrate (test): requires unsupported testing capabilities: B.ResetTimer
-
-## Gated by a host capability
-
-A gate names a declaration the converted test host *provably cannot run at all* — not an
-assertion it fails. It is filtered from **both** sides of the comparison, and because the gate
-keys on the DECLARATION, every verdict row `go test` reports underneath it is withdrawn with
-it. None of the rows below is claimed by the matched count above; they are named here so this
-page states exactly what the row leaves out.
-
-### `TestCalibrate` — B.ResetTimer
-
-1 verdict row `go test` reports and this comparison does not claim:
-
-`TestCalibrate`
+- TestAddMulVVWWNoADX (test): requires the native implementation flavor: arith_amd64_test.go is excluded by the conversion's build tags (purego,math_big_pure_go), and the corpus reproduces the pure-Go flavor

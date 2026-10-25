@@ -167,11 +167,12 @@ public static bool /*deleted*/ CompareAndDelete(this ж<RWMutexMap> Ꮡm, any ke
 
 public static void Range(this ж<RWMutexMap> Ꮡm, Func<any, any, bool> f) {
     ref var m = ref Ꮡm.DerefOrNull();
+    var keysᴷ = new stackAppend<any>();
 
     Ꮡm.of(RWMutexMap.Ꮡmu).RLock();
     var keys = new slice<any>(0, len(m.dirty));
     foreach (var (k, _) in m.dirty) {
-        keys = append(keys, k);
+        keys = append(keysᴷ, keys, k);
     }
     Ꮡm.of(RWMutexMap.Ꮡmu).RUnlock();
 

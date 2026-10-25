@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/rand` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**314 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**314 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/rand`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/rand).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -358,4 +358,7 @@ the capability it needs.
 
 - BenchmarkPrime (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRead (benchmark): benchmark execution is deferred to Phase 4D
+- ExampleInt (example): example execution is deferred to Phase 4D
+- ExamplePrime (example): example execution is deferred to Phase 4D
 - ExampleRead (example): example execution is deferred to Phase 4D
+- ExampleText (example): example execution is deferred to Phase 4D

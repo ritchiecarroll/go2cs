@@ -24,35 +24,35 @@ internal static class Go2CsTestHost
             "stringer_example_test.go",
             "stringer_test.go",
         });
-        registry.Add("TestAppend", fmt_test_package.TestAppend, "fmt_test.go", 1990);
-        registry.Add("TestAppendf", fmt_test_package.TestAppendf, "fmt_test.go", 1978);
-        registry.Add("TestAppendln", fmt_test_package.TestAppendln, "fmt_test.go", 2002);
-        registry.Add("TestBadVerbRecursion", fmt_test_package.TestBadVerbRecursion, "fmt_test.go", 1833);
-        registry.Add("TestBlank", fmt_test_package.TestBlank, "fmt_test.go", 1674);
-        registry.Add("TestBlankln", fmt_test_package.TestBlankln, "fmt_test.go", 1684);
+        registry.Add("TestAppend", fmt_test_package.TestAppend, "fmt_test.go", 1999);
+        registry.Add("TestAppendf", fmt_test_package.TestAppendf, "fmt_test.go", 1987);
+        registry.Add("TestAppendln", fmt_test_package.TestAppendln, "fmt_test.go", 2011);
+        registry.Add("TestBadVerbRecursion", fmt_test_package.TestBadVerbRecursion, "fmt_test.go", 1842);
+        registry.Add("TestBlank", fmt_test_package.TestBlank, "fmt_test.go", 1683);
+        registry.Add("TestBlankln", fmt_test_package.TestBlankln, "fmt_test.go", 1693);
         registry.Add("TestComplexFormatting", fmt_test_package.TestComplexFormatting, "fmt_test.go", 1201);
-        registry.Add("TestCountMallocs", fmt_test_package.TestCountMallocs, "fmt_test.go", 1513);
+        registry.Add("TestCountMallocs", fmt_test_package.TestCountMallocs, "fmt_test.go", 1522);
         registry.Add("TestEOF", fmt_test_package.TestEOF, "scan_test.go", 786);
         registry.Add("TestEOFAllTypes", fmt_test_package.TestEOFAllTypes, "scan_test.go", 863);
         registry.Add("TestEOFAtEndOfInput", fmt_test_package.TestEOFAtEndOfInput, "scan_test.go", 814);
-        registry.Add("TestEmptyMap", fmt_test_package.TestEmptyMap, "fmt_test.go", 1658);
+        registry.Add("TestEmptyMap", fmt_test_package.TestEmptyMap, "fmt_test.go", 1667);
         registry.Add("TestErrorf", fmt_test_package.TestErrorf, "errors_test.go", 14);
-        registry.Add("TestFlagParser", fmt_test_package.TestFlagParser, "fmt_test.go", 1566);
+        registry.Add("TestFlagParser", fmt_test_package.TestFlagParser, "fmt_test.go", 1575);
         registry.Add("TestFmtInterface", fmt_test_package.TestFmtInterface, "fmt_test.go", 41);
         registry.Add("TestFormatString", fmt_test_package.TestFormatString, "state_test.go", 57);
-        registry.Add("TestFormatterFlags", fmt_test_package.TestFormatterFlags, "fmt_test.go", 1938);
-        registry.Add("TestFormatterPrintln", fmt_test_package.TestFormatterPrintln, "fmt_test.go", 1693);
+        registry.Add("TestFormatterFlags", fmt_test_package.TestFormatterFlags, "fmt_test.go", 1947);
+        registry.Add("TestFormatterPrintln", fmt_test_package.TestFormatterPrintln, "fmt_test.go", 1702);
         registry.Add("TestHexByte", fmt_test_package.TestHexByte, "scan_test.go", 1322);
         registry.Add("TestHexBytes", fmt_test_package.TestHexBytes, "scan_test.go", 1136);
         registry.Add("TestInf", fmt_test_package.TestInf, "scan_test.go", 636);
-        registry.Add("TestIsSpace", fmt_test_package.TestIsSpace, "fmt_test.go", 1848);
+        registry.Add("TestIsSpace", fmt_test_package.TestIsSpace, "fmt_test.go", 1857);
         registry.Add("TestLineByLineFscanf", fmt_test_package.TestLineByLineFscanf, "scan_test.go", 957);
-        registry.Add("TestMapPrinter", fmt_test_package.TestMapPrinter, "fmt_test.go", 1640);
+        registry.Add("TestMapPrinter", fmt_test_package.TestMapPrinter, "fmt_test.go", 1649);
         registry.Add("TestMultiLine", fmt_test_package.TestMultiLine, "scan_test.go", 916);
         registry.Add("TestNaN", fmt_test_package.TestNaN, "scan_test.go", 609);
-        registry.Add("TestNilDoesNotBecomeTyped", fmt_test_package.TestNilDoesNotBecomeTyped, "fmt_test.go", 1860);
-        registry.Add("TestPanics", fmt_test_package.TestPanics, "fmt_test.go", 1805);
-        registry.Add("TestParsenum", fmt_test_package.TestParsenum, "fmt_test.go", 1947);
+        registry.Add("TestNilDoesNotBecomeTyped", fmt_test_package.TestNilDoesNotBecomeTyped, "fmt_test.go", 1869);
+        registry.Add("TestPanics", fmt_test_package.TestPanics, "fmt_test.go", 1814);
+        registry.Add("TestParsenum", fmt_test_package.TestParsenum, "fmt_test.go", 1956);
         registry.Add("TestReorder", fmt_test_package.TestReorder, "fmt_test.go", 1287);
         registry.Add("TestScan", fmt_test_package.TestScan, "scan_test.go", 532);
         registry.Add("TestScanEmpty", fmt_test_package.TestScanEmpty, "scan_test.go", 709);
@@ -69,12 +69,12 @@ internal static class Go2CsTestHost
         registry.Add("TestScanlnNewlinesTerminate", fmt_test_package.TestScanlnNewlinesTerminate, "scan_test.go", 1211);
         registry.Add("TestScanlnNoNewline", fmt_test_package.TestScanlnNoNewline, "scan_test.go", 749);
         registry.Add("TestScanlnWithMiddleNewline", fmt_test_package.TestScanlnWithMiddleNewline, "scan_test.go", 759);
-        registry.Add("TestSlicePrinter", fmt_test_package.TestSlicePrinter, "fmt_test.go", 1607);
+        registry.Add("TestSlicePrinter", fmt_test_package.TestSlicePrinter, "fmt_test.go", 1616);
         registry.Add("TestSprintf", fmt_test_package.TestSprintf, "fmt_test.go", 1152);
         registry.Add("TestStringer", fmt_test_package.TestStringer, "stringer_test.go", 52);
-        registry.Add("TestStructPrinter", fmt_test_package.TestStructPrinter, "fmt_test.go", 1576);
+        registry.Add("TestStructPrinter", fmt_test_package.TestStructPrinter, "fmt_test.go", 1585);
         registry.Add("TestUnreadRuneWithBufio", fmt_test_package.TestUnreadRuneWithBufio, "scan_test.go", 876);
-        registry.Add("TestWidthAndPrecision", fmt_test_package.TestWidthAndPrecision, "fmt_test.go", 1745);
+        registry.Add("TestWidthAndPrecision", fmt_test_package.TestWidthAndPrecision, "fmt_test.go", 1754);
         return TestHost.Run(registry, args);
     }
 }

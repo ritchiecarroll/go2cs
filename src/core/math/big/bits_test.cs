@@ -108,6 +108,8 @@ public static void TestNormBits(ж<testing.T> Ꮡt) {
 // round returns the Float value corresponding to x after rounding x
 // to prec bits according to mode.
 internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint prec, global::go.math.big_package.RoundingMode mode) {
+    var zᴷ = new stackAppend<nint>();
+
     x = x.norm();
 
     // determine range
@@ -148,7 +150,7 @@ internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint
             if (b == r + 1) {
                 bit0 = 1;
             }
-            z = append(z, b);
+            z = append(zᴷ, z, b);
             break;
         }}
     }

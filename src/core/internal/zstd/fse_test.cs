@@ -69,11 +69,12 @@ public static void TestPredefinedTables(ж<testing.T> Ꮡt) {
             predef: predefinedMatchTable[..]
         )
     }.slice();
-    foreach (var (_, test) in tests) {
-        ref var testΔ1 = ref heap<TestPredefinedTables_tests>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tests) {
+        ref var test = ref heap(new TestPredefinedTables_tests(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
             ref var r = ref heap(new global::go.@internal.zstd_package.Reader(), out var Ꮡr);
             var table = new slice<global::go.@internal.zstd_package.fseEntry>(((nint)1).Lsh((int64)(testʗ1.tableBits)));
             {

@@ -6,18 +6,33 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `log` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**8 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**23 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/log`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
 | `TestAll` | pass | pass |
+| `TestCallDepth` | pass | pass |
+| `TestCallDepth/Default.Fatal` | pass | pass |
+| `TestCallDepth/Default.Fatalf` | pass | pass |
+| `TestCallDepth/Default.Fatalln` | pass | pass |
+| `TestCallDepth/Default.Output` | pass | pass |
+| `TestCallDepth/Default.Panic` | pass | pass |
+| `TestCallDepth/Default.Panicf` | pass | pass |
+| `TestCallDepth/Default.Panicln` | pass | pass |
+| `TestCallDepth/Fatal` | pass | pass |
+| `TestCallDepth/Fatalf` | pass | pass |
+| `TestCallDepth/Fatalln` | pass | pass |
+| `TestCallDepth/Output` | pass | pass |
+| `TestCallDepth/Panic` | pass | pass |
+| `TestCallDepth/Panicf` | pass | pass |
+| `TestCallDepth/Panicln` | pass | pass |
 | `TestDefault` | pass | pass |
 | `TestDiscard` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestEmptyPrintCreatesLine` | pass | pass |

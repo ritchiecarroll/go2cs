@@ -74,7 +74,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
     // Generate concurrent contexts.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var ccf = new slice<slice<Action>>(gomaxprocs);
-    foreach (var (i, _) in ccf) {
+    foreach (var i in range(ccf)) {
         Ꮡwg.Add(1);
         var ccfʗ1 = ccf;
         var rootʗ1 = root;
@@ -83,7 +83,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var cf = new slice<Action>(perPContexts);
-                foreach (var (j, _) in cf) {
+                foreach (var j in range(cf)) {
                     (_, cf[j]) = WithTimeout(rootʗ1, time.ΔHour);
                 }
                 ccfʗ1[iΔ1] = cf;
@@ -99,7 +99,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var wcf = new slice<Action>(10);
         while (pb.Next()) {
-            foreach (var (i, _) in wcf) {
+            foreach (var i in range(wcf)) {
                 (_, wcf[i]) = WithTimeout(rootʗ2, time.ΔHour);
             }
             foreach (var (_, f) in wcf) {
@@ -247,6 +247,36 @@ public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> Ꮡb) {
                 Ꮡctx.ValueSlot.Value((nint)(-1));
             }
         });
+    }
+}
+
+public static void BenchmarkErrOK(ж<testing.B> Ꮡb) {
+    GoFrame ᒐ = default;
+    try {
+        var (ctx, cancel) = WithCancel(Background());
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        while (Ꮡb.Loop()) {
+            {
+                var err = ctx.Err(); if (err != default!) {
+                    Ꮡb.Fatalf("ctx.Err() = %v"u8, err);
+                }
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+public static void BenchmarkErrCanceled(ж<testing.B> Ꮡb) {
+    var (ctx, cancel) = WithCancel(Background());
+    cancel();
+    while (Ꮡb.Loop()) {
+        {
+            var err = ctx.Err(); if (err == default!) {
+                Ꮡb.Fatalf("ctx.Err() = %v"u8, err);
+            }
+        }
     }
 }
 
