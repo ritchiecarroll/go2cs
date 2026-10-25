@@ -9,6 +9,8 @@ using maps = go.@internal.runtime.maps_package;
 using math = go.math_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using go.@internal;
 using go.@internal.runtime;
@@ -16,7 +18,7 @@ using static go.@internal.runtime.maps_internal_test_package;
 
 partial class maps_test_package {
 
-public static void TestCtrlSize(ж<testing.T> Ꮡt) {
+public static partial void TestCtrlSize(ж<testing.T> Ꮡt) {
     var cs = /* unsafe.Sizeof(maps.CtrlGroup(0)) */ (uintptr)8;
     if (cs != abi.MapGroupSlots) {
         Ꮡt.Errorf("ctrlGroup size got %d want abi.MapGroupSlots %d"u8, cs, (nint)(abi.MapGroupSlots));

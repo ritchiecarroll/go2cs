@@ -161,9 +161,11 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             continue;
         }
         // Compare the average delta to the tolerance level.
-        if (averageDelta(m0, m1) > tc.tolerance) {
-            Ꮡt.Errorf("%s, quality=%d: average delta is too high"u8, tc.filename, tc.quality);
-            continue;
+        {
+            var d = averageDelta(m0, m1); if (d > tc.tolerance) {
+                Ꮡt.Errorf("%s, quality=%d: average delta is too high (%d > %d)"u8, tc.filename, tc.quality, d, tc.tolerance);
+                continue;
+            }
         }
     }
 }
@@ -172,7 +174,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 // through encode/decode cycle.
 public static void TestWriteGrayscale(ж<testing.T> Ꮡt) {
     var m0 = image.NewGray(image.Rect(0, 0, 32, 32));
-    foreach (var (i, _) in (~m0).Pix) {
+    foreach (var i in range((~m0).Pix)) {
         m0.Value.Pix[i] = (uint8)i;
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

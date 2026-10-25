@@ -339,6 +339,8 @@ internal partial struct TestEncodedLen_test /*dyn*/ {
 }
 
 public static void TestEncodedLen(ж<testing.T> Ꮡt) {
+    var testsᴷ = new stackAppend<TestEncodedLen_test>();
+
     var tests = new TestEncodedLen_test[]{
         new(RawStdEncoding, 0, 0),
         new(RawStdEncoding, 1, 2),
@@ -359,7 +361,7 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
     }
     else if (exprᴛ1 == 64) {
-        tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(1152921504606846976L)), 1537228672809129302L));
+        tests = append(testsᴷ, tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(1152921504606846976L)), 1537228672809129302L));
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
     }
     foreach (var (_, tt) in tests) {
@@ -378,6 +380,8 @@ internal partial struct TestDecodedLen_test /*dyn*/ {
 }
 
 public static void TestDecodedLen(ж<testing.T> Ꮡt) {
+    var testsᴷ = new stackAppend<TestDecodedLen_test>();
+
     var tests = new TestDecodedLen_test[]{
         new(RawStdEncoding, 0, 0),
         new(RawStdEncoding, 2, 1),
@@ -395,7 +399,7 @@ public static void TestDecodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 1610612735));
     }
     else if (exprᴛ1 == 64) {
-        tests = append(tests, new TestDecodedLen_test(RawStdEncoding, unchecked((nint)(1537228672809129302L)), 1152921504606846976L));
+        tests = append(testsᴷ, tests, new TestDecodedLen_test(RawStdEncoding, unchecked((nint)(1537228672809129302L)), 1152921504606846976L));
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 6917529027641081855L));
     }
     foreach (var (_, tt) in tests) {

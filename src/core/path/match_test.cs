@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using fmt = fmt_package;
 using static path_package;
 using testing = testing_package;
 
@@ -81,5 +82,24 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
         }
     }
 }
+
+public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
+    foreach (var (_, vᴛ1) in matchTests) {
+        ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        @string name = fmt.Sprintf("%q %q"u8, tt.pattern, tt.s);
+        var ttʗ1 = tt;
+        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            foreach (var _ᴛ1 in range((~bΔ1).N)) {
+                (bSink, errSink) = Match(ttʗ1.pattern, ttʗ1.s);
+            }
+        });
+    }
+}
+
+internal static bool bSink;
+internal static error errSink;
 
 } // end path_test_package

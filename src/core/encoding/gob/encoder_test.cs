@@ -1253,7 +1253,7 @@ public partial struct Z {
 public static void Test29ElementSlice(ж<testing.T> Ꮡt) {
     Register(new Z(nil));
     var src = new slice<any>(100); // Size needs to be bigger than size of type definition.
-    foreach (var (i, _) in src) {
+    foreach (var i in range(src)) {
         src[i] = new Z(nil);
     }
     var buf = @new<bytes.Buffer>();

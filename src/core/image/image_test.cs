@@ -227,7 +227,7 @@ internal partial interface TestRGBA64Image_type /*dyn*/ {
 public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
     // memset sets every element of s to v.
     void memset(slice<byte> s, byte v) {
-        foreach (var (i, _) in s) {
+        foreach (var i in range(s)) {
             s[i] = v;
         }
     }

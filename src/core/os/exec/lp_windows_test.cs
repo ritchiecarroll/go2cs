@@ -39,11 +39,13 @@ internal static void cmdPrintPath(params ꓸꓸꓸstring _ʗp) {
 // The empty string results in an empty entry.
 // Paths beginning with . are kept as relative entries.
 internal static @string makePATH(@string root, slice<@string> dirs) {
+    var pathsᴷ = new stackAppend<@string>();
+
     var paths = new slice<@string>(0, len(dirs));
     foreach (var (_, d) in dirs) {
         switch (ᐧ) {
         case {} when d == ""u8: {
-            paths = append(paths, ""u8);
+            paths = append(pathsᴷ, paths, ""u8);
             break;
         }
         case {} when d == "."u8 || (len(d) >= 2 && d[0] == (rune)'.' && os.IsPathSeparator(d[1])): {
@@ -307,6 +309,7 @@ internal static readonly @string pathextˢ = "PATHEXT"u8;
 
 public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
     // Not parallel: uses Chdir and Setenv.
+
     // We are using the "printpath" command mode to test exec.Command here,
     // so we won't be calling helperCommand to resolve it.
     // That may cause it to appear to be unused.
@@ -326,6 +329,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
 
         var ttʗ1 = tt;
         Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var pathsᴷ = new stackAppend<@string>();
             if (ttʗ1.want == ""u8 && ttʗ1.wantErr == default!) {
                 tΔ1.Fatalf("test must specify either want or wantErr"u8);
             }
@@ -344,7 +348,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
                 foreach (var (_, f) in ttʗ1.files) {
                     @string dir = filepath.Join(root, filepath.Dir(f));
                     if (!slices.Contains(paths, dir)) {
-                        paths = append(paths, dir);
+                        paths = append(pathsᴷ, paths, dir);
                     }
                 }
                 pathVar = strings.Join(paths, (@string)(rune)os.PathListSeparator);
@@ -573,6 +577,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
 
 public static void TestCommand(ж<testing.T> Ꮡt) {
     // Not parallel: uses Chdir and Setenv.
+
     // We are using the "printpath" command mode to test exec.Command here,
     // so we won't be calling helperCommand to resolve it.
     // That may cause it to appear to be unused.

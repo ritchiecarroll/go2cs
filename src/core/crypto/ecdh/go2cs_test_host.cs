@@ -14,15 +14,15 @@ internal static class Go2CsTestHost
             "nist.go",
             "x25519.go",
         });
-        registry.Add("TestECDH", ecdh_test_package.TestECDH, "ecdh_test.go", 38);
-        registry.Add("TestGenerateKey", ecdh_test_package.TestGenerateKey, "ecdh_test.go", 97);
-        registry.Add("TestLinker", ecdh_test_package.TestLinker, "ecdh_test.go", 443);
-        registry.Add("TestMismatchedCurves", ecdh_test_package.TestMismatchedCurves, "ecdh_test.go", 490);
-        registry.Add("TestNewPrivateKey", ecdh_test_package.TestNewPrivateKey, "ecdh_test.go", 282);
-        registry.Add("TestNewPublicKey", ecdh_test_package.TestNewPublicKey, "ecdh_test.go", 343);
-        registry.Add("TestString", ecdh_test_package.TestString, "ecdh_test.go", 191);
-        registry.Add("TestVectors", ecdh_test_package.TestVectors, "ecdh_test.go", 158);
-        registry.Add("TestX25519Failure", ecdh_test_package.TestX25519Failure, "ecdh_test.go", 200);
+        registry.Add("TestECDH", ecdh_test_package.TestECDH, "ecdh_test.go", 37);
+        registry.Add("TestGenerateKey", ecdh_test_package.TestGenerateKey, "ecdh_test.go", 96);
+        registry.Add("TestLinker", ecdh_test_package.TestLinker, "ecdh_test.go", 448);
+        registry.Add("TestMismatchedCurves", ecdh_test_package.TestMismatchedCurves, "ecdh_test.go", 493);
+        registry.Add("TestNewPrivateKey", ecdh_test_package.TestNewPrivateKey, "ecdh_test.go", 281);
+        registry.Add("TestNewPublicKey", ecdh_test_package.TestNewPublicKey, "ecdh_test.go", 348);
+        registry.Add("TestString", ecdh_test_package.TestString, "ecdh_test.go", 190);
+        registry.Add("TestVectors", ecdh_test_package.TestVectors, "ecdh_test.go", 157);
+        registry.Add("TestX25519Failure", ecdh_test_package.TestX25519Failure, "ecdh_test.go", 199);
         return TestHost.Run(registry, args);
     }
 }

@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `debug/elf` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**31 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**32 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/debug/elf`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/debug/elf).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -25,6 +25,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestDWARFRelocations/testdata/gcc-amd64-openbsd-debug-with-rela.obj` | pass | pass |
 | `TestDWARFRelocations/testdata/go-relocation-test-clang-arm.obj` | pass | pass |
 | `TestDWARFRelocations/testdata/go-relocation-test-clang-x86.obj` | pass | pass |
+| `TestDWARFRelocations/testdata/go-relocation-test-gcc133-ppc.obj` | pass | pass |
 | `TestDWARFRelocations/testdata/go-relocation-test-gcc424-x86-64.obj` | pass | pass |
 | `TestDWARFRelocations/testdata/go-relocation-test-gcc441-x86-64.obj` | pass | pass |
 | `TestDWARFRelocations/testdata/go-relocation-test-gcc441-x86.obj` | pass | pass |

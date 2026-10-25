@@ -44,6 +44,12 @@ using static global::go.go.ast_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -54,8 +60,9 @@ using static global::go.go.ast_test_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/ast/commentmap_test.go", "commentmap_test.cs", "AE6YAQATKIKCgpSmooKCgpSmgoKCgoLKgIK6ooKCgpSCgsqCgoKClKaCgIKCgtqCgoKCgoI=")]
 [assembly: global::go.GoPositionMap("go/ast/filter_test.go", "filter_test.cs", "AD1ylIKCgriCgoK4lpKAgqSUgg==")]
+[assembly: global::go.GoPositionMap("go/ast/import_test.go", "import_test.cs", "ADAcgoIAARCCgoKmpoKCuIK4ggABHoKCgqamgoKCyoIADQqCioKCgpQADAaCnoKCgpSCgriClII=", "15-42:1;44-80:2")]
 [assembly: global::go.GoPositionMap("go/ast/issues_test.go", "issues_test.cs", "AA4cotyCgoKokoKClJSClIIACQyyAGOiAYKCgqaCgg==", "29-32:1")]
-[assembly: global::go.GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABIc3JSCgoKmgoCC")]
+[assembly: global::go.GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABUi3JSCgoKmgoCCABYKggAAEoKUmIKCkoKAgqSAgoK2uO6CuIKC", "51-53:1;57-68:2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -85,6 +92,8 @@ public static partial class ast_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸformat() => builtin.initPackage(typeof(global::go.go.format_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));

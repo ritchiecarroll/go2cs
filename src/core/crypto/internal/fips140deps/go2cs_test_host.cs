@@ -16,8 +16,9 @@ internal static class Go2CsTestHost
             "byteorder",
             "cpu",
             "godebug",
+            "time",
         });
-        registry.Add("TestImports", fipsdeps_internal_test_package.TestImports, "fipsdeps_test.go", 32);
+        registry.Add("TestImports", fipsdeps_internal_test_package.TestImports, "fipsdeps_test.go", 36);
         return TestHost.Run(registry, args);
     }
 }

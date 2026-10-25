@@ -40,7 +40,7 @@ public static void TestStat(ж<testing.T> Ꮡt) {
     check(statOnlyˢ, info, err);
 
     // Test that Stat uses Open when the method is not present.
-    (info, err) = Stat(new openOnly(testFsys), helloTxtˢ);
+    (info, err) = Stat(new openOnly(new fstest_MapFSᴠFS(testFsys)), helloTxtˢ);
     check(openOnlyˢ, info, err);
 }
 

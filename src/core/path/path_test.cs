@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using Δpath = path_package;
 using static path_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
@@ -257,6 +258,19 @@ public static void TestIsAbs(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("IsAbs(%q) = %v, want %v"u8, test.path, r, test.isAbs);
             }
         }
+    }
+}
+
+public static void BenchmarkJoin(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    b.ReportAllocs();
+    var parts = new @string[]{"one"u8, "two"u8, "three"u8, "four"u8}.slice();
+    @string s = parts[0];
+    while (Ꮡb.Loop()) {
+        parts[0] = s;
+        s = Δpath.Join(parts.ꓸꓸꓸ);
+        s = s[..3];
     }
 }
 

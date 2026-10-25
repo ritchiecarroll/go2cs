@@ -45,7 +45,7 @@ internal static void appmain() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string monitorˢ = "monitor: "u8;
 private static readonly @string crashˢ = "*.crash"u8;
-private static readonly @string testRunˢ = "-test.run=ExampleSetCrashOutput_monitor"u8;
+private static readonly @string testRunˢ = "-test.run=^ExampleSetCrashOutput_monitor$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string monitorVarᶜ = "RUNTIME_DEBUG_MONITOR"u8;
@@ -97,7 +97,10 @@ internal static void monitor() {
         log.Fatal(err);
     }
     var cmd = exec.Command(exe, testRunˢ);
-    cmd.Value.Env = append(os.Environ(), monitorVar + "=1");
+    // Be selective in which variables we allow the child to inherit.
+    // Depending on the application, some may be necessary,
+    // while others (e.g. GOGC, GOMEMLIMIT) may be harmful; see #73490.
+    cmd.Value.Env = new @string[]{monitorVar + "=1"}.slice();
     cmd.Value.Stderr = new os.FileжWriter(os.Stderr);
     cmd.Value.Stdout = new os.FileжWriter(os.Stderr);
     (var pipe, err) = cmd.StdinPipe();

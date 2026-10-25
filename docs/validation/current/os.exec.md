@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `os/exec` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**116 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**117 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/os/exec`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/os/exec).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 8 of the matched tests identically.
+Both runtimes skip 7 of the matched tests identically.
 
 ## Verdicts
 
@@ -123,9 +123,10 @@ Both runtimes skip 8 of the matched tests identically.
 | `TestPipePassing` | pass | pass |
 | `TestPipes` | pass | pass |
 | `TestPrefixSuffixSaver` | pass | pass |
+| `TestStart_twice` | pass | pass |
 | `TestStdinClose` | pass | pass |
 | `TestStdinCloseRace` | pass | pass |
-| `TestString` | skip | skip |
+| `TestString` | pass | pass |
 | `TestStringPathNotResolved` | pass | pass |
 | `TestWaitInterrupt` | pass | pass |
 | `TestWaitInterrupt/Exit-hang` | pass | pass |

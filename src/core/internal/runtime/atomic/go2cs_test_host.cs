@@ -29,6 +29,7 @@ internal static class Go2CsTestHost
             "types.go",
             "types_64bit.go",
             "unaligned.go",
+            "xchg8.go",
             "xchg8_test.go",
         });
         registry.Add("TestAnd", atomic_test_package.TestAnd, "atomic_test.go", 153);
@@ -46,7 +47,7 @@ internal static class Go2CsTestHost
         registry.Add("TestUnaligned64", atomic_test_package.TestUnaligned64, "atomic_test.go", 91);
         registry.Add("TestXadduintptr", atomic_test_package.TestXadduintptr, "atomic_test.go", 31);
         registry.Add("TestXadduintptrOnUint64", atomic_test_package.TestXadduintptrOnUint64, "atomic_test.go", 58);
-        registry.Add("TestXchg8", atomic_test_package.TestXchg8, "xchg8_test.go", 14);
+        registry.Add("TestXchg8", atomic_test_package.TestXchg8, "xchg8_test.go", 12);
         return TestHost.Run(registry, args);
     }
 }

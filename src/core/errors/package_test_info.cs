@@ -26,13 +26,17 @@ using go;
 using static global::go.errors_test_package;
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("6572726f72735f746573742e74696d656f7574", "TestAsType_timeout")]
+[assembly: GoDynamicTypeLift("696e746572666163657b54696d656f7574282920626f6f6c3b206572726f727d", "TestAsType_timeout")]
 [assembly: GoDynamicTypeLift("696e746572666163657b54696d656f7574282920626f6f6c7d", "TestAs_timeout")]
-[assembly: GoDynamicTypeLift("696e746572666163657b556e777261702829205b5d6572726f727d", "TestJoin_typeᴛ1")]
+[assembly: GoDynamicTypeLift("696e746572666163657b556e777261702829205b5d6572726f727d", "ExampleJoin_type")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
+[assembly: GoImplement<MyAsError, error>]
 [assembly: GoImplement<MyError, error>]
-[assembly: GoImplement<errorT, error>]
+[assembly: GoImplement<MyIsError, error>]
+[assembly: GoImplement<errorT, compError>]
 [assembly: GoImplement<errorUncomparable, error>(Pointer = true)]
 [assembly: GoImplement<errorUncomparable, error>]
 [assembly: GoImplement<multiErr, error>]
@@ -43,6 +47,12 @@ using static global::go.errors_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,10 +61,10 @@ using static global::go.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("errors/errors_test.go", "errors_test.cs", "AA8YlIKUgriCgriCgoI=")]
-[assembly: go.GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAggAICoKCgv6ikoKCAAoKgoKCgoKClIIADBKCgIKClAALEIKAgoKClAALEIKCgoI=", "", "", "26=Date/1/1/1")]
-[assembly: go.GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAA0IgoKCAAoagoKUggAJCoKCggAKGoKC")]
-[assembly: go.GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKAggALFpSAooCigpS0tMSUABAGgoKCgoKClABbwAGylJKCooKClIKUgIIACQyCgtyCgsKClIKClKL4ooKUgoL6ooKCgoIACQqCgpQABhSCgIIACQ6A/oCigPiAooAACQyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1", "", "34=New/1/1/27;139=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81")]
+[assembly: go.GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABEYlIKUgriCgriCgoI=")]
+[assembly: go.GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAggAICoKCgvqCppSC7LKCgoKUgoKCggAMGKKSgoIADgqCgoKCgoKUgpQADBKCgIKClAAMGIKkguqigoIACQ6CgIKCgpQACBCCgIKAgpQADBaCpIKCgpTK+qKCgpSCgoIACBaigoKUgoIACxKCgoKC", "", "", "26=Date/1/1/1;232=New/1/1/3")]
+[assembly: go.GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAAwIgoKCggANIIKClIIACQqCgoIAChqCgg==")]
+[assembly: go.GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKAggALFpSAooCigpS0tMSUABAGgoKCgoKClABbwAGylJKCooKClIKUgIIACQyCgtyCgsKClIKClKIACgiCgoKKlLq6urq6urq6uri6urq6urq6AAoYooKCgoKC+qKClIKC+qKCgoKC+qKCgoCCAAoKgoKUAAYUgoCCAAkOgP6AooD4gKKAAAkMgqaCgg==", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;139=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;336=New/1/1/1;352=New/1/1/1;356=New/1/1/1;364=New/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,8 +79,10 @@ public static partial class errors_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface ExampleJoin_type {}
+    [GoLocalName("timeout")] internal partial interface TestAsType_timeout {}
     internal partial interface TestAs_timeout {}
-    internal partial interface TestJoin_typeᴛ1 {}
+    internal partial interface compError {}
     internal partial struct TestAs_testCases {}
     internal partial struct TestIs_testCases {}
     internal partial struct TestJoinErrorMethod_type {}
@@ -81,7 +93,9 @@ public static partial class errors_test_package
     internal partial struct multiErr {}
     internal partial struct poser {}
     internal partial struct wrapped {}
+    public partial struct MyAsError {}
     public partial struct MyError {}
+    public partial struct MyIsError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

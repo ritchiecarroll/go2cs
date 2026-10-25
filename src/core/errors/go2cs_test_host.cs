@@ -18,14 +18,15 @@ internal static class Go2CsTestHost
             "wrap_test.go",
         });
         registry.Add("TestAs", errors_test_package.TestAs, "wrap_test.go", 95);
+        registry.Add("TestAsType", errors_test_package.TestAsType, "wrap_test.go", 242);
         registry.Add("TestAsValidation", errors_test_package.TestAsValidation, "wrap_test.go", 219);
         registry.Add("TestErrorMethod", errors_test_package.TestErrorMethod, "errors_test.go", 28);
         registry.Add("TestIs", errors_test_package.TestIs, "wrap_test.go", 16);
         registry.Add("TestJoin", errors_test_package.TestJoin, "join_test.go", 25);
-        registry.Add("TestJoinErrorMethod", errors_test_package.TestJoinErrorMethod, "join_test.go", 51);
+        registry.Add("TestJoinErrorMethod", errors_test_package.TestJoinErrorMethod, "join_test.go", 55);
         registry.Add("TestJoinReturnsNil", errors_test_package.TestJoinReturnsNil, "join_test.go", 13);
         registry.Add("TestNewEqual", errors_test_package.TestNewEqual, "errors_test.go", 12);
-        registry.Add("TestUnwrap", errors_test_package.TestUnwrap, "wrap_test.go", 263);
+        registry.Add("TestUnwrap", errors_test_package.TestUnwrap, "wrap_test.go", 389);
         return TestHost.Run(registry, args);
     }
 }

@@ -16,6 +16,7 @@ internal static slice<isValidPathTestsᴛ1> isValidPathTests = new isValidPathTe
     new("."u8, true),
     new("x"u8, true),
     new("x/y"u8, true),
+
     new(""u8, false),
     new(".."u8, false),
     new("/"u8, false),

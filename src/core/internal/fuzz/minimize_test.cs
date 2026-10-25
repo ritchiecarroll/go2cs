@@ -1,7 +1,7 @@
 // Copyright 2021 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build darwin || freebsd || linux || windows
+//go:build darwin || freebsd || linux || openbsd || windows
 namespace go.@internal;
 
 using bytes = bytes_package;
@@ -135,11 +135,12 @@ public static void TestMinimizeInput(ж<testing.T> Ꮡt) {
         )
     }.slice();
 
-    foreach (var (_, tc) in cases) {
-        ref var tcΔ1 = ref heap<TestMinimizeInput_testcase>(out var ᏑtcΔ1);
-        tcΔ1 = tc;
-        var tcʗ1 = tcΔ1;
-        Ꮡt.Run(tcΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in cases) {
+        ref var tc = ref heap(new TestMinimizeInput_testcase(), out var Ꮡtc);
+        tc = vᴛ1;
+
+        var tcʗ1 = tc;
+        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
                 var tcʗ2 = tcʗ1;
             var ws = Ꮡ(new workerServer(

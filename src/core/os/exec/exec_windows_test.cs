@@ -102,6 +102,8 @@ internal static readonly object noSystemrootFoundˢ = (@string)"no SYSTEMROOT fo
 // with a copy of the parent's SYSTEMROOT.
 // (See issue 25210.)
 public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
+    var envᴷ = new stackAppend<@string>(moves: true);
+
     Ꮡt.Parallel();
     var cmd = helperCommand(Ꮡt, echoenvˢ, systemrootˢ);
 
@@ -110,9 +112,10 @@ public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
     foreach (var (_, kv) in cmd.Environ()) {
         var (k, _, ok) = strings.Cut(kv, "="u8);
         if (!ok || !strings.EqualFold(k, systemrootˢ)) {
-            env = append(env, kv);
+            env = append(envᴷ, env, kv);
         }
     }
+    env = move2heap(envᴷ, env);
     cmd.Value.Env = env;
 
     var (@out, err) = cmd.CombinedOutput();

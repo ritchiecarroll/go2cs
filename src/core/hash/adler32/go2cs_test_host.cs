@@ -12,8 +12,9 @@ internal static class Go2CsTestHost
             "adler32.go",
             "adler32_test.go",
         });
-        registry.Add("TestGolden", adler32_internal_test_package.TestGolden, "adler32_test.go", 75);
-        registry.Add("TestGoldenMarshal", adler32_internal_test_package.TestGoldenMarshal, "adler32_test.go", 93);
+        registry.Add("TestGolden", adler32_internal_test_package.TestGolden, "adler32_test.go", 81);
+        registry.Add("TestGoldenMarshal", adler32_internal_test_package.TestGoldenMarshal, "adler32_test.go", 99);
+        registry.Add("TestHashInterface", adler32_internal_test_package.TestHashInterface, "adler32_test.go", 16);
         return TestHost.Run(registry, args);
     }
 }

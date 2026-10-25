@@ -110,11 +110,13 @@ internal static partial slice<T> genericAllocFunc<T>(nint n)
 
 internal static slice<@string> profileToStrings(ж<profile.Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var resᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> res = default!;
     foreach (var (_, s) in p.Sample) {
-        res = append(res, sampleToString(s));
+        res = append(resᴷ, res, sampleToString(s));
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
@@ -131,11 +133,13 @@ internal static @string sampleToString(ж<profile.Sample> Ꮡs) {
 
 internal static slice<@string> locationToStrings(ж<profile.Location> Ꮡloc, slice<@string> funcs) {
     ref var loc = ref Ꮡloc.DerefOrNull();
+    var funcsᴷ = new stackAppend<@string>(moves: true);
 
-    foreach (var (j, _) in loc.Line) {
+    foreach (var j in range(loc.Line)) {
         var line = loc.Line[len(loc.Line) - 1 - j];
-        funcs = append(funcs, (~line.Function).Name);
+        funcs = append(funcsᴷ, funcs, (~line.Function).Name);
     }
+    funcs = move2heap(funcsᴷ, funcs);
     return funcs;
 }
 
@@ -154,7 +158,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
         foreach (var (_, sz) in new nint[]{128, 256}.slice()) {
             genericAllocFunc<uint32>(sz / 4);
         }
-        foreach (var (_, sz) in new nint[]{32, 64}.slice()) {
+        foreach (var (_, sz) in new nint[]{64, 128}.slice()) {
             genericAllocFunc<uint64>(sz / 8);
         }
 
@@ -174,8 +178,8 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
         var expected = new @string[]{
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 128 0 0]"u8,
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 256 0 0]"u8,
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 32 0 0]"u8,
-            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 64 0 0]"u8
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 64 0 0]"u8,
+            "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 128 0 0]"u8
         }.slice();
 
         foreach (var (_, l) in expected) {
@@ -286,7 +290,6 @@ internal static void growMap() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimePprofGrowMapˢ = "runtime/pprof.growMap"u8;
-internal static readonly @string runtimeInternalˢ = "runtime/internal/"u8;
 internal static readonly @string mapassignˢ = "mapassign"u8;
 
 // Runtime frames are hidden in heap profiles.
@@ -329,9 +332,6 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
             }
             if (strings_package.Contains(l, internalRuntimeˢ)) {
-                Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
-            }
-            if (strings_package.Contains(l, runtimeInternalˢ)) {
                 Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
             }
             if (strings_package.Contains(l, mapassignˢ)) { // in case mapassign moves to a package not matching above paths.

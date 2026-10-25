@@ -18,6 +18,7 @@ internal static class Go2CsTestHost
             "testdata/clang-386-darwin-exec-with-rpath.base64",
             "testdata/clang-386-darwin.obj.base64",
             "testdata/clang-amd64-darwin-exec-with-rpath.base64",
+            "testdata/clang-amd64-darwin-ld-r.obj.base64",
             "testdata/clang-amd64-darwin.obj.base64",
             "testdata/fat-gcc-386-amd64-darwin-exec.base64",
             "testdata/gcc-386-darwin-exec.base64",
@@ -29,13 +30,13 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestOpen", macho_internal_test_package.TestOpen, "file_test.go", 259);
-        registry.Add("TestOpenBadDysymCmd", macho_internal_test_package.TestOpenBadDysymCmd, "file_test.go", 420);
-        registry.Add("TestOpenFailure", macho_internal_test_package.TestOpenFailure, "file_test.go", 351);
-        registry.Add("TestOpenFat", macho_internal_test_package.TestOpenFat, "file_test.go", 359);
-        registry.Add("TestOpenFatFailure", macho_internal_test_package.TestOpenFatFailure, "file_test.go", 386);
-        registry.Add("TestRelocTypeString", macho_internal_test_package.TestRelocTypeString, "file_test.go", 402);
-        registry.Add("TestTypeString", macho_internal_test_package.TestTypeString, "file_test.go", 411);
+        registry.Add("TestOpen", macho_internal_test_package.TestOpen, "file_test.go", 276);
+        registry.Add("TestOpenBadDysymCmd", macho_internal_test_package.TestOpenBadDysymCmd, "file_test.go", 448);
+        registry.Add("TestOpenFailure", macho_internal_test_package.TestOpenFailure, "file_test.go", 379);
+        registry.Add("TestOpenFat", macho_internal_test_package.TestOpenFat, "file_test.go", 387);
+        registry.Add("TestOpenFatFailure", macho_internal_test_package.TestOpenFatFailure, "file_test.go", 414);
+        registry.Add("TestRelocTypeString", macho_internal_test_package.TestRelocTypeString, "file_test.go", 430);
+        registry.Add("TestTypeString", macho_internal_test_package.TestTypeString, "file_test.go", 439);
         return TestHost.Run(registry, args);
     }
 }

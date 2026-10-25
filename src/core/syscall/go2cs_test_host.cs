@@ -18,6 +18,7 @@ internal static class Go2CsTestHost
             "dirent_test.go",
             "dll_windows.go",
             "env_unix.go",
+            "env_unix_test.go",
             "env_windows.go",
             "errors_plan9.go",
             "exec_aix_test.go",
@@ -161,7 +162,6 @@ internal static class Go2CsTestHost
             "types_windows.go",
             "types_windows_386.go",
             "types_windows_amd64.go",
-            "types_windows_arm.go",
             "types_windows_arm64.go",
             "wtf8_windows.go",
             "wtf8_windows_test.go",
@@ -311,21 +311,22 @@ internal static class Go2CsTestHost
         {
             "js",
         });
-        registry.Add("TestChangingProcessParent", syscall_test_package.TestChangingProcessParent, "exec_windows_test.go", 50);
-        registry.Add("TestComputerName", syscall_test_package.TestComputerName, "syscall_windows_test.go", 55);
+        registry.Add("TestChangingProcessParent", syscall_test_package.TestChangingProcessParent, "exec_windows_test.go", 83);
+        registry.Add("TestComputerName", syscall_test_package.TestComputerName, "syscall_windows_test.go", 56);
         registry.Add("TestEnv", syscall_test_package.TestEnv, "syscall_test.go", 29);
-        registry.Add("TestEscapeArg", syscall_test_package.TestEscapeArg, "exec_windows_test.go", 17);
+        registry.Add("TestEnvBlockSorted", syscall_test_package.TestEnvBlockSorted, "exec_windows_test.go", 52);
+        registry.Add("TestEscapeArg", syscall_test_package.TestEscapeArg, "exec_windows_test.go", 19);
         registry.Add("TestExecErrPermutedFds", syscall_test_package.TestExecErrPermutedFds, "syscall_test.go", 37);
-        registry.Add("TestGetStartupInfo", syscall_test_package.TestGetStartupInfo, "syscall_windows_test.go", 221);
+        registry.Add("TestGetStartupInfo", syscall_test_package.TestGetStartupInfo, "syscall_windows_test.go", 222);
         registry.Add("TestGettimeofday", syscall_test_package.TestGettimeofday, "syscall_test.go", 47);
-        registry.Add("TestGetwd_DoesNotPanicWhenPathIsLong", syscall_test_package.TestGetwd_DoesNotPanicWhenPathIsLong, "syscall_windows_test.go", 198);
+        registry.Add("TestGetwd_DoesNotPanicWhenPathIsLong", syscall_test_package.TestGetwd_DoesNotPanicWhenPathIsLong, "syscall_windows_test.go", 199);
         registry.Add("TestOpen", syscall_test_package.TestOpen, "syscall_windows_test.go", 18);
-        registry.Add("TestStdioAreInheritable", syscall_test_package.TestStdioAreInheritable, "syscall_windows_test.go", 126);
-        registry.Add("TestSyscallAllocations", syscall_test_package.TestSyscallAllocations, "syscall_windows_test.go", 230);
-        registry.Add("TestTOKEN_ALL_ACCESS", syscall_test_package.TestTOKEN_ALL_ACCESS, "syscall_windows_test.go", 120);
+        registry.Add("TestStdioAreInheritable", syscall_test_package.TestStdioAreInheritable, "syscall_windows_test.go", 127);
+        registry.Add("TestSyscallAllocations", syscall_test_package.TestSyscallAllocations, "syscall_windows_test.go", 231);
+        registry.Add("TestTOKEN_ALL_ACCESS", syscall_test_package.TestTOKEN_ALL_ACCESS, "syscall_windows_test.go", 121);
         registry.Add("TestWTF16Golden", syscall_test_package.TestWTF16Golden, "wtf8_windows_test.go", 146);
         registry.Add("TestWTF16Rountrip", syscall_test_package.TestWTF16Rountrip, "wtf8_windows_test.go", 134);
-        registry.Add("TestWin32finddata", syscall_test_package.TestWin32finddata, "syscall_windows_test.go", 65);
+        registry.Add("TestWin32finddata", syscall_test_package.TestWin32finddata, "syscall_windows_test.go", 66);
         return TestHost.Run(registry, args);
     }
 }

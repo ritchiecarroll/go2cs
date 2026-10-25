@@ -20,6 +20,7 @@ partial class fstest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string helloLinkˢ = "hello.link"u8;
+internal static readonly @string helloRelLinkˢ = "hello_rel.link"u8;
 
 public static void TestSymlink(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new fstest_internal_test_package.testing_TжTB(Ꮡt));
@@ -35,6 +36,11 @@ public static void TestSymlink(ж<testing.T> Ꮡt) {
 
     {
         var err = os.Symlink(filepath.Join(tmp, helloˢ), filepath.Join(tmp, helloLinkˢ)); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+    {
+        var err = os.Symlink(helloˢ, filepath.Join(tmp, helloRelLinkˢ)); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
@@ -54,7 +60,7 @@ public static void TestDash(ж<testing.T> Ꮡt) {
         ["a-b/a"u8] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("a-b/a"u8)))
     });
     {
-        var err = TestFS(m, aBAˢ); if (err != default!) {
+        var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), aBAˢ); if (err != default!) {
             Ꮡt.Error(err);
         }
     }
@@ -117,7 +123,11 @@ internal static (fs.File, error) Open(this failPermFS f, @string name) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
 
-internal partial interface TestTestFSWrappedErrors_errs /*dyn*/ {
+// TestFS is expected to return a list of errors.
+// Enforce that the list can be extracted for browsing.
+internal partial interface TestTestFSWrappedErrors_wrapper /*dyn*/ :
+    error
+{
     slice<error> Unwrap();
 }
 
@@ -131,11 +141,8 @@ public static void TestTestFSWrappedErrors(ж<testing.T> Ꮡt) {
     if (!errors.Is(err, fs.ErrPermission)) {
         Ꮡt.Errorf("error should be a wrapped ErrPermission: %#v"u8, err);
     }
-
-    // TestFS is expected to return a list of errors.
-    // Enforce that the list can be extracted for browsing.
-    ref var errs = ref heap<TestTestFSWrappedErrors_errs>(out var Ꮡerrs);
-    if (!errors.As(err, Ꮡerrs)){
+    var (errs, ok) = errors.AsType<TestTestFSWrappedErrors_wrapper>(err);
+    if (!ok){
         Ꮡt.Errorf("caller should be able to extract the errors as a list: %#v"u8, err);
     } else {
         foreach (var (_, errΔ1) in errs.Unwrap()) {
