@@ -173,6 +173,61 @@ internal static @string composeChildDirectory(@string argv0, @string dir) {
     return composed;
 }
 
+// go2cs HOST SEAM (not in Go), the environment half of childDirectoryComposer: a child the host moved
+// keeps a PWD that names where it now starts. The twin of syscall/linux/exec_unix.cs's (see there for
+// the measured case, cfile's TestIssue59563). On darwin the run root sits under /var, a link to
+// /private/var, so the PWD os/exec sets and the directory the composer chose differ in spelling while
+// naming the same directory, which is exactly what realpath settles here.
+internal static slice<@string> respellChildPwd(slice<@string> env, @string dir) {
+    string target = dir.ToString();
+    string? canonicalTarget = spawnCanonicalPath(target);
+
+    if (canonicalTarget is null) {
+        return env;
+    }
+
+    for (nint i = len(env) - 1; i >= 0; i--) {
+        string entry = env[i].ToString();
+
+        if (!entry.StartsWith("PWD=", StringComparison.Ordinal)) {
+            continue;
+        }
+
+        string pwd = entry[4..];
+
+        if (pwd == target || !pwd.StartsWith('/') || spawnCanonicalPath(pwd) != canonicalTarget) {
+            return env;
+        }
+
+        var entries = new @string[(int)len(env)];
+
+        for (nint j = 0; j < len(env); j++) {
+            entries[j] = env[j];
+        }
+
+        entries[i] = "PWD=" + target;
+        return new slice<@string>(entries);
+    }
+
+    return env;
+}
+
+// realpath(3) with a NULL buffer, freed here; null on any failure.
+internal static string? spawnCanonicalPath(string path) {
+    IntPtr resolved = spawnRealpath(path, IntPtr.Zero);
+
+    if (resolved == IntPtr.Zero) {
+        return null;
+    }
+
+    try {
+        return Marshal.PtrToStringUTF8(resolved);
+    }
+    finally {
+        spawnFree(resolved);
+    }
+}
+
 internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr, ref SysProcAttr sys) {
     // libSystem's opaque handles, driven only through their init/destroy/add functions -- never by
     // layout knowledge. On darwin each block holds a pointer the init call allocates behind; the
@@ -188,7 +243,12 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
     try {
         pathz = MarshalStringZ(argv0);
         argvVec = MarshalStringVector(argv);
-        envVec = MarshalStringVector(attr.Env);
+
+        // The directory is composed BEFORE the environment is marshalled, so a child the host moves
+        // keeps a PWD that names where it starts (respellChildPwd).
+        @string dir = composeChildDirectory(argv0, attr.Dir);
+
+        envVec = MarshalStringVector(dir == attr.Dir ? attr.Env : respellChildPwd(attr.Env, dir));
 
         fileActions = Marshal.AllocHGlobal(128);
         int rc = posix_spawn_file_actions_init(fileActions);
@@ -208,8 +268,7 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
 
         // The child's working directory rides an action so it happens child-side, in order, before
         // exec -- macOS 10.15+; probed by call, never by version string, the miss a NAMED error.
-        @string dir = composeChildDirectory(argv0, attr.Dir);
-
+        // `dir` was composed above.
         if (dir != ""u8) {
             dirz = MarshalStringZ(dir);
             try {
@@ -553,6 +612,12 @@ internal static extern int posix_spawn_file_actions_addclose(IntPtr fileActions,
 
 [DllImport(libSystemB, SetLastError = false)]
 internal static extern int posix_spawn_file_actions_addchdir_np(IntPtr fileActions, IntPtr path);
+
+[DllImport(libSystemB, SetLastError = false, EntryPoint = "realpath")]
+internal static extern IntPtr spawnRealpath([MarshalAs(UnmanagedType.LPUTF8Str)] string path, IntPtr resolved);
+
+[DllImport(libSystemB, SetLastError = false, EntryPoint = "free")]
+internal static extern void spawnFree(IntPtr pointer);
 
 [DllImport(libSystemB, SetLastError = false)]
 internal static extern int posix_spawnattr_init(IntPtr attrp);
