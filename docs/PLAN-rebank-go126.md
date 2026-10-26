@@ -793,3 +793,103 @@ windows and linux lanes run.
      2026-10-25 (log 47 s, testing 62 s, math/big 80 s, net/http/cgi 190 s, log/slog 335 s first-row). SIGPIPE's
      test packages: a grep of go1.26.10's _test.go files (os, os/exec). reread.py reproduces reread.tsv byte-identically
      (sha1 4c42627db9). Batch 43's tip af4b007d14 is COORD's local assembly and was not read here. -->
+
+### 13.4 The lane briefs (one block per lane, ready to paste)
+
+`<TIP43>` is the only new placeholder: batch 43's tip, once it is on origin. `<GOROOT>`, `<TREE>` and `<SCRATCH>`
+are as at the top of this plan. Each block is self-contained, and names the §12 block whose common steps it reuses
+(the toolchain triple, the residue census, the wrapper's -SelfTest, the linux env and act).
+
+**The four windows lanes bank through the driver**, as pass 2 did. Their plan is
+[`data/rebank-go1.26.10/reread-dispatch-windows.tsv`](phase4/data/rebank-go1.26.10/reread-dispatch-windows.tsv):
+`reread.py`'s third output, driver version 1, W = 4, one slice per worker, digest `def7dc2862b5…`. All four workers
+DRY-RAN clean here at 3c94d73154: digest reproduced over 26 rows; G 9, H 13, R 2, i9 2 rows, 0 gaps.
+
+#### i9, H, G and R's windows (the same block; only the worker and its rows differ)
+
+```
+LANE <W> -- H10 FINAL RE-READ, WINDOWS BANK, go1.26.10. Plan: docs/PLAN-rebank-go126.md §13 at <TIP43>.
+ROWS, worker <W> at FleetSize 4, one slice; the DRIVER selects them from the plan, so none is typed. For
+  reading only (reread.tsv order, testing last where held):
+  i9: time runtime                                                       (25 min projected)
+  R : net/http crypto/tls                                                (27 min; R's WINDOWS, before RWSL-R)
+  H : internal/coverage/slicewriter iter go/constant io/fs go/token path/filepath go/build database/sql
+      math/big crypto/internal/fips140/edwards25519 crypto/rsa internal/trace testing          (21 min)
+  G : runtime/debug bufio encoding/asn1 image/jpeg log crypto/internal/fips140/edwards25519/field
+      crypto/cipher log/slog os                                          (20 min)
+BEFORE THE DRY RUN:
+  - a linked worktree ON A BRANCH claude/<w>-reread-final at <TIP43> (the driver banks; a detached tree is refused);
+    build the converter in it; 25 GB free;
+  - the §12 i9 block's residue census, toolchain triple (go1.26.10) and recon-wrapper copy + -SelfTest, at <TIP43>.
+DRY RUN, then RUN (the same line without -DryRun):
+  pwsh -NoProfile -File <TREE>\src\run-h10-dispatch.ps1 -Mode rebank -DryRun
+       -Plan <TREE>\docs\phase4\data\rebank-go1.26.10\reread-dispatch-windows.tsv -Worker <W> -FleetSize 4
+       -RebankWrapper <SCRATCH>\run-h10-recon.ps1 -Tree <TREE> -GoRoot <GOROOT> -Scratch <SCRATCH>
+       -ExpectTip <TIP43> -Ledger <SCRATCH>\<W>-R.ledger.tsv -TimingOut <SCRATCH>\<W>-R.timings.tsv
+  - the dry run must print "digest ... reproduced over 26 row(s)" and your row count; -TimingOut keeps the
+    timings out of the tree (the default writes beside the plan);
+  - capture rc on the next line; grep DRIVER_EXIT=; i9: the owner's hardware order (one heavy task, -m:4, WHEA).
+AFTER (§4 step 4, artifacts only, BY EXPLICIT PATH, never git add -A):
+  - each row's own directory minus its sub-package directories, plus its proof page; rewritten production .cs
+    restored; never docs/validation/index.md or the roster header;
+  - the evidence TSV and ledger to docs/phase4/h10-evidence/go1.26.10/windows/<W>-R.tsv on the branch; ls-remote.
+POST (one, <=40 lines):
+  - WHAT: lane, <TIP43>, ref@SHA;
+  - EVIDENCE: rows run against listed; the word tally; EACH ROW's matched (+ disclosed) BESIDE ITS BANK, and every
+    row that moved named. go/constant, encoding/asn1, crypto/internal/fips140/edwards25519/field, image/jpeg, time
+    and log moving ADDS that row to C1-R (§13.2's condition). Each row's ?? test sources and anchor status by path;
+  - NEXT.
+```
+
+#### R's WSL (after R's windows post; Q2: serial)
+
+```
+LANE R -- H10 FINAL RE-READ, LINUX READING, go1.26.10. Plan: docs/PLAN-rebank-go126.md §13 at <TIP43>.
+SHARD RWSL-R (3 rows, in reread.tsv order): net/http crypto/tls runtime   (82 min projected)
+  ONLY after R's windows post.
+LINUX ENV and LINUX ACT: exactly the §12 R block's, in a clone detached at <TIP43> whose src/core is the seed,
+  checked clean (tracked and untracked under tracked paths) before row 1. The argv is derived from the wrapper's
+  functions and the sweep's tables at <TIP43>, never typed (runtime: its 120m package and 60m per-test floors).
+LINUX EVIDENCE: the per-row TSV to docs/phase4/h10-evidence/go1.26.10/linux/RWSL-R.tsv on lane ref
+  claude/r-reread-final-rwsl; raw JSON kept outside the clone.
+POST: one, as the windows block's, with each row's matched (+ disclosed) beside its linux: annotation.
+```
+
+#### P1 and P2 (linux, cloud containers)
+
+```
+LANE P1 (P2 the same, with its own shard) -- H10 FINAL RE-READ, LINUX READING, go1.26.10.
+  Plan: docs/PLAN-rebank-go126.md §13 at <TIP43>.
+SHARD P1-R (18 rows, in reread.tsv order, 38 min projected):
+  internal/coverage/slicewriter go/constant go/token image/jpeg io/fs crypto/internal/fips140/edwards25519/field
+  bufio encoding/asn1 path/filepath go/build log/slog math/big crypto/rsa crypto/internal/fips140/edwards25519
+  database/sql iter internal/trace testing
+SHARD P2-R (5 rows, in reread.tsv order, 37 min projected):
+  runtime/debug log crypto/cipher os time
+LINUX ENV and ACT: the §12 R block's LINUX ENV and LINUX ACT, in a clone detached at <TIP43>, checked clean.
+CONTAINER RULES: the §12 P1/P2 block's (resume ledger on persistent disk keyed on corpus commit, converter commit and
+  binary mtime; re-enter at the first unrecorded row; a killed row re-runs at a raised budget; purge between rows).
+EVIDENCE: docs/phase4/h10-evidence/go1.26.10/linux/<shard>.tsv on lane ref claude/<p1|p2>-reread-final, pushed the
+  moment the shard ends.
+POST: one per shard, as the windows block's, plus the container's restarts and the uid.
+```
+
+#### C1 (darwin, at <TIP43>, concurrent with the lanes above)
+
+```
+LANE C1 -- H10 FINAL RE-READ, DARWIN READING, go1.26.10. Plan: docs/PLAN-rebank-go126.md §13.2 at <TIP43>.
+FOUR DISPATCHES, os-matrix.yml stage sweep-shard, goos darwin (both mac runners), at <TIP43>, filter EXACT:
+  C1-R1: runtime
+  C1-R2: sync/atomic                      (its 150m floor rides <TIP43>, from C2's atomic floor)
+  C1-R3: net
+  C1-R4: net/http/pprof,runtime/pprof,syscall,net/http/cgi,math/big,os,os/exec,log/slog,testing
+  plus any row (1)'s windows posts ADD under §13.2's condition, as its own dispatch.
+  These rows are BANKED, so sweep-shard reaches them at <TIP43>; a count red against the windows bank is the
+  reading's signal, not a stop.
+A ROW BANKS a darwin: annotation only when osx-arm64 and osx-x64 agree verdict for verdict, at the measured MATCHED
+  (+ disclosed) count from the row's own artifacts on both RIDs.
+EVIDENCE: the i9 reads the artifacts, one TSV per dispatch under docs/phase4/h10-evidence/go1.26.10/darwin/reread/
+  (the §2h fix reads it as the LATEST wave).
+POST: one per dispatch: the run id and tip; rows agreeing on both RIDs with their counts; rows disagreeing, by
+  name and with both counts; rows the sweep could not reach.
+```
