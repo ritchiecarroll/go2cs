@@ -28837,4 +28837,39 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — P2 (seat #4, 1.26.10.2): a deferred or `go` method call evaluates its receiver at the statement — the ARRAY ELEMENT row above, FIXED, with what it does not cover
+
+Amends the row of the same day ("reads the element when it runs"). The converter now gives a deferred or spawned
+call whose receiver is not a plain identifier the `ᴛ0` snapshot wherever the lambda form had read it at run time:
+
+- an interface or pointer receiver (an array, slice or map element, a field, a call result):
+  `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ)`, `goǃ(ᴛ0 => ᴛ0.Close(), cʗ1[0])`;
+- a pointer method on an addressable value (`defer v[0].Close()` on a `[N]conn`), which Go binds by ADDRESS, so the
+  snapshot is the address, `Ꮡv.at<conn>(0)`, and the call still sees a later write to `v[0]`;
+- the `go` statement, which had no receiver snapshot at all, for these and for a value receiver that is not a plain
+  identifier.
+
+It also fixes a COMPILE error in the same family: a void pointer method on an element of a captured, heap-boxed
+array (`defer v[0].Reset()`) named the capture copy's box, which does not exist (`Ꮡvʗ2.at<conn>(0).Reset`, CS0103).
+A heap-boxed root of such a receiver now takes no capture copy.
+
+Red-first: `DeferLoopCapture` red 3, 4 and 5. Before the change C# printed `close second`, `close second ptr`,
+`closed second` and `closed second value` where Go prints `first`, and red 4 did not compile.
+The no-regression check moved one other golden, `GoStmtReceiverLambda` (`goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1),
+Ꮡe.Value.tally, delta)`), closing the go-statement divergence `value-receiver-delegates.md` had recorded.
+
+Footprint (two-seeded `-stdlib`, three targets): 9 lines in 6 production files, identical on windows, linux and
+darwin (crypto/tls quic, database/sql, net/http fcgi, h2_bundle, httputil reverseproxy, transport). The census of the
+committed corpus also finds 126 sites in converted `_test.cs` files (95 in net/http and its subpackages, 24 in
+net, 7 elsewhere), mostly `defer res.Body.Close()`; they move at the next `-tests` conversion of those packages.
+
+Not covered, each a separate defect:
+- a NIL interface receiver: Go panics at the defer or go statement; the snapshot passes nil to the thunk, which
+  panics when it runs;
+- an IDENTIFIER receiver keeps the capture copy, as before;
+- a pointer method PROMOTED to a value through an embedded field, and another package's variable (whose address binds
+  a copy, the cross-package limitation seat #1 addresses), keep their earlier emission.
+
+— P2 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
