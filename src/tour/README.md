@@ -56,8 +56,8 @@ From the repository root:
 ```
 
 The bootstrap script verifies Go and .NET, installs
-`golang.org/x/website/tour` when needed (pinned to the newest revision that builds with
-Go 1.24; see `$TourVersion` in the script), and opens
+`golang.org/x/website/tour` when needed (pinned to a revision that builds with
+Go 1.26; see `$TourVersion` in the script), and opens
 <http://127.0.0.1:4000>. `-Runtime nuget` builds converted lessons against the
 published go2cs packages, so no standard library has to be staged first; the
 alternatives are described under *.NET runtime sources* below, and the

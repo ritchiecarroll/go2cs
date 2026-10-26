@@ -12,12 +12,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# The x/website revision the offline Tour is installed from: the newest commit whose go.mod says
-# go 1.24.x (9e72c5721b9d, 2026-02-11; the next commit raises it to 1.25). Never @latest: that
-# declares a newer Go than the converter's, so the install fails under GOTOOLCHAIN=local and
+# The x/website revision the offline Tour is installed from: 52d470bcf26e (2026-10-21), whose go.mod
+# says go 1.26.0, which the converter's Go 1.26.10 satisfies. Never @latest: that can
+# declare a newer Go than the converter's, so the install fails under GOTOOLCHAIN=local and
 # silently downloads another toolchain under auto. This moves with the corpus's Go release (the
-# Go 1.26 hop bumps it); keep it equal to start.sh and to tourModule in tour.go.
-$TourVersion = "v0.0.0-20260211181957-9e72c5721b9d"
+# Go 1.27 hop bumps it); keep it equal to start.sh and to tourModule in tour.go.
+$TourVersion = "v0.0.0-20261021155534-52d470bcf26e"
 
 # The executable suffix comes from the shared definition at src\_paths.ps1. start.sh remains the
 # Linux entry point (§A5 of docs/PLAN-linux-operation.md keeps the twin deliberately -- it is 19

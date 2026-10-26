@@ -18,7 +18,7 @@ import (
 
 const (
 	// Pinned, not @latest: see $TourVersion in scripts/start.ps1. Keep the three in step.
-	tourModule    = "golang.org/x/website/tour@v0.0.0-20260211181957-9e72c5721b9d"
+	tourModule    = "golang.org/x/website/tour@v0.0.0-20261021155534-52d470bcf26e"
 	tourGoVersion = "1.23.1"
 )
 
