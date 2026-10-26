@@ -1249,9 +1249,17 @@ $longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto
 #     watchdog abandoned the test first and its text replaced the signed one: pass 1 read the row DIVERGED (976 s).
 #     Floored at 30m, the test's own failure surfaces (~27m) inside the deadline and the comparison validates against
 #     the existing entry, unchanged. Cost: ~28 min of linux wall for this row. Windows never runs the test.
+#   sync/atomic 150m, added 2026-10-25 (COORD ruling on C2's arm64 read): TestValueCompareAndSwapConcurrent is W7's
+#     Gosched token ring (BOARD 2026-08-21/22), 1000 goroutine threads passing 100,000 strictly serial handoffs, so
+#     its wall is the host scheduler's: 84-183 s on windows, 5,868 s on WSL linux (the $longTimeouts comment above).
+#     darwin banked 108 on both mac legs on 2026-10-10 (run 38040305728 at c7e01c27d0), the arm64 job's whole wall
+#     27m04s, before the 15m watchdog landed (97eb14ccfe, 2026-10-17); since then the 3-core macos-15 arm64 runner
+#     abandons it at 900 s while osx-x64 and windows pass. Read as slow, not stuck: a code read found no ordering
+#     defect in atomic.Value or golib's spin loops, and the floor is what lets a mac run time it. The row takes its
+#     package floor, as crypto/dsa and go/parser do.
 # Every key here must also be a $longTimeouts row: a test bound above its own package's default deadline is
 # meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
-$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m'; 'internal/poll' = '30m' }
+$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m'; 'internal/poll' = '30m'; 'sync/atomic' = '150m' }
 
 # A row's per-test deadline: the LONGER of the asked -TestDeadline and the row's floor, compared as Go
 # durations, the package floor's rule. '0' is no deadline, which is longer than any duration, so an asked
