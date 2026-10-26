@@ -3,9 +3,9 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#package-conversion)
 Although a Go package more traditionally parallels a C# namespace, Go includes referenceable functions directly from within a package root, for example, the `Println` function in the `fmt` package is called like: `fmt.Println("Hello, world")`. For C#, only type declarations, e.g., `class`, `struct`, `enum`, etc., are allowed in a namespace; functions exist as part of a `class` or `struct`. Described from a C# perspective, all Go functions are [`static`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members), i.e., the functions exist separately from an instance of a type. Go supports the notion of a receiver function which allows a function to be targeted to an instance of a type (paralleling the operation of a C# extension function), but this is still a static function.
 
-As such, the conversion strategy for a Go package is to convert it into a static C# partial class, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`. The receiver functions are emitted as extension methods on that partial class (a pointer receiver is `this ref T`, see [Source Generators](source-generators.md#source-generators)).
+As such, the conversion strategy for a Go package is to convert it into a static C# partial class, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = fmt_package;` (spelled relative to the enclosing `go` namespace). The receiver functions are emitted as extension methods on that partial class (a pointer receiver is `this ref T`, see [Source Generators](source-generators.md#source-generators)).
 
-So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are simply converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`. Each package also emits a `package_info.cs` carrying the `[GoPackage]`-attributed package class declaration plus the package-wide global `using` aliases (Go's built-in types, exported type aliases, etc.).
+So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are simply converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = unicode.utf8_package;`. Each package also emits a `package_info.cs` carrying the `[GoPackage]`-attributed package class declaration plus the package-wide global `using` aliases (Go's built-in types, exported type aliases, etc.).
 
 A consequence of converting a Go method to a C# **extension method** is that C# only discovers an extension method when
 its containing static class's *namespace* is in scope (via a `using <namespace>;` directive or the enclosing namespace)
@@ -1761,9 +1761,9 @@ the record order is deterministic across runs.
   `CrossPkgLib_package.Label(this.Device)` is CS1503 for want of `this.Device.Sensor`. Promotion
   through an embedded INTERFACE is the common shape this still admits (`sort`'s `reverse` embeds
   `Interface`; `debug/macho`'s segment types embed `LoadBytes`). The bound is deliberately
-  CONSERVATIVE rather than a model of the generator's exact reach — it costs exactly two stdlib
-  records (`net`'s `tcpConnWithoutReadFrom`/`tcpConnWithoutWriteTo`→`Conn`, whose `*TCPConn` hop the
-  generator's `embedHopDeepPaths` arm can in fact follow), neither of which has a consumer, and
+  CONSERVATIVE rather than a model of the generator's exact reach — it withholds a few stdlib
+  records (such as `net`'s `tcpConnWithoutReadFrom`/`tcpConnWithoutWriteTo`→`Conn`, whose `*TCPConn` hop the
+  generator's `embedHopDeepPaths` arm can in fact follow), none of which has a consumer, and
   withholding a speculative record is always safe: the consumer keeps its local adapter.
 
 The gates bind only the SPECULATIVE recorder. A pair the source actually casts is DEMANDED and still

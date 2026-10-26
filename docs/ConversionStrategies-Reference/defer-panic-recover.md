@@ -133,8 +133,9 @@ its built-in calls qualified as `builtin.recover()`, exactly like every other sh
 
 Go evaluates a deferred call's ARGUMENTS at the `defer` statement and runs the call later, so every
 argument is captured at registration. `defer` is an arity ladder of generic rungs (`Action` and a
-result-discarding `Func` twin per arity, 1 through 16, plus a nullary rung) whose last parameter is
-`ref GoFrame` — the frame to register into:
+result-discarding `Func` twin per arity, 1 through 16, plus a nullary rung) whose last required
+parameter is `ref GoFrame` — the frame to register into (an optional `recovers` flag follows it; see
+[below](#only-the-function-the-defer-calls-directly-recovers)):
 
 ```csharp
 defer(Ꮡfd.writeUnlock, ref ᒐ);                      //  Go: defer fd.writeUnlock()

@@ -2548,8 +2548,10 @@ Reading the C#, piece by piece:
 Over an integer it also has the bitwise and shift operators. Each operator that computes a value returns the
 named type, as in Go, so `d / ΔSecond` is still a `Duration`. Shifts follow Go's rules: a shift by the full
 bit width or more gives 0, or -1 when a negative value is shifted right, where C# would mask the count
-([Integer Types and Arithmetic](#integer-types-and-arithmetic)). A C# shift count must be an `int`, so the
-count gets an `(int)` cast:
+([Integer Types and Arithmetic](#integer-types-and-arithmetic)), and a negative signed count panics with Go's
+"negative shift amount". The wrapper's shift operators take an `int`, `uint64` or `int64` count. A count
+provably below the width is cast to `int`; any other unsigned count passes as it is, and a signed one is
+cast to `int64`, as for an unnamed integer:
 
 <!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.go:25-62 -->
 ```go
@@ -2565,7 +2567,7 @@ func maskFor(s uint) word {
 partial struct word /*num:uint64*/;
 …
 internal static word maskFor(nuint s) {
-    var m = (((word)1) << (int)(s)) - 1;
+    var m = (((word)1) << s) - 1;
     return m;
 }
 ```
@@ -4580,7 +4582,7 @@ values of `v` ([Loops, Range and Labels](#loops-range-and-labels)).
 **A struct with array fields copies them too.** In Go, copying a struct copies its array fields. Such a
 struct gets a `ΔClone()` method, and a struct copy calls it: `c := d` becomes `var c = d.ΔClone();`.
 A [source generator](#source-generators) writes it. The `Δ` prefix avoids a clash with a `Clone` method
-the Go type may declare ([Struct Types](#struct-types)).
+the Go type may declare ([Struct Types](#struct-types)). One case differs from Go: an array reached only through an embedded struct is not cloned, so a copy of the outer struct shares it ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
 <!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.go:60 and src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:60 -->
 
 **Converting a slice to an array copies; converting it to an array pointer shares.** Go has both forms,
@@ -6433,7 +6435,7 @@ The entry point `func main` becomes `internal static void Main()`.
 A method is `public` only when its type is emitted `public` too. That is an exported type, or an unexported
 type that an exported signature exposes. C# forbids a public member from exposing an internal type, so such
 a type is emitted `public` itself.
-<!-- source: src/tests/Behavioral/PublicizedFieldType/main.go:52-55 (type tally int; func (cr CaseRange) Tally() tally) -> main.cs.target:29 (public partial struct tally /*num:nint*/;) and :33 (public static tally Tally(this CaseRange cr)); receiver clamp with the publicized exception: src/go2cs/visitFuncDecl.go:1255-1263 -->
+<!-- source: src/tests/Behavioral/PublicizedFieldType/main.go:52-55 (type tally int; func (cr CaseRange) Tally() tally) -> main.cs.target:29 (public partial struct tally /*num:nint*/;) and :33 (public static tally Tally(this CaseRange cr)); receiver clamp with the publicized exception: src/go2cs/visitFuncDecl.go:1266-1275 and :1937-1943 -->
 
 **A single named result stays on the signature as a comment.** The body declares it as a local, set to its
 zero value, and a bare `return` returns it. `default!` is C#'s zero value
@@ -8341,7 +8343,7 @@ second line. A traceback with Go's function names, files and lines follows;
 and :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. A panic raised inside a Go
 function the JIT inlined keeps that function's frame, restored from the IL:
 src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:18 `from the IL alone: the faulting frame's statement`.
-No Reference page states that rule yet. -->
+The Reference states it: manual-conversions.md, "A panic raised inside an INLINED Go function keeps that function's frame" (runtime.Stack section). -->
 
 **Full detail:** [Reference → Defer / Panic / Recover](ConversionStrategies-Reference/defer-panic-recover.md#defer--panic--recover) — why the body is not a lambda, every named-result form, which deferred calls move into the `finally`, variadic and value-returning deferred calls, each runtime panic value, and the crash report.
 
@@ -11442,12 +11444,12 @@ or parameter shape, or a literal in an `any` slot. These are the generators conv
 | Generator | Driven by | Produces |
 |---|---|---|
 | `TypeGenerator` | a `partial` struct, class or interface declared in the package class | the body of each type: struct constructors, field references, equality and `ToString`; wrappers for named numeric, slice, array, map and channel types; for an interface, the code that converts a value to it at run time, as a type assertion does ([Interfaces](#interfaces)); members promoted by [struct embedding](#struct-type-embedding) |
-| `RecvGenerator` | a method whose receiver is `this ref T` | a `ж<T>` overload of each pointer-receiver method, so it can be called on a box |
+| `RecvGenerator` | a method whose receiver is `this ref T` | a `ж<T>` overload of each pointer-receiver method, so it can be called on a box; for a method that must keep its frame, the overload carries the same two attributes as the method ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)) |
 | `ImplementGenerator` | `[assembly: GoImplement<T, I>]` | the code that lets `T` or `*T` be used as interface `I` ([Interfaces](#interfaces)) |
 | `ImplicitConvGenerator` | `[assembly: GoImplicitConv<S, T>]` | a conversion operator between two types C# cannot convert directly, such as two named numeric types or two structs with the same underlying type; the C# still writes the conversion where Go does, and the operator lets it compile |
 | `StrGenerator` | a method with an `sstring` parameter | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
 | `PartialStubGenerator` | a `partial` method with no body | a stub that throws, when no hand-written body exists ([Functions Without a Go Body](#functions-without-a-go-body)) |
-| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)); for a forwarder marked `/*linkname*/`, `[StackTraceHidden]` instead ([Functions Without a Go Body](#functions-without-a-go-body)) |
+| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]` and `DynamicSecurityMethod`, so the JIT never inlines the method, the CLR never tail-calls into it, and `runtime.Caller` still sees its frame and its caller's ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)); for a forwarder marked `/*linkname*/`, `[StackTraceHidden]` instead ([Functions Without a Go Body](#functions-without-a-go-body)) |
 | `LiteralInterceptorGenerator` | a plain C# string literal passed to an `any` parameter | an interceptor for that one call that passes a cached, boxed `@string` in the literal's place, so the callee sees a Go string rather than a .NET `string` ([Strings](#strings-string-and-sstring)) |
 | `LazyHolderGenerator` | a `[GoLazy]` holder class around one package-level var | the var's `ref` accessor in the package class, under its Go name, so a var built on its first read is used like any other ([A var whose value is pure data is built on its first read](#a-pure-data-var-is-built-on-its-first-read)) |
 <!-- The table names nine of the sixteen classes under src/gen/go2cs-gen declared `[Generator]` at
@@ -11643,11 +11645,22 @@ The generated half, in the project's `Generated` folder:
 
 <!-- source: the NoInliningPartialGenerator output for src/tests/Behavioral/NoInlinePartial (main.noinline.g.cs), abridged -->
 ```csharp
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Security.DynamicSecurityMethod]
 internal static partial @string here();
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Security.DynamicSecurityMethod]
 internal static partial @string plain();
 ```
+
+**The generated half also keeps the caller's frame.** Go never makes a tail call. The .NET JIT can: when a
+method ends by calling another, it may jump to that method instead, and the calling frame is then missing
+from a stack walk, as an inlined one is. The second attribute, `DynamicSecurityMethod`, is declared by golib.
+The C# compiler flags a method that carries it, and the CLR never makes an implicit tail call to a method
+with that flag. A call through a function value cannot be protected this way, because the method it calls
+is the delegate's `Invoke`. So when a function's last statement calls a function value that holds a
+function of the same package that reads its caller's frame, the converter marks the calling function too:
+on linux/amd64, a method marked `NoInlining` was measured to make no implicit tail call. For a marked
+pointer-receiver method, the `ж<T>` overload that `RecvGenerator` writes carries the same two attributes.
+<!-- go2cs-gen: src/gen/go2cs-gen/NoInliningPartialGenerator.cs:37#4a0c19 (AttributeFor), :68#3747bf (CallerFrameAttribute = "global::System.Security.DynamicSecurityMethod"), :242#113df9 (the declaring part takes AttributeFor(callerFrame); callerFrame is true when a public System.Security.DynamicSecurityMethodAttribute is in view, which golib declares: src/core/golib/DynamicSecurityMethodAttribute.cs, whose remarks name RequireSecObject and the VM's canTailCall). The ж<T> forwarder: src/gen/go2cs-gen/RecvGenerator.cs:51#984c99, :124#03de0e; Templates/ReceiverMethod/ReceiverMethodTemplate.cs:45-46#f0facf. The caller-side mark: src/go2cs/callerInliningAnalysis.go:340#4e8118 ("a [MethodImpl(NoInlining)] method makes no implicit tail call (measured on linux/amd64 ...)"), :454#df5783 (markTailCalledObservingValues). Guards: src/go2cs/tailCalledFuncValue_test.go:152#8d30b9 (TestTailCalledFuncValueKeepsTheCallersFrame); GolibTests TailCallFrameGuardTests. -->
 
 A function literal cannot be `partial`, so a marked literal keeps the attribute itself:
 `var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A marked `init` keeps
