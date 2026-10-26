@@ -61,7 +61,7 @@ public static void TestXadduintptr(ж<testing.T> Ꮡt) {
         atomic.Xadduintptr(Ꮡtotal, (uintptr)(-(int64)inc));
     });
     if (total != 0) {
-        Ꮡt.Fatalf("xadduintpr total error, want %d, got %d"u8, (nint)(0), total);
+        Ꮡt.Fatalf("xadduintpr total error, want %d, got %d"u8, (nint)0, total);
     }
 }
 
@@ -128,6 +128,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     // Unaligned 64-bit atomics on 32-bit systems are
     // a continual source of pain. Test that on 32-bit systems they crash
     // instead of failing silently.
+
     if (/* unsafe.Sizeof(int(0)) */ (uintptr)8 != 4) {
         Ꮡt.Skip(testOnlyRunsOn32Bitˢ);
     }
@@ -169,7 +170,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0xff;
     for (var i = (uint8)0; i < 8; i++) {
-        atomic.And8(Ꮡx, (uint8)(((uint8)(~(((uint8)1).Lsh((uint64)(i)))))));
+        atomic.And8(Ꮡx, (uint8)((uint8)(~(((uint8)1).Lsh((uint64)(i))))));
         {
             var r = (uint8)(((uint8)0xff).Lsh((uint64)((uint8)(i + 1)))); if (x != r) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got %#x"u8, (uint8)(((uint8)1).Lsh((uint64)(i))), r, x);
@@ -178,8 +179,8 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint8>((1 << (int)(12)));
-    foreach (var (i, _) in a) {
+    var a = new slice<uint8>((1 << 12));
+    foreach (var i in range(a)) {
         a[i] = 0xff;
     }
 
@@ -190,7 +191,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And8(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -215,15 +216,15 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
     for (var i = (uint32)0; i < 32; i++) {
         atomic.And(Ꮡx, ~(((uint32)1).Lsh((uint64)(i))));
         {
-            var r = ((uint32)0xffffffffU).Lsh((uint64)((i + 1))); if (x != r) {
+            var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got %#x"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x);
             }
         }
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint32>((1 << (int)(12)));
-    foreach (var (i, _) in a) {
+    var a = new slice<uint32>((1 << 12));
+    foreach (var i in range(a)) {
         a[i] = 0xffffffffU;
     }
 
@@ -234,7 +235,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -266,7 +267,7 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint8>((1 << (int)(12)));
+    var a = new slice<uint8>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
@@ -275,7 +276,7 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or8(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -300,14 +301,14 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
     for (var i = (uint32)0; i < 32; i++) {
         atomic.Or(Ꮡx, ((uint32)1).Lsh((uint64)(i)));
         {
-            var r = (((uint32)1).Lsh((uint64)((i + 1)))) - 1; if (x != r) {
+            var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r) {
                 Ꮡt.Fatalf("setting bit %#x: want %#x, got %#x"u8, ((uint32)1).Lsh((uint64)(i)), r, x);
             }
         }
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint32>((1 << (int)(12)));
+    var a = new slice<uint32>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
@@ -316,7 +317,7 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -339,9 +340,9 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     var a = new slice<uint8>(16);
 
     // Iterations to try.
-    nint N = (1 << (int)(16));
+    nint N = 1 << 16;
     if (testing.Short()) {
-        N = (1 << (int)(10));
+        N = 1 << 10;
     }
 
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
@@ -352,12 +353,12 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             for (nint n = 0; n < N; n++) {
-                foreach (var (iΔ1, _) in aʗ1) {
+                foreach (var iΔ1 in range(aʗ1)) {
                     atomic.Or8(Ꮡ(aʗ1, iΔ1), m);
                     if ((uint8)(atomic.Load8(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
                     }
-                    atomic.And8(Ꮡ(aʗ1, iΔ1), (uint8)(((uint8)(~m))));
+                    atomic.And8(Ꮡ(aʗ1, iΔ1), (uint8)((uint8)(~m)));
                     if ((uint8)(atomic.Load8(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
                         Ꮡt.Errorf("a[%v] bit %#x not clear"u8, iΔ1, m);
                     }
@@ -383,9 +384,9 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
     var a = new slice<uint32>(16);
 
     // Iterations to try.
-    nint N = (1 << (int)(16));
+    nint N = 1 << 16;
     if (testing.Short()) {
-        N = (1 << (int)(10));
+        N = 1 << 10;
     }
 
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
@@ -396,13 +397,13 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             for (nint n = 0; n < N; n++) {
-                foreach (var (iΔ1, _) in aʗ1) {
+                foreach (var iΔ1 in range(aʗ1)) {
                     atomic.Or(Ꮡ(aʗ1, iΔ1), m);
-                    if ((uint32)(atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != m) {
+                    if ((atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
                     }
                     atomic.And(Ꮡ(aʗ1, iΔ1), ~m);
-                    if ((uint32)(atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
+                    if ((atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
                         Ꮡt.Errorf("a[%v] bit %#x not clear"u8, iΔ1, m);
                     }
                 }
@@ -459,7 +460,7 @@ private static readonly object badEscapeAnalysisOfˢ = (@string)"Bad escape anal
 
 public static void TestStorepNoWB(ж<testing.T> Ꮡt) {
     ref var p = ref heap(new array<ж<nint>>(2), out var Ꮡp);
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         atomic.StorepNoWB(@unsafe.Pointer.FromBox(Ꮡp.at<ж<nint>>(i)), @unsafe.Pointer.FromPinnedBox(@new<nint>()));
     }
     if (p[0] == p[1]) {

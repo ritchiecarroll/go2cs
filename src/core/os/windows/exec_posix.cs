@@ -4,7 +4,7 @@
 //go:build unix || (js && wasm) || wasip1 || windows
 namespace go;
 
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using execenv = @internal.syscall.execenv_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
@@ -84,6 +84,32 @@ internal static error kill(this ж<Process> Ꮡp) {
     return Ꮡp.Signal(ΔKill);
 }
 
+internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
+    GoFrame ᒐ = default;
+    bool ᒐd1 = false;
+    try {
+        ref var p = ref Ꮡp.DerefOrNull();
+
+        if (p.handle == nil) {
+            return ErrNoHandle;
+        }
+        var (handle, status) = Ꮡp.handleTransientAcquire();
+        var exprᴛ1 = status;
+        if (exprᴛ1 == statusDone) {
+            return ErrProcessDone;
+        }
+        if (exprᴛ1 == statusReleased) {
+            return errProcessReleased;
+        }
+        ᒐd1 = true;
+        f(handle);
+
+        return default!;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
+}
+
 // ProcessState stores information about a process, as reported by Wait.
 partial struct ProcessState {
     internal nint pid;               // The process's id.
@@ -127,10 +153,10 @@ public static @string String(this ж<ProcessState> Ꮡp) {
     switch (ᐧ) {
     case {} when status.Exited(): {
         nint code = status.ExitStatus();
-        if (runtime.GOOS == "windows"u8 && (nuint)code >= ((nuint)1 << (int)(16))){ // windows uses large hex numbers
-            res = "exit status "u8 + itoa.Uitox((nuint)code);
+        if (runtime.GOOS == "windows"u8 && (nuint)code >= (nuint)1 << 16){ // windows uses large hex numbers
+            res = "exit status 0x"u8 + strconv.FormatUint((uint64)code, 16);
         } else { // unix systems use small decimal integers
-            res = "exit status "u8 + itoa.Itoa(code); // unix
+            res = "exit status "u8 + strconv.Itoa(code); // unix
         }
         break;
     }
@@ -141,7 +167,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
     case {} when status.Stopped(): {
         res = "stop signal: "u8 + status.StopSignal().String();
         if (status.StopSignal() == syscall.SIGTRAP && status.TrapCause() != 0) {
-            res += " (trap "u8 + itoa.Itoa(status.TrapCause()) + ")"u8;
+            res += " (trap "u8 + strconv.Itoa(status.TrapCause()) + ")"u8;
         }
         break;
     }

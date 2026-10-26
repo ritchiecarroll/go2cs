@@ -5,9 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
-using io = go.io_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -22,7 +19,6 @@ using static go.encoding.base32_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<badReader, ж<badReader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -33,7 +29,7 @@ using static go.encoding.base32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABcqABQqyqKCgoKU5oKCgoKCuIKCgoKCggAJCIKCgoKCgoKClIKClIKC6IKCgoKUgoKUgpTKgoKCgoKUgoKUgpQADwqCgoKCgoKClJSCgpSCgpSCgoKCAAoKgoKCgoKClIKCgpQACiTygoKUgpSClIKCgpSCAA0KooIAMnCygoKCgpSUgoKCgoKCgriC/KKCgoKSgoKCgIIACQ6igoKSgoKCgoKCgoKC6IKCgoKCgoKCgpSClAANCIIAGDiCgoKCgpSUlMQACAqCgoKCgpSCgoKClIKClIKCpoKCgoKmuIKCgoKClICCAAkKlAAKFqa41oIADBaUgoKCpoKCgoKmgriigoKCgriigoKCuKKCgoKCgraigoKCuIKCgoKUgpSCyoKCgoKUgpSCyoLcgoSClIKCpoIACAyClIKCpoKCAAkIggA0coKCpqKClKaClIIACgyCABY8gpKCooKUpoKUgpKCAAoKgoIAFTaUgqSClIKAggALCoKCABAslIKkgpSCgILagsqChIKCgpSCgqaUgtyCyoKCgoKmgoKmgtyCyoKCgoKCppSUgoKCgoKUgriC", "663-668:1;714-719:1", "", "655=WithPadding/1/2/2,WithPadding/2/2/3;925=WithPadding/1/1/2;952=WithPadding/1/1/2;977=WithPadding/1/1/2")]
+[assembly: go.GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABcqABQqyqKCgoKU5oKCgoKCuIKCgoKCggAJCIKCgoKCgoKClIKClIKC6IKCgoKUgoKUgpTKgoKCgoKUgoKUgpQADwqCgoKCgoKClJSCgpSCgpSCgoKCAAoKgoKCgoKClIKCgpQACiTygoKUgpSClIKCgpSCAA0KooIAMnCygoKCgpSUgoKCgoKCgriC/KKCgoKSgoKCgIIACQ6igoKSgoKCgoKCgoKC6IKCgoKCgoKCgpSClAANCIIAGDiCgoKCgpSUlMQACAqCgoKCgpSCgoKClIKClIKCpoKCgoKmuIKCgoKClICCAAkKlAAKFqa41oIADBaUgoKCpoKCgoKmgriigoKCgriigoKCuKKCgoKCgraigoKCuIKCgoKUgpSCyoKCgoKUgpSCyoLcgoSClIKCpoIACAyClIKCpoKCAAkIggA0coKCpqKClKaClIIACgyCABo8soKigpSmgpSCkoIACgqiggAVNpSCpIKUgoCCAAsKooIAECyUgqSClIKAgtqCyoKEgoKClIKCppSC3ILKgoKCgqaCgqaC3ILKgoKCgoKmlJSCgoKCgpSCuII=", "663-668:1;713-718:1", "", "655=WithPadding/1/2/2,WithPadding/2/2/3;934=WithPadding/1/1/2;961=WithPadding/1/1/2;986=WithPadding/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

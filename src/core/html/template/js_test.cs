@@ -72,6 +72,12 @@ public static void TestNextJsCtx(ж<testing.T> Ꮡt) {
         new(jsCtxRegexp, "return\t"u8),
         new(jsCtxRegexp, "return\n"u8),
         new(jsCtxRegexp, "return\u2028"u8),
+        new(jsCtxRegexp, "yield"u8),
+        // A keyword after property access is a property name.
+        new(jsCtxDivOp, "x.yield"u8),
+        new(jsCtxDivOp, "x?.yield"u8),
+        new(jsCtxDivOp, "x.\nyield"u8),
+        new(jsCtxDivOp, "x.in"u8),
         // Identifiers can be divided and cannot validly be preceded by
         // a regular expressions. Semicolon insertion cannot happen
         // between an identifier and a regular expression on a new line
@@ -149,10 +155,10 @@ public static void TestJSValEscaper(ж<testing.T> Ꮡt) {
         new((uint16)42, " 42 "u8, false),
         new((int64)(-42), " -42 "u8, false),
         new((uint64)42, " 42 "u8, false),
-        new(((uint64)1 << (int)(53)), " 9007199254740992 "u8, false),
+        new((uint64)1 << 53, " 9007199254740992 "u8, false),
         // ulp(1 << 53) > 1 so this loses precision in JS
         // but it is still a representable integer literal.
-        new(((uint64)1 << (int)(53)) + 1, " 9007199254740993 "u8, false),
+        new(((uint64)1 << 53) + 1, " 9007199254740993 "u8, false),
         new((float32)1.0F, " 1 "u8, false),
         new((float32)(-1.0F), " -1 "u8, false),
         new((float32)0.5F, " 0.5 "u8, false),
@@ -174,7 +180,7 @@ public static void TestJSValEscaper(ж<testing.T> Ꮡt) {
         new((@string)"\t\x0b"u8, @"""\t\u000b"""u8, false),
         new(new TestJSValEscaper_type(1, 2), @"{""X"":1,""Y"":2}"u8, false),
         new(new any[]{}.slice(), "[]"u8, false),
-        new(new any[]{(nint)(42), (@string)"foo"u8, default!}.slice(), @"[42,""foo"",null]"u8, false),
+        new(new any[]{(nint)42, (@string)"foo"u8, default!}.slice(), @"[42,""foo"",null]"u8, false),
         new(new @string[]{"<!--"u8, "</script>"u8, "-->"u8}.slice(), @"[""\u003c!--"",""\u003c/script\u003e"",""--\u003e""]"u8, false),
         new((@string)"<!--"u8, @"""\u003c!--"""u8, false),
         new((@string)"-->"u8, @"""--\u003e"""u8, false),
@@ -350,7 +356,7 @@ public static void TestEscapersOnLower7AndSelectHighCodepoints(ж<testing.T> Ꮡ
         // fast-path checking does not break escaping.
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         foreach (var (_, c) in input) {
-            Ꮡbuf.WriteString(test.escaper(((@string)c)));
+            Ꮡbuf.WriteString(test.escaper((@string)c));
         }
 
         {

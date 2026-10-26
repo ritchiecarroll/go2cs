@@ -3,15 +3,18 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using fmt = fmt_package;
+using Δregexp = regexp_package;
+using Δruntime = runtime_package;
 using static runtime_package;
 using slices = slices_package;
+using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
-using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
@@ -230,6 +233,108 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ10(tΔ15, b, default!, default!); // release data returned by previous read
         }
     });
+}
+
+public static partial void TestProfBufDoubleWakeup(ж<testing.T> Ꮡt) {
+    var b = runtime_internal_test_package.NewProfBuf(2, 16, 2);
+    var bʗ1 = b;
+    goǃ(() => {
+        foreach (var _ᴛ1 in range(1000)) {
+            bʗ1.Write(nil, 1, new uint64[]{5, 6}.slice(), new uintptr[]{7, 8}.slice());
+        }
+        bʗ1.Close();
+    });
+    while (ᐧ) {
+        var (_, _, eof) = b.Read(runtime_internal_test_package.ProfBufBlocking);
+        if (eof) {
+            return;
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string waitingˢ = "waiting"u8;
+internal static readonly @string runnableˢ = "runnable"u8;
+internal static readonly @string syscallˢ = "syscall"u8;
+internal static readonly @string testProfBufWakeupFunc1ˢ = "TestProfBufWakeup.func1"u8;
+
+public static void TestProfBufWakeup(ж<testing.T> Ꮡt) {
+    var b = runtime_internal_test_package.NewProfBuf(2, 16, 2);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    var bʗ1 = b;
+    Ꮡwg.Go(() => {
+        nint read = 0;
+        while (ᐧ) {
+            var (rdata, _, eof) = bʗ1.Read(runtime_internal_test_package.ProfBufBlocking);
+            if (read == 0 && len(rdata) < 8) {
+                Ꮡt.Errorf("first wake up at less than half full, got %x"u8, rdata);
+            }
+            read += len(rdata);
+            if (eof) {
+                return;
+            }
+        }
+    });
+
+    // Under the hood profBuf uses notetsleepg when the reader blocks.
+    // Different platforms have different implementations, leading to
+    // different statuses we need to look for to determine whether the
+    // reader is blocked.
+    @string waitStatus = default!;
+    var exprᴛ1 = Δruntime.GOOS;
+    if (exprᴛ1 == "js"u8) {
+        waitStatus = waitingˢ;
+    }
+    else if (exprᴛ1 == "wasip1"u8) {
+        waitStatus = runnableˢ;
+    }
+    else { /* default: */
+        waitStatus = syscallˢ;
+    }
+
+    // Ensure that the reader is blocked
+    awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
+    // NB: this writes 6 words not 4. Fine for the test.
+    // The reader shouldn't wake up for this
+    b.Write(nil, 1, new uint64[]{1, 2}.slice(), new uintptr[]{3, 4}.slice());
+
+    // The reader should still be blocked. The awaitBlockedGoroutine here
+    // checks that and also gives a buggy implementation a chance to
+    // actually wake up (it calls Gosched) before the next write. There is a
+    // small chance that a buggy implementation would have woken up but
+    // doesn't get scheduled by the time we do the next write. In that case
+    // the reader will see a more-than-half-full buffer and the test will
+    // pass. But if the implementation is broken, this test should fail
+    // regularly, even if not 100% of the time.
+    awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
+    b.Write(nil, 1, new uint64[]{5, 6}.slice(), new uintptr[]{7, 8}.slice());
+    b.Close();
+
+    // Wait here so we can be sure the reader got the data
+    Ꮡwg.Wait();
+}
+
+// see also runtime/pprof tests
+internal static partial void awaitBlockedGoroutine(@string state, @string fName) {
+    // NB: this matches [state] as well as [state, n minutes]
+    @string re = fmt.Sprintf(@"(?m)^goroutine \d+ \[%s.*\]:\n(?:.+\n\t.+\n)*runtime_test\.%s"u8, Δregexp.QuoteMeta(state), fName);
+    var r = Δregexp.MustCompile(re);
+
+    var buf = new slice<byte>((64 << 10));
+    while (ᐧ) {
+        Gosched();
+        nint n = Stack(buf, true);
+        if (n == len(buf)) {
+            // Buffer wasn't large enough for a full goroutine dump.
+            // Resize it and try again.
+            buf = new slice<byte>(2 * len(buf));
+            continue;
+        }
+        const nint count = 1;
+        if (len(r.FindAll(buf.slice(0, n), -1)) >= count) {
+            return;
+        }
+    }
 }
 
 } // end runtime_test_package

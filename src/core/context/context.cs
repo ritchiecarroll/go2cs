@@ -105,7 +105,7 @@ partial interface Context {
     //  	}
     //  }
     //
-    // See https://blog.golang.org/pipelines for more examples of how to use
+    // See https://go.dev/blog/pipelines for more examples of how to use
     // a Done channel for cancellation.
     /*<-*/channel<EmptyStruct> Done();
     // If Done is not yet closed, Err returns nil.
@@ -213,7 +213,7 @@ internal static any Value(this emptyCtx _, any key) {
 }
 
 partial struct backgroundCtx {
-    internal partial ref emptyCtx emptyCtx { get; }
+    /*embed*/ internal emptyCtx emptyCtx;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -224,7 +224,7 @@ internal static @string String(this backgroundCtx _) {
 }
 
 partial struct todoCtx {
-    internal partial ref emptyCtx emptyCtx { get; }
+    /*embed*/ internal emptyCtx emptyCtx;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -318,25 +318,25 @@ internal static ж<cancelCtx> withCancel(Context parent) {
 // Otherwise Cause(c) returns the same value as c.Err().
 // Cause returns nil if c has not been canceled yet.
 public static error Cause(Context c) {
-    GoFrame ᒐ = default;
-    try {
-        {
-            var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
-                cc.of(cancelCtx.Ꮡmu).Lock();
-                var ccʗ1 = cc;
-                defer(ccʗ1.of(cancelCtx.Ꮡmu).Unlock, ref ᒐ);
-                return (~cc).cause;
-            }
-        }
-        // There is no cancelCtxKey value, so we know that c is
-        // not a descendant of some Context created by WithCancelCause.
-        // Therefore, there is no specific cause to return.
-        // If this is not one of the standard Context types,
-        // it might still have an error even though it won't have a cause.
-        return c.Err();
+    var err = c.Err();
+    if (err == default!) {
+        return default!;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { ᒐ.Run(); }
+    {
+        var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
+            cc.of(cancelCtx.Ꮡmu).Lock();
+            var cause = cc.Value.cause;
+            cc.of(cancelCtx.Ꮡmu).Unlock();
+            if (cause != default!) {
+                return cause;
+            }
+            // The parent cancelCtx doesn't have a cause,
+            // so c must have been canceled in some custom context implementation.
+        }
+    }
+    // We don't have a cause to return from a parent cancelCtx,
+    // so return the context's error.
+    return err;
 }
 
 // AfterFunc arranges to call f in its own goroutine after ctx is canceled.
@@ -379,7 +379,7 @@ partial interface afterFuncer {
 }
 
 partial struct afterFuncCtx {
-    internal partial ref cancelCtx cancelCtx { get; }
+    /*embed*/ internal cancelCtx cancelCtx;
     internal Δsync.Once once; // either starts running f or stops f from running
     internal Action f;
 }
@@ -474,7 +474,7 @@ partial struct cancelCtx {
     internal Δsync.Mutex mu;            // protects following fields
     internal atomic.Value done;          // of chan struct{}, created lazily, closed by first cancel call
     internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
-    internal error err;                 // set to non-nil by the first cancel call
+    internal atomic.Value err;          // set to non-nil by the first cancel call
     internal error cause;                 // set to non-nil by the first cancel call
 }
 
@@ -515,12 +515,15 @@ internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
 }
 
 internal static error Err(this ж<cancelCtx> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
-    c.mu.Lock();
-    var err = c.err;
-    c.mu.Unlock();
-    return err;
+    // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
+    {
+        var err = Ꮡc.of(cancelCtx.Ꮡerr).Load(); if (err != default!) {
+            // Ensure the done channel has been closed before returning a non-nil error.
+            ᐸꟷ(Ꮡc.Done());
+            return err._<error>();
+        }
+    }
+    return default!;
 }
 
 // propagateCancel arranges for child to be canceled when parent is.
@@ -550,14 +553,16 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
         var (p, ok) = parentCancelCtx(parent); if (ok) {
             // parent is a *cancelCtx, or derives from one.
             p.of(cancelCtx.Ꮡmu).Lock();
-            if ((~p).err != default!){
-                // parent has already been canceled
-                child.cancel(false, (~p).err, (~p).cause);
-            } else {
-                if ((~p).children == default!) {
-                    p.Value.children = new map<canceler, EmptyStruct>();
+            {
+                var err = p.of(cancelCtx.Ꮡerr).Load(); if (err != default!){
+                    // parent has already been canceled
+                    child.cancel(false, err._<error>(), (~p).cause);
+                } else {
+                    if ((~p).children == default!) {
+                        p.Value.children = new map<canceler, EmptyStruct>();
+                    }
+                    p.Value.children[child] = new EmptyStruct();
                 }
-                p.Value.children[child] = new EmptyStruct();
             }
             p.of(cancelCtx.Ꮡmu).Unlock();
             return;
@@ -625,11 +630,11 @@ internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, erro
         cause = err;
     }
     c.mu.Lock();
-    if (c.err != default!) {
+    if (Ꮡc.of(cancelCtx.Ꮡerr).Load() != default!) {
         c.mu.Unlock();
         return; // already canceled
     }
-    c.err = err;
+    Ꮡc.of(cancelCtx.Ꮡerr).Store(err);
     c.cause = cause;
     var (d, _) = Ꮡc.of(cancelCtx.Ꮡdone).Load()._<channel<EmptyStruct>>(ᐧ);
     if (d == default!){
@@ -730,7 +735,7 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
         c.of(timerCtx.Ꮡmu).Lock();
         var cʗ2 = c;
         defer(cʗ2.of(timerCtx.Ꮡmu).Unlock, ref ᒐ);
-        if ((~c).err == default!) {
+        if (c.of(timerCtx.Ꮡerr).Load() == default!) {
             var cʗ3 = c;
             c.Value.timer = time.AfterFunc(dur, () => {
                 cʗ3.cancel(true, DeadlineExceeded, cause);
@@ -749,7 +754,7 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
 // implement Done and Err. It implements cancel by stopping its timer then
 // delegating to cancelCtx.cancel.
 partial struct timerCtx {
-    internal partial ref cancelCtx cancelCtx { get; }
+    /*embed*/ internal cancelCtx cancelCtx;
     internal ж<time.Timer> timer; // Under cancelCtx.mu.
     internal time.Time deadline;
 }

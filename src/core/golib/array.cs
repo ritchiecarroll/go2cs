@@ -26,14 +26,29 @@ public interface IArray : IEnumerable, ICloneable
 
     object? this[nint index] { get; set; }
 
+    // Whether an element holds a managed reference, which is what decides whether the data can be pinned
+    // (GCHandle refuses such an array). A fact of the element TYPE, answered by IArray<T> below; an
+    // implementer of the bare interface keeps the data-pin treatment it always had.
+    bool ElementHoldsReferences => false;
+
     public bool IndexIsValid(nint index)
     {
         return index > -1 && index < Length;
     }
 }
 
-public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
+public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
 {
+    /// <summary>
+    /// Go's <c>range</c> over the sequence: its <c>(index, value)</c> pairs, which <c>foreach</c> binds by pattern.
+    /// </summary>
+    /// <remarks>
+    /// The pairs are this interface's own member, not a second <c>IEnumerable&lt;(nint, T)&gt;</c>: with two generic
+    /// sequence interfaces, LINQ could infer neither element type and every LINQ call on a slice failed. The only
+    /// generic sequence interface is <c>IEnumerable&lt;T&gt;</c>, so LINQ sees the values.
+    /// </remarks>
+    new IEnumerator<(nint, T)> GetEnumerator();
+
     new T[] Source { get; }
 
     new ref T this[nint index] { get; }
@@ -45,6 +60,8 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
     // Reflect's object-form sequence operations (trim stage 3a; see IGoReflectSequence): the bodies the reflect bridge
     // closed over T with MakeGenericMethod, compiled here for every array, slice and named wrapper the program has.
     Type IGoReflectSequence.ReflectElementType => typeof(T);
+
+    bool IArray.ElementHoldsReferences => RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     object IGoReflectSequence.ReflectWindow(nint low, nint high) => this switch
     {
@@ -65,6 +82,11 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
     object IGoReflectSequence.ReflectElementAlias(int index) => new ElemRefBox<T>((IArray)this, index);
 
     object? IGoReflectSequence.ReflectFirstElement() => this[0];
+
+    // Element 0's length, read in place: every array<E> has the same layout whatever E is (the backing
+    // reference, then its low and length), so the element is read as an array<byte> and never boxed.
+    nint IGoReflectSequence.ReflectFirstArrayLength() =>
+        GoArrayElement<T>.IsOneDimArray && Length > 0 ? Unsafe.As<T, array<byte>>(ref this[0]).Length : -1;
 
     // A nested sized array's fill (GoReflect.MakeSizedArray; trim stage 3c-2a): every element built by `element`, in index
     // order, into this sequence's own backing store. The outer array's member, so it names nothing but its own element
@@ -105,14 +127,29 @@ public interface IGoReflectSequence
     /// <summary>Element 0, as <see cref="object"/>.</summary>
     object? ReflectFirstElement();
 
+    /// <summary>
+    /// Element 0's length when the element type is an unnamed one-dimension array (<c>array&lt;E&gt;</c>, E not itself an
+    /// array), without boxing it; -1 for any other element type or an empty sequence.
+    /// </summary>
+    nint ReflectFirstArrayLength();
+
     /// <summary>Stores <paramref name="element"/>'s result into every element, in index order.</summary>
     void ReflectFill(Func<object> element);
+}
+
+// Whether T is an unnamed one-dimension array, array<E> with E not itself an array<>: the one element type whose Go
+// type needs its VALUE's length (array<byte> is the C# type of every [N]byte).
+internal static class GoArrayElement<T>
+{
+    internal static readonly bool IsOneDimArray =
+        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>) &&
+        !(typeof(T).GetGenericArguments()[0] is { IsGenericType: true } inner && inner.GetGenericTypeDefinition() == typeof(array<>));
 }
 
 [Serializable]
 [System.Diagnostics.DebuggerDisplay("len = {Length}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(array<>.DebugView))]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the array's elements. Built only when a debugger expands one.
     internal sealed class DebugView(array<T> value)
@@ -288,8 +325,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
             return new StandardBox<array<T>>(new array<T>(backing, (int)index, (int)(length < available ? length : available)));
         }
 
+        // An element in NATIVE memory -- a native box, or an element of a native window such as an array field of a
+        // struct viewed over pinned bytes (`&buf.PathBuffer[0]`) -- is the base of a native block: the array is
+        // the native kind over its address, with Go's N, since nothing here knows how far the block extends. The
+        // raw route would build an array view no native memory can back, which the reverse conversion refuses.
+        if (length >= 0 && element is not null && nativeElementAddress(element) is var address and not 0)
+            return builtin.NativeArrayPointer<T>(address, length);
+
         return (ж<array<T>>)(uintptr)element!;
     }
+
+    private static nuint nativeElementAddress(ж<T> element) =>
+        element.NativeAddress is var address and not 0 ? address : element is ElemRefBox<T> run ? run.NativeElementAddress : 0;
 
     private static void checkArrayConversionLength(nint sourceLength, nint length)
     {
@@ -353,8 +400,11 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     // Returning by-ref value allows array to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
+    // The int and nint indexers inline (P-256 R2): the check and the load are what Go compiles an array
+    // index to, and a call per element was what fiat's limb loops paid.
     public ref T this[int index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -366,6 +416,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public ref T this[nint index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -875,6 +926,9 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     // array<T> to array<T> comparisons
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is array<T> value && this == value;
+
     public static bool operator ==(array<T> a, array<T> b)
     {
         return a.Equals(b);
@@ -1013,11 +1067,11 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         return WindowArray.AsEnumerable().GetEnumerator();
     }
 
-    // IArray<T> derives from IEnumerable<(nint, T)>, which the public GetEnumerator() satisfied
+    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
     // implicitly while it returned the interface. Now that it returns the concrete struct — so
     // `foreach` binds the pattern and allocates nothing — the interface member becomes explicit:
     // the boxing path, taken only when a consumer asks for the interface.
-    IEnumerator<(nint, T)> IEnumerable<(nint, T)>.GetEnumerator()
+    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
     {
         return new Enumerator(this);
     }

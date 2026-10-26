@@ -5,6 +5,8 @@ namespace go;
 
 using static fmt_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
@@ -102,10 +104,10 @@ public static @string String(this TB v) {
 }
 
 public static @string String(this TS v) {
-    return Sprintf("S: %q"u8, ((@string)v));
+    return Sprintf("S: %q"u8, (@string)v);
 }
 
-internal static void check(ж<Δtesting.T> Ꮡt, @string got, @string want) {
+internal static partial void check(ж<Δtesting.T> Ꮡt, @string got, @string want) {
     if (got != want) {
         Ꮡt.Error(got, (@string)"!="u8, want);
     }
@@ -118,13 +120,13 @@ internal static readonly @string f1000000F322000000F643ˢ = "F: 1.000000 F32: 2.
 internal static readonly @string bTrueSXˢ = "B: true S: \"x\""u8;
 
 public static void TestStringer(ж<Δtesting.T> Ꮡt) {
-    @string s = Sprintf("%v %v %v %v %v"u8, ((TI)0), ((TI8)1), ((TI16)2), ((TI32)3), ((TI64)4));
+    @string s = Sprintf("%v %v %v %v %v"u8, (TI)0, (TI8)1, (TI16)2, (TI32)3, (TI64)4);
     check(Ꮡt, s, i0I81I162I323I644ˢ);
-    s = Sprintf("%v %v %v %v %v %v"u8, ((TU)5), ((TU8)6), ((TU16)7), ((TU32)8), ((TU64)9), ((TUI)10));
+    s = Sprintf("%v %v %v %v %v %v"u8, (TU)5, (TU8)6, (TU16)7, (TU32)8, (TU64)9, (TUI)10);
     check(Ꮡt, s, u5U86U167U328U649Ui10ˢ);
-    s = Sprintf("%v %v %v"u8, ((TF)1.0D), ((TF32)2.0F), ((TF64)3.0D));
+    s = Sprintf("%v %v %v"u8, (TF)1.0D, (TF32)2.0F, (TF64)3.0D);
     check(Ꮡt, s, f1000000F322000000F643ˢ);
-    s = Sprintf("%v %v"u8, ((TB)true), ((TS)(@string)"x"u8));
+    s = Sprintf("%v %v"u8, (TB)true, (TS)(@string)"x"u8);
     check(Ꮡt, s, bTrueSXˢ);
 }
 

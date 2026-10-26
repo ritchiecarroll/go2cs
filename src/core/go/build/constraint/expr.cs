@@ -14,6 +14,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
+using iter = iter_package;
 
 partial class constraint_package {
 
@@ -463,11 +464,10 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     nint size = 0;
 
     Expr x = default!;
-    foreach (var (_, clause) in strings.Fields(text)) {
+    foreach (var clause in range<@string>(strings.FieldsSeq(text).Invoke)) {
         Expr y = default!;
-        foreach (var (_, vᴛ1) in strings.Split(clause, ","u8)) {
-            var lit = vᴛ1;
-
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(clause, ","u8).Invoke)) {
+            var lit = iᴛ1;
             Expr z = default!;
             bool neg = default!;
             if (strings.HasPrefix(lit, "!!"u8) || lit == "!"u8){
@@ -537,6 +537,9 @@ internal static readonly @string buildˢ2 = "// +build"u8;
 // PlusBuildLines returns a sequence of “// +build” lines that evaluate to the build expression x.
 // If the expression is too complex to convert directly to “// +build” lines, PlusBuildLines returns an error.
 public static (slice<@string>, error) PlusBuildLines(Expr x) {
+    var splitᴷ = new stackAppend<slice<slice<Expr>>>();
+    var linesᴷ = new stackAppend<@string>(moves: true);
+
     // Push all NOTs to the expression leaves, so that //go:build !(x && y) can be treated as !x || !y.
     // This rewrite is both efficient and commonly needed, so it's worth doing.
     // Essentially all other possible rewrites are too expensive and too rarely needed.
@@ -561,7 +564,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
             }
             ands = append(ands, lits);
         }
-        split = append(split, ands);
+        split = append(splitᴷ, split, ands);
     }
 
     // If all the ORs have length 1 (no actual OR'ing going on),
@@ -584,20 +587,21 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     // Prepare the +build lines.
     slice<@string> lines = default!;
     foreach (var (_, or) in split) {
-        @string line = buildˢ2;
+        ref var line = ref heap(new strings.Builder(), out var Ꮡline);
+        Ꮡline.WriteString(buildˢ2);
         foreach (var (_, and) in or) {
-            @string clause = ""u8;
+            Ꮡline.WriteString(" "u8);
             foreach (var (i, lit) in and) {
                 if (i > 0) {
-                    clause += ","u8;
+                    Ꮡline.WriteString(","u8);
                 }
-                clause += lit.String();
+                Ꮡline.WriteString(lit.String());
             }
-            line += " "u8 + clause;
         }
-        lines = append(lines, line);
+        lines = append(linesᴷ, lines, line.String());
     }
 
+    lines = move2heap(linesᴷ, lines);
     return (lines, default!);
 }
 

@@ -28,19 +28,19 @@ public static void TestBodyReadBadTrailer(ж<testing.T> Ꮡt) {
     ));
     var buf = new slice<byte>(7);
     var (n, err) = b.Read(buf[..3]);
-    @string got = ((@string)(buf.slice(0, n)));
+    @string got = (@string)(buf.slice(0, n));
     if (got != "foo"u8 || err != default!) {
         Ꮡt.Fatalf(@"first Read = %d (%q), %v; want 3 (""foo"")"u8, n, got, err);
     }
 
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf.slice(0, n)));
+    got = (@string)(buf.slice(0, n));
     if (got != "bar"u8 || err != default!) {
         Ꮡt.Fatalf(@"second Read = %d (%q), %v; want 3 (""bar"")"u8, n, got, err);
     }
 
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf.slice(0, n)));
+    got = (@string)(buf.slice(0, n));
     if (err == default!) {
         Ꮡt.Errorf("final Read was successful (%q), expected error from trailer read"u8, got);
     }
@@ -76,10 +76,13 @@ public static void TestDetectInMemoryReaders(ж<testing.T> Ꮡt) {
     var (pr, _) = io.Pipe();
     var tests = new TestDetectInMemoryReaders_tests[]{
         new(new io.PipeReaderжReader(pr), false),
+
         new(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), true),
         new(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!)), true),
         new(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)), true),
+
         new(io.NopCloser(new io.PipeReaderжReader(pr)), false),
+
         new(io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!))), true),
         new(io.NopCloser(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!))), true),
         new(io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))), true)
@@ -129,7 +132,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
     var fileType = reflect.TypeFor<ж<os.File>>();
     var bufferType = reflect.TypeFor<ж<bytes.Buffer>>();
 
-    var nBytes = (int64)(((int64)1 << (int)(10)));
+    var nBytes = (int64)((int64)1 << 10);
     var newFileFunc = (io.Reader r, Action done, error err) () => {
         Action done = default!;
         error err = default!;
@@ -261,7 +264,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(err);
                 }
                 var cleanupʗ1 = cleanup;
-                defer(cleanupʗ1, ref ᒐ);
+                defer(cleanupʗ1, ref ᒐ, recovers: true);
 
                 var mw = Ꮡ(new mockTransferWriter(nil));
                 var tw = Ꮡ(new transferWriter(

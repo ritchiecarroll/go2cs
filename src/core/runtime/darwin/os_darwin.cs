@@ -15,6 +15,10 @@ partial struct mOS {
     internal pthreadmutex mutex;
     internal pthreadcond cond;
     internal nint count;
+    // address of errno variable for this thread.
+    // This is an optimization to avoid calling libc_error
+    // on every syscall_rawsyscalln.
+    internal ж<int32> errnoAddr;
 }
 
 internal static void unimplemented(@string name) {
@@ -168,7 +172,8 @@ internal static void sigNoteSleep(ж<note> _) {
 internal static void osinit() {
     // pthread_create delayed until end of goenvs so that we
     // can look at the environment first.
-    ncpu = getncpu();
+
+    numCPUStartup = getCPUCount();
     physPageSize = getPageSize();
 
     osinit_hack();
@@ -183,16 +188,28 @@ internal static (int32, int32) sysctlbynameInt32(slice<byte> name) {
     return (ret, @out);
 }
 
-//go:linkname internal_cpu_getsysctlbyname internal/cpu.getsysctlbyname
-internal static (int32, int32) internal_cpu_getsysctlbyname(slice<byte> name) {
+internal static int32 sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    ref var nout = ref heap<uintptr>(out var Ꮡnout);
+    nout = (uintptr)len(@out);
+    var ret = sysctlbyname(Ꮡ(name, 0), Ꮡ(@out, 0), Ꮡnout, nil, 0);
+    return ret;
+}
+
+//go:linkname internal_cpu_sysctlbynameInt32 internal/cpu.sysctlbynameInt32
+internal static (int32, int32) internal_cpu_sysctlbynameInt32(slice<byte> name) {
     return sysctlbynameInt32(name);
+}
+
+//go:linkname internal_cpu_sysctlbynameBytes internal/cpu.sysctlbynameBytes
+internal static int32 internal_cpu_sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    return sysctlbynameBytes(name, @out);
 }
 
 internal static UntypedInt _CTL_HW => 6;
 internal static UntypedInt _HW_NCPU => 3;
 internal static UntypedInt _HW_PAGESIZE => 7;
 
-internal static int32 getncpu() {
+internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
     ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
     mib = new uint32[]{_CTL_HW, _HW_NCPU}.array();
@@ -364,6 +381,7 @@ internal static void minit() {
     }
     minitSignalMask();
     getg().Value.m.Value.procid = (uint64)(uintptr)pthread_self();
+    libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 
 // Called from dropm to undo the effect of an minit.
@@ -382,6 +400,7 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 internal static void mdestroy(ref m mp) {
 }
@@ -438,13 +457,13 @@ internal static void setsigstack(uint32 i) {
     ref var osa = ref heap(new usigactiont(), out var Ꮡosa);
     sigaction(i, nil, Ꮡosa);
     var handler = ~Ꮡosa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>();
-    if ((int32)(osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
+    if ((osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
         return;
     }
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     (Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>()).Value = handler;
     sa.sa_mask = osa.sa_mask;
-    sa.sa_flags = (int32)(osa.sa_flags | (int32)_SA_ONSTACK);
+    sa.sa_flags = osa.sa_flags | (int32)_SA_ONSTACK;
     sigaction(i, Ꮡsa, nil);
 }
 
@@ -466,11 +485,11 @@ internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
 //go:nosplit
 //go:nowritebarrierrec
 internal static void sigaddset(ref sigset mask, nint i) {
-    mask |= (sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1))));
+    mask |= (sigset)((sigset)((uint32)1 << (int)((uint32)i - 1)));
 }
 
 internal static void sigdelset(ref sigset mask, nint i) {
-    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1)))));
+    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)((uint32)i - 1))));
 }
 
 // go2cs generated this placeholder — func setProcessCPUProfiler is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -501,7 +520,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
 }
 
 internal static void signalM(ref m mp, nint sig) {
-    pthread_kill(((pthread)(uintptr)mp.procid), (uint32)sig);
+    pthread_kill((pthread)(uintptr)mp.procid, (uint32)sig);
 }
 
 // sigPerThreadSyscall is only used on linux, so we assign a bogus signal

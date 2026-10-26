@@ -5,7 +5,7 @@ namespace go;
 
 using cmp = cmp_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using slices = slices_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
@@ -20,7 +20,7 @@ partial class net_package {
 internal static partial uint64 runtime_rand();
 
 internal static nint randInt() {
-    return (nint)(((nuint)runtime_rand() >> (int)(1))); // clear sign bit
+    return (nint)((nuint)runtime_rand() >> 1); // clear sign bit
 }
 
 internal static nint randIntn(nint n) {
@@ -31,26 +31,28 @@ internal static nint randIntn(nint n) {
 // address addr suitable for rDNS (PTR) record lookup or an error if it fails
 // to parse the IP address.
 internal static (@string arpa, error err) reverseaddr(@string addr) {
+    var bufᴷ = new stackAppend<byte>();
+
     var ip = ParseIP(addr);
     if (ip == default!) {
         return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: "unrecognized address"u8, Name: addr))));
     }
     if (ip.To4() != default!) {
-        return (itoa.Uitoa((nuint)ip[15]) + "." + itoa.Uitoa((nuint)ip[14]) + "." + itoa.Uitoa((nuint)ip[13]) + "." + itoa.Uitoa((nuint)ip[12]) + ".in-addr.arpa.", default!);
+        return (strconv.Itoa((nint)ip[15]) + "." + strconv.Itoa((nint)ip[14]) + "." + strconv.Itoa((nint)ip[13]) + "." + strconv.Itoa((nint)ip[12]) + ".in-addr.arpa.", default!);
     }
     // Must be IPv6
     var buf = new slice<byte>(0, len(ip) * 4 + len("ip6.arpa."));
     // Add it, in reverse, to the buffer
     for (nint i = len(ip) - 1; i >= 0; i--) {
         var v = ip[i];
-        buf = append(buf, hexDigit[(byte)(v & 0xF)],
+        buf = append(bufᴷ, buf, hexDigit[(byte)(v & 0xF)],
             (byte)((rune)'.'),
-            hexDigit[(v >> (int)(4))],
+            hexDigit[(v >> 4)],
             (byte)((rune)'.'));
     }
     // Append "ip6.arpa." and return (buf already has the final .)
     buf = append(buf, ((@string)"ip6.arpa."u8).ꓸꓸꓸ);
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
@@ -192,7 +194,7 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
     while (sum > 0 && len(addrs) > 1) {
         nint s = 0;
         nint n = randIntn(sum);
-        foreach (var (i, _) in addrs) {
+        foreach (var i in range(addrs)) {
             s += (nint)(~addrs[i]).Weight;
             if (s > n) {
                 if (i > 0) {
@@ -237,7 +239,7 @@ partial struct byPref /*[]ж<MX>*/;
 
 // sort reorders MX records as specified in RFC 5321.
 internal static void sort(this byPref s) {
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }

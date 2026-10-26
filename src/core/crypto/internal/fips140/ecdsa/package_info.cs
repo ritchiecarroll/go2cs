@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,16 +43,18 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 [assembly: GoImplement<go.crypto.@internal.fips140.nistec_package.P256Point, Point<go.crypto.@internal.fips140.nistec_package.P256Point>>(ConstraintProxy = true)]
 [assembly: GoImplement<go.crypto.@internal.fips140.nistec_package.P384Point, Point<go.crypto.@internal.fips140.nistec_package.P384Point>>(ConstraintProxy = true)]
 [assembly: GoImplement<go.crypto.@internal.fips140.nistec_package.P521Point, Point<go.crypto.@internal.fips140.nistec_package.P521Point>>(ConstraintProxy = true)]
-[assembly: GoImplement<go.crypto.@internal.fips140.sha512_package.Digest, go.crypto.@internal.fips140_package.Hash>(Pointer = true)]
+[assembly: GoImplement<go.crypto.@internal.fips140.sha512_package.Digest, hash_package.Hash>(Pointer = true)]
 [assembly: GoImplement<plainPersonalizationString, personalizationString>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<PrivateKey, ж<PrivateKey>>(Indirect = true)]
-[assembly: GoImplicitConv<Signature, ж<Signature>>(Indirect = true)]
-[assembly: GoImplicitConv<hmacDRBG, ж<hmacDRBG>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔPublicKey, ж<ΔPublicKey>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,10 +64,10 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABEglAAWLoIADhiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABo2gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAJFMKCgoKUgoKUgqb4goKUqNKUhoKm7oIAAhIACAKCgoCCAAwYgKaClAAIEICCgraCABEmAAoCgpSC7oKAggAJEpQAAhAACwKClIKCgqrCgoLmtoKClIK4gpSCgpSCgtyCpoKUgoKUgoKmgqao0oKUgoKClNyqAAgKgIKCgILGgoIAAxLSgpSCgoKCpgAFFAAMAoKUgoL2toKCpoKClIKUgoKUgqaCpoKmgoKmgoKmgoKmgoKmgpQ=", "187-189:1;320-323:1", "", "219=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADhiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgANGvKCgoKUgpSCgpSClILaAAkIgpSCgpSo0pSGgqbuggACEgAIAoKCgIIADBiApoKUAAgQgIKCtoIAESYACgKClILugoCCAAkSlAACEAALAoKUgoKCqsKCgubGgoKUgriClIKClIKC3IKmgpSCgpSCgqaCpqjSgpSCgoKU3KoACAqAgoKAgsaCggADEtKClIKCgoKmAAUUAAwCgpSCgvbGgoKmgoKUgpSCgpSCpoKmgqaCgqaCgqaCgqaCgqaClA==", "202-204:1;335-338:1", "", "241=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACJM/uy0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoCCyqSUgqaCpoKmgoKCAAgSgoKClIKClA==", "56-58:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO/uy0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoCCyqSUgqaCpoKmgoKCAAgSgoKClIKClA==", "57-59:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -109,6 +110,7 @@ public static partial class ecdsa_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸnistec() => builtin.initPackage(typeof(go.crypto.@internal.fips140.nistec_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha512() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha512_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>

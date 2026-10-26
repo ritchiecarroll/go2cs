@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -102,11 +109,12 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="auth_test.cs" />
+    <Compile Include="bogo_shim_notunix_test.cs" />
     <Compile Include="bogo_shim_test.cs" />
     <Compile Include="cache_test.cs" />
     <Compile Include="conn_test.cs" />
     <Compile Include="ech_test.cs" />
-    <Compile Include="fips_test.cs" />
+    <Compile Include="fips140_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="handshake_client_test.cs" />
     <Compile Include="handshake_messages_test.cs" />
@@ -127,7 +135,9 @@
     <None Include="alert.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="auth.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="auth_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="bogo_shim_notunix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="bogo_shim_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="bogo_shim_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cache.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cache_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cipher_suites.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -136,10 +146,12 @@
     <None Include="conn.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="conn_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defaults.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="defaults_boring.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="defaults_fips140.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="ech.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="ech_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="fips_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="fips140_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="generate_cert.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="handshake_client.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="handshake_client_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -298,11 +310,13 @@
     <ProjectReference Include="$(go2csPath)core/crypto/ecdsa/crypto.ecdsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/ed25519/crypto.ed25519.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/elliptic/crypto.elliptic.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/fips140/crypto.fips140.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/hpke/crypto.hpke.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/crypto.internal.boring.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/mlkem/crypto.internal.fips140.mlkem.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/hpke/crypto.internal.hpke.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rsa/crypto.rsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
@@ -319,9 +333,11 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
+    <ProjectReference Include="$(go2csPath)core/html/template/html.template.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/obscuretestdata/internal.obscuretestdata.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
@@ -336,6 +352,7 @@
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
+    <ProjectReference Include="$(go2csPath)core/regexp/regexp.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
@@ -345,6 +362,7 @@
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/quick/testing.quick.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
+    <ProjectReference Include="$(go2csPath)core/text/template/text.template.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/unicode.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/crypto/cryptobyte/vendor.golang.org.x.crypto.cryptobyte.csproj" />

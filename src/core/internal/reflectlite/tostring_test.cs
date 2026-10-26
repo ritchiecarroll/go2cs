@@ -8,7 +8,8 @@ namespace go.@internal;
 
 using static global::go.@internal.reflectlite_package;
 using reflect = reflect_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
+using global::go;
 using reflectlite = global::go.@internal.reflectlite_package;
 using static global::go.@internal.reflectlite_internal_test_package;
 

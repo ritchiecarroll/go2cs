@@ -65,10 +65,10 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 
     // Add the edges.
     if (l == r){
-        d.unsorted = append(d.unsorted, new edge(l, 0D, area));
+        d.unsorted = builtin.append(d.unsorted, new edge(l, 0D, area));
     } else {
         var delta = area / (r - l);
-        d.unsorted = append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
+        d.unsorted = builtin.append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
     }
 
     // Update the histogram.
@@ -176,7 +176,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
         var newSorted = new slice<edge>(len(oldSorted) + len(edges));
         nint i = 0;
         nint j = 0;
-        foreach (var (o, _) in newSorted) {
+        foreach (var o in range(newSorted)) {
             if (i >= len(oldSorted)){
                 copy(newSorted.slice(o), edges.slice(j));
                 break;

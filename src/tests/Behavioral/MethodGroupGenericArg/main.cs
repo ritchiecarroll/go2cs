@@ -30,7 +30,7 @@ internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> 
         return false;
     }
 
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (!eq(s1[i], s2[i])) {
             return false;
         }
@@ -73,7 +73,7 @@ internal static bool sliceEq<S, E>(S a, S b)
         return false;
     }
 
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (!AreEqual(a[i], b[i])) {
             return false;
         }
@@ -97,7 +97,7 @@ internal static void Main() {
     fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 9, 4}.slice(), equalPair<nint>));
 
     fmt.Println(insertAt<slice<nint>, nint>(nums, 1));
-    fmt.Println(insertAt(nums, 1, (nint)(7), (nint)(8)));
+    fmt.Println(insertAt(nums, 1, (nint)7, (nint)8));
 
     var plain = new nint[]{1, 2, 3}.slice();
     applyTo<slice<nint>>(plain, reverse<slice<nint>, nint>);

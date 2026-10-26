@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/runtime/maps` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `f9a4b088f`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**3 matched · 108 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**19 matched · 108 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/runtime/maps`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/runtime/maps).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -128,6 +128,22 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestTableIterationGrowDuplicate/split` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTableKeyUpdate` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTablePutDelete` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestTombstoneGrow` | pass | pass |
+| `TestTombstoneGrow/tableSize=128/elems=112/load=0.875` | pass | pass |
+| `TestTombstoneGrow/tableSize=128/elems=14/load=0.109` | pass | pass |
+| `TestTombstoneGrow/tableSize=128/elems=56/load=0.438` | pass | pass |
+| `TestTombstoneGrow/tableSize=16/elems=1/load=0.062` | pass | pass |
+| `TestTombstoneGrow/tableSize=16/elems=14/load=0.875` | pass | pass |
+| `TestTombstoneGrow/tableSize=16/elems=7/load=0.438` | pass | pass |
+| `TestTombstoneGrow/tableSize=256/elems=112/load=0.438` | pass | pass |
+| `TestTombstoneGrow/tableSize=256/elems=224/load=0.875` | pass | pass |
+| `TestTombstoneGrow/tableSize=256/elems=28/load=0.109` | pass | pass |
+| `TestTombstoneGrow/tableSize=32/elems=14/load=0.438` | pass | pass |
+| `TestTombstoneGrow/tableSize=32/elems=28/load=0.875` | pass | pass |
+| `TestTombstoneGrow/tableSize=32/elems=3/load=0.094` | pass | pass |
+| `TestTombstoneGrow/tableSize=64/elems=28/load=0.438` | pass | pass |
+| `TestTombstoneGrow/tableSize=64/elems=56/load=0.875` | pass | pass |
+| `TestTombstoneGrow/tableSize=64/elems=7/load=0.109` | pass | pass |
 
 ## Disclosed divergences
 

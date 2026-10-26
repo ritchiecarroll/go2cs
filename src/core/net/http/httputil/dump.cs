@@ -77,7 +77,7 @@ internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
 partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = (byte)b;
     }
     return (len(p), default!);
@@ -112,7 +112,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         if (!body){
             var contentLength = outgoingLength(ref (Ꮡreq).DerefOrNull());
             if (contentLength != 0) {
-                req.Body = io.NopCloser(io.LimitReader(((neverEnding)(rune)'x'), contentLength));
+                req.Body = io.NopCloser(io.LimitReader((neverEnding)(rune)'x', contentLength));
                 dummyBody = true;
             }
         } else {
@@ -190,7 +190,6 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
 
         req.Body = save;
         if (err != default!) {
-            pw.Close();
             dr.Value.err = err;
             close(quitReadCh);
             return (default!, err);

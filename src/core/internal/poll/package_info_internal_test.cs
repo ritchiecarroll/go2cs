@@ -31,7 +31,6 @@ using static go.@internal.poll_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/poll/export_posix_test.go", "export_posix_test.cs", "AA0agg==")]
 [assembly: go.GoPositionMap("internal/poll/export_test.go", "export_test.cs", "AAwW3IKmgqaCpoKmgg==")]
-[assembly: go.GoPositionMap("internal/poll/export_windows_test.go", "export_windows_test.cs", "AA0YloI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -64,6 +63,7 @@ public static partial class poll_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

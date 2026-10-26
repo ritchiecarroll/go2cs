@@ -318,7 +318,7 @@ func (v *Visitor) narrowComparisonOperand(operand ast.Expr, converted string) st
 		return converted
 	}
 
-	return fmt.Sprintf("(%s)(%s)", castType, converted)
+	return castOf(castType, converted)
 }
 
 // wholeExprIsCastOfType reports whether expr is exactly `(castType)(…)` spanning its whole length — the
@@ -337,6 +337,11 @@ func wholeExprIsCastOfType(expr, castType string) bool {
 	if strings.HasPrefix(expr, uncheckedPrefix) &&
 		balancedCloseIndex(expr, len(uncheckedPrefix)-1) == len(expr)-1 {
 		expr = expr[len(uncheckedPrefix) : len(expr)-1]
+	}
+
+	// castOf's form for a literal operand, `(T)500`.
+	if literal, ok := strings.CutPrefix(expr, "("+castType+")"); ok && unsignedLiteral.MatchString(literal) {
+		return true
 	}
 
 	prefix := fmt.Sprintf("(%s)(", castType)
@@ -1036,6 +1041,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// SHL_ASSIGN case) rather than the native operator. Its count is widened to uint64, never `(int)`-cast.
 	shiftAssignGuarded := false
 
+	// shiftAssignWide: a compound shift-assign on a NAMED integer target with an unbounded count, which keeps the
+	// native operator form but passes the count widened to the wrapper's wide overload (compoundShiftWide).
+	shiftAssignWide := v.compoundShiftWide(assignStmt)
+
 	// signedAssignTarget and signedAssignOmitOperand: a governed compound `x /= b` or `x %= b` (see
 	// signedCompoundAssign) may write its own target text (a map element's `m`) and may leave the
 	// right operand out (a -1 fold such as `x = 0`).
@@ -1568,6 +1577,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
+			}
+
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
@@ -1611,6 +1626,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// across even when nil (see typedNilInterfaceBoxing.go). appendRhsPtrContext has
 				// already rendered it as the BOX rather than a deref alias.
 				rhsExpr = v.applyTypedNilPointerBox(rhs, rhsExpr)
+
+				// The TYPE-PARAMETER twin, only for a REAL empty-interface LHS (lhsIsEmptyInterface also answers for
+				// an LHS of type-parameter type, where wrapping would turn E into object).
+				if typeParam, ok := v.getType(rhs, false).(*types.TypeParam); ok && isEmptyInterfaceTarget(v.getType(lhs, false)) {
+					rhsExpr = applyTypedNilTypeParamBox(typeParam, rhsExpr)
+				}
 			}
 
 			// A `:=` DECLARATION whose RHS is a constant-folded NAMED-NUMERIC conversion
@@ -1669,9 +1690,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			if bitwiseAssignOp {
 				if assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN {
-					if shiftAssignGuarded {
-						// The guard takes the count WIDENED to uint64, never `(int)`-truncated: its
-						// full magnitude is what the width comparison needs (emitGuardedShift's rule).
+					if shiftAssignGuarded || shiftAssignWide {
+						// The guard, and a named wrapper's wide operator, take the count WIDENED to uint64,
+						// never `(int)`-truncated: its full magnitude is what the width comparison needs
+						// (emitGuardedShift's rule).
 						rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
 					} else {
 						// The shift count in a C# compound shift-assignment must be `int`;
@@ -1699,7 +1721,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
-				result.WriteString(rhsExpr)
+				result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 			}
 
 			if len(narrowCastType) > 0 {
@@ -1842,7 +1864,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if i < lhsLen && lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
-				result.WriteString(rhsExpr)
+				result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 			}
 		}
 
@@ -1924,6 +1946,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
+			}
+
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
@@ -1983,10 +2011,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
 				// counting loop), so it needs the same `(int)` cast the simple-variable path applies.
-				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded
+				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded && !shiftAssignWide
 
-				// A GUARDED shift-assign (`lhs.RshAssign(`) takes the count widened to uint64 instead.
-				if shiftAssignGuarded {
+				// A GUARDED shift-assign (`lhs.RshAssign(`), and a NAMED target's wide operator, take the count
+				// widened to uint64 instead.
+				if shiftAssignGuarded || shiftAssignWide {
 					rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
 				}
 
@@ -2010,7 +2039,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				if lhsTypeIsInterface[i] {
 					result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 				} else {
-					result.WriteString(rhsExpr)
+					result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 				}
 
 				if len(narrowCastType) > 0 {
@@ -2063,7 +2092,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
-						result.WriteString(rhsExpr)
+						result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 					}
 
 					if andNotUncheckedClose {
@@ -2206,7 +2235,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// parentheses are load-bearing for the lambda form: `(Func<…>)(nint p1) => …`
 					// does not parse as a cast.
 					if discardCastType != "" {
-						rhsExpr = fmt.Sprintf("(%s)(%s)", discardCastType, rhsExpr)
+						rhsExpr = castOf(discardCastType, rhsExpr)
 					}
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
@@ -2214,7 +2243,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if lhsTypeIsInterface[i] && !rhsIsTypeAssert {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
-						result.WriteString(rhsExpr)
+						result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 					}
 
 					if format.includeSemiColon || i < lhsLen-1 {

@@ -54,13 +54,13 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
     }
 
     // Test that ReadFile uses Open when the method is not present.
-    (data, err) = ReadFile(new openOnly(testFsys), helloTxtˢ);
+    (data, err) = ReadFile(new openOnly(new fstest_MapFSᴠFS(testFsys)), helloTxtˢ);
     if (((sstring)data) != "hello, world"u8 || err != default!) {
         Ꮡt.Fatalf(@"ReadFile(openOnly, ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
     }
 
     // Test that ReadFile on Sub of . works (sub_test checks non-trivial subs).
-    (var sub, err) = Sub(testFsys, "."u8);
+    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), "."u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

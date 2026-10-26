@@ -85,7 +85,7 @@ internal static readonly object randReadFailedˢ = (@string)"rand.Read failed:"u
 public static void TestWriter(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -309,7 +309,7 @@ public static void TestWriterTime(ж<testing.T> Ꮡt) {
 public static void TestWriterOffset(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -539,7 +539,7 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
     var archive = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(archive));
 
-    foreach (var (i, _) in files) {
+    foreach (var i in range(files)) {
         var f = Ꮡ(files, i);
         f.Value.crc32 = crc32.ChecksumIEEE((~f).content);
         var size = (uint64)len((~f).content);
@@ -686,7 +686,7 @@ internal static void testReadFile(ж<testing.T> Ꮡt, ж<global::go.archive.zip_
 public static void BenchmarkCompressedZipGarbage(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bigBuf = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
+    var bigBuf = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
 
     var bigBufʗ1 = bigBuf;
     void runOnce(ж<bytes.Buffer> buf) {
@@ -726,7 +726,7 @@ internal static fs.FS writeTestsToFS(slice<WriteTest> tests) {
             Mode: wt.Mode
         ));
     }
-    return fsys;
+    return new zip_test_package.fstest_MapFSᴠFS(fsys);
 }
 
 public static void TestWriterAddFS(ж<testing.T> Ꮡt) {

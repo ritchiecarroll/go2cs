@@ -9,6 +9,8 @@ using fs = go.io.fs_package;
 using Δos = os_package;
 using filepath = go.path.filepath_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.path;
 using static go.os_internal_test_package;
@@ -230,7 +232,7 @@ public static void TestErrPathNUL(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorsIsFailedWantedˢ = (@string)"errors.Is failed, wanted success"u8;
 
-public static void TestPathErrorUnwrap(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPathErrorUnwrap(ж<Δtesting.T> Ꮡt) {
     var pe = Ꮡ(new fs.PathError(Err: fs.ErrInvalid));
     if (!errors.Is(new fs.PathErrorжerror(pe), fs.ErrInvalid)) {
         Ꮡt.Error(errorsIsFailedWantedˢ);
@@ -248,7 +250,7 @@ internal static bool Is(this myErrorIs e, error target) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object osIsPermissionErrTrueˢ = (@string)"os.IsPermission(err) = true when err.Is(fs.ErrPermission), wanted false"u8;
 
-public static void TestErrorIsMethods(ж<Δtesting.T> Ꮡt) {
+public static partial void TestErrorIsMethods(ж<Δtesting.T> Ꮡt) {
     if (Δos.IsPermission(new myErrorIs(fs.ErrPermission))) {
         Ꮡt.Error(osIsPermissionErrTrueˢ);
     }

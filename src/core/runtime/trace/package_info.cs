@@ -11,6 +11,9 @@
 
 // <ImportedTypeAliases>
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +31,6 @@ using static go.runtime.trace_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b20656e61626c65642073796e632f61746f6d69632e426f6f6c7d", "tracingᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -43,6 +45,12 @@ using static go.runtime.trace_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,8 +59,13 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAXIIKCgqIAAhQACAKClJKCAAgSlrKClKyyAAIQ5qam")]
-[assembly: go.GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHfyAdKClICCpIKCgoKUpoLawoKClKI=", "128-136:1")]
+[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAYIIKCgqIAAhQACAKClJKCAAgSlrKClKyyAAIQ5qam")]
+[assembly: go.GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
+[assembly: go.GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
+[assembly: go.GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuICCtoKokoKUgqaCrLAAAhAADAKClKaUpgAHEIKCpoKClKaClIKCgrgAGzTG")]
+[assembly: go.GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1")]
+[assembly: go.GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB460oKUgoKClIKUgIKCgoKk1tKClJSCgoKUgpSC1tKClIKCgpSClICCgoKCpNbSgpSUgoKClIKUgtailJSAgraCpqKClIKCgqa4gpS4ooCCAAkSgpKSlIKCgpSCpoKCgpSClIKUgoK4goKCgoKUgpSCyoKo", "157-198:1")]
+[assembly: go.GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
@@ -67,8 +80,16 @@ public static partial class trace_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct batch {}
+    internal partial struct eventTime {}
+    internal partial struct frequency {}
+    internal partial struct rawGeneration {}
+    internal partial struct recorder {}
+    internal partial struct timestamp {}
     internal partial struct traceContextKey {}
-    internal partial struct tracingᴛ1 {}
+    internal partial struct traceMultiplexer {}
+    [GoValueClone("header")] public partial struct FlightRecorder {}
+    public partial struct FlightRecorderConfig {}
     public partial struct Region {}
     public partial struct Task {}
     // </TypeAccessibility>
@@ -81,10 +102,14 @@ public static partial class trace_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtracev2() => builtin.initPackage(typeof(@internal.trace.tracev2_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
+    [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }

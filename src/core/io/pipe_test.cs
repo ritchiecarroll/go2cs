@@ -227,7 +227,7 @@ public static partial void TestPipeReadClose2(ж<testing.T> Ꮡt) {
     var (n, err) = r.Read(new slice<byte>(64));
     ᐸꟷ(c);
     if (n != 0 || !AreEqual(err, ErrClosedPipe)) {
-        Ꮡt.Errorf("read from closed pipe: %v, %v want %v, %v"u8, n, err, (nint)(0), ErrClosedPipe);
+        Ꮡt.Errorf("read from closed pipe: %v, %v want %v, %v"u8, n, err, (nint)0, ErrClosedPipe);
     }
 }
 
@@ -275,7 +275,7 @@ public static partial void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
     var (n, err) = w.Write(new slice<byte>(64));
     ᐸꟷ(c);
     if (n != 0 || !AreEqual(err, ErrClosedPipe)) {
-        Ꮡt.Errorf("write to closed pipe: %v, %v want %v, %v"u8, n, err, (nint)(0), ErrClosedPipe);
+        Ꮡt.Errorf("write to closed pipe: %v, %v want %v, %v"u8, n, err, (nint)0, ErrClosedPipe);
     }
 }
 
@@ -329,7 +329,7 @@ public static partial void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
         if (err != default! && !AreEqual(err, ErrUnexpectedEOF)) {
             Ꮡt.Fatalf("got: %q; want: %q"u8, err, ErrUnexpectedEOF);
         }
-        result = ((@string)(buf.slice(0, n)));
+        result = (@string)(buf.slice(0, n));
         ᐸꟷ(done);
 
         if (result != "hello"u8) {
@@ -418,7 +418,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
 
         // Since each Write is fully gated, if multiple Read calls were needed,
         // the contents of Write should still appear together in the output.
-        @string got = ((@string)buf);
+        @string got = (@string)buf;
         @string want = strings.Repeat(input, count);
         if (got != want) {
             tΔ1.Errorf("got: %q; want: %q"u8, got, want);
@@ -468,9 +468,11 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
 }
 
 internal static slice<byte> sortBytesInGroups(slice<byte> b, nint n) {
+    var groupsᴷ = new stackAppend<slice<byte>>();
+
     slice<slice<byte>> groups = default!;
     while (len(b) > 0) {
-        groups = append(groups, b.slice(0, n));
+        groups = append(groupsᴷ, groups, b.slice(0, n));
         b = b.slice(n);
     }
     slices.SortFunc<slice<slice<byte>>, slice<byte>>(groups, bytes.Compare);

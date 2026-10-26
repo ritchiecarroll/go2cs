@@ -8,6 +8,60 @@ their full text.
 
 ---
 
+## October 26, 2026 — The converted standard library moves to Go 1.26.10
+
+**NuGet 1.26.10.1.** The converted standard library is now built from Go 1.26.10, a release Go still
+supports, so it carries the Go security fixes issued through Go 1.26.10. Converting needs Go 1.26.10, exactly
+that release, and the .NET 10 SDK as before. 1.24.13.7 stays the last release built from Go 1.24.
+
+**Every package that can be validated passes Go's own tests at Go 1.26.10**, on Windows x64 and on
+Linux x64. Each package was re-converted from Go 1.26.10's sources and re-validated from Go 1.26.10's
+own test files, so every row's counts on the [roster](ValidatedTestPackages.md) are Go 1.26.10 readings.
+Validation on macOS continues package by package.
+
+**New and removed packages.** Go 1.26 adds packages and removes or renames others, and the `go.*`
+packages follow it. 28 package IDs are new in this release:
+
+go.crypto.hpke, go.crypto.internal.constanttime, go.crypto.internal.entropy.v1.0.0,
+go.crypto.internal.fips140.mldsa, go.crypto.internal.fips140cache, go.crypto.internal.fips140deps.time,
+go.crypto.internal.rand, go.crypto.mlkem.mlkemtest, go.go.internal.scannerhooks, go.internal.cgrouptest,
+go.internal.routebsd, go.internal.runtime.cgroup, go.internal.runtime.gc, go.internal.runtime.gc.internal.gen,
+go.internal.runtime.gc.scan, go.internal.runtime.pprof.label, go.internal.runtime.startlinetest,
+go.internal.runtime.syscall.linux, go.internal.runtime.syscall.windows, go.internal.strconv,
+go.internal.testhash, go.internal.trace.internal.testgen, go.internal.trace.internal.tracev1,
+go.internal.trace.tracev2, go.math.big.internal.asmgen, go.net.http.internal.httpcommon,
+go.testing.cryptotest, go.testing.synctest.
+
+Ten package IDs have no Go 1.26 package behind them. Each is deprecated on nuget.org, pointing at
+1.24.13.7, the last release that carries it, and at its Go 1.26 successor where there is one:
+
+go.crypto.internal.hpke, go.internal.itoa, go.internal.runtime.syscall, go.internal.trace.event,
+go.internal.trace.event.go122, go.internal.trace.internal.oldtrace,
+go.internal.trace.internal.testgen.go122, go.log.slog.internal.slogtest,
+go.runtime.internal.startlinetest, go.vendor.golang.org.x.net.route.
+
+**A limitation to know about: the address of another package's variable.** When code takes the address
+of a variable that a different package exports and that is not itself a pointer, the pointer refers to
+a copy, so writes through it never reach the variable. That covers `&otherpkg.V`, a pointer-receiver
+method value such as `f := otherpkg.V.Reset`, and the common `flag.BoolVar(&otherpkg.Debug, ...)`,
+where parsing the flag leaves `otherpkg.Debug` unchanged. A direct call (`otherpkg.V.Reset()`) and a
+read both work, and inside one package all of these work. To avoid it, keep the variable and the code
+that takes its address in one package, or have the package export a pointer or an accessor function.
+[Limitations](Limitations.md) and [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-variable-are-lost)
+carry the details.
+
+**`crypto/tls` and process start-up.** Part of `crypto/tls`'s test suite runs BoringSSL's interop
+cases, and it starts a new helper process for each one. A converted helper process takes about 10 s to
+start and run its handshake, where Go's takes about 85 ms, measured on a Windows x64 desktop: .NET's
+process start and package initialization, then compiling the handshake path in each new process. The
+whole interop run would take over an hour, so it is reported as a host limit, and every other
+`crypto/tls` test validates. The same machine read the same cost on 1.24.13.7: it is the per-process
+cost of a converted program, not a Go 1.26 change. A program that starts many short-lived converted
+processes pays that start-up each time. Reducing it (ReadyToRun-compiled test hosts, or tiered
+compilation in spawned child processes) is planned work.
+
+---
+
 ## October 14, 2026 — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
 
 **NuGet 1.24.13.7.** This is the last release built from Go 1.24. The next one moves the converted

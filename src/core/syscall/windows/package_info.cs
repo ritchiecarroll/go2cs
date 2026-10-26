@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,8 +50,13 @@ using static go.syscall_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<win32finddata1, ж<win32finddata1>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,13 +67,13 @@ using static go.syscall_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("syscall/env_windows.go", "env_windows.cs", "AAoagoKClIKCgoKClILKgoKClIKClIKClIKmgoKClIKClIKmgriCgoLcooKClJSCgpSCgqaCgpQ=")]
-[assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAGEJKokqiSqJKqopai")]
-[assembly: go.GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABg+0oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLgrMKCgpQACxiArMKmlIKClpKCgoKCgriUAAcUgpSorKqepoKmgqgAAhDiAAIS4gAC3gEAaQKCgoKmooKUgoKUgpSkpJSClLiCppSCgoKUgoKUuJSCgp7SlIK0tKSCgpSCgqamhIKCgqamgoKCgpSUlKaCgoKClKaigoKClJSClIKUpqKClIKClIKUgpTqvKKCgsaq6M0AAhSClKaygpS0tKSCpoK4kpKWgoLKgtyCgoKUgpS4ooKClKaigoKUpqKCgpSmooKClKaigoKUgoKUpoKSgoKClOaCiIKCpqKCgoKmgoKUkoKClIKCprKClIKClKaClIKSkoKUgpQACQyygpSCgpSmgpSCkpKClIKU5oKmgoKClIKClIKUlKaCpoIAYvIBooKCgpSClIKCpoKClJSUpgAEYoKClKaCkgAKSoKmggAELqKCgpQACgKCgpSmpqKCgpQACgKCgpSmpoIADDqiAAgCgoKUpgAQNoCkgKSApICkgKSApICkgKSAAAkSgKSigoKqkKKCpICigAAbOoKSkoKmopKmosqApICkAAMSAAgCgoKUpqKCgoKUpqKCgpSCgoKAgqSCgpSCgvqCgoKUpoKYgoKCgpSClJSmooKCggAKFoKUqJCigKSAooCigKKApICigKKAooCigMikgoKCgqamgqjSlIKUlIKCgoKmgoKUgoKCgoKC2AAMEoKCgoL+lJTokqiygoKCgpSCgoKCpqiS3LKCgoKClKaCgoKUAAI2ABgCpoKCprKCppQ=")]
+[assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAGEJKokqiSqJKqopaimA==")]
+[assembly: go.GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABg80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLgrMKCgpQACxiArMLalIKCpoKUgIKkpoKClKaEkoKCgoKCuJQABxSClKisqp6mgqaCqAACEOIAAhLiAALgAQBqAoKCgqaigpSCgpSCgpSkpJSClLiCppSCgoKUgoLcgIKUtgAKFJSCntKUgrS0pIKClIKCppSEkoCCgqSCgriEgriAgraCgqamgoKCgpSUlKaCgoKClKaigoKClJSClIKUpqKClIKClIKUgpTqvKKCgsa0gpSmsoKUtLSkgqaCuJKSloKCyoLcgoKClIKUuKKCgpSmooKClKaigoKUpqKCgpSmooKClIKClKaCkoKCgpTmgoiCgqaigoKCpoKClJKCgpSCgqaygpSCgpSmgpSCkpKClIKUAAkMsoKUgoKUpoKUgpKSgpSClOaCpoKCgpSCgpSClJSmgqaCAGLyAaKCgoK4uIKUgoK4gqaSlKYABGKCgpSmgpIACkqCpoIABC6igoKUAAoCgoKUpqaigoKUAAoCgoKUpqaCAAw6ogAIAoKClKYAEDaApICkgKSApICkgKSApICkgAAJEoCkooKCqpCigqSAooAAGzqCkpKCpqKSpqIABhKApAADEgAIAoKClKaigoKClKaigoKUgoKCgIKkgoKUgoL6goKClKaCmIKCgoKUgpSUpqKCgoIAChaClKiQooCkgKKAooCigKSAooCigKKAooDIpIKCgoKmpoKo0oKClJSClJSCgoKCpoKClIKCgoKCgtgADBKCgoKC/pSU6JKosoKCgoKUgoKCgqaoktiSgoKCgpSUgoKCpoKCgpSCqJKCqJKCgoKokgACNgAYAqaCgqaygqaU")]
 [assembly: go.GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
-[assembly: go.GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEGOAQDbAc4DgoIADyKCpqKCggAcPrSUlIKmtJSUgoIAHk7ygoKCgoKCgqaCAN0E8gk=")]
+[assembly: go.GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEWaAQDzAf4DgoIADyKCpqKCggAcPrSUlIKmtJSUgoIAHk7ygoKCgoKCgqaCAOUEgAo=")]
 [assembly: go.GoPositionMap("syscall/wtf8_windows.go", "wtf8_windows.cs", "ACZYoqaClICCgoKCtoKUqqKCgoC2yILqgoKUgrSU")]
 [assembly: go.GoPositionMap("syscall/zerrors_windows.go", "zerrors_windows.cs", "AJMBrgI=")]
-[assembly: go.GoPositionMap("syscall/zsyscall_windows.go", "zsyscall_windows.cs", "ABIyopSkyqiCgoKCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAFJqLCgpSmooKClAAQAoKUpqLigpSmoqKClKaigoKUpqKigqaiwoKUpqIADgKClKaiAA4CgpSmoqKClKaigoKUpqIADAKClKaiwoKUpqIAFgKClKaiAAoCgpQABBaigoKUprKigoKUprKigoKUAAgwsoKCgpSmsqKCgpQABBaiwoKmooKCgpQABiCiwoKUpqKigpSmooKClAAEFqKCgpSmosKClKaywoKClKaywoKClKaiwoKUprKCgoKUpqLigpSmooKClAAQAoKUpqLCgpSmsoKCgpSmoqKClKaCoqaiAAgCgpSmooKClKKClKaCgqaigoKUAAYoooKClKaigoKUprKCgpTCgoKUpqKigpSmooKClKaigoKmosKClKaiooKUprKigoKUprKCgoKUpqKCgqaygoKClKaywoKClKaiooKUpqLCgpSmsqKCgpSmoqKClKaygoKClKayooKClKay4oKClKaigoKUprLCgoKUprKCgoKUprKigoKUpqIACAKClKai4oKUprLCgoKUAAQQsoKCgpSmgqKmsqKCgpQABBiygoKClKaiwoKUprKCgoKUprKigoKUprKCgoKUprKCgoKUpqLCgpSmsoKClIKCgpSmoqKClAAGJqLigpSmooKClOKClKaigoKU4oKUpqKigpSmoqKClKaigoKUpqLCgpSmoqKClKaigoKUpqKigpSmsqKCgpSmouKClKaigoKUpqKCgpSmooKClKaiAAgCgpSmooKClKaigoKUprKCgoKUpqLigpSmooKClOKClAAIMKKigpQABiaiwoKUpqLigpSmssKCgpSmosKClAAGIKKCgpQABBiiAAgCgpQACDaiAAoCgpQABBaiooKUpqKCgpSmoqKClKaygoKClAAEGKLCgpSmsoKCgpQABBiygoKClIKCgpQABBiiwoKUpqLCgpSmooKClKaigoKmoqKClKaigoKUprKCgoKU")]
+[assembly: go.GoPositionMap("syscall/zsyscall_windows.go", "zsyscall_windows.cs", "ABIyopSkyqiCgoKCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIABSaiwoKUpqKCgpQAEAKClKai4oKUpqKigpSmooKClKaiooKmosKClKaiAA4CgpSmogAOAoKUpqKigpSmooKClKaiAAwCgpSmosKClKaiABYCgpSmogAKAoKUAAQWooKClKayooKClKayooKClAAIMLKCgoKUprKigoKUAAQWosKCpqKCgoKUAAYgosKClKaiooKUpqKCgpQABBaigoKUpqLCgpSmssKCgpSmssKCgpSmosKClKaygoKClKai4oKUpqKCgpQAEAKClKaiwoKUprKCgoKUpqKigpSmgqKmogAIAoKUpqKCgpSigpSmgoKmooKClAAGKKKCgpSmooKClKaygoKUwoKClKaiooKUpqKCgpSmooKCpqLCgpSmoqKClKayooKClKaygoKClKaigoKmsoKCgpSmssKCgpSmoqKClKaiwoKUprKigoKUpqKigpSmsoKCgpSmsqKCgpSmsuKCgpSmooKClKaywoKClKaygoKClKayooKClKaiAAgCgpSmouKClKaywoKClAAEELKCgoKUpoKiprKigoKUAAQYsoKCgpSmosKClKaygoKClKayooKClKaygoKClKaygoKClKaygoKClKaiwoKUprKCgpSCgoKUpqKigpQABiai4oKUpqKCgpTigpQABB6iooKUpqKigpSmooKClKaiwoKUpqKigpSmooKClKaiooKUprKigoKUpqLigpSmooKClKaigoKUpqKCgpSmogAIAoKUpqKCgpSmooKClKaygoKClKai4oKUAApIoqKClAAGJqLCgpSmouKClKaywoKClKaiwoKUAAYgooKClAAEGKIACAKClAAINqIACgKClAAEFqKigpSmooKClKaiooKUprKCgoKUAAQYosKClKaygoKClAAEGLKCgoKUgoKClAAEGKLCgpSmosKClKaigoKUpqKCgqaiooKUpqKCgpSmsoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -86,6 +92,7 @@ public static partial class syscall_package
     internal partial struct _STARTUPINFOEXW {}
     internal partial struct connectExFuncᴛ1 {}
     [GoValueClone("PathBuffer")] internal partial struct mountPointReparseBuffer {}
+    internal partial struct procThreadAttributeListContainer {}
     internal partial struct reparseDataBuffer {}
     [GoValueClone("PathBuffer")] internal partial struct symbolicLinkReparseBuffer {}
     internal partial struct sysLinger {}
@@ -176,8 +183,10 @@ public static partial class syscall_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(@internal.bytealg_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() => builtin.initPackage(typeof(@internal.oserror_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindowsꓸsysdll() => builtin.initPackage(typeof(@internal.syscall.windows.sysdll_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));

@@ -74,7 +74,7 @@ internal static slice<uint64> weirdLimbs52 = new uint64[]{
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
-    ((uint64)1 << (int)(51)),
+    (uint64)1 << 51,
     (uint64)((2251799813685248L) + 1),
     (uint64)((4503599627370496L) - 19),
     (uint64)((4503599627370496L) - 1)
@@ -139,25 +139,25 @@ public static void TestMultiplyDistributesOverAdd(ж<testing.T> Ꮡt) {
 public static void TestMul64to128(ж<testing.T> Ꮡt) {
     var a = (uint64)5;
     var b = (uint64)5;
-    var r = mul64(a, b);
+    var r = mul(a, b);
     if (r.lo != 0x19 || r.hi != 0) {
         Ꮡt.Errorf("lo-range wide mult failed, got %d + %d*(2**64)"u8, r.lo, r.hi);
     }
 
     a = (uint64)18014398509481983UL; // 2^54 - 1
     b = (uint64)18014398509481983UL; // 2^54 - 1
-    r = mul64(a, b);
+    r = mul(a, b);
     if (r.lo != 0xff80000000000001UL || r.hi != 0xfffffffffffUL) {
         Ꮡt.Errorf("hi-range wide mult failed, got %d + %d*(2**64)"u8, r.lo, r.hi);
     }
 
     a = (uint64)1125899906842661UL;
     b = (uint64)2097155;
-    r = mul64(a, b);
-    r = addMul64(r, a, b);
-    r = addMul64(r, a, b);
-    r = addMul64(r, a, b);
-    r = addMul64(r, a, b);
+    r = mul(a, b);
+    r = addMul(r, a, b);
+    r = addMul(r, a, b);
+    r = addMul(r, a, b);
+    r = addMul(r, a, b);
     if (r.lo != 16888498990613035UL || r.hi != 640) {
         Ꮡt.Errorf("wrong answer: %d + %d*(2**64)"u8, r.lo, r.hi);
     }
@@ -177,7 +177,7 @@ public static void TestSetBytesRoundTrip(ж<testing.T> Ꮡt) {
 
         // Mask the most significant bit as it's ignored by SetBytes. (Now
         // instead of earlier so we check the masking in SetBytes is working.)
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1);
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1);
 
         return bytes_package.Equal(@in[..], fe.Bytes()) && isInBounds(Ꮡfe);
     };
@@ -241,7 +241,7 @@ public static void TestBytesBigEquivalence(ж<testing.T> Ꮡt) {
         ref var fe1 = ref heap(fe1ʗp, out var Ꮡfe1);
         Ꮡfe.SetBytes(@in[..]);
 
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1); // mask the most significant bit
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1); // mask the most significant bit
         var b = @new<bigꓸInt>().SetBytes(swapEndianness(@in[..]));
         Ꮡfe1.fromBig(b);
 
@@ -264,6 +264,7 @@ public static void TestBytesBigEquivalence(ж<testing.T> Ꮡt) {
 // fromBig sets v = n, and returns v. The bit length of n must not exceed 256.
 internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> fromBig(this ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> Ꮡv, ж<bigꓸInt> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
+    var bufᴷ = new stackAppend<byte>();
 
     if (n.BitLen() > 32 * 8) {
         throw panic("edwards25519: invalid field element input size");
@@ -277,7 +278,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
             if (len(buf) >= cap(buf)) {
                 break;
             }
-            buf = append(buf, (byte)(nuint)word);
+            buf = append(bufᴷ, buf, (byte)(nuint)word);
             word >>= (int)(8);
         }
     }
@@ -299,12 +300,12 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
     var buf = v.Bytes();
 
     var words = new slice<big.Word>(32 * 8 / bits.UintSize);
-    foreach (var (n, _) in words) {
+    foreach (var n in range(words)) {
         for (nint i = 0; i < bits.UintSize; i += 8) {
             if (len(buf) == 0) {
                 break;
             }
-            words[n] |= (big.Word)((((big.Word)(nuint)buf[0]) << (int)(nuint)(((big.Word)(nuint)i))));
+            words[n] |= (big.Word)((((big.Word)(nuint)buf[0]) << ((big.Word)(nuint)i)));
             buf = buf[1..];
         }
     }
@@ -538,33 +539,6 @@ public static void TestSqrtRatio(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestCarryPropagate(ж<testing.T> Ꮡt) {
-    var asmLikeGeneric = ([GoArrayDims(5)] array<uint64> a) => {
-        a = a.Clone();
-        var t1 = Ꮡ(new Element(a[0], a[1], a[2], a[3], a[4]));
-        var t2 = Ꮡ(new Element(a[0], a[1], a[2], a[3], a[4]));
-
-        t1.carryPropagate();
-        t2.carryPropagateGeneric();
-
-        if (t1.Value != t2.Value) {
-            Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, t1.OrTypedNil(), t2.OrTypedNil());
-        }
-
-        return t1.Value == t2.Value && isInBounds(t2);
-    };
-
-    {
-        var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Error(err);
-        }
-    }
-
-    if (!asmLikeGeneric(new uint64[]{0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL}.array())) {
-        Ꮡt.Errorf("failed for {0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff}"u8);
-    }
-}
-
 public static void TestFeSquare(ж<testing.T> Ꮡt) {
     var asmLikeGeneric = (global::go.crypto.@internal.fips140.edwards25519.field_package.Element a) => {
         ref var t1 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡt1);
@@ -572,8 +546,8 @@ public static void TestFeSquare(ж<testing.T> Ꮡt) {
         ref var t2 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡt2);
         t2 = a;
 
-        feSquareGeneric(Ꮡt1, ref (Ꮡt1).DerefOrNull());
-        feSquare(Ꮡt2, ref (Ꮡt2).DerefOrNull());
+        feSquareGeneric(ref (Ꮡt1).DerefOrNull(), ref (Ꮡt1).DerefOrNull());
+        feSquare(ref (Ꮡt2).DerefOrNull(), ref (Ꮡt2).DerefOrNull());
 
         if (t1 != t2) {
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, t1, t2);
@@ -600,8 +574,8 @@ public static void TestFeMul(ж<testing.T> Ꮡt) {
         ref var b2 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡb2);
         b2 = b;
 
-        feMulGeneric(Ꮡa1, ref (Ꮡa1).DerefOrNull(), ref (Ꮡb1).DerefOrNull());
-        feMul(Ꮡa2, ref (Ꮡa2).DerefOrNull(), ref (Ꮡb2).DerefOrNull());
+        feMulGeneric(ref (Ꮡa1).DerefOrNull(), ref (Ꮡa1).DerefOrNull(), ref (Ꮡb1).DerefOrNull());
+        feMul(ref (Ꮡa2).DerefOrNull(), ref (Ꮡa2).DerefOrNull(), ref (Ꮡb2).DerefOrNull());
 
         if (a1 != a2 || b1 != b2) {
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, a1, a2);

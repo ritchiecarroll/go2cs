@@ -208,6 +208,84 @@ func (v *Visitor) structFieldBoxName(sel *ast.Ident, structExpr ast.Expr) string
 	return removeLeadingSanitizationMarker(name)
 }
 
+// overlappingInterfaceMethodOwner returns the interface a method selection must be called on when the receiver is an
+// interface that reaches the method through two or more DISTINCT declaring interfaces, and nil otherwise. Go accepts the
+// overlap (identical signatures, Go 1.14), and go/types resolves the selection to one of them, the receiver of the
+// selected method. C# emits each embedded interface as a base interface and its methods only where they are declared,
+// so its lookup finds two members and the bare call is ambiguous (CS0121). One declaring interface reached by two
+// embed paths is not an overlap: C# finds the same member twice and binds it. A type-parameter receiver keeps its own
+// constraint dispatch.
+func overlappingInterfaceMethodOwner(sel *types.Selection) types.Type {
+	if sel == nil || sel.Kind() != types.MethodVal {
+		return nil
+	}
+
+	recv := types.Unalias(sel.Recv())
+
+	if _, isTypeParam := recv.(*types.TypeParam); isTypeParam {
+		return nil
+	}
+
+	iface, isInterface := recv.Underlying().(*types.Interface)
+
+	if !isInterface {
+		return nil
+	}
+
+	owners := interfaceMethodDeclarers(recv, iface, sel.Obj().Name())
+
+	if len(owners) < 2 {
+		return nil
+	}
+
+	if fn, isFunc := sel.Obj().(*types.Func); isFunc {
+		if sig, isSig := fn.Type().(*types.Signature); isSig && sig.Recv() != nil {
+			for _, owner := range owners {
+				if types.Identical(owner, sig.Recv().Type()) {
+					return owner
+				}
+			}
+		}
+	}
+
+	return owners[0]
+}
+
+// interfaceMethodDeclarers returns the distinct interfaces, in embedding order, that DECLARE the named method in the
+// interface owner (whose underlying type is iface): owner itself when it declares the method, else the declarers of
+// each embedded interface. A union or non-interface embedded term (a constraint) declares no methods.
+func interfaceMethodDeclarers(owner types.Type, iface *types.Interface, name string) []types.Type {
+	for i := 0; i < iface.NumExplicitMethods(); i++ {
+		if iface.ExplicitMethod(i).Name() == name {
+			return []types.Type{owner}
+		}
+	}
+
+	var declarers []types.Type
+
+	for i := 0; i < iface.NumEmbeddeds(); i++ {
+		embedded := types.Unalias(iface.EmbeddedType(i))
+		embeddedIface, isInterface := embedded.Underlying().(*types.Interface)
+
+		if !isInterface {
+			continue
+		}
+
+	nextDeclarer:
+		for _, declarer := range interfaceMethodDeclarers(embedded, embeddedIface, name) {
+			for _, known := range declarers {
+				if types.Identical(known, declarer) {
+					continue nextDeclarer
+				}
+			}
+
+			declarers = append(declarers, declarer)
+		}
+	}
+
+	return declarers
+}
+
 // crossPackageValuePromotion returns the embedded fields a selection walks when it promotes a concrete VALUE-receiver
 // method through an embed path in which some HOP crosses packages (the embedding type and the embedded type are declared
 // in different packages); nil otherwise. go2cs-gen promotes no method across packages -- a metadata embed promotes FIELDS
@@ -1124,6 +1202,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A CALL on an interface receiver whose method two embedded interfaces BOTH declare — go1.26.9 archive/zip's
+	// `s.Name()` on `interface { fs.FileInfo; fs.DirEntry }` — is legal Go, and go/types resolves it to one method.
+	// C# finds the method through both base interfaces and rejects the bare call (CS0121), so call it on the
+	// interface go/types resolved: `((fs.FileInfo)(s)).Name()` (overlappingInterfaceMethodOwner).
+	if context.isCallExpr {
+		if sel, ok := v.info.Selections[selectorExpr]; ok {
+			if owner := overlappingInterfaceMethodOwner(sel); owner != nil {
+				return fmt.Sprintf("((%s)(%s)).%s", convertToCSTypeName(v.getCSharpTypeName(owner)),
+					v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+			}
+		}
+	}
+
 	// A Go METHOD EXPRESSION — `(*timers).run`, the unbound method as a func value whose first
 	// parameter is the receiver (runtime time.go's `abi.FuncPCABIInternal((*timers).run)`) —
 	// selects a method off a TYPE. Emitting the selector naively renders the type in value
@@ -1868,6 +1959,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
 			if ptrType, isPtrType := exprType.(*types.Pointer); isPtrType {
+				// A local reinterpreted from unsafe.Pointer reads its fields through the generated field
+				// properties, at the Go offset when it aliases native memory (see fieldAccess.go).
+				if pointee := v.fieldAccessLocal(selectorExpr.X); pointee != nil {
+					if result, ok := v.fieldAccessSelector(selectorExpr, pointee); ok {
+						return result
+					}
+				}
+
 				// Check if the expression is *directly* an intra-function identifier (the
 				// receiver or a parameter) — a value-ref receiver/param accesses its fields
 				// without a deref. Use a direct type assertion, NOT getIdentifier (which digs
@@ -2545,10 +2644,14 @@ func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContex
 // error of snapshotting a value and binding ITS address, which silently redirects every write
 // through the method value into the copy.
 //
-// A bare IDENT receiver is returned untouched, and that is not an exception to the once-rule: a
-// local read has no side effect and nothing to alias, and the ident paths have already produced a
+// A bare LOCAL ident receiver is returned untouched, and that is not an exception to the once-rule:
+// a local read has no side effect and nothing to alias, and the ident paths have already produced a
 // once-evaluated temp of their own (the capture machinery's snapshot, or the box-ref arm above).
-// Hoisting it again would emit a second copy of a single evaluation, not a second evaluation.
+// Hoisting it again would emit a second copy of a single evaluation, not a second evaluation. A
+// PACKAGE-LEVEL var is never a capture, so no snapshot exists for it: left bare, `peek := g.peek`
+// emitted `() => g.peek()` and `fp := gp.inc` (gp a pointer var) `() => gp.inc()`, each reading the
+// static field at CALL time, so a write to g, or repointing gp, after the method value was taken
+// reached the call (Go 0 and 1, the conversion 7 and 0). It takes the temp like any other receiver.
 //
 // Where there is no statement-level sink, the previous rendering stands and the site is left as it
 // was -- never apply a rename you cannot also declare.
@@ -2587,8 +2690,10 @@ func (v *Visitor) hoistReceiverEvaluation(selectorExpr *ast.SelectorExpr, render
 		return rendered
 	}
 
-	if _, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
-		return rendered
+	if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+		if packageVar, ok := v.info.ObjectOf(ident).(*types.Var); !ok || packageVar.Parent() != v.pkg.Scope() {
+			return rendered
+		}
 	}
 
 	if tempName := v.hoistReceiverTemp(selectorExpr.X, false); tempName != "" {

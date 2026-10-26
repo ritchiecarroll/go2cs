@@ -79,11 +79,13 @@ partial interface GoStringer {
 // omitted. This function allows a [Formatter] to reconstruct the original
 // directive triggering the call to Format.
 public static @string FormatString(State state, rune verb) {
+    var bᴷ = new stackAppend<byte>();
+
     array<byte> tmp = new(16);               // Use a local buffer.
     var b = append(tmp[..0], (byte)((rune)'%'));
     foreach (var (_, c) in (@string)" +-#0"u8) { // All known flags
         if (state.Flag((nint)c)) { // The argument is an int for historical reasons.
-            b = append(b, (byte)c);
+            b = append(bᴷ, b, (byte)c);
         }
     }
     {
@@ -98,7 +100,7 @@ public static @string FormatString(State state, rune verb) {
         }
     }
     b = utf8.AppendRune(b, verb);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // Use simple []byte instead of bytes.Buffer to avoid large dependency.
@@ -256,7 +258,7 @@ public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -306,13 +308,14 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
 
 // Append formats using the default formats for its operands, appends the result to
 // the byte slice, and returns the updated slice.
+// Spaces are added between operands when neither is a string.
 public static slice<byte> Append(slice<byte> b, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
@@ -358,7 +361,7 @@ public static @string Sprintln(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -657,7 +660,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
         break;
     }
     case (rune)'q': {
-        p.fmt.fmtQ(((@string)v));
+        p.fmt.fmtQ((@string)v);
         break;
     }
     default: {
@@ -720,10 +723,11 @@ internal static readonly @string methodˢ = " method: "u8;
 internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string method) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var p = ref Ꮡp.DerefOrNull();
 
         {
-            var err = recover(); if (err != default!) {
+            var err = recover(calledByDefer); if (err != default!) {
                 // If it's a nil pointer, just say "<nil>". The likeliest causes are a
                 // Stringer that fails to guard against nil or a nil pointer for a
                 // value receiver, and in either case, "<nil>" is a nice result.
@@ -792,7 +796,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
         {
             var (formatter, ok) = p.arg._<Formatter>(ᐧ); if (ok) {
                 handled = true;
-                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢ, ref ᒐ);
+                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢ, ref ᒐ, recovers: true);
                 formatter.Format(new ppжState(Ꮡp), verb);
                 goto ᒐdone;
             }
@@ -803,7 +807,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
             {
                 var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢ, ref ᒐ, recovers: true);
                     // Print the result of GoString unadorned.
                     p.fmt.fmtS(stringer.GoString());
                     goto ᒐdone;
@@ -822,13 +826,13 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
                 switch (p.arg.type()) {
                 case {} Δv when Δv._<error>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢ, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.Error(), verb);
                     goto ᒐdone;
                 }
                 case {} Δv when Δv._<Stringer>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢ, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.String(), verb);
                     goto ᒐdone;
                 }}
@@ -1114,7 +1118,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
                         // so we build a slice by hand. This is a rare case but it would be nice
                         // if reflection could help a little more.
                         bytes = new slice<byte>(f.Len());
-                        foreach (var (i, _) in bytes) {
+                        foreach (var i in range(bytes)) {
                             bytes[i] = (byte)f.Index(i).Uint();
                         }
                     }
@@ -1414,11 +1418,7 @@ break_simpleFormat:;
             break;
         }
 
-        var verb = (rune)format[i];
-        nint size = 1;
-        if (verb >= utf8.RuneSelf) {
-            (verb, size) = utf8.DecodeRuneInString(format.slice(i));
-        }
+        var (verb, size) = utf8.DecodeRuneInString(format.slice(i));
         i += size;
 
         var matchᴛ2 = false;

@@ -45,6 +45,12 @@ using static go.crypto.ed25519_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -53,7 +59,7 @@ using static go.crypto.ed25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "ACtewoKClN6SgoKokoKClKyyAAYYAA4IgoKUgoKAgqSUpIKUpKQADSCQrtKCpoKAgraCgq7UgoKmgoKUlKrGgoKmuIKClIIAAhDSAAUcAA0CgIKkgoKUlKSClKSk")]
+[assembly: go.GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "AC9kwoKClN6SgoKokoKClKyyAAsgAAsCuoKUgoKAgqSUpIKUpKQADSCQpAABFgAJAoKCgoKmuIKAgraCgq7UgoKmgoKUlKrGgoKmgrqClIIAAhDSAAUcAA0CgIKkgoKUlKSClKSk", "98-100:1;100-102:2;204-206:1;206-208:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -81,11 +87,14 @@ public static partial class ed25519_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcrypto() => builtin.initPackage(typeof(crypto_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140cache() => builtin.initPackage(typeof(go.crypto.@internal.fips140cache_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸed25519() => builtin.initPackage(typeof(go.crypto.@internal.fips140.ed25519_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsubtle() => builtin.initPackage(typeof(go.crypto.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(go.@internal.godebug_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>

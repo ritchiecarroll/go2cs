@@ -78,10 +78,30 @@ var syscallFunnelFuncNames = map[string]bool{
 // trampoline over abi.FuncPCABI0 exactly like package syscall's darwin ones) and no other function
 // among these names — measured as the one raw pointer-derived funnel argument outside package
 // syscall on darwin, CFNumberGetValue's `uintptr(unsafe.Pointer(&value))`.
+//
+// ⚠ A PATH IS RELEASE-SPECIFIC, and a moved package fails SILENTLY here: its callers simply stop
+// being funnel calls, the pointer arguments go unpinned, and the package still compiles. Go 1.26
+// moved Syscall6 to internal/runtime/syscall/linux (the package split into linux/ and windows/), and
+// the 1.26 emission of its EpollWait/EpollCtl/Open/Read passed `(uintptr)ev`, `(uintptr)Ꮡevent`,
+// `(uintptr)Ꮡpath` and `(uintptr)p0` to Syscall6 with no KeepAlive (the i9's H5 re-run, 2026-10-15),
+// where the 1.24 emission pinned them. Both paths stay: the converter still converts a 1.24 GOROOT.
+// The windows half declares only StdCall, whose arguments travel in a *StdCallInfo struct rather
+// than as `uintptr(...)` call arguments, so it is not a funnel of this shape.
+//
+// TestSyscallFunnelPackagePathsAreRealPackages holds every entry to the GOROOT under test: a live
+// entry must be a real std package for some GOOS, a retired one (syscallFunnelRetiredPaths) must be
+// gone from any release at or past its retirement. The next move fails it by name.
 var syscallFunnelPackagePaths = map[string]bool{
-	"syscall":                    true,
-	"internal/runtime/syscall":   true,
-	"crypto/x509/internal/macos": true,
+	"syscall":                        true,
+	"internal/runtime/syscall":       true,
+	"internal/runtime/syscall/linux": true,
+	"crypto/x509/internal/macos":     true,
+}
+
+// syscallFunnelRetiredPaths names the syscallFunnelPackagePaths entries kept only for an OLDER
+// GOROOT, each with the Go release that removed the package.
+var syscallFunnelRetiredPaths = map[string]string{
+	"internal/runtime/syscall": "go1.26",
 }
 
 // syscallFunnelCall reports whether callExpr calls one of the funnel functions — resolved via

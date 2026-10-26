@@ -29,11 +29,11 @@ internal static void Main() {
     arr = new nint[]{10, 20, 30, 40, 50}.array();
     var p = Ꮡarr;
 
-    var full = (~p)[..];
-    var low = (~p)[2..];
-    var high = (~p)[..3];
-    var mid = (~p)[1..4];
-    var three = (~p).slice(1, 3, 4);
+    var full = p.slice();
+    var low = p.slice(2);
+    var high = p.slice(0, 3);
+    var mid = p.slice(1, 4);
+    var three = p.slice(1, 3, 4);
 
     fmt.Println(full);
     fmt.Println(low);
@@ -47,6 +47,39 @@ internal static void Main() {
     ref var g = ref heap<grid>(out var Ꮡg);
     g = new grid(new nint[]{2, 4, 6, 8}.array());
     fmt.Println(g.firstTwo(), sumParam(Ꮡg));
+
+    rangeIndexOnly();
+}
+
+internal static void rangeIndexOnly() {
+    ж<array<nint>> nilp = default!;
+    foreach (var i in range(nilp, 3)) {
+        fmt.Print(i, " ");
+    }
+    fmt.Println();
+
+    ж<grid> nilg = default!;
+    nint count = 0;
+    foreach (var _ᴛ1 in range(nilg, 4)) {
+        count++;
+    }
+    fmt.Println("nil *grid ranges", count);
+
+    var p = Ꮡ(new @string[]{"a", "b"}.array());
+    foreach (var i in range(p, 2)) {
+        p.Value[i] += "!"u8;
+    }
+    fmt.Println(p.Value[0], p.Value[1]);
+
+    grid g = default!;
+    g.fill();
+    fmt.Println("receiver ranges", g);
+}
+
+internal static void fill(this ref grid b) {
+    foreach (var i in range(4)) {
+        b.Value[i] = i * 10;
+    }
 }
 
 } // end main_package

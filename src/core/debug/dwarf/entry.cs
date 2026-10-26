@@ -88,12 +88,12 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
 
         // Walk over attributes again, this time writing them down.
         abbrev a = default!;
-        a.tag = ((Tag)(uint32)b.@uint());
+        a.tag = (Tag)(uint32)b.@uint();
         a.children = b.uint8() != 0;
         a.field = new slice<afield>(n);
-        foreach (var (i, _) in a.field) {
-            a.field[i].attr = ((Attr)(uint32)b.@uint());
-            a.field[i].fmt = ((format)(uint32)b.@uint());
+        foreach (var i in range(a.field)) {
+            a.field[i].attr = (Attr)(uint32)b.@uint();
+            a.field[i].fmt = (format)(uint32)b.@uint();
             a.field[i].@class = formToClass(a.field[i].fmt, a.field[i].attr, vers, Ꮡb);
             if (a.field[i].fmt == formImplicitConst) {
                 a.field[i].val = b.@int();
@@ -114,7 +114,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
 // attrIsExprloc indicates attributes that allow exprloc values that
 // are encoded as block values in DWARF 2 and 3. See DWARF 4, Figure
 // 20.
-internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
+[GoLazy] partial class lazyᴛattrIsExprloc { internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
     [AttrLocation] = true,
     [AttrByteSize] = true,
     [AttrBitOffset] = true,
@@ -135,11 +135,11 @@ internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
     [AttrAssociated] = true,
     [AttrDataLocation] = true,
     [AttrStride] = true
-};
+}; }
 
 // attrPtrClass indicates the *ptr class of attributes that have
 // encoding formSecOffset in DWARF 4 or formData* in DWARF 2 and 3.
-internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
+[GoLazy] partial class lazyᴛattrPtrClass { internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
     [AttrLocation] = ClassLocListPtr,
     [AttrStmtList] = ClassLinePtr,
     [AttrStringLength] = ClassLocListPtr,
@@ -158,7 +158,7 @@ internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
     [AttrAddrBase] = ClassAddrPtr,
     [AttrRnglistsBase] = ClassRngListsPtr,
     [AttrLoclistsBase] = ClassLocListPtr
-};
+}; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cannotDetermineClassOfˢ = "cannot determine class of unknown attribute form"u8;
@@ -245,7 +245,7 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
     }
 }
 
-// An entry is a sequence of attribute/value pairs.
+// An Entry is a sequence of attribute/value pairs.
 partial struct Entry {
     public Offset Offset; // offset of Entry in DWARF info
     public Tag Tag;    // tag (kind of Entry)
@@ -440,21 +440,15 @@ internal static readonly @string dwFormStrxWithNoDebugStrˢ = "DW_FORM_strx with
 internal static readonly @string unknownOffsetSizeForDwˢ = "unknown offset size for DW_FORM_strx"u8;
 internal static readonly @string unknownSizeForDwFormStrpˢ2 = "unknown size for DW_FORM_strp_sup"u8;
 
-// If we are currently parsing the compilation unit,
-// we can't evaluate Addrx or Strx until we've seen the
-// relevant base entry.
-internal partial struct entry_delayed /*dyn*/ {
-    internal nint idx;
-    internal uint64 off;
-    internal format fmt;
-}
-
 // Entry reads a single entry from buf, decoding
 // according to the given abbreviation table.
-internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable atab, Offset ubase, nint vers) {
+internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, ж<unit> Ꮡu) {
     ref var b = ref Ꮡb.DerefOrNull();
-    ref var cu = ref Ꮡcu.DerefOrNull();
+    ref var u = ref Ꮡu.DerefOrNull();
 
+    var atab = u.atable;
+    var ubase = u.@base;
+    nint vers = u.vers;
     ref var off = ref heap<Offset>(out var Ꮡoff);
     off = b.off;
     var id = (uint32)b.@uint();
@@ -472,7 +466,6 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         Children: a.children,
         Field: new slice<Field>(len(a.field))
     ));
-    slice<entry_delayed> delay = default!;
 
     @string resolveStrx(uint64 strBase, uint64 offΔ1) {
         offΔ1 += strBase;
@@ -533,12 +526,12 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         return rnglistsBase + offΔ2;
     }
 
-    foreach (var (i, _) in (~e).Field) {
+    foreach (var i in range((~e).Field)) {
         (~e).Field[i].Attr = a.field[i].attr;
         (~e).Field[i].Class = a.field[i].@class;
         var fmt = a.field[i].fmt;
         if (fmt == formIndirect) {
-            fmt = ((format)(uint32)b.@uint());
+            fmt = (format)(uint32)b.@uint();
             (~e).Field[i].Class = formToClass(fmt, a.field[i].attr, vers, Ꮡb);
         }
         any val = default!;
@@ -548,53 +541,39 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
             val = b.addr();
         }
         else if (exprᴛ1 == formAddrx || exprᴛ1 == formAddrx1 || exprᴛ1 == formAddrx2 || exprᴛ1 == formAddrx3 || exprᴛ1 == formAddrx4) {
-            do {
-                uint64 offΔ6 = default!;
-                var exprᴛ2 = fmt;
-                if (exprᴛ2 == formAddrx) {
-                    offΔ6 = b.@uint();
-                }
-                else if (exprᴛ2 == formAddrx1) {
-                    offΔ6 = (uint64)b.uint8();
-                }
-                else if (exprᴛ2 == formAddrx2) {
-                    offΔ6 = (uint64)b.uint16();
-                }
-                else if (exprᴛ2 == formAddrx3) {
-                    offΔ6 = (uint64)b.uint24();
-                }
-                else if (exprᴛ2 == formAddrx4) {
-                    offΔ6 = (uint64)b.uint32();
-                }
-                if ((~b.dwarf).addr == default!) {
-                    b.error(dwFormAddrxWithNoDebugˢ);
-                }
-                if (b.err != default!) {
-                    return default!;
-                }
+            uint64 offΔ6 = default!;
+            var exprᴛ2 = fmt;
+            if (exprᴛ2 == formAddrx) {
+                offΔ6 = b.@uint();
+            }
+            else if (exprᴛ2 == formAddrx1) {
+                offΔ6 = (uint64)b.uint8();
+            }
+            else if (exprᴛ2 == formAddrx2) {
+                offΔ6 = (uint64)b.uint16();
+            }
+            else if (exprᴛ2 == formAddrx3) {
+                offΔ6 = (uint64)b.uint24();
+            }
+            else if (exprᴛ2 == formAddrx4) {
+                offΔ6 = (uint64)b.uint32();
+            }
+            if ((~b.dwarf).addr == default!) {
+                b.error(dwFormAddrxWithNoDebugˢ);
+            }
+            if (b.err != default!) {
+                return default!;
+            }
 
-                // We have to adjust by the offset of the
-                // compilation unit. This won't work if the
-                // program uses Reader.Seek to skip over the
-                // unit. Not much we can do about that.
-                int64 addrBase = default!;
-                if (Ꮡcu != nil){
-                    (addrBase, _) = cu.Val(AttrAddrBase)._<int64>(ᐧ);
-                } else 
-                if (a.tag == TagCompileUnit) {
-                    delay = append(delay, new entry_delayed(i, offΔ6, formAddrx));
-                    break;
+            var addrBase = (int64)u.addrBase();
+            error err = default!;
+            (val, err) = b.dwarf.debugAddr(b.format, (uint64)addrBase, offΔ6);
+            if (err != default!) {
+                if (b.err == default!) {
+                    b.err = err;
                 }
-
-                error err = default!;
-                (val, err) = b.dwarf.debugAddr(b.format, (uint64)addrBase, offΔ6);
-                if (err != default!) {
-                    if (b.err == default!) {
-                        b.err = err;
-                    }
-                    return default!;
-                }
-            } while (false);
+                return default!;
+            }
         }
         // block
         else if (exprᴛ1 == formDwarfBlock1) {
@@ -626,7 +605,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
             val = b.bytes(16);
         }
         else if (exprᴛ1 == formSdata) {
-            val = (int64)b.@int();
+            val = b.@int();
         }
         else if (exprᴛ1 == formUdata) {
             val = (int64)b.@uint();
@@ -651,16 +630,16 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 b.error(unknownVersionForDwFormˢ);
             } else 
             if (versΔ2 == 2){
-                val = ((Offset)(uint32)b.addr());
+                val = (Offset)(uint32)b.addr();
             } else {
                 var (is64, known) = b.format.dwarf64();
                 if (!known){
                     b.error(unknownSizeForDwFormRefˢ);
                 } else 
                 if (is64){
-                    val = ((Offset)(uint32)b.uint64());
+                    val = (Offset)(uint32)b.uint64();
                 } else {
-                    val = ((Offset)b.uint32());
+                    val = (Offset)b.uint32();
                 }
             }
         }
@@ -718,55 +697,41 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
             }
         }
         else if (exprᴛ1 == formStrx || exprᴛ1 == formStrx1 || exprᴛ1 == formStrx2 || exprᴛ1 == formStrx3 || exprᴛ1 == formStrx4) {
-            do {
-                uint64 offΔ8 = default!;
-                var exprᴛ3 = fmt;
-                if (exprᴛ3 == formStrx) {
-                    offΔ8 = b.@uint();
-                }
-                else if (exprᴛ3 == formStrx1) {
-                    offΔ8 = (uint64)b.uint8();
-                }
-                else if (exprᴛ3 == formStrx2) {
-                    offΔ8 = (uint64)b.uint16();
-                }
-                else if (exprᴛ3 == formStrx3) {
-                    offΔ8 = (uint64)b.uint24();
-                }
-                else if (exprᴛ3 == formStrx4) {
-                    offΔ8 = (uint64)b.uint32();
-                }
-                if (len((~b.dwarf).strOffsets) == 0) {
-                    b.error(dwFormStrxWithNoDebugStrˢ);
-                }
-                var (is64, known) = b.format.dwarf64();
-                if (!known) {
-                    b.error(unknownOffsetSizeForDwˢ);
-                }
-                if (b.err != default!) {
-                    return default!;
-                }
-                if (is64){
-                    offΔ8 *= 8;
-                } else {
-                    offΔ8 *= 4;
-                }
+            uint64 offΔ8 = default!;
+            var exprᴛ3 = fmt;
+            if (exprᴛ3 == formStrx) {
+                offΔ8 = b.@uint();
+            }
+            else if (exprᴛ3 == formStrx1) {
+                offΔ8 = (uint64)b.uint8();
+            }
+            else if (exprᴛ3 == formStrx2) {
+                offΔ8 = (uint64)b.uint16();
+            }
+            else if (exprᴛ3 == formStrx3) {
+                offΔ8 = (uint64)b.uint24();
+            }
+            else if (exprᴛ3 == formStrx4) {
+                offΔ8 = (uint64)b.uint32();
+            }
+            if (len((~b.dwarf).strOffsets) == 0) {
+                b.error(dwFormStrxWithNoDebugStrˢ);
+            }
+            var (is64, known) = b.format.dwarf64();
+            if (!known) {
+                b.error(unknownOffsetSizeForDwˢ);
+            }
+            if (b.err != default!) {
+                return default!;
+            }
+            if (is64){
+                offΔ8 *= 8;
+            } else {
+                offΔ8 *= 4;
+            }
 
-                // We have to adjust by the offset of the
-                // compilation unit. This won't work if the
-                // program uses Reader.Seek to skip over the
-                // unit. Not much we can do about that.
-                int64 strBase = default!;
-                if (Ꮡcu != nil){
-                    (strBase, _) = cu.Val(AttrStrOffsetsBase)._<int64>(ᐧ);
-                } else 
-                if (a.tag == TagCompileUnit) {
-                    delay = append(delay, new entry_delayed(i, offΔ8, formStrx));
-                    break;
-                }
-
-                val = resolveStrx((uint64)strBase, offΔ8);
-            } while (false);
+            var strBase = (int64)u.strOffsetsBase();
+            val = resolveStrx((uint64)strBase, offΔ8);
         }
         else if (exprᴛ1 == formStrpSup) {
             var (is64, known) = b.format.dwarf64();
@@ -816,24 +781,10 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         }
         // rnglist
         else if (exprᴛ1 == formRnglistx) {
-            do {
-                var offΔ9 = b.@uint();
+            var offΔ9 = b.@uint();
 
-                // We have to adjust by the rnglists_base of
-                // the compilation unit. This won't work if
-                // the program uses Reader.Seek to skip over
-                // the unit. Not much we can do about that.
-                int64 rnglistsBase = default!;
-                if (Ꮡcu != nil){
-                    (rnglistsBase, _) = cu.Val(AttrRnglistsBase)._<int64>(ᐧ);
-                } else 
-                if (a.tag == TagCompileUnit) {
-                    delay = append(delay, new entry_delayed(i, offΔ9, formRnglistx));
-                    break;
-                }
-
-                val = resolveRnglistx((uint64)rnglistsBase, offΔ9);
-            } while (false);
+            var rnglistsBase = (int64)u.rngListsBase();
+            val = resolveRnglistx((uint64)rnglistsBase, offΔ9);
         }
         else { /* default: */
             b.error("unknown entry attr format 0x"u8 + strconv.FormatInt((int64)(uint32)fmt, 16));
@@ -844,34 +795,6 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
     if (b.err != default!) {
         return default!;
     }
-
-    foreach (var (_, del) in delay) {
-        var exprᴛ4 = del.fmt;
-        if (exprᴛ4 == formAddrx) {
-            var (addrBase, _) = e.Val(AttrAddrBase)._<int64>(ᐧ);
-            var (val, err) = b.dwarf.debugAddr(b.format, (uint64)addrBase, del.off);
-            if (err != default!) {
-                b.err = err;
-                return default!;
-            }
-            (~e).Field[del.idx].Val = val;
-        }
-        else if (exprᴛ4 == formStrx) {
-            var (strBase, _) = e.Val(AttrStrOffsetsBase)._<int64>(ᐧ);
-            (~e).Field[del.idx].Val = resolveStrx((uint64)strBase, del.off);
-            if (b.err != default!) {
-                return default!;
-            }
-        }
-        else if (exprᴛ4 == formRnglistx) {
-            var (rnglistsBase, _) = e.Val(AttrRnglistsBase)._<int64>(ᐧ);
-            (~e).Field[del.idx].Val = resolveRnglistx((uint64)rnglistsBase, del.off);
-            if (b.err != default!) {
-                return default!;
-            }
-        }
-    }
-
     return e;
 }
 
@@ -927,6 +850,7 @@ public static void Seek(this ref ΔReader r, Offset off) {
         var uΔ1 = Ꮡ((~d).unit, 0);
         r.unit = 0;
         r.b = makeBuf(r.d, new unitжdataFormat(uΔ1), infoˢ, (~uΔ1).off, (~uΔ1).data);
+        r.collectDwarf5BaseOffsets(uΔ1);
         r.cu = default!;
         return;
     }
@@ -942,6 +866,7 @@ public static void Seek(this ref ΔReader r, Offset off) {
     var u = Ꮡ((~d).unit, i);
     r.unit = i;
     r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, off, (~u).data.slice((nint)(uint32)(off - (~u).off)));
+    r.collectDwarf5BaseOffsets(u);
 }
 
 // maybeNextUnit advances to the next unit if this one is finished.
@@ -957,6 +882,21 @@ internal static void nextUnit(this ref ΔReader r) {
     var u = Ꮡ((~r.d).unit, r.unit);
     r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, (~u).off, (~u).data);
     r.cu = default!;
+    r.collectDwarf5BaseOffsets(u);
+}
+
+internal static void collectDwarf5BaseOffsets(this ref ΔReader r, ж<unit> Ꮡu) {
+    ref var u = ref Ꮡu.DerefOrNull();
+
+    if (u.vers < 5 || u.unit5 != nil) {
+        return;
+    }
+    u.unit5 = @new<unit5>();
+    {
+        var err = r.d.collectDwarf5BaseOffsets(Ꮡu); if (err != default!) {
+            r.err = err;
+        }
+    }
 }
 
 // Next reads the next entry from the encoded entry stream.
@@ -974,7 +914,7 @@ public static (ж<Entry>, error) Next(this ж<ΔReader> Ꮡr) {
         return (default!, default!);
     }
     var u = Ꮡ((~r.d).unit, r.unit);
-    var e = Ꮡr.of(dwarf_package.ΔReader.Ꮡb).entry(r.cu, (~u).atable, (~u).@base, (~u).vers);
+    var e = Ꮡr.of(dwarf_package.ΔReader.Ꮡb).entry(r.cu, u);
     if (r.b.err != default!) {
         r.err = r.b.err;
         return (default!, r.err);
@@ -1068,6 +1008,7 @@ public static (ж<Entry>, error) SeekPC(this ж<ΔReader> Ꮡr, uint64 pc) {
         r.cu = default!;
         var u = Ꮡ((~r.d).unit, unit);
         r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, (~u).off, (~u).data);
+        r.collectDwarf5BaseOffsets(u);
         var (e, err) = Ꮡr.Next();
         if (err != default!) {
             return (default!, err);
@@ -1200,7 +1141,7 @@ internal static (ж<Entry>, uint64, error) baseAddressForEntry(this ж<Data> Ꮡ
         var u = Ꮡ(d.unit, i);
         ref var b = ref heap<buf>(out var Ꮡb);
         b = makeBuf(Ꮡd, new unitжdataFormat(u), infoˢ, (~u).off, (~u).data);
-        cu = Ꮡb.entry(nil, (~u).atable, (~u).@base, (~u).vers);
+        cu = Ꮡb.entry(nil, u);
         if (b.err != default!) {
             return (default!, 0, b.err);
         }
@@ -1226,11 +1167,12 @@ internal static readonly @string rangesˢ = "ranges"u8;
 internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
+    var retᴷ = new stackAppend<array<uint64>>(moves: true);
 
     if (ranges < 0 || ranges > (int64)len(d.ranges)) {
         return (default!, fmt.Errorf("invalid range offset %d (max %d)"u8, ranges, len(d.ranges)));
     }
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, ((Offset)(uint32)ranges), d.ranges.slice((nint)(ranges)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, (Offset)(uint32)ranges, d.ranges.slice((nint)(ranges)));
     while (len(buf.data) > 0) {
         var low = buf.addr();
         var high = buf.addr();
@@ -1242,10 +1184,11 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
         if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))){
             @base = high;
         } else {
-            ret = append(ret, new uint64[]{@base + low, @base + high}.array());
+            ret = append(retᴷ, ret, new uint64[]{@base + low, @base + high}.array());
         }
     }
 
+    ret = move2heap(retᴷ, ret);
     return (ret, default!);
 }
 

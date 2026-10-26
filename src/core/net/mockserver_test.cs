@@ -112,7 +112,7 @@ internal static readonly @string noDualstackPortAvailableˢ = "no dualstack port
 
 internal partial struct newDualStackListener_type /*dyn*/ {
     internal @string network;
-    public partial ref global::go.net_package.TCPAddr TCPAddr { get; }
+    /*embed*/ public global::go.net_package.TCPAddr TCPAddr;
 }
 
 internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) newDualStackListener() {
@@ -193,7 +193,7 @@ internal static error teardown(this ж<localServer> Ꮡls) {
     finally { if (ᒐd1) Ꮡls.of(localServer.Ꮡlnmu).Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<localServer> newLocalServer(testing.TB t, @string network) {
+internal static partial ж<localServer> newLocalServer(testing.TB t, @string network) {
     t.Helper();
     var ln = newLocalListener(t, network);
     return Ꮡ(new localServer(Listener: ln, done: new channel<bool>(0)));
@@ -220,7 +220,7 @@ internal partial struct dualStackServer {
 internal static partial error buildup(this ж<dualStackServer> Ꮡdss, Action<ж<dualStackServer>, global::go.net_package.Listener> handler) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
-    foreach (var (i, _) in dss.lns) {
+    foreach (var i in range(dss.lns)) {
         goǃ((nint iΔ1) => {
             handler(Ꮡdss, Ꮡdss.Value.lns[iΔ1].Listener);
             builtin.close(Ꮡdss.Value.lns[iΔ1].done);
@@ -233,7 +233,7 @@ internal static error teardownNetwork(this ж<dualStackServer> Ꮡdss, @string n
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     Ꮡdss.of(dualStackServer.Ꮡlnmu).Lock();
-    foreach (var (i, _) in dss.lns) {
+    foreach (var i in range(dss.lns)) {
         if (network == dss.lns[i].network && dss.lns[i].Listener != default!) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
@@ -248,7 +248,7 @@ internal static error teardown(this ж<dualStackServer> Ꮡdss) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     Ꮡdss.of(dualStackServer.Ꮡlnmu).Lock();
-    foreach (var (i, _) in dss.lns) {
+    foreach (var i in range(dss.lns)) {
         if (dss.lns[i].Listener != default!) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
@@ -454,7 +454,7 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
 
 internal partial struct newDualStackPacketListener_type /*dyn*/ {
     internal @string network;
-    public partial ref global::go.net_package.UDPAddr UDPAddr { get; }
+    /*embed*/ public global::go.net_package.UDPAddr UDPAddr;
 }
 
 internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDualStackPacketListener() {
@@ -521,7 +521,7 @@ internal static error teardown(this ж<localPacketServer> Ꮡls) {
     return default!;
 }
 
-internal static ж<localPacketServer> newLocalPacketServer(testing.TB t, @string network) {
+internal static partial ж<localPacketServer> newLocalPacketServer(testing.TB t, @string network) {
     t.Helper();
     var c = newLocalPacketListener(t, network);
     return Ꮡ(new localPacketServer(PacketConn: c, done: new channel<bool>(0)));
@@ -558,11 +558,11 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
         if (peer == default!) { // for connected-mode sockets
             var exprᴛ1 = c.LocalAddr().Network();
             if (exprᴛ1 == "udp"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
             }
             else if (exprᴛ1 == "unixgram"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
             }
             if (err != default!) {
@@ -634,6 +634,10 @@ internal static partial (global::go.net_package.Conn client, global::go.net_pack
     try {
         t.Helper();
 
+        if (!testableNetwork(net)) {
+            t.Skipf("network %q not supported"u8, net);
+        }
+
         var ln = newLocalListener(t, net);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
@@ -675,19 +679,12 @@ internal partial interface startTestSocketPeer_type /*dyn*/ {
 
 internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, global::go.net_package.Conn conn, @string op, nint chunkSize, nint totalSize) {
     t.Helper();
-
-    if (Δruntime.GOOS == "windows"u8) {
-        // TODO(panjf2000): Windows has not yet implemented FileConn,
-        //		remove this when it's implemented in https://go.dev/issues/9503.
-        t.Fatalf("startTestSocketPeer is not supported on %s"u8, Δruntime.GOOS);
-    }
-
     var (f, err) = conn._<startTestSocketPeer_type>().File();
     if (err != default!) {
         return (default!, err);
     }
 
-    var cmd = testenv.Command(t, Δos.Args[0]);
+    var cmd = testenv.Command(t, testenv.Executable(t));
     cmd.Value.Env = new @string[]{
         "GO_NET_TEST_TRANSFER=1"u8,
         "GO_NET_TEST_TRANSFER_OP="u8 + op,
@@ -695,7 +692,14 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         "GO_NET_TEST_TRANSFER_TOTAL_SIZE="u8 + strconv.Itoa(totalSize),
         "TMPDIR="u8 + Δos.Getenv(tmpdirˢ)
     }.slice();
-    cmd.Value.ExtraFiles = append((~cmd).ExtraFiles, f);
+    if (Δruntime.GOOS == "windows"u8){
+        // Windows doesn't support ExtraFiles
+        var fd = f.Fd();
+        cmd.Value.Env = append((~cmd).Env, "GO_NET_TEST_TRANSFER_FD="u8 + strconv.FormatUint((uint64)fd, 10));
+        addCmdInheritedHandle(cmd, fd);
+    } else {
+        cmd.Value.ExtraFiles = append((~cmd).ExtraFiles, f);
+    }
     cmd.Value.Stdout = new Δos.FileжWriter(Δos.Stdout);
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
 
@@ -731,9 +735,19 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         if (Δos.Getenv("GO_NET_TEST_TRANSFER"u8) == ""u8) {
             return;
         }
-        defer(Δos.Exit, (nint)(0), ref ᒐ);
+        defer(Δos.Exit, (nint)0, ref ᒐ);
 
-        var f = Δos.NewFile((uintptr)3, "splice-test-conn"u8);
+        uintptr fd = default!;
+        if (Δruntime.GOOS == "windows"u8){
+            var (v, errΔ1) = strconv.ParseUint(Δos.Getenv("GO_NET_TEST_TRANSFER_FD"u8), 10, 0);
+            if (errΔ1 != default!) {
+                Δlog.Fatal(errΔ1);
+            }
+            fd = (uintptr)v;
+        } else {
+            fd = (uintptr)3;
+        }
+        var f = Δos.NewFile(fd, "splice-test-conn"u8);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
@@ -783,9 +797,9 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
                 buf = buf.slice(0, totalSize - count);
             }
 
-            error errΔ1 = default!;
+            error errΔ2 = default!;
             {
-                (n, errΔ1) = fn(buf); if (errΔ1 != default!) {
+                (n, errΔ2) = fn(buf); if (errΔ2 != default!) {
                     return;
                 }
             }

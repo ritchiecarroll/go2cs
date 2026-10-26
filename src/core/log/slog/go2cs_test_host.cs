@@ -18,6 +18,7 @@ internal static class Go2CsTestHost
             "example_log_level_test.go",
             "example_logvaluer_group_test.go",
             "example_logvaluer_secret_test.go",
+            "example_multi_handler_test.go",
             "example_test.go",
             "example_wrap_test.go",
             "handler.go",
@@ -28,6 +29,8 @@ internal static class Go2CsTestHost
             "level_test.go",
             "logger.go",
             "logger_test.go",
+            "multi_handler.go",
+            "multi_handler_test.go",
             "record.go",
             "record_test.go",
             "slogtest_test.go",
@@ -40,22 +43,25 @@ internal static class Go2CsTestHost
         {
             "internal",
         });
-        registry.Add("TestAliasingAndClone", slog_internal_test_package.TestAliasingAndClone, "record_test.go", 72);
-        registry.Add("TestAlloc", slog_internal_test_package.TestAlloc, "logger_test.go", 232);
+        registry.Add("TestAliasingAndClone", slog_internal_test_package.TestAliasingAndClone, "record_test.go", 83);
+        registry.Add("TestAlloc", slog_internal_test_package.TestAlloc, "logger_test.go", 330);
         registry.Add("TestAnyLevelAlloc", slog_internal_test_package.TestAnyLevelAlloc, "value_test.go", 127);
         registry.Add("TestAnyValue", slog_internal_test_package.TestAnyValue, "value_test.go", 136);
         registry.Add("TestAppendJSONValue", slog_internal_test_package.TestAppendJSONValue, "json_handler_test.go", 76);
         registry.Add("TestAttrNoAlloc", slog_internal_test_package.TestAttrNoAlloc, "attr_test.go", 14);
-        registry.Add("TestAttrs", slog_internal_test_package.TestAttrs, "logger_test.go", 162);
-        registry.Add("TestCallDepth", slog_internal_test_package.TestCallDepth, "logger_test.go", 178);
-        registry.Add("TestConcurrentWrites", slog_internal_test_package.TestConcurrentWrites, "handler_test.go", 110);
-        registry.Add("TestConnections", slog_internal_test_package.TestConnections, "logger_test.go", 76);
-        registry.Add("TestContext", slog_internal_test_package.TestContext, "logger_test.go", 474);
-        registry.Add("TestDefaultHandle", slog_internal_test_package.TestDefaultHandle, "handler_test.go", 24);
-        registry.Add("TestDiscardHandler", slog_internal_test_package.TestDiscardHandler, "handler_test.go", 716);
+        registry.Add("TestAttrs", slog_internal_test_package.TestAttrs, "logger_test.go", 167);
+        registry.Add("TestCallDepth", slog_internal_test_package.TestCallDepth, "logger_test.go", 183);
+        registry.Add("TestCallDepthConnection", slog_internal_test_package.TestCallDepthConnection, "logger_test.go", 240);
+        registry.Add("TestConcurrentWrites", slog_internal_test_package.TestConcurrentWrites, "handler_test.go", 112);
+        registry.Add("TestConnections", slog_internal_test_package.TestConnections, "logger_test.go", 81);
+        registry.Add("TestContext", slog_internal_test_package.TestContext, "logger_test.go", 572);
+        registry.Add("TestDefaultHandle", slog_internal_test_package.TestDefaultHandle, "handler_test.go", 26);
+        registry.Add("TestDiscardHandler", slog_internal_test_package.TestDiscardHandler, "handler_test.go", 770);
         registry.Add("TestEmptyGroup", slog_internal_test_package.TestEmptyGroup, "value_test.go", 257);
-        registry.Add("TestHandlerEnabled", slog_internal_test_package.TestHandlerEnabled, "handler_test.go", 595);
-        registry.Add("TestJSONAndTextHandlers", slog_internal_test_package.TestJSONAndTextHandlers, "handler_test.go", 157);
+        registry.Add("TestHandlerEnabled", slog_internal_test_package.TestHandlerEnabled, "handler_test.go", 615);
+        registry.Add("TestJSONAllocs", slog_internal_test_package.TestJSONAllocs, "json_handler_test.go", 145);
+        registry.Add("TestJSONAndTextHandlers", slog_internal_test_package.TestJSONAndTextHandlers, "handler_test.go", 159);
+        registry.Add("TestJSONAndTextHandlersWithUnavailableSource", slog_internal_test_package.TestJSONAndTextHandlersWithUnavailableSource, "handler_test.go", 641);
         registry.Add("TestJSONAppendAttrValueSpecial", slog_internal_test_package.TestJSONAppendAttrValueSpecial, "json_handler_test.go", 118);
         registry.Add("TestJSONHandler", slog_internal_test_package.TestJSONHandler, "json_handler_test.go", 23);
         registry.Add("TestKindString", slog_internal_test_package.TestKindString, "value_test.go", 17);
@@ -71,21 +77,23 @@ internal static class Go2CsTestHost
         registry.Add("TestLevelVarFlag", slog_internal_test_package.TestLevelVarFlag, "level_test.go", 195);
         registry.Add("TestLevelVarMarshalText", slog_internal_test_package.TestLevelVarMarshalText, "level_test.go", 162);
         registry.Add("TestLevelVarString", slog_internal_test_package.TestLevelVarString, "level_test.go", 209);
-        registry.Add("TestLogLoggerLevelForDefaultHandler", slog_internal_test_package.TestLogLoggerLevelForDefaultHandler, "logger_test.go", 370);
-        registry.Add("TestLogLoggerLevelForHandlerWriter", slog_internal_test_package.TestLogLoggerLevelForHandlerWriter, "logger_test.go", 403);
-        registry.Add("TestLogTextHandler", slog_internal_test_package.TestLogTextHandler, "logger_test.go", 35);
+        registry.Add("TestLogLoggerLevelForDefaultHandler", slog_internal_test_package.TestLogLoggerLevelForDefaultHandler, "logger_test.go", 468);
+        registry.Add("TestLogLoggerLevelForHandlerWriter", slog_internal_test_package.TestLogLoggerLevelForHandlerWriter, "logger_test.go", 501);
+        registry.Add("TestLogTextHandler", slog_internal_test_package.TestLogTextHandler, "logger_test.go", 40);
         registry.Add("TestLogValue", slog_internal_test_package.TestLogValue, "value_test.go", 192);
-        registry.Add("TestLoggerError", slog_internal_test_package.TestLoggerError, "logger_test.go", 434);
-        registry.Add("TestLoggerNoOps", slog_internal_test_package.TestLoggerNoOps, "logger_test.go", 461);
+        registry.Add("TestLoggerError", slog_internal_test_package.TestLoggerError, "logger_test.go", 532);
+        registry.Add("TestLoggerNoOps", slog_internal_test_package.TestLoggerNoOps, "logger_test.go", 559);
+        registry.Add("TestMultiHandler", slog_internal_test_package.TestMultiHandler, "multi_handler_test.go", 27);
         registry.Add("TestNeedsQuoting", slog_internal_test_package.TestNeedsQuoting, "text_handler_test.go", 156);
-        registry.Add("TestNewLogLogger", slog_internal_test_package.TestNewLogLogger, "logger_test.go", 453);
-        registry.Add("TestPanics", slog_internal_test_package.TestPanics, "logger_test.go", 672);
+        registry.Add("TestNewLogLogger", slog_internal_test_package.TestNewLogLogger, "logger_test.go", 551);
+        registry.Add("TestNewMultiHandlerCopy", slog_internal_test_package.TestNewMultiHandlerCopy, "multi_handler_test.go", 127);
+        registry.Add("TestPanics", slog_internal_test_package.TestPanics, "logger_test.go", 770);
         registry.Add("TestRecordAttrs", slog_internal_test_package.TestRecordAttrs, "record_test.go", 15);
         registry.Add("TestRecordSource", slog_internal_test_package.TestRecordSource, "record_test.go", 41);
-        registry.Add("TestReplaceAttrGroups", slog_internal_test_package.TestReplaceAttrGroups, "handler_test.go", 641);
-        registry.Add("TestSecondWith", slog_internal_test_package.TestSecondWith, "handler_test.go", 621);
-        registry.Add("TestSetAttrs", slog_internal_test_package.TestSetAttrs, "logger_test.go", 330);
-        registry.Add("TestSetDefault", slog_internal_test_package.TestSetDefault, "logger_test.go", 351);
+        registry.Add("TestReplaceAttrGroups", slog_internal_test_package.TestReplaceAttrGroups, "handler_test.go", 695);
+        registry.Add("TestSecondWith", slog_internal_test_package.TestSecondWith, "handler_test.go", 675);
+        registry.Add("TestSetAttrs", slog_internal_test_package.TestSetAttrs, "logger_test.go", 428);
+        registry.Add("TestSetDefault", slog_internal_test_package.TestSetDefault, "logger_test.go", 449);
         registry.Add("TestSlogtest", slog_test_package.TestSlogtest, "slogtest_test.go", 18);
         registry.Add("TestTextHandler", slog_internal_test_package.TestTextHandler, "text_handler_test.go", 21);
         registry.Add("TestTextHandlerAlloc", slog_internal_test_package.TestTextHandlerAlloc, "text_handler_test.go", 142);
@@ -95,7 +103,7 @@ internal static class Go2CsTestHost
         registry.Add("TestValueNoAlloc", slog_internal_test_package.TestValueNoAlloc, "value_test.go", 89);
         registry.Add("TestValueString", slog_internal_test_package.TestValueString, "value_test.go", 69);
         registry.Add("TestValueTime", slog_internal_test_package.TestValueTime, "value_test.go", 240);
-        registry.Add("TestWriteTimeRFC3339", slog_internal_test_package.TestWriteTimeRFC3339, "handler_test.go", 693);
+        registry.Add("TestWriteTimeRFC3339", slog_internal_test_package.TestWriteTimeRFC3339, "handler_test.go", 747);
         return TestHost.Run(registry, args);
     }
 }

@@ -13,7 +13,7 @@ using context = context_package;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using Δio = io_package;
 using os = os_package;
@@ -103,7 +103,7 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
     }
     udpReq = tcpReq[2..];
     nint l = len(tcpReq) - 2;
-    tcpReq[0] = (byte)((l >> (int)(8)));
+    tcpReq[0] = (byte)(l >> 8);
     tcpReq[1] = (byte)l;
     return (id, udpReq, tcpReq, default!);
 }
@@ -170,7 +170,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ2);
         }
     }
-    nint l = (nint)(((nint)b[0] << (int)(8)) | (nint)b[1]);
+    nint l = (nint)b[0] << 8 | (nint)b[1];
     if (l > len(b)) {
         b = new slice<byte>(l);
     }
@@ -642,7 +642,7 @@ internal static @string String(this ΔhostLookupOrder o) {
             return s;
         }
     }
-    return "hostLookupOrder="u8 + itoa.Itoa((nint)o) + "??"u8;
+    return "hostLookupOrder="u8 + strconv.Itoa((nint)o) + "??"u8;
 }
 
 internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
@@ -713,6 +713,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     slice<IPAddr> addrs = default!;
     dnsmessage.Name cname = new();
     ref var conf = ref Ꮡconf.DerefOrNull();
+    var qtypesᴷ = new stackAppend<dnsmessage.Type>();
 
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         @string canonical = default!;
@@ -744,7 +745,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     var lane = new channel<goLookupIPCNAMEOrder_result>(1);
     var qtypes = new dnsmessage.Type[]{dnsmessage.TypeA, dnsmessage.TypeAAAA}.slice();
     if (network == "CNAME"u8) {
-        qtypes = append(qtypes, dnsmessage.TypeCNAME);
+        qtypes = append(qtypesᴷ, qtypes, dnsmessage.TypeCNAME);
     }
     switch (ipVersion(network)) {
     case (rune)'4': {
@@ -950,6 +951,8 @@ internal static (@string, error) goLookupCNAME(this ж<Resolver> Ꮡr, context.C
 
 // goLookupPTR is the native Go implementation of LookupAddr.
 internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, context.Context ctx, @string addr, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
+    var ptrsᴷ = new stackAppend<@string>(moves: true);
+
     if (order == hostLookupFiles || order == hostLookupFilesDNS) {
         var names = lookupStaticAddr(addr);
         if (len(names) > 0) {
@@ -968,12 +971,13 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, Ꮡconf);
     if (err != default!) {
-        ref var dnsErr = ref heap<ж<DNSError>>(out var ᏑdnsErr);
-        if (errors.As(err, ᏑdnsErr) && (~dnsErr).IsNotFound) {
-            if (order == hostLookupDNSFiles) {
-                var names = lookupStaticAddr(addr);
-                if (len(names) > 0) {
-                    return (names, default!);
+        {
+            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && (~dnsErr).IsNotFound) {
+                if (order == hostLookupDNSFiles) {
+                    var names = lookupStaticAddr(addr);
+                    if (len(names) > 0) {
+                        return (names, default!);
+                    }
                 }
             }
         }
@@ -1011,9 +1015,10 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
                 Server: server
             ))));
         }
-        ptrs = append(ptrs, ptr.PTR.String());
+        ptrs = append(ptrsᴷ, ptrs, ptr.PTR.String());
     }
 
+    ptrs = move2heap(ptrsᴷ, ptrs);
     return (ptrs, default!);
 }
 

@@ -42,6 +42,12 @@ using static go.crypto.subtle_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -50,8 +56,8 @@ using static go.crypto.subtle_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/subtle/constant_time.go", "constant_time.cs", "AA0ewqqiqJKokqyyqqI=")]
-[assembly: go.GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAw8ABQCgoKmgpS4goK4og==", "43-47:1")]
+[assembly: go.GoPositionMap("crypto/subtle/constant_time.go", "constant_time.cs", "AA8q8qqiqJKokqyyqqI=")]
+[assembly: go.GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAxQAB4CgoKmuIKCuKKmxg==", "50-54:1")]
 [assembly: go.GoPositionMap("crypto/subtle/xor.go", "xor.cs", "AAoiAAgC")]
 // </GoSourcePositionMaps>
 
@@ -78,6 +84,5 @@ public static partial class subtle_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsubtle() => builtin.initPackage(typeof(go.crypto.@internal.fips140.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsys() => builtin.initPackage(typeof(go.@internal.runtime.sys_package));
-    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }

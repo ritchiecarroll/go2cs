@@ -36,11 +36,17 @@ using static go.crypto.@internal.fips140.tls12_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, go.crypto.@internal.fips140_package.Hash>(Pointer = true)]
+[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -50,8 +56,8 @@ using static go.crypto.@internal.fips140.tls12_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls12/cast.go", "cast.cs", "AA8egoK4uAAHEICCpA==", "16-37:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls12/tls12.go", "tls12.cs", "AA4gwoKClIKCqLKCgpSCgoKCgoKUgoIABxLmgpSCxoLGtg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/tls12/cast.go", "cast.cs", "ABAegoK4uAAHEICCpA==", "16-37:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/tls12/tls12.go", "tls12.cs", "AA8iwoKClIKCqLKCgpSCgoKCgoKUgoIABxLmgpSCxoLGtg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -82,5 +88,6 @@ public static partial class tls12_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha256() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha256_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha512() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha512_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }

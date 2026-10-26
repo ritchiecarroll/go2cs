@@ -6,9 +6,8 @@
 // Section 7.2 and allowed by SP 800-135 Revision 1.
 namespace go.crypto.@internal.fips140;
 
-using fips140 = go.crypto.@internal.fips140_package;
 // blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-using go.crypto.@internal;
+using hash = hash_package;
 
 partial class ssh_package {
 
@@ -26,14 +25,14 @@ public static Direction ClientKeys;
     ClientKeys = new Direction(new byte[]{(rune)'A'}.slice(), new byte[]{(rune)'C'}.slice(), new byte[]{(rune)'E'}.slice());
 }
 
-public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash>(Func<Hash> hash, Direction d, slice<byte> K, slice<byte> H, slice<byte> sessionID, nint ivKeyLen, nint keyLen, nint macKeyLen)
-    where Hash : fips140.Hash
+public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash>(Func<Hash> hashΔ1, Direction d, slice<byte> K, slice<byte> H, slice<byte> sessionID, nint ivKeyLen, nint keyLen, nint macKeyLen)
+    where Hash : hash.Hash
 {
     slice<byte> ivKey = default!;
     slice<byte> key = default!;
     slice<byte> macKey = default!;
 
-    var h = hash();
+    var h = hashΔ1();
     var Hʗ1 = H;
     var Kʗ1 = K;
     var hʗ1 = h;

@@ -74,7 +74,7 @@ partial struct interlaceScan {
 
 // interlacing defines Adam7 interlacing, with 7 passes of reduced images.
 // See https://www.w3.org/TR/PNG/#8Interlace
-internal static slice<interlaceScan> interlacing = new interlaceScan[]{
+[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = new interlaceScan[]{
     new(8, 8, 0, 0),
     new(8, 8, 4, 0),
     new(4, 8, 0, 4),
@@ -82,7 +82,7 @@ internal static slice<interlaceScan> interlacing = new interlaceScan[]{
     new(2, 4, 0, 2),
     new(2, 2, 1, 0),
     new(1, 2, 0, 1)
-}.slice();
+}.slice(); }
 
 // Decoding stage.
 // The PNG specification says that the IHDR, PLTE (if present), tRNS (if
@@ -627,7 +627,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 8) {
                     var b = cdat[x / 8];
                     for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                        var ycol = (uint8)(((b >> (int)(7))) * 0xff);
+                        var ycol = (uint8)((b >> 7) * 0xff);
                         var acol = (uint8)0xff;
                         if (ycol == ty) {
                             acol = 0x00;
@@ -640,7 +640,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 8) {
                     var b = cdat[x / 8];
                     for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(7))) * 0xff)));
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 7) * 0xff)));
                         b <<= (int)(1);
                     }
                 }
@@ -652,7 +652,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 4) {
                     var b = cdat[x / 4];
                     for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                        var ycol = (uint8)(((b >> (int)(6))) * 0x55);
+                        var ycol = (uint8)((b >> 6) * 0x55);
                         var acol = (uint8)0xff;
                         if (ycol == ty) {
                             acol = 0x00;
@@ -665,7 +665,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 4) {
                     var b = cdat[x / 4];
                     for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(6))) * 0x55)));
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 6) * 0x55)));
                         b <<= (int)(2);
                     }
                 }
@@ -677,7 +677,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 2) {
                     var b = cdat[x / 2];
                     for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                        var ycol = (uint8)(((b >> (int)(4))) * 0x11);
+                        var ycol = (uint8)((b >> 4) * 0x11);
                         var acol = (uint8)0xff;
                         if (ycol == ty) {
                             acol = 0x00;
@@ -690,7 +690,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 for (nint x = 0; x < width; x += 2) {
                     var b = cdat[x / 2];
                     for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(4))) * 0x11)));
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)((b >> 4) * 0x11)));
                         b <<= (int)(4);
                     }
                 }
@@ -759,7 +759,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             for (nint x = 0; x < width; x += 8) {
                 var b = cdat[x / 8];
                 for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                    var idx = (uint8)((b >> (int)(7)));
+                    var idx = (uint8)((b >> 7));
                     if (len((~paletted).Palette) <= (nint)idx) {
                         paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
@@ -772,7 +772,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             for (nint x = 0; x < width; x += 4) {
                 var b = cdat[x / 4];
                 for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                    var idx = (uint8)((b >> (int)(6)));
+                    var idx = (uint8)((b >> 6));
                     if (len((~paletted).Palette) <= (nint)idx) {
                         paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
@@ -785,7 +785,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             for (nint x = 0; x < width; x += 2) {
                 var b = cdat[x / 2];
                 for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                    var idx = (uint8)((b >> (int)(4)));
+                    var idx = (uint8)((b >> 4));
                     if (len((~paletted).Palette) <= (nint)idx) {
                         paletted.Value.Palette = (~paletted).Palette.slice(0, (nint)idx + 1);
                     }
@@ -811,9 +811,9 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
         }
         else if (exprᴛ3 == cbG16) {
             if (d.useTransparent){
-                var ty = (uint16)((uint16)((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
+                var ty = (uint16)((uint16)((uint16)d.transparent[0] << 8) | (uint16)d.transparent[1]);
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
+                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << 8) | (uint16)cdat[2 * x + 1]);
                     var acol = (uint16)0xffff;
                     if (ycol == ty) {
                         acol = 0x0000;
@@ -822,27 +822,27 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
+                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << 8) | (uint16)cdat[2 * x + 1]);
                     gray16.SetGray16(x, y, new color.Gray16(ycol));
                 }
             }
         }
         else if (exprᴛ3 == cbGA16) {
             for (nint x = 0; x < width; x++) {
-                var ycol = (uint16)((uint16)((uint16)cdat[4 * x + 0] << (int)(8)) | (uint16)cdat[4 * x + 1]);
-                var acol = (uint16)((uint16)((uint16)cdat[4 * x + 2] << (int)(8)) | (uint16)cdat[4 * x + 3]);
+                var ycol = (uint16)((uint16)((uint16)cdat[4 * x + 0] << 8) | (uint16)cdat[4 * x + 1]);
+                var acol = (uint16)((uint16)((uint16)cdat[4 * x + 2] << 8) | (uint16)cdat[4 * x + 3]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(ycol, ycol, ycol, acol));
             }
         }
         else if (exprᴛ3 == cbTC16) {
             if (d.useTransparent){
-                var tr = (uint16)((uint16)((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
-                var tg = (uint16)((uint16)((uint16)d.transparent[2] << (int)(8)) | (uint16)d.transparent[3]);
-                var tb = (uint16)((uint16)((uint16)d.transparent[4] << (int)(8)) | (uint16)d.transparent[5]);
+                var tr = (uint16)((uint16)((uint16)d.transparent[0] << 8) | (uint16)d.transparent[1]);
+                var tg = (uint16)((uint16)((uint16)d.transparent[2] << 8) | (uint16)d.transparent[3]);
+                var tb = (uint16)((uint16)((uint16)d.transparent[4] << 8) | (uint16)d.transparent[5]);
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
-                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
-                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << 8) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << 8) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << 8) | (uint16)cdat[6 * x + 5]);
                     var acol = (uint16)0xffff;
                     if (rcol == tr && gcol == tg && bcol == tb) {
                         acol = 0x0000;
@@ -851,19 +851,19 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
-                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
-                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << 8) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << 8) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << 8) | (uint16)cdat[6 * x + 5]);
                     rgba64.SetRGBA64(x, y, new color.RGBA64(rcol, gcol, bcol, 0xffff));
                 }
             }
         }
         else if (exprᴛ3 == cbTCA16) {
             for (nint x = 0; x < width; x++) {
-                var rcol = (uint16)((uint16)((uint16)cdat[8 * x + 0] << (int)(8)) | (uint16)cdat[8 * x + 1]);
-                var gcol = (uint16)((uint16)((uint16)cdat[8 * x + 2] << (int)(8)) | (uint16)cdat[8 * x + 3]);
-                var bcol = (uint16)((uint16)((uint16)cdat[8 * x + 4] << (int)(8)) | (uint16)cdat[8 * x + 5]);
-                var acol = (uint16)((uint16)((uint16)cdat[8 * x + 6] << (int)(8)) | (uint16)cdat[8 * x + 7]);
+                var rcol = (uint16)((uint16)((uint16)cdat[8 * x + 0] << 8) | (uint16)cdat[8 * x + 1]);
+                var gcol = (uint16)((uint16)((uint16)cdat[8 * x + 2] << 8) | (uint16)cdat[8 * x + 3]);
+                var bcol = (uint16)((uint16)((uint16)cdat[8 * x + 4] << 8) | (uint16)cdat[8 * x + 5]);
+                var acol = (uint16)((uint16)((uint16)cdat[8 * x + 6] << 8) | (uint16)cdat[8 * x + 7]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(rcol, gcol, bcol, acol));
             }
         }

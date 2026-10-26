@@ -37,6 +37,19 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
             arg = operandString(ref (a).DerefOrNull(), qf);
             break;
         }
+        case slice<ж<operand>> a: {
+            ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+            Ꮡbuf.WriteByte((rune)'[');
+            foreach (var (iΔ1, x) in a) {
+                if (iΔ1 > 0) {
+                    Ꮡbuf.WriteString(", "u8);
+                }
+                Ꮡbuf.WriteString(operandString(ref (x).DerefOrNull(), qf));
+            }
+            Ꮡbuf.WriteByte((rune)']');
+            arg = buf.String();
+            break;
+        }
         case tokenꓸPos a: {
             if (Ꮡfset != nil) {
                 arg = Ꮡfset.Position(a).String();
@@ -72,8 +85,8 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
             var w = newTypeWriter(Ꮡbuf, qf);
             w.Value.tpSubscripts = tpSubscripts;
             buf.WriteByte((rune)'[');
-            foreach (var (iΔ1, x) in a) {
-                if (iΔ1 > 0) {
+            foreach (var (iΔ2, x) in a) {
+                if (iΔ2 > 0) {
                     buf.WriteString(", "u8);
                 }
                 w.typ(x);
@@ -87,8 +100,8 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
             var w = newTypeWriter(Ꮡbuf, qf);
             w.Value.tpSubscripts = tpSubscripts;
             buf.WriteByte((rune)'[');
-            foreach (var (iΔ2, x) in a) {
-                if (iΔ2 > 0) {
+            foreach (var (iΔ3, x) in a) {
+                if (iΔ3 > 0) {
                     buf.WriteString(", "u8);
                 }
                 w.typ(new TypeParamжΔType(x));
@@ -120,10 +133,33 @@ internal static void trace(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string f
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    fmt.Printf("%s:\t%s%s\n"u8,
-        check.fset.Position(pos),
+    var pos1 = check.fset.Position(pos);
+    // Use the width of line and pos values to align the ":" by adding padding before it.
+    // Cap padding at 5: 3 digits for the line, 2 digits for the column number, which is
+    // ok for most cases.
+    nint w = ndigits(pos1.Line) + ndigits(pos1.Column);
+    @string pad = "     "u8.slice(0, max(5 - w, 0));
+    fmt.Printf("%s%s:  %s%s\n"u8,
+        pos1,
+        pad,
         strings.Repeat(".  "u8, check.indent),
         sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+}
+
+// ndigits returns the number of decimal digits in x.
+// For x < 10, the result is always 1.
+// For x > 100, the result is always 3.
+internal static nint ndigits(nint x) {
+    switch (ᐧ) {
+    case {} when x is < 10: {
+        return 1;
+    }
+    case {} when x is < 100: {
+        return 2;
+    }
+    default: {
+        return 3;
+    }}
 }
 
 // dump is only needed for debugging

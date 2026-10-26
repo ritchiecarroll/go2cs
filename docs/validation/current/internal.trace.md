@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/trace` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `7ec9e10ed`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**92 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**187 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/trace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/trace).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 2 of the matched tests identically.
+Both runtimes skip 13 of the matched tests identically.
 
 ## Verdicts
 
@@ -25,19 +25,85 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestMMUTrace/V2` | pass | pass |
 | `TestMUD` | pass | pass |
 | `TestMUDTracking` | pass | pass |
-| `TestOldtrace` | pass | pass |
-| `TestOldtrace/fmt_1_21_pprof_good` | pass | pass |
-| `TestOldtrace/http_1_19_good` | pass | pass |
-| `TestOldtrace/http_1_21_good` | pass | pass |
-| `TestOldtrace/stress_1_11_good` | pass | pass |
-| `TestOldtrace/stress_1_19_good` | pass | pass |
-| `TestOldtrace/stress_1_21_good` | pass | pass |
-| `TestOldtrace/stress_start_stop_1_11_good` | pass | pass |
-| `TestOldtrace/stress_start_stop_1_19_good` | pass | pass |
-| `TestOldtrace/stress_start_stop_1_21_good` | pass | pass |
-| `TestOldtrace/user_task_region_1_11_good` | pass | pass |
-| `TestOldtrace/user_task_region_1_19_good` | pass | pass |
-| `TestOldtrace/user_task_region_1_21_good` | pass | pass |
+| `TestMakeEvent` | pass | pass |
+| `TestMakeEvent/GoroutineTransition` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoBlock` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoCreate` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoCreateBlocked` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoCreateSyscall` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoDestroy` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoDestroySyscall` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoStart` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoStop` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoSyscallBegin` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoSyscallEnd` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoSyscallEndBlocked` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/EvGoUnblock` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatusStack_Undetermined->Runnable` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatusStack_Undetermined->Waiting` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatus_Runnable->Runnable` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatus_Runnable->Running` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatus_Undetermined->Running` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/GoStatus_Undetermined->Waiting` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/invalid_NotExits->NotExists` | pass | pass |
+| `TestMakeEvent/GoroutineTransition/invalid_Running->Undetermined` | pass | pass |
+| `TestMakeEvent/Label` | pass | pass |
+| `TestMakeEvent/Log` | pass | pass |
+| `TestMakeEvent/Log/basic` | pass | pass |
+| `TestMakeEvent/Log/invalid_kind` | pass | pass |
+| `TestMakeEvent/Metric` | pass | pass |
+| `TestMakeEvent/Metric/gomaxprocs` | pass | pass |
+| `TestMakeEvent/Metric/gomaxprocs_with_stack` | pass | pass |
+| `TestMakeEvent/Metric/heap_goal` | pass | pass |
+| `TestMakeEvent/Metric/heap_objects` | pass | pass |
+| `TestMakeEvent/Metric/invalid_metric` | pass | pass |
+| `TestMakeEvent/ProcTransition` | pass | pass |
+| `TestMakeEvent/ProcTransition/ProcStart` | pass | pass |
+| `TestMakeEvent/ProcTransition/ProcStatus` | pass | pass |
+| `TestMakeEvent/ProcTransition/ProcSteal` | pass | pass |
+| `TestMakeEvent/ProcTransition/ProcSteal_lost_info` | pass | pass |
+| `TestMakeEvent/ProcTransition/ProcStop` | pass | pass |
+| `TestMakeEvent/Range` | pass | pass |
+| `TestMakeEvent/Range/Metric/GC_concurrent_mark_phase/None` | pass | pass |
+| `TestMakeEvent/Range/Metric/GC_incremental_sweep/Proc(4)` | pass | pass |
+| `TestMakeEvent/Range/Metric/GC_mark_assist/Goroutine(4)` | pass | pass |
+| `TestMakeEvent/Range/Metric/stop-the-world_(for_a_good_reason)/Goroutine(4)` | pass | pass |
+| `TestMakeEvent/Range/RangeActive/GC_concurrent_mark_phase/None` | pass | pass |
+| `TestMakeEvent/Range/RangeActive/GC_incremental_sweep/Proc(2)` | pass | pass |
+| `TestMakeEvent/Range/RangeActive/GC_mark_assist/Goroutine(2)` | pass | pass |
+| `TestMakeEvent/Range/RangeActive/stop-the-world_(for_a_good_reason)/Goroutine(2)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_concurrent_mark_phase/None` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_concurrent_mark_phase_-_INVALID/None` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_incremental_sweep/Proc(1)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_incremental_sweep_-_INVALID/Proc(5)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_mark_assist/Goroutine(1)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/GC_mark_assist_-_INVALID/Goroutine(5)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/stop-the-world_(for_a_good_reason)/Goroutine(1)` | pass | pass |
+| `TestMakeEvent/Range/RangeBegin/stop-the-world_(for_a_good_reason)_-_INVALID/Goroutine(5)` | pass | pass |
+| `TestMakeEvent/Range/RangeEnd/GC_concurrent_mark_phase/None` | pass | pass |
+| `TestMakeEvent/Range/RangeEnd/GC_incremental_sweep/Proc(3)` | pass | pass |
+| `TestMakeEvent/Range/RangeEnd/GC_mark_assist/Goroutine(3)` | pass | pass |
+| `TestMakeEvent/Range/RangeEnd/stop-the-world_(for_a_good_reason)/Goroutine(3)` | pass | pass |
+| `TestMakeEvent/Region` | pass | pass |
+| `TestMakeEvent/Region/EvUserRegionBegin` | pass | pass |
+| `TestMakeEvent/Region/EvUserRegionEnd` | pass | pass |
+| `TestMakeEvent/Region/invalid_kind` | pass | pass |
+| `TestMakeEvent/StackSample` | pass | pass |
+| `TestMakeEvent/StackSample/basic` | pass | pass |
+| `TestMakeEvent/StackSample/invalid_kind` | pass | pass |
+| `TestMakeEvent/Sync` | pass | pass |
+| `TestMakeEvent/Sync/N` | pass | pass |
+| `TestMakeEvent/Sync/N+Batches` | pass | pass |
+| `TestMakeEvent/Sync/N+ClockSnapshot` | pass | pass |
+| `TestMakeEvent/Sync/invalid_kind` | pass | pass |
+| `TestMakeEvent/Sync/unknown_experiment` | pass | pass |
+| `TestMakeEvent/Task` | pass | pass |
+| `TestMakeEvent/Task/EvUserTaskBegin` | pass | pass |
+| `TestMakeEvent/Task/EvUserTaskEnd` | pass | pass |
+| `TestMakeEvent/Task/invalid_kind` | pass | pass |
+| `TestMakeEvent/Task/no_parent` | pass | pass |
+| `TestMakeEvent/Task/no_task` | pass | pass |
+| `TestMakeStack` | pass | pass |
 | `TestPanicEvent` | pass | pass |
 | `TestQueue` | pass | pass |
 | `TestReaderGolden` | pass | pass |
@@ -61,55 +127,84 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestReaderGolden/tests\go122-syscall-steal-proc-simple.test` | pass | pass |
 | `TestReaderGolden/tests\go122-syscall-steal-proc-sitting-in-syscall.test` | pass | pass |
 | `TestReaderGolden/tests\go122-task-across-generations.test` | pass | pass |
+| `TestReaderGolden/tests\go123-sync.test` | pass | pass |
+| `TestReaderGolden/tests\go125-sync.test` | pass | pass |
 | `TestRelatedGoroutinesV2Trace` | pass | pass |
 | `TestSummarizeGoroutinesRegionsTrace` | pass | pass |
 | `TestSummarizeGoroutinesTrace` | pass | pass |
 | `TestSummarizeTasksTrace` | pass | pass |
 | `TestTraceAnnotations` | pass | pass |
-| `TestTraceAnnotations/AllocFree` | pass | pass |
+| `TestTraceAnnotations/AllocFree` | skip | skip |
+| `TestTraceAnnotations/AsyncPreemptOff` | pass | pass |
 | `TestTraceAnnotations/Default` | pass | pass |
 | `TestTraceAnnotations/Stress` | pass | pass |
 | `TestTraceAnnotationsStress` | pass | pass |
-| `TestTraceAnnotationsStress/AllocFree` | pass | pass |
+| `TestTraceAnnotationsStress/AllocFree` | skip | skip |
+| `TestTraceAnnotationsStress/AsyncPreemptOff` | pass | pass |
 | `TestTraceAnnotationsStress/Default` | pass | pass |
 | `TestTraceAnnotationsStress/Stress` | pass | pass |
 | `TestTraceCPUProfile` | pass | pass |
-| `TestTraceCPUProfile/AllocFree` | pass | pass |
+| `TestTraceCPUProfile/AllocFree` | skip | skip |
+| `TestTraceCPUProfile/AsyncPreemptOff` | pass | pass |
 | `TestTraceCPUProfile/Default` | pass | pass |
 | `TestTraceCPUProfile/Stress` | pass | pass |
 | `TestTraceCgoCallback` | skip | skip |
 | `TestTraceFutileWakeup` | pass | pass |
-| `TestTraceFutileWakeup/AllocFree` | pass | pass |
+| `TestTraceFutileWakeup/AllocFree` | skip | skip |
+| `TestTraceFutileWakeup/AsyncPreemptOff` | pass | pass |
 | `TestTraceFutileWakeup/Default` | pass | pass |
 | `TestTraceFutileWakeup/Stress` | pass | pass |
 | `TestTraceGCStress` | pass | pass |
-| `TestTraceGCStress/AllocFree` | pass | pass |
+| `TestTraceGCStress/AllocFree` | skip | skip |
+| `TestTraceGCStress/AsyncPreemptOff` | pass | pass |
 | `TestTraceGCStress/Default` | pass | pass |
 | `TestTraceGCStress/Stress` | pass | pass |
 | `TestTraceGOMAXPROCS` | pass | pass |
-| `TestTraceGOMAXPROCS/AllocFree` | pass | pass |
+| `TestTraceGOMAXPROCS/AllocFree` | skip | skip |
+| `TestTraceGOMAXPROCS/AsyncPreemptOff` | pass | pass |
 | `TestTraceGOMAXPROCS/Default` | pass | pass |
 | `TestTraceGOMAXPROCS/Stress` | pass | pass |
+| `TestTraceGenSync` | pass | pass |
+| `TestTraceGenSync/go123-sync.test` | pass | pass |
+| `TestTraceGenSync/go125-sync.test` | pass | pass |
 | `TestTraceIterPull` | pass | pass |
-| `TestTraceIterPull/AllocFree` | pass | pass |
+| `TestTraceIterPull/AllocFree` | skip | skip |
+| `TestTraceIterPull/AsyncPreemptOff` | pass | pass |
 | `TestTraceIterPull/Default` | pass | pass |
 | `TestTraceIterPull/Stress` | pass | pass |
 | `TestTraceManyStartStop` | pass | pass |
-| `TestTraceManyStartStop/AllocFree` | pass | pass |
+| `TestTraceManyStartStop/AllocFree` | skip | skip |
+| `TestTraceManyStartStop/AsyncPreemptOff` | pass | pass |
 | `TestTraceManyStartStop/Default` | pass | pass |
 | `TestTraceManyStartStop/Stress` | pass | pass |
 | `TestTraceStacks` | pass | pass |
-| `TestTraceStacks/AllocFree` | pass | pass |
+| `TestTraceStacks/AllocFree` | skip | skip |
+| `TestTraceStacks/AsyncPreemptOff` | pass | pass |
 | `TestTraceStacks/Default` | pass | pass |
 | `TestTraceStacks/Stress` | pass | pass |
 | `TestTraceStress` | pass | pass |
-| `TestTraceStress/AllocFree` | pass | pass |
+| `TestTraceStress/AllocFree` | skip | skip |
+| `TestTraceStress/AsyncPreemptOff` | pass | pass |
 | `TestTraceStress/Default` | pass | pass |
 | `TestTraceStress/Stress` | pass | pass |
 | `TestTraceStressStartStop` | pass | pass |
-| `TestTraceStressStartStop/AllocFree` | pass | pass |
+| `TestTraceStressStartStop/AllocFree` | skip | skip |
+| `TestTraceStressStartStop/AsyncPreemptOff` | pass | pass |
 | `TestTraceStressStartStop/Default` | pass | pass |
 | `TestTraceStressStartStop/Stress` | pass | pass |
+| `TestTraceV1` | pass | pass |
+| `TestTraceV1/fmt_1_21_pprof_good` | pass | pass |
+| `TestTraceV1/http_1_19_good` | pass | pass |
+| `TestTraceV1/http_1_21_good` | pass | pass |
+| `TestTraceV1/stress_1_11_good` | pass | pass |
+| `TestTraceV1/stress_1_19_good` | pass | pass |
+| `TestTraceV1/stress_1_21_good` | pass | pass |
+| `TestTraceV1/stress_start_stop_1_11_good` | pass | pass |
+| `TestTraceV1/stress_start_stop_1_19_good` | pass | pass |
+| `TestTraceV1/stress_start_stop_1_21_good` | pass | pass |
+| `TestTraceV1/user_task_region_1_11_good` | pass | pass |
+| `TestTraceV1/user_task_region_1_19_good` | pass | pass |
+| `TestTraceV1/user_task_region_1_21_good` | pass | pass |
 | `TestTraceWaitOnPipe` | skip | skip |
 
 ## Excluded declarations

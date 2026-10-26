@@ -21,6 +21,7 @@ using os = os_package;
 using strings = strings_package;
 using testing = testing_package;
 using compress;
+using ecdh = go.crypto.ecdh_package;
 using encoding;
 using go.crypto;
 using go.crypto.@internal;
@@ -231,6 +232,7 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
     //
     // The SigVer.rsp file has been edited to remove test vectors for
     // unsupported algorithms and has been compressed.
+
     if (testing.Short()) {
         return;
     }
@@ -603,6 +605,202 @@ internal static void testRFC6979(ж<testing.T> Ꮡt, elliptic.Curve curve, @stri
     }
 }
 
+public static void TestParseAndBytesRoundTrip(ж<testing.T> Ꮡt) {
+    testAllCurves(Ꮡt, testParseAndBytesRoundTrip);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string genericˢ = "/Generic"u8;
+internal static readonly object theseMethodsDonTSupportˢ = (@string)"these methods don't support generic curves"u8;
+
+internal static void testParseAndBytesRoundTrip(ж<testing.T> Ꮡt, elliptic.Curve curve) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (strings.HasSuffix(Ꮡt.Name(), genericˢ)) {
+        Ꮡt.Skip(theseMethodsDonTSupportˢ);
+    }
+    var (priv, _) = GenerateKey(curve, rand.Reader);
+
+    var (b, err) = priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey).Bytes();
+    if (err != default!) {
+        Ꮡt.Fatalf("failed to serialize private key's public key: %v"u8, err);
+    }
+    if (b[0] != 4) {
+        Ꮡt.Fatalf("public key bytes doesn't start with 0x04 (uncompressed format)"u8);
+    }
+    (var p, err) = ParseUncompressedPublicKey(curve, b);
+    if (err != default!) {
+        Ꮡt.Fatalf("failed to parse private key's public key: %v"u8, err);
+    }
+    if (!priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey).Equal(p.OrTypedNil())) {
+        Ꮡt.Errorf("parsed private key's public key doesn't match original"u8);
+    }
+
+    (var bk, err) = priv.Bytes();
+    if (err != default!) {
+        Ꮡt.Fatalf("failed to serialize private key: %v"u8, err);
+    }
+    (var k, err) = ParseRawPrivateKey(curve, bk);
+    if (err != default!) {
+        Ꮡt.Fatalf("failed to parse private key: %v"u8, err);
+    }
+    if (!priv.Equal(k.OrTypedNil())) {
+        Ꮡt.Errorf("parsed private key doesn't match original"u8);
+    }
+
+    if (!AreEqual(curve, elliptic.P224())) {
+        var (privECDH, errΔ1) = priv.ECDH();
+        if (errΔ1 != default!) {
+            Ꮡt.Fatalf("failed to convert private key to ECDH: %v"u8, errΔ1);
+        }
+
+        (var pp, errΔ1) = privECDH.Curve().NewPublicKey(b);
+        if (errΔ1 != default!) {
+            Ꮡt.Fatalf("failed to parse with ECDH: %v"u8, errΔ1);
+        }
+        if (!privECDH.PublicKey().Equal(pp.OrTypedNil())) {
+            Ꮡt.Errorf("parsed ECDH public key doesn't match original"u8);
+        }
+        if (!bytes.Equal(b, pp.Bytes())) {
+            Ꮡt.Errorf("encoded ECDH public key doesn't match Bytes"u8);
+        }
+
+        (var kk, errΔ1) = privECDH.Curve().NewPrivateKey(bk);
+        if (errΔ1 != default!) {
+            Ꮡt.Fatalf("failed to parse with ECDH: %v"u8, errΔ1);
+        }
+        if (!privECDH.Equal(kk.OrTypedNil())) {
+            Ꮡt.Errorf("parsed ECDH private key doesn't match original"u8);
+        }
+        if (!bytes.Equal(bk, kk.Bytes())) {
+            Ꮡt.Errorf("encoded ECDH private key doesn't match Bytes"u8);
+        }
+    }
+}
+
+public static void TestInvalidPublicKeys(ж<testing.T> Ꮡt) {
+    testAllCurves(Ꮡt, testInvalidPublicKeys);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string infinityˢ = "Infinity"u8;
+internal static readonly @string notOnCurveˢ = "NotOnCurve"u8;
+internal static readonly @string compressedˢ = "Compressed"u8;
+
+internal static void testInvalidPublicKeys(ж<testing.T> Ꮡt, elliptic.Curve curve) {
+    Ꮡt.Run(infinityˢ, (ж<testing.T> tΔ1) => {
+        var k = Ꮡ(new PublicKey(Curve: curve, X: big.NewInt(0), Y: big.NewInt(0)));
+        {
+            var (_, err) = k.Bytes(); if (err == default!) {
+                tΔ1.Errorf("PublicKey.Bytes accepted infinity"u8);
+            }
+        }
+
+        var b = new byte[]{0}.slice();
+        {
+            var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == default!) {
+                tΔ1.Errorf("ParseUncompressedPublicKey accepted infinity"u8);
+            }
+        }
+        b = new slice<byte>(1 + 2 * ((~curve.Params()).BitSize + 7) / 8);
+        b[0] = 4;
+        {
+            var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == default!) {
+                tΔ1.Errorf("ParseUncompressedPublicKey accepted infinity"u8);
+            }
+        }
+    });
+    Ꮡt.Run(notOnCurveˢ, (ж<testing.T> tΔ2) => {
+        var (k, _) = GenerateKey(curve, rand.Reader);
+        k.Value.X = (~k).X.Add((~k).X, big.NewInt(1));
+        {
+            var (_, err) = k.Bytes(); if (err == default!) {
+                tΔ2.Errorf("PublicKey.Bytes accepted not on curve"u8);
+            }
+        }
+
+        var b = new slice<byte>(1 + 2 * ((~curve.Params()).BitSize + 7) / 8);
+        b[0] = 4;
+        (~k).X.FillBytes(b.slice(1, 1 + len(b) / 2));
+        (~k).Y.FillBytes(b.slice(1 + len(b) / 2));
+        {
+            var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == default!) {
+                tΔ2.Errorf("ParseUncompressedPublicKey accepted not on curve"u8);
+            }
+        }
+    });
+    Ꮡt.Run(compressedˢ, (ж<testing.T> tΔ3) => {
+        var (k, _) = GenerateKey(curve, rand.Reader);
+        var b = elliptic.MarshalCompressed(curve, (~k).X, (~k).Y);
+        {
+            var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == default!) {
+                tΔ3.Errorf("ParseUncompressedPublicKey accepted compressed key"u8);
+            }
+        }
+    });
+}
+
+public static void TestInvalidPrivateKeys(ж<testing.T> Ꮡt) {
+    testAllCurves(Ꮡt, testInvalidPrivateKeys);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string zeroˢ = "Zero"u8;
+internal static readonly @string overflowˢ = "Overflow"u8;
+internal static readonly @string lengthˢ = "Length"u8;
+
+internal static void testInvalidPrivateKeys(ж<testing.T> Ꮡt, elliptic.Curve curve) {
+    Ꮡt.Run(zeroˢ, (ж<testing.T> tΔ1) => {
+        var k = Ꮡ(new PrivateKey(new PublicKey(curve, big.NewInt(0), big.NewInt(0)), big.NewInt(0)));
+        {
+            var (_, err) = k.Bytes(); if (err == default!) {
+                tΔ1.Errorf("PrivateKey.Bytes accepted zero key"u8);
+            }
+        }
+
+        var b = new slice<byte>(((~curve.Params()).BitSize + 7) / 8);
+        {
+            var (_, err) = ParseRawPrivateKey(curve, b); if (err == default!) {
+                tΔ1.Errorf("ParseRawPrivateKey accepted zero key"u8);
+            }
+        }
+    });
+    Ꮡt.Run(overflowˢ, (ж<testing.T> tΔ2) => {
+        var d = @new<bigꓸInt>().Add((~curve.Params()).N, big.NewInt(5));
+        var (x, y) = curve.ScalarBaseMult(d.Bytes());
+        var k = Ꮡ(new PrivateKey(new PublicKey(curve, x, y), d));
+        {
+            var (_, err) = k.Bytes(); if (err == default!) {
+                tΔ2.Errorf("PrivateKey.Bytes accepted overflow key"u8);
+            }
+        }
+
+        var b = new slice<byte>(((~curve.Params()).BitSize + 7) / 8);
+        (~k).D.FillBytes(b);
+        {
+            var (_, err) = ParseRawPrivateKey(curve, b); if (err == default!) {
+                tΔ2.Errorf("ParseRawPrivateKey accepted overflow key"u8);
+            }
+        }
+    });
+    Ꮡt.Run(lengthˢ, (ж<testing.T> tΔ3) => {
+        var b = new byte[]{1, 2, 3}.slice();
+        {
+            var (_, err) = ParseRawPrivateKey(curve, b); if (err == default!) {
+                tΔ3.Errorf("ParseRawPrivateKey accepted short key"u8);
+            }
+        }
+
+        b = new slice<byte>(((~curve.Params()).BitSize + 7) / 8);
+        b = appendꓸꓸꓸ(b, new byte[]{1, 2, 3}.slice());
+        {
+            var (_, err) = ParseRawPrivateKey(curve, b); if (err == default!) {
+                tΔ3.Errorf("ParseRawPrivateKey accepted long key"u8);
+            }
+        }
+    });
+}
+
 internal partial struct benchmarkAllCurves_tests /*dyn*/ {
     internal @string name;
     internal elliptic.Curve curve;
@@ -625,7 +823,7 @@ internal static void benchmarkAllCurves(ж<testing.B> Ꮡb, Action<ж<testing.B>
 
 public static void BenchmarkSign(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -650,7 +848,7 @@ internal static readonly object verifyFailedˢ = (@string)"verify failed"u8;
 
 public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -673,7 +871,7 @@ public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkGenerateKey(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {

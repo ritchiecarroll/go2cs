@@ -43,10 +43,27 @@ public class PanicFramesRound4Tests
     public void AFaultingCalleeInlinedIntoAWrapperSplicesNothing() =>
         AssertNoSplice(Run(panicframesprobe_package.nonNilFaultingCalleeThroughWrapper), "nonNilFaultingCalleeThroughWrapper");
 
-    // An intrinsified atomic on a nil address.
+    // An intrinsified atomic on a nil address. Go is the oracle (COORD ruling 2026-10-22): a DIRECT call of the
+    // atomic is intrinsified, so Go's traceback reads gopanic | panicmem | sigpanic | owner (the probe's own comment,
+    // PanicFramesProbe.Round4.cs atomicOnNil). Code optimized from its first call -- the banks' Release
+    // TieredCompilation=0 -- inlines AddInt32 and reads exactly that. Tier-0 inlines nothing, keeps the atomic's
+    // frame and splices nothing, which is Go's answer only for a func-value call; it is pinned here as tier-0's
+    // reading, never matched by deoptimizing every atomic.
     [TestMethod]
-    public void AnIntrinsifiedAtomicOnANilAddressSplicesNothing() =>
-        AssertNoSplice(Run(panicframesprobe_package.atomicOnNil), "atomicOnNil");
+    public void AnIntrinsifiedAtomicOnANilAddressSplicesNothing()
+    {
+        List<string> names = Run(panicframesprobe_package.atomicOnNil);
+
+        if (!JitMode.OptimizedFromFirstCall())
+        {
+            AssertNoSplice(names, "atomicOnNil");
+            return;
+        }
+
+        List<string> below = Below(names, "atomicOnNil");
+        CollectionAssert.AreEqual(new[] { "runtime.gopanic", "runtime.panicmem", "runtime.sigpanic", Pkg + "atomicOnNil" }, below,
+            $"expected Go's intrinsic frames; got {string.Join(" | ", below)}");
+    }
 
     // A panic in a range-over-func loop body, recovered by the ranger's deferred call.
     [TestMethod]

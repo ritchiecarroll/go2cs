@@ -34,6 +34,7 @@ using static global::go.io.fs_test_package;
 [assembly: GoImplement<formatTest, go.io.fs_package.FileInfo>(Pointer = true)]
 [assembly: GoImplement<globOnly, go.io.fs_package.FS>]
 [assembly: GoImplement<globOnly, go.io.fs_package.GlobFS>(Promoted = true)]
+[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.FS>]
 [assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.GlobFS>]
 [assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.ReadDirFS>]
 [assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.ReadFileFS>]
@@ -54,6 +55,12 @@ using static global::go.io.fs_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,13 +70,14 @@ using static global::go.io.fs_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
-[assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABk8goKCgg==")]
-[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABMgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgsqCpoI=", "74-79:1", "", "20=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
-[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUkgNSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEEoKSooKCpoKAgqSAkqSAguyCgoKUAAkGgoKCgoCS", "21-30:1;76-92:1", "", "65=Now/1/2/4,Now/2/2/10")]
+[assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
+[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABUgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgsqCpoI=", "74-79:1", "", "22=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
+[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABckgNSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACQaCgoKCgJI=", "21-30:1;75-91:1", "", "67=Now/1/2/4,Now/2/2/10")]
 [assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgriCgriCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
-[assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEegOSCgoKCgoKUyoKmgg==", "18-27:1")]
+[assembly: go.GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ABsaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
+[assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABMegOSCgoKCgoKUyoKmgg==", "18-27:1")]
 [assembly: go.GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAKBIKCgoKClIKCpoKCgoKUyoKmgpSCgpSCgpSCpoKC", "18-37:1")]
-[assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgpKCmIKClIKUgoKU+KKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;126-134:1")]
+[assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgpKCmIKClIKUgoKUuILu7oKigoCCkoCCtIKUuIKClIKAggAJCqKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

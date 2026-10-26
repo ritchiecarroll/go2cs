@@ -511,7 +511,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
             nerr++;
             continue;
         }
-        if (averageDelta(got, new image.ΔRGBAжImage(src)) > ((int64)2 << (int)(8))) {
+        if (averageDelta(got, new image.ΔRGBAжImage(src)) > (int64)2 << 8) {
             Ꮡt.Errorf("image #%d changed too much after a round trip"u8, i);
             nerr++;
             continue;
@@ -559,6 +559,7 @@ public static void TestBadRestartMarker(ж<testing.T> Ꮡt) {
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0xff})),
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0xff, 0x00})),
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0xff, 0xff, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff})),
+
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0x03})),
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xd5})),
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xff, 0xd5}))

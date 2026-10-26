@@ -4,149 +4,24 @@
 namespace go.@internal;
 
 using errors = errors_package;
-using fmt = fmt_package;
 using poll = go.@internal.poll_package;
 using windows = go.@internal.syscall.windows_package;
+using io = io_package;
 using os = os_package;
-using sync = go.sync_package;
+using filepath = path.filepath_package;
 using Δsyscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using go;
+using fs = go.io.fs_package;
 using go.@internal;
 using go.@internal.syscall;
+using path;
 using static go.@internal.poll_internal_test_package;
 
 partial class poll_test_package {
 
-partial struct loggedFD {
-    public @string Net;
-    public ж<poll.FD> FD;
-    public error Err;
-}
-
-internal static ж<sync.Mutex> ᏑlogMu = new StandardBox<sync.Mutex>(default(sync.Mutex));
-internal static ref sync.Mutex logMu => ref ᏑlogMu.Value;
-internal static map<syscallꓸHandle, ж<loggedFD>> loggedFDs;
-
-internal static void logFD(@string net, ж<poll.FD> Ꮡfd, error err) {
-    GoFrame ᒐ = default;
-    try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
-        ᏑlogMu.Lock();
-        defer(ᏑlogMu.Unlock, ref ᒐ);
-
-        loggedFDs[fd.Sysfd] = Ꮡ(new loggedFD(
-            Net: net,
-            FD: Ꮡfd,
-            Err: err
-        ));
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-}
-
 [GoInit] internal static void init() {
-    loggedFDs = new map<syscallꓸHandle, ж<loggedFD>>();
-    poll_internal_test_package.LogInitFD.ValueSlot = logFD;
-
     poll.InitWSA();
-}
-
-internal static (ж<loggedFD> lfd, bool found) findLoggedFD(syscallꓸHandle h) {
-    ж<loggedFD> lfd = default!;
-    bool found = default!;
-    GoFrame ᒐ = default;
-    try {
-        ᏑlogMu.Lock();
-        defer(ᏑlogMu.Unlock, ref ᒐ);
-
-        (lfd, found) = loggedFDs[h, ꟷ];
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-    return (lfd, found);
-}
-
-// checkFileIsNotPartOfNetpoll verifies that f is not managed by netpoll.
-// It returns error, if check fails.
-internal static error checkFileIsNotPartOfNetpoll(ж<os.File> Ꮡf) {
-    ref var f = ref Ꮡf.DerefOrNull();
-
-    var (lfd, found) = findLoggedFD(((syscallꓸHandle)Ꮡf.Fd()));
-    if (!found) {
-        return fmt.Errorf("%v fd=%v: is not found in the log"u8, f.Name(), Ꮡf.Fd());
-    }
-    if ((~lfd).FD.IsPartOfNetpoll()) {
-        return fmt.Errorf("%v fd=%v: is part of netpoll, but should not be (logged: net=%v err=%v)"u8, f.Name(), Ꮡf.Fd(), (~lfd).Net, (~lfd).Err);
-    }
-    return default!;
-}
-
-public static void TestFileFdsAreInitialised(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        var (exe, err) = os.Executable();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-        (var f, err) = os.Open(exe);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-        var fʗ1 = f;
-        defer(() => fʗ1.Close(), ref ᒐ);
-
-        err = checkFileIsNotPartOfNetpoll(f);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object skippingˢ = (@string)"Skipping: "u8;
-
-public static void TestSerialFdsAreInitialised(ж<testing.T> Ꮡt) {
-    foreach (var (_, name) in new @string[]{"COM1"u8, "COM2"u8, "COM3"u8, "COM4"u8}.slice()) {
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
-            GoFrame ᒐ = default;
-            try {
-                var (h, err) = Δsyscall.CreateFile(Δsyscall.StringToUTF16Ptr(name),
-                    (uint32)((uint32)Δsyscall.GENERIC_READ | (uint32)Δsyscall.GENERIC_WRITE),
-                    0,
-                    nil,
-                    Δsyscall.OPEN_EXISTING,
-                    (uint32)((uint32)Δsyscall.FILE_ATTRIBUTE_NORMAL | (uint32)Δsyscall.FILE_FLAG_OVERLAPPED),
-                    0);
-                if (err != default!) {
-                    {
-                        var (errno, ok) = err._<Δsyscall.Errno>(ᐧ); if (ok) {
-                            var exprᴛ1 = errno;
-                            if (exprᴛ1 == Δsyscall.ERROR_FILE_NOT_FOUND || exprᴛ1 == Δsyscall.ERROR_ACCESS_DENIED) {
-                                tΔ1.Log(skippingˢ, err);
-                                return;
-                            }
-                        }
-                    }
-                    tΔ1.Fatal(err);
-                }
-                var f = os.NewFile((uintptr)h, name);
-                var fʗ1 = f;
-                defer(() => fʗ1.Close(), ref ᒐ);
-
-                err = checkFileIsNotPartOfNetpoll(f);
-                if (err != default!) {
-                    tΔ1.Fatal(err);
-                }
-            }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-            finally { ᒐ.Run(); }
-        });
-    }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -155,16 +30,18 @@ internal static readonly @string tcpˢ = "tcp"u8;
 public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        Ꮡt.Parallel();
         var (s, err) = windows.WSASocket(Δsyscall.AF_INET, Δsyscall.SOCK_STREAM, Δsyscall.IPPROTO_TCP, nil, 0, windows.WSA_FLAG_OVERLAPPED);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         ref var fd = ref heap<poll.FD>(out var Ꮡfd);
         fd = new poll.FD(Sysfd: s, IsStream: true, ZeroReadIsEOF: true);
-        (_, err) = Ꮡfd.Init(tcpˢ, true);
-        if (err != default!) {
-            Δsyscall.CloseHandle(s);
-            Ꮡt.Fatal(err);
+        {
+            err = Ꮡfd.Init(tcpˢ, true); if (err != default!) {
+                Δsyscall.CloseHandle(s);
+                Ꮡt.Fatal(err);
+            }
         }
         defer(() => Ꮡfd.Close(), ref ᒐ);
 
@@ -232,6 +109,93 @@ partial struct _TCP_INFO_v0 {
     public uint32 DupAcksIn;
     public uint32 TimeoutEpisodes;
     public uint8 SynRetrans;
+}
+
+internal static ж<poll.FD> newFD(testing.TB t, syscallꓸHandle h, @string kind, bool overlapped) {
+    ref var fd = ref heap<poll.FD>(out var Ꮡfd);
+    fd = new poll.FD(
+        Sysfd: h,
+        IsStream: true,
+        ZeroReadIsEOF: true
+    );
+    var err = Ꮡfd.Init(kind, overlapped);
+    if (overlapped && err != default!) {
+        // Overlapped file handles should not error.
+        Ꮡfd.Close();
+        t.Fatal(err);
+    }
+    t.Cleanup(() => {
+        Ꮡfd.Close();
+    });
+    return Ꮡfd;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string fileˢ = "file"u8;
+internal static readonly @string pipeˢ = "pipe"u8;
+
+internal static ж<poll.FD> newFile(testing.TB t, @string name, bool overlapped) {
+    var (namep, err) = Δsyscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        t.Fatal(err);
+    }
+    nint flags = Δsyscall.FILE_ATTRIBUTE_NORMAL;
+    if (overlapped) {
+        flags |= (nint)(Δsyscall.FILE_FLAG_OVERLAPPED);
+    }
+    (var h, err) = Δsyscall.CreateFile(namep,
+        (uint32)((uint32)Δsyscall.GENERIC_READ | (uint32)Δsyscall.GENERIC_WRITE),
+        (uint32)((uint32)Δsyscall.FILE_SHARE_WRITE | (uint32)Δsyscall.FILE_SHARE_READ),
+        nil, Δsyscall.OPEN_ALWAYS, (uint32)flags, 0);
+    if (err != default!) {
+        t.Fatal(err);
+    }
+    (var typ, err) = Δsyscall.GetFileType(h);
+    if (err != default!) {
+        Δsyscall.CloseHandle(h);
+        t.Fatal(err);
+    }
+    @string kind = fileˢ;
+    if (typ == Δsyscall.FILE_TYPE_PIPE) {
+        kind = pipeˢ;
+    }
+    return newFD(t, h, kind, overlapped);
+}
+
+public static void BenchmarkReadOverlapped(ж<testing.B> Ꮡb) {
+    benchmarkRead(Ꮡb, true);
+}
+
+public static void BenchmarkReadSync(ж<testing.B> Ꮡb) {
+    benchmarkRead(Ꮡb, false);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string fooˢ = "foo"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string contentᶜ = "hello world"u8;
+
+internal static void benchmarkRead(ж<testing.B> Ꮡb, bool overlapped) {
+    @string name = filepath.Join(Ꮡb.TempDir(), fooˢ);
+    @string content = contentᶜ;
+    var err = os.WriteFile(name, slice<byte>(content), 420);
+    if (err != default!) {
+        Ꮡb.Fatal(err);
+    }
+    var @file = newFile(new poll_test_package.testing_BжTB(Ꮡb), name, overlapped);
+    array<byte> buf = new(11); /* len(content) */
+    while (Ꮡb.Loop()) {
+        var (_, errΔ1) = io.ReadFull(new poll_test_package.poll_FDжReader(@file), buf[..]);
+        if (errΔ1 != default!) {
+            Ꮡb.Fatal(errΔ1);
+        }
+        {
+            var (_, errΔ2) = @file.Seek(0, io.SeekStart); if (errΔ2 != default!) {
+                Ꮡb.Fatal(errΔ2);
+            }
+        }
+    }
 }
 
 } // end poll_test_package

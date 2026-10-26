@@ -49,7 +49,7 @@ using static go.collideb.dup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAcQgA==")]
+[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAQQgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.collideb;

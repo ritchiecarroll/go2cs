@@ -249,6 +249,21 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
             @"<script>alert([""\u003ca\u003e"",""\u003cb\u003e""])</script>"u8
         ),
         new(
+            "scriptTypeSpace"u8,
+            "<script type=\" \">{{.H}}</script>"u8,
+            "<script type=\" \">\"\\u003cHello\\u003e\"</script>"u8
+        ),
+        new(
+            "scriptTypeTab"u8,
+            "<script type=\"\t\">{{.H}}</script>"u8,
+            "<script type=\"\t\">\"\\u003cHello\\u003e\"</script>"u8
+        ),
+        new(
+            "scriptTypeEmpty"u8,
+            "<script type=\"\">{{.H}}</script>"u8,
+            "<script type=\"\">\"\\u003cHello\\u003e\"</script>"u8
+        ),
+        new(
             "jsObjValueNotOverEscaped"u8,
             "<button onclick='alert({{.A | html}})'>"u8,
             @"<button onclick='alert([&#34;\u003ca\u003e&#34;,&#34;\u003cb\u003e&#34;])'>"u8
@@ -733,6 +748,36 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
             "JS template lit, nested JS"u8,
             "<script>var a = `${ var a = \"{{\"a \\\" d\"}}\" }`</script>"u8,
             "<script>var a = `${ var a = \"a \\u0022 d\" }`</script>"u8
+        ),
+        new(
+            "meta content attribute url"u8,
+            @"<meta http-equiv=""refresh"" content=""asd; url={{""javascript:alert(1)""}}; asd; url={{""vbscript:alert(1)""}}; asd"">"u8,
+            @"<meta http-equiv=""refresh"" content=""asd; url=#ZgotmplZ; asd; url=#ZgotmplZ; asd"">"u8
+        ),
+        new(
+            "meta content string"u8,
+            @"<meta http-equiv=""refresh"" content=""{{""asd: 123""}}"">"u8,
+            @"<meta http-equiv=""refresh"" content=""asd: 123"">"u8
+        ),
+        new(
+            "meta content url with whitespace before equals"u8,
+            @"<meta http-equiv=""refresh"" content=""0;url ={{""javascript:alert(1)""}}"">"u8,
+            @"<meta http-equiv=""refresh"" content=""0;url =#ZgotmplZ"">"u8
+        ),
+        new(
+            "meta content url with tab before equals"u8,
+            "<meta http-equiv=\"refresh\" content=\"0;url\t={{\"javascript:alert(1)\"}}\">"u8,
+            "<meta http-equiv=\"refresh\" content=\"0;url\t=#ZgotmplZ\">"u8
+        ),
+        new(
+            "meta content url with space after equals"u8,
+            @"<meta http-equiv=""refresh"" content=""0;url= {{""javascript:alert(1)""}}"">"u8,
+            @"<meta http-equiv=""refresh"" content=""0;url= #ZgotmplZ"">"u8
+        ),
+        new(
+            "meta content url with whitespace both sides of equals"u8,
+            "<meta http-equiv=\"refresh\" content=\"0;url \t= {{\"javascript:alert(1)\"}}\">"u8,
+            "<meta http-equiv=\"refresh\" content=\"0;url \t= #ZgotmplZ\">"u8
         )
     }.slice();
 
@@ -1059,6 +1104,14 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             "<script>var tmpl = `asd ${return \"{\"}`;</script>"u8,
             @""u8
         ),
+        new(
+            @"{{if eq """" """"}}<meta>{{end}}"u8,
+            @""u8
+        ),
+        new(
+            @"{{if eq """" """"}}<meta content=""url={{""asd""}}"">{{end}}"u8,
+            @""u8
+        ),
 
         // Error cases.
         new(
@@ -1209,6 +1262,18 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             @"Hello, {{. | urlquery | html}}!"u8,
             // html is allowed since it is the last command in the pipeline, but urlquery is not.
             @"predefined escaper ""urlquery"" disallowed in template"u8
+        ),
+        new(
+            "<script>var a = `{{if .X}}`{{end}}"u8,
+            @"{{if}} branches end in different contexts"u8
+        ),
+        new(
+            "<script>var a = `{{if .X}}a{{else}}`{{end}}"u8,
+            @"{{if}} branches end in different contexts"u8
+        ),
+        new(
+            "<script>var a = `{{if .X}}a{{else}}b{{end}}`</script>"u8,
+            @""u8
         )
     }.slice();
     foreach (var (_, test) in tests) {
@@ -1786,7 +1851,7 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
         ),
         new(
             "<script>var a = `${"u8,
-            new context(state: stateJS, element: elementScript)
+            new context(state: stateJS, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${}"u8,
@@ -1794,27 +1859,27 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
         ),
         new(
             "<script>var a = `${`"u8,
-            new context(state: stateJSTmplLit, element: elementScript)
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${var a = \""u8,
-            new context(state: stateJSDqStr, element: elementScript)
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${var a = \"`"u8,
-            new context(state: stateJSDqStr, element: elementScript)
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${var a = \"}"u8,
-            new context(state: stateJSDqStr, element: elementScript)
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${``"u8,
-            new context(state: stateJS, element: elementScript)
+            new context(state: stateJS, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${`}"u8,
-            new context(state: stateJSTmplLit, element: elementScript)
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>`${ {} } asd`</script><script>`${ {} }"u8,
@@ -1822,7 +1887,7 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
         ),
         new(
             "<script>var foo = `${ (_ => { return \"x\" })() + \"${"u8,
-            new context(state: stateJSDqStr, element: elementScript)
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var a = `${ {</script><script>var b = `${ x }"u8,
@@ -1846,27 +1911,35 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
         ),
         new(
             "<script>function f() {`${ function f() { `${1}` } }`}"u8,
-            new context(state: stateJS, element: elementScript, jsCtx: jsCtxDivOp)
+            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp)
         ),
         new(
             "<script>`${ { `` }"u8,
-            new context(state: stateJS, element: elementScript)
+            new context(state: stateJS, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>`${ { }`"u8,
-            new context(state: stateJSTmplLit, element: elementScript)
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
         ),
         new(
             "<script>var foo = `${ foo({ a: { c: `${"u8,
-            new context(state: stateJS, element: elementScript)
+            new context(state: stateJS, element: elementScript, jsBraceDepth: new nint[]{2, 0}.slice())
         ),
         new(
             "<script>var foo = `${ foo({ a: { c: `${ {{.}} }` }, b: "u8,
-            new context(state: stateJS, element: elementScript)
+            new context(state: stateJS, element: elementScript, jsBraceDepth: new nint[]{1}.slice())
         ),
         new(
             "<script>`${ `}"u8,
-            new context(state: stateJSTmplLit, element: elementScript)
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: new nint[]{0}.slice())
+        ),
+        new(
+            "<script>`${1}${"u8,
+            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: new nint[]{0}.slice())
+        ),
+        new(
+            "<script>`${`${1}${"u8,
+            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: new nint[]{0, 0}.slice())
         )
     }.slice();
 
@@ -2069,12 +2142,12 @@ public static void TestRedundantFuncs(ж<testing.T> Ꮡt) {
 
     var inputs = new any[]{
         (@string)("\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f" + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" + @" !""#$%&'()*+,-./" + @"0123456789:;<=>?" + @"@ABCDEFGHIJKLMNO" + @"PQRSTUVWXYZ[\]^_" + "`abcdefghijklmno" + "pqrstuvwxyz{|}~\x7f" + "\u00A0\u0100\u2028\u2029\ufeff\ufdec\ufffd\uffff\U0001D11E" + "&amp;%22\\"),
-        ((global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ),
-        ((global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ),
-        ((global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ),
-        ((global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ),
-        ((global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ),
-        ((global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3)
+        (global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ,
+        (global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ,
+        (global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ,
+        (global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ,
+        (global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ,
+        (global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3
     }.slice();
 
     foreach (var (n0, m) in redundantFuncs) {
@@ -2173,7 +2246,7 @@ public static void TestPipeToMethodIsEscaped(ж<testing.T> Ꮡt) {
                 }
             }, ref ᒐ);
             ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), ((Issue7379)0));
+            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (Issue7379)0);
             return b.String();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2358,6 +2431,181 @@ public static void TestAliasedParseTreeDoesNotOverescape(ж<testing.T> Ꮡt) {
     }
     if (got1 != got2) {
         Ꮡt.Fatalf(@"Template ""foo"" and ""bar"" rendered %q and %q respectively, expected equal values"u8, got1, got2);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugˢ = "GODEBUG"u8;
+internal static readonly @string metaHttpEquivRefreshˢ = @"<meta http-equiv=""refresh"" content=""asd; url={{""javascript:alert(1)""}}; asd; url={{""vbscript:alert(1)""}}; asd"">"u8;
+internal static readonly @string metaHttpEquivRefreshˢ2 = @"<meta http-equiv=""refresh"" content=""asd; url=javascript:alert(1); asd; url=vbscript:alert(1); asd"">"u8;
+
+public static void TestMetaContentEscapeGODEBUG(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        @string savedGODEBUG = os.Getenv(godebugˢ);
+        os.Setenv(godebugˢ, savedGODEBUG + ",htmlmetacontenturlescape=0"u8);
+        defer(() => {
+            os.Setenv(godebugˢ, savedGODEBUG);
+        }, ref ᒐ);
+
+        var (ᴛ25, ᴛ26) = New(""u8).Parse(metaHttpEquivRefreshˢ);
+        var tmpl = Must(ᴛ25, ᴛ26);
+        ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+        {
+            var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), default!); if (err != default!) {
+                Ꮡt.Fatalf("unexpected error: %s"u8, err);
+            }
+        }
+        @string want = metaHttpEquivRefreshˢ2;
+        {
+            @string got = b.String(); if (got != want) {
+                Ꮡt.Fatalf("got %q, want %q"u8, got, want);
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string scriptConstS1GScriptˢ = "<script>const s = `${1}${/{{.}}/g}`</script>"u8;
+internal static readonly object xExecAlert1ˢ = (@string)@"x/.exec(alert(1))}"u8;
+internal static readonly @string scriptConstS1XExecAlert1ˢ = "<script>const s = `${1}${/x\\/\\.exec\\(alert\\(1\\)\\)\\}/g}`</script>"u8;
+
+public static void TestIssue81821(ж<testing.T> Ꮡt) {
+    var (ᴛ27, ᴛ28) = New(testˢ).Parse(scriptConstS1GScriptˢ);
+    var tmpl = Must(ᴛ27, ᴛ28);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    {
+        var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), xExecAlert1ˢ); if (err != default!) {
+            Ꮡt.Fatalf("Execute: %v"u8, err);
+        }
+    }
+    @string want = scriptConstS1XExecAlert1ˢ;
+    {
+        @string got = Ꮡbuf.String(); if (got != want) {
+            Ꮡt.Errorf("got:  %s\nwant: %s"u8, got, want);
+        }
+    }
+}
+
+internal partial struct TestCVE202656858_tests /*dyn*/ {
+    internal @string name;
+    internal @string tmpl;
+    internal @string input;
+    internal @string want;
+}
+
+public static void TestCVE202656858(ж<testing.T> Ꮡt) {
+    var tests = new TestCVE202656858_tests[]{
+        new(
+            name: "regexp after open brace in if block"u8,
+            tmpl: @"<script>if(true){/{{.}}/g.test(""x"")}</script>"u8,
+            input: "a.b"u8,
+            want: @"<script>if(true){/a\.b/g.test(""x"")}</script>"u8
+        ),
+        new(
+            name: "regexp after close brace"u8,
+            tmpl: @"<script>if(true){x=1}/{{.}}/g.test(""x"")</script>"u8,
+            input: "a.b"u8,
+            want: @"<script>if(true){x=1}/a\.b/g.test(""x"")</script>"u8
+        ),
+        new(
+            name: "regexp pathological attacker input"u8,
+            tmpl: @"<script>if(true){/{{.}}/g.test(""x"")}</script>"u8,
+            input: @"./;alert(1);var q=/."u8,
+            want: @"<script>if(true){/\.\/;alert\(1\);var q=\/\./g.test(""x"")}</script>"u8
+        ),
+        new(
+            name: "regexp after open brace in template literal"u8,
+            tmpl: "<script>`${ (function(){/{{.}}/g.test(x)}) }`</script>"u8,
+            input: "a.b"u8,
+            want: "<script>`${ (function(){/a\\.b/g.test(x)}) }`</script>"u8
+        ),
+        new(
+            name: "regexp after close brace in template literal"u8,
+            tmpl: "<script>`${ (function(){}/{{.}}/g.test(x)) }`</script>"u8,
+            input: "a.b"u8,
+            want: "<script>`${ (function(){}/a\\.b/g.test(x)) }`</script>"u8
+        )
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestCVE202656858_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var (ᴛ29, ᴛ30) = New(testˢ).Parse(ttʗ1.tmpl);
+            var tmpl = Must(ᴛ29, ᴛ30);
+            ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+            {
+                var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), ttʗ1.input); if (err != default!) {
+                    tΔ1.Fatalf("Execute: %v"u8, err);
+                }
+            }
+            {
+                @string got = Ꮡbuf.String(); if (got != ttʗ1.want) {
+                    tΔ1.Errorf("got:  %s\nwant: %s"u8, got, ttʗ1.want);
+                }
+            }
+        });
+    }
+}
+
+internal partial struct TestIssue81823_tests /*dyn*/ {
+    internal @string name;
+    internal @string tmpl;
+    internal @string input;
+    internal @string want;
+}
+
+public static void TestIssue81823(ж<testing.T> Ꮡt) {
+    var tests = new TestIssue81823_tests[]{
+        new(
+            name: "yield"u8,
+            tmpl: @"<script>function* rules(){yield /{{.}}/g}</script>"u8,
+            input: @"/;alert(1)//"u8,
+            want: @"<script>function* rules(){yield /\/;alert\(1\)\/\//g}</script>"u8
+        ),
+        new(
+            name: "property yield"u8,
+            tmpl: "<script>const pct = bond.yield / 100;\nconst user = {{.}}; // state\n</script>"u8,
+            input: @"1;pwned=1;0"u8,
+            want: "<script>const pct = bond.yield / 100;\nconst user = \"1;pwned=1;0\"; \n</script>"u8
+        ),
+        new(
+            name: "private yield"u8,
+            tmpl: "<script>class Bond { #yield = 4; pct() { return this.#yield / 100; } }\nconst user = {{.}}; // state\n</script>"u8,
+            input: @"1;pwned=1;0"u8,
+            want: "<script>class Bond { #yield = 4; pct() { return this.#yield / 100; } }\nconst user = \"1;pwned=1;0\"; \n</script>"u8
+        ),
+        new(
+            name: "property in"u8,
+            tmpl: "<script>const kb = traffic.in / 1024;\nconst user = {{.}}; // state\n</script>"u8,
+            input: @"1;pwned=1;0"u8,
+            want: "<script>const kb = traffic.in / 1024;\nconst user = \"1;pwned=1;0\"; \n</script>"u8
+        )
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestIssue81823_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var (ᴛ31, ᴛ32) = New(testˢ).Parse(ttʗ1.tmpl);
+            var tmpl = Must(ᴛ31, ᴛ32);
+            ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+            {
+                var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), ttʗ1.input); if (err != default!) {
+                    tΔ1.Fatalf("Execute: %v"u8, err);
+                }
+            }
+            {
+                @string got = buf.String(); if (got != ttʗ1.want) {
+                    tΔ1.Errorf("got:  %s\nwant: %s"u8, got, ttʗ1.want);
+                }
+            }
+        });
     }
 }
 

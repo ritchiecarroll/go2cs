@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -363,14 +364,15 @@ public class CrossPackagePromotedForwarderTests
     {
         (string package, string sibling) = Split(GeneratedFor(GenerateClean(Consumer), "Direct"), "mainᴛDirectᴛxpkg");
 
-        // A value-receiver method: the value form by value, and its pointer twin.
-        StringAssert.Contains(sibling, $"public static string Name(this {DirectType} target) => target.Inner.Name();");
+        // A value-receiver method: the value form by value, and its pointer twin. The value form is marked promoted,
+        // which golib's reflect binder reads (a nil *T is the nil-pointer fault there, not panicwrap).
+        StringAssert.Contains(sibling, $"[global::go.GoPromoted] public static string Name(this {DirectType} target) => target.Inner.Name();");
         StringAssert.Contains(sibling, $"public static string Name(this ж<{DirectType}> Ꮡtarget)");
 
         // A pointer-receiver method through a VALUE hop is in the pointer set alone: the value
         // form mirrors its source's `this ref` and carries [GoRecv], which keeps it out of the
         // run-time value set and off the copy-binding path.
-        StringAssert.Contains(sibling, $"[global::go.GoRecv] public static void Set(this ref {DirectType} target, int n) => target.Inner.Set(n);");
+        StringAssert.Contains(sibling, $"[global::go.GoPromoted] [global::go.GoRecv] public static void Set(this ref {DirectType} target, int n) => target.Inner.Set(n);");
         StringAssert.Contains(sibling, $"public static void Set(this ж<{DirectType}> Ꮡtarget, int n)");
 
         // A direct-ж (box) primary through a direct value embed: the pointer shim alone.
@@ -388,6 +390,21 @@ public class CrossPackagePromotedForwarderTests
         // Containment: the package class gains nothing, so same-package output stays what it was.
         foreach (string name in new[] { "Name(", "Set(", "Reset(", "Unix(", "Read(", "Close(", "lower(", "secret(", "Leak(" })
             Assert.IsFalse(package.Contains($" {name}"), $"'{name}' must be minted into the sibling class only, never into the package class");
+    }
+
+    [TestMethod]
+    public void TheFullTrimKeepNamesTheSiblingClassThatHoldsTheForwarder()
+    {
+        // golib's GoMethodText prints a struct through its run-time method set, so a method promoted from another
+        // package is printed through its forwarder in the SIBLING class. MethodSetKeep must keep it there: a
+        // dependency on the package class resolves no member under a full trim (ILC IL2037).
+        string generated = GeneratedFor(GenerateClean(Consumer), "Direct");
+        string[] keeps = [.. generated.Split('\n').Where(line => line.Contains("DynamicDependency(\"Name\"")).Select(line => line.Trim())];
+
+        Assert.AreEqual(1, keeps.Length, "one keep for the promoted Name: " + string.Join(" | ", keeps));
+        StringAssert.Contains(keeps[0], "ᴛDirectᴛxpkg)", "the keep names the sibling class");
+        Assert.IsTrue(generated.IndexOf(keeps[0], StringComparison.Ordinal) < generated.IndexOf("public override string ToString()", StringComparison.Ordinal),
+            "the keep sits on the struct's generated ToString");
     }
 
     [TestMethod]
@@ -541,7 +558,7 @@ public class CrossPackagePromotedForwarderTests
         foreach (string source in run.Sources.Values)
             Assert.IsFalse(source.Contains("ᴛxpkg"), "the CompilationReference view moved: re-measure it against the metadata view");
 
-        StringAssert.Contains(GeneratedFor(run, "Direct"), "internal static string Name(this Direct target) => target.Inner.Name();");
+        StringAssert.Contains(GeneratedFor(run, "Direct"), "[global::go.GoPromoted] internal static string Name(this Direct target) => target.Inner.Name();");
     }
 
     [TestMethod]

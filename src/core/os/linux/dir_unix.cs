@@ -28,13 +28,13 @@ partial struct dirInfo {
 // More than 5760 to work around https://golang.org/issue/24015.
 internal static UntypedInt blockSize => 8192;
 
-internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(blockSize);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
 
 internal static void close(this ref dirInfo d) {
@@ -54,11 +54,19 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         ref var f = ref Ꮡf.DerefOrNull();
 
         // If this file has no dirInfo, create one.
-        var d = Ꮡf.of(File.Ꮡdirinfo).Load();
-        if (d == nil) {
-            d = @new<dirInfo>();
-            Ꮡf.of(File.Ꮡdirinfo).Store(d);
+        ж<dirInfo> d = default!;
+        while (ᐧ) {
+            d = Ꮡf.of(File.Ꮡdirinfo).Load();
+            if (d != nil) {
+                break;
+            }
+            var newD = @new<dirInfo>();
+            if (Ꮡf.of(File.Ꮡdirinfo).CompareAndSwap(nil, newD)) {
+                d = newD;
+                break;
+            }
         }
+
         d.of(dirInfo.Ꮡmu).Lock();
         var dʗ1 = d;
         defer(dʗ1.of(dirInfo.Ꮡmu).Unlock, ref ᒐ);
@@ -137,10 +145,10 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 n--;
             }
             if (mode == readdirName){
-                names = append(names, ((@string)name));
+                names = append(names, (@string)name);
             } else 
             if (mode == readdirDirEntry){
-                var (de, errΔ1) = newUnixDirent(f.name, ((@string)name), direntType(rec));
+                var (de, errΔ1) = newUnixDirent(Ꮡf, (@string)name, direntType(rec));
                 if (IsNotExist(errΔ1)) {
                     // File disappeared between readdir and stat.
                     // Treat as if it didn't exist.
@@ -151,7 +159,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 }
                 dirents = append(dirents, de);
             } else {
-                var (info, errΔ2) = lstat(f.name + "/"u8 + ((@string)name));
+                var (info, errΔ2) = Ꮡf.lstatat((@string)name);
                 if (IsNotExist(errΔ2)) {
                     // File disappeared between readdir + stat.
                     // Treat as if it didn't exist.

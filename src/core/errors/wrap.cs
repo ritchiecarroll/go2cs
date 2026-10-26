@@ -28,6 +28,7 @@ public static error Unwrap(error err) {
 }
 
 // Is reports whether any error in err's tree matches target.
+// The target must be comparable.
 //
 // The tree consists of err itself, followed by the errors obtained by repeatedly
 // calling its Unwrap() error or Unwrap() []error method. When err wraps multiple
@@ -96,6 +97,10 @@ internal static bool @is(error err, error target, bool targetComparable) {
 
 // As finds the first error in err's tree that matches target, and if one is found, sets
 // target to that error value and returns true. Otherwise, it returns false.
+//
+// For most uses, prefer [AsType]. As is equivalent to [AsType] but sets its target
+// argument rather than returning the matching error and doesn't require its target
+// argument to implement error.
 //
 // The tree consists of err itself, followed by the errors obtained by repeatedly
 // calling its Unwrap() error or Unwrap() []error method. When err wraps multiple
@@ -171,6 +176,73 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
     }
 }
 
-internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
+internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
+
+// AsType finds the first error in err's tree that matches the type E, and
+// if one is found, returns that error value and true. Otherwise, it
+// returns the zero value of E and false.
+//
+// The tree consists of err itself, followed by the errors obtained by
+// repeatedly calling its Unwrap() error or Unwrap() []error method. When
+// err wraps multiple errors, AsType examines err followed by a
+// depth-first traversal of its children.
+//
+// An error err matches the type E if the type assertion err.(E) holds,
+// or if the error has a method As(any) bool such that err.As(target)
+// returns true when target is a non-nil *E. In the latter case, the As
+// method is responsible for setting target.
+public static (E, bool) AsType<E>(error err) {
+    if (err == default!) {
+        E zero = GoZero<E>();
+        return (zero, false);
+    }
+    ref var pe = ref heap<ж<E>>(out var Ꮡpe);    // lazily initialized
+    return asType(err, ref pe);
+}
+
+internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
+    while (ᐧ) {
+        {
+            var (e, ok) = err._<E>(ᐧ); if (ok) {
+                return (e, true);
+            }
+        }
+        {
+            var (x, ok) = err._<as_type>(ᐧ); if (ok) {
+                if (ppe == nil) {
+                    ppe = @new<E>();
+                }
+                if (x.As(ppe.OrTypedNil())) {
+                    return (ppe.ValueSlot, true);
+                }
+            }
+        }
+        switch (err.type()) {
+        case {} Δx when Δx._<Unwrap_type>(out var x): {
+            err = x.Unwrap();
+            if (err == default!) {
+                return (default!, default!);
+            }
+            break;
+        }
+        case {} Δx when Δx._<is_typeᴛ1>(out var x): {
+            foreach (var (_, errΔ1) in x.Unwrap()) {
+                if (errΔ1 == default!) {
+                    continue;
+                }
+                {
+                    var (xΔ1, ok) = asType(errΔ1, ref ppe); if (ok) {
+                        return (xΔ1, true);
+                    }
+                }
+            }
+            return (default!, default!);
+        }
+        default: {
+            var x = err;
+            return (default!, default!);
+        }}
+    }
+}
 
 } // end errors_package

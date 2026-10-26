@@ -28,7 +28,7 @@ using static go.hash.crc32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/crc32/crc32_test.go", "crc32_test.cs", "ABIiyIKCAAkUACFIooKAgt6igoCC3ti4goKCgoKCgsySkpiC6oKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClIK4goKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgtyCgpSCgqaAgsqSkpiCqoKCloKW6IKClIKC6oKClIKCuoK4koKCgoKUgoK4goKmkoKCypKSgoKClIKCAAkKgoKCpoKCgoKClIKSggAHEKKCgoKClKaCgpSUgoKCgoI=", "112-114:1;117-119:2;123-165:1;166-209:2;229-231:1;234-236:2;241-243:3;245-247:4;258-260:1;269-271:1;280-289:1;297-301:2;306-315:3;326-340:1;332-338:1.1;334-336:1.1.1")]
+[assembly: go.GoPositionMap("hash/crc32/crc32_test.go", "crc32_test.cs", "ABUmyIKCpoIACRQAI0yigoCC3qKCgILe2LiCgoKCgoKCzJKSmILqgoKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgriCgoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSC3IKClIKCpoCCypKSmIKqgoKWgpbogoKUgoLqgoKUgoK6griSgoKCgpSCgriCgqaSgoLKkpKCgoKUgoIACQqCgoKmgoKCgoKUgpKCAAcQooKCgoKUpoKClJSCgoKCgg==", "29-29:1;120-122:1;125-127:2;131-173:1;174-217:2;237-239:1;242-244:2;249-251:3;253-255:4;266-268:1;277-279:1;288-297:1;305-309:2;314-323:3;334-348:1;340-346:1.1;342-344:1.1.1", "", "43=Repeat/1/2/32,Repeat/2/2/33")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -54,8 +54,10 @@ public static partial class crc32_internal_test_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }

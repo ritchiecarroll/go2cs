@@ -88,6 +88,9 @@
   <Folder Name="/crypto/hmac/" Id="e880e2c4-ac45-55b7-90cb-0d49f1337e9d">
     <Project Path="core/crypto/hmac/crypto.hmac.csproj" />
   </Folder>
+  <Folder Name="/crypto/hpke/" Id="0cffcc18-2b02-553d-aefe-ba2e461a7c98">
+    <Project Path="core/crypto/hpke/crypto.hpke.csproj" />
+  </Folder>
   <Folder Name="/crypto/internal/" />
   <Folder Name="/crypto/internal/boring/bbig/" Id="2af9c7fa-a987-55d9-b0f5-b957b1725e08">
     <Project Path="core/crypto/internal/boring/bbig/crypto.internal.boring.bbig.csproj" />
@@ -101,11 +104,17 @@
   <Folder Name="/crypto/internal/boring/sig/" Id="3353fc5f-5cd7-5ab6-b653-d817dd7700b3">
     <Project Path="core/crypto/internal/boring/sig/crypto.internal.boring.sig.csproj" />
   </Folder>
+  <Folder Name="/crypto/internal/constanttime/" Id="a4ef3396-d623-540a-a2dc-15d6b0c665ee">
+    <Project Path="core/crypto/internal/constanttime/crypto.internal.constanttime.csproj" />
+  </Folder>
   <Folder Name="/crypto/internal/cryptotest/" Id="b5883a52-48c1-5ee2-a561-81a14748ccda">
     <Project Path="core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
   </Folder>
   <Folder Name="/crypto/internal/entropy/" Id="a0c9a0f6-84dc-5951-a8fd-cdf0d1e03a65">
     <Project Path="core/crypto/internal/entropy/crypto.internal.entropy.csproj" />
+  </Folder>
+  <Folder Name="/crypto/internal/entropy/v1.0.0/" Id="721a7183-2c19-5b95-86c7-1d8725102173">
+    <Project Path="core/crypto/internal/entropy/v1.0.0/crypto.internal.entropy.v1.0.0.csproj" />
   </Folder>
   <Folder Name="/crypto/internal/fips140/aes/" Id="820848a2-ba3e-59ac-8fab-e54e39cc3989">
     <Project Path="core/crypto/internal/fips140/aes/crypto.internal.fips140.aes.csproj" />
@@ -152,6 +161,9 @@
   <Folder Name="/crypto/internal/fips140/hmac/" Id="5c1e3acd-3df0-5099-b79d-956c0f2cbc9c">
     <Project Path="core/crypto/internal/fips140/hmac/crypto.internal.fips140.hmac.csproj" />
   </Folder>
+  <Folder Name="/crypto/internal/fips140/mldsa/" Id="9da5ab04-493f-5c4c-a62f-c7793ed5e902">
+    <Project Path="core/crypto/internal/fips140/mldsa/crypto.internal.fips140.mldsa.csproj" />
+  </Folder>
   <Folder Name="/crypto/internal/fips140/mlkem/" Id="e587a680-190d-543a-92b6-663dfd0afce3">
     <Project Path="core/crypto/internal/fips140/mlkem/crypto.internal.fips140.mlkem.csproj" />
   </Folder>
@@ -188,6 +200,9 @@
   <Folder Name="/crypto/internal/fips140/tls13/" Id="2a12aaf3-c98b-5953-b177-966cbd32c3cf">
     <Project Path="core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
   </Folder>
+  <Folder Name="/crypto/internal/fips140cache/" Id="a25b2f9b-ac52-59bf-80fd-0a6ad96b0e94">
+    <Project Path="core/crypto/internal/fips140cache/crypto.internal.fips140cache.csproj" />
+  </Folder>
   <Folder Name="/crypto/internal/fips140deps/byteorder/" Id="be1005bc-9c02-57f3-8c23-8e18f30786e4">
     <Project Path="core/crypto/internal/fips140deps/byteorder/crypto.internal.fips140deps.byteorder.csproj" />
   </Folder>
@@ -200,17 +215,20 @@
   <Folder Name="/crypto/internal/fips140deps/godebug/" Id="7e823eb4-9474-520c-89d4-0cc9b41efe7c">
     <Project Path="core/crypto/internal/fips140deps/godebug/crypto.internal.fips140deps.godebug.csproj" />
   </Folder>
+  <Folder Name="/crypto/internal/fips140deps/time/" Id="eaab47e6-e711-5040-92cb-4a0ab718e7d3">
+    <Project Path="core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
+  </Folder>
   <Folder Name="/crypto/internal/fips140hash/" Id="3634f623-a263-5dd5-85a5-e78c4e97cd5b">
     <Project Path="core/crypto/internal/fips140hash/crypto.internal.fips140hash.csproj" />
   </Folder>
   <Folder Name="/crypto/internal/fips140only/" Id="0b347fef-6947-5a2a-a5eb-aae380d85c88">
     <Project Path="core/crypto/internal/fips140only/crypto.internal.fips140only.csproj" />
   </Folder>
-  <Folder Name="/crypto/internal/hpke/" Id="80f6c935-7b4c-5033-9294-ef32d72e4044">
-    <Project Path="core/crypto/internal/hpke/crypto.internal.hpke.csproj" />
-  </Folder>
   <Folder Name="/crypto/internal/impl/" Id="92a25083-35a7-5726-9e60-0431303eeccc">
     <Project Path="core/crypto/internal/impl/crypto.internal.impl.csproj" />
+  </Folder>
+  <Folder Name="/crypto/internal/rand/" Id="bdf6f76a-0b5a-5ed2-80bc-75daa938fe0c">
+    <Project Path="core/crypto/internal/rand/crypto.internal.rand.csproj" />
   </Folder>
   <Folder Name="/crypto/internal/randutil/" Id="eb42a633-5407-569a-bf9b-c4cd8c0a4555">
     <Project Path="core/crypto/internal/randutil/crypto.internal.randutil.csproj" />
@@ -227,6 +245,9 @@
   </Folder>
   <Folder Name="/crypto/mlkem/" Id="62c9e4ef-681e-5ad5-a83c-a6be29f2e93e">
     <Project Path="core/crypto/mlkem/crypto.mlkem.csproj" />
+  </Folder>
+  <Folder Name="/crypto/mlkem/mlkemtest/" Id="f8f652e7-d0dd-59c6-ae6b-3c36378bae29">
+    <Project Path="core/crypto/mlkem/mlkemtest/crypto.mlkem.mlkemtest.csproj" />
   </Folder>
   <Folder Name="/crypto/pbkdf2/" Id="662fbba5-8a1c-5db6-b3b1-f2d722bab1f2">
     <Project Path="core/crypto/pbkdf2/crypto.pbkdf2.csproj" />
@@ -384,6 +405,9 @@
   <Folder Name="/go/internal/gcimporter/" Id="d2c9ff47-2bb2-51d4-83b6-95aedfde0f36">
     <Project Path="core/go/internal/gcimporter/go.internal.gcimporter.csproj" />
   </Folder>
+  <Folder Name="/go/internal/scannerhooks/" Id="40694da3-a23b-5c79-b6ba-7a137a7cf52e">
+    <Project Path="core/go/internal/scannerhooks/go.internal.scannerhooks.csproj" />
+  </Folder>
   <Folder Name="/go/internal/srcimporter/" Id="96d05d98-859e-52de-8f19-893e544f9950">
     <Project Path="core/go/internal/srcimporter/go.internal.srcimporter.csproj" />
   </Folder>
@@ -480,6 +504,9 @@
   <Folder Name="/internal/cfg/" Id="9c5ca441-df9e-55e6-bf20-737ef83c6f97">
     <Project Path="core/internal/cfg/internal.cfg.csproj" />
   </Folder>
+  <Folder Name="/internal/cgrouptest/" Id="1e529a6f-432a-5c01-84ba-2f6dbe29979b">
+    <Project Path="core/internal/cgrouptest/internal.cgrouptest.csproj" />
+  </Folder>
   <Folder Name="/internal/chacha8rand/" Id="fd774760-fbac-5876-b7a5-f7c7c75bba0b">
     <Project Path="core/internal/chacha8rand/internal.chacha8rand.csproj" />
   </Folder>
@@ -573,9 +600,6 @@
   <Folder Name="/internal/goversion/" Id="327dceb5-4021-5a98-a53b-6a0daed2f161">
     <Project Path="core/internal/goversion/internal.goversion.csproj" />
   </Folder>
-  <Folder Name="/internal/itoa/" Id="78fa7aa6-3fb0-5aee-bcd1-c789f58b1a3a">
-    <Project Path="core/internal/itoa/internal.itoa.csproj" />
-  </Folder>
   <Folder Name="/internal/lazyregexp/" Id="12329c56-fb65-5a83-948a-54c89c9570a3">
     <Project Path="core/internal/lazyregexp/internal.lazyregexp.csproj" />
   </Folder>
@@ -615,12 +639,28 @@
   <Folder Name="/internal/reflectlite/" Id="2f2e22ab-1a07-552d-bfc8-ba21ea45c83d">
     <Project Path="core/internal/reflectlite/internal.reflectlite.csproj" />
   </Folder>
+  <Folder Name="/internal/routebsd/" Id="befe733f-8583-5317-8b19-bef916036a88">
+    <Project Path="core/internal/routebsd/internal.routebsd.csproj" />
+  </Folder>
   <Folder Name="/internal/runtime/" />
   <Folder Name="/internal/runtime/atomic/" Id="0c1bd934-8b64-5cc0-9f0a-522f84ac6c72">
     <Project Path="core/internal/runtime/atomic/internal.runtime.atomic.csproj" />
   </Folder>
+  <Folder Name="/internal/runtime/cgroup/" Id="58a1b918-00f5-50ad-9afa-7b7cbff75ab0">
+    <Project Path="core/internal/runtime/cgroup/internal.runtime.cgroup.csproj" />
+  </Folder>
   <Folder Name="/internal/runtime/exithook/" Id="660710b4-102a-587e-92e1-842f055bc1a5">
     <Project Path="core/internal/runtime/exithook/internal.runtime.exithook.csproj" />
+  </Folder>
+  <Folder Name="/internal/runtime/gc/" Id="b40118f9-df1c-5dc8-a17b-0e32b69420ab">
+    <Project Path="core/internal/runtime/gc/internal.runtime.gc.csproj" />
+  </Folder>
+  <Folder Name="/internal/runtime/gc/internal/" />
+  <Folder Name="/internal/runtime/gc/internal/gen/" Id="8cf7f101-2dfe-58e0-a537-7bfc1402d105">
+    <Project Path="core/internal/runtime/gc/internal/gen/internal.runtime.gc.internal.gen.csproj" />
+  </Folder>
+  <Folder Name="/internal/runtime/gc/scan/" Id="81e42a22-cf64-556e-957e-a26aebb76d48">
+    <Project Path="core/internal/runtime/gc/scan/internal.runtime.gc.scan.csproj" />
   </Folder>
   <Folder Name="/internal/runtime/maps/" Id="d706fa79-494c-5d7b-8c9d-2e5fd006d4f0">
     <Project Path="core/internal/runtime/maps/internal.runtime.maps.csproj" />
@@ -628,17 +668,31 @@
   <Folder Name="/internal/runtime/math/" Id="36adcf5a-8c36-56f6-b28f-cbee12cafc9f">
     <Project Path="core/internal/runtime/math/internal.runtime.math.csproj" />
   </Folder>
+  <Folder Name="/internal/runtime/pprof/" />
+  <Folder Name="/internal/runtime/pprof/label/" Id="d3c17d81-e3c3-5468-be44-2904da9cbafe">
+    <Project Path="core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj" />
+  </Folder>
+  <Folder Name="/internal/runtime/startlinetest/" Id="b569c0e1-f10f-5eb4-b0b5-1dac75b5c778">
+    <Project Path="core/internal/runtime/startlinetest/internal.runtime.startlinetest.csproj" />
+  </Folder>
   <Folder Name="/internal/runtime/sys/" Id="438f5237-9230-5af9-afba-68d0a70cc241">
     <Project Path="core/internal/runtime/sys/internal.runtime.sys.csproj" />
   </Folder>
-  <Folder Name="/internal/runtime/syscall/" Id="f87f468e-b61e-543e-ad50-71097d1940a6">
-    <Project Path="core/internal/runtime/syscall/internal.runtime.syscall.csproj" />
+  <Folder Name="/internal/runtime/syscall/" />
+  <Folder Name="/internal/runtime/syscall/linux/" Id="1db1de9c-c844-5991-9417-98f96ef056d8">
+    <Project Path="core/internal/runtime/syscall/linux/internal.runtime.syscall.linux.csproj" />
+  </Folder>
+  <Folder Name="/internal/runtime/syscall/windows/" Id="080838b5-da02-5b2f-afbf-653cdf564638">
+    <Project Path="core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
   </Folder>
   <Folder Name="/internal/saferio/" Id="01c49cfc-eaa7-55b2-94d6-6d89331a1a8d">
     <Project Path="core/internal/saferio/internal.saferio.csproj" />
   </Folder>
   <Folder Name="/internal/singleflight/" Id="2ef481ff-bf1c-5409-a7bc-a4b144652fd2">
     <Project Path="core/internal/singleflight/internal.singleflight.csproj" />
+  </Folder>
+  <Folder Name="/internal/strconv/" Id="197ea00e-2b25-5d2d-a066-b38aa9d73bd4">
+    <Project Path="core/internal/strconv/internal.strconv.csproj" />
   </Folder>
   <Folder Name="/internal/stringslite/" Id="3a15def1-8ecc-52f5-bb77-4ad3506f2fd2">
     <Project Path="core/internal/stringslite/internal.stringslite.csproj" />
@@ -674,34 +728,33 @@
   <Folder Name="/internal/testenv/" Id="66c95e08-7ff0-5a58-a3c8-3d89203f1e0e">
     <Project Path="core/internal/testenv/internal.testenv.csproj" />
   </Folder>
+  <Folder Name="/internal/testhash/" Id="cac0e760-c3f5-5895-a7e2-3364d55054df">
+    <Project Path="core/internal/testhash/internal.testhash.csproj" />
+  </Folder>
   <Folder Name="/internal/testlog/" Id="990ec0e7-e84d-5ccf-b201-dda8b464c73b">
     <Project Path="core/internal/testlog/internal.testlog.csproj" />
   </Folder>
   <Folder Name="/internal/testpty/" Id="187738a0-d2c0-5922-8c0e-71d3e1605d52">
     <Project Path="core/internal/testpty/internal.testpty.csproj" />
   </Folder>
-  <Folder Name="/internal/trace/event/go122/" Id="cec2f414-79a0-5ae5-9903-49148eef6cc5">
-    <Project Path="core/internal/trace/event/go122/internal.trace.event.go122.csproj" />
-  </Folder>
-  <Folder Name="/internal/trace/event/" Id="80e4aabe-ea3d-52be-a8bd-178cffc108e9">
-    <Project Path="core/internal/trace/event/internal.trace.event.csproj" />
-  </Folder>
   <Folder Name="/internal/trace/" Id="d3eb6a62-f751-5797-b5e4-12427dbd78b9">
     <Project Path="core/internal/trace/internal.trace.csproj" />
   </Folder>
   <Folder Name="/internal/trace/internal/" />
-  <Folder Name="/internal/trace/internal/oldtrace/" Id="0927bcd8-2a82-578e-ac94-176bb4669c3e">
-    <Project Path="core/internal/trace/internal/oldtrace/internal.trace.internal.oldtrace.csproj" />
+  <Folder Name="/internal/trace/internal/testgen/" Id="6310f2bb-94d6-5325-9c87-9eb2fcebf261">
+    <Project Path="core/internal/trace/internal/testgen/internal.trace.internal.testgen.csproj" />
   </Folder>
-  <Folder Name="/internal/trace/internal/testgen/" />
-  <Folder Name="/internal/trace/internal/testgen/go122/" Id="47057d4b-f858-52e4-8d3b-a1e8acd26ea6">
-    <Project Path="core/internal/trace/internal/testgen/go122/internal.trace.internal.testgen.go122.csproj" />
+  <Folder Name="/internal/trace/internal/tracev1/" Id="62772046-60e6-555e-9a40-242d4ae27e8c">
+    <Project Path="core/internal/trace/internal/tracev1/internal.trace.internal.tracev1.csproj" />
   </Folder>
   <Folder Name="/internal/trace/raw/" Id="82d8ae69-0b31-5525-9c91-03f81ef5bc5e">
     <Project Path="core/internal/trace/raw/internal.trace.raw.csproj" />
   </Folder>
   <Folder Name="/internal/trace/testtrace/" Id="bb9a67f0-e159-5923-96ae-4783ed170372">
     <Project Path="core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
+  </Folder>
+  <Folder Name="/internal/trace/tracev2/" Id="1de6fbd9-826d-5514-9f26-9791ef6a5122">
+    <Project Path="core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
   </Folder>
   <Folder Name="/internal/trace/traceviewer/format/" Id="ad83ef03-7fdb-5fe3-89b5-ba617823839b">
     <Project Path="core/internal/trace/traceviewer/format/internal.trace.traceviewer.format.csproj" />
@@ -755,9 +808,6 @@
   <Folder Name="/log/slog/internal/" Id="9bc9d8e1-0c84-5789-8aef-3bc34b578896">
     <Project Path="core/log/slog/internal/log.slog.internal.csproj" />
   </Folder>
-  <Folder Name="/log/slog/internal/slogtest/" Id="5e1bf31e-0e49-5dcc-a277-077e09cab5e3">
-    <Project Path="core/log/slog/internal/slogtest/log.slog.internal.slogtest.csproj" />
-  </Folder>
   <Folder Name="/log/slog/" Id="06d0a98a-14ae-5a90-8453-0fc34c34827e">
     <Project Path="core/log/slog/log.slog.csproj" />
   </Folder>
@@ -766,6 +816,10 @@
   </Folder>
   <Folder Name="/maps/" Id="079da7ca-3e6f-5277-b409-6e9977c61891">
     <Project Path="core/maps/maps.csproj" />
+  </Folder>
+  <Folder Name="/math/big/internal/" />
+  <Folder Name="/math/big/internal/asmgen/" Id="8dcac93a-774b-503a-8340-c63c81ce9bd8">
+    <Project Path="core/math/big/internal/asmgen/math.big.internal.asmgen.csproj" />
   </Folder>
   <Folder Name="/math/big/" Id="fa2d8c5f-ce60-54a4-bc73-b79607bf5332">
     <Project Path="core/math/big/math.big.csproj" />
@@ -814,6 +868,9 @@
   </Folder>
   <Folder Name="/net/http/internal/ascii/" Id="f730cd45-52a9-5a3b-b2df-2fceb7594198">
     <Project Path="core/net/http/internal/ascii/net.http.internal.ascii.csproj" />
+  </Folder>
+  <Folder Name="/net/http/internal/httpcommon/" Id="2af043eb-df66-5b17-96a2-6bda9491df8e">
+    <Project Path="core/net/http/internal/httpcommon/net.http.internal.httpcommon.csproj" />
   </Folder>
   <Folder Name="/net/http/internal/" Id="4fe59796-737b-5a05-be91-0426c3ff409a">
     <Project Path="core/net/http/internal/net.http.internal.csproj" />
@@ -902,10 +959,6 @@
   <Folder Name="/runtime/debug/" Id="a3a25c33-5f50-5260-b527-870d2cae4584">
     <Project Path="core/runtime/debug/runtime.debug.csproj" />
   </Folder>
-  <Folder Name="/runtime/internal/" />
-  <Folder Name="/runtime/internal/startlinetest/" Id="74c3cd97-ea25-52c9-bd4c-8055f2169fc8">
-    <Project Path="core/runtime/internal/startlinetest/runtime.internal.startlinetest.csproj" />
-  </Folder>
   <Folder Name="/runtime/metrics/" Id="d1f778c5-8e72-5d63-ae70-b7dc62440ca3">
     <Project Path="core/runtime/metrics/runtime.metrics.csproj" />
   </Folder>
@@ -949,6 +1002,9 @@
   <Folder Name="/syscall/" Id="fd6f44e2-68f7-5111-b697-5c1eb2a5661e">
     <Project Path="core/syscall/syscall.csproj" />
   </Folder>
+  <Folder Name="/testing/cryptotest/" Id="e44df3b0-c1e2-5248-a616-7fc7c98adb97">
+    <Project Path="core/testing/cryptotest/testing.cryptotest.csproj" />
+  </Folder>
   <Folder Name="/testing/fstest/" Id="de7775db-512c-58fd-a9a5-027ae090947d">
     <Project Path="core/testing/fstest/testing.fstest.csproj" />
   </Folder>
@@ -964,6 +1020,9 @@
   </Folder>
   <Folder Name="/testing/slogtest/" Id="566af56b-8687-595c-892b-30bf2dacc2fe">
     <Project Path="core/testing/slogtest/testing.slogtest.csproj" />
+  </Folder>
+  <Folder Name="/testing/synctest/" Id="ff88949a-a87f-586c-9c05-50af13f3c12d">
+    <Project Path="core/testing/synctest/testing.synctest.csproj" />
   </Folder>
   <Folder Name="/testing/" Id="49bef292-8c1c-515a-a24e-983cd1747ffc">
     <Project Path="core/testing/testing.csproj" />
@@ -1046,9 +1105,6 @@
   </Folder>
   <Folder Name="/vendor/golang.org/x/net/nettest/" Id="31be96dc-b027-500c-bb6b-a2da3cc1bdb0">
     <Project Path="core/vendor/golang.org/x/net/nettest/vendor.golang.org.x.net.nettest.csproj" />
-  </Folder>
-  <Folder Name="/vendor/golang.org/x/net/route/" Id="1b4d1c07-9f03-5af2-a7ae-b9ce56c07779">
-    <Project Path="core/vendor/golang.org/x/net/route/vendor.golang.org.x.net.route.csproj" />
   </Folder>
   <Folder Name="/vendor/golang.org/x/sys/" />
   <Folder Name="/vendor/golang.org/x/sys/cpu/" Id="ce20011c-29be-50dc-8476-a9e2d9481ddc">

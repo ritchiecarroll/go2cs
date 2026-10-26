@@ -365,7 +365,7 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 internal static bool matchResult(this ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
-        if ((uint64)(id & (~c).mask) == (~c).bits) {
+        if ((id & (~c).mask) == (~c).bits) {
             return (~c).result;
         }
     }
@@ -453,7 +453,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
 
     var @base = stk[0];
     // normalize PCs
-    foreach (var (i, _) in stk.slice(0, n)) {
+    foreach (var i in range(stk.slice(0, n))) {
         stk[i] -= @base;
     }
 
@@ -478,7 +478,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
         } else {
             if (!d.seen(h)) {
                 // Restore PCs in stack for printing
-                foreach (var (i, _) in stk.slice(0, n)) {
+                foreach (var i in range(stk.slice(0, n))) {
                     stk[i] += @base;
                 }
                 printStack(w, h, stk.slice(1, n));
@@ -536,7 +536,7 @@ internal static error printStack(Writer w, uint64 h, slice<uintptr> stk) {
 // about a match of the given ID.
 // It always returns the hexadecimal format.
 public static @string Marker(uint64 id) {
-    return ((@string)AppendMarker(default!, id));
+    return (@string)AppendMarker(default!, id);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -548,7 +548,7 @@ public static slice<byte> AppendMarker(slice<byte> dst, uint64 id) {
     array<byte> buf = new(33); /* len(prefix) + 16 + 1 */
     copy(buf[..], prefix);
     for (nint i = 0; i < 16; i++) {
-        buf[len(prefix) + i] = LiteralByteAt("0123456789abcdef"u8, (id >> (int)(60)));
+        buf[len(prefix) + i] = LiteralByteAt("0123456789abcdef"u8, (id >> 60));
         id <<= (int)(4);
     }
     buf[len(prefix) + 16] = (rune)']';
@@ -795,7 +795,7 @@ internal static uint64 fnvString(uint64 h, @string x) {
 
 internal static uint64 fnvUint64(uint64 h, uint64 x) {
     for (nint i = 0; i < 8; i++) {
-        h ^= (uint64)((uint64)(x & 0xFF));
+        h ^= (uint64)((x & 0xFF));
         x >>= (int)(8);
         h *= prime64;
     }
@@ -804,7 +804,7 @@ internal static uint64 fnvUint64(uint64 h, uint64 x) {
 
 internal static uint64 fnvUint32(uint64 h, uint32 x) {
     for (nint i = 0; i < 4; i++) {
-        h ^= (uint64)((uint64)((uint32)(x & 0xFF)));
+        h ^= (uint64)((uint64)(x & 0xFF));
         x >>= (int)(8);
         h *= prime64;
     }

@@ -48,7 +48,7 @@ internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr)
         if (br.bits > 0){
             // Get next bit - fast path.
             br.bits--;
-            bit = (uint16)((uint16)((br.n >> (int)(((nuint)(br.bits & 63))))) & 1);
+            bit = (uint16)((uint16)(br.n >> (int)(br.bits & 63)) & 1);
         } else {
             // Get next bit - slow path.
             // Use ReadBits to retrieve a single bit
@@ -90,6 +90,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     // order to minimize the amount of information needed to build a tree
     // bzip2 uses a canonical tree so that it can be reconstructed given
     // only the code length assignments.
+
     if (len(lengths) < 2) {
         throw panic("newHuffmanTree: too few symbols");
     }
@@ -167,12 +168,12 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     error err = default!;
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var test = ((uint32)1).Lsh((uint64)((31 - level)));
+    var test = ((uint32)1).Lsh((uint64)(31 - level));
 
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
     foreach (var (i, code) in codes) {
-        if ((uint32)(code.code & test) != 0) {
+        if ((code.code & test) != 0) {
             firstRightIndex = i;
             break;
         }
@@ -185,6 +186,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
         // There is a superfluous level in the Huffman tree indicating
         // a bug in the encoder. However, this bug has been observed in
         // the wild so we handle it.
+
         // If this function was called recursively then we know that
         // len(codes) >= 2 because, otherwise, we would have hit the
         // "leaf node" case, below, and not recurred.

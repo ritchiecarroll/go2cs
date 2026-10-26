@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 
 // A Token holds a value of one of these types:
 //
@@ -114,6 +115,7 @@ Input:
     while (scanp >= 0) {
         // help the compiler see that scanp is never negative, so it can remove
         // some bounds checks below.
+
         // Look in the buffer for a new value.
         for (; scanp < len(dec.buf); scanp++) {
             var c = dec.buf[scanp];
@@ -377,7 +379,7 @@ internal static void tokenValueEnd(this ref Decoder dec) {
 partial struct Delim /*num:rune*/;
 
 public static @string String(this Delim d) {
-    return ((@string)(rune)d);
+    return (@string)(rune)d;
 }
 
 // Token returns the next JSON token in the input stream.
@@ -408,7 +410,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.scanp++;
             dec.tokenStack = append(dec.tokenStack, dec.tokenState);
             dec.tokenState = tokenArrayStart;
-            return (((Delim)(rune)'['), default!);
+            return ((Delim)(rune)'[', default!);
         }
         if (exprᴛ1 is (rune)']') { matchᴛ1 = true;
             if (dec.tokenState != tokenArrayStart && dec.tokenState != tokenArrayComma) {
@@ -418,7 +420,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
             dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
-            return (((Delim)(rune)']'), default!);
+            return ((Delim)(rune)']', default!);
         }
         if (exprᴛ1 is (rune)'{') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
@@ -427,7 +429,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.scanp++;
             dec.tokenStack = append(dec.tokenStack, dec.tokenState);
             dec.tokenState = tokenObjectStart;
-            return (((Delim)(rune)'{'), default!);
+            return ((Delim)(rune)'{', default!);
         }
         if (exprᴛ1 is (rune)'}') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectStart && dec.tokenState != tokenObjectComma) {
@@ -437,7 +439,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1];
             dec.tokenStack = dec.tokenStack.slice(0, len(dec.tokenStack) - 1);
             dec.tokenValueEnd();
-            return (((Delim)(rune)'}'), default!);
+            return ((Delim)(rune)'}', default!);
         }
         if (exprᴛ1 is (rune)':') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectColon) {

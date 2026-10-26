@@ -23,7 +23,7 @@ public static @string String(this OSArch p) {
 public static bool RaceDetectorSupported(@string goos, @string goarch) {
     var exprᴛ1 = goos;
     if (exprᴛ1 == "linux"u8) {
-        return goarch == "amd64"u8 || goarch == "ppc64le"u8 || goarch == "arm64"u8 || goarch == "s390x"u8;
+        return goarch == "amd64"u8 || goarch == "arm64"u8 || goarch == "loong64"u8 || goarch == "ppc64le"u8 || goarch == "riscv64"u8 || goarch == "s390x"u8;
     }
     if (exprᴛ1 == "darwin"u8) {
         return goarch == "amd64"u8 || goarch == "arm64"u8;
@@ -67,7 +67,7 @@ public static bool ASanSupported(@string goos, @string goarch) {
 // ('go test -fuzz=.').
 public static bool FuzzSupported(@string goos, @string goarch) {
     var exprᴛ1 = goos;
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8) {
+    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "windows"u8) {
         return true;
     }
     { /* default: */
@@ -79,7 +79,7 @@ public static bool FuzzSupported(@string goos, @string goarch) {
 // instrumentation. (FuzzInstrumented implies FuzzSupported.)
 public static bool FuzzInstrumented(@string goos, @string goarch) {
     var exprᴛ1 = goarch;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
+    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8) {
         // TODO(#14565): support more architectures.
         return FuzzSupported(goos, goarch);
     }
@@ -93,18 +93,12 @@ public static bool FuzzInstrumented(@string goos, @string goarch) {
 public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) {
     if (withCgo) {
         var exprᴛ1 = goarch;
-        if (exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+        if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
             // Internally linking cgo is incomplete on some architectures.
             // https://go.dev/issue/14449
             return true;
         }
-        if (exprᴛ1 == "arm64"u8) {
-            if (goos == "windows"u8) {
-                // windows/arm64 internal linking is not implemented.
-                return true;
-            }
-        }
-        else if (exprᴛ1 == "ppc64"u8) {
+        if (exprᴛ1 == "ppc64"u8) {
             // Big Endian PPC64 cgo internal linking is not implemented for aix or linux.
             // https://go.dev/issue/8912
             if (goos == "aix"u8 || goos == "linux"u8) {
@@ -199,7 +193,7 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
     }
     if (exprᴛ1 == "pie"u8) {
         var exprᴛ5 = platform;
-        if (exprᴛ5 == "linux/386"u8 || exprᴛ5 == "linux/amd64"u8 || exprᴛ5 == "linux/arm"u8 || exprᴛ5 == "linux/arm64"u8 || exprᴛ5 == "linux/loong64"u8 || exprᴛ5 == "linux/ppc64le"u8 || exprᴛ5 == "linux/riscv64"u8 || exprᴛ5 == "linux/s390x"u8 || exprᴛ5 == "android/amd64"u8 || exprᴛ5 == "android/arm"u8 || exprᴛ5 == "android/arm64"u8 || exprᴛ5 == "android/386"u8 || exprᴛ5 == "freebsd/amd64"u8 || exprᴛ5 == "darwin/amd64"u8 || exprᴛ5 == "darwin/arm64"u8 || exprᴛ5 == "ios/amd64"u8 || exprᴛ5 == "ios/arm64"u8 || exprᴛ5 == "aix/ppc64"u8 || exprᴛ5 == "openbsd/arm64"u8 || exprᴛ5 == "windows/386"u8 || exprᴛ5 == "windows/amd64"u8 || exprᴛ5 == "windows/arm"u8 || exprᴛ5 == "windows/arm64"u8) {
+        if (exprᴛ5 == "linux/386"u8 || exprᴛ5 == "linux/amd64"u8 || exprᴛ5 == "linux/arm"u8 || exprᴛ5 == "linux/arm64"u8 || exprᴛ5 == "linux/loong64"u8 || exprᴛ5 == "linux/ppc64le"u8 || exprᴛ5 == "linux/riscv64"u8 || exprᴛ5 == "linux/s390x"u8 || exprᴛ5 == "android/amd64"u8 || exprᴛ5 == "android/arm"u8 || exprᴛ5 == "android/arm64"u8 || exprᴛ5 == "android/386"u8 || exprᴛ5 == "freebsd/amd64"u8 || exprᴛ5 == "darwin/amd64"u8 || exprᴛ5 == "darwin/arm64"u8 || exprᴛ5 == "ios/amd64"u8 || exprᴛ5 == "ios/arm64"u8 || exprᴛ5 == "aix/ppc64"u8 || exprᴛ5 == "openbsd/arm64"u8 || exprᴛ5 == "windows/386"u8 || exprᴛ5 == "windows/amd64"u8 || exprᴛ5 == "windows/arm64"u8) {
             return true;
         }
         return false;
@@ -213,7 +207,7 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
     }
     if (exprᴛ1 == "plugin"u8) {
         var exprᴛ7 = platform;
-        if (exprᴛ7 == "linux/amd64"u8 || exprᴛ7 == "linux/arm"u8 || exprᴛ7 == "linux/arm64"u8 || exprᴛ7 == "linux/386"u8 || exprᴛ7 == "linux/loong64"u8 || exprᴛ7 == "linux/s390x"u8 || exprᴛ7 == "linux/ppc64le"u8 || exprᴛ7 == "android/amd64"u8 || exprᴛ7 == "android/386"u8 || exprᴛ7 == "darwin/amd64"u8 || exprᴛ7 == "darwin/arm64"u8 || exprᴛ7 == "freebsd/amd64"u8) {
+        if (exprᴛ7 == "linux/amd64"u8 || exprᴛ7 == "linux/arm"u8 || exprᴛ7 == "linux/arm64"u8 || exprᴛ7 == "linux/386"u8 || exprᴛ7 == "linux/loong64"u8 || exprᴛ7 == "linux/riscv64"u8 || exprᴛ7 == "linux/s390x"u8 || exprᴛ7 == "linux/ppc64le"u8 || exprᴛ7 == "android/amd64"u8 || exprᴛ7 == "android/386"u8 || exprᴛ7 == "darwin/amd64"u8 || exprᴛ7 == "darwin/arm64"u8 || exprᴛ7 == "freebsd/amd64"u8) {
             return true;
         }
         return false;
@@ -225,7 +219,7 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
 
 public static bool InternalLinkPIESupported(@string goos, @string goarch) {
     var exprᴛ1 = goos + "/"u8 + goarch;
-    if (exprᴛ1 == "android/arm64"u8 || exprᴛ1 == "darwin/amd64"u8 || exprᴛ1 == "darwin/arm64"u8 || exprᴛ1 == "linux/amd64"u8 || exprᴛ1 == "linux/arm64"u8 || exprᴛ1 == "linux/ppc64le"u8 || exprᴛ1 == "windows/386"u8 || exprᴛ1 == "windows/amd64"u8 || exprᴛ1 == "windows/arm"u8 || exprᴛ1 == "windows/arm64"u8) {
+    if (exprᴛ1 == "android/arm64"u8 || exprᴛ1 == "darwin/amd64"u8 || exprᴛ1 == "darwin/arm64"u8 || exprᴛ1 == "linux/amd64"u8 || exprᴛ1 == "linux/arm64"u8 || exprᴛ1 == "linux/loong64"u8 || exprᴛ1 == "linux/ppc64le"u8 || exprᴛ1 == "windows/386"u8 || exprᴛ1 == "windows/amd64"u8 || exprᴛ1 == "windows/arm64"u8) {
         return true;
     }
     return false;

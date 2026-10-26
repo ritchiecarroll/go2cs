@@ -82,7 +82,7 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
         }
     }
     d.Value.Content = (~d).Content[..1]; // might be blank lines, code blocks, etc in “first sentence”
-    return strings.TrimSpace(((@string)pr.Text(d)));
+    return strings.TrimSpace((@string)pr.Text(d));
 }
 
 } // end doc_package

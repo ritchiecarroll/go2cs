@@ -24,6 +24,8 @@ using regexp = regexp_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using global::go.mime;
@@ -375,7 +377,7 @@ public static void TestMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> �
 internal static readonly @string myfileTxtˢ = "myfile.txt"u8;
 
 internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> Ꮡt, testMode mode) {
-    nint payloadSize = (1 << (int)(10));
+    nint payloadSize = 1 << 10;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ1) => {
         // The combination of:
         //      MaxInt64 + payloadSize + (internal spare of 10MiB)
@@ -426,7 +428,6 @@ public static void TestRequestRedirect(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ5 = "/foo/"u8;
 internal static readonly @string fooˢ6 = "/foo/$"u8;
 
 internal static void testRequestRedirect(ж<testing.T> Ꮡt, testMode mode) {
@@ -723,9 +724,11 @@ partial struct newRequestHostTestsᴛ1 /*dyn*/ {
 internal static slice<newRequestHostTestsᴛ1> newRequestHostTests = new newRequestHostTestsᴛ1[]{
     new("http://www.example.com/"u8, "www.example.com"u8),
     new("http://www.example.com:8080/"u8, "www.example.com:8080"u8),
+
     new("http://192.168.0.1/"u8, "192.168.0.1"u8),
     new("http://192.168.0.1:8080/"u8, "192.168.0.1:8080"u8),
     new("http://192.168.0.1:/"u8, "192.168.0.1"u8),
+
     new("http://[fe80::1]/"u8, "[fe80::1]"u8),
     new("http://[fe80::1]:8080/"u8, "[fe80::1]:8080"u8),
     new("http://[fe80::1%25en0]/"u8, "[fe80::1%en0]"u8),
@@ -831,6 +834,7 @@ internal static slice<parseHTTPVersionTestsᴛ1> parseHTTPVersionTests = new par
     new("HTTP/0.9"u8, 0, 9, true),
     new("HTTP/1.0"u8, 1, 0, true),
     new("HTTP/1.1"u8, 1, 1, true),
+
     new("HTTP"u8, 0, 0, false),
     new("HTTP/one.one"u8, 0, 0, false),
     new("HTTP/1.1/"u8, 0, 0, false),
@@ -912,6 +916,7 @@ internal static slice<parseBasicAuthTestsᴛ1> parseBasicAuthTests = new parseBa
     // Case doesn't matter:
     new("BASIC "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), "Aladdin"u8, "open sesame"u8, true),
     new("basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), "Aladdin"u8, "open sesame"u8, true),
+
     new("Basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open:sesame"u8)), "Aladdin"u8, "open:sesame"u8, true),
     new("Basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>(":"u8)), ""u8, ""u8, true),
     new("Basic"u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), ""u8, ""u8, false),
@@ -938,13 +943,13 @@ partial struct logWrites {
     internal ж<slice<@string>> dst;
 }
 
-internal static error WriteByte(this logWrites l, byte c) {
+internal static partial error WriteByte(this logWrites l, byte c) {
     l.t.Fatalf("unexpected WriteByte call"u8);
     return default!;
 }
 
 internal static (nint n, error err) Write(this logWrites l, slice<byte> p) {
-    l.dst.ValueSlot = append(l.dst.ValueSlot, ((@string)p));
+    l.dst.ValueSlot = append(l.dst.ValueSlot, (@string)p);
     return (len(p), default!);
 }
 
@@ -1373,7 +1378,7 @@ internal partial struct TestNewRequestGetBody_tests /*dyn*/ {
 // verify that NewRequest sets Request.GetBody and that it works
 public static void TestNewRequestGetBody(ж<testing.T> Ꮡt) {
     var tests = new TestNewRequestGetBody_tests[]{
-        new(r: new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ3))),
+        new(r: new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ))),
         new(r: new http_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>("hello"u8)))),
         new(r: new http_test_package.bytes_BufferжReader(bytes.NewBuffer(slice<byte>("hello"u8))))
     }.slice();
@@ -1635,7 +1640,7 @@ public static void TestRequestCookiesByName(ж<testing.T> Ꮡt) {
             if (!reflect.DeepEqual(got, ttʗ1.want)) {
                 @string asStr(any v) {
                     var (blob, _) = json.MarshalIndent(v, ""u8, "  "u8);
-                    return ((@string)blob);
+                    return (@string)blob;
                 }
                 tΔ1.Fatalf("Result mismatch\n\tGot: %s\n\tWant: %s"u8, asStr(got), asStr(ttʗ1.want));
             }
@@ -1757,15 +1762,15 @@ public static void BenchmarkReadRequestWrk(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkFileAndServer_1KB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(10)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 10);
 }
 
 public static void BenchmarkFileAndServer_16MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(24)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 24);
 }
 
 public static void BenchmarkFileAndServer_64MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(26)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 26);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1855,7 +1860,7 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorsIsErrNotSupportedˢ = (@string)"errors.Is(ErrNotSupported, errors.ErrUnsupported) failed"u8;
 
-public static void TestErrNotSupported(ж<testing.T> Ꮡt) {
+public static partial void TestErrNotSupported(ж<testing.T> Ꮡt) {
     if (!errors.Is(new Δhttp.ProtocolErrorжerror(ErrNotSupported), errors.ErrUnsupported)) {
         Ꮡt.Error(errorsIsErrNotSupportedˢ);
     }

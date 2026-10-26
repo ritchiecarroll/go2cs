@@ -30,8 +30,8 @@ internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) {
 
     var head = l.head;
     while (head != 0) {
-        var i = Ꮡ(p.Inst, (head >> (int)(1)));
-        if ((uint32)(head & 1) == 0){
+        var i = Ꮡ(p.Inst, (head >> 1));
+        if ((head & 1) == 0){
             head = i.Value.Out;
             i.Value.Out = val;
         } else {
@@ -51,8 +51,8 @@ internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2)
         return l1;
     }
 
-    var i = Ꮡ(p.Inst, (l1.tail >> (int)(1)));
-    if ((uint32)(l1.tail & 1) == 0){
+    var i = Ꮡ(p.Inst, (l1.tail >> 1));
+    if ((l1.tail & 1) == 0){
         i.Value.Out = l2.head;
     } else {
         i.Value.Arg = l2.head;
@@ -107,7 +107,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
             return c.nop();
         }
         frag f = default!;
-        foreach (var (j, _) in re.Rune) {
+        foreach (var j in range(re.Rune)) {
             var f1 = c.rune(re.Rune.slice(j, j + 1), re.Flags);
             if (j == 0){
                 f = f1;
@@ -145,9 +145,9 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
         return c.empty(EmptyNoWordBoundary);
     }
     if (exprᴛ1 == OpCapture) {
-        var bra = c.cap((uint32)((re.Cap << (int)(1))));
+        var bra = c.cap((uint32)(re.Cap << 1));
         var sub = c.compile(re.Sub[0]);
-        var ket = c.cap((uint32)((nint)((re.Cap << (int)(1)) | 1)));
+        var ket = c.cap((uint32)(re.Cap << 1 | 1));
         return c.cat(c.cat(bra, sub), ket);
     }
     if (exprᴛ1 == OpStar) {
@@ -192,7 +192,7 @@ internal static frag inst(this ref compiler c, InstOp op) {
 
 internal static frag nop(this ref compiler c) {
     var f = c.inst(InstNop);
-    f.@out = makePatchList((f.i << (int)(1)));
+    f.@out = makePatchList(f.i << 1);
     return f;
 }
 
@@ -202,7 +202,7 @@ internal static frag fail(this ref compiler c) {
 
 internal static frag cap(this ref compiler c, uint32 arg) {
     var f = c.inst(InstCapture);
-    f.@out = makePatchList((f.i << (int)(1)));
+    f.@out = makePatchList(f.i << 1);
     (~c.p).Inst[f.i].Arg = arg;
 
     if ((~c.p).NumCap < (nint)arg + 1) {
@@ -246,10 +246,10 @@ internal static frag quest(this ref compiler c, frag f1, bool nongreedy) {
     var i = Ꮡ((~c.p).Inst, f.i);
     if (nongreedy){
         i.Value.Arg = f1.i;
-        f.@out = makePatchList((f.i << (int)(1)));
+        f.@out = makePatchList(f.i << 1);
     } else {
         i.Value.Out = f1.i;
-        f.@out = makePatchList((uint32)((f.i << (int)(1)) | 1));
+        f.@out = makePatchList(f.i << 1 | 1);
     }
     f.@out = f.@out.append(c.p, f1.@out);
     return f;
@@ -265,10 +265,10 @@ internal static frag loop(this ref compiler c, frag f1, bool nongreedy) {
     var i = Ꮡ((~c.p).Inst, f.i);
     if (nongreedy){
         i.Value.Arg = f1.i;
-        f.@out = makePatchList((f.i << (int)(1)));
+        f.@out = makePatchList(f.i << 1);
     } else {
         i.Value.Out = f1.i;
-        f.@out = makePatchList((uint32)((f.i << (int)(1)) | 1));
+        f.@out = makePatchList(f.i << 1 | 1);
     }
     f1.@out.patch(c.p, f.i);
     return f;
@@ -290,7 +290,7 @@ internal static frag plus(this ref compiler c, frag f1, bool nongreedy) {
 internal static frag empty(this ref compiler c, EmptyOp op) {
     var f = c.inst(InstEmptyWidth);
     (~c.p).Inst[f.i].Arg = (uint32)(uint8)op;
-    f.@out = makePatchList((f.i << (int)(1)));
+    f.@out = makePatchList(f.i << 1);
     return f;
 }
 
@@ -305,7 +305,7 @@ internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
         flags &= unchecked((Flags)~(Flags)(FoldCase));
     }
     i.Value.Arg = (uint32)(uint16)flags;
-    f.@out = makePatchList((f.i << (int)(1)));
+    f.@out = makePatchList(f.i << 1);
 
     // Special cases for exec machine.
     switch (ᐧ) {

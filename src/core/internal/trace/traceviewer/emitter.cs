@@ -8,9 +8,10 @@ using fmt = fmt_package;
 using trace = go.@internal.trace_package;
 using format = go.@internal.trace.traceviewer.format_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using time = time_package;
 using encoding;
+using go;
 using go.@internal;
 using go.@internal.trace.traceviewer;
 
@@ -203,8 +204,8 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
 
                 // Reached max size, commit this range and
                 // start a new range.
-                var startTime = ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D));
-                var endTime = ((time.Duration)(int64)(ev.Time * 1000D));
+                var startTime = (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D);
+                var endTime = (time.Duration)(int64)(ev.Time * 1000D);
                 sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
                     Name: fmt.Sprintf("%v-%v"u8, startTime, endTime),
                     Start: start,
@@ -225,7 +226,7 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
             {
                 nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
                     sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
-                        Name: fmt.Sprintf("%v-%v"u8, ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D)), ((time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D))),
+                        Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
                         Start: start,
                         End: end,
                         StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
@@ -455,7 +456,7 @@ public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
 }
 
 partial struct AsyncSliceEvent {
-    public partial ref SliceEvent SliceEvent { get; }
+    /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.
@@ -668,10 +669,10 @@ public static void Flush(this ref Emitter e) {
 
     e.processMeta(format.ProcsSection, e.resourceType, 2);
 
-    e.threadMeta(format.ProcsSection, trace.GCP, "GC"u8, -6);
-    e.threadMeta(format.ProcsSection, trace.NetpollP, networkˢ, -5);
-    e.threadMeta(format.ProcsSection, trace.TimerP, timersˢ, -4);
-    e.threadMeta(format.ProcsSection, trace.SyscallP, syscallsˢ, -3);
+    e.threadMeta(format.ProcsSection, GCP, "GC"u8, -6);
+    e.threadMeta(format.ProcsSection, NetpollP, networkˢ, -5);
+    e.threadMeta(format.ProcsSection, TimerP, timersˢ, -4);
+    e.threadMeta(format.ProcsSection, SyscallP, syscallsˢ, -3);
 
     foreach (var (id, name) in e.resources) {
         nint priority = (nint)id;
@@ -719,12 +720,12 @@ internal static void processMeta(this ref Emitter e, uint64 sectionID, @string n
 
 // Stack emits the given frames and returns a unique id for the stack. No
 // pointers to the given data are being retained beyond the call to Stack.
-public static nint Stack(this ref Emitter e, slice<ж<trace.Frame>> stk) {
+public static nint Stack(this ref Emitter e, slice<trace.StackFrame> stk) {
     return e.buildBranch(e.frameTree, stk);
 }
 
 // buildBranch builds one branch in the prefix tree rooted at ctx.frameTree.
-internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<trace.Frame>> stk) {
+internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return parent.id;
     }
@@ -732,13 +733,13 @@ internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<
     var frame = stk[last];
     stk = stk.slice(0, last);
 
-    var (node, ok) = parent.children[(~frame).PC, ꟷ];
+    var (node, ok) = parent.children[frame.PC, ꟷ];
     if (!ok) {
         e.frameSeq++;
         node.id = e.frameSeq;
         node.children = new map<uint64, frameNode>();
-        parent.children[(~frame).PC] = node;
-        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, (~frame).Fn, (~frame).Line), Parent: parent.id));
+        parent.children[frame.PC] = node;
+        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, frame.Func, frame.Line), Parent: parent.id));
     }
     return e.buildBranch(node, stk);
 }
@@ -811,7 +812,7 @@ internal static readonly @string colorManzGreen = "cq_build_attempt_runnig"u8; /
 internal static readonly @string colorKellyGreen = "cq_build_attempt_passed"u8; // 108, 218, 35
 internal static readonly @string colorAnotherGrey = "cq_build_attempt_failed"u8; // 187, 187, 187
 
-internal static slice<@string> colorForTask = new @string[]{
+[GoLazy] partial class lazyᴛcolorForTask { internal static slice<@string> colorForTask = new @string[]{
     colorLightMauve,
     colorOrange,
     colorSeafoamGreen,
@@ -835,7 +836,7 @@ internal static slice<@string> colorForTask = new @string[]{
     colorSilver,
     colorManzGreen,
     colorKellyGreen
-}.slice();
+}.slice(); }
 
 internal static @string pickTaskColor(uint64 id) {
     var idx = id % (uint64)len(colorForTask);

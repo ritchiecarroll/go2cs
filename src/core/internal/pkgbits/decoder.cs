@@ -51,7 +51,7 @@ partial struct PkgDecoder {
     // For example, section K's end positions start at elemEndsEnds[K-1]
     // (or 0, if K==0) and end at elemEndsEnds[K].
     internal array<uint32> elemEndsEnds = new(numRelocs);
-    internal slice<RelocEnt> scratchRelocEnt;
+    internal slice<RefTableEntry> scratchRelocEnt;
 }
 
 // PkgPath returns the package path for the package
@@ -81,7 +81,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
     ref var ver = ref heap(new uint32(), out var Ꮡver);
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡver) == default!);
-    pr.version = ((ΔVersion)ver);
+    pr.version = (ΔVersion)ver;
 
     if (pr.version >= numVersions) {
         throw panic(fmt.Errorf("cannot decode %q, export data version %d is greater than maximum supported version %d"u8, pkgPath, pr.version, (nint)(numVersions - 1)));
@@ -90,7 +90,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     if (pr.version.Has(Flags)) {
         ref var flags = ref heap(new uint32(), out var Ꮡflags);
         assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡflags) == default!);
-        pr.sync = (uint32)(flags & (uint32)flagSyncMarkers) != 0;
+        pr.sync = (flags & (uint32)flagSyncMarkers) != 0;
     }
 
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, pr.elemEndsEnds[..]) == default!);
@@ -110,7 +110,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // NumElems returns the number of elements in section k.
-public static nint NumElems(this ref PkgDecoder pr, RelocKind k) {
+public static nint NumElems(this ref PkgDecoder pr, SectionKind k) {
     nint count = (nint)pr.elemEndsEnds[k];
     if (k > 0) {
         count -= (nint)pr.elemEndsEnds[k - 1];
@@ -132,7 +132,7 @@ public static array<byte> Fingerprint(this ref PkgDecoder pr) {
 
 // AbsIdx returns the absolute index for the given (section, index)
 // pair.
-public static nint AbsIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
+public static nint AbsIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = (nint)(int32)idx;
     if (k > 0) {
         absIdx += (nint)pr.elemEndsEnds[k - 1];
@@ -145,7 +145,7 @@ public static nint AbsIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
 
 // DataIdx returns the raw element bitstream for the given (section,
 // index) pair.
-public static @string DataIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
+public static @string DataIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = pr.AbsIdx(k, idx);
 
     uint32 start = default!;
@@ -158,13 +158,13 @@ public static @string DataIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
 }
 
 // StringIdx returns the string value for the given string index.
-public static @string StringIdx(this ref PkgDecoder pr, Index idx) {
-    return pr.DataIdx(RelocString, idx);
+public static @string StringIdx(this ref PkgDecoder pr, RelElemIdx idx) {
+    return pr.DataIdx(SectionString, idx);
 }
 
 // NewDecoder returns a Decoder for the given (section, index) pair,
 // and decodes the given SyncMarker from the element bitstream.
-public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx, SyncMarker marker) {
+public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(out var Ꮡr);
     r = Ꮡpr.NewDecoderRaw(k, idx);
     Ꮡr.Sync(marker);
@@ -175,7 +175,7 @@ public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index i
 // and decodes the given SyncMarker from the element bitstream.
 // If possible the Decoder should be RetireDecoder'd when it is no longer
 // needed, this will avoid heap allocations.
-public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx, SyncMarker marker) {
+public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(out var Ꮡr);
     r = Ꮡpr.TempDecoderRaw(k, idx);
     Ꮡr.Sync(marker);
@@ -192,7 +192,7 @@ public static void RetireDecoder(this ref PkgDecoder pr, ж<Decoder> Ꮡd) {
 // NewDecoderRaw returns a Decoder for the given (section, index) pair.
 //
 // Most callers should use NewDecoder instead.
-public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx) {
+public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(out var Ꮡr);
@@ -204,16 +204,16 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Inde
 
     r.Data.Reset(pr.DataIdx(k, idx));
     Ꮡr.Sync(SyncRelocs);
-    r.Relocs = new slice<RelocEnt>(Ꮡr.Len());
-    foreach (var (i, _) in r.Relocs) {
+    r.Relocs = new slice<RefTableEntry>(Ꮡr.Len());
+    foreach (var i in range(r.Relocs)) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RelocEnt(((RelocKind)(int32)Ꮡr.Len()), ((Index)(int32)Ꮡr.Len()));
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
 
     return r;
 }
 
-public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx) {
+public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(out var Ꮡr);
@@ -230,11 +230,11 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
         r.Relocs = pr.scratchRelocEnt.slice(0, l);
         pr.scratchRelocEnt = default!;
     } else {
-        r.Relocs = new slice<RelocEnt>(l);
+        r.Relocs = new slice<RefTableEntry>(l);
     }
-    foreach (var (i, _) in r.Relocs) {
+    foreach (var i in range(r.Relocs)) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RelocEnt(((RelocKind)(int32)Ꮡr.Len()), ((Index)(int32)Ꮡr.Len()));
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
 
     return r;
@@ -244,10 +244,10 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
 // bitstream data.
 partial struct Decoder {
     internal ж<PkgDecoder> common;
-    public slice<RelocEnt> Relocs;
+    public slice<RefTableEntry> Relocs;
     public strings.Reader Data;
-    internal RelocKind k;
-    public Index Idx;
+    internal SectionKind k;
+    public RelElemIdx Idx;
 }
 
 internal static void checkErr(this ref Decoder r, error err) {
@@ -284,7 +284,7 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
             if (i == (nint)(binary.MaxVarintLen64 - 1) && b > 1) {
                 return (x, overflow);
             }
-            return ((uint64)(x | ((uint64)b).Lsh(s)), default!);
+            return (x | ((uint64)b).Lsh(s), default!);
         }
         x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;
@@ -298,14 +298,14 @@ internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
 
     // Zig-zag decode.
-    var x = (int64)((ux >> (int)(1)));
-    if ((uint64)(ux & 1) != 0) {
+    var x = (int64)(ux >> 1);
+    if ((ux & 1) != 0) {
         x = ~x;
     }
     return x;
 }
 
-internal static Index rawReloc(this ref Decoder r, RelocKind k, nint idx) {
+internal static RelElemIdx rawReloc(this ref Decoder r, SectionKind k, nint idx) {
     var e = r.Relocs[idx];
     assert(e.Kind == k);
     return e.Idx;
@@ -323,9 +323,9 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     }
 
     var (pos, _) = r.Data.Seek(0, io.SeekCurrent);
-    SyncMarker mHave = ((SyncMarker)(nint)Ꮡr.rawUvarint());
+    SyncMarker mHave = (SyncMarker)(nint)Ꮡr.rawUvarint();
     var writerPCs = new slice<nint>((nint)(Ꮡr.rawUvarint()));
-    foreach (var (i, _) in writerPCs) {
+    foreach (var i in range(writerPCs)) {
         writerPCs[i] = (nint)Ꮡr.rawUvarint();
     }
 
@@ -356,7 +356,7 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
         fmt.Printf("\t[stack trace unavailable; recompile package %q with -d=syncframes]\n"u8, (~r.common).pkgPath);
     }
     foreach (var (_, pc) in writerPCs) {
-        fmt.Printf("\t%s\n"u8, r.common.StringIdx(r.rawReloc(RelocString, pc)));
+        fmt.Printf("\t%s\n"u8, r.common.StringIdx(r.rawReloc(SectionString, pc)));
     }
 
     fmt.Printf("\nexpected %v, reading at:\n"u8, mWant);
@@ -433,7 +433,7 @@ public static nint Code(this ж<Decoder> Ꮡr, SyncMarker mark) {
 
 // Reloc decodes a relocation of expected section k from the element
 // bitstream and returns an index to the referenced element.
-public static Index Reloc(this ж<Decoder> Ꮡr, RelocKind k) {
+public static RelElemIdx Reloc(this ж<Decoder> Ꮡr, SectionKind k) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncUseReloc);
@@ -446,14 +446,14 @@ public static @string String(this ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncString);
-    return r.common.StringIdx(Ꮡr.Reloc(RelocString));
+    return r.common.StringIdx(Ꮡr.Reloc(SectionString));
 }
 
 // Strings decodes and returns a variable-length slice of strings from
 // the element bitstream.
 public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
-    foreach (var (i, _) in res) {
+    foreach (var i in range(res)) {
         res[i] = Ꮡr.String();
     }
     return res;
@@ -473,7 +473,7 @@ public static constant.Value Value(this ж<Decoder> Ꮡr) {
 
 internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
     {
-        CodeVal tag = ((CodeVal)Ꮡr.Code(SyncVal));
+        CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
         var exprᴛ1 = tag;
         if (exprᴛ1 == ValBool) {
             return constant.MakeBool(Ꮡr.Bool());
@@ -521,13 +521,13 @@ internal static ж<big.Float> bigFloat(this ж<Decoder> Ꮡr) {
 
 // PeekPkgPath returns the package path for the specified package
 // index.
-public static @string PeekPkgPath(this ж<PkgDecoder> Ꮡpr, Index idx) {
+public static @string PeekPkgPath(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     @string path = default!;
     {
         ref var r = ref heap<Decoder>(out var Ꮡr);
-        r = Ꮡpr.TempDecoder(RelocPkg, idx, SyncPkgDef);
+        r = Ꮡpr.TempDecoder(SectionPkg, idx, SyncPkgDef);
         path = Ꮡr.String();
         pr.RetireDecoder(Ꮡr);
     }
@@ -539,18 +539,18 @@ public static @string PeekPkgPath(this ж<PkgDecoder> Ꮡpr, Index idx) {
 
 // PeekObj returns the package path, object name, and CodeObj for the
 // specified object index.
-public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Index idx) {
+public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
-    Index ridx = default!;
+    RelElemIdx ridx = default!;
     @string name = default!;
     nint rcode = default!;
     {
         ref var r = ref heap<Decoder>(out var Ꮡr);
-        r = Ꮡpr.TempDecoder(RelocName, idx, SyncObject1);
+        r = Ꮡpr.TempDecoder(SectionName, idx, SyncObject1);
         Ꮡr.Sync(SyncSym);
         Ꮡr.Sync(SyncPkg);
-        ridx = Ꮡr.Reloc(RelocPkg);
+        ridx = Ꮡr.Reloc(SectionPkg);
         name = Ꮡr.String();
         rcode = Ꮡr.Code(SyncCodeObj);
         pr.RetireDecoder(Ꮡr);
@@ -559,7 +559,7 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Ind
     @string path = Ꮡpr.PeekPkgPath(ridx);
     assert(name != ""u8);
 
-    CodeObj tag = ((CodeObj)rcode);
+    CodeObj tag = (CodeObj)rcode;
 
     return (path, name, tag);
 }

@@ -6,7 +6,6 @@ partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object abcˢ = (@string)"abc"u8;
-private static readonly @string foundˢ = "found"u8;
 
 internal static void Main() {
     @string pick(any v) {
@@ -27,7 +26,7 @@ internal static void Main() {
     }
 
     fmt.Println(pick(abcˢ));
-    fmt.Println(pick((nint)(42)));
+    fmt.Println(pick((nint)42));
     fmt.Println(pick(true));
 
     @string wrap(@string s, bool quote) {
@@ -37,8 +36,8 @@ internal static void Main() {
         return fmt.Sprintf("p:%s"u8, s);
     }
 
-    fmt.Println(wrap("x"u8, true));
-    fmt.Println(wrap("y"u8, false));
+    fmt.Println(wrap("x", true));
+    fmt.Println(wrap("y", false));
 
     @string tag(@string s) {
         if (len(s) == 0) {
@@ -47,8 +46,8 @@ internal static void Main() {
         return "tag:"u8 + s;
     }
 
-    fmt.Println(tag("z"u8));
-    fmt.Println(tag(""u8));
+    fmt.Println(tag("z"));
+    fmt.Println(tag(""));
 
     @string bang(@string s) {
         if (len(s) > 1) {
@@ -57,8 +56,8 @@ internal static void Main() {
         return fmt.Sprintf("%s?"u8, s);
     }
 
-    fmt.Println(bang("hi"u8));
-    fmt.Println(bang("h"u8));
+    fmt.Println(bang("hi"));
+    fmt.Println(bang("h"));
 
     Func<@string, bool, @string> pad = (@string s, bool wide) => {
         if (wide) {
@@ -67,8 +66,8 @@ internal static void Main() {
         return fmt.Sprintf("[%s]"u8, s);
     };
 
-    fmt.Println(pad("v"u8, true));
-    fmt.Println(pad("v"u8, false));
+    fmt.Println(pad("v", true));
+    fmt.Println(pad("v", false));
 
     (nint dur, slice<byte> cov, @string errMsg) fuzzish(nint entry) {
         if (entry < 0) {
@@ -92,7 +91,7 @@ internal static void Main() {
         if (!ok) {
             return ("", fmt.Errorf("no string"u8));
         }
-        return (foundˢ, default!);
+        return ("found", default!);
     }
 
     var (s1, err1) = sget(false);

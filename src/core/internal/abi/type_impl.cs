@@ -57,6 +57,10 @@ partial struct Type {
     [GoReflectCompanion] public nint[]?[]? funcParamDims;
     [GoReflectCompanion] public GoChanDir[]? chanDirChain;
     [GoReflectCompanion] public nint[]? keyDims;
+    // sizeUnknown: the Go size could not be derived, so Size_ is NOT a size. C# spells every [N]T as one array<T>,
+    // so a descriptor built from the type alone (abi.TypeFor[[2]string]()) has no length. Size(), Len() and
+    // ArrayType() refuse by name on it rather than answer the plausible zero (see UnknownGoSize).
+    [GoReflectCompanion] public bool sizeUnknown;
     // funcInChanDirs / funcOutChanDirs: a FUNC descriptor's per-parameter and per-result channel
     // DIRECTION, the direction twin of funcParamDims. `func(<-chan int)` and `func(chan int)` are
     // DISTINCT Go types over one managed delegate, so the direction joins the interning key and rides
@@ -155,6 +159,20 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
                         string.Join(",", arrayDims) + "] vs stamped [" + string.Join(",", stampedDims) + "]");
         }
         arrayDims = stampedDims;
+    }
+    // A DEFINED array type's declared chain (`type A [4]int`, `type M [2][3]int`), read off the leading
+    // [N][M]... of its [GoType] marker (GoReflect.DefinedArrayDims). It decides every position it declares,
+    // as the stamp above decides the whole chain, and ONLY those: a deeper carried chain reaches into a
+    // NAMED array element, which answers its own length from its own marker when Elem() builds it. So a
+    // carried tail past the declaration is dropped rather than compared, and one Go type interns to one
+    // descriptor.
+    else if (GoReflect.DefinedArrayDims(st) is { } declaredDims) {
+        int compared = arrayDims is null ? 0 : Math.Min(arrayDims.Length, declaredDims.Length);
+        if (!arrayDims.AsSpan(0, compared).SequenceEqual(declaredDims.AsSpan(0, compared))) {
+            throw panic("reflect: descriptor cargo for " + GoReflect.GoTypeName(st) + " disagrees with its declared length: dims [" +
+                        string.Join(",", arrayDims) + "] vs declared [" + string.Join(",", declaredDims) + "]");
+        }
+        arrayDims = declaredDims;
     }
     if (GoReflect.TypeStampedChanDirChain(st) is { } stampedChain) {
         GoChanDir[]? carried = normalizeChanDirChain(chanDirChain);
@@ -306,6 +324,12 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     // sub-record behind the descriptor (there is none); TFlagExtraStar promises a name blob whose
     // first byte is a '*' to strip; TFlagRegularMemory/TFlagUnrolledBitmap describe a GC bitmap
     // layout the managed heap does not have. Each is a read this bridge cannot honor.
+    //
+    // That is also why the FIVE Uncommon() arms in type.cs (`Reinterpret<Type, structTypeUncommon>`
+    // and `Reinterpret<Type, Uncommon_u…>`, one per kind) are left converted and never hand-owned: each
+    // is a prefix downcast no synthesized descriptor can honor, and each sits behind Uncommon()'s
+    // `TFlag & TFlagUncommon == 0` early return, which this bit being zero makes unconditional. They are
+    // unreachable, not fixed; a census of prefix downcasts will list them (H7 row 57, 2026-10-15).
     if (GoReflect.HasGoName(st)) {
         t.TFlag |= (TFlag)TFlagNamed;
     }
@@ -323,6 +347,15 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
         nint align = GoReflect.GoAlignOf(st);
         t.Align_ = (uint8)align;
         t.FieldAlign_ = (uint8)align;
+    } else {
+        // The Size_ FIELD of an unknown-size descriptor holds ^uintptr(0), never 0. Size() refuses by name, but
+        // the converted runtime and internal/runtime read the field directly, and 0 is a SIZE a direct reader
+        // would act on, as unique's zero-size arm did. No Go type has this size: it is past the address space,
+        // where gc rejects a type, and Go's own overflow and allocation guards (math.MulUintptr, maxAlloc) reject
+        // it loudly. No production path builds one today: the census found 0 production instantiations
+        // with an unnamed array type argument.
+        t.sizeUnknown = true;
+        t.Size_ = ~(uintptr)0;
     }
     // PtrBytes is the pointer-bearing PREFIX of the type, and it is what Pointers() reports. Leaving
     // it unstamped made every synthesized descriptor answer "I hold no pointers", which is a claim
@@ -354,9 +387,14 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     // non-pointer-shaped type reaching funcLayout. So the readers are live; the honest
     // classification simply agrees with what they already concluded.
     //
-    // Kind() masks with KindMask (31), so bit 5 cannot disturb the kind it sits beside.
+    // GO 1.26 MOVED THE BIT (H6, 2026-10-15). It was bit 5 of the KIND byte (`KindDirectIface`), which
+    // Kind() masked off with KindMask; Go 1.26 deletes KindMask, makes Kind() return Kind_ unmasked, and
+    // reads directness from the TYPE FLAGS (`IsDirectIface`: `t.TFlag&TFlagDirectIface != 0`). Stamped
+    // into Kind_ as before, every direct-iface descriptor would report its kind plus 32 (a pointer is not
+    // Pointer, a map not Map) and read as indirect besides. `KindDirectIface` survives upstream only as
+    // a breadcrumb for dlv; nothing may set it.
     if (GoReflect.GoIsDirectIface(st, arrayDims)) {
-        t.Kind_ |= (ΔKind)KindDirectIface;
+        t.TFlag |= TFlagDirectIface;
     }
     // Carry Go comparability on the descriptor: reflect.Type.Comparable and internal/reflectlite's
     // Comparable both report `Equal != nil`, and errors.Is gates its equality match on the latter — so a
@@ -369,6 +407,8 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     }
     return Ꮡt;
 }
+
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Type type, nint length), ж<Type>> s_oneDimDescriptors = new();
 
 // TypeOf returns the abi.Type of some value. The descriptor stands for the value's GO dynamic
 // type: an interface-carrier wrapper (IжAdapter / IInterfaceAdapter chain) unwraps to the *T box
@@ -383,6 +423,13 @@ public static ж<Type> TypeOf(any a) {
     }
     System.Type dyn = GoReflect.GoDynamicTypeOf(a);
     nint kind = GoReflect.KindOf(dyn);
+    // A one-dimension array (its element is not itself an array) is the common case, and its descriptor
+    // depends on its type and length alone, so it is interned on that pair: a hit measures nothing. The
+    // general route below allocates the dims array and renders the intern key for every call, 64 B for a
+    // [6]byte (reflect's TestDeepEqualAllocs, twice a DeepEqual).
+    if (kind == GoReflect.Array && a is IArray array && a is not ISlice && GoReflect.KindOf(GoReflect.ElementType(dyn)) != GoReflect.Array) {
+        return s_oneDimDescriptors.GetOrAdd((dyn, array.Length), static key => synthType(key.type, [key.length], null, null, null, null, null));
+    }
     // A POINTER carries its POINTEE's dims unshifted, which is the rule Elem() already applies when
     // it hands the cargo down — so `*[3]int` must be measured here or `Elem()` describes a
     // dimension-less array and reflect.New allocates a zero-length one. See PointeeArrayDims.
@@ -391,6 +438,11 @@ public static ж<Type> TypeOf(any a) {
                  : kind == GoReflect.Slice ? GoReflect.SliceElemArrayDims(a)
                  : kind == GoReflect.Map ? GoReflect.MapElemArrayDims(a)
                  : null;
+    // A slice's descriptor carries nothing but its element's dims, so one dimension interns on the same
+    // pair ([][6]byte rendered the key on every TypeOf).
+    if (kind == GoReflect.Slice && dims is [nint elemLength]) {
+        return s_oneDimDescriptors.GetOrAdd((dyn, elemLength), static key => synthType(key.type, [key.length], null, null, null, null, null));
+    }
     nint[]? keyDims = kind == GoReflect.Map ? GoReflect.MapKeyArrayDims(a) : null;
     nint[]?[]? paramDims = kind == GoReflect.Func ? GoReflect.FuncParamDims(a) : null;
     // A CHANNEL value carries the direction of the type it was made with, and a POINTER carries its
@@ -439,7 +491,43 @@ public static ж<Type> TypeOf(any a) {
 
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔStructType>> s_structTypes = new();
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔArrayType>> s_arrayTypes = new();
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<mapType>> s_mapTypes = new();
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔMapType>> s_mapTypes = new();
+
+// TypeFor returns the abi.Type for a type parameter.
+//
+// Go 1.26 spells it `(*PtrType)(unsafe.Pointer(TypeOf((*T)(nil)))).Elem` (type.go:193): a prefix
+// downcast from the pointer descriptor's Type header to the PtrType record around it, then that
+// record's Elem field. A synthesized descriptor has no PtrType around it, so the converted
+// `Reinterpret<Type, PtrType>().Value.Elem` panicked on EVERY reflect.TypeFor[T]() ("dereference of a
+// managed pointer with no address"), H7 row 57. Elem() is this family's hand-owned answer for a
+// pointer descriptor, so the body is Go's own minus the cast. `(ж<T>)nil` is golib's canonical TYPED
+// nil (ж<T>.NilBox), not a C# null, so TypeOf sees a *T and answers its descriptor.
+public static ж<Type> TypeFor<T>() {
+    return TypeOf((ж<T>)nil).Elem();
+}
+
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔInterfaceType>> s_interfaceTypes = new();
+
+// InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
+//
+// The same prefix downcast as TypeFor's (`(*InterfaceType)(unsafe.Pointer(t))`), reached for EVERY
+// interface descriptor: internal/reflectlite's rtype.NumMethod reads `len(tt.Methods)` through it, and
+// the converted Reinterpret panicked at that read. Synthesized like StructType: the record's Type is
+// the descriptor itself, and Methods holds one entry per method of the interface, counted over the
+// SAME golib method-set machinery reflect's hand-owned rtype.NumMethod reads (GoReflect.GoMethodCount),
+// so the two layers cannot disagree about an interface's size. Each entry's Name and Typ stay zero:
+// they are offsets into a module's name and type sections, which a managed descriptor does not have,
+// exactly as StructType leaves each field's Name zero. No converted caller reads them.
+public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
+    if (Ꮡt == nil || Ꮡt.Value.Kind() != Interface || Ꮡt.Value.sysType is null) {
+        return default!;
+    }
+    return s_interfaceTypes.GetOrAdd(Ꮡt, static box => new StandardBox<ΔInterfaceType>(new ΔInterfaceType(
+        Type: box.Value,
+        PkgPath: default!,
+        Methods: new slice<Imethod>(new Imethod[(int)GoReflect.GoMethodCount(box.Value.sysType!)])
+    )));
+}
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
 public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
@@ -497,11 +585,30 @@ private static ж<ΔStructType> synthesizeStructType(ж<Type> Ꮡt) {
 }
 
 // ArrayType returns t cast to a *ArrayType, or nil if its tag does not match.
+//
+// An array descriptor whose length is unknown refuses by name. Its nil would read as "not an array", Go's own
+// tag-mismatch answer, for a descriptor whose tag IS Array.
 public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Array || Ꮡt.Value.sysType is null) {
         return default!;
     }
-    return s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
+    ж<ΔArrayType> arrayType = s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
+    if (arrayType == nil) {
+        throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, Ꮡt.Value.arrayDims);
+    }
+    return arrayType;
+}
+
+// Size returns the size of data with type t.
+//
+// Hand-owned for one arm: a descriptor whose Go size could not be derived (sizeUnknown) refuses by name. Its
+// unstamped Size_ is 0, and 0 is a SIZE. unique.Make reads it as the zero-size type and returns the shared zerobase
+// handle for every value, so two different [2]string pairs compared equal. Every other descriptor answers Size_.
+[GoRecv] public static uintptr Size(this ref Type t) {
+    if (t.sizeUnknown) {
+        throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the size", t.sysType, t.arrayDims);
+    }
+    return t.Size_;
 }
 
 // ==== the FUNC specialization — the same operation, and the same answer ==========================
@@ -601,8 +708,8 @@ public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
 // ==== the descriptor ACCESSORS that reach an element or a key: Elem() / Key() ====
 //
 // The SAME prefix-downcast idiom as the specializations above, one level in: Go's Elem() casts the
-// Type header to the sliceType/arrayType/chanType/mapType/ptrType the linker really allocated
-// behind it and reads that record's Elem field, and Key() does it for a mapType. So both inherited
+// Type header to the SliceType/ArrayType/ChanType/MapType/PtrType the linker really allocated
+// behind it and reads that record's Elem field, and Key() does it for a MapType. So both inherited
 // exactly the defect documented above — Reinterpret rightly refuses to alias managed storage for a
 // reference-bearing pair — and answered nil for every slice, array, chan, map and pointer
 // descriptor in the corpus.
@@ -703,14 +810,15 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 // is ONE managed type for every key length, so the datum reaches here from the converter's stamp on
 // the declaring FIELD — the position a decode target reads, where the map itself is still nil and a
 // live entry could reveal nothing. Unstamped answers Go's dimension-less array, unchanged.
-// MapType returns t cast to a *mapType (SwissMapType under the swissmap build), or nil if its tag
-// does not match. HAND-OWNED because the auto body is `Ꮡt.Reinterpret<Type, mapType>()` -- Go's
-// `(*mapType)(unsafe.Pointer(t))` taken literally -- and a SYNTHESIZED descriptor has no native
+// MapType returns t cast to a *MapType, or nil if its tag does not match. (Go 1.26 retired the swissmap
+// experiment and its `mapType` alias for SwissMapType: the record is now `MapType`, whose C# name is
+// `ΔMapType` beside this method, with the same fields.) HAND-OWNED because the auto body is
+// `Ꮡt.Reinterpret<Type, ΔMapType>()` -- Go's `(*MapType)(unsafe.Pointer(t))` taken literally -- and a SYNTHESIZED descriptor has no native
 // storage to reinterpret. Measured (internal/sync's TestHashTrieMapTruncHash, 2026-09-20): the
 // reinterpret fell through golib's aliasing gate -- which requires `SizeOf<TDst> <= SizeOf<T>`, and
-// a mapType is WIDER than the Type it embeds -- and the address fallback minted a NativeBox over an
+// a MapType is WIDER than the Type it embeds -- and the address fallback minted a NativeBox over an
 // ORDER TOKEN, so the first field read panicked in ж.NativeBox.get_Value with "dereference of a
-// managed pointer with no address (*SwissMapType ...)". That refusal is CORRECT: materializing a
+// managed pointer with no address (*SwissMapType ...)", the 1.24 spelling. That refusal is CORRECT: materializing a
 // reference-bearing struct out of token bytes would fabricate managed references. So the fix belongs
 // here, at the producer -- a synthetic descriptor answers its kind view through a real PROJECTION,
 // never through a reinterpretation. Same shape, cache discipline and nil rule as StructType and
@@ -747,27 +855,27 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 // predicates that sit on Flags (NeedKeyUpdate, HashMightPanic, IndirectKey, IndirectElem)
 // therefore answer false, the same honest zero -- including IndirectKey/IndirectElem, which the
 // group's layout above already applied to its slot size.
-public static ж<mapType> MapType(this ж<Type> Ꮡt) {
+public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Map || Ꮡt.Value.sysType is null) {
         return default!;
     }
     return s_mapTypes.GetOrAdd(Ꮡt, static box => synthesizeMapType(box));
 }
 
-// The raw spelling of the same downcast -- `(*SwissMapType)(unsafe.Pointer(abi.TypeOf(m)))`, which
+// The raw spelling of the same downcast -- `(*abi.MapType)(unsafe.Pointer(abi.TypeOf(m)))` (`*SwissMapType` at 1.24), which
 // internal/runtime/maps' newTestMapType writes -- reaches golib's Reinterpret, not MapType. Register
 // the projection there so both spellings answer the ONE cached box (Go's pointer identity), and a
 // descriptor of any other kind answers nil and keeps the reinterpret it had.
 [System.Runtime.CompilerServices.ModuleInitializer]
 internal static void registerMapTypeProjection() {
-    PrefixProjection<Type, mapType>.Project = static box => box.MapType();
+    PrefixProjection<Type, ΔMapType>.Project = static box => box.MapType();
 }
 
-private static ж<mapType> synthesizeMapType(ж<Type> Ꮡt) {
+private static ж<ΔMapType> synthesizeMapType(ж<Type> Ꮡt) {
     var key = Ꮡt.Key();
     var elem = Ꮡt.Elem();
     var group = synthesizeGroup(key, elem);
-    return new StandardBox<mapType>(new mapType(
+    return new StandardBox<ΔMapType>(new ΔMapType(
         Type: Ꮡt.Value,
         Key: key,
         Elem: elem,
@@ -784,8 +892,8 @@ private static ж<mapType> synthesizeMapType(ж<Type> Ꮡt) {
 // not answer). A field's size, alignment and pointer prefix come off its stamped descriptor, and a
 // field wider than its swiss limit is replaced by a pointer exactly as the compiler does.
 private static ж<Type> synthesizeGroup(ж<Type> Ꮡkey, ж<Type> Ꮡelem) {
-    if (!groupField(Ꮡkey, (nuint)SwissMapMaxKeyBytes, out nuint keySize, out nuint keyAlign, out nuint keyPtrBytes) ||
-        !groupField(Ꮡelem, (nuint)SwissMapMaxElemBytes, out nuint elemSize, out nuint elemAlign, out nuint elemPtrBytes)) {
+    if (!groupField(Ꮡkey, (nuint)MapMaxKeyBytes, out nuint keySize, out nuint keyAlign, out nuint keyPtrBytes) ||
+        !groupField(Ꮡelem, (nuint)MapMaxElemBytes, out nuint elemSize, out nuint elemAlign, out nuint elemPtrBytes)) {
         return default!;
     }
     // slot = struct { key; elem }
@@ -793,8 +901,8 @@ private static ж<Type> synthesizeGroup(ж<Type> Ꮡkey, ж<Type> Ꮡelem) {
     nuint slotAlign = keyAlign > elemAlign ? keyAlign : elemAlign;
     nuint slotSize = structSize(elemOff + elemSize, elemSize == 0, slotAlign);
     nuint slotPtrBytes = elemPtrBytes > 0 ? elemOff + elemPtrBytes : keyPtrBytes;
-    // group = struct { ctrl uint64; slots [SwissMapGroupSlots]slot }
-    nuint slots = (nuint)SwissMapGroupSlots;
+    // group = struct { ctrl uint64; slots [MapGroupSlots]slot }
+    nuint slots = (nuint)MapGroupSlots;
     nuint slotsSize = slots * slotSize;
     nuint groupAlign = slotAlign > 8 ? slotAlign : 8;
     ref var t = ref heap<Type>(out var Ꮡt);
@@ -851,11 +959,20 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
 // reported [3]byte and [3]byte as different types. A length the descriptor does not know is still
 // answered as Go's 0 — array dims are non-identity cargo (the recorded §5 limitation), so two
 // dimension-less array descriptors compare equal rather than randomly unequal.
+//
+// An array descriptor that carries no length REFUSES by name instead (UnknownGoSize). Its 0 read as a real empty
+// array, which is a plausible answer and a wrong one for every [N]T a type argument named.
 public static nint Len(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Array) {
         return 0;
     }
-    return Ꮡt.Value.arrayDims is { Length: > 0 } dims ? dims[0] : 0;
+    if (Ꮡt.Value.arrayDims is { Length: > 0 } dims) {
+        return dims[0];
+    }
+    if (Ꮡt.Value.sysType is { } st && GoReflect.DefinedArrayDims(st) is { Length: > 0 } declared) {
+        return declared[0];
+    }
+    throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, null);
 }
 
 private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
@@ -890,7 +1007,7 @@ private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
 // The test is on the KIND, never on the absence of a System.Type. That distinction is the whole
 // point: a descriptor that BYPASSED synthType still names a real Go type and so still reports a
 // real Kind, and must keep tripping canonType's assert; only a descriptor naming NO Go kind at all
-// is admitted here. Go's Kind_ is left zero by the mint and Kind() masks with KindMask, so Invalid
+// is admitted here. Go's Kind_ is left zero by the mint and Kind() returns it (unmasked since Go 1.26), so Invalid
 // is exactly "this descriptor names no Go kind". It also fails CLOSED: were a future Go release to
 // start stamping a kind on the frame type, this predicate would stop recognizing it and the assert
 // would fire — a loud stop, not a silent admission.

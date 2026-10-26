@@ -42,16 +42,36 @@ public static void Register(@string pkg, @string name, ж<bool> Ꮡavailable) {
     ));
 }
 
+// Packages returns the list of all packages for which alternative
+// implementations are registered.
+public static slice<@string> Packages() {
+    var pkgsᴷ = new stackAppend<@string>(moves: true);
+
+    slice<@string> pkgs = default!;
+    var seen = new map<@string, bool>();
+    foreach (var (_, i) in allImplementations) {
+        if (!seen[i.Package]) {
+            pkgs = append(pkgsᴷ, pkgs, i.Package);
+            seen[i.Package] = true;
+        }
+    }
+    pkgs = move2heap(pkgsᴷ, pkgs);
+    return pkgs;
+}
+
 // List returns the names of all alternative implementations registered for the
 // given package, whether available or not. The implicit base implementation is
 // not included.
 public static slice<@string> List(@string pkg) {
+    var namesᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> names = default!;
     foreach (var (_, i) in allImplementations) {
         if (i.Package == pkg) {
-            names = append(names, i.Name);
+            names = append(namesᴷ, names, i.Name);
         }
     }
+    names = move2heap(namesᴷ, names);
     return names;
 }
 

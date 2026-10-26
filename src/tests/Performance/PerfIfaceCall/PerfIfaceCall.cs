@@ -5,20 +5,20 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial interface Shape {
+partial interface Shape {
     nint Area();
     nint Perimeter();
 }
 
-[GoType] partial struct Rect {
+partial struct Rect {
     internal nint w, h;
 }
 
-[GoType] partial struct Circle {
+partial struct Circle {
     internal nint r;
 }
 
-[GoType] partial struct Tri {
+partial struct Tri {
     internal nint a, b, c;
 }
 
@@ -49,24 +49,24 @@ public static nint Perimeter(this Tri t) {
 internal static nint run(nint n) {
     var shapes = new Shape[]{new Rect(3, 4), new Circle(2), new Tri(6, 3, 7), new Rect(1, 9), new Circle(5), new Tri(4, 4, 6)}.slice();
     nint total = 0;
+
     for (nint i = 0; i < n; i++) {
         var s = shapes[i % len(shapes)];
         total += s.Area();
         total += s.Perimeter();
     }
+
     return total;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object checksumˢ = (@string)"checksum:"u8;
-private static readonly object elapsedNsˢ = (@string)"elapsed_ns:"u8;
-
 internal static void Main() {
     var start = time.Now().UnixNano();
+
     nint total = run(50000000);
+
     var elapsed = time.Now().UnixNano() - start;
-    fmt.Println(checksumˢ, total);
-    fmt.Println(elapsedNsˢ, elapsed);
+    fmt.Println("checksum:", total);
+    fmt.Println("elapsed_ns:", elapsed);
 }
 
 } // end main_package

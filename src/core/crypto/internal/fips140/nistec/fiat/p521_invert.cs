@@ -31,6 +31,7 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     //	x519      = x260 << 259 + x259
     //	return      x519 << 2 + 1
     //
+
     ж<P521Element> z = @new<P521Element>().Set(Ꮡe);
     ж<P521Element> t0 = @new<P521Element>();
 

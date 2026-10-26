@@ -17,8 +17,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using strings = go.strings_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -33,6 +31,7 @@ using static global::go.archive.zip_test_package;
 [assembly: GoImplement<bytes_package.Reader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<global::go.archive.zip_package.ReadCloser, go.io.fs_package.FS>(Pointer = true)]
 [assembly: GoImplement<global::go.archive.zip_package.Reader, go.io.fs_package.FS>(Pointer = true)]
+[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.FS>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.ReaderAt>(Pointer = true)]
@@ -41,11 +40,13 @@ using static global::go.archive.zip_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.archive.zip_package.File, ж<global::go.archive.zip_package.File>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.archive.zip_package.Writer, ж<global::go.archive.zip_package.Writer>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Reader, ж<strings.Reader>>(Indirect = true)]
-[assembly: GoImplicitConv<testing.T, ж<testing.T>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

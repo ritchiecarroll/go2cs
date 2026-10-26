@@ -44,6 +44,7 @@ internal static slice<ж<deflateTest>> deflateTests = new ж<deflateTest>[]{
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), -1, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), DefaultCompression, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), 4, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
+
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), 0, new byte[]{0, 1, 0, 254, 255, 17, 1, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11, 0x12}.slice(), 0, new byte[]{0, 2, 0, 253, 255, 17, 18, 1, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11}.slice(), 0,
@@ -80,8 +81,8 @@ internal static slice<ж<reverseBitsTest>> reverseBitsTests = new ж<reverseBits
 
 internal static slice<byte> largeDataChunk() {
     var result = new slice<byte>(100000);
-    foreach (var (i, _) in result) {
-        result[i] = (byte)((nint)(i * i & 0xFF));
+    foreach (var i in range(result)) {
+        result[i] = (byte)(i * i & 0xFF);
     }
     return result;
 }
@@ -96,7 +97,7 @@ public static void TestBulkHash4(ж<testing.T> Ꮡt) {
         for (nint j = 4; j < len(y); j++) {
             var yΔ1 = y.slice(0, j);
             var dst = new slice<uint32>(len(yΔ1) - (nint)minMatchLength + 1);
-            foreach (var (i, _) in dst) {
+            foreach (var i in range(dst)) {
                 dst[i] = (uint32)(i + 100);
             }
             bulkHash4(yΔ1, dst);
@@ -193,8 +194,8 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
         n -= (nint)(cur - r.l);
         cur = r.l;
     }
-    foreach (var (i, _) in b.slice(0, n)) {
-        if (r.cur + (int64)i >= r.l - ((int64)1 << (int)(16))){
+    foreach (var i in range(b.slice(0, n))) {
+        if (r.cur + (int64)i >= r.l - ((int64)1 << 16)){
             b[i] = 1;
         } else {
             b[i] = 0;
@@ -511,7 +512,7 @@ public static void TestReaderDict(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (((sstring)data) != "hello again world"u8) {
-        Ꮡt.Fatalf("read returned %q want %q"u8, ((@string)data), text);
+        Ꮡt.Fatalf("read returned %q want %q"u8, (@string)data, text);
     }
 }
 
@@ -699,7 +700,7 @@ public static void TestBestSpeed(ж<testing.T> Ꮡt) {
 
     Ꮡt.Parallel();
     var abc = new slice<byte>(128);
-    foreach (var (i, _) in abc) {
+    foreach (var i in range(abc)) {
         abc[i] = (byte)i;
     }
     var abcabc = bytes.Repeat(abc, 131072 / len(abc));
@@ -1107,7 +1108,7 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> Ꮡt) {
     // testData may not generate internal matches.
     var testData = new slice<byte>(32);
     var rng = rand.New(rand.NewSource(0));
-    foreach (var (i, _) in testData) {
+    foreach (var i in range(testData)) {
         testData[i] = (byte)rng.Uint32();
     }
 
@@ -1160,13 +1161,13 @@ public static partial void TestMaxStackSize(ж<testing.T> Ꮡt) {
     try {
         // This test must not run in parallel with other tests as debug.SetMaxStack
         // affects all goroutines.
-        nint n = debug.SetMaxStack((1 << (int)(16)));
+        nint n = debug.SetMaxStack(1 << 16);
         defer(debug.SetMaxStack, n, ref ᒐ);
 
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
-        var b = new slice<byte>((1 << (int)(20)));
+        var b = new slice<byte>((1 << 20));
         for (nint level = HuffmanOnly; level <= BestCompression; level++) {
             // Run in separate goroutine to increase probability of stack regrowth.
             Ꮡwg.Add(1);

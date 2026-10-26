@@ -15,6 +15,7 @@ partial class runtime_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string defaultˢ = "default"u8;
 internal static readonly @string godebugPanicnil0ˢ = "GODEBUG=panicnil=0"u8;
+internal static readonly @string godebugˢ = "GODEBUG"u8;
 internal static readonly @string panicnil0ˢ = "panicnil=0"u8;
 internal static readonly @string godebugPanicnil1ˢ = "GODEBUG=panicnil=1"u8;
 internal static readonly @string panicnil1ˢ = "panicnil=1"u8;

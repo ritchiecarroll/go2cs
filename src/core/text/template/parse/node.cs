@@ -76,8 +76,8 @@ public static NodeType NodeContinue => 22;    // A continue action.
 
 // ListNode holds a sequence of nodes.
 partial struct ListNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public slice<Node> Nodes; // The element nodes in lexical order.
 }
@@ -125,8 +125,8 @@ public static Node Copy(this ж<ListNode> Ꮡl) {
 
 // TextNode holds plain text.
 partial struct TextNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public slice<byte> Text; // The text; may span newlines.
 }
@@ -153,8 +153,8 @@ public static Node Copy(this ref TextNode t) {
 
 // CommentNode holds a comment.
 partial struct CommentNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public @string Text; // Comment text.
 }
@@ -185,8 +185,8 @@ public static Node Copy(this ref CommentNode c) {
 
 // PipeNode holds a pipeline with optional declaration
 partial struct PipeNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public nint Line;            // The line number in the input. Deprecated: Kept for compatibility.
     public bool IsAssign;            // The variables are being assigned, not declared.
@@ -260,8 +260,8 @@ public static Node Copy(this ж<PipeNode> Ꮡp) {
 // Control actions have their own nodes; ActionNode represents simple
 // ones such as field evaluations and parenthesized pipelines.
 partial struct ActionNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public nint Line;      // The line number in the input. Deprecated: Kept for compatibility.
     public ж<PipeNode> Pipe; // The pipeline in the action.
@@ -293,8 +293,8 @@ public static Node Copy(this ref ActionNode a) {
 
 // CommandNode holds a command (a pipeline inside an evaluating action).
 partial struct CommandNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public slice<Node> Args; // Arguments in lexical order: Identifier, field, or constant.
 }
@@ -349,8 +349,8 @@ public static Node Copy(this ж<CommandNode> Ꮡc) {
 
 // IdentifierNode holds an identifier.
 partial struct IdentifierNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public @string Ident; // The identifier's name.
 }
@@ -399,8 +399,8 @@ public static Node Copy(this ref IdentifierNode i) {
 // VariableNode holds a list of variable names, possibly with chained field
 // accesses. The dollar sign is part of the (first) name.
 partial struct VariableNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public slice<@string> Ident; // Variable name and fields in lexical order.
 }
@@ -434,8 +434,8 @@ public static Node Copy(this ref VariableNode v) {
 
 // DotNode holds the special identifier '.'.
 partial struct DotNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
 }
 
@@ -468,8 +468,8 @@ public static Node Copy(this ref DotNode d) {
 
 // NilNode holds the special identifier 'nil' representing an untyped nil constant.
 partial struct NilNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
 }
 
@@ -507,8 +507,8 @@ public static Node Copy(this ref NilNode n) {
 // The names may be chained ('.x.y').
 // The period is dropped from each ident.
 partial struct FieldNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public slice<@string> Ident; // The identifiers in lexical order.
 }
@@ -542,8 +542,8 @@ public static Node Copy(this ref FieldNode f) {
 // The names may be chained ('.x.y').
 // The periods are dropped from each ident.
 partial struct ChainNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public Node Node;
     public slice<@string> Field; // The identifiers in lexical order.
@@ -597,8 +597,8 @@ public static Node Copy(this ref ChainNode c) {
 
 // BoolNode holds a boolean constant.
 partial struct BoolNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public bool True; // The value of the boolean constant.
 }
@@ -634,8 +634,8 @@ public static Node Copy(this ref BoolNode b) {
 // The value is parsed and stored under all the types that can represent the value.
 // This simulates in a small amount of code the behavior of Go's ideal constants.
 partial struct NumberNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public bool IsInt;       // Number has an integral value.
     public bool IsUint;       // Number has an unsigned integral value.
@@ -778,8 +778,8 @@ public static Node Copy(this ref NumberNode n) {
 
 // StringNode holds a string constant. The value has been "unquoted".
 partial struct StringNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public @string Quoted; // The original text of the string, with quotes.
     public @string Text; // The string, after quote processing.
@@ -808,8 +808,8 @@ public static Node Copy(this ref StringNode s) {
 // endNode represents an {{end}} action.
 // It does not appear in the final parse tree.
 partial struct endNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
 }
 
@@ -838,8 +838,8 @@ internal static Node Copy(this ref endNode e) {
 
 // elseNode represents an {{else}} action. Does not appear in the final tree.
 partial struct elseNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public nint Line; // The line number in the input. Deprecated: Kept for compatibility.
 }
@@ -873,8 +873,8 @@ internal static Node Copy(this ref elseNode e) {
 
 // BranchNode is the common representation of if, range, and with.
 partial struct BranchNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public nint Line;      // The line number in the input. Deprecated: Kept for compatibility.
     public ж<PipeNode> Pipe; // The pipeline to be evaluated.
@@ -942,7 +942,7 @@ public static Node Copy(this ref BranchNode b) {
 
 // IfNode represents an {{if}} action and its commands.
 partial struct IfNode {
-    public partial ref BranchNode BranchNode { get; }
+    /*embed*/ public BranchNode BranchNode;
 }
 
 internal static ж<IfNode> newIf(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
@@ -956,8 +956,8 @@ public static Node Copy(this ref IfNode i) {
 // BreakNode represents a {{break}} action.
 partial struct BreakNode {
     internal ж<Tree> tr;
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     public nint Line;
 }
 
@@ -987,8 +987,8 @@ internal static void writeTo(this ref BreakNode b, ж<strings.Builder> Ꮡsb) {
 // ContinueNode represents a {{continue}} action.
 partial struct ContinueNode {
     internal ж<Tree> tr;
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     public nint Line;
 }
 
@@ -1017,7 +1017,7 @@ internal static void writeTo(this ref ContinueNode c, ж<strings.Builder> Ꮡsb)
 
 // RangeNode represents a {{range}} action and its commands.
 partial struct RangeNode {
-    public partial ref BranchNode BranchNode { get; }
+    /*embed*/ public BranchNode BranchNode;
 }
 
 internal static ж<RangeNode> newRange(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
@@ -1030,7 +1030,7 @@ public static Node Copy(this ref RangeNode r) {
 
 // WithNode represents a {{with}} action and its commands.
 partial struct WithNode {
-    public partial ref BranchNode BranchNode { get; }
+    /*embed*/ public BranchNode BranchNode;
 }
 
 internal static ж<WithNode> newWith(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
@@ -1043,8 +1043,8 @@ public static Node Copy(this ref WithNode w) {
 
 // TemplateNode represents a {{template}} action.
 partial struct TemplateNode {
-    public partial ref NodeType NodeType { get; }
-    public partial ref Pos Pos { get; }
+    /*embed*/ public NodeType NodeType;
+    /*embed*/ public Pos Pos;
     internal ж<Tree> tr;
     public nint Line;      // The line number in the input. Deprecated: Kept for compatibility.
     public @string Name;   // The name of the template (unquoted).

@@ -74,7 +74,7 @@ public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("exec(self) failed: %v"u8, err);
     }
-    @string outs = ((@string)@out);
+    @string outs = (@string)@out;
     if (!filepath.IsAbs(outs)) {
         Ꮡt.Fatalf("Child returned %q, want an absolute path"u8, @out);
     }

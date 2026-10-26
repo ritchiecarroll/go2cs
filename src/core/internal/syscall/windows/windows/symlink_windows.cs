@@ -19,6 +19,7 @@ public static UntypedInt SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE => 0x2;
 public static UntypedInt FileBasicInfo => 0; // FILE_BASIC_INFO
 public static UntypedInt FileStandardInfo => 1; // FILE_STANDARD_INFO
 public static UntypedInt FileNameInfo => 2; // FILE_NAME_INFO
+public static UntypedInt FileDispositionInfo => 4; // FILE_DISPOSITION_INFO
 public static UntypedInt FileStreamInfo => 7; // FILE_STREAM_INFO
 public static UntypedInt FileCompressionInfo => 8; // FILE_COMPRESSION_INFO
 public static UntypedInt FileAttributeTagInfo => 9; // FILE_ATTRIBUTE_TAG_INFO

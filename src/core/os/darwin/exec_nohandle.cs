@@ -6,7 +6,8 @@ namespace go;
 
 partial class os_package {
 
-internal static void closeHandle(this ref Process p) {
+internal static void closeHandle(this ref processHandle ph) {
+    throw panic("internal error: unexpected call to closeHandle");
 }
 
 } // end os_package

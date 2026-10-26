@@ -141,7 +141,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
     }
     // Could check that the high byte is zero but it's not worth it.
     foreach (var (_, bΔ1) in buf.slice(0, width)) {
-        x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
+        x = x << 8 | (uint64)bΔ1;
     }
     width++; // +1 for length byte
     return (x, width, err);
@@ -170,7 +170,7 @@ internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
     // Don't need to check error; it's safe to loop regardless.
     // Could check that the high byte is zero but it's not worth it.
     foreach (var (_, bΔ1) in buf.slice(0, n)) {
-        x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
+        x = x << 8 | (uint64)bΔ1;
     }
     state.b.Drop(n);
     return x;
@@ -180,10 +180,10 @@ internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
 // Does not check for overflow.
 internal static int64 decodeInt(this ref decoderState state) {
     var x = state.decodeUint();
-    if ((uint64)(x & 1) != 0) {
-        return ~(int64)((x >> (int)(1)));
+    if ((x & 1) != 0) {
+        return ~(int64)(x >> 1);
     }
-    return (int64)((x >> (int)(1)));
+    return (int64)(x >> 1);
 }
 
 // getLength decodes the next uint and makes sure it is a possible
@@ -474,7 +474,7 @@ internal static void decString(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, ref
     if (len(data) < n) {
         errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
     }
-    @string s = ((@string)(data.slice(0, n)));
+    @string s = (@string)(data.slice(0, n));
     state.b.Drop(n);
     value.SetString(s);
 }
@@ -788,7 +788,7 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
 
     // Read the name of the concrete type.
     var nr = state.decodeUint();
-    if (nr > ((uint64)1 << (int)(31))) { // zero is permissible for anonymous types
+    if (nr > (uint64)1 << 31) { // zero is permissible for anonymous types
         errorf("invalid type name length %d"u8, nr);
     }
     if (nr > (uint64)state.b.Len()) {
@@ -807,7 +807,7 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
         errorf("name too long (%d bytes): %.20q..."u8, len(name), name);
     }
     // The concrete type must be registered.
-    var (typi, ok) = ᏑnameToConcreteType.Load(((@string)name));
+    var (typi, ok) = ᏑnameToConcreteType.Load((@string)name);
     if (!ok) {
         errorf("name not registered for interface: %q"u8, name);
     }
@@ -884,13 +884,16 @@ internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡ
     // We know it's one of these.
     var exprᴛ1 = ut.externalDec;
     if (exprᴛ1 == xGob) {
-        err = value.Interface()._<GobDecoder>().GobDecode(b);
+        var (gobDecoder, _) = reflect.TypeAssert<GobDecoder>(value);
+        err = gobDecoder.GobDecode(b);
     }
     else if (exprᴛ1 == xBinary) {
-        err = value.Interface()._<encoding.BinaryUnmarshaler>().UnmarshalBinary(b);
+        var (binaryUnmarshaler, _) = reflect.TypeAssert<encoding.BinaryUnmarshaler>(value);
+        err = binaryUnmarshaler.UnmarshalBinary(b);
     }
     else if (exprᴛ1 == xText) {
-        err = value.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(b);
+        var (textUnmarshaler, _) = reflect.TypeAssert<encoding.TextUnmarshaler>(value);
+        err = textUnmarshaler.UnmarshalText(b);
     }
     if (err != default!) {
         error_(err);
@@ -914,7 +917,7 @@ internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡ
 }
 
 // Index by Go types.
-internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
+[GoLazy] partial class lazyᴛdecOpTable { internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
     [1] = decBool,
     [3] = decInt8,
     [4] = decInt16,
@@ -929,7 +932,7 @@ internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> d
     [15] = decComplex64,
     [16] = decComplex128,
     [24] = decString
-}.array(25);
+}.array(25); }
 
 // Indexed by gob types.  tComplex will be added during type.init().
 internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap;
@@ -1011,7 +1014,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                     typeId elemId = default!;
                     {
                         var tt = builtinIdToType(wireId); if (tt != default!){
-                            elemId = tt._<ж<sliceType>>().Value.Elem;
+                            elemId = tt._<ΔgobType, ж<sliceType>>().Value.Elem;
                         } else {
                             elemId = dec.wireType[wireId].Value.SliceT.Value.Elem;
                         }
@@ -1345,7 +1348,7 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
         ref var ut = ref Ꮡut.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         var rt = ut.@base;
         var srt = rt;
         if (srt.Kind() != reflect.Struct || ut.externalDec != 0) {
@@ -1464,7 +1467,7 @@ internal static void decodeValue(this ж<Decoder> Ꮡdec, typeId wireId, reflect
     try {
         ref var dec = ref Ꮡdec.DerefOrNull();
 
-        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡdec.of(Decoder.Ꮡerr), ref ᒐ);
+        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡdec.of(Decoder.Ꮡerr), ref ᒐ, recovers: true);
         // If the value is nil, it means we should just ignore this item.
         if (!value.IsValid()) {
             Ꮡdec.decodeIgnoredValue(wireId);

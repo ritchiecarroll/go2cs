@@ -101,8 +101,8 @@ internal static void Main() {
     fmt.Println(recv.ValShadowField());
     fmt.Println(recv.SliceShadowIndex());
 
-    var box = Ꮡ(new Box(HasName: new Tag(tag: "R"u8), id: 1));
-    var obox = Ꮡ(new Box(HasName: new Tag(tag: "S"u8), id: 2));
+    var box = Ꮡ(new Box(HasName: new Tag(tag: "R"), id: 1));
+    var obox = Ꮡ(new Box(HasName: new Tag(tag: "S"), id: 2));
     fmt.Println(box.IfaceShadowEmbed(obox));
 }
 

@@ -36,8 +36,9 @@ internal static Object universeComparable;
 // The *Basic type for Typ[Byte] will have the name "uint8".
 // Use Universe.Lookup("byte").Type() to obtain the specific
 // alias basic type named "byte" (and analogous for "rune").
-public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
+[GoLazy] partial class lazyᴛTyp { public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type"u8)),
+
     [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool"u8)),
     [(int)Int] = Ꮡ(new Basic(Int, IsInteger, "int"u8)),
     [(int)Int8] = Ꮡ(new Basic(Int8, IsInteger, "int8"u8)),
@@ -56,6 +57,7 @@ public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)Complex128] = Ꮡ(new Basic(Complex128, IsComplex, "complex128"u8)),
     [(int)ΔString] = Ꮡ(new Basic(ΔString, IsString, "string"u8)),
     [(int)UnsafePointer] = Ꮡ(new Basic(UnsafePointer, 0, "Pointer"u8)),
+
     [(int)UntypedBool] = Ꮡ(new Basic(UntypedBool, (BasicInfo)(IsBoolean | IsUntyped), "untyped bool"u8)),
     [(int)ΔUntypedInt] = Ꮡ(new Basic(ΔUntypedInt, (BasicInfo)(IsInteger | IsUntyped), "untyped int"u8)),
     [(int)UntypedRune] = Ꮡ(new Basic(UntypedRune, (BasicInfo)(IsInteger | IsUntyped), "untyped rune"u8)),
@@ -63,7 +65,7 @@ public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)ΔUntypedComplex] = Ꮡ(new Basic(ΔUntypedComplex, (BasicInfo)(IsComplex | IsUntyped), "untyped complex"u8)),
     [(int)UntypedString] = Ꮡ(new Basic(UntypedString, (BasicInfo)(IsString | IsUntyped), "untyped string"u8)),
     [(int)UntypedNil] = Ꮡ(new Basic(UntypedNil, IsUntyped, "untyped nil"u8))
-}.slice();
+}.slice(); }
 
 internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
     Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte"u8)),
@@ -100,7 +102,6 @@ internal static void defPredeclaredTypes() {
     // interface.
     {
         universeAnyNoAlias = NewTypeName(nopos, nil, anyˢ, new InterfaceжΔType(Ꮡ(new Interface(complete: true, tset: ᏑtopTypeSet))));
-        universeAnyNoAlias.of(TypeName.Ꮡobject).setColor(black);
         // ensure that the any TypeName reports a consistent Parent, after
         // hijacking Universe.Lookup with gotypesalias=0.
         universeAnyNoAlias.of(TypeName.Ꮡobject).setParent(Universe);
@@ -109,7 +110,6 @@ internal static void defPredeclaredTypes() {
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
         universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default!);
-        universeAnyAlias.of(TypeName.Ꮡobject).setColor(black);
         _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
@@ -117,12 +117,11 @@ internal static void defPredeclaredTypes() {
     // type error interface{ Error() string }
     {
         var obj = NewTypeName(nopos, nil, errorˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
 
         // error.Error() string
-        var recv = NewVar(nopos, nil, ""u8, new NamedжΔType(typ));
-        var res = NewVar(nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
+        var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
+        var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
         var sig = NewSignatureType(recv, default!, default!, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
@@ -130,20 +129,21 @@ internal static void defPredeclaredTypes() {
         var ityp = Ꮡ(new Interface(methods: new ж<Func>[]{err}.slice(), complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 
     // type comparable interface{} // marked as comparable
     {
         var obj = NewTypeName(nopos, nil, comparableˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
 
         // interface{} // marked as comparable
         var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default!, allTermlist, true))));
 
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 }
@@ -166,7 +166,7 @@ internal static void defPredeclaredConsts() {
 }
 
 internal static void defPredeclaredNil() {
-    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]), color_: black)))));
+    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]))))));
 }
 
 // A builtinId is the id of a builtin function.
@@ -212,7 +212,7 @@ partial struct predeclaredFuncsᴛ1 /*dyn*/ {
     internal bool variadic;
     internal exprKind kind;
 }
-internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseArray<predeclaredFuncsᴛ1>{
+[GoLazy] partial class lazyᴛpredeclaredFuncs { internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseArray<predeclaredFuncsᴛ1>{
     [(int)_Append] = new("append"u8, 1, true, expression),
     [(int)_Cap] = new("cap"u8, 1, false, expression),
     [(int)_Clear] = new("clear"u8, 1, false, statement),
@@ -232,6 +232,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
     [(int)_Println] = new("println"u8, 0, true, statement),
     [(int)_Real] = new("real"u8, 1, false, expression),
     [(int)_Recover] = new("recover"u8, 0, false, statement),
+
     [(int)_Add] = new("Add"u8, 2, false, expression),
     [(int)_Alignof] = new("Alignof"u8, 1, false, expression),
     [(int)_Offsetof] = new("Offsetof"u8, 1, false, expression),
@@ -240,13 +241,14 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
     [(int)_SliceData] = new("SliceData"u8, 1, false, expression),
     [(int)_String] = new("String"u8, 2, false, expression),
     [(int)_StringData] = new("StringData"u8, 1, false, expression),
+
     [(int)_Assert] = new("assert"u8, 1, false, statement),
     [(int)_Trace] = new("trace"u8, 0, true, statement)
-}.array();
+}.array(); }
 
 internal static void defPredeclaredFuncs() {
-    foreach (var (i, _) in predeclaredFuncs) {
-        builtinId id = ((builtinId)i);
+    foreach (var i in range(predeclaredFuncs)) {
+        builtinId id = (builtinId)i;
         if (id == _Assert || id == _Trace) {
             continue; // only define these in testing environment
         }
@@ -290,7 +292,7 @@ public static void DefPredeclaredTestFuncs() {
 // a scope. Objects with exported names are inserted in the unsafe package
 // scope; other objects are inserted in the universe scope.
 internal static void def(Object obj) {
-    assert(obj.color() == black);
+    assert(obj.Type() != default!);
     @string name = obj.Name();
     if (strings.Contains(name, " "u8)) {
         return; // nothing to do

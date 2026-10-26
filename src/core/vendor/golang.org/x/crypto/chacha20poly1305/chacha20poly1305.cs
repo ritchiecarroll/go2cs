@@ -36,10 +36,14 @@ partial struct chacha20poly1305 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string chacha20poly1305UseOfˢ = "chacha20poly1305: use of ChaCha20Poly1305 is not allowed in FIPS 140-only mode"u8;
 private static readonly @string chacha20poly1305BadKeyˢ = "chacha20poly1305: bad key length"u8;
 
 // New returns a ChaCha20-Poly1305 AEAD that uses the given 256-bit key.
 public static (cipher.AEAD, error) New(slice<byte> key) {
+    if (fips140Enforced()) {
+        return (default!, errors.New(chacha20poly1305UseOfˢ));
+    }
     if (len(key) != KeySize) {
         return (default!, errors.New(chacha20poly1305BadKeyˢ));
     }

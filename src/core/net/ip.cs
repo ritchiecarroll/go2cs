@@ -11,7 +11,7 @@
 namespace go;
 
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using netip = net.netip_package;
 using @internal;
@@ -312,15 +312,15 @@ public static @string String(this IP ip) {
         buf = new slice<byte>(0, maxCap);
     }
     buf = ip.appendTo(buf);
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static @string hexString(slice<byte> b) {
     var s = new slice<byte>(len(b) * 2);
     foreach (var (i, tn) in b) {
-        (s[i * 2], s[i * 2 + 1]) = (hexDigit[(tn >> (int)(4))], hexDigit[(byte)(tn & 0xf)]);
+        (s[i * 2], s[i * 2 + 1]) = (hexDigit[(tn >> 4)], hexDigit[(byte)(tn & 0xf)]);
     }
-    return ((@string)s);
+    return (@string)s;
 }
 
 // ipEmptyString is like ip.String except that it returns
@@ -379,7 +379,7 @@ public static error UnmarshalText(this ref IP ip, slice<byte> text) {
         return default!;
     }
     ref var s = ref heap<@string>(out var Ꮡs);
-    s = ((@string)text);
+    s = (@string)text;
     var x = ParseIP(s);
     if (x == default!) {
         return new ParseErrorжerror(Ꮡ(new ParseError(Type: "IP address"u8, Text: s)));
@@ -538,7 +538,7 @@ public static @string String(this ж<IPNet> Ꮡn) {
     if (l == -1) {
         return nn.String() + "/"u8 + m.String();
     }
-    return nn.String() + "/"u8 + itoa.Uitoa((nuint)l);
+    return nn.String() + "/"u8 + strconv.Itoa(l);
 }
 
 // ParseIP parses s as an IP address, returning the result.
@@ -550,7 +550,7 @@ public static @string String(this ж<IPNet> Ꮡn) {
 public static IP ParseIP(@string s) {
     {
         var (addr, valid) = parseIP(s); if (valid) {
-            return ((IP)(addr[..]));
+            return (IP)(addr[..]);
         }
     }
     return default!;
@@ -589,7 +589,7 @@ public static (IP, ж<IPNet>, error) ParseCIDR(@string s) {
     }
     var m = CIDRMask(n, ipAddr.BitLen());
     var addr16 = ipAddr.As16();
-    return (((IP)(addr16[..])), Ꮡ(new IPNet(IP: ((IP)(addr16[..])).Mask(m), Mask: m)), default!);
+    return ((IP)(addr16[..]), Ꮡ(new IPNet(IP: ((IP)(addr16[..])).Mask(m), Mask: m)), default!);
 }
 
 internal static IP copyIP(IP x) {

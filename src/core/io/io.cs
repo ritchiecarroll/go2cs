@@ -710,12 +710,12 @@ internal static (nint, error) WriteString(this discard _, @string s) {
     return (len(s), default!);
 }
 
-internal static ж<Δsync.Pool> ᏑblackHolePool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛblackHolePool { internal static ж<Δsync.Pool> ᏑblackHolePool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         var b = new slice<byte>(8192);
         return Ꮡ(b);
     }
-));
+)); }
 internal static ref Δsync.Pool blackHolePool => ref ᏑblackHolePool.Value;
 
 internal static (int64 n, error err) ReadFrom(this discard _, Reader r) {
@@ -775,7 +775,19 @@ internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w)
 // defined to read from src until EOF, it does not treat an EOF from Read
 // as an error to be reported.
 public static (slice<byte>, error) ReadAll(Reader r) {
+    var chunksᴷ = new stackAppend<slice<byte>>();
+
+    // Build slices of exponentially growing size,
+    // then copy into a perfectly-sized slice at the end.
     var b = new slice<byte>(0, 512);
+    // Starting with next equal to 256 (instead of say 512 or 1024)
+    // allows less memory usage for small inputs that finish in the
+    // early growth stages, but we grow the read sizes quickly such that
+    // it does not materially impact medium or large inputs.
+    nint next = 256;
+    var chunks = new slice<slice<byte>>(0, 4);
+    // Invariant: finalSize = sum(len(c) for c in chunks)
+    nint finalSize = default!;
     while (ᐧ) {
         var (n, err) = r.Read(b.slice(len(b), cap(b)));
         b = b.slice(0, len(b) + n);
@@ -783,12 +795,26 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             if (AreEqual(err, EOF)) {
                 err = default!;
             }
-            return (b, err);
+            if (len(chunks) == 0) {
+                return (b, err);
+            }
+
+            // Build our final right-sized slice.
+            finalSize += len(b);
+            var final = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(finalSize))[..0];
+            foreach (var (_, chunk) in chunks) {
+                final = appendꓸꓸꓸ(final, chunk);
+            }
+            final = appendꓸꓸꓸ(final, b);
+            return (final, err);
         }
 
-        if (len(b) == cap(b)) {
-            // Add more capacity (let append pick how much).
-            b = append(b, (byte)(0)).slice(0, len(b));
+        if (cap(b) - len(b) < cap(b) / 16) {
+            // Move to the next intermediate slice.
+            chunks = append(chunksᴷ, chunks, b);
+            finalSize += len(b);
+            b = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(next))[..0];
+            next += next / 2;
         }
     }
 }

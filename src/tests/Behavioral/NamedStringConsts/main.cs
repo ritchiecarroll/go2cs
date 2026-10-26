@@ -20,56 +20,40 @@ internal static @string tag(this relationship r) {
     return "rel:"u8 + ((@string)r);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sameˢ = "same"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string describe(relationship r) {
     if (r == equivalent) {
-        return sameˢ;
+        return "same";
     }
     if (r == moreGeneral || r == moreSpecific) {
         return "related:"u8 + ((@string)r);
     }
-    return otherˢ;
+    return "other";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string opLoadˢ = "opLoad"u8;
 private static readonly @string opLocalˢ = "opLocal"u8;
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly relationship localRelᶜ = "moreSpecific"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string plainᶜ = "plain"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly relationship localOpᶜ = "opLocal"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string untypedOpᶜ = "opUntyped";
-
 internal static void Main() {
     fmt.Println(describe(equivalent));
     fmt.Println(describe(moreGeneral));
-    fmt.Println(describe(((relationship)(@string)"x"u8)));
+    fmt.Println(describe((relationship)(@string)"x"u8));
 
-    relationship localRel = localRelᶜ;
+    relationship localRel = "moreSpecific"u8;
     fmt.Println(describe(localRel));
 
     fmt.Println(equivalent.tag());
 
-    @string plain = plainᶜ;
+    @string plain = "plain";
     fmt.Println(plain);
 
     fmt.Println(opLoad == ((relationship)(@string)opLoadˢ), opStore == opLoad, opStore.tag(), opDelete.tag());
     fmt.Println(describe(opLoad));
 
-    relationship localOp = localOpᶜ;
+    relationship localOp = "opLocal"u8;
     fmt.Println(localOp.tag(), localOp == ((relationship)(@string)opLocalˢ));
 
-    @string untypedOp = untypedOpᶜ;
+    @string untypedOp = "opUntyped";
     fmt.Println(untypedOp, len(untypedOp));
 }
 

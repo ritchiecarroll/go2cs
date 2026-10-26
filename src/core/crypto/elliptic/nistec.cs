@@ -28,13 +28,8 @@ internal static void initP224() {
     ));
 }
 
-partial struct p256Curve {
-    internal partial ref nistCurve<P256PointжnistPoint> nistCurve { get; }
-}
-
-internal static ж<p256Curve> p256 = Ꮡ(new p256Curve(new nistCurve<P256PointжnistPoint>(
+internal static ж<nistCurve<P256PointжnistPoint>> p256 = Ꮡ(new nistCurve<P256PointжnistPoint>(
     newPoint: () => nistec.NewP256Point()
-)
 ));
 
 internal static void initP256() {
@@ -247,28 +242,6 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult<Point>(this ref ni
         throw panic("crypto/elliptic: nistec rejected normalized scalar");
     }
     return curve.pointToAffine(p);
-}
-
-// CombinedMult returns [s1]G + [s2]P where G is the generator. It's used
-// through an interface upgrade in crypto/ecdsa.
-internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> ᏑPx, ж<bigꓸInt> ᏑPy, slice<byte> s1, slice<byte> s2)
-    where Point : nistPoint<Point>
-{
-    s1 = curve.normalizeScalar(s1);
-    var (q, err) = curve.newPoint().ScalarBaseMult(s1);
-    if (err != default!) {
-        throw panic("crypto/elliptic: nistec rejected normalized scalar");
-    }
-    (var p, err) = curve.pointFromAffine(ᏑPx, ᏑPy);
-    if (err != default!) {
-        throw panic("crypto/elliptic: CombinedMult was called on an invalid point");
-    }
-    s2 = curve.normalizeScalar(s2);
-    (p, err) = p.ScalarMult(p, s2);
-    if (err != default!) {
-        throw panic("crypto/elliptic: nistec rejected normalized scalar");
-    }
-    return curve.pointToAffine(p.Add(p, q));
 }
 
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data)

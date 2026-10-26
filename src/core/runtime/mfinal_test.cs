@@ -44,7 +44,7 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
     var chʗ1 = ch;
     void finalize(ж<nint> x) {
         if (x.Value != 97531) {
-            Ꮡt.Errorf("finalizer %d, want %d"u8, x.Value, (nint)(97531));
+            Ꮡt.Errorf("finalizer %d, want %d"u8, x.Value, (nint)97531);
         }
         chʗ1.ᐸꟷ(true);
     }
@@ -199,6 +199,8 @@ internal static UntypedInt objsize => 320;
 partial struct objtype /*[320]byte*/;
 
 internal static (ж<objtype>, ж<objtype>) adjChunks() {
+    var sᴷ = new stackAppend<ж<objtype>>();
+
     slice<ж<objtype>> s = default!;
 
     while (ᐧ) {
@@ -211,7 +213,7 @@ internal static (ж<objtype>, ж<objtype>) adjChunks() {
                 return (d, c);
             }
         }
-        s = append(s, c);
+        s = append(sᴷ, s, c);
     }
 }
 
@@ -226,7 +228,7 @@ public static void TestEmptySlice(ж<testing.T> Ꮡt) {
     var (x, y) = adjChunks();
 
     // the pointer inside xs points to y.
-    var xs = (~x).Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
+    var xs = x.Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
 
     var fin = new channel<bool>(1);
     var finʗ1 = fin;
@@ -244,7 +246,7 @@ internal static (@string, ж<objtype>) adjStringChunk() {
     var b = new slice<byte>(objsize);
     while (ᐧ) {
         ref var s = ref heap<@string>(out var Ꮡs);
-        s = ((@string)b);
+        s = (@string)b;
         var t = @new<objtype>();
         var p = ~Ꮡs.Reinterpret<@string, uintptr>();
         var q = (uintptr)t;

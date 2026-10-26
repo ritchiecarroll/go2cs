@@ -13,6 +13,7 @@ global using slogꓸHandler = go.log.slog_package.ΔHandler;
 global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
 global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
+global using slogꓸSource = go.log.slog_package.ΔSource;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,6 +28,12 @@ using static global::go.testing.slogtest_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

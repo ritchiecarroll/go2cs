@@ -38,19 +38,46 @@
 //     (managed_impl.cs), so when nothing keeps the finalized object alive its cleanup can come due
 //     inside the SAME runtime.GC() call, where Go needs a second cycle. It still runs after the
 //     finalizer, never before; runtime's TestCleanupAfterFinalizer reads the order, not the cycle.
-//  3. THE ptr == arg GUARD IS WIDER THAN GO'S. Go compares the two pointer VALUES. We compare
-//     referents, so we also panic when arg is a pointer to a DIFFERENT field of the same
-//     allocation. That direction is safe: such an arg keeps the allocation alive, so the cleanup
-//     could never run, which is precisely what the guard exists to say. No case is refused whose
-//     cleanup would otherwise have run.
+//  3. THE ARG GUARDS READ ORDER TOKENS AND REFERENTS, NOT A SPAN. Go 1.26 panics "ptr is equal to
+//     arg" when the two ADDRESSES are equal, and "ptr is within arg" when arg points elsewhere in
+//     ptr's object, outside the tiny-allocator span. We compare order tokens for the first (equal
+//     pointers have equal tokens, so &obj.a with a at offset 0 is EQUAL to &obj, as in Go) and
+//     referents for the second, and stand in for tinySpanClass by Go's own rule for it: a
+//     pointer-free object of at most 16 bytes (inTinySpan). Before Go 1.26 there was one message,
+//     and this guard compared referents for it.
 //  4. Arena and span checks are GONE, not ported: inUserArenaChunk, findObject and
 //     isGoPointerWithoutSpan ask about a heap layout that does not exist here. Their panics
 //     ("ptr is arena-allocated", "ptr not in allocated block") are therefore unreachable and the
 //     lines are not kept as dead code. debug.sbrk IS kept -- it is a converted variable with a
 //     managed meaning and Go's noop-Cleanup answer is still the right one.
+//  5. THE CLOSES-OVER-PTR GUARD (Go 1.26) READS THE CAPTURES THE CONVERTER PASSES, NOT POINTER
+//     SLOTS. Go scans every pointer slot of the cleanup's funcval object for an address inside
+//     ptr's allocation. A C# delegate's closure object cannot answer that without reflection, and
+//     a C# closure object can also hold variables only a SIBLING lambda of its scope captured. So
+//     the converter, which knows which Go variables the cleanup closes over BY VALUE, passes their
+//     values to the four-argument AddCleanup below (src/go2cs/addCleanupCaptures.go), and the
+//     guard panics when one of them is a pointer whose referent is ptr's. The same answer under the
+//     JIT and native AOT. The converter passes pointer, unsafe.Pointer and interface captures as
+//     themselves, and a STRUCT or ARRAY captured by value that holds a pointer slot (and is within
+//     cmd/compile's 128-byte by-value limit) in a fifth argument, walked through GoReflect.GoFields
+//     (registered types only, depth-bounded; valueHoldsPointerInto). A slice, map, channel or func
+//     capture is not passed: Go's slot scan sees its header pointer, not ptr's object. The one case
+//     Go refuses that this does not is a SLICE over ptr's own array (a BOARD row names it). A
+//     cleanup held in a func-typed LOCAL whose every assignment is a func literal or a method value
+//     passes the UNION of those values' captures. That superset is safe: a literal that could flow
+//     there and closes over ptr is one Go refuses. Any other func value (a parameter, a
+//     package-level variable, a field, a call result, a local whose address is taken) carries no
+//     static fact and takes the three-argument form UNCHECKED. Censused 2026-10-17 over the
+//     go1.26.9 tree by that predicate (a go/types walk of runtime, internal/sync and
+//     runtime/race/testdata): 20 func-variable call sites, all 20 covered, residual 0.
 [module: go.GoManualConversion]
 
 namespace go;
+
+using atomic = @internal.runtime.atomic_package;
+using cpu = @internal.cpu_package;
+using sys = @internal.runtime.sys_package;
+using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
@@ -111,7 +138,22 @@ partial class runtime_package {
 // mentions it. To ensure a cleanup does not get called prematurely,
 // pass the object to the [KeepAlive] function after the last point
 // where the object must remain reachable.
-public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) {
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured: null, capturedValues: null);
+
+// The converter's form for a cleanup whose by-value captures it can see (a func literal or a method
+// value at the call site): `captured` holds their values, read by Go 1.26's closes-over-ptr check at
+// the point in the order Go runs it. See divergence 5.
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[] captured) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured, capturedValues: null);
+
+// The same, when the cleanup also captures a STRUCT or ARRAY by value that holds a pointer slot:
+// `capturedValues` holds those values, walked field by field (valueHoldsPointerInto). `captured` is
+// null when there is no pointer or interface capture beside them.
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[]? captured, object?[] capturedValues) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured, capturedValues);
+
+private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[]? captured, object?[]? capturedValues) {
     // The pointer to the object must be valid. `abi.Escape` above this line in Go forces ptr to the
     // heap; a go2cs pointer box IS the heap, so there is nothing to force.
     if (Ꮡptr == nil) {
@@ -134,10 +176,14 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     object referent = ReferentOf(Ꮡptr);
     // Check that arg is not equal to ptr. Go tests this only for a pointer-kinded arg, which is
     // `arg is INilPointer` here -- @unsafe.Pointer is a ж<uintptr> and so answers it too, covering
-    // Go's abi.Pointer and abi.UnsafePointer arms in one predicate. See divergence 3 in the header:
-    // ours compares referents, so it is the wider guard and safely so.
-    if (argʗp is INilPointer && ReferenceEquals(ReferentOf(argʗp!), referent)) {
-        throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
+    // Go's abi.Pointer and abi.UnsafePointer arms in one predicate. Equal ADDRESSES, as Go compares:
+    // equal pointers always have equal order tokens (see pointerFacts).
+    object? argAllocation = null;
+    if (argʗp is INilPointer argPointer && !argPointer.IsNilPointer) {
+        (nuint argAddress, argAllocation) = pointerFacts(argPointer);
+        if (argAddress == Ꮡptr.PointerOrderToken) {
+            throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
+        }
     }
     if (debug.sbrk != 0) {
         // debug.sbrk never frees memory, so no cleanup will ever run
@@ -150,6 +196,27 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     // so registering against it would tie the cleanup to a referent that never dies.
     if (GoZeroBase.Is(referent)) {
         return new Cleanup(nil);
+    }
+    // Check that arg is not within ptr. Another address in ptr's object keeps the object alive just
+    // as ptr itself would. Go exempts the tiny-allocator span, where two separate small objects can
+    // share one block; see inTinySpan.
+    if (argAllocation is not null && ReferenceEquals(argAllocation, referent) && !inTinySpan(referent)) {
+        throw panic("runtime.AddCleanup: ptr is within arg, cleanup will never run");
+    }
+    // Check that the cleanup function doesn't close over the pointer.
+    if (captured is not null) {
+        foreach (object? value in captured) {
+            if (holdsPointerInto(value, referent)) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
+    }
+    if (capturedValues is not null) {
+        foreach (object? value in capturedValues) {
+            if (value is not null && valueHoldsPointerInto(value, value.GetType(), referent, depth: 0)) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
     }
     // Go: `fn := func() { cleanup(arg) }`, closed over arg at registration. The closure is the whole
     // reason a cleanup needs no argument binding at dispatch, unlike a finalizer.
@@ -187,6 +254,91 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     );
 }
 
+// Whether a captured pointer or interface value addresses ptr's allocation: a non-nil pointer whose
+// referent is ptr's, or the referent object itself. An interface whose dynamic value is a struct is
+// NOT taken apart: Go's slot scan sees the interface's data word, which addresses a copy.
+private static bool holdsPointerInto(object? value, object referent) => value switch {
+    null => false,
+    INilPointer pointer => !pointer.IsNilPointer && ReferenceEquals(pointerFacts(pointer).allocation, referent),
+    _ => ReferenceEquals(value, referent)
+};
+
+// A non-nil pointer-kinded value's Go address (its order token) and the allocation it points into.
+// An unsafe.Pointer answers through the box it names, since its own token is the number it was
+// minted as; one with no recoverable managed referent (a bare number, native memory) is in no Go
+// allocation.
+private static (nuint address, object? allocation) pointerFacts(INilPointer pointer) {
+    if (pointer is @unsafe.Pointer up) {
+        return up.Referent is INilPointer box ? (box.PointerOrderToken, box.ReferentObject) : (up.PointerOrderToken, up.Referent);
+    }
+    return (pointer.PointerOrderToken, pointer.ReferentObject);
+}
+
+// Whether Go would allocate the referent in the tiny-allocator span, which the within check
+// exempts: tinySpanClass is size class 2 (16 bytes) noscan, so it holds every pointer-free object
+// of at most maxTinySize bytes, whether the tiny allocator or the small-object path placed it.
+// A referent whose Go type is not known answers false, and the guard stands.
+private static bool inTinySpan(object referent) {
+    Type? type;
+    nint count = 1;
+    if (referent is Array backing && backing.Rank == 1) {
+        type = backing.GetType().GetElementType();
+        count = backing.Length;
+    } else if (!GoReflect.TryPointerBoxElement(referent.GetType(), out type)) {
+        return false;
+    }
+    if (type is null) {
+        return false;
+    }
+    nint size = GoReflect.GoSizeOf(type);
+    return size > 0 && size * count <= (nint)maxTinySize && GoReflect.GoPtrBytesOf(type) == 0;
+}
+
+// Go's funcval holds a by-value struct or array capture inline, so its slot scan reaches every
+// pointer field and element. This walks the same slots: a struct through GoReflect.GoFields (the
+// registered-type projection, so no unregistered reflection and the same answer under native AOT),
+// an array element by element, each slot checked by holdsPointerInto. It reads a field only when
+// its static kind can hold a pointer slot, and stops at maxCaptureDepth. A slice, map, channel or
+// func field is never followed (Go's scan sees its header pointer, not ptr's object).
+private const int maxCaptureDepth = 16;
+
+private static bool valueHoldsPointerInto(object? value, Type type, object referent, int depth) {
+    if (value is null || depth > maxCaptureDepth) {
+        return false;
+    }
+    switch (GoReflect.KindOf(type)) {
+        case GoReflect.Pointer or GoReflect.UnsafePointer or GoReflect.Interface:
+            return holdsPointerInto(value, referent);
+        // A converted Go struct is a C# struct. A CLASS that classifies as Struct (weak.Pointer's
+        // handle<T>, which holds only a WeakReference) is one opaque slot, as Go's handle is.
+        case GoReflect.Struct when !type.IsValueType:
+            return holdsPointerInto(value, referent);
+        case GoReflect.Struct:
+            foreach (GoReflect.GoFieldInfo field in GoReflect.GoFields(type)) {
+                if (canHoldPointerSlot(field.Type) && valueHoldsPointerInto(field.Read(value), field.Type, referent, depth + 1)) {
+                    return true;
+                }
+            }
+            return false;
+        case GoReflect.Array:
+            Type? element = GoReflect.ElementType(type);
+            if (element is null || !canHoldPointerSlot(element) || value is not IArray array) {
+                return false;
+            }
+            for (nint index = 0; index < array.Length; index++) {
+                if (valueHoldsPointerInto(array[index], element, referent, depth + 1)) {
+                    return true;
+                }
+            }
+            return false;
+        default:
+            return false;
+    }
+}
+
+private static bool canHoldPointerSlot(Type type) =>
+    GoReflect.KindOf(type) is GoReflect.Pointer or GoReflect.UnsafePointer or GoReflect.Interface or GoReflect.Struct or GoReflect.Array;
+
 // Cleanup is a handle to a cleanup call for a specific object.
 [GoType] partial struct Cleanup {
     // id is the unique identifier for the cleanup within the arena.
@@ -209,6 +361,25 @@ public static void Stop(this Cleanup c) {
     // body, so the weak entry below is already dead and there is nothing to cancel. Go says the
     // same thing about its own race, in the same words, for the same reason.
     GoCleanupSentinel.Cancel(c.id);
+}
+
+// unique_runtime_blockUntilEmptyCleanupQueue blocks until the cleanup queue is empty or the
+// timeout is reached, and reports whether it emptied. Go 1.26 pushes it into unique's in-package
+// tests (`//go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue`),
+// whose drainCleanupQueue calls it after runtime.GC(). Go's body waits on gcCleanups, the queue
+// its cleanup goroutines read, which does not exist here: a cleanup body runs on GoFinalizerQueue
+// (see the header), so this is blockUntilEmptyFinalizerQueue's wait. PUBLIC for the forwarder the
+// converter emits in the consumer's assembly (linknamePushTargets in go2cs/linknameOperations.go).
+// Added at the Go 1.26 hop, ahead of this file's H6 rewrite. Go's timeout is nanoseconds.
+public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
+}
+
+// sync_test_runtime_blockUntilEmptyCleanupQueue is the same wait, pushed into sync's EXTERNAL tests
+// (`//go:linkname sync_test_runtime_blockUntilEmptyCleanupQueue sync_test.runtime_blockUntilEmptyCleanupQueue`;
+// the consumer is oncefunc_test.go's one-arg handle). Go gives both pushes the identical body.
+public static bool sync_test_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
 }
 
 // Every cleanup registered against one object. ConditionalWeakTable holds ONE value per key, and a
@@ -309,7 +480,17 @@ private sealed class GoCleanupSentinel
 
         // HAND OFF, never invoke here -- running a Go body on the CLR finalizer thread is the
         // deadlock GoFinalizerQueue exists to avoid, and it is no less a deadlock for a cleanup.
-        GoFinalizerQueue.EnqueueCleanup(body);
+        // readQueueStats' two counts (the cleanup-queue surface below): queued when the cleanup is handed
+        // to the runner, executed once its body has run.
+        global::System.Threading.Interlocked.Increment(ref s_cleanupsQueued);
+        GoFinalizerQueue.EnqueueCleanup(() => {
+            try {
+                body();
+            }
+            finally {
+                global::System.Threading.Interlocked.Increment(ref s_cleanupsExecuted);
+            }
+        });
     }
 
     // ---- the id table, which exists ONLY so Cleanup.Stop can find a sentinel it must not hold ----
@@ -389,6 +570,124 @@ private sealed class GoCleanupSentinel
                 s_byID.TryRemove(entry.Key, out global::System.WeakReference<GoCleanupSentinel>? _);
         }
     }
+}
+
+// =====================================================================================================
+// THE GO 1.25 CLEANUP-QUEUE SURFACE (option A, COORD ruling 2026-10-14; PREREAD-h6-runtime-go126 §6.1)
+// =====================================================================================================
+//
+// Go 1.25 moved cleanups onto their own queue: gcCleanups, a cleanupQueue of cleanupBlock lists that
+// up to max(GOMAXPROCS/4, 1) cleanup goroutines drain, fed at sweep from the mspan specials. That
+// queue is not private to mcleanup.go. Eight converted runtime files reach into it at go1.26.9, so
+// the runtime does not compile until it is declared. This file keeps A11's sentinel mechanism (above)
+// and divergence 1 (cleanups run sequentially on the fing analogue). It declares Go's types as the
+// converter emits them from go1.26.9's mcleanup.go, and answers each member the converted code calls
+// with a managed shim:
+//
+//   member                 site (go1.26.9)                         answer here
+//   ---------------------  --------------------------------------  ----------------------------------------
+//   lock                   mgc.go gcinit: lockInit(&gcCleanups.     a real mutex field, initialised and never
+//                          lock, lockRankCleanupQueue)              contended (nothing below takes it)
+//   all                    mgcmark.go markroot, fixedRootCleanups:  stays nil (no cleanupBlock exists), so
+//                          walks gcCleanups.all as cleanupBlock     the root loop runs zero times
+//   cleanupBlock,          mgcmark.go (the same loop: alllink, n,   declared as emitted; nothing allocates
+//   cleanupBlockPtrMask    cleanups[0], cleanupBlockPtrMask)        one
+//   cleanupFn,             mheap.go specialCleanup.cleanup and      declared as emitted; specialCleanup
+//   cleanupFnPtrMask       addCleanup; mgcmark.go markrootSpans     records are never made here
+//   enqueue(cleanupFn)     mheap.go freeSpecial, _KindSpecial-      UNREACHABLE: no mspan cleanup special
+//                          Cleanup arm                              exists here, so reaching it throws by name
+//   flush()                mgcsweep.go: the last sweeper            a no-op: no P holds a local block
+//   needsWake(), wake()    proc.go findRunnable                     false, and a no-op
+//   running                mprof.go goroutineProfileWithLabels      stays 0: a running cleanup is on the fing
+//                          (counts cleanup goroutines)              runner, not a cleanup goroutine
+//   queued                 proc.go destroy: queued += pp.           the field, as Go's; p.cleanupsQueued is
+//                          cleanupsQueued (runtime2.cs)             never written here, so it adds 0
+//   readQueueStats()       metrics.go /gc/cleanups/*; mgc.go        REAL counts: the managed path counts
+//                          gcMarkTermination                        queued and executed (s_cleanups* below)
+//   blockUntilEmpty(t)     export_test.go BlockUntilEmptyCleanup-   the finalizer-queue wait, the one the
+//                          Queue (mcleanup_test, metrics_test)      two pushed bodies above already use
+//
+// Out of scope here, and why: cleanupBlock's own methods (enqueue, full, empty, take), cleanupQueue's
+// addWork, tryTakeWork, dequeue, needG, createGs, beginRunningCleanups and endRunningCleanups,
+// runCleanups, and p.cleanups are all reached only from inside go1.26.9's mcleanup.go, which this file
+// replaces whole. Option B, porting the queue for Go's concurrency, is a post-hop design item.
+
+internal static UntypedInt cleanupBlockSize => 512;
+
+[GoType] internal partial struct cleanupBlock {
+    /*embed*/ internal cleanupBlockHeader cleanupBlockHeader;
+    internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
+}
+
+internal static ж<array<uint8>> ᏑcleanupFnPtrMask = new StandardBox<array<uint8>>(new uint8[]{0b111}.array());
+internal static ref array<uint8> cleanupFnPtrMask => ref ᏑcleanupFnPtrMask.Value;
+
+[GoType] internal partial struct cleanupFn {
+    internal Action<ж<funcval>, @unsafe.Pointer> call;
+    internal ж<funcval> fn;
+    internal @unsafe.Pointer arg;
+}
+
+internal static ж<array<byte>> ᏑcleanupBlockPtrMask = new StandardBox<array<byte>>(new array<byte>(8));
+internal static ref array<byte> cleanupBlockPtrMask => ref ᏑcleanupBlockPtrMask.Value;
+
+[GoType] internal partial struct cleanupBlockHeader {
+    internal sys.NotInHeap _;
+    /*embed*/ internal lfnode lfnode;
+    internal ж<cleanupBlock> alllink;
+    internal uint32 n;
+}
+
+[GoType] internal partial struct cleanupQueue {
+    internal lfstack full;
+    internal atomic.Uint64 workUnits;
+    internal array<byte> _ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - /* unsafe.Sizeof(atomic.Uint64{}) */ (uintptr)8);
+    internal lfstack free;
+    internal atomic.Bool flushed;
+    internal array<byte> __ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - 1);
+    internal atomic.UnsafePointer all;
+    internal array<byte> ___ = new((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(atomic.UnsafePointer{}) */ (uintptr)8);
+    internal mutex @lock;
+    internal gList sleeping;
+    internal atomic.Uint32 asleep;
+    internal atomic.Uint32 running;
+    internal atomic.Uint32 ng;
+    internal atomic.Uint32 needg;
+    internal uint64 queued;
+    internal atomic.Uint64 executed;
+}
+
+internal static ж<cleanupQueue> ᏑgcCleanups = new StandardBox<cleanupQueue>(new cleanupQueue());
+internal static ref cleanupQueue gcCleanups => ref ᏑgcCleanups.Value;
+
+// The managed path's two counts, read by readQueueStats. Incremented by the sentinel's finalizer when it
+// hands a cleanup to GoFinalizerQueue, and after the cleanup body returns.
+private static long s_cleanupsQueued;
+private static long s_cleanupsExecuted;
+
+internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
+    @throw("runtime: gcCleanups.enqueue reached: the managed runtime makes no mspan cleanup specials (mcleanup.cs runs cleanups through GoFinalizerQueue)"u8);
+}
+
+internal static void flush(this ж<cleanupQueue> Ꮡq) {
+}
+
+internal static bool needsWake(this ж<cleanupQueue> Ꮡq) {
+    return false;
+}
+
+internal static void wake(this ж<cleanupQueue> Ꮡq) {
+}
+
+internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQueue> Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+    uint64 queued = q.queued + (uint64)global::System.Threading.Interlocked.Read(ref s_cleanupsQueued);
+    uint64 executed = (uint64)global::System.Threading.Interlocked.Read(ref s_cleanupsExecuted);
+    return (queued, executed);
+}
+
+internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
 }
 
 } // end runtime_package

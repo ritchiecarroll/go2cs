@@ -62,16 +62,34 @@ internal static class IArrayViewTypeTemplate
                 // An unsigned index forwards UNNARROWED to the underlying wrapper's ulong indexer.
                 public ref {{targetTypeName}} this[ulong index] => ref view[index];
 
+                // Go's slice of the array, `x[:]` / `x[lo:hi]` (and `p[:]` through a pointer): the same members
+                // IArrayTypeTemplate gives a type defined DIRECTLY over an array, forwarded through the view so the
+                // result shares this wrapper's backing. A chain two or more definitions deep (runtime's
+                // `type PallocBits pallocBits` over `type pallocBits pageBits`) had only the element indexers, so
+                // `want[:][2]` read `[..]` against an nint indexer (CS1503 ×9, runtime's mpallocbits_test.go).
+                public slice<{{targetTypeName}}> this[global::System.Range range] => view[range];
+
+                // The same sub-slice when a bound is not a constant that fits int32 — see IArrayTypeTemplate.
+                public slice<{{targetTypeName}}> slice(nint low) => view.slice(low);
+
+                public slice<{{targetTypeName}}> slice(nint low, nint high) => view.slice(low, high);
+
+                public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => view.slice(low, high, max);
+
+                public slice<{{targetTypeName}}> Slice(nint start, nint length) => view.Slice(start, length);
+
                 public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
 
                 public global::System.Span<{{targetTypeName}}> ToSpan() => view.ToSpan();
 
                 // Forwards the CONCRETE struct enumerator, not IEnumerator<(nint, T)> — see
-                // IArrayTypeTemplate; the interface member becomes explicit so IArray<T>'s
-                // IEnumerable<(nint, T)> is still satisfied on the boxing path.
+                // IArrayTypeTemplate; the interface member becomes explicit so IArray<T>'s own
+                // GetEnumerator() over (nint, T) is still satisfied on the boxing path.
                 public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => view.GetEnumerator();
 
-                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::System.Collections.Generic.IEnumerable<(nint, {{targetTypeName}})>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<(nint, {{targetTypeName}})>)view).GetEnumerator();
+                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::go.IArray<{{targetTypeName}}>.GetEnumerator() => ((global::go.IArray<{{targetTypeName}}>)view).GetEnumerator();
+
+                global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)view).GetEnumerator();
 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)view).GetEnumerator();
 

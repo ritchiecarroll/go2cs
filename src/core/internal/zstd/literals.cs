@@ -37,19 +37,21 @@ internal static readonly @string rleLiteralMissingˢ = "RLE literal missing"u8;
 // readRawRLELiterals reads and decompresses a Raw_Literals_Block or
 // a RLE_Literals_Block. RFC 3.1.1.3.1.1.
 internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
+    var outbufᴷ = new stackAppend<byte>(moves: true);
+
     var raw = ((byte)(hdr & 3)) == 0;
 
     nint regeneratedSize = default!;
-    switch ((byte)(((hdr >> (int)(2))) & 3)) {
+    switch ((byte)((hdr >> 2) & 3)) {
     case 0 or 2: {
-        regeneratedSize = (nint)((hdr >> (int)(3)));
+        regeneratedSize = (nint)(hdr >> 3);
         break;
     }
     case 1: {
         if (off >= builtin.len(data)) {
             return (0, default!, r.makeEOFError(off));
         }
-        regeneratedSize = (nint)((hdr >> (int)(4))) + (((nint)data[off] << (int)(4)));
+        regeneratedSize = (nint)(hdr >> 4) + ((nint)data[off] << 4);
         off++;
         break;
     }
@@ -57,7 +59,7 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
         if (off + 1 >= builtin.len(data)) {
             return (0, default!, r.makeEOFError(off));
         }
-        regeneratedSize = (nint)((hdr >> (int)(4))) + (((nint)data[off] << (int)(4))) + (((nint)data[off + 1] << (int)(12)));
+        regeneratedSize = (nint)(hdr >> 4) + ((nint)data[off] << 4) + ((nint)data[off + 1] << 12);
         off += 2;
         break;
     }}
@@ -65,7 +67,7 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
     // We are going to use the entire literal block in the output.
     // The maximum size of one decompressed block is 128K,
     // so we can't have more literals than that.
-    if (regeneratedSize > (128 << (int)(10))) {
+    if (regeneratedSize > 128 << 10) {
         return (0, default!, r.makeError(off, literalSizeTooLargeˢ));
     }
 
@@ -84,10 +86,11 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
         var rle = data[off];
         off++;
         for (nint i = 0; i < regeneratedSize; i++) {
-            outbuf = append(outbuf, rle);
+            outbuf = append(outbufᴷ, outbuf, rle);
         }
     }
 
+    outbuf = move2heap(outbufᴷ, outbuf);
     return (off, outbuf, default!);
 }
 
@@ -103,15 +106,15 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     nint regeneratedSize = default!;
     nint compressedSize = default!;
     nint streams = default!;
-    switch ((byte)(((hdr >> (int)(2))) & 3)) {
+    switch ((byte)((hdr >> 2) & 3)) {
     case 0 or 1: {
         if (off + 1 >= builtin.len(data)) {
             return (0, default!, r.makeEOFError(off));
         }
-        regeneratedSize = (nint)((((nint)hdr >> (int)(4))) | ((((nint)((nint)data[off] & 0x3f)) << (int)(4))));
-        compressedSize = (nint)((((nint)data[off] >> (int)(6))) | (((nint)data[off + 1] << (int)(2))));
+        regeneratedSize = ((nint)hdr >> 4) | (((nint)data[off] & 0x3f) << 4);
+        compressedSize = ((nint)data[off] >> 6) | ((nint)data[off + 1] << 2);
         off += 2;
-        if (((byte)(((hdr >> (int)(2))) & 3)) == 0){
+        if (((byte)((hdr >> 2) & 3)) == 0){
             streams = 1;
         } else {
             streams = 4;
@@ -122,8 +125,8 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
         if (off + 2 >= builtin.len(data)) {
             return (0, default!, r.makeEOFError(off));
         }
-        regeneratedSize = (nint)((nint)((((nint)hdr >> (int)(4))) | (((nint)data[off] << (int)(4)))) | ((((nint)((nint)data[off + 1] & 3)) << (int)(12))));
-        compressedSize = (nint)((((nint)data[off + 1] >> (int)(2))) | (((nint)data[off + 2] << (int)(6))));
+        regeneratedSize = ((nint)hdr >> 4) | ((nint)data[off] << 4) | (((nint)data[off + 1] & 3) << 12);
+        compressedSize = ((nint)data[off + 1] >> 2) | ((nint)data[off + 2] << 6);
         off += 3;
         streams = 4;
         break;
@@ -132,8 +135,8 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
         if (off + 3 >= builtin.len(data)) {
             return (0, default!, r.makeEOFError(off));
         }
-        regeneratedSize = (nint)((nint)((((nint)hdr >> (int)(4))) | (((nint)data[off] << (int)(4)))) | ((((nint)((nint)data[off + 1] & 0x3f)) << (int)(12))));
-        compressedSize = (nint)((nint)((((nint)data[off + 1] >> (int)(6))) | (((nint)data[off + 2] << (int)(2)))) | (((nint)data[off + 3] << (int)(10))));
+        regeneratedSize = ((nint)hdr >> 4) | ((nint)data[off] << 4) | (((nint)data[off + 1] & 0x3f) << 12);
+        compressedSize = ((nint)data[off + 1] >> 6) | ((nint)data[off + 2] << 2) | ((nint)data[off + 3] << 10);
         off += 4;
         streams = 4;
         break;
@@ -142,7 +145,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     // We are going to use the entire literal block in the output.
     // The maximum size of one decompressed block is 128K,
     // so we can't have more literals than that.
-    if (regeneratedSize > (128 << (int)(10))) {
+    if (regeneratedSize > 128 << 10) {
         return (0, default!, r.makeError(off, literalSizeTooLargeˢ));
     }
 
@@ -155,7 +158,8 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     if (((byte)(hdr & 3)) == 2){
         // Compressed_Literals_Block.
         // Read new huffman tree.
-        if (builtin.len(r.huffmanTable) < (nint)((1 << (int)(maxHuffmanBits)))) {
+
+        if (builtin.len(r.huffmanTable) < (nint)(1 << (int)(maxHuffmanBits))) {
             r.huffmanTable = new slice<uint16>((1 << (int)(maxHuffmanBits)));
         }
 
@@ -201,6 +205,7 @@ internal static readonly @string literalsHuffmanStreamOutˢ = "literals Huffman 
 // readLiteralsOneStream reads a single stream of compressed literals.
 internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
+    var outbufᴷ = new stackAppend<byte>(moves: true);
 
     // We let the reverse bit reader read earlier bytes,
     // because the Huffman table ignores bits that it doesn't need.
@@ -219,12 +224,13 @@ internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr,
         }
 
         uint16 t = default!;
-        var idx = (uint32)((rbr.bits.Rsh((uint64)((rbr.cnt - huffBits)))) & huffMask);
+        var idx = (rbr.bits.Rsh((uint64)(rbr.cnt - huffBits))) & huffMask;
         t = huffTable[idx];
-        outbuf = append(outbuf, (byte)((t >> (int)(8))));
+        outbuf = append(outbufᴷ, outbuf, (byte)(t >> 8));
         rbr.cnt -= (uint32)((uint16)(t & 0xff));
     }
 
+    outbuf = move2heap(outbufᴷ, outbuf);
     return (outbuf, default!);
 }
 
@@ -326,7 +332,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
             if (!rbr.fetch((uint8)huffBits)) {
                 return (0, rbr.makeError(literalsHuffmanStreamOutˢ));
             }
-            var idx = (uint32)(((~rbr).bits.Rsh((uint64)(((~rbr).cnt - huffBits)))) & huffMask);
+            var idx = ((~rbr).bits.Rsh((uint64)((~rbr).cnt - huffBits))) & huffMask;
             return (huffTableʗ1[idx], default!);
         }
 
@@ -350,20 +356,20 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
             if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
-            outbuf[out4] = (byte)((t4 >> (int)(8)));
+            outbuf[out4] = (byte)(t4 >> 8);
             out4++;
             rbr4.cnt -= (uint32)((uint16)(t4 & 0xff));
         }
 
-        outbuf[out1] = (byte)((t1 >> (int)(8)));
+        outbuf[out1] = (byte)(t1 >> 8);
         out1++;
         rbr1.cnt -= (uint32)((uint16)(t1 & 0xff));
 
-        outbuf[out2] = (byte)((t2 >> (int)(8)));
+        outbuf[out2] = (byte)(t2 >> 8);
         out2++;
         rbr2.cnt -= (uint32)((uint16)(t2 & 0xff));
 
-        outbuf[out3] = (byte)((t3 >> (int)(8)));
+        outbuf[out3] = (byte)(t3 >> 8);
         out3++;
         rbr3.cnt -= (uint32)((uint16)(t3 & 0xff));
     }

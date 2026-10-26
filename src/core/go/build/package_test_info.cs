@@ -48,6 +48,12 @@ using static global::go.go.build_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,8 +62,8 @@ using static global::go.go.build_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/build_test.go", "build_test.cs", "ABgqgoLmgpKCgoKCgpSCpoKCgoKUgriCgpSCgoKCgoIACAaCgoKUgqaCgpSClIKC+IKCgpSClIL4goKAggAJCIKUgoKUyoK4gIK2gIK2gIL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggAKFIKCgoKClIIABxCCqIL2ABAsgrKSkoKUlJKUgoIACQqCgqaCgpSCusYADB6CgoKClAAJCqIACRqCgoKUggARDsKCpJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAIBIKUlJKCgpSCgoKUgoK4opSUkoKClIKCgoKCggAICoKUlJKCgpSCgoKmgoK4gpSUkoKClJSCgpSClIKCAAsOsri4goCCpICCtoKCkoKUgoCCkoCClAAIDNiCgqaC7NiCgqaCAAoOsoKCgIKkgoKUkpSCgoLKypSAgv6ykoKCgpSCggALEsKSgoKCgpSCgpSCgqaCgoKClIKUgoLogoKClIIADgiCgoKmgoKUgoKCppSU", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "142=FromSlash/1/1/1;535=Join/1/2/6,Join/2/2/8")]
-[assembly: global::go.GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AIoGjAyUpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCysSCgoKUgoKClIKCgpSCgoKUlIKUyIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "779-796:1", "", "876=Join/1/1/1")]
+[assembly: global::go.GoPositionMap("go/build/build_test.go", "build_test.cs", "ABoqgoLmgpKCgoKCgpSCpoKCgoKUgriCgpSCgoKCgoIACAaCgoKUgqaCgpSClIKC+IKCgpSClIL4goKAggAJCIKUgoKUyoK4gIK2gIK2gIL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggAKFIKCgoKClIIABxCCqIL2ABAsgrKSkoKUlJKUgoIACQqCgqaCgpSCusYADB6CgoKClAAJCqIACRqCgoKUggARDsKCpJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAIBIKUlJKCgpSCgoKUgoK4opSUkoKClIKCgoKCggAICoKUlJKCgpSCgoKmgoK4gpSUkoKClJSCgpSClIKCAAsOsri4goCCpICCtoKCkoKUgoCCkoCClAAIDNiCgqaC7NiCgqaCAAoOsoKCgIKkgoKUkpSCgoLKypSAgv6ykoKCgpSCggALEsKSgoKCgpSCgpSCgqaCgoKClIKUgoLogoKClIIADgiCgoKmgoKUgoKCppSU", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "144=FromSlash/1/1/1;537=Join/1/2/6,Join/2/2/8")]
+[assembly: global::go.GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOAGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCysSCgoKUgoKClIKCgpSCgoKUlIKUyIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "962=Join/1/1/1")]
 [assembly: global::go.GoPositionMap("go/build/read_test.go", "read_test.cs", "ABcuADtoADBagoKCgpSAgoK2goKCgpKClJSCgqaCgsqCgoKCuIKmAEWGAbiCgoKCgqaCgoLoAFiaAYKCgsiCgoKUgoKCgpSCgoI=", "154-158:1;244-248:1")]
 [assembly: global::go.GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
 [assembly: global::go.GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABgoAAsQkoKCgoKClIKCgoKCpoIAChKCgoKm9qIABhSCgg==")]
@@ -87,8 +93,8 @@ public static partial class build_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdag() => builtin.initPackage(typeof(@internal.dag_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdag() => builtin.initPackage(typeof(global::go.@internal.dag_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(global::go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸmaps() => builtin.initPackage(typeof(maps_package));

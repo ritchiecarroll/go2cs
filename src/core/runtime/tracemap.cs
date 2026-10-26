@@ -21,8 +21,16 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(traceMapNode))]
 partial class runtime_package {
 
+// traceMap is a map of a variable-sized array of bytes to a unique ID.
+//
+// Because traceMap just operates on raw bytes, this type is used as the
+// backing store for both the trace string table and trace stack table,
+// the latter of which is just an array of PCs.
+//
+// ID 0 is reserved for arrays of bytes of size zero.
 partial struct traceMap {
     internal atomic.UnsafePointer root; // *traceMapNode (can't use generics because it's notinheap)
     internal cpu.CacheLinePad _;
@@ -101,12 +109,12 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             // anymore.
             n = (ж<traceMapNode>)(uintptr)(m.Load());
         }
-        if ((~n).hash == hash && (uintptr)len((~n).data) == size) {
-            if (memequal(@unsafe.Pointer.FromPinnedBox(Ꮡ((~n).data, 0)), data, size)) {
-                return ((~n).id, false);
+        if (n.hash == hash && (uintptr)len(n.data) == size) {
+            if (memequal(@unsafe.Pointer.FromPinnedBox(Ꮡ(n.data, 0)), data, size)) {
+                return (n.id, false);
             }
         }
-        m = n.at(traceMapNode.Ꮡchildren, (ulong)((hashIter >> (int)((8 * goarch.PtrSize - 2)))));
+        m = n.at(traceMapNode.Ꮡchildren, (ulong)((hashIter >> (int)(8 * goarch.PtrSize - 2))));
         hashIter <<= (int)(2);
     }
 }

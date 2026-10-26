@@ -11,7 +11,6 @@ using strings = strings_package;
 using testing = testing_package;
 using unicode = unicode_package;
 using encoding;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto;
 using go.crypto.@internal.fips140;
 using hash = hash_package;
@@ -42,17 +41,17 @@ public static void TestACVPVectors(ж<testing.T> Ꮡt) {
     // the hash in sequence to develop the transcript.
     var transcript = sha256.New();
 
-    var es = tls13.NewEarlySecret<fips140.Hash>(widen<hash.Hash, fips140.Hash>(sha256.New, elemᴛ0 => new tls_test_package.hash_HashᴠHash(elemᴛ0)), psk);
+    var es = tls13.NewEarlySecret<hash.Hash>(sha256.New, psk);
 
     transcript.Write(helloClientRandom);
 
     {
-        var got = es.ClientEarlyTrafficSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, clientEarlyTrafficSecret)) {
+        var got = es.ClientEarlyTrafficSecret(transcript); if (!bytes.Equal(got, clientEarlyTrafficSecret)) {
             Ꮡt.Errorf("clientEarlyTrafficSecret = %x, want %x"u8, got, clientEarlyTrafficSecret);
         }
     }
     {
-        var got = tls13.TestingOnlyExporterSecret(es.EarlyExporterMasterSecret(new tls_test_package.hash_HashᴠHash(transcript))); if (!bytes.Equal(got, earlyExporterMasterSecret)) {
+        var got = tls13.TestingOnlyExporterSecret(es.EarlyExporterMasterSecret(transcript)); if (!bytes.Equal(got, earlyExporterMasterSecret)) {
             Ꮡt.Errorf("earlyExporterMasterSecret = %x, want %x"u8, got, earlyExporterMasterSecret);
         }
     }
@@ -62,12 +61,12 @@ public static void TestACVPVectors(ж<testing.T> Ꮡt) {
     transcript.Write(helloServerRandom);
 
     {
-        var got = hs.ClientHandshakeTrafficSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, clientHandshakeTrafficSecret)) {
+        var got = hs.ClientHandshakeTrafficSecret(transcript); if (!bytes.Equal(got, clientHandshakeTrafficSecret)) {
             Ꮡt.Errorf("clientHandshakeTrafficSecret = %x, want %x"u8, got, clientHandshakeTrafficSecret);
         }
     }
     {
-        var got = hs.ServerHandshakeTrafficSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, serverHandshakeTrafficSecret)) {
+        var got = hs.ServerHandshakeTrafficSecret(transcript); if (!bytes.Equal(got, serverHandshakeTrafficSecret)) {
             Ꮡt.Errorf("serverHandshakeTrafficSecret = %x, want %x"u8, got, serverHandshakeTrafficSecret);
         }
     }
@@ -77,17 +76,17 @@ public static void TestACVPVectors(ж<testing.T> Ꮡt) {
     transcript.Write(finishedServerRandom);
 
     {
-        var got = ms.ClientApplicationTrafficSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, clientApplicationTrafficSecret)) {
+        var got = ms.ClientApplicationTrafficSecret(transcript); if (!bytes.Equal(got, clientApplicationTrafficSecret)) {
             Ꮡt.Errorf("clientApplicationTrafficSecret = %x, want %x"u8, got, clientApplicationTrafficSecret);
         }
     }
     {
-        var got = ms.ServerApplicationTrafficSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, serverApplicationTrafficSecret)) {
+        var got = ms.ServerApplicationTrafficSecret(transcript); if (!bytes.Equal(got, serverApplicationTrafficSecret)) {
             Ꮡt.Errorf("serverApplicationTrafficSecret = %x, want %x"u8, got, serverApplicationTrafficSecret);
         }
     }
     {
-        var got = tls13.TestingOnlyExporterSecret(ms.ExporterMasterSecret(new tls_test_package.hash_HashᴠHash(transcript))); if (!bytes.Equal(got, exporterMasterSecret)) {
+        var got = tls13.TestingOnlyExporterSecret(ms.ExporterMasterSecret(transcript)); if (!bytes.Equal(got, exporterMasterSecret)) {
             Ꮡt.Errorf("exporterMasterSecret = %x, want %x"u8, got, exporterMasterSecret);
         }
     }
@@ -95,7 +94,7 @@ public static void TestACVPVectors(ж<testing.T> Ꮡt) {
     transcript.Write(finishedClientRandom);
 
     {
-        var got = ms.ResumptionMasterSecret(new tls_test_package.hash_HashᴠHash(transcript)); if (!bytes.Equal(got, resumptionMasterSecret)) {
+        var got = ms.ResumptionMasterSecret(transcript); if (!bytes.Equal(got, resumptionMasterSecret)) {
             Ꮡt.Errorf("resumptionMasterSecret = %x, want %x"u8, got, resumptionMasterSecret);
         }
     }

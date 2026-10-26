@@ -73,6 +73,9 @@ public class TypeGenerator : ISourceGenerator
         Dictionary<(string packageNamespace, string packageName), List<(string typeOf, string members)>> registrations = new();
         HashSet<ISymbol> registeredTypes = new(SymbolEqualityComparer.Default);
 
+        // The needy structs of each package class, whose Go zero factories it registers (EmitGoTypeRegistrations).
+        Dictionary<(string packageNamespace, string packageName), List<string>> goZeroFactories = new();
+
         foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes, bool byRule) in goTypeFinder.Targets)
         {
             if (byRule && handOwned)
@@ -144,7 +147,7 @@ public class TypeGenerator : ISourceGenerator
                 switch (targetSyntax)
                 {
                     case StructDeclarationSyntax structDeclaration when string.IsNullOrWhiteSpace(typeDefinition) || typeDefinition.Equals("dyn"):
-                        generatedSource = new StructTypeTemplate
+                        StructTypeTemplate structTemplate = new()
                         {
                             PackageNamespace = packageNamespace,
                             EmitGoTypeAttribute = emitGoTypeAttribute,
@@ -173,8 +176,17 @@ public class TypeGenerator : ISourceGenerator
                                 structDeclaration.GetInterfaceValueMembers(context.Compilation)),
                             ValueCloneFields = valueCloneFields,
                             UsingStatements = usingStatements
+                        };
+
+                        generatedSource = structTemplate.Generate();
+
+                        if (structTemplate.GoZeroFactoryType is { } goZeroFactoryType)
+                        {
+                            if (!goZeroFactories.TryGetValue((packageNamespace, packageName), out List<string>? factories))
+                                goZeroFactories[(packageNamespace, packageName)] = factories = [];
+
+                            factories.Add(goZeroFactoryType);
                         }
-                        .Generate();
 
                         break;
                     
@@ -272,6 +284,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeSize = arraySize,
                             TypeClass = "Array",
                             ElementZeroFactory = ArrayElementZeroFactory(context, targetSyntax, semanticModel, typeName, needsConstructionCache),
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -512,6 +525,7 @@ public class TypeGenerator : ISourceGenerator
                             // one gets no shell rather than one that fails to implement it (CS0535).
                             EmitShells = shellEligible && interfaceMethods.Length > 0 &&
                                 interfaceMethods.All(method => method.IsSignatureRenderable),
+                            EmitAssertOverload = shellEligible,
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -562,11 +576,20 @@ public class TypeGenerator : ISourceGenerator
                         registrations[(packageNamespace, packageName)] = entries = [];
 
                     entries.Add((OpenGenericName(identifier), RegistryMembersFor(targetSyntax, typeDefinition)));
+
+                    // A generic value type's Go methods, closed over its own type parameters for golib (MethodSource).
+                    if (MethodSource.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSource)
+                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
+
+                    // A value type's exported Go methods as compiled delegates, reached only through reflect's method paths (MethodSet).
+                    if (MethodSet.Source(packageNamespace, generatedType as INamedTypeSymbol, context.Compilation, generatedSource) is { } methodSet)
+                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSet.g.cs")), methodSet);
                 }
             }
         }
 
         EmitGoTypeRegistrations(context, emittedHintNames, registrations);
+        EmitGoZeroFactories(context, emittedHintNames, goZeroFactories);
     }
 
     // The trimming registry (docs/PLAN-golib-full-trim.md, stage 2): ONE empty module initializer per package class,
@@ -598,6 +621,34 @@ public class TypeGenerator : ISourceGenerator
                 "}\r\n";
 
             context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoTypeRegistry.g.cs")), source);
+        }
+    }
+
+    // The Go zero factories of a package class's needy structs (StructTypeTemplate.GoZeroFactoryType), registered by ONE
+    // method its module initializer defers to golib's first constructed zero that finds no factory (DeferredRegistration).
+    private static void EmitGoZeroFactories(GeneratorExecutionContext context, HashSet<string> emittedHintNames, Dictionary<(string packageNamespace, string packageName), List<string>> goZeroFactories)
+    {
+        foreach (KeyValuePair<(string packageNamespace, string packageName), List<string>> package in goZeroFactories)
+        {
+            (string packageNamespace, string packageName) = package.Key;
+
+            string factories = string.Join("", package.Value.Distinct().OrderBy(name => name, StringComparer.Ordinal).Select(name =>
+                $"        global::go.GoZeroFactory<{name}>.Create = static () => new {name}();\r\n"));
+
+            string source =
+                $"{AutoGeneratedHeader}\r\n\r\n" +
+                "#nullable enable\r\n\r\n" +
+                $"namespace {packageNamespace};\r\n\r\n" +
+                $"public static partial class {packageName}{PackageSuffix}\r\n" +
+                "{\r\n" +
+                DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories") +
+                $"    private static void {TempVarMarker}RegisterGoZeroFactories()\r\n" +
+                "    {\r\n" +
+                factories +
+                "    }\r\n" +
+                "}\r\n";
+
+            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoZeroFactories.g.cs")), source);
         }
     }
 

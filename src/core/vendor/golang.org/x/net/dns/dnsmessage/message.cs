@@ -17,8 +17,21 @@ using errors = errors_package;
 partial class dnsmessage_package {
 
 // Message formats
+//
+// To add a new Resource Record type:
+// 1. Create Resource Record types
+//   1.1. Add a Type constant named "Type<name>"
+//   1.2. Add the corresponding entry to the typeNames map
+//   1.3. Add a [ResourceBody] implementation named "<name>Resource"
+// 2. Implement packing
+//   2.1. Implement Builder.<name>Resource()
+// 3. Implement unpacking
+//   3.1. Add the unpacking code to unpackResourceBody()
+//   3.2. Implement Parser.<name>Resource()
 
-// A Type is a type of DNS request and response.
+// A Type is the type of a DNS Resource Record, as defined in the [IANA registry].
+//
+// [IANA registry]: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4
 partial struct Type /*num:uint16*/;
 
 // ResourceHeader.Type and Question.Type
@@ -32,6 +45,8 @@ public static Type TypeTXT => 16;
 public static Type TypeAAAA => 28;
 public static Type TypeSRV => 33;
 public static Type TypeOPT => 41;
+public static Type TypeSVCB => 64;
+public static Type TypeHTTPS => 65;
 
 // Question.Type
 public static Type TypeWKS => 11;
@@ -40,7 +55,7 @@ public static Type TypeMINFO => 14;
 public static Type TypeAXFR => 252;
 public static Type TypeALL => 255;
 
-internal static map<Type, @string> typeNames = new map<Type, @string>{
+[GoLazy] partial class lazyᴛtypeNames { internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeA] = "TypeA"u8,
     [TypeNS] = "TypeNS"u8,
     [TypeCNAME] = "TypeCNAME"u8,
@@ -51,12 +66,14 @@ internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeAAAA] = "TypeAAAA"u8,
     [TypeSRV] = "TypeSRV"u8,
     [TypeOPT] = "TypeOPT"u8,
+    [TypeSVCB] = "TypeSVCB"u8,
+    [TypeHTTPS] = "TypeHTTPS"u8,
     [TypeWKS] = "TypeWKS"u8,
     [TypeHINFO] = "TypeHINFO"u8,
     [TypeMINFO] = "TypeMINFO"u8,
     [TypeAXFR] = "TypeAXFR"u8,
     [TypeALL] = "TypeALL"u8
-};
+}; }
 
 // String implements fmt.Stringer.String.
 public static @string String(this Type t) {
@@ -137,14 +154,14 @@ public static RCode RCodeNameError => 3;    // NXDomain
 public static RCode RCodeNotImplemented => 4; // NotImp
 public static RCode RCodeRefused => 5;      // Refused
 
-internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
+[GoLazy] partial class lazyᴛrCodeNames { internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
     [RCodeSuccess] = "RCodeSuccess"u8,
     [RCodeFormatError] = "RCodeFormatError"u8,
     [RCodeServerFailure] = "RCodeServerFailure"u8,
     [RCodeNameError] = "RCodeNameError"u8,
     [RCodeNotImplemented] = "RCodeNotImplemented"u8,
     [RCodeRefused] = "RCodeRefused"u8
-};
+}; }
 
 // String implements fmt.Stringer.String.
 public static @string String(this RCode r) {
@@ -187,31 +204,35 @@ internal static slice<byte> printUint8Bytes(slice<byte> buf, uint8 i) {
 }
 
 internal static @string printByteSlice(slice<byte> b) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(b) == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, 5 * len(b));
     buf = printUint8Bytes(buf, (uint8)b[0]);
     foreach (var (_, n) in b[1..]) {
-        buf = append(buf, (byte)((rune)','), (byte)((rune)' '));
+        buf = append(bufᴷ, buf, (byte)((rune)','), (byte)((rune)' '));
         buf = printUint8Bytes(buf, (uint8)n);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static readonly @string hexDigits = "0123456789abcdef"u8;
 
 internal static @string printString(slice<byte> str) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(0, len(str));
     for (nint i = 0; i < len(str); i++) {
         var c = str[i];
         if (c == (rune)'.' || c == (rune)'-' || c == (rune)' ' || (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z' || (rune)'0' <= c && c <= (rune)'9') {
-            buf = append(buf, c);
+            buf = append(bufᴷ, buf, c);
             continue;
         }
 
-        var upper = (byte)((c >> (int)(4)));
-        var lower = (byte)((((byte)(c << (int)(4))) >> (int)(4)));
+        var upper = (byte)((c >> 4));
+        var lower = (byte)((((byte)(c << 4)) >> 4));
         buf = append(
             buf,
             (byte)((rune)'\\'),
@@ -219,7 +240,7 @@ internal static @string printString(slice<byte> str) {
             hexDigits[upper],
             hexDigits[lower]);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static @string printUint16(uint16 i) {
@@ -237,7 +258,7 @@ internal static @string printUint32(uint32 i) {
         b = b[1..];
         i %= d;
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -278,6 +299,8 @@ internal static error errTooManyAuthorities = errors.New("too many Authorities t
 internal static error errTooManyAdditionals = errors.New("too many Additionals to pack (>65535)"u8);
 internal static error errNonCanonicalName = errors.New("name is not in canonical format (it must end with a .)"u8);
 internal static error errStringTooLong = errors.New("character string exceeds maximum length (255)"u8);
+internal static error errParamOutOfOrder = errors.New("parameter out of order"u8);
+internal static error errTooLongSVCBValue = errors.New("value too long (>65535 bytes)"u8);
 
 // Internal constants.
 // packStartingCap is the default initial buffer size allocated during
@@ -329,7 +352,7 @@ internal static (uint16 id, uint16 bits) pack(this ref Header m) {
     uint16 bits = default!;
 
     id = m.ID;
-    bits = (uint16)((uint16)((uint16)m.OpCode << (int)(11)) | (uint16)m.RCode);
+    bits = (uint16)((uint16)((uint16)m.OpCode << 11) | (uint16)m.RCode);
     if (m.RecursionAvailable) {
         bits |= (uint16)(headerBitRA);
     }
@@ -361,7 +384,7 @@ public static @string GoString(this ref Header m) {
 
 // Message is a representation of a DNS message.
 partial struct Message {
-    public partial ref Header Header { get; }
+    /*embed*/ public Header Header;
     public slice<ΔQuestion> Questions;
     public slice<Resource> Answers;
     public slice<Resource> Authorities;
@@ -471,7 +494,7 @@ internal static Header header(this ref Δheader h) {
     return new Header(
         ID: h.id,
         Response: ((uint16)(h.bits & (uint16)headerBitQR)) != 0,
-        OpCode: (OpCode)(((OpCode)((h.bits >> (int)(11)))) & 0xF),
+        OpCode: (OpCode)(((OpCode)(h.bits >> 11)) & 0xF),
         Authoritative: ((uint16)(h.bits & (uint16)headerBitAA)) != 0,
         Truncated: ((uint16)(h.bits & (uint16)headerBitTC)) != 0,
         RecursionDesired: ((uint16)(h.bits & (uint16)headerBitRD)) != 0,
@@ -1178,7 +1201,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
     // compression will help ensure compliance.
     var compression = new map<@string, uint16>{};
 
-    foreach (var (i, _) in m.Questions) {
+    foreach (var i in range(m.Questions)) {
         error err = default!;
         {
             (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1186,7 +1209,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Answers) {
+    foreach (var i in range(m.Answers)) {
         error err = default!;
         {
             (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1194,7 +1217,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Authorities) {
+    foreach (var i in range(m.Authorities)) {
         error err = default!;
         {
             (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1202,7 +1225,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Additionals) {
+    foreach (var i in range(m.Additionals)) {
         error err = default!;
         {
             (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1951,8 +1974,8 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
     h.Name = new Name(Data: new byte[]{(rune)'.'}.array(255), Length: 1); // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
-    h.Class = ((Class)(uint16)udpPayloadLen);
-    h.TTL = (((uint32)(uint16)extRCode >> (int)(4)) << (int)(24));
+    h.Class = (Class)(uint16)udpPayloadLen;
+    h.TTL = ((uint32)(uint16)extRCode >> 4) << 24;
     if (dnssecOK) {
         h.TTL |= (uint32)(edns0DNSSECOK);
     }
@@ -1961,15 +1984,15 @@ public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCod
 
 // DNSSECAllowed reports whether the DNSSEC OK bit is set.
 public static bool DNSSECAllowed(this ref ResourceHeader h) {
-    return (uint32)(h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK; // RFC 6891 section 6.1.3
+    return (h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK; // RFC 6891 section 6.1.3
 }
 
 // ExtendedRCode returns an extended RCode.
 //
 // The provided rcode must be the RCode in DNS message header.
 public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
-    if ((uint32)(h.TTL & (uint32)ednsVersionMask) == edns0Version) { // RFC 6891 section 6.1.3
-        return (RCode)(((RCode)(uint16)(((h.TTL >> (int)(24)) << (int)(4)))) | rcode);
+    if ((h.TTL & (uint32)ednsVersionMask) == edns0Version) { // RFC 6891 section 6.1.3
+        return (RCode)(((RCode)(uint16)(((h.TTL >> 24) << 4))) | rcode);
     }
     return rcode;
 }
@@ -2008,14 +2031,14 @@ internal static (nint, error) skipResource(slice<byte> msg, nint off) {
 
 // packUint16 appends the wire format of field to msg.
 internal static slice<byte> packUint16(slice<byte> msg, uint16 field) {
-    return append(msg, (byte)((field >> (int)(8))), (byte)field);
+    return append(msg, (byte)(field >> 8), (byte)field);
 }
 
 internal static (uint16, nint, error) unpackUint16(slice<byte> msg, nint off) {
     if (off + (nint)uint16Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    return ((uint16)((uint16)((uint16)msg[off] << (int)(8)) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
+    return ((uint16)((uint16)((uint16)msg[off] << 8) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
 }
 
 internal static (nint, error) skipUint16(slice<byte> msg, nint off) {
@@ -2032,7 +2055,7 @@ internal static slice<byte> packType(slice<byte> msg, Type field) {
 
 internal static (Type, nint, error) unpackType(slice<byte> msg, nint off) {
     var (t, o, err) = unpackUint16(msg, off);
-    return (((Type)t), o, err);
+    return ((Type)t, o, err);
 }
 
 internal static (nint, error) skipType(slice<byte> msg, nint off) {
@@ -2046,7 +2069,7 @@ internal static slice<byte> packClass(slice<byte> msg, Class field) {
 
 internal static (Class, nint, error) unpackClass(slice<byte> msg, nint off) {
     var (c, o, err) = unpackUint16(msg, off);
-    return (((Class)c), o, err);
+    return ((Class)c, o, err);
 }
 
 internal static (nint, error) skipClass(slice<byte> msg, nint off) {
@@ -2057,9 +2080,9 @@ internal static (nint, error) skipClass(slice<byte> msg, nint off) {
 internal static slice<byte> packUint32(slice<byte> msg, uint32 field) {
     return append(
         msg,
-        (byte)((field >> (int)(24))),
-        (byte)((field >> (int)(16))),
-        (byte)((field >> (int)(8))),
+        (byte)(field >> 24),
+        (byte)(field >> 16),
+        (byte)(field >> 8),
         (byte)field);
 }
 
@@ -2067,7 +2090,7 @@ internal static (uint32, nint, error) unpackUint32(slice<byte> msg, nint off) {
     if (off + (nint)uint32Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    var v = (uint32)((uint32)((uint32)(((uint32)msg[off] << (int)(24)) | ((uint32)msg[off + 1] << (int)(16))) | ((uint32)msg[off + 2] << (int)(8))) | (uint32)msg[off + 3]);
+    var v = (uint32)msg[off] << 24 | (uint32)msg[off + 1] << 16 | (uint32)msg[off + 2] << 8 | (uint32)msg[off + 3];
     return (v, off + (nint)uint32Len, default!);
 }
 
@@ -2099,7 +2122,7 @@ internal static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
     if (endOff > len(msg)) {
         return ("", off, errCalcLen);
     }
-    return (((@string)(msg.slice(beginOff, endOff))), endOff, default!);
+    return ((@string)(msg.slice(beginOff, endOff)), endOff, default!);
 }
 
 // packBytes appends the wire format of field to msg.
@@ -2150,7 +2173,7 @@ public static Name MustNewName(@string name) {
 public static @string String(this Name n) {
     n = n.ΔClone();
 
-    return ((@string)(n.Data.slice(0, n.Length)));
+    return (@string)(n.Data.slice(0, n.Length));
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -2179,7 +2202,7 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
 
     // Allow root domain.
     if (n.Data[0] == (rune)'.' && n.Length == 1) {
-        return (append(msg, (byte)(0)), default!);
+        return (append(msg, (byte)0), default!);
     }
 
     @string nameAsStr = default!;
@@ -2191,7 +2214,7 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
             // The two most significant bits have special meaning.
             // It isn't allowed for segments to be long enough to
             // need them.
-            if (i - begin >= (1 << (int)(6))) {
+            if (i - begin >= 1 << 6) {
                 return (oldMsg, errSegTooLong);
             }
 
@@ -2218,28 +2241,30 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
                 var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
                     // Hit. Emit a pointer instead of the rest of
                     // the domain.
-                    return (append(msg, (byte)((uint16)((ptr >> (int)(8)) | 0xC0)), (byte)ptr), default!);
+                    return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default!);
                 }
             }
 
             // Miss. Add the suffix to the compression table if the
             // offset can be stored in the available 14 bits.
             nint newPtr = len(msg) - compressionOff;
-            if (newPtr <= (nint)((unchecked((uint16)(~(uint16)0)) >> (int)(2)))) {
+            if (newPtr <= (nint)(unchecked((uint16)(~(uint16)0)) >> 2)) {
                 if (nameAsStr == ""u8) {
                     // allocate n.Data on the heap once, to avoid allocating it
                     // multiple times (for next labels).
-                    nameAsStr = ((@string)(n.Data.slice(0, n.Length)));
+                    nameAsStr = (@string)(n.Data.slice(0, n.Length));
                 }
                 compression[nameAsStr.slice(i)] = (uint16)newPtr;
             }
         }
     }
-    return (append(msg, (byte)(0)), default!);
+    return (append(msg, (byte)0), default!);
 }
 
 // unpack unpacks a domain name.
 internal static (nint, error) unpack(this ref Name n, slice<byte> msg, nint off) {
+    var nameᴷ = new stackAppend<byte>();
+
     // currOff is the current working offset.
     nint currOff = off;
 
@@ -2261,7 +2286,7 @@ Loop:
         }
         nint c = (nint)msg[currOff];
         currOff++;
-        switch ((nint)(c & 0xC0)) {
+        switch ((c & 0xC0)) {
         case 0x00: { // String segment
             if (c == 0x00) {
                 // A zero length signals the end of the name.
@@ -2281,7 +2306,7 @@ Loop:
             }
 
             name = appendꓸꓸꓸ(name, msg.slice(currOff, endOff));
-            name = append(name, (byte)((rune)'.'));
+            name = append(nameᴷ, name, (byte)((rune)'.'));
             currOff = endOff;
             break;
         }
@@ -2300,7 +2325,7 @@ Loop:
                     return (off, errTooManyPtr);
                 }
             }
-            currOff = (nint)((((nint)(c ^ 0xC0)) << (int)(8)) | (nint)c1);
+            currOff = (c ^ 0xC0) << 8 | (nint)c1;
             break;
         }
         default: {
@@ -2336,7 +2361,7 @@ Loop:
         }
         nint c = (nint)msg[newOff];
         newOff++;
-        switch ((nint)(c & 0xC0)) {
+        switch ((c & 0xC0)) {
         case 0x00: {
             if (c == 0x00) {
                 // A zero length signals the end of the name.
@@ -2351,6 +2376,7 @@ Loop:
         }
         case 0xC0: {
             // Pointer to somewhere else in msg.
+
             // Pointers are two bytes.
             newOff++;
 
@@ -2398,6 +2424,8 @@ private static readonly @string ptrˢ = "PTR"u8;
 private static readonly @string txtˢ = "TXT"u8;
 private static readonly @string aaaaˢ = "AAAA"u8;
 private static readonly @string srvˢ = "SRV"u8;
+private static readonly @string svcbˢ = "SVCB"u8;
+private static readonly @string httpsˢ = "HTTPS"u8;
 private static readonly @string optˢ = "OPT"u8;
 private static readonly @string unknownˢ = "Unknown"u8;
 
@@ -2461,6 +2489,18 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
         (rb, err) = unpackSRVResource(msg, off);
         r = new ΔSRVResourceжResourceBody(Ꮡrb);
         name = srvˢ;
+    }
+    else if (exprᴛ1 == TypeSVCB) {
+        ref var rb = ref heap(new ΔSVCBResource(), out var Ꮡrb);
+        (rb, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔSVCBResourceжResourceBody(Ꮡrb);
+        name = svcbˢ;
+    }
+    else if (exprᴛ1 == TypeHTTPS) {
+        ref var rb = ref heap(new ΔHTTPSResource(), out var Ꮡrb);
+        (rb.SVCBResource, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔHTTPSResourceжResourceBody(Ꮡrb);
+        name = httpsˢ;
     }
     else if (exprᴛ1 == TypeOPT) {
         ref var rb = ref heap(new ΔOPTResource(), out var Ꮡrb);

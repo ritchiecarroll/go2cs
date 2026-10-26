@@ -3,54 +3,55 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#the-gogolib-support-namespace)
 
-golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `TypeExtensions`, `HashCode`, `FatalError`, …) live in the **`go.golib`** child namespace — deliberately NOT `go.<any Go package name>`. The namespace was originally `go.runtime`, which collides with the real `runtime` package: converted code imports runtime as `using runtime = runtime_package;` inside `namespace go`, and a child namespace `go.runtime` visible from any referenced assembly (golib is referenced by *every* project) wins simple-name lookup over the alias — CS0576 at every `runtime.X` use (surfaced by `iter`/`internal/weak` in wave 1). The same reasoning forbids `go.internal`, `go.sync`, etc.; `golib` is not a Go stdlib package name, so the child namespace can never collide with an import alias. Emitted code references these types via the child namespace (`new golib.SparseArray<T>{…}`), which resolves inside `namespace go` with no using directive.
+golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `TypeExtensions`, `HashCode`, `FatalError`, …) live in the **`go.golib`** child namespace — deliberately NOT `go.<any Go package name>`. A name such as `go.runtime` would collide with the real `runtime` package: converted code imports runtime as `using runtime = runtime_package;` inside `namespace go`, and a child namespace `go.runtime` visible from any referenced assembly (golib is referenced by *every* project) wins simple-name lookup over the alias — CS0576 at every `runtime.X` use.<!-- the namespace was originally go.runtime; iter/internal/weak surfaced the collision in wave 1 --> The same reasoning forbids `go.internal`, `go.sync`, etc.; `golib` is not a Go stdlib package name, so the child namespace can never collide with an import alias. Emitted code references these types via the child namespace (`new golib.SparseArray<T>{…}`), which resolves inside `namespace go` with no using directive.
 
-The general form of this collision — a REAL parent/child package pair — is handled by **Δ-renaming the import alias**. A C# using alias declared inside a namespace conflicts with a same-named child namespace visible from ANY transitively referenced assembly (CS0576 at every use), and transitivity makes this common: `runtime.csproj` itself references `runtime/internal/math|sys` (namespace `go.runtime.@internal`), so *every* package importing `runtime` sees a `go.runtime` child namespace — `iter` and `internal/weak` surfaced it in wave 1 (`weak`, in namespace `go.@internal`, collides with `go.@internal.runtime` from `internal/runtime/*` instead). A pre-pass computes the package's transitive Go import closure (exactly mirroring MSBuild's transitive ProjectReference visibility), derives every child-namespace chain it contributes, and Δ-renames any import alias the current package's namespace would capture: `using Δruntime = runtime_package;` with uses `Δruntime.Goexit()` — the established collision marker. The rename propagates through one lookup to the using emission, package-qualifier identifiers, and cross-package type-name prefixes; a package with no collision emits byte-identically. (The behavioral corpus sees this on `io` — the real Go closure contains `os → io/fs`, hence `go.io` — captured in the `AnonymousInterfaces` golden as `Δio`.)
+The general form of this collision — a REAL parent/child package pair — is handled by **Δ-renaming the import alias**. A C# using alias declared inside a namespace conflicts with a same-named child namespace visible from ANY transitively referenced assembly (CS0576 at every use), and transitivity makes this common: `runtime.csproj` itself references `runtime/internal/math|sys` (namespace `go.runtime.@internal`), so *every* package importing `runtime` sees a `go.runtime` child namespace — `iter` and `internal/weak` have it (`weak`, in namespace `go.@internal`, collides with `go.@internal.runtime` from `internal/runtime/*` instead). A pre-pass computes the package's transitive Go import closure (exactly mirroring MSBuild's transitive ProjectReference visibility), derives every child-namespace chain it contributes, and Δ-renames any import alias the current package's namespace would capture: `using Δruntime = runtime_package;` with uses `Δruntime.Goexit()` — the established collision marker. The rename propagates through one lookup to the using emission, package-qualifier identifiers, and cross-package type-name prefixes; a package with no collision emits byte-identically. (The behavioral corpus sees this on `io` — the real Go closure contains `os → io/fs`, hence `go.io` — captured in the `AnonymousInterfaces` golden as `Δio`.)
 
-Three properties of the rename, established empirically (2026-07-16 review of the `Δmath` emissions; ruled working-as-designed): **(1) The trigger is per-file and, for a top-level parent package, fires only in packages emitting into `namespace go`.** The collision key is `<packageNS>.<alias>`, and usings are per-file — so `math` (whose own closure always contains `math/bits`, hence `go.math`) renders as `Δmath` in exactly the `namespace go` importers' math-importing files (strconv's ftoa/atof/eisel_lemire, fmt's scan, reflect's value, expvar, testing's benchmark), while every nested-namespace importer (`go.compress`, `go.crypto`, …) keeps the clean `using math = math_package;`: an alias declared inside the file-scoped nested namespace wins simple-name lookup before the outer `go.math` is consulted. That inner-scope exemption is why the clean form dominates the corpus. **(2) The baseline stub is lenient only by omission.** The clean alias compiles against `src/core` solely because the hand-owned stub csprojs omit the Go closure (`core/math` references just golib); in the design-target consumption — full conversion, NuGet packages, `-recurse` apps, all with transitive reference visibility — the clean alias is CS0576 at every use, and hoisting it to compilation-unit scope merely trades that for CS0234 (inside `namespace go` the child namespace shadows the alias). Output must be context-independent, so the conservative rename stands. **(3) The marker cannot be swapped onto "the colliding item".** That item is the child namespace itself — the import-path-mirroring namespace of `math/bits` et al., baked into separately-compiled referenced assemblies — so there is nothing local to rename, and renaming the namespace would break the path-mirroring invariant corpus-wide (the mechanism covers `Δruntime` ×48 files, `Δsync` ×38, `Δio` ×23, `Δsyscall`, `Δunicode`, …). The `MathFloatBits` and `GoNamespaceShadow` goldens pin the `Δmath` form.
+Three properties of the rename, established empirically:<!-- 2026-07-16 review of the Δmath emissions; ruled working-as-designed --> **(1) The trigger is per-file and, for a top-level parent package, fires only in packages emitting into `namespace go`.** The collision key is `<packageNS>.<alias>`, and usings are per-file — so `math` (whose own closure always contains `math/bits`, hence `go.math`) renders as `Δmath` in exactly the `namespace go` importers' math-importing files (fmt's scan, reflect's value, expvar, …), while every nested-namespace importer (`go.compress`, `go.crypto`, …) keeps the clean `using math = math_package;`: an alias declared inside the file-scoped nested namespace wins simple-name lookup before the outer `go.math` is consulted. That inner-scope exemption is why the clean form dominates the corpus. **(2) The rename is required wherever the closure is visible.** Every consumption has transitive reference visibility — `src/core` itself, NuGet packages, `-recurse` apps — and there the clean alias is CS0576 at every use, and hoisting it to compilation-unit scope merely trades that for CS0234 (inside `namespace go` the child namespace shadows the alias). Output must be context-independent, so the conservative rename stands.<!-- When this was written the clean alias still compiled against the hand-owned stub baseline, whose csprojs omitted the Go closure (core/math referenced just golib); that baseline retired 2026-08-01 (commit 2e8066da6). --> **(3) The marker cannot be swapped onto "the colliding item".** That item is the child namespace itself — the import-path-mirroring namespace of `math/bits` et al., baked into separately-compiled referenced assemblies — so there is nothing local to rename, and renaming the namespace would break the path-mirroring invariant corpus-wide (the mechanism covers `Δruntime`, `Δsync`, `Δio`, `Δsyscall`, `Δunicode`, …)<!-- ×48, ×38, ×23 files at the time -->. The `MathFloatBits` and `GoNamespaceShadow` goldens pin the `Δmath` form.
 
 ## Foreign renamed types reference the recorded imported-type alias
 A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declares `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSharpTypeName` (delegate elements, parameters, results) and `getScopeCheckedTypeName` (named struct fields) -- and deliberately NOT in `getAliasQualifiedTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
 
-A **pointer/box (or other composite) element** — `*time.Location` as a func result (archive/zip's `timeZone`), a `*syscall.Handle` parameter, a slice/map element — is renamed too, but by a *different route* that does not need `getAliasQualifiedTypeName` (so the CS8799 landmine is untouched): `getAliasQualifiedTypeName` renders the Go-shaped `*time.Location` (unrenamed, per above), then the downstream `convertToCSFullTypeName` applies `getAliasedTypeName` to the FINAL string identifier — substituting `time.Location → timeꓸLocation` before boxing — yielding `ж<timeꓸLocation>`. So the alias reaches every position that flows through the C# type-name conversion (values, pointers, boxes, composite elements alike), **provided `importedTypeAliases` is populated**. That map is loaded from the imported package's `package_info.cs` (the `[GoTypeAlias]` round-trip), so a *fresh full reconvert* renders the alias everywhere; a **stale/partial overlay** that lacks the up-to-date `package_info.cs` renders the raw name and mis-reports CS0426 — the failure is in the measurement tree, not the converter (internal/trace/testtrace's `trace.Time`/`Event`/`Stack` and archive/zip's `*time.Location` were both bank-diagnosed as converter roots, then shown by a clean reconvert to already render `traceꓸTime`/`ж<timeꓸLocation>`).
+A **pointer/box (or other composite) element** — `*time.Location` as a func result (archive/zip's `timeZone`), a `*syscall.Handle` parameter, a slice/map element — is renamed too, but by a *different route* that does not need `getAliasQualifiedTypeName` (so the CS8799 landmine is untouched): `getAliasQualifiedTypeName` renders the Go-shaped `*time.Location` (unrenamed, per above), then the downstream `convertToCSFullTypeName` applies `getAliasedTypeName` to the FINAL string identifier — substituting `time.Location → timeꓸLocation` before boxing — yielding `ж<timeꓸLocation>`. So the alias reaches every position that flows through the C# type-name conversion (values, pointers, boxes, composite elements alike), **provided `importedTypeAliases` is populated**. That map is loaded from the imported package's `package_info.cs` (the `[GoTypeAlias]` round-trip), so a *fresh full reconvert* renders the alias everywhere; a **stale/partial overlay** that lacks the up-to-date `package_info.cs` renders the raw name and mis-reports CS0426 — the failure is in the measurement tree, not the converter (a clean reconvert renders internal/trace/testtrace's `trace.Time`/`Event`/`Stack` as `traceꓸTime` and archive/zip's `*time.Location` as `ж<timeꓸLocation>`).<!-- both were bank-diagnosed as converter roots before a clean reconvert showed otherwise -->
 
-The map is now populated for the WHOLE package before any file converts. Even within a fresh reconvert,
-`importedTypeAliases` was loaded INCREMENTALLY — `visitImportSpec` loads a package's aliases only when it
-visits an import of that package, and files convert in sorted-filename order. So a foreign renamed type
-reached TRANSITIVELY — through a value whose package the current FILE does not itself import — rendered its
-raw (nonexistent) name if that file converted before any file that DOES import the package. go/printer's
+The map is populated for the WHOLE package before any file converts. Loaded INCREMENTALLY —
+`visitImportSpec` loads a package's aliases only when it visits an import of that package, and files
+convert in sorted-filename order — a foreign renamed type reached TRANSITIVELY (through a value whose
+package the current FILE does not itself import) would render its raw (nonexistent) name if that file
+converted before any file that DOES import the package. go/printer's
 `comment.go` (`slash := list[0].Slash`, a `token.Pos` read through `ast.Comment`, importing only `go/ast`)
-sorts first, so its `slash` heap box emitted `heap<go.token_package.Pos>` instead of `heap<tokenꓸPos>`
-(= `go.go.token_package.ΔPos`) — CS0426, the sole such site in the stdlib. A package-level pre-pass
-(`preloadImportedTypeAliases`, run before the file-conversion loop) now loads the exported aliases of every
+sorts first, so its `slash` heap box would emit `heap<go.token_package.Pos>` instead of `heap<tokenꓸPos>`
+(= `go.go.token_package.ΔPos`) — CS0426. A package-level pre-pass
+(`preloadImportedTypeAliases`, run before the file-conversion loop) loads the exported aliases of every
 package ANY file imports, up front. The load is deduped per imported package, so it only FRONT-LOADS what
-`visitImportSpec` did incrementally; the alias set is file-order-independent and, because it only ADDS
-aliases previously missing for a transitive-use file, it can only turn a currently-WRONG render right (a
-compiling package has no wrong-rendered renamed type) — CNR byte-identical across the behavioral corpus, and
-an A/B full-stdlib reconvert changes exactly one file (go/printer/comment.cs), greening go.printer alongside
-the append-disambiguation root above. (Guarded by the three-package `TransitiveAliasPreload` fixture:
+`visitImportSpec` does incrementally; the alias set is file-order-independent, and because it only ADDS
+aliases a transitive-use file would otherwise miss, it can only turn a WRONG render right (a
+compiling package has no wrong-rendered renamed type).<!-- at the change: CNR byte-identical across the
+behavioral corpus, and an A/B full-stdlib reconvert changed exactly one file (go/printer/comment.cs, the sole
+such site in the stdlib), greening go.printer alongside an append-disambiguation root --> (Guarded by the three-package
+`TransitiveAliasPreload` fixture:
 `CrossPkgBox.Box` carries a field of `CrossPkgLib`'s Δ-renamed `Status`; the test's `a_boxed.go` (sorts
 first) reads it transitively — `return &s` heap-boxes `s`, rendering `heap<CrossPkgLibꓸStatus>` — while
 importing only `CrossPkgBox`, and `z_main.go` (sorts last) is the only file importing `CrossPkgLib`. Without
-the preload the box renders the nonexistent `CrossPkgLib_package.Status` (CS0426); output-compared vs Go, 4
-phases green. This is the three-package shape the 2-package `CrossPkg` harness could not previously express —
-cf. the `os.FileInfo` alias root, still GUARD OWED above for that reason.)
+the preload the box renders the nonexistent `CrossPkgLib_package.Status` (CS0426); output-compared vs Go. It
+needs three packages, which the two-package `CrossPkgLib`/`CrossPkgUser` pair cannot express.)<!-- 4 phases
+green at the time; cf. the os.FileInfo alias root, then GUARD OWED for that reason -->
 
 The preload still covers only packages **some file imports**. A foreign renamed type reached ONLY through
 ANOTHER package's signature — go/types renders go/ast's `FieldFilter` (`func(string, reflect.Value) bool`)
-when it passes `ast.NotNilFilter` to `ast.Fprint`, and **no go/types file imports `reflect`** — had no alias
-loaded at all, so the synthesized delegate wrap rendered the raw name: `new Func<@string, reflect.Value,
-bool>(ast.NotNilFilter)` — `Value` resolved inside `reflect_package` (CS0426) and the mismatched delegate
-then failed the method-group conversion (CS0123). `aliasedElementTypeName` (the delegate-element rename
-route) now loads the owning package's exported aliases **on demand** when a foreign named element has no
+when it passes `ast.NotNilFilter` to `ast.Fprint`, and **no go/types file imports `reflect`** — has no alias
+loaded from the preload, so the synthesized delegate wrap would render the raw name: `new Func<@string, reflect.Value,
+bool>(ast.NotNilFilter)` — `Value` resolved inside `reflect_package` (CS0426), and the mismatched delegate
+then fails the method-group conversion (CS0123). `aliasedElementTypeName` (the delegate-element rename
+route) therefore loads the owning package's exported aliases **on demand** when a foreign named element has no
 registered alias — `loadImportedTypeAliases` is deduped per package, so a miss costs one probe — and the
 resolving `global using reflectꓸValue = go.reflect_package.ΔValue;` rides the normal package_info emission
 (the consumer sees the type through its importer's **transitive** assembly reference). For LOCAL modules the
-resolver map (`importPackageDirs`) is now captured over the **transitive** import closure rather than direct
+resolver map (`importPackageDirs`) is captured over the **transitive** import closure rather than direct
 imports only, so the same on-demand load works outside GOROOT. (Guarded by `SynthesizedDelegateCrossPkg`:
 `CrossPkgFuncLib.Picker func(CrossPkgLib.Status) bool` + exported `Hot` matching it; the consumer imports
 only `CrossPkgFuncLib` and passes `Hot` where a `Picker` is expected — the wrap must render
-`new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)`; output-compared vs Go, 4 phases green.)
+`new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)`; output-compared vs Go.)
 ```csharp
 public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
 internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
@@ -62,15 +63,16 @@ Guarded by `CrossPkgUser` (`CheckFunc`/`gauge`/`meterBox` -- delegate, signature
 
 Everything above depends on `importedTypeAliases` being **populated**, and the only source it had was the
 dependency's emitted `package_info.cs` — an artifact that exists only once that dependency has been
-converted **into the output root this run resolves against**. So the spelling of a foreign renamed member
-depended on the *composition of the run*: a full `-stdlib` run converts `time` before `archive/tar`, so
-`writer.cs` correctly emitted `tw.hdr.ModTime.Round(time.ΔSecond)`; converting `archive/tar` **alone**
-(`go2cs -stdlib archive/tar`) emitted the unrenamed `time.Second`, which binds the `Second(this Time)`
-extension method group — CS0019/CS1503/CS0023, it does not compile. That hit **every end-user path**, where
+converted **into the output root this run resolves against**. From that source alone the spelling of a foreign renamed
+member
+would depend on the *composition of the run*: a full `-stdlib` run converts `time` before `archive/tar`, so
+`writer.cs` emits `tw.hdr.ModTime.Round(time.ΔSecond)`, while converting `archive/tar` **alone**
+(`go2cs -stdlib archive/tar`) would emit the unrenamed `time.Second`, which binds the `Second(this Time)`
+extension method group — CS0019/CS1503/CS0023, it does not compile. That would hit **every end-user path**, where
 the stdlib is by definition *not* part of the run: a standalone `go2cs <dir>` and `-recurse` alike. `time`
 is the worst case (`Second`/`Minute`/`Hour`/`Nanosecond`/`UTC`/`Local` all collide with `Time`'s accessors,
-and `Location`/`Month`/`Weekday` are collision-renamed types), so the flagship four-line program
-`d := 2 * time.Second` failed to compile.
+and `Location`/`Month`/`Weekday` are collision-renamed types), so even the four-line program
+`d := 2 * time.Second` would fail to compile.
 
 **Invariant:** a foreign package's collision renames are a function of **that package's own declarations**,
 never of which packages the current run converts. `foreignCollisionTypeAliases` derives them from the
@@ -78,9 +80,9 @@ dependency's loaded `go/types` scope — an exported package-level const/var/def
 method or function name of the same package, exactly `performNameCollisionAnalysis`'s rule — reproducing the
 `GoTypeAlias` entries the dependency's own conversion publishes, and feeding them through the *same*
 normalization as parsed ones (`applyExportedTypeAliases`) so a derived target is qualified identically. The
-derivation runs only where the loader previously did nothing at all (no `package_info.cs` on disk), so a
-conversion that *can* read the real artifact is untouched — the whole-stdlib emission is byte-for-byte
-unchanged. This is the same discipline `packageHasMethodNamed` applies to the cross-package *field* rename
+derivation runs only where the loader finds no `package_info.cs` on disk, so a conversion that *can* read
+the real artifact is untouched. This is the same discipline `packageHasMethodNamed` applies to the cross-package *field*
+rename
 above: recompute a foreign package's collisions from its own `types.Package` rather than from run-accumulated
 state.
 
@@ -96,22 +98,24 @@ Two shapes are deliberately **not** derived, because publishing a wrong target i
 none: a methodless named func type (rendered inline as its base delegate, so no `<pkg>_package.Δname` type
 exists to alias — `go/doc`'s `ast.Filter`, the same skip `writePackageInfoFile` applies), and a defined type
 over a **non-empty named interface**, whose alias target is a `visitTypeSpec`-only rendering of the RHS (no
-instance exists in the 302-package corpus). Both keep the pre-existing emission.
+instance exists in the corpus<!-- the 302-package corpus at the time -->). Both keep the unrenamed emission.
 
 A derived alias's `global using` is emitted into the consumer's `package_info.cs` **only when an emitted
 reference resolved through it**. A parsed alias set describes an assembly that provably declares every
 target; a derived set describes what go2cs *would* emit for that dependency's Go source — true of any real
-conversion, but not of a hand-written proxy such as the baseline `core/time` stub, which declares no
-`ΔLocation`/`ΔMonth`/`ΔWeekday` at all (an unused `global using` to one is CS0426 in every behavioral test
-that imports `time`). Gating on use keeps the derived metadata's reach to the code that actually names the
+conversion, but not of a hand-written replacement that declares fewer types (an unused `global using` to a type it
+lacks is CS0426 in every consumer).<!-- history: the retired baseline core/time stub declared no
+ΔLocation/ΔMonth/ΔWeekday, and an unused global using to one was CS0426 in every behavioral test that
+imported time. --> Gating on use keeps the derived metadata's reach to the code that actually names
+the
 renamed member — where the rename is required for the reference to bind at all — at the cost of a
 single-package conversion omitting the *unused* alias declarations a full run emits. Every emitted
-**reference** is identical either way: a single-package `-stdlib archive/tar` reconvert is byte-identical to
-the committed full-run corpus in all code, and the flagship program compiles and runs.
+**reference** is identical either way: a single-package `-stdlib archive/tar` reconvert matches the
+full-run corpus in all code, and the `time.Second` program compiles and runs.
 
 Two neighboring classes of run-composition dependence share the loader and the symptom but are *not*
 collision renames, so this derivation does not cover them: a dependency's re-exported Go type **aliases**
-(closed next) and its **GoImplement** pairs (`loadPackageImplements`, still open — see the end of the next
+(closed next) and its **GoImplement** pairs (`loadPackageImplements`, open — see the end of the next
 subsection).
 
 (Guarded by `foreignNameCollisions_test.go`: a two-package fixture whose `dep` carries one of every shape —
@@ -127,7 +131,7 @@ The sibling class, and the one that hits real end-user code hardest. `os` declar
 `global using FileMode = go.io.fs_package.FileMode;` and publishes
 `[assembly: GoTypeAlias("FileMode", "go.io.fs_package.FileMode")]`. The re-export is therefore a *using
 alias inside os's assembly*, **never a member of `os_package`** — so a consumer converted without that
-artifact emits `os.PathError` and gets `CS0426: the type name 'PathError' does not exist in the type
+artifact would emit `os.PathError` and get `CS0426: the type name 'PathError' does not exist in the type
 'os_package'`. Exactly the run-composition dependence of the collision renames, one metadata class over.
 
 `foreignTypeAliases.go` derives these under the same invariant — what a dependency publishes is a function
@@ -162,7 +166,7 @@ Three details make the reproduction exact rather than approximate:
   `crypto`'s `PublicKey`/`PrivateKey`/`DecrypterOpts`, `plugin`'s `Symbol`, `database/sql/driver`'s `Value`.
 
 **Deliberately not derived** (a wrong target is worse than none — a missing entry leaves the reference
-exactly as it converts today, a wrong one names a type that does not exist): a composite or basic RHS
+unrenamed, a wrong one names a type that does not exist): a composite or basic RHS
 (`type Table = map[string]int`, whose rendering runs the whole `convertToCSFullTypeName` lowering) and an
 alias-to-an-alias chain; an **anonymous** struct/interface RHS, which is *lifted* under a generated name
 only a conversion assigns (`internal/fuzz`'s `type CorpusEntry = struct{…}` → `CorpusEntryᴛ1`); a generic
@@ -172,24 +176,23 @@ emitted as a using alias by its own package, which would need a second hop this 
 Each declines by shape, from the dependency's own declarations, so the decision is stable across runs.
 
 Same use-gating as the collision renames: a derived alias's `global using` reaches the consumer's
-`package_info.cs` only once an emitted reference has resolved through it. Evidence, taken with the fix
+`package_info.cs` only once an emitted reference has resolved through it. Evidence, taken with the derivation
 neutered and restored: a standalone `os.FileMode`/`os.FileInfo`/`os.PathError` + `fs.WalkDir` program
-converted with `go2cs <dir>` against an output root holding **no** converted stdlib failed with the CS0426
-above and now compiles and runs with output byte-identical to `go run .`; single-package `-stdlib crypto/ecdh`
-reconverts `ecdh.cs` byte-identically to the committed full-run corpus where before it emitted the
-nonexistent `crypto.PublicKey`; and a whole-stdlib reconvert is byte-for-byte unchanged, the derivation
-running only where the loader previously did nothing at all.
+converted with `go2cs <dir>` against an output root holding **no** converted stdlib fails with the CS0426
+above without it, and with it compiles and runs with output byte-identical to `go run .`; a single-package
+`-stdlib crypto/ecdh` reconverts `ecdh.cs` byte-identically to the full-run corpus, where without it it emits
+the nonexistent `crypto.PublicKey`.<!-- a whole-stdlib reconvert was byte-for-byte unchanged at the change -->
 
-**Still open — the `GoImplement` pairs** (`loadPackageImplements`), and *honestly* so rather than pending:
+**Open — the `GoImplement` pairs** (`loadPackageImplements`), and deliberately so:
 they are recorded at CONVERSION time from the cast and witness sites a dependency's own bodies contain, so
 which adapter classes its assembly actually carries is a product of its **emission**, not of its
 declarations. There is nothing sound to compute from `go/types`: an over-approximation (every exported type
-× every exported interface) would name adapters that do not exist — CS0246, strictly worse than the present
-behavior, where the consumer records and emits its own local adapter (`io_SectionReaderжReader` instead of the
+× every exported interface) would name adapters that do not exist — CS0246, strictly worse than what the
+converter does, where the consumer records and emits its own local adapter (`io_SectionReaderжReader` instead of the
 provider's `io.SectionReaderжReader`), which compiles and behaves identically and only duplicates the class.
-The class retires with the runtime interface shells rather than with a derivation: once a concrete-to-interface
-conversion goes through a runtime-constructed shell instead of a compile-time adapter, there is no per-pair
-record left to be missing.
+A derivation would not close it; a concrete-to-interface conversion that went through a runtime-constructed
+shell (see [Interfaces](interfaces.md#every-eligible-interface-carries-runtime-duck-typing-shells--the-sole-resolver-of-a-structural-assert))
+instead of a compile-time adapter would leave no per-pair record to be missing.
 
 (Guarded by `foreignTypeAliases_test.go`: a three-package fixture — a consumer, the `dep` whose re-exports
 are under test, and the `other` it re-exports from — carrying one declaration of every published shape and
@@ -205,27 +208,27 @@ A dot import (`. "go/types"`) makes a foreign type's reference a bare `*ast.Iden
 the qualified-name resolver to rewrite — yet the type may still be collision-renamed inside its own package.
 The **type-driven** positions were always fine: a declaration, a parameter, a conversion and a field all
 resolve from `types.Type` through `getCSharpTypeName`/`getScopeCheckedTypeName`, both of which consult
-`foreignAliasedTypeName`. That is why `var mu Mutex` through a dot import has worked since
-`DotImportRenamedPackage`. The two **AST-ident** type positions did not: a *type-assertion target* and a
-*composite-literal type* render through `convIdent`'s `isType` arm, which returned the bare sanitized Go
-name and consulted nothing.
+`foreignAliasedTypeName`. That is why `var mu Mutex` through a dot import works (`DotImportRenamedPackage`). The two
+**AST-ident** type positions are the exception: a *type-assertion target* and a
+*composite-literal type* render through `convIdent`'s `isType` arm, which by itself returns the bare sanitized Go
+name and consults nothing.
 
-So `internal/types/errors`, whose external test file dot-imports `go/types`, emitted `err._<Error>(ᐧ)` and
+So `internal/types/errors`, whose external test file dot-imports `go/types`, would emit `err._<Error>(ᐧ)` and
 `new Info(…)` against declarations named `ΔError` and `ΔInfo` — `go/types` renames `Error` for its own
 `func (err Error) Error() string` and `Info` for the unrelated `func (b *Basic) Info() BasicInfo` — while
-that test's own `package_test_info.cs` had already minted `global using typesꓸError = …ΔError;` and
-`typesꓸInfo`, and left both unused. CS0246 ×2.
+that test's own `package_test_info.cs` mints `global using typesꓸError = …ΔError;` and
+`typesꓸInfo` (CS0246 ×2).
 
 **Invariant:** one Go type has one C# spelling, whatever the source called it. `convIdent`'s `isType` arm
-now routes through `foreignAliasedTypeName` — the *same* recorded-alias lookup the qualified path takes — so
+routes through `foreignAliasedTypeName` — the *same* recorded-alias lookup the qualified path takes — so
 `Info{…}` and `types.Info{…}` emit the identical `typesꓸInfo`. It is a no-op for a same-package type and for
-any type with no registered alias, so nothing else moves (whole-corpus CNR byte-identical).
+any type with no registered alias.
 
 ```csharp
-var m = new renamedlibꓸMarker(Name: "alpha"u8, Size: 3);          // composite literal  (was: new Marker(…))
-var (got, ok) = Describe(deltaˢ, 9)._<renamedlibꓸMarker>(ᐧ);      // type assertion     (was: _<Marker>(ᐧ))
-var pl = new Plain(Note: "eta"u8);                                 // NOT renamed — bare, unchanged
-var l = new ΔLocal(Tag: "iota"u8);                                 // same-package rename — local, no alias
+var m = new renamedlibꓸMarker(Name: "alpha", Size: 3);            // composite literal  (not: new Marker(…))
+var (got, ok) = Describe("delta", 9)._<renamedlibꓸMarker>(ᐧ);    // type assertion     (not: _<Marker>(ᐧ))
+var pl = new Plain(Note: "eta");                                   // NOT renamed — bare, unchanged
+var l = new ΔLocal(Tag: "iota");                                   // same-package rename — local, no alias
 ```
 
 The rename rule itself is `performNameCollisionAnalysis`'s and is worth stating exactly, because the second
@@ -238,29 +241,32 @@ can only ever come from a method.
 plus a non-renamed control, consumed across the package boundary through a dot import via composite
 literals — value and pointer — and type assertions in comma-ok, single-value and missed forms, with a
 same-package renamed type as the second control; output-compared vs `go run`. Verified to FAIL as CS0246
-with the fix reverted.)
+with the alias lookup reverted.)
 
-## The reflection bridge answers a read where the answer EXISTS — four members that did not (2026-08-19)
+<a id="the-reflection-bridge-answers-a-read-where-the-answer-exists--four-members-that-did-not-2026-08-19"></a>
+## The reflection bridge answers a read where the answer EXISTS
 
-Four unrelated reads through `reflect` degraded rather than answered, and each degraded to a value that reads as a real answer, which is what kept them invisible. Recorded together because the discipline is one: a bridged member either honors the read or refuses it by name — never a plausible-looking substitute. (This is the r39d rule applied in the direction it is usually NOT applied: a descriptor field left unpopulated because it *seemed* unanswerable, where the answer was in fact already computed one layer down.)
+Four unrelated reads through `reflect` answer from what golib already computes, where a degraded answer would read as a real one. They share one discipline: a bridged member either honors the read or refuses it by name — never a plausible-looking substitute, and never a descriptor field left unpopulated because it *seemed* unanswerable when the answer is computed one layer down.<!-- 2026-08-19; the r39d rule applied in the direction it is usually NOT applied -->
 
-| Member | Was | Is |
+| Member | A degraded bridge answers | go2cs answers |
 |:--|:--|:--|
 | `Value.Index` on a **string** | `panic: reflect: call of reflect.Value.Index on string Value` — Go's message for a kind that does not support indexing AT ALL | the i'th BYTE as a non-addressable `uint8` Value, Go's own arm |
 | `Value.Slice` on a **string** | the same ValueError | a string of the receiver's OWN type, so a NAMED string stays named (Go returns `Value{v.typ(), …}`) |
 | `Value.Slice3` | `invalid memory address or nil pointer dereference` — the auto conversion reinterprets the never-populated `ptr` slot as a raw `unsafeheader.Slice` and edits it in place | hand-owned over the same golib window machinery `Slice` uses, so the two- and three-index forms cannot disagree about what a window is |
 | `StructField.Offset` | `0` — a REAL answer for a field at the front of a struct, so an unpopulated descriptor read as a LAYOUT failure | the Go (amd64) offset, from the same memoized layout walk `internal/abi`'s `StructType()` already publishes |
 
-`Offset` is the one worth stating at length, because it had a stated reason for staying empty: *a Go byte offset exists only to be added to a data pointer, and managed storage has no such pointer*. That is true of `Offset` as an ADDRESS and false of `Offset` as layout METADATA, which is the only way anything has ever read it here — `unique`'s clone sequencer and `internal/reflectlite` through `abi`, and now `sync/atomic`'s `TestAutoAligned64`, which asserts `TypeOf(&struct{_ uint32; i Int64}{}).Elem().Field(1).Offset == 8`. Reading it off `GoReflect.GoFieldOffsets` is what makes the two Go-specific layout rules come out right where a naive `Marshal.OffsetOf` would not: a Go **zero-size** field occupies nothing (its C# surrogate is one byte), and an `align64`-bearing field is padded to its 8-byte boundary. The r39d rule still bites where it should — a struct holding a field whose Go size is unknowable makes every later offset a guess, `GoFieldOffsets` answers `null` for the whole struct there, and every field keeps the zero rather than a plausible number.
+`Offset` is the one worth stating at length, because there is a stated reason to leave it empty: *a Go byte offset exists only to be added to a data pointer, and managed storage has no such pointer*. That is true of `Offset` as an ADDRESS and false of `Offset` as layout METADATA, which is the only way anything reads it here — `unique`'s clone sequencer and `internal/reflectlite` through `abi`, and `sync/atomic`'s `TestAutoAligned64`, which asserts `TypeOf(&struct{_ uint32; i Int64}{}).Elem().Field(1).Offset == 8`. Reading it off `GoReflect.GoFieldOffsets` is what makes the two Go-specific layout rules come out right where a naive `Marshal.OffsetOf` would not: a Go **zero-size** field occupies nothing (its C# surrogate is one byte), and an `align64`-bearing field is padded to its 8-byte boundary. Refusing still applies where it should<!-- the r39d rule --> — a struct holding a field whose Go size is unknowable makes every later offset a guess, `GoFieldOffsets` answers `null` for the whole struct there, and every field keeps the zero rather than a plausible number.
 
-`text/template`'s `index` and `slice` builtins are the measured consumers of the first three (`{{index `x` 0}}`, `{{slice .S 1 2}}`, `{{slice .SICap 6 10 10}}`), and closing them took the package from 49 to 50 of 52. Guarded by `ReflectStringWindow` (every arm plus Go's own out-of-range, wrong-kind and reversed-bound panic texts, and a byte-slice control that the string arms did not disturb the container path) and by `ReflectStructTagCopy` (offsets across a zero-size/aligned/tail layout, and a promoted field whose offset is relative to its own declaring struct).
+`text/template`'s `index` and `slice` builtins are the measured consumers of the first three (`{{index `x` 0}}`, `{{slice .S 1 2}}`, `{{slice .SICap 6 10 10}}`).<!-- closing them took text/template from 49 to 50 of 52 --> Guarded by `ReflectStringWindow` (every arm plus Go's own out-of-range, wrong-kind and reversed-bound panic texts, and a byte-slice control that the string arms did not disturb the container path) and by `ReflectStructTagCopy` (offsets across a zero-size/aligned/tail layout, and a promoted field whose offset is relative to its own declaring struct).
 
 ## A typed nil keeps its type across BOTH interface-space boundaries
 
-`Value.Interface()` has packed a nil pointer as Go's typed nil since the `packEface` work — a non-nil `any` carrying `(type=*T, value=nil)` — and two other paths had not joined that one nil encoding. Both surfaced as `text/template` rendering a value Go renders through its method:
+`Value.Interface()` packs a nil pointer as Go's typed nil — a non-nil `any` carrying `(type=*T, value=nil)` — and two
+other paths use that one nil encoding too. Without it both show as `text/template` mis-rendering a value Go renders
+through its method:
 
-1. **`Value.Call` into an INTERFACE-typed parameter.** Go's assignment to such a parameter BUILDS an eface, and an eface keeps the type half. `marshalCallArg` read the slot's raw `null` and handed that across, so the callee's `reflect.ValueOf(arg)` answered the INVALID zero Value — `{{html .NIL}}` over a nil `*int` printed `&lt;no value&gt;` where Go prints `&lt;nil&gt;`. It packs through `packInterfaceValue` when — and only when — the destination is interface space; a concrete parameter type builds no eface and is untouched.
-2. **A nil RECEIVER dispatched through the runtime duck-typing SHELL tier.** Go's method set belongs to the TYPE, so `(*W)(nil).Error()` dispatches normally and the method decides what nil means (`if w == nil { return "nilW" }` is an idiom, not an edge case). golib's `error<T>` read `m_target_ptr.Value` BEFORE choosing between its `ж`-receiver and by-value overloads, so it threw on exactly that value — for a pointee the `ж` overload it then selected never needed. The throw was invisible: `fmt`'s `handleMethods` wraps every `Error()` call in Go's own `catchPanic`, which prints `<nil>` for a nil-pointer argument, so the symptom was a wrong RENDERING and the defect reproduced ONLY where the pair resolved through the runtime shell rather than through a generated nominal adapter — i.e. only when nothing in the program converts that type to that interface explicitly. Dereferencing on the by-value path is kept, because Go dereferences there too and a nil pointer must still panic.
+1. **`Value.Call` into an INTERFACE-typed parameter.** Go's assignment to such a parameter BUILDS an eface, and an eface keeps the type half. Handing the slot's raw `null` across would make the callee's `reflect.ValueOf(arg)` answer the INVALID zero Value — `{{html .NIL}}` over a nil `*int` would print `&lt;no value&gt;` where Go prints `&lt;nil&gt;`. `marshalCallArg` packs through `packInterfaceValue` when — and only when — the destination is interface space; a concrete parameter type builds no eface and is untouched.
+2. **A nil RECEIVER dispatched through the runtime duck-typing SHELL tier.** Go's method set belongs to the TYPE, so `(*W)(nil).Error()` dispatches normally and the method decides what nil means (`if w == nil { return "nilW" }` is an idiom, not an edge case). golib's `error<T>` chooses between its `ж`-receiver and by-value overloads BEFORE reading `m_target_ptr.Value`; reading first would throw on exactly that value, for a pointee the `ж` overload never needs. Such a throw would be invisible: `fmt`'s `handleMethods` wraps every `Error()` call in Go's own `catchPanic`, which prints `<nil>` for a nil-pointer argument, so the symptom would be a wrong RENDERING, ONLY where the pair resolves through the runtime shell rather than through a generated nominal adapter — i.e. only when nothing in the program converts that type to that interface explicitly. Dereferencing on the by-value path is kept, because Go dereferences there too and a nil pointer must still panic.
 
 Guarded by `ReflectTypedNilInterface`, which carries a type reached only through the shell tier and the concrete-parameter control for the `Call` arm.
 
@@ -270,31 +276,29 @@ terminal, a pipe, or a file. .NET does not. `Console.Out` is constructed with `C
 which on Windows defaults to the **console output code page** (`GetConsoleOutputCP()` — the OEM page, 437
 on a stock US install), and to the ANSI default (1252) when the process has no console at all — the case for a
 program launched by the behavioral runner (`CreateNoWindow = true`) or by the tour's `.NET Run` pane
-(`src/tour/pipeline.go` `runStage`, whose `command.Stdout` is a `bytes.Buffer`). Encoding a rune that code
+(`src/tour/pipeline.go` `runStage`, whose `command.Stdout` is an in-process writer). Encoding a rune that code
 page cannot represent is not an error in .NET; the encoder substitutes `?`, so the Tour of Go's first
-lesson would render `Hello, ??` with no diagnostic anywhere.
+lesson would render `Hello, ??` with no diagnostic anywhere (on windows/amd64).
 
 golib forecloses this in its `[ModuleInitializer]` (`src/core/golib/builtin.cs`), which runs before any
 converted code: `Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8`. The setter also discards
 any already-created `Console.Out`, so the writer is rebuilt on the UTF-8 encoding, and .NET strips the
 encoding's preamble for console writers — no BOM is prepended. A failing `SetConsoleOutputCP` (no console
-attached) is tolerated, so the redirected case is covered as fully as the interactive one. The **full**
-conversion reaches the same place by a different route and needs nothing added: real `fmt` writes through
-`os.Stdout` → `internal/poll` → `syscall.WriteFile`, which hands the `[]byte` to Win32 verbatim and is
-byte-transparent by construction. Only the baseline `core/fmt` stub — a proxy over
-`Console.Write`/`Console.WriteLine` — depends on the encoding above.
+attached) is tolerated, so the redirected case is covered as fully as the interactive one. `fmt` itself
+reaches the same place by a different route and needs nothing added: it writes through `os.Stdout` →
+`internal/poll` → the platform write (`syscall.WriteFile` on Windows), which hands the `[]byte` over
+verbatim and is byte-transparent by construction. What depends on the encoding above is output written
+through `System.Console`, such as golib's `print`/`println` and its unhandled-exception report on
+`Console.Error`.<!-- When this was written the baseline core/fmt stub, a proxy over Console.Write/Console.WriteLine,
+also depended on it; the stub baseline retired 2026-08-01 (commit 2e8066da6). The stub's one other divergence
+retired with it: Console.WriteLine terminated with Environment.NewLine (CRLF on Windows) where Go always writes \n. -->
 
 Guarded by the `UnicodeConsoleOutput` behavioral test, which prints CJK, Greek, Cyrillic, a math symbol and
 an astral-plane emoji, and is stdout-compared against the Go binary. The guard is differential, so it holds
 even under a lossy capture: the runner decodes both children's bytes with the same encoding, and mojibake
-never equals `?`. Neutering the golib line and running under `chcp 437` fails it with
-`stdout mismatch C# vs Go`; restoring the line passes in the same console.
-
-One divergence remains, and it is stub-only: `Console.WriteLine` terminates with `Environment.NewLine`
-(CRLF on Windows) where Go always writes `\n`, so baseline-stub output is mixed CRLF/LF — a `\n` inside a
-`Printf` format string stays LF. The behavioral comparison reads both children line-by-line and so
-normalizes this away; the full conversion does not have it at all, since `WriteFile` passes Go's `\n`
-through unchanged.
+never equals `?`.<!-- Neutering the golib line and running under `chcp 437` failed it with `stdout mismatch C# vs Go`
+when fmt was the stub; restoring the line passed in the same console. --> The converted `fmt` writes Go's `\n`
+unchanged on every platform, since the platform write passes the bytes through.
 
 ---
 

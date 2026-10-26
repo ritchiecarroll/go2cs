@@ -21,6 +21,12 @@ using static global::go.crypto.aes_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -29,7 +35,7 @@ using static global::go.crypto.aes_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/aes/aes_test.go", "aes_test.cs", "ABkuACFAkqaCgoKCgpSCgoKCgt6SpoKCgoKClIKCgoKC3pKmgoKCAAkKgoCSgJKA5qKCgpSCgoKCuIKAkoCSgLaigoKUgoKCgriCgJKAkoC2ooKCgII=", "107-109:1;114-114:1;115-115:2;116-116:3;133-133:1;134-134:2;135-135:3;152-152:1;153-153:2;154-154:3")]
+[assembly: go.GoPositionMap("crypto/aes/aes_test.go", "aes_test.cs", "ABowACFAkqaCgoKCgpSCgoKCgt6SpoKCgoKClIKCgoKC3pKmgoKC+oKClIKSAAgIgoCSgJKA5qKCgpSCgoKCuIKAkoCSgLaigoKUgoKCgriCgJKAkoC2ooKCgII=", "108-110:1;118-121:1;125-125:1;126-126:2;127-127:3;144-144:1;145-145:2;146-146:3;163-163:1;164-164:2;165-165:3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -53,6 +59,7 @@ public static partial class aes_internal_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));

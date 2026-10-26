@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `iter` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**28 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**28 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/iter`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/iter).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -45,3 +45,14 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestPullPanic` | pass | pass |
 | `TestPullPanic/next` | pass | pass |
 | `TestPullPanic/stop` | pass | pass |
+
+## Excluded declarations
+
+Declarations filtered from **both** sides of the comparison, and therefore not claimed above:
+`Benchmark`, `Fuzz` and `Example` declarations the converted host does not execute, plus any
+test requiring a capability the managed runtime does not provide — a `testing` member the host
+has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
+the capability it needs.
+
+- BenchmarkPull (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkPull2 (benchmark): benchmark execution is deferred to Phase 4D

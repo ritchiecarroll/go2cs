@@ -268,8 +268,12 @@ public class PromotedMetadataEmbedTests
         Assert.IsTrue(sibling >= 0, "the cross-package forwarders live in the sibling class");
         StringAssert.Contains(generated[sibling..], "static void ServePublic(this global::go.net_test_package.serverProbe target) => target.Server.Value.ServePublic();",
             "an exported cross-package method gains a forwarder in the sibling class");
-        Assert.IsFalse(generated[..sibling].Contains("ServePublic"),
+        // A DECLARATION is what the package class must not gain. The name itself does appear there: MethodSetKeep keeps
+        // the forwarder on the struct's generated ToString, naming the sibling class that holds it.
+        Assert.IsFalse(generated[..sibling].Contains("ServePublic(this"),
             "the package class must not gain a cross-package forwarder");
+        StringAssert.Contains(generated[..sibling], "DynamicDependency(\"ServePublic\", typeof(global::go.net_testᴛserverProbeᴛxpkg))",
+            "the full-trim keep names the sibling class");
         Assert.IsFalse(generated.Contains("serveInternal"),
             "an unexported cross-package method is not observable across Go packages and gains no forwarder, friend grant or not");
     }

@@ -102,7 +102,6 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object thisTestCanTRunOnWindowsˢ = (@string)"this test can't run on windows/arm"u8;
 internal static readonly @string testwinlibDllˢ = "testwinlib.dll"u8;
 internal static readonly @string buildmodeˢ = "-buildmode"u8;
 internal static readonly @string cSharedˢ = "c-shared"u8;
@@ -118,12 +117,7 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
         if (flagQuick.Value) {
             Ꮡt.Skip(quickˢ);
         }
-        if (Δruntime.GOARCH == "arm"u8) {
-            //TODO: remove this skip and update testwinlib/main.c
-            // once windows/arm supports c-shared buildmode.
-            // See go.dev/issues/43800.
-            Ꮡt.Skip(thisTestCanTRunOnWindowsˢ);
-        }
+
         testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveExecPath(new runtime_test_package.testing_TжTB(Ꮡt), gccˢ);
@@ -154,14 +148,14 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failure while running executable: %s\n%s"u8, err, @out);
         }
         @string expectedOutput = default!;
-        if (Δruntime.GOARCH == "arm64"u8 || Δruntime.GOARCH == "arm"u8){
-            // TODO: remove when windows/arm64 and windows/arm support SEH stack unwinding.
+        if (Δruntime.GOARCH == "arm64"u8){
+            // TODO: remove when windows/arm64 support SEH stack unwinding.
             expectedOutput = exceptionCount1ˢ;
         } else {
             expectedOutput = exceptionCount1ˢ2;
         }
         // cleaning output
-        @string cleanedOut = strings.ReplaceAll(((@string)@out), "\r\n"u8, "\n"u8);
+        @string cleanedOut = strings.ReplaceAll((@string)@out, "\r\n"u8, "\n"u8);
         if (cleanedOut != expectedOutput) {
             Ꮡt.Errorf("expected output %q, got %q"u8, expectedOutput, cleanedOut);
         }
@@ -378,7 +372,7 @@ public static void TestIssue59213(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("%v: %v\n%s"u8, cmdΔ1.OrTypedNil(), errΔ1, (~cmdΔ1).Stderr);
         }
-        @string outΔ1 = ((@string)bytes.TrimSpace(line));
+        @string outΔ1 = (@string)bytes.TrimSpace(line);
         Ꮡt.Logf("%v: %q"u8, cmdΔ1.OrTypedNil(), outΔ1);
         return outΔ1;
     }

@@ -8,12 +8,8 @@ partial struct pusher {
     internal @string id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pushˢ = (@string)"push"u8;
-private static readonly object fromˢ = (@string)"from"u8;
-
 internal static error Push(this pusher p, @string target, nint weight) {
-    fmt.Println(pushˢ, target, weight, fromˢ, p.id);
+    fmt.Println("push", target, weight, "from", p.id);
     return default!;
 }
 
@@ -25,17 +21,9 @@ partial struct setter {
     internal @string id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object setˢ = (@string)"set"u8;
-
 internal static void Set(this ref setter s, @string value) {
-    fmt.Println(setˢ, value, (@string)"on"u8, s.id);
+    fmt.Println("set", value, "on", s.id);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object errˢ = (@string)"err:"u8;
-private static readonly @string styleCssˢ = "/style.css"u8;
-private static readonly object notAPusherˢ = (@string)"not a pusher"u8;
 
 internal partial interface serve_type /*dyn*/ {
     error Push(@string target, nint weight);
@@ -45,16 +33,12 @@ internal partial interface serve_type /*dyn*/ {
 internal static void serve(any v) {
     {
         var (p, ok) = v._<serve_type>(ᐧ); if (ok){
-            fmt.Println(errˢ, p.Push(styleCssˢ, 7), p.Label());
+            fmt.Println("err:", p.Push("/style.css", 7), p.Label());
         } else {
-            fmt.Println(notAPusherˢ);
+            fmt.Println("not a pusher");
         }
     }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string blueˢ = "blue"u8;
-private static readonly object notASetterˢ = (@string)"not a setter"u8;
 
 internal partial interface apply_type /*dyn*/ {
     void Set(@string value);
@@ -63,21 +47,21 @@ internal partial interface apply_type /*dyn*/ {
 internal static void apply(any v) {
     {
         var (s, ok) = v._<apply_type>(ᐧ); if (ok){
-            s.Set(blueˢ);
+            s.Set("blue");
         } else {
-            fmt.Println(notASetterˢ);
+            fmt.Println("not a setter");
         }
     }
 }
 
 internal static void Main() {
-    serve(new pusher(id: "v"u8));
+    serve(new pusher(id: "v"));
 
-    serve(Ꮡ(new pusher(id: "p"u8)));
+    serve(Ꮡ(new pusher(id: "p")));
 
-    apply(Ꮡ(new setter(id: "s"u8)));
+    apply(Ꮡ(new setter(id: "s")));
 
-    apply(new pusher(id: "x"u8));
+    apply(new pusher(id: "x"));
 }
 
 } // end main_package

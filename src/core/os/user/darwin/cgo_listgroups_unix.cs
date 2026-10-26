@@ -1,7 +1,7 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build (cgo || darwin) && !osusergo && (darwin || dragonfly || freebsd || (linux && !android) || netbsd || openbsd || (solaris && !illumos))
+//go:build (cgo || darwin) && !osusergo && unix && !android && !aix
 namespace go.os;
 
 using fmt = fmt_package;
@@ -17,12 +17,12 @@ internal static (slice<@string>, error) listGroups(ref User u) {
     if (err != default!) {
         return (default!, fmt.Errorf("user: list groups for %s: invalid gid %q"u8, u.Username, u.Gid));
     }
-    var userGID = ((_C_gid_t)ug);
+    var userGID = (_C_gid_t)ug;
     var nameC = new slice<byte>(len(u.Username) + 1);
     copy(nameC, u.Username);
 
     ref var n = ref heap<_C_int>(out var Ꮡn);
-    n = ((_C_int)256);
+    n = (_C_int)256;
     ref var gidsC = ref heap<slice<_C_gid_t>>(out var ᏑgidsC);
     gidsC = new slice<_C_gid_t>(n);
     var rv = getGroupList(Ꮡ(nameC, 0), userGID, Ꮡ(gidsC, 0), Ꮡn);

@@ -9,6 +9,7 @@ using strings = strings_package;
 using testing = testing_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using atomic = global::go.sync.atomic_package;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -35,6 +36,8 @@ internal partial struct testCallers_want /*dyn*/ {
 }
 
 internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pan) {
+    var seenᴷ = new stackAppend<@string>();
+
     var m = new map<@string, nint>(len(pcs));
     var frames = Δruntime.CallersFrames(pcs);
     while (ᐧ) {
@@ -49,7 +52,7 @@ internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pa
 
     slice<@string> seen = default!;
     foreach (var (k, _) in m) {
-        seen = append(seen, k);
+        seen = append(seenᴷ, seen, k);
     }
     Ꮡt.Logf("functions seen: %s"u8, strings.Join(seen, " "u8));
 
@@ -149,12 +152,12 @@ public static partial void TestCallersDoublePanic(ж<testing.T> Ꮡt) {
                 if (recover() == default!) {
                     Ꮡt.Fatal(didNotPanicˢ);
                 }
-                throw panic((nint)(2));
+                throw panic((nint)2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -181,7 +184,7 @@ public static partial void TestCallersAfterRecovery(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -440,7 +443,7 @@ internal static void testGenericEndlineno<_>(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void testCallerLine(ж<testing.T> Ꮡt, nint want) {
+internal static partial void testCallerLine(ж<testing.T> Ꮡt, nint want) {
     {
         nint have = callerLine(Ꮡt, 1); if (have != want) {
             Ꮡt.Errorf("callerLine(1) returned %d, but want %d\n"u8, have, want);
@@ -627,7 +630,7 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
         // call stack won't crash.
         defer(() => {
             var pcs = new slice<uintptr>(32);
-            foreach (var (i, _) in pcs) {
+            foreach (var i in range(pcs)) {
                 // If runtime.recovery doesn't properly restore the
                 // frame pointer before returning control to this
                 // function, it will point somewhere lower in the stack
@@ -646,7 +649,36 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+//go:noinline
+internal static partial nint deref() {
+    ref var i = ref heap<ж<nint>>(out var Ꮡi);
+    Δruntime.KeepAlive(Ꮡi);
+    return i.Value;
+}
+
+public static void TestFPUnwindStackGrowthAfterRecovery(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        if (!runtime_internal_test_package.FramePointerEnabled) {
+            Ꮡt.Skip(framePointersNotˢ);
+        }
+        global::go.runtime_internal_test_package.StackPoisonCopyRestore state = runtime_internal_test_package.StackPoisonCopy();
+        defer(ᴛ0 => ᴛ0.Restore(), state, ref ᒐ);
+        defer(() => {
+            if (recover() == default!) {
+                Ꮡt.Fatal(didNotRecoverFromPanicˢ);
+            }
+            growStack(nil);
+            ref var pcs = ref heap(new array<uintptr>(32), out var Ꮡpcs);
+            runtime_internal_test_package.FPCallers(pcs[..]);
+        }, ref ᒐ);
+        deref();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

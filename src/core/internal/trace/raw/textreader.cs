@@ -6,11 +6,12 @@ namespace go.@internal.trace;
 using bufio = bufio_package;
 using fmt = fmt_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
+using go;
 using go.@internal.trace;
 
 partial class raw_package {
@@ -19,8 +20,8 @@ partial class raw_package {
 // into an event stream.
 partial struct TextReader {
     internal version.Version v;
-    internal slice<Δevent.Spec> specs;
-    internal map<@string, Δevent.Type> names;
+    internal slice<tracev2.EventSpec> specs;
+    internal map<@string, tracev2.EventType> names;
     internal ж<bufio.Scanner> s;
 }
 
@@ -46,13 +47,13 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     if (err != default!) {
         return (default!, fmt.Errorf("failed to parse header Go version: %v"u8, err));
     }
-    var v = ((version.Version)(uint32)rawv);
+    var v = (version.Version)(uint32)rawv;
     if (!v.Valid()) {
         return (default!, fmt.Errorf("unknown or unsupported Go version 1.%d"u8, v));
     }
     tr.Value.v = v;
     tr.Value.specs = v.Specs();
-    tr.Value.names = Δevent.Names((~tr).specs);
+    tr.Value.names = tracev2.EventNames((~tr).specs);
     foreach (var (_, rΔ1) in line) {
         if (!unicode.IsSpace(rΔ1)) {
             return (default!, fmt.Errorf("encountered unexpected non-space at the end of the header: %q"u8, line));
@@ -143,6 +144,8 @@ internal static (@string, error) nextLine(this ref TextReader r) {
 internal static slice<@string> frameFields = new @string[]{"pc"u8, "func"u8, "file"u8, "line"u8}.slice();
 
 internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names) {
+    var argsᴷ = new stackAppend<uint64>(moves: true);
+
     slice<uint64> args = default!;
     foreach (var (_, name) in names) {
         var (arg, value, rest, err) = readArg(s);
@@ -152,7 +155,7 @@ internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names)
         if (arg != name) {
             return (default!, fmt.Errorf("expected argument %q, but got %q"u8, name, arg));
         }
-        args = append(args, value);
+        args = append(argsᴷ, args, value);
         s = rest;
     }
     foreach (var (_, r) in s) {
@@ -160,6 +163,7 @@ internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names)
             return (default!, fmt.Errorf("encountered unexpected non-space at the end of an event: %q"u8, s));
         }
     }
+    args = move2heap(argsᴷ, args);
     return (args, default!);
 }
 
@@ -174,14 +178,13 @@ internal static (@string arg, uint64 value, @string rest, error err) readArg(@st
     if (len(tok) == 0) {
         return ("", 0, s, fmt.Errorf("no argument"u8));
     }
-    var parts = strings.SplitN(tok, "="u8, 2);
-    if (len(parts) < 2) {
+    (arg, var val, var found) = strings.Cut(tok, "="u8);
+    if (!found) {
         return ("", 0, s, fmt.Errorf("malformed argument: %q"u8, tok));
     }
-    arg = parts[0];
-    (value, err) = strconv.ParseUint(parts[1], 10, 64);
+    (value, err) = strconv.ParseUint(val, 10, 64);
     if (err != default!) {
-        return (arg, value, s, fmt.Errorf("failed to parse argument value %q for arg %q"u8, parts[1], parts[0]));
+        return (arg, value, s, fmt.Errorf("failed to parse argument value %q for arg %q"u8, val, arg));
     }
     return (arg, value, rest, err);
 }
@@ -214,11 +217,11 @@ internal static (@string token, @string rest) readToken(@string s) {
 }
 
 internal static (slice<byte>, error) readData(@string line) {
-    var parts = strings.SplitN(line, "="u8, 2);
-    if (len(parts) < 2 || strings.TrimSpace(parts[0]) != "data"u8) {
+    var (dk, dv, found) = strings.Cut(line, "="u8);
+    if (!found || strings.TrimSpace(dk) != "data"u8) {
         return (default!, fmt.Errorf("malformed data: %q"u8, line));
     }
-    var (data, err) = strconv.Unquote(strings.TrimSpace(parts[1]));
+    var (data, err) = strconv.Unquote(strings.TrimSpace(dv));
     if (err != default!) {
         return (default!, fmt.Errorf("failed to parse data: %q: %v"u8, line, err));
     }

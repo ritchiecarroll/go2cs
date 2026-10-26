@@ -6,9 +6,12 @@ namespace go.compress;
 using bytes = bytes_package;
 using hex = encoding.hex_package;
 using fmt = fmt_package;
+using obscuretestdata = @internal.obscuretestdata_package;
 using io = io_package;
 using os = os_package;
+using strings = strings_package;
 using testing = testing_package;
+using @internal;
 using encoding;
 using static go.compress.bzip2_package;
 
@@ -23,6 +26,14 @@ internal static slice<byte> mustDecodeHex(@string s) {
 }
 
 internal static slice<byte> mustLoadFile(@string f) {
+    if (strings.HasSuffix(f, ".base64"u8)) {
+        var (tf, errΔ1) = obscuretestdata.DecodeToTempFile(f);
+        if (errΔ1 != default!) {
+            throw panic(fmt.Sprintf("obscuretestdata.DecodeToTempFile(%s): %v"u8, f, errΔ1));
+        }
+        f = tf;
+    }
+
     var (b, err) = os.ReadFile(f);
     if (err != default!) {
         throw panic(err);
@@ -44,7 +55,7 @@ internal static readonly @string testdataPassRandom1Binˢ = "testdata/pass-rando
 internal static readonly @string testdataPassRandom2Bz2ˢ = "testdata/pass-random2.bz2"u8;
 internal static readonly @string testdataPassRandom2Binˢ = "testdata/pass-random2.bin"u8;
 internal static readonly @string testdataPassSawtoothBz2ˢ = "testdata/pass-sawtooth.bz2"u8;
-internal static readonly @string testdataFailIssue5747Bz2ˢ = "testdata/fail-issue5747.bz2"u8;
+internal static readonly @string testdataFailIssue5747Bz2ˢ = "testdata/fail-issue5747.bz2.base64"u8;
 
 internal partial struct TestReader_type /*dyn*/ {
     internal @string desc;
@@ -69,7 +80,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
     ), new(
         desc: "1MiB zeros"u8,
         input: mustDecodeHex(""u8 + "425a683931415926535938571ce50008084000c0040008200030cc0529a60806"u8 + "c4201e2ee48a70a12070ae39ca"u8),
-        output: new slice<byte>((1 << (int)(20)))
+        output: new slice<byte>((1 << 20))
     ), new(
         desc: "random data"u8,
         input: mustLoadFile(testdataPassRandom1Bz2ˢ),
@@ -86,8 +97,8 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         desc: "1MiB sawtooth"u8,
         input: mustLoadFile(testdataPassSawtoothBz2ˢ),
         output: ((Func<slice<byte>>)(() => {
-            var b = new slice<byte>((1 << (int)(20)));
-            foreach (var (i, _) in b) {
+            var b = new slice<byte>((1 << 20));
+            foreach (var i in range(b)) {
                 b[i] = (byte)i;
             }
             return b;

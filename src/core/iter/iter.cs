@@ -28,6 +28,8 @@ or index-value pairs.
 Yield returns true if the iterator should continue with the next
 element in the sequence, false if it should stop.
 
+Yield panics if called after it returns false.
+
 For instance, [maps.Keys] returns an iterator that produces the sequence
 of keys of the map m, implemented as follows:
 
@@ -180,13 +182,13 @@ with the extra operations and then provide an iterator over positions.
 For example, a tree implementation might provide:
 
 	// Positions returns an iterator over positions in the sequence.
-	func (t *Tree[V]) Positions() iter.Seq[*Pos]
+	func (t *Tree[V]) Positions() iter.Seq[*Pos[V]]
 
 	// A Pos represents a position in the sequence.
 	// It is only valid during the yield call it is passed to.
 	type Pos[V any] struct { ... }
 
-	// Pos returns the value at the cursor.
+	// Value returns the value at the cursor.
 	func (p *Pos[V]) Value() V
 
 	// Delete deletes the value at this point in the iteration.
@@ -236,6 +238,16 @@ internal static partial ж<coro> newcoro(Action<ж<coro>> _);
 //go:linkname coroswitch runtime.coroswitch
 internal static partial void coroswitch(ж<coro> _);
 
+internal partial struct Pull_pull<V> /*dyn*/ {
+    internal V v;
+    internal bool ok;
+    internal bool done;
+    internal bool yieldNext;
+    internal bool seqDone; // to detect Goexit
+    internal nint racer;
+    internal any panicValue;
+}
+
 // Pull converts the “push-style” iterator sequence seq
 // into a “pull-style” iterator accessed by the two functions
 // next and stop.
@@ -262,52 +274,46 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     Func<(V, bool)> next = default!;
     Action stop = default!;
 
-    ref var v = ref heap<V>(out var Ꮡv);
-    bool ok = default!;
-    bool done = default!;
-    bool yieldNext = default!;
-    ref var racer = ref heap(new nint(), out var Ꮡracer);
-    ref var panicValue = ref heap<any>(out var ᏑpanicValue);
-    bool seqDone = default!;      // to detect Goexit
+    ref var pull = ref heap(new Pull_pull<V>(), out var Ꮡpull);
     var c = newcoro((ж<coro> cΔ1) => {
         GoFrame ᒐ = default;
         try {
-            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
-            if (done) {
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
+            if (Ꮡpull.Value.done) {
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
                 return;
             }
             var yield = (V v1) => {
-                if (done) {
+                if (Ꮡpull.Value.done) {
                     return false;
                 }
-                if (!yieldNext) {
+                if (!Ꮡpull.Value.yieldNext) {
                     throw panic("iter.Pull: yield called again before next");
                 }
-                yieldNext = false;
-                (Ꮡv.ValueSlot, ok) = (v1, true);
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+                Ꮡpull.Value.yieldNext = false;
+                (Ꮡpull.Value.v, Ꮡpull.Value.ok) = (v1, true);
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
                 coroswitch(cΔ1);
-                race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
-                return !done;
+                race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
+                return !Ꮡpull.Value.done;
             };
             // Recover and propagate panics from seq.
             defer(() => {
                 {
                     var p = recover(); if (p != default!){
-                        ᏑpanicValue.ValueSlot = p;
+                        Ꮡpull.Value.panicValue = p;
                     } else 
-                    if (!seqDone) {
-                        ᏑpanicValue.ValueSlot = goexitPanicValue;
+                    if (!Ꮡpull.Value.seqDone) {
+                        Ꮡpull.Value.panicValue = goexitPanicValue;
                     }
                 }
-                done = true; // Invalidate iterator
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+                Ꮡpull.Value.done = true; // Invalidate iterator
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
             }, ref ᒐ);
             seq(yield);
             V v0 = GoZero<V>();
-            (Ꮡv.ValueSlot, ok) = (v0, false);
-            seqDone = true;
+            (Ꮡpull.Value.v, Ꮡpull.Value.ok) = (v0, false);
+            Ꮡpull.Value.seqDone = true;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -316,52 +322,63 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     next = () => {
         V v1 = GoZero<V>();
         bool ok1 = default!;
-        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
+        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer))); // detect races
 
-        if (done) {
+        if (Ꮡpull.Value.done) {
             return (v1, ok1);
         }
-        if (yieldNext) {
+        if (Ꮡpull.Value.yieldNext) {
             throw panic("iter.Pull: next called again before yield");
         }
-        yieldNext = true;
-        race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        Ꮡpull.Value.yieldNext = true;
+        race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
         coroswitch(cʗ1);
-        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
 
         // Propagate panics and goexits from seq.
-        if (ᏑpanicValue.ValueSlot != default!) {
-            if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
+        if (Ꮡpull.Value.panicValue != default!) {
+            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
                 // Propagate runtime.Goexit from seq.
                 runtime.Goexit();
             } else {
-                throw panic(ᏑpanicValue.ValueSlot);
+                throw panic(Ꮡpull.Value.panicValue);
             }
         }
-        return (Ꮡv.ValueSlot, ok);
+        return (Ꮡpull.Value.v, Ꮡpull.Value.ok);
     };
     var cʗ2 = c;
     stop = () => {
-        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
+        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer))); // detect races
 
-        if (!done) {
-            done = true;
-            race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        if (!Ꮡpull.Value.done) {
+            Ꮡpull.Value.done = true;
+            race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
             coroswitch(cʗ2);
-            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
 
             // Propagate panics and goexits from seq.
-            if (ᏑpanicValue.ValueSlot != default!) {
-                if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
+            if (Ꮡpull.Value.panicValue != default!) {
+                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
                     // Propagate runtime.Goexit from seq.
                     runtime.Goexit();
                 } else {
-                    throw panic(ᏑpanicValue.ValueSlot);
+                    throw panic(Ꮡpull.Value.panicValue);
                 }
             }
         }
     };
     return (next, stop);
+}
+
+internal partial struct Pull2_pull<K, V> /*dyn*/ {
+    internal K k;
+    internal V v;
+    internal bool ok;
+    internal bool done;
+    internal bool yieldNext;
+    internal bool seqDone;
+    internal nint racer;
+    internal any panicValue;
 }
 
 // Pull2 converts the “push-style” iterator sequence seq
@@ -390,54 +407,47 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
     Func<(K, V, bool)> next = default!;
     Action stop = default!;
 
-    ref var k = ref heap<K>(out var Ꮡk);
-    ref var v = ref heap<V>(out var Ꮡv);
-    bool ok = default!;
-    bool done = default!;
-    bool yieldNext = default!;
-    ref var racer = ref heap(new nint(), out var Ꮡracer);
-    ref var panicValue = ref heap<any>(out var ᏑpanicValue);
-    bool seqDone = default!;
+    ref var pull = ref heap(new Pull2_pull<K, V>(), out var Ꮡpull);
     var c = newcoro((ж<coro> cΔ1) => {
         GoFrame ᒐ = default;
         try {
-            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
-            if (done) {
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
+            if (Ꮡpull.Value.done) {
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
                 return;
             }
             var yield = (K k1, V v1) => {
-                if (done) {
+                if (Ꮡpull.Value.done) {
                     return false;
                 }
-                if (!yieldNext) {
+                if (!Ꮡpull.Value.yieldNext) {
                     throw panic("iter.Pull2: yield called again before next");
                 }
-                yieldNext = false;
-                (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok) = (k1, v1, true);
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+                Ꮡpull.Value.yieldNext = false;
+                (Ꮡpull.Value.k, Ꮡpull.Value.v, Ꮡpull.Value.ok) = (k1, v1, true);
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
                 coroswitch(cΔ1);
-                race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
-                return !done;
+                race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
+                return !Ꮡpull.Value.done;
             };
             // Recover and propagate panics from seq.
             defer(() => {
                 {
                     var p = recover(); if (p != default!){
-                        ᏑpanicValue.ValueSlot = p;
+                        Ꮡpull.Value.panicValue = p;
                     } else 
-                    if (!seqDone) {
-                        ᏑpanicValue.ValueSlot = goexitPanicValue;
+                    if (!Ꮡpull.Value.seqDone) {
+                        Ꮡpull.Value.panicValue = goexitPanicValue;
                     }
                 }
-                done = true; // Invalidate iterator.
-                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+                Ꮡpull.Value.done = true; // Invalidate iterator.
+                race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
             }, ref ᒐ);
             seq(yield);
             K k0 = GoZero<K>();
             V v0 = GoZero<V>();
-            (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok) = (k0, v0, false);
-            seqDone = true;
+            (Ꮡpull.Value.k, Ꮡpull.Value.v, Ꮡpull.Value.ok) = (k0, v0, false);
+            Ꮡpull.Value.seqDone = true;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -447,47 +457,47 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
         K k1 = GoZero<K>();
         V v1 = GoZero<V>();
         bool ok1 = default!;
-        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
+        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer))); // detect races
 
-        if (done) {
+        if (Ꮡpull.Value.done) {
             return (k1, v1, ok1);
         }
-        if (yieldNext) {
+        if (Ꮡpull.Value.yieldNext) {
             throw panic("iter.Pull2: next called again before yield");
         }
-        yieldNext = true;
-        race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        Ꮡpull.Value.yieldNext = true;
+        race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
         coroswitch(cʗ1);
-        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
 
         // Propagate panics and goexits from seq.
-        if (ᏑpanicValue.ValueSlot != default!) {
-            if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
+        if (Ꮡpull.Value.panicValue != default!) {
+            if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
                 // Propagate runtime.Goexit from seq.
                 runtime.Goexit();
             } else {
-                throw panic(ᏑpanicValue.ValueSlot);
+                throw panic(Ꮡpull.Value.panicValue);
             }
         }
-        return (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok);
+        return (Ꮡpull.Value.k, Ꮡpull.Value.v, Ꮡpull.Value.ok);
     };
     var cʗ2 = c;
     stop = () => {
-        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡracer)); // detect races
+        race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer))); // detect races
 
-        if (!done) {
-            done = true;
-            race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+        if (!Ꮡpull.Value.done) {
+            Ꮡpull.Value.done = true;
+            race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
             coroswitch(cʗ2);
-            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡracer));
+            race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
 
             // Propagate panics and goexits from seq.
-            if (ᏑpanicValue.ValueSlot != default!) {
-                if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
+            if (Ꮡpull.Value.panicValue != default!) {
+                if (AreEqual(Ꮡpull.Value.panicValue, goexitPanicValue)){
                     // Propagate runtime.Goexit from seq.
                     runtime.Goexit();
                 } else {
-                    throw panic(ᏑpanicValue.ValueSlot);
+                    throw panic(Ꮡpull.Value.panicValue);
                 }
             }
         }

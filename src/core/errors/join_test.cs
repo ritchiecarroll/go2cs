@@ -27,18 +27,18 @@ public static void TestJoinReturnsNil(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string err3ˢ = "err3"u8;
+
 internal partial struct TestJoin_type /*dyn*/ {
     internal slice<error> errs;
     internal slice<error> want;
 }
 
-internal partial interface TestJoin_typeᴛ1 /*dyn*/ {
-    slice<error> Unwrap();
-}
-
 public static void TestJoin(ж<testing.T> Ꮡt) {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
+    var merr = new multiErr(new error[]{errors.New(err3ˢ)}.slice());
     foreach (var (_, test) in new TestJoin_type[]{new(
         errs: new error[]{err1}.slice(),
         want: new error[]{err1}.slice()
@@ -48,9 +48,12 @@ public static void TestJoin(ж<testing.T> Ꮡt) {
     ), new(
         errs: new error[]{err1, default!, err2}.slice(),
         want: new error[]{err1, err2}.slice()
+    ), new(
+        errs: new error[]{merr}.slice(),
+        want: new error[]{merr}.slice()
     )
     }.slice()) {
-        var got = errors.Join(test.errs.ꓸꓸꓸ)._<TestJoin_typeᴛ1>().Unwrap();
+        var got = errors.Join(test.errs.ꓸꓸꓸ)._<ExampleJoin_type>().Unwrap();
         if (!reflect.DeepEqual(got, test.want)) {
             Ꮡt.Errorf("Join(%v) = %v; want %v"u8, test.errs, got, test.want);
         }

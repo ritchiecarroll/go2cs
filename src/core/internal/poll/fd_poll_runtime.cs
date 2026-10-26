@@ -49,7 +49,7 @@ internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ᏑserverInit.Do(runtime_pollServerInit);
     var (ctx, errno) = runtime_pollOpen((uintptr)fd.Sysfd);
     if (errno != 0) {
-        return errnoErr(((Δsyscall.Errno)(uintptr)errno));
+        return errnoErr((Δsyscall.Errno)(uintptr)errno);
     }
     pd.runtimeCtx = ctx;
     return default!;
@@ -175,6 +175,7 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
             }
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
+
         if (fd.pd.runtimeCtx == 0) {
             return ErrNoDeadline;
         }

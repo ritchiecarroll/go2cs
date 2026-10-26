@@ -13,11 +13,11 @@ public static (bool nonblocking, error err) IsNonblock(nint fd) {
     if (e1 != default!) {
         return (false, e1);
     }
-    return ((nint)(flag & (nint)syscall.O_NONBLOCK) != 0, default!);
+    return ((flag & (nint)syscall.O_NONBLOCK) != 0, default!);
 }
 
 public static bool HasNonblockFlag(nint flag) {
-    return (nint)(flag & (nint)syscall.O_NONBLOCK) != 0;
+    return (flag & (nint)syscall.O_NONBLOCK) != 0;
 }
 
 } // end unix_package

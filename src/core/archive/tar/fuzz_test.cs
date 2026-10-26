@@ -41,6 +41,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     f.Add(b.Bytes());
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> bΔ1) => {
+        var filesᴷ = new stackAppend<FuzzReader_file>(moves: true);
         var r = NewReader(new tar_test_package.bytes_ReaderжReader(bytes.NewReader(bΔ1)));
         var files = new FuzzReader_file[]{}.slice();
         while (ᐧ) {
@@ -57,7 +58,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                     continue;
                 }
             }
-            files = append(files, new FuzzReader_file(header: hdr, content: buf.Bytes()));
+            files = append(filesᴷ, files, new FuzzReader_file(header: hdr, content: buf.Bytes()));
         }
 
         // If we were unable to read anything out of the archive don't
@@ -68,6 +69,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
 
         var @out = bytes.NewBuffer(default!);
         var wΔ1 = NewWriter(new tar_test_package.bytes_BufferжWriter(@out));
+        files = move2heap(filesᴷ, files);
         foreach (var (_, fΔ1) in files) {
             {
                 var errΔ4 = wΔ1.WriteHeader(fΔ1.header); if (errΔ4 != default!) {

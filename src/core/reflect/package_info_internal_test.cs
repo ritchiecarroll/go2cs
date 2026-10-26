@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -13,6 +12,7 @@ using static go.reflect_package;
 using static go.reflect_internal_test_package;
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b4128297d", "TestTypeAssert_type")]
 [assembly: GoDynamicTypeLift("696e746572666163657b4469737428696e742920696e747d", "TestMethod_x")]
 [assembly: GoDynamicTypeLift("696e746572666163657b4628297d", "Δtypeᴛ35")]
 [assembly: GoDynamicTypeLift("696e746572666163657b476574282920696e747d", "TestStructOfWithInterface_Iface")]
@@ -24,6 +24,7 @@ using static go.reflect_internal_test_package;
 [assembly: GoDynamicTypeLift("696e746572666163657b5928293b207928293b207265666c6563745f746573742e497d", "TestMethodPkgPath_i")]
 [assembly: GoDynamicTypeLift("696e746572666163657b5928293b207928297d", "TestCallPanic_T1")]
 [assembly: GoDynamicTypeLift("696e746572666163657b612866756e632866756e6328696e742920696e74292066756e632866756e6328696e74292920696e74293b206228297d", "typeᴛ33_x")]
+[assembly: GoDynamicTypeLift("696e746572666163657b666f6f28297d", "TestTypeAssertAllocs_I")]
 [assembly: GoDynamicTypeLift("7265666c6563745f746573742e49", "TestMethodPkgPath_I")]
 [assembly: GoDynamicTypeLift("7265666c6563745f746573742e4966616365", "TestStructOfWithInterface_Iface")]
 [assembly: GoDynamicTypeLift("7265666c6563745f746573742e4966616365536574", "TestStructOfWithInterface_IfaceSet")]
@@ -135,8 +136,7 @@ using static go.reflect_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("reflect/export_swiss_test.go", "export_swiss_test.cs", "AAoSgoI=")]
-[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeAA4CgoKClKaCgqaCuIKClJSCgriCgoKCgqamgoKCgoKCgqam/OyUgpSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSU", "51-56:1")]
+[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeABICgoKClKaCgqaCuIKClJSCgriCgoKCgqbmooKCgoKCgqa2/OyUgpSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSUlIKC", "51-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -167,6 +167,7 @@ public static partial class reflect_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸast() => builtin.initPackage(typeof(global::go.go.ast_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(@internal.abi_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));

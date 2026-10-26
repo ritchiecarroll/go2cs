@@ -1,6 +1,7 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using json = go.encoding.json_package;
@@ -19,7 +20,7 @@ public static Size Small => 1;
 public static Size Large => 2;
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
-    var exprᴛ1 = strings.ToLower(((@string)text));
+    var exprᴛ1 = strings.ToLower((@string)text);
     if (exprᴛ1 == "small"u8) {
         s = Small;
     }

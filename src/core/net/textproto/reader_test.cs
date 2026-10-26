@@ -227,7 +227,7 @@ public static void TestLargeReadMIMEHeader(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(data); i++) {
         data[i] = (rune)'x';
     }
-    @string sdata = ((@string)data);
+    @string sdata = (@string)data;
     var r = reader("Cookie: "u8 + sdata + "\r\n\n"u8);
     var (m, err) = r.ReadMIMEHeader();
     if (err != default!) {
@@ -398,6 +398,33 @@ public static void TestReadMIMEHeaderAllocations(ж<testing.T> Ꮡt) {
     }
 }
 
+internal partial struct testReader {
+    internal Func<slice<byte>, (nint, error)> read;
+}
+
+internal static (nint n, error err) Read(this testReader r, slice<byte> p) {
+    return r.read(p);
+}
+
+public static void TestReadMIMEHeaderShortLimitLongLine(ж<testing.T> Ꮡt) {
+    // Small limit, long first line.
+    var r = NewReader(bufio.NewReader(
+        io.MultiReader(
+            new textproto_internal_test_package.strings_ReaderжReader(strings.NewReader("K:"u8)),
+            new testReader(
+                read: (slice<byte> p) => {
+                    foreach (var i in range(p)) {
+                        p[i] = (rune)' ';
+                    }
+                    return (len(p), default!);
+                }
+            ))));
+    var (_, err) = readMIMEHeader(r, 1, 1);
+    if (!AreEqual(err, errMessageTooLarge)) {
+        Ꮡt.Fatalf("readMIMEHeader = %v, want errMessageTooLarge"u8, err);
+    }
+}
+
 internal partial struct readResponseTest {
     internal @string @in;
     internal nint inCode;
@@ -411,16 +438,19 @@ internal static slice<readResponseTest> readResponseTests = new readResponseTest
         230,
         "Anonymous access granted, restrictions apply\nRead the file README.txt,\n please"u8
     ),
+
     new("230 Anonymous access granted, restrictions apply\n"u8,
         23,
         230,
         "Anonymous access granted, restrictions apply"u8
     ),
+
     new("400-A\n400-B\n400 C"u8,
         4,
         400,
         "A\nB\nC"u8
     ),
+
     new("400-A\r\n400-B\r\n400 C\r\n"u8,
         4,
         400,
@@ -446,24 +476,29 @@ public static void TestRFC959Lines(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string theEmailAccountThatYouˢ = @"550 ""5.1.1 The email account that you tried to reach does not exist. Please try\n5.1.1 double-checking the recipient's email address for typos or\n5.1.1 unnecessary spaces. Learn more at\nUnexpected but legal text!\n5.1.1 https://support.google.com/mail/answer/6596 h20si25154304pfd.166 - gsmtp"""u8;
+
 // Test that multi-line errors are appropriately and fully read. Issue 10230.
 public static void TestReadMultiLineError(ж<testing.T> Ꮡt) {
     var r = reader("550-5.1.1 The email account that you tried to reach does not exist. Please try\n"u8 + "550-5.1.1 double-checking the recipient's email address for typos or\n"u8 + "550-5.1.1 unnecessary spaces. Learn more at\n"u8 + "Unexpected but legal text!\n"u8 + "550 5.1.1 https://support.google.com/mail/answer/6596 h20si25154304pfd.166 - gsmtp\n"u8);
 
     @string wantMsg = "5.1.1 The email account that you tried to reach does not exist. Please try\n"u8 + "5.1.1 double-checking the recipient's email address for typos or\n"u8 + "5.1.1 unnecessary spaces. Learn more at\n"u8 + "Unexpected but legal text!\n"u8 + "5.1.1 https://support.google.com/mail/answer/6596 h20si25154304pfd.166 - gsmtp"u8;
 
+    @string wantError = theEmailAccountThatYouˢ;
+
     var (code, msg, err) = r.ReadResponse(250);
     if (err == default!) {
         Ꮡt.Errorf("ReadResponse: no error, want error"u8);
     }
     if (code != 550) {
-        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)(550));
+        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)550);
     }
     if (msg != wantMsg) {
         Ꮡt.Errorf("ReadResponse: msg=%q, want %q"u8, msg, wantMsg);
     }
-    if (err != default! && err.Error() != "550 "u8 + wantMsg) {
-        Ꮡt.Errorf("ReadResponse: error=%q, want %q"u8, err.Error(), "550 " + wantMsg);
+    if (err != default! && err.Error() != wantError) {
+        Ꮡt.Errorf("ReadResponse: error=%q, want %q"u8, err.Error(), wantError);
     }
 }
 
@@ -499,6 +534,7 @@ public static partial void TestIssue46363(ж<testing.T> Ꮡt) {
     // Regression test for data race reported in issue 46363:
     // ReadMIMEHeader reads commonHeader before commonHeader has been initialized.
     // Run this test with the race detector enabled to catch the reported data race.
+
     // Reset commonHeaderOnce, so that commonHeader will have to be initialized
     commonHeaderOnce = new sync.Once(nil);
     commonHeader = default!;

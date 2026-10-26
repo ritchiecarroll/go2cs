@@ -51,10 +51,19 @@ internal sealed class GoThreadState
     internal ExceptionDispatchInfo? InFlightForeign;
     internal PanicException? RecoverablePanic;
 
+    // Set just before a deferred call whose callee calls recover() runs, and taken (read and cleared) by that
+    // callee's first line: Go's "called directly by the deferred function" rule (GoFrame.TakeDeferredCall).
+    internal bool DeferredCallPending;
+
     // The panic sequences (see GoFrame): how many deferring Runs are live on this thread, and the entries a
     // panic writes, allocated on the first panic and reused.
     internal int SequenceDepth;
     internal GoFrame.Sequence[]? Sequences;
+
+    // Whether this goroutine counts in Go's runningPanicDefers (golib.MainExit): set when a panic starts running
+    // its deferred calls, cleared once no panic is in flight on the thread, when the goroutine ends, or when its
+    // fatal report begins.
+    internal bool RunningPanicDefers;
 
     /// <summary>Clears this thread's state before a pooled thread runs its next goroutine; a thread with no holder has nothing to clear.</summary>
     internal static void ResetThread() { if (t_current is { } state) state.Reset(); }
@@ -66,6 +75,7 @@ internal sealed class GoThreadState
         UnclaimedPanic = null;
         InFlightForeign = null;
         RecoverablePanic = null;
+        DeferredCallPending = false;
         SequenceDepth = 0;
 
         if (Sequences is { } entries)

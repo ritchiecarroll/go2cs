@@ -171,7 +171,7 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
             )
         );
         {
-            (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(ref (k).DerefOrNull(), default!); if (err != default!) {
+            (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(k, default!); if (err != default!) {
                 return (default!, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
             }
         }

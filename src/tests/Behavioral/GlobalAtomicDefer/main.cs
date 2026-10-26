@@ -16,9 +16,9 @@ internal static int32 lockUnlock(uint64 id) {
     try {
         while (!Ꮡlocked.CompareAndSwap(0, 1)) {
         }
-        defer(Ꮡlocked.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡlocked.Store, (int32)0, ref ᒐ);
         ᏑrunGoid.Store(id);
-        defer(ᏑrunGoid.Store, (uint64)(0), ref ᒐ);
+        defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
         return Ꮡlocked.Load();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -30,24 +30,18 @@ internal static int32 localAtomicDefer() {
     try {
         ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
         Ꮡn.Store(41);
-        defer(Ꮡn.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡn.Store, (int32)0, ref ᒐ);
         return Ꮡn.Load();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object whileLockedˢ = (@string)"while locked:"u8;
-private static readonly object afterUnlockˢ = (@string)"after unlock:"u8;
-private static readonly object runGoidˢ = (@string)"runGoid:"u8;
-private static readonly object localDuringˢ = (@string)"local during:"u8;
-
 internal static void Main() {
-    fmt.Println(whileLockedˢ, lockUnlock(7));
-    fmt.Println(afterUnlockˢ, Ꮡlocked.Load());
-    fmt.Println(runGoidˢ, ᏑrunGoid.Load());
-    fmt.Println(localDuringˢ, localAtomicDefer());
+    fmt.Println("while locked:", lockUnlock(7));
+    fmt.Println("after unlock:", Ꮡlocked.Load());
+    fmt.Println("runGoid:", ᏑrunGoid.Load());
+    fmt.Println("local during:", localAtomicDefer());
 }
 
 } // end main_package

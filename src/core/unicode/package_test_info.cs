@@ -23,6 +23,12 @@ using static global::go.unicode_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -34,7 +40,7 @@ using static global::go.unicode_test_package;
 [assembly: go.GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AAsYADp2ACJGgoKCpoKCzJKCgg==")]
 [assembly: go.GoPositionMap("unicode/graphic_test.go", "graphic_test.cs", "AAsewoKCgpS0pILKooKCgoLKooKCgoLKooKCgoLKooKCgoLKooKCgoKUgsqigoKCgsqigoKCgsqigoKCgsqigoKCgg==")]
 [assembly: go.GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaABEkAHPoAYKCgqaCgqaCgsqCgoKmgoKmgoIACgqClKSklKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCygAXMIKCgoKCgIKkuICCAA0clIKCpoLugoKSgoKCgriSgoKCgriCgoKUpoKCgpSmgoKCgpSCpqaUgoKCgoKClIKUpqaC7oKCgoKUggAJDIaigoKCuO4AESSCgoLKgoKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgsqigriiggAJCIKCgoK4goKC", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
-[assembly: go.GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACdQAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
+[assembly: go.GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACtYAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

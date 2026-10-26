@@ -27,25 +27,52 @@ internal static void Main() {
         fmt.Println(u32.Rsh(k));
     }
 
-    fmt.Println((u >> (int)(((nuint)(c[3] & 63)))));
-    fmt.Println((u >> (int)((c[4] % 64))));
+    fmt.Println(u >> (int)(c[3] & 63));
+    fmt.Println(u >> (int)(c[4] % 64));
 
     word w = (nuint)0x8000000000000001UL;
     const nuint W = 64;
     nuint h = c[0];
-    fmt.Println((nuint)((w >> (int)((W - h)))), (nuint)((w << (int)((W - h)))));
+    fmt.Println((nuint)(w >> (W - h)), (nuint)(w << (W - h)));
     foreach (var (_, k) in c) {
-        fmt.Println((nuint)((w >> (int)(k))), (nuint)((w << (int)(k))));
+        fmt.Println((nuint)(w >> k), (nuint)(w << k));
     }
 
     halfword hw = 0xDEADBEEFU;
     foreach (var (_, k) in new nuint[]{31, 32, 40}.slice()) {
-        fmt.Println((uint32)((hw >> (int)(k))));
+        fmt.Println((uint32)(hw >> k));
     }
 
     signedword sw = -8;
     signedword swp = (signedword)(1099511627776L);
-    fmt.Println((int64)((sw >> (int)(c[3]))), (int64)((sw >> (int)(c[5]))), (int64)((swp >> (int)(c[3]))));
+    fmt.Println((int64)(sw >> c[3]), (int64)(sw >> c[5]), (int64)(swp >> c[3]));
+
+    var far = new nuint[]{(nuint)1 << 32, (nuint)(4294967296L + 1)}.slice();
+    foreach (var (_, k) in far) {
+        fmt.Println((uint32)(hw << k), (uint32)(hw >> k));
+    }
+    var hc = hw;
+    hc <<= far[1];
+    fmt.Println((uint32)hc);
+    fmt.Println(namedNegativeShift(hw, -1));
+}
+
+internal static @string /*msg*/ namedNegativeShift(halfword x, nint n) {
+    @string msg = default!;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    msg = fmt.Sprint(e);
+                }
+            }
+        }, ref ᒐ);
+        msg = fmt.Sprint((uint32)(x << (int64)(n)));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return msg;
 }
 
 } // end main_package

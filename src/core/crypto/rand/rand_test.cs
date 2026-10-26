@@ -88,7 +88,7 @@ public static void TestLargeRead(ж<testing.T> Ꮡt) {
 
 internal static void testLargeRead(ж<testing.T> Ꮡt, Func<slice<byte>, (nint, error)> Read) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
-    var b = new slice<byte>((40 << (int)(20)));
+    var b = new slice<byte>((40 << 20));
     {
         var (n, err) = Read(b); if (err != default!){
             Ꮡt.Fatal(err);
@@ -200,7 +200,8 @@ internal static readonly object skippingTestInShortModeˢ = (@string)"skipping t
 internal static readonly @string goTestReadErrorˢ = "GO_TEST_READ_ERROR"u8;
 internal static readonly @string errorˢ = "error"u8;
 internal static readonly object readDidNotCrashˢ = (@string)"Read did not crash"u8;
-internal static readonly @string testRunTestReadErrorˢ = "-test.run=TestReadError"u8;
+internal static readonly @string testRunTestReadErrorˢ = "-test.run=^TestReadError$"u8;
+internal static readonly @string testVˢ = "-test.v"u8;
 internal static readonly object subprocessSucceededˢ = (@string)"subprocess succeeded unexpectedly"u8;
 internal static readonly @string fatalErrorCryptoRandˢ = "fatal error: crypto/rand: failed to read random data"u8;
 
@@ -210,7 +211,6 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
         if (testing.Short()) {
             Ꮡt.Skip(skippingTestInShortModeˢ);
         }
-        testenv.MustHaveExec(new rand_test_package.testing_TжTB(Ꮡt));
 
         // We run this test in a subprocess because it's expected to crash.
         if (os.Getenv(goTestReadErrorˢ) == "1"u8) {
@@ -223,7 +223,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
             return;
         }
 
-        var cmd = testenv.Command(new rand_test_package.testing_TжTB(Ꮡt), os.Args[0], testRunTestReadErrorˢ);
+        var cmd = testenv.Command(new rand_test_package.testing_TжTB(Ꮡt), testenv.Executable(new rand_test_package.testing_TжTB(Ꮡt)), testRunTestReadErrorˢ, testVˢ);
         cmd.Value.Env = append(os.Environ(), "GO_TEST_READ_ERROR=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         if (err == default!) {
@@ -246,7 +246,7 @@ public static void BenchmarkRead(ж<testing.B> Ꮡb) {
         benchmarkRead(bΔ2, 32);
     });
     Ꮡb.Run("4K"u8, (ж<testing.B> bΔ3) => {
-        benchmarkRead(bΔ3, (4 << (int)(10)));
+        benchmarkRead(bΔ3, 4 << 10);
     });
 }
 

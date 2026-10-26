@@ -20,8 +20,8 @@ internal static void add(@string verb, slice<@string> args) {
 }
 
 internal static void Main() {
-    add("go"u8, new @string[]{"1.23.0"u8}.slice());
-    add("go"u8, default!);
+    add("go", new @string[]{"1.23.0"}.slice());
+    add("go", default!);
 }
 
 } // end main_package

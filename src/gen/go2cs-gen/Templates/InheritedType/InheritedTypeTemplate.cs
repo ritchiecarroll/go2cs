@@ -173,7 +173,7 @@ internal class InheritedTypeTemplate : TemplateBase
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, "Value", made => $"new {ValueFieldType}({made})") :
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
         "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
-        "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
+        "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
         _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType)
@@ -300,6 +300,13 @@ internal class InheritedTypeTemplate : TemplateBase
     // gate in `ж<T>.at()` structurally cannot see. It does NOT close a materialization that happens on a
     // by-value COPY of the wrapper (the copy's field is the one published) — that is the mpallocbits
     // operator-copy door, tracked separately.
+    //
+    // The two paths are split so the warm one inlines (P-256 R2, COORD ruling 2026-10-22). With the
+    // allocation and the CAS in the getter's body, the JIT kept `get_Value` as a call, and every element
+    // read of a named array paid it: crypto/internal/fips140/nistec's fiat `p256Mul` reads 24 limbs of
+    // its [4]uint64 wrappers per multiply. Now the getter is the reference load and the null test,
+    // marked AggressiveInlining, and the first touch, which allocates and publishes exactly as above,
+    // is `materializeValue`, marked NoInlining so its body never counts against a caller's budget.
     // The lazy backing's constructor arguments: the length alone when `default(element)` is already
     // the element's Go zero value, and the length plus a construction lambda when it is not. golib's
     // `array<T>(nint length, Func<T> elementFactory)` overload is the same one the CONVERTER's
@@ -317,18 +324,15 @@ internal class InheritedTypeTemplate : TemplateBase
             $$"""
                       public {{TypeName}} Value
                       {
-                          get
-                          {
-                              {{ValueFieldType}}? value = m_value;
+                          [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+                          get => m_value is { } value ? value.Value : materializeValue();
+                      }
 
-                              if (value is null)
-                              {
-                                  {{ValueFieldType}} created = new {{ValueFieldType}}(new {{TypeName}}({{LazyBackingArguments}}));
-                                  value = global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created;
-                              }
-
-                              return value.Value;
-                          }
+                      [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+                      private {{TypeName}} materializeValue()
+                      {
+                          {{ValueFieldType}} created = new {{ValueFieldType}}(new {{TypeName}}({{LazyBackingArguments}}));
+                          return (global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created).Value;
                       }
               """,
         // A self-containing map's holder (see HoldsMapInHolder): a null holder is the nil map. READONLY,
@@ -721,6 +725,12 @@ internal class InheritedTypeTemplate : TemplateBase
         }
     }
 
+    // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
+    // EXPLICITLY, through this type's own == (EqualityExpression; IEEE for a float underlying, where its Equals is
+    // NaN-equal), so the comparison runs in compiled code and no member is added.
+    private string GoEquatablePart =>
+        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
+
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
@@ -735,7 +745,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
 
         {{ValueProperty}}
-                public override string ToString() => {{ToStringImplementation}};
+                public override string ToString() => global::go.GoMethodText.Of(this) ?? {{ToStringImplementation}};
         {{EqualityOverrides}}
                 public static bool operator ==({{ObjectName}} left, {{ObjectName}} right) => {{EqualityExpression}};
         
@@ -753,6 +763,6 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=(NilType nil, {{ObjectName}} value) => value != nil;
         
                 public static implicit operator {{ObjectName}}(NilType nil) => {{NilConversionExpression}};
-            }
+            }{{GoEquatablePart}}
         """;
 }

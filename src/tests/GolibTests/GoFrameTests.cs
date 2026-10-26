@@ -256,6 +256,138 @@ public class GoFrameTests
         Assert.IsTrue(ran, "Goexit must still run the frame's defers");
     }
 
+    // A Goexit raised BY A DEFERRED CALL (go1.26.10, measured 2026-10-24): the frame's remaining deferred calls still
+    // run, a recover() in them reads nil, a panic the frame was running is abandoned, and the Goexit is what leaves
+    // the frame. Each arm runs on its own thread, because a Goexit marks its thread's goroutine as exiting.
+    private static (Exception? escaped, bool laterRan, object? laterRecovered) DeferredGoexit(bool panicking)
+    {
+        Exception? escaped = null;
+        bool laterRan = false;
+        object? laterRecovered = "unset";
+
+        System.Threading.Thread thread = new(() =>
+        {
+            try
+            {
+                GoFrame frame = default;
+
+                try
+                {
+                    frame.Push(() => { laterRan = true; laterRecovered = recover(); });
+                    frame.Push(() => throw new GoexitException());
+
+                    if (panicking)
+                        throw panic("A");
+                }
+                catch (Exception ex) when (GoFrame.IsPanic(ex, out PanicException? p))
+                {
+                    GoFrame.Capture(p);
+                }
+                finally
+                {
+                    frame.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                escaped = ex;
+            }
+        });
+
+        thread.Start();
+        thread.Join();
+
+        return (escaped, laterRan, laterRecovered);
+    }
+
+    [TestMethod]
+    public void ADeferredGoexitStillRunsTheRemainingDeferredCalls()
+    {
+        // go func() { defer func() { recover() }(); defer func() { runtime.Goexit() }() }()
+        (Exception? escaped, bool laterRan, object? laterRecovered) = DeferredGoexit(panicking: false);
+
+        Assert.IsTrue(laterRan, "the earlier-deferred call runs after the Goexit");
+        Assert.IsNull(laterRecovered, "recover() reads nil while a Goexit runs the deferred calls");
+        Assert.IsInstanceOfType(escaped, typeof(GoexitException), "the goroutine then exits");
+    }
+
+    [TestMethod]
+    public void ADeferredGoexitAbandonsThePanicTheFrameWasRunning()
+    {
+        // go func() { defer func() { recover() }(); defer func() { runtime.Goexit() }(); panic("A") }()
+        (Exception? escaped, bool laterRan, object? laterRecovered) = DeferredGoexit(panicking: true);
+
+        Assert.IsTrue(laterRan, "the earlier-deferred call runs after the Goexit");
+        Assert.IsNull(laterRecovered, "recover() reads nil: the Goexit, not the panic, is running the deferred calls");
+        Assert.IsInstanceOfType(escaped, typeof(GoexitException), "the panic is abandoned and the goroutine exits quietly");
+    }
+
+    [TestMethod]
+    public void ARecoveredPanicDoesNotEndAGoexitThatIsRunningTheDeferredCalls()
+    {
+        // func f() { defer func() { earliest = true }(); defer func() { r = recover() }(); defer func() { panic("B") }(); defer runtime.Goexit() }
+        // go func() { defer func() { callerDeferRan = true }(); f(); returnedNormally = true }()
+        // go1.26.10: recover reads B, the earliest deferred call runs, the Goexit RESUMES, f never returns normally,
+        // and the caller's deferred call runs as the goroutine exits.
+        object? recovered = "unset";
+        bool earliest = false, returnedNormally = false, callerDeferRan = false;
+        Exception? escaped = null;
+
+        System.Threading.Thread thread = new(() =>
+        {
+            try
+            {
+                GoFrame caller = default;
+
+                try
+                {
+                    caller.Push(() => callerDeferRan = true);
+
+                    GoFrame frame = default;
+
+                    try
+                    {
+                        frame.Push(() => earliest = true);
+                        frame.Push(() => recovered = recover());
+                        frame.Push(() => throw panic("B"));
+                        frame.Push(() => throw new GoexitException());
+                    }
+                    catch (Exception ex) when (GoFrame.IsPanic(ex, out PanicException? p))
+                    {
+                        GoFrame.Capture(p);
+                    }
+                    finally
+                    {
+                        frame.Run();
+                    }
+
+                    returnedNormally = true;
+                }
+                catch (Exception ex) when (GoFrame.IsPanic(ex, out PanicException? p))
+                {
+                    GoFrame.Capture(p);
+                }
+                finally
+                {
+                    caller.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                escaped = ex;
+            }
+        });
+
+        thread.Start();
+        thread.Join();
+
+        Assert.AreEqual((@string)"B", recovered, "recover() reads the panic a later deferred call raised");
+        Assert.IsTrue(earliest, "the remaining deferred calls run after the recovery");
+        Assert.IsFalse(returnedNormally, "the Goexit resumes: the frame never returns normally");
+        Assert.IsTrue(callerDeferRan, "the caller's deferred calls run as the goroutine exits");
+        Assert.IsInstanceOfType(escaped, typeof(GoexitException), "the goroutine exits on the Goexit, not on B");
+    }
+
     // --- panic bookkeeping ---------------------------------------------------------------------
 
     [TestMethod]

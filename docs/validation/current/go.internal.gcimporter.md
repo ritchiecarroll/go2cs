@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/internal/gcimporter` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**621 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**638 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/internal/gcimporter`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/internal/gcimporter).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 14 of the matched tests identically.
+Both runtimes skip 13 of the matched tests identically.
 
 ## Verdicts
 
@@ -47,12 +47,15 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/crypto/fips140` | pass | pass |
 | `TestImportStdLib/crypto/hkdf` | pass | pass |
 | `TestImportStdLib/crypto/hmac` | pass | pass |
+| `TestImportStdLib/crypto/hpke` | pass | pass |
 | `TestImportStdLib/crypto/internal/boring` | pass | pass |
 | `TestImportStdLib/crypto/internal/boring/bbig` | pass | pass |
 | `TestImportStdLib/crypto/internal/boring/bcache` | pass | pass |
 | `TestImportStdLib/crypto/internal/boring/sig` | pass | pass |
+| `TestImportStdLib/crypto/internal/constanttime` | pass | pass |
 | `TestImportStdLib/crypto/internal/cryptotest` | pass | pass |
 | `TestImportStdLib/crypto/internal/entropy` | pass | pass |
+| `TestImportStdLib/crypto/internal/entropy/v1.0.0` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/aes` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/aes/gcm` | pass | pass |
@@ -68,6 +71,7 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/crypto/internal/fips140/edwards25519/field` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/hkdf` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/hmac` | pass | pass |
+| `TestImportStdLib/crypto/internal/fips140/mldsa` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/mlkem` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/nistec` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/nistec/fiat` | pass | pass |
@@ -80,19 +84,22 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/crypto/internal/fips140/subtle` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/tls12` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140/tls13` | pass | pass |
+| `TestImportStdLib/crypto/internal/fips140cache` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140deps` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140deps/byteorder` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140deps/cpu` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140deps/godebug` | pass | pass |
+| `TestImportStdLib/crypto/internal/fips140deps/time` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140hash` | pass | pass |
 | `TestImportStdLib/crypto/internal/fips140only` | pass | pass |
-| `TestImportStdLib/crypto/internal/hpke` | pass | pass |
 | `TestImportStdLib/crypto/internal/impl` | pass | pass |
+| `TestImportStdLib/crypto/internal/rand` | pass | pass |
 | `TestImportStdLib/crypto/internal/randutil` | pass | pass |
 | `TestImportStdLib/crypto/internal/sysrand` | pass | pass |
 | `TestImportStdLib/crypto/internal/sysrand/internal/seccomp` | pass | pass |
 | `TestImportStdLib/crypto/md5` | pass | pass |
 | `TestImportStdLib/crypto/mlkem` | pass | pass |
+| `TestImportStdLib/crypto/mlkem/mlkemtest` | pass | pass |
 | `TestImportStdLib/crypto/pbkdf2` | pass | pass |
 | `TestImportStdLib/crypto/rand` | pass | pass |
 | `TestImportStdLib/crypto/rc4` | pass | pass |
@@ -142,6 +149,7 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/go/importer` | pass | pass |
 | `TestImportStdLib/go/internal/gccgoimporter` | pass | pass |
 | `TestImportStdLib/go/internal/gcimporter` | pass | pass |
+| `TestImportStdLib/go/internal/scannerhooks` | pass | pass |
 | `TestImportStdLib/go/internal/srcimporter` | pass | pass |
 | `TestImportStdLib/go/parser` | pass | pass |
 | `TestImportStdLib/go/printer` | pass | pass |
@@ -204,7 +212,6 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/internal/goroot` | pass | pass |
 | `TestImportStdLib/internal/gover` | pass | pass |
 | `TestImportStdLib/internal/goversion` | pass | pass |
-| `TestImportStdLib/internal/itoa` | pass | pass |
 | `TestImportStdLib/internal/lazyregexp` | pass | pass |
 | `TestImportStdLib/internal/lazytemplate` | pass | pass |
 | `TestImportStdLib/internal/msan` | pass | pass |
@@ -219,12 +226,20 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/internal/race` | pass | pass |
 | `TestImportStdLib/internal/reflectlite` | pass | pass |
 | `TestImportStdLib/internal/runtime/atomic` | pass | pass |
+| `TestImportStdLib/internal/runtime/cgroup` | pass | pass |
 | `TestImportStdLib/internal/runtime/exithook` | pass | pass |
+| `TestImportStdLib/internal/runtime/gc` | pass | pass |
+| `TestImportStdLib/internal/runtime/gc/internal/gen` | pass | pass |
+| `TestImportStdLib/internal/runtime/gc/scan` | pass | pass |
 | `TestImportStdLib/internal/runtime/maps` | pass | pass |
 | `TestImportStdLib/internal/runtime/math` | pass | pass |
+| `TestImportStdLib/internal/runtime/pprof/label` | pass | pass |
+| `TestImportStdLib/internal/runtime/startlinetest` | pass | pass |
 | `TestImportStdLib/internal/runtime/sys` | pass | pass |
+| `TestImportStdLib/internal/runtime/syscall/windows` | pass | pass |
 | `TestImportStdLib/internal/saferio` | pass | pass |
 | `TestImportStdLib/internal/singleflight` | pass | pass |
+| `TestImportStdLib/internal/strconv` | pass | pass |
 | `TestImportStdLib/internal/stringslite` | pass | pass |
 | `TestImportStdLib/internal/sync` | pass | pass |
 | `TestImportStdLib/internal/synctest` | pass | pass |
@@ -236,15 +251,15 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/internal/sysinfo` | pass | pass |
 | `TestImportStdLib/internal/syslist` | pass | pass |
 | `TestImportStdLib/internal/testenv` | pass | pass |
+| `TestImportStdLib/internal/testhash` | pass | pass |
 | `TestImportStdLib/internal/testlog` | pass | pass |
 | `TestImportStdLib/internal/testpty` | pass | pass |
 | `TestImportStdLib/internal/trace` | pass | pass |
-| `TestImportStdLib/internal/trace/event` | pass | pass |
-| `TestImportStdLib/internal/trace/event/go122` | pass | pass |
-| `TestImportStdLib/internal/trace/internal/oldtrace` | pass | pass |
-| `TestImportStdLib/internal/trace/internal/testgen/go122` | pass | pass |
+| `TestImportStdLib/internal/trace/internal/testgen` | pass | pass |
+| `TestImportStdLib/internal/trace/internal/tracev1` | pass | pass |
 | `TestImportStdLib/internal/trace/raw` | pass | pass |
 | `TestImportStdLib/internal/trace/testtrace` | pass | pass |
+| `TestImportStdLib/internal/trace/tracev2` | pass | pass |
 | `TestImportStdLib/internal/trace/traceviewer` | pass | pass |
 | `TestImportStdLib/internal/trace/traceviewer/format` | pass | pass |
 | `TestImportStdLib/internal/trace/version` | pass | pass |
@@ -263,11 +278,11 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/log/slog/internal` | pass | pass |
 | `TestImportStdLib/log/slog/internal/benchmarks` | pass | pass |
 | `TestImportStdLib/log/slog/internal/buffer` | pass | pass |
-| `TestImportStdLib/log/slog/internal/slogtest` | pass | pass |
 | `TestImportStdLib/log/syslog` | pass | pass |
 | `TestImportStdLib/maps` | pass | pass |
 | `TestImportStdLib/math` | pass | pass |
 | `TestImportStdLib/math/big` | pass | pass |
+| `TestImportStdLib/math/big/internal/asmgen` | pass | pass |
 | `TestImportStdLib/math/bits` | pass | pass |
 | `TestImportStdLib/math/cmplx` | pass | pass |
 | `TestImportStdLib/math/rand` | pass | pass |
@@ -285,6 +300,7 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/net/http/httputil` | pass | pass |
 | `TestImportStdLib/net/http/internal` | pass | pass |
 | `TestImportStdLib/net/http/internal/ascii` | pass | pass |
+| `TestImportStdLib/net/http/internal/httpcommon` | pass | pass |
 | `TestImportStdLib/net/http/internal/testcert` | pass | pass |
 | `TestImportStdLib/net/http/pprof` | pass | pass |
 | `TestImportStdLib/net/internal/socktest` | pass | pass |
@@ -311,7 +327,6 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/runtime` | pass | pass |
 | `TestImportStdLib/runtime/coverage` | pass | pass |
 | `TestImportStdLib/runtime/debug` | pass | pass |
-| `TestImportStdLib/runtime/internal/startlinetest` | pass | pass |
 | `TestImportStdLib/runtime/metrics` | pass | pass |
 | `TestImportStdLib/runtime/pprof` | pass | pass |
 | `TestImportStdLib/runtime/race` | pass | pass |
@@ -326,11 +341,13 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportStdLib/sync/atomic` | pass | pass |
 | `TestImportStdLib/syscall` | pass | pass |
 | `TestImportStdLib/testing` | pass | pass |
+| `TestImportStdLib/testing/cryptotest` | pass | pass |
 | `TestImportStdLib/testing/fstest` | pass | pass |
 | `TestImportStdLib/testing/internal/testdeps` | pass | pass |
 | `TestImportStdLib/testing/iotest` | pass | pass |
 | `TestImportStdLib/testing/quick` | pass | pass |
 | `TestImportStdLib/testing/slogtest` | pass | pass |
+| `TestImportStdLib/testing/synctest` | pass | pass |
 | `TestImportStdLib/text/scanner` | pass | pass |
 | `TestImportStdLib/text/tabwriter` | pass | pass |
 | `TestImportStdLib/text/template` | pass | pass |
@@ -406,7 +423,7 @@ Both runtimes skip 14 of the matched tests identically.
 | `TestImportTypeparamTests/issue45722.go` | pass | pass |
 | `TestImportTypeparamTests/issue45738.go` | pass | pass |
 | `TestImportTypeparamTests/issue45817.go` | pass | pass |
-| `TestImportTypeparamTests/issue46461.go` | skip | skip |
+| `TestImportTypeparamTests/issue46461.go` | pass | pass |
 | `TestImportTypeparamTests/issue46461b.go` | pass | pass |
 | `TestImportTypeparamTests/issue46472.go` | pass | pass |
 | `TestImportTypeparamTests/issue46591.go` | pass | pass |

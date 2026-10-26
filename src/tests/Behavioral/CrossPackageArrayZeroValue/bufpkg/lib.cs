@@ -14,7 +14,7 @@ partial struct Nested {
 }
 
 public static void Fill(this ref State s) {
-    foreach (var (i, _) in s.Buf) {
+    foreach (var i in range(s.Buf)) {
         s.Buf[i] = (uint64)i + 1;
     }
     s.N = (uint32)len(s.Buf);
@@ -23,7 +23,7 @@ public static void Fill(this ref State s) {
 public static void FillArray(/*[4]*/ ж<array<uint64>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    foreach (var (i, _) in buf) {
+    foreach (var i in range(4)) {
         buf[i] = (uint64)i * 3;
     }
 }

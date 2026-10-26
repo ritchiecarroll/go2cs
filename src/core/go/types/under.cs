@@ -5,144 +5,137 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using iter = iter_package;
+using ꓸꓸꓸany = Span<any>;
+
 partial class types_package {
 
-// under returns the true expanded underlying type.
-// If it doesn't exist, the result is Typ[Invalid].
-// under must only be called when a type is known
-// to be fully set up.
-internal static ΔType under(ΔType t) {
-    {
-        var tΔ1 = asNamed(t); if (tΔ1 != nil) {
-            return tΔ1.under();
-        }
-    }
-    return t.Underlying();
+// If typ is a type parameter, underIs returns the result of typ.underIs(f).
+// Otherwise, underIs returns the result of f(typ.Underlying()).
+internal static bool underIs(ΔType typ, Func<ΔType, bool> f) {
+    return all(typ, (ΔType _, ΔType u) => f(u));
 }
 
-// If typ is a type parameter, underIs returns the result of typ.underIs(f).
-// Otherwise, underIs returns the result of f(under(typ)).
-internal static bool underIs(ΔType typ, Func<ΔType, bool> f) {
-    bool ok = default!;
-    typeset(typ, (ΔType _, ΔType u) => {
-        ok = f(u);
-        return ok;
-    });
-    return ok;
+// all reports whether f(t, u) is true for all (type/underlying type)
+// pairs in the typeset of t. See [typeset] for details of sequence.
+internal static bool all(ΔType t, Func<ΔType, ΔType, bool> f) {
+    {
+        var (p, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (p != nil) {
+            return p.typeset(f);
+        }
+    }
+    return f(t, t.Underlying());
 }
 
 // typeset is an iterator over the (type/underlying type) pairs of the
 // specific type terms of the type set implied by t.
 // If t is a type parameter, the implied type set is the type set of t's constraint.
-// In that case, if there are no specific terms, typeset calls yield with (nil, nil).
+// In this case, if there are no specific terms, the iterator produces (nil, nil).
 // If t is not a type parameter, the implied type set consists of just t.
-// In any case, typeset is guaranteed to call yield at least once.
-internal static void typeset(ΔType t, Func<ΔType, ΔType, bool> yield) {
-    {
-        var (p, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (p != nil) {
-            p.typeset(yield);
-            return;
-        }
-    }
-    yield(t, under(t));
+// In any case, typeset is guaranteed to produce at least one set of results.
+internal static iter.Seq2<ΔType, ΔType> typeset(ΔType t) {
+    return (Func<ΔType, ΔType, bool> yield) => {
+        all(t, yield);
+    };
 }
 
-// If t is not a type parameter, coreType returns the underlying type.
-// If t is a type parameter, coreType returns the single underlying
-// type of all types in its type set if it exists, or nil otherwise. If the
-// type set contains only unrestricted and restricted channel types (with
-// identical element types), the single underlying type is the restricted
-// channel type if the restrictions are always the same, or nil otherwise.
-internal static ΔType coreType(ΔType t) {
-    ref var su = ref heap<ΔType>(out var Ꮡsu);
-    typeset(t, (ΔType _, ΔType u) => {
-        if (u == default!) {
-            return false;
-        }
-        if (Ꮡsu.ValueSlot != default!) {
-            u = match(Ꮡsu.ValueSlot, u);
-            if (u == default!) {
-                Ꮡsu.ValueSlot = default!;
-                return false;
-            }
-        }
-        // su == nil || match(su, u) != nil
-        Ꮡsu.ValueSlot = u;
-        return true;
-    });
-    return su;
+// A typeError describes a type error.
+partial struct typeError {
+    internal @string format_;
+    internal slice<any> args;
 }
 
-// coreString is like coreType but also considers []byte
-// and strings as identical. In this case, if successful and we saw
-// a string, the result is of type (possibly untyped) string.
-internal static ΔType coreString(ΔType t) {
-    // This explicit case is needed because otherwise the
-    // result would be string if t is an untyped string.
-    if (!isTypeParam(t)) {
-        return under(t); // untyped string remains untyped
-    }
+internal static ж<typeError> ᏑemptyTypeError = new StandardBox<typeError>(default(typeError));
+internal static ref typeError emptyTypeError => ref ᏑemptyTypeError.Value;
 
-    ref var su = ref heap<ΔType>(out var Ꮡsu);
-    var hasString = false;
-    typeset(t, (ΔType _, ΔType u) => {
-        if (u == default!) {
-            return false;
-        }
-        if (isString(u)) {
-            u = new SliceжΔType(NewSlice(universeByte));
-            hasString = true;
-        }
-        if (Ꮡsu.ValueSlot != default!) {
-            u = match(Ꮡsu.ValueSlot, u);
-            if (u == default!) {
-                Ꮡsu.ValueSlot = default!;
-                hasString = false;
-                return false;
-            }
-        }
-        // su == nil || match(su, u) != nil
-        Ꮡsu.ValueSlot = u;
-        return true;
-    });
-    if (hasString) {
-        return new BasicжΔType(Typ[ΔString]);
+internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany argsʗp) {
+    var args = argsʗp.slice();
+
+    if (format == ""u8) {
+        return ᏑemptyTypeError;
     }
-    return su;
+    return Ꮡ(new typeError(format, args));
 }
 
-// If x and y are identical, match returns x.
-// If x and y are identical channels but for their direction
-// and one of them is unrestricted, match returns the channel
-// with the restricted direction.
-// In all other cases, match returns nil.
-internal static ΔType match(ΔType x, ΔType y) {
-    // Common case: we don't have channels.
-    if (Identical(x, y)) {
-        return x;
-    }
+// format formats a type error as a string.
+// check may be nil.
+internal static @string format(this ref typeError err, ж<Checker> Ꮡcheck) {
+    return Ꮡcheck.sprintf(err.format_, err.args.ꓸꓸꓸ);
+}
 
-    // We may have channels that differ in direction only.
-    {
-        var (xΔ1, _) = x._<ж<Chan>>(ᐧ); if (xΔ1 != nil) {
+// If t is a type parameter, cond is nil, and t's type set contains no channel types,
+// commonUnder returns the common underlying type of all types in t's type set if
+// it exists, or nil and a type error otherwise.
+//
+// If t is a type parameter, cond is nil, and there are channel types, t's type set
+// must only contain channel types, they must all have the same element types,
+// channel directions must not conflict, and commonUnder returns one of the most
+// restricted channels. Otherwise, the function returns nil and a type error.
+//
+// If cond != nil, each pair (t, u) of type and underlying type in t's type set
+// must satisfy the condition expressed by cond. If the result of cond is != nil,
+// commonUnder returns nil and the type error reported by cond.
+// Note that cond is called before any other conditions are checked; specifically
+// cond may be called with (nil, nil) if the type set contains no specific types.
+//
+// If t is not a type parameter, commonUnder behaves as if t was a type parameter
+// with the single type t in its type set.
+internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔType, ж<typeError>> cond) {
+    ΔType ct = default!;              // type and respective common underlying type
+    ΔType cu = default!;
+    foreach (var (tΔ1, u) in range<ΔType, ΔType>(typeset(t).Invoke)) {
+        if (cond != default!) {
             {
-                var (yΔ1, _) = y._<ж<Chan>>(ᐧ); if (yΔ1 != nil && Identical((~xΔ1).elem, (~yΔ1).elem)) {
-                    // We have channels that differ in direction only.
-                    // If there's an unrestricted channel, select the restricted one.
-                    switch (ᐧ) {
-                    case {} when (~xΔ1).dir == SendRecv: {
-                        return new ChanжΔType(yΔ1);
-                    }
-                    case {} when (~yΔ1).dir == SendRecv: {
-                        return new ChanжΔType(xΔ1);
-                    }}
+                var err = cond(tΔ1, u); if (err != nil) {
+                    return (default!, err);
                 }
             }
         }
-    }
 
-    // types are different
-    return default!;
+        if (u == default!) {
+            return (default!, typeErrorf("no specific type"u8));
+        }
+
+        // If this is the first type we're seeing, we're done.
+        if (cu == default!) {
+            (ct, cu) = (tΔ1, u);
+            continue;
+        }
+
+        // If we've seen a channel before, and we have a channel now, they must be compatible.
+        {
+            var (chu, _) = cu._<ж<Chan>>(ᐧ); if (chu != nil) {
+                {
+                    var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil) {
+                        if (!Identical((~chu).elem, (~ch).elem)) {
+                            return (default!, typeErrorf("channels %s and %s have different element types"u8, ct, tΔ1));
+                        }
+                        // If we have different channel directions, keep the restricted one
+                        // and complain if they conflict.
+                        switch (ᐧ) {
+                        case {} when (~chu).dir == (~ch).dir: {
+                            // nothing to do
+                            break;
+                        }
+                        case {} when (~chu).dir == SendRecv: {
+                            (ct, cu) = (tΔ1, u); // switch to restricted channel
+                            break;
+                        }
+                        case {} when (~ch).dir != SendRecv: {
+                            return (default!, typeErrorf("channels %s and %s have conflicting directions"u8, ct, tΔ1));
+                        }}
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // Otherwise, the current type must have the same underlying type as all previous types.
+        if (!Identical(cu, u)) {
+            return (default!, typeErrorf("%s and %s have different underlying types"u8, ct, tΔ1));
+        }
+    }
+    return (cu, default!);
 }
 
 } // end types_package

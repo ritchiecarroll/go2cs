@@ -139,15 +139,15 @@ public partial struct Service {
 internal static ж<Ship> nilStruct;
 
 public partial struct EmbedA {
-    public partial ref EmbedC EmbedC { get; }
+    /*embed*/ public EmbedC EmbedC;
     public EmbedB EmbedB;
     public @string FieldA;
-    internal partial ref embedD embedD { get; }
+    /*embed*/ internal embedD embedD;
 }
 
 public partial struct EmbedB {
     public @string FieldB;
-    public partial ref ж<EmbedC> EmbedC { get; }
+    /*embed*/ public ж<EmbedC> EmbedC;
 }
 
 public partial struct EmbedC {
@@ -292,7 +292,7 @@ public partial struct Plain {
 public partial struct MyInt /*num:nint*/;
 
 public partial struct EmbedInt {
-    public partial ref MyInt MyInt { get; }
+    /*embed*/ public MyInt MyInt;
 }
 
 public partial struct Strings {
@@ -313,8 +313,8 @@ public partial struct ChardataEmptyTest {
 }
 
 public partial struct PointerAnonFields {
-    public partial ref ж<MyInt> MyInt { get; }
-    public partial ref ж<NamedType> NamedType { get; }
+    /*embed*/ public ж<MyInt> MyInt;
+    /*embed*/ public ж<NamedType> NamedType;
 }
 
 public partial struct MyMarshalerTest {
@@ -324,7 +324,7 @@ internal static global::go.encoding.xml_package.Marshaler _ᴛ1ʗ = new xml_inte
 
 public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encoding.xml_package.Encoder> Ꮡe, global::go.encoding.xml_package.StartElement start) {
     Ꮡe.EncodeToken(start);
-    Ꮡe.EncodeToken(((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8)));
+    Ꮡe.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8));
     Ꮡe.EncodeToken(new EndElement(start.Name));
     return default!;
 }
@@ -351,24 +351,24 @@ public partial struct InnerStruct {
 }
 
 public partial struct OuterStruct {
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterNamedStruct {
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"outerns test"`*/
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterNamedOrderedStruct {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"outerns test"`*/
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterOuterStruct {
-    public partial ref OuterStruct OuterStruct { get; }
+    /*embed*/ public OuterStruct OuterStruct;
 }
 
 public partial struct NestedAndChardata {
@@ -605,7 +605,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(Value: Ꮡ(new Plain((@string)"</>"u8)), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(slice<byte>("</>"u8))), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new byte[]{(rune)'<', (rune)'/', (rune)'>'}.array())), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(((NamedType)(@string)"potato"u8))), ExpectXML: @"<Plain><V>potato</V></Plain>"u8),
+    new(Value: Ꮡ(new Plain((NamedType)(@string)"potato"u8)), ExpectXML: @"<Plain><V>potato</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.slice())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.array())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
     new(Value: ifaceptr(true), MarshalOnly: true, ExpectXML: @"<bool>true</bool>"u8),
@@ -1586,7 +1586,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
                 return;
             }
             {
-                @string got = ((@string)data);
+                @string got = (@string)data;
                 @string want = testʗ1.ExpectXML; if (got != want) {
                     if (strings.Contains(want, "\n"u8)){
                         tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s"u8, testʗ1.Value, got, want);
@@ -1716,7 +1716,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
             switch (destʗ1.type()) {
             case ж<Feed> fix: {
                 fix.Value.Author.InnerXML = ""u8;
-                foreach (var (iΔ1, _) in (~fix).Entry) {
+                foreach (var iΔ1 in range((~fix).Entry)) {
                     (~fix).Entry[iΔ1].Author.InnerXML = ""u8;
                 }
                 break;
@@ -1749,7 +1749,7 @@ public static void TestMarshalIndent(ж<testing.T> Ꮡt) {
             continue;
         }
         {
-            @string got = ((@string)data);
+            @string got = (@string)data;
             @string want = test.ExpectXML; if (got != want) {
                 Ꮡt.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s"u8, i, got, want);
             }
@@ -1835,7 +1835,7 @@ public static void TestMarshalFlush(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
     {
-        var err = enc.EncodeToken(((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8))); if (err != default!) {
+        var err = enc.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8)); if (err != default!) {
             Ꮡt.Fatalf("enc.EncodeToken: %v"u8, err);
         }
     }
@@ -1899,7 +1899,7 @@ public static void TestStructPointerMarshal(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     {
-        @string x = ((@string)b); if (x != "<a><c><value>x</value></c></a>"u8) {
+        @string x = (@string)b; if (x != "<a><c><value>x</value></c></a>"u8) {
             Ꮡt.Fatal(x);
         }
     }
@@ -1938,25 +1938,25 @@ internal static void initᴛencodeTokenTests() { encodeTokenTests = new encodeTo
 ), new(
     desc: "char data"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"foo"u8
 ), new(
     desc: "char data with escaped chars"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8))
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8)
     }.slice(),
     want: " &#x9;\n"u8
 ), new(
     desc: "comment"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!--foo-->"u8
 ), new(
     desc: "comment with invalid content"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8))
+        (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8)
     }.slice(),
     err: "xml: EncodeToken of Comment containing --> marker"u8
 ), new(
@@ -1980,19 +1980,19 @@ internal static void initᴛencodeTokenTests() { encodeTokenTests = new encodeTo
 ), new(
     desc: "directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!foo>"u8
 ), new(
     desc: "more complex directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8)
     }.slice(),
     want: @"<!DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]>"u8
 ), new(
     desc: "directive instruction with bad name"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8)
     }.slice(),
     err: "xml: EncodeToken of Directive containing wrong < or > markers"u8
 ), new(
@@ -2442,12 +2442,12 @@ public static void TestIsValidDirective(ж<testing.T> Ꮡt) {
         "<!DOCTYPE doc <!--comment>"u8
     }.slice();
     foreach (var (_, s) in testOK) {
-        if (!isValidDirective(((global::go.encoding.xml_package.Directive)slice<byte>(s)))) {
+        if (!isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             Ꮡt.Errorf("Directive %q is expected to be valid"u8, s);
         }
     }
     foreach (var (_, s) in testKO) {
-        if (isValidDirective(((global::go.encoding.xml_package.Directive)slice<byte>(s)))) {
+        if (isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             Ꮡt.Errorf("Directive %q is expected to be invalid"u8, s);
         }
     }
@@ -2548,7 +2548,7 @@ public static void TestInvalidXMLName(ж<testing.T> Ꮡt) {
 public partial struct LayerOne {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"l1"`*/
     public ж<float64> Value; /*`xml:"value,omitempty"`*/
-    public partial ref ж<LayerTwo> LayerTwo { get; } /*`xml:",omitempty"`*/
+    /*embed*/ public ж<LayerTwo> LayerTwo; /*`xml:",omitempty"`*/
 }
 
 public partial struct LayerTwo {
@@ -2599,7 +2599,7 @@ internal static slice<encodeTokenTestsᴛ1> closeTests = new encodeTokenTestsᴛ
 ), new(
     desc: "directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!foo>"u8
 )
@@ -2609,11 +2609,12 @@ internal static slice<encodeTokenTestsᴛ1> closeTests = new encodeTokenTestsᴛ
 internal static readonly object expectedErrorGotNoneˢ = (@string)" expected error; got none"u8;
 
 public static void TestClose(ж<testing.T> Ꮡt) {
-    foreach (var (_, tt) in closeTests) {
-        ref var ttΔ1 = ref heap<encodeTokenTestsᴛ1>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.desc, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in closeTests) {
+        ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.desc, (ж<testing.T> tΔ1) => {
             ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
             var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡout));
             foreach (var (j, tok) in ttʗ1.toks) {
@@ -2644,7 +2645,7 @@ public static void TestClose(ж<testing.T> Ꮡt) {
             }
             tΔ1.Log((~enc).p.closed);
             {
-                var errΔ1 = enc.EncodeToken(((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))); if (errΔ1 == default!) {
+                var errΔ1 = enc.EncodeToken((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)); if (errΔ1 == default!) {
                     tΔ1.Errorf("unexpected success when encoding after Close"u8);
                 }
             }

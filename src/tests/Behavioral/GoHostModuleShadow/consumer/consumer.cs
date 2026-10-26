@@ -24,24 +24,20 @@ public static @string Describe(@string s) {
 
 internal static @string itoa(nint n) {
     if (n == 0) {
-        return "0"u8;
+        return "0";
     }
-    @string digits = ""u8;
+    @string digits = "";
     for (; n > 0; n /= 10) {
         digits = ((@string)(rune)((rune)'0' + n % 10)) + digits;
     }
     return digits;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string trueˢ = "true"u8;
-private static readonly @string falseˢ = "false"u8;
-
 internal static @string bool2s(bool b) {
     if (b) {
-        return trueˢ;
+        return "true";
     }
-    return falseˢ;
+    return "false";
 }
 
 } // end consumer_package

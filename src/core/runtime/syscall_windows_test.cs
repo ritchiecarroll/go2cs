@@ -5,6 +5,8 @@ namespace go;
 
 using fmt = fmt_package;
 using abi = @internal.abi_package;
+using race = @internal.race_package;
+using windows = @internal.runtime.syscall.windows_package;
 using sysdll = @internal.syscall.windows.sysdll_package;
 using testenv = @internal.testenv_package;
 using Δio = io_package;
@@ -20,6 +22,7 @@ using syscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime.syscall;
 using @internal.syscall.windows;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -31,7 +34,7 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 partial struct DLL {
-    public partial ref ж<syscall_package.DLL> ΔDLL { get; }
+    /*embed*/ public ж<syscall_package.DLL> ΔDLL;
     internal ж<testing.T> t;
 }
 
@@ -343,7 +346,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> Ꮡt) {
         if (r == 0) {
             Ꮡt.Fatalf("CreateThread failed: %v"u8, err);
         }
-        var h = ((syscallꓸHandle)r);
+        var h = (syscallꓸHandle)r;
         defer(syscall.CloseHandle, h, ref ᒐ);
 
         {
@@ -411,7 +414,7 @@ internal static void cSrc(this cbFunc f, Δio.Writer w, bool cdecl) {
     var t = reflect.TypeOf(f.goFunc);
     var cTypes = new slice<@string>(t.NumIn());
     var cArgs = new slice<@string>(t.NumIn());
-    foreach (var (i, _) in cTypes) {
+    foreach (var i in range(cTypes)) {
         // We included stdint.h, so this works for all sized
         // integer types, and uint8Pair_t.
         cTypes[i] = t.In(i).Name() + "_t"u8;
@@ -622,7 +625,7 @@ internal static @string build(this ref cbDLL d, ж<testing.T> Ꮡt, @string dir)
     cmd.Value.Dir = dir;
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
     }
     return filepath.Join(dir, outname);
 }
@@ -772,7 +775,7 @@ public static void TestRaiseException(ж<testing.T> Ꮡt) {
 internal static readonly @string zeroDivisionExceptionˢ = "ZeroDivisionException"u8;
 internal static readonly @string panicRuntimeErrorIntegerˢ = "panic: runtime error: integer divide by zero"u8;
 
-public static void TestZeroDivisionException(ж<testing.T> Ꮡt) {
+public static partial void TestZeroDivisionException(ж<testing.T> Ꮡt) {
     @string o = runTestProg(Ꮡt, testprogˢ, zeroDivisionExceptionˢ);
     if (!strings.Contains(o, panicRuntimeErrorIntegerˢ)) {
         Ꮡt.Fatalf("No stack trace: %v"u8, o);
@@ -781,7 +784,7 @@ public static void TestZeroDivisionException(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testWerDialogueˢ = "TEST_WER_DIALOGUE"u8;
-internal static readonly @string testRunTestWERDialogueˢ = "-test.run=TestWERDialogue"u8;
+internal static readonly @string testRunTestWERDialogueˢ = "-test.run=^TestWERDialogue$"u8;
 internal static readonly object testProgramSucceededˢ = (@string)"test program succeeded unexpectedly"u8;
 
 public static void TestWERDialogue(ж<testing.T> Ꮡt) {
@@ -807,16 +810,20 @@ public static void TestWERDialogue(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestRaceModeUsesˢ = (@string)"skipping test: race mode uses more stack memory"u8;
 internal static readonly @string stackMemoryˢ = "StackMemory"u8;
 
 public static void TestWindowsStackMemory(ж<testing.T> Ꮡt) {
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceModeUsesˢ);
+    }
     @string o = runTestProg(Ꮡt, testprogˢ, stackMemoryˢ);
     var (stackUsage, err) = strconv.Atoi(o);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to read stack usage: %v"u8, err);
     }
     {
-        nint expected = (128 << (int)(10));
+        nint expected = 128 << 10;
         nint got = stackUsage; if (got > expected) {
             Ꮡt.Fatalf("expected < %d bytes of memory per thread, got %d"u8, expected, got);
         }
@@ -898,7 +905,7 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -915,7 +922,7 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
         ref var want = ref heap<TestReturnAfterStackGrowInCallback_result>(out var Ꮡwant);
         want = new TestReturnAfterStackGrowInCallback_result(
             // Make it large enough to test issue #29331.
-            r: ((~(uintptr)0) >> (int)(24)),
+            r: ((~(uintptr)0) >> 24),
             err: 333
         );
         var c = new channel<TestReturnAfterStackGrowInCallback_result>(0);
@@ -946,7 +953,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
         Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
     }
 
-    for (nint arglen = 0; arglen <= runtime_internal_test_package.MaxArgs; arglen++) {
+    for (nint arglen = 0; arglen <= windows.MaxArgs; arglen++) {
         nint arglenΔ1 = arglen;
         Ꮡt.Run(fmt.Sprintf("arg-%d"u8, arglenΔ1), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
@@ -955,7 +962,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
                 var args = new slice<@string>(arglenΔ1);
                 var rets = new slice<@string>(arglenΔ1 + 1);
                 var @params = new slice<uintptr>(arglenΔ1);
-                foreach (var (i, _) in args) {
+                foreach (var i in range(args)) {
                     args[i] = fmt.Sprintf("int a%d"u8, i);
                     rets[i] = fmt.Sprintf("(a%d == %d)"u8, i, i);
                     @params[i] = (uintptr)i;
@@ -1043,7 +1050,7 @@ public static void TestFloatArgs(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1117,7 +1124,7 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1153,7 +1160,7 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTimeBeginPeriod(ж<testing.T> Ꮡt) {
+public static partial void TestTimeBeginPeriod(ж<testing.T> Ꮡt) {
     const uint32 TIMERR_NOERROR = 0;
     if (runtime_internal_test_package.TimeBeginPeriodRetValue.Value != TIMERR_NOERROR) {
         Ꮡt.Fatalf("timeBeginPeriod failed: it returned %d"u8, runtime_internal_test_package.TimeBeginPeriodRetValue.Value);
@@ -1224,7 +1231,7 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
         if (h == 0) {
             return err;
         }
-        defer(syscall.Close, ((syscallꓸHandle)h), ref ᒐ);
+        defer(syscall.Close, (syscallꓸHandle)h, ref ᒐ);
 
         (ret, _, err) = _ResumeThread.Call(h);
         if (ret == 0xffffffffU) {
@@ -1240,7 +1247,7 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
 internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
 internal static readonly @string getProcessAffinityMaskˢ = "GetProcessAffinityMask"u8;
 internal static readonly @string setProcessAffinityMaskˢ = "SetProcessAffinityMask"u8;
-internal static readonly @string testRunTestNumCPUˢ = "-test.run=TestNumCPU"u8;
+internal static readonly @string testRunTestNumCPUˢ = "-test.run=^TestNumCPU$"u8;
 
 public static void TestNumCPU(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1275,7 +1282,7 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
         var _GetProcessAffinityMask = kernel32.MustFindProc(getProcessAffinityMaskˢ);
         var _SetProcessAffinityMask = kernel32.MustFindProc(setProcessAffinityMaskˢ);
 
-        var cmd = exec.Command(Δos.Args[0], testRunTestNumCPUˢ);
+        var cmd = exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestNumCPUˢ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         cmd.Value.Stdout = new runtime_test_package.strings_BuilderжWriter(Ꮡbuf);
@@ -1381,7 +1388,7 @@ public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
     cmd.Value.Dir = tmpdir;
     (var @out, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
     }
     @string dllpath = filepath.Join(tmpdir, name);
 
@@ -1445,7 +1452,7 @@ public static void TestBigStackCallbackSyscall(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1488,7 +1495,7 @@ internal static (syscallꓸHandle, error) createEvent() {
     if (r0 == 0) {
         return (0, e0);
     }
-    return (((syscallꓸHandle)r0), default!);
+    return ((syscallꓸHandle)r0, default!);
 }
 
 internal static error setEvent(syscallꓸHandle h) {

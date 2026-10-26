@@ -5,7 +5,6 @@
 // and only — class is the test metadata class the go2cs-gen generators anchor
 // generated adapters and partials to.
 global using static global::go.crypto.mlkem_package;
-global using static global::go.crypto.mlkem_internal_test_package;
 
 // <ImportedTypeAliases>
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
@@ -18,12 +17,20 @@ using static global::go.crypto.mlkem_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<global::go.crypto.mlkem_package.DecapsulationKey1024, decapsulationKey<encapsulationKey>>(Pointer = true)]
-[assembly: GoImplement<global::go.crypto.mlkem_package.DecapsulationKey768, decapsulationKey<encapsulationKey>>(Pointer = true)]
+[assembly: GoImplement<go.crypto.mlkem_package.DecapsulationKey1024, decapsulationKey<encapsulationKey>>(Pointer = true)]
+[assembly: GoImplement<go.crypto.mlkem_package.DecapsulationKey768, decapsulationKey<encapsulationKey>>(Pointer = true)]
+[assembly: GoImplement<go.crypto.mlkem_package.EncapsulationKey1024, encapsulationKey>(Pointer = true)]
+[assembly: GoImplement<go.crypto.mlkem_package.EncapsulationKey768, encapsulationKey>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -33,7 +40,8 @@ using static global::go.crypto.mlkem_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAwYlIKClLimgoK4prSCgpSmpg==")]
+[assembly: go.GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAsYlIKClLimgoK4prSCgpSmpg==")]
+[assembly: go.GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "ACE8goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoCCtoKCgoCCyIKAgraCgoKAgsiCgIK2goKCgILamKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSClIKClIKmgoKClKaCgtyikoKCgoKCuKKCgoKClIKCgoKClIK4ooKClIKCgoKC+IKCgpSCgoKClKKCgoKUgpSCgpSmkoKCgpSCgpTMkoKmgqaCpoKmgqaC", "31-33:1;34-36:2;101-103:1;104-106:2;280-295:1;296-308:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -48,6 +56,8 @@ public static partial class mlkem_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface decapsulationKey<E> {}
+    internal partial interface encapsulationKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -61,6 +71,7 @@ public static partial class mlkem_test_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸmlkem() => builtin.initPackage(typeof(go.crypto.@internal.fips140.mlkem_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha3() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha3_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸmlkem() => builtin.initPackage(typeof(go.crypto.mlkem_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸmlkemꓸmlkemtest() => builtin.initPackage(typeof(go.crypto.mlkem.mlkemtest_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸhex() => builtin.initPackage(typeof(encoding.hex_package));
     [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));

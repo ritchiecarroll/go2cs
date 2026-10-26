@@ -6,8 +6,6 @@ namespace go;
 using bytes = bytes_package;
 using flag = flag_package;
 using fmt = fmt_package;
-using abi = @internal.abi_package;
-using goexperiment = @internal.goexperiment_package;
 using testenv = @internal.testenv_package;
 using Δos = os_package;
 using exec = global::go.os.exec_package;
@@ -93,13 +91,18 @@ internal static void checkGdbVersion(ж<testing.T> Ꮡt) {
     if (len(matches) < 3) {
         Ꮡt.Skipf("skipping: can't determine gdb version from\n%s\n"u8, @out);
     }
-    var (major, err1) = strconv.Atoi(((@string)matches[1]));
-    var (minor, err2) = strconv.Atoi(((@string)matches[2]));
+    var (major, err1) = strconv.Atoi((@string)matches[1]);
+    var (minor, err2) = strconv.Atoi((@string)matches[2]);
     if (err1 != default! || err2 != default!) {
         Ꮡt.Skipf("skipping: can't determine gdb version: %v, %v"u8, err1, err2);
     }
-    if (major < 7 || (major == 7 && minor < 7)) {
+    // The Go toolchain now generates DWARF 5 by default, which needs
+    // a GDB version of 10 or above.
+    if (major < 10) {
         Ꮡt.Skipf("skipping: gdb version %d.%d too old"u8, major, minor);
+    }
+    if (major < 12 || (major == 12 && minor < 1)) {
+        Ꮡt.Logf("gdb version <12.1 is known to crash due to a SIGWINCH received in non-interactive mode; if you see a crash, some test may be sending SIGWINCH to the whole process group. See go.dev/issue/58932."u8);
     }
     Ꮡt.Logf("gdb version %d.%d"u8, major, minor);
 }
@@ -119,7 +122,7 @@ internal static void checkGdbPython(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Skipf("skipping due to issue running gdb: %v"u8, err);
     }
-    if (strings.TrimSpace(((@string)@out)) != "go gdb python support"u8) {
+    if (strings.TrimSpace((@string)@out) != "go gdb python support"u8) {
         Ꮡt.Skipf("skipping due to lack of python gdb support: %s"u8, @out);
     }
 }
@@ -171,7 +174,7 @@ internal static void checkPtraceScope(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to read file: %v"u8, err);
     }
-    (var value, err) = strconv.Atoi(strings.TrimSpace(((@string)data)));
+    (var value, err) = strconv.Atoi(strings.TrimSpace((@string)data));
     if (err != default!) {
         Ꮡt.Fatalf("failed converting value to int: %v"u8, err);
     }
@@ -188,8 +191,6 @@ internal static void checkPtraceScope(ж<testing.T> Ꮡt) {
     }}
 }
 
-// NOTE: the maps below are allocated larger than abi.MapBucketCount
-// to ensure that they are not "optimized out".
 internal static @string helloSource = """
 
 import "fmt"
@@ -199,23 +200,21 @@ var gslice []string
 var smallmapvar map[string]string
 func main() {
 	smallmapvar = make(map[string]string)
-	mapvar := make(map[string]string, 
-"""u8.Raw() + strconv.FormatInt(abi.OldMapBucketCount + 9, 10) + """
-)
-	slicemap := make(map[string][]string,
-"""u8.Raw() + strconv.FormatInt(abi.OldMapBucketCount + 3, 10) + """
-)
-    chanint := make(chan int, 10)
-    chanstr := make(chan string, 10)
-    chanint <- 99
+	// NOTE: the maps below are allocated large to ensure that they are not
+	// "optimized out".
+	mapvar := make(map[string]string, 10)
+	slicemap := make(map[string][]string, 10)
+	chanint := make(chan int, 10)
+	chanstr := make(chan string, 10)
+	chanint <- 99
 	chanint <- 11
-    chanstr <- "spongepants"
-    chanstr <- "squarebob"
+	chanstr <- "spongepants"
+	chanstr <- "squarebob"
 	smallmapvar["abc"] = "def"
 	mapvar["abc"] = "def"
 	mapvar["ghi"] = "jkl"
 	slicemap["a"] = []string{"b","c","d"}
-    slicemap["e"] = []string{"f","g","h"}
+	slicemap["e"] = []string{"f","g","h"}
 	strvar := "abc"
 	ptrvar := &strvar
 	slicevar := make([]string, 0, 16)
@@ -309,6 +308,8 @@ internal static readonly @string m0S0x09aFSInSMainMainAtˢ = @"(?m)^#0\s+(0x[0-9
 internal static readonly @string goroutineAllBtˢ = "goroutine all bt"u8;
 
 internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
+    var argsᴷ = new stackAppend<@string>();
+
     if (cgo) {
         testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
     }
@@ -364,7 +365,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
         // compress the .debug_gdb_scripts into .zdebug_gdb_scripts.
         // Until gold and gdb can work together, temporarily load the
         // python script directly.
-        args = append(args,
+        args = append(argsᴷ, args,
             "-ex"u8, "source " + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ, runtimeGdbPyˢ));
     } else {
         args = append(args,
@@ -423,7 +424,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     var partRe = Δregexp.MustCompile(msBeginNNNENDˢ);
     var blocks = new map<@string, @string>{};
     foreach (var (_, subs) in partRe.FindAllSubmatch(got, -1)) {
-        blocks[((@string)subs[1])] = ((@string)subs[2]);
+        blocks[((@string)subs[1])] = (@string)subs[2];
     }
 
     var infoGoroutinesRe = Δregexp.MustCompile(sDSRunningSˢ);
@@ -550,12 +551,11 @@ func main() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testParallelˢ = "test.parallel"u8;
+internal static readonly @string couldnTGetAZAZRegistersˢ = @"Couldn't get [a-zA-Z_ -]* ?registers: No such process\."u8;
 
 // TestGdbBacktrace tests that gdb can unwind the stack correctly
 // using only the DWARF debug info.
 public static void TestGdbBacktrace(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δruntime.GOOS == "netbsd"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 15603);
     }
@@ -632,13 +632,14 @@ public static void TestGdbBacktrace(ж<testing.T> Ꮡt) {
     (var got, err) = cmd.CombinedOutput();
     Ꮡt.Logf("gdb output:\n%s"u8, got);
     if (err != default!) {
+        var noProcessRE = Δregexp.MustCompile(couldnTGetAZAZRegistersˢ);
         switch (ᐧ) {
         case {} when bytes.Contains(got, slice<byte>("internal-error: wait returned unexpected status 0x0"u8)): {
             // GDB bug: https://sourceware.org/bugzilla/show_bug.cgi?id=28551
             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 43068);
             break;
         }
-        case {} when (bytes.Contains(got, slice<byte>("Couldn't get registers: No such process."u8))) || (bytes.Contains(got, slice<byte>("Unable to fetch general registers.: No such process."u8))) || (bytes.Contains(got, slice<byte>("reading register pc (#64): No such process."u8))): {
+        case {} when (noProcessRE.Match(got)) || (bytes.Contains(got, slice<byte>("Unable to fetch general registers.: No such process."u8))) || (bytes.Contains(got, slice<byte>("reading register pc (#64): No such process."u8))): {
             // GDB bug: https://sourceware.org/bugzilla/show_bug.cgi?id=9086
             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 50838);
             break;
@@ -745,27 +746,17 @@ public static void TestGdbAutotmpTypes(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
     }
 
-    @string sgot = ((@string)got);
+    @string sgot = (@string)got;
 
     // Check that the backtrace matches the source code.
     var types = new @string[]{
         "[]main.astruct"u8,
-        "main.astruct"u8
+        "main.astruct"u8,
+        "groupReference<string,main.astruct>"u8,
+        "table<string,main.astruct>"u8,
+        "map<string,main.astruct>"u8,
+        "map<string,main.astruct> * map[string]main.astruct"u8
     }.slice();
-    if (goexperiment.SwissMap){
-        types = appendꓸꓸꓸ(types, new @string[]{
-            "groupReference<string,main.astruct>"u8,
-            "table<string,main.astruct>"u8,
-            "map<string,main.astruct>"u8,
-            "map<string,main.astruct> * map[string]main.astruct"u8
-        }.slice());
-    } else {
-        types = appendꓸꓸꓸ(types, new @string[]{
-            "bucket<string,main.astruct>"u8,
-            "hash<string,main.astruct>"u8,
-            "hash<string,main.astruct> * map[string]main.astruct"u8
-        }.slice());
-    }
     foreach (var (_, name) in types) {
         if (!strings.Contains(sgot, name)) {
             Ꮡt.Fatalf("could not find %q in 'info typrs astruct' output"u8, name);
@@ -828,7 +819,7 @@ public static void TestGdbConst(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
     }
 
-    @string sgot = strings.ReplaceAll(((@string)got), "\r\n"u8, "\n"u8);
+    @string sgot = strings.ReplaceAll((@string)got, "\r\n"u8, "\n"u8);
 
     if (!strings.Contains(sgot, "\n$1 = 42\n$2 = 18446744073709551615\n$3 = -1\n$4 = 1 '\\001'\n$5 = 8192"u8)) {
         Ꮡt.Fatalf("output mismatch"u8);

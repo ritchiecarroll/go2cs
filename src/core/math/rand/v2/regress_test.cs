@@ -37,11 +37,12 @@ internal static readonly @string regressTestGoˢ = "regress_test.go"u8;
 
 public static void TestRegress(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var argsᴷ = new stackAppend<reflectꓸValue>();
 
-    slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, (int32)(1 << (int)(30)), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
-    slice<uint32> uint32s = new uint32[]{1, 10, 32, ((uint32)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((uint32)1 << (int)(30)), (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))}.slice();
-    slice<int64> int64s = new int64[]{1, 10, 32, ((int64)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((int64)1 << (int)(30)), 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
-    slice<uint64> uint64s = new uint64[]{1, 10, 32, ((uint64)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((uint64)1 << (int)(30)), (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, ((uint64)1 << (int)(60)), 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL}.slice();
+    slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
+    slice<uint32> uint32s = new uint32[]{1, 10, 32, (uint32)1 << 20, (1 << 20) + 1, 1000000000, (uint32)1 << 30, (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))}.slice();
+    slice<int64> int64s = new int64[]{1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
+    slice<uint64> uint64s = new uint64[]{1, 10, 32, (uint64)1 << 20, (1 << 20) + 1, 1000000000, (uint64)1 << 30, (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, (uint64)1 << 60, 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL}.slice();
     slice<nint> permSizes = new nint[]{0, 1, 5, 8, 9, 10, 16}.slice();
 
     nint n = reflect.TypeOf(New(new rand.PCGжSource(NewPCG(1, 2))).OrTypedNil()).NumMethod();
@@ -120,7 +121,7 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("unexpected argument type for r.%s"u8, m.Name);
                 }
                 argstr = fmt.Sprint(x);
-                args = append(args, reflect.ValueOf(x));
+                args = append(argsᴷ, args, reflect.ValueOf(x));
             }
 
             any @out = default!;
@@ -150,7 +151,7 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
             } else {
                 var want = regressGolden[p];
                 if (m.Name == "Int"u8) {
-                    want = (int64)(nint)((((nuint)(want._<int64>()) << (int)(1)) >> (int)(1)));
+                    want = (int64)(nint)(((nuint)(want._<int64>()) << 1) >> 1);
                 }
                 if (m.Name == "Uint"u8) {
                     want = (uint64)(nuint)(want._<uint64>());
@@ -211,7 +212,7 @@ public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// Output:\n"u8);
-        foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+        foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
             if (line != ""u8) {
                 fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// %s\n"u8, line);
             }
@@ -285,6 +286,7 @@ internal static slice<any> regressGolden = new any[]{
     (float64)0.4981788638202421D, // ExpFloat64()
     (float64)0.15806532306947937D, // ExpFloat64()
     (float64)0.9419163802459202D, // ExpFloat64()
+
     (float32)0.95955694F, // Float32()
     (float32)0.8076733F, // Float32()
     (float32)0.8135684F, // Float32()
@@ -305,6 +307,7 @@ internal static slice<any> regressGolden = new any[]{
     (float32)0.19820237F, // Float32()
     (float32)0.7443699F, // Float32()
     (float32)0.56461F, // Float32()
+
     (float64)0.6764556596678251D, // Float64()
     (float64)0.4613862177205994D, // Float64()
     (float64)0.5085473976760264D, // Float64()
@@ -325,6 +328,7 @@ internal static slice<any> regressGolden = new any[]{
     (float64)0.5856191500346635D, // Float64()
     (float64)0.9549597149363428D, // Float64()
     (float64)0.5168804691962643D, // Float64()
+
     (int64)4969059760275911952L, // Int()
     (int64)2147869220224756844L, // Int()
     (int64)5246770554000605320L, // Int()
@@ -345,6 +349,7 @@ internal static slice<any> regressGolden = new any[]{
     (int64)158397175702351138L, // Int()
     (int64)1350674201389090105L, // Int()
     (int64)6093522341581845358L, // Int()
+
     (int32)1652216515, // Int32()
     (int32)1323786710, // Int32()
     (int32)1684546306, // Int32()
@@ -365,6 +370,7 @@ internal static slice<any> regressGolden = new any[]{
     (int32)1092181682, // Int32()
     (int32)157239171, // Int32()
     (int32)709379364, // Int32()
+
     (int32)0, // Int32N(1)
     (int32)6, // Int32N(10)
     (int32)8, // Int32N(32)
@@ -385,6 +391,7 @@ internal static slice<any> regressGolden = new any[]{
     (int32)1092181681, // Int32N(2147483647)
     (int32)0, // Int32N(1)
     (int32)3, // Int32N(10)
+
     (int64)4969059760275911952L, // Int64()
     (int64)2147869220224756844L, // Int64()
     (int64)5246770554000605320L, // Int64()
@@ -405,6 +412,7 @@ internal static slice<any> regressGolden = new any[]{
     (int64)158397175702351138L, // Int64()
     (int64)1350674201389090105L, // Int64()
     (int64)6093522341581845358L, // Int64()
+
     (int64)0, // Int64N(1)
     (int64)6, // Int64N(10)
     (int64)8, // Int64N(32)
@@ -425,6 +433,7 @@ internal static slice<any> regressGolden = new any[]{
     (int64)533292, // Int64N(1048577)
     (int64)73220195, // Int64N(1000000000)
     (int64)686060398, // Int64N(1073741824)
+
     (int64)0, // IntN(1)
     (int64)6, // IntN(10)
     (int64)8, // IntN(32)
@@ -445,6 +454,7 @@ internal static slice<any> regressGolden = new any[]{
     (int64)533292, // IntN(1048577)
     (int64)73220195, // IntN(1000000000)
     (int64)686060398, // IntN(1073741824)
+
     (float64)0.37944549835531083D, // NormFloat64()
     (float64)0.07473804659119399D, // NormFloat64()
     (float64)0.20006841200604142D, // NormFloat64()
@@ -465,6 +475,7 @@ internal static slice<any> regressGolden = new any[]{
     (float64)1.5631937339973658D, // NormFloat64()
     (float64)(-0.3841235370075905D), // NormFloat64()
     (float64)(-0.2967295854430667D), // NormFloat64()
+
     new nint[]{}.slice(), // Perm(0)
     new nint[]{0}.slice(), // Perm(1)
     new nint[]{1, 4, 2, 0, 3}.slice(), // Perm(5)
@@ -485,6 +496,7 @@ internal static slice<any> regressGolden = new any[]{
     new nint[]{3, 2, 1, 0, 7, 5, 4, 6}.slice(), // Perm(8)
     new nint[]{1, 3, 4, 5, 0, 2, 7, 8, 6}.slice(), // Perm(9)
     new nint[]{1, 8, 4, 7, 2, 6, 5, 9, 0, 3}.slice(), // Perm(10)
+
     (uint64)14192431797130687760UL, // Uint()
     (uint64)11371241257079532652UL, // Uint()
     (uint64)14470142590855381128UL, // Uint()
@@ -505,6 +517,7 @@ internal static slice<any> regressGolden = new any[]{
     (uint64)9381769212557126946UL, // Uint()
     (uint64)1350674201389090105UL, // Uint()
     (uint64)6093522341581845358UL, // Uint()
+
     (uint32)3304433030U, // Uint32()
     (uint32)2647573421U, // Uint32()
     (uint32)3369092613U, // Uint32()
@@ -525,6 +538,7 @@ internal static slice<any> regressGolden = new any[]{
     (uint32)2184363364U, // Uint32()
     (uint32)314478343, // Uint32()
     (uint32)1418758728, // Uint32()
+
     (uint32)0, // Uint32N(1)
     (uint32)6, // Uint32N(10)
     (uint32)8, // Uint32N(32)
@@ -545,6 +559,7 @@ internal static slice<any> regressGolden = new any[]{
     (uint32)522841378, // Uint32N(1073741824)
     (uint32)157239171, // Uint32N(2147483646)
     (uint32)709379364, // Uint32N(2147483647)
+
     (uint64)14192431797130687760UL, // Uint64()
     (uint64)11371241257079532652UL, // Uint64()
     (uint64)14470142590855381128UL, // Uint64()
@@ -565,6 +580,7 @@ internal static slice<any> regressGolden = new any[]{
     (uint64)9381769212557126946UL, // Uint64()
     (uint64)1350674201389090105UL, // Uint64()
     (uint64)6093522341581845358UL, // Uint64()
+
     (uint64)0, // Uint64N(1)
     (uint64)6, // Uint64N(10)
     (uint64)8, // Uint64N(32)
@@ -585,6 +601,7 @@ internal static slice<any> regressGolden = new any[]{
     (uint64)2, // Uint64N(32)
     (uint64)312633, // Uint64N(1048576)
     (uint64)346376, // Uint64N(1048577)
+
     (uint64)0, // UintN(1)
     (uint64)6, // UintN(10)
     (uint64)8, // UintN(32)

@@ -180,8 +180,13 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this 
     error err = default!;
     ref var req = ref Ꮡreq.DerefOrNull();
 
+    var cookieURL = req.URL;
+    if (req.Host != ""u8) {
+        cookieURL = cloneURL(cookieURL);
+        cookieURL.Value.Host = req.Host;
+    }
     if (c.Jar != default!) {
-        foreach (var (_, cookie) in c.Jar.Cookies(req.URL)) {
+        foreach (var (_, cookie) in c.Jar.Cookies(cookieURL)) {
             req.AddCookie(cookie);
         }
     }
@@ -192,7 +197,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this 
     if (c.Jar != default!) {
         {
             var rc = resp.Cookies(); if (builtin.len(rc) > 0) {
-                c.Jar.SetCookies(req.URL, rc);
+                c.Jar.SetCookies(cookieURL, rc);
             }
         }
     }
@@ -373,7 +378,7 @@ internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) 
 // The first way, used only for RoundTripper
 // implementations written before Go 1.5 or Go 1.6.
 internal partial interface setRequestCancel_canceler /*dyn*/ {
-    void CancelRequest(ж<Request> _);
+    void CancelRequest(ж<Request> _Δp0);
 }
 
 // setRequestCancel sets req.Cancel and adds a deadline context to req
@@ -693,7 +698,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
         time.Time deadline = c.deadline();
         ref var reqs = ref heap<slice<ж<Request>>>(out var Ꮡreqs);
         ref var resp = ref heap<ж<Response>>(out var Ꮡresp);
-        Action<ж<Request>, bool> copyHeaders = Ꮡc.makeHeadersCopier(Ꮡreq);
+        Action<ж<Request>, bool, bool> copyHeaders = Ꮡc.makeHeadersCopier(Ꮡreq);
         bool reqBodyClosed = false; // have we closed the current req.Body?
 
         // Redirect behavior:
@@ -761,6 +766,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                         resp.closeBody();
                         (retres, reterr) = (default!, uerr(errΔ1)); goto ᒐdone;
                     }
+                    req.GetBody = ireq.Value.GetBody;
                     req.ContentLength = ireq.Value.ContentLength;
                 }
 
@@ -773,8 +779,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                         stripSensitiveHeaders = true;
                     }
                 }
-                copyHeaders(Ꮡreq, stripSensitiveHeaders);
-
+                copyHeaders(Ꮡreq, stripSensitiveHeaders, !includeBody);
                 // Add the Referer header from the most recent
                 // request URL to the new one, if it's not https->http:
                 {
@@ -853,7 +858,7 @@ internal static readonly @string cookieˢ = "Cookie"u8;
 // makeHeadersCopier makes a function that copies headers from the
 // initial Request, ireq. For every redirect, this function must be called
 // so that it can copy headers into the upcoming Request.
-internal static Action<ж<Request>, bool> makeHeadersCopier(this ж<Client> Ꮡc, ж<Request> Ꮡireq) {
+internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client> Ꮡc, ж<Request> Ꮡireq) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var ireq = ref Ꮡireq.DerefOrNull();
 
@@ -870,7 +875,8 @@ internal static Action<ж<Request>, bool> makeHeadersCopier(this ж<Client> Ꮡc
 
     var icookiesʗ1 = icookies;
     var ireqhdrʗ1 = ireqhdr;
-    return (ж<Request> req, bool stripSensitiveHeaders) => {
+    return (ж<Request> req, bool stripSensitiveHeaders, bool stripBodyHeaders) => {
+        var ssᴷ = new stackAppend<@string>();
         // If Jar is present and there was some initial cookies provided
         // via the request header, then we may need to alter the initial
         // cookies as we follow redirects since each redirect may end up
@@ -898,7 +904,7 @@ internal static Action<ж<Request>, bool> makeHeadersCopier(this ж<Client> Ꮡc
                 slice<@string> ss = default!;
                 foreach (var (_, cs) in icookiesʗ1) {
                     foreach (var (_, cΔ3) in cs) {
-                        ss = append(ss, (~cΔ3).Name + "="u8 + (~cΔ3).Value);
+                        ss = append(ssᴷ, ss, (~cΔ3).Name + "="u8 + (~cΔ3).Value);
                     }
                 }
                 slices.Sort<slice<@string>, @string>(ss); // Ensure deterministic headers
@@ -910,11 +916,18 @@ internal static Action<ж<Request>, bool> makeHeadersCopier(this ж<Client> Ꮡc
         // (at least the safe ones).
         foreach (var (k, vv) in ireqhdrʗ1) {
             var sensitive = false;
+            var body = false;
             var exprᴛ1 = CanonicalHeaderKey(k);
             if (exprᴛ1 == "Authorization"u8 || exprᴛ1 == "Www-Authenticate"u8 || exprᴛ1 == "Cookie"u8 || exprᴛ1 == "Cookie2"u8 || exprᴛ1 == "Proxy-Authorization"u8 || exprᴛ1 == "Proxy-Authenticate"u8) {
                 sensitive = true;
             }
-            if (!(sensitive && stripSensitiveHeaders)) {
+            else if (exprᴛ1 == "Content-Encoding"u8 || exprᴛ1 == "Content-Language"u8 || exprᴛ1 == "Content-Location"u8 || exprᴛ1 == "Content-Type"u8) {
+                // Headers relating to the body which is removed for
+                // POST to GET redirects
+                // https://fetch.spec.whatwg.org/#http-redirect-fetch
+                body = true;
+            }
+            if (!(sensitive && stripSensitiveHeaders) && !(body && stripBodyHeaders)) {
                 req.Value.Header[k] = vv;
             }
         }
@@ -967,7 +980,7 @@ internal static readonly @string contentTypeˢ = "Content-Type"u8;
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and [Client.Do].
 //
-// See the Client.Do method documentation for details on how redirects
+// See the [Client.Do] method documentation for details on how redirects
 // are handled.
 public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
     error err = default!;
@@ -1012,7 +1025,7 @@ internal static readonly @string applicationXWwwFormˢ = "application/x-www-form
 // When err is nil, resp always contains a non-nil resp.Body.
 // Caller should close resp.Body when done reading from it.
 //
-// See the Client.Do method documentation for details on how redirects
+// See the [Client.Do] method documentation for details on how redirects
 // are handled.
 //
 // To make a request with a specified context.Context, use [NewRequestWithContext]
@@ -1119,6 +1132,7 @@ internal static error Close(this ref cancelTimerBody b) {
 internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.URL> Ꮡdest) {
     // Permit sending auth/cookie headers from "foo.com"
     // to "sub.foo.com".
+
     // Note that we don't send all cookies to subdomains
     // automatically. This function is only used for
     // Cookies set explicitly on the initial outgoing
@@ -1128,6 +1142,7 @@ internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.U
     // outgoing requests with the Cookie header set
     // directly, we don't know their scope, so we assume
     // it's for *.domain.com.
+
     @string ihost = idnaASCIIFromURL(Ꮡinitial);
     @string dhost = idnaASCIIFromURL(Ꮡdest);
     return isDomainOrSubdomain(dhost, ihost);

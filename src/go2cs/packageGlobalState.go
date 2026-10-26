@@ -240,10 +240,16 @@ var promotedInterfaceImplementations map[string]hashset.HashSet[string]
 // generic type instantiated with a pointer type whose type parameter carries a self-referential
 // generic method-set interface constraint (nistCurve's `Point nistPoint[Point]` at `*P224Point`).
 // The box ж<P224Point> can't nominally implement nistPoint<…>, so a proxy stands in as the type
-// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName}; each
-// becomes a `[assembly: GoImplement<element, iface<element>>(ConstraintProxy = true)]` record that
-// drives ImplementGenerator's EmitConstraintProxy. See constraintProxyArg.
-var constraintProxies map[string][2]string
+// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName,
+// placeholder}; each becomes a `[assembly: GoImplement<element, iface<placeholder>>(ConstraintProxy =
+// true)]` record that drives ImplementGenerator's EmitConstraintProxy. The placeholder is the element,
+// or the proxy itself for an interface that constrains itself (see constraintProxyFor). A record keyed with
+// constraintProxyBindKey binds a FOREIGN interface's generic proxy instead (see foreignConstraintProxy).
+var constraintProxies map[string][3]string
+
+// importedConstraintProxies caches, per imported package path, the CONCRETE constraint proxies that package publishes:
+// proxy class name → the element of each record naming it (see publishedConstraintProxyElements).
+var importedConstraintProxies map[string]map[string][]string
 
 // nominalProductionConstraints collects the (production type argument, test-declared constraint
 // interface) pairs a WHITE-BOX REFERENCE test conversion has emitted a nominal C# `where` clause
@@ -367,6 +373,23 @@ var hasSiblingInternalTestFiles bool
 // exactly as siblingTestFuncMethodNames pins reference spelling.
 var siblingTestAddressedGlobalNames []string
 
+// siblingTestMethodValues holds the METHOD VALUES the build-selected IN-PACKAGE `_test.go` half takes
+// on a selector chain rooted at an identifier it does not bind (`f := g.inc`, `gh.t.inc`, `ga[1].inc`).
+// A pointer-receiver method value on addressable storage takes the root's address exactly as `&g`
+// does, so a production var it reaches must be heap-boxed — and, as for siblingTestAddressedGlobalNames,
+// only the production emission can declare the box. The scan is type-free, so whether a candidate IS
+// a pointer-receiver method value on value storage is decided at the fold (collectAddressedGlobals,
+// siblingMethodValueRoot) against the real package types.
+var siblingTestMethodValues []siblingMethodValue
+
+// siblingMethodValue is one candidate of siblingTestMethodValues: the root identifier, the steps from
+// it to the method's operand (a field name, or "[]" for an index expression), and the method name.
+type siblingMethodValue struct {
+	root   string
+	path   []string
+	method string
+}
+
 // siblingTestPublicizedTypeNames holds the UNEXPORTED type names the build-selected IN-PACKAGE
 // `_test.go` half reaches through one of its own EXPORTED members. In Go the in-package test file
 // IS the package, so a production type consumed by an exported member of that file must be at least
@@ -475,6 +498,10 @@ var packageLock = sync.Mutex{}
 // can't see that per-file map. This package-level registry, resolved after the
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
+
+// packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
+// to its lift, for the methods whose receiver copy of the constraint no signature key may name.
+var packageConstraintLiftNames = map[string]string{}
 
 // packageLiftedTypeNames holds every lifted type name (an anonymous struct/interface, or a
 // function-local declaration hoisted out of its body) CLAIMED so far by this package's conversion.

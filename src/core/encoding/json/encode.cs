@@ -1,13 +1,46 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 
-// Package json implements encoding and decoding of JSON as defined in
-// RFC 7159. The mapping between JSON and Go values is described
-// in the documentation for the Marshal and Unmarshal functions.
+// Package json implements encoding and decoding of JSON as defined in RFC 7159.
+// The mapping between JSON and Go values is described in the documentation for
+// the Marshal and Unmarshal functions.
 //
 // See "JSON and Go" for an introduction to this package:
 // https://golang.org/doc/articles/json_and_go.html
+//
+// # Security Considerations
+//
+// The JSON standard (RFC 7159) is lax in its definition of a number of parser
+// behaviors. As such, many JSON parsers behave differently in various
+// scenarios. These differences in parsers mean that systems that use multiple
+// independent JSON parser implementations may parse the same JSON object in
+// differing ways.
+//
+// Systems that rely on a JSON object being parsed consistently for security
+// purposes should be careful to understand the behaviors of this parser, as
+// well as how these behaviors may cause interoperability issues with other
+// parser implementations.
+//
+// Due to the Go Backwards Compatibility promise (https://go.dev/doc/go1compat)
+// there are a number of behaviors this package exhibits that may cause
+// interopability issues, but cannot be changed. In particular the following
+// parsing behaviors may cause issues:
+//
+//   - If a JSON object contains duplicate keys, keys are processed in the order
+//     they are observed, meaning later values will replace or be merged into
+//     prior values, depending on the field type (in particular maps and structs
+//     will have values merged, while other types have values replaced).
+//   - When parsing a JSON object into a Go struct, keys are considered in a
+//     case-insensitive fashion.
+//   - When parsing a JSON object into a Go struct, unknown keys in the JSON
+//     object are ignored (unless a [Decoder] is used and
+//     [Decoder.DisallowUnknownFields] has been called).
+//   - Invalid UTF-8 bytes in JSON strings are replaced by the Unicode
+//     replacement character.
+//   - Large JSON number integers will lose precision when unmarshaled into
+//     floating-point types.
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -274,7 +307,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 
 // An encodeState encodes JSON into a bytes.Buffer.
 partial struct encodeState {
-    public partial ref bytes_package.Buffer Buffer { get; } // accumulated output
+    /*embed*/ public bytes_package.Buffer Buffer; // accumulated output
     // Keep track of what pointers we've seen in the current recursive call
     // path, to avoid cycles that could lead to a stack overflow. Only do
     // the relatively expensive map operations if ptrLevel is larger than
@@ -384,23 +417,21 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
     }
 
     // To deal with recursive types, populate the map with an
-    // indirect func before we build it. This type waits on the
-    // real func (f) to be ready and then calls it. This indirect
-    // func is only used for recursive types.
-    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
-    ref var f = ref heap<Action<ж<encodeState>, reflectꓸValue, encOpts>>(out var Ꮡf);
-    Ꮡwg.Add(1);
+    // indirect func before we build it. If the type is recursive,
+    // the second lookup for the type will return the indirect func.
+    //
+    // This indirect func is only used for recursive types,
+    // and briefly during racing calls to typeEncoder.
+    var indirect = sync.OnceValue(Action<ж<encodeState>, reflectꓸValue, encOpts> () => newTypeEncoder(t, true));
+    var indirectʗ1 = indirect;
     var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflectꓸValue, encOpts>((ж<encodeState> e, reflectꓸValue v, encOpts opts) => {
-        Ꮡwg.Wait();
-        Ꮡf.ValueSlot(e, v, opts);
+        indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
         return fi._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
     }
 
-    // Compute the real encoder and replace the indirect func with it.
-    f = newTypeEncoder(t, true);
-    Ꮡwg.Done();
+    var f = indirect();
     ᏑencoderCache.Store(t, (f).OrTypedNilFunc());
     return f;
 }
@@ -481,7 +512,7 @@ internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, e
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var (m, ok) = v.Interface()._<Marshaler>(ᐧ);
+    var (m, ok) = reflect.TypeAssert<Marshaler>(v);
     if (!ok) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -506,7 +537,7 @@ internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var m = va.Interface()._<Marshaler>();
+    var (m, _) = reflect.TypeAssert<Marshaler>(va);
     var (b, err) = m.MarshalJSON();
     if (err == default!) {
         Ꮡe.of(encodeState.ᏑBuffer).Grow(len(b));
@@ -526,7 +557,7 @@ internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var (m, ok) = v.Interface()._<encoding.TextMarshaler>(ᐧ);
+    var (m, ok) = reflect.TypeAssert<encoding.TextMarshaler>(v);
     if (!ok) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -546,7 +577,7 @@ internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸVa
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var m = va.Interface()._<encoding.TextMarshaler>();
+    var (m, _) = reflect.TypeAssert<encoding.TextMarshaler>(va);
     var (b, err) = m.MarshalText();
     if (err != default!) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalText"u8))));
@@ -647,21 +678,11 @@ internal static void stringEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encO
     }
 }
 
-// isValidNumber reports whether s is a valid JSON number literal.
-//
-// isValidNumber should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname isValidNumber
 internal static bool isValidNumber(@string s) {
     // This function implements the JSON numbers grammar.
     // See https://tools.ietf.org/html/rfc7159#section-6
     // and https://www.json.org/img/number.png
+
     if (s == ""u8) {
         return false;
     }
@@ -745,7 +766,7 @@ partial struct structFields {
 internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
     var next = (byte)(rune)'{';
 FieldLoop:
-    foreach (var (i, _) in se.fields.list) {
+    foreach (var i in range(se.fields.list)) {
         var f = Ꮡ(se.fields.list, i);
 
         // Find the nested struct field by following f.index.
@@ -861,6 +882,8 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
 }
 
 internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+    var bᴷ = new stackAppend<byte>();
+
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -868,7 +891,7 @@ internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, en
 
     var s = v.Bytes();
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
-    b = append(b, (byte)((rune)'"'));
+    b = append(bᴷ, b, (byte)((rune)'"'));
     b = base64.StdEncoding.AppendEncode(b, s);
     b = append(b, (byte)((rune)'"'));
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
@@ -1051,12 +1074,12 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
         return (k.String(), default!);
     }
     {
-        var (tm, ok) = k.Interface()._<encoding.TextMarshaler>(ᐧ); if (ok) {
+        var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
             if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
                 return ("", default!);
             }
             var (buf, err) = tm.MarshalText();
-            return (((@string)buf), err);
+            return ((@string)buf, err);
         }
     }
     var exprᴛ1 = k.Kind();
@@ -1113,7 +1136,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     // because they can lead to security holes when
                     // user-controlled strings are rendered into JSON
                     // and served to some browsers.
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> (int)(4))], hex[(byte)(b & 0xF)]);
+                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> 4)], hex[(byte)(b & 0xF)]);
                     break;
                 }}
                 i++;
@@ -1125,10 +1148,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // For now, cast only a small portion of byte slices to a string
         // so that it can be stack allocated. This slows down []byte slightly
         // due to the extra copy, but keeps string performance roughly the same.
-        nint n = len(src) - i;
-        if (n > utf8.UTFMax) {
-            n = utf8.UTFMax;
-        }
+        nint n = min(len(src) - i, (nint)(utf8.UTFMax));
         var (c, size) = utf8.DecodeRuneInString(src.slice(i, i + n).ToGoString());
         if (c == utf8.RuneError && size == 1) {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
@@ -1146,7 +1166,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // See https://en.wikipedia.org/wiki/JSON#Safety.
         if (c == (rune)'\u2028' || c == (rune)'\u2029') {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(rune)(c & 0xF)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;
@@ -1186,19 +1206,6 @@ internal static readonly @string stringˢ = "string"u8;
 internal static readonly @string omitemptyˢ = "omitempty"u8;
 internal static readonly @string omitzeroˢ = "omitzero"u8;
 
-// typeFields returns a list of fields that JSON should recognize for the given type.
-// The algorithm is breadth-first search over the set of structs to include - the top struct
-// and then any reachable anonymous structs.
-//
-// typeFields should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname typeFields
 internal static structFields typeFields(reflectꓸType t) {
     // Anonymous fields to explore at the current level and the next.
     var current = new field[]{}.slice();
@@ -1406,7 +1413,7 @@ internal static structFields typeFields(reflectꓸType t) {
     fields = @out;
     slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
 
-    foreach (var (i, _) in fields) {
+    foreach (var i in range(fields)) {
         var f = Ꮡ(fields, i);
         f.Value.encoder = typeEncoder(typeByIndex(t, (~f).index));
     }

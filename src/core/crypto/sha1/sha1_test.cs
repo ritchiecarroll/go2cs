@@ -7,13 +7,11 @@ namespace go.crypto;
 using bytes = bytes_package;
 using boring = go.crypto.@internal.boring_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
-using rand = go.crypto.rand_package;
 using encoding = encoding_package;
 using fmt = fmt_package;
 using hash = hash_package;
 using io = io_package;
 using testing = testing_package;
-using go.crypto;
 using go.crypto.@internal;
 using static go.crypto.sha1_package;
 
@@ -60,7 +58,14 @@ internal static slice<sha1Test> golden = new sha1Test[]{
     new("6627d6904d71420b0bf3886ab629623538689f45"u8, "How can you write a big system without C++?  -Paul Glick"u8, ((@string)(new byte[]{0x73, 0x68, 0x61, 0x01, 0x67, 0x45, 0x23, 0x01, 0xef, 0xcd, 0xab, 0x89, 0x98, 0xba, 0xdc, 0xfe, 0x10, 0x32, 0x54, 0x76, 0xc3, 0xd2, 0xe1, 0xf0, 0x48, 0x6f, 0x77, 0x20, 0x63, 0x61, 0x6e, 0x20, 0x79, 0x6f, 0x75, 0x20, 0x77, 0x72, 0x69, 0x74, 0x65, 0x20, 0x61, 0x20, 0x62, 0x69, 0x67, 0x20, 0x73, 0x79, 0x73, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1c})))
 }.slice();
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string sha1ˢ = "sha1"u8;
+
 public static void TestGolden(ж<testing.T> Ꮡt) {
+    cryptotest.TestAllImplementations(Ꮡt, sha1ˢ, testGolden);
+}
+
+internal static void testGolden(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(golden); i++) {
         var g = golden[i];
         @string s = fmt.Sprintf("%x"u8, Sum(slice<byte>(g.@in)));
@@ -103,6 +108,10 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
 }
 
 public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
+    cryptotest.TestAllImplementations(Ꮡt, sha1ˢ, testGoldenMarshal);
+}
+
+internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
     var h = New();
     var h2 = New();
     foreach (var (_, g) in golden) {
@@ -170,26 +179,6 @@ public static void TestBlockSize(ж<testing.T> Ꮡt) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object boringCryptoDoesnTExposeˢ = (@string)"BoringCrypto doesn't expose digest"u8;
-
-// Tests that blockGeneric (pure Go) and block (in assembly for some architectures) match.
-public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
-    if (boring.Enabled) {
-        Ꮡt.Skip(boringCryptoDoesnTExposeˢ);
-    }
-    for (nint i = 1; i < 30; i++) { // arbitrary factor
-        var (gen, asm) = (New()._<ж<global::go.crypto.sha1_package.digest>>(), New()._<ж<global::go.crypto.sha1_package.digest>>());
-        var buf = new slice<byte>((nint)ΔBlockSize * i);
-        rand.Read(buf);
-        blockGeneric(ref (gen).DerefOrNull(), buf);
-        block(ref (asm).DerefOrNull(), buf);
-        if (gen.Value != asm.Value) {
-            Ꮡt.Errorf("For %#v block and blockGeneric resulted in different states"u8, buf);
-        }
-    }
-}
-
 // Tests for unmarshaling hashes that have hashed a large amount of data
 // The initial hash generation is omitted from the test, because it takes a long time.
 // The test contains some already-generated states, and their expected sums
@@ -237,6 +226,10 @@ internal static (slice<byte> sum, error err) safeSum(hash.Hash h) {
 }
 
 public static void TestLargeHashes(ж<testing.T> Ꮡt) {
+    cryptotest.TestAllImplementations(Ꮡt, sha1ˢ, testLargeHashes);
+}
+
+internal static void testLargeHashes(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in largeUnmarshalTests) {
         var h = New();
         {
@@ -277,7 +270,34 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
 }
 
 public static void TestSHA1Hash(ж<testing.T> Ꮡt) {
-    cryptotest.TestHash(Ꮡt, new Func<hash.Hash>(New));
+    cryptotest.TestAllImplementations(Ꮡt, sha1ˢ, (ж<testing.T> tΔ1) => {
+        cryptotest.TestHash(tΔ1, new Func<hash.Hash>(New));
+    });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string constantTimeSumˢ = "ConstantTimeSum"u8;
+internal static readonly @string marshalBinaryˢ = "MarshalBinary"u8;
+internal static readonly @string unmarshalBinaryˢ = "UnmarshalBinary"u8;
+internal static readonly @string appendBinaryˢ = "AppendBinary"u8;
+
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    ref var h = ref heap<any>(out var Ꮡh);
+    h = maybeCloner(New());
+    cryptotest.NoExtraMethods(Ꮡt, Ꮡh, constantTimeSumˢ,
+        marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+}
+
+internal static any maybeCloner(hash.Hash hʗp) {
+    ref var h = ref heap(hʗp, out var Ꮡh);
+
+    {
+        ref var c = ref heap<hash.Cloner>(out var Ꮡc);
+        (c, var ok) = h._<hash.Cloner>(ᐧ); if (ok) {
+            return Ꮡc;
+        }
+    }
+    return Ꮡh;
 }
 
 internal static hash.Hash bench = New();

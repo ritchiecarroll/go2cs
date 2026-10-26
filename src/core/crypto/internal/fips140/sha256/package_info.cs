@@ -36,10 +36,17 @@ using static go.crypto.@internal.fips140.sha256_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Digest, hash_package.Cloner>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -50,8 +57,8 @@ using static go.crypto.@internal.fips140.sha256_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha256/cast.go", "cast.cs", "AAwagoK43IKCgIKk", "14-31:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "ADh2gqaCgpSUgoKCgoKCgoKCgoLmgoKUgpSCgoKCgoKCgoKCgoKmgqaCpoKCgoKCgoKCgpSCgoKCgoKClIKokoKCqJKCgoKmgoKUpoCkwoKCgoKCgoKUlIKCgpSClKaClJKCgpSmooSSgoKClLiCgoKUgqaUgoKCgoKCgoKm")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgqaCgpSCgoKCgqaUgpSUgoKCgoKCgqaCgoKCgoKClKY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AD+CAYKmgoKUlIKCgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKCgoKCpoKmgqaCkqaCgoKCgoKCgoKUgoKCgoKCgpSCqJKCgqiSgoKCpoKClKaApMKCgoKCgoKClJSCgoKCgpSClIKUpoKUkoKClKaihJKCgoKUuIKCgpSCppSCgoKCgoKCgqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgoKUgoKClIKCgoKmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256block_noasm.go", "sha256block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
@@ -80,6 +87,7 @@ public static partial class sha256_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }

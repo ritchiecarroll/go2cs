@@ -89,7 +89,7 @@ internal static slice<byte> colon = slice<byte>(":"u8);
 // Decode will find the next PEM formatted block (certificate, private key
 // etc) in the input. It returns that block and the remainder of the input. If
 // no PEM data is found, p is nil and the whole of the input is returned in
-// rest.
+// rest. Blocks must start at the beginning of a line and end at the end of a line.
 public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
     ж<Block> p = default!;
     slice<byte> rest = default!;
@@ -154,7 +154,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             // TODO(agl): need to cope with values that spread across lines.
             key = bytes.TrimSpace(key);
             val = bytes.TrimSpace(val);
-            p.Value.Headers[((@string)key)] = ((@string)val);
+            p.Value.Headers[((@string)key)] = (@string)val;
             rest = next;
             endIndex -= consumedΔ1;
             endTrailerIndex -= consumedΔ1;
@@ -273,6 +273,7 @@ internal static readonly @string procTypeᶜ = "Proc-Type"u8;
 // Encode writes the PEM encoding of b to out.
 public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var hᴷ = new stackAppend<@string>();
 
     // Check for invalid block before writing any output.
     foreach (var (k, _) in b.Headers) {
@@ -304,7 +305,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
                 hasProcType = true;
                 continue;
             }
-            h = append(h, k);
+            h = append(hᴷ, h, k);
         }
         // The Proc-Type header must be written first.
         // See RFC 1421, section 4.6.1.1

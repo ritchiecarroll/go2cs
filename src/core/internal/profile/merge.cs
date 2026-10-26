@@ -5,8 +5,9 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using sort = sort_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
+using go;
 
 partial class profile_package {
 
@@ -93,7 +94,7 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     }
 
     var normScale = new slice<float64>(len(baseVals));
-    foreach (var (i, _) in baseVals) {
+    foreach (var i in range(baseVals)) {
         if (srcVals[i] == 0){
             normScale[i] = 0.0D;
         } else {
@@ -178,6 +179,9 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
 
 // key generates sampleKey to be used as a key for maps.
 internal static sampleKey key(this ref Sample sample) {
+    var labelsᴷ = new stackAppend<@string>();
+    var numlabelsᴷ = new stackAppend<@string>();
+
     var ids = new slice<@string>(len(sample.Location));
     foreach (var (i, l) in sample.Location) {
         ids[i] = strconv.FormatUint((~l).ID, 16);
@@ -185,13 +189,13 @@ internal static sampleKey key(this ref Sample sample) {
 
     var labels = new slice<@string>(0, len(sample.Label));
     foreach (var (k, v) in sample.Label) {
-        labels = append(labels, fmt.Sprintf("%q%q"u8, k, v));
+        labels = append(labelsᴷ, labels, fmt.Sprintf("%q%q"u8, k, v));
     }
     sort.Strings(labels);
 
     var numlabels = new slice<@string>(0, len(sample.NumLabel));
     foreach (var (k, v) in sample.NumLabel) {
-        numlabels = append(numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
+        numlabels = append(numlabelsᴷ, numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
     }
     sort.Strings(numlabels);
 
@@ -451,12 +455,15 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
 
     var p = Ꮡ(new Profile(
         SampleType: new slice<ж<ValueType>>(len((~srcs[0]).SampleType)),
+
         DropFrames: (~srcs[0]).DropFrames,
         KeepFrames: (~srcs[0]).KeepFrames,
+
         TimeNanos: timeNanos,
         DurationNanos: durationNanos,
         PeriodType: (~srcs[0]).PeriodType,
         Period: period,
+
         Comments: comments,
         DefaultSampleType: defaultSampleType
     ));
@@ -478,7 +485,7 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         if (!equalValueType(ref (p.SampleType[i]).DerefOrNull(), ref (pb.SampleType[i]).DerefOrNull())) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }

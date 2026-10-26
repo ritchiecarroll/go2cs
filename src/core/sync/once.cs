@@ -7,7 +7,7 @@ using go;
 // deviation from the auto conversion is Do's fast path: the emitted `Ꮡo.of(Once.Ꮡdone).Load()`
 // minted a fresh ж field box per CALL — with the box Load itself minted, 2 objects/216 B on a path
 // Go runs allocation-free, measured by net/textproto's want-zero TestCommonHeaders (L11). Do now
-// reads the flag through atomic.Uint32's `[GoRecv] ref` receiver form (`o.done.Load()`), which is
+// reads the flag through atomic.Bool's `[GoRecv] ref` receiver form (`o.done.Load()`), which is
 // zero-allocation and reads exactly like the Go source. doSlow keeps the emitted shape — it runs
 // once per Once instance (plus contended racers), where the field-box cost is irrelevant.
 [module: GoManualConversion]
@@ -29,12 +29,13 @@ partial class sync_package {
 //
 // [the Go memory model]: https://go.dev/ref/mem
 [GoType] partial struct Once {
+    internal noCopy _;
     // done indicates whether the action has been performed.
     // It is first in the struct because it is used in the hot path.
     // The hot path is inlined at every call site.
     // Placing done first allows more compact instructions on some architectures (amd64/386),
     // and fewer instructions (to calculate offset) on other architectures.
-    internal atomic.Uint32 done;
+    internal atomic.Bool done;
     internal Mutex m;
 }
 
@@ -63,7 +64,7 @@ public static void Do(this ж<Once> Ꮡo, Action f) {
 
     // Note: Here is an incorrect implementation of Do:
     //
-    //	if o.done.CompareAndSwap(0, 1) {
+    //	if o.done.CompareAndSwap(false, true) {
     //		f()
     //	}
     //
@@ -74,7 +75,7 @@ public static void Do(this ж<Once> Ꮡo, Action f) {
     // waiting for the first's call to f to complete.
     // This is why the slow path falls back to a mutex, and why
     // the o.done.Store must be delayed until after f returns.
-    if (o.done.Load() == 0) {
+    if (!o.done.Load()) {
         // Outlined slow-path to allow inlining of the fast-path.
         Ꮡo.doSlow(f);
     }
@@ -85,8 +86,8 @@ internal static void doSlow(this ж<Once> Ꮡo, Action f) {
     try {
         Ꮡo.of(Once.Ꮡm).Lock();
         defer(Ꮡo.of(Once.Ꮡm).Unlock, ref ᒐ);
-        if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
-            defer(Ꮡo.of(Once.Ꮡdone).Store, (uint32)(1), ref ᒐ);
+        if (!Ꮡo.of(Once.Ꮡdone).Load()) {
+            defer(Ꮡo.of(Once.Ꮡdone).Store, (bool)true, ref ᒐ);
             f();
         }
     }

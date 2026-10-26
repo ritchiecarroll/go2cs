@@ -88,7 +88,7 @@ partial interface sniffSig {
 // RAR v5+
 // should be last
 // Data matching the table in section 6.
-internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8)), ((htmlSig)slice<byte>((@string)"<HTML"u8)), ((htmlSig)slice<byte>((@string)"<HEAD"u8)), ((htmlSig)slice<byte>((@string)"<SCRIPT"u8)), ((htmlSig)slice<byte>((@string)"<IFRAME"u8)), ((htmlSig)slice<byte>((@string)"<H1"u8)), ((htmlSig)slice<byte>((@string)"<DIV"u8)), ((htmlSig)slice<byte>((@string)"<FONT"u8)), ((htmlSig)slice<byte>((@string)"<TABLE"u8)), ((htmlSig)slice<byte>((@string)"<A"u8)), ((htmlSig)slice<byte>((@string)"<STYLE"u8)), ((htmlSig)slice<byte>((@string)"<TITLE"u8)), ((htmlSig)slice<byte>((@string)"<B"u8)), ((htmlSig)slice<byte>((@string)"<BODY"u8)), ((htmlSig)slice<byte>((@string)"<BR"u8)), ((htmlSig)slice<byte>((@string)"<P"u8)), ((htmlSig)slice<byte>((@string)"<!--"u8)), new maskedSigжsniffSig(Ꮡ(new maskedSig(
+[GoLazy] partial class lazyᴛsniffSignatures { internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8)), ((htmlSig)slice<byte>((@string)"<HTML"u8)), ((htmlSig)slice<byte>((@string)"<HEAD"u8)), ((htmlSig)slice<byte>((@string)"<SCRIPT"u8)), ((htmlSig)slice<byte>((@string)"<IFRAME"u8)), ((htmlSig)slice<byte>((@string)"<H1"u8)), ((htmlSig)slice<byte>((@string)"<DIV"u8)), ((htmlSig)slice<byte>((@string)"<FONT"u8)), ((htmlSig)slice<byte>((@string)"<TABLE"u8)), ((htmlSig)slice<byte>((@string)"<A"u8)), ((htmlSig)slice<byte>((@string)"<STYLE"u8)), ((htmlSig)slice<byte>((@string)"<TITLE"u8)), ((htmlSig)slice<byte>((@string)"<B"u8)), ((htmlSig)slice<byte>((@string)"<BODY"u8)), ((htmlSig)slice<byte>((@string)"<BR"u8)), ((htmlSig)slice<byte>((@string)"<P"u8)), ((htmlSig)slice<byte>((@string)"<!--"u8)), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}))),
     pat: slice<byte>("<?xml"u8),
     skipWS: true,
@@ -139,7 +139,7 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     mask: slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff}))),
     ct: "application/vnd.ms-fontobject"u8
 ))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x01\x00\x00"u8), "font/ttf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("OTTO"u8), "font/otf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("ttcf"u8), "font/collection"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOFF"u8), "font/woff"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOF2"u8), "font/woff2"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("PK\x03\x04"u8), "application/zip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x61\x73\x6D"u8), "application/wasm"u8))), new textSig(nil)
-}.slice();
+}.slice(); }
 
 partial struct exactSig {
     internal slice<byte> sig;
@@ -162,6 +162,7 @@ partial struct maskedSig {
 internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
+
     if (m.skipWS) {
         data = data.slice(firstNonWS);
     }

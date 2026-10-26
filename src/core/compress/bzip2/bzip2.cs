@@ -41,7 +41,7 @@ partial struct reader {
     internal nuint repeats;    // the number of copies of lastByte to output.
 }
 
-// NewReader returns an io.Reader which decompresses bzip2 data from r.
+// NewReader returns an [io.Reader] which decompresses bzip2 data from r.
 // If r does not also implement [io.ByteReader],
 // the decompressor may read more data than necessary from r.
 public static io.Reader NewReader(io.Reader r) {
@@ -131,12 +131,14 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
     nint n = 0;
     while ((bz2.repeats > 0 || bz2.preRLEUsed < len(bz2.preRLE)) && n < len(buf)) {
         // We have RLE data pending.
+
         // The run-length encoding works like this:
         // Any sequence of four equal bytes is followed by a length
         // byte which contains the number of repeats of that byte to
         // include. (The number of repeats can be zero.) Because we are
         // decompressing on-demand our state is kept in the reader
         // object.
+
         if (bz2.repeats > 0) {
             buf[n] = (byte)bz2.lastByte;
             n++;
@@ -276,7 +278,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     var br = Ꮡbz2.of(reader.Ꮡbr);
     bz2.wantBlockCRC = (uint32)br.ReadBits64(32); // skip checksum. TODO: check it if we can figure out what it is.
     bz2.blockCRC = 0;
-    bz2.fileCRC = (uint32)(((uint32)((bz2.fileCRC << (int)(1)) | (bz2.fileCRC >> (int)(31)))) ^ bz2.wantBlockCRC);
+    bz2.fileCRC = (bz2.fileCRC << 1 | bz2.fileCRC >> 31) ^ bz2.wantBlockCRC;
     nint randomized = br.ReadBits(1);
     if (randomized != 0) {
         return ((StructuralError)(@string)deprecatedRandomizedˢ);
@@ -290,10 +292,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     var symbolPresent = new slice<bool>(256);
     nint numSymbols = 0;
     for (nuint symRange = (nuint)0; symRange < 16; symRange++) {
-        if ((nint)(symbolRangeUsedBitmap & (((nint)1).Lsh((15 - symRange)))) != 0) {
+        if ((symbolRangeUsedBitmap & (((nint)1).Lsh((15 - symRange)))) != 0) {
             nint bits = br.ReadBits(16);
             for (nuint symbol = (nuint)0; symbol < 16; symbol++) {
-                if ((nint)(bits & (((nint)1).Lsh((15 - symbol)))) != 0) {
+                if ((bits & (((nint)1).Lsh((15 - symbol)))) != 0) {
                     symbolPresent[16 * symRange + symbol] = true;
                     numSymbols++;
                 }
@@ -320,7 +322,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     // The tree indexes are move-to-front transformed and stored as unary
     // numbers.
     var mtfTreeDecoder = newMTFDecoderWithRange(numHuffmanTrees);
-    foreach (var (i, _) in treeIndexes) {
+    foreach (var i in range(treeIndexes)) {
         nint c = 0;
         while (ᐧ) {
             nint inc = br.ReadBits(1);
@@ -352,10 +354,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
 
     // Now we decode the arrays of code-lengths for each tree.
     var lengths = new slice<uint8>(numSymbols);
-    foreach (var (i, _) in huffmanTrees) {
+    foreach (var i in range(huffmanTrees)) {
         // The code lengths are delta encoded from a 5-bit base value.
         nint length = br.ReadBits(5);
-        foreach (var (j, _) in lengths) {
+        foreach (var j in range(lengths)) {
             while (ᐧ) {
                 if (length < 1 || length > 20) {
                     return ((StructuralError)(@string)huffmanLengthOutOfRangeˢ);
@@ -499,13 +501,13 @@ internal static uint32 inverseBWT(slice<uint32> tt, nuint origPtr, slice<nuint> 
         c[i] = sum - c[i];
     }
 
-    foreach (var (i, _) in tt) {
-        var b = (uint32)(tt[i] & 0xff);
-        tt[c[b]] |= (uint32)(((uint32)i << (int)(8)));
+    foreach (var i in range(tt)) {
+        var b = tt[i] & 0xff;
+        tt[c[b]] |= (uint32)(((uint32)i << 8));
         c[b]++;
     }
 
-    return (tt[origPtr] >> (int)(8));
+    return tt[origPtr] >> 8;
 }
 
 // This is a standard CRC32 like in hash/crc32 except that all the shifts are reversed,
@@ -514,11 +516,11 @@ internal static array<uint32> crctab = new(256);
 
 [GoInit] internal static void init() {
     const uint32 poly = 0x04C11DB7;
-    foreach (var (i, _) in crctab) {
-        var crc = ((uint32)i << (int)(24));
+    foreach (var i in range(crctab)) {
+        var crc = (uint32)i << 24;
         for (nint j = 0; j < 8; j++) {
-            if ((uint32)(crc & 0x80000000U) != 0){
-                crc = (uint32)(((crc << (int)(1))) ^ poly);
+            if ((crc & 0x80000000U) != 0){
+                crc = (uint32)((crc << 1) ^ poly);
             } else {
                 crc <<= (int)(1);
             }
@@ -532,7 +534,7 @@ internal static array<uint32> crctab = new(256);
 internal static uint32 updateCRC(uint32 val, slice<byte> b) {
     var crc = ~val;
     foreach (var (_, v) in b) {
-        crc = (uint32)(crctab[(byte)((byte)((crc >> (int)(24))) ^ v)] ^ ((crc << (int)(8))));
+        crc = crctab[(byte)((byte)(crc >> 24) ^ v)] ^ (crc << 8);
     }
     return ~crc;
 }

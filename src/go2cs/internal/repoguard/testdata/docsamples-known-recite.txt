@@ -1,0 +1,9 @@
+# TestDocsSamplesHoldTheirLines' known-list: source comments whose sample is verbatim in its file but
+# outside the lines the comment cites (docsamples -recite would re-cite them). Each row is excused while
+# docsamples still re-cites it; a row it no longer re-cites fails the guard, so the list only shrinks.
+# Re-cite a row with docsamples -recite -goroot <pinned GOROOT> -write <page>, then delete it here.
+# Seeded 2026-10-15 at the Go 1.26 hop: 108 golden (src/tests) citations and 5 GOROOT ones, every one
+# already off before the hop's H5 regeneration.
+# 2026-10-19 (C2, interceptors seat): the 89 golden rows, re-cited by docsamples -recite when the any-slot
+# literals went plain and the goldens were regenerated, and deleted here; the 5 GOROOT rows remain.
+# page<TAB>citation (the comment's text after "source:"), one row per comment

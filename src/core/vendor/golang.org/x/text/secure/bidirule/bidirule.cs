@@ -61,57 +61,57 @@ partial struct ruleTransition {
     internal uint16 mask;
 }
 
-internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
+[GoLazy] partial class lazyᴛtransitions { internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
     // [2.1] The first character must be a character with Bidi property L, R, or
     // AL. If it has the R or AL property, it is an RTL label; if it has the L
     // property, it is an LTR label.
     [ruleInitial] = new ruleTransition[]{
         new(ruleLTRFinal, (uint16)(1 << (int)(nuint)(bidi.L))),
-        new(ruleRTLFinal, (uint16)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))))}.array(),
+        new(ruleRTLFinal, (uint16)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)))}.array(),
     [ruleRTL] = new ruleTransition[]{
         // [2.3] In an RTL label, the end of the label must be a character with
         // Bidi property R, AL, EN, or AN, followed by zero or more characters
         // with Bidi property NSM.
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN)))),
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.AN))),
 
         // [2.2] In an RTL label, only characters with the Bidi properties R,
         // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.3]
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)) | 1 << (int)(nuint)(bidi.NSM)))}.array(),
     [ruleRTLFinal] = new ruleTransition[]{
         // [2.3] In an RTL label, the end of the label must be a character with
         // Bidi property R, AL, EN, or AN, followed by zero or more characters
         // with Bidi property NSM.
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN))) | (1 << (int)(nuint)(bidi.NSM)))),
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.AN)) | 1 << (int)(nuint)(bidi.NSM))),
 
         // [2.2] In an RTL label, only characters with the Bidi properties R,
         // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.3] and NSM.
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)))}.array(),
     [ruleLTR] = new ruleTransition[]{
         // [2.6] In an LTR label, the end of the label must be a character with
         // Bidi property L or EN, followed by zero or more characters with Bidi
         // property NSM.
-        new(ruleLTRFinal, (uint16)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN)))),
+        new(ruleLTRFinal, (uint16)(1 << (int)(nuint)(bidi.L) | 1 << (int)(nuint)(bidi.EN))),
 
         // [2.5] In an LTR label, only characters with the Bidi properties L,
         // EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.6].
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)) | 1 << (int)(nuint)(bidi.NSM)))}.array(),
     [ruleLTRFinal] = new ruleTransition[]{
         // [2.6] In an LTR label, the end of the label must be a character with
         // Bidi property L or EN, followed by zero or more characters with Bidi
         // property NSM.
-        new(ruleLTRFinal, (uint16)((UntypedInt)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.NSM)))),
+        new(ruleLTRFinal, (uint16)((UntypedInt)(1 << (int)(nuint)(bidi.L) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.NSM))),
 
         // [2.5] In an LTR label, only characters with the Bidi properties L,
         // EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.6].
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)))}.array(),
     [ruleInvalid] = new ruleTransition[]{
         new(ruleInvalid, 0),
         new(ruleInvalid, 0)}.array()
-}.array();
+}.array(); }
 
 // [2.4] In an RTL label, if an EN is present, no AN may be present, and
 // vice versa.
@@ -258,7 +258,7 @@ public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, 
 internal static array<bidi.Properties> asciiTable = new(128);
 
 [GoInit] internal static void init() {
-    foreach (var (i, _) in asciiTable) {
+    foreach (var i in range(asciiTable)) {
         var (p, _) = bidi.LookupRune((rune)i);
         asciiTable[i] = p;
     }

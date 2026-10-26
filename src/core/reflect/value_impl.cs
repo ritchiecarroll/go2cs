@@ -40,8 +40,9 @@ partial struct ΔValue {
     [GoReflectCompanion] internal object? boxed;
     [GoReflectCompanion] internal object? addrBox;
 
-    // The LIVE value this Value represents (read-through for an addressable Value).
-    internal object? live => addrBox is null ? boxed : GoReflect.ReadPointerSlot(addrBox);
+    // The LIVE value this Value represents (read-through for an addressable Value). A Type.Method(i).Func is
+    // carried unbound (GoReflect.LazyMethodFunc) and binds here, at its first use.
+    internal object? live => addrBox is null ? (boxed is GoReflect.LazyMethodFunc lazy ? lazy.Func : boxed) : GoReflect.ReadPointerSlot(addrBox);
 
     // Go compares two Values as structs: typ_, ptr and flag. Its ptr is the datum's ADDRESS -- an
     // addressable Value's slot, a pointer-shaped value itself (pointer, map, chan, func,
@@ -153,6 +154,52 @@ internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
     return packInterfaceValue(v);
 }
 
+// TypeAssert is semantically equivalent to:
+//
+//	v2, ok := v.Interface().(T)
+//
+// Hand-owned to that DEFINITION. Go 1.25 implements it by reinterpreting the Value's data word through unsafe:
+// for an interface T it fabricates an eface `abi.EmptyInterface{Type: v.typ(), Data: nil}` and asserts that, and
+// for a concrete T it compares descriptors and reads `*(*T)(v.ptr)`. Managed storage has no data word. The
+// fabricated eface was a dereference of an order token, and it panicked on every Go 1.26 json, asn1, gob and xml
+// marshal path, all of which call TypeAssert. The descriptor compare would also have read a dimless
+// TypeFor[[2]int]() against a value-built [2]int as different types.
+//
+// Go's own two preconditions come first, with TypeAssert's texts: an invalid Value, and a read-only one (Go refuses
+// those before Interface() would, under its own name). The general answer is the Value's interface value
+// (valueInterface, the one Interface() answers) asserted by golib's ordinary Go type assertion. Two arms keep Go's
+// ALLOCATION profile, which reflect's TestTypeAssertAllocs measures. An addressable Value's interface value is a
+// fresh box per read, which Go does not pay:
+//   - a CONCRETE T reads the slot itself, `ж<T>.Value`, or unboxes the stored value. Anything else takes the
+//     general answer, so a match is never decided on the C# type alone;
+//   - an INTERFACE T over a concrete Value decides on the TYPE first (builtin.TypeImplements, the cached method-set
+//     probe `_<T>` itself uses). That is Go's nil-data eface probe, so a failing assertion allocates nothing.
+public static (T, bool) TypeAssert<T>(ΔValue v) {
+    if (v.flag == 0) {
+        throw panic(Ꮡ(new ValueError("reflect.TypeAssert"u8, Invalid)));
+    }
+    if ((flag)(v.flag & flagRO) != 0) {
+        throw panic("reflect.TypeAssert: cannot return value obtained from unexported field or method");
+    }
+    if ((flag)(v.flag & flagMethod) != 0) {
+        v = makeMethodValue("TypeAssert"u8, v);
+    }
+    if (v.kind() != ΔInterface && typeof(T) != typeof(object)) {
+        if (!typeof(T).IsInterface) {
+            if (v.addrBox is ж<T> box) {
+                return (box.Value, true);
+            }
+            if (v.addrBox is null && v.boxed is T value) {
+                return (value, true);
+            }
+        }
+        else if (!global::go.builtin.TypeImplements<T>(v.typ_ == nil ? null : v.typ_.Value.sysType)) {
+            return (default!, false);
+        }
+    }
+    return valueInterface(v, false)._<T>(ᐧ);
+}
+
 // packInterfaceValue is the bridge's packEface: it builds the interface value for v, and Go's
 // rule for that is entirely about the TYPE half. An eface carries (type, data word), so a
 // POINTER-kinded Value whose data word is nil packs as a NON-nil interface holding
@@ -180,6 +227,14 @@ internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
 internal static any /*i*/ packInterfaceValue(ΔValue v) {
     object? cur = v.live;
     if (cur is not null) {
+        if (v.addrBox is not null && copiesAddressableValue(v.kind()) && cur.GetType().IsValueType) {
+            // Go's packEface copies an ADDRESSABLE value of an indirect type into a fresh allocation, so a later
+            // Set cannot reach the interface value it returned: one malloc, which reflect's TestTypeAssertAllocs
+            // asserts (TypeAssert[any](ValueOf(&val).Elem()) wants exactly 1). The read above made that same one
+            // copy, a fresh box of the slot's value, outside golib's allocation sites, so the counter never saw
+            // it and testing.AllocsPerRun reported 24 BYTES against Go's count of 1. It is charged here, once.
+            AllocationCounter.Count();
+        }
         return cur;
     }
     ΔKind k = v.kind();
@@ -197,6 +252,12 @@ internal static any /*i*/ packInterfaceValue(ΔValue v) {
     System.Type? st = v.typ_ == nil ? null : v.typ_.Value.sysType;
     return (st is null ? null : GoReflect.CanonicalNilPointer(st))!;
 }
+
+// Whether Go's Interface() of an ADDRESSABLE Value of kind k copies the datum (packEface's IfaceIndir arm). A
+// pointer-shaped kind is stored in the interface word itself, and an Interface-kind slot is returned as the
+// interface it holds (valueInterface's special case, before packEface), so neither allocates in Go.
+private static bool copiesAddressableValue(ΔKind k) =>
+    k != Ptr && k != Map && k != Chan && k != Func && k != ΔUnsafePointer && k != ΔInterface;
 
 // storedDatum is what a reflect WRITE path stores for x into a slot of kind slotKind. An INTERFACE
 // slot takes the interface packing of x -- packInterfaceValue, the same re-encoding Interface()
@@ -1231,7 +1292,8 @@ public static uintptr UnsafeAddr(this ΔValue v) {
 // consumer that dereferences it.
 //
 // The classification comes from GoReflect.GoIsDirectIface, the SAME authority abi.synthType stamps
-// KindDirectIface from, so the descriptor bit and this word cannot disagree about one type.
+// TFlagDirectIface from (Go 1.26 moved the bit from Kind_ to TFlag and made the rule a size test,
+// Size_ == PtrBytes == PtrSize), so the descriptor bit and this word cannot disagree about one type.
 public static array<uintptr> InterfaceData(this ΔValue v) {
     v.mustBe(ΔInterface);
     var data = new array<uintptr>(2);
@@ -1690,8 +1752,12 @@ public static ΔValue NewAt(ΔType typ, @unsafe.Pointer p) {
     // with the zero box every such field read as zero (cmpopts IgnoreUnexported and IgnoreFields
     // compared differing structs equal). EXACT ONLY (ruled 2026-10-04): a live token, or a live
     // token plus an offset landing exactly on a node of this type -- see
-    // GoReflect.ResolveNewAtPointee. Every miss keeps the zero box, so gcbits' path is unchanged.
+    // GoReflect.ResolveNewAtPointee. A pointer to a POINTER array over memory the Go runtime did not
+    // allocate reads the foreign words it holds, through E's registered opener, and refuses by name an
+    // E no compilation spells (G's ruling, 2026-10-19; GoReflect.OpenNewAtPointerArray). Every other
+    // miss keeps the zero box, so gcbits' path is unchanged: its p is a tagged storage token.
     object box = GoReflect.ResolveNewAtPointee((nuint)(uintptr)p, st) ??
+                 GoReflect.OpenNewAtPointerArray((nuint)(uintptr)p, st, dims) ??
                  GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
     return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
 }
@@ -2361,6 +2427,7 @@ public static void SetIterValue(this ΔValue v, ж<MapIter> Ꮡiter) {
 // underlying System.Type so identity-equality matches Go. The cache is process-lifetime (type
 // descriptors are permanent, exactly like Go's). See docs/phase4/DESIGN-reflection-bridge.md.
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Type, string), ΔType> s_canonTypeCache = new();
+private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<ж<abi.Type>, ΔType> s_canonTypeByDescriptor = new();
 
 // (toRType stays AUTO: the ruled managed-box reinterpret model — FINDING-managed-box-uintptr-
 // lifetime.md — makes the converter emit `Ꮡt.Reinterpret<abi.Type, rtype>()`, a GC-safe
@@ -2542,13 +2609,23 @@ internal static ΔType canonType(ж<abi.Type> Ꮡt) {
     // type's per-parameter dims, without which `func([32]byte) bool` and `func([64]byte) bool`
     // (ONE managed delegate type, no arrayDims of their own) would share a wrapper and the first to
     // intern would answer In(0).Len() for both.
+    //
+    // A descriptor's key never changes (descriptors are immutable once synthesized), so the wrapper it
+    // resolved to is remembered on the descriptor itself and a repeat asks no key at all. Rendering the
+    // key took a string.Join enumerator on every Type() of an array Value (reflect's TestDeepEqualAllocs
+    // [6]byte rows, twice a DeepEqual).
+    if (s_canonTypeByDescriptor.TryGetValue(Ꮡt, out ΔType? known)) {
+        return known;
+    }
     string dimsKey = abi.descriptorDimsKey(Ꮡt.Value.arrayDims, Ꮡt.Value.funcParamDims, Ꮡt.Value.chanDirChain, Ꮡt.Value.keyDims,
         Ꮡt.Value.funcInChanDirs, Ꮡt.Value.funcOutChanDirs);
     // STATIC factory, captured state as GetOrAdd's TArg -- the twin of the descriptor cache at
     // abi/type_impl.cs and for the same reason: a capturing lambda allocates a display class and a
     // delegate on every call, cache HITS included. TypeOf crosses BOTH sites in sequence, which is
     // why its cache-hit cost measured 208 B rather than half that.
-    return s_canonTypeCache.GetOrAdd((st, dimsKey), static (_, box) => new rtypeжΔType(toRType(box)), Ꮡt);
+    ΔType canonical = s_canonTypeCache.GetOrAdd((st, dimsKey), static (_, box) => new rtypeжΔType(toRType(box)), Ꮡt);
+    s_canonTypeByDescriptor.TryAdd(Ꮡt, canonical);
+    return canonical;
 }
 
 // Type returns v's type. Hand-owned so the common (non-method) fast path returns the CANONICAL Type
@@ -2569,6 +2646,15 @@ public static ΔType Type(this ΔValue v) {
 // unimplemented bridge gap, NOT canonical (tracked separately); do not rely on their identity.
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
     return canonType(Ꮡt);
+}
+
+// TypeFor returns the [Type] that represents the type argument T. Hand-owned for the reason toType is:
+// Go's body is `toRType(abi.TypeFor[T]())`, an *rtype converted to Type, and that conversion mints a
+// fresh wrapper over a fresh box per call. Go interns the descriptor, so TypeFor[T]() is the same Type
+// TypeOf answers; route it through toType so it is. abi.TypeFor never answers nil, so canonType's nil
+// arm is not reached.
+public static ΔType TypeFor<T>() {
+    return toType(abi.TypeFor<T>());
 }
 
 // ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====
@@ -2696,13 +2782,23 @@ internal static nint NumMethod(this ж<rtype> Ꮡt) {
 // Method.Type carries the receiver as its first argument and Func is the UNBOUND func value, Go's
 // contract for the type side; an interface method has neither a receiver nor a Func (zero Value),
 // and its PkgPath qualifies an unexported name.
+// Func is built LAZILY: it carries the method unbound and binds at its first use (ΔValue.live), so
+// Method(i).Name and MethodByName's lookup never bind, as in Go. Binding is where a method with no
+// delegate form fails (under Native AOT, any method whose Func/Expression instantiation has no native
+// code), and its Go panic belongs to the use of Func. Func's type is Method.Type itself, Go's
+// m.Func.Type() == m.Type.
 internal static ΔMethod Method(this ж<rtype> Ꮡt, nint i) {
     System.Type? st = Ꮡt.Value.t.sysType;
     if (i < 0 || i >= GoReflect.GoMethodCount(st)) {
         throw panic("reflect: Method index out of range");
     }
     string name = GoReflect.GoMethodName(st, (int)i);
-    var fn = GoReflect.GoMethodFunc(st, (int)i);
+    ж<abi.Type> ft = methodFuncType(st, (int)i);
+    ΔValue fn = new ΔValue(nil);
+    if (GoReflect.GoMethodHasFunc(st, (int)i)) {
+        fn = new ΔValue(ft, default!, ((flag)(uintptr)(uint8)Func));
+        fn.boxed = new GoReflect.LazyMethodFunc(st, (int)i);
+    }
     return new ΔMethod(
         Name: (@string)name,
         PkgPath: (@string)(isExportedGoName(name) ? "" : GoReflect.GoPackagePath(st)),
@@ -2711,8 +2807,8 @@ internal static ΔMethod Method(this ж<rtype> Ꮡt, nint i) {
         // through a delegate instance, so abi.TypeOf's func-value route cannot supply them here.
         // net/rpc reads exactly this — mtype.In(2) for every service method's reply — and without
         // the cargo a `*[1]int` reply allocated a ZERO-length array through reflect.New.
-        Type: toType(methodFuncType(st, (int)i)),
-        Func: fn is null ? new ΔValue(nil) : makeReflectValue(fn),
+        Type: toType(ft),
+        Func: fn,
         Index: i
     );
 }
@@ -3772,10 +3868,10 @@ public static ΔType StructOf(slice<StructField> fields) {
                     throw panic("reflect: embedded type with methods not implemented if type is not first field");
                 }
                 // For a POINTER embed Go refuses any second field; for a non-pointer it refuses only
-                // when the type is pointer-shaped (`Kind_&KindDirectIface`), because an interface
-                // then holds a pointer to the struct rather than a copy of it. SettablePointer is
-                // exactly that case and its method set is EMPTY, which is why the outer gate cannot
-                // be a method-count test.
+                // when the type is pointer-shaped (`ft.IsDirectIface()`, a TFlag bit since Go 1.26),
+                // because an interface then holds a pointer to the struct rather than a copy of it.
+                // SettablePointer is exactly that case and its method set is EMPTY, which is why the
+                // outer gate cannot be a method-count test.
                 if (n > 1 && (field.Type.Kind() == ΔPointer || GoReflect.GoIsDirectIface(ft))) {
                     throw panic(field.Type.Kind() == ΔPointer
                         ? "reflect: embedded type with methods not implemented if there is more than one field"

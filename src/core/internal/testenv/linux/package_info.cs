@@ -57,6 +57,12 @@ using static go.@internal.testenv_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -67,9 +73,9 @@ using static go.@internal.testenv_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABpCAAwCgIKCgpSC2ILIAAsYuMqCgpSCgq7ClIKCgoKUlKYABBKylIKCgpSCggAHFAAIAoKUpoKmgpSUAAsWAAoCgpSqgIiApoKAgoKClNqCgIIADBiUgLj6gqLc3JSUlKKClIK4qsKC", "206-222:1;225-232:2")]
 [assembly: go.GoPositionMap("internal/testenv/opt.go", "opt.cs", "AAgUkg==")]
-[assembly: go.GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "AClGzMLaosqmttyCgpSCgoKClIKClICCtgAIEoKCgoKClIKClIKmrLKCgpSCgrqkqqKCgr6ylJSqooKCAAMQwoKCgsqClKaSgNwADx6CgqaCgoKUpoCCgraCgoKClJSUgoKCgpQABRrygoKClIKU2JKClKacopSCvKKssoKClIKCupKmgoKClIKCgoKUgoKUqJKCgryirLKCgoKUvrKCgr6ygoK6koKqooKCgrrIqqKCgriUgoKC+IKAgoLKkpSUrsKCguqSgoIAChQACAKUgoKCppSCgoKCgqaCgpSCgpSCyoCCzKKssoKU")]
+[assembly: go.GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "ACtGAAQWAAkC2qLKprbcgoKUgoKCgpSCgpSAgrYACBKCgoKCgpSCgpSCpqyygoKUgoK6pKqigoK+spSUqqKCggADEMKCgoLKgpSmkoDcAA8egoKmgoKClKaAgoK2goKCgpSUlIKCgoKUAAUa8oKCgpSClNiSgpSmnKKUgryirLKCgpSCgrqSpoKCgpSCgoKClIKClKiSgoK8ogANIrKClIKCgpS+soKCvrKCgrqSgqqigoKCusiqooKCuJSCgoL4goCCgsqSlJSuwoKC6pKCggAKFAAIApSCgoKmlIKCgoKCpoKClIKClILKgILMoqyygpQ=")]
 [assembly: go.GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABEiwpT+goKUgpSCgIKkgIKClMg=")]
-[assembly: go.GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABEmgoKmgoK4yLiCpg==")]
+[assembly: go.GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABEmgoKmgIK4yMiCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -85,6 +91,7 @@ public static partial class testenv_package
 
     // <TypeAccessibility>
     internal partial interface CommandContext_type {}
+    public partial struct SpecialBuildTypes {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -105,7 +112,7 @@ public static partial class testenv_package
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));

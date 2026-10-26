@@ -22,12 +22,14 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     // The constant-time implementation is adapted from Thomas Pornin's ecGFp5.
     //
     // https://github.com/pornin/ecgfp5/blob/82325b965/rust/src/field.rs#L337-L385
+
     // p = q*2^n + 1 with q odd -> q = 2^128 - 1 and n = 96
     // g^(2^n) = 1 -> g = 11 ^ q (where 11 is the smallest non-square)
     // GG[j] = g^(2^j) for j = 0 to n-1
+
     Ꮡp224GGOnce.Do(() => {
         p224GG = Ꮡ(new array<fiat.P224Element>(96, () => new()));
-        foreach (var (i, _) in p224GG.Value) {
+        foreach (var i in range(p224GG, 96)) {
             if (i == 0){
                 p224GG.at<fiat.P224Element>(i).SetBytes(new byte[]{0x6a, 0x0f, 0xec, 0x67,
                     0x85, 0x98, 0xa7, 0x92, 0x0c, 0x55, 0xb2, 0xd4,

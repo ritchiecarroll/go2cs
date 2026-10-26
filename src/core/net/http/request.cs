@@ -407,11 +407,11 @@ public static bool ProtoAtLeast(this ref Request r, nint major, nint minor) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string userAgentˢ2 = "User-Agent"u8;
+internal static readonly @string userAgentˢ = "User-Agent"u8;
 
 // UserAgent returns the client's User-Agent, if sent in the request.
 public static @string UserAgent(this ref Request r) {
-    return r.Header.Get(userAgentˢ2);
+    return r.Header.Get(userAgentˢ);
 }
 
 // Cookies parses and returns the HTTP cookies sent with the request.
@@ -705,8 +705,8 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
         // Use the defaultUserAgent unless the Header contains one, which
         // may be blank to not send the header.
         @string userAgent = defaultUserAgent;
-        if (r.Header.has(userAgentˢ2)) {
-            userAgent = r.Header.Get(userAgentˢ2);
+        if (r.Header.has(userAgentˢ)) {
+            userAgent = r.Header.Get(userAgentˢ);
         }
         if (userAgent != ""u8) {
             userAgent = headerNewlineToSpace.Replace(userAgent);
@@ -716,7 +716,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
                 goto ᒐdone;
             }
             if (trace != nil && (~trace).WroteHeaderField != default!) {
-                (~trace).WroteHeaderField(userAgentˢ2, new @string[]{userAgent}.slice());
+                (~trace).WroteHeaderField(userAgentˢ, new @string[]{userAgent}.slice());
             }
         }
 
@@ -889,7 +889,7 @@ internal static bool validMethod(@string method) {
 	   extension-method = token
 	     token          = 1*<any CHAR except CTLs or separators>
 	*/
-    return builtin.len(method) > 0 && strings.IndexFunc(method, isNotToken) == -1;
+    return isToken(method);
 }
 
 // NewRequest wraps [NewRequestWithContext] using [context.Background].
@@ -915,7 +915,7 @@ internal static readonly @string netHttpNilContextˢ = "net/http: nil Context"u8
 // For an outgoing client request, the context
 // controls the entire lifetime of a request and its response:
 // obtaining a connection, sending the request, and reading the
-// response headers and body. See the Request type's documentation for
+// response headers and body. See the [Request] type's documentation for
 // the difference between inbound and outbound request fields.
 //
 // If body is of type [*bytes.Buffer], [*bytes.Reader], or
@@ -1059,7 +1059,7 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
     if (err != default!) {
         return ("", "", false);
     }
-    @string cs = ((@string)c);
+    @string cs = (@string)c;
     (username, password, ok) = strings.Cut(cs, ":"u8);
     if (!ok) {
         return ("", "", false);
@@ -1130,7 +1130,7 @@ public static (ж<Request>, error) ReadRequest(ж<bufio.Reader> Ꮡb) {
     }
 
     delete((~req).Header, "Host"u8);
-    return (req, err);
+    return (req, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1219,7 +1219,7 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> Ꮡb) 
         if (err != default!) {
             (req, err) = (default!, err); goto ᒐdone;
         }
-        req.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
+        req.Value.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
         if (builtin.len((~req).Header[hostˢ]) > 1) {
             (req, err) = (default!, fmt.Errorf("too many Host headers"u8)); goto ᒐdone;
         }
@@ -1382,7 +1382,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
         var maxFormSize = (int64)(9223372036854775807L);
         {
             var (_, ok) = r.Body._<ж<maxBytesReader>>(ᐧ); if (!ok) {
-                maxFormSize = (int64)(((int64)10 << (int)(20))); // 10 MB is a lot of text.
+                maxFormSize = (int64)((int64)10 << 20); // 10 MB is a lot of text.
                 reader = io.LimitReader(r.Body, maxFormSize + 1);
             }
         }
@@ -1397,7 +1397,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
             err = errors.New(httpPostTooLargeˢ);
             return (vs, err);
         }
-        (vs, e) = url.ParseQuery(((@string)b));
+        (vs, e) = url.ParseQuery((@string)b);
         if (err == default!) {
             err = e;
         }
@@ -1639,8 +1639,11 @@ internal static nint patIndex(this ref Request r, @string name) {
 }
 
 internal static bool expectsContinue(this ref Request r) {
-    return hasToken(r.Header.get(expectˢ), continueˢ);
+    return hasToken(r.Header.get(expectˢ2), continueˢ);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string keepAliveˢ = "keep-alive"u8;
 
 internal static bool wantsHttp10KeepAlive(this ref Request r) {
     if (r.ProtoMajor != 1 || r.ProtoMinor != 0) {
@@ -1711,12 +1714,14 @@ internal static bool requestMethodUsuallyLacksBody(@string method) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string upgradeˢ = "upgrade"u8;
+internal static readonly @string upgradeˢ2 = "Upgrade"u8;
 internal static readonly @string websocketˢ = "websocket"u8;
 
 // requiresHTTP1 reports whether this request requires being sent on
 // an HTTP/1 connection.
 internal static bool requiresHTTP1(this ref Request r) {
-    return hasToken(r.Header.Get(connectionˢ), upgradeˢ2) && ascii.EqualFold(r.Header.Get(upgradeˢ), websocketˢ);
+    return hasToken(r.Header.Get(connectionˢ), upgradeˢ) && ascii.EqualFold(r.Header.Get(upgradeˢ2), websocketˢ);
 }
 
 } // end http_package

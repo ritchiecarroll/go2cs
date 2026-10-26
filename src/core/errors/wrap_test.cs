@@ -257,17 +257,17 @@ public static void TestAs(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errorˢ = "error"u8;
+private static readonly @string errorˢ2 = "error"u8;
 
 public static void TestAsValidation(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new @string(), out var Ꮡs);
     var testCases = new any[]{
         default!,
-        ((ж<nint>)nil),
+        (ж<nint>)nil,
         (@string)"error"u8,
         Ꮡs
     }.slice();
-    var err = errors.New(errorˢ);
+    var err = errors.New(errorˢ2);
     foreach (var (_, tc) in testCases) {
         var errʗ1 = err;
         var tcʗ1 = tc;
@@ -287,6 +287,110 @@ public static void TestAsValidation(ж<testing.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
     }
+}
+
+internal partial interface TestAsType_timeout /*dyn*/ :
+    error
+{
+    bool Timeout();
+}
+
+public static void TestAsType(ж<testing.T> Ꮡt) {
+    errorT errT = default!;
+    ж<fs.PathError> errP = default!;
+    var (_, errF) = os.Open(nonExistingˢ);
+    var poserErr = Ꮡ(new poser("oh no"u8, default!));
+
+    testAsType(Ꮡt,
+        default!,
+        errP,
+        false);
+    testAsType(Ꮡt,
+        new wrapped("pitied the fool"u8, new errorT("T"u8)),
+        new errorT("T"u8),
+        true);
+    testAsType(Ꮡt,
+        errF,
+        errF,
+        true);
+    testAsType(Ꮡt,
+        errT,
+        errP,
+        false);
+    testAsType(Ꮡt,
+        new wrapped("wrapped"u8, default!),
+        errT,
+        false);
+    testAsType(Ꮡt,
+        new poserжerror(Ꮡ(new poser("error"u8, default!))),
+        new errorT("poser"u8),
+        true);
+    testAsType(Ꮡt,
+        new poserжerror(Ꮡ(new poser("path"u8, default!))),
+        poserPathErr,
+        true);
+    testAsType(Ꮡt,
+        new poserжerror(poserErr),
+        poserErr,
+        true);
+    testAsType(Ꮡt,
+        errors.New(errˢ),
+        (TestAsType_timeout)default!,
+        false);
+    testAsType(Ꮡt,
+        errF,
+        errF._<TestAsType_timeout>(),
+        true);
+    testAsType(Ꮡt,
+        new wrapped("path error"u8, errF),
+        errF._<TestAsType_timeout>(),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{}.slice()),
+        errT,
+        false);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{errors.New("a"u8), new errorT("T"u8)}.slice()),
+        new errorT("T"u8),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{new errorT("T"u8), errors.New("a"u8)}.slice()),
+        new errorT("T"u8),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{new errorT("a"u8), new errorT("b"u8)}.slice()),
+        new errorT("a"u8),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice()),
+        new errorT("a"u8),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{new wrapped("path error"u8, errF)}.slice()),
+        errF._<TestAsType_timeout>(),
+        true);
+    testAsType(Ꮡt,
+        new multiErr(new error[]{default!}.slice()),
+        errT,
+        false);
+}
+
+partial interface compError :
+    error
+{
+}
+
+internal static void testAsType<E>(ж<testing.T> Ꮡt, error err, E want, bool wantOK) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    Ꮡt.Helper();
+    @string name = fmt.Sprintf("AsType[%T](Errorf(..., %v))"u8, (want).OrTypedNilOf(), err);
+    Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        var (got, gotOK) = errors.AsType<E>(err);
+        if (gotOK != wantOK || !AreEqual(got, want)) {
+            tΔ1.Fatalf("got %v, %t; want %v, %t"u8, (got).OrTypedNilOf(), gotOK, (want).OrTypedNilOf(), wantOK);
+        }
+    });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -316,6 +420,22 @@ public static void BenchmarkAs(ж<testing.B> Ꮡb) {
         ref var target = ref heap(new errorT(), out var Ꮡtarget);
         if (!errors.As(err, Ꮡtarget)) {
             Ꮡb.Fatal(asFailedˢ);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object asTypeFailedˢ = (@string)"AsType failed"u8;
+
+public static void BenchmarkAsType(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice())}.slice());
+    foreach (var _ᴛ1 in range(b.N)) {
+        {
+            var (_, ok) = errors.AsType<errorT>(err); if (!ok) {
+                Ꮡb.Fatal(asTypeFailedˢ);
+            }
         }
     }
 }
@@ -376,7 +496,7 @@ internal static @string Error(this multiErr m) {
 }
 
 internal static slice<error> Unwrap(this multiErr m) {
-    return ((slice<error>)m);
+    return (slice<error>)m;
 }
 
 partial struct errorUncomparable {

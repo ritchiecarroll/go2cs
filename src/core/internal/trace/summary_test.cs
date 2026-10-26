@@ -10,6 +10,8 @@ using testing = testing_package;
 using go.@internal;
 using go.@internal.trace;
 using static go.@internal.trace_internal_test_package;
+using time = time_package;
+using version = go.@internal.trace.version_package;
 
 partial class trace_test_package {
 
@@ -21,12 +23,14 @@ internal static readonly @string gcMarkAssistˢ = "GC mark assist"u8;
 internal static readonly object missingSchedWaitTimeˢ = (@string)"missing sched wait time"u8;
 internal static readonly object missingSyncBlockTimeˢ = (@string)"missing sync block time"u8;
 internal static readonly object missingGcMarkAssistTimeˢ = (@string)"missing GC mark assist time"u8;
+internal static readonly object hasTimeThatIsUnaccountedˢ = (@string)"has time that is unaccounted for"u8;
 
 public static void TestSummarizeGoroutinesTrace(ж<testing.T> Ꮡt) {
     var summaries = summarizeTraceTest(Ꮡt, testdataTestsGo122Gcˢ).Value.Goroutines;
     bool hasSchedWaitTime = default!;
     bool hasSyncBlockTime = default!;
     bool hasGCMarkAssistTime = default!;
+    bool hasUnknownTime = default!;
 
     assertContainsGoroutine(Ꮡt, summaries, runtimeGcBgMarkWorkerˢ);
     assertContainsGoroutine(Ꮡt, summaries, mainMainFunc1ˢ);
@@ -44,6 +48,7 @@ public static void TestSummarizeGoroutinesTrace(ж<testing.T> Ꮡt) {
                 hasGCMarkAssistTime = true;
             }
         }
+        hasUnknownTime = hasUnknownTime || summary.UnknownTime() > 0;
     }
     if (!hasSchedWaitTime) {
         Ꮡt.Error(missingSchedWaitTimeˢ);
@@ -53,6 +58,9 @@ public static void TestSummarizeGoroutinesTrace(ж<testing.T> Ꮡt) {
     }
     if (!hasGCMarkAssistTime) {
         Ꮡt.Error(missingGcMarkAssistTimeˢ);
+    }
+    if (hasUnknownTime) {
+        Ꮡt.Error(hasTimeThatIsUnaccountedˢ);
     }
 }
 
@@ -230,7 +238,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
         if (len(want.logs) != len((~summary).Logs)){
             Ꮡt.Errorf("wanted %d logs for task %d, got %d logs instead"u8, len(want.logs), id, len((~summary).Logs));
         } else {
-            foreach (var (i, _) in want.logs) {
+            foreach (var i in range(want.logs)) {
                 if (want.logs[i] != (~(~summary).Logs[i]).Log()) {
                     Ꮡt.Errorf("log mismatch: want %#v, got %#v"u8, want.logs[i], (~(~summary).Logs[i]).Log());
                 }
@@ -293,7 +301,7 @@ internal static void basicGoroutineSummaryChecks(ж<testing.T> Ꮡt, ж<Δtrace.
 }
 
 internal static ж<Δtrace.Summary> summarizeTraceTest(ж<testing.T> Ꮡt, @string testPath) {
-    var (trc, _, err) = testtrace.ParseFile(testPath);
+    var (trc, _, _, err) = testtrace.ParseFile(testPath);
     if (err != default!) {
         Ꮡt.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
     }
@@ -441,7 +449,7 @@ internal static void basicGoroutineExecStatsChecks(ж<testing.T> Ꮡt, ж<Δtrac
 
 public static void TestRelatedGoroutinesV2Trace(ж<testing.T> Ꮡt) {
     @string testPath = testdataTestsGo122Gcˢ;
-    var (trc, _, err) = testtrace.ParseFile(testPath);
+    var (trc, _, _, err) = testtrace.ParseFile(testPath);
     if (err != default!) {
         Ꮡt.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
     }
@@ -466,13 +474,13 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> Ꮡt) {
     }
 
     // Test the function.
-    var targetg = ((Δtrace.GoID)86);
+    var targetg = (Δtrace.GoID)86;
     var got = Δtrace.RelatedGoroutinesV2(events, targetg);
     var want = new map<Δtrace.GoID, EmptyStruct>{
-        [((Δtrace.GoID)86)] = new EmptyStruct(), // N.B. Result includes target.
-        [((Δtrace.GoID)71)] = new EmptyStruct(),
-        [((Δtrace.GoID)25)] = new EmptyStruct(),
-        [((Δtrace.GoID)122)] = new EmptyStruct()
+        [((Δtrace.GoID)86)] = new(), // N.B. Result includes target.
+        [((Δtrace.GoID)71)] = new(),
+        [((Δtrace.GoID)25)] = new(),
+        [((Δtrace.GoID)122)] = new()
     };
     foreach (var (goid, _) in got) {
         {

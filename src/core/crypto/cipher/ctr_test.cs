@@ -40,7 +40,7 @@ internal static void inc(slice<byte> b) {
 }
 
 internal static void xor(slice<byte> a, slice<byte> b) {
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] ^= (byte)(b[i]);
     }
 }
@@ -48,9 +48,9 @@ internal static void xor(slice<byte> a, slice<byte> b) {
 public static void TestCTR(ж<testing.T> Ꮡt) {
     for (nint size = 64; size <= 1024; size *= 2) {
         var iv = new slice<byte>(size);
-        var ctr = cipher.NewCTR(((noopBlock)size), iv);
+        var ctr = cipher.NewCTR((noopBlock)size, iv);
         var src = new slice<byte>(1024);
-        foreach (var (i, _) in src) {
+        foreach (var i in range(src)) {
             src[i] = 0xff;
         }
         var want = new slice<byte>(1024);
@@ -100,6 +100,14 @@ public static void TestCTRStream(ж<testing.T> Ꮡt) {
 
         cryptotest.TestStreamFromBlock(tΔ3, block, cipher.NewCTR);
     });
+}
+
+public static void TestCTRExtraMethods(ж<testing.T> Ꮡt) {
+    var (block, _) = aes.NewCipher(new slice<byte>(16));
+    var iv = new slice<byte>(block.BlockSize());
+    ref var s = ref heap<cipher.Stream>(out var Ꮡs);
+    s = cipher.NewCTR(block, iv);
+    cryptotest.NoExtraMethods(Ꮡt, Ꮡs);
 }
 
 } // end cipher_test_package

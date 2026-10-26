@@ -4,12 +4,15 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using sys = @internal.runtime.sys_package;
 using windows = @internal.syscall.windows_package;
 using Δruntime = runtime_package;
 using slices = slices_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
+using @internal.runtime.syscall;
 using @internal.syscall;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -58,41 +61,50 @@ public static void TestSehLookupFunctionEntry(ж<testing.T> Ꮡt) {
         new("func in prologue"u8, sehf1pc + 1, true),
         new("anonymous func with frame"u8, abi.FuncPCABIInternal((fnwithframe).OrTypedNilFunc()), true),
         new("anonymous func without frame"u8, abi.FuncPCABIInternal((fnwithoutframe).OrTypedNilFunc()), false),
-        new("pc at func body"u8, (~runtime_internal_test_package.NewContextStub()).GetPC(), true)
+        new("pc at func body"u8, sys.GetCallerPC(), true)
     }.slice();
     foreach (var (_, tt) in tests) {
         ref var @base = ref heap(new uintptr(), out var Ꮡbase);
         var fn = windows.RtlLookupFunctionEntry(tt.pc, Ꮡbase, nil);
         if (!tt.hasframe) {
-            if (fn != 0) {
+            if (fn != nil) {
                 Ꮡt.Errorf("%s: unexpected frame"u8, tt.name);
             }
             continue;
         }
-        if (fn == 0) {
+        if (fn == nil) {
             Ꮡt.Errorf("%s: missing frame"u8, tt.name);
         }
     }
+}
+
+//go:noinline
+internal static partial ж<windowsꓸContext> newCtx() {
+    ref var ctx = ref heap(new windowsꓸContext(), out var Ꮡctx);
+    ctx.SetPC(sys.GetCallerPC());
+    ctx.SetSP(sys.GetCallerSP());
+    ctx.SetFP(runtime_internal_test_package.GetCallerFp());
+    return Ꮡctx;
 }
 
 internal static slice<uintptr> sehCallers() {
     // We don't need a real context,
     // RtlVirtualUnwind just needs a context with
     // valid a pc, sp and fp (aka bp).
-    var ctx = runtime_internal_test_package.NewContextStub();
+    var ctx = newCtx();
 
     var pcs = new slice<uintptr>(15);
     ref var @base = ref heap(new uintptr(), out var Ꮡbase);
     ref var frame = ref heap(new uintptr(), out var Ꮡframe);
     nint n = default!;
     for (nint i = 0; i < len(pcs); i++) {
-        var fn = windows.RtlLookupFunctionEntry((~ctx).GetPC(), Ꮡbase, nil);
-        if (fn == 0) {
+        var fn = windows.RtlLookupFunctionEntry(ctx.PC(), Ꮡbase, nil);
+        if (fn == nil) {
             break;
         }
-        pcs[i] = (~ctx).GetPC();
+        pcs[i] = ctx.PC();
         n++;
-        windows.RtlVirtualUnwind(0, @base, (~ctx).GetPC(), fn, (uintptr)ctx, nil, Ꮡframe, nil);
+        windows.RtlVirtualUnwind(0, @base, ctx.PC(), fn, @unsafe.Pointer.FromPinnedBox(ctx), nil, Ꮡframe, nil);
     }
     return pcs.slice(0, n);
 }
@@ -129,6 +141,10 @@ internal static void testSehCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs,
             // whether inlining is on or off.
             continue;
         }
+        else if (exprᴛ1 == "runtime_test.sehCallers"u8) {
+            // This is an artifact of the implementation of sehCallers.
+            continue;
+        }
         got = append(got, name);
     }
     if (!slices.Equal<slice<@string>, @string>(want, got)) {
@@ -141,8 +157,7 @@ public static void TestSehUnwind(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingAmd64OnlyTestˢ);
     }
     var pcs = sehf3(false);
-    testSehCallersEqual(Ꮡt, pcs, new @string[]{"runtime_test.sehCallers"u8, "runtime_test.sehf4"u8,
-        "runtime_test.sehf3"u8, "runtime_test.TestSehUnwind"u8}.slice());
+    testSehCallersEqual(Ꮡt, pcs, new @string[]{"runtime_test.sehf4"u8, "runtime_test.sehf3"u8, "runtime_test.TestSehUnwind"u8}.slice());
 }
 
 public static void TestSehUnwindPanic(ж<testing.T> Ꮡt) {
@@ -151,7 +166,7 @@ public static void TestSehUnwindPanic(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH != "amd64"u8) {
             Ꮡt.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.sehCallers"u8, "runtime_test.TestSehUnwindPanic.func1"u8, "runtime.gopanic"u8,
+        var want = new @string[]{"runtime_test.TestSehUnwindPanic.func1"u8, "runtime.gopanic"u8,
             "runtime_test.sehf4"u8, "runtime_test.sehf3"u8, "runtime_test.TestSehUnwindPanic"u8}.slice();
         var wantʗ1 = want;
         defer(() => {
@@ -175,7 +190,7 @@ public static void TestSehUnwindDoublePanic(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH != "amd64"u8) {
             Ꮡt.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.sehCallers"u8, "runtime_test.TestSehUnwindDoublePanic.func1.1"u8, "runtime.gopanic"u8,
+        var want = new @string[]{"runtime_test.TestSehUnwindDoublePanic.func1.1"u8, "runtime.gopanic"u8,
             "runtime_test.TestSehUnwindDoublePanic.func1"u8, "runtime.gopanic"u8, "runtime_test.TestSehUnwindDoublePanic"u8}.slice();
         var wantʗ1 = want;
         defer(() => {
@@ -192,12 +207,12 @@ public static void TestSehUnwindDoublePanic(ж<testing.T> Ꮡt) {
                 if (recover() == default!) {
                     Ꮡt.Fatal(didNotPanicˢ);
                 }
-                throw panic((nint)(2));
+                throw panic((nint)2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -209,7 +224,7 @@ public static void TestSehUnwindNilPointerPanic(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH != "amd64"u8) {
             Ꮡt.Skip(skippingAmd64OnlyTestˢ);
         }
-        var want = new @string[]{"runtime_test.sehCallers"u8, "runtime_test.TestSehUnwindNilPointerPanic.func1"u8, "runtime.gopanic"u8,
+        var want = new @string[]{"runtime_test.TestSehUnwindNilPointerPanic.func1"u8, "runtime.gopanic"u8,
             "runtime.sigpanic"u8, "runtime_test.TestSehUnwindNilPointerPanic"u8}.slice();
         var wantʗ1 = want;
         defer(() => {

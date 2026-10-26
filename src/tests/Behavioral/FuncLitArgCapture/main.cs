@@ -84,7 +84,7 @@ internal static nint nestedArgLiteralCapture() {
     run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var items = new nint[]{1, 2, 3}.slice();
         var done = new channel<nint>(len(items));
-        foreach (var (i, _) in items) {
+        foreach (var i in range(items)) {
             nint iΔ1 = i;
             var doneʗ1 = done;
             var itemsʗ1 = items;
@@ -93,7 +93,7 @@ internal static nint nestedArgLiteralCapture() {
             });
         }
         nint sum = 0;
-        foreach ((_, _) in items) {
+        foreach (var _ᴛ1 in range(items)) {
             sum += ᐸꟷ(done);
         }
         totalʗ1.ᐸꟷ(sum);
@@ -106,28 +106,28 @@ internal static void Main() {
     run(() => {
         set(ref (Ꮡm).DerefOrNull());
     });
-    fmt.Println((@string)"1:"u8, m.x);
+    fmt.Println("1:", m.x);
 
     ref var n = ref heap(new box(), out var Ꮡn);
     run(() => {
         set(ref (Ꮡn).DerefOrNull());
         Ꮡn.Value.y = Ꮡn.Value.x + 1;
     });
-    fmt.Println((@string)"2:"u8, n.x, n.y);
+    fmt.Println("2:", n.x, n.y);
 
     ref var c = ref heap(new box(), out var Ꮡc);
     run(() => {
         var p = Ꮡc.of(box.Ꮡx);
         p.Value = 99;
     });
-    fmt.Println((@string)"3:"u8, c.x);
+    fmt.Println("3:", c.x);
 
     ref var d = ref heap(new box(), out var Ꮡd);
     void f() {
         set(ref (Ꮡd).DerefOrNull());
     }
     f();
-    fmt.Println((@string)"4:"u8, d.x);
+    fmt.Println("4:", d.x);
 
     ref var e = ref heap(new box(), out var Ꮡe);
     var pe = Ꮡe;
@@ -136,31 +136,31 @@ internal static void Main() {
         peʗ1.Value.x = 11;
         peʗ1.Value.y = (~peʗ1).x + 1;
     });
-    fmt.Println((@string)"5:"u8, e.x, e.y);
+    fmt.Println("5:", e.x, e.y);
 
     gPtr = Ꮡe;
     run(() => {
         gPtr.Value.x = gVal.x;
     });
-    fmt.Println((@string)"6:"u8, e.x);
+    fmt.Println("6:", e.x);
 
     var vals = new nint[]{5}.slice();
     var valsʗ1 = vals;
     nint adder(nint k) => k + valsʗ1[0];
-    fmt.Println((@string)"7:"u8, adder(10));
+    fmt.Println("7:", adder(10));
 
     var @base = new nint[]{3}.slice();
         var baseʗ1 = @base;
     var handlers = new Func<nint, nint>[]{
         (nint k) => k + baseʗ1[0]
     }.slice();
-    fmt.Println((@string)"8:"u8, handlers[0](100));
+    fmt.Println("8:", handlers[0](100));
 
     var seed = new nint[]{2}.slice();
 
     var seedʗ1 = seed;
     Func<nint, nint> mul = (nint k) => k * seedʗ1[0];
-    fmt.Println((@string)"9:"u8, mul(21));
+    fmt.Println("9:", mul(21));
 
     (nint x, bool ok) pick(nint sel) {
         nint x = default!;
@@ -174,7 +174,7 @@ internal static void Main() {
     }
     var (a, b) = pick(3);
     var (zx, zok) = pick(-1);
-    fmt.Println((@string)"10:"u8, a, b, zx, zok);
+    fmt.Println("10:", a, b, zx, zok);
 
     (nint n, @string s) zero() {
         nint nΔ1 = default!;
@@ -182,17 +182,17 @@ internal static void Main() {
         return (nΔ1, s);
     }
     var (n0, s0) = zero();
-    fmt.Println((@string)"11:"u8, n0, s0 == ""u8);
+    fmt.Println("11:", n0, s0 == ""u8);
 
-    fmt.Println((@string)"12:"u8, nestedStructCapture());
+    fmt.Println("12:", nestedStructCapture());
 
-    fmt.Println((@string)"13:"u8, selfRefCapture());
+    fmt.Println("13:", selfRefCapture());
 
     ref var g = ref heap(new box(), out var Ꮡg);
     deferArgCapture(Ꮡg);
-    fmt.Println((@string)"14:"u8, g.x);
+    fmt.Println("14:", g.x);
 
-    fmt.Println((@string)"15:"u8, nestedArgLiteralCapture());
+    fmt.Println("15:", nestedArgLiteralCapture());
 }
 
 } // end main_package

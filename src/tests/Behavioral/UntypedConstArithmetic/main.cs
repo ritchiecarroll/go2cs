@@ -25,7 +25,7 @@ internal static void Main() {
     fmt.Println(sum(12345000054321L));
 
     var n = (int64)7;
-    var max = (int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n);
+    var max = (int64)(9223372036854775807UL - ((uint64)1 << 63) % (uint64)n);
     fmt.Println(max);
 
     float64 hf = 9223372036854775808D;
@@ -33,13 +33,13 @@ internal static void Main() {
     fmt.Println(hf / (1152921504606846976D));
 
     float32 sf = 1099511627776F;
-    fmt.Println(sf / ((1 << (int)(30))));
+    fmt.Println(sf / (1 << 30));
 
     float64 big = 1099511627776D;
     fmt.Println(1099511627776D * 1.5D / big);
 
-    float64 small = (1 << (int)(10));
-    fmt.Println(small / ((1 << (int)(3))));
+    float64 small = (1 << 10);
+    fmt.Println(small / (1 << 3));
     fmt.Println(1e18D * 10.0D / hf);
 }
 

@@ -29,9 +29,10 @@ public static class GeneratedPartials
 
     /// <summary>
     /// The source of one generated file: <paramref name="attributes"/> on a partial of <paramref name="type"/>,
-    /// nested inside a partial of each enclosing type, outermost first.
+    /// nested inside a partial of each enclosing type, outermost first. <paramref name="baseList"/> (<c>" : I"</c>) and
+    /// <paramref name="body"/> (member lines indented one level, as inside the type) are written into that partial.
     /// </summary>
-    public static string Source(string ns, INamedTypeSymbol type, IEnumerable<string> attributes)
+    public static string Source(string ns, INamedTypeSymbol type, IEnumerable<string> attributes, string baseList = "", string body = "")
     {
         List<INamedTypeSymbol> chain = EnclosingChain(type).Reverse().ToList();
 
@@ -49,7 +50,15 @@ public static class GeneratedPartials
                     source.Append(indent).Append(attribute).Append("\r\n");
             }
 
-            source.Append($"{indent}partial {Keyword(chain[depth])} {EscapeIdentifier(chain[depth].Name)}{TypeParameters(chain[depth])}\r\n{indent}{{\r\n");
+            source.Append($"{indent}partial {Keyword(chain[depth])} {EscapeIdentifier(chain[depth].Name)}{TypeParameters(chain[depth])}{(depth == chain.Count - 1 ? baseList : "")}\r\n{indent}{{\r\n");
+        }
+
+        if (body.Length > 0)
+        {
+            string bodyIndent = new(' ', (chain.Count - 1) * 4);
+
+            foreach (string line in body.TrimEnd('\r', '\n').Split(["\r\n"], System.StringSplitOptions.None))
+                source.Append(line.Length == 0 ? "" : bodyIndent).Append(line).Append("\r\n");
         }
 
         for (int depth = chain.Count - 1; depth >= 0; depth--)
@@ -190,6 +199,7 @@ public static class GeneratedPartials
             reference.GetSyntax() is TypeDeclarationSyntax declaration &&
             declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)));
 
+    // A contextual keyword is escaped too: `file` cannot name a type (CS9056), and the converter emits Go's `file` as `@file`.
     private static string EscapeIdentifier(string name) =>
-        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None || SyntaxFacts.GetContextualKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 }

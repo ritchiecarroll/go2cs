@@ -24,6 +24,7 @@ internal static class Go2CsTestHost
             "exec_windows.go",
             "exec_windows_test.go",
             "internal_test.go",
+            "lookpath.go",
             "lp_linux_test.go",
             "lp_plan9.go",
             "lp_test.go",
@@ -38,45 +39,46 @@ internal static class Go2CsTestHost
             "internal",
         });
         registry.Add("TestAbsCommandWithDoubledExtension", exec_test_package.TestAbsCommandWithDoubledExtension, "lp_windows_test.go", 606);
-        registry.Add("TestAbsPathExec", exec_test_package.TestAbsPathExec, "exec_test.go", 1791);
-        registry.Add("TestCancelErrors", exec_test_package.TestCancelErrors, "exec_test.go", 1488);
+        registry.Add("TestAbsPathExec", exec_test_package.TestAbsPathExec, "exec_test.go", 1794);
+        registry.Add("TestCancelErrors", exec_test_package.TestCancelErrors, "exec_test.go", 1491);
         registry.Add("TestCatGoodAndBadFile", exec_test_package.TestCatGoodAndBadFile, "exec_test.go", 366);
         registry.Add("TestCatStdin", exec_test_package.TestCatStdin, "exec_test.go", 327);
         registry.Add("TestChildCriticalEnv", exec_test_package.TestChildCriticalEnv, "exec_windows_test.go", 88);
-        registry.Add("TestClosePipeOnCopyError", exec_test_package.TestClosePipeOnCopyError, "exec_test.go", 892);
+        registry.Add("TestClosePipeOnCopyError", exec_test_package.TestClosePipeOnCopyError, "exec_test.go", 895);
         registry.Add("TestCommand", exec_test_package.TestCommand, "lp_windows_test.go", 531);
         registry.Add("TestCommandRelativeName", exec_test_package.TestCommandRelativeName, "exec_test.go", 297);
-        registry.Add("TestConcurrentExec", exec_test_package.TestConcurrentExec, "exec_test.go", 1705);
-        registry.Add("TestContext", exec_test_package.TestContext, "exec_test.go", 919);
-        registry.Add("TestContextCancel", exec_test_package.TestContextCancel, "exec_test.go", 951);
+        registry.Add("TestConcurrentExec", exec_test_package.TestConcurrentExec, "exec_test.go", 1708);
+        registry.Add("TestContext", exec_test_package.TestContext, "exec_test.go", 922);
+        registry.Add("TestContextCancel", exec_test_package.TestContextCancel, "exec_test.go", 954);
         registry.Add("TestDedupEnv", exec_internal_test_package.TestDedupEnv, "env_test.go", 12);
-        registry.Add("TestDedupEnvEcho", exec_test_package.TestDedupEnvEcho, "exec_test.go", 1015);
-        registry.Add("TestDoubleStartLeavesPipesOpen", exec_test_package.TestDoubleStartLeavesPipesOpen, "exec_test.go", 1091);
+        registry.Add("TestDedupEnvEcho", exec_test_package.TestDedupEnvEcho, "exec_test.go", 1018);
+        registry.Add("TestDoubleStartLeavesPipesOpen", exec_test_package.TestDoubleStartLeavesPipesOpen, "exec_test.go", 1094);
         registry.Add("TestEcho", exec_test_package.TestEcho, "exec_test.go", 285);
         registry.Add("TestEchoFileRace", exec_test_package.TestEchoFileRace, "exec_test.go", 344);
-        registry.Add("TestEnvNULCharacter", exec_test_package.TestEnvNULCharacter, "exec_test.go", 1029);
+        registry.Add("TestEnvNULCharacter", exec_test_package.TestEnvNULCharacter, "exec_test.go", 1032);
         registry.Add("TestExitCode", exec_test_package.TestExitCode, "exec_test.go", 416);
         registry.Add("TestExitStatus", exec_test_package.TestExitStatus, "exec_test.go", 396);
         registry.Add("TestExtraFiles", exec_test_package.TestExtraFiles, "exec_test.go", 659);
-        registry.Add("TestExtraFilesRace", exec_test_package.TestExtraFilesRace, "exec_test.go", 791);
-        registry.Add("TestIgnorePipeErrorOnSuccess", exec_test_package.TestIgnorePipeErrorOnSuccess, "exec_test.go", 863);
+        registry.Add("TestExtraFilesRace", exec_test_package.TestExtraFilesRace, "exec_test.go", 794);
+        registry.Add("TestIgnorePipeErrorOnSuccess", exec_test_package.TestIgnorePipeErrorOnSuccess, "exec_test.go", 866);
         registry.Add("TestLookPath", exec_test_package.TestLookPath, "dot_test.go", 25);
         registry.Add("TestLookPathNotFound", exec_internal_test_package.TestLookPathNotFound, "lp_test.go", 16);
         registry.Add("TestLookPathWindows", exec_test_package.TestLookPathWindows, "lp_windows_test.go", 271);
         registry.Add("TestNoExistExecutable", exec_test_package.TestNoExistExecutable, "exec_test.go", 386);
         registry.Add("TestNoInheritHandles", exec_test_package.TestNoInheritHandles, "exec_windows_test.go", 70);
-        registry.Add("TestNoPath", exec_test_package.TestNoPath, "exec_test.go", 1080);
-        registry.Add("TestOutputStderrCapture", exec_test_package.TestOutputStderrCapture, "exec_test.go", 903);
-        registry.Add("TestPathRace", exec_test_package.TestPathRace, "exec_test.go", 1777);
+        registry.Add("TestNoPath", exec_test_package.TestNoPath, "exec_test.go", 1083);
+        registry.Add("TestOutputStderrCapture", exec_test_package.TestOutputStderrCapture, "exec_test.go", 906);
+        registry.Add("TestPathRace", exec_test_package.TestPathRace, "exec_test.go", 1780);
         registry.Add("TestPipeLookPathLeak", exec_test_package.TestPipeLookPathLeak, "exec_test.go", 616);
         registry.Add("TestPipePassing", exec_test_package.TestPipePassing, "exec_windows_test.go", 41);
         registry.Add("TestPipes", exec_test_package.TestPipes, "exec_test.go", 470);
         registry.Add("TestPrefixSuffixSaver", exec_internal_test_package.TestPrefixSuffixSaver, "internal_test.go", 12);
+        registry.Add("TestStart_twice", exec_test_package.TestStart_twice, "exec_test.go", 1844);
         registry.Add("TestStdinClose", exec_test_package.TestStdinClose, "exec_test.go", 526);
         registry.Add("TestStdinCloseRace", exec_test_package.TestStdinCloseRace, "exec_test.go", 569);
-        registry.Add("TestString", exec_test_package.TestString, "exec_test.go", 1041);
-        registry.Add("TestStringPathNotResolved", exec_test_package.TestStringPathNotResolved, "exec_test.go", 1065);
-        registry.Add("TestWaitInterrupt", exec_test_package.TestWaitInterrupt, "exec_test.go", 1293);
+        registry.Add("TestString", exec_test_package.TestString, "exec_test.go", 1044);
+        registry.Add("TestStringPathNotResolved", exec_test_package.TestStringPathNotResolved, "exec_test.go", 1068);
+        registry.Add("TestWaitInterrupt", exec_test_package.TestWaitInterrupt, "exec_test.go", 1296);
         registry.SetTestMain(exec_test_package.TestMain);
         return TestHost.Run(registry, args);
     }

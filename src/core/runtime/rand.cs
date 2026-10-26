@@ -7,7 +7,7 @@ namespace go;
 using byteorder = @internal.byteorder_package;
 using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
-using math = @internal.runtime.math_package;
+using Δmath = @internal.runtime.math_package;
 using @unsafe = unsafe_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
@@ -56,16 +56,16 @@ internal static void randinit() {
             seed.Value[i % 32] ^= (byte)(c);
         }
     } else {
-        if (readRandom((~seed)[..]) != 32 || allZero((~seed)[..])) {
+        if (readRandom(seed.slice()) != 32 || allZero(seed.slice())) {
             // readRandom should never fail, but if it does we'd rather
             // not make Go binaries completely unusable, so make up
             // some random data based on the current time.
             readRandomFailed = true;
-            readTimeRandom((~seed)[..]);
+            readTimeRandom(seed.slice());
         }
     }
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
-    builtin.clear((~seed)[..]);
+    builtin.clear(seed.slice());
 
     if (startupRand != default!) {
         // Overwrite startupRand instead of clearing it, in case cgo programs
@@ -110,10 +110,10 @@ internal static void readTimeRandom(slice<byte> r) {
             size = len(r);
         }
         for (nint i = 0; i < size; i++) {
-            r[i] ^= (byte)((byte)(v.Rsh((int64)((8 * i)))));
+            r[i] ^= (byte)((byte)(v.Rsh((int64)(8 * i))));
         }
         r = r.slice(size);
-        v = (uint64)((v >> (int)(32)) | (v << (int)(32)));
+        v = v >> 32 | v << 32;
     }
 }
 
@@ -202,7 +202,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var (i, _) in seed) {
+    foreach (var i in range(seed)) {
         seed[i] = bootstrapRand();
     }
     bootstrapRandReseed(); // erase key we just extracted
@@ -217,7 +217,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
 //go:linkname randn
 internal static uint32 randn(uint32 n) {
     // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    return (uint32)((((uint64)(uint32)rand() * (uint64)n) >> (int)(32)));
+    return (uint32)(((uint64)(uint32)rand() * (uint64)n) >> 32);
 }
 
 // cheaprand is a non-cryptographic-quality 32-bit random generator
@@ -246,8 +246,8 @@ internal static uint32 cheaprand() {
     // by the compiler should be in this list.
     if ((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(goarch.IsAmd64 | goarch.IsArm64) | goarch.IsPpc64) | goarch.IsPpc64le) | goarch.IsMips64) | goarch.IsMips64le) | goarch.IsS390x) | goarch.IsRiscv64) | goarch.IsLoong64) == 1) {
         mp.Value.cheaprand += 0xa0761d6478bd642fUL;
-        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
-        return (uint32)((uint64)(hi ^ lo));
+        var (hi, lo) = Δmath.Mul64((~mp).cheaprand, (~mp).cheaprand ^ 0xe7037ed1a0b428dbUL);
+        return (uint32)(hi ^ lo);
     }
 
     // Implement xorshift64+: 2 32-bit xorshift sequences added together.
@@ -257,8 +257,8 @@ internal static uint32 cheaprand() {
     // http://simul.iro.umontreal.ca/testu01/tu01.html
     var t = @unsafe.ArrayPointer<uint32>.Of(mp.of(m.Ꮡcheaprand), 2);
     var (s1, s0) = (t.ElementRef(0), t.ElementRef(1));
-    s1 ^= (uint32)((s1 << (int)(17)));
-    s1 = (uint32)((uint32)((uint32)(s1 ^ s0) ^ (s1 >> (int)(7))) ^ (s0 >> (int)(16)));
+    s1 ^= (uint32)((s1 << 17));
+    s1 = s1 ^ s0 ^ s1 >> 7 ^ s0 >> 16;
     (t.ElementRef(0), t.ElementRef(1)) = (s0, s1);
     return s0 + s1;
 }
@@ -282,7 +282,7 @@ internal static uint32 cheaprand() {
 //go:linkname cheaprand64
 //go:nosplit
 internal static int64 cheaprand64() {
-    return (int64)(((int64)cheaprand() << (int)(31)) ^ (int64)cheaprand());
+    return (int64)cheaprand() << 31 ^ (int64)cheaprand();
 }
 
 // cheaprandn is like cheaprand() % n but faster.
@@ -303,7 +303,7 @@ internal static int64 cheaprand64() {
 //go:nosplit
 internal static uint32 cheaprandn(uint32 n) {
     // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    return (uint32)((((uint64)cheaprand() * (uint64)n) >> (int)(32)));
+    return (uint32)(((uint64)cheaprand() * (uint64)n) >> 32);
 }
 
 // Too much legacy code has go:linkname references

@@ -10,6 +10,5 @@ partial class fuzz_package {
     static fuzz_package() {
         initᴛcoverageEnabled();
         initᴛcoverageSnapshot();
-        initᴛbyteSliceMutators();
     }
 } // end fuzz_package

@@ -33,13 +33,25 @@ partial struct Tree {
     internal map<@string, ж<Tree>> treeSet;
     internal nint actionLine; // line of left delim starting action
     internal nint rangeDepth;
+    internal nint stackDepth; // depth of nested parenthesized expressions
 }
 
-// A mode value is a set of flags (or 0). Modes control parser behavior.
+// A Mode value is a set of flags (or 0). Modes control parser behavior.
 partial struct Mode /*num:nuint*/;
 
 public static Mode ParseComments => /* 1 << iota */ 1;       // parse comments and add them to AST
 public static Mode SkipFuncCheck => 2;       // do not check that functions are defined
+
+// maxStackDepth is the maximum depth permitted for nested
+// parenthesized expressions.
+internal static nint maxStackDepth = 10000;
+
+// init reduces maxStackDepth for WebAssembly due to its smaller stack size.
+[GoInit] internal static void init() {
+    if (runtime.GOARCH == "wasm"u8) {
+        maxStackDepth = 1000;
+    }
+}
 
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
 public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
@@ -221,10 +233,11 @@ internal static void unexpected(this ref Tree t, item token, @string context) {
 internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var t = ref Ꮡt.DerefOrNull();
         ref var errp = ref Ꮡerrp.DerefOrNull();
 
-        var e = builtin.recover();
+        var e = builtin.recover(calledByDefer);
         if (e != default!) {
             {
                 var (_, ok) = e._<runtimeꓸError>(ᐧ); if (ok) {
@@ -254,6 +267,7 @@ internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs,
     t.vars = new @string[]{"$"u8}.slice();
     t.funcs = funcs;
     t.treeSet = treeSet;
+    t.stackDepth = 0;
     lex.options = new lexOptions(
         emitComment: (Mode)(t.Mode & ParseComments) != 0,
         breakOK: !t.hasFunction(breakˢ2),
@@ -282,7 +296,7 @@ public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text,
         ref var t = ref Ꮡt.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡt.recover, Ꮡerr, ref ᒐ);
+        defer(Ꮡt.recover, Ꮡerr, ref ᒐ, recovers: true);
         t.ParseName = t.Name;
         var lexer = lex(t.Name, text, leftDelim, rightDelim);
         t.startParse(funcs, lexer, treeSet);
@@ -962,53 +976,65 @@ internal static readonly @string parenthesizedPipelineˢ = "parenthesized pipeli
 // A term is a simple "expression".
 // A nil return means the next item is not a term.
 internal static Node term(this ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+    GoFrame ᒐ = default;
+    try {
+        ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var token = t.nextNonSpace();
-        var exprᴛ1 = token.typ;
-        if (exprᴛ1 == itemIdentifier) {
-            var checkFunc = (Mode)(t.Mode & SkipFuncCheck) == 0;
-            if (checkFunc && !t.hasFunction(token.val)) {
-                t.errorf("function %q not defined"u8, token.val);
+        {
+            var token = t.nextNonSpace();
+            var exprᴛ1 = token.typ;
+            if (exprᴛ1 == itemIdentifier) {
+                var checkFunc = (Mode)(t.Mode & SkipFuncCheck) == 0;
+                if (checkFunc && !t.hasFunction(token.val)) {
+                    t.errorf("function %q not defined"u8, token.val);
+                }
+                return new IdentifierNodeжNode(NewIdentifier(token.val).SetTree(Ꮡt).SetPos(token.pos));
             }
-            return new IdentifierNodeжNode(NewIdentifier(token.val).SetTree(Ꮡt).SetPos(token.pos));
-        }
-        if (exprᴛ1 == itemDot) {
-            return new DotNodeжNode(Ꮡt.newDot(token.pos));
-        }
-        if (exprᴛ1 == itemNil) {
-            return new NilNodeжNode(Ꮡt.newNil(token.pos));
-        }
-        if (exprᴛ1 == itemVariable) {
-            return Ꮡt.useVar(token.pos, token.val);
-        }
-        if (exprᴛ1 == itemField) {
-            return new FieldNodeжNode(Ꮡt.newField(token.pos, token.val));
-        }
-        if (exprᴛ1 == itemBool) {
-            return new BoolNodeжNode(Ꮡt.newBool(token.pos, token.val == "true"u8));
-        }
-        if (exprᴛ1 == itemCharConstant || exprᴛ1 == itemComplex || exprᴛ1 == itemNumber) {
-            var (number, err) = Ꮡt.newNumber(token.pos, token.val, token.typ);
-            if (err != default!) {
-                t.error(err);
+            if (exprᴛ1 == itemDot) {
+                return new DotNodeжNode(Ꮡt.newDot(token.pos));
             }
-            return new NumberNodeжNode(number);
-        }
-        if (exprᴛ1 == itemLeftParen) {
-            return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ, itemRightParen));
-        }
-        if (exprᴛ1 == itemString || exprᴛ1 == itemRawString) {
-            var (s, err) = strconv.Unquote(token.val);
-            if (err != default!) {
-                t.error(err);
+            if (exprᴛ1 == itemNil) {
+                return new NilNodeжNode(Ꮡt.newNil(token.pos));
             }
-            return new StringNodeжNode(Ꮡt.newString(token.pos, token.val, s));
+            if (exprᴛ1 == itemVariable) {
+                return Ꮡt.useVar(token.pos, token.val);
+            }
+            if (exprᴛ1 == itemField) {
+                return new FieldNodeжNode(Ꮡt.newField(token.pos, token.val));
+            }
+            if (exprᴛ1 == itemBool) {
+                return new BoolNodeжNode(Ꮡt.newBool(token.pos, token.val == "true"u8));
+            }
+            if (exprᴛ1 == itemCharConstant || exprᴛ1 == itemComplex || exprᴛ1 == itemNumber) {
+                var (number, err) = Ꮡt.newNumber(token.pos, token.val, token.typ);
+                if (err != default!) {
+                    t.error(err);
+                }
+                return new NumberNodeжNode(number);
+            }
+            if (exprᴛ1 == itemLeftParen) {
+                if (t.stackDepth >= maxStackDepth) {
+                    t.errorf("max expression depth exceeded"u8);
+                }
+                t.stackDepth++;
+                defer(() => {
+                    Ꮡt.Value.stackDepth--;
+                }, ref ᒐ);
+                return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ, itemRightParen));
+            }
+            if (exprᴛ1 == itemString || exprᴛ1 == itemRawString) {
+                var (s, err) = strconv.Unquote(token.val);
+                if (err != default!) {
+                    t.error(err);
+                }
+                return new StringNodeжNode(Ꮡt.newString(token.pos, token.val, s));
+            }
         }
+        t.backup();
+        return default!;
     }
-    t.backup();
-    return default!;
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.

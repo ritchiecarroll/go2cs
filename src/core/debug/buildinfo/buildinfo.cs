@@ -78,8 +78,7 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
 
         defer(() => {
             {
-                ref var pathErr = ref heap<ж<fs.PathError>>(out var ᏑpathErr);
-                pathErr = ((ж<fs.PathError>)nil); if (errors.As(Ꮡerr.ValueSlot, ᏑpathErr)){
+                var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok){
                     Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
                 } else 
                 if (Ꮡerr.ValueSlot != default!) {
@@ -321,6 +320,7 @@ internal static bool hasPlan9Magic(slice<byte> magic) {
 
 internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
     // varint length followed by length bytes of data.
+
     // N.B. ReadData reads _up to_ size bytes from the section containing
     // addr. So we don't need to check that size doesn't overflow the
     // section.
@@ -354,7 +354,7 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
         return ("", 0, errNotGoExe);
     }
 
-    return (((@string)b), addr + length, default!);
+    return ((@string)b, addr + length, default!);
 }
 
 // readString returns the string at address addr in the executable x.
@@ -369,7 +369,7 @@ internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64
     if (err != default! || (uint64)len(data) < dataLen) {
         return ""u8;
     }
-    return ((@string)data);
+    return (@string)data;
 }
 
 internal static UntypedInt searchChunkSize => /* 1 << 20 */ 1048576; // 1 MB
@@ -384,7 +384,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
     }
 
     // Round up start; magic can't occur in the initial unaligned portion.
-    start = (uint64)((start + (uint64)buildInfoAlign - 1) & ~(uint64)((buildInfoAlign - 1)));
+    start = (start + (uint64)buildInfoAlign - 1) & ~(uint64)(buildInfoAlign - 1);
     if (start >= end) {
         return (0, errNotGoExe);
     }
@@ -432,7 +432,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
             }
             if (i % (nint)buildInfoAlign != 0) {
                 // Found magic, but misaligned. Keep searching.
-                nint next = (nint)((i + (nint)buildInfoAlign - 1) & ~(nint)(buildInfoAlign - 1));
+                nint next = (i + (nint)buildInfoAlign - 1) & ~(nint)(buildInfoAlign - 1);
                 if (next > len(data)) {
                     // Corrupt object file: the remaining
                     // count says there is more data,

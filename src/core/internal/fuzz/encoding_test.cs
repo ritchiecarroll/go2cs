@@ -4,9 +4,10 @@
 namespace go.@internal;
 
 using math = math_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using testing = testing_package;
 using unicode = unicode_package;
+using global::go;
 using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {
@@ -301,7 +302,7 @@ uint(0xffffffffffffffff)
                 want = testʗ1.@in;
             }
             want += "\n"u8;
-            @string got = ((@string)newB);
+            @string got = (@string)newB;
             if (got != want) {
                 tΔ1.Errorf("unexpected marshaled value\ngot:\n%s\nwant:\n%s"u8, got, want);
             }
@@ -318,13 +319,13 @@ public static void BenchmarkMarshalCorpusFile(ж<testing.B> Ꮡb) {
         buf[i] = (byte)i;
     }
 
-    for (nint sz = 1; sz <= len(buf); sz <<= (int)(1)) {
-        nint szΔ1 = sz;
+    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= (int)(1)) {
+        var sz = szᴛ1;
         var bufʗ1 = buf;
-        Ꮡb.Run(strconv.Itoa(szΔ1), (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                bΔ1.SetBytes((int64)szΔ1);
-                marshalCorpusFile(bufʗ1.slice(0, szΔ1));
+                bΔ1.SetBytes((int64)sz);
+                marshalCorpusFile(bufʗ1.slice(0, sz));
             }
         });
     }
@@ -339,13 +340,13 @@ public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> Ꮡb) {
         buf[i] = (byte)i;
     }
 
-    for (nint sz = 1; sz <= len(buf); sz <<= (int)(1)) {
-        nint szΔ1 = sz;
-        var data = marshalCorpusFile(buf.slice(0, szΔ1));
+    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= (int)(1)) {
+        var sz = szᴛ1;
+        var data = marshalCorpusFile(buf.slice(0, sz));
         var dataʗ1 = data;
-        Ꮡb.Run(strconv.Itoa(szΔ1), (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                bΔ1.SetBytes((int64)szΔ1);
+                bΔ1.SetBytes((int64)sz);
                 unmarshalCorpusFile(dataʗ1);
             }
         });
@@ -452,7 +453,7 @@ public static void FuzzStringRoundTrip(ж<testing.F> Ꮡf) {
 
     f.Add((@string)""u8);
     f.Add((@string)"\x00"u8);
-    f.Add(((@string)new rune[]{unicode.ReplacementChar}.slice()));
+    f.Add((@string)new rune[]{unicode.ReplacementChar}.slice());
 
     Ꮡf.Fuzz((ж<testing.T> t, @string s1) => {
         var b = marshalCorpusFile(s1);

@@ -156,7 +156,7 @@ public static float64 Gamma(float64 x) {
         // If |x| were >= 2⁶³ it would have to be an integer.
         nint signgam = 1;
         {
-            var ip = (int64)p; if ((int64)(ip & 1) == 0) {
+            var ip = (int64)p; if ((ip & 1) == 0) {
                 signgam = -1;
             }
         }

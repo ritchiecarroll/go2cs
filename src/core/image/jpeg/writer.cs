@@ -15,13 +15,13 @@ partial class jpeg_package {
 // div returns a/b rounded to the nearest integer, instead of rounded to zero.
 internal static int32 div(int32 a, int32 b) {
     if (a >= 0) {
-        return quo((a + ((b >> (int)(1)))), b);
+        return quo((a + (b >> 1)), b);
     }
-    return -(quo((-a + ((b >> (int)(1)))), b));
+    return -(quo((-a + (b >> 1)), b));
 }
 
 // bitCount counts the number of bits needed to hold an integer.
-internal static array<byte> bitCount = new byte[]{
+[GoLazy] partial class lazyᴛbitCount { internal static array<byte> bitCount = new byte[]{
     0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -38,7 +38,7 @@ internal static array<byte> bitCount = new byte[]{
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-}.array();
+}.array(); }
 
 partial struct quantIndex /*num:nint*/;
 
@@ -50,7 +50,7 @@ internal static quantIndex nQuantIndex => 2;
 // encoder copies and scales the tables according to its quality parameter.
 // The values are derived from section K.1 of the spec, after converting from
 // natural to zig-zag order.
-internal static array<array<byte>> unscaledQuant = new array<byte>[]{
+[GoLazy] partial class lazyᴛunscaledQuant { internal static array<array<byte>> unscaledQuant = new array<byte>[]{
     // Luminance.
     new byte[]{
         16, 11, 12, 14, 12, 10, 16, 14,
@@ -71,7 +71,7 @@ internal static array<array<byte>> unscaledQuant = new array<byte>[]{
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99}.array()
-}.array();
+}.array(); }
 
 partial struct huffIndex /*num:nint*/;
 
@@ -99,7 +99,7 @@ partial struct huffmanSpec {
 // The AC tables have 162 decoded values: bytes that pack a 4-bit Run and a
 // 4-bit Size. There are 16 valid Runs and 10 valid Sizes, plus two special R|S
 // cases: 0|0 (meaning EOB) and F|0 (meaning ZRL).
-internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
+[GoLazy] partial class lazyᴛtheHuffmanSpec { internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
     // Luminance DC.
     new(
         new byte[]{0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}.array(),
@@ -164,7 +164,7 @@ internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
             0xf9, 0xfa
         }.slice()
     )
-}.array();
+}.array(); }
 
 // huffmanLUT is a compiled look-up table representation of a huffmanSpec.
 // Each value maps to a uint32 of which the 8 most significant bits hold the
@@ -185,9 +185,9 @@ internal static void init(this ref huffmanLUT h, huffmanSpec s) {
     var code = (uint32)0;
     nint k = 0;
     for (nint i = 0; i < len(s.count); i++) {
-        var nBits = ((uint32)(i + 1) << (int)(24));
+        var nBits = (uint32)(i + 1) << 24;
         for (var j = (uint8)0; j < s.count[i]; j++) {
-            (h)[s.value[k]] = (uint32)(nBits | code);
+            (h)[s.value[k]] = nBits | code;
             code++;
             k++;
         }
@@ -257,7 +257,7 @@ internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
     bits.LshAssign((uint64)(32 - nBits));
     bits |= (uint32)(e.bits);
     while (nBits >= 8) {
-        var b = (uint8)((bits >> (int)(24)));
+        var b = (uint8)(bits >> 24);
         e.writeByte(b);
         if (b == 0xff) {
             e.writeByte(0x00);
@@ -271,7 +271,7 @@ internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
 // emitHuff emits the given value with the given Huffman encoder.
 internal static void emitHuff(this ref encoder e, huffIndex h, int32 value) {
     var x = theHuffmanLUT[h][value];
-    e.emit((uint32)(x & ((1 << (int)(24)) - 1)), (x >> (int)(24)));
+    e.emit((uint32)(x & ((1 << 24) - 1)), x >> 24);
 }
 
 // emitHuffRLE emits a run of runLength copies of value encoded with the given
@@ -285,11 +285,11 @@ internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLengt
     if (a < 0x100){
         nBits = (uint32)bitCount[a];
     } else {
-        nBits = 8 + (uint32)bitCount[(a >> (int)(8))];
+        nBits = 8 + (uint32)bitCount[(a >> 8)];
     }
-    e.emitHuff(h, (int32)((runLength << (int)(4)) | (int32)nBits));
+    e.emitHuff(h, runLength << 4 | (int32)nBits);
     if (nBits > 0) {
-        e.emit((uint32)((uint32)b & (((uint32)1).Lsh((uint64)(nBits)) - 1)), nBits);
+        e.emit((uint32)b & (((uint32)1).Lsh((uint64)(nBits)) - 1), nBits);
     }
 }
 
@@ -297,8 +297,8 @@ internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLengt
 internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint markerlen) {
     e.buf[0] = 0xff;
     e.buf[1] = marker;
-    e.buf[2] = (uint8)((markerlen >> (int)(8)));
-    e.buf[3] = (uint8)((nint)(markerlen & 0xff));
+    e.buf[2] = (uint8)(markerlen >> 8);
+    e.buf[3] = (uint8)(markerlen & 0xff);
     e.write(e.buf[..4]);
 }
 
@@ -306,7 +306,7 @@ internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint ma
 internal static void writeDQT(this ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
-    foreach (var (i, _) in e.quant) {
+    foreach (var i in range(e.quant)) {
         e.writeByte((uint8)i);
         e.write(e.quant[i][..]);
     }
@@ -317,10 +317,10 @@ internal static void writeSOF0(this ref encoder e, image.Point size, nint nCompo
     nint markerlen = 8 + 3 * nComponent;
     e.writeMarkerHeader(sof0Marker, markerlen);
     e.buf[0] = 8; // 8-bit color.
-    e.buf[1] = (uint8)((size.Y >> (int)(8)));
-    e.buf[2] = (uint8)((nint)(size.Y & 0xff));
-    e.buf[3] = (uint8)((size.X >> (int)(8)));
-    e.buf[4] = (uint8)((nint)(size.X & 0xff));
+    e.buf[1] = (uint8)(size.Y >> 8);
+    e.buf[2] = (uint8)(size.Y & 0xff);
+    e.buf[3] = (uint8)(size.X >> 8);
+    e.buf[4] = (uint8)(size.X & 0xff);
     e.buf[5] = (uint8)nComponent;
     if (nComponent == 1){
         e.buf[6] = 1;
@@ -370,9 +370,9 @@ internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex 
     fdct(Ꮡb);
     // Emit the DC delta.
     var dc = div(b[0], 8 * (int32)e.quant[q][0]);
-    e.emitHuffRLE(((huffIndex)(nint)(2 * q + 0)), 0, dc - prevDC);
+    e.emitHuffRLE((huffIndex)(nint)(2 * q + 0), 0, dc - prevDC);
     // Emit the AC components.
-    huffIndex h = ((huffIndex)(nint)(2 * q + 1));
+    huffIndex h = (huffIndex)(nint)(2 * q + 1);
     var runLength = (int32)0;
     for (nint zig = 1; zig < blockSize; zig++) {
         var ac = div(b[unzig[zig]], 8 * (int32)e.quant[q][zig]);
@@ -402,7 +402,7 @@ internal static void toYCbCr(image.Image m, image.Point p, ref block yBlock, ref
     for (nint j = 0; j < 8; j++) {
         for (nint i = 0; i < 8; i++) {
             var (r, g, bΔ1, _) = m.At(min(p.X + i, xmax), min(p.Y + j, ymax)).RGBA();
-            var (yy, cb, cr) = color.RGBToYCbCr((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((bΔ1 >> (int)(8))));
+            var (yy, cb, cr) = color.RGBToYCbCr((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(bΔ1 >> 8));
             yBlock[8 * j + i] = (int32)yy;
             cbBlock[8 * j + i] = (int32)cb;
             crBlock[8 * j + i] = (int32)cr;
@@ -483,12 +483,12 @@ internal static void yCbCrToYCbCr(ж<image.YCbCr> Ꮡm, image.Point p, ref block
 // dst block.
 internal static void scale(ref block dst, ref array<block> src) {
     for (nint i = 0; i < 4; i++) {
-        nint dstOff = (nint)((((nint)(i & 2)) << (int)(4)) | (((nint)(i & 1)) << (int)(2)));
+        nint dstOff = (i & 2) << 4 | (i & 1) << 2;
         for (nint y = 0; y < 4; y++) {
             for (nint x = 0; x < 4; x++) {
                 nint j = 16 * y + 2 * x;
                 var sum = src[i][j] + src[i][j + 1] + src[i][j + 8] + src[i][j + 9];
-                dst[8 * y + x + dstOff] = ((sum + 2) >> (int)(2));
+                dst[8 * y + x + dstOff] = (sum + 2) >> 2;
             }
         }
     }
@@ -559,8 +559,8 @@ internal static void writeSOS(this ref encoder e, image.Image m) {
         for (nint y = bounds.Min.Y; y < bounds.Max.Y; y += 16) {
             for (nint x = bounds.Min.X; x < bounds.Max.X; x += 16) {
                 for (nint i = 0; i < 4; i++) {
-                    nint xOff = ((nint)(i & 1)) * 8;
-                    nint yOff = ((nint)(i & 2)) * 4;
+                    nint xOff = (i & 1) * 8;
+                    nint yOff = (i & 2) * 4;
                     var p = image.Pt(x + xOff, y + yOff);
                     if (rgba != nil){
                         rgbaToYCbCr(rgba, p, ref b, ref cb[i], ref cr[i]);
@@ -602,7 +602,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     var b = m.Bounds();
-    if (b.Dx() >= (1 << (int)(16)) || b.Dy() >= (1 << (int)(16))) {
+    if (b.Dx() >= 1 << 16 || b.Dy() >= 1 << 16) {
         return errors.New(jpegImageIsTooLargeToˢ);
     }
     encoder e = new();
@@ -632,8 +632,8 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         scale = 200 - quality * 2;
     }
     // Initialize the quantization tables.
-    foreach (var (i, _) in e.quant) {
-        foreach (var (j, _) in e.quant[i]) {
+    foreach (var i in range(e.quant)) {
+        foreach (var j in range(e.quant[i])) {
             nint x = (nint)unscaledQuant[i][j];
             x = (x * scale + 50) / 100;
             if (x < 1){

@@ -122,7 +122,7 @@ internal static array<float64> _lgamS = new float64[]{
     3.19475326584100867617e-05D // 0x3F00BFECDD17E945
 }.array();
 
-internal static array<float64> _lgamT = new float64[]{
+[GoLazy] partial class lazyᴛ_lgamT { internal static array<float64> _lgamT = new float64[]{
     4.83836122723810047042e-01D, // 0x3FDEF72BC8EE38A2
     -1.47587722994593911752e-01D, // 0xBFC2E4278DC6C509
     6.46249402391333854778e-02D, // 0x3FB08B4294D5419B
@@ -138,7 +138,7 @@ internal static array<float64> _lgamT = new float64[]{
     3.15632070903625950361e-04D, // 0x3F34AF6D6C0EBBF7
     -3.12754168375120860518e-04D, // 0xBF347F24ECC38C38
     3.35529192635519073543e-04D // 0x3F35FD3EE8C2D3F4
-}.array();
+}.array(); }
 
 internal static array<float64> _lgamU = new float64[]{
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
@@ -379,7 +379,7 @@ internal static float64 sinPi(float64 x) {
             if (x < Two52) {
                 z = x + Two52; // exact
             }
-            n = (nint)((uint64)(1 & Float64bits(z)));
+            n = (nint)(1 & Float64bits(z));
             x = (float64)n;
             n <<= (int)(2);
         }

@@ -26,6 +26,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/check/cycles4.go",
             "../../internal/types/testdata/check/cycles5.go",
             "../../internal/types/testdata/check/cycles5a.go",
+            "../../internal/types/testdata/check/cycles6.go",
             "../../internal/types/testdata/check/decls0.go",
             "../../internal/types/testdata/check/decls1.go",
             "../../internal/types/testdata/check/decls2/decls2a.go",
@@ -33,6 +34,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/check/decls3.go",
             "../../internal/types/testdata/check/decls4.go",
             "../../internal/types/testdata/check/decls5.go",
+            "../../internal/types/testdata/check/doubled_labels.go",
             "../../internal/types/testdata/check/errors.go",
             "../../internal/types/testdata/check/expr0.go",
             "../../internal/types/testdata/check/expr1.go",
@@ -48,6 +50,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/check/go1_21_19.go",
             "../../internal/types/testdata/check/go1_21_22.go",
             "../../internal/types/testdata/check/go1_22_21.go",
+            "../../internal/types/testdata/check/go1_25.go",
             "../../internal/types/testdata/check/go1_8.go",
             "../../internal/types/testdata/check/go1_xx_19.go",
             "../../internal/types/testdata/check/gotos.go",
@@ -61,6 +64,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/check/init2.go",
             "../../internal/types/testdata/check/issue25008/issue25008a.go",
             "../../internal/types/testdata/check/issue25008/issue25008b.go",
+            "../../internal/types/testdata/check/issue70974.go",
             "../../internal/types/testdata/check/issues0.go",
             "../../internal/types/testdata/check/issues1.go",
             "../../internal/types/testdata/check/labels.go",
@@ -132,7 +136,6 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/fixedbugs/issue43109.go",
             "../../internal/types/testdata/fixedbugs/issue43110.go",
             "../../internal/types/testdata/fixedbugs/issue43124.go",
-            "../../internal/types/testdata/fixedbugs/issue43125.go",
             "../../internal/types/testdata/fixedbugs/issue43190.go",
             "../../internal/types/testdata/fixedbugs/issue43527.go",
             "../../internal/types/testdata/fixedbugs/issue43671.go",
@@ -327,6 +330,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/fixedbugs/issue67683.go",
             "../../internal/types/testdata/fixedbugs/issue67872.go",
             "../../internal/types/testdata/fixedbugs/issue67962.go",
+            "../../internal/types/testdata/fixedbugs/issue68162.go",
             "../../internal/types/testdata/fixedbugs/issue68184.go",
             "../../internal/types/testdata/fixedbugs/issue68903.go",
             "../../internal/types/testdata/fixedbugs/issue68935.go",
@@ -336,9 +340,24 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/fixedbugs/issue70150.go",
             "../../internal/types/testdata/fixedbugs/issue70417.go",
             "../../internal/types/testdata/fixedbugs/issue70526.go",
+            "../../internal/types/testdata/fixedbugs/issue70549.go",
             "../../internal/types/testdata/fixedbugs/issue71131.go",
             "../../internal/types/testdata/fixedbugs/issue71198.go",
             "../../internal/types/testdata/fixedbugs/issue71284.go",
+            "../../internal/types/testdata/fixedbugs/issue72936.go",
+            "../../internal/types/testdata/fixedbugs/issue73428.go",
+            "../../internal/types/testdata/fixedbugs/issue75194.go",
+            "../../internal/types/testdata/fixedbugs/issue75883.go",
+            "../../internal/types/testdata/fixedbugs/issue75885.go",
+            "../../internal/types/testdata/fixedbugs/issue75918.go",
+            "../../internal/types/testdata/fixedbugs/issue75986.go",
+            "../../internal/types/testdata/fixedbugs/issue76103.go",
+            "../../internal/types/testdata/fixedbugs/issue76220.go",
+            "../../internal/types/testdata/fixedbugs/issue76366.go",
+            "../../internal/types/testdata/fixedbugs/issue76383.go",
+            "../../internal/types/testdata/fixedbugs/issue76384.go",
+            "../../internal/types/testdata/fixedbugs/issue76478.go",
+            "../../internal/types/testdata/fixedbugs/issue78163.go",
             "../../internal/types/testdata/spec/assignability.go",
             "../../internal/types/testdata/spec/comparable.go",
             "../../internal/types/testdata/spec/comparable1.19.go",
@@ -352,6 +371,7 @@ internal static class Go2CsTestHost
             "../../internal/types/testdata/spec/typeAliases1.23b.go",
             "../../internal/types/testdata/spec/typeAliases1.8.go",
             "alias.go",
+            "alias_test.go",
             "api.go",
             "api_predicates.go",
             "api_test.go",
@@ -370,6 +390,7 @@ internal static class Go2CsTestHost
             "context.go",
             "context_test.go",
             "conversions.go",
+            "cycles.go",
             "decl.go",
             "errorcalls_test.go",
             "errors.go",
@@ -415,6 +436,7 @@ internal static class Go2CsTestHost
             "package.go",
             "pointer.go",
             "predicates.go",
+            "range.go",
             "recording.go",
             "resolver.go",
             "resolver_test.go",
@@ -462,61 +484,61 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestAlias_Rhs", types_test_package.TestAlias_Rhs, "api_test.go", 3010);
+        registry.Add("TestAlias_Rhs", types_test_package.TestAlias_Rhs, "api_test.go", 3014);
         registry.Add("TestAlignofNaclSlice", types_test_package.TestAlignofNaclSlice, "sizes_test.go", 58);
-        registry.Add("TestAnyHijacking_Check", types_test_package.TestAnyHijacking_Check, "api_test.go", 3030);
-        registry.Add("TestAnyHijacking_Lookup", types_test_package.TestAnyHijacking_Lookup, "api_test.go", 3053);
-        registry.Add("TestArgumentErrorUnwrapping", types_test_package.TestArgumentErrorUnwrapping, "api_test.go", 2488);
+        registry.Add("TestAnyHijacking_Check", types_test_package.TestAnyHijacking_Check, "api_test.go", 3034);
+        registry.Add("TestAnyHijacking_Lookup", types_test_package.TestAnyHijacking_Lookup, "api_test.go", 3057);
+        registry.Add("TestArgumentErrorUnwrapping", types_test_package.TestArgumentErrorUnwrapping, "api_test.go", 2493);
         registry.Add("TestAssignOp", types_internal_test_package.TestAssignOp, "token_test.go", 37);
-        registry.Add("TestAssignableTo", types_test_package.TestAssignableTo, "api_test.go", 2014);
+        registry.Add("TestAssignableTo", types_test_package.TestAssignableTo, "api_test.go", 2020);
         registry.Add("TestAtomicAlign", types_test_package.TestAtomicAlign, "sizes_test.go", 102);
         registry.Add("TestBuiltinSignatures", types_test_package.TestBuiltinSignatures, "builtins_test.go", 165);
         registry.Add("TestCheck", types_test_package.TestCheck, "check_test.go", 428);
         registry.Add("TestCheckExpr", types_test_package.TestCheckExpr, "eval_test.go", 219);
         registry.Add("TestCommentMap", types_test_package.TestCommentMap, "commentMap_test.go", 69);
-        registry.Add("TestCompositeLitTypes", types_test_package.TestCompositeLitTypes, "api_test.go", 2196);
+        registry.Add("TestCompositeLitTypes", types_test_package.TestCompositeLitTypes, "api_test.go", 2202);
         registry.Add("TestContextHashCollisions", types_internal_test_package.TestContextHashCollisions, "context_test.go", 14);
-        registry.Add("TestConvertibleTo", types_test_package.TestConvertibleTo, "api_test.go", 1989);
-        registry.Add("TestDefsInfo", types_test_package.TestDefsInfo, "api_test.go", 823);
+        registry.Add("TestConvertibleTo", types_test_package.TestConvertibleTo, "api_test.go", 1995);
+        registry.Add("TestDefsInfo", types_test_package.TestDefsInfo, "api_test.go", 829);
         registry.Add("TestEmbeddedMethod", types_test_package.TestEmbeddedMethod, "object_test.go", 58);
         registry.Add("TestError", types_internal_test_package.TestError, "errors_test.go", 12);
         registry.Add("TestErrorCalls", types_test_package.TestErrorCalls, "errorcalls_test.go", 22);
-        registry.Add("TestErrorURL", types_test_package.TestErrorURL, "api_test.go", 2824);
+        registry.Add("TestErrorURL", types_test_package.TestErrorURL, "api_test.go", 2828);
         registry.Add("TestEvalArith", types_test_package.TestEvalArith, "eval_test.go", 74);
         registry.Add("TestEvalBasic", types_test_package.TestEvalBasic, "eval_test.go", 60);
         registry.Add("TestEvalComposite", types_test_package.TestEvalComposite, "eval_test.go", 67);
         registry.Add("TestEvalPos", types_test_package.TestEvalPos, "eval_test.go", 91);
-        registry.Add("TestExamples", types_test_package.TestExamples, "check_test.go", 439);
+        registry.Add("TestExamples", types_test_package.TestExamples, "check_test.go", 433);
         registry.Add("TestExprString", types_test_package.TestExprString, "exprstring_test.go", 121);
-        registry.Add("TestFailedImport", types_test_package.TestFailedImport, "api_test.go", 2310);
-        registry.Add("TestFileVersions", types_test_package.TestFileVersions, "api_test.go", 2867);
-        registry.Add("TestFiles", types_test_package.TestFiles, "api_test.go", 1585);
+        registry.Add("TestFailedImport", types_test_package.TestFailedImport, "api_test.go", 2316);
+        registry.Add("TestFileVersions", types_test_package.TestFileVersions, "api_test.go", 2871);
+        registry.Add("TestFiles", types_test_package.TestFiles, "api_test.go", 1591);
         registry.Add("TestFiniteTypeExpansion", types_test_package.TestFiniteTypeExpansion, "named_test.go", 90);
-        registry.Add("TestFixedbugs", types_test_package.TestFixedbugs, "check_test.go", 440);
+        registry.Add("TestFixedbugs", types_test_package.TestFixedbugs, "check_test.go", 434);
         registry.Add("TestGCSizes", types_test_package.TestGCSizes, "sizes_test.go", 187);
         registry.Add("TestGenerate", types_test_package.TestGenerate, "generate_test.go", 36);
-        registry.Add("TestGenericMethodInfo", types_test_package.TestGenericMethodInfo, "api_test.go", 947);
+        registry.Add("TestGenericMethodInfo", types_test_package.TestGenericMethodInfo, "api_test.go", 953);
         registry.Add("TestHilbert", types_test_package.TestHilbert, "hilbert_test.go", 25);
-        registry.Add("TestIdentical", types_test_package.TestIdentical, "api_test.go", 2037);
-        registry.Add("TestIdenticalUnions", types_test_package.TestIdenticalUnions, "api_test.go", 2100);
-        registry.Add("TestIdentical_issue15173", types_test_package.TestIdentical_issue15173, "api_test.go", 2083);
-        registry.Add("TestImmutableSignatures", types_test_package.TestImmutableSignatures, "instantiate_test.go", 198);
-        registry.Add("TestImplements", types_test_package.TestImplements, "api_test.go", 2656);
-        registry.Add("TestImplicitsInfo", types_test_package.TestImplicitsInfo, "api_test.go", 1028);
+        registry.Add("TestIdentical", types_test_package.TestIdentical, "api_test.go", 2043);
+        registry.Add("TestIdenticalUnions", types_test_package.TestIdenticalUnions, "api_test.go", 2106);
+        registry.Add("TestIdentical_issue15173", types_test_package.TestIdentical_issue15173, "api_test.go", 2089);
+        registry.Add("TestImmutableSignatures", types_test_package.TestImmutableSignatures, "instantiate_test.go", 197);
+        registry.Add("TestImplements", types_test_package.TestImplements, "api_test.go", 2660);
+        registry.Add("TestImplicitsInfo", types_test_package.TestImplicitsInfo, "api_test.go", 1034);
         registry.Add("TestIndexRepresentability", types_test_package.TestIndexRepresentability, "check_test.go", 416);
-        registry.Add("TestInitOrderInfo", types_test_package.TestInitOrderInfo, "api_test.go", 1402);
-        registry.Add("TestInstanceIdentity", types_test_package.TestInstanceIdentity, "api_test.go", 2502);
-        registry.Add("TestInstanceInfo", types_test_package.TestInstanceInfo, "api_test.go", 565);
-        registry.Add("TestInstantiate", types_test_package.TestInstantiate, "api_test.go", 2376);
-        registry.Add("TestInstantiateConcurrent", types_test_package.TestInstantiateConcurrent, "api_test.go", 2400);
+        registry.Add("TestInitOrderInfo", types_test_package.TestInitOrderInfo, "api_test.go", 1408);
+        registry.Add("TestInstanceIdentity", types_test_package.TestInstanceIdentity, "api_test.go", 2507);
+        registry.Add("TestInstanceInfo", types_test_package.TestInstanceInfo, "api_test.go", 571);
+        registry.Add("TestInstantiate", types_test_package.TestInstantiate, "api_test.go", 2382);
+        registry.Add("TestInstantiateConcurrent", types_test_package.TestInstantiateConcurrent, "api_test.go", 2406);
         registry.Add("TestInstantiateEquality", types_test_package.TestInstantiateEquality, "instantiate_test.go", 15);
-        registry.Add("TestInstantiateErrors", types_test_package.TestInstantiateErrors, "api_test.go", 2454);
+        registry.Add("TestInstantiateErrors", types_test_package.TestInstantiateErrors, "api_test.go", 2459);
         registry.Add("TestInstantiateNonEquality", types_test_package.TestInstantiateNonEquality, "instantiate_test.go", 137);
-        registry.Add("TestInstantiatedObjects", types_test_package.TestInstantiatedObjects, "api_test.go", 2526);
+        registry.Add("TestInstantiatedObjects", types_test_package.TestInstantiatedObjects, "api_test.go", 2531);
         registry.Add("TestInvalidTypeSet", types_internal_test_package.TestInvalidTypeSet, "typeset_test.go", 14);
         registry.Add("TestIsAlias", types_test_package.TestIsAlias, "object_test.go", 16);
         registry.Add("TestIssue13898", types_test_package.TestIssue13898, "issues_test.go", 188);
-        registry.Add("TestIssue15305", types_test_package.TestIssue15305, "api_test.go", 2171);
+        registry.Add("TestIssue15305", types_test_package.TestIssue15305, "api_test.go", 2177);
         registry.Add("TestIssue16902", types_test_package.TestIssue16902, "sizes_test.go", 80);
         registry.Add("TestIssue22525", types_test_package.TestIssue22525, "issues_test.go", 261);
         registry.Add("TestIssue25627", types_test_package.TestIssue25627, "issues_test.go", 278);
@@ -527,64 +549,67 @@ internal static class Go2CsTestHost
         registry.Add("TestIssue34921", types_test_package.TestIssue34921, "issues_test.go", 476);
         registry.Add("TestIssue43088", types_test_package.TestIssue43088, "issues_test.go", 495);
         registry.Add("TestIssue43124", types_test_package.TestIssue43124, "issues_test.go", 542);
-        registry.Add("TestIssue44410", types_test_package.TestIssue44410, "issues_test.go", 995);
+        registry.Add("TestIssue44410", types_test_package.TestIssue44410, "issues_test.go", 1023);
         registry.Add("TestIssue44515", types_test_package.TestIssue44515, "issues_test.go", 520);
         registry.Add("TestIssue47243_TypedRHS", types_test_package.TestIssue47243_TypedRHS, "check_test.go", 421);
         registry.Add("TestIssue50646", types_test_package.TestIssue50646, "issues_test.go", 612);
-        registry.Add("TestIssue51093", types_test_package.TestIssue51093, "issues_test.go", 675);
-        registry.Add("TestIssue54258", types_test_package.TestIssue54258, "issues_test.go", 728);
+        registry.Add("TestIssue51093", types_test_package.TestIssue51093, "issues_test.go", 703);
+        registry.Add("TestIssue54258", types_test_package.TestIssue54258, "issues_test.go", 756);
         registry.Add("TestIssue55030", types_test_package.TestIssue55030, "issues_test.go", 638);
         registry.Add("TestIssue5770", types_test_package.TestIssue5770, "issues_test.go", 23);
         registry.Add("TestIssue5849", types_test_package.TestIssue5849, "issues_test.go", 31);
-        registry.Add("TestIssue59603", types_test_package.TestIssue59603, "api_test.go", 1833);
-        registry.Add("TestIssue59831", types_test_package.TestIssue59831, "issues_test.go", 1018);
-        registry.Add("TestIssue59944", types_test_package.TestIssue59944, "issues_test.go", 850);
+        registry.Add("TestIssue59603", types_test_package.TestIssue59603, "api_test.go", 1839);
+        registry.Add("TestIssue59831", types_test_package.TestIssue59831, "issues_test.go", 1046);
+        registry.Add("TestIssue59944", types_test_package.TestIssue59944, "issues_test.go", 878);
         registry.Add("TestIssue60634", types_test_package.TestIssue60634, "methodset_test.go", 160);
-        registry.Add("TestIssue61737", types_test_package.TestIssue61737, "api_test.go", 2142);
-        registry.Add("TestIssue61931", types_test_package.TestIssue61931, "issues_test.go", 914);
-        registry.Add("TestIssue61938", types_test_package.TestIssue61938, "issues_test.go", 935);
-        registry.Add("TestIssue63260", types_test_package.TestIssue63260, "issues_test.go", 951);
+        registry.Add("TestIssue61737", types_test_package.TestIssue61737, "api_test.go", 2148);
+        registry.Add("TestIssue61931", types_test_package.TestIssue61931, "issues_test.go", 942);
+        registry.Add("TestIssue61938", types_test_package.TestIssue61938, "issues_test.go", 963);
+        registry.Add("TestIssue63260", types_test_package.TestIssue63260, "issues_test.go", 979);
         registry.Add("TestIssue6413", types_test_package.TestIssue6413, "issues_test.go", 73);
-        registry.Add("TestIssue64759", types_test_package.TestIssue64759, "issues_test.go", 1091);
+        registry.Add("TestIssue64759", types_test_package.TestIssue64759, "issues_test.go", 1119);
         registry.Add("TestIssue65898", types_test_package.TestIssue65898, "eval_test.go", 314);
-        registry.Add("TestIssue68334", types_test_package.TestIssue68334, "issues_test.go", 1108);
-        registry.Add("TestIssue68877", types_test_package.TestIssue68877, "issues_test.go", 1137);
-        registry.Add("TestIssue69092", types_test_package.TestIssue69092, "issues_test.go", 1157);
+        registry.Add("TestIssue68334", types_test_package.TestIssue68334, "issues_test.go", 1136);
+        registry.Add("TestIssue68877", types_test_package.TestIssue68877, "issues_test.go", 1165);
+        registry.Add("TestIssue69092", types_test_package.TestIssue69092, "issues_test.go", 1185);
         registry.Add("TestIssue7245", types_test_package.TestIssue7245, "issues_test.go", 101);
+        registry.Add("TestIssue73871", types_test_package.TestIssue73871, "api_test.go", 3178);
+        registry.Add("TestIssue74181", types_test_package.TestIssue74181, "alias_test.go", 15);
         registry.Add("TestIssue7827", types_test_package.TestIssue7827, "issues_test.go", 128);
-        registry.Add("TestIssue8518", types_test_package.TestIssue8518, "api_test.go", 1804);
-        registry.Add("TestLocal", types_test_package.TestLocal, "check_test.go", 441);
+        registry.Add("TestIssue8518", types_test_package.TestIssue8518, "api_test.go", 1810);
+        registry.Add("TestLocal", types_test_package.TestLocal, "check_test.go", 435);
         registry.Add("TestLongConstants", types_test_package.TestLongConstants, "check_test.go", 401);
-        registry.Add("TestLookupFieldOrMethod", types_test_package.TestLookupFieldOrMethod, "api_test.go", 1871);
-        registry.Add("TestLookupFieldOrMethodOnNil", types_test_package.TestLookupFieldOrMethodOnNil, "api_test.go", 1859);
-        registry.Add("TestLookupFieldOrMethod_RecursiveGeneric", types_test_package.TestLookupFieldOrMethod_RecursiveGeneric, "api_test.go", 1954);
+        registry.Add("TestLookupFieldOrMethod", types_test_package.TestLookupFieldOrMethod, "api_test.go", 1877);
+        registry.Add("TestLookupFieldOrMethodOnNil", types_test_package.TestLookupFieldOrMethodOnNil, "api_test.go", 1865);
+        registry.Add("TestLookupFieldOrMethod_RecursiveGeneric", types_test_package.TestLookupFieldOrMethod_RecursiveGeneric, "api_test.go", 1960);
         registry.Add("TestManual", types_test_package.TestManual, "check_test.go", 377);
         registry.Add("TestMethodInstantiation", types_test_package.TestMethodInstantiation, "instantiate_test.go", 162);
         registry.Add("TestMethodOrdering", types_test_package.TestMethodOrdering, "named_test.go", 134);
-        registry.Add("TestMissingMethodAlternative", types_test_package.TestMissingMethodAlternative, "api_test.go", 2769);
-        registry.Add("TestModuleVersion", types_test_package.TestModuleVersion, "api_test.go", 2850);
+        registry.Add("TestMissingMethodAlternative", types_test_package.TestMissingMethodAlternative, "api_test.go", 2773);
+        registry.Add("TestModuleVersion", types_test_package.TestModuleVersion, "api_test.go", 2854);
         registry.Add("TestMonoBad", types_test_package.TestMonoBad, "mono_test.go", 38);
         registry.Add("TestMonoGood", types_test_package.TestMonoGood, "mono_test.go", 30);
-        registry.Add("TestMultiFileInitOrder", types_test_package.TestMultiFileInitOrder, "api_test.go", 1560);
+        registry.Add("TestMultiFileInitOrder", types_test_package.TestMultiFileInitOrder, "api_test.go", 1566);
         registry.Add("TestMultipleSizeUse", types_test_package.TestMultipleSizeUse, "sizes_test.go", 35);
-        registry.Add("TestNewAlias_Issue65455", types_test_package.TestNewAlias_Issue65455, "api_test.go", 2165);
+        registry.Add("TestNewAlias_Issue65455", types_test_package.TestNewAlias_Issue65455, "api_test.go", 2171);
         registry.Add("TestNewMethodSet", types_test_package.TestNewMethodSet, "methodset_test.go", 18);
         registry.Add("TestNewMethodSet_RecursiveGeneric", types_test_package.TestNewMethodSet_RecursiveGeneric, "methodset_test.go", 131);
-        registry.Add("TestObjectParents", types_test_package.TestObjectParents, "api_test.go", 2242);
-        registry.Add("TestObjectString", types_test_package.TestObjectString, "object_test.go", 112);
-        registry.Add("TestPkgNameOf", types_test_package.TestPkgNameOf, "api_test.go", 1096);
-        registry.Add("TestPredicatesInfo", types_test_package.TestPredicatesInfo, "api_test.go", 1198);
+        registry.Add("TestObjectParents", types_test_package.TestObjectParents, "api_test.go", 2248);
+        registry.Add("TestObjectString", types_test_package.TestObjectString, "object_test.go", 111);
+        registry.Add("TestPartialTypeCheckUndeclaredAliasPanic", types_test_package.TestPartialTypeCheckUndeclaredAliasPanic, "alias_test.go", 58);
+        registry.Add("TestPkgNameOf", types_test_package.TestPkgNameOf, "api_test.go", 1102);
+        registry.Add("TestPredicatesInfo", types_test_package.TestPredicatesInfo, "api_test.go", 1204);
         registry.Add("TestQualifiedTypeString", types_test_package.TestQualifiedTypeString, "typestring_test.go", 139);
         registry.Add("TestResolveIdents", types_test_package.TestResolveIdents, "resolver_test.go", 44);
         registry.Add("TestScopeLookupParent", types_test_package.TestScopeLookupParent, "scope2_test.go", 21);
-        registry.Add("TestScopesInfo", types_test_package.TestScopesInfo, "api_test.go", 1286);
-        registry.Add("TestSelection", types_test_package.TestSelection, "api_test.go", 1626);
+        registry.Add("TestScopesInfo", types_test_package.TestScopesInfo, "api_test.go", 1292);
+        registry.Add("TestSelection", types_test_package.TestSelection, "api_test.go", 1632);
         registry.Add("TestSelf", types_test_package.TestSelf, "self_test.go", 20);
         registry.Add("TestSizeof", types_internal_test_package.TestSizeof, "sizeof_test.go", 13);
-        registry.Add("TestSpec", types_test_package.TestSpec, "check_test.go", 438);
-        registry.Add("TestStdFixed", types_test_package.TestStdFixed, "stdlib_test.go", 307);
-        registry.Add("TestStdKen", types_test_package.TestStdKen, "stdlib_test.go", 351);
-        registry.Add("TestStdTest", types_test_package.TestStdTest, "stdlib_test.go", 289);
+        registry.Add("TestSpec", types_test_package.TestSpec, "check_test.go", 432);
+        registry.Add("TestStdFixed", types_test_package.TestStdFixed, "stdlib_test.go", 305);
+        registry.Add("TestStdKen", types_test_package.TestStdKen, "stdlib_test.go", 353);
+        registry.Add("TestStdTest", types_test_package.TestStdTest, "stdlib_test.go", 287);
         registry.Add("TestStdlib", types_test_package.TestStdlib, "stdlib_test.go", 42);
         registry.Add("TestStripAnnotations", types_internal_test_package.TestStripAnnotations, "errors_test.go", 32);
         registry.Add("TestTermDisjoint", types_internal_test_package.TestTermDisjoint, "typeterm_test.go", 216);
@@ -605,15 +630,16 @@ internal static class Go2CsTestHost
         registry.Add("TestTermlistSubsetOf", types_internal_test_package.TestTermlistSubsetOf, "termlist_test.go", 258);
         registry.Add("TestTermlistSupersetOf", types_internal_test_package.TestTermlistSupersetOf, "termlist_test.go", 222);
         registry.Add("TestTermlistUnion", types_internal_test_package.TestTermlistUnion, "termlist_test.go", 112);
-        registry.Add("TestTooNew", types_test_package.TestTooNew, "api_test.go", 2944);
+        registry.Add("TestTooNew", types_test_package.TestTooNew, "api_test.go", 2948);
         registry.Add("TestTypeSetString", types_internal_test_package.TestTypeSetString, "typeset_test.go", 20);
         registry.Add("TestTypeString", types_test_package.TestTypeString, "typestring_test.go", 112);
-        registry.Add("TestTypesInfo", types_test_package.TestTypesInfo, "api_test.go", 193);
-        registry.Add("TestUnaliasTooSoonInCycle", types_test_package.TestUnaliasTooSoonInCycle, "api_test.go", 2991);
-        registry.Add("TestUsesInfo", types_test_package.TestUsesInfo, "api_test.go", 872);
-        registry.Add("TestValuesInfo", types_test_package.TestValuesInfo, "api_test.go", 75);
-        registry.Add("TestVersionIssue69477", types_test_package.TestVersionIssue69477, "api_test.go", 3076);
-        registry.Add("TestVersionWithoutPos", types_test_package.TestVersionWithoutPos, "api_test.go", 3106);
+        registry.Add("TestTypesInfo", types_test_package.TestTypesInfo, "api_test.go", 194);
+        registry.Add("TestUnaliasTooSoonInCycle", types_test_package.TestUnaliasTooSoonInCycle, "api_test.go", 2995);
+        registry.Add("TestUsesInfo", types_test_package.TestUsesInfo, "api_test.go", 878);
+        registry.Add("TestValuesInfo", types_test_package.TestValuesInfo, "api_test.go", 76);
+        registry.Add("TestVarKind", types_test_package.TestVarKind, "api_test.go", 3132);
+        registry.Add("TestVersionIssue69477", types_test_package.TestVersionIssue69477, "api_test.go", 3080);
+        registry.Add("TestVersionWithoutPos", types_test_package.TestVersionWithoutPos, "api_test.go", 3110);
         registry.Add("TestZeroTok", types_internal_test_package.TestZeroTok, "token_test.go", 29);
         registry.SetTestMain(types_test_package.TestMain);
         return TestHost.Run(registry, args);

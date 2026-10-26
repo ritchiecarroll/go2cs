@@ -167,7 +167,7 @@ internal static void maySkipHelperCommand(@string name) {
 }
 
 // helperCommand returns an exec.Cmd that will run the named helper command.
-internal static ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, params ꓸꓸꓸstring argsʗp) {
+internal static partial ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
     Ꮡt.Helper();
@@ -212,10 +212,11 @@ internal static void initᴛhelperCommands() { helperCommands = new map<@string,
 
 internal static void cmdEcho(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
+    var iargsᴷ = new stackAppend<any>();
 
     var iargs = new any[]{}.slice();
     foreach (var (_, s) in args) {
-        iargs = append(iargs, (any)(s));
+        iargs = append(iargsᴷ, iargs, (any)(s));
     }
     fmt.Println(iargs.ꓸꓸꓸ);
 }
@@ -285,7 +286,7 @@ internal static void cmdStdinClose(params ꓸꓸꓸstring ʗp) {
         os.Exit(1);
     }
     {
-        @string s = ((@string)b); if (s != stdinCloseTestString) {
+        @string s = (@string)b; if (s != stdinCloseTestString) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: Read %q, want %q"u8, s, stdinCloseTestString);
             os.Exit(1);
         }
@@ -344,7 +345,7 @@ public static void TestEcho(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("echo: %v"u8, err);
     }
     {
-        @string g = ((@string)bs);
+        @string g = (@string)bs;
         @string e = fooBarBazˢ; if (g != e) {
             Ꮡt.Errorf("echo: want %q, got %q"u8, e, g);
         }
@@ -382,7 +383,7 @@ public static void TestCommandRelativeName(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("echo: %v"u8, err);
     }
     {
-        @string g = ((@string)@out);
+        @string g = (@string)@out;
         @string e = fooˢ2; if (g != e) {
             Ꮡt.Errorf("echo: want %q, got %q"u8, e, g);
         }
@@ -404,7 +405,7 @@ public static void TestCatStdin(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("cat: %v"u8, err);
     }
-    @string s = ((@string)bs);
+    @string s = (@string)bs;
     if (s != input) {
         Ꮡt.Errorf("cat: want %q, got %q"u8, input, s);
     }
@@ -462,7 +463,7 @@ public static void TestCatGoodAndBadFile(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected *exec.ExitError from cat combined; got %T: %v"u8, err, err);
         }
     }
-    var (errLine, body, ok) = strings.Cut(((@string)bs), "\n"u8);
+    var (errLine, body, ok) = strings.Cut((@string)bs, "\n"u8);
     if (!ok) {
         Ꮡt.Fatalf("expected two lines from cat; got %q"u8, bs);
     }
@@ -611,7 +612,7 @@ public static void TestPipes(ж<testing.T> Ꮡt) {
         if (errΔ2 != default!) {
             Ꮡt.Fatalf("%s: %v"u8, what, errΔ2);
         }
-        return ((@string)lineΔ1);
+        return (@string)lineΔ1;
     }
 
     err = c.Start();
@@ -802,12 +803,14 @@ public static void TestPipeLookPathLeak(ж<testing.T> Ꮡt) {
     // Not parallel: checks for leaked file descriptors
 
     slice<uintptr> openFDs() {
+        var fdsᴷ = new stackAppend<uintptr>(moves: true);
         slice<uintptr> fds = default!;
         for (var i = (uintptr)0; i < 100; i++) {
             if (fdtest.Exists(i)) {
-                fds = append(fds, i);
+                fds = append(fdsᴷ, fds, i);
             }
         }
+        fds = move2heap(fdsᴷ, fds);
         return fds;
     }
 
@@ -881,7 +884,10 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
 
         // This test runs with cgo disabled. External linking needs cgo, so
         // it doesn't work if external linking is required.
-        testenv.MustInternalLink(new exec_test_package.testing_TжTB(Ꮡt), false);
+        //
+        // N.B. go build below explictly doesn't pass through
+        // -asan/-msan/-race, so we don't care about those.
+        testenv.MustInternalLink(new exec_test_package.testing_TжTB(Ꮡt), testenv.NoSpecialBuildTypes);
 
         if (runtime.GOOS == "windows"u8) {
             Ꮡt.Skipf("skipping test on %q"u8, runtime.GOOS);
@@ -1079,7 +1085,7 @@ partial struct delayedInfiniteReader {
 
 internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) {
     time.Sleep(100 * time.Millisecond);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (rune)'x';
     }
     return (len(b), default!);
@@ -1111,7 +1117,7 @@ public static void TestIgnorePipeErrorOnSuccess(ж<testing.T> Ꮡt) {
                 }
             }
         };
-    Ꮡt.Run("10MB"u8, testWith(new exec_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("x"u8, (10 << (int)(20)))))));
+    Ꮡt.Run("10MB"u8, testWith(new exec_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("x"u8, 10 << 20)))));
     Ꮡt.Run(infiniteˢ, testWith(new delayedInfiniteReader(nil)));
 }
 
@@ -1149,7 +1155,7 @@ public static void TestOutputStderrCapture(ж<testing.T> Ꮡt) {
     if (!ok) {
         Ꮡt.Fatalf("Output error type = %T; want ExitError"u8, err);
     }
-    @string got = ((@string)(~ee).Stderr);
+    @string got = (@string)(~ee).Stderr;
     @string want = someStderrTextˢ;
     if (got != want) {
         Ꮡt.Errorf("ExitError.Stderr = %q; want %q"u8, got, want);
@@ -1296,7 +1302,7 @@ public static void TestDedupEnvEcho(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     {
-        @string got = strings.TrimSpace(((@string)@out));
+        @string got = strings.TrimSpace((@string)@out);
         @string want = goodˢ; if (got != want) {
             Ꮡt.Errorf("output = %q; want %q"u8, got, want);
         }
@@ -1315,7 +1321,7 @@ public static void TestEnvNULCharacter(ж<testing.T> Ꮡt) {
     cmd.Value.Env = append(cmd.Environ(), ((@string)(new byte[]{0x46, 0x4f, 0x4f, 0x3d, 0x66, 0x6f, 0x6f, 0x00, 0x42, 0x41, 0x52, 0x3d, 0x62, 0x61, 0x72})));
     var (@out, err) = cmd.CombinedOutput();
     if (err == default!) {
-        Ꮡt.Errorf("output = %q; want error"u8, ((@string)@out));
+        Ꮡt.Errorf("output = %q; want error"u8, (@string)@out);
     }
 }
 
@@ -1730,8 +1736,8 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         // and the grandchild will exit (or die by SIGPIPE) once the
         // stderr pipe is closed.
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
-                tΔ3.Errorf("Wait error = %v; want %T"u8, err, ee.ValueSlot.OrTypedNil());
+            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+                tΔ3.Errorf("Wait error = %v; want %T"u8, err, ee.OrTypedNil());
             }
         }
     });
@@ -1777,8 +1783,8 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         // This command ignores SIGINT, sleeping until it is killed.
         // Wait should return the usual error for a killed process.
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
-                tΔ5.Errorf("Wait error = %v; want %T"u8, err, ee.ValueSlot.OrTypedNil());
+            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+                tΔ5.Errorf("Wait error = %v; want %T"u8, err, ee.OrTypedNil());
             }
         }
     });
@@ -1832,7 +1838,7 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         tΔ7.Logf("[%d] %v"u8, (~(~cmd).Process).Pid, err);
 
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
+            var (_, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
                 tΔ7.Errorf("Wait error = %v; want %v"u8, err, ctx.Err());
             }
         }
@@ -2294,6 +2300,28 @@ public static void TestAbsPathExec(ж<testing.T> Ꮡt) {
             tΔ1.Error(ranWrongBinaryˢ);
         }
     });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string binNonesuchˢ = "/bin/nonesuch"u8;
+internal static readonly @string execAlreadyStartedˢ = "exec: already started"u8;
+
+// Calling Start twice is an error, regardless of outcome.
+public static void TestStart_twice(ж<testing.T> Ꮡt) {
+    testenv.MustHaveExec(new exec_test_package.testing_TжTB(Ꮡt));
+
+    var cmd = Δexec.Command(binNonesuchˢ);
+    {
+        var errΔ1 = cmd.Start(); if (errΔ1 == default!) {
+            Ꮡt.Fatalf("running invalid command succeeded"u8);
+        }
+    }
+    var err = cmd.Start();
+    @string got = fmt.Sprint(err);
+    @string want = execAlreadyStartedˢ;
+    if (got != want) {
+        Ꮡt.Fatalf("Start call returned err %q, want %q"u8, got, want);
+    }
 }
 
 } // end exec_test_package

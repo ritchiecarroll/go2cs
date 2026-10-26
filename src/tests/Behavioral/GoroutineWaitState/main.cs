@@ -14,10 +14,10 @@ internal static UntypedInt dumpSize => /* 1 << 18 */ 262144;
 internal static UntypedInt pollLimit => 2000;
 
 internal static slice<@string> parked = new @string[]{
-    "sync.Mutex.Lock"u8,
-    "chan receive"u8,
-    "select"u8,
-    "semacquire"u8
+    "sync.Mutex.Lock",
+    "chan receive",
+    "select",
+    "semacquire"
 }.slice();
 
 internal static bool present(@string dump, @string state) {
@@ -25,7 +25,7 @@ internal static bool present(@string dump, @string state) {
 }
 
 internal static partial @string dump(slice<byte> buf) {
-    return ((@string)(buf.slice(0, runtime.Stack(buf, true))));
+    return (@string)(buf.slice(0, runtime.Stack(buf, true)));
 }
 
 internal static @string await(slice<byte> buf, slice<@string> want, bool sense) {
@@ -53,14 +53,6 @@ internal static @string await(slice<byte> buf, slice<@string> want, bool sense) 
     return d;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string mutexˢ = "mutex"u8;
-private static readonly @string recvˢ = "recv"u8;
-private static readonly @string selectˢ = "select"u8;
-private static readonly @string waitgroupˢ = "waitgroup"u8;
-private static readonly @string runningˢ = "running"u8;
-private static readonly @string chanSendˢ = "chan send"u8;
-
 internal static partial void Main() {
     var buf = new slice<byte>(dumpSize);
 
@@ -81,14 +73,14 @@ internal static partial void Main() {
     goǃ(() => {
         Ꮡmu.Lock();
         Ꮡmu.Unlock();
-        doneʗ1.ᐸꟷ(mutexˢ);
+        doneʗ1.ᐸꟷ("mutex");
     });
 
     var doneʗ2 = done;
     var recvʗ1 = recv;
     goǃ(() => {
         ᐸꟷ(recvʗ1);
-        doneʗ2.ᐸꟷ(recvˢ);
+        doneʗ2.ᐸꟷ("recv");
     });
 
     var doneʗ3 = done;
@@ -104,13 +96,13 @@ internal static partial void Main() {
         case 1 when selᴛ2.ꟷᐳ(out _): {
             break;
         }}
-        doneʗ3.ᐸꟷ(selectˢ);
+        doneʗ3.ᐸꟷ("select");
     });
 
     var doneʗ4 = done;
     goǃ(() => {
         Ꮡwg.Wait();
-        doneʗ4.ᐸꟷ(waitgroupˢ);
+        doneʗ4.ᐸꟷ("waitgroup");
     });
 
     @string blocked = await(buf, parked, true);
@@ -119,16 +111,16 @@ internal static partial void Main() {
         fmt.Printf("parked %s: %v\n"u8, state, present(blocked, state));
     }
 
-    fmt.Printf("parked running: %v\n"u8, present(blocked, runningˢ));
+    fmt.Printf("parked running: %v\n"u8, present(blocked, "running"));
 
-    fmt.Printf("parked chan send: %v\n"u8, present(blocked, chanSendˢ));
+    fmt.Printf("parked chan send: %v\n"u8, present(blocked, "chan send"));
 
     Ꮡmu.Unlock();
     close(recv);
     close(selA);
     Ꮡwg.Done();
 
-    foreach ((_, _) in parked) {
+    foreach (var _ᴛ1 in range(parked)) {
         ᐸꟷ(done);
     }
 
@@ -138,7 +130,7 @@ internal static partial void Main() {
         fmt.Printf("released %s: %v\n"u8, state, present(released, state));
     }
 
-    fmt.Printf("released running: %v\n"u8, present(released, runningˢ));
+    fmt.Printf("released running: %v\n"u8, present(released, "running"));
 }
 
 } // end main_package

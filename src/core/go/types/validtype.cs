@@ -35,6 +35,8 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
+        var nestᴷ = new stackAppend<ж<Named>>();
+        var pathᴷ = new stackAppend<ж<Named>>();
 
         typ = Unalias(typ);
 
@@ -108,12 +110,6 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // if check.valids.lookup(t) != nil {
             // 	break
             // }
-            // Don't report a 2nd error if we already know the type is invalid
-            // (e.g., if a cycle was detected earlier, via under).
-            // Note: ensure that t.orig is fully resolved by calling Underlying().
-            if (!isValid(t.Underlying())) {
-                return false;
-            }
 
             // If the current type t is also found in nest, (the memory of) t is
             // embedded in itself, indicating an invalid recursive type.
@@ -142,8 +138,9 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // are not yet available to other goroutines).
                     assert((~(~t).obj).pkg == check.pkg);
                     assert((~(~t.Origin()).obj).pkg == check.pkg);
-                    t.Value.underlying = new BasicжΔType(Typ[Invalid]);
-                    t.Origin().Value.underlying = new BasicжΔType(Typ[Invalid]);
+
+                    // let t become invalid when it is unpacked
+                    t.Origin().Value.fromRHS = new BasicжΔType(Typ[Invalid]);
 
                     // Find the starting point of the cycle and report it.
                     // Because each type in nest must also appear in path (see invariant below),
@@ -164,7 +161,8 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // Every type added to nest is also added to path; thus every type that is in nest
             // must also be in path (invariant). But not every type in path is in nest, since
             // nest may be pruned (see below, *TypeParam case).
-            if (!Ꮡcheck.validType0(pos, (~t.Origin()).fromRHS, append(nest, t), append(path, t))) {
+            t.Origin().unpack();
+            if (!Ꮡcheck.validType0(pos, t.Origin().rhs(), append(nestᴷ, nest, t), append(pathᴷ, path, t))) {
                 return false;
             }
 

@@ -6,7 +6,7 @@ namespace go.crypto;
 using bytes = bytes_package;
 using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using fips140only = go.crypto.@internal.fips140only_package;
-using randutil = go.crypto.@internal.randutil_package;
+using rand = go.crypto.@internal.rand_package;
 using errors = errors_package;
 using io = io_package;
 using go.crypto.@internal;
@@ -42,14 +42,14 @@ internal static @string String(this ref x25519Curve c) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string cryptoEcdhUseOfX25519Isˢ = "crypto/ecdh: use of X25519 is not allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader rand) {
-    if (fips140only.Enabled) {
+internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader r) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
+    r = rand.CustomReader(r);
     var key = new slice<byte>(x25519PrivateKeySize);
-    randutil.MaybeReadByte(rand);
     {
-        var (_, err) = io.ReadFull(rand, key); if (err != default!) {
+        var (_, err) = io.ReadFull(r, key); if (err != default!) {
             return (default!, err);
         }
     }
@@ -60,7 +60,7 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, i
 private static readonly @string cryptoEcdhInvalidPrivateˢ2 = "crypto/ecdh: invalid private key size"u8;
 
 internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     if (len(key) != x25519PrivateKeySize) {
@@ -80,7 +80,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc,
 }
 
 internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdhUseOfX25519Isˢ));
     }
     if (len(key) != x25519PublicKeySize) {
@@ -129,7 +129,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
 
     nint swap = 0;
     for (nint pos = 254; pos >= 0; pos--) {
-        var b = (byte)(e[pos / 8].Rsh((nuint)((nint)(pos & 7))));
+        var b = (byte)(e[pos / 8].Rsh((nuint)(pos & 7)));
         b &= (byte)(1);
         swap ^= (nint)((nint)b);
         x2.Swap(Ꮡx3, swap);

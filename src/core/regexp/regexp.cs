@@ -397,10 +397,6 @@ partial struct inputString {
 
 internal static (rune, nint) step(this ref inputString i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -426,17 +422,11 @@ internal static lazyFlag context(this ref inputString i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }
@@ -448,10 +438,6 @@ partial struct inputBytes {
 
 internal static (rune, nint) step(this ref inputBytes i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRune(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -477,17 +463,11 @@ internal static lazyFlag context(this ref inputBytes i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRune(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRune(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }
@@ -603,14 +583,14 @@ public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @stri
         n = 2 * (re.numSubexp + 1);
     }
     var b = Ꮡre.replaceAll(default!, src, n, (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default!, src, match));
-    return ((@string)b);
+    return (@string)b;
 }
 
 // ReplaceAllLiteralString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) {
-    return ((@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
+    return (@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
@@ -619,7 +599,7 @@ public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src
 // directly, without using [Regexp.Expand].
 public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
     var b = Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src.slice(match[0], match[1])).ꓸꓸꓸ));
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) {
@@ -705,7 +685,7 @@ public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, sli
     var srcʗ1 = src;
     var b = Ꮡre.replaceAll(src, ""u8, n, (slice<byte> dst, slice<nint> match) => {
         if (len(srepl) != len(replʗ1)) {
-            srepl = ((@string)replʗ1);
+            srepl = (@string)replʗ1;
         }
         return Ꮡre.Value.expand(dst, srepl, srcʗ1, ""u8, match);
     });
@@ -734,12 +714,12 @@ internal static array<byte> specialBytes = new(16);
 
 // special reports whether byte b needs to be escaped by QuoteMeta.
 internal static bool special(byte b) {
-    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (((byte)1).Lsh((uint64)((b / 16))))) != 0;
+    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (((byte)1).Lsh((uint64)(b / 16)))) != 0;
 }
 
 [GoInit] internal static void init() {
     foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$"u8)) {
-        specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)((b / 16))));
+        specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)(b / 16)));
     }
 }
 
@@ -770,7 +750,7 @@ public static @string QuoteMeta(@string s) {
         b[j] = s[i];
         j++;
     }
-    return ((@string)(b.slice(0, j)));
+    return (@string)(b.slice(0, j));
 }
 
 // The number of capture values in the program may correspond
@@ -918,7 +898,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
         return default!;
     }
     var ret = new slice<slice<byte>>(1 + re.numSubexp);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = b.slice(a[2 * i], a[2 * i + 1], a[2 * i + 1]);
         }
@@ -944,7 +924,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
 //
 // To insert a literal $ in the output, use $$ in the template.
 public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) {
-    return re.expand(dst, ((@string)template), src, ""u8, match);
+    return re.expand(dst, (@string)template, src, ""u8, match);
 }
 
 // ExpandString is like [Regexp.Expand] but the template and source are strings.
@@ -1082,7 +1062,7 @@ public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡre, @string s
         return default!;
     }
     var ret = new slice<@string>(1 + re.numSubexp);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = s.slice(a[2 * i], a[2 * i + 1]);
         }
@@ -1202,7 +1182,7 @@ public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, s
             Ꮡresult.ValueSlot = new slice<slice<slice<byte>>>(0, startSize);
         }
         var Δslice = new slice<slice<byte>>(len(match) / 2);
-        foreach (var (j, _) in Δslice) {
+        foreach (var j in range(Δslice)) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = bʗ1.slice(match[2 * j], match[2 * j + 1], match[2 * j + 1]);
             }
@@ -1244,7 +1224,7 @@ public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre,
             Ꮡresult.ValueSlot = new slice<slice<@string>>(0, startSize);
         }
         var Δslice = new slice<@string>(len(match) / 2);
-        foreach (var (j, _) in Δslice) {
+        foreach (var j in range(Δslice)) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = s.slice(match[2 * j], match[2 * j + 1]);
             }
@@ -1345,7 +1325,7 @@ public static (slice<byte>, error) MarshalText(this ref Regexp re) {
 // UnmarshalText implements [encoding.TextUnmarshaler] by calling
 // [Compile] on the encoded value.
 public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
-    var (newRE, err) = Compile(((@string)text));
+    var (newRE, err) = Compile((@string)text);
     if (err != default!) {
         return err;
     }

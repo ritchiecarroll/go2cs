@@ -283,7 +283,7 @@ internal static bool isOptHdrEq(any a, any b) {
 }
 
 public static void TestOpen(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in fileTests) {
+    foreach (var i in range(fileTests)) {
         var tt = Ꮡ(fileTests, i);
 
         var (f, err) = Open((~tt).@file);
@@ -380,6 +380,8 @@ internal static readonly object mainMainNotFoundˢ = (@string)"main.main not fou
 internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
     GoFrame ᒐ = default;
     try {
+        var argsᴷ = new stackAppend<@string>();
+
         if (runtime.GOOS != "windows"u8) {
             Ꮡt.Skip(skippingWindowsOnlyTestˢ);
         }
@@ -416,7 +418,7 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         else if (exprᴛ1 == linkCgoDefault) {
         }
         else if (exprᴛ1 == linkCgoInternal) {
-            args = append(args, "-ldflags"u8, "-linkmode=internal");
+            args = append(argsᴷ, args, "-ldflags"u8, "-linkmode=internal");
         }
         else if (exprᴛ1 == linkCgoExternal) {
             args = append(args, "-ldflags"u8, "-linkmode=external");
@@ -433,9 +435,9 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         if (err != default!) {
             Ꮡt.Fatalf("running test executable failed: %s %s"u8, err, @out);
         }
-        Ꮡt.Logf("Testprog output:\n%s"u8, ((@string)@out));
+        Ꮡt.Logf("Testprog output:\n%s"u8, (@string)@out);
 
-        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch(((@string)@out));
+        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch((@string)@out);
         if (len(matches) < 2) {
             Ꮡt.Fatalf("unexpected program output: %s"u8, @out);
         }
@@ -455,7 +457,7 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
 
         bool foundDebugGDBScriptsSection = default!;
         foreach (var (_, sect) in (~f).Sections) {
-            if ((~sect).Name == ".debug_gdb_scripts"u8) {
+            if ((~sect).Name == ".debug_gdb_scripts"u8 || (~sect).Name == ".zdebug_gdb_scripts"u8) {
                 foundDebugGDBScriptsSection = true;
             }
         }
@@ -547,7 +549,7 @@ public static void TestBSSHasZeros(ж<testing.T> Ꮡt) {
         var cmd = exec.Command(gccpath, "-c"u8, srcpath, "-o", objpath);
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, (@string)@out);
         }
 
         (var f, err) = Open(objpath);

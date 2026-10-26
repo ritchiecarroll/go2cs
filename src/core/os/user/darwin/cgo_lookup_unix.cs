@@ -27,7 +27,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
         (pwd, found, errno) = _C_getpwnam_r(Ꮡ(nameCʗ1, 0),
-            Ꮡ(buf, 0), ((_C_size_t)len(buf)));
+            Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
     if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
@@ -36,7 +36,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
     if (err != default!) {
         return (default!, fmt.Errorf("user: lookup username %s: %v"u8, username, err));
     }
-    return (buildUser(ref pwd), err);
+    return (buildUser(ref pwd), default!);
 }
 
 internal static (ж<User>, error) lookupUserId(@string uid) {
@@ -53,8 +53,8 @@ internal static (ж<User>, error) lookupUnixUid(nint uid) {
 
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
-        (pwd, found, errno) = _C_getpwuid_r(((_C_uid_t)uid),
-            Ꮡ(buf, 0), ((_C_size_t)len(buf)));
+        (pwd, found, errno) = _C_getpwuid_r((_C_uid_t)uid,
+            Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
     if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
@@ -93,7 +93,7 @@ internal static (ж<Group>, error) lookupGroup(@string groupname) {
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
         (grp, found, errno) = _C_getgrnam_r(Ꮡ(cnameʗ1, 0),
-            Ꮡ(buf, 0), ((_C_size_t)len(buf)));
+            Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
     if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
@@ -119,8 +119,8 @@ internal static (ж<Group>, error) lookupUnixGid(nint gid) {
 
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
-        (grp, found, errno) = _C_getgrgid_r(((_C_gid_t)gid),
-            Ꮡ(buf, 0), ((_C_size_t)len(buf)));
+        (grp, found, errno) = _C_getgrgid_r((_C_gid_t)gid,
+            Ꮡ(buf, 0), (_C_size_t)len(buf));
         return errno;
     });
     if (AreEqual(err, syscall.ENOENT) || (err == default! && !found)) {
@@ -146,7 +146,7 @@ internal static bufferKind userBuffer = ((bufferKind)_C__SC_GETPW_R_SIZE_MAX);
 internal static bufferKind groupBuffer = ((bufferKind)_C__SC_GETGR_R_SIZE_MAX);
 
 internal static _C_size_t initialSize(this bufferKind k) {
-    var sz = _C_sysconf(((_C_int)k));
+    var sz = _C_sysconf((_C_int)k);
     if (sz == -1) {
         // DragonFly and FreeBSD do not have _SC_GETPW_R_SIZE_MAX.
         // Additionally, not all Linux systems have it, either. For
@@ -157,7 +157,7 @@ internal static _C_size_t initialSize(this bufferKind k) {
         // Truncate.  If this truly isn't enough, retryWithBuffer will error on the first run.
         return maxBufferSize;
     }
-    return ((_C_size_t)sz);
+    return (_C_size_t)sz;
 }
 
 // retryWithBuffer repeatedly calls f(), increasing the size of the

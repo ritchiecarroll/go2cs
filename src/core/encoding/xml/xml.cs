@@ -83,7 +83,7 @@ partial struct CharData /*[]byte*/;
 
 // Copy creates a new copy of CharData.
 public static CharData Copy(this CharData c) {
-    return ((CharData)bytes.Clone(c));
+    return (CharData)bytes.Clone(c);
 }
 
 // A Comment represents an XML comment of the form <!--comment-->.
@@ -92,7 +92,7 @@ partial struct Comment /*[]byte*/;
 
 // Copy creates a new copy of Comment.
 public static Comment Copy(this Comment c) {
-    return ((Comment)bytes.Clone(c));
+    return (Comment)bytes.Clone(c);
 }
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
@@ -113,7 +113,7 @@ partial struct Directive /*[]byte*/;
 
 // Copy creates a new copy of Directive.
 public static Directive Copy(this Directive d) {
-    return ((Directive)bytes.Clone(d));
+    return (Directive)bytes.Clone(d);
 }
 
 // CopyToken returns a copy of a Token.
@@ -208,6 +208,7 @@ partial struct Decoder {
     internal bytes.Buffer buf;
     internal ж<bytes.Buffer> saved;
     internal ж<stack> stk;
+    internal nint stkDepth;
     internal ж<stack> free;
     internal bool needClose;
     internal Name toClose;
@@ -218,7 +219,7 @@ partial struct Decoder {
     internal nint line;
     internal int64 linestart;
     internal int64 offset;
-    internal nint unmarshalDepth;
+    internal bool inUnmarshalXML;
 }
 
 // NewDecoder creates a new XML parser reading from r.
@@ -335,7 +336,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
 
         d.pushElement(t1.Name);
         d.translate(Ꮡt1.of(StartElement.ᏑName), true);
-        foreach (var (i, _) in t1.Attr) {
+        foreach (var i in range(t1.Attr)) {
             d.translate(Ꮡ(t1.Attr, i).of(Attr.ᏑName), false);
         }
         t = t1;
@@ -424,6 +425,9 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
     }
     s.Value.next = d.stk;
     s.Value.kind = kind;
+    if (kind == stkStart) {
+        d.stkDepth++;
+    }
     d.stk = s;
     return s;
 }
@@ -431,6 +435,9 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
 internal static ж<stack> pop(this ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
+        if ((~s).kind == stkStart) {
+            d.stkDepth--;
+        }
         d.stk = s.Value.next;
         s.Value.next = d.free;
         d.free = s;
@@ -571,7 +578,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
 public static (ΔToken, error) RawToken(this ref Decoder d) {
-    if (d.unmarshalDepth > 0) {
+    if (d.inUnmarshalXML) {
         return (default!, errRawToken);
     }
     return d.rawToken();
@@ -618,7 +625,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         if (data == default!) {
             return (default!, d.err);
         }
-        return (((CharData)data), default!);
+        return ((CharData)data, default!);
     }
 
     {
@@ -680,7 +687,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         data = data.slice(0, len(data) - 2); // chop ?>
 
         if (targetΔ1 == "xml"u8) {
-            @string content = ((@string)data);
+            @string content = (@string)data;
             @string ver = procInst(versionˢ, content);
             if (ver != ""u8 && ver != "1.0"u8) {
                 d.err = fmt.Errorf("xml: unsupported version %q; only version 1.0 is supported"u8, ver);
@@ -747,7 +754,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             }
             var data = d.buf.Bytes();
             data = data.slice(0, len(data) - 3); // chop -->
-            return (((Comment)data), default!);
+            return ((Comment)data, default!);
         }
         case (rune)'[': { // <![
             // Probably <![CDATA[.
@@ -767,7 +774,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             if (data == default!) {
                 return (default!, d.err);
             }
-            return (((CharData)data), default!);
+            return ((CharData)data, default!);
         }}
 
         // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
@@ -849,7 +856,7 @@ HandleB:
                 break;
             }}
         }
-        return (((Directive)d.buf.Bytes()), default!);
+        return ((Directive)d.buf.Bytes(), default!);
     }}
 
     // Must be an open element like <a href="foo">
@@ -921,7 +928,7 @@ HandleB:
             if (data == default!) {
                 return (default!, d.err);
             }
-            a.Value = ((@string)data);
+            a.Value = (@string)data;
         }
         attr = append(attr, a);
     }
@@ -1172,11 +1179,11 @@ Input:
                 if (b != (rune)';'){
                     d.ungetc(b);
                 } else {
-                    @string s = ((@string)(d.buf.Bytes().slice(start)));
+                    @string s = (@string)(d.buf.Bytes().slice(start));
                     d.buf.WriteByte((rune)';');
                     var (n, err) = strconv.ParseUint(s, @base, 64);
                     if (err == default! && n <= unicode.MaxRune) {
-                        text = ((@string)(rune)n);
+                        text = (@string)(rune)n;
                         haveText = true;
                     }
                 }
@@ -1198,10 +1205,10 @@ Input:
                     var name = d.buf.Bytes().slice(before + 1);
                     d.buf.WriteByte((rune)';');
                     if (isName(name)) {
-                        @string s = ((@string)name);
+                        @string s = (@string)name;
                         {
                             var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2){
-                                text = ((@string)r);
+                                text = (@string)r;
                                 haveText = true;
                             } else 
                             if (d.Entity != default!) {
@@ -1222,7 +1229,7 @@ Input:
                 (b0, b1) = (0, 0);
                 goto continue_Input;
             }
-            @string ent = ((@string)(d.buf.Bytes().slice(before)));
+            @string ent = (@string)(d.buf.Bytes().slice(before));
             if (ent[len(ent) - 1] != (rune)';') {
                 ent += " (no semicolon)"u8;
             }
@@ -1311,7 +1318,7 @@ internal static (@string s, bool ok) name(this ref Decoder d) {
         d.err = d.syntaxError("invalid XML name: "u8 + ((sstring)b));
         return ("", false);
     }
-    return (((@string)b), true);
+    return ((@string)b, true);
 }
 
 // Read a name and append its bytes to d.buf.
@@ -1403,7 +1410,7 @@ internal static bool isNameString(@string s) {
 // the XML spec at https://www.xml.com/axml/testaxml.htm
 // and then reformatting. First corresponds to (Letter | '_' | ':')
 // and second corresponds to NameChar.
-internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛfirst { internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
         new(0x003A, 0x003A, 1),
         new(0x0041, 0x005A, 1),
@@ -1596,9 +1603,9 @@ internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
         new(0x4E00, 0x9FA5, 1),
         new(0xAC00, 0xD7A3, 1)
     }.slice()
-));
+)); }
 
-internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛsecond { internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
         new(0x002D, 0x002E, 1),
         new(0x0030, 0x0039, 1),
@@ -1713,16 +1720,15 @@ internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
         new(0x309D, 0x309E, 1),
         new(0x30FC, 0x30FE, 1)
     }.slice()
-));
+)); }
 
 // HTMLEntity is an entity map containing translations for the
 // standard HTML entity characters.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-public static map<@string, @string> HTMLEntity;
-internal static void initᴛHTMLEntity() { HTMLEntity = htmlEntity; }
+[GoLazy] partial class lazyᴛHTMLEntity { public static map<@string, @string> HTMLEntity = htmlEntity; }
 
-internal static map<@string, @string> htmlEntity = new map<@string, @string>{
+[GoLazy] partial class lazyᴛhtmlEntity { internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     /*
 		hget http://www.w3.org/TR/html4/sgml/entities.html |
 		ssam '
@@ -1983,7 +1989,7 @@ internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     ["lsaquo"u8] = "\u2039"u8,
     ["rsaquo"u8] = "\u203A"u8,
     ["euro"u8] = "\u20AC"u8
-};
+}; }
 
 // HTMLAutoClose is the set of HTML elements that
 // should be considered to close automatically.

@@ -9,9 +9,10 @@ using ast = global::go.go.ast_package;
 using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
 using math = math_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
+using global::go;
 using global::go.go;
 using io = io_package;
 using unicode;
@@ -130,6 +131,8 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
 
 // unmarshalCorpusFile decodes corpus bytes into their respective values.
 internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
+    var valsᴷ = new stackAppend<any>(moves: true);
+
     if (len(b) == 0) {
         return (default!, fmt.Errorf("cannot unmarshal empty string"u8));
     }
@@ -137,7 +140,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
     if (len(lines) < 2) {
         return (default!, fmt.Errorf("must include version and at least one value"u8));
     }
-    @string version = strings.TrimSuffix(((@string)lines[0]), "\r"u8);
+    @string version = strings.TrimSuffix((@string)lines[0], "\r"u8);
     if (version != encVersion1) {
         return (default!, fmt.Errorf("unknown encoding version: %s"u8, version));
     }
@@ -153,8 +156,9 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
         if (err != default!) {
             return (default!, fmt.Errorf("malformed line %q: %v"u8, line, err));
         }
-        vals = append(vals, v);
+        vals = append(valsᴷ, vals, v);
     }
+    vals = move2heap(valsᴷ, vals);
     return (vals, default!);
 }
 

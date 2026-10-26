@@ -25,7 +25,6 @@ global using templateꓸFuncMap = go.text.template_package.FuncMap;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using sync = go.sync_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -68,11 +67,13 @@ using static go.net.rpc_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Request, ж<Request>>(Indirect = true)]
-[assembly: GoImplicitConv<methodType, ж<methodType>>(Indirect = true)]
-[assembly: GoImplicitConv<sync.Mutex, ж<sync.Mutex>>(Indirect = true)]
-[assembly: GoImplicitConv<sync.WaitGroup, ж<sync.WaitGroup>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -84,7 +85,7 @@ using static go.net.rpc_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("net/rpc/client.go", "client.cs", "ABcsgqYAKlrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCguiiAAgMggAFHAAJAoKCqqK4kgAJFKKAgqSAgqSmgqaCpoKqoqqigoKUuIKClIKUggAHEpKCgpSqwoKCgpSCgt7CgoKCgoLcgqaCgqiSgg==")]
 [assembly: global::go.GoPositionMap("net/rpc/debug.go", "debug.cs", "ACpQABQogKKAooCkgKKAooAACQ6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJcBrAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgriCgpSCpoCCpIKmlJSklKYACASCgoKCgpSCypSCgoKUgqaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=", "", "", "480=NewDecoder/1/1/2,NewEncoder/1/1/3")]
+[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJkBsAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgriCgpSCpoCCpIKmlJSklKYACASCgoKCgpSCypSCgoKUgqaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=", "", "", "482=NewDecoder/1/1/2,NewEncoder/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

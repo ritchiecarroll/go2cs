@@ -36,6 +36,13 @@ var wantUtf8Census = map[string]int{
 	// `first` table's row comments, end-of-line again since F, follow rows `@as` widens)
 	"eol:misaligned":    3,
 	"eol:cs-ragged-run": 3,
+	// The Go 1.26 hop's H5 (2026-10-15): go1.26.9 rewrote Valid around word-sized reads (ptrSize, hiBits,
+	// word[T]), and the converter's reading of that new code is one site per class -- a blank line the C#
+	// adds before `hiBits` (utf8.go:460), the blank line before `for len(p) > 0 {` it drops (utf8.go:476),
+	// and one unexplained extra body line after Valid's `p = p[:len(p):len(p)]` (utf8.cs:509).
+	"top:go-none-cs-blank":   1,
+	"body:go-blank-cs-none":  1,
+	"body:extra:unexplained": 1,
 }
 
 func TestCommentParityUtf8(t *testing.T) {

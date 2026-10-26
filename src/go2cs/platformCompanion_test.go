@@ -136,3 +136,52 @@ func TestMergeCarriesPerGOOSReviewSiblingsFromTheirOwnTarget(t *testing.T) {
 		t.Errorf("root syscall/linux/exec_unix.cs = %q, want it untouched", got)
 	}
 }
+
+// TestMergeTakesCompanionsFromATargetThatConvertedThePackage is the companion half of F-H0-3 (H5,
+// 2026-10-15). crypto/x509/internal/macos is darwin-only: the Windows and Linux stages never convert
+// it and hold only the seed's copy of its README, yet Windows, first in -platforms order, "had" it,
+// so the root kept the seeded `macOS_package` while the darwin stage emitted `macos_package`. The
+// merge now takes a companion from the first target that CONVERTED the package (emitted a .cs in it).
+//
+// os/exec/internal/fdtest is the control, and the reason the rule reads conversion rather than the
+// companion's own emission: its README varies by platform, Windows converts the package but rewrites
+// the README to the bytes it already holds (so its modification time never moves), and Linux emits
+// its own flavor. The Windows flavor must still win.
+func TestMergeTakesCompanionsFromATargetThatConvertedThePackage(t *testing.T) {
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+	seed := map[string]string{
+		"crypto/x509/internal/macos/macos.csproj": "<Project />",
+		"crypto/x509/internal/macos/macos.cs":     "seed macos source",
+		"crypto/x509/internal/macos/README.md":    "macOS_package",
+		"os/exec/internal/fdtest/fdtest.csproj":   "<Project />",
+		"os/exec/internal/fdtest/exist.cs":        "seed fdtest source",
+		"os/exec/internal/fdtest/README.md":       "fdtest README, windows flavor",
+	}
+
+	coreDir, stages := newCompanionStages(t, targets, seed)
+
+	// darwin alone converts macos, and its README changed.
+	writeTestFile(t, filepath.Join(stages[2], "core", "crypto", "x509", "internal", "macos", "macos.cs"), "darwin macos source")
+	writeTestFile(t, filepath.Join(stages[2], "core", "crypto", "x509", "internal", "macos", "README.md"), "macos_package")
+
+	// Every target converts fdtest; only Linux's README differs from the seed, so only Linux's moves.
+	for i := range targets {
+		writeTestFile(t, filepath.Join(stages[i], "core", "os", "exec", "internal", "fdtest", "exist.cs"), "fdtest source")
+	}
+
+	writeTestFile(t, filepath.Join(stages[1], "core", "os", "exec", "internal", "fdtest", "README.md"), "fdtest README, linux flavor")
+
+	emissions := snapshotCompanionStages(t, targets, stages)
+
+	if _, _, _, err := mergeCompanionArtifacts(coreDir, targets, emissions); err != nil {
+		t.Fatalf("mergeCompanionArtifacts failed: %v", err)
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, "crypto", "x509", "internal", "macos", "README.md")); got != "macos_package" {
+		t.Errorf("root macos README.md = %q, want %q: a single-target package's companion must come from the target that converted it, not a stage holding the seed", got, "macos_package")
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, "os", "exec", "internal", "fdtest", "README.md")); got != "fdtest README, windows flavor" {
+		t.Errorf("root fdtest README.md = %q, want the Windows flavor: the first target that converted the package wins even when its rewrite left the bytes unchanged", got)
+	}
+}

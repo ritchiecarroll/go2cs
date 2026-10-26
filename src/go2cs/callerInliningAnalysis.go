@@ -93,10 +93,19 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		depth int64
 	}
 	var windows []skipWindow
+	// paramSkips[g] = g's runtime.Caller/Callers calls whose skip is one of g's own parameters (see
+	// runtimeCallerParamSkips), and bodies = every declaration's body, walked after the files for the
+	// same-package call sites that pass such a parameter a constant -- see THE PARAMETER-CARRIED WINDOW.
+	paramSkips := map[types.Object][]paramSkip{}
+	var bodies []declBody
 	// fixedSkipUsers and smallBodies feed the fixed-skip path closure (moduleScope only), applied after
 	// the walk because a path's callers can be declared in any file.
 	fixedSkipUsers := map[types.Object]bool{}
 	smallBodies := map[types.Object]bool{}
+	// decorators collects the SMALL declarations that call testing's decorating API directly (see
+	// callsTestingDecorator). They join after the opaque-forwarder gate, so a test package's helpers do not
+	// switch that gate on, and before the fixed point, so a thin forwarder to a helper chains as usual.
+	var decorators []types.Object
 
 	for _, entry := range files {
 		if entry.file == nil {
@@ -131,6 +140,12 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 				windows = append(windows, skipWindow{obj: obj, depth: depth})
 			}
 
+			if skips := runtimeCallerParamSkips(info, fn); len(skips) > 0 {
+				paramSkips[obj] = skips
+			}
+
+			bodies = append(bodies, declBody{obj: obj, body: fn.Body})
+
 			if moduleScope {
 				if callsFixedSkipRuntimeCaller(info, fn) {
 					fixedSkipUsers[obj] = true
@@ -145,6 +160,11 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 
 			if callsSkipCountedRuntimeCaller(info, fn.Body) || callsSkipCountedWalker(info, fn.Body) {
 				seed[obj] = true
+				continue
+			}
+
+			if callsTestingDecorator(info, fn.Body) && isSmallCallerBody(fn.Body) {
+				decorators = append(decorators, obj)
 				continue
 			}
 
@@ -176,6 +196,27 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	for _, window := range windows {
 		for _, caller := range callersWithinDepth(window.obj, window.depth, callers) {
 			seed[caller] = true
+		}
+	}
+
+	// THE PARAMETER-CARRIED WINDOW (COORD ruling 2026-10-24, G's seat): the skip window above is sized by
+	// a CONSTANT skip, so a skip carried by a PARAMETER sized nothing, and only its direct user was seeded.
+	// log is the measured case: output calls runtime.Caller(calldepth), and the constant 2 lives at its 18
+	// callers. The six single-statement Print* joined as thin forwarders, but the 2- and 3-statement Fatal*
+	// and Panic* did not, and the linux Release TieredCompilation=0 JIT inlined Fatalf into TestCallDepth's
+	// one-line closure: the reported line moved to the closure's caller (FAIL untiered, PASS tiered, PASS
+	// untiered with DOTNET_JitNoInline=1). ONE step, per call site: a declaration whose own body passes a
+	// constant k to such a parameter of a same-package function sits at depth 1 below that function's
+	// frame, so it keeps its frame when k skips depth 1, and its callers within the remaining depth keep
+	// theirs too. A non-constant argument (Output's calldepth+1) opens nothing, exactly as before; no
+	// parameter is forwarded further and no fact crosses the package.
+	for _, d := range bodies {
+		for _, depth := range paramSkipCallDepths(info, pkg, d.body, paramSkips) {
+			seed[d.obj] = true
+
+			for _, caller := range callersWithinDepth(d.obj, depth-1, callers) {
+				seed[caller] = true
+			}
 		}
 	}
 
@@ -255,6 +296,10 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		}
 	}
 
+	for _, obj := range decorators {
+		seed[obj] = true
+	}
+
 	// Fixed point: a forwarder whose target just joined the set joins it too, which can chain
 	// (a forwarder to a forwarder to the Caller-calling function). Bounded by the package's own
 	// function count, so this always terminates.
@@ -288,7 +333,230 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		seed[obj] = true
 	}
 
+	// THE TAIL-CALLED FUNCTION VALUE (the tail-call seat's lever B, G 2026-10-25): Go never tail-calls, the optimizing
+	// JIT does, and a frame erased by a tail call is as gone as an inlined one. A callee that observes its caller is
+	// protected from its own side (go2cs-gen writes [DynamicSecurityMethod] beside every no-inline mark), but not when
+	// it is reached through a FUNCTION VALUE: the call's exact callee is then the delegate's Invoke, which carries no
+	// mark. So the CALLER keeps its frame instead: a [MethodImpl(NoInlining)] method makes no implicit tail call (measured
+	// on linux/amd64 for direct, delegate and lambda shapes). testing's TestTBHelper is the measured case: testHelper
+	// ends `genericIntHelper(t, "GenericInt")`, a package var holding genericHelper[int], whose t.Helper names
+	// testHelper's line; on linux the tail call erased testHelper and the record named its caller. The marks go on the
+	// function VALUES first (a *types.Var key in this same map, which no declaration lookup can collide with), so a func
+	// literal's tail call is judged by the same entry (litNoInliningPrefix).
+	markTailCalledObservingValues(files, info, pkg, bodies, seed)
+
 	return seed
+}
+
+// declBody is one package-scope function declaration and its body, as computeNoInliningClosure walks them.
+type declBody struct {
+	obj  types.Object
+	body *ast.BlockStmt
+}
+
+// observesCaller reports whether a body, as a frame of its own, makes its CALLER's frame part of what Go reports: it
+// calls runtime.Caller/Callers with a counted skip, a skip-counted walker, or testing's Helper, which makes every record
+// it writes name its caller. A body that only calls t.Errorf, t.Log or t.Run is not one: those name the body's OWN line,
+// so its caller's frame is not reported (measured, 2026-10-25: the decorator set would have marked 139 test sites where
+// Helper and the runtime walkers mark the census's 60).
+func observesCaller(info *types.Info, body *ast.BlockStmt) bool {
+	return body != nil && (callsSkipCountedRuntimeCaller(info, body) || callsSkipCountedWalker(info, body) || callsTestingHelper(info, body))
+}
+
+// callsTestingHelper reports whether body itself (a nested *ast.FuncLit is a frame of its own) calls testing's Helper on
+// one of the decorating receivers (callsTestingDecorator's scope, narrowed to the one method that names the CALLER).
+func callsTestingHelper(info *types.Info, body *ast.BlockStmt) bool {
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		callee, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || callee.Pkg() == nil || callee.Pkg().Path() != "testing" || callee.Name() != "Helper" {
+			return true
+		}
+
+		if sig, ok := callee.Type().(*types.Signature); ok && sig.Recv() != nil && testingDecoratorReceivers[testingReceiverName(sig.Recv().Type())] {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
+// tailCall is the call a body ends with: its last statement is the call, or returns exactly that call's result.
+func tailCall(body *ast.BlockStmt) *ast.CallExpr {
+	if body == nil || len(body.List) == 0 {
+		return nil
+	}
+
+	switch stmt := body.List[len(body.List)-1].(type) {
+	case *ast.ExprStmt:
+		call, _ := ast.Unparen(stmt.X).(*ast.CallExpr)
+		return call
+	case *ast.ReturnStmt:
+		if len(stmt.Results) == 1 {
+			call, _ := ast.Unparen(stmt.Results[0]).(*ast.CallExpr)
+			return call
+		}
+	}
+
+	return nil
+}
+
+// tailCallsObservingValue reports whether body ends with a call through a function VALUE that marked records as
+// reaching a caller-observing target (markTailCalledObservingValues).
+func tailCallsObservingValue(info *types.Info, body *ast.BlockStmt, marked map[types.Object]bool) bool {
+	call := tailCall(body)
+
+	if call == nil {
+		return false
+	}
+
+	ident, ok := ast.Unparen(call.Fun).(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	value, ok := info.Uses[ident].(*types.Var)
+
+	return ok && marked[value]
+}
+
+// markTailCalledObservingValues marks, in seed, every function VALUE whose static target observes its caller -- a
+// package-level var whose initializer names a declaration of this package that observesCaller or already keeps its
+// frame (seed), and a local var assigned a func literal that observesCaller -- and then every declaration whose LAST
+// statement calls through one. Deliberately narrow: a value with no static target is not judged, and a call through an
+// interface method is not either (a census of std, 2026-10-25: 922 function-value and 528 interface tail calls in all,
+// of which 60 reach a caller-observing static target -- the BOARD row's broad rule is post-publish).
+func markTailCalledObservingValues(files []FileEntry, info *types.Info, pkg *types.Package, bodies []declBody, seed map[types.Object]bool) {
+	bodyOf := map[types.Object]*ast.BlockStmt{}
+
+	for _, entry := range bodies {
+		bodyOf[entry.obj] = entry.body
+	}
+
+	observing := func(target types.Object) bool {
+		if target == nil || target.Pkg() != pkg {
+			return false
+		}
+
+		return seed[target] || observesCaller(info, bodyOf[target])
+	}
+
+	marked := false
+
+	for _, entry := range files {
+		if entry.file == nil {
+			continue
+		}
+
+		for _, decl := range entry.file.Decls {
+			gen, ok := decl.(*ast.GenDecl)
+
+			if !ok || gen.Tok != token.VAR {
+				continue
+			}
+
+			for _, spec := range gen.Specs {
+				value, ok := spec.(*ast.ValueSpec)
+
+				if !ok || len(value.Values) != len(value.Names) {
+					continue
+				}
+
+				for i, name := range value.Names {
+					if variable, ok := info.Defs[name].(*types.Var); ok && observing(namedFunction(info, value.Values[i])) {
+						seed[variable] = true
+						marked = true
+					}
+				}
+			}
+		}
+
+		ast.Inspect(entry.file, func(n ast.Node) bool {
+			assign, ok := n.(*ast.AssignStmt)
+
+			if !ok || len(assign.Lhs) != len(assign.Rhs) {
+				return true
+			}
+
+			for i, lhs := range assign.Lhs {
+				ident, isIdent := lhs.(*ast.Ident)
+				literal, isLiteral := ast.Unparen(assign.Rhs[i]).(*ast.FuncLit)
+
+				if !isIdent || !isLiteral || !observesCaller(info, literal.Body) {
+					continue
+				}
+
+				object := info.Defs[ident]
+
+				if object == nil {
+					object = info.Uses[ident]
+				}
+
+				if variable, ok := object.(*types.Var); ok {
+					seed[variable] = true
+					marked = true
+				}
+			}
+
+			return true
+		})
+	}
+
+	if !marked {
+		return
+	}
+
+	for _, entry := range bodies {
+		if tailCallsObservingValue(info, entry.body, seed) {
+			seed[entry.obj] = true
+		}
+	}
+}
+
+// namedFunction is the declaration an initializer names, through an instantiation (`genericHelper[int]`) or a
+// package qualifier; nil for anything else.
+func namedFunction(info *types.Info, expr ast.Expr) types.Object {
+	switch e := ast.Unparen(expr).(type) {
+	case *ast.IndexExpr:
+		return namedFunction(info, e.X)
+	case *ast.IndexListExpr:
+		return namedFunction(info, e.X)
+	case *ast.Ident:
+		if function, ok := info.Uses[e].(*types.Func); ok {
+			return function
+		}
+	case *ast.SelectorExpr:
+		if function, ok := info.Uses[e.Sel].(*types.Func); ok {
+			return function
+		}
+	}
+
+	return nil
 }
 
 // executesGoStatement reports whether body ITSELF executes a `go` statement -- one not inside a nested
@@ -409,6 +677,86 @@ func callsSkipCountedWalker(info *types.Info, body *ast.BlockStmt) bool {
 	})
 
 	return found
+}
+
+// testingDecorators are the methods of Go's testing API (on T, B, F, common and the TB interface) whose record
+// names its CALLER's file:line, or that mark their caller as a helper: Go's (*common).log decorates every record
+// with callSite(3) -- skipping callSite, log and the public method -- so the frame it names is the one that
+// called Log, Error, Fatal or Skip; and Helper records its caller's function, which frameSkip then steps over.
+// The hand-owned host walks the same frames (TestExecution.LogFromCaller, Helper), so a JIT that inlines that
+// caller moves the attribution to ITS caller. testing's own TestTBHelper is the measured case: its
+// notHelperCallingHelper is one statement forwarding to helper, which calls t.Helper and t.Error, and under the
+// Release TieredCompilation=0 configuration of record the record read helperfuncs_test.go:48 where Go reads :24
+// (Debug passes outright). Cleanup and Run join for the same reason: Cleanup records its caller as the frame its
+// cleanup's records name (Go's cleanupPc), and Run records its caller's stack as the subtest's creator. Seeded
+// only on a SMALL body (isSmallCallerBody): a large Test function is not an inlining candidate, and seeding every
+// caller measured 6,294 std test functions against the few helpers that carry the risk.
+var testingDecorators = map[string]bool{
+	"Log": true, "Logf": true, "Error": true, "Errorf": true, "Fatal": true, "Fatalf": true,
+	"Skip": true, "Skipf": true, "Helper": true, "Cleanup": true, "Run": true,
+}
+
+// callsTestingDecorator reports whether body itself (a nested *ast.FuncLit is a frame of its own) calls one of
+// testingDecorators as a METHOD of package testing.
+func callsTestingDecorator(info *types.Info, body *ast.BlockStmt) bool {
+	if body == nil || info == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		callee, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || callee.Pkg() == nil || callee.Pkg().Path() != "testing" || !testingDecorators[callee.Name()] {
+			return true
+		}
+
+		if sig, ok := callee.Type().(*types.Signature); ok && sig.Recv() != nil && testingDecoratorReceivers[testingReceiverName(sig.Recv().Type())] {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
+// testingDecoratorReceivers are the testing types whose methods decorate: M.Run (every TestMain's m.Run) runs the
+// tests and records nothing about its caller.
+var testingDecoratorReceivers = map[string]bool{"T": true, "B": true, "F": true, "common": true, "TB": true}
+
+// testingReceiverName is the name of a testing method's receiver type, through a pointer.
+func testingReceiverName(recv types.Type) string {
+	if pointer, ok := recv.(*types.Pointer); ok {
+		recv = pointer.Elem()
+	}
+
+	if named, ok := recv.(*types.Named); ok {
+		return named.Obj().Name()
+	}
+
+	return ""
 }
 
 // isThinAllocator reports whether body is a single statement whose whole work is ONE heap allocation
@@ -898,6 +1246,197 @@ func callersWithinDepth(fn types.Object, depth int64, callers map[types.Object]m
 	}
 
 	return reached
+}
+
+// paramSkip is one runtime.Caller/Callers call whose skip is the declaring function's own parameter: the
+// parameter's index in the signature, and the frames the skip does not count (1 for Caller(k), which
+// reports depth k; 2 for Callers(k), which records from depth k-1), as in runtimeCallerSkipWindow.
+type paramSkip struct {
+	index     int
+	unskipped int64
+}
+
+// runtimeCallerParamSkips reports fn's own runtime.Caller/Callers calls (a nested *ast.FuncLit is a frame of
+// its own) whose skip argument is exactly one of fn's parameters. A variadic parameter, or one the body
+// assigns, increments or takes the address of (closures included), carries no fact the caller can size.
+func runtimeCallerParamSkips(info *types.Info, fn *ast.FuncDecl) []paramSkip {
+	if fn == nil || fn.Body == nil || info == nil {
+		return nil
+	}
+
+	obj, ok := info.ObjectOf(fn.Name).(*types.Func)
+
+	if !ok {
+		return nil
+	}
+
+	sig := obj.Type().(*types.Signature)
+	var skips []paramSkip
+
+	ast.Inspect(fn.Body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || len(call.Args) == 0 {
+			return true
+		}
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		used, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || used.Pkg() == nil || used.Pkg().Path() != "runtime" {
+			return true
+		}
+
+		var unskipped int64
+
+		switch used.Name() {
+		case "Caller":
+			unskipped = 1
+		case "Callers":
+			unskipped = 2
+		default:
+			return true
+		}
+
+		ident, ok := ast.Unparen(call.Args[0]).(*ast.Ident)
+
+		if !ok {
+			return true
+		}
+
+		param, ok := info.Uses[ident].(*types.Var)
+
+		if !ok {
+			return true
+		}
+
+		for i := 0; i < sig.Params().Len(); i++ {
+			if sig.Params().At(i) != param {
+				continue
+			}
+
+			if !(sig.Variadic() && i == sig.Params().Len()-1) && !paramReassigned(info, fn.Body, param) {
+				skips = append(skips, paramSkip{index: i, unskipped: unskipped})
+			}
+		}
+
+		return true
+	})
+
+	return skips
+}
+
+// paramReassigned reports whether body (its closures included) assigns param, increments or decrements it,
+// or takes its address -- any of which leaves the value reaching runtime.Caller unknown at the call site.
+func paramReassigned(info *types.Info, body *ast.BlockStmt, param *types.Var) bool {
+	is := func(expr ast.Expr) bool {
+		ident, ok := ast.Unparen(expr).(*ast.Ident)
+		return ok && info.Uses[ident] == param
+	}
+
+	reassigned := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		switch node := n.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
+				if is(lhs) {
+					reassigned = true
+				}
+			}
+		case *ast.IncDecStmt:
+			if is(node.X) {
+				reassigned = true
+			}
+		case *ast.UnaryExpr:
+			if node.Op == token.AND && is(node.X) {
+				reassigned = true
+			}
+		}
+
+		return !reassigned
+	})
+
+	return reassigned
+}
+
+// paramSkipCallDepths returns, for each call in body (a nested *ast.FuncLit is a frame of its own) to a
+// same-package function with a parameter-carried skip, the depth below that function's frame the call's
+// CONSTANT argument skips, when it reaches at least body's own frame (depth 1). A non-constant argument,
+// or a call through an interface or a function value, contributes nothing.
+func paramSkipCallDepths(info *types.Info, pkg *types.Package, body *ast.BlockStmt, paramSkips map[types.Object][]paramSkip) []int64 {
+	if body == nil || info == nil || len(paramSkips) == 0 {
+		return nil
+	}
+
+	var depths []int64
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || call.Ellipsis.IsValid() {
+			return true
+		}
+
+		fun := ast.Unparen(call.Fun)
+
+		switch index := fun.(type) {
+		case *ast.IndexExpr:
+			fun = index.X
+		case *ast.IndexListExpr:
+			fun = index.X
+		}
+
+		var ident *ast.Ident
+
+		switch f := fun.(type) {
+		case *ast.Ident:
+			ident = f
+		case *ast.SelectorExpr:
+			ident = f.Sel
+		default:
+			return true
+		}
+
+		callee, ok := info.Uses[ident].(*types.Func)
+
+		if !ok || callee.Pkg() != pkg {
+			return true
+		}
+
+		for _, skip := range paramSkips[callee.Origin()] {
+			if skip.index >= len(call.Args) {
+				continue
+			}
+
+			value := info.Types[call.Args[skip.index]].Value
+
+			if value == nil {
+				continue
+			}
+
+			if k, exact := constant.Int64Val(value); exact && k-skip.unskipped >= 1 {
+				depths = append(depths, k-skip.unskipped)
+			}
+		}
+
+		return true
+	})
+
+	return depths
 }
 
 // fixedSkipClosureApplies reports whether computeNoInliningClosure's fixed-skip path closure applies to the

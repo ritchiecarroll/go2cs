@@ -118,6 +118,11 @@ docs/phase4/hopA-inputs/recon-lists/*.txt text eol=lf
 docs/phase4/data/*.txt text eol=lf
 docs/phase4/data/*.tsv text eol=lf
 docs/phase4/hopA-inputs/*.tsv text eol=lf
+# 2026-10-24, the go1.26.10 re-bank plan: its shard deal and eligibility lists sit one directory down, where the two
+# lines above do not reach (a `*` never crosses `/`). The deal's sha256 is taken over these LF bytes.
+docs/phase4/data/rebank-go1.26.10/* text eol=lf
+# 2026-10-25: the alloc-units reading run's inputs sit one directory further down, for the same reason.
+docs/phase4/data/rebank-go1.26.10/alloc-reading/* text eol=lf
 
 # ---------------------------------------------------------------------------
 # LF pin for the converter's embedded stdlib metadata asset
@@ -173,7 +178,8 @@ src/tools/nugetgo/testdata/** -text
 # unpinned text payload checks out CRLF and the embedded resource is no longer Go's.
 src/core/internal/trace/traceviewer/static/** -text
 src/core/embed/internal/embedtest/concurrency.txt -text
-src/core/crypto/internal/fips140test/acvp_capabilities.json -text
+src/core/crypto/internal/fips140test/acvp_capabilities_fips140v1.26.json -text
+src/core/crypto/internal/fips140test/acvp_capabilities.entropy.json -text
 
 # The converter EMBEDS these templates at compile time (embeddedTemplates.go) and
 # assumes CRLF: writePackageInfoFile splits the package_info skeleton on "\r\n", so
@@ -184,3 +190,5 @@ src/core/crypto/internal/fips140test/acvp_capabilities.json -text
 src/go2cs/csproj-template.xml      eol=crlf
 src/go2cs/test-csproj-template.xml eol=crlf
 src/go2cs/package_info-template.txt eol=crlf
+src/tests/Behavioral/EmbedDirectiveForms/testdata/** -text
+src/tests/Behavioral/EmbedDirectiveForms/capabilities.json -text

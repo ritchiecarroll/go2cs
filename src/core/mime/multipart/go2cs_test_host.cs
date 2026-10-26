@@ -23,6 +23,7 @@ internal static class Go2CsTestHost
             "testdata",
         });
         registry.Add("TestBoundaryLine", multipart_internal_test_package.TestBoundaryLine, "multipart_test.go", 19);
+        registry.Add("TestFileContentDisposition", multipart_internal_test_package.TestFileContentDisposition, "writer_test.go", 176);
         registry.Add("TestLineContinuation", multipart_internal_test_package.TestLineContinuation, "multipart_test.go", 403);
         registry.Add("TestLineLimit", multipart_internal_test_package.TestLineLimit, "multipart_test.go", 278);
         registry.Add("TestMultipart", multipart_internal_test_package.TestMultipart, "multipart_test.go", 111);

@@ -8,7 +8,7 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encArrayHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
+[GoLazy] partial class lazyᴛencArrayHelper { internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encArrayHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
     [reflect.ΔBool] = encBoolArray,
     [reflect.Complex64] = encComplex64Array,
     [reflect.Complex128] = encComplex128Array,
@@ -25,9 +25,9 @@ internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool
     [reflect.Uint32] = encUint32Array,
     [reflect.Uint64] = encUint64Array,
     [reflect.Uintptr] = encUintptrArray
-};
+}; }
 
-internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encSliceHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
+[GoLazy] partial class lazyᴛencSliceHelper { internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encSliceHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
     [reflect.ΔBool] = encBoolSlice,
     [reflect.Complex64] = encComplex64Slice,
     [reflect.Complex128] = encComplex128Slice,
@@ -44,7 +44,7 @@ internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool
     [reflect.Uint32] = encUint32Slice,
     [reflect.Uint64] = encUint64Slice,
     [reflect.Uintptr] = encUintptrSlice
-};
+}; }
 
 internal static bool encBoolArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     // Can only slice if it is addressable.
@@ -57,7 +57,7 @@ internal static bool encBoolArray(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<bool>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<bool>>(v);
     if (!ok) {
         // It is kind bool but not type bool. TODO: We can handle this unsafely.
         return false;
@@ -85,7 +85,7 @@ internal static bool encComplex64Array(ж<encoderState> Ꮡstate, reflectꓸValu
 internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<complex64>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<complex64>>(v);
     if (!ok) {
         // It is kind complex64 but not type complex64. TODO: We can handle this unsafely.
         return false;
@@ -112,7 +112,7 @@ internal static bool encComplex128Array(ж<encoderState> Ꮡstate, reflectꓸVal
 internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<complex128>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<complex128>>(v);
     if (!ok) {
         // It is kind complex128 but not type complex128. TODO: We can handle this unsafely.
         return false;
@@ -139,7 +139,7 @@ internal static bool encFloat32Array(ж<encoderState> Ꮡstate, reflectꓸValue 
 internal static bool encFloat32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<float32>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<float32>>(v);
     if (!ok) {
         // It is kind float32 but not type float32. TODO: We can handle this unsafely.
         return false;
@@ -164,7 +164,7 @@ internal static bool encFloat64Array(ж<encoderState> Ꮡstate, reflectꓸValue 
 internal static bool encFloat64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<float64>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<float64>>(v);
     if (!ok) {
         // It is kind float64 but not type float64. TODO: We can handle this unsafely.
         return false;
@@ -189,7 +189,7 @@ internal static bool encIntArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
 internal static bool encIntSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<nint>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<nint>>(v);
     if (!ok) {
         // It is kind int but not type int. TODO: We can handle this unsafely.
         return false;
@@ -213,7 +213,7 @@ internal static bool encInt16Array(ж<encoderState> Ꮡstate, reflectꓸValue v)
 internal static bool encInt16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<int16>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<int16>>(v);
     if (!ok) {
         // It is kind int16 but not type int16. TODO: We can handle this unsafely.
         return false;
@@ -237,7 +237,7 @@ internal static bool encInt32Array(ж<encoderState> Ꮡstate, reflectꓸValue v)
 internal static bool encInt32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<int32>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<int32>>(v);
     if (!ok) {
         // It is kind int32 but not type int32. TODO: We can handle this unsafely.
         return false;
@@ -261,7 +261,7 @@ internal static bool encInt64Array(ж<encoderState> Ꮡstate, reflectꓸValue v)
 internal static bool encInt64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<int64>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<int64>>(v);
     if (!ok) {
         // It is kind int64 but not type int64. TODO: We can handle this unsafely.
         return false;
@@ -285,7 +285,7 @@ internal static bool encInt8Array(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 internal static bool encInt8Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<int8>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<int8>>(v);
     if (!ok) {
         // It is kind int8 but not type int8. TODO: We can handle this unsafely.
         return false;
@@ -309,7 +309,7 @@ internal static bool encStringArray(ж<encoderState> Ꮡstate, reflectꓸValue v
 internal static bool encStringSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<@string>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<@string>>(v);
     if (!ok) {
         // It is kind string but not type string. TODO: We can handle this unsafely.
         return false;
@@ -334,7 +334,7 @@ internal static bool encUintArray(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 internal static bool encUintSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<nuint>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<nuint>>(v);
     if (!ok) {
         // It is kind uint but not type uint. TODO: We can handle this unsafely.
         return false;
@@ -358,7 +358,7 @@ internal static bool encUint16Array(ж<encoderState> Ꮡstate, reflectꓸValue v
 internal static bool encUint16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<uint16>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<uint16>>(v);
     if (!ok) {
         // It is kind uint16 but not type uint16. TODO: We can handle this unsafely.
         return false;
@@ -382,7 +382,7 @@ internal static bool encUint32Array(ж<encoderState> Ꮡstate, reflectꓸValue v
 internal static bool encUint32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<uint32>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<uint32>>(v);
     if (!ok) {
         // It is kind uint32 but not type uint32. TODO: We can handle this unsafely.
         return false;
@@ -406,7 +406,7 @@ internal static bool encUint64Array(ж<encoderState> Ꮡstate, reflectꓸValue v
 internal static bool encUint64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<uint64>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<uint64>>(v);
     if (!ok) {
         // It is kind uint64 but not type uint64. TODO: We can handle this unsafely.
         return false;
@@ -430,7 +430,7 @@ internal static bool encUintptrArray(ж<encoderState> Ꮡstate, reflectꓸValue 
 internal static bool encUintptrSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var (Δslice, ok) = v.Interface()._<slice<uintptr>>(ᐧ);
+    var (Δslice, ok) = reflect.TypeAssert<slice<uintptr>>(v);
     if (!ok) {
         // It is kind uintptr but not type uintptr. TODO: We can handle this unsafely.
         return false;

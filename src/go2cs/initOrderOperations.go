@@ -9,12 +9,15 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/constant"
 	"go/token"
 	"go/types"
 	"math"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -56,15 +59,17 @@ var packageMovedInitVars map[types.Object]int
 // ordinal order.
 var packageMovedInitMethods map[int]string
 
-// packageTestInitHookMethod is the classic-partial-method hook a production package_init.cs
-// static constructor ends with when the package converts under -tests: the test conversion
-// IMPLEMENTS it (writeTestVariantInitFile) when the package's own _test.go files add relocated
-// initializers to the SAME class (the internal-variant recompile model — a C# class gets ONE
-// static ctor across all parts, so the test side cannot declare its own). Unimplemented, C#
-// erases both the declaration and the call (classic partial method: void, no accessibility),
-// so the production assembly — whose compile set excludes the *_test.cs implementation — is
-// byte-for-byte unaffected at runtime. The doubled marker keeps every real relocated-var
-// method name (`init<ᴛ><name>`) out of the collision space.
+// packageTestInitHookMethod names the module initializer an internal test variant on the RECOMPILE
+// model emits when its own _test.go files add relocated initializers to the production class
+// (writeTestVariantInitFile). A C# class gets ONE static ctor across all its parts and production's
+// package_init.cs already holds it, so the test side cannot declare a second; it forces that ctor
+// and then runs its own relocations. The doubled marker keeps every real relocated-var method name
+// (`init<ᴛ><name>`) out of the collision space.
+//
+// It was once a classic partial the production ctor called LAST, declared in package_init.cs under
+// -tests only. That made package_init.cs -- a file -stdlib and -tests both write -- differ by mode
+// (the H7 consolidated re-emit found internal/trace and runtime/windows flipping), and in the corpus
+// nothing implemented it. Production now never mentions the test side (H7 ruling F).
 var packageTestInitHookMethod = "init" + TempVarMarker + TempVarMarker + "tests"
 
 // collectMovedInitVars flags the package-level var initializers that must be relocated into the
@@ -74,6 +79,10 @@ var packageTestInitHookMethod = "init" + TempVarMarker + TempVarMarker + "tests"
 // bodies, which Go's own analysis also treats as references), then flags the initializer when a
 // dependency is cross-file, a same-file forward reference, or itself already flagged.
 func collectMovedInitVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {
+	// The vars built on their first read stay out of the ordered ctor (lazyPackageVarOperations.go); decided here so every
+	// driver that relocates initializers decides laziness alike.
+	collectLazyPackageVars(fset, pkg, info, syntax)
+
 	scope := pkg.Scope()
 
 	// Per-function direct references: package-level vars read and package functions/methods
@@ -272,6 +281,12 @@ func collectMovedInitVars(fset *token.FileSet, pkg *types.Package, info *types.I
 	movedVars := map[*types.Var]bool{}
 
 	for ordinal, initializer := range info.InitOrder {
+		// A var built on its first read (collectLazyPackageVars) has no place in the ordered ctor: its value cannot depend
+		// on when it is built, and a reader that runs earlier simply builds it then.
+		if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {
+			continue
+		}
+
 		// Direct references in the RHS — INCLUDING func-literal bodies: Go's analysis counts
 		// references inside literals (and an IIFE literal actually executes at init time).
 		directVars := map[*types.Var]bool{}
@@ -444,14 +459,14 @@ func recordMovedInitMethod(ordinal int, methodName string) {
 }
 
 // writePackageInitFile emits the synthetic per-package init file whose static constructor calls
-// each relocated initializer's per-file init method in Go's InitOrder. No-op when nothing was
-// relocated. The methods live in their home files, so this file needs no using directives.
-// Under -tests (withTestHook), the ctor additionally ends with the erasable test hook (see
-// packageTestInitHookMethod) so an internal-variant test conversion can append its own relocated
-// initializers to the same class's single static-ctor slot.
-func writePackageInitFile(outputDir, packageNamespace, packageName string, withTestHook bool) error {
+// each relocated initializer's per-file init method in Go's InitOrder. When nothing was relocated it
+// writes nothing, and retires a package_init.cs an EARLIER conversion generated at this path (see
+// retireStalePackageInitFile). The methods live in their home files, so this file needs no using
+// directives. It takes no conversion mode: -stdlib and -tests both write it, so it is the same file
+// from either.
+func writePackageInitFile(outputDir, packageNamespace, packageName string) error {
 	if len(packageMovedInitMethods) == 0 {
-		return nil
+		return retireStalePackageInitFile(outputDir)
 	}
 
 	packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
@@ -468,28 +483,41 @@ func writePackageInitFile(outputDir, packageNamespace, packageName string, withT
 	sb.WriteString(fmt.Sprintf("partial class %s {\r\n", packageClassName))
 	sb.WriteString(fmt.Sprintf("    static %s() {\r\n", packageClassName))
 	writeOrderedInitCalls(&sb)
-
-	if withTestHook {
-		sb.WriteString("        ")
-		sb.WriteString(packageTestInitHookMethod)
-		sb.WriteString("();\r\n")
-	}
-
 	sb.WriteString("    }\r\n")
-
-	if withTestHook {
-		sb.WriteString("\r\n")
-		sb.WriteString("    // -tests hook: implemented by the internal test variant's relocated-initializer\r\n")
-		sb.WriteString("    // file when its _test.go files need init-order relocation into this same class;\r\n")
-		sb.WriteString("    // erased entirely (declaration and call) when unimplemented — the production\r\n")
-		sb.WriteString("    // compile set excludes the *_test.cs implementation.\r\n")
-		sb.WriteString(fmt.Sprintf("    static partial void %s();\r\n", packageTestInitHookMethod))
-	}
-
 	sb.WriteString(fmt.Sprintf("} // end %s\r\n", packageClassName))
 
 	_, err := writeSourceIfChanged(filepath.Join(outputDir, PackageInitFileName), []byte(sb.String()))
 	return err
+}
+
+// packageInitGeneratedHeader opens every package_init.cs writePackageInitFile emits, and is how a
+// later conversion recognises one it may retire.
+const packageInitGeneratedHeader = "// Code generated by go2cs. DO NOT EDIT.\r\n// Package-level variable initialization ordered to match Go's dependency order"
+
+// retireStalePackageInitFile removes the package_init.cs an earlier conversion generated at outputDir
+// when this conversion relocates nothing. Left in place, its static constructor still calls init
+// methods this conversion no longer declares, and the package does not compile (CS0103): measured when
+// plain string literals stopped a package-level initializer from reading a hoisted field, so it no
+// longer needed relocating (LocalStringConstHoist's `initᴛgreeting`), and reachable by any user who
+// converts once with -hoist-literals and once without. Only a file carrying the generated header is
+// removed; a hand-written package_init.cs is never touched.
+func retireStalePackageInitFile(outputDir string) error {
+	path := filepath.Join(outputDir, PackageInitFileName)
+	content, err := os.ReadFile(path)
+
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if !strings.HasPrefix(string(uniformLineEndings(bytes.TrimPrefix(content, []byte("\xef\xbb\xbf")))), packageInitGeneratedHeader) {
+		return nil
+	}
+
+	return os.Remove(path)
 }
 
 // writeOrderedInitCalls appends the relocated init-method calls in InitOrder ordinal order.
@@ -514,15 +542,16 @@ func writeOrderedInitCalls(sb *strings.Builder) {
 // driver too — the three-drivers rule). Two shapes, both into a `*_test.cs`-suffixed file the
 // production csproj's test-artifact exclusion already ignores:
 //
-//   - implementHook: the INTERNAL variant when the production package_init.cs exists — that file
-//     already owns the class's single static-ctor slot, so the test side implements the erasable
-//     partial hook its ctor calls LAST. Test relocations therefore run after every production
+//   - productionOwnsCtor: the INTERNAL variant on the recompile model when the production
+//     package_init.cs exists -- that file already owns the class's single static-ctor slot, so the
+//     test side emits a module initializer ([GoInit]) that forces the production static ctor and
+//     then calls its own init methods. Test relocations therefore run after every production
 //     relocation (semantically safe: production initializers can never depend on test vars), with
-//     all static field initializers (every class part) already complete.
+//     all static field initializers (every class part) already complete, before any test code runs.
 //   - otherwise: the variant's class has no static ctor yet (the external `<pkg>_test` class, or
 //     an internal variant whose production package had nothing to relocate) — emit the ordered
 //     static constructor directly, exactly like package_init.cs.
-func writeTestVariantInitFile(outputDir, fileName, packageNamespace, packageClassName string, implementHook bool) error {
+func writeTestVariantInitFile(outputDir, fileName, packageNamespace, packageClassName string, productionOwnsCtor bool) error {
 	if len(packageMovedInitMethods) == 0 {
 		return nil
 	}
@@ -536,8 +565,9 @@ func writeTestVariantInitFile(outputDir, fileName, packageNamespace, packageClas
 	sb.WriteString(fmt.Sprintf("namespace %s;\r\n\r\n", packageNamespace))
 	sb.WriteString(fmt.Sprintf("partial class %s {\r\n", packageClassName))
 
-	if implementHook {
-		sb.WriteString(fmt.Sprintf("    static partial void %s() {\r\n", packageTestInitHookMethod))
+	if productionOwnsCtor {
+		sb.WriteString(fmt.Sprintf("    [GoInit] internal static void %s() {\r\n", packageTestInitHookMethod))
+		sb.WriteString(fmt.Sprintf("        global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(%s).TypeHandle);\r\n", packageClassName))
 	} else {
 		sb.WriteString(fmt.Sprintf("    static %s() {\r\n", packageClassName))
 	}

@@ -10,6 +10,7 @@ partial class time_internal_test_package {
         initᴛErrLocation();
         initᴛLoadTzinfo();
         initᴛNextStdChunk();
+        initᴛAsynctimerChan();
         initᴛQuote();
         initᴛAppendFormatAny();
         initᴛAppendFormatRFC3339();

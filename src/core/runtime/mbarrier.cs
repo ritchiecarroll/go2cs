@@ -267,8 +267,8 @@ internal static void reflectcallmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @uns
     memmove(dst, src, size);
 
     // Move pointers returned in registers to a place where the GC can see them.
-    foreach (var (i, _) in regs.Ints) {
-        if (regs.ReturnIsPtr.Get(i)) {
+    foreach (var i in range(regs.Ints)) {
+        if (Ꮡregs.of(abi.RegArgs.ᏑReturnIsPtr).Get(i)) {
             regs.Ptrs[i] = (@unsafe.Pointer)regs.Ints[i];
         }
     }

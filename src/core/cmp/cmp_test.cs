@@ -26,9 +26,9 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nint compare;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new((nint)(1), (nint)(2), -1),
-    new((nint)(1), (nint)(1), 0),
-    new((nint)(2), (nint)(1), +1),
+    new((nint)1, (nint)2, -1),
+    new((nint)1, (nint)1, 0),
+    new((nint)2, (nint)1, +1),
     new((@string)"a"u8, (@string)"aa"u8, -1),
     new((@string)"a"u8, (@string)"a"u8, 0),
     new((@string)"aa"u8, (@string)"a"u8, +1),
@@ -208,6 +208,30 @@ public static void ExampleOr_sort() {
     // foo bob 4.00
     // bar carol 1.00
     // baz carol 4.00
+}
+
+public static void ExampleLess() {
+    fmt.Println(cmp.Less<nint>(1, 2));
+    fmt.Println(cmp.Less((@string)"a", (@string)"aa"));
+    fmt.Println(cmp.Less(1.0D, Δmath.NaN()));
+    fmt.Println(cmp.Less(Δmath.NaN(), 1.0D));
+    // Output:
+    // true
+    // true
+    // false
+    // true
+}
+
+public static void ExampleCompare() {
+    fmt.Println(cmp.Compare<nint>(1, 2));
+    fmt.Println(cmp.Compare((@string)"a", (@string)"aa"));
+    fmt.Println(cmp.Compare(1.5D, 1.5D));
+    fmt.Println(cmp.Compare(Δmath.NaN(), 1.0D));
+    // Output:
+    // -1
+    // -1
+    // 0
+    // -1
 }
 
 } // end cmp_test_package

@@ -28,4 +28,7 @@ public static (FileInfo, error) Lstat(@string name) {
     return lstatNolog(name);
 }
 
+// stathook is set in tests
+internal static Func<ж<File>, @string, (FileInfo, error)> stathook;
+
 } // end os_package

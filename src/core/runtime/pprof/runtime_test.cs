@@ -10,8 +10,10 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using label = @internal.runtime.pprof.label_package;
 using static go.runtime.pprof_package;
 
+[GoFieldAccess(typeof(global::go.runtime.pprof_package.labelMap))]
 partial class pprof_internal_test_package {
 
 public static partial void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
@@ -119,9 +121,10 @@ internal static map<@string, @string> getProfLabel() {
     if (l == nil) {
         return new map<@string, @string>{};
     }
-    var m = new map<@string, @string>(len((~l).list));
-    foreach (var (_, lbl) in (~l).list) {
-        m[lbl.key] = lbl.value;
+    var ls = l.Set.List;
+    var m = new map<@string, @string>(len(ls));
+    foreach (var (_, lbl) in ls) {
+        m[lbl.Key] = lbl.Value;
     }
     return m;
 }

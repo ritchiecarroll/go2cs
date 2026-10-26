@@ -2,22 +2,22 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-116_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/os.exec.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/os/exec@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/os/exec) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/os/exec)
+[![Tests](https://img.shields.io/badge/Tests-117_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/os.exec.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/os/exec@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/os/exec) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/os/exec)
 
 From C#, call this package through the static class go.os.exec_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package exec runs external commands. It wraps os.StartProcess to make it easier to remap stdin and stdout, connect I/O with pipes, and do other adjustments.
 
-Unlike the "system" library call from C and other languages, the os/exec package intentionally does not invoke the system shell and does not expand any glob patterns or handle other expansions, pipelines, or redirections typically done by shells. The package behaves more like C's "exec" family of functions. To expand glob patterns, either call the shell directly, taking care to escape any dangerous input, or use the [path/filepath](https://pkg.go.dev/path/filepath@go1.24.13) package's Glob function. To expand environment variables, use package os's ExpandEnv.
+Unlike the "system" library call from C and other languages, the os/exec package intentionally does not invoke the system shell and does not expand any glob patterns or handle other expansions, pipelines, or redirections typically done by shells. The package behaves more like C's "exec" family of functions. To expand glob patterns, either call the shell directly, taking care to escape any dangerous input, or use the [path/filepath](https://pkg.go.dev/path/filepath@go1.26.10) package's Glob function. To expand environment variables, use package os's ExpandEnv.
 
-Note that the examples in this package assume a Unix system. They may not run on Windows, and they do not run in the Go Playground used by golang.org and godoc.org.
+Note that the examples in this package assume a Unix system. They may not run on Windows, and they do not run in the Go Playground used by go.dev and pkg.go.dev.
 
 ### Executables in the current directory
 
 The functions \[Command] and \[LookPath] look for a program in the directories listed in the current path, following the conventions of the host operating system. Operating systems have for decades included the current directory in this search, sometimes implicitly and sometimes configured explicitly that way by default. Modern practice is that including the current directory is usually unexpected and often leads to security problems.
 
-To avoid those security problems, as of Go 1.19, this package will not resolve a program using an implicit or explicit path entry relative to the current directory. That is, if you run \[LookPath]("go"), it will not successfully return ./go on Unix nor .\\go.exe on Windows, no matter how the path is configured. Instead, if the usual path algorithms would result in that answer, these functions return an error err satisfying [errors.Is](https://pkg.go.dev/errors@go1.24.13#Is)(err, \[ErrDot]).
+To avoid those security problems, as of Go 1.19, this package will not resolve a program using an implicit or explicit path entry relative to the current directory. That is, if you run \[LookPath]("go"), it will not successfully return ./go on Unix nor .\\go.exe on Windows, no matter how the path is configured. Instead, if the usual path algorithms would result in that answer, these functions return an error err satisfying [errors.Is](https://pkg.go.dev/errors@go1.26.10#Is)(err, \[ErrDot]).
 
 For example, consider these two program snippets:
 

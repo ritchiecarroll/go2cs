@@ -42,7 +42,11 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 
 // go2cs generated this placeholder — func sysReserveOS is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
+internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
+}
+
+internal static bool needZeroAfterSysUnusedOS() {
+    return true;
 }
 
 } // end runtime_package

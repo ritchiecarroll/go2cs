@@ -4,7 +4,7 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using testenv = @internal.testenv_package;
+using testenv = global::go.@internal.testenv_package;
 using io = io_package;
 using maps = maps_package;
 using os = os_package;
@@ -14,8 +14,10 @@ using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
+using global::go.@internal;
 using global::go.path;
 using static global::go.go.build_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -31,7 +33,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 internal static readonly @string defaultˢ = "default"u8;
 internal static readonly @string modifiedˢ = "modified"u8;
 
-public static void TestMatch(ж<testing.T> Ꮡt) {
+public static partial void TestMatch(ж<testing.T> Ꮡt) {
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     @string what = defaultˢ;
@@ -911,7 +913,7 @@ internal static readonly @string goTest1Testdataˢ = @"[{""//go:test1"" ""testda
 internal static readonly @string xTestDirectivesˢ = "XTestDirectives"u8;
 internal static readonly @string goXtest1Testdataˢ = @"[{""//go:xtest1"" ""testdata/directives/c_test.go:1:1""} {""//go:xtest2"" ""testdata/directives/d_test.go:1:1""} {""//go:xtest3"" ""testdata/directives/d_test.go:2:1""}]"u8;
 
-public static void TestDirectives(ж<testing.T> Ꮡt) {
+public static partial void TestDirectives(ж<testing.T> Ꮡt) {
     var (p, err) = ImportDir(testdataDirectivesˢ, 0);
     if (err != default!) {
         Ꮡt.Fatalf("could not import testdata: %v"u8, err);

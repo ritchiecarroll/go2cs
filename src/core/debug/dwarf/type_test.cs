@@ -166,6 +166,8 @@ internal static void testTypedefs(ж<testing.T> Ꮡt, ж<dwarf.Data> Ꮡd, @stri
 internal static readonly @string testdataCycleElfˢ = "testdata/cycle.elf"u8;
 
 public static void TestTypedefCycle(ж<testing.T> Ꮡt) {
+    var offsetsᴷ = new stackAppend<dwarf.Offset>(moves: true);
+
     // See issue #13039: reading a typedef cycle starting from a
     // different place than the size needed to be computed from
     // used to crash.
@@ -185,11 +187,12 @@ public static void TestTypedefCycle(ж<testing.T> Ꮡt) {
         }
         var exprᴛ1 = (~e).Tag;
         if (exprᴛ1 == TagBaseType || exprᴛ1 == TagTypedef || exprᴛ1 == TagPointerType || exprᴛ1 == TagStructType) {
-            offsets = append(offsets, (~e).Offset);
+            offsets = append(offsetsᴷ, offsets, (~e).Offset);
         }
     }
 
     // Parse each type with a fresh type cache.
+    offsets = move2heap(offsetsᴷ, offsets);
     foreach (var (_, offset) in offsets) {
         var dΔ1 = elfData(Ꮡt, testdataCycleElfˢ);
         var (_, err) = dΔ1.Type(offset);

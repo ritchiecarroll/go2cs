@@ -53,7 +53,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             while (start > 0 && s[start - 1] == c) {
                 start--;
             }
-            if ((nint)((n - start) & 1) == 1) {
+            if (((n - start) & 1) == 1) {
                 // Reached for trailing minus signs since "---" is the
                 // same as "-- -".
                 return jsCtxRegexp;
@@ -108,7 +108,9 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
                 j--;
             }
-            if (regexpPrecederKeywords[tmpstring(s.slice(j))]) {
+            // An IdentifierName after a property-access dot is a property name,
+            // which precedes a div op.
+            if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
                 return jsCtxRegexp;
             }
             break;
@@ -120,9 +122,10 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     return jsCtxDivOp;
 }
 
-// regexpPrecederKeywords is a set of reserved JS keywords that can precede a
-// regular expression in JS source.
-internal static map<@string, bool> regexpPrecederKeywords = new map<@string, bool>{
+// regexpPrecederKeywords is a set of JS keywords that can precede a regular
+// expression in JS source. It deliberately treats the context-sensitive
+// keyword yield as a keyword.
+[GoLazy] partial class lazyᴛregexpPrecederKeywords { internal static map<@string, bool> regexpPrecederKeywords = new map<@string, bool>{
     ["break"u8] = true,
     ["case"u8] = true,
     ["continue"u8] = true,
@@ -136,8 +139,9 @@ internal static map<@string, bool> regexpPrecederKeywords = new map<@string, boo
     ["throw"u8] = true,
     ["try"u8] = true,
     ["typeof"u8] = true,
-    ["void"u8] = true
-};
+    ["void"u8] = true,
+    ["yield"u8] = true
+}; }
 
 internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
 
@@ -177,7 +181,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         a = indirectToJSONMarshaler(args[0]);
         switch (a.type()) {
         case JS t: {
-            return ((@string)t);
+            return (@string)t;
         }
         case JSStr t: {
             // TODO: normalize quotes.
@@ -222,7 +226,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         //     x//* error marshaling y:
         //          second line of error message */null
         @string errStr = err.Error();
-        errStr = ((@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8)));
+        errStr = (@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8));
         errStr = strings.ReplaceAll(errStr, "*/"u8, "* /"u8);
         errStr = strings.ReplaceAll(errStr, "<!--"u8, x3Cˢ);
         return fmt.Sprintf(" /* %s */null "u8, errStr);
@@ -273,7 +277,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         }
         return buf.String();
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // jsStrEscaper produces a string that can be included between quotes in
@@ -361,7 +365,7 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
     return b.String();
 }
 
-internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(32){
+[GoLazy] partial class lazyᴛlowUnicodeReplacementTable { internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(32){
     [0] = @"\u0000"u8, [1] = @"\u0001"u8, [2] = @"\u0002"u8, [3] = @"\u0003"u8, [4] = @"\u0004"u8, [5] = @"\u0005"u8, [6] = @"\u0006"u8,
     [(rune)'\a'] = @"\u0007"u8,
     [(rune)'\b'] = @"\u0008"u8,
@@ -373,9 +377,9 @@ internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(3
     [0xe] = @"\u000e"u8, [0xf] = @"\u000f"u8, [0x10] = @"\u0010"u8, [0x11] = @"\u0011"u8, [0x12] = @"\u0012"u8, [0x13] = @"\u0013"u8,
     [0x14] = @"\u0014"u8, [0x15] = @"\u0015"u8, [0x16] = @"\u0016"u8, [0x17] = @"\u0017"u8, [0x18] = @"\u0018"u8, [0x19] = @"\u0019"u8,
     [0x1a] = @"\u001a"u8, [0x1b] = @"\u001b"u8, [0x1c] = @"\u001c"u8, [0x1d] = @"\u001d"u8, [0x1e] = @"\u001e"u8, [0x1f] = @"\u001f"u8
-};
+}; }
 
-internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
+[GoLazy] partial class lazyᴛjsStrReplacementTable { internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
@@ -393,11 +397,11 @@ internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
     [(rune)'<'] = @"\u003c"u8,
     [(rune)'>'] = @"\u003e"u8,
     [(rune)'\\'] = @"\\"u8
-};
+}; }
 
 // jsBqStrReplacementTable is like jsStrReplacementTable except it also contains
 // the special characters for JS template literals: $, {, and }.
-internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126){
+[GoLazy] partial class lazyᴛjsBqStrReplacementTable { internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
@@ -418,11 +422,11 @@ internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126)
     [(rune)'$'] = @"\u0024"u8,
     [(rune)'{'] = @"\u007b"u8,
     [(rune)'}'] = @"\u007d"u8
-};
+}; }
 
 // jsStrNormReplacementTable is like jsStrReplacementTable but does not
 // overencode existing escapes since this table has no entry for `\`.
-internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97){
+[GoLazy] partial class lazyᴛjsStrNormReplacementTable { internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
@@ -439,9 +443,9 @@ internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97
     [(rune)'/'] = @"\/"u8,
     [(rune)'<'] = @"\u003c"u8,
     [(rune)'>'] = @"\u003e"u8
-};
+}; }
 
-internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
+[GoLazy] partial class lazyᴛjsRegexpReplacementTable { internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
@@ -471,7 +475,7 @@ internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126
     [(rune)'{'] = @"\{"u8,
     [(rune)'|'] = @"\|"u8,
     [(rune)'}'] = @"\}"u8
-};
+}; }
 
 // isJSIdentPart reports whether the given rune is a JS identifier part.
 // It does not handle all the non-Latin letters, joiners, and combining marks,
@@ -511,7 +515,7 @@ internal static bool isJSType(@string mimeType) {
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
     var exprᴛ1 = mimeType;
-    if (exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
+    if (exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
         return true;
     }
     { /* default: */

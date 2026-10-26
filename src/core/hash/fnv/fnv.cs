@@ -361,7 +361,7 @@ internal static error UnmarshalBinary(this ref sum32 s, slice<byte> b) {
     if (len(b) != marshaledSize32) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum32)byteorder.BEUint32(b[4..]));
+    s = (sum32)byteorder.BEUint32(b[4..]);
     return default!;
 }
 
@@ -372,7 +372,7 @@ internal static error UnmarshalBinary(this ref sum32a s, slice<byte> b) {
     if (len(b) != marshaledSize32) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum32a)byteorder.BEUint32(b[4..]));
+    s = (sum32a)byteorder.BEUint32(b[4..]);
     return default!;
 }
 
@@ -383,7 +383,7 @@ internal static error UnmarshalBinary(this ref sum64 s, slice<byte> b) {
     if (len(b) != marshaledSize64) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum64)byteorder.BEUint64(b[4..]));
+    s = (sum64)byteorder.BEUint64(b[4..]);
     return default!;
 }
 
@@ -394,7 +394,7 @@ internal static error UnmarshalBinary(this ref sum64a s, slice<byte> b) {
     if (len(b) != marshaledSize64) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum64a)byteorder.BEUint64(b[4..]));
+    s = (sum64a)byteorder.BEUint64(b[4..]);
     return default!;
 }
 
@@ -420,6 +420,42 @@ internal static error UnmarshalBinary(this ref sum128a s, slice<byte> b) {
     s.Value[0] = byteorder.BEUint64(b[4..]);
     s.Value[1] = byteorder.BEUint64(b[12..]);
     return default!;
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum32 d) {
+    ref var r = ref heap<sum32>(out var Ꮡr);
+    r = d;
+    return (new sum32жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum32a d) {
+    ref var r = ref heap<sum32a>(out var Ꮡr);
+    r = d;
+    return (new sum32aжCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum64 d) {
+    ref var r = ref heap<sum64>(out var Ꮡr);
+    r = d;
+    return (new sum64жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum64a d) {
+    ref var r = ref heap<sum64a>(out var Ꮡr);
+    r = d;
+    return (new sum64aжCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum128 d) {
+    ref var r = ref heap<sum128>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new sum128жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum128a d) {
+    ref var r = ref heap<sum128a>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new sum128aжCloner(Ꮡr), default!);
 }
 
 } // end fnv_package

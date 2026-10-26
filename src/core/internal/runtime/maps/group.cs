@@ -25,7 +25,6 @@ internal static ctrl ctrlDeleted => 0b11111110;
 internal static UntypedInt bitsetLSB => 0x0101010101010101;
 internal static UntypedInt bitsetMSB => 0x8080808080808080;
 internal const uint64 bitsetEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
-internal const uint64 bitsetDeleted = /* bitsetLSB * uint64(ctrlDeleted) */ 18374403900871474942;
 
 // bitset represents a set of slots within a group.
 //
@@ -38,7 +37,7 @@ internal const uint64 bitsetDeleted = /* bitsetLSB * uint64(ctrlDeleted) */ 1837
 // On other architectures, bitset uses one byte per slot, where each byte is
 // either 0x80 if the slot is part of the set or 0x00 otherwise. This makes it
 // convenient to calculate for an entire group at once using standard
-// arithemetic instructions.
+// arithmetic instructions.
 partial struct bitset /*num:uint64*/;
 
 // first returns the relative index of the first control byte in the group that
@@ -54,7 +53,7 @@ internal static uintptr first(this bitset b) {
 // On AMD64, this is replaced with an intrisic that simply does
 // TrailingZeros64. There is no need to shift as the bitset is packed.
 internal static uintptr bitsetFirst(bitset b) {
-    return ((uintptr)sys.TrailingZeros64((uint64)b) >> (int)(3));
+    return (uintptr)sys.TrailingZeros64((uint64)b) >> 3;
 }
 
 // removeFirst clears the first set bit (that is, resets the least significant
@@ -89,7 +88,7 @@ internal static bool lowestSet(this bitset b) {
 //
 // On AMD64, this is replaced with an intrisic that checks the lowest bit.
 internal static bool bitsetLowestSet(bitset b) {
-    return (bitset)(b & ((bitset)((uint64)1 << (int)(7)))) != 0;
+    return (bitset)(b & ((bitset)((uint64)1 << 7))) != 0;
 }
 
 // shiftOutLowest shifts the lowest entry out of the bitset. Afterwards, the
@@ -102,7 +101,13 @@ internal static bitset shiftOutLowest(this bitset b) {
 //
 // On AMD64, this is replaced with an intrisic that shifts a single bit.
 internal static bitset bitsetShiftOutLowest(bitset b) {
-    return (b >> (int)(8));
+    return b >> 8;
+}
+
+// count returns the number of bits set in b.
+internal static nint count(this bitset b) {
+    // Note: works for both bitset representations (AMD64 and generic)
+    return sys.OnesCount64((uint64)b);
 }
 
 // Each slot in the hash table has a control byte which can have one of three
@@ -110,12 +115,12 @@ internal static bitset bitsetShiftOutLowest(bitset b) {
 //
 //	  empty: 1 0 0 0 0 0 0 0
 //	deleted: 1 1 1 1 1 1 1 0
-//	   full: 0 h h h h h h h  // h represents the H1 hash bits
+//	   full: 0 h h h h h h h  // h represents the H2 hash bits
 //
 // TODO(prattmic): Consider inverting the top bit so that the zero value is empty.
 partial struct ctrl /*num:uint8*/;
 
-// ctrlGroup is a fixed size array of abi.SwissMapGroupSlots control bytes
+// ctrlGroup is a fixed size array of abi.MapGroupSlots control bytes
 // stored in a uint64.
 partial struct ctrlGroup /*num:uint64*/;
 
@@ -142,7 +147,7 @@ internal static void set(this ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
 
 // setEmpty sets all the control bytes to empty.
 internal static void setEmpty(this ref ctrlGroup g) {
-    g = ((ctrlGroup)bitsetEmpty);
+    g = (ctrlGroup)bitsetEmpty;
 }
 
 // matchH2 returns the set of slots which are full and for which the 7-bit hash
@@ -154,7 +159,7 @@ internal static bitset matchH2(this ctrlGroup g, uintptr h) {
 // Portable implementation of matchH2.
 //
 // Note: On AMD64, this is an intrinsic implemented with SIMD instructions. See
-// note on bitset about the packed instrinsified return value.
+// note on bitset about the packed intrinsified return value.
 internal static bitset ctrlGroupMatchH2(ctrlGroup g, uintptr h) {
     // NB: This generic matching routine produces false positive matches when
     // h is 2^N and the control bytes have a seq of 2^N followed by 2^N+1. For
@@ -164,8 +169,8 @@ internal static bitset ctrlGroupMatchH2(ctrlGroup g, uintptr h) {
     // just a rare inefficiency. Note that they only occur if there is a real
     // match and never occur on ctrlEmpty, or ctrlDeleted. The subsequent key
     // comparisons ensure that there is no correctness issue.
-    var v = (uint64)((uint64)g ^ ((uint64)bitsetLSB * (uint64)h));
-    return ((bitset)((uint64)(((uint64)((v - (uint64)bitsetLSB) & ~v)) & (uint64)bitsetMSB)));
+    var v = (uint64)g ^ ((uint64)bitsetLSB * (uint64)h);
+    return (bitset)(((v - (uint64)bitsetLSB) & ~v) & (uint64)bitsetMSB);
 }
 
 // matchEmpty returns the set of slots in the group that are empty.
@@ -176,7 +181,7 @@ internal static bitset matchEmpty(this ctrlGroup g) {
 // Portable implementation of matchEmpty.
 //
 // Note: On AMD64, this is an intrinsic implemented with SIMD instructions. See
-// note on bitset about the packed instrinsified return value.
+// note on bitset about the packed intrinsified return value.
 internal static bitset ctrlGroupMatchEmpty(ctrlGroup g) {
     // An empty slot is   1000 0000
     // A deleted slot is  1111 1110
@@ -185,7 +190,7 @@ internal static bitset ctrlGroupMatchEmpty(ctrlGroup g) {
     // A slot is empty iff bit 7 is set and bit 1 is not. We could select any
     // of the other bits here (e.g. v << 1 would also work).
     var v = (uint64)g;
-    return ((bitset)((uint64)(((uint64)(v & ~((v << (int)(6))))) & (uint64)bitsetMSB)));
+    return (bitset)((v & ~(v << 6)) & (uint64)bitsetMSB);
 }
 
 // matchEmptyOrDeleted returns the set of slots in the group that are empty or
@@ -197,7 +202,7 @@ internal static bitset matchEmptyOrDeleted(this ctrlGroup g) {
 // Portable implementation of matchEmptyOrDeleted.
 //
 // Note: On AMD64, this is an intrinsic implemented with SIMD instructions. See
-// note on bitset about the packed instrinsified return value.
+// note on bitset about the packed intrinsified return value.
 internal static bitset ctrlGroupMatchEmptyOrDeleted(ctrlGroup g) {
     // An empty slot is  1000 0000
     // A deleted slot is 1111 1110
@@ -205,7 +210,7 @@ internal static bitset ctrlGroupMatchEmptyOrDeleted(ctrlGroup g) {
     //
     // A slot is empty or deleted iff bit 7 is set.
     var v = (uint64)g;
-    return ((bitset)((uint64)(v & (uint64)bitsetMSB)));
+    return (bitset)(v & (uint64)bitsetMSB);
 }
 
 // matchFull returns the set of slots in the group that are full.
@@ -213,10 +218,16 @@ internal static bitset matchFull(this ctrlGroup g) {
     return ctrlGroupMatchFull(g);
 }
 
+// anyFull reports whether any slots in the group are full.
+internal static bool anyFull(this ctrlGroup g) {
+    // A slot is full iff bit 7 is unset. Test whether any slot has bit 7 unset.
+    return (ctrlGroup)((~g) & (uint64)bitsetMSB) != 0;
+}
+
 // Portable implementation of matchFull.
 //
 // Note: On AMD64, this is an intrinsic implemented with SIMD instructions. See
-// note on bitset about the packed instrinsified return value.
+// note on bitset about the packed intrinsified return value.
 internal static bitset ctrlGroupMatchFull(ctrlGroup g) {
     // An empty slot is  1000 0000
     // A deleted slot is 1111 1110
@@ -224,13 +235,13 @@ internal static bitset ctrlGroupMatchFull(ctrlGroup g) {
     //
     // A slot is full iff bit 7 is unset.
     var v = (uint64)g;
-    return ((bitset)((uint64)(~v & (uint64)bitsetMSB)));
+    return (bitset)(~v & (uint64)bitsetMSB);
 }
 
 // groupReference is a wrapper type representing a single slot group stored at
 // data.
 //
-// A group holds abi.SwissMapGroupSlots slots (key/elem pairs) plus their
+// A group holds abi.MapGroupSlots slots (key/elem pairs) plus their
 // control word.
 partial struct groupReference {
     // data points to the group, which is described by typ.Group and has
@@ -238,7 +249,7 @@ partial struct groupReference {
     //
     // type group struct {
     // 	ctrls ctrlGroup
-    // 	slots [abi.SwissMapGroupSlots]slot
+    // 	slots [abi.MapGroupSlots]slot
     // }
     //
     // type slot struct {
@@ -276,7 +287,7 @@ internal static ж<ctrlGroup> ctrls(this ref groupReference g) {
 }
 
 // key returns a pointer to the key at index i.
-internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer key(this ref groupReference g, ж<abiꓸMapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
@@ -285,7 +296,7 @@ internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.SwissMapTy
 }
 
 // elem returns a pointer to the element at index i.
-internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.SwissMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer elem(this ref groupReference g, ж<abiꓸMapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
@@ -308,7 +319,7 @@ partial struct groupsReference {
 // newGroups allocates a new array of length groups.
 //
 // Length must be a power of two.
-internal static groupsReference newGroups(ref abi.SwissMapType typ, uint64 length) {
+internal static groupsReference newGroups(ref abiꓸMapType typ, uint64 length) {
     return new groupsReference(
         // TODO: make the length type the same throughout.
         data: (uintptr)newarray(typ.Group, (nint)length),
@@ -317,7 +328,7 @@ internal static groupsReference newGroups(ref abi.SwissMapType typ, uint64 lengt
 }
 
 // group returns the group at index i.
-internal static groupReference group(this ref groupsReference g, ж<abi.SwissMapType> Ꮡtyp, uint64 i) {
+internal static groupReference group(this ref groupsReference g, ж<abiꓸMapType> Ꮡtyp, uint64 i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // TODO(prattmic): Do something here about truncation on cast to
@@ -327,6 +338,36 @@ internal static groupReference group(this ref groupsReference g, ж<abi.SwissMap
     return new groupReference(
         data: (@unsafe.Pointer)((uintptr)g.data + offset)
     );
+}
+
+internal static void cloneGroup(ж<abiꓸMapType> Ꮡtyp, groupReference newGroup, groupReference oldGroup) {
+    ref var typ = ref Ꮡtyp.DerefOrNull();
+
+    typedmemmove(typ.Group, newGroup.data, oldGroup.data);
+    if (typ.IndirectKey()) {
+        // Deep copy keys if indirect.
+        for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
+            @unsafe.Pointer oldKey = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.key(Ꮡtyp, i));
+            if (oldKey == nil) {
+                continue;
+            }
+            @unsafe.Pointer newKey = (uintptr)newobject(typ.Key);
+            typedmemmove(typ.Key, newKey, oldKey);
+            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.key(Ꮡtyp, i))).Value = newKey;
+        }
+    }
+    if (typ.IndirectElem()) {
+        // Deep copy elems if indirect.
+        for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
+            @unsafe.Pointer oldElem = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)oldGroup.elem(Ꮡtyp, i));
+            if (oldElem == nil) {
+                continue;
+            }
+            @unsafe.Pointer newElem = (uintptr)newobject(typ.Elem);
+            typedmemmove(typ.Elem, newElem, oldElem);
+            ((ж<@unsafe.Pointer>)(uintptr)((uintptr)newGroup.elem(Ꮡtyp, i))).Value = newElem;
+        }
+    }
 }
 
 } // end maps_package

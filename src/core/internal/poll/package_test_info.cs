@@ -27,6 +27,8 @@ global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
+global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -37,10 +39,18 @@ using static global::go.@internal.poll_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
+[assembly: GoImplement<go.@internal.poll_package.FD, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<testing_package.B, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,8 +63,8 @@ using static global::go.@internal.poll_test_package;
 [assembly: go.GoPositionMap("internal/poll/error_stub_test.go", "error_stub_test.cs", "AA0egqaC")]
 [assembly: go.GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABMggqKCgpTIlIKCgILEtoKCgIKkgIKkgIKkgIKk", "17-33:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABcggpSClIKmgpSCpoKUgriCgoKmgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKkgoCSgJKApICAgJKAgICSgICAtoKCgoKC9qKCgoKUgoKUgriCgrSkooKCgoKUgoKCgoKCspKUgoKUgoKUgoLGgoKmgoKUgoKCgsaCgqaCgpSCgoKC6KSCgqaClIK0", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
-[assembly: go.GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABUeAA4qgoKCgg==")]
-[assembly: go.GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "AB88woKU6qSCgpSmwoKUgtrCgoKUgpSmooKClIKClKSCgrTUgoKi7oKAgpaCtpSCpIKCtPiigoKUkoKCgpSUgpKCpKaCgpSUgAAIFLamgILW", "88-114:1")]
+[assembly: go.GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABUeAA8qgoKCgg==")]
+[assembly: go.GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "ABYmgtaigoKClJKAgoKklIKSgqSmgoKUlIAACBS2poCC1gAYMILagpSClIKU5oKCgpSCgpS4gpSCgoKUgoKUpoKmggAIBoKCgoKClIKCgoKClICC", "106-108:1")]
 [assembly: go.GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABQegoKCgoKCooKCgIKCpLS2uIKClMjcgoKCgpSClA==", "16-34:1;21-30:1.1")]
 [assembly: go.GoPositionMap("internal/poll/writev_test.go", "writev_test.cs", "ABMaggAkUoKSgoI=")]
 // </GoSourcePositionMaps>
@@ -74,7 +84,6 @@ public static partial class poll_test_package
     internal partial struct TestConsume_tests {}
     internal partial struct _TCP_INFO_v0 {}
     internal partial struct eofErrorTestsᴛ1 {}
-    internal partial struct loggedFD {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -93,6 +102,7 @@ public static partial class poll_test_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

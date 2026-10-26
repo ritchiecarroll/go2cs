@@ -271,12 +271,12 @@ internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     if (err != default!) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
     }
-    d.vers = ((@string)(d.tmp[..6]));
+    d.vers = (@string)(d.tmp[..6]);
     if (d.vers != "GIF87a"u8 && d.vers != "GIF89a"u8) {
         return fmt.Errorf("gif: can't recognize format %q"u8, d.vers);
     }
-    d.width = (nint)d.tmp[6] + ((nint)d.tmp[7] << (int)(8));
-    d.height = (nint)d.tmp[8] + ((nint)d.tmp[9] << (int)(8));
+    d.width = (nint)d.tmp[6] + ((nint)d.tmp[7] << 8);
+    d.height = (nint)d.tmp[8] + ((nint)d.tmp[9] << 8);
     {
         var fields = d.tmp[10]; if ((byte)(fields & (byte)fColorTable) != 0) {
             d.backgroundIndex = d.tmp[11];
@@ -300,7 +300,7 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
     }
     nint j = 0;
     var p = new Δcolor.Palette(n);
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = new colorꓸRGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
         j += 3;
     }
@@ -353,7 +353,7 @@ internal static error readExtension(this ref decoder d) {
             return default!;
         }
         if (n == 3 && d.tmp[0] == 1) {
-            d.loopCount = (nint)((nint)d.tmp[1] | ((nint)d.tmp[2] << (int)(8)));
+            d.loopCount = (nint)d.tmp[1] | (nint)d.tmp[2] << 8;
         }
     }
     while (ᐧ) {
@@ -377,8 +377,8 @@ internal static error readGraphicControl(this ref decoder d) {
         return fmt.Errorf("gif: invalid graphic control extension block size: %d"u8, d.tmp[0]);
     }
     var flags = d.tmp[1];
-    d.disposalMethod = (byte)((((byte)(flags & (byte)gcDisposalMethodMask)) >> (int)(2)));
-    d.delayTime = (nint)((nint)d.tmp[2] | ((nint)d.tmp[3] << (int)(8)));
+    d.disposalMethod = (byte)((((byte)(flags & (byte)gcDisposalMethodMask)) >> 2));
+    d.delayTime = (nint)d.tmp[2] | (nint)d.tmp[3] << 8;
     if ((byte)(flags & (byte)gcTransparentColorSet) != 0) {
         d.transparentIndex = d.tmp[4];
         d.hasTransparentIndex = true;
@@ -416,7 +416,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         if (d.hasTransparentIndex) {
             if (!useLocalColorTable) {
                 // Clone the global color table.
-                m.Value.Palette = appendꓸꓸꓸ(((Δcolor.Palette)default!), d.globalColorTable);
+                m.Value.Palette = appendꓸꓸꓸ((Δcolor.Palette)default!, d.globalColorTable);
             }
             {
                 nint ti = (nint)d.transparentIndex; if (ti < len((~m).Palette)){
@@ -525,10 +525,10 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref deco
             return (default!, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
         }
     }
-    nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << (int)(8));
-    nint top = (nint)d.tmp[2] + ((nint)d.tmp[3] << (int)(8));
-    nint width = (nint)d.tmp[4] + ((nint)d.tmp[5] << (int)(8));
-    nint height = (nint)d.tmp[6] + ((nint)d.tmp[7] << (int)(8));
+    nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << 8);
+    nint top = (nint)d.tmp[2] + ((nint)d.tmp[3] << 8);
+    nint width = (nint)d.tmp[4] + ((nint)d.tmp[5] << 8);
+    nint height = (nint)d.tmp[6] + ((nint)d.tmp[7] << 8);
     d.imageFields = d.tmp[8];
 
     // The GIF89a spec, Section 20 (Image Descriptor) says: "Each image must

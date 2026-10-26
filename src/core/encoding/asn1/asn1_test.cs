@@ -540,7 +540,8 @@ internal static slice<unmarshalTestDataᴛ1> unmarshalTestData = new unmarshalTe
     new(new byte[]{0x30, 0x0b, 0x13, 0x03, 0x66, 0x6f, 0x6f, 0x02, 0x01, 0x22, 0x02, 0x01, 0x33}.slice(), Ꮡ(new TestElementsAfterString("foo"u8, 0x22, 0x33))),
     new(new byte[]{0x30, 0x05, 0x02, 0x03, 0x12, 0x34, 0x56}.slice(), Ꮡ(new TestBigInt(big.NewInt(0x123456)))),
     new(new byte[]{0x30, 0x0b, 0x31, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03}.slice(), Ꮡ(new TestSet(Ints: new nint[]{1, 2, 3}.slice()))),
-    new(new byte[]{0x12, 0x0b, (rune)'0', (rune)'1', (rune)'2', (rune)'3', (rune)'4', (rune)'5', (rune)'6', (rune)'7', (rune)'8', (rune)'9', (rune)' '}.slice(), newString("0123456789 "u8).OrTypedNil())
+    new(new byte[]{0x12, 0x0b, (rune)'0', (rune)'1', (rune)'2', (rune)'3', (rune)'4', (rune)'5', (rune)'6', (rune)'7', (rune)'8', (rune)'9', (rune)' '}.slice(), newString("0123456789 "u8).OrTypedNil()),
+    new(new byte[]{0x14, 0x03, 0xbf, 0x61, 0x3f}.slice(), newString("¿a?"u8).OrTypedNil())
 }.slice();
 
 public static void TestUnmarshal(ж<testing.T> Ꮡt) {
@@ -642,6 +643,7 @@ internal static readonly object unmarshalSucceededShouldˢ = (@string)"Unmarshal
 public static void TestCertificateWithNUL(ж<testing.T> Ꮡt) {
     // This is the paypal NUL-hack certificate. It should fail to parse because
     // NUL isn't a permitted character in a PrintableString.
+
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
     {
         var (_, err) = Unmarshal(derEncodedPaypalNULCertBytes, Ꮡcert); if (err == default!) {
@@ -669,9 +671,9 @@ public static void TestRawStructs(ж<testing.T> Ꮡt) {
         return;
     }
     if (s.A != 0x50) {
-        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)(0x50));
+        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)0x50);
     }
-    if (!bytes.Equal(((slice<byte>)s.Raw), input)) {
+    if (!bytes.Equal((slice<byte>)s.Raw, input)) {
         Ꮡt.Errorf("bad value for Raw: got %x want %x"u8, s.Raw, input);
     }
 }
@@ -1188,10 +1190,10 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
 
     var tests = new TestTaggedRawValue_tests[]{
         new(false, new byte[]{0x30, 3, TagInteger, 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((byte)((ClassContextSpecific << (int)(6))) | (byte)tag), 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassContextSpecific << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassApplication << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassPrivate << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice())
+        new(true, new byte[]{0x30, 3, (byte)((byte)(ClassContextSpecific << 6) | (byte)tag), 1, 1}.slice()),
+        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassContextSpecific << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassApplication << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassPrivate << 6) | tag) | (byte)isCompound), 1, 1}.slice())
     }.slice();
 
     foreach (var (i, test) in tests) {
@@ -1213,35 +1215,52 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
 }
 
 partial struct bmpStringTestsᴛ1 /*dyn*/ {
+    internal @string name;
     internal @string decoded;
     internal @string encodedHex;
+    internal bool invalid;
 }
 internal static slice<bmpStringTestsᴛ1> bmpStringTests = new bmpStringTestsᴛ1[]{
-    new(""u8, "0000"u8),
+    new("empty string"u8, ""u8, "0000"u8, false),
     // Example from https://tools.ietf.org/html/rfc7292#appendix-B.
-    new("Beavis"u8, "0042006500610076006900730000"u8),
+    new("rfc7292 example"u8, "Beavis"u8, "0042006500610076006900730000"u8, false),
     // Some characters from the "Letterlike Symbols Unicode block".
-    new("\u2115 - Double-struck N"u8, "21150020002d00200044006f00750062006c0065002d00730074007200750063006b0020004e0000"u8)
+    new("letterlike symbols"u8, "\u2115 - Double-struck N"u8, "21150020002d00200044006f00750062006c0065002d00730074007200750063006b0020004e0000"u8, false),
+    new("invalid length"u8, ""u8, "ff"u8, true),
+    new("invalid surrogate"u8, ""u8, "5051d801"u8, true),
+    new("invalid noncharacter 0xfdd1"u8, ""u8, "5051fdd1"u8, true),
+    new("invalid noncharacter 0xffff"u8, ""u8, "5051ffff"u8, true),
+    new("invalid noncharacter 0xfffe"u8, ""u8, "5051fffe"u8, true)
 }.slice();
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object parseBMPStringDidnTFailˢ = (@string)"parseBMPString didn't fail as expected"u8;
+
 public static void TestBMPString(ж<testing.T> Ꮡt) {
-    foreach (var (i, test) in bmpStringTests) {
-        var (encoded, err) = hex.DecodeString(test.encodedHex);
-        if (err != default!) {
-            Ꮡt.Fatalf("#%d: failed to decode from hex string"u8, i);
-        }
+    foreach (var (_, vᴛ1) in bmpStringTests) {
+        ref var test = ref heap(new bmpStringTestsᴛ1(), out var Ꮡtest);
+        test = vᴛ1;
 
-        (var decoded, err) = parseBMPString(encoded);
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+            var (encoded, err) = hex.DecodeString(testʗ1.encodedHex);
+            if (err != default!) {
+                tΔ1.Fatalf("failed to decode from hex string: %s"u8, err);
+            }
 
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: decoding output gave an error: %s"u8, i, err);
-            continue;
-        }
+            (var decoded, err) = parseBMPString(encoded);
 
-        if (decoded != test.decoded) {
-            Ꮡt.Errorf("#%d: decoding output resulted in %q, but it should have been %q"u8, i, decoded, test.decoded);
-            continue;
-        }
+            if (err != default! && !testʗ1.invalid){
+                tΔ1.Errorf("parseBMPString failed: %s"u8, err);
+            } else 
+            if (testʗ1.invalid && err == default!) {
+                tΔ1.Error(parseBMPStringDidnTFailˢ);
+            }
+
+            if (decoded != testʗ1.decoded) {
+                tΔ1.Errorf("parseBMPString(%q): got %q, want %q"u8, encoded, decoded, testʗ1.decoded);
+            }
+        });
     }
 }
 
@@ -1266,6 +1285,40 @@ public static void BenchmarkObjectIdentifierString(ж<testing.B> Ꮡb) {
     }
 }
 
+internal partial struct TestImplicitTypeRoundtrip_tagged /*dyn*/ {
+    public @string IA5; /*`asn1:"tag:1,ia5"`*/
+    public @string Printable; /*`asn1:"tag:2,printable"`*/
+    public @string UTF8; /*`asn1:"tag:3,utf8"`*/
+    public @string Numeric; /*`asn1:"tag:4,numeric"`*/
+    public time.Time UTC; /*`asn1:"tag:5,utc"`*/
+    public time.Time Generalized; /*`asn1:"tag:6,generalized"`*/
+}
+
+public static void TestImplicitTypeRoundtrip(ж<testing.T> Ꮡt) {
+    var a = new TestImplicitTypeRoundtrip_tagged(
+        IA5: "ia5"u8,
+        Printable: "printable"u8,
+        UTF8: "utf8"u8,
+        Numeric: "123 456"u8,
+        UTC: time.Now().UTC().Truncate(time.ΔSecond),
+        Generalized: time.Now().UTC().Truncate(time.ΔSecond)
+    );
+    var (enc, err) = Marshal(a);
+    if (err != default!) {
+        Ꮡt.Fatalf("Marshal failed: %s"u8, err);
+    }
+    ref var b = ref heap(new TestImplicitTypeRoundtrip_tagged(), out var Ꮡb);
+    {
+        var (_, errΔ1) = Unmarshal(enc, Ꮡb); if (errΔ1 != default!) {
+            Ꮡt.Fatalf("Unmarshal failed: %s"u8, errΔ1);
+        }
+    }
+
+    if (!reflect.DeepEqual(a, b)) {
+        Ꮡt.Fatalf("Unexpected diff after roundtripping struct\na: %#v\nb: %#v"u8, a, b);
+    }
+}
+
 internal partial struct TestParsingMemoryConsumption_out /*dyn*/ {
     public slice<nint> Id;
     public bool Critical; /*`asn1:"optional"`*/
@@ -1278,7 +1331,7 @@ public static void TestParsingMemoryConsumption(ж<testing.T> Ꮡt) {
     // fail due to the empty content; and, in such cases, we want to make sure
     // that we do not unnecessarily allocate memories.
     var derBomb = new slice<byte>(10_000_000);
-    foreach (var (i, _) in derBomb) {
+    foreach (var i in range(derBomb)) {
         derBomb[i] = 0x30;
     }
     derBomb = appendꓸꓸꓸ(new byte[]{0x30, 0x83, 0x98, 0x96, 0x80}.slice(), derBomb);
@@ -1299,9 +1352,115 @@ public static void TestParsingMemoryConsumption(ж<testing.T> Ꮡt) {
 
     // Ensure that the memory allocated does not exceed 10<<21 (~20 MB) when
     // the parsing fails.
-    if (memDiff > ((uint64)10 << (int)(21))) {
+    if (memDiff > (uint64)10 << 21) {
         Ꮡt.Errorf("Too much memory allocated while parsing DER: %v MiB"u8, memDiff / 1024 / 1024);
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string belowLimitˢ = "below limit"u8;
+internal static readonly @string aboveLimitˢ = "above limit"u8;
+internal static readonly @string asn1StructureErrorˢ = "asn1: structure error: nesting depth exceeded"u8;
+
+internal partial struct TestUnmarshalNestingLimitSlice_Recursive /*[]TestUnmarshalNestingLimitSlice_Recursive*/;
+
+public static void TestUnmarshalNestingLimitSlice(ж<testing.T> Ꮡt) {
+    nint limit = 10000;
+    if (runtime.GOARCH == "wasm"u8) {
+        limit = 5000;
+    }
+
+    slice<byte> makeData(ж<testing.T> tΔ1, nint depth) {
+        TestUnmarshalNestingLimitSlice_Recursive r = default!;
+        foreach (var _ᴛ1 in range(depth - 1)) {
+            r = new TestUnmarshalNestingLimitSlice_Recursive(new TestUnmarshalNestingLimitSlice_Recursive[]{r}.slice());
+        }
+        var (data, err) = Marshal(r);
+        if (err != default!) {
+            tΔ1.Fatalf("Marshal failed: %v"u8, err);
+        }
+        return data;
+    }
+
+    var makeDataʗ1 = makeData;
+    Ꮡt.Run(belowLimitˢ, (ж<testing.T> tΔ2) => {
+        var data = makeDataʗ1(tΔ2, limit);
+        ref var r = ref heap<TestUnmarshalNestingLimitSlice_Recursive>(out var Ꮡr);
+        {
+            var (_, err) = Unmarshal(data, Ꮡr); if (err != default!) {
+                tΔ2.Errorf("Unmarshal failed at depth %d: %v"u8, limit, err);
+            }
+        }
+    });
+
+    var makeDataʗ2 = makeData;
+    Ꮡt.Run(aboveLimitˢ, (ж<testing.T> tΔ3) => {
+        var data = makeDataʗ2(tΔ3, limit + 1);
+        ref var r = ref heap<TestUnmarshalNestingLimitSlice_Recursive>(out var Ꮡr);
+        var (_, err) = Unmarshal(data, Ꮡr);
+        if (err == default!) {
+            tΔ3.Fatalf("Unmarshal succeeded at depth %d, want error"u8, limit + 1);
+        }
+        {
+            @string got = err.Error();
+            @string want = asn1StructureErrorˢ; if (got != want) {
+                tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q"u8, got, want);
+            }
+        }
+    });
+}
+
+internal partial struct TestUnmarshalNestingLimitStruct_Recursive /*dyn*/ {
+    public slice<TestUnmarshalNestingLimitStruct_Recursive> Next; /*`asn1:"optional"`*/
+}
+
+// Note that recursive structs fail in half the normal limit because each level
+// of nesting in a struct (with a slice field) involves two depth increments
+// (one for the struct and one for the slice).
+public static void TestUnmarshalNestingLimitStruct(ж<testing.T> Ꮡt) {
+    nint limit = 5000;
+    if (runtime.GOARCH == "wasm"u8) {
+        limit = 2500;
+    }
+
+    slice<byte> makeData(ж<testing.T> tΔ1, nint depth) {
+        TestUnmarshalNestingLimitStruct_Recursive r = default!;
+        foreach (var _ᴛ1 in range(depth - 1)) {
+            r = new TestUnmarshalNestingLimitStruct_Recursive(Next: new TestUnmarshalNestingLimitStruct_Recursive[]{r}.slice());
+        }
+        var (data, err) = Marshal(r);
+        if (err != default!) {
+            tΔ1.Fatalf("Marshal failed: %v"u8, err);
+        }
+        return data;
+    }
+
+    var makeDataʗ1 = makeData;
+    Ꮡt.Run(belowLimitˢ, (ж<testing.T> tΔ2) => {
+        var data = makeDataʗ1(tΔ2, limit);
+        ref var r = ref heap(new TestUnmarshalNestingLimitStruct_Recursive(), out var Ꮡr);
+        {
+            var (_, err) = Unmarshal(data, Ꮡr); if (err != default!) {
+                tΔ2.Errorf("Unmarshal failed at depth %d: %v"u8, limit, err);
+            }
+        }
+    });
+
+    var makeDataʗ2 = makeData;
+    Ꮡt.Run(aboveLimitˢ, (ж<testing.T> tΔ3) => {
+        var data = makeDataʗ2(tΔ3, limit + 1);
+        ref var r = ref heap(new TestUnmarshalNestingLimitStruct_Recursive(), out var Ꮡr);
+        var (_, err) = Unmarshal(data, Ꮡr);
+        if (err == default!) {
+            tΔ3.Fatalf("Unmarshal succeeded at depth %d, want error"u8, limit + 1);
+        }
+        {
+            @string got = err.Error();
+            @string want = asn1StructureErrorˢ; if (got != want) {
+                tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q"u8, got, want);
+            }
+        }
+    });
 }
 
 } // end asn1_internal_test_package

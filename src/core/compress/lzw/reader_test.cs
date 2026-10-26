@@ -236,10 +236,10 @@ public static void TestNoLongerSavingPriorExpansions(ж<testing.T> Ꮡt) {
         nBits += e.n * e.width;
     }
     if (nCodes != 3839) {
-        Ꮡt.Fatalf("nCodes: got %v, want %v"u8, nCodes, (nint)(3839));
+        Ꮡt.Fatalf("nCodes: got %v, want %v"u8, nCodes, (nint)3839);
     }
     if (nBits != 43255) {
-        Ꮡt.Fatalf("nBits: got %v, want %v"u8, nBits, (nint)(43255));
+        Ꮡt.Fatalf("nBits: got %v, want %v"u8, nBits, (nint)43255);
     }
 
     // Construct our input of 43255 zero bits (which gets d.hi and d.width up
@@ -270,7 +270,7 @@ public static void TestNoLongerSavingPriorExpansions(ж<testing.T> Ꮡt) {
     //
     // The 'z' bit is unused.
     var @in = new slice<byte>(5406);
-    @in = append(@in, (byte)(0x80), (byte)(0xff), (byte)(0x0f), (byte)(0x08));
+    @in = append(@in, (byte)0x80, (byte)0xff, (byte)0x0f, (byte)0x08);
 
     var r = NewReader(new lzw_internal_test_package.bytes_ReaderжReader(bytes.NewReader(@in)), LSB, 8);
     var (nDecoded, err) = io.Copy(io.Discard, r);

@@ -259,7 +259,7 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
     nint lo = 0;
     nint hi = len(rune) / 2;
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         {
             var c = rune[2 * m]; if (c <= r){
                 if (r <= rune[2 * m + 1]) {
@@ -317,7 +317,7 @@ internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸstring argsʗp
 internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    foreach (var (j, _) in p.Inst) {
+    foreach (var j in range(p.Inst)) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {
@@ -378,14 +378,14 @@ internal static void dumpInst(ж<strings.Builder> Ꮡb, ref Inst i) {
             // shouldn't happen
             bw(Ꮡb, runeNilˢ);
         }
-        bw(Ꮡb, runeˢ, strconv.QuoteToASCII(((@string)i.Rune)));
+        bw(Ꮡb, runeˢ, strconv.QuoteToASCII((@string)i.Rune));
         if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
             bw(Ꮡb, "/i"u8);
         }
         bw(Ꮡb, " -> "u8, u32(i.Out));
     }
     else if (exprᴛ1 == InstRune1) {
-        bw(Ꮡb, rune1ˢ, strconv.QuoteToASCII(((@string)i.Rune)), " -> ", u32(i.Out));
+        bw(Ꮡb, rune1ˢ, strconv.QuoteToASCII((@string)i.Rune), " -> ", u32(i.Out));
     }
     else if (exprᴛ1 == InstRuneAny) {
         bw(Ꮡb, anyˢ, u32(i.Out));

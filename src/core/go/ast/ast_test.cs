@@ -23,6 +23,7 @@ internal static slice<commentsᴛ1> comments = new commentsᴛ1[]{
     new(new @string[]{"// foo"u8, "//"u8, "//"u8, "//"u8, "// bar"u8}.slice(), "foo\n\nbar\n"u8),
     new(new @string[]{"// foo"u8, "/* bar */"u8}.slice(), "foo\n bar\n"u8),
     new(new @string[]{"//"u8, "//"u8, "//"u8, "// foo"u8, "//"u8, "//"u8, "//"u8}.slice(), "foo\n"u8),
+
     new(new @string[]{"/**/"u8}.slice(), ""u8),
     new(new @string[]{"/*   */"u8}.slice(), ""u8),
     new(new @string[]{"/**/"u8, "/**/"u8, "/*   */"u8}.slice(), ""u8),
@@ -33,6 +34,7 @@ internal static slice<commentsᴛ1> comments = new commentsᴛ1[]{
     new(new @string[]{"/* Foo*/"u8, "/*\n*/"u8, "//"u8, "/*\n*/"u8, "// Bar"u8}.slice(), " Foo\n\nBar\n"u8),
     new(new @string[]{"/* Foo*/"u8, "// Bar"u8}.slice(), " Foo\nBar\n"u8),
     new(new @string[]{"/* Foo\n Bar*/"u8}.slice(), " Foo\n Bar\n"u8),
+
     new(new @string[]{"// foo"u8, "//go:noinline"u8, "// bar"u8, "//:baz"u8}.slice(), "foo\nbar\n:baz\n"u8),
     new(new @string[]{"// foo"u8, "//lint123:ignore"u8, "// bar"u8}.slice(), "foo\nbar\n"u8)
 }.slice();

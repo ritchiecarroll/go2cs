@@ -33,6 +33,7 @@ internal static class Go2CsTestHost
         registry.Add("TestEnvOverride", cgi_internal_test_package.TestEnvOverride, "host_test.go", 457);
         registry.Add("TestHandlerStderr", cgi_internal_test_package.TestHandlerStderr, "host_test.go", 480);
         registry.Add("TestHostingOurselves", cgi_internal_test_package.TestHostingOurselves, "integration_test.go", 27);
+        registry.Add("TestIncludedServerProtocol", cgi_internal_test_package.TestIncludedServerProtocol, "child_test.go", 159);
         registry.Add("TestInternalRedirect", cgi_internal_test_package.TestInternalRedirect, "host_test.go", 346);
         registry.Add("TestKillChildAfterCopyError", cgi_internal_test_package.TestKillChildAfterCopyError, "integration_test.go", 93);
         registry.Add("TestNilRequestBody", cgi_internal_test_package.TestNilRequestBody, "integration_test.go", 132);
@@ -46,7 +47,7 @@ internal static class Go2CsTestHost
         registry.Add("TestRequestWithoutHost", cgi_internal_test_package.TestRequestWithoutHost, "child_test.go", 97);
         registry.Add("TestRequestWithoutRemotePort", cgi_internal_test_package.TestRequestWithoutRemotePort, "child_test.go", 139);
         registry.Add("TestRequestWithoutRequestURI", cgi_internal_test_package.TestRequestWithoutRequestURI, "child_test.go", 117);
-        registry.Add("TestResponse", cgi_internal_test_package.TestResponse, "child_test.go", 157);
+        registry.Add("TestResponse", cgi_internal_test_package.TestResponse, "child_test.go", 179);
         registry.SetTestMain(cgi_internal_test_package.TestMain);
         return TestHost.Run(registry, args);
     }

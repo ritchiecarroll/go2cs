@@ -13,7 +13,7 @@ namespace go;
 
 /// <summary>
 /// Runtime registry of generated interface-implementation adapters, keyed by the Go dynamic
-/// value's runtime type and the target interface type.
+/// value's type (a box by its <c>ж&lt;T&gt;</c>, whatever its kind) and the target interface type.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,8 +21,8 @@ namespace go;
 /// semantics: a raw receiver box <c>ж&lt;T&gt;</c> held in an interface matches
 /// <c>case Iface:</c> whenever <c>*T</c> implements the interface. The box cannot nominally
 /// implement the C# interface — the generated pointer adapter (<c>TжIface</c>) does — so each
-/// generated adapter registers a wrapping factory here from a module initializer, and the golib
-/// type-assert machinery re-wraps the box on demand. This stays reflection-free and
+/// generated adapter registers a wrapping factory here (queued by its package's module initializer and
+/// run on a lookup's first miss), and the golib type-assert machinery re-wraps the box on demand. This stays reflection-free and
 /// Native-AOT-safe: factories are compiled lambdas over closed generic types, and the module
 /// initializer itself roots the adapter class against trimming.
 /// </para>
@@ -109,7 +109,35 @@ public static class AdapterRegistry
     /// </remarks>
     internal static bool TryGetAdapterFactory(Type valueType, Type interfaceType, [NotNullWhen(true)] out Func<object, object>? factory)
     {
-        return s_factories.TryGetValue((valueType, interfaceType), out factory);
+        (Type, Type) key = (AdapterKey(valueType), interfaceType);
+
+        // A miss runs the adapters loaded assemblies deferred (GoDeferredRegistrations.Adapters), then looks again.
+        return s_factories.TryGetValue(key, out factory) ||
+               GoDeferredRegistrations.Adapters.Run() && s_factories.TryGetValue(key, out factory);
+    }
+
+    // The registration key of a Go dynamic value's runtime type. A generated pointer adapter registers
+    // typeof(ж<T>), but no box has that runtime type: since the box kind split (36b7e9d96b) ж<T> is abstract, and
+    // a box is one of its kinds (StandardBox<T>, SlottedStandardBox<T>, FieldRefBox<T>, ElemRefBox<T>,
+    // NativeBox<T>, ...). Keyed by its runtime type, a box never found its adapter, and every assert of a raw box
+    // to a named interface fell to the run-time shell tier: slower under the JIT, and a MISS under Native AOT,
+    // where the shell's MakeGenericType over the pointee is not available (fmt printed a *PathError as
+    // `&{read |0 0x8000000500000000}`). So a box is keyed by the ж<T> in its base chain; any other type is its
+    // own key. Memoized per runtime type: a T has a handful of kinds, each resolved once.
+    private static readonly ConcurrentDictionary<Type, Type> s_adapterKeys = new();
+
+    internal static Type AdapterKey(Type valueType) =>
+        valueType.IsClass ? s_adapterKeys.GetOrAdd(valueType, static type => BoxTypeOf(type) ?? type) : valueType;
+
+    private static Type? BoxTypeOf(Type type)
+    {
+        for (Type? candidate = type; candidate is not null; candidate = candidate.BaseType)
+        {
+            if (candidate.IsGenericType && candidate.GetGenericTypeDefinition() == typeof(ж<>))
+                return candidate;
+        }
+
+        return null;
     }
 
     /// <summary>

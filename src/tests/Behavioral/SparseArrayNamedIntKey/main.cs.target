@@ -16,14 +16,14 @@ internal static code codeA => /* iota */ 0;
 internal static code codeB => 1;
 
 internal static slice<@string> rankNames = new golib.SparseArray<@string>{
-    [(int)rankLow] = "low"u8,
-    [(int)rankMid] = "mid"u8,
-    [(int)rankHigh] = "high"u8
+    [(int)rankLow] = "low",
+    [(int)rankMid] = "mid",
+    [(int)rankHigh] = "high"
 }.slice();
 
 internal static slice<@string> codeNames = new golib.SparseArray<@string>{
-    [codeA] = "a"u8,
-    [codeB] = "b"u8
+    [codeA] = "a",
+    [codeB] = "b"
 }.slice();
 
 partial struct errno /*num:uintptr*/;
@@ -31,8 +31,8 @@ partial struct errno /*num:uintptr*/;
 partial struct kindT /*num:nuint*/;
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
-    [1] = "one"u8,
-    [3] = "three"u8
+    [1] = "one",
+    [3] = "three"
 }.slice();
 
 internal static errno errBase => /* 1 << 10 */ 1024;
@@ -40,8 +40,8 @@ internal static errno eBig => /* errBase + 1 */ 1025;
 internal static errno eAcces => /* errBase + 2 */ 1026;
 
 internal static slice<@string> errNames = new golib.SparseArray<@string>{
-    [1] = "big"u8,
-    [2] = "acces"u8
+    [1] = "big",
+    [2] = "acces"
 }.slice();
 
 internal static void Main() {
@@ -57,6 +57,6 @@ internal static void Main() {
     fmt.Println(kindNames[((kindT)3)], len(kindNames));
 }
 
-internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};
+[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1}; }
 
 } // end main_package

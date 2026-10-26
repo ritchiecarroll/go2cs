@@ -153,8 +153,18 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 // class, and an instance member of the same name silently shadows it (vendored x/crypto/sha3's
 // `state.Clone() ShakeHash`, whose recv-overload forwarder then bound to the wrong return type).
 // Empty when t needs no clone, so a caller can use it as its own gate.
+//
+// A named ARRAY that declares a Go method named `Clone` takes ValueCloneMethod too: its wrapper's
+// `Clone()` would be an INSTANCE member, which C# binds before the extension method Go's own Clone
+// becomes, so the wrapper drops it for such a type (IArrayTypeTemplate) and the copy must not name it
+// -- Go 1.26 hash/fnv's sum128/sum128a, whose `Clone() (hash.Cloner, error)` forwarder bound the array
+// copy (CS0029).
 func valueCloneSuffix(t types.Type) string {
 	if typeIsArrayValue(t) {
+		if declaresGoMethod(t, "Clone") {
+			return fmt.Sprintf(".%s()", ValueCloneMethod)
+		}
+
 		return ".Clone()"
 	}
 
@@ -163,6 +173,24 @@ func valueCloneSuffix(t types.Type) string {
 	}
 
 	return ""
+}
+
+// declaresGoMethod reports whether t is (an alias of) a NAMED type declaring a method called name,
+// with either receiver form.
+func declaresGoMethod(t types.Type, name string) bool {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok {
+		return false
+	}
+
+	for i := 0; i < named.NumMethods(); i++ {
+		if named.Method(i).Name() == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 // wrapperValueCloneAttr returns the `[GoValueClone("Value")] ` stamp for a DEFINED type over another

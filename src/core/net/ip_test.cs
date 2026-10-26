@@ -25,8 +25,10 @@ internal static void initᴛparseIPTests() { parseIPTests = new parseIPTestsᴛ1
     new("::ffff:7f01:0203"u8, IPv4(127, 1, 2, 3)),
     new("0:0:0:0:0000:ffff:127.1.2.3"u8, IPv4(127, 1, 2, 3)),
     new("0:0:0:0::ffff:127.1.2.3"u8, IPv4(127, 1, 2, 3)),
+
     new("2001:4860:0:2001::68"u8, new IP(new byte[]{0x20, 0x01, 0x48, 0x60, 0, 0, 0x20, 0x01, 0, 0, 0, 0, 0, 0, 0x00, 0x68}.slice())),
     new("2001:4860:0000:2001:0000:0000:0000:0068"u8, new IP(new byte[]{0x20, 0x01, 0x48, 0x60, 0, 0, 0x20, 0x01, 0, 0, 0, 0, 0, 0, 0x00, 0x68}.slice())),
+
     new("-0.0.0.0"u8, default!),
     new("0.-1.0.0"u8, default!),
     new("0.0.-2.0"u8, default!),
@@ -376,11 +378,11 @@ partial struct ipMaskTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskTestsᴛ1> ipMaskTests;
 internal static void initᴛipMaskTests() { ipMaskTests = new ipMaskTestsᴛ1[]{
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 255, 255, 128), IPv4(192, 168, 1, 0)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8))), IPv4(192, 168, 1, 64)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8))), IPv4(192, 168, 1, 96)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8)), IPv4(192, 168, 1, 64)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8)), IPv4(192, 168, 1, 96)),
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 0, 255, 0), IPv4(192, 0, 1, 0)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), ParseIP("2001:d80::"u8)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8))), ParseIP("2000:d08::"u8))
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), ParseIP("2001:d80::"u8)),
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8)), ParseIP("2000:d08::"u8))
 }.slice(); }
 
 public static void TestIPMask(ж<testing.T> Ꮡt) {
@@ -400,8 +402,8 @@ partial struct ipMaskStringTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskStringTestsᴛ1> ipMaskStringTests = new ipMaskStringTestsᴛ1[]{
     new(IPv4Mask(255, 255, 255, 240), "fffffff0"u8),
     new(IPv4Mask(255, 0, 128, 0), "ff008000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), "ffffff80000000000000000000000000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8))), "ef00ff800000000000000000cafe0000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), "ffffff80000000000000000000000000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8)), "ef00ff800000000000000000cafe0000"u8),
     new(default!, "<nil>"u8)
 }.slice();
 
@@ -661,17 +663,22 @@ public static void TestSplitHostPort(ж<testing.T> Ꮡt) {
         new("[fe80::1%lo0]"u8, "missing port in address"u8),
         new("[localhost%lo0]"u8, "missing port in address"u8),
         new("localhost%lo0"u8, "missing port in address"u8),
+
         new("::1"u8, "too many colons in address"u8),
         new("fe80::1%lo0"u8, "too many colons in address"u8),
         new("fe80::1%lo0:80"u8, "too many colons in address"u8),
 
         // Test cases that didn't fail in Go 1
+
         new("[foo:bar]"u8, "missing port in address"u8),
         new("[foo:bar]baz"u8, "missing port in address"u8),
         new("[foo]bar:baz"u8, "missing port in address"u8),
+
         new("[foo]:[bar]:baz"u8, "too many colons in address"u8),
+
         new("[foo]:[bar]baz"u8, "unexpected '[' in address"u8),
         new("foo[bar]:baz"u8, "unexpected '[' in address"u8),
+
         new("foo]bar:baz"u8, "unexpected ']' in address"u8)
     }.slice()) {
         {
@@ -884,7 +891,7 @@ internal static void benchmarkIPEqual(ж<testing.B> Ꮡb, nint size) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var ips = new slice<global::go.net_package.IP>(1000);
-    foreach (var (i, _) in ips) {
+    foreach (var i in range(ips)) {
         ips[i] = new global::go.net_package.IP(size);
         rand.Read(ips[i]);
     }

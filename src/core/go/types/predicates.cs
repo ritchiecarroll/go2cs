@@ -56,19 +56,17 @@ internal static bool isConstType(ΔType t) {
     return isBasic(t, IsConstType);
 }
 
-// isBasic reports whether under(t) is a basic type with the specified info.
+// isBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter the result is false; i.e.,
 // isBasic does not look inside a type parameter.
 internal static bool isBasic(ΔType t, BasicInfo info) {
-    var (u, _) = under(t)._<ж<Basic>>(ᐧ);
+    var (u, _) = t.Underlying()._<ж<Basic>>(ᐧ);
     return u != nil && (BasicInfo)((~u).info & info) != 0;
 }
 
 // The allX predicates below report whether t is an X.
 // If t is a type parameter the result is true if isX is true
 // for all specified types of the type parameter's type set.
-// allX is an optimized version of isX(coreType(t)) (which
-// is the same as underIs(t, isX)).
 internal static bool allBoolean(ΔType t) {
     return allBasic(t, IsBoolean);
 }
@@ -97,10 +95,9 @@ internal static bool allNumericOrString(ΔType t) {
     return allBasic(t, (BasicInfo)(IsNumeric | IsString));
 }
 
-// allBasic reports whether under(t) is a basic type with the specified info.
+// allBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter, the result is true if isBasic(t, info) is true
 // for all specific types of the type parameter's type set.
-// allBasic(t, info) is an optimized version of isBasic(coreType(t), info).
 internal static bool allBasic(ΔType t, BasicInfo info) {
     {
         var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
@@ -140,7 +137,7 @@ internal static bool isTypeLit(ΔType t) {
 // Safe to call from types that are not fully set up.
 internal static bool isTyped(ΔType t) {
     // Alias and named types cannot denote untyped types
-    // so there's no need to call Unalias or under, below.
+    // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
     return b == nil || (BasicInfo)((~b).info & IsUntyped) == 0;
 }
@@ -155,14 +152,14 @@ internal static bool isUntyped(ΔType t) {
 // Safe to call from types that are not fully set up.
 internal static bool isUntypedNumeric(ΔType t) {
     // Alias and named types cannot denote untyped types
-    // so there's no need to call Unalias or under, below.
+    // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
     return b != nil && (BasicInfo)((~b).info & IsUntyped) != 0 && (BasicInfo)((~b).info & IsNumeric) != 0;
 }
 
 // IsInterface reports whether t is an interface type.
 public static bool IsInterface(ΔType t) {
-    var (_, ok) = under(t)._<ж<Interface>>(ᐧ);
+    var (_, ok) = t.Underlying()._<ж<Interface>>(ᐧ);
     return ok;
 }
 
@@ -207,73 +204,78 @@ internal static bool isGeneric(ΔType t) {
 
 // Comparable reports whether values of type T are comparable.
 public static bool Comparable(ΔType T) {
-    return comparableType(T, true, default!, default!);
+    return comparableType(T, true, default!) == nil;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string emptyTypeSetˢ = "empty type set"u8;
+internal static readonly @string incomparableTypesInTypeˢ = "incomparable types in type set"u8;
+
+// If T is comparable, comparableType returns nil.
+// Otherwise it returns a type error explaining why T is not comparable.
 // If dynamic is set, non-type parameter interfaces are always comparable.
-// If reportf != nil, it may be used to report why T is not comparable.
-internal static bool comparableType(ΔType T, bool dynamic, map<ΔType, bool> seen, Actionꓸꓸꓸ<@string, any> reportf) {
+internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType, bool> seen) {
     if (seen[T]) {
-        return true;
+        return default!;
     }
     if (seen == default!) {
         seen = new map<ΔType, bool>();
     }
     seen[T] = true;
 
-    var switchᴛ11 = under(T);
-    switch (switchᴛ11.type()) {
+    var switchᴛ10 = T.Underlying();
+    switch (switchᴛ10.type()) {
     case ж<Basic> t: {
-        // assume invalid types to be comparable
-        // to avoid follow-up errors
-        return (~t).kind != UntypedNil;
+        // assume invalid types to be comparable to avoid follow-up errors
+        if ((~t).kind == UntypedNil) {
+            return typeErrorf(""u8);
+        }
+        break;
     }
     case ж<Pointer> _:
     case ж<Chan> _: {
-        var t = switchᴛ11;
-        return true;
+        var t = switchᴛ10;
+        // always comparable
+        break;
     }
     case ж<Struct> t: {
         foreach (var (_, f) in (~t).fields) {
-            if (!comparableType((~f).typ, dynamic, seen, default!)) {
-                if (reportf != default!) {
-                    reportf("struct containing %s cannot be compared"u8, (~f).typ);
-                }
-                return false;
+            if (comparableType((~f).typ, dynamic, seen) != nil) {
+                return typeErrorf("struct containing %s cannot be compared"u8, (~f).typ);
             }
         }
-        return true;
+        break;
     }
     case ж<Array> t: {
-        if (!comparableType((~t).elem, dynamic, seen, default!)) {
-            if (reportf != default!) {
-                reportf("%s cannot be compared"u8, t.OrTypedNil());
-            }
-            return false;
+        if (comparableType((~t).elem, dynamic, seen) != nil) {
+            return typeErrorf("%s cannot be compared"u8, T);
         }
-        return true;
+        break;
     }
     case ж<Interface> t: {
         if (dynamic && !isTypeParam(T) || t.typeSet().IsComparable(seen)) {
-            return true;
+            return default!;
         }
-        if (reportf != default!) {
-            if (t.typeSet().IsEmpty()){
-                reportf("empty type set"u8);
-            } else {
-                reportf("incomparable types in type set"u8);
-            }
+        @string cause = default!;
+        if (t.typeSet().IsEmpty()){
+            cause = emptyTypeSetˢ;
+        } else {
+            cause = incomparableTypesInTypeˢ;
         }
-        // fallthrough
-        break;
+        return typeErrorf(cause);
+    }
+    default: {
+        var t = switchᴛ10;
+        return typeErrorf(""u8);
     }}
-    return false;
+
+    return default!;
 }
 
 // hasNil reports whether type t includes the nil value.
 internal static bool hasNil(ΔType t) {
-    var switchᴛ12 = under(t);
-    switch (switchᴛ12.type()) {
+    var switchᴛ11 = t.Underlying();
+    switch (switchᴛ11.type()) {
     case ж<Basic> u: {
         return (~u).kind == UnsafePointer;
     }
@@ -282,7 +284,7 @@ internal static bool hasNil(ΔType t) {
     case ж<ΔSignature> _:
     case ж<Map> _:
     case ж<Chan> _: {
-        var u = switchᴛ12;
+        var u = switchᴛ11;
         return true;
     }
     case ж<Interface> u: {
@@ -325,6 +327,7 @@ partial struct comparer {
 // For changes to this code the corresponding changes should be made to unifier.nify.
 internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var targsᴷ = new stackAppend<ΔType>();
 
     x = Unalias(x);
     y = Unalias(y);
@@ -447,8 +450,8 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ytparams = yΔ7.TypeParams().list();
 
             slice<ΔType> targs = default!;
-            foreach (var (i, _) in xtparams) {
-                targs = append(targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
+            foreach (var i in range(xtparams)) {
+                targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
 
@@ -630,7 +633,7 @@ internal static bool identicalInstance(ΔType xorig, slice<ΔType> xargs, ΔType
 // for untyped nil is untyped nil.
 public static ΔType Default(ΔType t) {
     // Alias and named types cannot denote untyped types
-    // so there's no need to call Unalias or under, below.
+    // so there's no need to call Unalias or Underlying, below.
     {
         var (tΔ1, _) = t._<ж<Basic>>(ᐧ); if (tΔ1 != nil) {
             var exprᴛ1 = (~tΔ1).kind;

@@ -37,13 +37,13 @@ partial struct dirInfo {
 // Windows 8.1 and earlier only works with buffer sizes up to 64 kB.
 internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 
-internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(dirBufSize);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
 
 internal static void close(this ref dirInfo d) {
@@ -80,11 +80,11 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
         // but we can still read the directory entries.
         return;
     }
-    if ((uint32)(flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
+    if ((flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
         // The file system does not support object IDs, no need to continue.
         return;
     }
-    if (allowReadDirFileID && (uint32)(flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
+    if (allowReadDirFileID && (flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
         // Use FileIdBothDirectoryRestartInfo if available as it returns the file ID
         // without the need to open the file.
         d.@class = windows.FileIdBothDirectoryRestartInfo;

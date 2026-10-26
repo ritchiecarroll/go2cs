@@ -131,7 +131,7 @@ internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) {
     return k + 1;
 }
 
-internal static array<uint32> huffmanCodes = new uint32[]{
+[GoLazy] partial class lazyᴛhuffmanCodes { internal static array<uint32> huffmanCodes = new uint32[]{
     0x1ff8,
     0x7fffd8,
     0xfffffe2,
@@ -388,9 +388,9 @@ internal static array<uint32> huffmanCodes = new uint32[]{
     0x7ffffef,
     0x7fffff0,
     0x3ffffee
-}.array();
+}.array(); }
 
-internal static array<uint8> huffmanCodeLen = new uint8[]{
+[GoLazy] partial class lazyᴛhuffmanCodeLen { internal static array<uint8> huffmanCodeLen = new uint8[]{
     13, 23, 28, 28, 28, 28, 28, 28, 28, 24, 30, 28, 28, 30, 28, 28,
     28, 28, 28, 28, 28, 28, 30, 28, 28, 28, 28, 28, 28, 28, 28, 28,
     6, 10, 10, 12, 13, 6, 8, 11, 10, 10, 8, 11, 8, 6, 6, 6,
@@ -407,6 +407,6 @@ internal static array<uint8> huffmanCodeLen = new uint8[]{
     19, 21, 26, 27, 27, 26, 27, 24, 21, 21, 26, 26, 28, 27, 27, 27,
     20, 24, 20, 21, 22, 21, 21, 23, 22, 22, 25, 25, 24, 24, 26, 23,
     26, 27, 26, 26, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, 27, 26
-}.array();
+}.array(); }
 
 } // end hpack_package

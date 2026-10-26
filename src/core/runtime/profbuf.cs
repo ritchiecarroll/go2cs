@@ -38,6 +38,10 @@ partial class runtime_package {
 // be returned by read. By definition, r ≤ rNext ≤ w (before wraparound),
 // and rNext is only used by the reader, so it can be accessed without atomics.
 //
+// If the reader is blocked waiting for more data, the writer will wake it up if
+// either the buffer is more than half full, or when the writer sets the eof
+// marker or writes overflow entries (described below.)
+//
 // If the writer gets ahead of the reader, so that the buffer fills,
 // future writes are discarded and replaced in the output stream by an
 // overflow entry, which has size 2+hdrsize+1, time set to the time of
@@ -110,7 +114,7 @@ internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profInd
 internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8589934592);       // overflow or eof waiting
 
 internal static profIndex load(this ж<profAtomic> Ꮡx) {
-    return ((profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>()));
+    return (profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>());
 }
 
 internal static void store(this ж<profAtomic> Ꮡx, profIndex @new) {
@@ -126,7 +130,7 @@ internal static uint32 dataCount(this profIndex x) {
 }
 
 internal static uint32 tagCount(this profIndex x) {
-    return (uint32)(uint64)((x >> (int)(34)));
+    return (uint32)(uint64)((x >> 34));
 }
 
 // countSub subtracts two counts obtained from profIndex.dataCount or profIndex.tagCount,
@@ -136,12 +140,12 @@ internal static uint32 tagCount(this profIndex x) {
 // This function works for both.
 internal static nint countSub(uint32 x, uint32 y) {
     // x-y is 32-bit signed or 30-bit signed; sign-extend to 32 bits and convert to int.
-    return (nint)((((int32)(x - y) << (int)(2)) >> (int)(2)));
+    return (nint)(((int32)(x - y) << 2) >> 2);
 }
 
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
 internal static profIndex addCountsAndClearFlags(this profIndex x, nint data, nint tag) {
-    return ((profIndex)((uint64)(((((uint64)x >> (int)(34)) + (uint64)((((uint32)tag << (int)(2)) >> (int)(2)))) << (int)(34)) | (uint64)((uint32)(uint64)x + (uint32)data))));
+    return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)(uint64)x + (uint32)data));
 }
 
 // hasOverflow reports whether b has any overflow records pending.
@@ -165,7 +169,7 @@ internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) 
             break;
         }
         // Increment generation, clear overflow count in low bits.
-        if (Ꮡb.of(profBuf.Ꮡoverflow).CompareAndSwap(overflow, ((((overflow >> (int)(32))) + 1) << (int)(32)))) {
+        if (Ꮡb.of(profBuf.Ꮡoverflow).CompareAndSwap(overflow, ((overflow >> 32) + 1) << 32)) {
             break;
         }
         overflow = Ꮡb.of(profBuf.Ꮡoverflow).Load();
@@ -185,7 +189,7 @@ internal static void incrementOverflow(this ж<profBuf> Ꮡb, int64 now) {
         if ((uint32)overflow == 0) {
             // Store overflowTime first so it's always available when overflow != 0.
             Ꮡb.of(profBuf.ᏑoverflowTime).Store((uint64)now);
-            Ꮡb.of(profBuf.Ꮡoverflow).Store((((((overflow >> (int)(32))) + 1) << (int)(32))) + 1);
+            Ꮡb.of(profBuf.Ꮡoverflow).Store((((overflow >> 32) + 1) << 32) + 1);
             break;
         }
         // Otherwise we're racing to increment against reader
@@ -217,7 +221,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
     // worry about uint32 wraparound changing the effective position
     // within the buffers. We store 30 bits of count; limiting to 28
     // gives us some room for intermediate calculations.
-    if (bufwords >= (1 << (int)(28)) || tags >= (1 << (int)(28))) {
+    if (bufwords >= 1 << 28 || tags >= 1 << 28) {
         @throw(newProfBufBufferTooLargeˢ);
     }
     nint i = default!;
@@ -325,6 +329,11 @@ internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
     while (ᐧ) {
         var old = Ꮡb.of(profBuf.Ꮡw).load();
         var @new = (profIndex)(old | profWriteExtra);
+        // Clear profReaderSleeping. We're going to wake up the reader
+        // if it was sleeping and we don't want double wakeups in case
+        // we, for example, attempt to write into a full buffer multiple
+        // times before the reader wakes up.
+        @new &= unchecked((profIndex)~(profIndex)(profReaderSleeping));
         if (!Ꮡb.of(profBuf.Ꮡw).cas(old, @new)) {
             continue;
         }

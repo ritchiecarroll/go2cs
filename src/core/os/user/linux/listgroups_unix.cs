@@ -1,7 +1,7 @@
 // Copyright 2021 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build ((darwin || dragonfly || freebsd || (js && wasm) || wasip1 || (!android && linux) || netbsd || openbsd || solaris) && ((!cgo && !darwin) || osusergo)) || aix || illumos
+//go:build (((unix && !android) || (js && wasm) || wasip1) && ((!cgo && !darwin) || osusergo)) || aix
 namespace go.os;
 
 using bufio = bufio_package;
@@ -86,7 +86,7 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
         if (len(parts) != 3 || len(parts[0]) == 0) {
             continue;
         }
-        @string gid = ((@string)parts[2]);
+        @string gid = (@string)parts[2];
         // Make sure it's numeric and not the same as primary GID.
         (var numGid, errΔ1) = strconv.Atoi(gid);
         if (errΔ1 != default! || numGid == primaryGid) {

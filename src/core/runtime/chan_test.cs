@@ -114,12 +114,12 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 }
                 {
                     nint v = ᐸꟷ(c); if (v != 0) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)(0));
+                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)0);
                     }
                 }
                 {
                     var (v, ok) = ᐸꟷ(c, ꟷ); if (v != 0 || ok) {
-                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)(0), false);
+                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)0, false);
                     }
                 }
             }
@@ -220,7 +220,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 // Test len/cap.
                 var c = new channel<nint>(chanCap);
                 if (len(c) != 0 || cap(c) != chanCap) {
-                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)(0), chanCap, len(c), cap(c));
+                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)0, chanCap, len(c), cap(c));
                 }
                 for (nint i = 0; i < chanCap; i++) {
                     c.ᐸꟷ(i);
@@ -382,23 +382,23 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var c = new channel<nint>(chanCap);
-            for (nint p = 0; p < 2; p++) {
-                nint pΔ1 = p;
+            for (nint pᴛ1 = 0; pᴛ1 < 2; pᴛ1++) {
+                var p = pᴛ1;
                 var cʗ1 = c;
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint i = 0; i < 1000; i++) {
-                            if (pΔ1 == 0 || i % 2 == 0){
-                                var selᴛ11 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                            if (p == 0 || i % 2 == 0){
+                                var selᴛ11 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 var selᴛ12 = cʗ1;
                                 switch (select(selᴛ11, ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
                                 case 0: {
                                     break;
                                 }
                                 case 1 when selᴛ12.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -406,10 +406,10 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                                 }}
                             } else {
                                 var selᴛ13 = cʗ1;
-                                var selᴛ14 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                                var selᴛ14 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), selᴛ14)) {
                                 case 0 when selᴛ13.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -453,19 +453,19 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
         // but we are careful that this whole construct does not deadlock.
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(10);
-        for (nint k = 0; k < 4; k++) {
-            nint kΔ1 = k;
+        for (nint kᴛ1 = 0; kᴛ1 < 4; kᴛ1++) {
+            var k = kᴛ1;
             var cʗ1 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    cʗ1[kΔ1].ᐸꟷ(0);
+                    cʗ1[k].ᐸꟷ(0);
                 }
                 Ꮡwg.Done();
             });
             var cʗ2 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    ᐸꟷ(cʗ2[kΔ1]);
+                    ᐸꟷ(cʗ2[k]);
                 }
                 Ꮡwg.Done();
             });
@@ -938,7 +938,7 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
     var dʗ1 = d;
     void f(channel<bool> ready, bool dup) {
         // Temporarily grow the stack to 10K.
-        stackGrowthRecursive(((10 << (int)(10))) / (128 * 8));
+        stackGrowthRecursive((10 << 10) / (128 * 8));
 
         // We're ready to trigger GC and stack shrink.
         ready.ᐸꟷ(true);
@@ -1507,6 +1507,7 @@ public static void BenchmarkChanSem(ж<testing.B> Ꮡb) {
 
 public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var aᴷ = new stackAppend<channel<bool>>();
 
     const nint n = 1000;
     var c = new channel<bool>(0);
@@ -1515,7 +1516,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
     Ꮡwg.Add(n);
     for (nint j = 0; j < n; j++) {
         var d = new channel<bool>(0);
-        a = append(a, d);
+        a = append(aᴷ, a, d);
         var cʗ1 = c;
         var dʗ1 = d;
         goǃ(() => {

@@ -23,16 +23,16 @@ internal static UntypedInt bufferReset => /* math.MaxInt32 - maxStoreBlockSize*2
 
 internal static uint32 load32(slice<byte> b, int32 i) {
     b = b.slice(i, i + 4, len(b)); // Help the compiler eliminate bounds checks on the next line.
-    return (uint32)((uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16))) | ((uint32)b[3] << (int)(24)));
+    return (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16 | (uint32)b[3] << 24;
 }
 
 internal static uint64 load64(slice<byte> b, int32 i) {
     b = b.slice(i, i + 8, len(b)); // Help the compiler eliminate bounds checks on the next line.
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
+    return (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32 | (uint64)b[5] << 40 | (uint64)b[6] << 48 | (uint64)b[7] << 56;
 }
 
 internal static uint32 hash(uint32 u) {
-    return ((u * 0x1e35a7bd) >> (int)(tableShift));
+    return (u * 0x1e35a7bd) >> (int)(tableShift);
 }
 
 // These constants are defined by the Snappy implementation so that its
@@ -108,15 +108,15 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
         tableEntry candidate = default!;
         while (ᐧ) {
             s = nextS;
-            var bytesBetweenHashLookups = (skip >> (int)(5));
+            var bytesBetweenHashLookups = skip >> 5;
             nextS = s + bytesBetweenHashLookups;
             skip += bytesBetweenHashLookups;
             if (nextS > sLimit) {
                 goto emitRemainder;
             }
-            candidate = e.table[(uint32)(nextHash & (uint32)tableMask)];
+            candidate = e.table[(nextHash & (uint32)tableMask)];
             var now = load32(src, nextS);
-            e.table[(uint32)(nextHash & (uint32)tableMask)] = new tableEntry(offset: s + e.cur, val: cv);
+            e.table[(nextHash & (uint32)tableMask)] = new tableEntry(offset: s + e.cur, val: cv);
             nextHash = hash(now);
 
             var offset = s - (candidate.offset - e.cur);
@@ -144,6 +144,7 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
         while (ᐧ) {
             // Invariant: we have a 4-byte match at s, and no need to emit any
             // literal bytes prior to s.
+
             // Extend the 4-byte match as long as possible.
             //
             s += 4;
@@ -166,15 +167,15 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
             // three load32 calls.
             var x = load64(src, s - 1);
             var prevHash = hash((uint32)x);
-            e.table[(uint32)(prevHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s - 1, val: (uint32)x);
+            e.table[(prevHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s - 1, val: (uint32)x);
             x >>= (int)(8);
             var currHash = hash((uint32)x);
-            candidate = e.table[(uint32)(currHash & (uint32)tableMask)];
-            e.table[(uint32)(currHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s, val: (uint32)x);
+            candidate = e.table[(currHash & (uint32)tableMask)];
+            e.table[(currHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s, val: (uint32)x);
 
             var offset = s - (candidate.offset - e.cur);
             if (offset > maxMatchOffset || (uint32)x != candidate.val) {
-                cv = (uint32)((x >> (int)(8)));
+                cv = (uint32)(x >> 8);
                 nextHash = hash(cv);
                 s++;
                 break;
@@ -214,7 +215,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
         var aΔ1 = src.slice(s, s1);
         bΔ1 = bΔ1.slice(0, len(aΔ1));
         // Extend the match to be as long as possible.
-        foreach (var (i, _) in aΔ1) {
+        foreach (var i in range(aΔ1)) {
             if (aΔ1[i] != bΔ1[i]) {
                 return (int32)i;
             }
@@ -235,7 +236,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
         b = b.slice(0, len(a));
     }
     a = a.slice(0, len(b));
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         if (a[i] != b[i]) {
             return (int32)i;
         }
@@ -251,7 +252,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
     // Continue looking for more matches in the current block.
     a = src.slice(s + n, s1);
     b = src.slice(0, len(a));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (a[i] != b[i]) {
             return (int32)i + n;
         }
@@ -286,7 +287,7 @@ internal static void shiftOffsets(this ref deflateFast e) {
     }
 
     // Shift down everything in the table that isn't already too far away.
-    foreach (var (i, _) in e.table[..]) {
+    foreach (var i in range(e.table[..])) {
         var v = e.table[i].offset - e.cur + (int32)maxMatchOffset + 1;
         if (v < 0) {
             // We want to reset e.cur to maxMatchOffset + 1, so we need to shift

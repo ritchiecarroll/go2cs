@@ -14,9 +14,11 @@ namespace go.@internal;
 using fmt = fmt_package;
 using os = os_package;
 using filepath = path.filepath_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
+using go;
 using io = io_package;
+using iter = iter_package;
 using path;
 
 partial class buildcfg_package {
@@ -109,32 +111,52 @@ internal static @string gofips140() {
     if (isFIPSVersion(v)) {
         return v;
     }
-    Error = fmt.Errorf("invalid GOFIPS140: must be off, latest, inprocess, certified, or vX.Y.Z"u8);
+    Error = fmt.Errorf("invalid GOFIPS140: must be off, latest, inprocess, certified, or v1.Y.Z"u8);
     return DefaultGOFIPS140;
 }
 
 // isFIPSVersion reports whether v is a valid FIPS version,
-// of the form vX.Y.Z or vX.Y.Z-hash.
+// of the form v1.Y.Z or v1.Y.Z-hhhhhhhh or v1.Y.Z-rcN.
 internal static bool isFIPSVersion(@string v) {
-    if (!strings.HasPrefix(v, "v"u8)) {
+    (v, var ok) = strings.CutPrefix(v, "v1."u8);
+    if (!ok) {
         return false;
     }
-    (v, var ok) = skipNum(v[(int)(len("v"))..]);
-    if (!ok || !strings.HasPrefix(v, "."u8)) {
-        return false;
+    {
+        (v, ok) = cutNum(v); if (!ok) {
+            return false;
+        }
     }
-    (v, ok) = skipNum(v[(int)(len("."))..]);
-    if (!ok || !strings.HasPrefix(v, "."u8)) {
-        return false;
+    {
+        (v, ok) = strings.CutPrefix(v, "."u8); if (!ok) {
+            return false;
+        }
     }
-    (v, ok) = skipNum(v[(int)(len("."))..]);
-    var hasHash = strings.HasPrefix(v, "-"u8) && len(v) == len("-") + 8;
-    return ok && (v == ""u8 || hasHash);
+    {
+        (v, ok) = cutNum(v); if (!ok) {
+            return false;
+        }
+    }
+    if (v == ""u8) {
+        return true;
+    }
+    {
+        (v, ok) = strings.CutPrefix(v, "-rc"u8); if (ok) {
+            (v, ok) = cutNum(v);
+            return ok && v == ""u8;
+        }
+    }
+    {
+        (v, ok) = strings.CutPrefix(v, "-"u8); if (ok) {
+            return len(v) == 8;
+        }
+    }
+    return false;
 }
 
-// skipNum skips the leading text matching [0-9]+
+// cutNum skips the leading text matching [0-9]+
 // in s, returning the rest and whether such text was found.
-internal static (@string rest, bool ok) skipNum(@string s) {
+internal static (@string rest, bool ok) cutNum(@string s) {
     nint i = 0;
     while (i < len(s) && (rune)'0' <= s[i] && s[i] <= (rune)'9') {
         i++;
@@ -388,8 +410,11 @@ internal static nint goriscv64() {
         if (exprᴛ1 == "rva22u64"u8) {
             return 22;
         }
+        if (exprᴛ1 == "rva23u64"u8) {
+            return 23;
+        }
     }
-    Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64"u8);
+    Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
     nint i = strings.IndexFunc(v, (rune r) => r < (rune)'0' || r > (rune)'9');
     var (year, _) = strconv.Atoi(v.slice(0, i));
@@ -397,18 +422,13 @@ internal static nint goriscv64() {
 }
 
 public partial struct gowasmFeatures {
-    public bool SatConv;
-    public bool SignExt;
 }
 
+// Legacy features, now always enabled
+//SatConv bool
+//SignExt bool
 public static @string String(this gowasmFeatures f) {
     slice<@string> flags = default!;
-    if (f.SatConv) {
-        flags = append(flags, "satconv"u8);
-    }
-    if (f.SignExt) {
-        flags = append(flags, "signext"u8);
-    }
     return strings.Join(flags, ","u8);
 }
 
@@ -418,13 +438,13 @@ internal static readonly @string gowasmˢ = "GOWASM"u8;
 internal static gowasmFeatures /*f*/ gowasm() {
     gowasmFeatures f = default!;
 
-    foreach (var (_, opt) in strings.Split(envOr(gowasmˢ, ""u8), ","u8)) {
+    foreach (var opt in range<@string>(strings.SplitSeq(envOr(gowasmˢ, ""u8), ","u8).Invoke)) {
         var exprᴛ1 = opt;
         if (exprᴛ1 == "satconv"u8) {
-            f.SatConv = true;
+            // ignore, always enabled
         }
         else if (exprᴛ1 == "signext"u8) {
-            f.SignExt = true;
+            // ignore, always enabled
         }
         else if (exprᴛ1 == ""u8) {
             // ignore
@@ -450,6 +470,8 @@ internal static slice<@string> toolTags() {
 }
 
 internal static slice<@string> experimentTags() {
+    var listᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> list = default!;
     // For each experiment that has been enabled in the toolchain, define a
     // build tag with the same name but prefixed by "goexperiment." which can be
@@ -457,8 +479,9 @@ internal static slice<@string> experimentTags() {
     // changes for the experiment, like extra struct fields in the runtime,
     // without affecting the base non-experiment code at all.
     foreach (var (_, exp) in ᏑExperiment.Enabled()) {
-        list = append(list, "goexperiment."u8 + exp);
+        list = append(listᴷ, list, "goexperiment."u8 + exp);
     }
+    list = move2heap(listᴷ, list);
     return list;
 }
 
@@ -490,6 +513,9 @@ public static (@string name, @string value) GOGOARCH() {
     if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
         return (goppc64ˢ, fmt.Sprintf("power%d"u8, GOPPC64));
     }
+    if (exprᴛ1 == "riscv64"u8) {
+        return (goriscv64ˢ, fmt.Sprintf("rva%du64"u8, GORISCV64));
+    }
     if (exprᴛ1 == "wasm"u8) {
         return (gowasmˢ, GOWASM.String());
     }
@@ -497,6 +523,10 @@ public static (@string name, @string value) GOGOARCH() {
 }
 
 internal static slice<@string> gogoarchTags() {
+    var listᴷ = new stackAppend<@string>(moves: true);
+    var listᴷΔ1 = new stackAppend<@string>(moves: true);
+    var listᴷΔ2 = new stackAppend<@string>(moves: true);
+
     var exprᴛ1 = GOARCH;
     if (exprᴛ1 == "386"u8) {
         return new @string[]{GOARCH + "."u8 + GO386}.slice();
@@ -504,15 +534,17 @@ internal static slice<@string> gogoarchTags() {
     if (exprᴛ1 == "amd64"u8) {
         slice<@string> list = default!;
         for (nint i = 1; i <= GOAMD64; i++) {
-            list = append(list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
+            list = append(listᴷ, list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷ, list);
         return list;
     }
     if (exprᴛ1 == "arm"u8) {
         slice<@string> list = default!;
         for (nint i = 5; i <= GOARM.Version; i++) {
-            list = append(list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
+            list = append(listᴷΔ1, list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷΔ1, list);
         return list;
     }
     if (exprᴛ1 == "arm64"u8) {
@@ -525,7 +557,7 @@ internal static slice<@string> gogoarchTags() {
         // ARM64 v9.x also includes support of v8.x+5 (i.e. v9.1 includes v8.(1+5) = v8.6).
         if (major == 9) {
             for (nint i = 0; i <= minor + 5 && i <= 9; i++) {
-                list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)(8), i));
+                list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)8, i));
             }
         }
         return list;
@@ -539,8 +571,9 @@ internal static slice<@string> gogoarchTags() {
     if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
         slice<@string> list = default!;
         for (nint i = 8; i <= GOPPC64; i++) {
-            list = append(list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
+            list = append(listᴷΔ2, list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷΔ2, list);
         return list;
     }
     if (exprᴛ1 == "riscv64"u8) {
@@ -548,16 +581,17 @@ internal static slice<@string> gogoarchTags() {
         if (GORISCV64 >= 22) {
             list = append(list, GOARCH + "."u8 + "rva22u64"u8);
         }
+        if (GORISCV64 >= 23) {
+            list = append(list, GOARCH + "."u8 + "rva23u64"u8);
+        }
         return list;
     }
     if (exprᴛ1 == "wasm"u8) {
         slice<@string> list = default!;
-        if (GOWASM.SatConv) {
-            list = append(list, GOARCH + ".satconv"u8);
-        }
-        if (GOWASM.SignExt) {
-            list = append(list, GOARCH + ".signext"u8);
-        }
+        // SatConv is always enabled
+        list = append(list, GOARCH + ".satconv"u8);
+        // SignExt is always enabled
+        list = append(list, GOARCH + ".signext"u8);
         return list;
     }
     return default!;

@@ -27,10 +27,11 @@ partial class syscall_package
     // Go's runtime exits the process immediately with the given status. Environment.Exit is the
     // managed equivalent (it is what golib's unrecovered-panic handler already uses to report
     // exit code 2) and flushes the console writers on the way out, which Go's buffered stdout
-    // does as well.
+    // does as well. It goes through golib's MainExit.Exit, so the exit owns its status: like Go's
+    // exit, it never waits on a goroutine that is panicking.
     public static partial void Exit(nint code)
     {
-        Environment.Exit((int)code);
+        global::go.golib.MainExit.Exit((int)code);
     }
 
     // Go's runtime provides this (runtime.syscall_Getpagesize): it returns physPageSize, the page size
@@ -57,5 +58,16 @@ partial class syscall_package
     internal static partial void runtimeUnsetenv(@string k)
     {
         runtime_package.syscallRuntimeUnsetenv(k);
+    }
+
+    // Go 1.26 adds runtimeClearenv (syscall.go), which Clearenv calls before it empties env. The
+    // runtime pushes it from runtime_noclearenv.go, whose body unsets each key in turn, or on linux
+    // from runtime_clearenv.go, which calls the C library's clearenv when cgo is loaded and then
+    // reparses GODEBUG if env held it. There is no cgo here, so both reduce to the noclearenv body,
+    // and that is this body: runtimeUnsetenv per key reparses GODEBUG on the way, as each push does.
+    internal static partial void runtimeClearenv(map<@string, nint> env)
+    {
+        foreach (var entry in env)
+            runtimeUnsetenv(entry.Key);
     }
 }

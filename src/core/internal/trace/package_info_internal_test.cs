@@ -28,8 +28,9 @@ using static go.@internal.trace_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/batchcursor_test.go", "batchcursor_test.cs", "AA4egqaCgoKCgriCgoKCpoKCuIKCgoK4goKCgriCgoKCuIKCgqaCgoLKgqaCgoKCgpSCuIKmgoKCgoKUlIKmgpSCgpSCpoI=")]
-[assembly: go.GoPositionMap("internal/trace/event_test.go", "event_test.cs", "AAoSlKSSlJKUkpSSlJKUkpSS6KKCgIK2og==", "13-15:1;16-18:2;19-21:3;22-24:4;25-27:5;28-30:6;31-33:7;37-41:1")]
+[assembly: go.GoPositionMap("internal/trace/batchcursor_test.go", "batchcursor_test.cs", "AA4eoqaCgoKCgriCgoKCpoKCuIKCgoK4goKCgriCgoKCuIKCgqaCgoLKgqaCgoKCgpSCuIKmgoKCgoKUlIKmgpSCgpSCpoI=")]
+[assembly: go.GoPositionMap("internal/trace/event_test.go", "event_test.cs", "AHcggpKCgqaCgoKUgpKClJSagoKCgqbI2sIABhqywtyClIKCgoKUgtyiyoKUgoKUgpSClKaiABk+soKyyoKUgoKUgpSClMrSggDiAdoDssKCgoLugpSCgpSCgpSCgpSClIKUgsqiAAYcsrKC3IKUgoKCgpSClIKUgtyiACtmsrLKgpSCgoKUgpKCkoKClIKUgqaC3KIABx6yssqClIKCgpSClILcogAFGLKyyoKUgoKClILcogAEGLKyyoKUgoKClIKUgt7CAAQUssLugpSCgt6CuIKClIKCypSkkpSSlJKUkpSSlJKUkuiigoCCtqI=", "17-22:1;23-34:2;40-46:3;56-92:4;71-90:4.1;94-114:5;116-172:6;150-170:6.1;174-450:7;414-448:7.1;452-496:8;468-494:8.1;498-585:9;551-583:9.1;587-626:10;604-624:10.1;628-661:11;642-659:11.1;663-700:12;677-697:12.1;702-731:13;714-728:13.1;754-756:1;757-759:2;760-762:3;763-765:4;766-768:5;769-771:6;772-774:7;778-782:1", "", "182=Uint64Value/1/1/3;207=MakeResourceID/1/1/3;231=MakeResourceID/1/15/12,MakeResourceID/2/15/13,MakeResourceID/3/15/14,MakeResourceID/4/15/15,MakeResourceID/5/15/16,MakeResourceID/6/15/18,MakeResourceID/7/15/19,MakeResourceID/8/15/20,MakeResourceID/9/15/21,MakeResourceID/10/15/22,MakeResourceID/11/15/24,MakeResourceID/12/15/25,MakeResourceID/13/15/26,MakeResourceID/14/15/27,MakeResourceID/15/15/28;619=Unix/1/1/27")]
+[assembly: go.GoPositionMap("internal/trace/export_reader_test.go", "export_reader_test.cs", "AAsUkg==")]
 [assembly: go.GoPositionMap("internal/trace/export_test.go", "export_test.cs", "AAoO")]
 [assembly: go.GoPositionMap("internal/trace/mud_test.go", "mud_test.cs", "AA0apoKCgoKCgpSCgqaCgpSCuIKCgoKClILcpoKCgoKCgoKCgoKClIKClIKmgpSClIIABhSygpSCgg==")]
 [assembly: go.GoPositionMap("internal/trace/order_test.go", "order_test.cs", "ABESgoKCgpSCgIKSgraAgqSAgraCgoKC", "11-28:1")]
@@ -47,6 +48,7 @@ public static partial class trace_internal_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("stackType")] partial struct TestMakeEvent_stackType {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -60,10 +62,10 @@ public static partial class trace_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(go.@internal.diff_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(go.@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtrace() => builtin.initPackage(typeof(go.@internal.trace_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸraw() => builtin.initPackage(typeof(go.@internal.trace.raw_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtesttrace() => builtin.initPackage(typeof(go.@internal.trace.testtrace_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸversion() => builtin.initPackage(typeof(go.@internal.trace.version_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
@@ -71,6 +73,7 @@ public static partial class trace_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

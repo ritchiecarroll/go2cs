@@ -34,6 +34,8 @@ internal static readonly @string runtimeˢ = "runtime"u8;
 // Check that 64-bit fields on which we apply atomic operations
 // are aligned to 8 bytes. This can be a problem on 32-bit systems.
 public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt)); // go command needed to resolve std .a files for importer.Default().
 
     // Read the code making the tables above, to see which fields and
@@ -45,14 +47,14 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     }
     var fieldDesc = new map<nint, @string>{};
     var r = Δregexp.MustCompile(unsafeOffsetofWWˢ);
-    var matches = r.FindAllStringSubmatch(((@string)x), -1);
+    var matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ1) in matches) {
         @checked["field runtime." + vΔ1[1] + "." + vΔ1[2]] = true;
         fieldDesc[i] = vΔ1[1] + "." + vΔ1[2];
     }
     var varDesc = new map<nint, @string>{};
     r = Δregexp.MustCompile(unsafePointerWˢ);
-    matches = r.FindAllStringSubmatch(((@string)x), -1);
+    matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ2) in matches) {
         @checked["var " + vΔ2[1]] = true;
         varDesc[i] = vΔ2[1];
@@ -90,7 +92,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     slice<ж<ast.File>> files = default!;
     foreach (var (fname, f) in (~pkg).Files) {
         if (fileMap[fname]) {
-            files = append(files, f);
+            files = append(filesᴷ, files, f);
         }
     }
 

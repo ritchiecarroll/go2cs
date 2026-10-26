@@ -45,6 +45,12 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -55,7 +61,7 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgpKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyAooCigAACFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmuIKCgoKUlIKUpgAGfAA3AqakpAADFvKCgoKClIKUpqqigoCCyKik3IKmlIKUAAcQpoKClIKCgpSmgoKClLqSgg==", "", "", "82=New/1/1/2")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgIKkgIKkgIKkgIK2AAYSgqaAqMLcgriCuAAJFKa4uLim3AACJAAPAoKUgqaClICCgoKAgpKCgIKCgtiCAAkW0qaCgIKCkoKCgtqmpKQADh6AooCigKSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JSkpKaCyoKUgu6CkqaCgpSClMqUpIKSggAGEIKCgoKmgoIADiKApIKClKrCgoKCuIKClIKCpoKCgqaCloKCppIACRzWuIKCgsrcgoKCgIKClP6CggAQIoKCgoKCgpKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqbKgoK4goK6ppSClIKUpIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgpSCgpSCgqaUuIKUqLKmgoKCuJSUooKClJSUgoKClKamrsKCgoLugpSCggAGIgAUGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUqqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCtqamgoKUgpQ=", "", "", "510=maxLevel/1/2/5,typeForLevel/1/2/5,maxLevel/2/2/6,typeForLevel/2/2/6")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgIKkgIKkgIKkgIK2AAgSgqaAqMLcgriCuAAJFKa4uLim3AACJAAPAoKUgqaClICCgoKAgpKCgIKCgtiCAAkW0qaCgIKCkoKCgtqmpKQADh6AooCigKSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JSkpKaCyoKUgu6CkqaCgpSClMqUpIKSggAHEIKCgoKmgoIADiKAqMKCgoK4goKUgoKmgoKCpoKWgoKmkgAJHNa4goKCytyCgoKAgoKU/oKCABAigoKCgoKCkoLcopSCpoKClIKCgqaCpsqCgsqilIKCgoKCpoLeppSipoKW2IKUgoKmgpSCgriClMqmpsqCgriCgrqmlIKUgpSkgpS4lKYABRCigoK+0oKCgoKCprSqwoKCgoKmAAUU4oKClIKClIKCppS4gpSowqaCgoK4lJSigoKUlJSCgoKUpqa+woKCgu6ClIKCAAYiABUYlMqClKaCgpTugoKCgpSmpgACJAAPApSqopSCgoKUgpSUrLKUgtyCgoKClIK4goKUgoKCpoKmyqqilJSokpSUqJKClKaCgpSCgqamgoaUpoKCgoKUlIKUpoKClIK2pqaCgpSClA==", "", "", "506=typeForLevel/1/2/5,typeForLevel/2/2/6")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqJCooKaSpgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AAsYvrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKU3ACwDeIa")]
 // </GoSourcePositionMaps>

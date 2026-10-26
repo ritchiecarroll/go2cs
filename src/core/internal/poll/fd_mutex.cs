@@ -53,11 +53,11 @@ internal static readonly @string overflowMsg = "too many concurrent operations o
 internal static bool incref(this ж<fdMutex> Ꮡmu) {
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
-        if ((uint64)(old & (uint64)mutexClosed) != 0) {
+        if ((old & (uint64)mutexClosed) != 0) {
             return false;
         }
         var @new = old + (uint64)mutexRef;
-        if ((uint64)(@new & (uint64)mutexRefMask) == 0) {
+        if ((@new & (uint64)mutexRefMask) == 0) {
             throw panic(overflowMsg);
         }
         if (atomic.CompareAndSwapUint64(Ꮡmu.of(fdMutex.Ꮡstate), old, @new)) {
@@ -73,7 +73,7 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 internal static bool decref(this ж<fdMutex> Ꮡmu) {
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
-        if ((uint64)(old & (uint64)mutexRefMask) == 0) {
+        if ((old & (uint64)mutexRefMask) == 0) {
             throw panic("inconsistent poll.fdMutex");
         }
         var @new = old - (uint64)mutexRef;
@@ -155,6 +155,34 @@ internal static void writeUnlock(this ж<FD> Ꮡfd) {
     if (fd.fdmu.rwunlock(false)) {
         Ꮡfd.destroy();
     }
+}
+
+// readWriteLock adds a reference to fd and locks fd for reading and writing.
+// It returns an error when fd cannot be used for reading and writing.
+internal static error readWriteLock(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
+        return errClosing(fd.isFile);
+    }
+    return default!;
+}
+
+// readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
+// It also closes fd when the state of fd is set to closed and there
+// is no remaining reference.
+internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    fd.fdmu.rwunlock(true);
+    if (fd.fdmu.rwunlock(false)) {
+        Ꮡfd.destroy();
+    }
+}
+
+// closing returns true if fd is closing.
+internal static bool closing(this ж<FD> Ꮡfd) {
+    return (atomic.LoadUint64(Ꮡfd.of(FD.Ꮡfdmu).of(fdMutex.Ꮡstate)) & (uint64)mutexClosed) != 0;
 }
 
 } // end poll_package

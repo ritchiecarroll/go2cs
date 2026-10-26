@@ -35,11 +35,11 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
         foreach (var (j, s) in (~dΔ1).Specs) {
             if (j > i && lineAt(Ꮡfset, s.Pos()) > 1 + lineAt(Ꮡfset, (~dΔ1).Specs[j - 1].End())) {
                 // j begins a new run. End this one.
-                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
+                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
                 i = j;
             }
         }
-        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i)));
+        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i)));
         dΔ1.Value.Specs = specs;
 
         // Deduping can leave a blank line before the rparen; clean that up.
@@ -113,7 +113,7 @@ partial struct cgPos {
     internal ж<CommentGroup> cg;
 }
 
-internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, slice<Spec> specs) {
+internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref GenDecl d, slice<Spec> specs) {
     // Can't short-circuit here even if specs are already sorted,
     // since they might yet need deduplication.
     // A lone import, however, may be safely ignored.
@@ -212,7 +212,13 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
             deduped = append(deduped, s);
         } else {
             tokenꓸPos p = s.Pos();
-            Ꮡfset.File(p).MergeLine(lineAt(Ꮡfset, p));
+            // This function is exited early when len(specs) <= 1,
+            // so d.Rparen must be populated (d.Rparen.IsValid() == true).
+            {
+                nint l = lineAt(Ꮡfset, p); if (l != lineAt(Ꮡfset, d.Rparen)) {
+                    Ꮡfset.File(p).MergeLine(l);
+                }
+            }
         }
     }
     specs = deduped;
@@ -223,7 +229,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
         if ((~sΔ1).Name != nil) {
             sΔ1.Value.Name.Value.NamePos = pos[i].Start;
         }
-        sΔ1.Value.Path.Value.ValuePos = pos[i].Start;
+        updateBasicLitPos((~sΔ1).Path, pos[i].Start);
         sΔ1.Value.EndPos = pos[i].End;
         foreach (var (_, g) in importComments[sΔ1]) {
             foreach (var (_, c) in (~g.cg).List) {
@@ -243,6 +249,19 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
     slices.SortFunc(comments, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 
     return specs;
+}
+
+// updateBasicLitPos updates lit.Pos,
+// ensuring that lit.End is displaced by the same amount.
+// (See https://go.dev/issue/76395.)
+internal static void updateBasicLitPos(ж<BasicLit> Ꮡlit, tokenꓸPos pos) {
+    ref var lit = ref Ꮡlit.DerefOrNull();
+
+    tokenꓸPos len = lit.End() - lit.Pos();
+    lit.ValuePos = pos;
+    if (lit.ValueEnd.IsValid()) {
+        lit.ValueEnd = pos + len;
+    }
 }
 
 } // end ast_package

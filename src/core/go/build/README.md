@@ -2,12 +2,22 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-57_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/go.build.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/build@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/build) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/go/build)
+[![Tests](https://img.shields.io/badge/Tests-57_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/go.build.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/go/build@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/go/build) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/go/build)
 
 From C#, call this package through the static class go.go.build_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package build gathers information about Go packages.
+
+### Build Constraints
+
+A build constraint, also known as a build tag, is a condition under which a file should be included in the package. Build constraints are given by a line comment that begins
+
+	//go:build
+
+Build constraints may also be part of a file's name (for example, source\_windows.go will only be included if the target operating system is windows).
+
+See 'go help buildconstraint' ([https://pkg.go.dev/cmd/go#hdr-Build\_constraints](https://pkg.go.dev/cmd/go#hdr-Build_constraints)) for details.
 
 ### Go Path
 
@@ -40,16 +50,6 @@ Here's an example directory layout:
 	        linux_amd64/
 	            foo/
 	                bar.a          (installed package object)
-
-### Build Constraints
-
-A build constraint, also known as a build tag, is a condition under which a file should be included in the package. Build constraints are given by a line comment that begins
-
-	//go:build
-
-Build constraints may also be part of a file's name (for example, source\_windows.go will only be included if the target operating system is windows).
-
-See 'go help buildconstraint' ([https://golang.org/cmd/go/#hdr-Build\_constraints](https://golang.org/cmd/go/#hdr-Build_constraints)) for details.
 
 ### Binary-Only Packages
 

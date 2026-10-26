@@ -62,7 +62,7 @@ internal static @string htmlEscaper(params ꓸꓸꓸany argsʗp) {
 
 // htmlReplacementTable contains the runes that need to be escaped
 // inside a quoted attribute value or in a text node.
-internal static slice<@string> htmlReplacementTable = new slice<@string>(63){
+[GoLazy] partial class lazyᴛhtmlReplacementTable { internal static slice<@string> htmlReplacementTable = new slice<@string>(63){
     // https://www.w3.org/TR/html5/syntax.html#attribute-value-(unquoted)-state
     // U+0000 NULL Parse error. Append a U+FFFD REPLACEMENT
     // CHARACTER character to the current attribute's value.
@@ -76,18 +76,18 @@ internal static slice<@string> htmlReplacementTable = new slice<@string>(63){
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'>'] = "&gt;"u8
-};
+}; }
 
 // htmlNormReplacementTable is like htmlReplacementTable but without '&' to
 // avoid over-encoding existing entities.
-internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63){
+[GoLazy] partial class lazyᴛhtmlNormReplacementTable { internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63){
     [0] = "\uFFFD"u8,
     [(rune)'"'] = "&#34;"u8,
     [(rune)'\''] = "&#39;"u8,
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'>'] = "&gt;"u8
-};
+}; }
 
 // htmlNospaceReplacementTable contains the runes that need to be escaped
 // inside an unquoted attribute value.
@@ -106,7 +106,7 @@ internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63)
 // }
 // document.write(a.join(", "));
 // })()</script>
-internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(97){
+[GoLazy] partial class lazyᴛhtmlNospaceReplacementTable { internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
     [(rune)'\t'] = "&#9;"u8,
     [(rune)'\n'] = "&#10;"u8,
@@ -125,11 +125,11 @@ internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(
     // before attribute value states.
     // Treated as a quoting character by IE.
     [(rune)'`'] = "&#96;"u8
-};
+}; }
 
 // htmlNospaceNormReplacementTable is like htmlNospaceReplacementTable but
 // without '&' to avoid over-encoding existing entities.
-internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@string>(97){
+[GoLazy] partial class lazyᴛhtmlNospaceNormReplacementTable { internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
     [(rune)'\t'] = "&#9;"u8,
     [(rune)'\n'] = "&#10;"u8,
@@ -147,7 +147,7 @@ internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@stri
     // before attribute value states.
     // Treated as a quoting character by IE.
     [(rune)'`'] = "&#96;"u8
-};
+}; }
 
 // htmlReplacer returns s with runes replaced according to replacementTable
 // and when badRunes is true, certain bad runes are allowed through unescaped.

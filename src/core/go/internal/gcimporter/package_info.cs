@@ -15,7 +15,9 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+global using pkgbitsꓸAbsElemIdx = uint;
 global using pkgbitsꓸCode = go.@internal.pkgbits_package.ΔCode;
+global using pkgbitsꓸRelElemIdx = go.@internal.pkgbits_package.Index;
 global using pkgbitsꓸVersion = go.@internal.pkgbits_package.ΔVersion;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
@@ -56,8 +58,13 @@ using static go.go.@internal.gcimporter_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<readerDict, ж<readerDict>>]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,8 +75,8 @@ using static go.go.@internal.gcimporter_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoCCpIKClJSCgoKClLiAgsiSgpSClKaUpIKCgoKUlIKE", "62-67:1")]
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIN6CgoKmgpSCuKaCgoKCpoIAFiySgoKUgoKClA==", "64-69:1")]
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAAwelIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooCCtoKC7pSmgoKmtJSCgqqygqbGgIK2goKmooKUpKSmgIK2lIKUqrKmgoKClKaygoKCgpSmgIK2goKClIKCpoCCtoKmooCspoKCgoKUpqaCpIKkpKSkpKSkAAJJggAEUIKCgoKCgoKClIKCgpSmpoKCgpSmooKClIKCgoKmgqaCggAJFJSmgpSCgpSmgpSCgqamgpSCgpSqspSCpoKUgoKmpqSCgoKClIKUgqaCgriAgraClIKUkqaagoKClIKmgoKCpoKCgqaUgoKUlMqAgoKCgpSCpoKCpoKCtpSCuIKCAAKDAQADjAGmpJSCgoCCtoKCpoKCgoKCuLimou6CAAcQgoKClIKmgoIADh6CooK4poKCgpSClIKmgKKAooCkgoKuwoKU2LaUgoKClII=", "100-102:1;481-483:1;635-639:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;132=NewDecoder/1/1/1;139=TempDecoder/1/1/1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIO6CgoKmgpSCuKaCgoKCpoIAFiySgoKUgoKClA==", "64-69:1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAA8elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooCCtoKC7pSmgoKmtJSCgqqygqbGgIK2goKmooKUpKSmgIK2lIKUqrKmgoKClKaygoKCgpSmgIK2goKClIKCpoCCtoKmooCspoKCgoKUpqaCpIKkpKSkpKSkAAJJggAEUIKCgoKCgoKClIKCgpSmpoKCgpSmooKClIKCgoKmgqaCggAJFJSmgpSCgpSmgpSCgqamgpSCgpSCgqqylIKmgpSCgqampIKCgoKUgpSCpoKCuICCtoKUgpSSppqCgoKUgqaCgoKmgoKCppSCgpSUyoCCgoKClIKCpoKCpoKCtpSCuIKCAAKFAQADjgGmpJSCgoCCtoKCpoKCgoKCuLimou6CAAcQgoKClIKmgoIADh6CooK4poKCgpSClIKmgKKAooCkgoKuwoKU2LaUgoKClII=", "100-102:1;483-485:1;638-642:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;135=NewDecoder/1/1/1;142=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

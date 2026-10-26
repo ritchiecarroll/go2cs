@@ -46,20 +46,21 @@ partial struct SessionState {
 //           case 0: Empty;
 //           case 1: opaque alpn<1..2^8-1>;
 //       };
-//       select (SessionState.type) {
-//           case server: Empty;
-//           case client: struct {
-//               select (SessionState.version) {
-//                   case VersionTLS10..VersionTLS12: Empty;
-//                   case VersionTLS13: struct {
-//                       uint64 use_by;
-//                       uint32 age_add;
-//                   };
+//       select (SessionState.version) {
+//           case VersionTLS10..VersionTLS12: uint16 curve_id;
+//           case VersionTLS13: select (SessionState.type) {
+//               case server: Empty;
+//               case client: struct {
+//                   uint64 use_by;
+//                   uint32 age_add;
 //               };
 //           };
 //       };
 //   } SessionState;
 //
+// The format can be extended backwards-compatibly by adding new fields at
+// the end. Otherwise, a new SessionStateType must be used, as different Go
+// versions may share the same session ticket encryption key.
 
     // Extra is ignored by crypto/tls, but is encoded by [SessionState.Bytes]
     // and parsed by [ParseSessionState].
@@ -80,14 +81,13 @@ partial struct SessionState {
     internal uint16 version;
     internal bool isClient;
     internal uint16 cipherSuite;
-    // createdAt is the generation time of the secret on the sever (which for
+    // createdAt is the generation time of the secret on the server (which for
     // TLS 1.0–1.2 might be earlier than the current session) and the time at
     // which the ticket was received on the client.
     internal uint64 createdAt; // seconds since UNIX epoch
     internal slice<byte> secret; // master secret for TLS 1.2, or the PSK for TLS 1.3
     internal bool extMasterSecret;
     internal slice<ж<Δx509.Certificate>> peerCertificates;
-    internal slice<ж<activeCert>> activeCertHandles;
     internal slice<byte> ocspResponse;
     internal slice<slice<byte>> scts;
     internal slice<slice<ж<Δx509.Certificate>>> verifiedChains;
@@ -96,6 +96,8 @@ partial struct SessionState {
     internal uint64 useBy; // seconds since UNIX epoch
     internal uint32 ageAdd;
     internal slice<byte> ticket;
+    // TLS 1.0–1.2 only fields.
+    internal CurveID curveID;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -168,11 +170,13 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
             bΔ7.AddBytes(slice<byte>(Ꮡs.Value.alpnProtocol));
         });
     }
-    if (s.isClient) {
-        if (s.version >= VersionTLS13) {
+    if (s.version >= VersionTLS13){
+        if (s.isClient) {
             addUint64(Ꮡb, s.useBy);
             b.AddUint32(s.ageAdd);
         }
+    } else {
+        b.AddUint16((uint16)s.curveID);
     }
     return b.Bytes();
 }
@@ -187,19 +191,20 @@ internal static slice<slice<byte>> certificatesToBytesSlice(slice<ж<Δx509.Cert
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInvalidSessionˢ = "tls: invalid session encoding"u8;
+internal static readonly @string tlsUnknownSessionˢ = "tls: unknown session encoding"u8;
 internal static readonly @string tlsNoServerCertificatesˢ = "tls: no server certificates in client session"u8;
 
 // ParseSessionState parses a [SessionState] encoded by [SessionState.Bytes].
 public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     var ss = Ꮡ(new SessionState(nil));
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
     ref var typ = ref heap(new uint8(), out var Ꮡtyp);
     ref var extMasterSecret = ref heap(new uint8(), out var ᏑextMasterSecret);
     ref var earlyData = ref heap(new uint8(), out var ᏑearlyData);
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
     ref var extra = ref heap<cryptobyte.String>(out var Ꮡextra);
-    if (!s.ReadUint16(ss.of(SessionState.Ꮡversion)) || !s.ReadUint8(Ꮡtyp) || (typ != 1 && typ != 2) || !s.ReadUint16(ss.of(SessionState.ᏑcipherSuite)) || !readUint64(Ꮡs, ref (ss.of(SessionState.ᏑcreatedAt)).DerefOrNull()) || !readUint8LengthPrefixed(Ꮡs, ss.of(SessionState.Ꮡsecret)) || !s.ReadUint24LengthPrefixed(Ꮡextra) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len((~ss).secret) == 0 || !unmarshalCertificate(Ꮡs, Ꮡcert)) {
+    if (!s.ReadUint16(ss.of(SessionState.Ꮡversion)) || !s.ReadUint8(Ꮡtyp) || !s.ReadUint16(ss.of(SessionState.ᏑcipherSuite)) || !readUint64(Ꮡs, ref (ss.of(SessionState.ᏑcreatedAt)).DerefOrNull()) || !readUint8LengthPrefixed(Ꮡs, ss.of(SessionState.Ꮡsecret)) || !s.ReadUint24LengthPrefixed(Ꮡextra) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len((~ss).secret) == 0 || !unmarshalCertificate(Ꮡs, Ꮡcert)) {
         return (default!, errors.New(tlsInvalidSessionˢ));
     }
     while (!extra.Empty()) {
@@ -209,6 +214,18 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         }
         ss.Value.Extra = append((~ss).Extra, e);
     }
+    switch (typ) {
+    case 1: {
+        ss.Value.isClient = false;
+        break;
+    }
+    case 2: {
+        ss.Value.isClient = true;
+        break;
+    }
+    default: {
+        return (default!, errors.New(tlsUnknownSessionˢ));
+    }}
     switch (extMasterSecret) {
     case 0: {
         ss.Value.extMasterSecret = false;
@@ -238,8 +255,10 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         if (err != default!) {
             return (default!, err);
         }
-        ss.Value.activeCertHandles = append((~ss).activeCertHandles, c);
-        ss.Value.peerCertificates = append((~ss).peerCertificates, (~c).cert);
+        ss.Value.peerCertificates = append((~ss).peerCertificates, c);
+    }
+    if ((~ss).isClient && len((~ss).peerCertificates) == 0) {
+        return (default!, errors.New(tlsNoServerCertificatesˢ));
     }
     ss.Value.ocspResponse = cert.OCSPStaple;
     ss.Value.scts = cert.SignedCertificateTimestamps;
@@ -266,8 +285,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
             if (err != default!) {
                 return (default!, err);
             }
-            ss.Value.activeCertHandles = append((~ss).activeCertHandles, c);
-            chain = append(chain, (~c).cert);
+            chain = append(chain, c);
         }
         ss.Value.verifiedChains = append((~ss).verifiedChains, chain);
     }
@@ -276,28 +294,18 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         if (!readUint8LengthPrefixed(Ꮡs, Ꮡalpn)) {
             return (default!, errors.New(tlsInvalidSessionˢ));
         }
-        ss.Value.alpnProtocol = ((@string)alpn);
+        ss.Value.alpnProtocol = (@string)alpn;
     }
-    {
-        var isClient = typ == 2; if (!isClient) {
-            if (!s.Empty()) {
+    if ((~ss).version >= VersionTLS13){
+        if ((~ss).isClient) {
+            if (!s.ReadUint64(ss.of(SessionState.ᏑuseBy)) || !s.ReadUint32(ss.of(SessionState.ᏑageAdd))) {
                 return (default!, errors.New(tlsInvalidSessionˢ));
             }
-            return (ss, default!);
         }
-    }
-    ss.Value.isClient = true;
-    if (len((~ss).peerCertificates) == 0) {
-        return (default!, errors.New(tlsNoServerCertificatesˢ));
-    }
-    if ((~ss).version < VersionTLS13) {
-        if (!s.Empty()) {
+    } else {
+        if (!s.ReadUint16(ss.of(SessionState.ᏑcurveID).Reinterpret<CurveID, uint16>())) {
             return (default!, errors.New(tlsInvalidSessionˢ));
         }
-        return (ss, default!);
-    }
-    if (!s.ReadUint64(ss.of(SessionState.ᏑuseBy)) || !s.ReadUint32(ss.of(SessionState.ᏑageAdd)) || !s.Empty()) {
-        return (default!, errors.New(tlsInvalidSessionˢ));
     }
     return (ss, default!);
 }
@@ -311,12 +319,12 @@ internal static ж<SessionState> sessionState(this ref Conn c) {
         createdAt: (uint64)c.config.time().Unix(),
         alpnProtocol: c.clientProtocol,
         peerCertificates: c.peerCertificates,
-        activeCertHandles: c.activeCertHandles,
         ocspResponse: c.ocspResponse,
         scts: c.scts,
         isClient: c.isClient,
         extMasterSecret: c.extMasterSecret,
-        verifiedChains: c.verifiedChains
+        verifiedChains: c.verifiedChains,
+        curveID: c.curveID
     ));
 }
 

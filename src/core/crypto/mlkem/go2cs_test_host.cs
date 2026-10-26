@@ -12,11 +12,14 @@ internal static class Go2CsTestHost
             "example_test.go",
             "mlkem.go",
             "mlkem_test.go",
+        }, new string[]
+        {
+            "mlkemtest",
         });
-        registry.Add("TestAccumulated", mlkem_internal_test_package.TestAccumulated, "mlkem_test.go", 164);
-        registry.Add("TestBadLengths", mlkem_internal_test_package.TestBadLengths, "mlkem_test.go", 98);
-        registry.Add("TestConstantSizes", mlkem_internal_test_package.TestConstantSizes, "mlkem_test.go", 309);
-        registry.Add("TestRoundTrip", mlkem_internal_test_package.TestRoundTrip, "mlkem_test.go", 28);
+        registry.Add("TestAccumulated", mlkem_test_package.TestAccumulated, "mlkem_test.go", 166);
+        registry.Add("TestBadLengths", mlkem_test_package.TestBadLengths, "mlkem_test.go", 100);
+        registry.Add("TestConstantSizes", mlkem_test_package.TestConstantSizes, "mlkem_test.go", 312);
+        registry.Add("TestRoundTrip", mlkem_test_package.TestRoundTrip, "mlkem_test.go", 30);
         return TestHost.Run(registry, args);
     }
 }

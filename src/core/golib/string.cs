@@ -40,7 +40,8 @@ public readonly struct @string :
     ICloneable, 
     IComparisonOperators<@string, @string, bool>,
     IAdditionOperators<@string, @string, @string>,
-    IByteSeq<@string, byte>
+    IByteSeq<@string, byte>,
+    IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the text, and the bytes a Go string IS on expand.
     internal sealed class DebugView(@string value)
@@ -335,6 +336,13 @@ public readonly struct @string :
         return new slice<byte>(m_value ?? [], m_offset, m_offset + m_length);
     }
 
+    // Whether two strings are the same (backing, offset, length) window: Go's two header words compared as words, which
+    // the string header box (StringHeaderBox) uses to notice that the variable under a held header has moved.
+    internal bool SameWindowAs(in @string other)
+    {
+        return ReferenceEquals(m_value, other.m_value) && m_offset == other.m_offset && m_length == other.m_length;
+    }
+
     // No bound is a sentinel (S-c R1-A): the callers pass every bound explicitly.
     internal ReadOnlySpan<byte> SliceBounds(nint low, nint high, nint max)
     {
@@ -517,10 +525,12 @@ public readonly struct @string :
 
     #region [ Operators ]
 
-    // Enable implicit conversions between string and @string struct
+    // Enable implicit conversions between string and @string struct. A C# string LITERAL converts
+    // once per process and is shared from then on (Go's RODATA cost model; see StringLiteralCache);
+    // any other string converts exactly as `new @string(value)` does.
     public static implicit operator @string(string value)
     {
-        return new @string(value);
+        return StringLiteralCache.Get(value);
     }
 
     public static implicit operator string(@string value)
@@ -680,6 +690,9 @@ public readonly struct @string :
     {
         return Default;
     }
+
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is @string value && this == value;
 
     public static bool operator ==(@string a, @string b)
     {

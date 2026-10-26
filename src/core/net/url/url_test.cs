@@ -11,6 +11,7 @@ using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
 using reflect = reflect_package;
+using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using encoding = encoding_package;
@@ -509,26 +510,6 @@ internal static slice<URLTest> urltests = new URLTest[]{
         ""u8
     ),
     new(
-        // Malformed IPv6 but still accepted.
-        "http://2b01:e34:ef40:7730:8e70:5aff:fefe:edac:8080/foo"u8,
-        Ꮡ(new URL(
-            Scheme: "http"u8,
-            Host: "2b01:e34:ef40:7730:8e70:5aff:fefe:edac:8080"u8,
-            Path: "/foo"u8
-        )),
-        ""u8
-    ),
-    new(
-        // Malformed IPv6 but still accepted.
-        "http://2b01:e34:ef40:7730:8e70:5aff:fefe:edac:/foo"u8,
-        Ꮡ(new URL(
-            Scheme: "http"u8,
-            Host: "2b01:e34:ef40:7730:8e70:5aff:fefe:edac:"u8,
-            Path: "/foo"u8
-        )),
-        ""u8
-    ),
-    new(
         "http://[2b01:e34:ef40:7730:8e70:5aff:fefe:edac]:8080/foo"u8,
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -626,6 +607,47 @@ internal static slice<URLTest> urltests = new URLTest[]{
             RawQuery: "subject=hi"u8
         )),
         "mailto:?subject=hi"u8
+    ),
+    // PostgreSQL URLs can include a comma-separated list of host:post hosts.
+    // https://go.dev/issue/75859
+    new(
+        "postgres://host1:1,host2:2,host3:3"u8,
+        Ꮡ(new URL(
+            Scheme: "postgres"u8,
+            Host: "host1:1,host2:2,host3:3"u8,
+            Path: ""u8
+        )),
+        "postgres://host1:1,host2:2,host3:3"u8
+    ),
+    new(
+        "postgresql://host1:1,host2:2,host3:3"u8,
+        Ꮡ(new URL(
+            Scheme: "postgresql"u8,
+            Host: "host1:1,host2:2,host3:3"u8,
+            Path: ""u8
+        )),
+        "postgresql://host1:1,host2:2,host3:3"u8
+    ),
+    // Mongodb URLs can include a comma-separated list of host:post hosts.
+    new(
+        "mongodb://user:password@host1:1,host2:2,host3:3"u8,
+        Ꮡ(new URL(
+            Scheme: "mongodb"u8,
+            User: UserPassword("user"u8, "password"u8),
+            Host: "host1:1,host2:2,host3:3"u8,
+            Path: ""u8
+        )),
+        ""u8
+    ),
+    new(
+        "mongodb+srv://user:password@host1:1,host2:2,host3:3"u8,
+        Ꮡ(new URL(
+            Scheme: "mongodb+srv"u8,
+            User: UserPassword("user"u8, "password"u8),
+            Host: "host1:1,host2:2,host3:3"u8,
+            Path: ""u8
+        )),
+        ""u8
     )
 }.slice();
 
@@ -712,6 +734,7 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = new parse
     new("http://[fe80::1%25en0]:8080/"u8, true), // with alphanum zone identifier
     new("http://[fe80::1%25%65%6e%301-._~]/"u8, true), // with percent-encoded+unreserved zone identifier
     new("http://[fe80::1%25%65%6e%301-._~]:8080/"u8, true), // with percent-encoded+unreserved zone identifier
+
     new("foo.html"u8, false),
     new("../dir/"u8, false),
     new(" http://foo.com"u8, false),
@@ -736,6 +759,7 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = new parse
     new("https://[fe80::abc:def%254]"u8, true), // link-local address with zone ID (interface index)
     new("https://[2001:db8::1]/path"u8, true), // compressed IPv6 address with path
     new("https://[fe80::1%25eth0]/path?query=1"u8, true), // link-local with zone, path, and query
+
     new("https://[::ffff:192.0.2.1]"u8, true),
     new("https://[:1] "u8, false),
     new("https://[1:2:3:4:5:6:7:8:9]"u8, false),
@@ -744,7 +768,10 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = new parse
     new("https://[ffff::127.0.0.4000]"u8, false),
     new("https://[0:0::test.com]:80"u8, false),
     new("https://[2001:db8::test.com]"u8, false),
-    new("https://[test.com]"u8, false)
+    new("https://[test.com]"u8, false),
+    new("https://1:2:3:4:5:6:7:8"u8, false),
+    new("https://1:2:3:4:5:6:7:8:80"u8, false),
+    new("https://example.com:80:"u8, false)
 }.slice();
 
 public static void TestParseRequestURI(ж<testing.T> Ꮡt) {
@@ -901,13 +928,12 @@ public static void TestURLRedacted(ж<testing.T> Ꮡt) {
         ref var tt = ref heap(new TestURLRedacted_cases(), out var Ꮡtt);
         tt = vᴛ1;
 
-        var tΔ1 = Ꮡt;
         var ttʗ1 = tt;
-        tΔ1.Run(tt.name, (ж<testing.T> tΔ2) => {
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             {
                 @string g = ttʗ1.url.Redacted();
                 @string w = ttʗ1.want; if (g != w) {
-                    tΔ2.Fatalf("got: %q\nwant: %q"u8, g, w);
+                    tΔ1.Fatalf("got: %q\nwant: %q"u8, g, w);
                 }
             }
         });
@@ -954,27 +980,27 @@ internal static slice<EscapeTest> unescapeTests = new EscapeTest[]{
     new(
         "%"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%"u8
     ),
     new(
         "%a"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%a"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%a"u8
     ),
     new(
         "%1"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%1"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%1"u8
     ),
     new(
         "123%45%6"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%6"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%6"u8
     ),
     new(
         "%zzzzz"u8, // invalid hex digits
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%zz"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%zz"u8
     ),
     new(
         "a+b"u8,
@@ -1141,7 +1167,18 @@ internal static slice<EncodeQueryTest> encodeQueryTests = new EncodeQueryTest[]{
         ["a"u8] = new @string[]{"a1"u8, "a2"u8, "a3"u8}.slice(),
         ["b"u8] = new @string[]{"b1"u8, "b2"u8, "b3"u8}.slice(),
         ["c"u8] = new @string[]{"c1"u8, "c2"u8, "c3"u8}.slice()
-    }), "a=a1&a=a2&a=a3&b=b1&b=b2&b=b3&c=c1&c=c2&c=c3"u8)
+    }), "a=a1&a=a2&a=a3&b=b1&b=b2&b=b3&c=c1&c=c2&c=c3"u8),
+    new(new Values(new map<@string, slice<@string>>{
+        ["a"u8] = new @string[]{"a"u8}.slice(),
+        ["b"u8] = new @string[]{"b"u8}.slice(),
+        ["c"u8] = new @string[]{"c"u8}.slice(),
+        ["d"u8] = new @string[]{"d"u8}.slice(),
+        ["e"u8] = new @string[]{"e"u8}.slice(),
+        ["f"u8] = new @string[]{"f"u8}.slice(),
+        ["g"u8] = new @string[]{"g"u8}.slice(),
+        ["h"u8] = new @string[]{"h"u8}.slice(),
+        ["i"u8] = new @string[]{"i"u8}.slice()
+    }), "a=a&b=b&c=c&d=d&e=e&f=f&g=g&h=h&i=i"u8)
 }.slice();
 
 public static void TestEncodeQuery(ж<testing.T> Ꮡt) {
@@ -1151,6 +1188,21 @@ public static void TestEncodeQuery(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf(@"EncodeQuery(%+v) = %q, want %q"u8, tt.m, q, tt.expected);
             }
         }
+    }
+}
+
+public static void BenchmarkEncodeQuery(ж<testing.B> Ꮡb) {
+    foreach (var (_, vᴛ1) in encodeQueryTests) {
+        ref var tt = ref heap(new EncodeQueryTest(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡb.Run(tt.expected, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            while (bΔ1.Loop()) {
+                ttʗ1.m.Encode();
+            }
+        });
     }
 }
 
@@ -1182,15 +1234,35 @@ public static void TestResolvePath(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string simpleˢ = "Simple"u8;
 internal static readonly @string aBCˢ = "a/b/c"u8;
+internal static readonly @string deepˢ = "Deep"u8;
+internal static readonly @string backtrackˢ = "Backtrack"u8;
 
 public static void BenchmarkResolvePath(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    b.ReportAllocs();
-    for (nint i = 0; i < b.N; i++) {
-        resolvePath(aBCˢ, ".././d"u8);
-    }
+    Ꮡb.Run(simpleˢ, (ж<testing.B> bΔ1) => {
+        for (nint i = 0; i < (~bΔ1).N; i++) {
+            resolvePath(aBCˢ, ".././d"u8);
+        }
+    });
+    Ꮡb.Run(deepˢ, (ж<testing.B> bΔ2) => {
+        @string @base = strings.Repeat("a/"u8, 100) + "b"u8;
+        @string @ref = "c"u8;
+        bΔ2.ResetTimer();
+        while (bΔ2.Loop()) {
+            resolvePath(@base, @ref);
+        }
+    });
+    Ꮡb.Run(backtrackˢ, (ж<testing.B> bΔ3) => {
+        @string @base = strings.Repeat("a/"u8, 100) + "b"u8;
+        @string @ref = strings.Repeat("../"u8, 50) + "c"u8;
+        bΔ3.ResetTimer();
+        while (bΔ3.Loop()) {
+            resolvePath(@base, @ref);
+        }
+    });
 }
 
 partial struct resolveReferenceTestsᴛ1 /*dyn*/ {
@@ -1820,16 +1892,19 @@ public static void TestParseErrors(ж<testing.T> Ꮡt) {
         new("http://%41:8080/"u8, true), // not allowed: % encoding only for non-ASCII
         new("mysql://x@y(z:123)/foo"u8, true), // not well-formed per RFC 3986, golang.org/issue/33646
         new("mysql://x@y(1.2.3.4:123)/foo"u8, true),
+
         new(" http://foo.com"u8, true), // invalid character in schema
         new("ht tp://foo.com"u8, true), // invalid character in schema
         new("ahttp://foo.com"u8, false), // valid schema characters
         new("1http://foo.com"u8, true), // invalid character in schema
+
         new("http://[]%20%48%54%54%50%2f%31%2e%31%0a%4d%79%48%65%61%64%65%72%3a%20%31%32%33%0a%0a/"u8, true), // golang.org/issue/11208
         new("http://a b.com/"u8, true), // no space in host name please
         new("cache_object://foo"u8, true), // scheme cannot have _, relative path cannot have : in first segment
         new("cache_object:foo"u8, true),
         new("cache_object:foo/bar"u8, true),
         new("cache_object/:foo/bar"u8, false),
+
         new("http://[192.168.0.1]/"u8, true), // IPv4 in brackets
         new("http://[192.168.0.1]:8080/"u8, true), // IPv4 in brackets with port
         new("http://[::ffff:192.168.0.1]/"u8, false), // IPv4-mapped IPv6 in brackets
@@ -1840,7 +1915,13 @@ public static void TestParseErrors(ж<testing.T> Ꮡt) {
         new("http://[fe80::1%foo]/"u8, true), // invalid zone format in brackets
         new("http://[fe80::1"u8, true), // missing closing bracket
         new("http://fe80::1]/"u8, true), // missing opening bracket
-        new("http://[test.com]/"u8, true) // domain name in brackets
+        new("http://[test.com]/"u8, true), // domain name in brackets
+        new("http://example.com[::1]"u8, true), // IPv6 literal doesn't start with '['
+        new("http://example.com[::1"u8, true),
+        new("http://[::1"u8, true),
+        new("http://.[::1]"u8, true),
+        new("http:// [::1]"u8, true),
+        new("hxxp://mathepqo[.]serveftp(.)com:9059"u8, true)
     }.slice();
     foreach (var (_, tt) in tests) {
         var (u, err) = Parse(tt.@in);
@@ -1971,8 +2052,8 @@ internal static bool Temporary(this ref temporaryError e) {
 }
 
 internal partial struct timeoutTemporaryError {
-    internal partial ref timeoutError timeoutError { get; }
-    internal partial ref temporaryError temporaryError { get; }
+    /*embed*/ internal timeoutError timeoutError;
+    /*embed*/ internal temporaryError temporaryError;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2246,16 +2327,19 @@ internal static slice<escapeBenchmarksᴛ1> escapeBenchmarks = new escapeBenchma
         query: "%D0%A4%D0%BE%D1%82%D0%BA%D0%B8+%D1%81%D0%BE%D0%B1%D0%B0%D0%BA"u8,
         path: "%D0%A4%D0%BE%D1%82%D0%BA%D0%B8%20%D1%81%D0%BE%D0%B1%D0%B0%D0%BA"u8
     ),
+
     new(
         unescaped: "shortrun(break)shortrun"u8,
         query: "shortrun%28break%29shortrun"u8,
         path: "shortrun%28break%29shortrun"u8
     ),
+
     new(
         unescaped: "longerrunofcharacters(break)anotherlongerrunofcharacters"u8,
         query: "longerrunofcharacters%28break%29anotherlongerrunofcharacters"u8,
         path: "longerrunofcharacters%28break%29anotherlongerrunofcharacters"u8
     ),
+
     new(
         unescaped: strings.Repeat("padded/with+various%characters?that=need$some@escaping+paddedsowebreak/256bytes"u8, 4),
         query: strings.Repeat("padded%2Fwith%2Bvarious%25characters%3Fthat%3Dneed%24some%40escaping%2Bpaddedsowebreak%2F256bytes"u8, 4),
@@ -2372,11 +2456,6 @@ public static void TestJoinPath(ж<testing.T> Ꮡt) {
         ),
         new(
             @base: "https://go.googlesource.com"u8,
-            elem: new @string[]{"../go"u8}.slice(),
-            @out: "https://go.googlesource.com/go"u8
-        ),
-        new(
-            @base: "https://go.googlesource.com"u8,
             elem: new @string[]{"../go"u8, "../../go"u8, "../../../go"u8}.slice(),
             @out: "https://go.googlesource.com/go"u8
         ),
@@ -2440,6 +2519,10 @@ public static void TestJoinPath(ж<testing.T> Ꮡt) {
             @out: "https://go.googlesource.com/a/b/go"u8
         ),
         new(
+            @base: "https://go.googlesource.com/"u8,
+            elem: new @string[]{"100%"u8}.slice()
+        ),
+        new(
             @base: "/"u8,
             elem: default!,
             @out: "/"u8
@@ -2475,25 +2558,63 @@ public static void TestJoinPath(ж<testing.T> Ꮡt) {
             @out: "a"u8
         )
     }.slice();
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, vᴛ1) in tests) {
+        var tt = vᴛ1;
+
         @string wantErr = nilˢ2;
         if (tt.@out == ""u8) {
             wantErr = nonNilErrorˢ;
         }
-        {
-            var (outΔ1, errΔ1) = JoinPath(tt.@base, tt.elem.ꓸꓸꓸ); if (outΔ1 != tt.@out || (errΔ1 == default!) != (tt.@out != ""u8)) {
-                Ꮡt.Errorf("JoinPath(%q, %q) = %q, %v, want %q, %v"u8, tt.@base, tt.elem, outΔ1, errΔ1, tt.@out, wantErr);
-            }
-        }
-        @string @out = default!;
-        var (u, err) = Parse(tt.@base);
-        if (err == default!) {
-            u = u.JoinPath(tt.elem.ꓸꓸꓸ);
-            @out = u.String();
-        }
+        var (@out, err) = JoinPath(tt.@base, tt.elem.ꓸꓸꓸ);
         if (@out != tt.@out || (err == default!) != (tt.@out != ""u8)) {
-            Ꮡt.Errorf("Parse(%q).JoinPath(%q) = %q, %v, want %q, %v"u8, tt.@base, tt.elem, @out, err, tt.@out, wantErr);
+            Ꮡt.Errorf("JoinPath(%q, %q) = %q, %v, want %q, %v"u8, tt.@base, tt.elem, @out, err, tt.@out, wantErr);
         }
+
+        (var u, err) = Parse(tt.@base);
+        if (err != default!) {
+            if (tt.@out != ""u8) {
+                Ꮡt.Errorf("Parse(%q) = %v"u8, tt.@base, err);
+            }
+            continue;
+        }
+        if (tt.@out == ""u8) {
+            // URL.JoinPath doesn't return an error, so leave it unchanged
+            tt.@out = tt.@base;
+        }
+        @out = u.JoinPath(tt.elem.ꓸꓸꓸ).String();
+        if (@out != tt.@out) {
+            Ꮡt.Errorf("Parse(%q).JoinPath(%q) = %q, want %q"u8, tt.@base, tt.elem, @out, tt.@out);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string urlstrictcolons0ˢ = "urlstrictcolons=0"u8;
+
+internal partial struct TestParseStrictIpv6_tests /*dyn*/ {
+    internal @string url;
+}
+
+public static void TestParseStrictIpv6(ж<testing.T> Ꮡt) {
+    Ꮡt.Setenv(godebugˢ, urlstrictcolons0ˢ);
+
+    var tests = new TestParseStrictIpv6_tests[]{
+        // Malformed URLs that used to parse.
+        new("https://1:2:3:4:5:6:7:8"u8),
+        new("https://1:2:3:4:5:6:7:8:80"u8),
+        new("https://example.com:80:"u8)
+    }.slice();
+    foreach (var (i, vᴛ1) in tests) {
+        ref var tc = ref heap(new TestParseStrictIpv6_tests(), out var Ꮡtc);
+        tc = vᴛ1;
+
+        var tcʗ1 = tc;
+        Ꮡt.Run(strconv.Itoa(i), (ж<testing.T> tΔ1) => {
+            var (_, err) = Parse(tcʗ1.url);
+            if (err != default!) {
+                tΔ1.Errorf("Parse(%q) error = %v, want nil"u8, tcʗ1.url, err);
+            }
+        });
     }
 }
 

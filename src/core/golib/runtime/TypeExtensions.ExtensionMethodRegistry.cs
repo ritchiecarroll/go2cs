@@ -101,6 +101,14 @@ public static partial class TypeExtensions
     // move while it ran.
     private static int s_extensionMethodsGeneration;
 
+    /// <summary>
+    /// The type-cache generation: bumped by every assembly load (<see cref="ClearTypeCaches"/>), together with the
+    /// clearing of every cache derived from the extension scan. A cache kept OUTSIDE this file records the value it
+    /// was computed under and recomputes when it moves, which is how golib's GoMethodText keeps one int compare on its
+    /// hot path and still obeys the rule above.
+    /// </summary>
+    internal static int TypeCacheGeneration => Volatile.Read(ref s_extensionMethodsGeneration);
+
     // A load storm must not spin the scan forever: after this many generations moved under it, the latest
     // complete scan is returned UNCACHED, and the next caller scans again.
     private const int MaxScanAttempts = 4;
@@ -406,14 +414,12 @@ public static partial class TypeExtensions
                 return Expression.Lambda(delegateType, Expression.Call(methodInfo, arguments), arguments).Compile();
             }
 
-            if (!delegateType.IsGenericType || !methodInfo.IsGenericMethod)
-                return Delegate.CreateDelegate(delegateType, methodInfo);
-
-            Type extensionTarget = delegateType.GetGenericArguments()[0];
-
-            return Delegate.CreateDelegate(delegateType, extensionTarget.IsGenericType ?
-                methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]) :
-                methodInfo.MakeGenericMethod(extensionTarget));
+            // A generic type's method arrives CLOSED over the receiver's type arguments: the method-set candidate
+            // source closes it (CloseGoMethod), and the generated shells bind what AdapterBinder resolves from there.
+            // An open method has no delegate, which CreateDelegate reports as the ArgumentException caught below. (This
+            // once closed an open method over the receiver's FIRST type argument, right for one type parameter and
+            // wrong for two: `Pair[string, int]` never bound fmt.Stringer.)
+            return Delegate.CreateDelegate(delegateType, methodInfo);
         }
         catch (ArgumentException)
         {

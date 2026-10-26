@@ -111,4 +111,8 @@ internal static partial void runtimeSetenv(@string k, @string v);
 
 internal static partial void runtimeUnsetenv(@string k);
 
+// runtimeClearenv is provided by the runtime (on platforms without
+// clearenv(3), it is just a wrapper around runtimeUnsetenv).
+internal static partial void runtimeClearenv(map<@string, nint> env);
+
 } // end syscall_package

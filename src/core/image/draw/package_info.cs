@@ -47,6 +47,12 @@ using static go.image.draw_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -55,7 +61,7 @@ using static go.image.draw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKkgIKUgqSCpILIgsiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClJKCguiCgIKCgpTogoCCgoKU6qKigoIACRSAgoCCgoKCgoKCgoKUgoKCAAgSlICCgoKCgoKCgpSmxrSCgoKC7gAKFAAMFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKUppSAgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgpSmAAoSgoKCgpSCgoKCgoIABxCUgoKCloKCgqa6koKUgpSu+IKmAAcSooCCgoKCgoKClLzCgoKUgMiUgMSAxIDYkoKmgoKCgoKCpriSooKCgoK4lIKUgoKCloKCgsqUgpSCgoKCuIKCgoKCgoKCgoKCgoKCgriCgg==", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;213=Dx/1/1/1;272=Dx/1/1/1;286=Dx/1/1/1")]
+[assembly: go.GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKkgIKUgqSCpILIgsiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClJKCguiCgIKCgpTogoCCgoKU6qKigoIACRSAgoCCgoKCgoKCgoKUgoKCAAgSlICCgoKCgoKCgpSmxrSCgoKC7gAKFAAMFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKUppSAgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgpSmAAoSgoKCgpSCgoKCgoIABxCUgoKCloKCgqa6koKUgpSu+IKmAAgSooCCgoKCgoKClLzCgoKUgMiUgMSAxIDYkoKmgoKCgoKCpriSooKCgoK4lIKUgoKCloKCgsqUgpSCgoKCuIKCgoKCgoKCgoKCgoKCgriCgg==", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;213=Dx/1/1/1;272=Dx/1/1/1;286=Dx/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

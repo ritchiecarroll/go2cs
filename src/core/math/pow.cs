@@ -16,7 +16,7 @@ internal static bool isOddInt(float64 x) {
     }
 
     var (xi, xf) = Modf(x);
-    return xf == 0D && (int64)((int64)xi & 1) == 1;
+    return xf == 0D && ((int64)xi & 1) == 1;
 }
 
 // Special cases taken from FreeBSD's /usr/src/lib/msun/src/e_pow.c
@@ -151,7 +151,7 @@ internal static float64 pow(float64 x, float64 y) {
     // accumulate powers of two into exp.
     var (x1, xe) = Frexp(x);
     for (var i = (int64)yi; i != 0; i >>= (int)(1)) {
-        if (xe < (-1 << (int)(12)) || (1 << (int)(12)) < xe) {
+        if (xe < -1 << 12 || 1 << 12 < xe) {
             // catch xe before it overflows the left shift below
             // Since i !=0 it has at least one bit still set, so ae will accumulate xe
             // on at least one more iteration, ae += xe is a lower bound on ae
@@ -160,7 +160,7 @@ internal static float64 pow(float64 x, float64 y) {
             ae += xe;
             break;
         }
-        if ((int64)(i & 1) == 1) {
+        if ((i & 1) == 1) {
             a1 *= x1;
             ae += xe;
         }

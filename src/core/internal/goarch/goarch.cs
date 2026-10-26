@@ -7,14 +7,17 @@ namespace go.@internal;
 
 partial class goarch_package {
 
-partial struct ArchFamilyType /*num:nint*/;
-
 // The next line makes 'go generate' write the zgoarch*.go files with
 // per-arch information, including constants named $GOARCH for every
 // GOARCH. The constant is 1 on the current system, 0 otherwise; multiplying
 // by them is useful for defining GOARCH-specific constants.
 //
 //go:generate go run gengoarch.go
+
+// ArchFamilyType represents a family of one or more related architectures.
+// For example, ppc64 and ppc64le are both members of the PPC64 family.
+partial struct ArchFamilyType /*num:nint*/;
+
 public static ArchFamilyType AMD64 => /* iota */ 0;
 public static ArchFamilyType ARM => 1;
 public static ArchFamilyType ARM64 => 2;
@@ -30,6 +33,9 @@ public static ArchFamilyType WASM => 10;
 // PtrSize is the size of a pointer in bytes - unsafe.Sizeof(uintptr(0)) but as an ideal constant.
 // It is also the size of the machine's native word size (that is, 4 on 32-bit systems, 8 on 64-bit).
 public static UntypedInt PtrSize => /* 4 << (^uintptr(0) >> 63) */ 8;
+
+// PtrBits is bit width of a pointer.
+public static UntypedInt PtrBits => /* PtrSize * 8 */ 64;
 
 // ArchFamily is the architecture family (AMD64, ARM, ...)
 public static ArchFamilyType ArchFamily => /* _ArchFamily */ 0;

@@ -524,7 +524,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				}
 			} else if interfaceType, interfaceIdentType := v.extractInterfaceType(field.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 				v.indentLevel += indentOffset
-				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				liftedName := v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+
+				// A lift that closes over this generic struct's type parameters: each concrete
+				// instantiation's shape takes the closed generic as a base (dynamicInterfaceBase.go).
+				if len(liftCapturedTypeParams(interfaceIdentType)) > 0 {
+					v.writeLiftedInterfaceBaseMarkers(structPrefix, identType, field.Names[0].Name, liftedName)
+				}
+
 				v.indentLevel -= indentOffset
 
 				if structPrefix != nil {
@@ -648,6 +655,22 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		}
 
 		if field.Names == nil {
+			// An embed is a field the converter declares (owner ruling (A)), so under the zero-size layout arc's
+			// explicit layout it carries its Go offset like any other field, and a ZERO-SIZE embed is readonly for
+			// the same reason a zero-size named field is. One go/types field, so the flat index advances once,
+			// before any path below that skips the embed.
+			var embedOffsetAttr, embedReadOnly string
+
+			if hasZeroSizeLayout {
+				embedOffsetAttr = zeroSizeLayout.fieldOffsetAttribute(layoutFieldIndex)
+
+				if zeroSizeLayout.fieldIsZeroSize(layoutFieldIndex) {
+					embedReadOnly = "readonly "
+				}
+			}
+
+			layoutFieldIndex++
+
 			// Check for promoted fields
 			var ident *ast.Ident
 			var ok bool
@@ -921,7 +944,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+				v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 			} else {
 				var handled bool
 
@@ -931,21 +954,27 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
 							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
 							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
-							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					}
 				}
 
-				// Handle promoted struct implementations
+				// An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD declared here, in Go
+				// declaration order, marked like every other embed: `/*embed*/ public T T;` or `/*embed*/ public
+				// ж<T> T;`. The field is the embed's storage and its accessor, so go2cs-gen declares neither and
+				// generates only the promoted members. Declaring it here is what puts it where Go lays it: storage
+				// the generator declared in a later partial part was laid AFTER every field written here, so a
+				// struct read at Go's layout (runtime's lfstack node, `struct{ LFNode; data int }`) found its
+				// fields at the wrong offsets (owner ruling (A), 2026-10-16, uniform over value and pointer embeds).
 				if !handled {
-					v.writeString(target, "%s partial ref %s %s { get; }%s", getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+					v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 				}
 			}
 
@@ -1066,14 +1095,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 }
 
 // structHasPromotedEmbeds reports whether the type's underlying struct carries at least one
-// embedded field that the generated C# stores in a constructor-initialized readonly `ж<T>` box
-// (the StructTypeTemplate "Promoted Struct References"). A `default`-valued instance of such a
-// struct has null boxes, so the first promoted-member access throws NullReferenceException —
-// an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
-// mirrors the embedded-field emission above: an embed renders as a `partial ref` promotion
-// (and thus a box) unless it is a same-package interface, a builtin non-named embed (`int`),
-// or a pointer to a non-named type; a CROSS-PACKAGE embed always takes the promotion path
-// (the selector-type branch above bypasses every plain-field case, interfaces included).
+// embedded field that go2cs-gen's constructors build (StructTypeTemplate's AppendZeroValueInitializers:
+// a value embed by its own `new T(nil)`, a pointer embed as a nil `ж<T>` box). A `default`-valued
+// instance leaves a pointer embed a raw null, so a promoted access throws NullReferenceException where
+// Go panics — an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
+// follows the embedded-field emission above: an embed is a PROMOTING declared field (go2cs-gen
+// keeps the constructor route for it) unless it is an interface, a builtin non-named embed
+// (`int`), or a pointer to a non-named type. A CROSS-PACKAGE named embed answers true here even
+// when it is an interface, which is conservative: it only selects the `new T(nil)` rendering.
 func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 	if t == nil {
 		return false
@@ -1149,7 +1178,7 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 }
 
 // structZeroValueNeedsConstruction reports whether a struct type's zero value default(T) is
-// BROKEN — it has a promoted-embed box (constructor-allocated) or a fixed-size array field
+// BROKEN — it has a promoted embed (constructor-built) or a fixed-size array field
 // (`= new(N)` field initializer that default(T) skips), directly or through a nested value-struct
 // field — so `var z T` must run the generated parameterless constructor (`new()`) rather than
 // emit `default!`. Mirrors go2cs-gen StructTypeTemplate.NeedsConstruction; a false result keeps the

@@ -15,11 +15,11 @@ internal static @string describe(Δtime.Time timeΔ1) {
 }
 
 internal static @string qualifiedDurations() {
-    return fmt.Sprint(Δtime.ΔNanosecond, (@string)" "u8, Δtime.ΔSecond, (@string)" "u8, Δtime.ΔMinute, (@string)" "u8, Δtime.ΔHour);
+    return fmt.Sprint(Δtime.ΔNanosecond, " ", Δtime.ΔSecond, " ", Δtime.ΔMinute, " ", Δtime.ΔHour);
 }
 
 internal static @string qualifiedLocations() {
-    return fmt.Sprint(Δtime.ΔUTC.OrTypedNil(), (@string)" "u8, Δtime.ΔLocal != nil);
+    return fmt.Sprint(Δtime.ΔUTC.OrTypedNil(), " ", Δtime.ΔLocal != nil);
 }
 
 internal static (Δtime.Duration, float64, nint) foldedConstant() {
@@ -30,20 +30,20 @@ internal static (Δtime.Duration, float64, nint) foldedConstant() {
 internal static void Main() {
     var stamp = Δtime.Date(2009, Δtime.February, 4, 21, 0, 57, 12345600, Δtime.ΔUTC);
 
-    fmt.Println((@string)"1:"u8, describe(stamp));
+    fmt.Println("1:", describe(stamp));
 
     var timeΔ1 = stamp;
-    fmt.Println((@string)"2:"u8, timeΔ1.Format(layout));
+    fmt.Println("2:", timeΔ1.Format(layout));
 
-    fmt.Println((@string)"3:"u8, qualifiedDurations(), qualifiedLocations());
+    fmt.Println("3:", qualifiedDurations(), qualifiedLocations());
 
     var (d, secs, east) = foldedConstant();
-    fmt.Println((@string)"4:"u8, d, secs, east);
+    fmt.Println("4:", d, secs, east);
 
     nint frac = 4;
-    fmt.Println((@string)"5:"u8, ((@string)"012345678"u8.slice(0, frac)) + "000000000"u8.slice(0, 9 - frac));
+    fmt.Println("5:", ((@string)"012345678"u8.slice(0, frac)) + "000000000"u8.slice(0, 9 - frac));
 
-    fmt.Println((@string)"6:"u8, dotImported());
+    fmt.Println("6:", dotImported());
 }
 
 } // end main_package

@@ -61,8 +61,8 @@ internal static ж<Table> makeTable(uint64 poly) {
     for (nint i = 0; i < 256; i++) {
         var crc = (uint64)i;
         for (nint j = 0; j < 8; j++) {
-            if ((uint64)(crc & 1) == 1){
-                crc = (uint64)(((crc >> (int)(1))) ^ poly);
+            if ((crc & 1) == 1){
+                crc = (crc >> 1) ^ poly;
             } else {
                 crc >>= (int)(1);
             }
@@ -78,7 +78,7 @@ internal static ж<array<Table>> makeSlicingBy8Table(ref Table t) {
     for (nint i = 0; i < 256; i++) {
         var crc = t[i];
         for (nint j = 1; j < 8; j++) {
-            crc = (uint64)(t[(uint64)(crc & 0xff)] ^ ((crc >> (int)(8))));
+            crc = t[(crc & 0xff)] ^ (crc >> 8);
             helperTable[j][i] = crc;
         }
     }
@@ -145,6 +145,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
     buildSlicing8TablesOnce();
     crc = ~crc;
@@ -168,13 +174,13 @@ internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
         // Update using slicing-by-8
         while (len(p) > 8) {
             crc ^= (uint64)(byteorder.LEUint64(p));
-            crc = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(helperTable.Value[7][(uint64)(crc & 0xff)] ^ helperTable.Value[6][(uint64)(((crc >> (int)(8))) & 0xff)]) ^ helperTable.Value[5][(uint64)(((crc >> (int)(16))) & 0xff)]) ^ helperTable.Value[4][(uint64)(((crc >> (int)(24))) & 0xff)]) ^ helperTable.Value[3][(uint64)(((crc >> (int)(32))) & 0xff)]) ^ helperTable.Value[2][(uint64)(((crc >> (int)(40))) & 0xff)]) ^ helperTable.Value[1][(uint64)(((crc >> (int)(48))) & 0xff)]) ^ helperTable.Value[0][(crc >> (int)(56))]);
+            crc = helperTable.Value[7][(crc & 0xff)] ^ helperTable.Value[6][((crc >> 8) & 0xff)] ^ helperTable.Value[5][((crc >> 16) & 0xff)] ^ helperTable.Value[4][((crc >> 24) & 0xff)] ^ helperTable.Value[3][((crc >> 32) & 0xff)] ^ helperTable.Value[2][((crc >> 40) & 0xff)] ^ helperTable.Value[1][((crc >> 48) & 0xff)] ^ helperTable.Value[0][(crc >> 56)];
             p = p[8..];
         }
     }
     // For reminders or small sizes
     foreach (var (_, v) in p) {
-        crc = (uint64)(tab[(byte)((byte)crc ^ v)] ^ ((crc >> (int)(8))));
+        crc = tab[(byte)((byte)crc ^ v)] ^ (crc >> 8);
     }
     return ~crc;
 }
@@ -195,7 +201,7 @@ internal static uint64 Sum64(this ref digest d) {
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum64();
-    return append(@in, (byte)((s >> (int)(56))), (byte)((s >> (int)(48))), (byte)((s >> (int)(40))), (byte)((s >> (int)(32))), (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
+    return append(@in, (byte)(s >> 56), (byte)(s >> 48), (byte)(s >> 40), (byte)(s >> 32), (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
 
 // Checksum returns the CRC-64 checksum of data

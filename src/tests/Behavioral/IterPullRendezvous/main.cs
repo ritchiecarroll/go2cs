@@ -111,28 +111,12 @@ internal static iter.Seq<nint> doubleNext() {
     };
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pullˢ = (@string)"pull:"u8;
-private static readonly object pullAfterExhaustionˢ = (@string)"pull after exhaustion:"u8;
-private static readonly object stopAfterExhaustionIsANoˢ = (@string)"stop after exhaustion is a no-op"u8;
-private static readonly object pull2ˢ = (@string)"pull2:"u8;
-private static readonly object earlyPullˢ = (@string)"early pull:"u8;
-private static readonly object pullAfterEarlyStopˢ = (@string)"pull after early stop:"u8;
-private static readonly @string firstNextˢ = "first next"u8;
-private static readonly object pullAfterPanicˢ = (@string)"pull after panic:"u8;
-private static readonly @string stopAfterPanicˢ = "stop after panic"u8;
-private static readonly object cleanupPullˢ = (@string)"cleanup pull:"u8;
-private static readonly @string stopIntoCleanupˢ = "stop into cleanup"u8;
-private static readonly object goexitCrossedˢ = (@string)"goexit crossed:"u8;
-private static readonly object pullAfterGoexitˢ = (@string)"pull after goexit:"u8;
-private static readonly object pullAfterImmediateStopˢ = (@string)"pull after immediate stop:"u8;
-
 internal static void Main() {
     var (next, stop) = iter.Pull(count(3));
 
     while (ᐧ) {
         var (vΔ1, okΔ1) = next();
-        fmt.Println(pullˢ, vΔ1, okΔ1);
+        fmt.Println("pull:", vΔ1, okΔ1);
 
         if (!okΔ1) {
             break;
@@ -140,17 +124,17 @@ internal static void Main() {
     }
 
     var (v, ok) = next();
-    fmt.Println(pullAfterExhaustionˢ, v, ok);
+    fmt.Println("pull after exhaustion:", v, ok);
 
     stop();
     stop();
-    fmt.Println(stopAfterExhaustionIsANoˢ);
+    fmt.Println("stop after exhaustion is a no-op");
 
     var (next2, stop2) = iter.Pull2(squares(3));
 
     while (ᐧ) {
         var (k, v2, ok2) = next2();
-        fmt.Println(pull2ˢ, k, v2, ok2);
+        fmt.Println("pull2:", k, v2, ok2);
 
         if (!ok2) {
             break;
@@ -162,33 +146,33 @@ internal static void Main() {
     var (next3, stop3) = iter.Pull(count(100));
     var (a, aok) = next3();
     var (b, bok) = next3();
-    fmt.Println(earlyPullˢ, a, aok, b, bok);
+    fmt.Println("early pull:", a, aok, b, bok);
 
     stop3();
 
     var (c, cok) = next3();
-    fmt.Println(pullAfterEarlyStopˢ, c, cok);
+    fmt.Println("pull after early stop:", c, cok);
 
     var (nextP, stopP) = iter.Pull(panicSeq());
     var nextPʗ1 = nextP;
-    @catch(firstNextˢ, () => {
+    @catch("first next", () => {
         nextPʗ1();
     });
 
     var (pv, pok) = nextP();
-    fmt.Println(pullAfterPanicˢ, pv, pok);
+    fmt.Println("pull after panic:", pv, pok);
 
     var stopPʗ1 = stopP;
-    @catch(stopAfterPanicˢ, () => {
+    @catch("stop after panic", () => {
         stopPʗ1();
     });
 
     var (nextC, stopC) = iter.Pull(panicCleanupSeq());
     var (cv, cvok) = nextC();
-    fmt.Println(cleanupPullˢ, cv, cvok);
+    fmt.Println("cleanup pull:", cv, cvok);
 
     var stopCʗ1 = stopC;
-    @catch(stopIntoCleanupˢ, () => {
+    @catch("stop into cleanup", () => {
         stopCʗ1();
     });
 
@@ -198,20 +182,20 @@ internal static void Main() {
 
     ref var goexitNext = ref heap<Func<(nint, bool)>>(out var ᏑgoexitNext);
 
-    fmt.Println(goexitCrossedˢ, goexits(() => {
+    fmt.Println("goexit crossed:", goexits(() => {
         var (n, _) = iter.Pull(goexitSeq());
         ᏑgoexitNext.ValueSlot = n;
         n();
     }));
 
     var (gv, gok) = goexitNext();
-    fmt.Println(pullAfterGoexitˢ, gv, gok);
+    fmt.Println("pull after goexit:", gv, gok);
 
     var (nextI, stopI) = iter.Pull(panicSeq());
     stopI();
 
     var (iv, iok) = nextI();
-    fmt.Println(pullAfterImmediateStopˢ, iv, iok);
+    fmt.Println("pull after immediate stop:", iv, iok);
 }
 
 } // end main_package

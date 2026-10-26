@@ -4,7 +4,7 @@ namespace go.vendor.golang.org.x.net.http2;
 
 partial class hpack_package {
 
-internal static ж<headerFieldTable> staticTable = Ꮡ(new headerFieldTable(
+[GoLazy] partial class lazyᴛstaticTable { internal static ж<headerFieldTable> staticTable = Ꮡ(new headerFieldTable(
     evictCount: 0,
     byName: new map<@string, uint64>{
         [":authority"u8] = 1,
@@ -186,6 +186,6 @@ internal static ж<headerFieldTable> staticTable = Ꮡ(new headerFieldTable(
         new(Name: "via"u8, Value: ""u8, Sensitive: false),
         new(Name: "www-authenticate"u8, Value: ""u8, Sensitive: false)
     }.slice()
-));
+)); }
 
 } // end hpack_package

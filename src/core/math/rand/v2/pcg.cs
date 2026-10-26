@@ -100,10 +100,10 @@ public static uint64 Uint64(this ref PCG p) {
 
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L176
     const uint64 cheapMul = 0xda942042e4dd58b5;
-    hi ^= (uint64)((hi >> (int)(32)));
+    hi ^= (uint64)((hi >> 32));
     hi *= cheapMul;
-    hi ^= (uint64)((hi >> (int)(48)));
-    hi *= ((uint64)(lo | 1));
+    hi ^= (uint64)((hi >> 48));
+    hi *= (lo | 1);
     return hi;
 }
 

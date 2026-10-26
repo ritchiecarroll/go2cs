@@ -22,7 +22,7 @@ internal const nuint is64bit = /* ^uint(0) >> 63 */ 1; // 0 for 32-bit hosts, 1 
 // NOTE fields are exported to be used by TestSiginfoChildLayout.
 partial struct SiginfoChild {
     public int32 Signo;
-    internal partial ref siErrnoCode siErrnoCode { get; }                // Two int32 fields, swapped on MIPS.
+    /*embed*/ internal siErrnoCode siErrnoCode;                // Two int32 fields, swapped on MIPS.
     internal array<int32> _ = new(is64bit); // Extra padding for 64-bit hosts only.
 // End of common part. Beginning of signal-specific part.
     public int32 Pid;
@@ -52,16 +52,16 @@ public static syscall.WaitStatus /*ws*/ WaitStatus(this ref SiginfoChild s) {
 
     var exprᴛ1 = s.Code;
     if (exprᴛ1 is _CLD_EXITED) {
-        ws = ((syscall.WaitStatus)(uint32)((s.Status << (int)(8))));
+        ws = (syscall.WaitStatus)(uint32)((s.Status << 8));
     }
     else if (exprᴛ1 == _CLD_DUMPED) {
         ws = (syscall.WaitStatus)(((syscall.WaitStatus)(uint32)s.Status) | (uint32)core);
     }
     else if (exprᴛ1 == _CLD_KILLED) {
-        ws = ((syscall.WaitStatus)(uint32)s.Status);
+        ws = (syscall.WaitStatus)(uint32)s.Status;
     }
     else if (exprᴛ1 == _CLD_TRAPPED || exprᴛ1 == _CLD_STOPPED) {
-        ws = (syscall.WaitStatus)(((syscall.WaitStatus)(uint32)((s.Status << (int)(8)))) | (uint32)stopped);
+        ws = (syscall.WaitStatus)(((syscall.WaitStatus)(uint32)((s.Status << 8))) | (uint32)stopped);
     }
     else if (exprᴛ1 == _CLD_CONTINUED) {
         ws = continued;

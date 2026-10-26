@@ -22,6 +22,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAdapterNameInterfaceCollision() => CheckTarget("AdapterNameInterfaceCollision");
 
     [TestMethod]
+    public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
@@ -67,6 +70,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
@@ -77,9 +83,6 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
-
-    [TestMethod]
-    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
 
     [TestMethod]
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
@@ -185,6 +188,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
+
+    [TestMethod]
+    public void CheckBuildInfoSettings() => CheckTarget("BuildInfoSettings");
 
     [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
@@ -442,6 +448,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferVariadicCallee() => CheckTarget("DeferVariadicCallee");
 
     [TestMethod]
+    public void CheckDefinedArrayChainSlice() => CheckTarget("DefinedArrayChainSlice");
+
+    [TestMethod]
     public void CheckDefinedComplexConst() => CheckTarget("DefinedComplexConst");
 
     [TestMethod]
@@ -484,6 +493,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
+
+    [TestMethod]
     public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
 
     [TestMethod]
@@ -512,6 +524,12 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
+
+    [TestMethod]
+    public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
+
+    [TestMethod]
+    public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
@@ -551,6 +569,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
+
+    [TestMethod]
+    public void CheckFieldAccessReinterpret() => CheckTarget("FieldAccessReinterpret");
 
     [TestMethod]
     public void CheckFieldChainBoxReceiver() => CheckTarget("FieldChainBoxReceiver");
@@ -617,6 +638,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
+
+    [TestMethod]
+    public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
 
     [TestMethod]
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
@@ -697,6 +721,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
 
     [TestMethod]
+    public void CheckGenericArrayTypeArgZero() => CheckTarget("GenericArrayTypeArgZero");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]
@@ -722,6 +749,15 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
+
+    [TestMethod]
+    public void CheckGenericInterfaceCrossPackage() => CheckTarget("GenericInterfaceCrossPackage");
+
+    [TestMethod]
+    public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
+
+    [TestMethod]
+    public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
 
     [TestMethod]
     public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
@@ -847,10 +883,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
+
+    [TestMethod]
     public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
 
     [TestMethod]
     public void CheckGoroutineParkStorm() => CheckTarget("GoroutineParkStorm");
+
+    [TestMethod]
+    public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
 
     [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
@@ -889,6 +931,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]
+    public void CheckImplicitConvArgumentParameter() => CheckTarget("ImplicitConvArgumentParameter");
+
+    [TestMethod]
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
@@ -910,7 +955,13 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInitFrameNames() => CheckTarget("InitFrameNames");
 
     [TestMethod]
+    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
+
+    [TestMethod]
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
+
+    [TestMethod]
+    public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
@@ -923,6 +974,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
+
+    [TestMethod]
+    public void CheckInterfaceEqualityTyped() => CheckTarget("InterfaceEqualityTyped");
 
     [TestMethod]
     public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
@@ -998,6 +1052,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
+
+    [TestMethod]
+    public void CheckLazyPackageVars() => CheckTarget("LazyPackageVars");
 
     [TestMethod]
     public void CheckLibraryImportPartial() => CheckTarget("LibraryImportPartial");
@@ -1111,10 +1168,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMapStringBytesLookup() => CheckTarget("MapStringBytesLookup");
 
     [TestMethod]
+    public void CheckMathBitsLeaves() => CheckTarget("MathBitsLeaves");
+
+    [TestMethod]
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]
     public void CheckMathHugeArgReduction() => CheckTarget("MathHugeArgReduction");
+
+    [TestMethod]
+    public void CheckMemProfileAllocFrames() => CheckTarget("MemProfileAllocFrames");
 
     [TestMethod]
     public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
@@ -1312,13 +1375,13 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
 
     [TestMethod]
+    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
+
+    [TestMethod]
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
-
-    [TestMethod]
-    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
 
     [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
@@ -1459,6 +1522,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNewExpr() => CheckTarget("NewExpr");
+
+    [TestMethod]
     public void CheckNilAdapterOpsClosure() => CheckTarget("NilAdapterOpsClosure");
 
     [TestMethod]
@@ -1501,13 +1567,10 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilVarNamedFuncConv() => CheckTarget("NilVarNamedFuncConv");
 
     [TestMethod]
-    public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
-
-    [TestMethod]
-    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
-
-    [TestMethod]
     public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
+
+    [TestMethod]
+    public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
@@ -1538,6 +1601,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
+
+    [TestMethod]
+    public void CheckPackageVarMethodValue() => CheckTarget("PackageVarMethodValue");
 
     [TestMethod]
     public void CheckPackageVarTupleInitOrder() => CheckTarget("PackageVarTupleInitOrder");
@@ -1573,6 +1639,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
 
     [TestMethod]
+    public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
+
+    [TestMethod]
+    public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
+
+    [TestMethod]
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
 
     [TestMethod]
@@ -1583,6 +1655,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPipeCloseUnblocksRead() => CheckTarget("PipeCloseUnblocksRead");
+
+    [TestMethod]
+    public void CheckPipeSharedFileObject() => CheckTarget("PipeSharedFileObject");
 
     [TestMethod]
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
@@ -1601,6 +1676,12 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerCastSliceReinterpret() => CheckTarget("PointerCastSliceReinterpret");
+
+    [TestMethod]
+    public void CheckPointerConversionAliasing() => CheckTarget("PointerConversionAliasing");
+
+    [TestMethod]
+    public void CheckPointerConversionAnonymousTarget() => CheckTarget("PointerConversionAnonymousTarget");
 
     [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
@@ -1723,6 +1804,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
 
     [TestMethod]
+    public void CheckProxyContainerForwarding() => CheckTarget("ProxyContainerForwarding");
+
+    [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
 
     [TestMethod]
@@ -1765,6 +1849,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
 
     [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
+
+    [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
 
     [TestMethod]
@@ -1781,6 +1868,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
+    public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
 
     [TestMethod]
     public void CheckRecvArrayFieldElementAddress() => CheckTarget("RecvArrayFieldElementAddress");
@@ -1864,6 +1954,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectStructTagCopy() => CheckTarget("ReflectStructTagCopy");
 
     [TestMethod]
+    public void CheckReflectTypeAssertMarshal() => CheckTarget("ReflectTypeAssertMarshal");
+
+    [TestMethod]
+    public void CheckReflectTypeIdentity() => CheckTarget("ReflectTypeIdentity");
+
+    [TestMethod]
     public void CheckReflectTypedNilInterface() => CheckTarget("ReflectTypedNilInterface");
 
     [TestMethod]
@@ -1921,6 +2017,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
+    public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
+
+    [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]
@@ -1975,6 +2074,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
 
     [TestMethod]
+    public void CheckSelfRefGenerics() => CheckTarget("SelfRefGenerics");
+
+    [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
 
     [TestMethod]
@@ -2015,6 +2117,15 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
+
+    [TestMethod]
+    public void CheckShellCacheMutation() => CheckTarget("ShellCacheMutation");
+
+    [TestMethod]
+    public void CheckShellCacheNilFunc() => CheckTarget("ShellCacheNilFunc");
+
+    [TestMethod]
+    public void CheckShellCacheReassertEquality() => CheckTarget("ShellCacheReassertEquality");
 
     [TestMethod]
     public void CheckShellForwardArity() => CheckTarget("ShellForwardArity");
@@ -2087,6 +2198,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
+
+    [TestMethod]
+    public void CheckStackAppendBackingStore() => CheckTarget("StackAppendBackingStore");
 
     [TestMethod]
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
@@ -2233,6 +2347,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]
+    public void CheckTypeAssertionPanic() => CheckTarget("TypeAssertionPanic");
+
+    [TestMethod]
+    public void CheckTypeAssertionSource() => CheckTarget("TypeAssertionSource");
+
+    [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
 
     [TestMethod]
@@ -2243,6 +2363,12 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeInference() => CheckTarget("TypeInference");
+
+    [TestMethod]
+    public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
+
+    [TestMethod]
+    public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
@@ -2264,6 +2390,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
+
+    [TestMethod]
+    public void CheckTypeSwitchNilPointer() => CheckTarget("TypeSwitchNilPointer");
 
     [TestMethod]
     public void CheckTypeSwitchPointerAdapter() => CheckTarget("TypeSwitchPointerAdapter");
@@ -2380,6 +2509,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
 
     [TestMethod]
+    public void CheckUntypedConstTypeArg() => CheckTarget("UntypedConstTypeArg");
+
+    [TestMethod]
     public void CheckUntypedConstWideMask() => CheckTarget("UntypedConstWideMask");
 
     [TestMethod]
@@ -2390,6 +2522,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUntypedFloatTypedCompare() => CheckTarget("UntypedFloatTypedCompare");
+
+    [TestMethod]
+    public void CheckUntypedIntExactConstArithmetic() => CheckTarget("UntypedIntExactConstArithmetic");
 
     [TestMethod]
     public void CheckUntypedIntFloatContexts() => CheckTarget("UntypedIntFloatContexts");

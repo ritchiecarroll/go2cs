@@ -6,18 +6,15 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.trace;
 using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
-
-// Maximum number of PCs in a single stack trace.
-// Since events contain only stack id rather than whole stack trace,
-// we can allow quite large values here.
-internal static UntypedInt traceStackSize => 128;
 
 // logicalStackSentinel is a sentinel value at pcBuf[0] signifying that
 // pcBuf[1:] holds a logical stack requiring no further processing. Any other
@@ -35,13 +32,11 @@ internal static readonly @string attemptedToTraceStackOfAˢ = "attempted to trac
 // skip controls the number of leaf frames to omit in order to hide tracer internals
 // from stack traces, see CL 5523.
 //
-// Avoid calling this function directly. gen needs to be the current generation
-// that this stack trace is being written out for, which needs to be synchronized with
-// generations moving forward. Prefer traceEventWriter.stack.
-internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
+// Avoid calling this function directly. Prefer traceEventWriter.stack.
+internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackTable> Ꮡtab) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    array<uintptr> pcBuf = new(128); /* traceStackSize */
+    var pcBuf = getg().Value.m.Value.profStack;
 
     // Figure out gp and mp for the backtrace.
     ж<m> mp = default!;
@@ -54,14 +49,14 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
     if (debug.traceCheckStackOwnership != 0 && Ꮡgp != nil) {
         var status = readgstatus(Ꮡgp);
         // If the scan bit is set, assume we're the ones that acquired it.
-        if ((uint32)(status & (uint32)_Gscan) == 0) {
+        if ((status & (uint32)_Gscan) == 0) {
             // Use the trace status to check this. There are a number of cases
             // where a running goroutine might be in _Gwaiting, and these cases
             // are totally fine for taking a stack trace. They're captured
             // correctly in goStatusToTraceGoStatus.
             var exprᴛ1 = goStatusToTraceGoStatus(status, gp.waitreason);
             var matchᴛ1 = false;
-            if (exprᴛ1 == traceGoRunning || exprᴛ1 == traceGoSyscall) { matchᴛ1 = true;
+            if (exprᴛ1 == tracev2.GoRunning || exprᴛ1 == tracev2.GoSyscall) { matchᴛ1 = true;
                 do {
                     if (getg() == Ꮡgp || (~mp).curg == Ꮡgp) {
                         break;
@@ -124,7 +119,22 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
                 nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.syscallbp, pcBuf[2..]);
             } else {
                 pcBuf[1] = gp.sched.pc;
-                nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.sched.bp, pcBuf[2..]);
+                if (gp.syncSafePoint){
+                    // We're stopped in morestack, which is an odd state because gp.sched.bp
+                    // refers to our parent frame, since we haven't had the chance to push our
+                    // frame pointer to the stack yet. If we just start walking from gp.sched.bp,
+                    // we'll skip a frame as a result. Luckily, we can find the PC we want right
+                    // at gp.sched.sp on non-LR platforms, and we have it directly on LR platforms.
+                    // See issue go.dev/issue/68090.
+                    if (usesLR){
+                        pcBuf[2] = gp.sched.lr;
+                    } else {
+                        pcBuf[2] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)gp.sched.sp);
+                    }
+                    nstk += 2 + fpTracebackPCs((@unsafe.Pointer)gp.sched.bp, pcBuf[3..]);
+                } else {
+                    nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.sched.bp, pcBuf[2..]);
+                }
             }
         }
     }
@@ -134,12 +144,13 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
     if (nstk > 0 && gp.goid == 1) {
         nstk--; // skip runtime.main
     }
-    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf.slice(0, nstk));
+    var id = Ꮡtab.put(pcBuf.slice(0, nstk));
     return id;
 }
 
-// traceStackTable maps stack traces (arrays of PC's) to unique uint32 ids.
-// It is lock-free for reading.
+// traceStackTable maps stack traces (arrays of PC's) to unique IDs.
+//
+// ID 0 is reserved for a zero-length stack.
 partial struct traceStackTable {
     internal traceMap tab;
 }
@@ -147,8 +158,10 @@ partial struct traceStackTable {
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
 internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
+    // Even though put will handle this for us, taking the address of pcs forces a bounds check
+    // that will fail if len(pcs) == 0.
     if (len(pcs) == 0) {
-        return 0;
+        return 0; // ID 0 is reserved for zero-length stacks.
     }
     var (id, _) = Ꮡt.of(traceStackTable.Ꮡtab).put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(pcs, 0))), (uintptr)len(pcs) * /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
     return id;
@@ -158,7 +171,7 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
-    var stackBuf = new slice<uintptr>(traceStackSize);
+    var stackBuf = new slice<uintptr>(tracev2.MaxFramesPerStack);
     var w = unsafeTraceWriter(gen, nil);
     {
         var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceStackTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {
@@ -187,16 +200,16 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     // bound is pretty loose, but avoids counting
     // lots of varint sizes.
     //
-    // Add 1 because we might also write traceEvStacks.
+    // Add 1 because we might also write tracev2.EvStacks.
     bool flushed = default!;
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
-        w.@byte((byte)traceEvStacks);
+        w.@byte((byte)tracev2.EvStacks);
     }
 
     // Emit stack event.
-    w.@byte((byte)traceEvStack);
-    w.varint((uint64)node.id);
+    w.@byte((byte)tracev2.EvStack);
+    w.varint(node.id);
     w.varint((uint64)len(frames));
     foreach (var (_, frame) in frames) {
         w.varint((uint64)frame.PC);
@@ -206,7 +219,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     }
 
     // Recursively walk all child nodes.
-    foreach (var (i, _) in node.children) {
+    foreach (var i in range(node.children)) {
         @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;

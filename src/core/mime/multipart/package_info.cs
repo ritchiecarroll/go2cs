@@ -62,6 +62,12 @@ using static go.mime.multipart_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -70,10 +76,10 @@ using static go.mime.multipart_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACQbigpiCgoKmgoCCgIKCxpSSgoCCtoKCgriCgoIAESSCgpSCgoKUpoKCgoKUgpSClJSCgpSqsoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgIKkgpaEgpSCgoKCgoCCpKaCgoKUpuaigoKCgoKmAAwckoKCgoKCgsoADSCSgIKCpIKCgpSClAAVKIKClA==", "62-81:1")]
+[assembly: go.GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACQbigpiCgoKmgoCCgIKCxpSSgoCCtoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSqsoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgIKkgpaEgpSCgoKCgoCCpKaCgoKUpuaigoKCgoKmAAwckoKCgoKCgsoADSCSgIKCpIKCgpSClAAVKIKClA==", "62-81:1")]
 [assembly: go.GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YABxAxoKUgpTcsoKUgoK41oKCgoKCAAMU4oIAEiaigpSCAAgGgriAgqSmgoKCgqamgoKCgqaClKqiAAgSgoK4goKClIKC3IKUgoKUgoKCgpQAAhoACgKUgpSkpKaCyoCClKSktoLugoKUAAIeAAwCgoKUlJSCuIKClJSUgrimgoIAFzSUgoCCgIKCxgACEuIAAhDSpqKClIKUgoKU3JSCpoKCgoKUgqaUpoKmlO6Cgqa+soKUgoKm7oKUgsqCgpSuwoKU", "", "", "130=NewReaderSize/1/1/1")]
 [assembly: go.GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
-[assembly: go.GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAcS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKAgraCgpSmgoKmgoKClKaCppSC6qKCpoKqooKUqJKCgpSCqqKCgIKklIIACBKCgtaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;156=escapeQuotes/1/2/2,escapeQuotes/2/2/2,Sprintf/1/1/1;167=escapeQuotes/1/1/1,Sprintf/1/1/1")]
+[assembly: go.GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAcS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKAgraCgpSmgoKmgoKClKaCpgABHAAMAuqigoKCqqKClKqiupKCgpSCqqKCgIKklIIACBKCgtaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;177=escapeQuotes/1/1/1,Sprintf/1/1/1;185=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;

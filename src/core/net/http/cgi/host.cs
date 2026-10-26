@@ -103,6 +103,7 @@ internal static io.Writer stderr(this ref Handler h) {
 //	}
 internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> env) {
     slice<@string> ret = default!;
+    var retᴷ = new stackAppend<@string>(moves: true);
 
     foreach (var (i, e) in env) {
         var found = false;
@@ -118,9 +119,10 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
             }
         }
         if (!found) {
-            ret = append(ret, e);
+            ret = append(retᴷ, ret, e);
         }
     }
+    ret = move2heap(retᴷ, ret);
     return ret;
 }
 
@@ -314,7 +316,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 break;
             }
             headerLines++;
-            var (header, val, ok) = strings.Cut(((@string)line), ":"u8);
+            var (header, val, ok) = strings.Cut((@string)line, ":"u8);
             if (!ok) {
                 h.printf("cgi: bogus header line: %s"u8, line);
                 continue;

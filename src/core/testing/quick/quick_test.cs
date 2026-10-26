@@ -6,6 +6,8 @@ namespace go.testing;
 using rand = go.math.rand_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using static go.testing.quick_package;
 
@@ -247,7 +249,7 @@ internal static TestUintptrAlias fUintptrAlias(TestUintptrAlias a) {
     return a;
 }
 
-internal static void reportError(@string property, error err, ж<testing.T> Ꮡt) {
+internal static partial void reportError(@string property, error err, ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("%s: %s"u8, property, err);
     }
@@ -365,7 +367,7 @@ internal static bool myStructProperty(myStruct @in) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string myStructPropertyˢ = "myStructProperty"u8;
 
-public static void TestCheckProperty(ж<testing.T> Ꮡt) {
+public static partial void TestCheckProperty(ж<testing.T> Ꮡt) {
     reportError(myStructPropertyˢ, Check(myStructProperty, nil), Ꮡt);
 }
 
@@ -481,7 +483,7 @@ public static void TestInt64(ж<testing.T> Ꮡt) {
     };
     var cfg = Ꮡ(new Config(MaxCount: 10000));
     Check((f).OrTypedNilFunc(), cfg);
-    if (((uint64)lo >> (int)(62)) == 0 || ((uint64)hi >> (int)(62)) == 0) {
+    if ((uint64)lo >> 62 == 0 || (uint64)hi >> 62 == 0) {
         Ꮡt.Errorf("int64 returned range %#016x,%#016x; does not look like full range"u8, lo, hi);
     }
 }

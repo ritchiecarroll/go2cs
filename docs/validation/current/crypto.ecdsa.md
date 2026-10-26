@@ -6,12 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/ecdsa` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**77 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**125 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/ecdsa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/ecdsa).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
+
+Both runtimes skip 1 of the matched tests identically.
 
 ## Verdicts
 
@@ -28,6 +30,48 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestINDCCA/P256/Generic` | pass | pass |
 | `TestINDCCA/P384` | pass | pass |
 | `TestINDCCA/P521` | pass | pass |
+| `TestInvalidPrivateKeys` | pass | pass |
+| `TestInvalidPrivateKeys/P224` | pass | pass |
+| `TestInvalidPrivateKeys/P224/Length` | pass | pass |
+| `TestInvalidPrivateKeys/P224/Overflow` | pass | pass |
+| `TestInvalidPrivateKeys/P224/Zero` | pass | pass |
+| `TestInvalidPrivateKeys/P256` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Generic` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Generic/Length` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Generic/Overflow` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Generic/Zero` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Length` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Overflow` | pass | pass |
+| `TestInvalidPrivateKeys/P256/Zero` | pass | pass |
+| `TestInvalidPrivateKeys/P384` | pass | pass |
+| `TestInvalidPrivateKeys/P384/Length` | pass | pass |
+| `TestInvalidPrivateKeys/P384/Overflow` | pass | pass |
+| `TestInvalidPrivateKeys/P384/Zero` | pass | pass |
+| `TestInvalidPrivateKeys/P521` | pass | pass |
+| `TestInvalidPrivateKeys/P521/Length` | pass | pass |
+| `TestInvalidPrivateKeys/P521/Overflow` | pass | pass |
+| `TestInvalidPrivateKeys/P521/Zero` | pass | pass |
+| `TestInvalidPublicKeys` | pass | pass |
+| `TestInvalidPublicKeys/P224` | pass | pass |
+| `TestInvalidPublicKeys/P224/Compressed` | pass | pass |
+| `TestInvalidPublicKeys/P224/Infinity` | pass | pass |
+| `TestInvalidPublicKeys/P224/NotOnCurve` | pass | pass |
+| `TestInvalidPublicKeys/P256` | pass | pass |
+| `TestInvalidPublicKeys/P256/Compressed` | pass | pass |
+| `TestInvalidPublicKeys/P256/Generic` | pass | pass |
+| `TestInvalidPublicKeys/P256/Generic/Compressed` | pass | pass |
+| `TestInvalidPublicKeys/P256/Generic/Infinity` | pass | pass |
+| `TestInvalidPublicKeys/P256/Generic/NotOnCurve` | pass | pass |
+| `TestInvalidPublicKeys/P256/Infinity` | pass | pass |
+| `TestInvalidPublicKeys/P256/NotOnCurve` | pass | pass |
+| `TestInvalidPublicKeys/P384` | pass | pass |
+| `TestInvalidPublicKeys/P384/Compressed` | pass | pass |
+| `TestInvalidPublicKeys/P384/Infinity` | pass | pass |
+| `TestInvalidPublicKeys/P384/NotOnCurve` | pass | pass |
+| `TestInvalidPublicKeys/P521` | pass | pass |
+| `TestInvalidPublicKeys/P521/Compressed` | pass | pass |
+| `TestInvalidPublicKeys/P521/Infinity` | pass | pass |
+| `TestInvalidPublicKeys/P521/NotOnCurve` | pass | pass |
 | `TestKeyGeneration` | pass | pass |
 | `TestKeyGeneration/P224` | pass | pass |
 | `TestKeyGeneration/P256` | pass | pass |
@@ -52,6 +96,12 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestNonceSafety/P256/Generic` | pass | pass |
 | `TestNonceSafety/P384` | pass | pass |
 | `TestNonceSafety/P521` | pass | pass |
+| `TestParseAndBytesRoundTrip` | pass | pass |
+| `TestParseAndBytesRoundTrip/P224` | pass | pass |
+| `TestParseAndBytesRoundTrip/P256` | pass | pass |
+| `TestParseAndBytesRoundTrip/P256/Generic` | skip | skip |
+| `TestParseAndBytesRoundTrip/P384` | pass | pass |
+| `TestParseAndBytesRoundTrip/P521` | pass | pass |
 | `TestRFC6979` | pass | pass |
 | `TestRFC6979/P-224` | pass | pass |
 | `TestRFC6979/P-256` | pass | pass |

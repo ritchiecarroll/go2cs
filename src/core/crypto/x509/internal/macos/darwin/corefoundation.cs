@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //go:build darwin
 
-// Package macOS provides cgo-less wrappers for Core Foundation and
+// Package macos provides cgo-less wrappers for Core Foundation and
 // Security.framework, similarly to how package syscall provides access to
 // libSystem.dylib.
 namespace go.crypto.x509.@internal;
@@ -16,7 +16,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 
-partial class macOS_package {
+partial class macos_package {
 
 // Core Foundation linker flags for the external linker. See Issue 42459.
 //
@@ -44,7 +44,7 @@ public static @string CFStringToString(CFRef @ref) {
     }
     var b = CFDataToSlice(data);
     CFRelease(data);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // TimeToCFDateRef converts a time.Time into an apple CFDateRef.
@@ -67,7 +67,7 @@ public static CFRef BytesToCFData(slice<byte> b) {
         var ret = syscall(abi.FuncPCABI0(x509_CFDataCreate_trampoline), kCFAllocatorDefault, (uintptr)ᴋ0, (uintptr)len(b), 0, 0, 0D);
     System.GC.KeepAlive(ᴋ0);
     runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p));
-    return ((CFRef)ret);
+    return (CFRef)ret;
 }
 
 internal static partial void x509_CFDataCreate_trampoline();
@@ -82,7 +82,7 @@ public static CFString StringToCFString(@string s) {
     System.GC.KeepAlive(ᴋ1);
     /* isExternalRepresentation */
     runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p));
-    return ((CFString)ret);
+    return (CFString)ret;
 }
 
 internal static partial void x509_CFStringCreateWithBytes_trampoline();
@@ -148,7 +148,7 @@ internal static partial void x509_CFArrayGetCount_trampoline();
 //go:cgo_import_dynamic x509_CFArrayGetValueAtIndex CFArrayGetValueAtIndex "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static CFRef CFArrayGetValueAtIndex(CFRef Δarray, nint index) {
     var ret = syscall(abi.FuncPCABI0(x509_CFArrayGetValueAtIndex_trampoline), (uintptr)Δarray, (uintptr)index, 0, 0, 0, 0D);
-    return ((CFRef)ret);
+    return (CFRef)ret;
 }
 
 internal static partial void x509_CFArrayGetValueAtIndex_trampoline();
@@ -172,7 +172,7 @@ internal static partial void x509_CFRelease_trampoline();
 public static CFRef CFArrayCreateMutable() {
     var ret = syscall(abi.FuncPCABI0(x509_CFArrayCreateMutable_trampoline), kCFAllocatorDefault, 0, 0, 0, 0, 0D);
     /* kCFTypeArrayCallBacks */
-    return ((CFRef)ret);
+    return (CFRef)ret;
 }
 
 internal static partial void x509_CFArrayCreateMutable_trampoline();
@@ -187,7 +187,7 @@ internal static partial void x509_CFArrayAppendValue_trampoline();
 //go:cgo_import_dynamic x509_CFDateCreate CFDateCreate "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static CFRef CFDateCreate(float64 seconds) {
     var ret = syscall(abi.FuncPCABI0(x509_CFDateCreate_trampoline), kCFAllocatorDefault, 0, 0, 0, 0, seconds);
-    return ((CFRef)ret);
+    return (CFRef)ret;
 }
 
 internal static partial void x509_CFDateCreate_trampoline();
@@ -195,7 +195,7 @@ internal static partial void x509_CFDateCreate_trampoline();
 //go:cgo_import_dynamic x509_CFErrorCopyDescription CFErrorCopyDescription "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static CFRef CFErrorCopyDescription(CFRef errRef) {
     var ret = syscall(abi.FuncPCABI0(x509_CFErrorCopyDescription_trampoline), (uintptr)errRef, 0, 0, 0, 0, 0D);
-    return ((CFRef)ret);
+    return (CFRef)ret;
 }
 
 internal static partial void x509_CFErrorCopyDescription_trampoline();
@@ -216,7 +216,7 @@ public static (CFRef, error) CFStringCreateExternalRepresentation(CFRef strRef) 
     if (ret == 0) {
         return (0, errors.New(stringCanTBeRepresentedˢ));
     }
-    return (((CFRef)ret), default!);
+    return ((CFRef)ret, default!);
 }
 
 internal static partial void x509_CFStringCreateExternalRepresentation_trampoline();
@@ -235,4 +235,4 @@ public static void ReleaseCFArray(CFRef Δarray) {
     CFRelease(Δarray);
 }
 
-} // end macOS_package
+} // end macos_package

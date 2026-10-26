@@ -1,0 +1,14 @@
+w	worker	slice	seq	row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	banked	manifest_pins	cost_i9_s	reserved
+4	H	1	1	internal/coverage/slicewriter	PASS	1	214	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	215	0	yes	0	38	0
+4	H	1	2	iter	PASS	28	44	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	44	0	yes	0	39	0
+4	H	1	3	go/constant	PASS	9	55	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	55	0	yes	0	49	0
+4	H	1	4	io/fs	PASS	21	53	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	53	0	yes	0	49	0
+4	H	1	5	go/token	PASS	36	59	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	60	0	yes	0	59	0
+4	H	1	6	path/filepath	PASS	67	64	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	64	0	yes	0	66	0
+4	H	1	7	go/build	PASS	57	99	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	99	0	yes	1	73	0
+4	H	1	8	database/sql	PASS	141	209	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	209	0	yes	2	114	0
+4	H	1	9	math/big	PASS	248	129	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	130	0	yes	3	120	0
+4	H	1	10	crypto/internal/fips140/edwards25519	PASS	54	136	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	137	0	yes	0	139	0
+4	H	1	11	crypto/rsa	PASS	590	129	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	130	0	yes	1	141	0
+4	H	1	12	internal/trace	PASS	187	256	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	257	0	yes	0	286	0
+4	H	1	13	testing	PASS	83	84	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	84	0	yes	2	86	0

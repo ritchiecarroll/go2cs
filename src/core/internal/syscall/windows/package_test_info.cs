@@ -16,6 +16,8 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
+global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
+global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,10 +27,17 @@ using static global::go.@internal.syscall.windows_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
+[assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -38,7 +47,7 @@ using static global::go.@internal.syscall.windows_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABUegpSCgoKClJQACh6CgoKCgpSCgoKClII=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABkggpSCgoKClJQACh6CgoKCgpSCgoKClIIACQqCAAYSspKUgoKCgpS4poKClIKCgoK4gILsgoCCAAkIooKClIKClIKCpgAJGNySgMy2goAABxLE", "66-66:1;72-103:2;127-137:1", "", "161=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3")]
 [assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==")]
 // </GoSourcePositionMaps>
 
@@ -54,6 +63,7 @@ public static partial class windows_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct TestDeleteAt_testCases {}
     internal partial struct TestOpen_tests {}
     // </TypeAccessibility>
 
@@ -67,6 +77,7 @@ public static partial class windows_test_package
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.syscall.windows_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));

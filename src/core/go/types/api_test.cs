@@ -12,6 +12,7 @@ using token = global::go.go.token_package;
 using goversion = global::go.@internal.goversion_package;
 using testenv = global::go.@internal.testenv_package;
 using slices = slices_package;
+using sort = sort_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
@@ -22,6 +23,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using global::go.@internal;
 using global::go.go;
 using io = io_package;
+using iter = iter_package;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
 
@@ -102,37 +104,46 @@ public static void TestValuesInfo(ж<testing.T> Ꮡt) {
         new(@"package a3; const _ = 0."u8, @"0."u8, @"untyped float"u8, @"0"u8),
         new(@"package a4; const _ = 0i"u8, @"0i"u8, @"untyped complex"u8, @"(0 + 0i)"u8),
         new(@"package a5; const _ = ""foo"""u8, @"""foo"""u8, @"untyped string"u8, @"""foo"""u8),
+
         new(@"package b0; var _ = false"u8, @"false"u8, @"bool"u8, @"false"u8),
         new(@"package b1; var _ = 0"u8, @"0"u8, @"int"u8, @"0"u8),
         new(@"package b2; var _ = 'A'"u8, @"'A'"u8, @"rune"u8, @"65"u8),
         new(@"package b3; var _ = 0."u8, @"0."u8, @"float64"u8, @"0"u8),
         new(@"package b4; var _ = 0i"u8, @"0i"u8, @"complex128"u8, @"(0 + 0i)"u8),
         new(@"package b5; var _ = ""foo"""u8, @"""foo"""u8, @"string"u8, @"""foo"""u8),
+
         new(@"package c0a; var _ = bool(false)"u8, @"false"u8, @"bool"u8, @"false"u8),
         new(@"package c0b; var _ = bool(false)"u8, @"bool(false)"u8, @"bool"u8, @"false"u8),
         new(@"package c0c; type T bool; var _ = T(false)"u8, @"T(false)"u8, @"c0c.T"u8, @"false"u8),
+
         new(@"package c1a; var _ = int(0)"u8, @"0"u8, @"int"u8, @"0"u8),
         new(@"package c1b; var _ = int(0)"u8, @"int(0)"u8, @"int"u8, @"0"u8),
         new(@"package c1c; type T int; var _ = T(0)"u8, @"T(0)"u8, @"c1c.T"u8, @"0"u8),
+
         new(@"package c2a; var _ = rune('A')"u8, @"'A'"u8, @"rune"u8, @"65"u8),
         new(@"package c2b; var _ = rune('A')"u8, @"rune('A')"u8, @"rune"u8, @"65"u8),
         new(@"package c2c; type T rune; var _ = T('A')"u8, @"T('A')"u8, @"c2c.T"u8, @"65"u8),
+
         new(@"package c3a; var _ = float32(0.)"u8, @"0."u8, @"float32"u8, @"0"u8),
         new(@"package c3b; var _ = float32(0.)"u8, @"float32(0.)"u8, @"float32"u8, @"0"u8),
         new(@"package c3c; type T float32; var _ = T(0.)"u8, @"T(0.)"u8, @"c3c.T"u8, @"0"u8),
+
         new(@"package c4a; var _ = complex64(0i)"u8, @"0i"u8, @"complex64"u8, @"(0 + 0i)"u8),
         new(@"package c4b; var _ = complex64(0i)"u8, @"complex64(0i)"u8, @"complex64"u8, @"(0 + 0i)"u8),
         new(@"package c4c; type T complex64; var _ = T(0i)"u8, @"T(0i)"u8, @"c4c.T"u8, @"(0 + 0i)"u8),
+
         new(@"package c5a; var _ = string(""foo"")"u8, @"""foo"""u8, @"string"u8, @"""foo"""u8),
         new(@"package c5b; var _ = string(""foo"")"u8, @"string(""foo"")"u8, @"string"u8, @"""foo"""u8),
         new(@"package c5c; type T string; var _ = T(""foo"")"u8, @"T(""foo"")"u8, @"c5c.T"u8, @"""foo"""u8),
         new(@"package c5d; var _ = string(65)"u8, @"65"u8, @"untyped int"u8, @"65"u8),
         new(@"package c5e; var _ = string('A')"u8, @"'A'"u8, @"untyped rune"u8, @"65"u8),
         new(@"package c5f; type T string; var _ = T('A')"u8, @"'A'"u8, @"untyped rune"u8, @"65"u8),
+
         new(@"package d0; var _ = []byte(""foo"")"u8, @"""foo"""u8, @"string"u8, @"""foo"""u8),
         new(@"package d1; var _ = []byte(string(""foo""))"u8, @"""foo"""u8, @"string"u8, @"""foo"""u8),
         new(@"package d2; var _ = []byte(string(""foo""))"u8, @"string(""foo"")"u8, @"string"u8, @"""foo"""u8),
         new(@"package d3; type T []byte; var _ = T(""foo"")"u8, @"""foo"""u8, @"string"u8, @"""foo"""u8),
+
         new(@"package e0; const _ = float32( 1e-200)"u8, @"float32(1e-200)"u8, @"float32"u8, @"0"u8),
         new(@"package e1; const _ = float32(-1e-200)"u8, @"float32(-1e-200)"u8, @"float32"u8, @"0"u8),
         new(@"package e2; const _ = float64( 1e-2000)"u8, @"float64(1e-2000)"u8, @"float64"u8, @"0"u8),
@@ -141,6 +152,7 @@ public static void TestValuesInfo(ж<testing.T> Ꮡt) {
         new(@"package e5; const _ = complex64(-1e-200)"u8, @"complex64(-1e-200)"u8, @"complex64"u8, @"(0 + 0i)"u8),
         new(@"package e6; const _ = complex128( 1e-2000)"u8, @"complex128(1e-2000)"u8, @"complex128"u8, @"(0 + 0i)"u8),
         new(@"package e7; const _ = complex128(-1e-2000)"u8, @"complex128(-1e-2000)"u8, @"complex128"u8, @"(0 + 0i)"u8),
+
         new(@"package f0 ; var _ float32 =  1e-200"u8, @"1e-200"u8, @"float32"u8, @"0"u8),
         new(@"package f1 ; var _ float32 = -1e-200"u8, @"-1e-200"u8, @"float32"u8, @"0"u8),
         new(@"package f2a; var _ float64 =  1e-2000"u8, @"1e-2000"u8, @"float64"u8, @"0"u8),
@@ -153,6 +165,7 @@ public static void TestValuesInfo(ж<testing.T> Ꮡt) {
         new(@"package f7a; var _ complex128 = -1e-2000i"u8, @"-1e-2000i"u8, @"complex128"u8, @"(0 + 0i)"u8),
         new(@"package f6b; var _            =  1e-2000i"u8, @"1e-2000i"u8, @"complex128"u8, @"(0 + 0i)"u8),
         new(@"package f7b; var _            = -1e-2000i"u8, @"-1e-2000i"u8, @"complex128"u8, @"(0 + 0i)"u8),
+
         new(@"package g0; const (a = len([iota]int{}); b; c); const _ = c"u8, @"c"u8, @"int"u8, @"2"u8), // go.dev/issue/22341
         new(@"package g1; var(j int32; s int; n = 1.0<<s == j)"u8, @"1.0"u8, @"int32"u8, @"1"u8) // go.dev/issue/48422
     }.slice();
@@ -232,6 +245,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package n4; var _ chan int = nil"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n5; var _ interface{} = nil"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n6; import ""unsafe""; var _ unsafe.Pointer = nil"u8, @"nil"u8, @"untyped nil"u8),
+
         new(@"package n10; var (x *int; _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n11; var (x func(); _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n12; var (x []byte; _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
@@ -239,6 +253,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package n14; var (x chan int; _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n15; var (x interface{}; _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n15; import ""unsafe""; var (x unsafe.Pointer; _ = x == nil)"u8, @"nil"u8, @"untyped nil"u8),
+
         new(@"package n20; var _ = (*int)(nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n21; var _ = (func())(nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n22; var _ = ([]byte)(nil)"u8, @"nil"u8, @"untyped nil"u8),
@@ -246,6 +261,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package n24; var _ = (chan int)(nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n25; var _ = (interface{})(nil)"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n26; import ""unsafe""; var _ = unsafe.Pointer(nil)"u8, @"nil"u8, @"untyped nil"u8),
+
         new(@"package n30; func f(*int) { f(nil) }"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n31; func f(func()) { f(nil) }"u8, @"nil"u8, @"untyped nil"u8),
         new(@"package n32; func f([]byte) { f(nil) }"u8, @"nil"u8, @"untyped nil"u8),
@@ -378,6 +394,11 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         // go.dev/issue/47895
         new(@"package p; import ""unsafe""; type S struct { f int }; var s S; var _ = unsafe.Offsetof(s.f)"u8, @"s.f"u8, @"int"u8),
 
+        // go.dev/issue/74303. Note that interface field types are synthetic, so
+        // even though `func()` doesn't appear in the source, it appears in the
+        // syntax tree.
+        new(@"package p; type T interface { M(int) }"u8, @"func(int)"u8, @"func(int)"u8),
+
         // go.dev/issue/50093
         new(@"package u0a; func _[_ interface{int}]() {}"u8, @"int"u8, @"int"u8),
         new(@"package u1a; func _[_ interface{~int}]() {}"u8, @"~int"u8, @"~int"u8),
@@ -386,6 +407,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package u3a; func _[_ interface{int | string | ~bool}]() {}"u8, @"int | string"u8, @"int | string"u8),
         new(@"package u3a; func _[_ interface{int | string | ~bool}]() {}"u8, @"~bool"u8, @"~bool"u8),
         new(@"package u3a; func _[_ interface{int | string | ~float64|~bool}]() {}"u8, @"int | string | ~float64"u8, @"int | string | ~float64"u8),
+
         new(@"package u0b; func _[_ int]() {}"u8, @"int"u8, @"int"u8),
         new(@"package u1b; func _[_ ~int]() {}"u8, @"~int"u8, @"~int"u8),
         new(@"package u2b; func _[_ int | string]() {}"u8, @"int | string"u8, @"int | string"u8),
@@ -393,6 +415,7 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package u3b; func _[_ int | string | ~bool]() {}"u8, @"int | string"u8, @"int | string"u8),
         new(@"package u3b; func _[_ int | string | ~bool]() {}"u8, @"~bool"u8, @"~bool"u8),
         new(@"package u3b; func _[_ int | string | ~float64|~bool]() {}"u8, @"int | string | ~float64"u8, @"int | string | ~float64"u8),
+
         new(@"package u0c; type _ interface{int}"u8, @"int"u8, @"int"u8),
         new(@"package u1c; type _ interface{~int}"u8, @"~int"u8, @"~int"u8),
         new(@"package u2c; type _ interface{int | string}"u8, @"int | string"u8, @"int | string"u8),
@@ -408,12 +431,14 @@ public static void TestTypesInfo(ж<testing.T> Ꮡt) {
         new(@"package r4; var _ func(int, string) = g; func g[P, Q any](P, Q) {}"u8, @"g"u8, @"func(int, string)"u8),
         new(@"package r5; var _ func(int, string) = g[int]; func g[P, Q any](P, Q) {}"u8, @"g"u8, @"func[P, Q any](P, Q)"u8), // go.dev/issues/60212
         new(@"package r6; var _ func(int, string) = g[int]; func g[P, Q any](P, Q) {}"u8, @"g[int]"u8, @"func(int, string)"u8),
+
         new(@"package s1; func _() { f(g) }; func f(func(int)) {}; func g[P any](P) {}"u8, @"g"u8, @"func(int)"u8),
         new(@"package s2; func _() { f(g[int]) }; func f(func(int)) {}; func g[P any](P) {}"u8, @"g"u8, @"func[P any](P)"u8), // go.dev/issues/60212
         new(@"package s3; func _() { f(g[int]) }; func f(func(int)) {}; func g[P any](P) {}"u8, @"g[int]"u8, @"func(int)"u8),
         new(@"package s4; func _() { f(g) }; func f(func(int, string)) {}; func g[P, Q any](P, Q) {}"u8, @"g"u8, @"func(int, string)"u8),
         new(@"package s5; func _() { f(g[int]) }; func f(func(int, string)) {}; func g[P, Q any](P, Q) {}"u8, @"g"u8, @"func[P, Q any](P, Q)"u8), // go.dev/issues/60212
         new(@"package s6; func _() { f(g[int]) }; func f(func(int, string)) {}; func g[P, Q any](P, Q) {}"u8, @"g[int]"u8, @"func(int, string)"u8),
+
         new(@"package s7; func _() { f(g, h) }; func f[P any](func(int, P), func(P, string)) {}; func g[P any](P, P) {}; func h[P, Q any](P, Q) {}"u8, @"g"u8, @"func(int, int)"u8),
         new(@"package s8; func _() { f(g, h) }; func f[P any](func(int, P), func(P, string)) {}; func g[P any](P, P) {}; func h[P, Q any](P, Q) {}"u8, @"h"u8, @"func(int, string)"u8),
         new(@"package s9; func _() { f(g, h[int]) }; func f[P any](func(int, P), func(P, string)) {}; func g[P any](P, P) {}; func h[P, Q any](P, Q) {}"u8, @"h"u8, @"func[P, Q any](P, Q)"u8), // go.dev/issues/60212
@@ -620,6 +645,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
         new(@"package p4; func f[A, B any](A, *B, ...[]B) {}; func _() { f(1.2, new(byte)) }"u8,
             new TestInstanceInfo_testInst[]{new(@"f"u8, new @string[]{@"float64"u8, @"byte"u8}.slice(), @"func(float64, *byte, ...[]byte)"u8)}.slice()
         ),
+
         new(@"package s1; func f[T any, P interface{*T}](x T) {}; func _(x string) { f(x) }"u8,
             new TestInstanceInfo_testInst[]{new(@"f"u8, new @string[]{@"string"u8, @"*string"u8}.slice(), @"func(x string)"u8)}.slice()
         ),
@@ -639,6 +665,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
                 new(@"f"u8, new @string[]{@"int"u8, @"chan<- int"u8, @"chan<- []*chan<- int"u8}.slice(), @"func(x []int)"u8)
             }.slice()
         ),
+
         new(@"package t1; func f[T any, P interface{*T}]() T { panic(0) }; func _() { _ = f[string] }"u8,
             new TestInstanceInfo_testInst[]{new(@"f"u8, new @string[]{@"string"u8, @"*string"u8}.slice(), @"func() string"u8)}.slice()
         ),
@@ -662,6 +689,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
         new(@"package i0; import ""lib""; func _() { lib.F(42) }"u8,
             new TestInstanceInfo_testInst[]{new(@"F"u8, new @string[]{@"int"u8}.slice(), @"func(int)"u8)}.slice()
         ),
+
         new(@"package duplfunc0; func f[T any](T) {}; func _() { f(42); f(""foo""); f[int](3) }"u8,
             new TestInstanceInfo_testInst[]{
                 new(@"f"u8, new @string[]{@"int"u8}.slice(), @"func(int)"u8),
@@ -676,6 +704,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
                 new(@"F"u8, new @string[]{@"int"u8}.slice(), @"func(int)"u8)
             }.slice()
         ),
+
         new(@"package type0; type T[P interface{~int}] struct{ x P }; var _ T[int]"u8,
             new TestInstanceInfo_testInst[]{new(@"T"u8, new @string[]{@"int"u8}.slice(), @"struct{x int}"u8)}.slice()
         ),
@@ -691,6 +720,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
         new(@"package type4; import ""lib""; var _ lib.T[int]"u8,
             new TestInstanceInfo_testInst[]{new(@"T"u8, new @string[]{@"int"u8}.slice(), @"[]int"u8)}.slice()
         ),
+
         new(@"package dupltype0; type T[P interface{~int}] struct{ x P }; var x T[int]; var y T[int]"u8,
             new TestInstanceInfo_testInst[]{
                 new(@"T"u8, new @string[]{@"int"u8}.slice(), @"struct{x int}"u8),
@@ -1108,10 +1138,12 @@ public static void TestImplicitsInfo(ж<testing.T> Ꮡt) {
         new(@"package p2; import . ""fmt""; var _ = Println"u8, ""u8), // no Implicits entry
         new(@"package p0; import local ""fmt""; var _ = local.Println"u8, ""u8), // no Implicits entry
         new(@"package p1; import ""fmt""; var _ = fmt.Println"u8, "importSpec: package fmt"u8),
+
         new(@"package p3; func f(x interface{}) { switch x.(type) { case int: } }"u8, ""u8), // no Implicits entry
         new(@"package p4; func f(x interface{}) { switch t := x.(type) { case int: _ = t } }"u8, "caseClause: var t int"u8),
         new(@"package p5; func f(x interface{}) { switch t := x.(type) { case int, uint: _ = t } }"u8, "caseClause: var t interface{}"u8),
         new(@"package p6; func f(x interface{}) { switch t := x.(type) { default: _ = t } }"u8, "caseClause: var t interface{}"u8),
+
         new(@"package p7; func f(x int) {}"u8, ""u8), // no Implicits entry
         new(@"package p8; func f(int) {}"u8, "field: var  int"u8),
         new(@"package p9; func f() (complex64) { return 0 }"u8, "field: var  complex64"u8),
@@ -1922,6 +1954,7 @@ public static void TestSelection(ж<testing.T> Ꮡt) {
 
     var wantOut = new map<@string, array<@string>>{
         ["lib.T.M"u8] = new @string[]{"method expr (lib.T) M(lib.T)"u8, ".[0]"u8}.array(),
+
         ["A{}.B"u8] = new @string[]{"field (main.A) B *main.B"u8, ".[0]"u8}.array(),
         ["new(A).B"u8] = new @string[]{"field (*main.A) B *main.B"u8, "->[0]"u8}.array(),
         ["A{}.C"u8] = new @string[]{"field (main.A) C main.C"u8, ".[1]"u8}.array(),
@@ -1931,6 +1964,7 @@ public static void TestSelection(ж<testing.T> Ꮡt) {
         ["A{}.c"u8] = new @string[]{"field (main.A) c int"u8, ".[1 0]"u8}.array(),
         ["new(A).c"u8] = new @string[]{"field (*main.A) c int"u8, "->[1 0]"u8}.array(),
         ["Inst.p"u8] = new @string[]{"field (main.G[int]) p int"u8, ".[0]"u8}.array(),
+
         ["A{}.f"u8] = new @string[]{"method (main.A) f(int)"u8, "->[0 0]"u8}.array(),
         ["new(A).f"u8] = new @string[]{"method (*main.A) f(int)"u8, "->[0 0]"u8}.array(),
         ["A{}.g"u8] = new @string[]{"method (main.A) g()"u8, ".[1 0]"u8}.array(),
@@ -1942,6 +1976,7 @@ public static void TestSelection(ж<testing.T> Ꮡt) {
         ["new(C).g"u8] = new @string[]{"method (*main.C) g()"u8, "->[0]"u8}.array(),
         ["new(C).h"u8] = new @string[]{"method (*main.C) h()"u8, "->[1]"u8}.array(), // TODO(gri) should this report .[1] ?
         ["Inst.m"u8] = new @string[]{"method (main.G[int]) m(int)"u8, ".[0]"u8}.array(),
+
         ["A.f"u8] = new @string[]{"method expr (main.A) f(main.A, int)"u8, "->[0 0]"u8}.array(),
         ["(*A).f"u8] = new @string[]{"method expr (*main.A) f(*main.A, int)"u8, "->[0 0]"u8}.array(),
         ["B.f"u8] = new @string[]{"method expr (main.B) f(main.B, int)"u8, ".[0]"u8}.array(),
@@ -2431,6 +2466,7 @@ public static void TestIssue61737(ж<testing.T> Ꮡt) {
     //
     // It must be possible for importers to construct such invalid interfaces.
     // Previously, this panicked.
+
     var sig1 = NewSignatureType(nil, default!, default!, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжΔType(Typ[Int]))), nil, false);
     var sig2 = NewSignatureType(nil, default!, default!, NewTuple(NewParam(nopos, nil, ""u8, new types.BasicжΔType(Typ[ΔString]))), nil, false);
 
@@ -2762,8 +2798,8 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
         ref var counts = ref heap(new array<nint>(2), out var Ꮡcounts);              // method counts
         ref var methods = ref heap(new array<slice<@string>>(2), out var Ꮡmethods);                 // method strings
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
-        for (nint i = 0; i < 2; i++) {
-            nint iΔ1 = i;
+        for (nint iᴛ1 = 0; iᴛ1 < 2; iᴛ1++) {
+            var i = iᴛ1;
             Ꮡwg.Add(1);
             var instʗ1 = inst;
             goǃ(() => {
@@ -2771,9 +2807,9 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
 
-                    Ꮡcounts.Value[iΔ1] = instʗ1.NumMethods();
-                    for (nint mi = 0; mi < Ꮡcounts.Value[iΔ1]; mi++) {
-                        Ꮡmethods.Value[iΔ1] = append(Ꮡmethods.Value[iΔ1], instʗ1.Method(mi).String());
+                    Ꮡcounts.Value[i] = instʗ1.NumMethods();
+                    for (nint mi = 0; mi < Ꮡcounts.Value[i]; mi++) {
+                        Ꮡmethods.Value[i] = append(Ꮡmethods.Value[i], instʗ1.Method(mi).String());
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2822,8 +2858,8 @@ public static void TestInstantiateErrors(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Instantiate(%v, %v) returned nil error, want non-nil"u8, T.OrTypedNil(), test.targs);
         }
 
-        ref var argErr = ref heap<ж<types.ArgumentError>>(out var ᏑargErr);
-        if (!errors.As(err, ᏑargErr)) {
+        var (argErr, ok) = errors.AsType<ж<types.ArgumentError>>(err);
+        if (!ok) {
             Ꮡt.Fatalf("Instantiate(%v, %v): error is not an *ArgumentError"u8, T.OrTypedNil(), test.targs);
         }
 
@@ -2841,8 +2877,8 @@ public static void TestArgumentErrorUnwrapping(ж<testing.T> Ꮡt) {
         Index: 1,
         Err: new typesꓸError(Msg: "test"u8)
     )));
-    ref var e = ref heap(new typesꓸError(), out var Ꮡe);
-    if (!errors.As(err, Ꮡe)) {
+    var (e, ok) = errors.AsType<typesꓸError>(err);
+    if (!ok) {
         Ꮡt.Fatalf("error %v does not wrap types.Error"u8, err);
     }
     if (e.Msg != "test"u8) {
@@ -2978,13 +3014,14 @@ public static void TestInstantiatedObjects(ж<testing.T> Ꮡt) {
         return true;
     });
 
-    foreach (var (_, test) in tests) {
-        ref var testΔ1 = ref heap<TestInstantiatedObjects_tests>(out var ᏑtestΔ1);
-        testΔ1 = test;
+    foreach (var (_, vᴛ1) in tests) {
+        ref var test = ref heap(new TestInstantiatedObjects_tests(), out var Ꮡtest);
+        test = vᴛ1;
+
         var identsʗ2 = idents;
         var infoʗ1 = info;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.name, (ж<testing.T> tΔ1) => {
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
             {
                 nint got = len(identsʗ2[testʗ1.name]); if (got != 1) {
                     tΔ1.Fatalf("found %d identifiers named %s, want 1"u8, got, testʗ1.name);
@@ -3539,8 +3576,6 @@ public static void TestAnyHijacking_Lookup(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string godebugˢ = "GODEBUG"u8;
-internal static readonly @string gotypesalias1ˢ = "gotypesalias=1"u8;
 internal static readonly @string gotypesalias0ˢ = "gotypesalias=0"u8;
 
 internal static void setGotypesalias(ж<testing.T> Ꮡt, bool enable) {
@@ -3616,6 +3651,121 @@ public static void TestVersionWithoutPos(ж<testing.T> Ꮡt) {
     @string want = rangeOverSVariableOfTypeˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("check error was %q, want substring %q"u8, got, want);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object packagePVarGlobalIntTypeˢ = (@string)"""
+package p
+
+var global int
+
+type T struct { field int }
+
+func (recv T) f(param int) (result int) {
+	var local int
+	local2 := 0
+	switch local3 := any(local).(type) {
+	default:
+		_ = local3
+	}
+	return local2
+}
+
+"""u8.Raw();
+
+public static void TestVarKind(ж<testing.T> Ꮡt) {
+    var fset = token.NewFileSet();
+    var (f, _) = parser.ParseFile(fset, aGoˢ, packagePVarGlobalIntTypeˢ, 0);
+
+    var pkg = NewPackage("p"u8, "p"u8);
+    var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+    var check = NewChecker(Ꮡ(new Config(nil)), fset, pkg, info);
+    {
+        var err = check.Files(new ж<ast.File>[]{f}.slice()); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+    slice<@string> got = default!;
+    foreach (var (_, obj) in (~info).Defs) {
+        {
+            var (v, ok) = obj._<ж<types.Var>>(ᐧ); if (ok) {
+                got = append(got, fmt.Sprintf("%s: %v"u8, v.Name(), v.Kind()));
+            }
+        }
+    }
+    sort.Strings(got);
+    var want = new @string[]{
+        "field: FieldVar"u8,
+        "global: PackageVar"u8,
+        "local2: LocalVar"u8,
+        "local: LocalVar"u8,
+        "param: ParamVar"u8,
+        "recv: RecvVar"u8,
+        "result: ResultVar"u8
+    }.slice();
+    if (!slices.Equal<slice<@string>, @string>(got, want)) {
+        Ꮡt.Errorf("got:\n%s\nwant:\n%s"u8, got, want);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string funcByteByteByteˢ = "func([]byte, ...byte) []byte"u8;
+internal static readonly @string funcBytePBByteˢ = "func([]byte, p.B...) []byte"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ12 = """
+package p
+
+func f[T ~[]byte](y T) []byte { return append([]byte(nil), y...) }
+
+type B []byte
+var _ = f[B]
+
+"""u8.Raw();
+
+public static void TestIssue73871(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ12;
+    var fset = token.NewFileSet();
+    var (f, _) = parser.ParseFile(fset, pGoˢ, src, 0);
+
+    var pkg = NewPackage("p"u8, "p"u8);
+    var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
+    var check = NewChecker(Ꮡ(new Config(nil)), fset, pkg, info);
+    {
+        var err = check.Files(new ж<ast.File>[]{f}.slice()); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+
+    // Check type inferred for 'append'.
+    //
+    // Before CL 688815, the inferred type of append's y parameter
+    // was T. When a client such as x/tools/go/ssa instantiated T=B,
+    // it would result in the Signature "func([]byte, B)" with the
+    // variadic flag set, an invalid combination that caused
+    // NewSignatureType to panic.
+    var append = (~(~(~(~f).Decls[0]._<ж<ast.FuncDecl>>()).Body).List[0]._<ж<ast.ReturnStmt>>()).Results[0]._<ж<ast.CallExpr>>().Value.Fun;
+    var tAppend = info.TypeOf(append)._<ж<typesꓸSignature>>();
+    {
+        @string got = fmt.Sprint(tAppend.OrTypedNil());
+        @string want = funcByteByteByteˢ; if (got != want) {
+            // Before CL 688815, tAppend was func([]byte, T) []byte,
+            // where T prints as "<expected string type>".
+            Ꮡt.Errorf("append: got type %s, want %s"u8, got, want);
+        }
+    }
+
+    // Instantiate the type inferred for append(...) at T=B.
+    // Before the fix in CL 689277, NewSignatureType would panic.
+    var @params = slices.Collect(tAppend.Params().Variables());
+    @params[1] = NewVar(token.NoPos, pkg, ""u8, pkg.Scope().Lookup("B"u8).Type());
+    var sig = NewSignatureType(nil, default!, default!, NewTuple(@params.ꓸꓸꓸ), tAppend.Results(), true);
+    {
+        @string got = fmt.Sprint(sig.OrTypedNil());
+        @string want = funcBytePBByteˢ; if (got != want) {
+            Ꮡt.Errorf("instantiated: got type %s, want %s"u8, got, want);
+        }
     }
 }
 

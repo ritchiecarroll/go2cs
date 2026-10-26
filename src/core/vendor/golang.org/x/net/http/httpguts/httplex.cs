@@ -12,7 +12,7 @@ using unicode;
 
 partial class httpguts_package {
 
-internal static array<bool> isTokenTable = new array<bool>(256){
+[GoLazy] partial class lazyᴛisTokenTable { internal static array<bool> isTokenTable = new array<bool>(256){
     [(rune)'!'] = true,
     [(rune)'#'] = true,
     [(rune)'$'] = true,
@@ -90,7 +90,7 @@ internal static array<bool> isTokenTable = new array<bool>(256){
     [(rune)'z'] = true,
     [(rune)'|'] = true,
     [(rune)'~'] = true
-};
+}; }
 
 public static bool IsTokenRune(rune r) {
     return r < utf8.RuneSelf && isTokenTable[(byte)r];
@@ -231,17 +231,20 @@ public static bool ValidHostHeader(@string h) {
 }
 
 // See the validHostHeader comment.
-internal static array<bool> validHostByte = new array<bool>(256){
+[GoLazy] partial class lazyᴛvalidHostByte { internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)'0'] = true, [(rune)'1'] = true, [(rune)'2'] = true, [(rune)'3'] = true, [(rune)'4'] = true, [(rune)'5'] = true, [(rune)'6'] = true, [(rune)'7'] = true,
     [(rune)'8'] = true, [(rune)'9'] = true,
+
     [(rune)'a'] = true, [(rune)'b'] = true, [(rune)'c'] = true, [(rune)'d'] = true, [(rune)'e'] = true, [(rune)'f'] = true, [(rune)'g'] = true, [(rune)'h'] = true,
     [(rune)'i'] = true, [(rune)'j'] = true, [(rune)'k'] = true, [(rune)'l'] = true, [(rune)'m'] = true, [(rune)'n'] = true, [(rune)'o'] = true, [(rune)'p'] = true,
     [(rune)'q'] = true, [(rune)'r'] = true, [(rune)'s'] = true, [(rune)'t'] = true, [(rune)'u'] = true, [(rune)'v'] = true, [(rune)'w'] = true, [(rune)'x'] = true,
     [(rune)'y'] = true, [(rune)'z'] = true,
+
     [(rune)'A'] = true, [(rune)'B'] = true, [(rune)'C'] = true, [(rune)'D'] = true, [(rune)'E'] = true, [(rune)'F'] = true, [(rune)'G'] = true, [(rune)'H'] = true,
     [(rune)'I'] = true, [(rune)'J'] = true, [(rune)'K'] = true, [(rune)'L'] = true, [(rune)'M'] = true, [(rune)'N'] = true, [(rune)'O'] = true, [(rune)'P'] = true,
     [(rune)'Q'] = true, [(rune)'R'] = true, [(rune)'S'] = true, [(rune)'T'] = true, [(rune)'U'] = true, [(rune)'V'] = true, [(rune)'W'] = true, [(rune)'X'] = true,
     [(rune)'Y'] = true, [(rune)'Z'] = true,
+
     [(rune)'!'] = true, // sub-delims
     [(rune)'$'] = true, // sub-delims
     [(rune)'%'] = true, // pct-encoded (and used in IPv6 zones)
@@ -261,7 +264,7 @@ internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)']'] = true,
     [(rune)'_'] = true, // unreserved
     [(rune)'~'] = true // unreserved
-};
+}; }
 
 // ValidHeaderFieldValue reports whether v is a valid "field-value" according to
 // http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2 :

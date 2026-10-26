@@ -196,7 +196,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     return b.String();
 }
 
-internal static slice<@string> cssReplacementTable = new slice<@string>(126){
+[GoLazy] partial class lazyᴛcssReplacementTable { internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [0] = @"\0"u8,
     [(rune)'\t'] = @"\9"u8,
     [(rune)'\n'] = @"\a"u8,
@@ -218,7 +218,7 @@ internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [(rune)'\\'] = @"\\"u8,
     [(rune)'{'] = @"\7b"u8,
     [(rune)'}'] = @"\7d"u8
-};
+}; }
 
 internal static slice<byte> expressionBytes = slice<byte>("expression"u8);
 
@@ -231,6 +231,7 @@ internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 // and anything that might execute scripts.
 internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
+    var idᴷ = new stackAppend<byte>();
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     if (t == contentTypeCSS) {
@@ -264,7 +265,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
         }
         default: {
             if (c < utf8.RuneSelf && isCSSNmchar((rune)c)) {
-                id = append(id, c);
+                id = append(idᴷ, id, c);
             }
             break;
         }}
@@ -273,7 +274,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes)) {
         return filterFailsafe;
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end template_package

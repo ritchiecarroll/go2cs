@@ -41,6 +41,13 @@
     <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
   </PropertyGroup>
 
+  <!-- The CONTROL arm of src/tests/Performance/run-shell-churn-bound.ps1: AdapterBinder's shell cache
+       compiled out, so the gate compares the tree against no cache at all on the same box. Nothing
+       else sets this property. -->
+  <PropertyGroup Condition="'$(Go2csNoShellCache)'=='true'">
+    <DefineConstants>$(DefineConstants);GO2CS_NO_SHELL_CACHE</DefineConstants>
+  </PropertyGroup>
+
   <!-- USERPROFILE is a Windows-only environment variable; HOME is its POSIX counterpart. Every
        CONVERTED project inherits this fallback from csproj-template.xml, but golib.csproj is
        hand-written and never regenerated, so it was the one project in the tree without it: a
@@ -72,6 +79,8 @@
     <None Include="buildTransitive/go.lib.targets" Pack="true" PackagePath="buildTransitive/" />
     <!-- Imported by go.lib.targets: the symbol files beside a single-file host, on every publish. -->
     <None Include="buildTransitive/go.lib.symbols.targets" Pack="true" PackagePath="buildTransitive/" />
+    <!-- Imported by go.lib.targets: a packed converted package's own usings, build/<PackageId>.props. -->
+    <None Include="buildTransitive/go.lib.pack.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
   <ItemGroup>

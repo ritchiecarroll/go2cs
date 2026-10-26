@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 	"unicode"
@@ -52,11 +53,15 @@ func hasDuplicateBlankParams(parameters *types.Tuple) bool {
 	return false
 }
 
-// bodyUsesBlankDiscard reports whether the function's body contains a `_ = …` discard
-// (single or tuple position). A LONE blank param normally keeps the literal `_` name
-// (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
+// bodyUsesBlankDiscard reports whether the function's body emits a bare C# `_` discard: a
+// `_ = …` assignment (single or tuple position), or a select case that receives and drops the
+// value (`case <-ch:`, emitted `selᴛN.ꟷᐳ(out _)`). A LONE blank param normally keeps the
+// literal `_` name (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
 // encoding/binary's bounds-check hints (`_ = b[7]`) assigned a byte to the blank
-// littleEndian receiver (CS0029 ×12), so such functions synthesize blank names instead.
+// littleEndian receiver (CS0029 ×12), and net/http's transport_dial_test closure
+// `func(_ context.Context, …)` bound `out _` to that Context (CS1503) — so such functions
+// synthesize blank names instead. The walk includes nested function literals, which are
+// emitted inside the function and see its parameters.
 func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	if funcDecl == nil || funcDecl.Body == nil {
 		return false
@@ -65,9 +70,17 @@ func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	found := false
 
 	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
-		if assign, ok := node.(*ast.AssignStmt); ok {
-			for _, lhs := range assign.Lhs {
+		switch node := node.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
 				if ident, ok := lhs.(*ast.Ident); ok && ident.Name == "_" {
+					found = true
+					return false
+				}
+			}
+		case *ast.CommClause:
+			if exprStmt, ok := node.Comm.(*ast.ExprStmt); ok {
+				if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
 					found = true
 					return false
 				}
@@ -333,7 +346,11 @@ func (v *Visitor) noInliningPrefix(fnObj types.Object) string {
 func (v *Visitor) litNoInliningPrefix(funcLit *ast.FuncLit) string {
 	needsIt := literalCallsSkipCountedRuntimeCaller(v.info, funcLit) ||
 		(funcLit.Body != nil && callsSkipCountedWalker(v.info, funcLit.Body)) ||
-		executesGoStatement(funcLit.Body)
+		executesGoStatement(funcLit.Body) ||
+		// A literal ending in a call through a function value whose target observes its caller (`func(t *testing.T) {
+		// check(t, x) }` where check is a t.Helper closure) keeps its frame against the tail call, as a declaration
+		// does (markTailCalledObservingValues; the tail-call seat's lever B).
+		tailCallsObservingValue(v.info, funcLit.Body, v.needsNoInlining)
 
 	if !needsIt {
 		if target := thinForwarderTarget(v.info, v.pkg, funcLit.Body); target != nil {
@@ -357,6 +374,12 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 	// A parameter/result's own anonymous-struct or -interface type is externally significant
 	// across function scopes (see liftAtCallBoundary's doc comment) — set for both loops below.
 	v.liftAtCallBoundary = true
+
+	// An INLINE constraint carrying methods (`func Show[T interface{ Name() string }]`) lifts like
+	// an anonymous parameter interface, before anything in the signature can name it.
+	v.indentLevel++
+	v.liftTypeParamConstraints(funcDecl.Type.TypeParams, "", nil, funcDecl.Name.Name)
+	v.indentLevel--
 
 	// Loop through function results to check if any are structs
 	if funcDecl.Type.Results != nil {
@@ -407,6 +430,72 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 	}
 
 	v.liftAtCallBoundary = false
+}
+
+// liftTypeParamConstraints lifts each ANONYMOUS inline constraint that carries methods in a type
+// parameter list — `[T interface{ Name() string }]`, `[T interface{ ~int; String() string }]` — to a
+// named interface, exactly as an anonymous parameter interface is lifted (visitInterfaceType), named
+// `<declaration>_<parameter>`. Before this, getGenericDefinition named such a constraint by its Go
+// text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
+// down; a NAMED constraint takes the same arms with a name, so lifting is what gives the inline form
+// every arm the named form already has. A constraint naming the declaration's own parameters
+// (`[T interface{ Less(T) bool }]`) lifts generic over the ones it captures (liftCapturedTypeParams).
+// Operator-only type sets (`interface{ ~int | ~string }`) carry no methods and are not lifted: their
+// arm lifts operator constraints instead and never names the interface.
+//
+// owner names a generic TYPE (`Box` for `type Box[T interface{…}]`), which lifts at package level,
+// outside any function; a function's lifts are prefixed with its name by visitInterfaceType. A type's
+// lift is also registered by DECLARATION (registerConstraintLift): each of its methods reaches the
+// constraint as the receiver's own copy, a different object, and a lift that captures a parameter is
+// never registered by signature (its `T` means something else in every declaration). A lift that
+// captures a parameter is PUBLISHED by declaration instead, under goOwner, the declaration's Go name
+// (publishInlineConstraintLift), so another package instantiating it can name the lift too.
+func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner string, ownerType *types.Named, goOwner string) {
+	if typeParams == nil || len(typeParams.List) == 0 {
+		return
+	}
+
+	index := 0
+
+	for _, field := range typeParams.List {
+		first := index
+		index += len(field.Names)
+		interfaceType, ok := ast.Unparen(field.Type).(*ast.InterfaceType)
+
+		if !ok || len(field.Names) == 0 || v.liftedTypeExists(interfaceType) {
+			continue
+		}
+
+		iface, ok := v.info.TypeOf(interfaceType).(*types.Interface)
+
+		if !ok || iface.NumMethods() == 0 {
+			continue
+		}
+
+		// `[A, B interface{…}]` shares one constraint expression, so it lifts once, under the first.
+		name := field.Names[0].Name
+
+		if len(owner) > 0 {
+			name = owner + "_" + name
+		}
+
+		liftName := v.visitInterfaceType(interfaceType, iface, name, nil, true, nil)
+
+		// Every instantiation reads this declared constraint object (inlineConstraintNamed).
+		registerConstraintLift(inlineConstraintKey(iface), liftName)
+
+		if ownerType != nil {
+			for i := first; i < index; i++ {
+				registerConstraintLift(constraintLiftKey(ownerType, i), liftName)
+			}
+		}
+
+		if len(liftCapturedTypeParams(iface)) > 0 {
+			for i := first; i < index; i++ {
+				publishInlineConstraintLift(goOwner, i, liftName)
+			}
+		}
+	}
 }
 
 // manualSignatureLiftPrefix answers the lifted-type declarations a MANUAL declaration's signature
@@ -559,6 +648,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// for the same reason: the declaration, the use inside the body and every call site must read
 	// ONE source or the emitted arities disagree. See descriptorCompanion.go.
 	v.currentFuncCompanionNames = v.collectDescriptorCompanions(currentFuncType)
+
+	// A type parameter whose zero value this declaration builds, and that an own-package
+	// instantiation passes an ARRAY, gains an ARRAY-DIMS COMPANION carrying the length C# cannot
+	// keep in the type. One source for the declaration, the body and the call sites, as above. See
+	// arrayDimsCompanion.go.
+	v.currentFuncArrayDimsNames = v.collectArrayDimsCompanions(currentFuncType)
 
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
@@ -991,6 +1086,18 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
 					// force the signature rebuild even if this leaves implicitPointers empty.
 					skippedDeadPointerAlias = true
+
+					// A defer→finally lowered call is not in the body text this scan reads, so it
+					// can still name the alias (`p.handleTransientRelease()`, a `ref Process`
+					// method, after a body that reached p only through the box — os's
+					// pidfd_linux.go). Record the box path as the live arm below does, so the
+					// finally re-roots the call on the box instead of naming an undeclared `p`
+					// (CS0103).
+					if v.entryAliasBoxPaths == nil {
+						v.entryAliasBoxPaths = map[string]string{}
+					}
+
+					v.entryAliasBoxPaths[getSanitizedIdentifier(analyzedName)] = fmt.Sprintf("%s%s.%s", AddressPrefix, param.Name(), NilDeferringDerefAccessor)
 					continue
 				}
 
@@ -1109,6 +1216,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 		// The prelude's parts are written line after line, and one blank line sets the whole prelude
 		// apart from the Go body (the owner's decision 2, docs/PLAN-comment-and-spacing-parity.md E2).
+		//
+		// A function that calls recover() takes golib's deferred-call mark FIRST, before anything it calls could
+		// take it: Go's direct-call rule (recoverForms.go).
+		if local, ok := packageRecovererFlagNames[funcDecl]; ok {
+			blockPrefix += fmt.Sprintf("%s%svar %s = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?", v.newline, v.indent(v.indentLevel+1), local)
+		}
+
 		blockPrefix += resultParameters.String()
 		blockPrefix += arrayClones.String()
 		blockPrefix += implicitPointers.String()
@@ -1127,6 +1241,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// the box was created outside the wrapper; body statements keep referencing the plain
 		// name through this ref alias, exactly like a deref'd pointer parameter.
 		blockPrefix += namedResultAliases.String()
+
+		// Go's stack backing store for each qualifying append variable this function declares, at entry, where
+		// Go keeps the buffer and its used flag (stackAppendHints.go).
+		blockPrefix += v.stackAppendBufferPrologue(funcDecl, v.indentLevel+1)
 
 		if blockPrefix != "" {
 			blockPrefix += v.newline
@@ -1517,6 +1635,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.writeOutputLn(";")
 		}
 	} else {
+		v.outputBuilder.WriteString(v.newline)
+	}
+
+	// The phantom dims structs this declaration's call sites pass to its array-dims companions, each
+	// declared once per package, after the first function that needs it (arrayDimsCompanion.go).
+	if dimsTypes := v.arrayDimsTypeDeclarations(currentFuncType); dimsTypes != "" {
+		v.outputBuilder.WriteString(dimsTypes)
 		v.outputBuilder.WriteString(v.newline)
 	}
 
@@ -2187,6 +2312,15 @@ var linknameForwardTargets = map[string]bool{
 	// adds a `time` project reference to time/tzdata, which is acyclic: time imports no subpackage
 	// of itself.
 	"time.registerLoadFromEmbeddedTZData": true,
+	// testing/cryptotest's two pulls, both Go 1.26 (rand.go's SetGlobalRandom calls them in order):
+	// `//go:linkname testingCheckParallel testing.checkParallel` reaches the HAND-OWNED testing host's
+	// public checkParallel (testing.cs, Go's parallel-conflict refusal), and `//go:linkname
+	// randSetTestingReader crypto/internal/rand.SetTestingReader` reaches ORDINARY CONVERTED Go, authorized
+	// by the matching one-arg handle in crypto/internal/rand/rand.go. Without them both stayed throwing
+	// stubs, and TestSetGlobalRandom's seven leaves read as infrastructure errors (NotImplementedException).
+	// Neither target imports testing/cryptotest, so the project references they add are acyclic.
+	"testing.checkParallel":                 true,
+	"crypto/internal/rand.SetTestingReader": true,
 	// runtime's fcntl, pulled by internal/syscall/unix's fcntl_unix.go
 	// (`//go:linkname fcntl runtime.fcntl` over a bodyless `func fcntl(fd, cmd, arg int32) (int32,
 	// int32)`), and authorized by the matching one-arg handle in runtime/linkname_unix.go. Like the
@@ -2376,6 +2510,32 @@ var linknameForwardTargets = map[string]bool{
 	"syscall.fstatat":   true,
 	"syscall.ioctlPtr":  true,
 	"syscall.writev":    true,
+	// NOT HERE: runtime.traceClockNow (runtime/trace/recorder.go). The handle exists, but the target
+	// returns runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
+	// would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
+	//
+	// NOT HERE: runtime.rand, pulled as runtime_rand by net, os, math/rand, math/rand/v2 and (Go 1.26)
+	// unique. Each puller bodies it in a hand-owned companion over Random.Shared. A forward would collide
+	// with those bodies (CS0757), and runtime.rand reads getg().m.chacha8, whose m the managed getg mints
+	// per goroutine with an unseeded ChaCha8 state, so every goroutine would draw the same sequence.
+	// syscall's utimensat, pulled at Go 1.26 by internal/syscall/unix/utimes.go (`//go:linkname
+	// Utimensat syscall.utimensat`, built on every unix), whose one caller is os.Root's Chtimes
+	// (root_unix.go). ORDINARY CONVERTED Go on both unix targets: a generated libc wrapper on darwin
+	// and a raw SYS_UTIMENSAT on linux. The one-arg handle is in syscall_darwin.go ONLY, so linux
+	// widens it through linknameForwardHandleElsewhere below. No new project reference.
+	"syscall.utimensat": true,
+}
+
+// linknameForwardHandleElsewhere names linknameForwardTargets rows that packageFuncAccess widens
+// WITHOUT the one-arg handle in the files being converted, because Go's handle for the symbol is in a
+// file that builds for another target. Go's linker requires that handle only for a pull from outside
+// the standard library, and these pullers are std packages, so the pull is authorized on every target
+// where it builds; the converter, reading one target's files, sees the handle on some targets and not
+// others. Keyed by the forward row; the value records where the handle is and where it is missing.
+// TestLinknameForwardHandlesCoverEveryPullingTarget requires every row whose puller builds where the
+// handle does not to be here, and every entry here to still need it.
+var linknameForwardHandleElsewhere = map[string]string{
+	"syscall.utimensat": "handle in syscall_darwin.go; linux builds internal/syscall/unix/utimes.go with none",
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not

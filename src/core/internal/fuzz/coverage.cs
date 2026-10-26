@@ -22,14 +22,8 @@ public static void ResetCoverage() {
 // multiple values for each counter by OR'ing them together.
 public static void SnapshotCoverage() {
     var cov = coverage();
-    foreach (var (i, vᴛ1) in cov) {
-        var b = vᴛ1;
-
-        b |= (byte)((b >> (int)(1)));
-        b |= (byte)((b >> (int)(2)));
-        b |= (byte)((b >> (int)(4)));
-        b -= (byte)((b >> (int)(1)));
-        coverageSnapshot[i] = b;
+    foreach (var (i, b) in cov) {
+        coverageSnapshot[i] = pow2Table[b];
     }
 }
 
@@ -40,7 +34,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
         throw panic(fmt.Sprintf("the number of coverage bits changed: before=%d, after=%d"u8, len(@base), len(snapshot)));
     }
     var found = false;
-    foreach (var (i, _) in snapshot) {
+    foreach (var i in range(snapshot)) {
         if ((byte)(snapshot[i] & ~@base[i]) != 0) {
             found = true;
             break;
@@ -50,7 +44,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
         return default!;
     }
     var diff = new slice<byte>(len(snapshot));
-    foreach (var (i, _) in diff) {
+    foreach (var i in range(diff)) {
         diff[i] = (byte)(snapshot[i] & ~@base[i]);
     }
     return diff;
@@ -60,7 +54,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
 // set in base.
 internal static nint countNewCoverageBits(slice<byte> @base, slice<byte> snapshot) {
     nint n = 0;
-    foreach (var (i, _) in snapshot) {
+    foreach (var i in range(snapshot)) {
         n += bits.OnesCount8((uint8)((byte)(snapshot[i] & ~@base[i])));
     }
     return n;
@@ -80,7 +74,7 @@ internal static bool isCoverageSubset(slice<byte> @base, slice<byte> snapshot) {
 // hasCoverageBit returns true if snapshot has at least one bit set that is
 // also set in base.
 internal static bool hasCoverageBit(slice<byte> @base, slice<byte> snapshot) {
-    foreach (var (i, _) in snapshot) {
+    foreach (var i in range(snapshot)) {
         if ((byte)(snapshot[i] & @base[i]) != 0) {
             return true;
         }
@@ -108,5 +102,19 @@ internal static ж<array<byte>> Ꮡ_counters = new StandardBox<array<byte>>(new 
 internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
 internal static ж<array<byte>> Ꮡ_ecounters = new StandardBox<array<byte>>(new array<byte>(0));
 internal static ref array<byte> _ecounters => ref Ꮡ_ecounters.Value;
+
+// lookup table for faster power of two rounding
+internal static array<byte> pow2Table = new(256);
+
+[GoInit] internal static void init() {
+    foreach (var i in range(pow2Table)) {
+        var b = (byte)i;
+        b |= (byte)((b >> 1));
+        b |= (byte)((b >> 2));
+        b |= (byte)((b >> 4));
+        b -= (byte)((b >> 1));
+        pow2Table[i] = b;
+    }
+}
 
 } // end fuzz_package

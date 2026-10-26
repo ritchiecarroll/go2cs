@@ -37,9 +37,13 @@ internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
 
 public static void TestCompare(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in compareTests) {
-        nint cmp = Compare(tt.a, tt.b);
-        if (cmp != tt.i) {
-            Ꮡt.Errorf(@"Compare(%q, %q) = %v"u8, tt.a, tt.b, cmp);
+        nint numShifts = 16;
+        for (nint offset = 0; offset <= numShifts; offset++) {
+            @string shiftedB = (Repeat("*"u8, offset) + tt.b).slice(offset);
+            nint cmp = Compare(tt.a, shiftedB);
+            if (cmp != tt.i) {
+                Ꮡt.Errorf(@"Compare(%q, %q), offset %d = %v; want %v"u8, tt.a, tt.b, offset, cmp, tt.i);
+            }
         }
     }
 }
@@ -59,18 +63,20 @@ public static void TestCompareIdenticalString(ж<testing.T> Ꮡt) {
 }
 
 public static void TestCompareStrings(ж<testing.T> Ꮡt) {
+    var lengthsᴷ = new stackAppend<nint>();
+
     // unsafeString converts a []byte to a string with no allocation.
     // The caller must not modify b while the result string is in use.
     @string unsafeString(slice<byte> bΔ1) => @unsafe.String(@unsafe.SliceData(bΔ1), len(bΔ1));
 
     var lengths = new slice<nint>(0); // lengths to test in ascending order
     for (nint i = 0; i <= 128; i++) {
-        lengths = append(lengths, i);
+        lengths = append(lengthsᴷ, lengths, i);
     }
-    lengths = append(lengths, (nint)(256), (nint)(512), (nint)(1024), (nint)(1333), (nint)(4095), (nint)(4096), (nint)(4097));
+    lengths = append(lengths, (nint)256, (nint)512, (nint)1024, (nint)1333, (nint)4095, (nint)4096, (nint)4097);
 
     if (!testing.Short() || testenv.Builder() != ""u8) {
-        lengths = append(lengths, (nint)(65535), (nint)(65536), (nint)(65537), (nint)(99999));
+        lengths = append(lengths, (nint)65535, (nint)65536, (nint)65537, (nint)99999);
     }
 
     nint n = lengths[len(lengths) - 1];

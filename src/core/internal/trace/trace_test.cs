@@ -10,6 +10,7 @@ using race = go.@internal.race_package;
 using testenv = go.@internal.testenv_package;
 using Δtrace = go.@internal.trace_package;
 using testtrace = go.@internal.trace.testtrace_package;
+using version = go.@internal.trace.version_package;
 using io = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
@@ -17,6 +18,7 @@ using Δruntime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using context = context_package;
 using exec = go.os.exec_package;
 using go.@internal;
 using go.@internal.trace;
@@ -37,15 +39,15 @@ internal partial struct TestTraceAnnotations_evDesc /*dyn*/ {
 }
 
 public static void TestTraceAnnotations(ж<testing.T> Ꮡt) {
-    testTraceProg(Ꮡt, annotationsGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, bool _Δp3) => {
+    testTraceProg(Ꮡt, annotationsGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) => {
         var want = new TestTraceAnnotations_evDesc[]{
-            new(Δtrace.EventTaskBegin, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()),
-            new(Δtrace.EventRegionBegin, ((Δtrace.TaskID)1), new @string[]{"region0"u8}.slice()),
-            new(Δtrace.EventRegionBegin, ((Δtrace.TaskID)1), new @string[]{"region1"u8}.slice()),
-            new(Δtrace.EventLog, ((Δtrace.TaskID)1), new @string[]{"key0"u8, "0123456789abcdef"u8}.slice()),
-            new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region1"u8}.slice()),
-            new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region0"u8}.slice()),
-            new(Δtrace.EventTaskEnd, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()),
+            new(Δtrace.EventTaskBegin, (Δtrace.TaskID)1, new @string[]{"task0"u8}.slice()),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, new @string[]{"region0"u8}.slice()),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, new @string[]{"region1"u8}.slice()),
+            new(Δtrace.EventLog, (Δtrace.TaskID)1, new @string[]{"key0"u8, "0123456789abcdef"u8}.slice()),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, new @string[]{"region1"u8}.slice()),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, new @string[]{"region0"u8}.slice()),
+            new(Δtrace.EventTaskEnd, (Δtrace.TaskID)1, new @string[]{"task0"u8}.slice()),
             //  Currently, pre-existing region is not recorded to avoid allocations.
             new(Δtrace.EventRegionBegin, Δtrace.BackgroundTask, new @string[]{"post-existing region"u8}.slice())
         }.slice();
@@ -121,7 +123,7 @@ internal static readonly object cpuProfileDidNotIncludeˢ = (@string)"CPU profil
 public static void TestTraceCPUProfile(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    testTraceProg(Ꮡt, cpuProfileGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> stderr, bool _Δp3) => {
+    testTraceProg(Ꮡt, cpuProfileGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> stderr, @string _Δp3) => {
         // Parse stderr which has a CPU profile summary, if everything went well.
         // (If it didn't, we shouldn't even make it here.)
         var scanner = bufio.NewScanner(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(stderr)));
@@ -242,7 +244,7 @@ internal static readonly @string futileWakeupGoˢ = "futile-wakeup.go"u8;
 internal static readonly object didNotSeeAGoroutineInAˢ = (@string)"did not see a goroutine in a the region 'special'"u8;
 
 public static void TestTraceFutileWakeup(ж<testing.T> Ꮡt) {
-    testTraceProg(Ꮡt, futileWakeupGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, bool _Δp3) => {
+    testTraceProg(Ꮡt, futileWakeupGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) => {
         // Check to make sure that no goroutine in the "special" trace region
         // ends up blocking, unblocking, then immediately blocking again.
         //
@@ -351,6 +353,8 @@ public static void TestTraceGOMAXPROCS(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stacksGoˢ = "stacks.go"u8;
+internal static readonly @string asyncpreemptoff1ˢ = "asyncpreemptoff=1"u8;
+internal static readonly @string traceadvanceperiod0ˢ = "traceadvanceperiod=0"u8;
 
 internal partial struct TestTraceStacks_frame /*dyn*/ {
     internal @string fn;
@@ -364,12 +368,13 @@ internal partial struct TestTraceStacks_evDesc /*dyn*/ {
 }
 
 public static void TestTraceStacks(ж<testing.T> Ꮡt) {
-    testTraceProg(Ꮡt, stacksGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _, bool stress) => {
+    testTraceProg(Ꮡt, stacksGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _, @string godebug) => {
         // mainLine is the line number of `func main()` in testprog/stacks.go.
         UntypedInt mainLine = 21;
         var want = new TestTraceStacks_evDesc[]{
             new(Δtrace.EventStateTransition, "Goroutine Running->Runnable"u8, new TestTraceStacks_frame[]{
-                new("main.main"u8, mainLine + 82)
+                new("runtime.Gosched"u8, 0),
+                new("main.main"u8, mainLine + 87)
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine NotExist->Runnable"u8, new TestTraceStacks_frame[]{
                 new("main.main"u8, mainLine + 11)
@@ -392,7 +397,7 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable"u8, new TestTraceStacks_frame[]{
                 new("runtime.chansend1"u8, 0),
-                new("main.main"u8, mainLine + 84)
+                new("main.main"u8, mainLine + 89)
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Running->Waiting"u8, new TestTraceStacks_frame[]{
                 new("runtime.chansend1"u8, 0),
@@ -400,7 +405,7 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable"u8, new TestTraceStacks_frame[]{
                 new("runtime.chanrecv1"u8, 0),
-                new("main.main"u8, mainLine + 85)
+                new("main.main"u8, mainLine + 90)
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Running->Waiting"u8, new TestTraceStacks_frame[]{
                 new("runtime.selectgo"u8, 0),
@@ -408,7 +413,7 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable"u8, new TestTraceStacks_frame[]{
                 new("runtime.selectgo"u8, 0),
-                new("main.main"u8, mainLine + 86)
+                new("main.main"u8, mainLine + 91)
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Running->Waiting"u8, new TestTraceStacks_frame[]{
                 new("sync.(*Mutex).Lock"u8, 0),
@@ -425,7 +430,7 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
             new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable"u8, new TestTraceStacks_frame[]{
                 new("sync.(*WaitGroup).Add"u8, 0),
                 new("sync.(*WaitGroup).Done"u8, 0),
-                new("main.main"u8, mainLine + 91)
+                new("main.main"u8, mainLine + 96)
             }.slice()),
             new(Δtrace.EventStateTransition, "Goroutine Running->Waiting"u8, new TestTraceStacks_frame[]{
                 new("sync.(*Cond).Wait"u8, 0),
@@ -446,6 +451,19 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
                 new("main.main"u8, 0)
             }.slice())
         }.slice();
+        var asyncPreemptOff = strings.Contains(godebug, asyncpreemptoff1ˢ);
+        if (asyncPreemptOff) {
+            // Only check for syncPreemptPoint if asynchronous preemption is disabled.
+            // Otherwise, the syncPreemptPoint goroutine might be exclusively async
+            // preempted, causing this test to flake.
+            var syncPreemptEv = new TestTraceStacks_evDesc(Δtrace.EventStateTransition, "Goroutine Running->Runnable"u8, new TestTraceStacks_frame[]{
+                new("main.syncPreemptPoint"u8, 0),
+                new("main.main.func12"u8, 0)
+            }.slice()
+            );
+            want = append(want, syncPreemptEv);
+        }
+        var stress = strings.Contains(godebug, traceadvanceperiod0ˢ);
         if (!stress) {
             // Only check for this stack if !stress because traceAdvance alone could
             // allocate enough memory to trigger a GC if called frequently enough.
@@ -479,6 +497,9 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
                     new("main.main.func11"u8, 0)
                 }.slice())
             }.slice());
+            if (Δruntime.GOOS == "darwin"u8) {
+                want[len(want) - 1].frames = appendꓸꓸꓸ(new TestTraceStacks_frame[]{new("syscall.syscall"u8, 0)}.slice(), want[len(want) - 1].frames);
+            }
         }
         bool stackMatches(traceꓸStack stk, slice<TestTraceStacks_frame> frames) {
             foreach (var (i, f) in slices.Collect(stk.Frames())) {
@@ -593,7 +614,7 @@ public static void TestTraceIterPull(ж<testing.T> Ꮡt) {
     testTraceProg(Ꮡt, iterPullGoˢ, default!);
 }
 
-internal static void checkReaderDeterminism(ж<testing.T> Ꮡt, slice<byte> tb, slice<byte> _Δp2, bool _Δp3) {
+internal static void checkReaderDeterminism(ж<testing.T> Ꮡt, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) {
     var tbʗ1 = tb;
     slice<traceꓸEvent> events() {
         slice<traceꓸEvent> evs = default!;
@@ -642,34 +663,60 @@ internal static void checkReaderDeterminism(ж<testing.T> Ꮡt, slice<byte> tb, 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gotipˢ = "gotip"u8;
 internal static readonly @string go1ˢ = "go1"u8;
+internal static readonly object testFailsOnFreebsdAmd64ˢ = (@string)"test fails on freebsd-amd64-race in LUCI; see go.dev/issue/71556"u8;
 internal static readonly @string testdataTestprogˢ = "./testdata/testprog"u8;
-internal static readonly @string runˢ = "run"u8;
+internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string tracecheckstackownershipˢ = "tracecheckstackownership=1"u8;
-internal static readonly object foundBadTraceDumpingToˢ = (@string)"found bad trace; dumping to test log..."u8;
+internal static readonly @string gotracebackˢ = "GOTRACEBACK"u8;
+internal static readonly @string stressˢ = "stress"u8;
+internal static readonly @string defaultˢ = "default"u8;
 internal static readonly @string defaultˢ2 = "Default"u8;
+internal static readonly @string asyncPreemptOffˢ = "AsyncPreemptOff"u8;
+internal static readonly object skippingTraceAsyncˢ = (@string)"skipping trace async preempt off tests in short mode"u8;
 internal static readonly @string stressˢ2 = "Stress"u8;
 internal static readonly object skippingTraceStressTestsˢ = (@string)"skipping trace stress tests in short mode"u8;
 internal static readonly @string allocFreeˢ = "AllocFree"u8;
-internal static readonly object skippingTraceAllocFreeˢ = (@string)"skipping trace alloc/free tests in short mode"u8;
+internal static readonly object skippingTraceAllocFreeˢ = (@string)"skipping trace alloc/free tests by default; too flaky (see go.dev/issue/70838)"u8;
+internal static readonly object skippingTraceAllocFreeˢ2 = (@string)"skipping trace alloc/free tests in short mode"u8;
 internal static readonly @string traceallocfree1ˢ = "traceallocfree=1"u8;
 
-internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<ж<testing.T>, slice<byte>, slice<byte>, bool> extra) {
+internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<ж<testing.T>, slice<byte>, slice<byte>, @string> extra) {
     testenv.MustHaveGoRun(new trace_test_package.testing_TжTB(Ꮡt));
 
     // Check if we're on a builder.
     var onBuilder = testenv.Builder() != ""u8;
     var onOldBuilder = !strings.Contains(testenv.Builder(), gotipˢ) && !strings.Contains(testenv.Builder(), go1ˢ);
 
+    if (progName == "cgo-callback.go"u8 && onBuilder && !onOldBuilder && Δruntime.GOOS == "freebsd"u8 && Δruntime.GOARCH == "amd64"u8 && race.Enabled) {
+        Ꮡt.Skip(testFailsOnFreebsdAmd64ˢ);
+    }
+
     @string testPath = filepath.Join(testdataTestprogˢ, progName);
     @string testName = progName;
     void runTest(ж<testing.T> tΔ1, bool stress, @string extraGODEBUG) {
-        // Run the program and capture the trace, which is always written to stdout.
-        var cmd = testenv.Command(new trace_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new trace_test_package.testing_TжTB(tΔ1)), runˢ);
-        if (race.Enabled) {
-            cmd.Value.Args = append((~cmd).Args, "-race"u8);
+        // Build the program.
+        var (binFile, err) = os.CreateTemp(""u8, progName);
+        if (err != default!) {
+            tΔ1.Fatalf("failed to create temporary output file: %v"u8, err);
         }
-        cmd.Value.Args = append((~cmd).Args, testPath);
-        cmd.Value.Env = append(os.Environ(), "GOEXPERIMENT=rangefunc"u8);
+        @string bin = binFile.Name();
+        binFile.Close();
+        tΔ1.Cleanup(() => {
+            os.Remove(bin);
+        });
+        var buildCmd = testenv.CommandContext(new trace_test_package.testing_TжTB(tΔ1), tΔ1.Context(), testenv.GoToolPath(new trace_test_package.testing_TжTB(tΔ1)), buildˢ, "-o", bin);
+        if (race.Enabled) {
+            buildCmd.Value.Args = append((~buildCmd).Args, "-race"u8);
+        }
+        buildCmd.Value.Args = append((~buildCmd).Args, testPath);
+        (var buildOutput, err) = buildCmd.CombinedOutput();
+        if (err != default!) {
+            tΔ1.Fatalf("failed to build %s: %v: output:\n%s"u8, testPath, err, buildOutput);
+        }
+
+        // Run the program and capture the trace, which is always written to stdout.
+        var cmd = testenv.CommandContext(new trace_test_package.testing_TжTB(tΔ1), tΔ1.Context(), bin);
+
         // Add a stack ownership check. This is cheap enough for testing.
         @string godebug = tracecheckstackownershipˢ;
         if (stress) {
@@ -681,6 +728,12 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
             godebug += ","u8 + extraGODEBUG;
         }
         cmd.Value.Env = append((~cmd).Env, "GODEBUG="u8 + godebug);
+        {
+            var (_, ok) = os.LookupEnv(gotracebackˢ); if (!ok) {
+                // Unless overriden, set GOTRACEBACK=crash.
+                cmd.Value.Env = append((~cmd).Env, "GOTRACEBACK=crash"u8);
+            }
+        }
 
         // Capture stdout and stderr.
         //
@@ -692,45 +745,41 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
         cmd.Value.Stderr = new trace_test_package.bytes_BufferжWriter(ᏑerrBuf);
         // Run the program.
         {
-            var err = cmd.Run(); if (err != default!) {
+            var errΔ1 = cmd.Run(); if (errΔ1 != default!) {
                 if (errBuf.Len() != 0) {
-                    tΔ1.Logf("stderr: %s"u8, ((@string)errBuf.Bytes()));
+                    tΔ1.Logf("stderr: %s"u8, (@string)errBuf.Bytes());
                 }
-                tΔ1.Fatal(err);
+                tΔ1.Fatal(errΔ1);
             }
         }
         var tb = traceBuf.Bytes();
 
         // Test the trace and the parser.
-        testReader(tΔ1, new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tb)), testtrace.ExpectSuccess());
+        var v = testtrace.NewValidator();
+        v.Value.GoVersion = version.Current;
+        if (Δruntime.GOOS == "windows"u8 && stress) {
+            // Under stress mode we're constantly advancing trace generations.
+            // Windows' clock granularity is too coarse to guarantee monotonic
+            // timestamps for monotonic and wall clock time in this case, so
+            // skip the checks.
+            v.SkipClockSnapshotChecks();
+        }
+        testReader(tΔ1, new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tb)), v, testtrace.ExpectSuccess());
 
         // Run some extra validation.
         if (!tΔ1.Failed() && extra != default!) {
-            extra(tΔ1, tb, errBuf.Bytes(), stress);
+            extra(tΔ1, tb, errBuf.Bytes(), godebug);
         }
 
         // Dump some more information on failure.
-        if (tΔ1.Failed() && onBuilder){
-            // Dump directly to the test log on the builder, since this
-            // data is critical for debugging and this is the only way
-            // we can currently make sure it's retained.
-            tΔ1.Log(foundBadTraceDumpingToˢ);
-            @string s = dumpTraceToText(tΔ1, tb);
-            if (onOldBuilder && len(s) > (1 << (int)(20)) + (512 << (int)(10))){
-                // The old build infrastructure truncates logs at ~2 MiB.
-                // Let's assume we're the only failure and give ourselves
-                // up to 1.5 MiB to dump the trace.
-                //
-                // TODO(mknyszek): Remove this when we've migrated off of
-                // the old infrastructure.
-                tΔ1.Logf("text trace too large to dump (%d bytes)"u8, len(s));
-            } else {
-                tΔ1.Log(s);
-            }
-        } else 
         if (tΔ1.Failed() || dumpTraces.Value) {
-            // We asked to dump the trace or failed. Write the trace to a file.
-            tΔ1.Logf("wrote trace to file: %s"u8, dumpTraceToFile(tΔ1, testName, stress, tb));
+            @string suffix(bool stressΔ1) {
+                if (stressΔ1) {
+                    return stressˢ;
+                }
+                return defaultˢ;
+            }
+            testtrace.Dump(tΔ1, fmt.Sprintf("%s.%s"u8, testName, suffix(stress)), tb, dumpTraces.Value);
         }
     }
     var runTestʗ1 = runTest;
@@ -738,18 +787,28 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
         runTestʗ1(tΔ2, false, ""u8);
     });
     var runTestʗ2 = runTest;
-    Ꮡt.Run(stressˢ2, (ж<testing.T> tΔ3) => {
-        if (testing.Short()) {
-            tΔ3.Skip(skippingTraceStressTestsˢ);
+    Ꮡt.Run(asyncPreemptOffˢ, (ж<testing.T> tΔ3) => {
+        if (testing.Short() && Δruntime.NumCPU() < 2) {
+            tΔ3.Skip(skippingTraceAsyncˢ);
         }
-        runTestʗ2(tΔ3, true, ""u8);
+        runTestʗ2(tΔ3, false, asyncpreemptoff1ˢ);
     });
     var runTestʗ3 = runTest;
-    Ꮡt.Run(allocFreeˢ, (ж<testing.T> tΔ4) => {
+    Ꮡt.Run(stressˢ2, (ж<testing.T> tΔ4) => {
         if (testing.Short()) {
-            tΔ4.Skip(skippingTraceAllocFreeˢ);
+            tΔ4.Skip(skippingTraceStressTestsˢ);
         }
-        runTestʗ3(tΔ4, false, traceallocfree1ˢ);
+        runTestʗ3(tΔ4, true, ""u8);
+    });
+    var runTestʗ4 = runTest;
+    Ꮡt.Run(allocFreeˢ, (ж<testing.T> tΔ5) => {
+        if (!allocFree.Value) {
+            tΔ5.Skip(skippingTraceAllocFreeˢ);
+        }
+        if (testing.Short()) {
+            tΔ5.Skip(skippingTraceAllocFreeˢ2);
+        }
+        runTestʗ4(tΔ5, false, traceallocfree1ˢ);
     });
 }
 

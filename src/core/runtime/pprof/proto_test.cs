@@ -5,6 +5,7 @@ namespace go.runtime;
 
 using bytes = bytes_package;
 using json = encoding.json_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using abi = @internal.abi_package;
 using profile = @internal.profile_package;
@@ -41,7 +42,11 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
             return (default!, err);
         }
     }
-    b.build();
+    {
+        var err = b.build(); if (err != default!) {
+            return (default!, err);
+        }
+    }
     return profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
 }
 
@@ -50,7 +55,7 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
 // data structures like profile.Profile.
 internal static @string fmtJSON(any x) {
     var (js, _) = json.MarshalIndent(x, ""u8, "\t"u8);
-    return ((@string)js);
+    return (@string)js;
 }
 
 public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {
@@ -238,7 +243,7 @@ internal static void checkProfile(ж<testing.T> Ꮡt, ж<profile.Profile> Ꮡp, 
     }
     if (fmtJSON(p.Sample) != fmtJSON(samples)) { // ignore unexported fields
         if (len(p.Sample) == len(samples)) {
-            foreach (var (i, _) in p.Sample) {
+            foreach (var i in range(p.Sample)) {
                 if (!reflect.DeepEqual(p.Sample[i].OrTypedNil(), samples[i].OrTypedNil())) {
                     Ꮡt.Errorf("sample %d = %v\nwant = %v\n"u8, i, fmtJSON(p.Sample[i].OrTypedNil()), fmtJSON(samples[i].OrTypedNil()));
                 }
@@ -525,6 +530,22 @@ public static void TestEmptyStack(ж<testing.T> Ꮡt) {
     var (_, err) = translateCPUProfile(b, 2);
     if (err != default!) {
         Ꮡt.Fatalf("translating profile: %v"u8, err);
+    }
+}
+
+internal static error errWrite = errors.New("error from writer"u8);
+
+internal partial struct errWriter {
+}
+
+internal static (nint, error) Write(this errWriter _, slice<byte> p) {
+    return (0, errWrite);
+}
+
+public static partial void TestWriteToErr(ж<testing.T> Ꮡt) {
+    var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.errWriterжWriter(Ꮡ(new errWriter(nil))), 0);
+    if (!errors.Is(err, errWrite)) {
+        Ꮡt.Fatalf("want error from writer, got: %v"u8, err);
     }
 }
 

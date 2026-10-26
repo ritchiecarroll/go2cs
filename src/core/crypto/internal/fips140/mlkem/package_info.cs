@@ -41,6 +41,12 @@ using static go.crypto.@internal.fips140.mlkem_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,10 +55,10 @@ using static go.crypto.@internal.fips140.mlkem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/cast.go", "cast.cs", "AA0cgoLc3NzcgoKCgoKClIKU", "15-52:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/field.go", "field.cs", "ABMikoKUqJKUgqaCgqaCggAFFKKCpoKCqqKCqqKCgqrsgoIADRyClpKqyILKpgAHENKClKjSgpSs0oKCgoKCgpQABhDygpSCgoKCgoCCpICCpJSu8oCClIKkggACEPKCgpSClAACENKCgoKClAACEPKCgpQAAhDSgoKClAACEPKCgoKCgoKCgoKCgoKUAAIQ8oKCgoKCgoKClAACEPKCgoKCgoKCgoKCgoKCuIKUAAIQ0oKCgoKCgoKCgoKCgoKmlIKUAAIQ8gACEPIAAhDyAAIQ8qyygoKCgsqCgoKCgoKUAAkSmuKUgoKCgpTKmtKCgoKClIKCgoK4rNKCgoKClIKCgoK4gpSssoKCABk0goKCgoKCgpSCgoKCgpSClIKClIKm")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABk8soKCggACEPKmgriClKaClKqiAA4gpIKmgoKUggANILSC1oKCgoKCgoKCqqKCgqq0gtaCgpSCgoKCAAcU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAUWAAoCgoKCgpSClK7EkqaCgqaCqqKCrPKCgoKCkoKqtILe4oKmgoKUgoKCgpSUlIKCuK7igoKCgpSCgpSUgoKClLiUgoKUlIKilJTewoKUuKzSgoKCgoKCgoKCgoKCgpSCruKCgoKmgpSCgpSU", "121-121:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AE6yAbKCgoIAAhDypoK4gpSmgpSqogAOIKSCpoKClIIADSC0gqaCgoKCgoKCgqqigoKqtIKmgoKUgoKCggACFPKCpoKCgoKClKaCgpSCgoKUgpSU3JQAAhAACAKClIKCgoKClIKCgriCgoKClIKCgqaCgoKCuIKCggACFgAKAoKCgoKUgpSuxJKmgoKmgqqigqzygoKCgpKCqrSCruKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpS4lIKClJSCopSUrsKClLis0oKCgoKCgoKCgoKCgoKUgq7igoKCpoKUgoKUlA==", "180-180:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/cast.go", "cast.cs", "ABEgggAHEuLc3Nzc3NyCgoKCgoKUgoKClIKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/field.go", "field.cs", "ABMikoKUqJKUgqaCgqaCggAFFKKCpoKCqqKCqqKCgqr8goIADRyClpKq2ILKpgAHENKClKjSgpSs0oKCgoKCgpQABhDygpSCgoKCgoCCpICCpJSu8oCClIKkggACEPKCgoKUAAIQ0oKCgoKUAAIQ8oKClAACENKCgoKUAAIQ8oKCgoKCgoKCgoKCgpQAAhDygoKCgoKCgoKUAAIQAAgCgoKCgoKCgoKCgoKCgriClAADENKCgoKCgoKCgoKCgoKCppSClAACEPIAAhDyAAIQ8gACEPKssoKCgoLKgoKCgoKClAAJEprilIKCgoKUyprSgoKCgpSCgoKCuKzSgoKCgpSCgoKCuIKUrLKCggAZNIKCgoKCgoKUgoKCgoKUgpSCgpSCpg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABk8soKCggACEPKmgriClKaClKqiAA4gpIKmgoKUggANILSC1oKCgoKCgoKCgqqigoKCqrSC1oKClIKCgoIABxTygqaCgoKCgpSmgoKUgoKClIKUlNyUAAIQAAgCgpSCgoKCgpSCgoK4goKCgpSCgoKmgoKCgriCgoIABRYACgKCgoKClIKUrsSSpoKCgqaCqqKCgqzygoKCgpKCqrSC3uKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpSUppSCgpSUgqKUlN7CgoKUuKzSgoKCgoKCgoKCgoKCgpSCruKCgoKmgpSCgpSU", "122-122:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AE6yAbKCgoIAAhDypoK4gpSmgpSqogAOIKSCpoKClIIADSC0gqaCgoKCgoKCgoKqooKCgqq0gqaCgpSCgoKCAAIU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAIWAAoCgoKCgpSClK7EkqaCgoKmgqqigoKs8oKCgoKSgqq0gq7igqaCgpSCgoKClJSUgoK4ruKCgoKClIKClJSCgoKUlKaUgoKUlIKilJSuwoKClLgABBDSgoKCgoKCgoKCgoKCgpSCpoKu4oKCgqaClIKClJQ=", "181-181:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -91,8 +97,10 @@ public static partial class mlkem_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸcheck() => builtin.initPackage(typeof(go.crypto.@internal.fips140.check_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸdrbg() => builtin.initPackage(typeof(go.crypto.@internal.fips140.drbg_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha256() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha256_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha3() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha3_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsubtle() => builtin.initPackage(typeof(go.crypto.@internal.fips140.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }

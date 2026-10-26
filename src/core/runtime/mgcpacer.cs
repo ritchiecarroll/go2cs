@@ -6,7 +6,9 @@ namespace go;
 using cpu = @internal.cpu_package;
 using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using Δmath = @internal.runtime.math_package;
+using strconv = @internal.strconv_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;
@@ -399,7 +401,7 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     // Clear per-P state
     foreach (var (_, Δp) in allp) {
         Δp.Value.gcAssistTime = 0;
-        Δp.Value.gcFractionalMarkTime = 0;
+        Δp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Store(0);
     }
 
     if (trigger.kind == gcTriggerTime){
@@ -431,9 +433,9 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
         var heapGoal = Ꮡc.heapGoal();
         var assistRatio = Ꮡc.of(gcControllerState.ᏑassistWorkPerByte).Load();
         print((@string)"pacer: assist ratio="u8, assistRatio,
-            (@string)" (scan "u8, (ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> (int)(20)), (@string)" MB in "u8,
-            (work.initialHeapLive >> (int)(20)), (@string)"->"u8,
-            (heapGoal >> (int)(20)), (@string)" MB)"u8,
+            (@string)" (scan "u8, ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> 20, (@string)" MB in "u8,
+            work.initialHeapLive >> 20, (@string)"->"u8,
+            heapGoal >> 20, (@string)" MB)"u8,
             (@string)" workers="u8, dedicatedMarkWorkersNeeded,
             (@string)"+"u8, c.fractionalUtilizationGoal, (@string)"\n"u8);
     }
@@ -640,7 +642,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     // earlier).
     var oldConsMark = c.consMark;
     c.consMark = currentConsMark;
-    foreach (var (i, _) in c.lastConsMark) {
+    foreach (var i in range(c.lastConsMark)) {
         if (c.lastConsMark[i] > c.consMark) {
             c.consMark = c.lastConsMark[i];
         }
@@ -664,20 +666,42 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
 // another P if there are spare worker slots. It is used by putfull
 // when more work is made available.
 //
+// If goexperiment.GreenTeaGC, the caller must not hold a G's scan bit,
+// otherwise this could cause a deadlock. This is already enforced by
+// the static lock ranking.
+//
 //go:nowritebarrier
 internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
-    // If there are idle Ps, wake one so it will run an idle worker.
-    // NOTE: This is suspected of causing deadlocks. See golang.org/issue/19112.
+    var needDedicated = Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() > 0;
+
+    // Create new workers from idle Ps with goexperiment.GreenTeaGC.
     //
-    //	if sched.npidle.Load() != 0 && sched.nmspinning.Load() == 0 {
-    //		wakep()
-    //		return
-    //	}
-    // There are no idle Ps. If we need more dedicated workers,
-    // try to preempt a running P so it will switch to a worker.
-    if (Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() <= 0) {
+    // Note: with Green Tea, this places a requirement on enlistWorker
+    // that it must not be called while a G's scan bit is held.
+    if (goexperiment.GreenTeaGC) {
+        var needIdle = Ꮡc.needIdleMarkWorker();
+
+        // If we're all full on dedicated and idle workers, nothing
+        // to do.
+        if (!needDedicated && !needIdle) {
+            return;
+        }
+
+        // If there are idle Ps, wake one so it will run a worker
+        // (the scheduler will already prefer to spin up a new
+        // dedicated worker over an idle one).
+        if (Ꮡsched.of(schedt.Ꮡnpidle).Load() != 0 && Ꮡsched.of(schedt.Ꮡnmspinning).Load() == 0) {
+            wakep(); // Likely to consume our worker request.
+            return;
+        }
+    }
+
+    // If we still need more dedicated workers, try to preempt a running P
+    // so it will switch to a worker.
+    if (!needDedicated) {
         return;
     }
+
     // Pick a random other P to preempt.
     if (gomaxprocs <= 1) {
         return;
@@ -705,9 +729,19 @@ internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gcControllerStateˢ = "gcControllerState.findRunnable: blackening not enabled"u8;
 
-// findRunnableGCWorker returns a background mark worker for pp if it
-// should be run. This must only be called when gcBlackenEnabled != 0.
-internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+// assignWaitingGCWorker assigns a background mark worker to pp if one should
+// be run.
+//
+// If a worker is selected, it is assigned to pp.nextMarkGCWorker and the P is
+// wired as a GC mark worker. The G is still in _Gwaiting. If no worker is
+// selected, ok returns false.
+//
+// If assignedWaitingGCWorker returns true, this P must either:
+// - Mark the G as runnable and run it, clearing pp.nextMarkGCWorker.
+// - Or, call c.releaseNextGCMarkWorker.
+//
+// This must only be called when gcBlackenEnabled != 0.
+internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pp = ref Ꮡpp.DerefOrNull();
 
@@ -715,23 +749,16 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         @throw(gcControllerStateˢ);
     }
 
-    // Since we have the current time, check if the GC CPU limiter
-    // hasn't had an update in a while. This check is necessary in
-    // case the limiter is on but hasn't been checked in a while and
-    // so may have left sufficient headroom to turn off again.
     if (now == 0) {
         now = nanotime();
     }
-    if (ᏑgcCPULimiter.needUpdate(now)) {
-        ᏑgcCPULimiter.update(now);
-    }
 
-    if (!gcMarkWorkAvailable(Ꮡpp)) {
-        // No work to be done right now. This can happen at
+    if (!gcShouldScheduleWorker(Ꮡpp)) {
+        // No good reason to schedule a worker. This can happen at
         // the end of the mark phase when there are still
         // assists tapering off. Don't bother running a worker
         // now because it'll just return immediately.
-        return (default!, now);
+        return (false, now);
     }
 
     if (Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() <= 0 && c.fractionalUtilizationGoal == 0D) {
@@ -742,7 +769,7 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         // When a dedicated worker stops running, the gcBgMarkWorker loop notes
         // the need for the worker before returning it to the pool. If we don't
         // see the need now, we wouldn't have found it in the pool anyway.
-        return (default!, now);
+        return (false, now);
     }
 
     // Grab a worker before we commit to running below.
@@ -759,7 +786,7 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         // it will always do so with queued global work. Thus, that P
         // will be immediately eligible to re-run the worker G it was
         // just using, ensuring work can complete.
-        return (default!, now);
+        return (false, now);
     }
 
     bool decIfPositive(ж<atomic.Int64> val) {
@@ -783,21 +810,62 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
     if (c.fractionalUtilizationGoal == 0D){
         // No need for fractional workers.
         ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
-        return (default!, now);
+        return (false, now);
     } else {
         // Is this P behind on the fractional utilization
         // goal?
         //
         // This should be kept in sync with pollFractionalWorkerExit.
         var delta = now - c.markStartTime;
-        if (delta > 0 && (float64)pp.gcFractionalMarkTime / (float64)delta > c.fractionalUtilizationGoal) {
+        if (delta > 0 && (float64)Ꮡpp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Load() / (float64)delta > c.fractionalUtilizationGoal) {
             // Nope. No need to run a fractional worker.
             ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
-            return (default!, now);
+            return (false, now);
         }
         // Run a fractional worker.
         pp.gcMarkWorkerMode = gcMarkWorkerFractionalMode;
     }
+
+    pp.nextGCMarkWorker = node;
+    return (true, now);
+}
+
+// findRunnableGCWorker returns a background mark worker for pp if it
+// should be run.
+//
+// If findRunnableGCWorker returns a G, this P is wired as a GC mark worker and
+// must run the G.
+//
+// This must only be called when gcBlackenEnabled != 0.
+//
+// This function is allowed to have write barriers because it is called from
+// the portion of findRunnable that always has a P.
+//
+//go:yeswritebarrierrec
+internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    // Since we have the current time, check if the GC CPU limiter
+    // hasn't had an update in a while. This check is necessary in
+    // case the limiter is on but hasn't been checked in a while and
+    // so may have left sufficient headroom to turn off again.
+    if (now == 0) {
+        now = nanotime();
+    }
+    if (ᏑgcCPULimiter.needUpdate(now)) {
+        ᏑgcCPULimiter.update(now);
+    }
+
+    // If a worker wasn't already assigned by procresize, assign one now.
+    if (pp.nextGCMarkWorker == nil) {
+        var (ok, nowΔ1) = Ꮡc.assignWaitingGCWorker(Ꮡpp, now);
+        if (!ok) {
+            return (default!, nowΔ1);
+        }
+    }
+
+    var node = pp.nextGCMarkWorker;
+    pp.nextGCMarkWorker = default!;
 
     // Run the background mark worker.
     var gp = (~node).gp.ptr();
@@ -808,6 +876,25 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         traceRelease(Δtrace);
     }
     return (gp, now);
+}
+
+// Release an unused pp.nextGCMarkWorker, if any.
+//
+// This function is allowed to have write barriers because it is called from
+// the portion of schedule.
+//
+//go:yeswritebarrierrec
+internal static void releaseNextGCMarkWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    var node = pp.nextGCMarkWorker;
+    if (node == nil) {
+        return;
+    }
+
+    Ꮡc.markWorkerStop(pp.gcMarkWorkerMode, 0);
+    ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
+    pp.nextGCMarkWorker = default!;
 }
 
 // resetLive sets up the controller state for the next mark phase after the end
@@ -925,6 +1012,7 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcCont
         } else {
             // We're not limited by the memory limit goal, so perform a series of
             // adjustments that might move the goal forward in a variety of circumstances.
+
             var sweepDistTrigger = Ꮡc.of(gcControllerState.ᏑsweepDistMinTrigger).Load();
             if (sweepDistTrigger > goal) {
                 // Set the goal to maintain a minimum sweep distance since
@@ -1307,8 +1395,8 @@ internal static int32 readGOGC() {
         return -1;
     }
     {
-        var (n, ok) = atoi32(Δp); if (ok) {
-            return n;
+        var (n, err) = strconv.ParseInt(Δp, 10, 32); if (err == default!) {
+            return (int32)n;
         }
     }
     return 100;
@@ -1360,7 +1448,7 @@ internal static readonly @string malformedGomemlimitSeeGoˢ = "malformed GOMEMLI
 internal static int64 readGOMEMLIMIT() {
     @string Δp = gogetenv(gomemlimitˢ);
     if (Δp == ""u8 || Δp == "off"u8) {
-        return maxInt64;
+        return Δmath.MaxInt64;
     }
     var (n, ok) = parseByteCount(Δp);
     if (!ok) {
@@ -1386,7 +1474,7 @@ internal static readonly @string negativeIdleMarkWorkersˢ = "negative idle mark
 internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n >= max) {
             // See the comment on idleMarkWorkers for why
             // n > max is tolerated.
@@ -1396,7 +1484,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n + 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n + 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return true;
         }
@@ -1413,7 +1501,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 //go:nosplit
 internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     var Δp = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-    var (n, max) = ((int32)((uint64)(Δp & (uint64)(~(uint32)0))), (int32)((Δp >> (int)(32))));
+    var (n, max) = ((int32)(Δp & (uint64)(~(uint32)0)), (int32)(Δp >> 32));
     return n < max;
 }
 
@@ -1421,12 +1509,12 @@ internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n - 1 < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n - 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n - 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }
@@ -1441,12 +1529,12 @@ internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int32 max) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var n = (int32)((uint64)(old & (uint64)(~(uint32)0)));
+        var n = (int32)(old & (uint64)(~(uint32)0));
         if (n < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)n | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)n | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }

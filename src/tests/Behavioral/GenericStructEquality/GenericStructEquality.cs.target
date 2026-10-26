@@ -34,24 +34,24 @@ internal static void Main() {
     var (h1, h2, h3) = (new handle<nint>(Ꮡx), new handle<nint>(Ꮡx), new handle<nint>(Ꮡy));
     fmt.Println(h1 == h2, h1 == h3, h1 == new handle<nint>(nil));
 
-    var b1 = new box<@string>("go"u8);
-    fmt.Println(b1 == new box<@string>("go"u8), b1 == new box<@string>("cs"u8));
+    var b1 = new box<@string>("go");
+    fmt.Println(b1 == new box<@string>("go"), b1 == new box<@string>("cs"));
     fmt.Println(new box<nint>(7) == new box<nint>(7), new box<nint>(7) == new box<nint>(8));
 
     var (m1, m2) = (new meta<@string>(3), new meta<float64>(3));
     fmt.Println(m1 == new meta<@string>(3), m2 == new meta<float64>(4));
 
-    var (n1, n2) = (new optval<@string>("a"u8, true), new optval<@string>("a"u8, false));
-    fmt.Println(n1 == new optval<@string>("a"u8, true), n1 == n2);
+    var (n1, n2) = (new optval<@string>("a", true), new optval<@string>("a", false));
+    fmt.Println(n1 == new optval<@string>("a", true), n1 == n2);
 
-    var (o1, o2) = (new outer<@string>(new box<@string>("k"u8), 1), new outer<@string>(new box<@string>("k"u8), 1));
-    fmt.Println(o1 == o2, o1 == new outer<@string>(new box<@string>("k"u8), 2));
+    var (o1, o2) = (new outer<@string>(new box<@string>("k"), 1), new outer<@string>(new box<@string>("k"), 1));
+    fmt.Println(o1 == o2, o1 == new outer<@string>(new box<@string>("k"), 2));
 
     var counts = new map<box<@string>, nint>{};
-    counts[new box<@string>("k"u8)]++;
-    counts[new box<@string>("k"u8)]++;
-    counts[new box<@string>("j"u8)]++;
-    fmt.Println(counts[new box<@string>("k"u8)], counts[new box<@string>("j"u8)], len(counts));
+    counts[new box<@string>("k")]++;
+    counts[new box<@string>("k")]++;
+    counts[new box<@string>("j")]++;
+    fmt.Println(counts[new box<@string>("k")], counts[new box<@string>("j")], len(counts));
 }
 
 } // end main_package

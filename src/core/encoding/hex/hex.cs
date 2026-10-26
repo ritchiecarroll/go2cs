@@ -29,7 +29,7 @@ public static nint EncodedLen(nint n) {
 public static nint Encode(slice<byte> dst, slice<byte> src) {
     nint j = 0;
     foreach (var (_, v) in src) {
-        dst[j] = hextable[(v >> (int)(4))];
+        dst[j] = hextable[(v >> 4)];
         dst[j + 1] = hextable[(byte)(v & 0x0f)];
         j += 2;
     }
@@ -85,7 +85,7 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         if (b > 0x0f) {
             return (i, ((InvalidByteError)q));
         }
-        dst[i] = (byte)(((byte)(a << (int)(4))) | b);
+        dst[i] = (byte)(((byte)(a << 4)) | b);
         i++;
     }
     if (len(src) % 2 == 1) {
@@ -113,7 +113,7 @@ public static (slice<byte>, error) AppendDecode(slice<byte> dst, slice<byte> src
 public static @string EncodeToString(slice<byte> src) {
     var dst = new slice<byte>(EncodedLen(len(src)));
     Encode(dst, src);
-    return ((@string)dst);
+    return (@string)dst;
 }
 
 // DecodeString returns the bytes represented by the hexadecimal string s.
@@ -268,13 +268,13 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
     // Output lines look like:
     // 00000010  2e 2f 30 31 32 33 34 35  36 37 38 39 3a 3b 3c 3d  |./0123456789:;<=|
     // ^ offset                          ^ extra space              ^ ASCII of line.
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         if (h.used == 0) {
             // At the beginning of a line we print the current
             // offset in hex.
-            h.buf[0] = (byte)((h.n >> (int)(24)));
-            h.buf[1] = (byte)((h.n >> (int)(16)));
-            h.buf[2] = (byte)((h.n >> (int)(8)));
+            h.buf[0] = (byte)(h.n >> 24);
+            h.buf[1] = (byte)(h.n >> 16);
+            h.buf[2] = (byte)(h.n >> 8);
             h.buf[3] = (byte)h.n;
             Encode(h.buf[4..], h.buf[..4]);
             h.buf[12] = (rune)' ';

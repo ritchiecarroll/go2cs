@@ -8,13 +8,6 @@ partial class main_package {
 
 internal static UntypedInt n => 1000;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object arrivedˢ = (@string)"arrived:"u8;
-private static readonly object sumˢ = (@string)"sum:"u8;
-private static readonly object rendezvousˢ = (@string)"rendezvous:"u8;
-private static readonly object totalˢ = (@string)"total:"u8;
-private static readonly object matchˢ = (@string)"match:"u8;
-
 internal static partial void Main() {
     ref var start = ref heap(new Δsync.WaitGroup(), out var Ꮡstart);
     Ꮡstart.Add(1);
@@ -46,7 +39,7 @@ internal static partial void Main() {
     for (nint i = 0; i < n; i++) {
         sum += ᐸꟷ(arrived);
     }
-    fmt.Println(arrivedˢ, (nint)(n), sumˢ, sum);
+    fmt.Println("arrived:", (nint)(n), "sum:", sum);
 
     Ꮡstart.Done();
 
@@ -56,8 +49,8 @@ internal static partial void Main() {
     }
     Ꮡdone.Wait();
 
-    fmt.Println(rendezvousˢ, (nint)(n), totalˢ, total);
-    fmt.Println(matchˢ, sum == total);
+    fmt.Println("rendezvous:", (nint)(n), "total:", total);
+    fmt.Println("match:", sum == total);
 }
 
 } // end main_package

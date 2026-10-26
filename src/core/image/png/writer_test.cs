@@ -106,21 +106,25 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             bitdepth: 8,
             datalen: (1 + width) * height
         ),
+
         new(
             plen: 128,
             bitdepth: 8,
             datalen: (1 + width) * height
         ),
+
         new(
             plen: 16,
             bitdepth: 4,
             datalen: (1 + width / 2) * height
         ),
+
         new(
             plen: 4,
             bitdepth: 2,
             datalen: (1 + width / 4) * height
         ),
+
         new(
             plen: 2,
             bitdepth: 1,
@@ -136,7 +140,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
         Ꮡt.Run(fmt.Sprintf("plen-%d"u8, tc.plen), (ж<testing.T> tΔ1) => {
             // Create a paletted image with the correct palette length
             var palette = new color.Palette(tcʗ1.plen);
-            foreach (var (iΔ1, _) in palette) {
+            foreach (var iΔ1 in range(palette)) {
                 palette[iΔ1] = new color.NRGBA(
                     R: (uint8)iΔ1,
                     G: (uint8)iΔ1,
@@ -168,7 +172,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
 
             while (i < len(data) - chunkFieldsLength) {
                 var length = binary.BigEndian.Uint32(data.slice(i, i + 4));
-                @string name = ((@string)(data.slice(i + 4, i + 8)));
+                @string name = (@string)(data.slice(i + 4, i + 8));
 
                 var exprᴛ1 = name;
                 if (exprᴛ1 == "IHDR"u8) {

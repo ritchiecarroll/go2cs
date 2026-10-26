@@ -231,7 +231,7 @@ redacted.go:0: runtime.goexit
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sentinelˢ = "sentinel "u8;
 internal static readonly @string runningˢ = " [running]:"u8;
-internal static readonly @string createdByˢ = "created by "u8;
+internal static readonly @string createdByˢ2 = "created by "u8;
 
 // parseStackPCs parses the parent process's program counters for the
 // first running goroutine out of a GOTRACEBACK=system traceback,
@@ -244,6 +244,8 @@ internal static readonly @string createdByˢ = "created by "u8;
 //
 // (Copied from golang.org/x/telemetry/crashmonitor.parseStackPCs.)
 internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
+    var pcsᴷ = new stackAppend<uintptr>(moves: true);
+
     // getSymbol parses the symbol name out of a line of the form:
     // SYMBOL(ARGS)
     //
@@ -305,7 +307,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
 
         // Search for "goroutine GID [STATUS]"
         if (!on) {
-            if (strings.HasPrefix(line, goroutineˢ) && strings.Contains(line, runningˢ)) {
+            if (strings.HasPrefix(line, goroutineˢ2) && strings.Contains(line, runningˢ)) {
                 on = true;
 
                 if (parentSentinel == 0) {
@@ -321,7 +323,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
         }
 
         // Skip the final "created by SYMBOL in goroutine GID" part.
-        if (strings.HasPrefix(line, createdByˢ)) {
+        if (strings.HasPrefix(line, createdByˢ2)) {
             break;
         }
 
@@ -345,6 +347,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
             var (pc, err) = getPC(line);
             if (err != default!) {
                 // Inlined frame, perhaps; skip it.
+
                 // Done with this frame. Next line is a new frame.
                 //
                 // Don't update prevSymbol; we only want to
@@ -393,7 +396,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
                 pc++;
             }
 
-            pcs = append(pcs, (uintptr)pc);
+            pcs = append(pcsᴷ, pcs, (uintptr)pc);
 
             // Done with this frame. Next line is a new frame.
             prevSymbol = currSymbol;
@@ -401,6 +404,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
             symLine = true;
         }
     }
+    pcs = move2heap(pcsᴷ, pcs);
     return (pcs, default!);
 }
 

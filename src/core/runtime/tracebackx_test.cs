@@ -12,6 +12,7 @@ partial class runtime_internal_test_package {
 public static partial void XTestSPWrite(TestingT t) {
     // Test that we can traceback from the stack check prologue of a function
     // that writes to SP. See #62326.
+
     // Start a goroutine to minimize the initial stack and ensure we grow the stack.
     var done = new channel<bool>(0);
     var doneʗ1 = done;

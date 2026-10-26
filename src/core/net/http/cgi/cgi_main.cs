@@ -91,7 +91,7 @@ internal static void testCGI() {
 partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = (byte)b;
     }
     return (len(p), default!);
@@ -142,7 +142,7 @@ internal static void childCGIProcess() {
             }
         }
         if (req.FormValue(writeForeverˢ) == "1"u8) {
-            io.Copy(new http_ResponseWriterᴠWriter(rw), ((neverEnding)(rune)'a'));
+            io.Copy(new http_ResponseWriterᴠWriter(rw), (neverEnding)(rune)'a');
             while (ᐧ) {
                 time.Sleep((time.Duration)(5000000000L)); // hang forever, until killed
             }

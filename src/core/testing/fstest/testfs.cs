@@ -26,13 +26,16 @@ partial class fstest_package {
 // TestFS tests a file system implementation.
 // It walks the entire tree of files in fsys,
 // opening and checking that each file behaves correctly.
+// Symbolic links are not followed,
+// but their Lstat values are checked
+// if the file system implements [fs.ReadLinkFS].
 // It also checks that the file system contains at least the expected files.
 // As a special case, if no expected files are listed, fsys must be empty.
 // Otherwise, fsys must contain at least the listed files; it can also contain others.
 // The contents of fsys must not change concurrently with TestFS.
 //
 // If TestFS finds any misbehaviors, it returns either the first error or a
-// list of errors. Use [errors.Is] or [errors.As] to inspect.
+// list of errors. Use [errors.Is] or [errors.AsType] to inspect.
 //
 // Typical usage inside a test is:
 //
@@ -41,6 +44,7 @@ partial class fstest_package {
 //	}
 public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
     var expected = expectedʗp.sslice();
+    var subExpectedᴷ = new stackAppend<@string>();
 
     {
         var err = testFS(fsys, expected.ꓸꓸꓸ); if (err != default!) {
@@ -55,7 +59,7 @@ public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
                 slice<@string> subExpected = default!;
                 foreach (var (_, nameΔ1) in expected) {
                     if (strings.HasPrefix(nameΔ1, dirSlash)) {
-                        subExpected = append(subExpected, nameΔ1.slice(len(dirSlash)));
+                        subExpected = append(subExpectedᴷ, subExpected, nameΔ1.slice(len(dirSlash)));
                     }
                 }
                 var (sub, err) = fs.Sub(fsys, dir);
@@ -191,9 +195,16 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             @string path = prefix + name;
             t.checkStat(path, info);
             Ꮡt.checkOpen(path);
-            if (info.IsDir()){
+            var exprᴛ1 = info.Type();
+            if (exprᴛ1 == fs.ModeDir) {
                 Ꮡt.checkDir(path);
-            } else {
+            }
+            else if (exprᴛ1 == fs.ModeSymlink) {
+                // No further processing.
+                // Avoid following symlinks to avoid potentially unbounded recursion.
+                t.files = append(t.files, path);
+            }
+            else { /* default: */
                 Ꮡt.checkFile(path);
             }
         }
@@ -329,6 +340,10 @@ internal static @string formatInfo(fs.FileInfo info) {
 
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
 internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
+    var patternᴷ = new stackAppend<rune>();
+    var wantᴷ = new stackAppend<@string>();
+    var problemsᴷ = new stackAppend<@string>();
+
     {
         var (_, ok) = t.fsys._<fs.GlobFS>(ᐧ); if (!ok) {
             return;
@@ -343,7 +358,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             slice<rune> pattern = default!;
             foreach (var (j, r) in e) {
                 if (r == (rune)'*' || r == (rune)'?' || r == (rune)'\\' || r == (rune)'[' || r == (rune)'-') {
-                    pattern = append(pattern, (rune)((rune)'\\'), r);
+                    pattern = append(patternᴷ, pattern, (rune)'\\', r);
                     continue;
                 }
                 switch ((i + j) % 5) {
@@ -352,23 +367,23 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
                     break;
                 }
                 case 1: {
-                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', r, (rune)']');
                     break;
                 }
                 case 2: {
-                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)'-'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', r, (rune)'-', r, (rune)']');
                     break;
                 }
                 case 3: {
-                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)']');
                     break;
                 }
                 case 4: {
-                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)'-'), (rune)((rune)'\\'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)'-', (rune)'\\', r, (rune)']');
                     break;
                 }}
             }
-            elem[i] = ((@string)pattern);
+            elem[i] = (@string)pattern;
         }
         glob = strings.Join(elem, "/"u8) + "/"u8;
     }
@@ -404,7 +419,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     slice<@string> want = default!;
     foreach (var (_, d) in list) {
         if (strings.ContainsRune(d.Name(), c)) {
-            want = append(want, path.Join(dir, d.Name()));
+            want = append(wantᴷ, want, path.Join(dir, d.Name()));
         }
     }
 
@@ -430,7 +445,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             break;
         }
         case {} when len(want) > 0 && (len(names) == 0 || want[0] < names[0]): {
-            problems = append(problems, "missing: " + want[0]);
+            problems = append(problemsᴷ, problems, "missing: " + want[0]);
             want = want[1..];
             break;
         }
@@ -508,12 +523,32 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
             }
         }
     }
+
+    {
+        var (fsys, ok) = t.fsys._<fs.ReadLinkFS>(ᐧ); if (ok) {
+            var (info2Δ2, errΔ2) = fsys.Lstat(path);
+            if (errΔ2 != default!) {
+                t.errorf("%s: fsys.Lstat: %v"u8, path, errΔ2);
+                return;
+            }
+            @string fientry2 = formatInfoEntry(info2Δ2);
+            if (fentry != fientry2) {
+                t.errorf("%s: mismatch:\n\tentry = %s\n\tfsys.Lstat(...) = %s"u8, path, fentry, fientry2);
+            }
+            @string feinfo = formatInfo(einfo);
+            @string finfo2Δ2 = formatInfo(info2Δ2);
+            if (feinfo != finfo2Δ2) {
+                t.errorf("%s: mismatch:\n\tentry.Info() = %s\n\tfsys.Lstat(...) = %s\n"u8, path, feinfo, finfo2Δ2);
+            }
+        }
+    }
 }
 
 // checkDirList checks that two directory lists contain the same files and file info.
 // The order of the lists need not match.
 internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var diffsᴷ = new stackAppend<@string>();
 
     var old = new map<@string, fs.DirEntry>();
     void checkMode(fs.DirEntry entry) {
@@ -536,7 +571,7 @@ internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string d
         var entry1 = old[entry2.Name()];
         if (entry1 == default!) {
             checkMode(entry2);
-            diffs = append(diffs, "+ "u8 + formatEntry(entry2));
+            diffs = append(diffsᴷ, diffs, "+ "u8 + formatEntry(entry2));
             continue;
         }
         if (formatEntry(entry1) != formatEntry(entry2)) {
@@ -612,7 +647,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
 
                 // Modify the data and check it again. Modifying the
                 // returned byte slice should not affect the next call.
-                foreach (var (i, _) in data2Δ1) {
+                foreach (var i in range(data2Δ1)) {
                     data2Δ1[i]++;
                 }
                 (data2Δ1, errΔ2) = fsys.ReadFile(@file);
@@ -682,12 +717,14 @@ internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
 internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
+    var badᴷ = new stackAppend<@string>();
+
     var bad = new @string[]{
         "/"u8 + @file,
         @file + "/."u8
     }.slice();
     if (@file == "."u8) {
-        bad = append(bad, "/"u8);
+        bad = append(badᴷ, bad, "/"u8);
     }
     {
         nint i = strings.Index(@file, "/"u8); if (i >= 0) {

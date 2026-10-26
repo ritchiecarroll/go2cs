@@ -7,8 +7,11 @@ using bytes = bytes_package;
 using obscuretestdata = @internal.obscuretestdata_package;
 using io = io_package;
 using reflect = reflect_package;
+using slices = slices_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.debug.macho_package;
 
 partial class macho_internal_test_package {
@@ -19,6 +22,7 @@ internal partial struct fileTest {
     internal slice<any> loads;
     internal slice<ж<global::go.debug.macho_package.SectionHeader>> sections;
     internal map<@string, slice<global::go.debug.macho_package.Reloc>> relocations;
+    internal slice<@string> importedSyms;
 }
 
 internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
@@ -46,6 +50,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__dyld"u8, "__DATA"u8, 0x2014, 0x1c, 0x1014, 0x2, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__jump_table"u8, "__IMPORT"u8, 0x3000, 0xa, 0x2000, 0x6, 0x0, 0x0, 0x4000008))
         }.slice(),
+        default!,
         default!
     ),
     new(
@@ -74,6 +79,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__dyld"u8, "__DATA"u8, 0x100001020UL, 0x38, 0x1020, 0x3, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__la_symbol_ptr"u8, "__DATA"u8, 0x100001058UL, 0x10, 0x1058, 0x2, 0x0, 0x0, 0x7))
         }.slice(),
+        default!,
         default!
     ),
     new(
@@ -102,6 +108,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__debug_pubnames"u8, "__DWARF"u8, 0x100002141UL, 0x1b, 0x1141, 0x0, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__debug_str"u8, "__DWARF"u8, 0x10000215cUL, 0x60, 0x115c, 0x0, 0x0, 0x0, 0x0))
         }.slice(),
+        default!,
         default!
     ),
     new(
@@ -126,6 +133,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             default! // LC_DATA_IN_CODE
         }.slice(),
         default!,
+        default!,
         default!
     ),
     new(
@@ -149,6 +157,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             default!, // LC_FUNCTION_STARTS
             default! // LC_DATA_IN_CODE
         }.slice(),
+        default!,
         default!,
         default!
     ),
@@ -184,7 +193,8 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
                     Value: 0xb,
                     Scattered: true
                 )}.slice()
-        }
+        },
+        default!
     ),
     new(
         "testdata/clang-amd64-darwin.obj.base64"u8,
@@ -218,7 +228,16 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
                     Extern: false,
                     Value: 1
                 )}.slice()
-        }
+        },
+        new @string[]{"_printf"u8}.slice()
+    ),
+    new(
+        "testdata/clang-amd64-darwin-ld-r.obj.base64"u8,
+        new FileHeader(0xfeedfacfU, CpuAmd64, 0x3, 0x1, 0x4, 0x1c0, 0x2000),
+        default!,
+        default!,
+        default!,
+        new @string[]{"_printf"u8}.slice()
     )
 }.slice());
 internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
@@ -258,7 +277,7 @@ internal static (ж<global::go.debug.macho_package.FatFile>, error) openFatObscu
 public static void TestOpen(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (i, _) in fileTests) {
+    foreach (var i in range(fileTests)) {
         var tt = Ꮡ(fileTests, i);
 
         // Use obscured files to prevent Apple’s notarization service from
@@ -354,6 +373,17 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
+        if ((~tt).importedSyms != default!) {
+            var (ss, errΔ1) = f.ImportedSymbols();
+            if (errΔ1 != default!) {
+                Ꮡt.Errorf("open %s: fail to read imported symbols: %v"u8, (~tt).@file, errΔ1);
+            }
+            var want = tt.Value.importedSyms;
+            if (!slices.Equal<slice<@string>, @string>(ss, want)) {
+                Ꮡt.Errorf("open %s: imported symbols differ:\n\thave %v\n\twant %v"u8, (~tt).@file, ss, want);
+            }
+        }
     }
 }
 
@@ -384,7 +414,7 @@ public static void TestOpenFat(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("OpenFat: got %d architectures, want 2"u8, len((~ff).Arches));
     }
 
-    foreach (var (i, _) in (~ff).Arches) {
+    foreach (var i in range((~ff).Arches)) {
         var arch = Ꮡ((~ff).Arches, i);
         var ftArch = Ꮡ(fileTests, i);
 
@@ -449,7 +479,7 @@ public static void TestTypeString(ж<testing.T> Ꮡt) {
 internal static readonly @string testdataGccAmd64Darwinˢ = "testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64"u8;
 internal static readonly object openObscuredDidNotFailˢ = (@string)"openObscured did not fail when opening a file with an invalid dynamic symbol table command"u8;
 
-public static void TestOpenBadDysymCmd(ж<testing.T> Ꮡt) {
+public static partial void TestOpenBadDysymCmd(ж<testing.T> Ꮡt) {
     var (_, err) = openObscured(testdataGccAmd64Darwinˢ);
     if (err == default!) {
         Ꮡt.Fatal(openObscuredDidNotFailˢ);

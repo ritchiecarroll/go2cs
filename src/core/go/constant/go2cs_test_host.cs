@@ -14,11 +14,11 @@ internal static class Go2CsTestHost
             "value.go",
             "value_test.go",
         });
-        registry.Add("TestBitLen", constant_internal_test_package.TestBitLen, "value_test.go", 723);
+        registry.Add("TestBitLen", constant_internal_test_package.TestBitLen, "value_test.go", 726);
         registry.Add("TestBytes", constant_internal_test_package.TestBytes, "value_test.go", 576);
         registry.Add("TestFractions", constant_internal_test_package.TestFractions, "value_test.go", 553);
-        registry.Add("TestMake", constant_internal_test_package.TestMake, "value_test.go", 667);
-        registry.Add("TestMakeFloat64", constant_internal_test_package.TestMakeFloat64, "value_test.go", 624);
+        registry.Add("TestMake", constant_internal_test_package.TestMake, "value_test.go", 670);
+        registry.Add("TestMakeFloat64", constant_internal_test_package.TestMakeFloat64, "value_test.go", 627);
         registry.Add("TestNumbers", constant_internal_test_package.TestNumbers, "value_test.go", 177);
         registry.Add("TestOps", constant_internal_test_package.TestOps, "value_test.go", 320);
         registry.Add("TestString", constant_internal_test_package.TestString, "value_test.go", 428);

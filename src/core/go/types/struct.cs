@@ -5,9 +5,9 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using strconv = strconv_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -157,7 +157,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
             // Because we have a name, typ must be of the form T or *T, where T is the name
             // of a (named or alias) type, and t (= deref(typ)) must be the type of T.
             // We must delay this check to the end because we don't want to instantiate
-            // (via under(t)) a possibly incomplete type.
+            // (via t.Underlying()) a possibly incomplete type.
 
             // for use in the closure below
             var embeddedTyp = typ;
@@ -167,7 +167,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
             var embeddedTypʗ1 = embeddedTyp;
             check.later(() => {
                 var (t, isPtr) = deref(embeddedTypʗ1);
-                switch (under(t).type()) {
+                switch (t.Underlying().type()) {
                 case ж<Basic> u: {
                     if (!isValid(t)) {
                         // error was reported before
@@ -237,7 +237,7 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
     {
         var alt = oset.insert(obj); if (alt != default!) {
             var err = Ꮡcheck.newError(DuplicateDecl);
-            err.addf(((atPos)pos), "%s redeclared"u8, obj.Name());
+            err.addf((atPos)pos, "%s redeclared"u8, obj.Name());
             err.addAltDecl(alt);
             err.report();
             return false;

@@ -96,9 +96,11 @@ partial class runtime_package
     // that branch is the only branch. This is a faithful implementation, not an approximation.
     internal static partial void systemstack(Action fn) => fn();
 
-    // procyield spins for the given number of iterations, emitting the architecture's pause hint.
-    // Thread.SpinWait is the CLR's spelling of exactly that.
-    internal static partial void procyield(uint32 cycles) => Thread.SpinWait((int)cycles);
+    // procyieldAsm spins for the given number of iterations, emitting the architecture's pause hint.
+    // Thread.SpinWait is the CLR's spelling of exactly that. Go 1.26 gave procyield a Go body (stubs.go:
+    // return on 0 cycles, else procyieldAsm), so the converted procyield is bodied and this part implements
+    // the bodyless assembly half it calls.
+    internal static partial void procyieldAsm(uint32 cycles) => Thread.SpinWait((int)cycles);
 
     // testSPWrite exists only for runtime's own TestSPWrite (#62326): on amd64 it is an assembly frame
     // with a 16 KB locals area that writes SP, so Go's stack-growth prologue has to be traced back from
@@ -135,7 +137,7 @@ partial class runtime_package
         Console.Out.Flush();
         Console.Error.Write(GOOS == "windows"u8 ? "fatal error: fault\n" : "SIGTRAP: trace trap\n");
         Console.Error.Flush();
-        Environment.Exit(2);
+        global::go.golib.MainExit.Exit(2);
     }
 
     // The ready-seam guards' view (GoroutineReadyTests): ANOTHER goroutine's g status, read through the
@@ -166,6 +168,14 @@ partial class runtime_package
 
     private static readonly bool s_getgReset = GoroutineThreadState.Register(static () => t_getg = null);
     private static readonly bool s_getgOwnerReset = GoroutineThreadState.Register(static () => t_getgOwner = null);
+
+    // Go's goexit0: a goroutine that exits still locked to its thread (LockOSThread, or the runtime's own
+    // lockOSThread, without the matching unlock) takes the thread with it -- "If the calling goroutine exits
+    // without unlocking the thread, the thread will be terminated." golib reuses a finished goroutine's
+    // thread (GoroutineThreadPool), so it asks this first. Read before the reset, while t_getg still holds
+    // the finished goroutine's g and its m's lock counts.
+    private static readonly bool s_lockedExitRetires = GoroutineThreadState.RegisterRetire(static () =>
+        t_getg is { } gp && gp.Value.m is { IsNilPointer: false } mp && (mp.Value.lockedExt != 0 || mp.Value.lockedInt != 0));
 
     internal static partial ж<g> getg()
     {
@@ -414,6 +424,7 @@ partial class runtime_package
         WaitReason.SynctestChanReceive => waitReasonSynctestChanReceive,
         WaitReason.SynctestChanSend => waitReasonSynctestChanSend,
         WaitReason.SynctestSelect => waitReasonSynctestSelect,
+        WaitReason.SynctestWaitGroupWait => waitReasonSynctestWaitGroupWait,
         _ => waitReasonZero,
     };
 

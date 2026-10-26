@@ -505,17 +505,17 @@ internal static (nint x, error err) atoi<bytes>(bytes s)
 internal static nint stdFracSecond(nint code, nint n, nint c) {
     // Use 0xfff to make the failure case even more absurd.
     if (c == (rune)'.') {
-        return (nint)(code | ((((nint)(n & 0xfff)) << (int)(stdArgShift))));
+        return code | ((n & 0xfff) << (int)(stdArgShift));
     }
-    return (nint)((nint)(code | ((((nint)(n & 0xfff)) << (int)(stdArgShift)))) | (nint)(1 << (int)(stdSeparatorShift)));
+    return code | ((n & 0xfff) << (int)(stdArgShift)) | (nint)(1 << (int)(stdSeparatorShift));
 }
 
 internal static nint digitsLen(nint std) {
-    return (nint)(((std >> (int)(stdArgShift))) & 0xfff);
+    return (std >> (int)(stdArgShift)) & 0xfff;
 }
 
 internal static byte separator(nint std) {
-    if (((std >> (int)(stdSeparatorShift))) == 0) {
+    if ((std >> (int)(stdSeparatorShift)) == 0) {
         return (rune)'.';
     }
     return (rune)',';
@@ -524,7 +524,7 @@ internal static byte separator(nint std) {
 // appendNano appends a fractional second, as nanoseconds, to b
 // and returns the result. The nanosec must be within [0, 999999999].
 internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
-    var trim = (nint)(std & (nint)stdMask) == stdFracSecond9;
+    var trim = (std & (nint)stdMask) == stdFracSecond9;
     nint n = digitsLen(std);
     if (trim && (n == 0 || nanosec == 0)) {
         return b;
@@ -561,10 +561,12 @@ internal static readonly @string mstˢ = "2006-01-02 15:04:05.999999999 -0700 MS
 // representation, use t.MarshalText, t.MarshalBinary, or t.Format
 // with an explicit format string.
 public static @string String(this Time t) {
+    var bufᴷ = new stackAppend<byte>();
+
     @string s = t.Format(mstˢ);
 
     // Format monotonic clock reading as m=±ddd.nnnnnnnnn.
-    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+    if ((t.wall & (uint64)hasMonotonic) != 0) {
         var m2 = (uint64)t.ext;
         var sign = (byte)(rune)'+';
         if (t.ext < 0) {
@@ -577,7 +579,7 @@ public static @string String(this Time t) {
         m1 = m1 % 1000000000;
         var buf = new slice<byte>(0, 24);
         buf = append(buf, ((@string)" m="u8).ꓸꓸꓸ);
-        buf = append(buf, sign);
+        buf = append(bufᴷ, buf, sign);
         nint wid = 0;
         if (m0 != 0) {
             buf = appendInt(buf, (nint)m0, 0);
@@ -594,6 +596,8 @@ public static @string String(this Time t) {
 // GoString implements [fmt.GoStringer] and formats t to be printed in Go source
 // code.
 public static @string GoString(this Time t) {
+    var bufᴷ = new stackAppend<byte>();
+
     var abs = t.absSec();
     var (year, month, day) = abs.days().date();
     var (hour, minute, second) = abs.clock();
@@ -647,11 +651,11 @@ public static @string GoString(this Time t) {
             // case we hope not to hit too often.
             buf = append(buf, ((@string)@"time.Location("u8).ꓸꓸꓸ);
             buf = append(buf, quote((~loc).name).ꓸꓸꓸ);
-            buf = append(buf, (byte)((rune)')'));
+            buf = append(bufᴷ, buf, (byte)((rune)')'));
         }
     }
     buf = append(buf, (byte)((rune)')'));
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Format returns a textual representation of the time value formatted according
@@ -671,7 +675,7 @@ public static @string Format(this Time t, @string layout) {
         b = new slice<byte>(0, max);
     }
     b = t.AppendFormat(b, layout);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // AppendFormat is like [Time.Format] but appends the textual
@@ -714,19 +718,19 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         layout = suffix;
 
         // Compute year, month, day if needed.
-        if (year < 0 && (nint)(std & (nint)stdNeedDate) != 0) {
+        if (year < 0 && (std & (nint)stdNeedDate) != 0) {
             (year, month, day) = days.date();
         }
-        if (yday < 0 && (nint)(std & (nint)stdNeedYday) != 0) {
+        if (yday < 0 && (std & (nint)stdNeedYday) != 0) {
             (_, yday) = days.yearYday();
         }
 
         // Compute hour, minute, second if needed.
-        if (hour < 0 && (nint)(std & (nint)stdNeedClock) != 0) {
+        if (hour < 0 && (std & (nint)stdNeedClock) != 0) {
             (hour, min, sec) = abs.clock();
         }
 
-        var exprᴛ1 = (nint)(std & (nint)stdMask);
+        var exprᴛ1 = (std & (nint)stdMask);
         if (exprᴛ1 == stdYear) {
             nint y = year;
             if (y < 0) {
@@ -914,6 +918,8 @@ internal static UntypedInt runeSelf => 0x80;
 internal static UntypedInt runeError => /* '\uFFFD' */ 65533;
 
 internal static @string quote(@string s) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(1, len(s) + 2); // slice will be at least len(s) + quotes
     buf[0] = (rune)'"';
     foreach (var (i, c) in s) {
@@ -931,22 +937,22 @@ internal static @string quote(@string s) {
                     width = 3;
                 }
             } else {
-                width = len(((@string)c));
+                width = len((@string)c);
             }
             for (nint j = 0; j < width; j++) {
                 buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
-                buf = append(buf, lowerhex[(s[i + j] >> (int)(4))]);
+                buf = append(bufᴷ, buf, lowerhex[(s[i + j] >> 4)]);
                 buf = append(buf, lowerhex[(byte)(s[i + j] & 0xF)]);
             }
         } else {
             if (c == (rune)'"' || c == (rune)'\\') {
                 buf = append(buf, (byte)((rune)'\\'));
             }
-            buf = append(buf, ((@string)c).ꓸꓸꓸ);
+            buf = append(buf, (byte)c);
         }
     }
     buf = append(buf, (byte)((rune)'"'));
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Error returns the string representation of a ParseError.
@@ -1149,7 +1155,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         layout = suffix;
         @string p = default!;
         @string hold = value;
-        var exprᴛ1 = (nint)(std & (nint)stdMask);
+        var exprᴛ1 = (std & (nint)stdMask);
         var matchᴛ1 = false;
         if (exprᴛ1 == stdYear) { matchᴛ1 = true;
             do {
@@ -1476,10 +1482,10 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         }
         if (m == 0) {
             m = (yday - 1) / 31 + 1;
-            if (daysBefore(((ΔMonth)(m + 1))) < yday) {
+            if (daysBefore((ΔMonth)(m + 1)) < yday) {
                 m++;
             }
-            d = yday - daysBefore(((ΔMonth)m));
+            d = yday - daysBefore((ΔMonth)m);
         }
         // If month, day already seen, yday's m, d must match.
         // Otherwise, set them from m, d.
@@ -1501,16 +1507,16 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     // Validate the day of the month.
-    if (day < 1 || day > daysIn(((ΔMonth)month), year)) {
+    if (day < 1 || day > daysIn((ΔMonth)month, year)) {
         return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, dayOutOfRangeˢ)));
     }
 
     if (z != nil) {
-        return (Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, z), default!);
+        return (Date(year, (ΔMonth)month, day, hour, min, sec, nsec, z), default!);
     }
 
     if (zoneOffset != -1) {
-        var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
+        var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
         t.addSec(-(int64)zoneOffset);
 
         // Look for local zone with the given offset.
@@ -1528,7 +1534,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     if (zoneName != ""u8) {
-        var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
+        var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
         // Look for local zone with the given offset.
         // If that zone was in effect at the given time, use it.
         var (offset, ok) = Ꮡlocal.lookupName(zoneName, t.unixSec());
@@ -1549,7 +1555,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     // Otherwise, fall back to default.
-    return (Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ᏑdefaultLocation), default!);
+    return (Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ᏑdefaultLocation), default!);
 }
 
 // parseTimeZone parses a time zone string and returns its length. Time zones
@@ -1710,7 +1716,7 @@ internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
             return (0, rem, errLeadingInt);
         }
         x = x * 10 + (uint64)c - (rune)'0';
-        if (x > ((uint64)1 << (int)(63))) {
+        if (x > (uint64)1 << 63) {
             // overflow
             return (0, rem, errLeadingInt);
         }
@@ -1742,7 +1748,7 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
             continue;
         }
         var y = x * 10 + (uint64)c - (rune)'0';
-        if (y > ((uint64)1 << (int)(63))) {
+        if (y > (uint64)1 << 63) {
             overflow = true;
             continue;
         }
@@ -1752,7 +1758,17 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
     return (x, scale, s.slice(i));
 }
 
-internal static map<@string, uint64> unitMap = new map<@string, uint64>{
+// parseDurationError describes a problem parsing a duration string.
+partial struct parseDurationError {
+    internal @string message;
+    internal @string value;
+}
+
+internal static @string Error(this ref parseDurationError e) {
+    return "time: "u8 + e.message + " "u8 + quote(e.value);
+}
+
+[GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
     ["us"u8] = (uint64)(int64)Microsecond,
     ["µs"u8] = (uint64)(int64)Microsecond, // U+00B5 = micro symbol
@@ -1761,7 +1777,7 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["s"u8] = (uint64)(int64)ΔSecond,
     ["m"u8] = (uint64)(int64)ΔMinute,
     ["h"u8] = (uint64)(int64)ΔHour
-};
+}; }
 
 // ParseDuration parses a duration string.
 // A duration string is a possibly signed sequence of
@@ -1770,7 +1786,8 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
 // Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 public static (Duration, error) ParseDuration(@string s) {
     // [-+]?([0-9]*(\.[0-9]*)?[a-z]+)+
-    @string orig = s;
+    ref var orig = ref heap<@string>(out var Ꮡorig);
+    orig = s;
     uint64 d = default!;
     var neg = false;
 
@@ -1787,7 +1804,7 @@ public static (Duration, error) ParseDuration(@string s) {
         return (0, default!);
     }
     if (s == ""u8) {
-        return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+        return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
     }
     while (s != ""u8) {
         uint64 v = default!;                      // integers before, after decimal point
@@ -1798,13 +1815,13 @@ public static (Duration, error) ParseDuration(@string s) {
 
         // The next character must be [0-9.]
         if (!(s[0] == (rune)'.' || (rune)'0' <= s[0] && s[0] <= (rune)'9')) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         // Consume [0-9]*
         nint pl = len(s);
         (v, s, err) = leadingInt(s);
         if (err != default!) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         var pre = pl != len(s); // whether we consumed anything before a period
 
@@ -1818,7 +1835,7 @@ public static (Duration, error) ParseDuration(@string s) {
         }
         if (!pre && !post) {
             // no digits (e.g. ".s" or "-.s")
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
 
         // Consume unit.
@@ -1830,40 +1847,40 @@ public static (Duration, error) ParseDuration(@string s) {
             }
         }
         if (i == 0) {
-            return (0, errors.New("time: missing unit in duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("missing unit in duration"u8, orig))));
         }
         @string u = s.slice(0, i);
         s = s.slice(i);
         var (unit, ok) = unitMap[u, ꟷ];
         if (!ok) {
-            return (0, errors.New("time: unknown unit "u8 + quote(u) + " in duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("unknown unit "u8 + quote(u) + " in duration"u8, orig))));
         }
-        if (v > ((uint64)1 << (int)(63)) / unit) {
+        if (v > ((uint64)1 << 63) / unit) {
             // overflow
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         v *= unit;
         if (f > 0) {
             // float64 is needed to be nanosecond accurate for fractions of hours.
             // v >= 0 && (f*unit/scale) <= 3.6e+12 (ns/h, h is the largest unit)
             v += (uint64)((float64)f * ((float64)unit / scale));
-            if (v > ((uint64)1 << (int)(63))) {
+            if (v > (uint64)1 << 63) {
                 // overflow
-                return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+                return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
             }
         }
         d += v;
-        if (d > ((uint64)1 << (int)(63))) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+        if (d > (uint64)1 << 63) {
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
     }
     if (neg) {
         return (-((Duration)(int64)d), default!);
     }
     if (d > 9223372036854775807UL) {
-        return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+        return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
     }
-    return (((Duration)(int64)d), default!);
+    return ((Duration)(int64)d, default!);
 }
 
 } // end time_package

@@ -2,14 +2,22 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-18_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/io.fs.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/io/fs@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/io/fs) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/io/fs)
+[![Tests](https://img.shields.io/badge/Tests-21_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/io.fs.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/io/fs@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/io/fs) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/io/fs)
 
 From C#, call this package through the static class go.io.fs_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package fs defines basic interfaces to a file system. A file system can be provided by the host operating system but also by other packages.
 
-See the [testing/fstest](https://pkg.go.dev/testing/fstest@go1.24.13) package for support with testing implementations of file systems.
+### Path Names
+
+The interfaces in this package all operate on the same path name syntax, regardless of the host operating system.
+
+Path names are UTF-8-encoded, unrooted, slash-separated sequences of path elements, like “x/y/z”. Path names must not contain an element that is “.” or “..” or the empty string, except for the special case that the name "." may be used for the root directory. Paths must not start or end with a slash: “/x” and “x/” are invalid.
+
+### Testing
+
+See the [testing/fstest](https://pkg.go.dev/testing/fstest@go1.26.10) package for support with testing implementations of file systems.
 
 ---
 

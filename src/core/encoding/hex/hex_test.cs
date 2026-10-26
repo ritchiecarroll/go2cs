@@ -100,12 +100,12 @@ internal static slice<errTestsᴛ1> errTests;
 internal static void initᴛerrTests() { errTests = new errTestsᴛ1[]{
     new(""u8, ""u8, default!),
     new("0"u8, ""u8, ErrLength),
-    new("zd4aa"u8, ""u8, ((global::go.encoding.hex_package.InvalidByteError)(rune)'z')),
-    new("d4aaz"u8, ((@string)(new byte[]{0xd4, 0xaa})), ((global::go.encoding.hex_package.InvalidByteError)(rune)'z')),
+    new("zd4aa"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
+    new("d4aaz"u8, ((@string)(new byte[]{0xd4, 0xaa})), (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
     new("30313"u8, "01"u8, ErrLength),
-    new("0g"u8, ""u8, ((global::go.encoding.hex_package.InvalidByteError)(rune)'g')),
-    new("00gg"u8, "\x00"u8, ((global::go.encoding.hex_package.InvalidByteError)(rune)'g')),
-    new("0\x01"u8, ""u8, ((global::go.encoding.hex_package.InvalidByteError)(rune)'\x01')),
+    new("0g"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
+    new("00gg"u8, "\x00"u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
+    new("0\x01"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'\x01'),
     new("ffeed"u8, ((@string)(new byte[]{0xff, 0xee})), ErrLength)
 }.slice(); }
 
@@ -114,7 +114,7 @@ public static void TestDecodeErr(ж<testing.T> Ꮡt) {
         var @out = new slice<byte>(len(tt.@in) + 10);
         var (n, err) = Decode(@out, slice<byte>(tt.@in));
         if (((sstring)(@out.slice(0, n))) != tt.@out || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("Decode(%q) = %q, %v, want %q, %v"u8, tt.@in, ((@string)(@out.slice(0, n))), err, tt.@out, tt.err);
+            Ꮡt.Errorf("Decode(%q) = %q, %v, want %q, %v"u8, tt.@in, (@string)(@out.slice(0, n)), err, tt.@out, tt.err);
         }
     }
 }
@@ -193,7 +193,7 @@ public static void TestDecoderErr(ж<testing.T> Ꮡt) {
 
 public static void TestDumper(ж<testing.T> Ꮡt) {
     array<byte> @in = new(40);
-    foreach (var (i, _) in @in) {
+    foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
     }
 
@@ -251,7 +251,7 @@ public static void TestDumper_earlyclose(ж<testing.T> Ꮡt) {
 
 public static void TestDump(ж<testing.T> Ꮡt) {
     array<byte> @in = new(40);
-    foreach (var (i, _) in @in) {
+    foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
     }
 

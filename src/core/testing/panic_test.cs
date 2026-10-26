@@ -14,6 +14,7 @@ using strings = strings_package;
 using testing = testing_package;
 using @internal;
 using go.os;
+using Δio = io_package;
 
 partial class testing_test_package {
 
@@ -44,6 +45,7 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
 
 """u8.Raw()
     ), new(
@@ -53,8 +55,10 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -67,8 +71,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -81,6 +87,7 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
 
 """u8.Raw()
     ), new(
@@ -93,8 +100,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -107,8 +116,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -121,8 +132,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -135,6 +148,7 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
 
 """u8.Raw()
     ), new(
@@ -147,8 +161,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     ), new(
@@ -161,8 +177,10 @@ ran middle cleanup 1
 ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
 
 """u8.Raw()
     )
@@ -173,11 +191,11 @@ ran outer cleanup
 
         var tcʗ1 = tc;
         Ꮡt.Run(tc.desc, (ж<testing.T> tΔ1) => {
-            var cmd = exec.Command(Δos.Args[0], testRunTestPanicHelperˢ);
+            var cmd = exec.Command(testenv.Executable(new testing_TжTB(tΔ1)), testRunTestPanicHelperˢ);
             cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, tcʗ1.flags);
             cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
             var (b, _) = cmd.CombinedOutput();
-            @string got = ((@string)b);
+            @string got = (@string)b;
             @string want = strings.TrimSpace(tcʗ1.want);
             @string re = makeRegexp(want);
             {
@@ -209,6 +227,7 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
         return;
     }
     Ꮡt.Log(Ꮡt.Name());
+    Ꮡt.Output().Write(slice<byte>(Ꮡt.Name()));
     if (Ꮡt.Name() == testPanicTest.Value) {
         throw panic("panic");
     }
@@ -224,13 +243,13 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
             throw panic("outer cleanup");
         }
     });
-    for (nint i = 0; i < 3; i++) {
-        nint iΔ1 = i;
-        Ꮡt.Run(fmt.Sprintf("%v"u8, iΔ1), (ж<testing.T> tΔ1) => {
+    for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+        var i = iᴛ1;
+        Ꮡt.Run(fmt.Sprintf("%v"u8, i), (ж<testing.T> tΔ1) => {
             var chosen = tΔ1.Name() == testPanicTest.Value;
             if (chosen && testPanicCleanup.Value) {
                 tΔ1.Cleanup(() => {
-                    fmt.Printf("ran middle cleanup %d\n"u8, iΔ1);
+                    fmt.Printf("ran middle cleanup %d\n"u8, i);
                     if (testPanicCleanupPanic.Value == "middle"u8) {
                         throw panic("middle cleanup");
                     }
@@ -240,10 +259,11 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
                 tΔ1.Parallel();
             }
             tΔ1.Log(tΔ1.Name());
+            tΔ1.Output().Write(slice<byte>(tΔ1.Name()));
             if (chosen) {
                 if (testPanicCleanup.Value) {
                     tΔ1.Cleanup(() => {
-                        fmt.Printf("ran inner cleanup %d\n"u8, iΔ1);
+                        fmt.Printf("ran inner cleanup %d\n"u8, i);
                         if (testPanicCleanupPanic.Value == "inner"u8) {
                             throw panic("inner cleanup");
                         }
@@ -283,10 +303,10 @@ panic: die
     }.slice();
 
     foreach (var (_, tc) in testCases) {
-        var cmd = exec.Command(Δos.Args[0], tc.flags.ꓸꓸꓸ);
+        var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)), tc.flags.ꓸꓸꓸ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         var (b, _) = cmd.CombinedOutput();
-        @string got = ((@string)b);
+        @string got = (@string)b;
         @string want = tc.want;
         @string re = makeRegexp(want);
         {

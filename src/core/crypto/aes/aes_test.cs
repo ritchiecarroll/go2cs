@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
+using boring = go.crypto.@internal.boring_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
 using fmt = fmt_package;
 using testing = testing_package;
@@ -114,6 +115,20 @@ internal static void testAESBlock(ж<testing.T> Ꮡt) {
             cryptotest.TestBlock(tΔ1, keylen / 8, new Func<slice<byte>, (cipher.Block, error)>(NewCipher));
         });
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object goBoringCryptoStillUsesˢ = (@string)"Go+BoringCrypto still uses the interface upgrades in crypto/cipher"u8;
+
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    if (boring.Enabled) {
+        Ꮡt.Skip(goBoringCryptoStillUsesˢ);
+    }
+    cryptotest.TestAllImplementations(Ꮡt, aesˢ, (ж<testing.T> tΔ1) => {
+        ref var b = ref heap<crypto.cipher_package.Block>(out var Ꮡb);
+        (b, _) = NewCipher(new slice<byte>(16));
+        cryptotest.NoExtraMethods(tΔ1, Ꮡb);
+    });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

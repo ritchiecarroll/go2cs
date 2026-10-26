@@ -11,13 +11,54 @@ partial class runtime_package {
 
 // go2cs generated this placeholder — func GOMAXPROCS is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// SetDefaultGOMAXPROCS updates the GOMAXPROCS setting to the runtime
+// default, as described by [GOMAXPROCS], ignoring the GOMAXPROCS
+// environment variable.
+//
+// SetDefaultGOMAXPROCS can be used to enable the default automatic updating
+// GOMAXPROCS behavior if it has been disabled by the GOMAXPROCS
+// environment variable or a prior call to [GOMAXPROCS], or to force an immediate
+// update if the caller is aware of a change to the total logical CPU count, CPU
+// affinity mask or cgroup quota.
+public static void SetDefaultGOMAXPROCS() {
+    // SetDefaultGOMAXPROCS conceptually means "[re]do what the runtime
+    // would do at startup if the GOMAXPROCS environment variable were
+    // unset." It still respects GODEBUG.
+
+    var procs = defaultGOMAXPROCS(0);
+
+    @lock(Ꮡsched.of(schedt.Ꮡlock));
+    var curr = gomaxprocs;
+    var custom = sched.customGOMAXPROCS;
+    unlock(Ꮡsched.of(schedt.Ꮡlock));
+
+    if (!custom && procs == curr) {
+        // Nothing to do if we're already using automatic GOMAXPROCS
+        // and the limit is unchanged.
+        return;
+    }
+
+    var stw = stopTheWorldGC(stwGOMAXPROCS);
+
+    // newprocs will be processed by startTheWorld
+    //
+    // TODO(prattmic): this could use a nicer API. Perhaps add it to the
+    // stw parameter?
+    newprocs = procs;
+    @lock(Ꮡsched.of(schedt.Ꮡlock));
+    sched.customGOMAXPROCS = false;
+    unlock(Ꮡsched.of(schedt.Ꮡlock));
+
+    startTheWorldGC(stw);
+}
+
 // NumCPU returns the number of logical CPUs usable by the current process.
 //
 // The set of available CPUs is checked by querying the operating system
 // at process startup. Changes to operating system CPU allocation after
 // process startup are not reflected.
 public static nint NumCPU() {
-    return (nint)ncpu;
+    return (nint)numCPUStartup;
 }
 
 // go2cs generated this placeholder — func NumCgoCall is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

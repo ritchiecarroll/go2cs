@@ -3,14 +3,14 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using testenv = @internal.testenv_package;
+using testenv = global::go.@internal.testenv_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
-using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
+using global::go.@internal;
 using global::go.os;
 using static global::go.go.build_package;
 
@@ -43,7 +43,7 @@ public static partial void TestVendorPackages(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    foreach (var (_, fullPkg) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, fullPkg) in strings.Split((@string)@out, "\n"u8)) {
         var (pkg, found) = strings.CutPrefix(fullPkg, vendorˢ2);
         if (!found) {
             (_, pkg, found) = strings.Cut(fullPkg, vendorˢ3);

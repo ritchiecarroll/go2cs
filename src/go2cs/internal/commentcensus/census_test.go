@@ -155,6 +155,93 @@ func TestAnchorReadsPastConverterScaffolding(t *testing.T) {
 	}
 }
 
+// A lazily built package var is declared on one line, `[GoLazy] partial class lazyᴛX { internal static T X = ...`
+// (docs/DESIGN-lazy-static-data.md). That line opens with an attribute and its initializer can name a `_package`
+// class (`new text.template_package.FuncMap(...)`), yet it is the var's declaration: its doc comment anchors on it,
+// it is the declaration the top-level walk maps, and the blank line above it is the var's separation.
+func TestLazyHolderLineIsTheDeclaration(t *testing.T) {
+	pairs := FindPairs("testdata/lazyholder/good", "testdata/lazyholder/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%d pairs found, want 1 (lh/lh.cs against lh/lh.go)", len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatal(err)
+	}
+
+	// Vacuity: both var docs are read, and all three declarations after the import are mapped and separated as Go
+	// separates them.
+	if r.Groups() < 2 || r.r.topLevel["same"] != 3 {
+		t.Errorf("%d comment groups, %d top-level separations alike; want at least 2 and exactly 3", r.Groups(), r.r.topLevel["same"])
+	}
+
+	for k, n := range r.Counts() {
+		if n > 0 && (strings.HasPrefix(k, "misplaced:") || strings.HasPrefix(k, "missed:") || strings.HasPrefix(k, "top:")) {
+			t.Errorf("%s = %d, want 0", k, n)
+		}
+	}
+
+	if t.Failed() {
+		for _, f := range r.Findings("") {
+			t.Logf("%s at %s: %s", f.Class, f.Where, f.Detail)
+		}
+	}
+}
+
+// move2heapFindings reads testdata/move2heap's rendering: the classes a move line could move.
+func move2heapFindings(t *testing.T, rendering string) map[string]int {
+	t.Helper()
+
+	pairs := FindPairs("testdata/move2heap/"+rendering, "testdata/move2heap/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%s: %d pairs found, want 1 (m2h/m2h.cs against m2h/m2h.go)", rendering, len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatalf("%s: %v", rendering, err)
+	}
+
+	// Vacuity: both functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 2 {
+		t.Fatalf("%s: %d function bodies read, want 2", rendering, n)
+	}
+
+	got := map[string]int{}
+
+	for k, n := range r.Counts() {
+		if n > 0 && (k == "body:extra:unexplained" || k == "body:go-blank-cs-none" || strings.HasPrefix(k, "misplaced:")) {
+			got[k] = n
+		}
+	}
+
+	return got
+}
+
+// Go 1.26's `s = move2heap(s)` is part of the statement it precedes (cmd/compile/internal/slice inserts it there),
+// and the converter writes it as its own line, `x = move2heap(xᴷ, x);`, ahead of that statement's translation:
+// one per variable that escapes there. Like a capture copy or a bare heap box, it is never a statement of Go's, so
+// a Go blank line above the statement sits above the move lines, and a comment above the statement sits above
+// them too. `good` is the converter's emission: a blank before a two-slice return, and a comment before a range
+// over a moved slice whose first identifier the move line does not carry. `bad` drops that blank and puts the
+// comment above the wrong statement, which must still read as a missing blank and a misplaced comment.
+func TestMove2heapLinesAreTheStatementsLowering(t *testing.T) {
+	if got := move2heapFindings(t, "good"); len(got) != 0 {
+		t.Errorf("good: %v, want no defect", got)
+	}
+
+	want := map[string]int{"body:go-blank-cs-none": 1, "misplaced:free-stmt/anchor-differs": 1}
+
+	if got := move2heapFindings(t, "bad"); !maps.Equal(got, want) {
+		t.Errorf("bad: %v, want %v", got, want)
+	}
+}
+
 // preludeBlanks reads testdata/prelude's rendering: its body blank-line classes, and the separators read.
 func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 	t.Helper()
@@ -171,9 +258,9 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 		t.Fatalf("%s: %v", rendering, err)
 	}
 
-	// Vacuity: the four functions are read, or no class could move.
-	if n := r.r.body["functions"]; n != 4 {
-		t.Fatalf("%s: %d function bodies read, want 4", rendering, n)
+	// Vacuity: the twelve functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 12 {
+		t.Fatalf("%s: %d function bodies read, want 12", rendering, n)
 	}
 
 	got := map[string]int{}
@@ -189,17 +276,31 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 
 // The converter sets its prelude (named-result locals, variadic slices, array clones, heap boxes) apart from the
 // Go body by exactly one blank line: the owner's decision 2, so that blank line is not a defect. `good` is the
-// converter's emission; `bad` puts the blank line inside the prelude in three functions, as the converter did
-// before, and two blank lines after the prelude in the fourth. `first` opens with a Go statement that reads like
+// converter's emission; `bad` puts the blank line inside the prelude in four functions, as the converter did
+// before, and two blank lines after the prelude in a fifth. `first` opens with a Go statement that reads like
 // a prelude line (`var z int`), followed by Go's own blank line: only the blank line above it is the separator.
+// `grow` opens with `buf := make([]int, len(xs))`, which the translation spells `var buf = new slice<nint>(...)`:
+// Go's builtin `make` never appears on the C# line, so the identifier test must not require it. `opens` opens
+// with a comment and then Go's blank line; `bad` drops that blank, as the converter does, and the census must
+// report it rather than credit the prelude's separator above the comment as Go's blank. `regrow` has a Go blank
+// line before `more := make(...)`: the line that places it must not require `make` either, or the blank reads
+// unmapped in `good` and is never reported missing in `bad`. `boxed` has a Go blank line before an escaping
+// local, whose translation is a heap box and then its assignment: the blank sits above the box, so the line that
+// places it walks back over the box as it does over a comment. `boxedVar` (G's planted pair) has an escaping
+// `var q int`, a box WITH an initializer and so a whole statement: `bad` drops the blank after it, and the walk
+// must stop at the box rather than credit the blank above it to the line below. `grouped` has a Go blank before
+// a `const (` group, which holds no identifier: the group's first spec places it. `scoped` has one before
+// `if m := twice(n); …`, which the translation wraps in a scope block and whose `m` it renames `mΔ1`: the
+// initializer's other identifiers place it, and the walk crosses the scope's `{`.
 func TestPreludeSeparatorIsNotADefect(t *testing.T) {
-	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 4 {
-		t.Errorf("good: %v and %d separators, want no body class and 4 separators", got, separators)
+	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 7 {
+		t.Errorf("good: %v and %d separators, want no body class and 7 separators", got, separators)
 	}
 
-	want := map[string]int{"body:extra:after-named-result-locals": 3, "body:extra:after-param-prelude": 1}
+	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 6}
 
-	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 0 {
-		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)
+	// `bad` keeps regrow's prelude separator: only the blank before its make line is dropped.
+	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 1 {
+		t.Errorf("bad: %v and %d separators, want %v and 1 separator", got, separators, want)
 	}
 }

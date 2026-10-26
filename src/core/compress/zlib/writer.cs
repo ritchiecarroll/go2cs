@@ -15,8 +15,8 @@ using go.hash;
 
 partial class zlib_package {
 
-// These constants are copied from the flate package, so that code that imports
-// "compress/zlib" does not also have to import "compress/flate".
+// These constants are copied from the [flate] package, so that code that imports
+// [compress/zlib] does not also have to import [compress/flate].
 public static UntypedInt NoCompression => /* flate.NoCompression */ 0;
 public static UntypedInt BestSpeed => /* flate.BestSpeed */ 1;
 public static UntypedInt BestCompression => /* flate.BestCompression */ 9;
@@ -24,7 +24,7 @@ public static UntypedInt DefaultCompression => /* flate.DefaultCompression */ -1
 public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
 // A Writer takes data written to it and writes the compressed
-// form of that data to an underlying writer (see NewWriter).
+// form of that data to an underlying writer (see [NewWriter]).
 partial struct Writer {
     internal io.Writer w;
     internal nint level;
@@ -36,7 +36,7 @@ partial struct Writer {
     internal bool wroteHeader;
 }
 
-// NewWriter creates a new Writer.
+// NewWriter creates a new [Writer].
 // Writes to the returned Writer are compressed and written to w.
 //
 // It is the caller's responsibility to call Close on the Writer when done.
@@ -46,17 +46,17 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return z;
 }
 
-// NewWriterLevel is like NewWriter but specifies the compression level instead
-// of assuming DefaultCompression.
+// NewWriterLevel is like [NewWriter] but specifies the compression level instead
+// of assuming [DefaultCompression].
 //
-// The compression level can be DefaultCompression, NoCompression, HuffmanOnly
-// or any integer value between BestSpeed and BestCompression inclusive.
+// The compression level can be [DefaultCompression], [NoCompression], [HuffmanOnly]
+// or any integer value between [BestSpeed] and [BestCompression] inclusive.
 // The error returned will be nil if the level is valid.
 public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     return NewWriterLevelDict(w, level, default!);
 }
 
-// NewWriterLevelDict is like NewWriterLevel but specifies a dictionary to
+// NewWriterLevelDict is like [NewWriterLevel] but specifies a dictionary to
 // compress with.
 //
 // The dictionary may be nil. If not, its contents should not be modified until
@@ -72,8 +72,8 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
     )), default!);
 }
 
-// Reset clears the state of the Writer z such that it is equivalent to its
-// initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
+// Reset clears the state of the [Writer] z such that it is equivalent to its
+// initial state from [NewWriterLevel] or [NewWriterLevelDict], but instead writing
 // to w.
 public static void Reset(this ref Writer z, io.Writer w) {
     z.w = w;
@@ -104,22 +104,22 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
     // The final five FCHECK bits form a mod-31 checksum.
     var exprᴛ1 = z.level;
     if (exprᴛ1 == -2 || exprᴛ1 == 0 || exprᴛ1 == 1) {
-        z.scratch[1] = (byte)(0 << (int)(6));
+        z.scratch[1] = (byte)(0 << 6);
     }
     else if (exprᴛ1 is 2 or 3 or 4 or 5) {
-        z.scratch[1] = (byte)(1 << (int)(6));
+        z.scratch[1] = (byte)(1 << 6);
     }
     else if (exprᴛ1 == 6 || exprᴛ1 == -1) {
-        z.scratch[1] = (byte)(2 << (int)(6));
+        z.scratch[1] = (byte)(2 << 6);
     }
     else if (exprᴛ1 is 7 or 8 or 9) {
-        z.scratch[1] = (byte)(3 << (int)(6));
+        z.scratch[1] = (byte)(3 << 6);
     }
     else { /* default: */
         throw panic("unreachable");
     }
     if (z.dict != default!) {
-        z.scratch[1] |= (byte)((byte)(1 << (int)(5)));
+        z.scratch[1] |= (byte)((byte)(1 << 5));
     }
     z.scratch[1] += (uint8)(31 - binary.BigEndian.Uint16(z.scratch[..2]) % 31);
     {
@@ -148,8 +148,8 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
     return default!;
 }
 
-// Write writes a compressed form of p to the underlying io.Writer. The
-// compressed bytes are not necessarily flushed until the Writer is closed or
+// Write writes a compressed form of p to the underlying [io.Writer]. The
+// compressed bytes are not necessarily flushed until the [Writer] is closed or
 // explicitly flushed.
 public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
     nint n = default!;
@@ -173,7 +173,7 @@ public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
     return (n, err);
 }
 
-// Flush flushes the Writer to its underlying io.Writer.
+// Flush flushes the Writer to its underlying [io.Writer].
 public static error Flush(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
@@ -186,7 +186,7 @@ public static error Flush(this ref Writer z) {
 }
 
 // Close closes the Writer, flushing any unwritten data to the underlying
-// io.Writer, but does not close the underlying io.Writer.
+// [io.Writer], but does not close the underlying io.Writer.
 public static error Close(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();

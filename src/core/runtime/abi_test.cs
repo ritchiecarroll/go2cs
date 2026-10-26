@@ -65,16 +65,14 @@ internal partial struct TestFinalizerRegisterABI_tests /*dyn*/ {
 public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
-
         // Actually run the test in a subprocess because we don't want
         // finalizers from other tests interfering.
         if (Δos.Getenv(testFinalizerRegabiˢ) != "1"u8) {
-            var cmd = testenv.CleanCmdEnv(exec.Command(Δos.Args[0], testRunˢ, testVˢ));
+            var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ, testVˢ));
             cmd.Value.Env = append((~cmd).Env, "TEST_FINALIZER_REGABI=1"u8);
             var (@out, err) = cmd.CombinedOutput();
-            if (!strings.Contains(((@string)@out), passˢ) || err != default!) {
-                Ꮡt.Fatalf("%s\n(exit status %v)"u8, ((@string)@out), err);
+            if (!strings.Contains((@string)@out, passˢ) || err != default!) {
+                Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
             }
             return;
         }
@@ -88,6 +86,10 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
         // it's extremely unlikely.
         Δruntime.GC();
         Δruntime.GC();
+
+        // Make sure the finalizer goroutine is running.
+        Δruntime.SetFinalizer(@new<TintPointer>(), (ж<TintPointer> _) => {
+        });
 
         // fing will only pick the new IntRegArgs up if it's currently
         // sleeping and wakes up, so wait for it to go to sleep.
@@ -110,12 +112,12 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             new("Pointer"u8, regFinalizerPointer, -1),
             new("Interface"u8, regFinalizerIface, -2)
         }.slice();
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             var test = Ꮡ(tests, i);
             var testʗ1 = test;
             Ꮡt.Run((~test).name, (ж<testing.T> tΔ1) => {
                 var x = Ꮡ(new TintPointer(p: @new<Tint>()));
-                (~x).p.Value = ((Tint)(~testʗ1).confirmValue);
+                (~x).p.Value = (Tint)(~testʗ1).confirmValue;
                 Δruntime.SetFinalizer(x.OrTypedNil(), (~testʗ1).fin);
 
                 Δruntime.KeepAlive(x.OrTypedNil());

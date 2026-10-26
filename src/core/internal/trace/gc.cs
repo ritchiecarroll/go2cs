@@ -68,6 +68,10 @@ internal partial struct MutatorUtilizationV2_procsCount /*dyn*/ {
 // If the UtilPerProc flag is not given, this always returns a single
 // utilization function. Otherwise, it returns one function per P.
 public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> events, UtilFlags flags) {
+    var outᴷ = new stackAppend<slice<MutatorUtil>>(moves: true);
+    var psᴷ = new stackAppend<MutatorUtilizationV2_perP>();
+    var procsᴷ = new stackAppend<MutatorUtilizationV2_procsCount>();
+
     var @out = new slice<MutatorUtil>[]{}.slice();
     nint stw = 0;
     var ps = new MutatorUtilizationV2_perP[]{}.slice();
@@ -75,7 +79,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     var states = new map<GoID, GoState>();
     var bgMark = new map<GoID, bool>();
     var procs = new MutatorUtilizationV2_procsCount[]{}.slice();
-    var seenSync = false;
+    nint nSync = 0;
 
     // Helpers.
     bool handleSTW(ΔRange r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
@@ -84,14 +88,14 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
 
     // Iterate through the trace, tracking mutator utilization.
     ж<ΔEvent> lastEv = default!;
-    foreach (var (i, _) in events) {
+    foreach (var i in range(events)) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
 
         // Process the event.
         var exprᴛ1 = (~ev).Kind();
         if (exprᴛ1 == EventSync) {
-            seenSync = true;
+            nSync = (~ev).Sync().N;
         }
         else if (exprᴛ1 == EventMetric) {
             do {
@@ -114,12 +118,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     nint series = 0;
                     if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
                         series = len(@out);
-                        @out = append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
+                        @out = builtin.append(outᴷ, @out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
                     }
-                    ps = append(ps, new MutatorUtilizationV2_perP(series: series));
+                    ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
                 }
                 if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                    procs = append(procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+                    procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
                 }
             } while (false);
         }
@@ -134,9 +138,9 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         var matchᴛ1 = false;
         if (exprᴛ2 == EventRangeActive) { matchᴛ1 = true;
             do {
-                if (seenSync) {
-                    // If we've seen a sync, then we can be sure we're not finding out about
-                    // something late; we have complete information after that point, and these
+                if (nSync > 1) {
+                    // If we've seen a full generation, then we can be sure we're not finding out
+                    // about something late; we have complete information after that point, and these
                     // active events will just be redundant.
                     break;
                 }
@@ -274,7 +278,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             if (stw > 0){
                 gcPs = len(ps);
             } else {
-                foreach (var (iΔ1, _) in ps) {
+                foreach (var iΔ1 in range(ps)) {
                     if (ps[iΔ1].gc > 0) {
                         gcPs++;
                     }
@@ -287,7 +291,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             @out[0] = addUtil(@out[0], muΔ1);
         } else {
             // Check for per-P utilization changes.
-            foreach (var (iΔ2, _) in ps) {
+            foreach (var iΔ2 in range(ps)) {
                 var p = Ꮡ(ps, iΔ2);
                 var util = 1.0D;
                 if (stw > 0 || (~p).gc > 0) {
@@ -308,9 +312,10 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     // shouldn't matter since no window should extend beyond this,
     // but using 0 is symmetric with the start of the trace.
     var mu = new MutatorUtil((int64)(~lastEv).Time(), 0D);
-    foreach (var (i, _) in ps) {
+    foreach (var i in range(ps)) {
         @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
     }
+    @out = move2heap(outᴷ, @out);
     return @out;
 }
 
@@ -328,7 +333,7 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
             return util;
         }
     }
-    return append(util, mu);
+    return builtin.append(util, mu);
 }
 
 // totalUtil is total utilization, measured in nanoseconds. This is a
@@ -337,7 +342,7 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
 partial struct totalUtil /*num:float64*/;
 
 internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
-    return ((totalUtil)(meanUtil * (float64)dur));
+    return (totalUtil)(meanUtil * (float64)dur);
 }
 
 // mean returns the mean utilization over dur.
@@ -421,7 +426,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     ref var s = ref heap<mmuSeries>(out var Ꮡs);
     s = new mmuSeries(util, sums, bands, bandDur);
     var leftSum = new integrator(Ꮡs, 0);
-    foreach (var (i, _) in bands) {
+    foreach (var i in range(bands)) {
         var (startTime, endTime) = s.bandTime(i);
         var cumUtil = leftSum.advance(startTime);
         nint predIdx = leftSum.pos;
@@ -469,7 +474,7 @@ internal static void Swap(this bandUtilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref bandUtilHeap h, any x) {
-    h = append(h, x._<bandUtil>());
+    h = builtin.append(h, x._<bandUtil>());
 }
 
 internal static any Pop(this ref bandUtilHeap h) {
@@ -503,7 +508,7 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref utilHeap h, any x) {
-    h = append(h, x._<UtilWindow>());
+    h = builtin.append(h, x._<UtilWindow>());
 }
 
 internal static any Pop(this ref utilHeap h) {
@@ -643,7 +648,7 @@ public static slice<UtilWindow> /*worst*/ Examples(this ref MMUCurve c, time.Dur
     acc = new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n);
     c.mmu(window, Ꮡacc);
     sort.Sort(sort.Reverse(acc.wHeap));
-    return ((slice<UtilWindow>)acc.wHeap);
+    return (slice<UtilWindow>)acc.wHeap;
 }
 
 // MUD returns mutator utilization distribution quantiles for the
@@ -703,7 +708,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
 
     // Evaluate the quantiles on the accumulated MUD.
     var @out = new slice<float64>(len(quantiles));
-    foreach (var (i, _) in @out) {
+    foreach (var i in range(@out)) {
         var (mu, _) = acc.mud.invCumulativeSum((float64)duration * quantiles[i]);
         if (math.IsNaN(mu)) {
             // There are a few legitimate ways this can
@@ -741,16 +746,16 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
 
         windows[i] = window;
         {
-            var max = ((time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time)); if (window > max) {
+            var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
                 windows[i] = max;
             }
         }
 
-        var bandU1 = ((bandUtilHeap)s.mkBandUtil(i, windows[i]));
+        var bandU1 = (bandUtilHeap)s.mkBandUtil(i, windows[i]);
         if (bandU == default!){
             bandU = bandU1;
         } else {
-            bandU = appendꓸꓸꓸ(bandU, bandU1);
+            bandU = builtin.appendꓸꓸꓸ(bandU, bandU1);
         }
     }
 
@@ -770,6 +775,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
 internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, time.Duration window) {
     // For each band, compute the worst-possible total mutator
     // utilization for all windows that start in that band.
+
     // minBands is the minimum number of bands a window can span
     // and maxBands is the maximum number of bands a window can
     // span in any alignment.
@@ -784,7 +790,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         nUtil = 0;
     }
     var bandU = new slice<bandUtil>(nUtil);
-    foreach (var (i, _) in bandU) {
+    foreach (var i in range(bandU)) {
         // To compute the worst-case MU, we assume the minimum
         // for any bands that are only partially overlapped by
         // some window and the mean for any bands that are
@@ -934,7 +940,7 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
         nint l = pos;
         nint r = len(util);
         while (l < r) {
-            nint h = (nint)(((nuint)(l + r) >> (int)(1)));
+            nint h = (nint)((nuint)(l + r) >> 1);
             if (util[h].Time <= time){
                 l = h + 1;
             } else {

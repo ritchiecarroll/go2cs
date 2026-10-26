@@ -670,7 +670,7 @@ partial struct workerComm {
 // processes in parallel and to collect inputs that caused crashes from shared
 // memory after a worker process terminates unexpectedly.
 partial struct workerServer {
-    internal partial ref workerComm workerComm { get; }
+    /*embed*/ internal workerComm workerComm;
     internal ж<mutator> m;
     // coverageMask is the local coverage data for the worker. It is
     // periodically updated to reflect the data in the coordinator when new
@@ -995,7 +995,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
             break;
         }
         case @string: {
-            valsʗ1[argsʗ2.Index] = ((@string)candidate);
+            valsʗ1[argsʗ2.Index] = (@string)candidate;
             break;
         }
         default: {
@@ -1058,7 +1058,7 @@ internal static pingResponse ping(this ref workerServer ws, context.Context ctx,
 // workerClient to call methods in each worker process (handled by
 // workerServer).
 partial struct workerClient {
-    internal partial ref workerComm workerComm { get; }
+    /*embed*/ internal workerComm workerComm;
     internal ж<mutator> m;
     // mu is the mutex protecting the workerComm.fuzzIn pipe. This must be
     // locked before making calls to the workerServer. It prevents
@@ -1175,7 +1175,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                 // caused the error.
                 switch (entryOut.Values[i].type()) {
                 case @string: {
-                    entryOut.Values[i] = ((@string)mem.valueCopy());
+                    entryOut.Values[i] = (@string)mem.valueCopy();
                     break;
                 }
                 case slice<byte>: {

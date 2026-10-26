@@ -41,6 +41,12 @@ using static go.math_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,28 +62,28 @@ using static go.math_package;
 [assembly: go.GoPositionMap("math/atan.go", "atan.cs", "AAduAC8CAAkYgoKCqqKYgpSClAACEuKClKaCgpSClA==")]
 [assembly: go.GoPositionMap("math/atan2.go", "atan2.cs", "AAc8ABcCgpSmlJSkgpSkpIKUpKaUpMa4goKClJQ=")]
 [assembly: go.GoPositionMap("math/atanh.go", "atanh.cs", "AAdgACkCgpSmgpSUpKSUgoKClIKUtIK0pIKU")]
-[assembly: go.GoPositionMap("math/bits.go", "bits.cs", "ABEokoKClJSokKbargAICqqigoKU")]
+[assembly: go.GoPositionMap("math/bits.go", "bits.cs", "ABEokoKClJSokKbargAICoKSgpSqooKClA==")]
 [assembly: go.GoPositionMap("math/cbrt.go", "cbrt.cs", "AAc0ABMCgpSmggAIFpSmgoKCuIKUgoK4goKmpoKCgoKmgpQ=")]
 [assembly: go.GoPositionMap("math/copysign.go", "copysign.cs", "AAcSooI=")]
 [assembly: go.GoPositionMap("math/dim.go", "dim.cs", "AAccAAwMgpSmAAIcAAsCgpSmlJSkpIKUlIKUAAIaAAoCgpSmlJSkpIKUlIKU")]
 [assembly: go.GoPositionMap("math/dim_asm.go", "dim_asm.cs", "AAoWuA==")]
 [assembly: go.GoPositionMap("math/erf.go", "erf.cs", "ALIB+gLygpSmgqqUpKSUgoKClIKCgoKUpoKCgoKUgpSUgoKCgoKUlIKClJSCkoKClIKUgoKClAACFPKClKaClJSkpJSCgoKUgoKClIKCgoKClKaClJSCgoKCgpSWgoKSgoKUgpSClIKCgpSUgpQ=")]
 [assembly: go.GoPositionMap("math/erfinv.go", "erfinv.cs", "AEKaAQAJBIKClKaCgoKmgoKCgoKUkoKCgoKUgoKUpoKUAAIWAAgC")]
-[assembly: go.GoPositionMap("math/exp.go", "exp.cs", "AAcgAAkCgpQAAp4BAEsCAAgWlKSkpKSokpS0pIKmrLKClKaCAAYSlKSkpKqilLSkgoKmqJIABRCCgoKU")]
+[assembly: go.GoPositionMap("math/exp.go", "exp.cs", "AAcgAAkCgpQAAp4BAEsCAAgWlKSkpKiSlLSkgqassoKUpoIABhKUpKSqopS0pIKCpqiSAAUQgoKClA==")]
 [assembly: go.GoPositionMap("math/exp2_noasm.go", "exp2_noasm.cs", "AAoWgg==")]
 [assembly: go.GoPositionMap("math/exp_amd64.go", "exp_amd64.cs", "AAsW")]
 [assembly: go.GoPositionMap("math/exp_asm.go", "exp_asm.cs", "AAoW")]
 [assembly: go.GoPositionMap("math/expm1.go", "expm1.cs", "AAf8AQB3AoKUpoIADySUpKaCgoKCuIKClIK6koKCkoKCgoKUgoKmgpSUgoKUgpKClLiCgoKCgoKUgoKUpIKUpIKClIKCgoKUgoKCgg==")]
-[assembly: go.GoPositionMap("math/floor.go", "floor.cs", "AAcc8oKUpoKClIKCgpSUggACFPKClKaCAAIU8oKUpoKClIIAAhQAEBSCgpSCgqSKwoKClAACFAARFoKCisKCgpKUppQ=")]
+[assembly: go.GoPositionMap("math/floor.go", "floor.cs", "AAcc8oKUpoKClIKCgpSUggACFPKClKaCAAIU8oKUpoKCpoKmgpQAAhQAEBSCgpSCgqSKwoKClAACFAARFoKCisKCgpKUppQ=")]
 [assembly: go.GoPositionMap("math/floor_asm.go", "floor_asm.cs", "AAoWuLg=")]
-[assembly: go.GoPositionMap("math/fma.go", "fma.cs", "AAoSgoKUyoKClMqygoKmsoKCrgALCpSkpKSCtIKkpqKCgpSs8oKClJSCgqaUqqKmgriCyoKCuMqCgqaCgqaCuIK4lqKUgoKCuIKCgoKCuJSUgoKClIKC")]
+[assembly: go.GoPositionMap("math/fma.go", "fma.cs", "AAoSgoKUyoKClMqygoKmsoKCrgALCpSkpKSCtIKkpqKCgpSs8oKClJSCgqaUqqKmgtyCuILKgoK4yoKCpoKCpoK4griWopSCgoK4goKCgoK4lJSCgoKUgoI=")]
 [assembly: go.GoPositionMap("math/frexp.go", "frexp.cs", "AAciAAoCgpSmxJSklIKCgoKCgg==")]
 [assembly: go.GoPositionMap("math/gamma.go", "gamma.cs", "AEGEAQAJEgAKFAAHHvKClJiCgoKCgoKUlAACGgAKApSUpKSClJSCgoKCgsqCgIKkgoKClIKClIKCgoKUlLiCgoKUgoKUgpSCgpSCpoKmgoKClIKClKaCgoKU")]
 [assembly: go.GoPositionMap("math/hypot.go", "hypot.cs", "AAcoAA0CgpSmgpSUpJSClIKUgg==")]
 [assembly: go.GoPositionMap("math/hypot_asm.go", "hypot_asm.cs", "AAoW")]
-[assembly: go.GoPositionMap("math/j0.go", "j0.cs", "AAqaAQBFAgAOIJSkpKaCgoKCpoKCgpTugoKUgoKUlIKClJSCgoKClIIABRYACAIADiCUpKSmAAoagoLcgoKClKaCgpSCgpSUgpSCgoIADBoACRAACRIACRAACRIACRAACRIACRAACBCCgoKCgpKCgpKCgpKCgpSCgoIADBoACRAAChQACRAAChQACRAAChQACRAACRKCkoKCkoKCkoKCkoKClIKCgg==")]
+[assembly: go.GoPositionMap("math/j0.go", "j0.cs", "AAqaAQBFAgAOIJSkpKaCgoKCpoKCgpTugoKUgoKUlIKClJSCgoKClIIABRYACAIADiCUpKSmAAsagoLcgoKClKaCgpSCgpSUgpSCgoIADBoACRAACRIACRAACRIACRAACRIACRAACBCCgoKCgpKCgpKCgpKCgpSCgoIADBoACRAAChQACRAAChQACRAAChQACRAACRKCkoKCkoKCkoKCkoKClIKCgg==")]
 [assembly: go.GoPositionMap("math/j1.go", "j1.cs", "AAqWAQBDAgANHpSkpoKCgpSCgoKmgoKClO6CgpSCgpSClJSClIKCgoKCgpQABRYACAIADR6UpKSmgoKCpoKCgpQADRyCgpSCgpSUgpSCgoIADBoACRAACRIACRAACRIACRAACRIACRAACBCCgoKCgpKCgpKCgpKCgpSCgoIADBoACRAAChQACRAAChQACRAAChQACRAACRKCkoKCkoKCkoKCkoKClIKCgg==")]
-[assembly: go.GoPositionMap("math/jn.go", "jn.cs", "AApsAC4CupSkyoKUgpSClIKUgoKCgqaClAAMHoKApLS0tLSUgoK4qIKUgoKCgoKUAB5AgoKCgoKCgoKClIKCgpSCAAgSgoKCgoKCpoKClIKCgrimgpQABRgACQKklKSmgpSCgpSUgoKCgqaCgpSUggAMHIKApLS0tLSUgpSCpoKU")]
+[assembly: go.GoPositionMap("math/jn.go", "jn.cs", "AApsAC4CupSkyoKUgpSClIKUgoKCgqaClAANHoKApLS0tLSUgoK4uIKUgoKCgoKUAB9AgoKCgoKCgoKClIKCgpSCAAgSgoKCgoKCpoKClIKCgrimgpQABRgACQKklKSmgpSCgpSUgoKCgqaCgpSUggANHIKApLS0tLSUgpSCpoKU")]
 [assembly: go.GoPositionMap("math/ldexp.go", "ldexp.cs", "AAceAAgCgpSmlJSklIKCgoKClIKClJSCgoKUgoI=")]
 [assembly: go.GoPositionMap("math/lgamma.go", "lgamma.cs", "AFm2AQAOHAAJEgAJEgARIgAIEAAIEAAJJgAMAgAJGIKUgqSCpIKmgoKCpoKClIKUgoKCgpSCgoKUgoK4lIKkgoKCgpSCtIK0graClIK0grSCtpSCgoKCtIKCgoKCgrSCgtaCgoKCgoKkgqSCpIKkgqSCxoKCgoK0pIKUqJKYgriCgoKClIKClIKUgoKmlLS0tLSk")]
 [assembly: go.GoPositionMap("math/log.go", "log.cs", "AAeiAQBJAoKUpoIAChqUpKS4goKClIKmgoKCgoKCgg==")]
@@ -86,8 +92,7 @@ using static go.math_package;
 [assembly: go.GoPositionMap("math/log_asm.go", "log_asm.cs", "AAoW")]
 [assembly: go.GoPositionMap("math/logb.go", "logb.cs", "AAccAAgElKSklAACFAAIBJSkpJSqooI=")]
 [assembly: go.GoPositionMap("math/mod.go", "mod.cs", "AAcsAA8CgpSmgoKUlIKCgqaCgoKUlIKU")]
-[assembly: go.GoPositionMap("math/modf.go", "modf.cs", "AAcc8oKUprKClIKklKaCpoKUgoI=")]
-[assembly: go.GoPositionMap("math/modf_noasm.go", "modf_noasm.cs", "AAoWgg==")]
+[assembly: go.GoPositionMap("math/modf.go", "modf.cs", "AAccAAoCgoI=")]
 [assembly: go.GoPositionMap("math/nextafter.go", "nextafter.cs", "AAccAAkClLS0tLSkAAIUAAkClLS0tLSk")]
 [assembly: go.GoPositionMap("math/pow.go", "pow.cs", "/oLcpoIAAjwAGwKClKaClKSkpJSClKSClMaUpKTGgpSUpMakpoKClKaUpKTKgqaCgoKU7oKC3IKUgoKUgoKCgu6CgpQ=")]
 [assembly: go.GoPositionMap("math/pow10.go", "pow10.cs", "AAgQAAcQygADFOKCpoK4grg=")]

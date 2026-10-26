@@ -68,21 +68,11 @@ partial struct @file {
     internal bool nonblock;                    // whether we set nonblocking mode
     internal bool stdoutOrErr;                    // whether this is stdout or stderr
     internal bool appendMode;                    // whether file is opened for appending
+    internal bool inRoot;                    // whether file is opened in a Root
 }
 
-// Fd returns the integer Unix file descriptor referencing the open file.
-// If f is closed, the file descriptor becomes invalid.
-// If f is garbage collected, a finalizer may close the file descriptor,
-// making it invalid; see [runtime.SetFinalizer] for more information on when
-// a finalizer might be run. On Unix systems this will cause the [File.SetDeadline]
-// methods to stop working.
-// Because file descriptors can be reused, the returned file descriptor may
-// only be closed through the [File.Close] method of f, or by its finalizer during
-// garbage collection. Otherwise, during garbage collection the finalizer
-// may close an unrelated file descriptor with the same (reused) number.
-//
-// As an alternative, see the f.SyscallConn method.
-public static uintptr Fd(this ж<File> Ꮡf) {
+// fd is the Unix implementation of Fd.
+internal static uintptr fd(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -101,16 +91,8 @@ public static uintptr Fd(this ж<File> Ꮡf) {
     return (uintptr)f.pfd.Sysfd;
 }
 
-// NewFile returns a new File with the given file descriptor and
-// name. The returned value will be nil if fd is not a valid file
-// descriptor. On Unix systems, if the file descriptor is in
-// non-blocking mode, NewFile will attempt to return a pollable File
-// (one for which the SetDeadline methods work).
-//
-// After passing it to NewFile, fd may become invalid under the same
-// conditions described in the comments of the Fd method, and the same
-// constraints apply.
-public static ж<File> NewFile(uintptr fd, @string name) {
+// newFileFromNewFile is called by [NewFile].
+internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
     nint fdi = (nint)fd;
     if (fdi < 0) {
         return default!;
@@ -121,7 +103,7 @@ public static ж<File> NewFile(uintptr fd, @string name) {
         flags = 0;
     }
     var f = newFile(fdi, name, kindNewFile, unix.HasNonblockFlag(flags));
-    f.Value.appendMode = (nint)(flags & (nint)syscall.O_APPEND) != 0;
+    f.Value.appendMode = (flags & (nint)syscall.O_APPEND) != 0;
     return f;
 }
 
@@ -281,7 +263,7 @@ public static readonly @string DevNull = "/dev/null"u8;
 // Changes here should be reflected in openDirAt and openDirNolog, if relevant.
 internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMode perm) {
     var setSticky = false;
-    if (!supportsCreateWithStickyBit && (nint)(flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
+    if (!supportsCreateWithStickyBit && (flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
         {
             var (_, err) = Stat(name); if (IsNotExist(err)) {
                 setSticky = true;
@@ -294,7 +276,7 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
     ref var e = ref heap<error>(out var Ꮡe);
     // We have to check EINTR here, per issues 11180 and 39237.
     ignoringEINTR(() => {
-        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, (nint)(flag | (nint)syscall.O_CLOEXEC), syscallMode(perm));
+        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
         return Ꮡe.ValueSlot;
     });
     if (e != default!) {
@@ -386,7 +368,7 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Truncate(@string name, int64 size) {
     var e = ignoringEINTR(() => syscall.Truncate(name, size));
     if (e != default!) {
@@ -396,7 +378,7 @@ public static error Truncate(@string name, int64 size) {
 }
 
 // Remove removes the named file or (empty) directory.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Remove(@string name) {
     // System call interface forces us to know
     // whether name is a file or directory.
@@ -481,7 +463,7 @@ internal static (@string, error) readlink(@string name) {
             return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
         }
         if (n < len) {
-            return (((@string)(b.slice(0, n))), default!);
+            return ((@string)(b.slice(0, n)), default!);
         }
     }
 }
@@ -509,24 +491,29 @@ internal static (FileInfo, error) Info(this ref unixDirent d) {
     if (d.info != default!) {
         return (d.info, default!);
     }
-    return lstat(d.parent + "/"u8 + d.name);
+    return Lstat(d.parent + "/"u8 + d.name);
 }
 
 internal static @string String(this ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
 
-internal static (DirEntry, error) newUnixDirent(@string parent, @string name, FileMode typ) {
+internal static (DirEntry, error) newUnixDirent(ж<File> Ꮡparent, @string name, FileMode typ) {
+    ref var parent = ref Ꮡparent.DerefOrNull();
+
     var ude = Ꮡ(new unixDirent(
-        parent: parent,
+        parent: parent.name,
         name: name,
         typ: typ
     ));
-    if (typ != ~((fs.FileMode)((fs.FileMode)0)) && !testingForceReadDirLstat) {
+    // When the parent file was opened in a Root,
+    // we cannot use a lazy lstat to load the FileInfo.
+    // Use lstatat here.
+    if (typ != ~((fs.FileMode)((fs.FileMode)0)) && !parent.inRoot) {
         return (new unixDirentжDirEntry(ude), default!);
     }
 
-    var (info, err) = lstat(parent + "/"u8 + name);
+    var (info, err) = Ꮡparent.lstatat(name);
     if (err != default!) {
         return (default!, err);
     }

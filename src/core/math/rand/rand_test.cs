@@ -118,7 +118,7 @@ internal static void checkSampleSliceDistributions(ж<testing.T> Ꮡt, slice<flo
 internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean, float64 stddev, int64 seed) {
     var r = New(NewSource(seed));
     var samples = new slice<float64>(nsamples);
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i] = r.NormFloat64() * stddev + mean;
     }
     return samples;
@@ -126,6 +126,7 @@ internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean
 
 internal static void testNormalDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 mean, float64 stddev, int64 seed) {
     //fmt.Printf("testing nsamples=%v mean=%v stddev=%v seed=%v\n", nsamples, mean, stddev, seed);
+
     var samples = generateNormalSamples(nsamples, mean, stddev, seed);
     var errorScale = max(1.0D, stddev); // Error scales with stddev
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.08D * errorScale));
@@ -172,7 +173,7 @@ public static void TestNonStandardNormalValues(ж<testing.T> Ꮡt) {
 internal static slice<float64> generateExponentialSamples(nint nsamples, float64 rate, int64 seed) {
     var r = New(NewSource(seed));
     var samples = new slice<float64>(nsamples);
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i] = r.ExpFloat64() / rate;
     }
     return samples;
@@ -180,6 +181,7 @@ internal static slice<float64> generateExponentialSamples(nint nsamples, float64
 
 internal static void testExponentialDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 rate, int64 seed) {
     //fmt.Printf("testing nsamples=%v rate=%v seed=%v\n", nsamples, rate, seed);
+
     ref var mean = ref heap<float64>(out var Ꮡmean);
     mean = 1D / rate;
     ref var stddev = ref heap<float64>(out var Ꮡstddev);
@@ -292,7 +294,7 @@ internal static nint compareUint32Slices(slice<uint32> s1, slice<uint32> s2) {
         }
         return len(s1) + 1;
     }
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (s1[i] != s2[i]) {
             return i;
         }
@@ -310,7 +312,7 @@ internal static nint compareFloat32Slices(slice<float32> s1, slice<float32> s2) 
         }
         return len(s1) + 1;
     }
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (!nearEqual((float64)s1[i], (float64)s2[i], 0D, 1e-7D)) {
             return i;
         }
@@ -428,7 +430,7 @@ internal static void testReadUniformity(ж<testing.T> Ꮡt, nint n, int64 seed) 
 
 public static void TestReadUniformity(ж<testing.T> Ꮡt) {
     var testBufferSizes = new nint[]{
-        2, 4, 7, 64, 1024, (1 << (int)(16)), (1 << (int)(20))
+        2, 4, 7, 64, 1024, 1 << 16, 1 << 20
     }.slice();
     foreach (var (_, seed) in testSeeds) {
         foreach (var (_, n) in testBufferSizes) {
@@ -557,7 +559,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                 new(name: "Perm"u8, fn: () => encodePerm(rʗ4.Perm(n))),
                 new(name: "Shuffle"u8, fn: () => {
                     // Generate permutation using Shuffle.
-                    foreach (var (i, _) in pʗ1) {
+                    foreach (var i in range(pʗ1)) {
                         pʗ1[i] = i;
                     }
                     var pʗ2 = pʗ1;
@@ -583,7 +585,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                         nsamples = 200;
                     }
                     var samples = new slice<float64>(nsamples);
-                    foreach (var (i, _) in samples) {
+                    foreach (var i in range(samples)) {
                         // Generate some uniformly distributed values and count their occurrences.
                         UntypedInt iters = 1000;
                         var counts = new slice<nint>(nfact);
@@ -755,7 +757,7 @@ public static void BenchmarkPerm30ViaShuffle(ж<testing.B> Ꮡb) {
     var r = New(NewSource(1));
     for (nint n = b.N; n > 0; n--) {
         var p = new slice<nint>(30);
-        foreach (var (i, _) in p) {
+        foreach (var i in range(p)) {
             p[i] = i;
         }
         var pʗ1 = p;

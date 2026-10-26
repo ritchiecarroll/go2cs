@@ -9,7 +9,7 @@ using sync = sync_package;
 partial class big_package {
 
 partial struct threeOnceᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal ж<Float> v;
 }
 internal static ж<threeOnceᴛ1> ᏑthreeOnce = new StandardBox<threeOnceᴛ1>(new threeOnceᴛ1(nil));

@@ -45,7 +45,7 @@ internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -62,13 +62,13 @@ internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -91,11 +91,11 @@ internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -134,7 +134,7 @@ internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -151,13 +151,13 @@ internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -180,11 +180,11 @@ internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -203,13 +203,13 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
 internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     default: {
-        return (uint8)bidiValues[(n << (int)(6)) + (uint32)b];
+        return (uint8)bidiValues[(n << 6) + (uint32)b];
     }}
 }
 
 // bidiValues: 259 blocks, 16576 entries, 16576 bytes
 // The third block is the zero block.
-internal static array<uint8> bidiValues = new array<uint8>(16576){
+[GoLazy] partial class lazyᴛbidiValues { internal static array<uint8> bidiValues = new array<uint8>(16576){
     // Block 0x0, offset 0x0
     [0x00] = 0x000b, [0x01] = 0x000b, [0x02] = 0x000b, [0x03] = 0x000b, [0x04] = 0x000b, [0x05] = 0x000b,
     [0x06] = 0x000b, [0x07] = 0x000b, [0x08] = 0x000b, [0x09] = 0x0008, [0x0a] = 0x0007, [0x0b] = 0x0008,
@@ -1918,11 +1918,11 @@ internal static array<uint8> bidiValues = new array<uint8>(16576){
     [0x40b0] = 0x000b, [0x40b1] = 0x000b, [0x40b2] = 0x000b, [0x40b3] = 0x000b, [0x40b4] = 0x000b, [0x40b5] = 0x000b,
     [0x40b6] = 0x000b, [0x40b7] = 0x000b, [0x40b8] = 0x000b, [0x40b9] = 0x000b, [0x40ba] = 0x000b, [0x40bb] = 0x000b,
     [0x40bc] = 0x000b, [0x40bd] = 0x000b, [0x40be] = 0x000b, [0x40bf] = 0x000b
-};
+}; }
 
 // bidiIndex: 26 blocks, 1664 entries, 3328 bytes
 // Block 0 is the zero block.
-internal static array<uint16> bidiIndex = new array<uint16>(1664){
+[GoLazy] partial class lazyᴛbidiIndex { internal static array<uint16> bidiIndex = new array<uint16>(1664){
     // Block 0x0, offset 0x0
     // Block 0x1, offset 0x40
     // Block 0x2, offset 0x80
@@ -2046,7 +2046,7 @@ internal static array<uint16> bidiIndex = new array<uint16>(1664){
     [0x63f] = 0x12,
     // Block 0x19, offset 0x640
     [0x64f] = 0x12
-};
+}; }
 
 // Total table size 19960 bytes (19KiB); checksum: F50EF68C
 

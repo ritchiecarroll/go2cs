@@ -7,6 +7,7 @@ using context = context_package;
 using errors = errors_package;
 using nettrace = @internal.nettrace_package;
 using singleflight = @internal.singleflight_package;
+using stringslite = @internal.stringslite_package;
 using netip = net.netip_package;
 using Δsync = sync_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
@@ -39,7 +40,7 @@ internal static map<@string, nint> protocols = new map<@string, nint>{
 // See https://www.iana.org/assignments/service-names-port-numbers
 //
 // On Unix, this map is augmented by readServices via goLookupPort.
-internal static map<@string, map<@string, nint>> services = new map<@string, map<@string, nint>>{
+[GoLazy] partial class lazyᴛservices { internal static map<@string, map<@string, nint>> services = new map<@string, map<@string, nint>>{
     ["udp"u8] = new map<@string, nint>{
         ["domain"u8] = 53},
     ["tcp"u8] = new map<@string, nint>{
@@ -57,7 +58,7 @@ internal static map<@string, map<@string, nint>> services = new map<@string, map
         ["submissions"u8] = 465,
         ["ssh"u8] = 22,
         ["telnet"u8] = 23}
-};
+}; }
 
 // dnsWaitGroup can be used by tests to wait for all DNS goroutines to
 // complete. This avoids races on the test hooks.
@@ -319,9 +320,9 @@ internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyVa
 
 // Value performs a lookup if the original context hasn't expired.
 internal static any Value(this ref onlyValuesCtx ovc, any key) {
-    var selᴛ15 = ovc.lookupValues.Done();
-    switch (trySelect(ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
-    case 0 when selᴛ15.ꟷᐳ(out _): {
+    var selᴛ13 = ovc.lookupValues.Done();
+    switch (trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
+    case 0 when selᴛ13.ꟷᐳ(out _): {
         return default!;
     }
     default: {
@@ -384,10 +385,10 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         ᏑdnsWaitGroup.Done();
         cancelFn();
     }
-    var selᴛ16 = ctx.Done();
-    var selᴛ17 = ch;
-    switch (select(ᐸꟷ(selᴛ16, ꓸꓸꓸ), ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
-    case 0 when selᴛ16.ꟷᐳ(out _): {
+    var selᴛ14 = ctx.Done();
+    var selᴛ15 = ch;
+    switch (select(ᐸꟷ(selᴛ14, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
+    case 0 when selᴛ14.ꟷᐳ(out _): {
         // Our context was canceled. If we are the only
         // goroutine looking up this key, then drop the key
         // from the lookupGroup and cancel the lookup.
@@ -410,7 +411,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         }
         return (default!, new DNSErrorжerror(err));
     }
-    case 1 when selᴛ17.ꟷᐳ(out var rΔ1): {
+    case 1 when selᴛ15.ꟷᐳ(out var rΔ1): {
         ᏑdnsWaitGroup.Done();
         lookupGroupCancel();
         var err = rΔ1.Err;
@@ -594,9 +595,9 @@ public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr,
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
 //
 // The returned mail server names are validated to be properly
-// formatted presentation-format domain names. If the response contains
-// invalid names, those records are filtered out and an error
-// will be returned alongside the remaining results, if any.
+// formatted presentation-format domain names, or numeric IP addresses.
+// If the response contains invalid names, those records are filtered out
+// and an error will be returned alongside the remaining results, if any.
 //
 // LookupMX uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupMX].
@@ -607,9 +608,9 @@ public static (slice<ж<MX>>, error) LookupMX(@string name) {
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
 //
 // The returned mail server names are validated to be properly
-// formatted presentation-format domain names. If the response contains
-// invalid names, those records are filtered out and an error
-// will be returned alongside the remaining results, if any.
+// formatted presentation-format domain names, or numeric IP addresses.
+// If the response contains invalid names, those records are filtered out
+// and an error will be returned alongside the remaining results, if any.
 public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (records, err) = Ꮡr.lookupMX(ctx, name);
     if (err != default!) {
@@ -621,7 +622,12 @@ public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Co
             continue;
         }
         if (!isDomainName((~mx).Host)) {
-            continue;
+            // Check for IP address. In practice we observe
+            // these with a trailing dot, so strip that.
+            var (ip, errΔ1) = netip.ParseAddr(stringslite.TrimSuffix((~mx).Host, "."u8));
+            if (errΔ1 != default! || ip.Zone() != ""u8) {
+                continue;
+            }
         }
         filteredMX = append(filteredMX, mx);
     }
@@ -873,6 +879,8 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
 
 // goLookupNS returns the NS records for name.
 internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+    var nssᴷ = new stackAppend<ж<NS>>(moves: true);
+
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeNS, nil);
     if (err != default!) {
@@ -911,8 +919,9 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
                 Server: server
             ))));
         }
-        nss = append(nss, Ꮡ(new NS(Host: ns.NS.String())));
+        nss = append(nssᴷ, nss, Ꮡ(new NS(Host: ns.NS.String())));
     }
+    nss = move2heap(nssᴷ, nss);
     return (nss, default!);
 }
 
@@ -970,7 +979,7 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
         if (len(txts) == 0) {
             txts = new slice<@string>(0, 1);
         }
-        txts = append(txts, ((@string)txtJoin));
+        txts = append(txts, (@string)txtJoin);
     }
     return (txts, default!);
 }

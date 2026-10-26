@@ -29,16 +29,18 @@ internal static bool isASCII(@string s) {
 // toASCII converts the input to an ASCII C-style string.
 // This is a best effort conversion, so invalid characters are dropped.
 internal static @string toASCII(@string s) {
+    var bᴷ = new stackAppend<byte>();
+
     if (isASCII(s)) {
         return s;
     }
     var b = new slice<byte>(0, len(s));
     foreach (var (_, c) in s) {
         if (c < 0x80 && c != 0x00) {
-            b = append(b, (byte)c);
+            b = append(bᴷ, b, (byte)c);
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 partial struct parser {
@@ -54,10 +56,10 @@ partial struct formatter {
 internal static @string parseString(this ref parser _, slice<byte> b) {
     {
         nint i = bytes.IndexByte(b, 0); if (i >= 0) {
-            return ((@string)(b.slice(0, i)));
+            return (@string)(b.slice(0, i));
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // formatString copies s into b, NUL-terminating if possible.
@@ -117,13 +119,13 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
             if (i == 0) {
                 c &= (byte)(0x7f); // Ignore signal bit in first byte
             }
-            if (((x >> (int)(56))) > 0) {
+            if ((x >> 56) > 0) {
                 p.err = ErrHeader; // Integer overflow
                 return 0;
             }
-            x = (uint64)((x << (int)(8)) | (uint64)c);
+            x = x << 8 | (uint64)c;
         }
-        if (((x >> (int)(63))) > 0) {
+        if ((x >> 63) > 0) {
             p.err = ErrHeader; // Integer overflow
             return 0;
         }
@@ -203,7 +205,7 @@ internal static bool fitsInOctal(nint n, int64 x) {
 // specification. Note that this implementation allows for negative timestamps,
 // which is allowed for by the PAX specification, but not always portable.
 internal static (time.Time, error) parsePAXTime(@string s) {
-    const nint maxNanoSecondDigits = 9;
+    UntypedInt maxNanoSecondDigits = 9;
 
     // Split string into seconds and sub-seconds parts.
     var (ss, sn, _) = strings.Cut(s, "."u8);
@@ -218,15 +220,22 @@ internal static (time.Time, error) parsePAXTime(@string s) {
     }
 
     // Parse the nanoseconds.
-    if (strings.Trim(sn, "0123456789"u8) != ""u8) {
-        return (new time.Time(nil), ErrHeader);
+    // Initialize an array with '0's to handle right padding automatically.
+    var nanoDigits = new byte[]{(rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0'}.array();
+    foreach (var i in range(len(sn))) {
+        {
+            var c = sn[i];
+            switch (ᐧ) {
+            case {} when c < (rune)'0' || c > (rune)'9': {
+                return (new time.Time(nil), ErrHeader);
+            }
+            case {} when i < len(nanoDigits): {
+                nanoDigits[i] = c;
+                break;
+            }}
+        }
     }
-    if (len(sn) < maxNanoSecondDigits){
-        sn += strings.Repeat("0"u8, maxNanoSecondDigits - len(sn)); // Right pad
-    } else {
-        sn = sn[..(int)(maxNanoSecondDigits)]; // Right truncate
-    }
-    var (nsecs, _) = strconv.ParseInt(sn, 10, 64); // Must succeed
+    var (nsecs, _) = strconv.ParseInt((@string)(nanoDigits[..]), 10, 64); // Must succeed after validation
     if (len(ss) > 0 && ss[0] == (rune)'-') {
         return (time.Unix(secs, -1 * nsecs), default!); // Negative correction
     }
@@ -321,7 +330,7 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
 //	"%d %s=%s\n" % (size, key, value)
 //
 // Keys and values should be UTF-8, but the number of bad writers out there
-// forces us to be a more liberal.
+// forces us to be more liberal.
 // Thus, we only reject all keys with NUL, and only reject NULs in values
 // for the PAX version of the USTAR string fields.
 // The key must not contain an '=' character.

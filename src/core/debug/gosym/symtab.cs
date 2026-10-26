@@ -140,7 +140,7 @@ public static @string BaseName(this ref Sym s) {
 // A Func collects information about a single function.
 partial struct Func {
     public uint64 Entry;
-    public partial ref ж<Sym> Sym { get; }
+    /*embed*/ public ж<Sym> Sym;
     public uint64 End;
     public slice<ж<Sym>> Params; // nil for Go 1.3 and later binaries
     public slice<ж<Sym>> Locals; // nil for Go 1.3 and later binaries
@@ -344,7 +344,8 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 
 // NewTable decodes the Go symbol table (the ".gosymtab" section in ELF),
 // returning an in-memory representation.
-// Starting with Go 1.3, the Go symbol table no longer includes symbol data.
+// Starting with Go 1.3, the Go symbol table no longer includes symbol data;
+// callers should pass nil for the symtab parameter.
 public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡpcln) {
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 
@@ -388,7 +389,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                 b[w] = b[i];
                 w++;
             }
-            ts.Value.Name = ((@string)(s.name.slice(0, w)));
+            ts.Value.Name = (@string)(s.name.slice(0, w));
             break;
         }
         case (rune)'z' or (rune)'Z': {
@@ -476,7 +477,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
 
             // Record file names
             nint depth = 0;
-            foreach (var (j, _) in (~obj).Paths) {
+            foreach (var j in range((~obj).Paths)) {
                 var s = Ꮡ((~obj).Paths, j);
                 if ((~s).Name == ""u8){
                     depth--;
@@ -645,7 +646,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
     if (err != default!) {
         return (pc, fn, err);
     }
-    foreach (var (i, _) in (~obj).Funcs) {
+    foreach (var i in range((~obj).Funcs)) {
         var f = Ꮡ((~obj).Funcs, i);
         var pcΔ2 = (~f).LineTable.LineToPC(abs, (~f).End);
         if (pcΔ2 != 0) {
@@ -659,7 +660,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
 // or nil if no such symbol is found.
 public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
-    foreach (var (i, _) in t.Syms) {
+    foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
         switch ((~s).Type) {
         case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {
@@ -675,7 +676,7 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
 public static ж<Func> LookupFunc(this ref Table t, @string name) {
-    foreach (var (i, _) in t.Funcs) {
+    foreach (var i in range(t.Funcs)) {
         var f = Ꮡ(t.Funcs, i);
         if ((~(~f).Sym).Name == name) {
             return f;
@@ -686,7 +687,7 @@ public static ж<Func> LookupFunc(this ref Table t, @string name) {
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
 public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
-    foreach (var (i, _) in t.Syms) {
+    foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
         switch ((~s).Type) {
         case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {

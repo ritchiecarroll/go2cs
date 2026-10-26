@@ -31,6 +31,9 @@ internal class StrTemplate : TemplateBase
     // The body member's [MethodImpl(NoInlining)] mark, which the forwarder repeats (see RecvGenerator).
     public required bool NoInlining;
 
+    // Whether DynamicSecurityMethod rides beside the no-inline mark (NoInliningPartials.CallerFrameMarkAvailable).
+    public bool CallerFrame;
+
     private bool IsTwinned(IParameterSymbol parameter) => parameter.Type.ToDisplayString() == SStringType;
 
     // The forwarder re-declares the signature from the symbols; a generic method, a ref return or a
@@ -95,7 +98,7 @@ internal class StrTemplate : TemplateBase
         : "";
 
     private string ForwarderAttributes => NoInlining
-        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]"
+        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining){(CallerFrame ? ", " + NoInliningPartials.CallerFrameAttribute : "")}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]"
         : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]";
 
     // A delegate TYPE ARGUMENT: a tuple loses its element names, which delegate identity ignores, so

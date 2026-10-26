@@ -25,7 +25,9 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using fs = io.fs_package;
 using go.os;
 using io;
+using iter = iter_package;
 using path;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class testing_test_package {
 
@@ -113,6 +115,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
     Ꮡt.Run(testˢ4, testTempDir);
     Ꮡt.Run(testˢ5, testTempDir);
     Ꮡt.Run("äöüéè"u8, testTempDir);
+    Ꮡt.Run(strings.Repeat("a"u8, 300), testTempDir);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -181,6 +184,50 @@ internal static void testTempDir(ж<testing.T> Ꮡt) {
             Ꮡt.Error(errΔ2);
         }
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string customGotmpdirTestˢ = "custom-gotmpdir-test"u8;
+private static readonly @string gotmpdirˢ = "GOTMPDIR"u8;
+
+public static void TestTempDirGOTMPDIR(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // The first call to t.TempDir will create a parent temporary directory
+        // that will contain all temporary directories created by TempDir.
+        //
+        // Use os.TempDir (not t.TempDir) to get a temporary directory,
+        // set GOTMPDIR to that directory,
+        // and then verify that t.TempDir creates a directory in GOTMPDIR.
+        @string customTmpDir = filepath.Join(Δos.TempDir(), customGotmpdirTestˢ);
+        {
+            var errΔ1 = Δos.MkdirAll(customTmpDir, 511); if (errΔ1 != default!) {
+                Ꮡt.Fatal(errΔ1);
+            }
+        }
+        defer(Δos.RemoveAll, customTmpDir, ref ᒐ);
+
+        Ꮡt.Setenv(gotmpdirˢ, customTmpDir);
+
+        @string dir = Ꮡt.TempDir();
+        if (dir == ""u8) {
+            Ꮡt.Fatal(expectedDirˢ);
+        }
+
+        if (!strings.HasPrefix(dir, customTmpDir)) {
+            Ꮡt.Errorf("TempDir did not use GOTMPDIR: got %q, want prefix %q"u8, dir, customTmpDir);
+        }
+
+        var (fi, err) = Δos.Stat(dir);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        if (!fi.IsDir()) {
+            Ꮡt.Errorf("dir %q is not a dir"u8, dir);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 internal partial struct TestSetenv_tests /*dyn*/ {
@@ -253,9 +300,11 @@ public static void TestSetenv(ж<testing.T> Ꮡt) {
 internal static void expectParallelConflict(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         @string want = testing.ParallelConflict;
         {
-            var got = recover(); if (!AreEqual(got, want)) {
+            var got = recover(calledByDefer); if (!AreEqual(got, want)) {
                 Ꮡt.Fatalf("expected panic; got %#v want %q"u8, got, want);
             }
         }
@@ -267,7 +316,7 @@ internal static void expectParallelConflict(ж<testing.T> Ꮡt) {
 internal static void testWithParallelAfter(ж<testing.T> Ꮡt, Action<ж<testing.T>> fn) {
     GoFrame ᒐ = default;
     try {
-        defer(expectParallelConflict, Ꮡt, ref ᒐ);
+        defer(expectParallelConflict, Ꮡt, ref ᒐ, recovers: true);
 
         fn(Ꮡt);
         Ꮡt.Parallel();
@@ -279,7 +328,7 @@ internal static void testWithParallelAfter(ж<testing.T> Ꮡt, Action<ж<testing
 internal static void testWithParallelBefore(ж<testing.T> Ꮡt, Action<ж<testing.T>> fn) {
     GoFrame ᒐ = default;
     try {
-        defer(expectParallelConflict, Ꮡt, ref ᒐ);
+        defer(expectParallelConflict, Ꮡt, ref ᒐ, recovers: true);
 
         Ꮡt.Parallel();
         fn(Ꮡt);
@@ -297,7 +346,7 @@ internal static void testWithParallelParentBefore(ж<testing.T> Ꮡt, Action<ж<
     Ꮡt.Run(childˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
-            defer(expectParallelConflict, tΔ1, ref ᒐ);
+            defer(expectParallelConflict, tΔ1, ref ᒐ, recovers: true);
 
             fn(tΔ1);
         }
@@ -316,7 +365,7 @@ internal static void testWithParallelGrandParentBefore(ж<testing.T> Ꮡt, Actio
         tΔ1.Run(grandChildˢ, (ж<testing.T> tΔ2) => {
             GoFrame ᒐ = default;
             try {
-                defer(expectParallelConflict, tΔ2, ref ᒐ);
+                defer(expectParallelConflict, tΔ2, ref ᒐ, recovers: true);
 
                 fn(tΔ2);
             }
@@ -420,6 +469,7 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
                 name: "current (relative) with extra os.Chdir"u8,
                 dir: "."u8,
                 pwd: oldDir,
+
                 extraChdir: true
             )
         }.slice()) {
@@ -540,7 +590,7 @@ public static void TestTesting(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("%v failed: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
     }
 
-    @string s = ((@string)bytes.TrimSpace(@out));
+    @string s = (@string)bytes.TrimSpace(@out);
     if (s != "false"u8) {
         Ꮡt.Errorf("in non-test testing.Test() returned %q, want %q"u8, s, falseˢ);
     }
@@ -553,7 +603,9 @@ private static readonly @string testBenchtime2xˢ = "-test.benchtime=2x"u8;
 
 // runTest runs a helper test with -test.v, ignoring its exit status.
 // runTest both logs and returns the test output.
-internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test) {
+internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test, params ꓸꓸꓸstring argsʗp) {
+    var args = argsʗp.sslice();
+
     Ꮡt.Helper();
 
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
@@ -561,6 +613,7 @@ internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test) {
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + test + "$"u8, "-test.bench=" + test, testVˢ2, testParallel2ˢ, testBenchtime2xˢ);
     cmd = testenv.CleanCmdEnv(cmd);
     cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, args);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
 
@@ -973,7 +1026,7 @@ public static void TestRunningTests(ж<testing.T> Ꮡt) {
 
     var timeout = 10 * time.Millisecond;
     while (ᐧ) {
-        var cmd = testenv.Command(new testing_TжTB(Ꮡt), Δos.Args[0], "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String(), testParallel4ˢ);
+        var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String(), testParallel4ˢ);
         cmd.Value.Env = append(cmd.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         Ꮡt.Logf("%v:\n%s"u8, cmd.OrTypedNil(), @out);
@@ -1016,6 +1069,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
             Ꮡt.Run(fmt.Sprintf("outer%d"u8, i), (ж<testing.T> tΔ1) => {
                 // Not parallel: we expect to see only one outer test,
                 // stuck in cleanup after its subtest finishes.
+
                 tΔ1.Cleanup(() => {
                     while (ᐧ) {
                         time.Sleep(1 * time.Millisecond);
@@ -1033,7 +1087,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
 
     var timeout = 10 * time.Millisecond;
     while (ᐧ) {
-        var cmd = testenv.Command(new testing_TжTB(Ꮡt), Δos.Args[0], "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String());
+        var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String());
         cmd.Value.Env = append(cmd.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         Ꮡt.Logf("%v:\n%s"u8, cmd.OrTypedNil(), @out);
@@ -1071,7 +1125,7 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
     slice<@string> runningTests = default!;
 
     var inRunningTests = false;
-    foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var line in range<@string>(strings.SplitSeq((@string)@out, "\n"u8).Invoke)) {
         if (inRunningTests) {
             // Package testing adds one tab, the panic printer adds another.
             {
@@ -1100,6 +1154,7 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
 public static partial void TestConcurrentRun(ж<testing.T> Ꮡt) {
     // Regression test for https://go.dev/issue/64402:
     // this deadlocked after https://go.dev/cl/506755.
+
     var block = new channel<EmptyStruct>(0);
     ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
     ref var done = ref heap(new Δsync.WaitGroup(), out var Ꮡdone);
@@ -1127,6 +1182,7 @@ private static readonly object helloInnerˢ = (@string)"Hello inner!"u8;
 public static void TestParentRun(ж<testing.T> Ꮡt1) {
     // Regression test for https://go.dev/issue/64402:
     // this deadlocked after https://go.dev/cl/506755.
+
     Ꮡt1.Run(outerˢ, (ж<testing.T> t2) => {
         t2.Log(helloOuterˢ);
         Ꮡt1.Run(notInnerˢ, (ж<testing.T> t3) => { // Note: this is t1.Run, not t2.Run.
@@ -1170,6 +1226,183 @@ public static void TestContext(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(expectedContextCanceledˢ);
         }
     });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string keyˢ = "key"u8;
+
+// TestAttrExample is used by TestAttrSet,
+// and also serves as a convenient test to run that sets an attribute.
+public static void TestAttrExample(ж<testing.T> Ꮡt) {
+    Ꮡt.Attr(keyˢ, valueˢ);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string testAttrExampleˢ = "TestAttrExample"u8;
+private static readonly @string attrTestAttrExampleKeyˢ = "=== ATTR  TestAttrExample key value\n"u8;
+
+public static void TestAttrSet(ж<testing.T> Ꮡt) {
+    @string @out = (@string)runTest(Ꮡt, testAttrExampleˢ);
+
+    @string want = attrTestAttrExampleKeyˢ;
+    if (!strings.Contains(@out, want)) {
+        Ꮡt.Errorf("expected output containing %q, got:\n%q"u8, want, @out);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string testAttrInvalidˢ = "TestAttrInvalid"u8;
+
+internal partial struct TestAttrInvalid_tests /*dyn*/ {
+    internal @string key;
+    internal @string value;
+}
+
+public static void TestAttrInvalid(ж<testing.T> Ꮡt) {
+    var tests = new TestAttrInvalid_tests[]{
+        new("k ey"u8, "value"u8),
+        new("k\tey"u8, "value"u8),
+        new("k\rey"u8, "value"u8),
+        new("k\ney"u8, "value"u8),
+        new("key"u8, "val\rue"u8),
+        new("key"u8, "val\nue"u8)
+    }.slice();
+
+    if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
+        foreach (var (i, vᴛ1) in tests) {
+            ref var test = ref heap(new TestAttrInvalid_tests(), out var Ꮡtest);
+            test = vᴛ1;
+
+            var testʗ1 = test;
+            Ꮡt.Run(fmt.Sprint(i), (ж<testing.T> tΔ1) => {
+                tΔ1.Attr(testʗ1.key, testʗ1.value);
+            });
+        }
+        return;
+    }
+
+    @string @out = (@string)runTest(Ꮡt, testAttrInvalidˢ);
+
+    foreach (var i in range(tests)) {
+        @string want = fmt.Sprintf("--- FAIL: TestAttrInvalid/%v "u8, i);
+        if (!strings.Contains(@out, want)) {
+            Ꮡt.Errorf("expected output containing %q, got:\n%q"u8, want, @out);
+        }
+    }
+}
+
+internal static readonly @string artifactContent = "It belongs in a museum.\n"u8;
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string artifactˢ = "artifact"u8;
+
+public static void TestArtifactDirExample(ж<testing.T> Ꮡt) {
+    Δos.WriteFile(filepath.Join(Ꮡt.ArtifactDir(), artifactˢ), slice<byte>(artifactContent), 438);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string testArtifactDirExampleˢ = "TestArtifactDirExample"u8;
+private static readonly @string testArtifactsˢ = "-test.artifacts"u8;
+
+public static void TestArtifactDirDefault(ж<testing.T> Ꮡt) {
+    @string tempDir = Ꮡt.TempDir();
+    Ꮡt.Chdir(tempDir);
+    var @out = runTest(Ꮡt, testArtifactDirExampleˢ, testArtifactsˢ);
+    checkArtifactDir(Ꮡt, @out, testArtifactDirExampleˢ, tempDir);
+}
+
+public static void TestArtifactDirSpecified(ж<testing.T> Ꮡt) {
+    @string tempDir = Ꮡt.TempDir();
+    var @out = runTest(Ꮡt, testArtifactDirExampleˢ, testArtifactsˢ, "-test.outputdir=" + tempDir);
+    checkArtifactDir(Ꮡt, @out, testArtifactDirExampleˢ, tempDir);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string artifactsˢ = "=== ARTIFACTS"u8;
+
+public static void TestArtifactDirNoArtifacts(ж<testing.T> Ꮡt) {
+    Ꮡt.Chdir(Ꮡt.TempDir());
+    @string @out = (@string)runTest(Ꮡt, testArtifactDirExampleˢ);
+    if (strings.Contains(@out, artifactsˢ)) {
+        Ꮡt.Errorf("expected output with no === ARTIFACTS, got\n%q"u8, @out);
+    }
+    var (ents, err) = Δos.ReadDir("."u8);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    foreach (var (_, e) in ents) {
+        Ꮡt.Errorf("unexpected file in current directory after test: %v"u8, e.Name());
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string subtestˢ = "Subtest"u8;
+
+public static void TestArtifactDirSubtestExample(ж<testing.T> Ꮡt) {
+    Ꮡt.Run(subtestˢ, (ж<testing.T> tΔ1) => {
+        Δos.WriteFile(filepath.Join(tΔ1.ArtifactDir(), artifactˢ), slice<byte>(artifactContent), 438);
+    });
+}
+
+public static void TestArtifactDirInSubtest(ж<testing.T> Ꮡt) {
+    @string tempDir = Ꮡt.TempDir();
+    var @out = runTest(Ꮡt, "TestArtifactDirSubtestExample/Subtest"u8, testArtifactsˢ, "-test.outputdir=" + tempDir);
+    checkArtifactDir(Ꮡt, @out, "TestArtifactDirSubtestExample/Subtest"u8, tempDir);
+}
+
+public static void TestArtifactDirLongTestNameExample(ж<testing.T> Ꮡt) {
+    @string name = strings.Repeat("x"u8, 256);
+    Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        Δos.WriteFile(filepath.Join(tΔ1.ArtifactDir(), artifactˢ), slice<byte>(artifactContent), 438);
+    });
+}
+
+public static void TestArtifactDirWithLongTestName(ж<testing.T> Ꮡt) {
+    @string tempDir = Ꮡt.TempDir();
+    var @out = runTest(Ꮡt, "TestArtifactDirLongTestNameExample"u8, testArtifactsˢ, "-test.outputdir=" + tempDir);
+    checkArtifactDir(Ꮡt, @out, @"TestArtifactDirLongTestNameExample/\w+"u8, tempDir);
+}
+
+public static void TestArtifactDirConsistent(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    @string a = Ꮡt.ArtifactDir();
+    @string b = Ꮡt.ArtifactDir();
+    if (a != b) {
+        Ꮡt.Errorf("t.ArtifactDir is not consistent between calls: %q, %q"u8, a, b);
+    }
+}
+
+internal static void checkArtifactDir(ж<testing.T> Ꮡt, slice<byte> @out, @string testName, @string outputDir) {
+    Ꮡt.Helper();
+
+    var re = Δregexp.MustCompile(@"=== ARTIFACTS "u8 + testName + @" ([^\n]+)"u8);
+    var match = re.FindSubmatch(@out);
+    if (match == default!) {
+        Ꮡt.Fatalf("expected output matching %q, got\n%q"u8, re.OrTypedNil(), @out);
+    }
+    @string artifactDir = (@string)match[1];
+
+    // Verify that the artifact directory is contained in the expected output directory.
+    var (relDir, err) = filepath.Rel(outputDir, artifactDir);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    if (!filepath.IsLocal(relDir)) {
+        Ꮡt.Fatalf("want artifact directory contained in %q, got %q"u8, outputDir, artifactDir);
+    }
+
+    foreach (var (_, part) in strings.Split(relDir, (@string)(rune)Δos.PathSeparator)) {
+        const nint maxSize = 64;
+        if (len(part) > maxSize) {
+            Ꮡt.Errorf("artifact directory %q contains component >%v characters long: %q"u8, relDir, (nint)(maxSize), part);
+        }
+    }
+
+    (var got, err) = Δos.ReadFile(filepath.Join(artifactDir, artifactˢ));
+    if (err != default! || ((sstring)got) != artifactContent) {
+        Ꮡt.Errorf("reading artifact in %q: got %q, %v; want %q"u8, artifactDir, got, err, artifactContent);
+    }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1236,6 +1469,10 @@ public static void BenchmarkBNPrint(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         Ꮡb.Logf("Printing from BenchmarkBNPrint"u8);
     }
+}
+
+public static partial void TestArtifactDir(ж<testing.T> Ꮡt) {
+    Ꮡt.Log(Ꮡt.ArtifactDir());
 }
 
 } // end testing_test_package

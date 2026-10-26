@@ -9,6 +9,8 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("unique", new string[]
         {
+            "canonmap.go",
+            "canonmap_test.go",
             "clone.go",
             "clone_test.go",
             "doc.go",
@@ -16,10 +18,15 @@ internal static class Go2CsTestHost
             "handle_bench_test.go",
             "handle_test.go",
         });
-        registry.Add("TestHandle", unique_internal_test_package.TestHandle, "handle_test.go", 37);
-        registry.Add("TestHandleUnsafeString", unique_internal_test_package.TestHandleUnsafeString, "handle_test.go", 143);
+        registry.Add("TestCanonMap", unique_internal_test_package.TestCanonMap, "canonmap_test.go", 16);
+        registry.Add("TestCanonMapBadHash", unique_internal_test_package.TestCanonMapBadHash, "canonmap_test.go", 22);
+        registry.Add("TestCanonMapTruncHash", unique_internal_test_package.TestCanonMapTruncHash, "canonmap_test.go", 28);
+        registry.Add("TestHandle", unique_internal_test_package.TestHandle, "handle_test.go", 46);
+        registry.Add("TestHandleUnsafeString", unique_internal_test_package.TestHandleUnsafeString, "handle_test.go", 133);
+        registry.Add("TestMakeAllocs", unique_internal_test_package.TestMakeAllocs, "handle_test.go", 203);
         registry.Add("TestMakeCloneSeq", unique_internal_test_package.TestMakeCloneSeq, "clone_test.go", 14);
-        registry.Add("TestMakeClonesStrings", unique_internal_test_package.TestMakeClonesStrings, "handle_test.go", 124);
+        registry.Add("TestMakeClonesStrings", unique_internal_test_package.TestMakeClonesStrings, "handle_test.go", 114);
+        registry.Add("TestNestedHandle", unique_internal_test_package.TestNestedHandle, "handle_test.go", 163);
         return TestHost.Run(registry, args);
     }
 }

@@ -8,13 +8,15 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using godebug = @internal.godebug_package;
-using static @internal.types.errors_package;
+using godebug = global::go.@internal.godebug_package;
+using static global::go.@internal.types.errors_package;
+using os = os_package;
 using atomic = global::go.sync.atomic_package;
-using @internal;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.@internal;
 using global::go.go;
 using global::go.sync;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
@@ -26,6 +28,9 @@ internal static atPos noposn = ((atPos)nopos);
 
 // debugging/development support
 internal const bool debug = false; // leave on during development
+
+// position tracing for panics during type checking
+internal const bool tracePos = true;
 
 // gotypesalias controls the use of Alias types.
 // As of Apr 16 2024 they are used by default.
@@ -164,9 +169,10 @@ partial struct Checker {
     internal ж<Context> ctxt; // context for de-duplicating instances
     internal ж<token.FileSet> fset;
     internal ж<Package> pkg;
-    public partial ref ж<ΔInfo> Info { get; }
+    /*embed*/ public ж<ΔInfo> Info;
     internal uint64 nextID;                 // unique Id for type parameters (first valid Id is 1)
     internal map<Object, ж<declInfo>> objMap; // maps package-level objects and (non-interface) methods to declaration info
+    internal slice<Object> objList;          // source-ordered keys of objMap
     internal map<importKey, ж<Package>> impMap; // maps (import path, source directory) to (complete or fake) package
 // see TODO in validtype.go
 // valids instanceLookup // valid *Named (incl. instantiated) types per the validType check
@@ -196,13 +202,15 @@ partial struct Checker {
     internal map<ж<TypeName>, slice<ж<Func>>> methods; // maps package scope type names to associated non-blank (non-interface) methods
     internal map<ast.Expr, exprInfo> untyped; // map of expressions without final type
     internal slice<action> delayed;         // stack of delayed action segments; segments are processed in FIFO order
-    internal slice<Object> objPath;         // path of object dependencies during type inference (for cycle reporting)
+    internal slice<Object> objPath;         // path of object dependencies during type-checking (for cycle reporting)
+    internal map<Object, nint> objPathIdx;     // map of object to object path index during type-checking (for cycle reporting)
     internal slice<cleaner> cleaners;        // list of types that may need a final cleanup at the end of type-checking
     // environment within which the current object is type-checked (valid only
     // for the duration of type-checking a specific object)
-    internal partial ref environment environment { get; }
+    /*embed*/ internal environment environment;
     // debugging
-    internal nint indent; // indentation for tracing
+    internal slice<positioner> posStack; // stack of source positions seen; used for panic tracing
+    internal nint indent;         // indentation for tracing
 }
 
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
@@ -272,19 +280,22 @@ internal static ж<action> later(this ref Checker check, Action f) {
     return Ꮡ(check.delayed, i);
 }
 
-// push pushes obj onto the object path and returns its index in the path.
-internal static nint push(this ref Checker check, Object obj) {
+// push pushes obj onto the object path and records its index in the path index map.
+internal static void push(this ref Checker check, Object obj) {
+    if (check.objPathIdx == default!) {
+        check.objPathIdx = new map<Object, nint>();
+    }
+    check.objPathIdx[obj] = len(check.objPath);
     check.objPath = append(check.objPath, obj);
-    return len(check.objPath) - 1;
 }
 
-// pop pops and returns the topmost object from the object path.
-internal static Object pop(this ref Checker check) {
+// pop pops an object from the object path and removes it from the path index map.
+internal static void pop(this ref Checker check) {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
-    check.objPath[i] = default!;
+    check.objPath[i] = default!; // help the garbage collector
     check.objPath = check.objPath.slice(0, i);
-    return obj;
+    delete(check.objPathIdx, obj);
 }
 
 partial interface cleaner {
@@ -355,6 +366,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     check.untyped = default!;
     check.delayed = default!;
     check.objPath = default!;
+    check.objPathIdx = default!;
     check.cleaners = default!;
 
     // We must initialize usedVars and usedPkgNames both here and in NewChecker,
@@ -383,7 +395,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 check.files = append(check.files, @file);
             }
             else if (!matchᴛ1) { /* default: */
-                Ꮡcheck.errorf(((atPos)(~@file).Package), MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
+                Ꮡcheck.errorf((atPos)(~@file).Package, MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
                 // ignore this file
             }
         }
@@ -422,7 +434,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 // downgrade to a version before go1.22, where the for loop semantics
                 // change was made, while being backwards compatible with versions of
                 // go before the new //go:build semantics were introduced.
-                v = ((@string)versionMax(fileVersion, go1_21));
+                v = (@string)versionMax(fileVersion, go1_21);
 
                 // Report a specific error for each tagged file that's too new.
                 // (Normally the build system will have filtered files by version,
@@ -445,17 +457,31 @@ internal static goVersion versionMax(goVersion a, goVersion b) {
     return a;
 }
 
+// pushPos pushes pos onto the pos stack.
+internal static void pushPos(this ref Checker check, positioner pos) {
+    check.posStack = append(check.posStack, pos);
+}
+
+// popPos pops from the pos stack.
+internal static void popPos(this ref Checker check) {
+    check.posStack = check.posStack.slice(0, len(check.posStack) - 1);
+}
+
 // A bailout panic is used for early termination.
 partial struct bailout {
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object theFollowingPanicˢ = (@string)"The following panic happened checking types near:"u8;
+
 internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
 
-        var switchᴛ5 = recover();
+        var switchᴛ5 = recover(calledByDefer);
         switch (switchᴛ5.type()) {
         case null:
         case bailout _: {
@@ -466,6 +492,24 @@ internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) 
         }
         default: {
             var p = switchᴛ5;
+            if (len(check.posStack) > 0) {
+                void doPrint(slice<positioner> ps) {
+                    for (nint i = len(ps) - 1; i >= 0; i--) {
+                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "\t%v\n"u8, Ꮡcheck.Value.fset.Position(ps[i].Pos()));
+                    }
+                }
+
+                fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢ);
+                if (len(check.posStack) <= 10){
+                    doPrint(check.posStack);
+                } else {
+                    // if it's long, truncate the middle; it's least likely to help
+                    doPrint(check.posStack.slice(len(check.posStack) - 5));
+                    fmt.Fprintln(new os.FileжWriter(os.Stderr), (@string)"\t..."u8);
+                    doPrint(check.posStack[..5]);
+                }
+            }
+
             // re-panic
             throw panic(p);
             break;
@@ -494,7 +538,7 @@ public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>>
         // localized to a piece of syntax and needn't prevent
         // type-checking of the rest of the package.
 
-        defer(Ꮡcheck.handleBailout, Ꮡerr, ref ᒐ);
+        defer(Ꮡcheck.handleBailout, Ꮡerr, ref ᒐ, recovers: true);
         Ꮡcheck.checkFiles(files);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -505,6 +549,8 @@ public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>>
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string initFilesˢ = "== initFiles =="u8;
 internal static readonly @string collectObjectsˢ = "== collectObjects =="u8;
+internal static readonly @string sortObjectsˢ = "== sortObjects =="u8;
+internal static readonly @string directCyclesˢ = "== directCycles =="u8;
 internal static readonly @string packageObjectsˢ = "== packageObjects =="u8;
 internal static readonly @string processDelayedˢ = "== processDelayed =="u8;
 internal static readonly @string cleanupˢ = "== cleanup =="u8;
@@ -532,7 +578,7 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
             if (atomic.AddInt32(Ꮡ_aliasAny, -1) >= 0) {
                 throw panic("!EnableAlias set while EnableAlias type checking is ongoing");
             }
-            defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)(1), ref ᒐ);
+            defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)1, ref ᒐ);
         }
 
         void print(@string msg) {
@@ -547,6 +593,12 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
 
         print(collectObjectsˢ);
         Ꮡcheck.collectObjects();
+
+        print(sortObjectsˢ);
+        check.sortObjects();
+
+        print(directCyclesˢ);
+        Ꮡcheck.directCycles();
 
         print(packageObjectsˢ);
         Ꮡcheck.packageObjects();

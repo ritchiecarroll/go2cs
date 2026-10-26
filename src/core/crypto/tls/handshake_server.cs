@@ -14,7 +14,6 @@ using Δx509 = go.crypto.x509_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using hash = hash_package;
-using byteorder = go.@internal.byteorder_package;
 using io = io_package;
 using time = time_package;
 using go.@internal;
@@ -194,7 +193,15 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
     // the contents of the client hello, since we may swap it out completely.
     ж<echServerContext> ech = default!;
     if (len((~clientHello).encryptedClientHello) != 0) {
-        (clientHello, ech, err) = Ꮡc.processECHClientHello(clientHello);
+        var echKeys = c.config.Value.EncryptedClientHelloKeys;
+        if ((~c.config).GetEncryptedClientHelloKeys != default!) {
+            (echKeys, err) = (~c.config).GetEncryptedClientHelloKeys(clientHelloInfo(ctx, ref (Ꮡc).DerefOrNull(), ref (clientHello).DerefOrNull()));
+            if (err != default!) {
+                Ꮡc.sendAlert(alertInternalError);
+                return (default!, default!, err);
+            }
+        }
+        (clientHello, ech, err) = Ꮡc.processECHClientHello(clientHello, echKeys);
         if (err != default!) {
             return (default!, default!, err);
         }
@@ -217,7 +224,16 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
     c.ticketKeys = originalConfig.ticketKeys(configForClient);
 
     var clientVersions = clientHello.Value.supportedVersions;
-    if (len((~clientHello).supportedVersions) == 0) {
+    if ((~clientHello).vers >= VersionTLS13 && len(clientVersions) == 0){
+        // RFC 8446 4.2.1 indicates when the supported_versions extension is not sent,
+        // compatible servers MUST negotiate TLS 1.2 or earlier if supported, even
+        // if the client legacy version is TLS 1.3 or later.
+        //
+        // Since we reject empty extensionSupportedVersions in the client hello unmarshal
+        // finding the supportedVersions empty indicates the extension was not present.
+        clientVersions = supportedVersionsFromMax(VersionTLS12);
+    } else 
+    if (len(clientVersions) == 0) {
         clientVersions = supportedVersionsFromMax((~clientHello).vers);
     }
     (c.vers, ok) = c.config.mutualVersion(roleServer, clientVersions);
@@ -268,7 +284,7 @@ internal static error processClientHello(this ref serverHandshakeState hs) {
     }
 
     if (!foundCompression) {
-        c.sendAlert(alertHandshakeFailure);
+        c.sendAlert(alertIllegalParameter);
         return errors.New(tlsClientDoesNotSupportˢ);
     }
 
@@ -323,7 +339,11 @@ internal static error processClientHello(this ref serverHandshakeState hs) {
         hs.hello.Value.scts = hs.cert.Value.SignedCertificateTimestamps;
     }
 
-    hs.ecdheOk = supportsECDHE((~c).config, (~c).vers, (~hs.clientHello).supportedCurves, (~hs.clientHello).supportedPoints);
+    (hs.ecdheOk, err) = supportsECDHE((~c).config, (~c).vers, (~hs.clientHello).supportedCurves, (~hs.clientHello).supportedPoints);
+    if (err != default!) {
+        c.sendAlert(alertMissingExtension);
+        return err;
+    }
 
     if (hs.ecdheOk && len((~hs.clientHello).supportedPoints) > 0) {
         // Although omitting the ec_point_formats extension is permitted, some
@@ -404,9 +424,12 @@ internal static (@string, error) negotiateALPN(slice<@string> serverProtos, slic
     return ("", fmt.Errorf("tls: client requested unsupported application protocols (%q)"u8, clientProtos));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tlsClientOfferedOnlyˢ = "tls: client offered only incompatible point formats"u8;
+
 // supportsECDHE returns whether ECDHE key exchanges can be used with this
 // pre-TLS 1.3 client.
-internal static bool supportsECDHE(ж<Config> Ꮡc, uint16 version, slice<CurveID> supportedCurves, slice<uint8> supportedPoints) {
+internal static (bool, error) supportsECDHE(ж<Config> Ꮡc, uint16 version, slice<CurveID> supportedCurves, slice<uint8> supportedPoints) {
     var supportsCurve = false;
     foreach (var (_, curve) in supportedCurves) {
         if (Ꮡc.supportsCurve(version, curve)) {
@@ -416,25 +439,29 @@ internal static bool supportsECDHE(ж<Config> Ꮡc, uint16 version, slice<CurveI
     }
 
     var supportsPointFormat = false;
+    var offeredNonCompressedFormat = false;
     foreach (var (_, pointFormat) in supportedPoints) {
-        if (pointFormat == pointFormatUncompressed) {
+        if (pointFormat == pointFormatUncompressed){
             supportsPointFormat = true;
-            break;
+        } else {
+            offeredNonCompressedFormat = true;
         }
     }
     // Per RFC 8422, Section 5.1.2, if the Supported Point Formats extension is
     // missing, uncompressed points are supported. If supportedPoints is empty,
     // the extension must be missing, as an empty extension body is rejected by
     // the parser. See https://go.dev/issue/49126.
-    if (len(supportedPoints) == 0) {
+    if (len(supportedPoints) == 0){
         supportsPointFormat = true;
+    } else 
+    if (offeredNonCompressedFormat && !supportsPointFormat) {
+        return (false, errors.New(tlsClientOfferedOnlyˢ));
     }
 
-    return supportsCurve && supportsPointFormat;
+    return (supportsCurve && supportsPointFormat, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tlsNoCipherSuiteˢ = "tls: no cipher suite supported by both client and server"u8;
 internal static readonly @string tlsClientUsingˢ = "tls: client using inappropriate protocol fallback"u8;
 
 internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
@@ -442,26 +469,13 @@ internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
 
     var c = hs.c;
 
-    var preferenceOrder = cipherSuitesPreferenceOrder;
-    if (!hasAESGCMHardwareSupport || !aesgcmPreferred((~hs.clientHello).cipherSuites)) {
-        preferenceOrder = cipherSuitesPreferenceOrderNoAES;
-    }
-
-    var configCipherSuites = (~c).config.cipherSuites();
-    var preferenceList = new slice<uint16>(0, len(configCipherSuites));
-    foreach (var (_, suiteID) in preferenceOrder) {
-        foreach (var (_, id) in configCipherSuites) {
-            if (id == suiteID) {
-                preferenceList = append(preferenceList, id);
-                break;
-            }
-        }
-    }
+    var preferenceList = (~c).config.cipherSuites(isAESGCMPreferred((~hs.clientHello).cipherSuites));
 
     hs.suite = selectCipherSuite(preferenceList, (~hs.clientHello).cipherSuites, Ꮡhs.cipherSuiteOk);
     if (hs.suite == nil) {
         c.sendAlert(alertHandshakeFailure);
-        return errors.New(tlsNoCipherSuiteˢ);
+        return fmt.Errorf("tls: no cipher suite supported by both client and server; client offered: %x"u8,
+            (~hs.clientHello).cipherSuites);
     }
     c.Value.cipherSuite = hs.suite.Value.id;
 
@@ -491,11 +505,11 @@ internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
 internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if ((nint)(c.flags & (nint)suiteECDHE) != 0){
+    if ((c.flags & (nint)suiteECDHE) != 0){
         if (!hs.ecdheOk) {
             return false;
         }
-        if ((nint)(c.flags & (nint)suiteECSign) != 0){
+        if ((c.flags & (nint)suiteECSign) != 0){
             if (!hs.ecSignOk) {
                 return false;
             }
@@ -507,7 +521,7 @@ internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSu
     if (!hs.rsaDecryptOk) {
         return false;
     }
-    if ((~hs.c).vers < VersionTLS12 && (nint)(c.flags & (nint)suiteTLS12) != 0) {
+    if ((~hs.c).vers < VersionTLS12 && (c.flags & (nint)suiteTLS12) != 0) {
         return false;
     }
     return true;
@@ -575,7 +589,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
 
     // Check that we also support the ciphersuite from the session.
     var suite = selectCipherSuite(new uint16[]{(~sessionState).cipherSuite}.slice(),
-        (~c).config.cipherSuites(), Ꮡhs.cipherSuiteOk);
+        (~c).config.supportedCipherSuites(), Ꮡhs.cipherSuiteOk);
     if (suite == nil) {
         return default!;
     }
@@ -609,6 +623,13 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
         // weird downgrade in client capabilities.
         return errors.New(tlsSessionSupportedˢ);
     }
+    if (!(~sessionState).extMasterSecret && fips140tls.Required()) {
+        if (fips140ems.Value() != "0"u8) {
+            // FIPS 140-3 requires the use of Extended Master Secret.
+            return default!;
+        }
+        fips140ems.IncNonDefault();
+    }
 
     c.Value.peerCertificates = sessionState.Value.peerCertificates;
     c.Value.ocspResponse = sessionState.Value.ocspResponse;
@@ -617,6 +638,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
     c.Value.extMasterSecret = sessionState.Value.extMasterSecret;
     hs.sessionState = sessionState;
     hs.suite = suite;
+    c.Value.curveID = sessionState.Value.curveID;
     c.Value.didResume = true;
     return default!;
 }
@@ -674,6 +696,10 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         hs.hello.Value.ocspStapling = true;
     }
 
+    if ((~hs.clientHello).serverName != ""u8) {
+        hs.hello.Value.serverNameAck = true;
+    }
+
     hs.hello.Value.ticketSupported = (~hs.clientHello).ticketSupported && !(~(~c).config).SessionTicketsDisabled;
     hs.hello.Value.cipherSuite = hs.suite.Value.id;
 
@@ -719,9 +745,11 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         return err;
     }
     if (skx != nil) {
-        if (len((~skx).key) >= 3 && (~skx).key[0] == 3) {
-            /* named curve */
-            c.Value.curveID = ((CurveID)byteorder.BEUint16((~skx).key[1..]));
+        {
+            var (keyAgreementΔ1, okΔ1) = keyAgreement._<ж<ecdheKeyAgreement>>(ᐧ); if (okΔ1) {
+                c.Value.curveID = keyAgreementΔ1.Value.curveID;
+                c.Value.peerSigAlg = keyAgreementΔ1.Value.signatureAlgorithm;
+            }
         }
         {
             var (_, errΔ5) = hs.c.writeHandshakeRecord(new serverKeyExchangeMsgжhandshakeMessage(skx), new ΔfinishedHashжtranscriptHash(Ꮡhs.of(serverHandshakeState.ᏑfinishedHash))); if (errΔ5 != default!) {
@@ -740,7 +768,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         }.slice();
         if ((~c).vers >= VersionTLS12) {
             certReq.Value.hasSignatureAlgorithm = true;
-            certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms();
+            certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms((~c).vers);
         }
 
         // An empty list of certificateAuthorities signals to
@@ -781,8 +809,8 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
     // If we requested a client certificate, then the client must send a
     // certificate message, even if it's empty.
     if ((~(~c).config).ClientAuth >= RequestClientCert) {
-        var (certMsgΔ1, okΔ1) = msg._<ж<certificateMsg>>(ᐧ);
-        if (!okΔ1) {
+        var (certMsgΔ1, okΔ2) = msg._<ж<certificateMsg>>(ᐧ);
+        if (!okΔ2) {
             c.sendAlert(alertUnexpectedMessage);
             return unexpectedMessageError(certMsgΔ1.OrTypedNil(), msg);
         }
@@ -829,6 +857,13 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         hs.masterSecret = extMasterFromPreMasterSecret((~c).vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
             hs.finishedHash.Sum());
     } else {
+        if (fips140tls.Required()) {
+            if (fips140ems.Value() != "0"u8) {
+                c.sendAlert(alertHandshakeFailure);
+                return errors.New(tlsFips1403RequiresTheˢ);
+            }
+            fips140ems.IncNonDefault();
+        }
         hs.masterSecret = masterFromPreMasterSecret((~c).vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
             (~hs.clientHello).random, (~hs.hello).random);
     }
@@ -853,8 +888,8 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         if (err != default!) {
             return err;
         }
-        var (certVerify, okΔ2) = msg._<ж<certificateVerifyMsg>>(ᐧ);
-        if (!okΔ2) {
+        var (certVerify, okΔ3) = msg._<ж<certificateVerifyMsg>>(ᐧ);
+        if (!okΔ3) {
             c.sendAlert(alertUnexpectedMessage);
             return unexpectedMessageError(certVerify.OrTypedNil(), msg);
         }
@@ -870,25 +905,40 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
             if (err != default!) {
                 return c.sendAlert(alertInternalError);
             }
+            if (sigHash == crypto.SHA1) {
+                tlssha1.Value(); // ensure godebug is initialized
+                tlssha1.IncNonDefault();
+            }
+            if (hs.finishedHash.buffer == default!) {
+                c.sendAlert(alertInternalError);
+                return errors.New(tlsInternalErrorDidNotˢ);
+            }
+            {
+                var errΔ12 = verifyHandshakeSignature(sigType, pub, sigHash, hs.finishedHash.buffer, (~certVerify).signature); if (errΔ12 != default!) {
+                    c.sendAlert(alertDecryptError);
+                    return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ12.Error());
+                }
+            }
         } else {
             (sigType, sigHash, err) = legacyTypeAndHashFromPublicKey(pub);
             if (err != default!) {
                 c.sendAlert(alertIllegalParameter);
                 return err;
             }
-        }
-
-        var signed = hs.finishedHash.hashForClientCertificate(sigType, sigHash);
-        {
-            var errΔ12 = verifyHandshakeSignature(sigType, pub, sigHash, signed, (~certVerify).signature); if (errΔ12 != default!) {
-                c.sendAlert(alertDecryptError);
-                return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ12.Error());
+            var signed = hs.finishedHash.hashForClientCertificate(sigType);
+            {
+                var errΔ13 = verifyLegacyHandshakeSignature(sigType, pub, sigHash, signed, (~certVerify).signature); if (errΔ13 != default!) {
+                    c.sendAlert(alertDecryptError);
+                    return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ13.Error());
+                }
             }
         }
 
+        c.Value.peerSigAlg = certVerify.Value.signatureAlgorithm;
+
         {
-            var errΔ13 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new ΔfinishedHashжtranscriptHash(Ꮡhs.of(serverHandshakeState.ᏑfinishedHash))); if (errΔ13 != default!) {
-                return errΔ13;
+            var errΔ14 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new ΔfinishedHashжtranscriptHash(Ꮡhs.of(serverHandshakeState.ᏑfinishedHash))); if (errΔ14 != default!) {
+                return errΔ14;
             }
         }
     }
@@ -1038,7 +1088,7 @@ internal static error sendFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
 internal static readonly @string tlsClientDidnTProvideAˢ = "tls: client didn't provide a certificate"u8;
 
 // processCertsFromClient takes a chain of client certificates either from a
-// Certificates message and verifies them.
+// certificateMsg message or a certificateMsgTLS13 message and verifies them.
 internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate certificate) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -1048,7 +1098,7 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
     foreach (var (i, asn1Data) in certificates) {
         {
             (certs[i], err) = Δx509.ParseCertificate(asn1Data); if (err != default!) {
-                Ꮡc.sendAlert(alertBadCertificate);
+                Ꮡc.sendAlert(alertDecodeError);
                 return errors.New("tls: failed to parse client certificate: "u8 + err.Error());
             }
         }
@@ -1067,7 +1117,7 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
         if (c.vers == VersionTLS13){
             Ꮡc.sendAlert(alertCertificateRequired);
         } else {
-            Ꮡc.sendAlert(alertBadCertificate);
+            Ꮡc.sendAlert(alertHandshakeFailure);
         }
         return errors.New(tlsClientDidnTProvideAˢ);
     }
@@ -1086,14 +1136,17 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
 
         var (chains, errΔ1) = certs[0].Verify(opts);
         if (errΔ1 != default!) {
-            ref var errCertificateInvalid = ref heap(new Δx509.CertificateInvalidError(), out var ᏑerrCertificateInvalid);
-            if (errors.As(errΔ1, Ꮡ(new Δx509.UnknownAuthorityError(nil)))){
-                Ꮡc.sendAlert(alertUnknownCA);
-            } else 
-            if (errors.As(errΔ1, ᏑerrCertificateInvalid) && errCertificateInvalid.Reason == Δx509.Expired){
-                Ꮡc.sendAlert(alertCertificateExpired);
-            } else {
-                Ꮡc.sendAlert(alertBadCertificate);
+            {
+                var (_, ok) = errors.AsType<Δx509.UnknownAuthorityError>(errΔ1); if (ok){
+                    Ꮡc.sendAlert(alertUnknownCA);
+                } else 
+                {
+                    var (errCertificateInvalid, okΔ1) = errors.AsType<Δx509.CertificateInvalidError>(errΔ1); if (okΔ1 && errCertificateInvalid.Reason == Δx509.Expired){
+                        Ꮡc.sendAlert(alertCertificateExpired);
+                    } else {
+                        Ꮡc.sendAlert(alertBadCertificate);
+                    }
+                }
             }
             return new CertificateVerificationErrorжerror(Ꮡ(new CertificateVerificationError(UnverifiedCertificates: certs, Err: errΔ1)));
         }
@@ -1150,6 +1203,7 @@ internal static ж<ClientHelloInfo> clientHelloInfo(context.Context ctx, ref Con
         SupportedVersions: ΔsupportedVersions,
         Extensions: clientHello.extensions,
         Conn: c.conn,
+        HelloRetryRequest: c.didHRR,
         config: c.config,
         ctx: ctx
     ));

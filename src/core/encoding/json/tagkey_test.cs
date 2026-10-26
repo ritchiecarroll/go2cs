@@ -1,6 +1,7 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using testing = testing_package;
@@ -73,7 +74,7 @@ internal partial struct unicodeTag {
 }
 
 internal partial struct TestStructTagObjectKey_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any raw;
     internal @string value;
     internal @string key;

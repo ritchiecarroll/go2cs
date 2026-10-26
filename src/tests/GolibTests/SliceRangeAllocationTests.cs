@@ -116,20 +116,20 @@ public class SliceRangeAllocationTests
     [TestMethod]
     public void EnumeratorStillSatisfiesTheInterfaceContract()
     {
-        // slice<T> is IArray<T> is IEnumerable<(nint, T)>. The pattern path must not have cost the
-        // interface path: LINQ, `foreach` over an interface-typed local, and anything holding the
-        // slice as IEnumerable<(nint, T)> still enumerate the same pairs (boxing, as they always did).
+        // slice<T> is IArray<T>, whose own GetEnumerator() yields (nint, T). The pattern path must not
+        // have cost the interface path: `foreach` over an IArray<T>-typed local or a constrained type
+        // parameter still enumerates the same pairs (boxing, as it always did). LINQ sees the values.
         slice<byte> s = new([10, 20, 30]);
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IEnumerable<(nint, byte)>)s)
+        foreach ((nint i, byte v) in (IArray<byte>)s)
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(
             new[] { ((nint)0, (byte)10), ((nint)1, (byte)20), ((nint)2, (byte)30) },
             viaInterface,
-            "IEnumerable<(nint, T)> enumeration diverged from the struct enumerator");
+            "IArray<T> pair enumeration diverged from the struct enumerator");
 
         // The T-typed interface view (IList<T>/IEnumerable<T>) is a separate, still-working path.
         List<byte> values = [];

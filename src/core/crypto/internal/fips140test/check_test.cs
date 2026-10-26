@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140test;
 
-using fips140 = go.crypto.@internal.fips140_package;
+using bytes = bytes_package;
+using cryptotest = go.crypto.@internal.cryptotest_package;
 using static go.crypto.@internal.fips140.check_package;
 using checktest = go.crypto.@internal.fips140.check.checktest_package;
 using fmt = fmt_package;
@@ -11,25 +12,27 @@ using abi = go.@internal.abi_package;
 using godebug = go.@internal.godebug_package;
 using testenv = go.@internal.testenv_package;
 using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
 using testing = testing_package;
 using unicode = unicode_package;
 using @unsafe = unsafe_package;
 using exec = go.os.exec_package;
+using fs = go.io.fs_package;
 using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.check;
 using go.os;
+using path;
 using ꓸꓸꓸnint = Span<nint>;
 
 partial class fipstest_internal_test_package {
 
-internal const bool enableFIPSTest = true;
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fips140ˢ = "fips140"u8;
-internal static readonly @string testRunTestFIPSCheckˢ = "-test.run=TestFIPSCheck"u8;
+internal static readonly @string testRunˢ = "-test.run=^TestIntegrityCheck$"u8;
 
-public static void TestFIPSCheckVerify(ж<testing.T> Ꮡt) {
+public static void TestIntegrityCheck(ж<testing.T> Ꮡt) {
     if (Verified) {
         Ꮡt.Logf("verified"u8);
         return;
@@ -39,23 +42,63 @@ public static void TestFIPSCheckVerify(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("GODEBUG=fips140=on but verification did not run"u8);
     }
 
-    if (!enableFIPSTest) {
-        return;
-    }
+    cryptotest.MustSupportFIPS140(Ꮡt);
 
-    {
-        var errΔ1 = fips140.Supported(); if (errΔ1 != default!) {
-            Ꮡt.Skipf("skipping: %v"u8, errΔ1);
-        }
-    }
-
-    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), os.Args[0], testVˢ, testRunTestFIPSCheckˢ);
+    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)), testVˢ, testRunˢ);
     cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=on"u8);
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("GODEBUG=fips140=on %v failed: %v\n%s"u8, (~cmd).Args, err, @out);
     }
     Ꮡt.Logf("exec'ed GODEBUG=fips140=on and succeeded:\n%s"u8, @out);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string fips140testExeˢ = "fips140test.exe"u8;
+internal static readonly @string codesignˢ = "codesign"u8;
+
+public static void TestIntegrityCheckFailure(ж<testing.T> Ꮡt) {
+    moduleStatus(Ꮡt);
+    cryptotest.MustSupportFIPS140(Ꮡt);
+
+    var (bin, err) = os.ReadFile(testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)));
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+
+    // Replace the expected module checksum with a different value.
+    bin = bytes.ReplaceAll(bin, Linkinfo.Sum[..], bytes.Repeat(slice<byte>("X"u8), len(Linkinfo.Sum)));
+
+    @string binPath = filepath.Join(Ꮡt.TempDir(), fips140testExeˢ);
+    {
+        var errΔ1 = os.WriteFile(binPath, bin, 493); if (errΔ1 != default!) {
+            Ꮡt.Fatal(errΔ1);
+        }
+    }
+
+    if (runtime.GOOS == "darwin"u8) {
+        // Regenerate the macOS ad-hoc code signature.
+        var cmdΔ1 = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), codesignˢ, "-s"u8, "-", "-f", binPath);
+        var (outΔ1, errΔ2) = cmdΔ1.CombinedOutput();
+        if (errΔ2 != default!) {
+            Ꮡt.Fatalf("codesign failed: %v\n%s"u8, errΔ2, outΔ1);
+        }
+    }
+
+    Ꮡt.Logf("running modified binary..."u8);
+    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), binPath, testVˢ, testRunˢ);
+    cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=on"u8);
+    (var @out, err) = cmd.CombinedOutput();
+    Ꮡt.Logf("running with GODEBUG=fips140=on:\n%s"u8, @out);
+    if (err == default!) {
+        Ꮡt.Errorf("modified binary did not fail as expected"u8);
+    }
+    if (!bytes.Contains(@out, slice<byte>("fips140: verification mismatch"u8))) {
+        Ꮡt.Errorf("modified binary did not fail with expected message"u8);
+    }
+    if (bytes.Contains(@out, slice<byte>("verified"u8))) {
+        Ꮡt.Errorf("modified binary did not exit"u8);
+    }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -73,16 +116,8 @@ internal static readonly @string fmtPrintfˢ = "fmt.Printf"u8;
 internal static readonly @string unicodeCategoriesˢ = "unicode.Categories"u8;
 internal static readonly @string unicodeAsciiHexDigitˢ = "unicode.ASCII_Hex_Digit"u8;
 
-public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
-    if (!enableFIPSTest) {
-        return;
-    }
-
-    {
-        var err = fips140.Supported(); if (err != default!) {
-            Ꮡt.Skipf("skipping: %v"u8, err);
-        }
-    }
+public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
+    cryptotest.MustSupportFIPS140(Ꮡt);
 
     // Check that the checktest symbols are initialized properly.
     if (checktest.NOPTRDATA != 1) {

@@ -26,7 +26,7 @@ internal static partial array<byte> /*a16*/ as16(uint64 hi, uint64 lo) {
 
 internal static void putUint64(slice<byte> b, uint64 v) {
     for (nint i = 0; i < 8; i++) {
-        b[i] = (byte)(v.Rsh((int64)((56 - 8 * i))));
+        b[i] = (byte)(v.Rsh((int64)(56 - 8 * i)));
     }
 }
 
@@ -84,7 +84,7 @@ internal static void Main() {
     fmt.Println(len(a), a[0], a[7], a[8], a[15]);
 
     array<byte> raw = new(32);
-    foreach (var (i, _) in raw) {
+    foreach (var i in range(raw)) {
         raw[i] = (byte)(i + 1);
     }
     var k = ticketFromBytes(raw);

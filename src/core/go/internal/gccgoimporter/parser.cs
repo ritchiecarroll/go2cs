@@ -73,7 +73,7 @@ internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Read
         Ꮡp.Value.error(msg);
     };
     p.scanner.Value.Mode = (nuint)((nuint)(UntypedInt)((UntypedInt)(scanner.ScanIdents | scanner.ScanInts) | scanner.ScanFloats) | (nuint)scanner.ScanStrings);
-    p.scanner.Value.Whitespace = (uint64)((1 << (int)((rune)'\t')) | 4294967296L);
+    p.scanner.Value.Whitespace = (uint64)(1 << (int)((rune)'\t') | 4294967296L);
     p.scanner.Value.Filename = filename; // for good error messages
     p.next();
 }
@@ -147,7 +147,7 @@ internal static @string parseUnquotedString(this ref parser p) {
     Ꮡb.WriteString(p.scanner.TokenText());
     // This loop needs to examine each character before deciding whether to consume it. If we see a semicolon,
     // we need to let it be consumed by p.next().
-    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && (uint64)((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
+    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && ((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
         Ꮡb.WriteRune(ch);
         p.scanner.Next();
     }
@@ -313,7 +313,7 @@ internal static readonly @string retˢ = "$ret"u8;
 internal static readonly @string escˢ = "esc"u8;
 
 // Param = Name ["..."] Type .
-internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ж<types.Var> param = default!;
     bool isVariadic = default!;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -342,6 +342,7 @@ internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser
         typ = new types.SliceжΔType(types.NewSlice(typ));
     }
     param = types.NewParam(token.NoPos, Ꮡpkg, name, typ);
+    param.SetKind(kind);
     return (param, isVariadic);
 }
 
@@ -350,7 +351,7 @@ internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> �
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
-    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg));
+    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg)); // (types.PackageVar)
     if (name[0] == (rune)'.' || name[0] == (rune)'<') {
         // This is an unexported variable,
         // or a variable defined in a different package.
@@ -689,10 +690,10 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
                 p.expect((rune)'/');
             }
             p.expect((rune)'(');
-            var (receiver, _) = Ꮡp.parseParam(pkg);
+            var (receiver, _) = Ꮡp.parseParam(types.RecvVar, pkg);
             p.expect((rune)')');
             @string nameΔ1 = p.parseName();
-            var (@params, isVariadic) = Ꮡp.parseParamList(pkg);
+            var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, pkg);
             var results = Ꮡp.parseResultList(pkg);
             Ꮡp.skipInlineBody();
             p.expectEOL();
@@ -835,7 +836,7 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
 internal static readonly object notOnFinalArgumentˢ = (@string)"... not on final argument"u8;
 
 // ParamList = "(" [ { Parameter "," } Parameter ] ")" .
-internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<types.Var>> list = default!;
@@ -846,7 +847,7 @@ internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<
         if (len(list) > 0) {
             p.expect((rune)',');
         }
-        var (par, variadic) = Ꮡp.parseParam(Ꮡpkg);
+        var (par, variadic) = Ꮡp.parseParam(kind, Ꮡpkg);
         list = append(list, par);
         if (variadic) {
             if (isVariadic) {
@@ -871,10 +872,12 @@ internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.P
             return default!;
         }
         var (taa, _) = Ꮡp.parseTypeAfterAngle(Ꮡpkg);
-        return types.NewTuple(types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa));
+        var param = types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa);
+        param.SetKind(types.ResultVar);
+        return types.NewTuple(param);
     }
     case (rune)'(': {
-        var (@params, _) = Ꮡp.parseParamList(Ꮡpkg);
+        var (@params, _) = Ꮡp.parseParamList(types.ResultVar, Ꮡpkg);
         return @params;
     }
     default: {
@@ -889,7 +892,7 @@ internal static ж<typesꓸSignature> parseFunctionType(this ж<parser> Ꮡp, ж
     var t = @new<typesꓸSignature>();
     p.update(new types.ΔSignatureжΔType(t), nlist);
 
-    var (@params, isVariadic) = Ꮡp.parseParamList(Ꮡpkg);
+    var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, Ꮡpkg);
     var results = Ꮡp.parseResultList(Ꮡpkg);
 
     t.Value = types.NewSignatureType(nil, default!, default!, @params, results, isVariadic).Value;
@@ -1184,6 +1187,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
+        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>(moves: true);
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
@@ -1193,7 +1197,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         nint total = 0;
         for (nint i = 1; i < maxp1; i++) {
             nint len = p.parseInt();
-            typeOffsets = append(typeOffsets, new parseTypes_typeOffset(total, len));
+            typeOffsets = append(typeOffsetsᴷ, typeOffsets, new parseTypes_typeOffset(total, len));
             total += len;
         }
 
@@ -1216,6 +1220,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         @string allTypeData = sb.String();
 
         p.typeData = new @string[]{""u8}.slice(); // type 0, unused
+        typeOffsets = move2heap(typeOffsetsᴷ, typeOffsets);
         foreach (var (_, to) in typeOffsets) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }

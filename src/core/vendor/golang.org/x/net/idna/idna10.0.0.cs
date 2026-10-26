@@ -207,7 +207,7 @@ public partial struct options {
 
 // A Profile defines the configuration of an IDNA mapper.
 partial struct Profile {
-    internal partial ref options options { get; }
+    /*embed*/ internal options options;
 }
 
 internal static void apply(ж<options> Ꮡo, slice<Action<ж<options>>> opts) {
@@ -287,22 +287,18 @@ internal static void initᴛPunycode() { Punycode = punycode; }
 // Lookup is the recommended profile for looking up domain names, according
 // to Section 5 of RFC 5891. The exact configuration of this profile may
 // change over time.
-public static ж<Profile> Lookup;
-internal static void initᴛLookup() { Lookup = Δlookup; }
+[GoLazy] partial class lazyᴛLookup { public static ж<Profile> Lookup = Δlookup; }
 
 // Display is the recommended profile for displaying domain names.
 // The configuration of this profile may change over time.
-public static ж<Profile> Display;
-internal static void initᴛDisplay() { Display = display; }
+[GoLazy] partial class lazyᴛDisplay { public static ж<Profile> Display = display; }
 
 // Registration is the recommended profile for checking whether a given
 // IDN is valid for registration, according to Section 4 of RFC 5891.
-public static ж<Profile> Registration;
-internal static void initᴛRegistration() { Registration = registration; }
+[GoLazy] partial class lazyᴛRegistration { public static ж<Profile> Registration = registration; }
 
 internal static ж<Profile> punycode = Ꮡ(new Profile(nil));
-internal static ж<Profile> Δlookup;
-internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛΔlookup { internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
     transitional: transitionalLookup,
     useSTD3Rules: true,
     checkHyphens: true,
@@ -313,8 +309,7 @@ internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
     bidirule: bidirule.ValidString
 )
 )); }
-internal static ж<Profile> display;
-internal static void initᴛdisplay() { display = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛdisplay { internal static ж<Profile> display = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     checkHyphens: true,
     checkJoiners: true,
@@ -324,8 +319,7 @@ internal static void initᴛdisplay() { display = Ꮡ(new Profile(new options(
     bidirule: bidirule.ValidString
 )
 )); }
-internal static ж<Profile> registration;
-internal static void initᴛregistration() { registration = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛregistration { internal static ж<Profile> registration = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     verifyDNSLength: true,
     checkHyphens: true,
@@ -395,13 +389,17 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
             continue;
         }
         if (strings.HasPrefix(label, acePrefix)){
-            var (u, err2) = decode(label[(int)(len(acePrefix))..]);
+            @string enc = label[(int)(len(acePrefix))..];
+            var (u, err2) = decode(enc);
             if (err2 != default!) {
                 if (err == default!) {
                     err = err2;
                 }
                 // Spec says keep the old label.
                 continue;
+            }
+            if (err == default! && len(u) > 0 && isASCII(u)) {
+                err = punyError(enc);
             }
             isBidi = isBidi || bidirule.DirectionString(u) != bidi.LeftToRight;
             labels.set(u);
@@ -457,6 +455,15 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
         }
     }
     return (s, err);
+}
+
+internal static bool isASCII(@string s) {
+    foreach (var (_, c) in slice<byte>(s)) {
+        if (c >= 0x80) {
+            return false;
+        }
+    }
+    return true;
 }
 
 internal static (@string mapped, bool isBidi, error err) normalize(ж<Profile> Ꮡp, @string s) {
@@ -578,7 +585,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
             b = norm.NFC.Bytes(b);
         }
         // TODO: the punycode converters require strings as input.
-        s = ((@string)b);
+        s = (@string)b;
     }
     return (s, bidi, err);
 }
@@ -709,7 +716,7 @@ internal static joinState stateBeforeVirama => 3;
 internal static joinState stateAfter => 4;
 internal static joinState stateFAIL => 5;
 
-internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new golib.SparseArray<array<joinState>>{
+[GoLazy] partial class lazyᴛjoinStates { internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new golib.SparseArray<array<joinState>>{
     [stateStart] = new golib.SparseArray<joinState>{
         [joiningL] = stateBefore,
         [joiningD] = stateBefore,
@@ -748,7 +755,7 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
         [joinZWNJ] = stateFAIL,
         [joinZWJ] = stateFAIL,
         [joinVirama] = stateFAIL}.array(8)
-}.slice(), 8);
+}.slice(), 8); }
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
@@ -773,7 +780,7 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
     var trie = p.trie; // p.checkJoiners is only set if trie is set.
     // TODO: merge the use of this in the trie.
     var (v, sz) = trie.lookupString(s);
-    var x = ((info)v);
+    var x = (info)v;
     if (x.isModifier()) {
         return new labelErrorжerror(Ꮡ(new labelError(s, "V5"u8)));
     }
@@ -800,7 +807,7 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
             }
         }
         (v, sz) = trie.lookupString(s.slice(i));
-        x = ((info)v);
+        x = (info)v;
     }
     if (st == stateFAIL || st == stateAfter) {
         return new labelErrorжerror(Ꮡ(new labelError(s, "C"u8)));

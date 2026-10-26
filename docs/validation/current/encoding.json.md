@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `encoding/json` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**532 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**550 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/encoding/json`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/json).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -42,6 +42,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestCompactAndIndent/#06` | pass | pass |
 | `TestCompactAndIndent/#07` | pass | pass |
 | `TestCompactAndIndent/#08` | pass | pass |
+| `TestCompactAndIndent/#09` | pass | pass |
 | `TestCompactBig` | pass | pass |
 | `TestCompactSeparators` | pass | pass |
 | `TestCompactSeparators/#00` | pass | pass |
@@ -65,8 +66,10 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestDecodeInStream/#15` | pass | pass |
 | `TestDecodeInStream/#16` | pass | pass |
 | `TestDecodeInStream/#17` | pass | pass |
+| `TestDecodeInStream/#18` | pass | pass |
 | `TestDecoder` | pass | pass |
 | `TestDecoderBuffered` | pass | pass |
+| `TestDecoderInputOffset` | pass | pass |
 | `TestDuplicatedFieldDisappears` | pass | pass |
 | `TestEmbeddedBug` | pass | pass |
 | `TestEmptyString` | pass | pass |
@@ -300,9 +303,11 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestStructTagObjectKey/#13` | pass | pass |
 | `TestStructTagObjectKey/#14` | pass | pass |
 | `TestStructTagObjectKey/#15` | pass | pass |
+| `TestSynctestMarshal` | pass | pass |
 | `TestTagParsing` | pass | pass |
 | `TestTaggedFieldDominates` | pass | pass |
 | `TestTextMarshalerMapKeysAreSorted` | pass | pass |
+| `TestTokenTruncation` | pass | pass |
 | `TestUnmarshal` | pass | pass |
 | `TestUnmarshal/#00` | pass | pass |
 | `TestUnmarshal/#01` | pass | pass |
@@ -383,6 +388,8 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestUnmarshal/#16` | pass | pass |
 | `TestUnmarshal/#160` | pass | pass |
 | `TestUnmarshal/#161` | pass | pass |
+| `TestUnmarshal/#162` | pass | pass |
+| `TestUnmarshal/#163` | pass | pass |
 | `TestUnmarshal/#17` | pass | pass |
 | `TestUnmarshal/#18` | pass | pass |
 | `TestUnmarshal/#19` | pass | pass |
@@ -466,6 +473,17 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestUnmarshal/#97` | pass | pass |
 | `TestUnmarshal/#98` | pass | pass |
 | `TestUnmarshal/#99` | pass | pass |
+| `TestUnmarshal/DashComma` | pass | pass |
+| `TestUnmarshal/DashCommaOmitEmpty` | pass | pass |
+| `TestUnmarshal/ErrorChan` | pass | pass |
+| `TestUnmarshal/ErrorForNestedUnamed` | pass | pass |
+| `TestUnmarshal/ErrorInterface` | pass | pass |
+| `TestUnmarshal/QuotedFloat/GoSyntax` | pass | pass |
+| `TestUnmarshal/QuotedFloat/Invalid` | pass | pass |
+| `TestUnmarshal/QuotedInt/GoSyntax` | pass | pass |
+| `TestUnmarshal/QuotedInt/Invalid` | pass | pass |
+| `TestUnmarshal/QuotedUint/GoSyntax` | pass | pass |
+| `TestUnmarshal/QuotedUint/Invalid` | pass | pass |
 | `TestUnmarshalEmbeddedUnexported` | pass | pass |
 | `TestUnmarshalEmbeddedUnexported/#00` | pass | pass |
 | `TestUnmarshalEmbeddedUnexported/#01` | pass | pass |

@@ -8,8 +8,10 @@ namespace go.debug;
 
 using bytes = bytes_package;
 using binary = encoding.binary_package;
+using abi = @internal.abi_package;
 using sort = sort_package;
 using sync = sync_package;
+using @internal;
 using encoding;
 
 partial class gosym_package {
@@ -186,11 +188,6 @@ internal static bool isGo12(this ж<LineTable> Ꮡt) {
     return t.version >= ver12;
 }
 
-internal static UntypedInt go12magic => 0xfffffffb;
-internal static UntypedInt go116magic => 0xfffffffa;
-internal static UntypedInt go118magic => 0xfffffff0;
-internal static UntypedInt go120magic => 0xfffffff1;
-
 // uintptr returns the pointer-sized value encoded at b.
 // The pointer size is dictated by the table being read.
 internal static uint64 uintptr(this ref LineTable t, slice<byte> b) {
@@ -233,38 +230,43 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         }
 
         version possibleVersion = default!;
-        var leMagic = binary.LittleEndian.Uint32(t.Data);
-        var beMagic = binary.BigEndian.Uint32(t.Data);
+
+        // The magic numbers are chosen such that reading the value with
+        // a different endianness does not result in the same value.
+        // That lets us the magic number to determine the endianness.
+        var leMagic = (abi.PCLnTabMagic)binary.LittleEndian.Uint32(t.Data);
+        var beMagic = (abi.PCLnTabMagic)binary.BigEndian.Uint32(t.Data);
+
         switch (ᐧ) {
-        case {} when leMagic == go12magic: {
+        case {} when leMagic == abi.Go12PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver12);
             break;
         }
-        case {} when beMagic == go12magic: {
+        case {} when beMagic == abi.Go12PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver12);
             break;
         }
-        case {} when leMagic == go116magic: {
+        case {} when leMagic == abi.Go116PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver116);
             break;
         }
-        case {} when beMagic == go116magic: {
+        case {} when beMagic == abi.Go116PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver116);
             break;
         }
-        case {} when leMagic == go118magic: {
+        case {} when leMagic == abi.Go118PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver118);
             break;
         }
-        case {} when beMagic == go118magic: {
+        case {} when beMagic == abi.Go118PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver118);
             break;
         }
-        case {} when leMagic == go120magic: {
+        case {} when leMagic == abi.Go120PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver120);
             break;
         }
-        case {} when beMagic == go120magic: {
+        case {} when beMagic == abi.Go120PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver120);
             break;
         }
@@ -344,7 +346,7 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
         var ft = Ꮡt.funcTab();
         var funcs = new slice<Func>(ft.Count(), () => new(nil));
         var syms = new slice<Sym>(len(funcs));
-        foreach (var (i, _) in funcs) {
+        foreach (var i in range(funcs)) {
             var f = Ꮡ(funcs, i);
             f.Value.Entry = ft.pc(i);
             f.Value.End = ft.pc(i + 1);
@@ -392,7 +394,7 @@ internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
     for (shift = 0; ᐧ ; shift += 7) {
         var b = p[0];
         p = p[1..];
-        v |= (uint32)(((uint32)((uint32)b & 0x7F)).Lsh((uint64)(shift)));
+        v |= (uint32)(((uint32)b & 0x7F).Lsh((uint64)(shift)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }
@@ -409,7 +411,7 @@ internal static @string funcName(this ref LineTable t, uint32 off) {
         }
     }
     nint i = bytes.IndexByte(t.funcnametab.slice((nint)(off)), 0);
-    @string s = ((@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i)));
     t.funcNames[off] = s;
     return s;
 }
@@ -422,7 +424,7 @@ internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32
         }
     }
     nint i = bytes.IndexByte(arr.slice((nint)(off)), 0);
-    @string s = ((@string)(arr.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(arr.slice((nint)(off), (nint)(off + (uint32)i)));
     t.strings[off] = s;
     return s;
 }
@@ -450,7 +452,7 @@ internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
 partial struct ΔfuncTab {
-    public partial ref ж<LineTable> LineTable { get; }
+    /*embed*/ public ж<LineTable> LineTable;
     internal nint sz; // cached result of t.functabFieldSize
 }
 
@@ -559,8 +561,8 @@ internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64>
     if (uvdelta == 0 && !first) {
         return false;
     }
-    if ((uint32)(uvdelta & 1) != 0){
-        uvdelta = ~((uvdelta >> (int)(1)));
+    if ((uvdelta & 1) != 0){
+        uvdelta = ~(uvdelta >> 1);
     } else {
         uvdelta >>= (int)(1);
     }

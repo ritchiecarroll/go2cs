@@ -57,14 +57,52 @@ internal sealed class TestOptions
     public string? ResultFile { get; private set; }
     public string? JUnitFile { get; private set; }
 
+    /// <summary>Go 1.26's <c>-test.artifacts</c>: keep each test's ArtifactDir under the output directory.</summary>
+    public bool Artifacts { get; private set; }
+
+    /// <summary>Go's <c>-test.fullpath</c>: a log record's call site names the whole file, not its base name.</summary>
+    public bool FullPath { get; private set; }
+
+    /// <summary>Go's <c>-test.outputdir</c>: where profiles and, with <see cref="Artifacts"/>, artifacts go.</summary>
+    public string? OutputDir { get; private set; }
+
+    /// <summary>
+    /// Go's <c>-test.testlogfile</c>: the test action log for cmd/go, written by M.Run through
+    /// <see cref="TestLogBridge"/>. Not under <see cref="OutputDir"/>: Go's own note is "Not using toOutputDir".
+    /// </summary>
+    public string? TestLogFile { get; private set; }
+
     /// <summary>Environment variable the pipeline passes the result-file path in.</summary>
     public const string ResultFileEnvironmentVariable = "GO2CS_TEST_RESULT";
 
     /// <summary>Environment variable the pipeline passes the JUnit-file path in.</summary>
     public const string JUnitFileEnvironmentVariable = "GO2CS_TEST_JUNIT";
 
-    // Reads an environment variable and removes it from this process, so nothing this process
-    // starts inherits it.
+    /// <summary>
+    /// The per-test deadline (DESIGN-object-lifetime-disclosure.md OQ-L3(b)): a top-level test still running
+    /// this long after it started RUNNING is reported failed and abandoned, and the run goes on
+    /// (<see cref="TestRunner.WaitBounded(TestExecution, Task)"/>). <see cref="TimeSpan.Zero"/>, the default, is no deadline.
+    /// </summary>
+    /// <remarks>
+    /// Go's test binary has no such bound: a hung test holds it until <c>-timeout</c> panics the whole binary.
+    /// That is why the deadline is the pipeline's setting, carried in the environment like the result file,
+    /// and never a <c>-test.*</c> flag on the converted program's argv; the Go side of the comparison is
+    /// unbounded.
+    /// </remarks>
+    public TimeSpan TestDeadline { get; private set; } = TimeSpan.Zero;
+
+    /// <summary>Environment variable the pipeline passes the per-test deadline in, as a Go duration ("15m0s"); "0" is none.</summary>
+    public const string TestDeadlineEnvironmentVariable = "GO2CS_TEST_DEADLINE";
+
+    /// <summary>
+    /// The three settings <see cref="Parse"/> takes from the environment, which no child this run starts
+    /// may inherit. TestHost.Run clears them from the converted environment as well.
+    /// </summary>
+    public static readonly string[] PipelineEnvironmentVariables =
+        [ResultFileEnvironmentVariable, JUnitFileEnvironmentVariable, TestDeadlineEnvironmentVariable];
+
+    // Reads an environment variable and removes it from the CLR environment, which is what this host and a
+    // CLR child read. A CONVERTED child reads syscall.envs, cleared by TestHost.Run after the parse.
     private static string? TakeEnvironmentVariable(string name)
     {
         string? value = Environment.GetEnvironmentVariable(name);
@@ -103,6 +141,49 @@ internal sealed class TestOptions
     /// none. Its verdict is deferred rather than decided here — see <see cref="Parse"/>.
     /// </summary>
     public string? UnrecognizedFlag { get; private set; }
+
+    /// <summary>
+    /// Go's <c>-test.*</c> flags that this host DEFINES but that <see cref="Parse"/> does not act on,
+    /// each with whether it takes a value.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="TestFlagBridge.Register"/> defines them on the converted <c>flag.CommandLine</c>, flag
+    /// for flag with Go's <c>testing.Init</c>, <c>initBenchmarkFlags</c> and <c>initFuzzFlags</c>, so
+    /// <c>flag.Parse()</c> records each value exactly as before. What the host's own parse needs is
+    /// only the ARITY, to step past one and keep reading. Go's binary never stops here, because its one
+    /// flag set defines them all. Stopping at one lost every host flag after it: testing's
+    /// <c>runTest</c> re-execs the binary as <c>-test.run=^X$ -test.bench=X -test.v ...</c>, the
+    /// parse stopped at <c>-test.bench</c>, <c>-test.v</c> never took effect, and a passing child
+    /// printed only "PASS" where TestAttrSet and the TestArtifactDir* parents read its
+    /// <c>=== ATTR</c> and <c>=== ARTIFACTS</c> lines. A bool flag takes no separate value, as in Go.
+    /// </remarks>
+    internal static readonly IReadOnlyDictionary<string, bool> GoTestFlagsNotReadHere = new Dictionary<string, bool>
+    {
+        // testing.Init
+        ["test.failfast"] = false,
+        ["test.coverprofile"] = true,
+        ["test.gocoverdir"] = true,
+        ["test.memprofile"] = true,
+        ["test.memprofilerate"] = true,
+        ["test.cpuprofile"] = true,
+        ["test.blockprofile"] = true,
+        ["test.blockprofilerate"] = true,
+        ["test.mutexprofile"] = true,
+        ["test.mutexprofilefraction"] = true,
+        ["test.paniconexit0"] = false,
+        ["test.trace"] = true,
+        ["test.cpu"] = true,
+        // initBenchmarkFlags
+        ["test.bench"] = true,
+        ["test.benchmem"] = false,
+        ["test.benchtime"] = true,
+        // initFuzzFlags
+        ["test.fuzz"] = true,
+        ["test.fuzztime"] = true,
+        ["test.fuzzminimizetime"] = true,
+        ["test.fuzzcachedir"] = true,
+        ["test.fuzzworker"] = false,
+    };
 
     /// <summary>
     /// Parses the host's command line with Go's <c>flag</c> package semantics.
@@ -169,6 +250,10 @@ internal sealed class TestOptions
         options.ResultFile = TakeEnvironmentVariable(ResultFileEnvironmentVariable);
         options.JUnitFile = TakeEnvironmentVariable(JUnitFileEnvironmentVariable);
 
+        // Cleared with the other two, so a test that re-executes this host runs its child unbounded.
+        if (TakeEnvironmentVariable(TestDeadlineEnvironmentVariable) is string deadline)
+            options.TestDeadline = deadline == "0" ? TimeSpan.Zero : ParseDuration(deadline);
+
         for (int index = 0; index < args.Length; index++)
         {
             string arg = args[index];
@@ -230,10 +315,26 @@ internal sealed class TestOptions
 
                     options.Verbose = value is null || bool.Parse(value);
                     break;
+                case "test.fullpath":
+                    // Go's callSite keeps a frame's whole file name instead of its base name (testing.go:1085).
+                    options.FullPath = value is null || bool.Parse(value);
+                    break;
                 case "short":
                 case "test.short":
                     // Backs testing.Short() in the shim; go test's default (flag absent) is false.
                     options.Short = value is null || bool.Parse(value);
+                    break;
+                case "artifacts":
+                case "test.artifacts":
+                    // Go 1.26 (testing.go:458): ArtifactDir keeps its directory under the output directory.
+                    options.Artifacts = value is null || bool.Parse(value);
+                    break;
+                case "outputdir":
+                case "test.outputdir":
+                    options.OutputDir = value ?? NextValue(args, ref index, name);
+                    break;
+                case "test.testlogfile":
+                    options.TestLogFile = value ?? NextValue(args, ref index, name);
                     break;
                 case "run":
                 case "test.run":
@@ -290,6 +391,16 @@ internal sealed class TestOptions
                     options.JUnitFile = value;
                     break;
                 default:
+                    // One of Go's own -test.* flags that this parse does not act on: step past it and its
+                    // value, as Go's one flag set does. See GoTestFlagsNotReadHere.
+                    if (GoTestFlagsNotReadHere.TryGetValue(name, out bool takesValue))
+                    {
+                        if (takesValue && value is null)
+                            NextValue(args, ref index, name);
+
+                        break;
+                    }
+
                     // Not this host's flag — and not yet knowably nobody's. Record it and stop; the
                     // package's own flag set does not exist until it initializes, and TestHost asks
                     // the question there. See the remarks.

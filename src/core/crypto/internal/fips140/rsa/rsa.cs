@@ -214,6 +214,8 @@ internal static readonly @string cryptoRsaInvalidPrimeˢ = "crypto/rsa: invalid 
 internal static readonly @string cryptoRsaPQNˢ = "crypto/rsa: p * q != n"u8;
 internal static readonly @string cryptoRsaInvalidCrtˢ = "crypto/rsa: invalid CRT exponent"u8;
 internal static readonly @string cryptoRsaInvalidCrtˢ2 = "crypto/rsa: invalid CRT coefficient"u8;
+internal static readonly @string cryptoRsaDDoesNotMatchDPˢ = "crypto/rsa: d does not match dP"u8;
+internal static readonly @string cryptoRsaDDoesNotMatchDQˢ = "crypto/rsa: d does not match dQ"u8;
 internal static readonly @string cryptoRsaPQˢ = "crypto/rsa: p == q"u8;
 internal static readonly @string cryptoRsaPQTooSmallˢ = "crypto/rsa: |p - q| too small"u8;
 internal static readonly @string cryptoRsaDTooSmallˢ = "crypto/rsa: d too small"u8;
@@ -271,8 +273,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     // It also implies that a^de ≡ a mod p as a^(p-1) ≡ 1 mod p. Thus a^de ≡ a
     // mod n for all a coprime to n, as required.
     //
-    // This checks dP, dQ, and e. We don't check d because it is not actually
-    // used in the RSA private key operation.
+    // This checks dP, dQ, and e.
     var (pMinus1, err) = bigmod.NewModulus(p.Nat().SubOne(p).Bytes(p));
     if (err != default!) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
@@ -310,6 +311,17 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     }
     if (qP.Mul(priv.qInv, p).IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ2);
+    }
+
+    // Check d against dP and dQ, even though we never actually use d,
+    // to make sure the key is consistent.
+    var dP1 = bigmod.NewNat().Mod(priv.d, pMinus1);
+    if (dP1.Equal(dP) != 1) {
+        return errors.New(cryptoRsaDDoesNotMatchDPˢ);
+    }
+    var dQ1 = bigmod.NewNat().Mod(priv.d, qMinus1);
+    if (dQ1.Equal(dQ) != 1) {
+        return errors.New(cryptoRsaDDoesNotMatchDQˢ);
     }
 
     // Check that |p - q| > 2^(nlen/2 - 100).
@@ -384,12 +396,12 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
     }
     // e needs to be coprime with p-1 and q-1, since it must be invertible
     // modulo λ(pq). Since p and q are prime, this means e needs to be odd.
-    if ((nint)(pub.E & 1) == 0) {
+    if ((pub.E & 1) == 0) {
         return (false, errors.New(cryptoRsaPublicExponentˢ2));
     }
     // FIPS 186-5, Section 5.5(e): "The exponent e shall be an odd, positive
     // integer such that 2¹⁶ < e < 2²⁵⁶."
-    if (pub.E <= (1 << (int)(16))) {
+    if (pub.E <= 1 << 16) {
         fipsApproved = false;
     }
     // We require pub.E to fit into a 32-bit integer so that we

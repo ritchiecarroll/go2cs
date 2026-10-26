@@ -201,11 +201,11 @@ internal static readonly @string htmlSpaceAndASCIIAlnumBytes = ((@string)(new by
 // isHTMLSpace is true iff c is a whitespace character per
 // https://infra.spec.whatwg.org/#ascii-whitespace
 internal static bool isHTMLSpace(byte c) {
-    return (c <= 0x20) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
+    return (c <= 0x20) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> 3)] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
 }
 
 internal static bool isHTMLSpaceOrASCIIAlnum(byte c) {
-    return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
+    return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> 3)] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
 }
 
 internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> Ꮡb) {

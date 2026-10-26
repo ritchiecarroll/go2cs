@@ -92,8 +92,8 @@ internal static void acquireSema(this ref nsswitchConfig conf) {
 }
 
 internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
-    var selᴛ21 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ21)) {
+    var selᴛ19 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    switch (trySelect(selᴛ19)) {
     case 0: {
         return true;
     }
@@ -275,7 +275,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
         if (hasUpperCase(f)) {
             var lower = slice<byte>(f);
             lowerASCIIBytes(lower);
-            f = ((@string)lower);
+            f = (@string)lower;
         }
         c = append(c, new nssCriterion(
             negate: not,

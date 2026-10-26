@@ -130,90 +130,107 @@ internal static Token additional_beg => 87;
 public static Token TILDE => 88;
 internal static Token additional_end => 89;
 
-internal static array<@string> tokens = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛtokens { internal static array<@string> tokens = new golib.SparseArray<@string>{
     [(int)ILLEGAL] = "ILLEGAL"u8,
+
     [(int)EOF] = "EOF"u8,
     [(int)COMMENT] = "COMMENT"u8,
+
     [(int)IDENT] = "IDENT"u8,
     [(int)INT] = "INT"u8,
     [(int)FLOAT] = "FLOAT"u8,
     [(int)IMAG] = "IMAG"u8,
     [(int)CHAR] = "CHAR"u8,
     [(int)STRING] = "STRING"u8,
+
     [(int)ADD] = "+"u8,
     [(int)SUB] = "-"u8,
     [(int)MUL] = "*"u8,
     [(int)QUO] = "/"u8,
     [(int)REM] = "%"u8,
+
     [(int)AND] = "&"u8,
     [(int)OR] = "|"u8,
     [(int)XOR] = "^"u8,
     [(int)SHL] = "<<"u8,
     [(int)SHR] = ">>"u8,
     [(int)AND_NOT] = "&^"u8,
+
     [(int)ADD_ASSIGN] = "+="u8,
     [(int)SUB_ASSIGN] = "-="u8,
     [(int)MUL_ASSIGN] = "*="u8,
     [(int)QUO_ASSIGN] = "/="u8,
     [(int)REM_ASSIGN] = "%="u8,
+
     [(int)AND_ASSIGN] = "&="u8,
     [(int)OR_ASSIGN] = "|="u8,
     [(int)XOR_ASSIGN] = "^="u8,
     [(int)SHL_ASSIGN] = "<<="u8,
     [(int)SHR_ASSIGN] = ">>="u8,
     [(int)AND_NOT_ASSIGN] = "&^="u8,
+
     [(int)LAND] = "&&"u8,
     [(int)LOR] = "||"u8,
     [(int)ARROW] = "<-"u8,
     [(int)INC] = "++"u8,
     [(int)DEC] = "--"u8,
+
     [(int)EQL] = "=="u8,
     [(int)LSS] = "<"u8,
     [(int)GTR] = ">"u8,
     [(int)ASSIGN] = "="u8,
     [(int)NOT] = "!"u8,
+
     [(int)NEQ] = "!="u8,
     [(int)LEQ] = "<="u8,
     [(int)GEQ] = ">="u8,
     [(int)DEFINE] = ":="u8,
     [(int)ELLIPSIS] = "..."u8,
+
     [(int)LPAREN] = "("u8,
     [(int)LBRACK] = "["u8,
     [(int)LBRACE] = "{"u8,
     [(int)COMMA] = ","u8,
     [(int)PERIOD] = "."u8,
+
     [(int)RPAREN] = ")"u8,
     [(int)RBRACK] = "]"u8,
     [(int)RBRACE] = "}"u8,
     [(int)SEMICOLON] = ";"u8,
     [(int)COLON] = ":"u8,
+
     [(int)BREAK] = "break"u8,
     [(int)CASE] = "case"u8,
     [(int)CHAN] = "chan"u8,
     [(int)CONST] = "const"u8,
     [(int)CONTINUE] = "continue"u8,
+
     [(int)DEFAULT] = "default"u8,
     [(int)DEFER] = "defer"u8,
     [(int)ELSE] = "else"u8,
     [(int)FALLTHROUGH] = "fallthrough"u8,
     [(int)FOR] = "for"u8,
+
     [(int)FUNC] = "func"u8,
     [(int)GO] = "go"u8,
     [(int)GOTO] = "goto"u8,
     [(int)IF] = "if"u8,
     [(int)IMPORT] = "import"u8,
+
     [(int)INTERFACE] = "interface"u8,
     [(int)MAP] = "map"u8,
     [(int)PACKAGE] = "package"u8,
     [(int)RANGE] = "range"u8,
     [(int)RETURN] = "return"u8,
+
     [(int)SELECT] = "select"u8,
     [(int)STRUCT] = "struct"u8,
     [(int)SWITCH] = "switch"u8,
     [(int)TYPE] = "type"u8,
     [(int)VAR] = "var"u8,
+
     [(int)TILDE] = "~"u8
-}.array(89);
+}.array(89); }
 
 // String returns the string corresponding to the token tok.
 // For operators, delimiters, and keywords the string is the actual

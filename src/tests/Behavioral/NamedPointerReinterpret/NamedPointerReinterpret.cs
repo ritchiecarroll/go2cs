@@ -42,24 +42,17 @@ internal static nint sliceToArray(slice<byte> s) {
     return (nint)a[3] + (nint)p.Value[1];
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilrefˢ = "nilref"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string classify(any v) {
     if (AreEqual(v, ((intRef)nil))) {
-        return nilrefˢ;
+        return "nilref";
     }
-    return otherˢ;
+    return "other";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcdˢ = "abcd"u8;
 
 internal static void Main() {
     var pb = makeBase();
     var pv = pb.Reinterpret<@base, view>();
-    var bb = ((@base)(pv.Value));
+    var bb = (@base)(pv.Value);
     fmt.Println(bb.a, bb.b);
 
     any boxed = ((intRef)nil);
@@ -69,7 +62,7 @@ internal static void Main() {
     intRef r = Ꮡn;
     fmt.Println(r.Value, classify(r));
 
-    fmt.Println(consume(abcdˢ));
+    fmt.Println(consume("abcd"));
 
     fmt.Println(sliceToArray(new byte[]{1, 2, 3, 4}.slice()));
 

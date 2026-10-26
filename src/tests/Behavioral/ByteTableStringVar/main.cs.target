@@ -16,47 +16,32 @@ internal static readonly @string constText = "hello world";
 
 internal static @string varText = ""u8 + "café "u8 + "白鵬翔"u8;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object lenˢ = (@string)" len="u8;
-private static readonly object bytesˢ = (@string)" bytes="u8;
-
 internal static void dump(@string name, @string s) {
-    fmt.Print(name, lenˢ, len(s), bytesˢ);
+    fmt.Print(name, " len=", len(s), " bytes=");
 
     for (nint i = 0; i < len(s); i++) {
-        fmt.Print(s[i], (@string)" "u8);
+        fmt.Print(s[i], " ");
     }
 
     fmt.Println();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string constTableˢ = "constTable"u8;
-private static readonly @string varTableˢ = "varTable"u8;
-private static readonly @string varSingleˢ = "varSingle"u8;
-private static readonly @string varTypedˢ = "varTyped"u8;
-private static readonly object indexˢ = (@string)"index"u8;
-private static readonly @string localˢ = "local"u8;
-private static readonly object bytesˢ2 = (@string)"bytes"u8;
-private static readonly @string constTextˢ = "constText"u8;
-private static readonly object varTextˢ = (@string)"varText"u8;
-
 internal static void Main() {
-    dump(constTableˢ, constTable);
-    dump(varTableˢ, varTable);
-    dump(varSingleˢ, varSingle);
-    dump(varTypedˢ, varTyped);
+    dump("constTable", constTable);
+    dump("varTable", varTable);
+    dump("varSingle", varSingle);
+    dump("varTyped", varTyped);
 
-    fmt.Println(indexˢ, constTable[2], varTable[2], constTable[4], varTable[4]);
+    fmt.Println("index", constTable[2], varTable[2], constTable[4], varTable[4]);
 
     @string local = ""u8 + ((@string)(new byte[]{0xff, 0x80})) + "\x02"u8;
-    dump(localˢ, local);
+    dump("local", local);
 
     var b = slice<byte>("" + ((@string)(new byte[]{0xff, 0x80})));
-    fmt.Println(bytesˢ2, len(b), b[0], b[1]);
+    fmt.Println("bytes", len(b), b[0], b[1]);
 
-    dump(constTextˢ, constText);
-    fmt.Println(varTextˢ, varText, len(varText));
+    dump("constText", constText);
+    fmt.Println("varText", varText, len(varText));
 }
 
 } // end main_package

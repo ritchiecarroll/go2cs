@@ -58,12 +58,12 @@ internal static ж<global::go.runtime_package.dloggerImpl> PC(this ж<global::go
 
 public static @string DumpDebugLog() {
     var gp = getg();
-    gp.Value.writebuf = new slice<byte>(0, (1 << (int)(20)));
+    gp.Value.writebuf = new slice<byte>(0, (1 << 20));
     printDebugLogImpl();
     var buf = gp.Value.writebuf;
     gp.Value.writebuf = default!;
 
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 public static void ResetDebugLog() {

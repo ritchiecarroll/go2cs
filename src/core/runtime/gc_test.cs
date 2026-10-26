@@ -5,6 +5,8 @@ namespace go;
 
 using fmt = fmt_package;
 using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using bits = global::go.math.bits_package;
 using rand = global::go.math.rand_package;
@@ -119,7 +121,7 @@ internal partial struct TestGcRescan_X /*dyn*/ {
 }
 
 internal partial struct TestGcRescan_Y /*dyn*/ {
-    public partial ref TestGcRescan_X X { get; }
+    /*embed*/ public TestGcRescan_X X;
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
 }
@@ -233,11 +235,15 @@ public static void TestPeriodicGC(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestCheckptrModeˢ2 = (@string)"skipped test: checkptr mode catches the issue before getting to zombie reporting"u8;
 internal static readonly @string gcZombieˢ = "GCZombie"u8;
 internal static readonly @string godebugInvalidptr0ˢ = "GODEBUG=invalidptr=0"u8;
 internal static readonly @string foundPointerToFreeObjectˢ = "found pointer to free object"u8;
 
 public static void TestGcZombieReporting(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestCheckptrModeˢ2);
+    }
     // This test is somewhat sensitive to how the allocator works.
     // Pointers in zombies slice may cross-span, thus we
     // add invalidptr=0 for avoiding the badPointer check.
@@ -279,6 +285,7 @@ public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
 internal static partial bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
     // new should have been updated by the stack move;
     // old should not have.
+
     // Capture new's value before doing anything that could
     // further move the stack.
     var new2 = (uintptr)Ꮡnew;
@@ -315,6 +322,9 @@ internal static partial void moveStack1(bool x) {
 }
 
 public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
+    var allᴷ = new stackAppend<@unsafe.Pointer>();
+    var halfᴷ = new stackAppend<@unsafe.Pointer>();
+
     slice<@unsafe.Pointer> all = default!;
     slice<@unsafe.Pointer> half = default!;
     uint64 want = default!;
@@ -322,20 +332,20 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
         // The tiny allocator muddies things, so we use a
         // scannable type.
         @unsafe.Pointer p = @unsafe.Pointer.FromBox(@new<ж<nint>>());
-        all = append(all, p);
+        all = append(allᴷ, all, p);
         if (i % 2 == 0) {
-            half = append(half, p);
+            half = append(halfᴷ, half, p);
             want |= (uint64)(((uint64)1).Lsh((int64)(i)));
         }
     }
 
     var got = runtime_internal_test_package.GCTestIsReachable(all.ꓸꓸꓸ);
-    if ((uint64)(got & want) != want) {
+    if ((got & want) != want) {
         // This is a serious bug - an object is live (due to the KeepAlive
         // call below), but isn't reported as such.
         Ꮡt.Fatalf("live object not in reachable set; want %b, got %b"u8, want, got);
     }
-    if (global::go.math.bits_package.OnesCount64((uint64)(got & ~want)) > 1) {
+    if (global::go.math.bits_package.OnesCount64(got & ~want) > 1) {
         // Note: we can occasionally have a value that is retained even though
         // it isn't live, due to conservative scanning of stack frames.
         // See issue 67204. For now, we allow a "slop" of 1 unintentionally
@@ -353,13 +363,13 @@ internal static ref nint pointerClassData => ref ᏑpointerClassData.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object extraAllocationsCauseˢ = (@string)"extra allocations cause this test to fail; see #70079"u8;
-internal static readonly @string stackˢ = "stack"u8;
+internal static readonly @string stackˢ2 = "stack"u8;
 internal static readonly @string heapˢ = "heap"u8;
 internal static readonly @string bssˢ = "bss"u8;
 internal static readonly @string dataˢ = "data"u8;
 internal static readonly @string otherˢ = "other"u8;
 
-public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
+public static partial void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     if (asan.Enabled) {
         Ꮡt.Skip(extraAllocationsCauseˢ);
     }
@@ -375,7 +385,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     }
     ref var onStack = ref heap(new nint(), out var ᏑonStack);
     ref var notOnStack = ref heap(new nint(), out var ᏑnotOnStack);
-    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ);
+    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ2);
     check(@unsafe.Pointer.FromPinnedBox(runtime_internal_test_package.Escape(ᏑnotOnStack)), heapˢ);
     check(@unsafe.Pointer.FromBox(ᏑpointerClassBSS), bssˢ);
     check(@unsafe.Pointer.FromPinnedBox(ᏑpointerClassData), dataˢ);
@@ -501,8 +511,8 @@ public static void TestPageAccounting(ж<testing.T> Ꮡt) {
     // pages-in-use count below zero because of a rounding
     // mismatch (golang.org/issue/15022).
     UntypedInt blockSize = /* 64 << 10 */ 65536;
-    var blocks = new slice<ж<array<byte>>>(((64 << (int)(20))) / blockSize);
-    foreach (var (i, _) in blocks) {
+    var blocks = new slice<ж<array<byte>>>((64 << 20) / blockSize);
+    foreach (var i in range(blocks)) {
         blocks[i] = Ꮡ(new array<byte>(65536));
     }
 
@@ -567,7 +577,7 @@ public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
     ref var ms = ref heap(new Δruntime.MemStats(), out var Ꮡms);
     UntypedInt heapSize = /* 100 << 20 */ 104857600;
     var x = new slice<ж<array<byte>>>(heapSize / 1024);
-    foreach (var (i, _) in x) {
+    foreach (var i in range(x)) {
         x[i] = Ꮡ(new array<byte>(1024));
     }
 
@@ -600,7 +610,7 @@ internal static partial Action applyGCLoad(ж<testing.B> Ꮡb) {
     buildTree = (nint depth) => {
         var tree = @new<applyGCLoad_node>();
         if (depth != 0) {
-            foreach (var (i, _) in (~tree).children) {
+            foreach (var i in range((~tree).children)) {
                 tree.Value.children[i] = ᏑbuildTree.ValueSlot(depth - 1);
             }
         }
@@ -656,6 +666,7 @@ internal static readonly @string p99Nsˢ = "p99-ns"u8;
 
 public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var latenciesᴷ = new stackAppend<time.Duration>();
 
     var stop = applyGCLoad(Ꮡb);
 
@@ -672,7 +683,7 @@ public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
         time.Sleep(100 * time.Millisecond);
         var start = time.Now();
         Δruntime.ReadMemStats(Ꮡms);
-        latencies = append(latencies, time.Since(start));
+        latencies = append(latenciesᴷ, latencies, time.Since(start));
     }
     // Make sure to stop the timer before we wait! The load created above
     // is very heavy-weight and not easy to stop, so we could end up
@@ -806,7 +817,7 @@ public static void BenchmarkWriteBarrier(ж<testing.B> Ꮡb) {
                 tos++;
             }
 
-            if (i % ((1 << (int)(12))) == 0) {
+            if (i % (1 << 12) == 0) {
                 // Avoid non-preemptible loops (see issue #10958).
                 Δruntime.Gosched();
             }
@@ -827,7 +838,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
     // Construct a large set of objects we can copy around.
     UntypedInt heapSize = /* 64 << 20 */ 67108864;
     var ptrs = new slice<ж<BenchmarkBulkWriteBarrier_obj>>((nint)((uintptr)heapSize / /* unsafe.Sizeof(obj{}) */ (uintptr)128));
-    foreach (var (i, _) in ptrs) {
+    foreach (var i in range(ptrs)) {
         ptrs[i] = @new<BenchmarkBulkWriteBarrier_obj>();
     }
 
@@ -976,7 +987,7 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
         Δruntime.GC();
 
         // Create many objects with a weak pointers to them.
-        foreach (var (i, _) in w) {
+        foreach (var i in range(w)) {
             var x = @new<TestWeakToStrongMarkTermination_T>();
             x.Value.a = @new<nint>();
             w[i] = weak.Make<TestWeakToStrongMarkTermination_T>(x);
@@ -1051,6 +1062,35 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugCheckfinalizers1ˢ = "GODEBUG=checkfinalizers=1"u8;
+internal static readonly @string detectedPossibleIssuesˢ = "detected possible issues with cleanups and/or finalizers"u8;
+internal static readonly @string isReachableFromˢ = "is reachable from"u8;
+internal static readonly @string isInATinyBlockˢ = "is in a tiny block"u8;
+internal static readonly @string mainˢ = "main.DetectFinalizerAndCleanupLeaks()"u8;
+
+public static void TestDetectFinalizerAndCleanupLeaks(ж<testing.T> Ꮡt) {
+    @string got = runTestProg(Ꮡt, testprogˢ, "DetectFinalizerAndCleanupLeaks"u8, godebugCheckfinalizers1ˢ);
+    var sp = strings.SplitN(got, detectedPossibleIssuesˢ, 2);
+    if (len(sp) != 2) {
+        Ꮡt.Fatalf("expected the runtime to throw, got:\n%s"u8, got);
+    }
+    if (strings.Count(sp[0], isReachableFromˢ) != 2) {
+        Ꮡt.Fatalf("expected exactly two leaked cleanups and/or finalizers, got:\n%s"u8, got);
+    }
+    // N.B. Disable in race mode and in asan mode. Both disable the tiny allocator.
+    nint wantSymbolizedLocations = 2;
+    if (!race.Enabled && !asan.Enabled) {
+        if (strings.Count(sp[0], isInATinyBlockˢ) != 1) {
+            Ꮡt.Fatalf("expected exactly one report for allocation in a tiny block, got:\n%s"u8, got);
+        }
+        wantSymbolizedLocations++;
+    }
+    if (strings.Count(sp[0], mainˢ) != wantSymbolizedLocations) {
+        Ꮡt.Fatalf("expected %d symbolized locations, got:\n%s"u8, wantSymbolizedLocations, got);
+    }
 }
 
 } // end runtime_test_package

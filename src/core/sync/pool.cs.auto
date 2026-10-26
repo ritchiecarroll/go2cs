@@ -55,7 +55,7 @@ partial class sync_package {
 // a call to Get returning that same value x.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] partial struct Pool {
+partial struct Pool {
     internal noCopy noCopy;
     internal @unsafe.Pointer local; // local fixed-size per-P pool, actual type is [P]poolLocal
     internal uintptr localSize;        // size of the local array
@@ -68,13 +68,13 @@ partial class sync_package {
 }
 
 // Local per-P Pool appendix.
-[GoType] partial struct poolLocalInternal {
+partial struct poolLocalInternal {
     internal any @private;       // Can be used only by the respective P.
     internal poolChain shared; // Local P can pushHead/popHead; any P can popTail.
 }
 
-[GoType] [GoValueClone("pad")] partial struct poolLocal {
-    internal partial ref poolLocalInternal poolLocalInternal { get; }
+[GoValueClone("pad")] partial struct poolLocal {
+    /*embed*/ internal poolLocalInternal poolLocalInternal;
     // Prevents false sharing on widespread platforms with
     // 128 mod (cache line size) = 0 .
     internal array<byte> pad = new(128 - /* unsafe.Sizeof(poolLocalInternal{}) */ (uintptr)32 % 128);
@@ -97,7 +97,7 @@ internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
     var ptr = (uintptr)((ж<array<@unsafe.Pointer>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡx))).Value[1];
-    var h = (uint32)((((uint64)(uint32)ptr * 0x85ebca6bU) >> (int)(16)));
+    var h = (uint32)(((uint64)(uint32)ptr * 0x85ebca6bU) >> 16);
     return @unsafe.Pointer.FromPinnedBox(ᏑpoolRaceHash.at<uint64>((ulong)(h % (uint32)len(poolRaceHash))));
 }
 
@@ -180,6 +180,7 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
             }
         }
     }
+
     // Try the victim cache. We do this after attempting to steal
     // from all primary caches because we want objects in the
     // victim cache to age out if at all possible.
@@ -203,9 +204,11 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
             }
         }
     }
+
     // Mark the victim cache as empty for future gets don't bother
     // with it.
     atomic.StoreUintptr(Ꮡp.of(Pool.ᏑvictimSize), 0);
+
     return default!;
 }
 
@@ -221,6 +224,7 @@ internal static (ж<poolLocal>, nint) pin(this ж<Pool> Ꮡp) {
     if (Ꮡp == nil) {
         throw panic("nil Pool");
     }
+
     nint pid = runtime_procPin();
     // In pinSlow we store to local and then to localSize, here we load in opposite order.
     // Since we've disabled preemption, GC cannot happen in between.
@@ -278,13 +282,16 @@ internal static (ж<poolLocal>, nint) pinSlow(this ж<Pool> Ꮡp) {
 internal static void poolCleanup() {
     // This function is called with the world stopped, at the beginning of a garbage collection.
     // It must not allocate and probably should not call any runtime functions.
+
     // Because the world is stopped, no pool user can be in a
     // pinned section (in effect, this has all Ps pinned).
+
     // Drop victim caches from all pools.
     foreach (var (_, p) in oldPools) {
         p.Value.victim = default!;
         p.Value.victimSize = 0;
     }
+
     // Move primary cache to victim cache.
     foreach (var (_, p) in allPools) {
         p.Value.victim = p.Value.local;
@@ -292,6 +299,7 @@ internal static void poolCleanup() {
         p.Value.local = default!;
         p.Value.localSize = 0;
     }
+
     // The pools with non-empty primary caches now have non-empty
     // victim caches and no pools have primary caches.
     (oldPools, allPools) = (allPools, default!);
@@ -299,7 +307,14 @@ internal static void poolCleanup() {
 
 internal static ж<Mutex> ᏑallPoolsMu = new StandardBox<Mutex>(default(Mutex));
 internal static ref Mutex allPoolsMu => ref ᏑallPoolsMu.Value;
+
+// allPools is the set of pools that have non-empty primary
+// caches. Protected by either 1) allPoolsMu and pinning or 2)
+// STW.
 internal static slice<ж<Pool>> allPools;
+
+// oldPools is the set of pools that may have non-empty victim
+// caches. Protected by STW.
 internal static slice<ж<Pool>> oldPools;
 
 [GoInit] internal static void init() {
@@ -326,6 +341,6 @@ internal static partial void runtime_procUnpin();
 internal static partial uintptr runtime_LoadAcquintptr(ж<uintptr> ptr);
 
 //go:linkname runtime_StoreReluintptr internal/runtime/atomic.StoreReluintptr
-internal static partial uintptr runtime_StoreReluintptr(ж<uintptr> ptr, uintptr val);
+internal static partial void runtime_StoreReluintptr(ж<uintptr> ptr, uintptr val);
 
 } // end sync_package

@@ -200,7 +200,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     nint lo = 0;
     nint hi = len(tx);
     while (hi - lo > 1) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var lim = tx[m].when;
         if (sec < lim){
             end = lim;
@@ -260,7 +260,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
     }
 
     // Case 3.
-    foreach (var (zi, _) in l.zone) {
+    foreach (var zi in range(l.zone)) {
         if (!l.zone[zi].isDST) {
             return zi;
         }
@@ -614,12 +614,12 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             d += 7;
         }
         for (nint i = 1; i < r.week; i++) {
-            if (d + 7 >= daysIn(((ΔMonth)r.mon), year)) {
+            if (d + 7 >= daysIn((ΔMonth)r.mon, year)) {
                 break;
             }
             d += 7;
         }
-        d += (nint)daysBefore(((ΔMonth)r.mon));
+        d += daysBefore((ΔMonth)r.mon);
         if (isLeap(year) && r.mon > 2) {
             d++;
         }
@@ -645,7 +645,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     // offset helps us pick the right one for the given time.
     // It's not perfect: during the backward transition we might pick
     // either one.)
-    foreach (var (i, _) in l.zone) {
+    foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
         if ((~zone).name == name) {
             var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)(~zone).offset);
@@ -656,7 +656,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     }
 
     // Otherwise fall back to an ordinary name match.
-    foreach (var (i, _) in l.zone) {
+    foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
         if ((~zone).name == name) {
             return ((~zone).offset, true);

@@ -477,11 +477,20 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
             if (err != default!) {
                 return err;
             }
-            // TODO(#49580): Handle symlinks when fs.ReadLinkFS is available.
-            if (!d.IsDir() && !info.Mode().IsRegular()) {
-                return errors.New(tarCannotAddNonRegularˢ);
+            @string linkTarget = ""u8;
+            {
+                var typ = d.Type(); if (typ == fs.ModeSymlink){
+                    error errΔ1 = default!;
+                    (linkTarget, errΔ1) = fs.ReadLink(fsys, name);
+                    if (errΔ1 != default!) {
+                        return errΔ1;
+                    }
+                } else 
+                if (!typ.IsRegular() && typ != fs.ModeDir) {
+                    return errors.New(tarCannotAddNonRegularˢ);
+                }
             }
-            (var h, err) = FileInfoHeader(info, ""u8);
+            (var h, err) = FileInfoHeader(info, linkTarget);
             if (err != default!) {
                 return err;
             }
@@ -490,11 +499,11 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
                 h.Value.Name += "/"u8;
             }
             {
-                var errΔ1 = Ꮡtw.WriteHeader(h); if (errΔ1 != default!) {
-                    return errΔ1;
+                var errΔ2 = Ꮡtw.WriteHeader(h); if (errΔ2 != default!) {
+                    return errΔ2;
                 }
             }
-            if (d.IsDir()) {
+            if (!d.Type().IsRegular()) {
                 return default!;
             }
             (var f, err) = fsys.Open(name);

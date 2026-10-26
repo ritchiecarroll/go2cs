@@ -136,7 +136,7 @@ internal static (nint n, error err) Write(this ref opensslOutputSink o, slice<by
 }
 
 internal static @string String(this ref opensslOutputSink o) {
-    return ((@string)o.all);
+    return (@string)o.all;
 }
 
 // clientTest represents a test of the TLS client handshake against a reference
@@ -193,12 +193,13 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
     GoFrame ᒐ = default;
     try {
         ref var test = ref Ꮡtest.DerefOrNull();
+        var commandᴷ = new stackAppend<@string>();
 
         var cert = testRSACertificate;
         if (len(test.cert) > 0) {
             cert = test.cert;
         }
-        @string certPath = tempFile(((@string)cert));
+        @string certPath = tempFile((@string)cert);
         defer(os.Remove, certPath, ref ᒐ);
 
         any key = testRSAPrivateKey.OrTypedNil();
@@ -219,7 +220,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
         slice<@string> command = default!;
         command = appendꓸꓸꓸ(command, serverCommand);
         command = appendꓸꓸꓸ(command, test.args);
-        command = append(command, "-cert"u8, certPath, "-certform", "DER", "-key", keyPath);
+        command = append(commandᴷ, command, "-cert"u8, certPath, "-certform", "DER", "-key", keyPath);
         // serverPort contains the port that OpenSSL will listen on. OpenSSL
         // can't take "0" as an argument here so we have to pick a number and
         // hope that it's not in use on the machine. Since this only occurs
@@ -256,7 +257,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
         }
 
         var cmd = exec.Command(command[0], command[1..].ꓸꓸꓸ);
-        stdin = ((opensslInput)new channel<opensslInputEvent>(0));
+        stdin = (opensslInput)new channel<opensslInputEvent>(0);
         cmd.Value.Stdin = stdin;
         var @out = newOpensslOutputSink();
         cmd.Value.Stdout = new tls_internal_test_package.opensslOutputSinkжWriter(@out);
@@ -423,7 +424,7 @@ internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt
 
                     buf = buf.slice(0, n);
                     if (!bytes.Equal(slice<byte>(opensslSentinel), buf)) {
-                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, ((@string)buf), opensslSentinel);
+                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, (@string)buf, opensslSentinel);
                     }
 
                     {
@@ -468,7 +469,7 @@ internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt
 
                     buf = buf.slice(0, n);
                     if (!bytes.Equal(slice<byte>(opensslSentinel), buf)) {
-                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, ((@string)buf), opensslSentinel);
+                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, (@string)buf, opensslSentinel);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -737,7 +738,7 @@ public static void TestHandshakeClientHelloRetryRequest(ж<testing.T> Ꮡt) {
         args: new @string[]{"-cipher"u8, "ECDHE-RSA-AES128-GCM-SHA256"u8, "-curves"u8, "P-256"u8}.slice(),
         config: config,
         validate: error (global::go.crypto.tls_package.ΔConnectionState cs) => {
-            if (!cs.testingOnlyDidHRR) {
+            if (!cs.HelloRetryRequest) {
                 return errors.New(expectedˢ);
             }
             return default!;
@@ -749,7 +750,7 @@ public static void TestHandshakeClientHelloRetryRequest(ж<testing.T> Ꮡt) {
 
 public static void TestHandshakeClientECDHERSAChaCha20(ж<testing.T> Ꮡt) {
     var config = testConfig.Clone();
-    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305}.slice();
+    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256}.slice();
 
     var test = Ꮡ(new clientTest(
         name: "ECDHE-RSA-CHACHA20-POLY1305"u8,
@@ -762,7 +763,7 @@ public static void TestHandshakeClientECDHERSAChaCha20(ж<testing.T> Ꮡt) {
 
 public static void TestHandshakeClientECDHEECDSAChaCha20(ж<testing.T> Ꮡt) {
     var config = testConfig.Clone();
-    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305}.slice();
+    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256}.slice();
 
     var test = Ꮡ(new clientTest(
         name: "ECDHE-ECDSA-CHACHA20-POLY1305"u8,
@@ -952,10 +953,10 @@ public static void TestClientKeyUpdate(ж<testing.T> Ꮡt) {
 }
 
 public static void TestResumption(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(tlSv12ˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         testResumption(tΔ1, VersionTLS12);
     });
-    Ꮡt.Run(tlSv13ˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         testResumption(tΔ2, VersionTLS13);
     });
 }
@@ -988,7 +989,7 @@ internal static readonly @string withoutSessionCacheˢ = "WithoutSessionCache"u8
 internal static readonly @string beforeSerializingCacheˢ = "BeforeSerializingCache"u8;
 internal static readonly @string withSerializingCacheˢ = "WithSerializingCache"u8;
 
-internal static void testResumption(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testResumption(ж<testing.T> Ꮡt, uint16 version) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }
@@ -1476,6 +1477,7 @@ internal static readonly @string serverSelectedˢ = "server selected unadvertise
 public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж<testing.T> Ꮡt) {
     // This checks that the server can't select an application protocol that the
     // client didn't offer.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var errChan = new channel<error>(1);
 
@@ -1496,7 +1498,7 @@ public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж
             Ꮡt.Fatal(err);
         }
     }
-    nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+    nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
     var record = new slice<byte>(recordLen);
     {
@@ -1515,9 +1517,9 @@ public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж
 
     s.Write(new byte[]{
         (byte)recordTypeHandshake,
-        (byte)(((byte)VersionTLS12).Rsh((uint64)(8))),
+        (byte)(((byte)VersionTLS12).Rsh((uint64)8)),
         (byte)((byte)((byte)VersionTLS12 & 0xff)),
-        (byte)((len(serverHelloBytes) >> (int)(8))),
+        (byte)(len(serverHelloBytes) >> 8),
         (byte)len(serverHelloBytes)
     }.slice());
     s.Write(serverHelloBytes);
@@ -1669,7 +1671,7 @@ public static void TestHandshakeClientExportKeyingMaterial(ж<testing.T> Ꮡt) {
                     return fmt.Errorf("ExportKeyingMaterial failed: %v"u8, err);
                 } else 
                 if (len(km) != 42) {
-                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)(42));
+                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)42);
                 }
             }
             return default!;
@@ -1721,7 +1723,7 @@ public static partial void TestHostnameInSNI(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
-        nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+        nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
         var record = new slice<byte>(recordLen);
         {
@@ -1753,6 +1755,7 @@ internal static readonly @string unconfiguredCipherˢ = "unconfigured cipher"u8;
 public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing.T> Ꮡt) {
     // This checks that the server can't select a cipher suite that the
     // client didn't offer. See #13174.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var errChan = new channel<error>(1);
 
@@ -1772,7 +1775,7 @@ public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing
             Ꮡt.Fatal(err);
         }
     }
-    nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+    nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
     var record = new slice<byte>(recordLen);
     {
@@ -1792,9 +1795,9 @@ public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing
 
     s.Write(new byte[]{
         (byte)recordTypeHandshake,
-        (byte)(((byte)VersionTLS12).Rsh((uint64)(8))),
+        (byte)(((byte)VersionTLS12).Rsh((uint64)8)),
         (byte)((byte)((byte)VersionTLS12 & 0xff)),
-        (byte)((len(serverHelloBytes) >> (int)(8))),
+        (byte)(len(serverHelloBytes) >> 8),
         (byte)len(serverHelloBytes)
     }.slice());
     s.Write(serverHelloBytes);
@@ -2719,7 +2722,7 @@ public static partial void TestHandshakeRace(ж<testing.T> Ꮡt) {
             readDoneʗ1.ᐸꟷ(new EmptyStruct());
         });
 
-        if ((nint)(i & 1) == 1){
+        if ((i & 1) == 1){
             startWrite.ᐸꟷ(new EmptyStruct());
             startRead.ᐸꟷ(new EmptyStruct());
         } else {
@@ -3150,7 +3153,7 @@ internal static void testResumptionKeepsOCSPAndSCT(ж<testing.T> Ꮡt, uint16 ve
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object clientHandshakeDidNotˢ = (@string)"Client handshake did not error when the context was canceled"u8;
-internal static readonly object connCloseDoesNotErrorAsˢ = (@string)"conn.Close does not error as expected when called multiple times on WASM"u8;
+internal static readonly object connCloseDoesNotErrorAsˢ = (@string)"conn.Close does not error as expected when called multiple times on GOOS=js or GOOS=wasip1"u8;
 internal static readonly object clientConnectionWasNotˢ = (@string)"Client connection was not closed when the context was canceled"u8;
 
 // TestClientHandshakeContextCancellation tests that canceling
@@ -3181,7 +3184,7 @@ public static partial void TestClientHandshakeContextCancellation(ж<testing.T> 
         if (!AreEqual(err, context.Canceled)) {
             Ꮡt.Errorf("Unexpected client handshake error: %v"u8, err);
         }
-        if (runtime.GOARCH == "wasm"u8) {
+        if (runtime.GOOS == "js"u8 || runtime.GOOS == "wasip1"u8) {
             Ꮡt.Skip(connCloseDoesNotErrorAsˢ);
         }
         err = cli.Close();
@@ -3223,11 +3226,12 @@ public static void TestTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt) {
             ciphers: new uint16[]{TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_AES_256_GCM_SHA384}.slice()
         )
     }.slice();
-    foreach (var (_, tt) in tls13Tests) {
-        ref var ttΔ1 = ref heap<TestTLS13OnlyClientHelloCipherSuite_tls13Tests>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tls13Tests) {
+        ref var tt = ref heap(new TestTLS13OnlyClientHelloCipherSuite_tls13Tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             testTLS13OnlyClientHelloCipherSuite(tΔ1, ttʗ1.ciphers);
         });
@@ -3240,12 +3244,12 @@ internal static void testTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt, sli
         GetConfigForClient: (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
             var expectedCiphersuites = defaultCipherSuitesTLS13NoAES;
             if (fips140tls.Required()) {
-                expectedCiphersuites = defaultCipherSuitesTLS13FIPS;
+                expectedCiphersuites = allowedCipherSuitesTLS13FIPS;
             }
             if (len((~chi).CipherSuites) != len(expectedCiphersuites)){
                 Ꮡt.Errorf("only TLS 1.3 suites should be advertised, got=%x"u8, (~chi).CipherSuites);
             } else {
-                foreach (var (i, _) in expectedCiphersuites) {
+                foreach (var i in range(expectedCiphersuites)) {
                     {
                         var (want, got) = (expectedCiphersuites[i], (~chi).CipherSuites[i]); if (want != got) {
                             Ꮡt.Errorf("cipher at index %d does not match, want=%x, got=%x"u8, i, want, got);

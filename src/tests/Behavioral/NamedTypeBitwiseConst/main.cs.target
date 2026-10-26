@@ -23,7 +23,7 @@ partial struct word /*num:uint64*/;
 internal static UntypedInt tagBits => 19;
 
 internal static word low(this word w) {
-    return (word)(w & (uint64)(((1 << (int)(tagBits)) - 1)));
+    return (word)(w & (uint64)((1 << (int)(tagBits)) - 1));
 }
 
 internal static void Main() {
@@ -50,7 +50,7 @@ internal static Tag mask(Tag t) {
 }
 
 internal static word maskFor(nuint s) {
-    var m = (((word)1) << (int)(s)) - 1;
+    var m = (((word)1) << s) - 1;
     return m;
 }
 

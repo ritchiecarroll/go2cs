@@ -15,27 +15,24 @@ internal static @string tag(this version v) {
 }
 
 internal static version asVersion(@string s) {
-    return ((version)s);
+    return (version)s;
 }
 
 internal static void mutate(ref @string s) {
     s = s + "-mutated"u8;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string go121ˢ = "go1.21"u8;
-
 internal static void Main() {
-    version fileVersion = asVersion(go121ˢ);
+    version fileVersion = asVersion("go1.21");
     if (fileVersion.isValid()) {
         fmt.Println(fileVersion.tag());
     }
 
-    @string cause = ""u8;
+    @string cause = "";
     mutate(ref cause);
     fmt.Println("cause:" + cause);
 
-    @string label = "x"u8;
+    @string label = "x";
     for (nint i = 0; i < 2; i++) {
         label = label + "y"u8;
     }

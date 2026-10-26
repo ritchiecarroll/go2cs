@@ -69,7 +69,7 @@ internal static (uint32 n, bool ok) big4(this ref dataIO d) {
         d.error = true;
         return (0, false);
     }
-    return ((uint32)((uint32)((uint32)((uint32)p[3] | ((uint32)p[2] << (int)(8))) | ((uint32)p[1] << (int)(16))) | ((uint32)p[0] << (int)(24))), true);
+    return ((uint32)p[3] | (uint32)p[2] << 8 | (uint32)p[1] << 16 | (uint32)p[0] << 24, true);
 }
 
 internal static (uint64 n, bool ok) big8(this ref dataIO d) {
@@ -79,7 +79,7 @@ internal static (uint64 n, bool ok) big8(this ref dataIO d) {
         d.error = true;
         return (0, false);
     }
-    return ((uint64)((((uint64)n1 << (int)(32))) | (uint64)n2), true);
+    return (((uint64)n1 << 32) | (uint64)n2, true);
 }
 
 internal static (byte n, bool ok) @byte(this ref dataIO d) {
@@ -105,7 +105,7 @@ internal static @string byteString(slice<byte> p) {
             p = p.slice(0, i);
         }
     }
-    return ((@string)p);
+    return (@string)p;
 }
 
 internal static error errBadData = errors.New("malformed time zone information"u8);
@@ -238,7 +238,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     ref var extend = ref heap(new @string(), out var Ꮡextend);
     var rest = d.rest();
     if (len(rest) > 2 && rest[0] == (rune)'\n' && rest[len(rest) - 1] == (rune)'\n') {
-        extend = ((@string)(rest.slice(1, len(rest) - 1)));
+        extend = (@string)(rest.slice(1, len(rest) - 1));
     }
 
     // Now we can build up a useful data structure.
@@ -251,7 +251,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         return (default!, errBadData);
     }
     var zones = new slice<zone>(nzone);
-    foreach (var (i, _) in zones) {
+    foreach (var i in range(zones)) {
         bool ok = default!;
         uint32 nΔ1 = default!;
         {
@@ -288,7 +288,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
 
     // Now the transition time info.
     var tx = new slice<zoneTrans>(n[NTime]);
-    foreach (var (i, _) in tx) {
+    foreach (var i in range(tx)) {
         int64 nΔ2 = default!;
         if (!is64){
             {
@@ -332,7 +332,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     // Fill in the cache with information about right now,
     // since that will be the most common lookup.
     var (sec, _, _) = runtimeNow();
-    foreach (var (i, _) in tx) {
+    foreach (var i in range(tx)) {
         if (tx[i].when <= sec && (i + 1 == len(tx) || sec < tx[i + 1].when)) {
             l.Value.cacheStart = tx[i].when;
             l.Value.cacheEnd = omega;
@@ -406,7 +406,7 @@ internal static nint get4(slice<byte> b) {
     if (len(b) < 4) {
         return 0;
     }
-    return (nint)((nint)((nint)((nint)b[0] | ((nint)b[1] << (int)(8))) | ((nint)b[2] << (int)(16))) | ((nint)b[3] << (int)(24)));
+    return (nint)b[0] | (nint)b[1] << 8 | (nint)b[2] << 16 | (nint)b[3] << 24;
 }
 
 // get2 returns the little-endian 16-bit value in b.
@@ -414,7 +414,7 @@ internal static nint get2(slice<byte> b) {
     if (len(b) < 2) {
         return 0;
     }
-    return (nint)((nint)b[0] | ((nint)b[1] << (int)(8)));
+    return (nint)b[0] | (nint)b[1] << 8;
 }
 
 // loadTzinfoFromZip returns the contents of the file with the given name

@@ -196,7 +196,7 @@ public static @string ToSlash(@string path) {
     return replaceStringByte(path, Separator, (rune)'/');
 }
 
-// FromSlash is filepath.ToSlash.
+// FromSlash is filepath.FromSlash.
 public static @string FromSlash(@string path) {
     if (Separator == (rune)'/') {
         return path;
@@ -209,12 +209,12 @@ internal static @string replaceStringByte(@string s, byte old, byte @new) {
         return s;
     }
     var n = slice<byte>(s);
-    foreach (var (i, _) in n) {
+    foreach (var i in range(n)) {
         if (n[i] == old) {
             n[i] = @new;
         }
     }
-    return ((@string)n);
+    return (@string)n;
 }
 
 // Split is filepath.Split.
@@ -258,7 +258,7 @@ public static @string Base(@string path) {
     }
     // If empty now, it had only slashes.
     if (path == ""u8) {
-        return ((@string)(rune)Separator);
+        return (@string)(rune)Separator;
     }
     return path;
 }

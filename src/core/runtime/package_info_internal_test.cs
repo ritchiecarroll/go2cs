@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,6 +20,7 @@ using static go.runtime_internal_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b206461746120737472696e677d", "stringdataᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b70205b315d2a696e747d", "BenchmarkMallocTypeInfo8_type")]
 [assembly: GoDynamicTypeLift("7374727563747b70205b325d2a696e747d", "BenchmarkMallocTypeInfo16_type")]
+[assembly: GoDynamicTypeLift("7374727563747b70205b345d2a696e747d", "BenchmarkMallocTypeInfo32_type")]
 [assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b2064697220737472696e673b20746172676574206d61705b737472696e675d2a72756e74696d655f746573742e6275696c646578657d", "testprogᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7820666c6f617436343b2079205b343339383436353934313530345d2a627974653b207a205b5d737472696e677d", "TestHugeGCInfo_type")]
 [assembly: GoDynamicTypeLift("7374727563747b7820666c6f617436343b2079205b343339383436353934313530345d75696e747074723b207a205b5d737472696e677d", "TestHugeGCInfo_typeᴛ1")]
@@ -41,14 +41,13 @@ using static go.runtime_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABo0")]
+[assembly: global::go.GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABgw")]
 [assembly: global::go.GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABIigqaAooCigKKAooCigKKAooCigKSCgoKCgpSmgoKCgoKClKaCgoKClII=")]
-[assembly: global::go.GoPositionMap("runtime/export_map_swiss_test.go", "export_map_swiss_test.cs", "AAoS")]
-[assembly: global::go.GoPositionMap("runtime/export_test.go", "export_test.cs", "ABwkkpKSkpKSkpKkopKSpKSUkpKUoqKkoqSUkqT+kqS8ggAJFIKmgqSCpoKCuKKClPaCgoKCgoCCpIKUgoCCgraAggAICoKCgoKCgoKClIKCgoKUgoKClIKUgoKClJSCgoKmgoL6yoKCgoKCgoKCgoKylIKClJSUgoKCuoKCgoKCgpKSppSigsyykpS2oqKilICigNiasoKmkpSylJSCgriUpoCigKKAyIKmggAFEIKmgqqCpoK4gpSm7tzKppSUttjSppSUuIKCgoKCgqqCgpSClICCgpSCgsqSlpKCgoKClIKUlIKCpoKCgpSClIKCpqaCrNKCgJKUgpK4oqqypoKCgu6CpoKmgqaCpoKmgoKCgqaCpgAGRgAKAoKCgoKUlIKCppSmgq6CpoKmoraWkqiSAAQkgoKm3oKCgqbclIKCyoKCAAscgKKAooCigNqCpICigKKAooCoorSCgpSClIKCgpSUlKiQqKKClIKSgoKClJSClKaClKyygoKClKbcgqSAooKkgqSCqJD+gqSAooCigKKAooKkgoKUxoKCAAoWgpSStoKClKSClIK2goKUpIKUtoKCtoKkooKSlKSCgoKUqJKCAAcSkqiSqJKokqiS/gAHIgAJApKCAAIQAAwMgoKCgpQABhKigoKUqqLe4oKUqJIABywADgKmgoKCppKCgriCpsqCpoKAgqaC/qaCpsqSgoK4rLKmgoKmgoKUuNyCpoKAgpQACxaCgoKUlIKClKqiAAcQsqaSpoKCgoKClNyCgoKCgpTK2JSUpqKmgqaCuIKmoqiilJSCgraiAAoekoKCgoKssoKCgpTekoKCgoKUqJKCgoK4goKCgoKCAAoiwoKClIKClKaCppSCgoKClIKmgtyYwgACEuIADiLKgoKCpqKCgpSCgoKCpoKmgqaCpoKmggAKFoKCgoKCgqaCgoKCpoKmgqaCpoLsgoKUqJKmgqbcggAJEoIACRjKgoKCpoKmgqaCpoKmgqaCpoKmgqaCpoIADyKigriCgoKmgoKCgrSCgoKkgsaCgoKUgqaCAAMUAA0MgoKCgoKClJSokqiSqsKCgoKClIKC7oIACxiCgoKCgqaCgqaCkqSUpoKClLiCkqSUpoKClLiigoKClJSmgqaCpoLcgoLaAAcQggAEGoKmgqaCgoKCgpSUpoKmlIKmoqqiqqLckpaCpILKgoK4goKClKTIpIIABxCCpoKmgqaUgoKClIKCpoKCgoKClILugqaCpII=", "92-94:1;98-100:1;186-194:1;227-229:1;313-338:1;352-424:1;435-435:1;439-441:2;609-612:1;769-775:1;789-795:1;802-808:1;814-820:1;827-829:1;988-992:1;1033-1037:2;1117-1153:1;1231-1235:1;1241-1245:1;1550-1569:1;1753-1759:1;1806-1808:1", "", "1294=chunkBase/1/1/1")]
-[assembly: global::go.GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "ABAikgAHGoI=")]
+[assembly: global::go.GoPositionMap("runtime/export_test.go", "export_test.cs", "AB8mkpKSkpKSkpKkopKSpKSUlJKioqKkoqSUkqQACA68ggAJFIKmgqSCpoKCuKKClPaCgoKCgoCCpIKUgoCCgraAggAICoKCgoKCgoKClIKCgoKUgoKClIKUgoKClJSCgoKmgoL6yoKCgoKCgoKCgoKylIKClJSUgoKCuoKCgoKCgpKSppSigsyykpS2oqKilICigOyCtpqygqaSlLKUlIKCuJSmgKKAooDIgqaCAAUQgqaCqoKmgriClKbu3MqmlJS22NKmlJS4goKCgoKCqoKClIKUgIKClIKCypKWkoKCgoKUgpSUgoKmgoKClIKUlIKmpoKs0oKAkpSCkriiyICkgoKCrLKmgoKC7oKmgqaCpoKmgqaCgoKCpoKmAAZGAAoCgoKCgpSUgoKmlKaCgpQAAhKCpoKmoraWkqiSAAQkgoKm7oKCgqbclIKCyoKCupKokoKClKjsAA4igKKAooCigNqCpICigKKAooCoorSCgpSClIKCgpSUlKiQqKKClIKSgoKClJSClKaClKyygoKClKbcgqSAooKkgqSCqJD+gqSAooCigKKAooKkgoKUxoKCAAoWgpSStoKClKSClIK2goKUpIKUtoKCtoKkooKSlKSCgoKUqJKCAAcSkqiSqJKokqiS/gAHIgAJApKCAAIQAAwMgoKCgpQABhKigoKUqqLe4oKUqJIABywADgKmgoKCppKCgriCpsqCpoKAgqaC/qaCpsqSgoK4rLKmgsqmgoKm7oLcpoKAgpQACxaCgoKUlIKClKqiAAcQsqaSppSCgoKClILcgoKCgoKUytiUpgAOHoKCgqaClILKpqKmgqaCuIKmoqiilJSCgraiAAoekoKCgoKssoKCgpTekoKCgoKClKiSgoKCuIKCgoKCggAKIsKCgpSCgpSmgqaUgoKCgpSCpoLcmMIAAhLiAA4iyoKCgqaigoKUgoKCgqaCpoKmgqaCpoIAChaCgoKCgoKmgoKCgqaCpoKmgqaC7IKClKiSpoIAAhDS7oIACRKCAAkYyoKCgqaCpoKmgqaCpoKmgqaCpoKmgqaCAA8iooK4goKCpoKCgoK0goKCpILGgoKClIKmggADFAANDIKCgoKCgpSUqJKokqrCgoKCgpSCgu6CAAsYgoKCgoKmgoKmgpKklKaCgpS4gpKklKaCgpS4ooKCgpSUpoKmgqaC3IKC2gAHEIIABBqCpoKmgoKCgoKUlKaCppSCpoKmoqqizqLckpaCpILKgoK4goKClKTIpIIABxCCpoKmgqaUgoKClIKCpoKCgoKClILugqaCpIIACBaCpoK2pJSA7ILugqaCpoLugu6CpoKmgqaigoKCgoK2gpSCgoKClKaCgoKCgoKClKqigoKCgpSokoKCgoKU", "90-92:1;96-98:1;184-192:1;225-227:1;317-342:1;356-429:1;440-440:1;444-446:2;629-632:1;817-823:1;837-843:1;850-856:1;862-868:1;875-877:1;1036-1040:1;1081-1085:2;1173-1211:1;1320-1325:1;1331-1335:1;1647-1666:1;1850-1856:1;1909-1911:1;2061-2063:1", "2062=runtime.hexdumpMarker.start")]
+[assembly: global::go.GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "AA4ekgADEoI=")]
 [assembly: global::go.GoPositionMap("runtime/proc_runtime_test.go", "proc_runtime_test.cs", "AAoSgoKCgoKUgoKCgoKCgpSClILcgoKmgoKCgoKU")]
 [assembly: global::go.GoPositionMap("runtime/symtabinl_test.go", "symtabinl_test.cs", "ABgagoKmgoKCptzugoKCgoAABxCkgoKCgqaUgoKClIKmgoKUgqaClKaClJSAguyCgsqCgsrEkqSigqSigoI=")]
-[assembly: global::go.GoPositionMap("runtime/tracebackx_test.go", "tracebackx_test.cs", "AAsOuoKSgpQ=", "13-16:1")]
+[assembly: global::go.GoPositionMap("runtime/tracebackx_test.go", "tracebackx_test.cs", "AAsOyoKSgpQ=", "13-16:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,16 +90,19 @@ public static partial class runtime_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtypes() => builtin.initPackage(typeof(global::go.go.types_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(@internal.abi_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸplatform() => builtin.initPackage(typeof(@internal.platform_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸprofile() => builtin.initPackage(typeof(@internal.profile_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸgc() => builtin.initPackage(typeof(@internal.runtime.gc_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸmaps() => builtin.initPackage(typeof(@internal.runtime.maps_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsys() => builtin.initPackage(typeof(@internal.runtime.sys_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsyscallꓸwindows() => builtin.initPackage(typeof(@internal.runtime.syscall.windows_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(@internal.stringslite_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsynctest() => builtin.initPackage(typeof(@internal.synctest_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() => builtin.initPackage(typeof(@internal.syscall.windows_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindowsꓸsysdll() => builtin.initPackage(typeof(@internal.syscall.windows.sysdll_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtrace() => builtin.initPackage(typeof(@internal.trace_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtesttrace() => builtin.initPackage(typeof(@internal.trace.testtrace_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));

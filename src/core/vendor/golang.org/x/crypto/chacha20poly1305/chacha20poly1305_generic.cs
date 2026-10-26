@@ -34,7 +34,10 @@ internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte>
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + (nint)poly1305.TagSize);
     var (ciphertext, tag) = (@out.slice(0, len(plaintext)), @out.slice(len(plaintext)));
     if (alias.InexactOverlap(@out, plaintext)) {
-        throw panic("chacha20poly1305: invalid buffer overlap");
+        throw panic("chacha20poly1305: invalid buffer overlap of output and input");
+    }
+    if (alias.AnyOverlap(@out, additionalData)) {
+        throw panic("chacha20poly1305: invalid buffer overlap of output and additional data");
     }
 
     ref var polyKey = ref heap(new array<byte>(32), out var ᏑpolyKey);
@@ -70,10 +73,13 @@ internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, sl
 
     var (ret, @out) = sliceForAppend(dst, len(ciphertext));
     if (alias.InexactOverlap(@out, ciphertext)) {
-        throw panic("chacha20poly1305: invalid buffer overlap");
+        throw panic("chacha20poly1305: invalid buffer overlap of output and input");
+    }
+    if (alias.AnyOverlap(@out, additionalData)) {
+        throw panic("chacha20poly1305: invalid buffer overlap of output and additional data");
     }
     if (!p.Verify(tag)) {
-        foreach (var (i, _) in @out) {
+        foreach (var i in range(@out)) {
             @out[i] = 0;
         }
         return (default!, errOpen);

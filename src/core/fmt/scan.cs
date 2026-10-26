@@ -182,7 +182,7 @@ partial struct ss {
     internal buffer buf;         // token accumulator
     internal nint count;           // runes consumed so far.
     internal bool atEOF;           // already read EOF
-    internal partial ref ssave ssave { get; }
+    /*embed*/ internal ssave ssave;
 }
 
 // ssave holds the parts of ss that need to be
@@ -313,7 +313,7 @@ internal static (slice<byte> tok, error err) Token(this ж<ss> Ꮡs, bool skipSp
 
 // space is a copy of the unicode.White_Space ranges,
 // to avoid depending on package unicode.
-internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<uint16>[]{
+[GoLazy] partial class lazyᴛspace { internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<uint16>[]{
     new uint16[]{0x0009, 0x000d}.array(),
     new uint16[]{0x0020, 0x0020}.array(),
     new uint16[]{0x0085, 0x0085}.array(),
@@ -324,10 +324,10 @@ internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<ui
     new uint16[]{0x202f, 0x202f}.array(),
     new uint16[]{0x205f, 0x205f}.array(),
     new uint16[]{0x3000, 0x3000}.array()
-}.slice(), 2);
+}.slice(), 2); }
 
 internal static bool isSpace(rune r) {
-    if (r >= (rune)(1 << (int)(16))) {
+    if (r >= (rune)(1 << 16)) {
         return false;
     }
     var rx = (uint16)r;
@@ -688,7 +688,7 @@ internal static @string scanNumber(this ref ss s, sstring digits, bool haveDigit
     }
     while (s.accept(digits)) {
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 // scanRune returns the next rune value in the input.
@@ -804,13 +804,13 @@ internal static @string floatToken(this ref ss s) {
     s.buf = s.buf[..0];
     // NaN?
     if (s.accept("nN"u8) && s.accept("aA"u8) && s.accept("nN"u8)) {
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     // leading sign?
     s.accept(sign);
     // Inf?
     if (s.accept("iI"u8) && s.accept("nN"u8) && s.accept("fF"u8)) {
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     @string digits = decimalDigits + "_";
     @string exp = exponent;
@@ -835,7 +835,7 @@ internal static @string floatToken(this ref ss s) {
         while (s.accept(decimalDigits + "_")) {
         }
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 // complexTokens returns the real and imaginary parts of the complex number starting here.
@@ -854,7 +854,7 @@ internal static (@string real, @string imag) complexTokens(this ref ss s) {
         s.error(errComplex);
     }
     // Sign is now in buffer
-    @string imagSign = ((@string)(slice<byte>)s.buf);
+    @string imagSign = (@string)(slice<byte>)s.buf;
     imag = s.floatToken();
     if (!s.accept("i"u8)) {
         s.error(errComplex);
@@ -956,7 +956,7 @@ internal static @string /*str*/ convertString(this ref ss s, rune verb) {
         break;
     }
     default: {
-        str = ((@string)s.token(true, notSpace)); // %s and %v just return the next word
+        str = (@string)s.token(true, notSpace); // %s and %v just return the next word
         break;
     }}
     return str;
@@ -979,7 +979,7 @@ internal static @string quotedString(this ref ss s) {
             }
             s.buf.writeRune(r);
         }
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     case (rune)'"': {
         // Double-quoted: Include the quotes and let strconv.Unquote do the backslash escapes.
@@ -997,7 +997,7 @@ internal static @string quotedString(this ref ss s) {
                 break;
             }
         }
-        var (result, err) = strconv.Unquote(((@string)(slice<byte>)s.buf));
+        var (result, err) = strconv.Unquote((@string)(slice<byte>)s.buf);
         if (err != default!) {
             s.error(err);
         }
@@ -1050,7 +1050,7 @@ internal static (byte b, bool ok) hexByte(this ref ss s) {
         s.errorString(illegalHexDigitˢ);
         return (b, ok);
     }
-    return ((byte)((nint)((value1 << (int)(4)) | value2)), true);
+    return ((byte)(value1 << 4 | value2), true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1070,7 +1070,7 @@ internal static @string hexString(this ref ss s) {
         s.errorString(noHexDataForXStringˢ);
         return ""u8;
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 internal static readonly @string floatVerbs = "beEfFgGv"u8;
@@ -1256,8 +1256,10 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
 internal static void errorHandler(ref error errp) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 {
                     var (se, ok) = e._<scanError>(ᐧ); if (ok){ // catch local error
                         errp = se.err;
@@ -1289,7 +1291,7 @@ internal static (nint numProcessed, error err) doScan(this ж<ss> Ꮡs, slice<an
         ref var s = ref Ꮡs.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         foreach (var (_, arg) in a) {
             Ꮡs.scanOne((rune)'v', arg);
             numProcessed++;
@@ -1422,7 +1424,7 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
         ref var s = ref Ꮡs.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         nint end = len(format) - 1;
         // We process one item per non-trivial format
         for (nint i = 0; i <= end; ) {

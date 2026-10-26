@@ -5,7 +5,7 @@
 namespace go;
 
 using errpkg = errors_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -196,7 +196,7 @@ partial struct caps {
 
 // See CAP_TO_INDEX in linux/capability.h:
 internal static uintptr capToIndex(uintptr cap) {
-    return (cap >> (int)(5));
+    return cap >> 5;
 }
 
 // See CAP_TO_MASK in linux/capability.h:
@@ -261,6 +261,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     ref var caps = ref heap(new caps(), out var Ꮡcaps);
     uintptr fd1 = default!;
     uintptr flags = default!;
+    uintptr ppid = default!;
     slice<byte> puid = default!;
     slice<byte> psetgroups = default!;
     slice<byte> pgid = default!;
@@ -298,7 +299,9 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // Record parent PID so child can test if it has died.
-    var (ppid, _) = rawSyscallNoError(SYS_GETPID, 0, 0, 0);
+    if (sys.Pdeathsig != 0) {
+        (ppid, _) = rawSyscallNoError(SYS_GETPID, 0, 0, 0);
+    }
 
     // Guard against side effects of shuffling fds below.
     // Make sure that nextfd is beyond any currently open files so
@@ -390,12 +393,12 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             }
         }
         var ᴋ1 = @unsafe.Pointer.FromBox(Ꮡerr2);
-                (pid, _, err1) = RawSyscall(SYS_READ, (uintptr)mapPipe[0], (uintptr)ᴋ1, /* unsafe.Sizeof(err2) */ (uintptr)8);
+                (c, _, err1) = RawSyscall(SYS_READ, (uintptr)mapPipe[0], (uintptr)ᴋ1, /* unsafe.Sizeof(err2) */ (uintptr)8);
         System.GC.KeepAlive(ᴋ1);
         if (err1 != 0) {
             goto childerror;
         }
-        if (pid != /* unsafe.Sizeof(err2) */ (uintptr)8) {
+        if (c != /* unsafe.Sizeof(err2) */ (uintptr)8) {
             err1 = EINVAL;
             goto childerror;
         }
@@ -460,7 +463,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
                 }
             }
             var ᴋ4 = Ꮡ(setgroups, 0);
-                        (pid, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ4, (uintptr)len(setgroups));
+                        (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ4, (uintptr)len(setgroups));
             System.GC.KeepAlive(ᴋ4);
             if (err1 != 0) {
                 goto childerror;
@@ -479,7 +482,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
                 }
             }
             var ᴋ6 = Ꮡ(gidmap, 0);
-                        (pid, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ6, (uintptr)len(gidmap));
+                        (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ6, (uintptr)len(gidmap));
             System.GC.KeepAlive(ᴋ6);
             if (err1 != 0) {
                 goto childerror;
@@ -501,7 +504,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
                 }
             }
             var ᴋ8 = Ꮡ(uidmap, 0);
-                        (pid, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ8, (uintptr)len(uidmap));
+                        (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ8, (uintptr)len(uidmap));
             System.GC.KeepAlive(ᴋ8);
             if (err1 != 0) {
                 goto childerror;
@@ -766,7 +769,7 @@ childerror:
 internal static slice<byte> formatIDMappings(slice<SysProcIDMap> idMap) {
     slice<byte> data = default!;
     foreach (var (_, im) in idMap) {
-        data = append(data, ((@string)(itoa.Itoa(im.ContainerID) + " "u8 + itoa.Itoa(im.HostID) + " "u8 + itoa.Itoa(im.Size) + "\n"u8)).ꓸꓸꓸ);
+        data = append(data, ((@string)(strconv.Itoa(im.ContainerID) + " "u8 + strconv.Itoa(im.HostID) + " "u8 + strconv.Itoa(im.Size) + "\n"u8)).ꓸꓸꓸ);
     }
     return data;
 }
@@ -799,7 +802,7 @@ internal static error writeIDMappings(@string path, slice<SysProcIDMap> idMap) {
 // This is needed since kernel 3.19, because you can't write gid_map without
 // disabling setgroups() system call.
 internal static error writeSetgroups(nint pid, bool enable) {
-    @string sgf = "/proc/"u8 + itoa.Itoa(pid) + "/setgroups"u8;
+    @string sgf = "/proc/"u8 + strconv.Itoa(pid) + "/setgroups"u8;
     var (fd, err) = Open(sgf, O_RDWR, 0);
     if (err != default!) {
         return err;
@@ -826,7 +829,7 @@ internal static error writeSetgroups(nint pid, bool enable) {
 // for a process and it is called from the parent process.
 internal static error writeUidGidMappings(nint pid, ref SysProcAttr sys) {
     if (sys.UidMappings != default!) {
-        @string uidf = "/proc/"u8 + itoa.Itoa(pid) + "/uid_map"u8;
+        @string uidf = "/proc/"u8 + strconv.Itoa(pid) + "/uid_map"u8;
         {
             var err = writeIDMappings(uidf, sys.UidMappings); if (err != default!) {
                 return err;
@@ -841,7 +844,7 @@ internal static error writeUidGidMappings(nint pid, ref SysProcAttr sys) {
                 return err;
             }
         }
-        @string gidf = "/proc/"u8 + itoa.Itoa(pid) + "/gid_map"u8;
+        @string gidf = "/proc/"u8 + strconv.Itoa(pid) + "/gid_map"u8;
         {
             var err = writeIDMappings(gidf, sys.GidMappings); if (err != default!) {
                 return err;
@@ -863,6 +866,24 @@ internal static void forkAndExecFailureCleanup(ref ProcAttr attr, ref SysProcAtt
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cloneClonePidfdFailedToˢ = "clone(CLONE_PIDFD) failed to return pidfd"u8;
 
+// Two int32 fields, swapped on MIPS.
+internal partial struct os_checkClonePidfd_sigInfo__ /*dyn*/ {
+    public int32 Errno;
+    public int32 Code;
+}
+
+internal partial struct os_checkClonePidfd_sigInfo /*dyn*/ {
+    public int32 Signo;
+    internal os_checkClonePidfd_sigInfo__ _;
+    internal array<int32> __ = new(1); // Extra padding for 64-bit hosts only.
+// End of common part. Beginning of signal-specific part.
+    public int32 Pid;
+    public uint32 Uid;
+    public int32 Status;
+    // Pad to 128 bytes.
+    internal array<byte> ___ = new(100);
+}
+
 // checkClonePidfd verifies that clone(CLONE_PIDFD) works by actually doing a
 // clone.
 //
@@ -880,6 +901,7 @@ internal static error os_checkClonePidfd() {
         if (pidfd == -1) {
             // Bad: CLONE_PIDFD failed to provide a pidfd. Reap the process
             // before returning.
+
             error err = default!;
             while (ᐧ) {
                 ref var status = ref heap(new WaitStatus(), out var Ꮡstatus);
@@ -904,9 +926,19 @@ internal static error os_checkClonePidfd() {
         // pidfd.
         defer(Close, (nint)pidfd, ref ᒐ);
 
+        // TODO(roland): this is necessary to prevent valgrind from complaining
+        // about passing 0x0 to waitid, which is doesn't like. This is clearly not
+        // ideal. The structures are copied (mostly) verbatim from syscall/unix,
+        // which we obviously cannot import because of an import loop.
+
+        const nuint is64bit = /* ^uint(0) >> 63 */ 1; // 0 for 32-bit hosts, 1 for 64-bit ones.
+
         while (ᐧ) {
             uintptr _P_PIDFD = 3;
-            (_, _, errno) = Syscall6(SYS_WAITID, _P_PIDFD, (uintptr)pidfd, 0, (uintptr)((uintptr)WEXITED | (uintptr)WCLONE), 0, 0);
+            ref var info = ref heap(new os_checkClonePidfd_sigInfo(), out var Ꮡinfo);
+            var ᴋ23 = Ꮡinfo;
+                        (_, _, errno) = Syscall6(SYS_WAITID, _P_PIDFD, (uintptr)pidfd, (uintptr)ᴋ23, (uintptr)((uintptr)WEXITED | (uintptr)WCLONE), 0, 0);
+            System.GC.KeepAlive(ᴋ23);
             if (errno != EINTR) {
                 break;
             }

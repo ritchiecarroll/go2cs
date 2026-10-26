@@ -14,6 +14,8 @@ using slices = slices_package;
 using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.math;
 using io = io_package;
@@ -40,6 +42,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "a*"u8
         }.slice()
     ),
+
     new(
         "all a's"u8,
         "aaaaaaaaaa"u8, // 10 a's
@@ -64,6 +67,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "aaa*"u8
         }.slice()
     ),
+
     new(
         "abc"u8,
         "abc"u8,
@@ -79,6 +83,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "abc?"u8
         }.slice()
     ),
+
     new(
         "barbara*3"u8,
         "barbarabarbarabarbara"u8,
@@ -91,6 +96,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "bara?bar"u8
         }.slice()
     ),
+
     new(
         "typing drill"u8,
         "Now is the time for all good men to come to the aid of their country."u8,
@@ -102,6 +108,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "to (come|the)?"u8
         }.slice()
     ),
+
     new(
         "godoc simulation"u8,
         "package main\n\nimport(\n    \"rand\"\n    "u8,
@@ -111,6 +118,8 @@ internal static slice<testCase> testCases = new testCase[]{
 
 // find all occurrences of s in source; report at most n occurrences
 internal static slice<nint> find(@string src, @string s, nint n) {
+    var resᴷ = new stackAppend<nint>(moves: true);
+
     slice<nint> res = default!;
     if (s != ""u8 && n != 0) {
         // find at most n occurrences of s in src
@@ -120,9 +129,10 @@ internal static slice<nint> find(@string src, @string s, nint n) {
                 break;
             }
             i += j + 1;
-            res = append(res, i);
+            res = append(resᴷ, res, i);
         }
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
@@ -241,7 +251,7 @@ internal static slice<byte> at(this ref index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 
-internal static void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
+internal static partial void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
     if (!sort.IsSorted(new suffixarray_internal_test_package.indexжInterface(Ꮡx.Reinterpret<global::go.index.suffixarray_package.Index, index>()))) {
@@ -402,7 +412,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
             size = 10000;
         }
         var x = new slice<byte>(size);
-        foreach (var (i, _) in x) {
+        foreach (var i in range(x)) {
             x[i] = LiteralByteAt("ab"u8, i % 2);
         }
         testSA(tΔ1, x, build);
@@ -423,7 +433,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         var x = new slice<byte>(100000, 100001);
         var lo = (byte)1;
         var hi = (byte)255;
-        foreach (var (i, _) in x) {
+        foreach (var i in range(x)) {
             if (i % 2 == 0){
                 x[i] = lo;
             } else {
@@ -545,7 +555,7 @@ internal static void benchmarkNew(ж<testing.B> Ꮡb, bool random) {
     if (random) {
         data = benchrand;
         if (data[0] == 0) {
-            foreach (var (i, _) in data) {
+            foreach (var i in range(data)) {
                 data[i] = (byte)rand.Intn(256);
             }
         }
@@ -590,7 +600,7 @@ internal static (slice<byte>, error) makeText(@string name) {
     }
     else if (exprᴛ1 == "rand"u8) {
         data = new slice<byte>(50000000);
-        foreach (var (i, _) in data) {
+        foreach (var i in range(data)) {
             data[i] = (byte)rand.Intn(256);
         }
     }
@@ -616,7 +626,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                 bΔ1.Fatal(err);
             }
             if (testing.Short() && builtin.len(data) > 5000000) {
-                data = data[..(int)(5000000)];
+                data = data[..(int)5000000];
             }
             foreach (var (_, size) in new nint[]{100000, 500000, 1000000, 5000000, 10000000, 50000000}.slice()) {
                 if (builtin.len(data) < size) {
@@ -659,8 +669,8 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
-    var data = new slice<byte>((1 << (int)(20))); // 1MB of data to index
-    foreach (var (i, _) in data) {
+    var data = new slice<byte>((1 << 20)); // 1MB of data to index
+    foreach (var i in range(data)) {
         data[i] = (byte)r.Intn(256);
     }
     foreach (var (_, bits) in new nint[]{32, 64}.slice()) {

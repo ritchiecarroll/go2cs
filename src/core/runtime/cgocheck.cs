@@ -62,7 +62,7 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     }
 
     systemstack(() => {
-        println((@string)"write of unpinned Go pointer"u8, ((Δhex)(uint64)(uintptr)src), (@string)"to non-Go memory"u8, ((Δhex)(uint64)(uintptr)Ꮡdst));
+        println((@string)"write of unpinned Go pointer"u8, (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory"u8, (Δhex)(uint64)(uintptr)Ꮡdst);
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -177,7 +177,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
         if (off > 0){
             off -= goarch.PtrSize;
         } else {
-            if ((uint32)(bits & 1) != 0) {
+            if ((bits & 1) != 0) {
                 @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);
@@ -185,34 +185,6 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
             }
         }
     }
-}
-
-// cgoCheckUsingType is like cgoCheckTypedBlock, but is a last ditch
-// fall back to look for pointers in src using the type information.
-// We only use this when looking at a value on the stack when the type
-// uses a GC program, because otherwise it's more efficient to use the
-// GC bits. This is called on the system stack.
-//
-//go:nowritebarrier
-//go:systemstack
-internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.DerefOrNull();
-
-    if (!typ.Pointers()) {
-        return;
-    }
-
-    // Anything past typ.PtrBytes is not a pointer.
-    if (typ.PtrBytes <= off) {
-        return;
-    }
-    {
-        var ptrdataSize = typ.PtrBytes - off; if (size > ptrdataSize) {
-            size = ptrdataSize;
-        }
-    }
-
-    cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
 }
 
 } // end runtime_package

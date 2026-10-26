@@ -212,9 +212,9 @@ retry:
     }
     var descriptor = r.scratch[0];
 
-    var singleSegment = (byte)(descriptor & ((byte)(1 << (int)(5)))) != 0;
+    var singleSegment = (byte)(descriptor & ((byte)(1 << 5))) != 0;
 
-    nint fcsFieldSize = ((nint)1).Lsh((uint64)(((descriptor >> (int)(6)))));
+    nint fcsFieldSize = ((nint)1).Lsh((uint64)(descriptor >> 6));
     if (fcsFieldSize == 1 && !singleSegment) {
         fcsFieldSize = 0;
     }
@@ -226,11 +226,11 @@ retry:
         windowDescriptorSize = 1;
     }
 
-    if ((byte)(descriptor & ((byte)(1 << (int)(3)))) != 0) {
+    if ((byte)(descriptor & ((byte)(1 << 3))) != 0) {
         return r.makeError(relativeOffset, reservedBitSetInFrameˢ);
     }
 
-    r.hasChecksum = (byte)(descriptor & ((byte)(1 << (int)(2)))) != 0;
+    r.hasChecksum = (byte)(descriptor & ((byte)(1 << 2))) != 0;
     if (r.hasChecksum) {
         r.checksum.reset();
     }
@@ -259,7 +259,7 @@ retry:
     if (!singleSegment) {
         // Window descriptor. RFC 3.1.1.1.2.
         var windowDescriptor = r.scratch[0];
-        var exponent = (uint64)((windowDescriptor >> (int)(3)));
+        var exponent = (uint64)(windowDescriptor >> 3);
         var mantissa = (uint64)((byte)(windowDescriptor & 7));
         var windowLog = exponent + 10;
         var windowBase = ((uint64)1).Lsh(windowLog);
@@ -267,7 +267,7 @@ retry:
         windowSize = windowBase + windowAdd;
 
         // Default zstd sets limits on the window size.
-        if (fuzzing && (windowLog > 31 || windowSize > ((uint64)1 << (int)(27)))) {
+        if (fuzzing && (windowLog > 31 || windowSize > (uint64)1 << 27)) {
             return r.makeError(relativeOffset, windowSizeTooLargeˢ);
         }
     }
@@ -421,16 +421,16 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
 
     relativeOffset += 3;
 
-    var header = (uint32)((uint32)((uint32)r.scratch[0] | (((uint32)r.scratch[1] << (int)(8)))) | (((uint32)r.scratch[2] << (int)(16))));
+    var header = (uint32)r.scratch[0] | ((uint32)r.scratch[1] << 8) | ((uint32)r.scratch[2] << 16);
 
-    var lastBlock = (uint32)(header & 1) != 0;
-    var blockType = (uint32)(((header >> (int)(1))) & 3);
-    nint blockSize = (nint)((header >> (int)(3)));
+    var lastBlock = (header & 1) != 0;
+    var blockType = (header >> 1) & 3;
+    nint blockSize = (nint)(header >> 3);
 
     // Maximum block size is smaller of window size and 128K.
     // We don't record the window size for a single segment frame,
     // so just use 128K. RFC 3.1.1.2.3, 3.1.1.2.4.
-    if (blockSize > (128 << (int)(10)) || (r.window.size > 0 && blockSize > r.window.size)) {
+    if (blockSize > 128 << 10 || (r.window.size > 0 && blockSize > r.window.size)) {
         return r.makeError(relativeOffset, blockSizeTooLargeˢ);
     }
 
@@ -456,7 +456,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         relativeOffset++;
         var v = r.scratch[0];
-        foreach (var (i, _) in r.buffer) {
+        foreach (var i in range(r.buffer)) {
             r.buffer[i] = v;
         }
         r.blockOffset += (int64)relativeOffset;

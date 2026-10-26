@@ -135,6 +135,9 @@ partial struct potentialParent {
 internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
+    var matchingKeyIDᴷ = new stackAppend<potentialParent>();
+    var oneKeyIDᴷ = new stackAppend<potentialParent>();
+    var mismatchKeyIDᴷ = new stackAppend<potentialParent>();
 
     if (Ꮡs == nil) {
         return default!;
@@ -157,15 +160,15 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
         var kidMatch = bytes.Equal((~candidate).SubjectKeyId, cert.AuthorityKeyId);
         switch (ᐧ) {
         case {} when kidMatch: {
-            matchingKeyID = append(matchingKeyID, new potentialParent(candidate, constraint));
+            matchingKeyID = append(matchingKeyIDᴷ, matchingKeyID, new potentialParent(candidate, constraint));
             break;
         }
         case {} when (builtin.len((~candidate).SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len((~candidate).SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
-            oneKeyID = append(oneKeyID, new potentialParent(candidate, constraint));
+            oneKeyID = append(oneKeyIDᴷ, oneKeyID, new potentialParent(candidate, constraint));
             break;
         }
         default: {
-            mismatchKeyID = append(mismatchKeyID, new potentialParent(candidate, constraint));
+            mismatchKeyID = append(mismatchKeyIDᴷ, mismatchKeyID, new potentialParent(candidate, constraint));
             break;
         }}
     }
@@ -198,7 +201,7 @@ public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), default!);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), default!);
 }
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -228,7 +231,7 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
 }
 
 internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal ж<Certificate> v;
 }
 
@@ -258,7 +261,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
             continue;
         }
         ref var lazyCert = ref heap(new AppendCertsFromPEM_lazyCert(), out var ᏑlazyCert);
-        s.addCertFunc(sha256.Sum224((~cert).Raw), ((@string)(~cert).RawSubject), () => {
+        s.addCertFunc(sha256.Sum224((~cert).Raw), (@string)(~cert).RawSubject, () => {
             ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
                 // This can't fail, as the same bytes already parsed above.
                 (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
@@ -319,7 +322,7 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), constraint);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), constraint);
 }
 
 } // end x509_package

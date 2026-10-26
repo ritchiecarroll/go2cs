@@ -27,7 +27,7 @@ internal static void n1() {
         counter c = default!;
         c.add(3);
         c.add(4);
-        fmt.Println((@string)"N1:"u8, c.n, c.tag);
+        fmt.Println("N1:", c.n, c.tag);
     });
 }
 
@@ -37,7 +37,7 @@ internal static void n2() {
         var p = Ꮡc;
         p.Value.n = 10;
         writeThrough(ref (p).DerefOrNull(), 5);
-        fmt.Println((@string)"N2:"u8, c.n);
+        fmt.Println("N2:", c.n);
     });
 }
 
@@ -49,7 +49,7 @@ internal static void n3() {
         }
         inner(7);
         inner(8);
-        fmt.Println((@string)"N3:"u8, Ꮡc.Value.n);
+        fmt.Println("N3:", Ꮡc.Value.n);
     });
 }
 
@@ -58,7 +58,7 @@ internal static void n4() {
     run(() => {
         Ꮡc.Value.n += 9;
     });
-    fmt.Println((@string)"N4:"u8, c.n);
+    fmt.Println("N4:", c.n);
 }
 
 internal static void n5() {
@@ -66,7 +66,7 @@ internal static void n5() {
         ref var a = ref heap(new array<nint>(3), out var Ꮡa);
         var q = Ꮡa.at<nint>(1);
         q.Value = 42;
-        fmt.Println((@string)"N5:"u8, a);
+        fmt.Println("N5:", a);
     });
 }
 
@@ -74,7 +74,7 @@ internal static void n6() {
     run(() => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         writeThrough(ref (Ꮡc).DerefOrNull(), 11);
-        fmt.Println((@string)"N6:"u8, c.n);
+        fmt.Println("N6:", c.n);
     });
 }
 
@@ -84,7 +84,7 @@ internal static void n7() {
         c.n = 5;
         var d = c;
         d.n = 6;
-        fmt.Println((@string)"N7:"u8, c.n, d.n);
+        fmt.Println("N7:", c.n, d.n);
     });
 }
 
@@ -94,7 +94,7 @@ internal static void n8() {
         var bump = Ꮡc.add;
         bump(2);
         bump(3);
-        fmt.Println((@string)"N8:"u8, c.n, c.tag);
+        fmt.Println("N8:", c.n, c.tag);
     });
 }
 

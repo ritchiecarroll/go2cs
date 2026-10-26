@@ -25,12 +25,6 @@ public static ж<Digest> New512() {
     return Ꮡ(new Digest(rate: rateK1024, outputLen: 64, dsbyte: dsbyteSHA3));
 }
 
-// TODO(fips): do this in the stdlib crypto/sha3 package.
-//
-//     crypto.RegisterHash(crypto.SHA3_224, New224)
-//     crypto.RegisterHash(crypto.SHA3_256, New256)
-//     crypto.RegisterHash(crypto.SHA3_384, New384)
-//     crypto.RegisterHash(crypto.SHA3_512, New512)
 internal static UntypedInt dsbyteSHA3 => 0b00000110;
 internal static UntypedInt dsbyteKeccak => 0b00000001;
 internal static UntypedInt dsbyteShake => 0b00011111;

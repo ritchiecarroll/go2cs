@@ -26,6 +26,8 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using go.crypto;
 using go.crypto.x509;
@@ -60,6 +62,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.google.com"u8,
+
         expectedChains: new slice<@string>[]{
             new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
         }.slice()
@@ -71,6 +74,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.google.com."u8,
+
         expectedChains: new slice<@string>[]{
             new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
         }.slice()
@@ -82,6 +86,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "WwW.GooGLE.coM"u8,
+
         expectedChains: new slice<@string>[]{
             new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
         }.slice()
@@ -93,6 +98,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.example.com"u8,
+
         errorCallback: expectHostnameError("certificate is valid for"u8)
     ),
     new(
@@ -102,6 +108,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1677615892,
         dnsName: "www.example.com"u8,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectHostnameError("certificate is valid for 200 names, but none matched"u8)
     ),
     new(
@@ -111,6 +118,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1677615892,
         dnsName: "1.2.3.4"u8,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectHostnameError("certificate is valid for 150 IP SANs, but none matched"u8)
     ),
     new(
@@ -120,6 +128,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "1.2.3.4"u8,
+
         errorCallback: expectHostnameError("doesn't contain any IP SANs"u8)
     ),
     new(
@@ -129,6 +138,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1,
         dnsName: "www.example.com"u8,
+
         errorCallback: expectExpired
     ),
     new(
@@ -150,6 +160,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.google.com"u8,
+
         expectedChains: new slice<@string>[]{
             new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
         }.slice(),
@@ -179,6 +190,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         intermediates: new @string[]{smimeIntermediate}.slice(),
         roots: new @string[]{smimeRoot}.slice(),
         currentTime: 1594673418,
+
         errorCallback: expectUsageError
     ),
     new(
@@ -188,6 +200,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{smimeRoot}.slice(),
         currentTime: 1594673418,
         keyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+
         errorCallback: expectUsageError
     ),
     new(
@@ -197,6 +210,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{smimeRoot}.slice(),
         currentTime: 1594673418,
         keyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageEmailProtection}.slice(),
+
         expectedChains: new slice<@string>[]{
             new @string[]{"CORPORATIVO FICTICIO ACTIVO"u8, "EAEko Herri Administrazioen CA - CA AAPP Vascas (2)"u8, "IZENPE S.A."u8}.slice()
         }.slice()
@@ -210,6 +224,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{globalSignRoot}.slice(),
         currentTime: 1524771953,
         dnsName: "udctest.ads.vt.edu"u8,
+
         expectedChains: new slice<@string>[]{
             new @string[]{
                 "udctest.ads.vt.edu"u8,
@@ -230,6 +245,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
 
         // CryptoAPI can find alternative validation paths.
         systemLax: true,
+
         expectedChains: new slice<@string>[]{
             new @string[]{
                 "tm.cn"u8,
@@ -246,6 +262,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1471624472,
         dnsName: "foo.example"u8,
         systemSkip: true, // does not chain to a system root
+
         expectedChains: new slice<@string>[]{
             new @string[]{"Acme Co"u8}.slice()
         }.slice()
@@ -259,6 +276,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1471624472,
         dnsName: "notfoo.example"u8,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectHostnameError("certificate is valid for"u8)
     ),
     new(
@@ -270,6 +288,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{x509v1TestRoot}.slice(),
         currentTime: 1481753183,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectNotAuthorizedError
     ),
     new(
@@ -279,6 +298,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{ignoreCNWithSANRoot}.slice(),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectHostnameError("certificate is not valid for any names"u8)
     ),
     new(
@@ -290,6 +310,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{excludedNamesRoot}.slice(),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectNameConstraintsError
     ),
     new(
@@ -301,6 +322,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{criticalExtRoot}.slice(),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectUnhandledCriticalExtension
     ),
     new(
@@ -312,6 +334,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{criticalExtRoot}.slice(),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectUnhandledCriticalExtension
     ),
     new(
@@ -321,6 +344,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{invalidCNRoot}.slice(),
         currentTime: 1540000000,
         systemSkip: true, // does not chain to a system root
+
         errorCallback: expectHostnameError("certificate relies on legacy Common Name field"u8)
     ),
     new(
@@ -332,6 +356,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1550000000,
         dnsName: "example"u8,
         systemSkip: true, // does not chain to a system root
+
         expectedChains: new slice<@string>[]{
             new @string[]{"Acme LLC"u8, "Acme Co"u8}.slice()
         }.slice()
@@ -345,6 +370,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         currentTime: 1550000000,
         dnsName: "example"u8,
         systemSkip: true,
+
         expectedChains: new slice<@string>[]{
             new @string[]{"Leaf"u8, "Root B"u8}.slice()
         }.slice()
@@ -364,7 +390,7 @@ internal static Action<ж<testing.T>, error> expectHostnameError(@string msg) {
     };
 }
 
-internal static void expectExpired(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectExpired(ж<testing.T> Ꮡt, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != Expired) {
             Ꮡt.Fatalf("error was not Expired: %v"u8, err);
@@ -372,7 +398,7 @@ internal static void expectExpired(ж<testing.T> Ꮡt, error err) {
     }
 }
 
-internal static void expectUsageError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectUsageError(ж<testing.T> Ꮡt, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != IncompatibleUsage) {
             Ꮡt.Fatalf("error was not IncompatibleUsage: %v"u8, err);
@@ -403,7 +429,7 @@ internal static void expectHashError(ж<testing.T> Ꮡt, error err) {
     }
 }
 
-internal static void expectNameConstraintsError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectNameConstraintsError(ж<testing.T> Ꮡt, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != CANotAuthorizedForThisName) {
             Ꮡt.Fatalf("error was not a CANotAuthorizedForThisName: %v"u8, err);
@@ -411,7 +437,7 @@ internal static void expectNameConstraintsError(ж<testing.T> Ꮡt, error err) {
     }
 }
 
-internal static void expectNotAuthorizedError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectNotAuthorizedError(ж<testing.T> Ꮡt, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != NotAuthorizedToSign) {
             Ꮡt.Fatalf("error was not a NotAuthorizedToSign: %v"u8, err);
@@ -419,7 +445,7 @@ internal static void expectNotAuthorizedError(ж<testing.T> Ꮡt, error err) {
     }
 }
 
-internal static void expectUnhandledCriticalExtension(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectUnhandledCriticalExtension(ж<testing.T> Ꮡt, error err) {
     {
         var (_, ok) = err._<UnhandledCriticalExtension>(ᐧ); if (!ok) {
             Ꮡt.Fatalf("error was not an UnhandledCriticalExtension: %v"u8, err);
@@ -608,10 +634,10 @@ internal static @string generatePEMCertWithRepeatSAN(int64 currentTime, nint cou
     if (err != default!) {
         log.Fatal(err);
     }
-    return ((@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
+    return (@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
         Type: "CERTIFICATE"u8,
         Bytes: certBytes
-    ))));
+    )));
 }
 
 internal static readonly @string gtsIntermediate = """
@@ -1463,48 +1489,6 @@ public static void TestUnknownAuthorityError(ж<testing.T> Ꮡt) {
     }
 }
 
-partial struct nameConstraintTestsᴛ1 /*dyn*/ {
-    internal @string constraint, domain;
-    internal bool expectError;
-    internal bool shouldMatch;
-}
-internal static slice<nameConstraintTestsᴛ1> nameConstraintTests = new nameConstraintTestsᴛ1[]{
-    new(""u8, "anything.com"u8, false, true),
-    new("example.com"u8, "example.com"u8, false, true),
-    new("example.com."u8, "example.com"u8, true, false),
-    new("example.com"u8, "example.com."u8, true, false),
-    new("example.com"u8, "ExAmPle.coM"u8, false, true),
-    new("example.com"u8, "exampl1.com"u8, false, false),
-    new("example.com"u8, "www.ExAmPle.coM"u8, false, true),
-    new("example.com"u8, "sub.www.ExAmPle.coM"u8, false, true),
-    new("example.com"u8, "notexample.com"u8, false, false),
-    new(".example.com"u8, "example.com"u8, false, false),
-    new(".example.com"u8, "www.example.com"u8, false, true),
-    new(".example.com"u8, "www..example.com"u8, true, false)
-}.slice();
-
-public static void TestNameConstraints(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (i, test) in nameConstraintTests) {
-        var (result, err) = matchDomainConstraint(test.domain, test.constraint, false, new map<@string, slice<@string>>{}, new map<@string, slice<@string>>{});
-
-        if (err != default! && !test.expectError) {
-            Ꮡt.Errorf("unexpected error for test #%d: domain=%s, constraint=%s, err=%s"u8, i, test.domain, test.constraint, err);
-            continue;
-        }
-
-        if (err == default! && test.expectError) {
-            Ꮡt.Errorf("unexpected success for test #%d: domain=%s, constraint=%s"u8, i, test.domain, test.constraint);
-            continue;
-        }
-
-        if (result != test.shouldMatch) {
-            Ꮡt.Errorf("unexpected result for test #%d: domain=%s, constraint=%s, result=%t"u8, i, test.domain, test.constraint, result);
-        }
-    }
-}
-
 internal static readonly @string selfSignedWithCommonName = """
 -----BEGIN CERTIFICATE-----
 MIIDCjCCAfKgAwIBAgIBADANBgkqhkiG9w0BAQsFADAaMQswCQYDVQQKEwJjYTEL
@@ -1680,12 +1664,15 @@ public static void TestValidHostname(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivateKey, error) generateCert(@string cn, bool isCA, ж<global::go.crypto.x509_package.Certificate> Ꮡissuer, cryptoꓸPrivateKey issuerKey) {
+internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivateKey, error) generateCert(@string cn, bool isCA, ж<global::go.crypto.x509_package.Certificate> Ꮡissuer, cryptoꓸPrivateKey issuerKey, cryptoꓸPrivateKey priv) {
     ref var issuer = ref Ꮡissuer.DerefOrNull();
 
-    var (priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (priv == default!) {
+        error errΔ1 = default!;
+        (priv, errΔ1) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
+        if (errΔ1 != default!) {
+            return (default!, default!, errΔ1);
+        }
     }
 
     var serialNumberLimit = @new<bigꓸInt>().Lsh(big.NewInt(1), 128);
@@ -1696,6 +1683,8 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
         Subject: new pkix.Name(CommonName: cn),
         NotBefore: time.Now().Add((time.Duration)(-3600000000000L)),
         NotAfter: time.Now().Add((time.Duration)(86400000000000L)),
+        DNSNames: new @string[]{rand.Text()}.slice(),
+
         KeyUsage: (global::go.crypto.x509_package.KeyUsage)((global::go.crypto.x509_package.KeyUsage)(KeyUsageKeyEncipherment | KeyUsageDigitalSignature) | KeyUsageCertSign),
         ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
         BasicConstraintsValid: true,
@@ -1703,10 +1692,10 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
     ));
     if (Ꮡissuer == nil) {
         Ꮡissuer = template; issuer = ref Ꮡissuer.DerefOrNull();
-        issuerKey = priv.OrTypedNil();
+        issuerKey = priv;
     }
 
-    (var derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡissuer, priv.Public(), issuerKey);
+    var (derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡissuer, priv._<crypto.Signer>().Public(), issuerKey);
     if (err != default!) {
         return (default!, default!, err);
     }
@@ -1715,93 +1704,93 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
         return (default!, default!, err);
     }
 
-    return (cert, priv.OrTypedNil(), default!);
+    return (cert, priv, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object skippingGenerationOfAˢ = (@string)"skipping generation of a long chain of certificates in short mode"u8;
-internal static readonly @string rootCaˢ = "Root CA"u8;
+internal static readonly object skippingGenerationOfAˢ = (@string)"skipping generation of a long chains of certificates in short mode"u8;
 internal static readonly @string intermediateCaˢ = "Intermediate CA"u8;
 internal static readonly @string leafˢ = "Leaf"u8;
-internal static readonly @string signatureCheckAttemptsˢ = "signature check attempts limit"u8;
 
-public static void TestPathologicalChain(ж<testing.T> Ꮡt) {
-    if (testing.Short()) {
-        Ꮡt.Skip(skippingGenerationOfAˢ);
-    }
-
-    // Build a chain where all intermediates share the same subject, to hit the
-    // path building worst behavior.
-    var (roots, intermediates) = (NewCertPool(), NewCertPool());
-
-    var (parent, parentKey, err) = generateCert(rootCaˢ, true, nil, default!);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
-    roots.AddCert(parent);
-
-    for (nint i = 1; i < 100; i++) {
-        (parent, parentKey, err) = generateCert(intermediateCaˢ, true, parent, parentKey);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-        intermediates.AddCert(parent);
-    }
-
-    (var leaf, _, err) = generateCert(leafˢ, false, parent, parentKey);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
-
-    var start = time.Now();
-    (_, err) = leaf.Verify(new VerifyOptions(
-        Roots: roots,
-        Intermediates: intermediates
-    ));
-    Ꮡt.Logf("verification took %v"u8, time.Since(start));
-
-    if (err == default! || !strings.Contains(err.Error(), signatureCheckAttemptsˢ)) {
-        Ꮡt.Errorf("expected verification to fail with a signature checks limit error; got %v"u8, err);
-    }
+internal partial struct TestPathologicalChains_type /*dyn*/ {
+    internal bool sameSubject;
+    internal bool sameKey;
 }
 
-public static void TestLongChain(ж<testing.T> Ꮡt) {
+public static void TestPathologicalChains(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingGenerationOfAˢ);
     }
 
-    var (roots, intermediates) = (NewCertPool(), NewCertPool());
+    // Test four pathological cases, where the intermediates in the chain have
+    // the same/different subjects and the same/different keys. This covers a
+    // number of cases where the chain building algorithm might be inefficient,
+    // such as when there are many intermediates with the same subject but
+    // different keys, many intermediates with the same key but different
+    // subjects, many intermediates with the same subject and key, or many
+    // intermediates with different subjects and keys.
+    //
+    // The worst case for our algorithm is when all of the intermediates share
+    // both subject and key, in which case all of the intermediates appear to
+    // have signed each other, causing us to see a large number of potential
+    // parents for each intermediate.
+    //
+    // All of these cases, Certificate.Verify should return errSignatureLimit.
+    //
+    // In all cases, don't have a root in the pool, so a valid chain cannot actually be built.
 
-    var (parent, parentKey, err) = generateCert(rootCaˢ, true, nil, default!);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
-    roots.AddCert(parent);
+    foreach (var (_, vᴛ1) in new TestPathologicalChains_type[]{
+        new(sameSubject: false, sameKey: false),
+        new(sameSubject: true, sameKey: false),
+        new(sameSubject: false, sameKey: true),
+        new(sameSubject: true, sameKey: true)
+    }.slice()) {
+        ref var test = ref heap(new TestPathologicalChains_type(), out var Ꮡtest);
+        test = vᴛ1;
 
-    for (nint i = 1; i < 15; i++) {
-        @string name = fmt.Sprintf("Intermediate CA #%d"u8, i);
-        (parent, parentKey, err) = generateCert(name, true, parent, parentKey);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
-        }
-        intermediates.AddCert(parent);
-    }
+        var testʗ1 = test;
+        Ꮡt.Run(fmt.Sprintf("sameSubject=%t,sameKey=%t"u8, test.sameSubject, test.sameKey), (ж<testing.T> tΔ1) => {
+            var intermediates = NewCertPool();
 
-    (var leaf, _, err) = generateCert(leafˢ, false, parent, parentKey);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
+            cryptoꓸPrivateKey intermediateKey = default!;
+            if (testʗ1.sameKey) {
+                error errΔ1 = default!;
+                (intermediateKey, errΔ1) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
+                if (errΔ1 != default!) {
+                    tΔ1.Fatal(errΔ1);
+                }
+            }
 
-    var start = time.Now();
-    {
-        var (_, errΔ1) = leaf.Verify(new VerifyOptions(
-            Roots: roots,
-            Intermediates: intermediates
-        )); if (errΔ1 != default!) {
-            Ꮡt.Error(errΔ1);
-        }
+            cryptoꓸPrivateKey leafSigner = default!;
+            ж<global::go.crypto.x509_package.Certificate> intermediate = default!;
+            foreach (var i in range(100)) {
+                @string cn = intermediateCaˢ;
+                if (!testʗ1.sameSubject) {
+                    cn += fmt.Sprintf(" #%d"u8, i);
+                }
+                error errΔ2 = default!;
+                (intermediate, leafSigner, errΔ2) = generateCert(cn, true, intermediate, leafSigner, intermediateKey);
+                if (errΔ2 != default!) {
+                    tΔ1.Fatal(errΔ2);
+                }
+                intermediates.AddCert(intermediate);
+            }
+
+            var (leaf, _, err) = generateCert(leafˢ, false, intermediate, leafSigner, default!);
+            if (err != default!) {
+                tΔ1.Fatal(err);
+            }
+
+            var start = time.Now();
+            (_, err) = leaf.Verify(new VerifyOptions(
+                Roots: NewCertPool(),
+                Intermediates: intermediates
+            ));
+            tΔ1.Logf("verification took %v"u8, time.Since(start));
+        });
     }
-    Ꮡt.Logf("verification took %v"u8, time.Since(start));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1875,7 +1864,7 @@ internal static (nint, error) macosMajorVersion(ж<testing.T> Ꮡt) {
         }
         return (0, fmt.Errorf("%v: %v"u8, cmd.OrTypedNil(), err));
     }
-    var (before, _, ok) = strings.Cut(((@string)@out), "."u8);
+    var (before, _, ok) = strings.Cut((@string)@out, "."u8);
     (var major, err) = strconv.Atoi(before);
     if (!ok || err != default!) {
         return (0, fmt.Errorf("%v: unexpected output: %q"u8, cmd.OrTypedNil(), @out));
@@ -2077,11 +2066,13 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
 }
 
 internal static slice<@string> chainsToStrings(slice<slice<ж<global::go.crypto.x509_package.Certificate>>> chains) {
+    var namesᴷ = new stackAppend<@string>();
+
     var chainStrings = new @string[]{}.slice();
     foreach (var (_, chain) in chains) {
         var names = new @string[]{}.slice();
         foreach (var (_, c) in chain) {
-            names = append(names, (~c).Subject.String());
+            names = append(namesᴷ, names, (~c).Subject.String());
         }
         chainStrings = append(chainStrings, strings.Join(names, " -> "u8));
     }
@@ -2933,7 +2924,7 @@ internal static readonly @string testdataPolicyLeafˢ2 = "testdata/policy_leaf_r
 
 internal partial struct TestPoliciesValid_testCase /*dyn*/ {
     internal slice<ж<global::go.crypto.x509_package.Certificate>> chain;
-    internal slice<global::go.crypto.x509_package.OID> policies;
+    internal slice<global::go.crypto.x509_package.ΔOID> policies;
     internal bool requireExplicitPolicy;
     internal bool inhibitPolicyMapping;
     internal bool inhibitAnyPolicy;
@@ -2949,6 +2940,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
     // TestParsePolicies.
     //
     // [0] https://boringssl.googlesource.com/boringssl/+/264f4f7a958af6c4ccb04662e302a99dfa7c5b85/crypto/x509/x509_test.cc#5913
+
     var testOID1 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 1}.slice());
     var testOID2 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 2}.slice());
     var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
@@ -3000,31 +2992,31 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID2}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID2}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1, testOID2}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1, testOID2}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1, testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1, testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
@@ -3033,23 +3025,23 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // in any valid policies.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: true
         ),
         // However, a CA with policy constraints can require an explicit policy.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: false
         ),
         // requireExplicitPolicy applies even if the application does not configure a
@@ -3067,48 +3059,48 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: false
         ),
         // requireExplicitPolicy is a count of certificates to skip. If the value is
         // not zero by the end of the chain, it doesn't count.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require1, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: false
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require2, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: true
         ),
         // If multiple certificates specify the constraint, the more constrained value
         // wins.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate_require1, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: false
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate_require2, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             valid: false
         ),
         // An intermediate that requires an explicit policy, but then specifies no
         // policies should fail verification as a result.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require_no_policies, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             valid: false
         ),
         // A constrained intermediate's policy extension has a duplicate policy, which
@@ -3122,13 +3114,13 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // valid policies are the intersection.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
         ),
@@ -3136,33 +3128,33 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // valid policies are the intersection.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
         ),
         // Both assert anyPolicy. All policies are valid.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         // With just a trust anchor, policy checking silently succeeds.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
@@ -3170,13 +3162,13 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // OID3. Nodes should not be created for the other mappings.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID4}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
             requireExplicitPolicy: true,
             valid: false
         ),
@@ -3185,14 +3177,14 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // anyPolicy edge cases).
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             inhibitPolicyMapping: true,
             valid: false
         ),
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root_cross_inhibit_mapping, root2}.slice(),
-            policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
         )
@@ -3210,19 +3202,19 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // acceptable for OID3.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid2, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
@@ -3236,7 +3228,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // {OID1, OID2} and no other node allows OID3.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid3, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: useAny
             ),
@@ -3249,7 +3241,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // OID3 (mapped) policies.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
                 requireExplicitPolicy: true,
                 valid: !useAny
             ),
@@ -3257,31 +3249,31 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // the other.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID4}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID5}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID5}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid5, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID4}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid5, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID5}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID5}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.OID[]{testOID4, testOID5}.slice(),
+                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4, testOID5}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
             )
@@ -3309,7 +3301,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509NoValidChainsBuiltˢ2 = "x509: no valid chains built: all candidate chains have invalid policies"u8;
+internal static readonly @string x509NoValidChainsBuilt1ˢ = "x509: no valid chains built: 1 candidate chains with invalid policies"u8;
 internal static readonly object unexpectedSuccessInvalidˢ = (@string)"unexpected success, invalid policy shouldn't be bypassed by passing VerifyOptions.KeyUsages with ExtKeyUsageAny"u8;
 
 public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
@@ -3329,7 +3321,7 @@ public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
     var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
     var (root, intermediate, leaf) = (loadTestCert(Ꮡt, testdataPolicyRootPemˢ), loadTestCert(Ꮡt, testdataPolicyˢ6), loadTestCert(Ꮡt, testdataPolicyLeafPemˢ));
 
-    @string expectedErr = x509NoValidChainsBuiltˢ2;
+    @string expectedErr = x509NoValidChainsBuilt1ˢ;
 
     var (roots, intermediates) = (NewCertPool(), NewCertPool());
     roots.AddCert(root);
@@ -3339,7 +3331,7 @@ public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
         Roots: roots,
         Intermediates: intermediates,
         KeyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice(),
-        CertificatePolicies: new global::go.crypto.x509_package.OID[]{testOID3}.slice()
+        CertificatePolicies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice()
     ));
     if (err == default!){
         Ꮡt.Fatal(unexpectedSuccessInvalidˢ);

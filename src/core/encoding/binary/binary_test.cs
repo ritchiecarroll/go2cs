@@ -52,6 +52,7 @@ internal static ж<Struct> Ꮡs = new StandardBox<Struct>(new Struct(
     0x1112,
     0x13141516,
     0x1718191a1b1c1d1eUL,
+
     math.Float32frombits(0x1f202122),
     math.Float64frombits(0x232425262728292aUL),
     complex(
@@ -60,7 +61,9 @@ internal static ж<Struct> Ꮡs = new StandardBox<Struct>(new Struct(
     complex(
         math.Float64frombits(0x333435363738393aUL),
         math.Float64frombits(0x3b3c3d3e3f404142UL)),
+
     new uint8[]{0x43, 0x44, 0x45, 0x46}.array(),
+
     true,
     new bool[]{true, false, true, false}.array()
 ));
@@ -75,11 +78,14 @@ internal static slice<byte> big = new byte[]{
     17, 18,
     19, 20, 21, 22,
     23, 24, 25, 26, 27, 28, 29, 30,
+
     31, 32, 33, 34,
     35, 36, 37, 38, 39, 40, 41, 42,
     43, 44, 45, 46, 47, 48, 49, 50,
     51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66,
+
     67, 68, 69, 70,
+
     1,
     1, 0, 1, 0
 }.slice();
@@ -93,11 +99,14 @@ internal static slice<byte> little = new byte[]{
     18, 17,
     22, 21, 20, 19,
     30, 29, 28, 27, 26, 25, 24, 23,
+
     34, 33, 32, 31,
     42, 41, 40, 39, 38, 37, 36, 35,
     46, 45, 44, 43, 50, 49, 48, 47,
     58, 57, 56, 55, 54, 53, 52, 51, 66, 65, 64, 63, 62, 61, 60, 59,
+
     67, 68, 69, 70,
+
     1,
     1, 0, 1, 0
 }.slice();
@@ -537,26 +546,26 @@ public static void TestSizeInvalid(ж<testing.T> Ꮡt) {
     var testcases = new any[]{
         (nint)0,
         @new<nint>(),
-        ((ж<nint>)nil),
+        (ж<nint>)nil,
         new nuint[]{}.array(1),
         Ꮡ(new array<nuint>(1)),
         ж<array<nuint>>.NilBoxOfDims(1L),
         new nint[]{}.slice(),
         slice<nint>(default!),
         @new<slice<nint>>(),
-        ((ж<slice<nint>>)nil),
-        ((ж<int8>)nil),
-        ((ж<uint8>)nil),
-        ((ж<int16>)nil),
-        ((ж<uint16>)nil),
-        ((ж<int32>)nil),
-        ((ж<uint32>)nil),
-        ((ж<int64>)nil),
-        ((ж<uint64>)nil),
-        ((ж<float32>)nil),
-        ((ж<float64>)nil),
-        ((ж<complex64>)nil),
-        ((ж<complex128>)nil)
+        (ж<slice<nint>>)nil,
+        (ж<int8>)nil,
+        (ж<uint8>)nil,
+        (ж<int16>)nil,
+        (ж<uint16>)nil,
+        (ж<int32>)nil,
+        (ж<uint32>)nil,
+        (ж<int64>)nil,
+        (ж<uint64>)nil,
+        (ж<float32>)nil,
+        (ж<float64>)nil,
+        (ж<complex64>)nil,
+        (ж<complex128>)nil
     }.slice();
     foreach (var (_, tc) in testcases) {
         {
@@ -630,7 +639,7 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
                     }
                 }
             }
-            read((nint)(0));
+            read((nint)0);
             ref var s = ref heap<ж<EmptyStruct>>(out var Ꮡs);
             s = @new<EmptyStruct>();
             read(Ꮡs);
@@ -811,10 +820,12 @@ internal static void testReadInvalidDestination(ж<testing.T> Ꮡt, global::go.e
         (int16)0,
         (int32)0,
         (int64)0,
+
         (uint8)0,
         (uint16)0,
         (uint32)0,
         (uint64)0,
+
         (bool)false
     }.slice();
 

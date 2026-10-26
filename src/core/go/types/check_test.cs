@@ -64,6 +64,8 @@ internal static ж<bool> verifyErrors = flag.Bool("verify"u8, false, "verify err
 internal static ж<token.FileSet> fset = token.NewFileSet();
 
 internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> Ꮡt, slice<@string> filenames, slice<slice<byte>> srcs, parser.Mode mode) {
+    var filesᴷ = new stackAppend<ж<ast.File>>(moves: true);
+
     slice<ж<ast.File>> files = default!;
     slice<error> errlist = default!;
     foreach (var (i, filename) in filenames) {
@@ -71,7 +73,7 @@ internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> Ꮡ
         if (@file == nil) {
             Ꮡt.Fatalf("%s: %s"u8, filename, err);
         }
-        files = append(files, @file);
+        files = append(filesᴷ, files, @file);
         if (err != default!) {
             {
                 var (list, _) = err._<scanner.ErrorList>(ᐧ); if (len(list) > 0){
@@ -84,6 +86,7 @@ internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> Ꮡ
             }
         }
     }
+    files = move2heap(filesᴷ, files);
     return (files, errlist);
 }
 
@@ -132,7 +135,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
         return fmt.Errorf("flags comment line too long"u8);
     }
 
-    return Ꮡflags.Parse(strings.Fields(((@string)(src.slice(0, end)))));
+    return Ꮡflags.Parse(strings.Fields((@string)(src.slice(0, end))));
 }
 
 // testFiles type-checks the package consisting of the given files, and
@@ -174,6 +177,7 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
     try {
         var opts = optsʗp.sslice();
         ref var t = ref Ꮡt.DerefOrNull();
+        var indicesᴷ = new stackAppend<nint>();
 
         if (len(filenames) == 0) {
             Ꮡt.Fatal(noSourceFilesˢ);
@@ -321,7 +325,7 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                         continue;
                     }
                 }
-                indices = append(indices, i);
+                indices = append(indicesᴷ, indices, i);
             }
             if (len(indices) == 0) {
                 Ꮡt.Errorf("%s: no error expected: %q"u8, gotPos, gotMsg);
@@ -385,7 +389,7 @@ internal static readonly @string go116codeˢ = "go116code"u8;
 
 internal static errors.Code readCode(typesꓸError err) {
     var v = reflect.ValueOf(err);
-    return ((errors.Code)(nint)v.FieldByName(go116codeˢ).Int());
+    return (errors.Code)(nint)v.FieldByName(go116codeˢ).Int();
 }
 
 // boolFieldAddr(conf, name) returns the address of the boolean field conf.<name>.
@@ -478,23 +482,23 @@ internal static Action<ж<types.Config>> withSizes(types.Sizes sizes) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ12 = @"package index; var s []byte; var _ = s[int64 /* ERRORx ""int64\\(1\\) << 40 \\(.*\\) overflows int"" */ (1) << 40]"u8;
+internal static readonly @string srcᶜ13 = @"package index; var s []byte; var _ = s[int64 /* ERRORx ""int64\\(1\\) << 40 \\(.*\\) overflows int"" */ (1) << 40]"u8;
 
 // TestIndexRepresentability tests that constant index operands must
 // be representable as int even if they already have a type that can
 // represent larger values.
 public static void TestIndexRepresentability(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ12;
+    @string src = srcᶜ13;
     testFiles(Ꮡt, new @string[]{"index.go"u8}.slice(), new slice<byte>[]{slice<byte>(src)}.slice(), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ13 = @"package issue47243; var a uint64; var _ = a << uint64(4294967296)"u8;
+internal static readonly @string srcᶜ14 = @"package issue47243; var a uint64; var _ = a << uint64(4294967296)"u8;
 
 public static void TestIssue47243_TypedRHS(ж<testing.T> Ꮡt) {
     // The RHS of the shift expression below overflows uint on 32bit platforms,
     // but this is OK as it is explicitly typed.
-    @string src = srcᶜ13;                                                    // uint64(1<<32)
+    @string src = srcᶜ14;                                                    // uint64(1<<32)
     testFiles(Ꮡt, new @string[]{"p.go"u8}.slice(), new slice<byte>[]{slice<byte>(src)}.slice(), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
 
@@ -502,19 +506,8 @@ public static void TestIssue47243_TypedRHS(ж<testing.T> Ꮡt) {
 internal static readonly @string internalTypesTestdataˢ = "../../internal/types/testdata/check"u8;
 
 public static void TestCheck(ж<testing.T> Ꮡt) {
-    GoFrame ᒐ = default;
-    try {
-        var old = buildcfg.Experiment.RangeFunc;
-        defer(() => {
-            buildcfg.Experiment.RangeFunc = old;
-        }, ref ᒐ);
-        buildcfg.Experiment.RangeFunc = true;
-
-        DefPredeclaredTestFuncs();
-        testDirFiles(Ꮡt, internalTypesTestdataˢ, false);
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
+    DefPredeclaredTestFuncs();
+    testDirFiles(Ꮡt, internalTypesTestdataˢ, false);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

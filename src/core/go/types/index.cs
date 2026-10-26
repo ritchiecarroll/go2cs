@@ -7,9 +7,10 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using iter = iter_package;
 
 partial class types_package {
 
@@ -43,7 +44,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     }
     if (exprᴛ1 == value) {
         {
-            var (sig, _) = under(x.typ)._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+            var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
                 // function instantiation
                 return true;
             }
@@ -59,7 +60,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     // ordinary index expression
     var valid = false;
     var length = (int64)(-1); // valid if >= 0
-    switch (under(x.typ).type()) {
+    switch (x.typ.Underlying().type()) {
     case ж<Basic> typ: {
         if (isString(new BasicжΔType(typ))) {
             valid = true;
@@ -85,7 +86,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     }
     case ж<Pointer> typ: {
         {
-            var (typΔ1, _) = under((~typ).@base)._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
+            var (typΔ1, _) = (~typ).@base.Underlying()._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
                 valid = true;
                 length = typΔ1.Value.len;
                 x.mode = variable;
@@ -146,7 +147,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
             }
             case ж<Pointer> t: {
                 {
-                    var (tΔ1, _) = under((~t).@base)._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
+                    var (tΔ1, _) = (~t).@base.Underlying()._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
                         l = tΔ1.Value.len;
                         eΔ1 = tΔ1.Value.elem;
                     }
@@ -213,7 +214,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
 
     if (!valid) {
         // types2 uses the position of '[' for the error
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonIndexableOperand, invalidOp + "cannot index %s", Ꮡx.OrTypedNil());
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonIndexableOperand, "cannot index %s"u8, Ꮡx.OrTypedNil());
         Ꮡcheck.use(e.indices.ꓸꓸꓸ);
         x.mode = invalid;
         return false;
@@ -249,11 +250,53 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         return;
     }
 
+    // determine common underlying type cu
+    ref var ct = ref heap<ΔType>(out var Ꮡct);              // type and respective common underlying type
+    ref var cu = ref heap<ΔType>(out var Ꮡcu);
+    bool hasString = default!;
+    // TODO(adonovan): use go1.23 "range typeset()".
+    typeset(x.typ)((ΔType t, ΔType u) => {
+        if (u == default!) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: no specific type in %s"u8, Ꮡx.OrTypedNil(), Ꮡx.Value.typ);
+            Ꮡcu.ValueSlot = default!;
+            return false;
+        }
+
+        // Treat strings like byte slices but remember that we saw a string.
+        if (isString(u)) {
+            u = new SliceжΔType(NewSlice(universeByte));
+            hasString = true;
+        }
+
+        // If this is the first type we're seeing, we're done.
+        if (Ꮡcu.ValueSlot == default!) {
+            (Ꮡct.ValueSlot, Ꮡcu.ValueSlot) = (t, u);
+            return true;
+        }
+
+        // Otherwise, the current type must have the same underlying type as all previous types.
+        if (!Identical(Ꮡcu.ValueSlot, u)) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: %s and %s have different underlying types"u8, Ꮡx.OrTypedNil(), Ꮡct.ValueSlot, t);
+            Ꮡcu.ValueSlot = default!;
+            return false;
+        }
+
+        return true;
+    });
+    if (hasString) {
+        // If we saw a string, proceed with string type,
+        // but don't go from untyped string to string.
+        cu = new BasicжΔType(Typ[ΔString]);
+        if (!isTypeParam(x.typ)) {
+            cu = x.typ.Underlying(); // untyped string remains untyped
+        }
+    }
+
     var valid = false;
     var length = (int64)(-1); // valid if >= 0
-    switch (coreString(x.typ).type()) {
+    switch (cu.type()) {
     case null: {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s: %s has no core type", Ꮡx.OrTypedNil(), x.typ);
+        // error reported above
         x.mode = invalid;
         return;
     }
@@ -284,7 +327,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         valid = true;
         length = u.Value.len;
         if (x.mode != variable) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s (value not addressable)", Ꮡx.OrTypedNil());
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice unaddressable value %s"u8, Ꮡx.OrTypedNil());
             x.mode = invalid;
             return;
         }
@@ -293,7 +336,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }
     case ж<Pointer> u: {
         {
-            var (uΔ1, _) = under((~u).@base)._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
+            var (uΔ1, _) = (~u).@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
                 valid = true;
                 length = uΔ1.Value.len;
                 x.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~uΔ1).elem)));
@@ -308,7 +351,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }}
 
     if (!valid) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s", Ꮡx.OrTypedNil());
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s"u8, Ꮡx.OrTypedNil());
         x.mode = invalid;
         return;
     }

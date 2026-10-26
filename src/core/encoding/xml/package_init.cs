@@ -8,7 +8,6 @@ namespace go.encoding;
 
 partial class xml_package {
     static xml_package() {
-        initᴛHTMLEntity();
         initᴛHTMLAutoClose();
     }
 } // end xml_package

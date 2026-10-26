@@ -60,19 +60,37 @@
 // assembly both sides see, and GoAsyncIO is the descriptor-keyed rendezvous: the poller registers a
 // readiness sink for its descriptor at pollOpen, and the callback below signals it knowing only the
 // descriptor and the mode -- which is all a completion callback CAN know. MODE is known from the
-// WRAPPER, not from the operation: WSARecv/AcceptEx are always the read operation and
-// WSASend/ConnectEx always the write one, because each FD has exactly one rop and one wop for its
-// lifetime.
+// WRAPPER, not from the operation: WSARecv/AcceptEx are always a read and WSASend/ConnectEx always a
+// write.
 //
-// WHERE THE CLR ASSOCIATION IS MADE, and why it is LAZY. Binding happens at the FIRST SUBMIT, not at
-// pollOpen (design §4.2 as amended at S2). Go's poller REJECTS completions it does not own --
+// GO 1.26 POOLS THE OPERATIONS, which is why a record is BOUND as well as keyed. Through Go 1.24
+// each FD owned exactly one rop and one wop for its lifetime, so the key alone fixed the descriptor
+// and the mode. Go 1.26's internal/poll takes every operation from a process-wide sync.Pool
+// (fd_windows.go's operationPool), and the corpus's sync.Pool really reuses, so one key arrives for
+// several sockets and for both modes. operationFor therefore asks golib for the record bound to THIS
+// (descriptor, mode): GoAsyncIO.GetOrBindOperationState retires a record bound to another pair
+// (disposing it, which frees its control block and drops it from its socket's list) and builds a new
+// one. Retiring is safe because execIO puts an operation back in the pool only after harvesting it.
+//
+// WHERE THE CLR ASSOCIATION IS MADE, and why it is LAZY FOR A SOCKET. A socket is bound at its FIRST
+// SUBMIT, not at pollOpen (design §4.2 as amended at S2); every other pollable handle is bound at
+// pollOpen, as Go binds it (GoAssociateAtOpen, below). Go's poller REJECTS completions it does not own --
 // pollOperationFromOverlappedEntry compares the completion key against the pollDesc in the operation
 // and drops a mismatch (go.dev/issue/58870) -- while ThreadPoolBoundHandle has no equivalent: its
 // callback resolves state FROM the NativeOverlapped it allocated, so a FOREIGN overlapped arriving at
 // that port is MISREAD rather than ignored. internal/poll has a live producer of one (FD.WSAIoctl
 // passes the CALLER's syscall.Overlapped, which being all-scalar in a standard box really does pin
 // and really does reach the kernel). Binding lazily removes the hazard structurally: a socket that
-// only ever sees foreign overlapped IO is never associated at all.
+// only ever sees foreign overlapped IO is never associated at all. That producer is a socket one, so
+// the lazy bind stops at sockets.
+//
+// A DISASSOCIATED SOCKET IS NEVER BOUND AGAIN. net's dup() and os's File.Fd() call internal/poll's
+// DisassociateIOCP, whose hand-own (internal/poll/windows/fd_windows_impl.cs) marks the descriptor
+// with GoAsyncIO.MarkUnassociated. A socket that was never bound has no port to replace, and
+// NtSetInformationFile(FileReplaceCompletionInformation) answers STATUS_INVALID_PARAMETER for it, so
+// the hand-own skips the call there. From the mark on, the factory builds records with no binding, and
+// they submit with the caller's own event (see OverlappedOp), which is what Go's waitIO waits on once
+// the FD is no longer pollable.
 //
 // THE OVERLAPPED IS FREED AT THE NEXT SUBMIT, NOT IN THE CALLBACK, and that is deliberate. execIO
 // harvests with WSAGetOverlappedResult AFTER its wait returns, and that call reads Internal /
@@ -167,10 +185,46 @@ partial class syscall_package
             Bound = ThreadPoolBoundHandle.BindHandle(m_handle);
         }
 
+        private SocketBinding(nuint descriptor, UnownedHandle handle, ThreadPoolBoundHandle bound)
+        {
+            Descriptor = descriptor;
+            m_handle = handle;
+            Bound = bound;
+        }
+
+        // The bind GoAssociateAtOpen asks for, or null when the OS refuses it. The ONE exception
+        // taken as a refusal is BindHandle's ArgumentException, which the CLR raises when
+        // CreateIoCompletionPort refuses the handle: its file object already belongs to a port (a
+        // second handle to one pipe, as under a shell's `2>&1`), or it was not opened for overlapped
+        // IO. Go's netpollopen returns the same refusal as an errno, and either way the FD belongs on
+        // the event path. Nothing broader is caught.
+        internal static SocketBinding? TryBind(nuint descriptor)
+        {
+            UnownedHandle handle = new(unchecked((nint)descriptor));
+
+            try
+            {
+                return new SocketBinding(descriptor, handle, ThreadPoolBoundHandle.BindHandle(handle));
+            }
+            catch (ArgumentException)
+            {
+                handle.Dispose();
+                return null;
+            }
+        }
+
         internal void Track(OverlappedOp operation)
         {
             lock (m_operations)
                 m_operations.Add(operation);
+        }
+
+        // A record retired by a re-bind (see the file header) leaves the list it was tracked in, so
+        // this socket's teardown does not visit it again.
+        internal void Untrack(OverlappedOp operation)
+        {
+            lock (m_operations)
+                m_operations.Remove(operation);
         }
 
         public void Dispose()
@@ -187,9 +241,11 @@ partial class syscall_package
                 m_operations.Clear();
             }
 
+            // Removal is conditional on the key still naming THIS record: a pooled key may have been
+            // re-bound to another socket's live record since it was tracked here.
             foreach (OverlappedOp operation in operations)
             {
-                GoAsyncIO.RemoveOperationState(operation.Key);
+                GoAsyncIO.RemoveOperationState(operation.Key, operation);
                 operation.Dispose();
             }
 
@@ -201,17 +257,74 @@ partial class syscall_package
     private static SocketBinding bindingFor(nuint descriptor) =>
         (SocketBinding)GoAsyncIO.GetOrCreateDescriptorState(descriptor, () => new SocketBinding(descriptor));
 
+    // ---- The association at open -----------------------------------------------------------------
+
+    // Called by internal/poll's runtime_pollOpen BEFORE it publishes anything for the handle. Go's
+    // netpollopen associates every pollable handle with its completion port at open and returns a
+    // refusal as pollOpen's errno; os.newFile ignores that error, the FD's pd keeps runtimeCtx 0, and
+    // execIO gives the FD's operations their own event (`o.o.HEvent = h | 1`). Two handles to ONE pipe
+    // object reach exactly that state under a shell's `2>&1`: the association belongs to the file
+    // object, so stdout's bind succeeds and stderr's is refused. Returns 0, or the errno to refuse
+    // with: ERROR_INVALID_PARAMETER, which is what CreateIoCompletionPort answers there.
+    //
+    // A SOCKET IS LEFT TO ITS FIRST SUBMIT (the file header). getsockopt(SO_TYPE) draws that line,
+    // because it succeeds only on a socket, while GetFileType reports a socket as FILE_TYPE_PIPE. A
+    // process that has not started Winsock gets WSANOTINITIALISED for every handle, and binds it here,
+    // which is what Go does with every handle.
+    public static Errno GoAssociateAtOpen(ΔHandle handle) {
+        nuint descriptor = (nuint)(uintptr)handle;
+
+        if (isSocket(handle)) {
+            return 0;
+        }
+
+        SocketBinding? binding = SocketBinding.TryBind(descriptor);
+
+        if (binding is null) {
+            return _ERROR_INVALID_PARAMETER;
+        }
+
+        // The kernel just accepted the bind, so no live handle holds this number, and a binding still
+        // filed under it was left by a handle closed without pollClose (a File whose handle was closed
+        // behind it, or one of two Files over one handle). It is replaced: Go keeps no such record and
+        // opens the new handle, and the old FD's pollClose retires only what is still its own.
+        GoAsyncIO.SetDescriptorState(descriptor, binding);
+
+        return 0;
+    }
+
+    // SO_TYPE is 0x1008 in winsock2.h; Go's syscall does not declare it for windows.
+    private const int32 soType = 0x1008;
+
+    private static unsafe bool isSocket(ΔHandle handle) {
+        int32 type = 0;
+        int32 length = sizeof(int32);
+
+        var (r1, _, _) = SyscallN(procgetsockopt.Addr(), (uintptr)handle, (uintptr)SOL_SOCKET, (uintptr)soType, (uintptr)(void*)&type, (uintptr)(void*)&length);
+
+        return r1 != socket_error;
+    }
+
     // ---- The per-operation record ----------------------------------------------------------------
 
-    // One record per (FD, mode) for the FD's lifetime, holding every piece of state the kernel is
-    // allowed to see: the NativeOverlapped the operation is identified by, the native WSABUF array or
-    // accept staging block, and -- crucially -- the ж<byte> BOXES whose pins hold the caller's own
-    // buffers still. Holding the address would not be enough: the pin is a GCHandle owned by that one
-    // box and released with it, so a later InitBuf dropping the last reference to a box the kernel is
-    // still writing through would unpin memory mid-flight.
+    // One record per binding of an operation to an (FD, mode) pair (see the file header), holding
+    // every piece of state the kernel is allowed to see: the NativeOverlapped the operation is
+    // identified by, the native WSABUF array or accept staging block, and -- crucially -- the ж<byte>
+    // BOXES whose pins hold the caller's own buffers still. Holding the address would not be enough:
+    // the pin is a GCHandle owned by that one box and released with it, so a later InitBuf dropping
+    // the last reference to a box the kernel is still writing through would unpin memory mid-flight.
+    //
+    // A record built for a descriptor the poller has DISASSOCIATED (GoAsyncIO.MarkUnassociated, set by
+    // internal/poll's hand-owned DisassociateIOCP) has no binding at all. Go's execIO gives such an
+    // operation its own event, `o.o.HEvent = h | 1` (the low bit keeps the kernel from queueing a
+    // completion packet), and waitIO's non-pollable arm blocks on that event. So the record submits a
+    // plain native OVERLAPPED that carries the caller's event, and never touches the CLR's port: a
+    // bound overlapped carries no event, and its completion would wake nobody. A BOUND record does
+    // the same for any submit that arrives carrying an event (see Rearm).
     private sealed unsafe class OverlappedOp : IGoAsyncOperation, IDisposable
     {
-        internal readonly SocketBinding Binding;
+        // Null for a record on a disassociated descriptor (see above).
+        internal readonly SocketBinding? Binding;
         internal readonly nint Mode;
 
         // The key this record is filed under in golib's operation table. Kept so that retiring the
@@ -220,8 +333,11 @@ partial class syscall_package
         // of every socket the program ever opened.
         internal readonly object Key;
 
-        private readonly PreAllocatedOverlapped m_preallocated;
+        private readonly PreAllocatedOverlapped? m_preallocated;
         private NativeOverlapped* m_native;
+
+        // Whether m_native came from the binding (and is freed through it) or from native memory.
+        private bool m_nativeBound;
 
         // Native staging: the WSABUF array for send/recv, the AcceptEx output block for accept.
         private void* m_staging;
@@ -230,14 +346,21 @@ partial class syscall_package
         // Boxes whose GCHandles pin the caller's buffers for the flight; replaced at each submit.
         private readonly List<object> m_pins = new();
 
+        // Two threads can retire one record at once: a submit whose pooled key now names another
+        // (descriptor, mode) retires it (GoAsyncIO.GetOrBindOperationState), while its own socket's
+        // pollClose retires every record the socket still tracks (SocketBinding.Dispose). Unguarded,
+        // both freed the one control block, and the second free threw "Handle is not initialized" out
+        // of net's Close. The gate makes the later caller wait for the earlier and then return, and
+        // Rearm takes it too, so a submit can never interleave with a retirement.
+        private readonly object m_gate = new();
         private bool m_disposed;
 
-        internal OverlappedOp(SocketBinding binding, nint mode, object key)
+        internal OverlappedOp(SocketBinding? binding, nint mode, object key)
         {
             Binding = binding;
             Mode = mode;
             Key = key;
-            m_preallocated = new PreAllocatedOverlapped(completed, this, null);
+            m_preallocated = binding is null ? null : new PreAllocatedOverlapped(completed, this, null);
         }
 
         // The address the kernel knows this operation by -- and the ENTIRE contract
@@ -247,14 +370,52 @@ partial class syscall_package
         // Frees the previous control block (see the file header on why not in the callback) and
         // allocates the one this submit will use. A PreAllocatedOverlapped may have only one
         // allocation outstanding, so free-then-allocate is required, not merely tidy.
+        //
+        // A retired record is never submitted on: Go's close ordering (pollClose only after every
+        // read and write has returned) and the pool (an operation returns to it only after its
+        // harvest) keep it so. A path that breaks either panics here, by name, rather than allocating
+        // a block on a record whose free has already happened.
         internal NativeOverlapped* Rearm()
         {
-            releaseOverlapped();
-            m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated);
+            lock (m_gate)
+            {
+                if (m_disposed)
+                    throw panic($"syscall: overlapped submit on a retired operation record (descriptor {Binding?.Descriptor.ToString() ?? "disassociated"}, mode '{(char)Mode}'): its socket was closed or its pooled operation re-bound before the submit");
 
-            m_pins.Clear();
+                releaseOverlapped();
 
-            return m_native;
+                // execIO sets the event on every submit, so it is read here rather than at creation,
+                // and the route is decided PER SUBMIT from it. Go gives an operation its own event
+                // exactly when its FD is not pollable (fd_windows.go's `!fd.isBlocking &&
+                // !fd.pollable()`), and pollable() reads THAT FD's pd.runtimeCtx and disassociated
+                // flag, never a table keyed by the handle's value. Two FDs can share one value
+                // (os.NewFile twice on one handle): the first is bound, the second's pollOpen is
+                // refused, and the second's operation arrives here on a record bound to the first's
+                // association. It carries its event, so it is submitted on that event and never
+                // through the port, where its completion would wake the first FD's waiter.
+                //
+                // A NIL overlapped has no event to read and keeps the route it had before the route
+                // was read per submit. WSASend and WSARecv never bring one here (they take their
+                // synchronous arm, as Go does); the other wrappers still can.
+                ж<Overlapped> Ꮡoverlapped = (ж<Overlapped>)Key;
+                nint eventHandle = Ꮡoverlapped == nil ? 0 : (nint)(nuint)(uintptr)Ꮡoverlapped.Value.HEvent;
+
+                if (Binding is null || eventHandle != 0)
+                {
+                    m_native = (NativeOverlapped*)NativeMemory.AllocZeroed((nuint)sizeof(NativeOverlapped));
+                    m_native->EventHandle = eventHandle;
+                    m_nativeBound = false;
+                }
+                else
+                {
+                    m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated!);
+                    m_nativeBound = true;
+                }
+
+                m_pins.Clear();
+
+                return m_native;
+            }
         }
 
         internal void Pin(object box) => m_pins.Add(box);
@@ -290,28 +451,40 @@ partial class syscall_package
             if (m_native is null)
                 return;
 
-            Binding.Bound.FreeNativeOverlapped(m_native);
+            if (m_nativeBound)
+                Binding!.Bound.FreeNativeOverlapped(m_native);
+            else
+                NativeMemory.Free(m_native);
+
             m_native = null;
         }
 
         public void Dispose()
         {
-            if (m_disposed)
-                return;
-
-            m_disposed = true;
-
-            releaseOverlapped();
-            m_preallocated.Dispose();
-
-            if (m_staging is not null)
+            lock (m_gate)
             {
-                NativeMemory.Free(m_staging);
-                m_staging = null;
-                m_stagingLength = 0;
-            }
+                if (m_disposed)
+                    return;
 
-            m_pins.Clear();
+                m_disposed = true;
+
+                releaseOverlapped();
+                m_preallocated?.Dispose();
+
+                if (m_staging is not null)
+                {
+                    NativeMemory.Free(m_staging);
+                    m_staging = null;
+                    m_stagingLength = 0;
+                }
+
+                m_pins.Clear();
+
+                // Untracked LAST. The socket disposes its bound handle after every record it still
+                // tracks is disposed, and the control block is freed THROUGH that handle, so a record
+                // leaves the list only once its block is freed.
+                Binding?.Untrack(this);
+            }
         }
     }
 
@@ -322,8 +495,9 @@ partial class syscall_package
     // instead. It deliberately does NOT free the overlapped either (see the file header).
     private static unsafe void completed(uint32 errorCode, uint32 numBytes, NativeOverlapped* native)
     {
-        if (ThreadPoolBoundHandle.GetNativeOverlappedState(native) is OverlappedOp operation)
-            GoAsyncIO.Signal(operation.Binding.Descriptor, operation.Mode);
+        // Only a bound record's overlapped can complete here, so Binding is set.
+        if (ThreadPoolBoundHandle.GetNativeOverlappedState(native) is OverlappedOp { Binding: { } binding } operation)
+            GoAsyncIO.Signal(binding.Descriptor, operation.Mode);
     }
 
     // Resolves (creating exactly once) the record for one operation. `Ꮡoverlapped` is the key: see
@@ -335,10 +509,11 @@ partial class syscall_package
     // SAME delegate, deliberately: two code paths that must agree about record identity are two code
     // paths that eventually will not.
     private static readonly Func<nuint, object, nint, object> s_operationFactory = (descriptor, key, mode) => {
-        SocketBinding binding = bindingFor(descriptor);
+        // A disassociated descriptor is never bound again (see OverlappedOp).
+        SocketBinding? binding = GoAsyncIO.IsUnassociated(descriptor) ? null : bindingFor(descriptor);
         OverlappedOp created = new(binding, mode, (ж<Overlapped>)key);
 
-        binding.Track(created);
+        binding?.Track(created);
 
         return created;
     };
@@ -356,7 +531,7 @@ partial class syscall_package
     {
         nuint descriptor = (nuint)(uintptr)handle;
 
-        return (OverlappedOp)GoAsyncIO.GetOrCreateOperationState(Ꮡoverlapped,
+        return (OverlappedOp)GoAsyncIO.GetOrBindOperationState(Ꮡoverlapped, descriptor, mode,
             () => s_operationFactory(descriptor, Ꮡoverlapped, mode));
     }
 
@@ -401,6 +576,10 @@ partial class syscall_package
     }
 
     public static unsafe error /*err*/ WSARecv(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+        if (Ꮡoverlapped == nil) {
+            return wsaRecvSync(s, Ꮡbufs, bufcnt, Ꮡrecvd, Ꮡflags);
+        }
+
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeRead);
         NativeOverlapped* native = operation.Rearm();
         NativeWSABuf* buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
@@ -426,6 +605,10 @@ partial class syscall_package
     }
 
     public static unsafe error /*err*/ WSASend(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+        if (Ꮡoverlapped == nil) {
+            return wsaSendSync(s, Ꮡbufs, bufcnt, Ꮡsent, flags);
+        }
+
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeWrite);
         NativeOverlapped* native = operation.Rearm();
         NativeWSABuf* buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
@@ -433,6 +616,57 @@ partial class syscall_package
         uint32 sent = 0;
 
         var (r1, _, e1) = Syscall9(procWSASend.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&sent), (uintptr)flags, (uintptr)(void*)native, 0, 0, 0);
+
+        if (Ꮡsent != nil) {
+            Ꮡsent.Value = sent;
+        }
+
+        return r1 == socket_error ? errnoErr(e1) : default!;
+    }
+
+    // THE SYNCHRONOUS ARMS of WSARecv and WSASend: a NIL overlapped, which Winsock's contract makes
+    // a blocking call that is done with every pointer before it returns. internal/poll always passes
+    // `&o.o`; a nil one comes from a caller issuing its own call on a socket's handle, as net's
+    // TestRawConnReadWrite does inside RawConn.Read and RawConn.Write on a socket the poller has
+    // bound. Such a call is not an operation of internal/poll's, so it takes no record: `operationFor`
+    // keys a record off the overlapped, and every nil-overlapped call on every socket would share one.
+    // The kernel gets a null overlapped, exactly as Go hands it one, and the staging is `stackalloc`
+    // by the same lifetime argument as WSASendto's synchronous arm. On an overlapped socket a
+    // synchronous call is legal, and with a null overlapped no completion is queued to the port.
+    private static unsafe error wsaRecvSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags) {
+        NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
+
+        writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
+
+        uint32 recvd = 0;
+        uint32 flags = Ꮡflags == nil ? 0 : Ꮡflags.Value;
+
+        var (r1, _, e1) = Syscall9(procWSARecv.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&recvd), (uintptr)(void*)(&flags), 0, 0, 0, 0);
+
+        // The pins live on the `ж<byte>` boxes `Ꮡbufs` names; see WSASendto.
+        System.GC.KeepAlive(Ꮡbufs);
+
+        if (Ꮡrecvd != nil) {
+            Ꮡrecvd.Value = recvd;
+        }
+
+        if (Ꮡflags != nil) {
+            Ꮡflags.Value = flags;
+        }
+
+        return r1 == socket_error ? errnoErr(e1) : default!;
+    }
+
+    private static unsafe error wsaSendSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags) {
+        NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
+
+        writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
+
+        uint32 sent = 0;
+
+        var (r1, _, e1) = Syscall9(procWSASend.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&sent), (uintptr)flags, 0, 0, 0, 0);
+
+        System.GC.KeepAlive(Ꮡbufs);
 
         if (Ꮡsent != nil) {
             Ꮡsent.Value = sent;

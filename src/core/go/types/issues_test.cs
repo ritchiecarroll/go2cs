@@ -14,7 +14,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.go.types_package;
-using constant = global::go.go.constant_package;
 using global::go.@internal;
 using global::go.go;
 using io = io_package;
@@ -159,7 +158,7 @@ public static void TestIssue7245(ж<testing.T> Ꮡt) {
 internal static readonly @string cannotAssignToWˢ = "cannot assign to w"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ19 = """
+internal static readonly @string srcᶜ20 = """
 
 package p
 func _() {
@@ -189,7 +188,9 @@ L7 uses var z int
 // are Uses, not Defs; and also that the (illegal) use of a non-var on
 // the LHS of an assignment is a Use nonetheless.
 public static void TestIssue7827(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ19;
+    var factsᴷ = new stackAppend<@string>();
+
+    @string src = srcᶜ20;
     // We need a specific fileset in this test below for positions.
     // Cannot use typecheck helper.
     var fset = token.NewFileSet();
@@ -215,7 +216,7 @@ public static void TestIssue7827(ж<testing.T> Ꮡt) {
     foreach (var (id, obj) in defs) {
         if (obj != default!) {
             @string fact = fmt.Sprintf("L%d defs %s"u8, fset.Position(id.Pos()).Line, obj);
-            facts = append(facts, fact);
+            facts = append(factsᴷ, facts, fact);
         }
     }
     foreach (var (id, obj) in uses) {
@@ -330,10 +331,10 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ20 = @"package p; func f() { var a, b, c, d, e int }"u8;
+internal static readonly @string srcᶜ21 = @"package p; func f() { var a, b, c, d, e int }"u8;
 
 public static void TestIssue22525(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ20;
+    @string src = srcᶜ21;
 
     @string got = "\n"u8;
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -430,7 +431,7 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
 
         // create file order permutation
         var files = new slice<ж<ast.File>>(len(sources));
-        foreach (var (i, _) in perm) {
+        foreach (var i in range(perm)) {
             files[i] = orig[perm[i]];
         }
 
@@ -727,6 +728,7 @@ public static void TestIssue43124(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(rFindley) move this to testdata by enhancing support for importing.
+
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The go command is needed for the importer to determine the locations of stdlib .a files.
 
     // All involved packages have the same name (template). Error messages should
@@ -793,38 +795,73 @@ public static void TestIssue50646(ж<testing.T> Ꮡt) {
 
 public static void TestIssue55030(ж<testing.T> Ꮡt) {
     // makeSig makes the signature func(typ...)
-    void makeSig(typesꓸType typ) {
-        var par = NewVar(nopos, nil, ""u8, typ);
-        var @params = NewTuple(par);
-        NewSignatureType(nil, default!, default!, @params, nil, true);
+    // If valid is not set, making that signature is expected to panic.
+    void makeSig(typesꓸType typ, bool valid) {
+        GoFrame ᒐ = default;
+        try {
+            if (!valid) {
+                defer(() => {
+                    var r = recover();
+                    if (r == default!) {
+                        throw panic("NewSignatureType panic expected");
+                    }
+                    {
+                        var (_, ok) = r._<@string>(ᐧ); if (!ok) {
+                            throw panic("NewSignatureType string panic expected");
+                        }
+                    }
+                }, ref ᒐ);
+            }
+            var par = NewParam(nopos, nil, ""u8, typ);
+            var @params = NewTuple(par);
+            NewSignatureType(nil, default!, default!, @params, nil, true);
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
     }
 
     // makeSig must not panic for the following (example) types:
     // []int
-    makeSig(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))));
+    makeSig(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), true);
 
     // string
-    makeSig(new types.BasicжΔType(Typ[ΔString]));
+    makeSig(new types.BasicжΔType(Typ[ΔString]), true);
 
-    // P where P's core type is string
+    // P where P's common underlying type is string
     {
         var P = NewTypeName(nopos, nil, "P"u8, default!); // [P string]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice())))));
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice())))), true);
     }
 
-    // P where P's core type is an (unnamed) slice
+    // P where P's common underlying type is an (unnamed) slice
     {
         var P = NewTypeName(nopos, nil, "P"u8, default!); // [P []int]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice())))));
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice())))), true);
     }
 
-    // P where P's core type is bytestring (i.e., string or []byte)
+    // P where P's type set contains strings and []byte
     {
         var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString])); // ~string
         var t2 = NewTerm(false, new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Byte])))); // []byte
         var u = NewUnion(new ж<typesꓸTerm>[]{t1, t2}.slice()); // ~string | []byte
         var P = NewTypeName(nopos, nil, "P"u8, default!); // [P ~string | []byte]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(u)}.slice())))));
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(u)}.slice())))), true);
+    }
+
+    // makeSig must panic for the following (example) types:
+    // int
+    makeSig(new types.BasicжΔType(Typ[Int]), false);
+
+    // P where P's type set doesn't have any specific types
+    {
+        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P any]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{Universe.Lookup(anyˢ).Type()}.slice())))), false);
+    }
+
+    // P where P's type set doesn't have any slice or string types
+    {
+        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P any]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice())))), false);
     }
 }
 
@@ -882,7 +919,7 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
         }
 
         if (n != 1) {
-            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)(1));
+            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)1);
         }
     }
 }
@@ -919,6 +956,7 @@ func (S) M0(struct{ f string }) {}
 .*have M0[(]struct{f string /[*] package b [*]/ }[)]
 .*want M0[(]struct{f string /[*] package main [*]/ }[)]
 """u8.Raw()),
+
         new( //---------------------------------------------------------------
             """
 package main
@@ -940,6 +978,7 @@ func (S) M1(struct{ string }) {}
 .*have M1[(]struct{string /[*] package b [*]/ }[)]
 .*want M1[(]struct{string /[*] package main [*]/ }[)]
 """u8.Raw()),
+
         new( //---------------------------------------------------------------
             """
 package main
@@ -961,6 +1000,7 @@ func (S) M2(struct{ f struct{ f string } }) {}
 .*have M2[(]struct{f struct{f string} /[*] package b [*]/ }[)]
 .*want M2[(]struct{f struct{f string} /[*] package main [*]/ }[)]
 """u8.Raw()),
+
         new( //---------------------------------------------------------------
             """
 package main
@@ -982,6 +1022,7 @@ func (S) M3(struct{ F struct{ f string } }) {}
 .*have M3[(]struct{F struct{f string /[*] package b [*]/ }}[)]
 .*want M3[(]struct{F struct{f string /[*] package main [*]/ }}[)]
 """u8.Raw()),
+
         new( //---------------------------------------------------------------
             """
 package main
@@ -1003,6 +1044,7 @@ func (S) M4(struct { *string }) {}
 .*have M4[(]struct{[*]string /[*] package b [*]/ }[)]
 .*want M4[(]struct{[*]string /[*] package main [*]/ }[)]
 """u8.Raw()),
+
         new( //---------------------------------------------------------------
             """
 package main
@@ -1058,7 +1100,7 @@ func (S) M5(struct {S;t}) {}
 internal static readonly @string go115UsesCgoˢ = "go115UsesCgo"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ21 = """
+internal static readonly @string srcᶜ22 = """
 // -gotypesalias=1
 
 package p
@@ -1122,7 +1164,7 @@ public static void TestIssue59944(ж<testing.T> Ꮡt) {
     testenv.MustHaveCGO(new types_test_package.testing_TжTB(Ꮡt));
 
     // Methods declared on aliases of cgo types are not permitted.
-    @string src = srcᶜ21;
+    @string src = srcᶜ22;
 
     // code generated by cmd/cgo for the above source.
     @string cgoTypes = cgoTypesᶜ;
@@ -1135,7 +1177,7 @@ public static void TestIssue59944(ж<testing.T> Ꮡt) {
 internal static readonly object expectedSyntaxErrorˢ = (@string)"expected syntax error"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ22 = """
+internal static readonly @string srcᶜ23 = """
 
 package p
 
@@ -1149,7 +1191,7 @@ func _() {
 """u8.Raw();
 
 public static void TestIssue61931(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ22;
+    @string src = srcᶜ23;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, pkgName(src), src, 0);
     if (err == default!) {
@@ -1161,7 +1203,7 @@ public static void TestIssue61931(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ23 = """
+internal static readonly @string srcᶜ24 = """
 
 package p
 
@@ -1171,7 +1213,7 @@ func _()        { f() }
 """u8.Raw();
 
 public static void TestIssue61938(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ23;
+    @string src = srcᶜ24;
     // no error handler provided (this issue)
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     typecheck(src, Ꮡconf, nil); // must not panic
@@ -1186,7 +1228,7 @@ public static void TestIssue61938(ж<testing.T> Ꮡt) {
 internal static readonly object variableVNotFoundˢ = (@string)"variable v not found"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ24 = """
+internal static readonly @string srcᶜ25 = """
 
 package p
 
@@ -1203,7 +1245,7 @@ func f[I *T, T any]() {
 """u8.Raw();
 
 public static void TestIssue63260(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ24;
+    @string src = srcᶜ25;
 
     ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
     info = new typesꓸInfo(
@@ -1239,7 +1281,7 @@ public static void TestIssue63260(ж<testing.T> Ꮡt) {
 internal static readonly object objectSNotFoundˢ = (@string)"object S not found"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ25 = """
+internal static readonly @string srcᶜ26 = """
 
 package p
 
@@ -1252,7 +1294,7 @@ type S struct{ A }
 internal static readonly @string wantᶜ3 = "type p.S struct{p.A}"u8;
 
 public static void TestIssue44410(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ25;
+    @string src = srcᶜ26;
 
     Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
@@ -1297,24 +1339,32 @@ public static void TestIssue59831(ж<testing.T> Ꮡt) {
         // tests importing a (or nothing)
         new(apkg, @"package a1; import ""a""; var _ interface { M() } = a.S{}"u8,
             "a.S does not implement interface{M()} (missing method M) have m() want M()"u8),
+
         new(apkg, @"package a2; import ""a""; var _ interface { m() } = a.S{}"u8,
             "a.S does not implement interface{m()} (unexported method m)"u8), // test for issue
+
         new(nil, @"package a3; type S struct{}; func (S) m(); var _ interface { M() } = S{}"u8,
             "S does not implement interface{M()} (missing method M) have m() want M()"u8),
+
         new(nil, @"package a4; type S struct{}; func (S) m(); var _ interface { m() } = S{}"u8,
             ""u8), // no error expected
+
         new(nil, @"package a5; type S struct{}; func (S) m(); var _ interface { n() } = S{}"u8,
             "S does not implement interface{n()} (missing method n)"u8),
 
         // tests importing b (or nothing)
         new(bpkg, @"package b1; import ""b""; var _ interface { m() } = b.S{}"u8,
             "b.S does not implement interface{m()} (missing method m) have M() want m()"u8),
+
         new(bpkg, @"package b2; import ""b""; var _ interface { M() } = b.S{}"u8,
             ""u8), // no error expected
+
         new(nil, @"package b3; type S struct{}; func (S) M(); var _ interface { M() } = S{}"u8,
             ""u8), // no error expected
+
         new(nil, @"package b4; type S struct{}; func (S) M(); var _ interface { m() } = S{}"u8,
             "S does not implement interface{m()} (missing method m) have M() want m()"u8),
+
         new(nil, @"package b5; type S struct{}; func (S) M(); var _ interface { n() } = S{}"u8,
             "S does not implement interface{n()} (missing method n)"u8)
     }.slice();
@@ -1346,7 +1396,7 @@ public static void TestIssue59831(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ26 = """
+internal static readonly @string srcᶜ27 = """
 
 //go:build go1.18
 package p
@@ -1360,7 +1410,7 @@ func _() {
 """u8.Raw();
 
 public static void TestIssue64759(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ26;
+    @string src = srcᶜ27;
     // Per the go:build directive, the source must typecheck
     // even though the (module) Go version is set to go1.17.
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -1369,7 +1419,7 @@ public static void TestIssue64759(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ27 = """
+internal static readonly @string srcᶜ28 = """
 
 package p
 
@@ -1386,7 +1436,7 @@ func f(x int) {
 """u8.Raw();
 
 public static void TestIssue68334(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ27;
+    @string src = srcᶜ28;
 
     @string got = ""u8;
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -1405,7 +1455,7 @@ public static void TestIssue68334(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ28 = """
+internal static readonly @string srcᶜ29 = """
 
 package p
 
@@ -1420,7 +1470,7 @@ type (
 internal static readonly @string wantᶜ4 = "type p.T struct{}"u8;
 
 public static void TestIssue68877(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ28;
+    @string src = srcᶜ29;
 
     Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
@@ -1436,7 +1486,7 @@ public static void TestIssue68877(ж<testing.T> Ꮡt) {
 internal static readonly object noTypeFoundForXˢ = (@string)"no type found for {x}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ29 = """
+internal static readonly @string srcᶜ30 = """
 
 package p
 
@@ -1445,7 +1495,7 @@ var _ = T{{x}}
 """u8.Raw();
 
 public static void TestIssue69092(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ29;
+    @string src = srcᶜ30;
 
     var fset = token.NewFileSet();
     var @file = mustParse(fset, src);

@@ -24,7 +24,7 @@ cleared:
 alloc-units.exe -entries reading-owed.txt <worktree>/src/core/net/netip <worktree>/src/core/strconv ...
 ```
 
-`-entries` takes one `<package> <test>` pair per line, and `#` starts a comment. Each entry gets exactly one row.
+`-entries` takes one `<package> <test>` pair per line, and `#` starts a comment at the start of a line or after whitespace, so a subtest name's `#NN` suffix (`TestSizeAllocs/[]binary.Struct#01`) is kept. Each entry gets exactly one row.
 Without `-entries`, every test that carries a note is reported. An argument can also name a
 `go2cs_test_results.json` directly. A sibling `go2cs_test_comparison.json`, when present, supplies the Go verdict.
 

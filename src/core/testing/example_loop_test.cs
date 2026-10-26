@@ -17,8 +17,8 @@ public static void ExBenchmark(ж<testing.B> Ꮡb) {
     // Generate a large random slice to use as an input.
     // Since this is done before the first call to b.Loop(),
     // it doesn't count toward the benchmark time.
-    var input = new slice<nint>((128 << (int)(10)));
-    foreach (var (i, _) in input) {
+    var input = new slice<nint>((128 << 10));
+    foreach (var i in range(input)) {
         input[i] = rand.Int();
     }
 

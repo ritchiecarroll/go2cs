@@ -22,7 +22,7 @@ partial class sync_package {
 // It has the added feature that it nils out unused slots to avoid
 // unnecessary retention of objects. This is important for sync.Pool,
 // but not typically a property considered in the literature.
-[GoType] partial struct poolDequeue {
+partial struct poolDequeue {
     // headTail packs together a 32-bit head index and a 32-bit
     // tail index. Both are indexes into vals modulo len(vals)-1.
     //
@@ -49,7 +49,7 @@ partial class sync_package {
     internal slice<eface> vals;
 }
 
-[GoType] partial struct eface {
+partial struct eface {
     internal @unsafe.Pointer typ, val;
 }
 
@@ -62,21 +62,24 @@ internal static UntypedInt dequeueBits => 32;
 // the index. We divide by 4 so this fits in an int on 32-bit.
 internal static UntypedInt dequeueLimit => /* (1 << dequeueBits) / 4 */ 1073741824;
 
-[GoType("ж<EmptyStruct>")] partial class dequeueNil;
+// dequeueNil is used in poolDequeue to represent interface{}(nil).
+// Since we use nil to represent empty slots, we need a sentinel value
+// to represent nil.
+partial class dequeueNil /*ж<EmptyStruct>*/;
 
-[GoRecv] internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
+internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
     uint32 head = default!;
     uint32 tail = default!;
 
     const uint64 mask = /* 1<<dequeueBits - 1 */ 4294967295;
-    head = (uint32)((uint64)(((ptrs >> (int)(dequeueBits))) & mask));
+    head = (uint32)((uint64)((ptrs >> (int)(dequeueBits)) & mask));
     tail = (uint32)((uint64)(ptrs & mask));
     return (head, tail);
 }
 
-[GoRecv] internal static uint64 pack(this ref poolDequeue d, uint32 head, uint32 tail) {
+internal static uint64 pack(this ref poolDequeue d, uint32 head, uint32 tail) {
     const uint32 mask = /* 1<<dequeueBits - 1 */ 4294967295;
-    return (uint64)((((uint64)head << (int)(dequeueBits))) | (uint64)((uint32)(tail & mask)));
+    return ((uint64)head << (int)(dequeueBits)) | (uint64)((uint32)(tail & mask));
 }
 
 // pushHead adds val at the head of the queue. It returns false if the
@@ -86,11 +89,12 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
 
     var ptrs = Ꮡd.of(poolDequeue.ᏑheadTail).Load();
     var (head, tail) = d.unpack(ptrs);
-    if ((uint32)((tail + (uint32)len(d.vals)) & (uint32)(((uint32)(4294967296L - 1)))) == head) {
+    if (((tail + (uint32)len(d.vals)) & (uint32)((uint32)(4294967296L - 1))) == head) {
         // Queue is full.
         return false;
     }
-    var slot = Ꮡ(d.vals, (uint32)(head & (uint32)(len(d.vals) - 1)));
+    var slot = Ꮡ(d.vals, (head & (uint32)(len(d.vals) - 1)));
+
     // Check if the head slot has been released by popTail.
     @unsafe.Pointer typ = (uintptr)atomic.LoadPointer(slot.of(eface.Ꮡtyp));
     if (typ != nil) {
@@ -98,14 +102,16 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
         // the queue is actually still full.
         return false;
     }
+
     // The head slot is free, so we own it.
     if (val == default!) {
-        val = ((dequeueNil)nil);
+        val = (dequeueNil)nil;
     }
     (slot.Reinterpret<eface, any>()).ValueSlot = val;
+
     // Increment head. This passes ownership of slot to popTail
     // and acts as a store barrier for writing the slot.
-    Ꮡd.of(poolDequeue.ᏑheadTail).Add(((uint64)1 << (int)(dequeueBits)));
+    Ꮡd.of(poolDequeue.ᏑheadTail).Add((uint64)1 << (int)(dequeueBits));
     return true;
 }
 
@@ -123,6 +129,7 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
             // Queue is empty.
             return (default!, false);
         }
+
         // Confirm tail and decrement head. We do this before
         // reading the value to take back ownership of this
         // slot.
@@ -130,10 +137,11 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
         var ptrs2 = d.pack(head, tail);
         if (Ꮡd.of(poolDequeue.ᏑheadTail).CompareAndSwap(ptrs, ptrs2)) {
             // We successfully took back slot.
-            slot = Ꮡ(d.vals, (uint32)(head & (uint32)(len(d.vals) - 1)));
+            slot = Ꮡ(d.vals, (head & (uint32)(len(d.vals) - 1)));
             break;
         }
     }
+
     var val = ~slot.Reinterpret<eface, any>();
     if (AreEqual(val, ((dequeueNil)nil))) {
         val = default!;
@@ -158,21 +166,24 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
             // Queue is empty.
             return (default!, false);
         }
+
         // Confirm head and tail (for our speculative check
         // above) and increment tail. If this succeeds, then
         // we own the slot at tail.
         var ptrs2 = d.pack(head, tail + 1);
         if (Ꮡd.of(poolDequeue.ᏑheadTail).CompareAndSwap(ptrs, ptrs2)) {
             // Success.
-            slot = Ꮡ(d.vals, (uint32)(tail & (uint32)(len(d.vals) - 1)));
+            slot = Ꮡ(d.vals, (tail & (uint32)(len(d.vals) - 1)));
             break;
         }
     }
+
     // We now own slot.
     var val = ~slot.Reinterpret<eface, any>();
     if (AreEqual(val, ((dequeueNil)nil))) {
         val = default!;
     }
+
     // Tell pushHead that we're done with this slot. Zeroing the
     // slot is also important so we don't leave behind references
     // that could keep this object live longer than necessary.
@@ -182,6 +193,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     slot.Value.val = default!;
     atomic.StorePointer(slot.of(eface.Ꮡtyp), nil);
     // At this point pushHead owns the slot.
+
     return (val, true);
 }
 
@@ -192,7 +204,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
 // dequeue fills up, this allocates a new one and only ever pushes to
 // the latest dequeue. Pops happen from the other end of the list and
 // once a dequeue is exhausted, it gets removed from the list.
-[GoType] partial struct poolChain {
+partial struct poolChain {
     // head is the poolDequeue to push to. This is only accessed
     // by the producer, so doesn't need to be synchronized.
     internal ж<poolChainElt> head;
@@ -201,8 +213,8 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     internal atomic.Pointer<poolChainElt> tail;
 }
 
-[GoType] partial struct poolChainElt {
-    internal partial ref poolDequeue poolDequeue { get; }
+partial struct poolChainElt {
+    /*embed*/ internal poolDequeue poolDequeue;
     // next and prev link to the adjacent poolChainElts in this
     // poolChain.
     //
@@ -228,9 +240,11 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
         c.head = d;
         Ꮡc.of(poolChain.Ꮡtail).Store(d);
     }
+
     if (d.of(poolChainElt.ᏑpoolDequeue).pushHead(val)) {
         return;
     }
+
     // The current dequeue is full. Allocate a new one of twice
     // the size.
     nint newSize = len((~d).vals) * 2;
@@ -238,6 +252,7 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
         // Can't make it any bigger.
         newSize = dequeueLimit;
     }
+
     var d2 = Ꮡ(new poolChainElt(nil));
     d2.of(poolChainElt.Ꮡprev).Store(d);
     d2.Value.vals = new slice<eface>(newSize);
@@ -246,7 +261,7 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
     d2.of(poolChainElt.ᏑpoolDequeue).pushHead(val);
 }
 
-[GoRecv] internal static (any, bool) popHead(this ref poolChain c) {
+internal static (any, bool) popHead(this ref poolChain c) {
     var d = c.head;
     while (d != nil) {
         {
@@ -266,6 +281,7 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
     if (d == nil) {
         return (default!, false);
     }
+
     while (ᐧ) {
         // It's important that we load the next pointer
         // *before* popping the tail. In general, d may be
@@ -274,16 +290,19 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
         // empty, which is the only condition under which it's
         // safe to drop d from the chain.
         var d2 = d.of(poolChainElt.Ꮡnext).Load();
+
         {
             var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popTail(); if (ok) {
                 return (val, ok);
             }
         }
+
         if (d2 == nil) {
             // This is the only dequeue. It's empty right
             // now, but could be pushed to in the future.
             return (default!, false);
         }
+
         // The tail of the chain has been drained, so move on
         // to the next dequeue. Try to drop it from the chain
         // so the next pop doesn't have to look at the empty

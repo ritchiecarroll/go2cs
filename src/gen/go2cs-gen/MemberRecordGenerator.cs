@@ -32,12 +32,17 @@ public static class MemberMarkers
     /// directly before the declaration's first token after any attribute lists, followed by one space
     /// (<c>/*embed*/ public Reader Reader;</c>). A comment anywhere else is not a marker, and a Go comment the
     /// converter carries is never spelled as one (memberMarkers.go, carriedComment), so neither can be read as
-    /// a fact about this field.
+    /// a fact about this field. After an attribute list on the same line (the zero-size layout arc's
+    /// <c>[FieldOffset(0)] /*embed*/ internal readonly T T;</c>) the comment is that list's TRAILING trivia, which is
+    /// where C# puts a comment that follows a token on its line, so it is read there.
     /// </summary>
     public static bool HasEmbed(FieldDeclarationSyntax field)
     {
         SyntaxToken first = field.Modifiers.Count > 0 ? field.Modifiers[0] : field.Declaration.Type.GetFirstToken();
         SyntaxTriviaList leading = first.LeadingTrivia;
+
+        if (leading.Count == 0 && field.AttributeLists.Count > 0)
+            leading = field.AttributeLists[field.AttributeLists.Count - 1].CloseBracketToken.TrailingTrivia;
 
         return leading.Count >= 2 &&
             leading[leading.Count - 1].IsKind(SyntaxKind.WhitespaceTrivia) && leading[leading.Count - 1].ToString() == " " &&

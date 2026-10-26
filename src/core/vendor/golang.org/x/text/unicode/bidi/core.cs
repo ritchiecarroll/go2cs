@@ -123,8 +123,10 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
     var p = Ꮡ(new paragraph(
         initialTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types),
         embeddingLevel: levels,
+
         pairTypes: pairTypes,
         pairValues: pairValues,
+
         resultTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types)
     ));
     p.run();
@@ -212,11 +214,11 @@ internal static void determineMatchingIsolates(this ref paragraph p) {
     p.matchingPDI = new slice<nint>(p.Len());
     p.matchingIsolateInitiator = new slice<nint>(p.Len());
 
-    foreach (var (i, _) in p.matchingIsolateInitiator) {
+    foreach (var i in range(p.matchingIsolateInitiator)) {
         p.matchingIsolateInitiator[i] = -1;
     }
 
-    foreach (var (i, _) in p.matchingPDI) {
+    foreach (var i in range(p.matchingPDI)) {
         p.matchingPDI[i] = -1;
 
         {
@@ -433,6 +435,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
         }
         else if (exprᴛ1 == B) { // paragraph separator.
             // Rule X8.
+
             // These values are reset for clarity, in this implementation B
             // can only occur as the last code in the array.
             stack.empty();
@@ -461,13 +464,6 @@ partial struct ΔisolatingRunSequence {
 
 internal static nint Len(this ref ΔisolatingRunSequence i) {
     return len(i.indexes);
-}
-
-internal static level maxLevel(level a, level b) {
-    if (a > b) {
-        return a;
-    }
-    return b;
 }
 
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
@@ -512,8 +508,8 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
         indexes: indexes,
         types: types,
         level: level,
-        sos: typeForLevel(maxLevel(prevLevel, level)),
-        eos: typeForLevel(maxLevel(succLevel, level))
+        sos: typeForLevel(max(prevLevel, level)),
+        eos: typeForLevel(max(succLevel, level))
     ));
 }
 
@@ -703,13 +699,13 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
 }
 
 internal static void setLevels(slice<level> levels, level newLevel) {
-    foreach (var (i, _) in levels) {
+    foreach (var i in range(levels)) {
         levels[i] = newLevel;
     }
 }
 
 internal static void setTypes(slice<ΔClass> types, ΔClass newType) {
-    foreach (var (i, _) in types) {
+    foreach (var i in range(types)) {
         types[i] = newType;
     }
 }
@@ -805,7 +801,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
     var allRuns = new slice<nint>[]{}.slice();
     var currentLevel = implicitLevel;
 
-    foreach (var (i, _) in p.initialTypes) {
+    foreach (var i in range(p.initialTypes)) {
         if (!isRemovedByX9(p.initialTypes[i])) {
             if (p.resultLevels[i] != currentLevel) {
                 // we just encountered a new run; wrap up last run
@@ -829,6 +825,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
 // Definition BD13. Determine isolating run sequences.
 internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences(this ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var sequencesᴷ = new stackAppend<ж<ΔisolatingRunSequence>>(moves: true);
 
     var levelRuns = p.determineLevelRuns();
 
@@ -863,9 +860,10 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
                     break;
                 }
             }
-            sequences = append(sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
+            sequences = append(sequencesᴷ, sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
+    sequences = move2heap(sequencesᴷ, sequences);
     return sequences;
 }
 
@@ -917,6 +915,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
     // initial text. Their final placement is not normative.
     // These codes are treated like WS in this implementation,
     // so they don't interrupt sequences of WS.
+
     validateLineBreaks(linebreaks, p.Len());
 
     var result = appendꓸꓸꓸ(slice<level>(default!), p.resultLevels);
@@ -1001,15 +1000,15 @@ internal static slice<nint> computeMultilineReordering(slice<level> levels, slic
 internal static slice<nint> computeReordering(slice<level> levels) {
     var result = new slice<nint>(len(levels));
     // initialize order
-    foreach (var (i, _) in result) {
+    foreach (var i in range(result)) {
         result[i] = i;
     }
 
     // locate highest level found on line.
     // Note the rules say text, but no reordering across line bounds is
     // performed, so this is sufficient.
-    var highestLevel = ((level)0);
-    var lowestOddLevel = ((level)(maxDepth + 2));
+    var highestLevel = (level)0;
+    var lowestOddLevel = (level)(maxDepth + 2);
     foreach (var (_, level) in levels) {
         if (level > highestLevel) {
             highestLevel = level;

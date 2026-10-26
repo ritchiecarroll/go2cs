@@ -7,10 +7,12 @@ using context = context_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
 using nettrace = @internal.nettrace_package;
+using netip = net.netip_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using System.Runtime.CompilerServices;
+using net;
 
 partial class net_package {
 
@@ -496,7 +498,7 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
 
 // sysDialer contains a Dial's parameters and configuration.
 partial struct sysDialer {
-    public partial ref Dialer Dialer { get; }
+    /*embed*/ public Dialer Dialer;
     internal @string network, address;
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
@@ -533,49 +535,14 @@ internal static readonly @string dialˢ = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
 
-        if (ctx == default!) {
-            throw panic("nil context");
-        }
-        var deadline = d.deadline(ctx, time.Now());
-        if (!deadline.IsZero()) {
-            testHookStepTime();
-            {
-                var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
-                    var (subCtx, cancel) = context.WithDeadline(ctx, deadline);
-                    var cancelʗ1 = cancel;
-                    defer(() => cancelʗ1(), ref ᒐ);
-                    ctx = subCtx;
-                }
-            }
-        }
-        {
-            var oldCancel = d.Cancel; if (oldCancel != default!) {
-                var (subCtx, cancel) = context.WithCancel(ctx);
-                var cancelʗ2 = cancel;
-                defer(() => cancelʗ2(), ref ᒐ);
-                var cancelʗ3 = cancel;
-                var oldCancelʗ1 = oldCancel;
-                var subCtxʗ1 = subCtx;
-                goǃ(() => {
-                    var selᴛ3 = oldCancelʗ1;
-                    var selᴛ4 = subCtxʗ1.Done();
-                    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-                    case 0 when selᴛ3.ꟷᐳ(out _): {
-                        cancelʗ3();
-                        break;
-                    }
-                    case 1 when selᴛ4.ꟷᐳ(out _): {
-                        break;
-                    }}
-                });
-                ctx = subCtx;
-            }
-        }
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
 
         // Shadow the nettrace (if any) during resolve so Connect events don't fire for DNS lookups.
         var resolveCtx = ctx;
@@ -609,6 +576,144 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
         }
 
         return sd.dialParallel(ctx, primaries, fallbacks);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+internal static partial (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) {
+    if (ctx == default!) {
+        throw panic("nil context");
+    }
+    var deadline = d.deadline(ctx, time.Now());
+    Action cancel1 = default!;
+    Action cancel2 = default!;
+    if (!deadline.IsZero()) {
+        testHookStepTime();
+        {
+            var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
+                context.Context subCtx = default!;
+                (subCtx, cancel1) = context.WithDeadline(ctx, deadline);
+                ctx = subCtx;
+            }
+        }
+    }
+    {
+        var oldCancel = d.Cancel; if (oldCancel != default!) {
+            var (subCtx, cancel2Δ1) = context.WithCancel(ctx);
+            var cancel2ʗ1 = cancel2Δ1;
+            var oldCancelʗ1 = oldCancel;
+            var subCtxʗ1 = subCtx;
+            goǃ(() => {
+                var selᴛ3 = oldCancelʗ1;
+                var selᴛ4 = subCtxʗ1.Done();
+                switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+                case 0 when selᴛ3.ꟷᐳ(out _): {
+                    cancel2ʗ1();
+                    break;
+                }
+                case 1 when selᴛ4.ꟷᐳ(out _): {
+                    break;
+                }}
+            });
+            ctx = subCtx;
+        }
+    }
+    var cancel1ʗ1 = cancel1;
+    var cancel2ʗ2 = cancel2;
+    return (ctx, () => {
+        if (cancel1ʗ1 != default!) {
+            cancel1ʗ1();
+        }
+        if (cancel2ʗ2 != default!) {
+            cancel2ʗ2();
+        }
+    });
+}
+
+// DialTCP acts like Dial for TCP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a TCP network name; see func Dial for details.
+public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialTCP(ctx, Ꮡd, network, TCPAddrFromAddrPort(laddr), TCPAddrFromAddrPort(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialUDP acts like Dial for UDP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a UDP network name; see func Dial for details.
+public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialUDP(ctx, Ꮡd, network, UDPAddrFromAddrPort(laddr), UDPAddrFromAddrPort(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialIP acts like Dial for IP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be an IP network name; see func Dial for details.
+public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netipꓸAddr laddr, netipꓸAddr raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialIP(ctx, Ꮡd, network, ipAddrFromAddr(laddr), ipAddrFromAddr(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialUnix acts like Dial for Unix networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a Unix network name; see func Dial for details.
+public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialUnix(ctx, Ꮡd, network, Ꮡladdr, Ꮡraddr);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -945,7 +1050,7 @@ public static (Listener, error) Listen(this ref ListenConfig lc, context.Context
 // parameters.
 //
 // The ctx argument is used while resolving the address on which to listen;
-// it does not affect the returned Listener.
+// it does not affect the returned PacketConn.
 public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
     if (err != default!) {
@@ -986,7 +1091,7 @@ public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context
 
 // sysListener contains a Listen's parameters and configuration.
 partial struct sysListener {
-    public partial ref ListenConfig ListenConfig { get; }
+    /*embed*/ public ListenConfig ListenConfig;
     internal @string network, address;
 }
 

@@ -8,10 +8,10 @@ partial class main_package {
 internal static void Main() {
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new nint[]{10, 20, 30, 40}.array();
-    var s = (~Ꮡarr)[..4];
+    var s = Ꮡarr.slice(0, 4);
 
     nint sum = 0;
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         sum += i;
     }
 
@@ -20,7 +20,7 @@ internal static void Main() {
         total += v;
     }
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         var ps = Ꮡ(s, i);
         ps.Value += 1;
     }
@@ -42,7 +42,7 @@ internal static void Main() {
     }
     _ = (uintptr)pick(true);
 
-    var op = ((opaque)(ж<array<nint>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ip)));
+    var op = (opaque)(ж<array<nint>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ip));
     _ = op;
 }
 

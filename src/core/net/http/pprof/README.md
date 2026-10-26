@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-15_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/net.http.pprof.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/net/http/pprof@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/net/http/pprof) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/net/http/pprof)
+[![Tests](https://img.shields.io/badge/Tests-15_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/net.http.pprof.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/net/http/pprof@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/net/http/pprof) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/net/http/pprof)
 
 From C#, call this package through the static class go.net.http.pprof_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -21,7 +21,7 @@ If your application is not already running an http server, you need to start one
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
-By default, all the profiles listed in [runtime/pprof.Profile](https://pkg.go.dev/runtime/pprof@go1.24.13#Profile) are available (via \[Handler]), in addition to the \[Cmdline], \[Profile], \[Symbol], and \[Trace] profiles defined in this package. If you are not using DefaultServeMux, you will have to register handlers with the mux you are using.
+By default, all the profiles listed in [runtime/pprof.Profile](https://pkg.go.dev/runtime/pprof@go1.26.10#Profile) are available (via \[Handler]), in addition to the \[Cmdline], \[Profile], \[Symbol], and \[Trace] profiles defined in this package. If you are not using DefaultServeMux, you will have to register handlers with the mux you are using.
 
 ### Parameters
 
@@ -42,11 +42,11 @@ Or to look at a 30-second CPU profile:
 
 	go tool pprof http://localhost:6060/debug/pprof/profile?seconds=30
 
-Or to look at the goroutine blocking profile, after calling [runtime.SetBlockProfileRate](https://pkg.go.dev/runtime@go1.24.13#SetBlockProfileRate) in your program:
+Or to look at the goroutine blocking profile, after calling [runtime.SetBlockProfileRate](https://pkg.go.dev/runtime@go1.26.10#SetBlockProfileRate) in your program:
 
 	go tool pprof http://localhost:6060/debug/pprof/block
 
-Or to look at the holders of contended mutexes, after calling [runtime.SetMutexProfileFraction](https://pkg.go.dev/runtime@go1.24.13#SetMutexProfileFraction) in your program:
+Or to look at the holders of contended mutexes, after calling [runtime.SetMutexProfileFraction](https://pkg.go.dev/runtime@go1.26.10#SetMutexProfileFraction) in your program:
 
 	go tool pprof http://localhost:6060/debug/pprof/mutex
 
@@ -57,7 +57,7 @@ The package also exports a handler that serves execution trace data for the "go 
 
 To view all available profiles, open [http://localhost:6060/debug/pprof/](http://localhost:6060/debug/pprof/) in your browser.
 
-For a study of the facility in action, visit [https://blog.golang.org/2011/06/profiling-go-programs.html](https://blog.golang.org/2011/06/profiling-go-programs.html).
+For a study of the facility in action, visit [https://go.dev/blog/pprof](https://go.dev/blog/pprof).
 
 ---
 

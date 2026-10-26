@@ -1,16 +1,17 @@
-// Copyright 2022 The Go Authors. All rights reserved.
+// Copyright 2025 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
 using pem = encoding.pem_package;
-using fmt = fmt_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
-using go.sync;
 using static go.crypto.tls_package;
+using Δx509 = go.crypto.x509_package;
 
 partial class tls_internal_test_package {
 
@@ -19,64 +20,59 @@ internal static readonly object failedToDecodeˢ = (@string)"Failed to decode ce
 internal static readonly object newCertReturnedAUniqueˢ = (@string)"newCert returned a unique reference for a duplicate certificate"u8;
 internal static readonly object cacheDoesNotContainˢ = (@string)"cache does not contain expected entry"u8;
 internal static readonly object timedOutWaitingForˢ = (@string)"timed out waiting for expected ref count"u8;
-internal static readonly object cacheDoesNotContainˢ2 = (@string)"cache does not contain expected key"u8;
 
-public static void TestCertCache(ж<testing.T> Ꮡt) {
-    ref var cc = ref heap<global::go.crypto.tls_package.certCache>(out var Ꮡcc);
-    cc = new certCache(nil);
+public static partial void TestWeakCertCache(ж<testing.T> Ꮡt) {
+    ref var wcc = ref heap<global::go.crypto.tls_package.weakCertCache>(out var Ꮡwcc);
+    wcc = new weakCertCache(nil);
     var (p, _) = pem.Decode(slice<byte>(rsaCertPEM));
     if (p == nil) {
         Ꮡt.Fatal(failedToDecodeˢ);
     }
 
-    var (certA, err) = Ꮡcc.newCert((~p).Bytes);
+    var (certA, err) = Ꮡwcc.newCert((~p).Bytes);
     if (err != default!) {
         Ꮡt.Fatalf("newCert failed: %s"u8, err);
     }
-    (var certB, err) = Ꮡcc.newCert((~p).Bytes);
+    (var certB, err) = Ꮡwcc.newCert((~p).Bytes);
     if (err != default!) {
         Ꮡt.Fatalf("newCert failed: %s"u8, err);
     }
-    if ((~certA).cert != (~certB).cert) {
+    if (certA != certB) {
         Ꮡt.Fatal(newCertReturnedAUniqueˢ);
     }
 
     {
-        var (entry, ok) = Ꮡcc.of(global::go.crypto.tls_package.certCache.ᏑMap).Load(((@string)(~p).Bytes)); if (!ok){
+        var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load((@string)(~p).Bytes); if (!ok) {
             Ꮡt.Fatal(cacheDoesNotContainˢ);
-        } else {
-            {
-                var refs = entry._<ж<global::go.crypto.tls_package.cacheEntry>>().of(global::go.crypto.tls_package.cacheEntry.Ꮡrefs).Load(); if (refs != 2) {
-                    Ꮡt.Fatalf("unexpected number of references: got %d, want 2"u8, refs);
-                }
-            }
         }
     }
 
-    void timeoutRefCheck(ж<testing.T> tΔ1, @string key, int64 count) {
+    void timeoutRefCheck(ж<testing.T> tΔ1, @string key, bool present) {
         tΔ1.Helper();
-        var c = time_package.After((time.Duration)(4000000000L));
+        var timeout = time_package.After((time.Duration)(4000000000L));
         while (ᐧ) {
-            var selᴛ1 = c;
+            var selᴛ1 = timeout;
             switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
                 tΔ1.Fatal(timedOutWaitingForˢ);
                 break;
             }
             default: {
-                var (e, ok) = Ꮡcc.of(global::go.crypto.tls_package.certCache.ᏑMap).Load(key);
-                if (!ok && count != 0){
-                    tΔ1.Fatal(cacheDoesNotContainˢ2);
-                } else 
-                if (count == 0 && !ok) {
-                    return;
-                }
-
-                if (e._<ж<global::go.crypto.tls_package.cacheEntry>>().of(global::go.crypto.tls_package.cacheEntry.Ꮡrefs).Load() == count) {
+                var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load(key);
+                if (ok == present) {
                     return;
                 }
                 break;
             }}
+            // Explicitly yield to the scheduler.
+            //
+            // On single-threaded platforms like js/wasm a busy-loop might
+            // never call into the scheduler for the full timeout, meaning
+            // that if we arrive here and the cleanup hasn't already run,
+            // we'll simply loop until the timeout. Busy-loops put us at the
+            // mercy of the Go scheduler, making this test fragile on some
+            // platforms.
+            runtime.Gosched();
         }
     }
 
@@ -87,7 +83,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
     certA = default!;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), 1);
+    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, true);
 
     // Keep certB alive until at least now, so that we can
     // purposefully nil it and force the finalizer to be
@@ -96,48 +92,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
     certB = default!;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), 0);
-}
-
-public static void BenchmarkCertCache(ж<testing.B> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
-    var (p, _) = pem.Decode(slice<byte>(rsaCertPEM));
-    if (p == nil) {
-        Ꮡb.Fatal(failedToDecodeˢ);
-    }
-
-    ref var cc = ref heap<global::go.crypto.tls_package.certCache>(out var Ꮡcc);
-    cc = new certCache(nil);
-    b.ReportAllocs();
-    b.ResetTimer();
-    // We expect that calling newCert additional times after
-    // the initial call should not cause additional allocations.
-    for (nint extraᴛ1 = 0; extraᴛ1 < 4; extraᴛ1++) {
-        var extra = extraᴛ1;
-        var pʗ1 = p;
-        Ꮡb.Run(fmt.Sprint(extra), (ж<testing.B> bΔ1) => {
-            var actives = new slice<ж<global::go.crypto.tls_package.activeCert>>(extra + 1);
-            bΔ1.ResetTimer();
-            for (nint i = 0; i < (~bΔ1).N; i++) {
-                error err = default!;
-                (actives[0], err) = Ꮡcc.newCert((~pʗ1).Bytes);
-                if (err != default!) {
-                    bΔ1.Fatal(err);
-                }
-                for (nint j = 0; j < extra; j++) {
-                    (actives[j + 1], err) = Ꮡcc.newCert((~pʗ1).Bytes);
-                    if (err != default!) {
-                        bΔ1.Fatal(err);
-                    }
-                }
-                for (nint j = 0; j < extra + 1; j++) {
-                    actives[j] = default!;
-                }
-                runtime.GC();
-            }
-        });
-    }
+    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, false);
 }
 
 } // end tls_internal_test_package

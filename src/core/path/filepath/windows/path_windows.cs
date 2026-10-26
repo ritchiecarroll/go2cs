@@ -23,6 +23,7 @@ public static bool HasPrefix(@string p, @string prefix) {
 internal static slice<@string> splitList(@string path) {
     // The same implementation is used in LookPath in os/exec;
     // consider changing os/exec when changing this.
+
     if (path == ""u8) {
         return new @string[]{}.slice();
     }

@@ -11,6 +11,7 @@ using fs = global::go.io.fs_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using Δruntime = runtime_package;
+using slices = slices_package;
 using strings = strings_package;
 using sync = global::go.sync_package;
 using testing = testing_package;
@@ -47,12 +48,7 @@ internal static visitor newVisitor() {
 }
 
 internal static bool filter(this visitor v, @string name) {
-    foreach (var (_, typeName) in typeNames) {
-        if (typeName == name) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains(typeNames, name);
 }
 
 internal static ast.Visitor Visit(this visitor v, ast.Node n) {
@@ -117,14 +113,15 @@ public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (rl, r) = (newVisitor(), newVisitor());
 
-    foreach (var (_, tc) in new TestMirrorWithReflect_type[]{
+    foreach (var (_, vᴛ1) in new TestMirrorWithReflect_type[]{
         new("."u8, "reflectlite"u8, rl),
         new(reflectDir, "reflect"u8, r)
     }.slice()) {
-        ref var tcΔ1 = ref heap<TestMirrorWithReflect_type>(out var ᏑtcΔ1);
-        tcΔ1 = tc;
+        ref var tc = ref heap(new TestMirrorWithReflect_type(), out var Ꮡtc);
+        tc = vᴛ1;
+
         Ꮡwg.Add(1);
-        var tcʗ1 = tcΔ1;
+        var tcʗ1 = tc;
         goǃ(() => {
             GoFrame ᒐ = default;
             try {

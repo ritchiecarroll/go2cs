@@ -486,7 +486,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    var v = ((any)n.V);
+    var v = (any)(n.V).OrTypedNilOf();
     // See issue 69728.
     {
         var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {
@@ -610,7 +610,7 @@ internal static connReuseStrategy cachedOrNewConn => 1;
 partial struct driverConn {
     internal ж<DB> db;
     internal time.Time createdAt;
-    public partial ref sync_package.Mutex Mutex { get; }  // guards following
+    /*embed*/ public sync_package.Mutex Mutex;  // guards following
     internal driver.Conn ci;
     internal bool needReset; // The connection session should be reset before use if true.
     internal bool closed;
@@ -1051,6 +1051,7 @@ public static error Ping(this ж<DB> Ꮡdb) {
 // long-lived and shared between many goroutines.
 public static error Close(this ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
+    var fnsᴷ = new stackAppend<Func<error>>();
 
     db.mu.Lock();
     if (db.closed) { // Make DB.Close idempotent
@@ -1063,7 +1064,7 @@ public static error Close(this ж<DB> Ꮡdb) {
     error err = default!;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
     foreach (var (_, dc) in db.freeConn) {
-        fns = append(fns, dc.closeDBLocked());
+        fns = append(fnsᴷ, fns, dc.closeDBLocked());
     }
     db.freeConn = default!;
     db.closed = true;
@@ -1188,7 +1189,7 @@ public static void SetConnMaxLifetime(this ж<DB> Ꮡdb, time.Duration d) {
     }
     db.mu.Lock();
     // Wake cleaner up when lifetime is shortened.
-    if (d > 0 && d < db.maxLifetime && db.cleanerCh != default!) {
+    if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
         var selᴛ7 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
         switch (trySelect(selᴛ7)) {
         case 0: {
@@ -1221,7 +1222,7 @@ public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) {
         ᒐd1 = true;
 
         // Wake cleaner up when idle time is shortened.
-        if (d > 0 && d < db.maxIdleTime && db.cleanerCh != default!) {
+        if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
             var selᴛ8 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
             switch (trySelect(selᴛ8)) {
             case 0: {
@@ -1395,9 +1396,11 @@ public static DBStats Stats(this ж<DB> Ꮡdb) {
 
         var stats = new DBStats(
             MaxOpenConnections: db.maxOpen,
+
             Idle: len(db.freeConn),
             OpenConnections: db.numOpen,
             InUse: db.numOpen - len(db.freeConn),
+
             WaitCount: db.waitCount,
             WaitDuration: ((time.Duration)wait),
             MaxIdleClosed: db.maxIdleClosed,
@@ -2463,7 +2466,7 @@ public static error Close(this ж<ΔConn> Ꮡc) {
 }
 
 partial struct Tx_stmts /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<ж<ΔStmt>> v;
 }
 
@@ -3629,11 +3632,11 @@ internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
 
     if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
-        return ((RawBytes)b);
+        return (RawBytes)b;
     }
     nint off = len(rs.raw);
     rs.raw = b;
-    return ((RawBytes)(rs.raw.slice(off)));
+    return (RawBytes)(rs.raw.slice(off));
 }
 
 internal static error errRowsClosed = errors.New("sql: Rows are closed"u8);
@@ -3753,7 +3756,7 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
     var names = rowsi.Columns();
 
     var list = new slice<ж<ColumnType>>(len(names));
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         var ci = Ꮡ(new ColumnType(
             name: names[i]
         ));
@@ -4097,8 +4100,8 @@ internal static (int64, error) RowsAffected(this driverResult dr) {
 }
 
 internal static partial @string stack() {
-    array<byte> buf = new(2048); /* (2 << (int)(10)) */
-    return ((@string)(buf.slice(0, runtime.Stack(buf[..], false))));
+    array<byte> buf = new(2048); /* (2 << 10) */
+    return (@string)(buf.slice(0, runtime.Stack(buf[..], false)));
 }
 
 // withLock runs while holding lk.

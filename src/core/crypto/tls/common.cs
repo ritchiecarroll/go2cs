@@ -30,7 +30,6 @@ using container;
 using go.@internal;
 using go.crypto;
 using go.crypto.tls.@internal;
-using math;
 
 partial class tls_package {
 
@@ -152,13 +151,27 @@ public static CurveID CurveP384 => 24;
 public static CurveID CurveP521 => 25;
 public static CurveID X25519 => 29;
 public static CurveID X25519MLKEM768 => 4588;
+public static CurveID SecP256r1MLKEM768 => 4587;
+public static CurveID SecP384r1MLKEM1024 => 4589;
 
 internal static bool isTLS13OnlyKeyExchange(CurveID curve) {
-    return curve == X25519MLKEM768;
+    var exprᴛ1 = curve;
+    if (exprᴛ1 == X25519MLKEM768 || exprᴛ1 == SecP256r1MLKEM768 || exprᴛ1 == SecP384r1MLKEM1024) {
+        return true;
+    }
+    { /* default: */
+        return false;
+    }
 }
 
 internal static bool isPQKeyExchange(CurveID curve) {
-    return curve == X25519MLKEM768;
+    var exprᴛ1 = curve;
+    if (exprᴛ1 == X25519MLKEM768 || exprᴛ1 == SecP256r1MLKEM768 || exprᴛ1 == SecP384r1MLKEM1024) {
+        return true;
+    }
+    { /* default: */
+        return false;
+    }
 }
 
 // TLS 1.3 Key Share. See RFC 8446, Section 4.2.8.
@@ -203,12 +216,12 @@ internal static crypto.Hash directSigning = 0;
 
 // helloRetryRequestRandom is set as the Random value of a ServerHello
 // to signal that the message is actually a HelloRetryRequest.
-internal static slice<byte> helloRetryRequestRandom = new byte[]{ // See RFC 8446, Section 4.1.3.
+[GoLazy] partial class lazyᴛhelloRetryRequestRandom { internal static slice<byte> helloRetryRequestRandom = new byte[]{ // See RFC 8446, Section 4.1.3.
     0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11,
     0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
     0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E,
     0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C
-}.slice();
+}.slice(); }
 
 // downgradeCanaryTLS12 or downgradeCanaryTLS11 is embedded in the server
 // random as a downgrade protection if the server would be capable of
@@ -232,6 +245,10 @@ partial struct ΔConnectionState {
     // CipherSuite is the cipher suite negotiated for the connection (e.g.
     // TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256).
     public uint16 CipherSuite;
+    // CurveID is the key exchange mechanism used for the connection. The name
+    // refers to elliptic curves for legacy reasons, see [CurveID]. If a legacy
+    // RSA key exchange is used, this value is zero.
+    public CurveID CurveID;
     // NegotiatedProtocol is the application protocol negotiated with ALPN.
     public @string NegotiatedProtocol;
     // NegotiatedProtocolIsMutual used to indicate a mutual NPN negotiation.
@@ -275,13 +292,14 @@ partial struct ΔConnectionState {
     // and accepted by the server. Currently, ECH is supported only on the
     // client side.
     public bool ECHAccepted;
+    // HelloRetryRequest indicates whether we sent a HelloRetryRequest if we
+    // are a server, or if we received a HelloRetryRequest if we are a client.
+    public bool HelloRetryRequest;
     // ekm is a closure exposed via ExportKeyingMaterial.
     internal Func<@string, slice<byte>, nint, (slice<byte>, error)> ekm;
-    // testingOnlyDidHRR is true if a HelloRetryRequest was sent/received.
-    internal bool testingOnlyDidHRR;
-    // testingOnlyCurveID is the selected CurveID, or zero if an RSA exchanges
-    // is performed.
-    internal CurveID testingOnlyCurveID;
+    // testingOnlyPeerSignatureAlgorithm is the signature algorithm used by the
+    // peer to sign the handshake. It is not set for resumed connections.
+    internal SignatureScheme testingOnlyPeerSignatureAlgorithm;
 }
 
 // ExportKeyingMaterial returns length bytes of exported key material in a new
@@ -425,6 +443,9 @@ partial struct ClientHelloInfo {
     // from, or write to, this connection; that will cause the TLS
     // connection to fail.
     public net.Conn Conn;
+    // HelloRetryRequest indicates whether the ClientHello was sent in response
+    // to a HelloRetryRequest message.
+    public bool HelloRetryRequest;
     // config is embedded by the GetCertificate or GetConfigForClient caller,
     // for use with SupportsCertificate.
     internal ж<Config> config;
@@ -713,6 +734,11 @@ partial struct Config {
     // From Go 1.24, the default includes the [X25519MLKEM768] hybrid
     // post-quantum key exchange. To disable it, set CurvePreferences explicitly
     // or use the GODEBUG=tlsmlkem=0 environment variable.
+    //
+    // From Go 1.26, the default includes the [SecP256r1MLKEM768] and
+    // [SecP256r1MLKEM768] hybrid post-quantum key exchanges, too. To disable
+    // them, set CurvePreferences explicitly or use either the
+    // GODEBUG=tlsmlkem=0 or the GODEBUG=tlssecpmlkem=0 environment variable.
     public slice<CurveID> CurvePreferences;
     // DynamicRecordSizingDisabled disables adaptive sizing of TLS records.
     // When true, the largest possible TLS record size is always used. When
@@ -766,6 +792,19 @@ partial struct Config {
     // certificate. VerifyPeerCertificate and VerifyConnection are not called
     // when ECH is rejected, even if set, and InsecureSkipVerify is ignored.
     public Func<ΔConnectionState, error> EncryptedClientHelloRejectionVerify;
+    // GetEncryptedClientHelloKeys, if not nil, is called when by a server when
+    // a client attempts ECH.
+    //
+    // If GetEncryptedClientHelloKeys is not nil, [EncryptedClientHelloKeys] is
+    // ignored.
+    //
+    // If GetEncryptedClientHelloKeys returns an error, the handshake will be
+    // aborted and the error will be returned. Otherwise,
+    // GetEncryptedClientHelloKeys must return a non-nil slice of
+    // [EncryptedClientHelloKey] that represents the acceptable ECH keys.
+    //
+    // For further details, see [EncryptedClientHelloKeys].
+    public Func<ж<ClientHelloInfo>, (slice<EncryptedClientHelloKey>, error)> GetEncryptedClientHelloKeys;
     // EncryptedClientHelloKeys are the ECH keys to use when a client
     // attempts ECH.
     //
@@ -775,6 +814,9 @@ partial struct Config {
     // If a client attempts ECH, but it is rejected by the server, the server
     // will send a list of configs to retry based on the set of
     // EncryptedClientHelloKeys which have the SendAsRetry field set.
+    //
+    // If GetEncryptedClientHelloKeys is non-nil, EncryptedClientHelloKeys is
+    // ignored.
     //
     // On the client side, this field is ignored. In order to configure ECH for
     // clients, see the EncryptedClientHelloConfigList field.
@@ -796,13 +838,29 @@ partial struct Config {
 // with a specific ECH config known to a client.
 partial struct EncryptedClientHelloKey {
     // Config should be a marshalled ECHConfig associated with PrivateKey. This
-    // must match the config provided to clients byte-for-byte. The config
-    // should only specify the DHKEM(X25519, HKDF-SHA256) KEM ID (0x0020), the
-    // HKDF-SHA256 KDF ID (0x0001), and a subset of the following AEAD IDs:
-    // AES-128-GCM (0x0000), AES-256-GCM (0x0001), ChaCha20Poly1305 (0x0002).
+    // must match the config provided to clients byte-for-byte. The config must
+    // use as KEM one of
+    //
+    //   - DHKEM(P-256, HKDF-SHA256) (0x0010)
+    //   - DHKEM(P-384, HKDF-SHA384) (0x0011)
+    //   - DHKEM(P-521, HKDF-SHA512) (0x0012)
+    //   - DHKEM(X25519, HKDF-SHA256) (0x0020)
+    //
+    // and as KDF one of
+    //
+    //   - HKDF-SHA256 (0x0001)
+    //   - HKDF-SHA384 (0x0002)
+    //   - HKDF-SHA512 (0x0003)
+    //
+    // and as AEAD one of
+    //
+    //   - AES-128-GCM (0x0001)
+    //   - AES-256-GCM (0x0002)
+    //   - ChaCha20Poly1305 (0x0003)
+    //
     public slice<byte> Config;
-    // PrivateKey should be a marshalled private key. Currently, we expect
-    // this to be the output of [ecdh.PrivateKey.Bytes].
+    // PrivateKey should be a marshalled private key, in the format expected by
+    // HPKE's DeserializePrivateKey (see RFC 9180), for the KEM used in Config.
     public slice<byte> PrivateKey;
     // SendAsRetry indicates if Config should be sent as part of the list of
     // retry configs when ECH is requested by the client but rejected by the
@@ -876,6 +934,7 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) {
             GetCertificate: c.GetCertificate,
             GetClientCertificate: c.GetClientCertificate,
             GetConfigForClient: c.GetConfigForClient,
+            GetEncryptedClientHelloKeys: c.GetEncryptedClientHelloKeys,
             VerifyPeerCertificate: c.VerifyPeerCertificate,
             VerifyConnection: c.VerifyConnection,
             RootCAs: c.RootCAs,
@@ -975,6 +1034,7 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         if (ᏑconfigForClient != nil) {
             ᏑconfigForClient.of(Config.Ꮡmutex).RLock();
             if (configForClient.SessionTicketsDisabled) {
+                ᏑconfigForClient.of(Config.Ꮡmutex).RUnlock();
                 return default!;
             }
             ᏑconfigForClient.initLegacySessionTicketKeyRLocked();
@@ -1079,18 +1139,26 @@ internal static time.Time time(this ref Config c) {
     return t();
 }
 
-internal static slice<uint16> cipherSuites(this ref Config c) {
-    if (c.CipherSuites == default!) {
-        if (fips140tls.Required()) {
-            return defaultCipherSuitesFIPS;
-        }
-        return defaultCipherSuites();
+internal static slice<uint16> cipherSuites(this ж<Config> Ꮡc, bool aesGCMPreferred) {
+    ref var c = ref Ꮡc.DerefOrNull();
+
+    slice<uint16> ΔcipherSuites = default!;
+    if (c.CipherSuites == default!){
+        ΔcipherSuites = defaultCipherSuites(aesGCMPreferred);
+    } else {
+        ΔcipherSuites = supportedCipherSuites(aesGCMPreferred);
+        ΔcipherSuites = slices.DeleteFunc(ΔcipherSuites, (uint16 id) => !slices.Contains(Ꮡc.Value.CipherSuites, id));
     }
     if (fips140tls.Required()) {
-        var ΔcipherSuites = slices.Clone<slice<uint16>, uint16>(c.CipherSuites);
-        return slices.DeleteFunc(ΔcipherSuites, (uint16 id) => !slices.Contains(defaultCipherSuitesFIPS, id));
+        ΔcipherSuites = slices.DeleteFunc(ΔcipherSuites, (uint16 id) => !slices.Contains(allowedCipherSuitesFIPS, id));
     }
-    return c.CipherSuites;
+    return ΔcipherSuites;
+}
+
+// supportedCipherSuites returns the supported TLS 1.0–1.2 cipher suites in an
+// undefined order. For preference ordering, use [Config.cipherSuites].
+internal static slice<uint16> supportedCipherSuites(this ж<Config> Ꮡc) {
+    return Ꮡc.cipherSuites(false);
 }
 
 internal static slice<uint16> ΔsupportedVersions = new uint16[]{
@@ -1108,12 +1176,14 @@ internal const bool roleServer = false;
 
 internal static ж<godebug.Setting> tls10server = godebug.New("tls10server"u8);
 
+// supportedVersions returns the list of supported TLS versions, sorted from
+// highest to lowest (and hence also in preference order).
 internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isClient) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var versions = new slice<uint16>(0, len(ΔsupportedVersions));
     foreach (var (_, v) in ΔsupportedVersions) {
-        if (fips140tls.Required() && !slices.Contains(defaultSupportedVersionsFIPS, v)) {
+        if (fips140tls.Required() && !slices.Contains(allowedSupportedVersionsFIPS, v)) {
             continue;
         }
         if ((Ꮡc == nil || c.MinVersion == 0) && v < VersionTLS12) {
@@ -1160,11 +1230,9 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
 internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 version) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    slice<CurveID> curvePreferences = default!;
-    if (fips140tls.Required()){
-        curvePreferences = slices.Clone<slice<CurveID>, CurveID>(defaultCurvePreferencesFIPS);
-    } else {
-        curvePreferences = defaultCurvePreferences();
+    var curvePreferences = defaultCurvePreferences();
+    if (fips140tls.Required()) {
+        curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(allowedCurvePreferencesFIPS, x));
     }
     if (Ꮡc != nil && len(c.CurvePreferences) != 0) {
         curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(Ꮡc.Value.CurvePreferences, x));
@@ -1176,23 +1244,16 @@ internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 ver
 }
 
 internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID curve) {
-    foreach (var (_, cc) in Ꮡc.curvePreferences(version)) {
-        if (cc == curve) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains(Ꮡc.curvePreferences(version), curve);
 }
 
 // mutualVersion returns the protocol version to use given the advertised
-// versions of the peer. Priority is given to the peer preference order.
+// versions of the peer. The highest supported version is preferred.
 internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
-    foreach (var (_, peerVersion) in peerVersions) {
-        foreach (var (_, v) in ΔsupportedVersions) {
-            if (v == peerVersion) {
-                return (v, true);
-            }
+    foreach (var (_, v) in ΔsupportedVersions) {
+        if (slices.Contains(peerVersions, v)) {
+            return (v, true);
         }
     }
     return (0, false);
@@ -1290,6 +1351,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // signature_algorithms_cert, and don't check the algorithms of the
     // signatures on the chain (which anyway are a SHOULD, see RFC 8446,
     // Section 4.4.2.2).
+
     var config = chi.config;
     if (config == nil) {
         config = Ꮡ(new Config(nil));
@@ -1302,13 +1364,13 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // If the client specified the name they are trying to connect to, the
     // certificate needs to be valid for it.
     if (chi.ServerName != ""u8) {
-        var (x509Cert, err) = c.leaf();
-        if (err != default!) {
-            return fmt.Errorf("failed to parse certificate: %w"u8, err);
+        var (x509Cert, errΔ1) = c.leaf();
+        if (errΔ1 != default!) {
+            return fmt.Errorf("failed to parse certificate: %w"u8, errΔ1);
         }
         {
-            var errΔ1 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ1 != default!) {
-                return fmt.Errorf("certificate is not valid for requested server name: %w"u8, errΔ1);
+            var errΔ2 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ2 != default!) {
+                return fmt.Errorf("certificate is not valid for requested server name: %w"u8, errΔ2);
             }
         }
     }
@@ -1339,11 +1401,11 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         }
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
-        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.cipherSuites(), (ж<cipherSuite> cΔ1) => {
-            if ((nint)((~cΔ1).flags & (nint)suiteECDHE) != 0) {
+        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), (ж<cipherSuite> cΔ1) => {
+            if (((~cΔ1).flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
-            if (vers < VersionTLS12 && (nint)((~cΔ1).flags & (nint)suiteTLS12) != 0) {
+            if (vers < VersionTLS12 && ((~cΔ1).flags & (nint)suiteTLS12) != 0) {
                 return false;
             }
             return true;
@@ -1358,8 +1420,8 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // schemes we can use with this certificate and TLS version.
     if (len(chi.SignatureSchemes) > 0) {
         {
-            var (_, err) = selectSignatureScheme(vers, ref (Ꮡc).DerefOrNull(), chi.SignatureSchemes); if (err != default!) {
-                return supportsRSAFallback(err);
+            var (_, errΔ3) = selectSignatureScheme(vers, Ꮡc, chi.SignatureSchemes); if (errΔ3 != default!) {
+                return supportsRSAFallback(errΔ3);
             }
         }
     }
@@ -1372,15 +1434,19 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     }
 
     // The only signed key exchange we support is ECDHE.
-    if (!supportsECDHE(config, vers, chi.SupportedCurves, chi.SupportedPoints)) {
+    var (ecdheSupported, err) = supportsECDHE(config, vers, chi.SupportedCurves, chi.SupportedPoints);
+    if (err != default!) {
+        return err;
+    }
+    if (!ecdheSupported) {
         return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢ));
     }
 
     bool ecdsaCipherSuite = default!;
     {
         var (priv, okΔ3) = c.PrivateKey._<crypto.Signer>(ᐧ); if (okΔ3){
-            var switchᴛ3 = priv.Public();
-            switch (switchᴛ3.type()) {
+            var switchᴛ2 = priv.Public();
+            switch (switchᴛ2.type()) {
             case ж<ecdsa.PublicKey> pub: {
                 CurveID curve = default!;
                 var exprᴛ1 = (~pub).Curve;
@@ -1420,7 +1486,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                 break;
             }
             default: {
-                var pub = switchᴛ3;
+                var pub = switchᴛ2;
                 return supportsRSAFallback(unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
             }}
         } else {
@@ -1431,11 +1497,11 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // Make sure that there is a mutually supported cipher suite that works with
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
-    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.cipherSuites(), (ж<cipherSuite> cΔ3) => {
-        if ((nint)((~cΔ3).flags & (nint)suiteECDHE) == 0) {
+    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), (ж<cipherSuite> cΔ3) => {
+        if (((~cΔ3).flags & (nint)suiteECDHE) == 0) {
             return false;
         }
-        if ((nint)((~cΔ3).flags & (nint)suiteECSign) != 0){
+        if (((~cΔ3).flags & (nint)suiteECSign) != 0){
             if (!ecdsaCipherSuite) {
                 return false;
             }
@@ -1444,7 +1510,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                 return false;
             }
         }
-        if (vers < VersionTLS12 && (nint)((~cΔ3).flags & (nint)suiteTLS12) != 0) {
+        if (vers < VersionTLS12 && ((~cΔ3).flags & (nint)suiteTLS12) != 0) {
             return false;
         }
         return true;
@@ -1466,7 +1532,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var (_, err) = selectSignatureScheme(cri.Version, ref (Ꮡc).DerefOrNull(), cri.SignatureSchemes); if (err != default!) {
+        var (_, err) = selectSignatureScheme(cri.Version, Ꮡc, cri.SignatureSchemes); if (err != default!) {
             return err;
         }
     }
@@ -1506,7 +1572,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
 // compatible chain from Certificates.
 public static void BuildNameToCertificate(this ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
-    foreach (var (i, _) in c.Certificates) {
+    foreach (var i in range(c.Certificates)) {
         var cert = Ꮡ(c.Certificates, i);
         var (x509Cert, err) = cert.leaf();
         if (err != default!) {
@@ -1552,9 +1618,14 @@ internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
 partial struct Certificate {
     public slice<slice<byte>> ΔCertificate;
     // PrivateKey contains the private key corresponding to the public key in
-    // Leaf. This must implement crypto.Signer with an RSA, ECDSA or Ed25519 PublicKey.
+    // Leaf. This must implement [crypto.Signer] with an RSA, ECDSA or Ed25519
+    // PublicKey.
+    //
     // For a server up to TLS 1.2, it can also implement crypto.Decrypter with
     // an RSA PublicKey.
+    //
+    // If it implements [crypto.MessageSigner], SignMessage will be used instead
+    // of Sign for TLS 1.2 and later.
     public cryptoꓸPrivateKey PrivateKey;
     // SupportedSignatureAlgorithms is an optional list restricting what
     // signature algorithms the PrivateKey can be used for.
@@ -1597,7 +1668,7 @@ partial interface handshakeMessageWithOriginalBytes :
 // lruSessionCache is a ClientSessionCache implementation that uses an LRU
 // caching strategy.
 partial struct lruSessionCache {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal map<@string, ж<list.Element>> m;
     internal ж<list.List> q;
     internal nint capacity;
@@ -1701,21 +1772,63 @@ internal static error unexpectedMessageError(any wanted, any got) {
     return fmt.Errorf("tls: received unexpected handshake message of type %T when waiting for %T"u8, got, wanted);
 }
 
-// supportedSignatureAlgorithms returns the supported signature algorithms.
-internal static slice<SignatureScheme> supportedSignatureAlgorithms() {
-    if (!fips140tls.Required()) {
-        return defaultSupportedSignatureAlgorithms;
+internal static slice<SignatureScheme> testingOnlySupportedSignatureAlgorithms;
+
+// supportedSignatureAlgorithms returns the supported signature algorithms for
+// the given minimum TLS version, to advertise in ClientHello and
+// CertificateRequest messages.
+internal static slice<SignatureScheme> supportedSignatureAlgorithms(uint16 minVers) {
+    var sigAlgs = defaultSupportedSignatureAlgorithms();
+    if (testingOnlySupportedSignatureAlgorithms != default!) {
+        sigAlgs = slices.Clone<slice<SignatureScheme>, SignatureScheme>(testingOnlySupportedSignatureAlgorithms);
     }
-    return defaultSupportedSignatureAlgorithmsFIPS;
+    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
 }
 
-internal static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice<SignatureScheme> supportedSignatureAlgorithms) {
-    foreach (var (_, s) in supportedSignatureAlgorithms) {
-        if (s == sigAlg) {
+internal static ж<godebug.Setting> tlssha1 = godebug.New("tlssha1"u8);
+
+internal static bool isDisabledSignatureAlgorithm(uint16 version, SignatureScheme s, bool isCert) {
+    if (fips140tls.Required() && !slices.Contains(allowedSignatureAlgorithmsFIPS, s)) {
+        return true;
+    }
+
+    // For the _cert extension we include all algorithms, including SHA-1 and
+    // PKCS#1 v1.5, because it's more likely that something on our side will be
+    // willing to accept a *-with-SHA1 certificate (e.g. with a custom
+    // VerifyConnection or by a direct match with the CertPool), than that the
+    // peer would have a better certificate but is just choosing not to send it.
+    // crypto/x509 will refuse to verify important SHA-1 signatures anyway.
+    if (isCert) {
+        return false;
+    }
+
+    // TLS 1.3 removed support for PKCS#1 v1.5 and SHA-1 signatures,
+    // and Go 1.25 removed support for SHA-1 signatures in TLS 1.2.
+    if (version > VersionTLS12){
+        var (sigType, sigHash, _) = typeAndHashFromSignatureScheme(s);
+        if (sigType == signaturePKCS1v15 || sigHash == crypto.SHA1) {
+            return true;
+        }
+    } else 
+    if (tlssha1.Value() != "1"u8) {
+        var (_, sigHash, _) = typeAndHashFromSignatureScheme(s);
+        if (sigHash == crypto.SHA1) {
             return true;
         }
     }
+
     return false;
+}
+
+// supportedSignatureAlgorithmsCert returns the supported algorithms for
+// signatures in certificates.
+internal static slice<SignatureScheme> supportedSignatureAlgorithmsCert() {
+    var sigAlgs = defaultSupportedSignatureAlgorithms();
+    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(0, s, true));
+}
+
+internal static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice<SignatureScheme> supportedSignatureAlgorithms) {
+    return slices.Contains(supportedSignatureAlgorithms, sigAlg);
 }
 
 // CertificateVerificationError is returned when certificate verification fails during the handshake.
@@ -1767,27 +1880,12 @@ internal static bool fipsAllowChain(slice<ж<Δx509.Certificate>> chain) {
     }
 
     foreach (var (_, cert) in chain) {
-        if (!fipsAllowCert(ref (cert).DerefOrNull())) {
+        if (!isCertificateAllowedFIPS(ref (cert).DerefOrNull())) {
             return false;
         }
     }
 
     return true;
-}
-
-internal static bool fipsAllowCert(ref Δx509.Certificate c) {
-    // The key must be RSA 2048, RSA 3072, RSA 4096,
-    // or ECDSA P-256, P-384, P-521.
-    switch (c.PublicKey.type()) {
-    case ж<rsa.PublicKey> k: {
-        nint size = (~k).N.BitLen();
-        return size == 2048 || size == 3072 || size == 4096;
-    }
-    case ж<ecdsa.PublicKey> k: {
-        return AreEqual((~k).Curve, elliptic.P256()) || AreEqual((~k).Curve, elliptic.P384()) || AreEqual((~k).Curve, elliptic.P521());
-    }}
-
-    return false;
 }
 
 // anyValidVerifiedChain reports if at least one of the chains in verifiedChains

@@ -16,14 +16,14 @@ partial class subtle_test_package {
 public static void TestXORBytes(ж<testing.T> Ꮡt) {
     for (nint n = 1; n <= 1024; n++) {
         if (n > 16 && testing.Short()) {
-            n += (n >> (int)(3));
+            n += (n >> 3);
         }
         for (nint alignP = 0; alignP < 8; alignP++) {
             for (nint alignQ = 0; alignQ < 8; alignQ++) {
                 for (nint alignD = 0; alignD < 8; alignD++) {
                     var p = new slice<byte>(alignP + n, alignP + n + 100).slice(alignP);
                     var q = new slice<byte>(alignQ + n, alignQ + n + 100).slice(alignQ);
-                    if ((nint)(n & 1) != 0){
+                    if ((n & 1) != 0){
                         p = p.slice(0, n);
                     } else {
                         q = q.slice(0, n);
@@ -109,10 +109,10 @@ public static void TestXorBytesPanic(ж<testing.T> Ꮡt) {
 }
 
 public static void BenchmarkXORBytes(ж<testing.B> Ꮡb) {
-    var dst = new slice<byte>((1 << (int)(15)));
-    var data0 = new slice<byte>((1 << (int)(15)));
-    var data1 = new slice<byte>((1 << (int)(15)));
-    var sizes = new int64[]{((int64)1 << (int)(3)), ((int64)1 << (int)(7)), ((int64)1 << (int)(11)), ((int64)1 << (int)(15))}.slice();
+    var dst = new slice<byte>((1 << 15));
+    var data0 = new slice<byte>((1 << 15));
+    var data1 = new slice<byte>((1 << 15));
+    var sizes = new int64[]{(int64)1 << 3, (int64)1 << 7, (int64)1 << 11, (int64)1 << 13, (int64)1 << 15}.slice();
     foreach (var (_, size) in sizes) {
         var data0ʗ1 = data0;
         var data1ʗ1 = data1;
@@ -125,6 +125,30 @@ public static void BenchmarkXORBytes(ж<testing.B> Ꮡb) {
                 XORBytes(dstʗ1, s0, s1);
             }
         });
+    }
+}
+
+public static void BenchmarkXORBytesAlignment(ж<testing.B> Ꮡb) {
+    var dst = new slice<byte>(8 + (1 << 11));
+    var data0 = new slice<byte>(8 + (1 << 11));
+    var data1 = new slice<byte>(8 + (1 << 11));
+    var sizes = new int64[]{(int64)1 << 3, (int64)1 << 7, (int64)1 << 11}.slice();
+    foreach (var (_, size) in sizes) {
+        for (var offsetᴛ1 = (int64)0; offsetᴛ1 < 8; offsetᴛ1++) {
+            var offset = offsetᴛ1;
+            var data0ʗ1 = data0;
+            var data1ʗ1 = data1;
+            var dstʗ1 = dst;
+            Ꮡb.Run(fmt.Sprintf("%dBytes%dOffset"u8, size, offset), (ж<testing.B> bΔ1) => {
+                var d = dstʗ1.slice((nint)(offset), (nint)(offset + size));
+                var s0 = data0ʗ1.slice((nint)(offset), (nint)(offset + size));
+                var s1 = data1ʗ1.slice((nint)(offset), (nint)(offset + size));
+                bΔ1.SetBytes((int64)size);
+                for (nint i = 0; i < (~bΔ1).N; i++) {
+                    XORBytes(d, s0, s1);
+                }
+            });
+        }
     }
 }
 

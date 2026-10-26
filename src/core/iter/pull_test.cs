@@ -36,7 +36,7 @@ internal static iter.Seq2<nint, int64> squares(nint n) {
 public static void TestPull(ж<testing.T> Ꮡt) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {
@@ -64,7 +64,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)0, false);
                 }
                 wantNG(0);
             }
@@ -81,7 +81,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
 public static void TestPull2(ж<testing.T> Ꮡt) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {
@@ -109,7 +109,7 @@ public static void TestPull2(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (k, v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)(0), (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)0, (nint)0, false);
                 }
                 wantNG(0);
             }
@@ -608,6 +608,26 @@ public static void TestPull2ImmediateStop(ж<testing.T> Ꮡt) {
         var (_, _, ok) = next(); if (ok) {
             Ꮡt.Fatal(nextReturnedTrueAfterˢ2);
         }
+    }
+}
+
+public static void BenchmarkPull(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var seq = count(1);
+    foreach (var _ᴛ1 in range(b.N)) {
+        var (_, stop) = Pull(seq);
+        stop();
+    }
+}
+
+public static void BenchmarkPull2(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var seq = squares(1);
+    foreach (var _ᴛ1 in range(b.N)) {
+        var (_, stop) = Pull2(seq);
+        stop();
     }
 }
 

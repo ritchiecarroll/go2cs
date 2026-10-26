@@ -1,6 +1,7 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using utf8 = go.unicode.utf8_package;
@@ -14,7 +15,7 @@ partial class json_package {
 //
 // All values are true except for the ASCII control characters (0-31), the
 // double quote ("), and the backslash character ("\").
-internal static array<bool> safeSet = new array<bool>(128){
+[GoLazy] partial class lazyᴛsafeSet { internal static array<bool> safeSet = new array<bool>(128){
     [(rune)' '] = true,
     [(rune)'!'] = true,
     [(rune)'"'] = false,
@@ -111,7 +112,7 @@ internal static array<bool> safeSet = new array<bool>(128){
     [(rune)'}'] = true,
     [(rune)'~'] = true,
     [(rune)'\x7f'] = true
-};
+}; }
 
 // htmlSafeSet holds the value true if the ASCII character with the given
 // array position can be safely represented inside a JSON string, embedded
@@ -120,7 +121,7 @@ internal static array<bool> safeSet = new array<bool>(128){
 // All values are true except for the ASCII control characters (0-31), the
 // double quote ("), the backslash character ("\"), HTML opening and closing
 // tags ("<" and ">"), and the ampersand ("&").
-internal static array<bool> htmlSafeSet = new array<bool>(128){
+[GoLazy] partial class lazyᴛhtmlSafeSet { internal static array<bool> htmlSafeSet = new array<bool>(128){
     [(rune)' '] = true,
     [(rune)'!'] = true,
     [(rune)'"'] = false,
@@ -217,6 +218,6 @@ internal static array<bool> htmlSafeSet = new array<bool>(128){
     [(rune)'}'] = true,
     [(rune)'~'] = true,
     [(rune)'\x7f'] = true
-};
+}; }
 
 } // end json_package

@@ -18,6 +18,9 @@ using @internal;
 
 partial class crc32_package {
 
+// Offset into internal/cpu records for use in assembly.
+internal static uintptr offsetX86HasAVX512VPCLMULQDQL => /* unsafe.Offsetof(cpu.X86.HasAVX512VPCLMULQDQ) */ 82;
+
 // This file contains the code to call the SSE 4.2 version of the Castagnoli
 // and IEEE CRC.
 
@@ -43,7 +46,7 @@ internal static UntypedInt castagnoliK1 => 168;
 
 internal static UntypedInt castagnoliK2 => 1344;
 
-[GoType("[4]Table")] partial struct sse42Table;
+partial struct sse42Table /*[4]Table*/;
 
 internal static ж<sse42Table> castagnoliSSE42TableK1;
 
@@ -81,13 +84,14 @@ internal static void archInitCastagnoli() {
 internal static uint32 castagnoliShift(ж<sse42Table> Ꮡtable, uint32 crc) {
     ref var table = ref Ꮡtable.DerefOrNull();
 
-    return (uint32)((uint32)((uint32)(table[3][(crc >> (int)(24))] ^ table[2][(uint32)(((crc >> (int)(16))) & 0xFF)]) ^ table[1][(uint32)(((crc >> (int)(8))) & 0xFF)]) ^ table[0][(uint32)(crc & 0xFF)]);
+    return table[3][(crc >> 24)] ^ table[2][((crc >> 16) & 0xFF)] ^ table[1][((crc >> 8) & 0xFF)] ^ table[0][(crc & 0xFF)];
 }
 
 internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     if (!cpu.X86.HasSSE42) {
         throw panic("not available");
     }
+
     // This method is inspired from the algorithm in Intel's white paper:
     //    "Fast CRC Computation for iSCSI Polynomial Using CRC32 Instruction"
     // The same strategy of splitting the buffer in three is used but the
@@ -145,17 +149,20 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     //
     // We can compute tables corresponding to the four terms for all 8-bit
     // values.
+
     crc = ~crc;
+
     // If a buffer is long enough to use the optimization, process the first few
     // bytes to align the buffer to an 8 byte boundary (if necessary).
     if (len(p) >= (nint)(castagnoliK1 * 3)) {
         nint delta = (nint)((uintptr)((uintptr)Ꮡ(p, 0) & 7));
         if (delta != 0) {
             delta = 8 - delta;
-            crc = castagnoliSSE42(crc, p[..(int)(delta)]);
-            p = p[(int)(delta)..];
+            crc = castagnoliSSE42(crc, p.slice(0, delta));
+            p = p.slice(delta);
         }
     }
+
     // Process 3*K2 at a time.
     while (len(p) >= (nint)(castagnoliK2 * 3)) {
         // Compute CRC(I, A), CRC(0, B), and CRC(0, C).
@@ -163,12 +170,14 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
             crc, 0, 0,
             p, p[(int)(castagnoliK2)..], p[(int)(castagnoliK2 * 2)..],
             castagnoliK2 / 24);
+
         // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-        var crcAB = (uint32)(castagnoliShift(castagnoliSSE42TableK2, crcA) ^ crcB);
+        var crcAB = castagnoliShift(castagnoliSSE42TableK2, crcA) ^ crcB;
         // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-        crc = (uint32)(castagnoliShift(castagnoliSSE42TableK2, crcAB) ^ crcC);
+        crc = castagnoliShift(castagnoliSSE42TableK2, crcAB) ^ crcC;
         p = p[(int)(castagnoliK2 * 3)..];
     }
+
     // Process 3*K1 at a time.
     while (len(p) >= (nint)(castagnoliK1 * 3)) {
         // Compute CRC(I, A), CRC(0, B), and CRC(0, C).
@@ -176,12 +185,14 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
             crc, 0, 0,
             p, p[(int)(castagnoliK1)..], p[(int)(castagnoliK1 * 2)..],
             castagnoliK1 / 24);
+
         // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-        var crcAB = (uint32)(castagnoliShift(castagnoliSSE42TableK1, crcA) ^ crcB);
+        var crcAB = castagnoliShift(castagnoliSSE42TableK1, crcA) ^ crcB;
         // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-        crc = (uint32)(castagnoliShift(castagnoliSSE42TableK1, crcAB) ^ crcC);
+        crc = castagnoliShift(castagnoliSSE42TableK1, crcAB) ^ crcC;
         p = p[(int)(castagnoliK1 * 3)..];
     }
+
     // Use the simple implementation for what's left.
     crc = castagnoliSSE42(crc, p);
     return ~crc;
@@ -205,11 +216,12 @@ internal static uint32 archUpdateIEEE(uint32 crc, slice<byte> p) {
     if (!cpu.X86.HasPCLMULQDQ || !cpu.X86.HasSSE41) {
         throw panic("not available");
     }
+
     if (len(p) >= 64) {
-        nint left = (nint)(len(p) & 15);
+        nint left = len(p) & 15;
         nint @do = len(p) - left;
-        crc = ~ieeeCLMUL(~crc, p[..(int)(@do)]);
-        p = p[(int)(@do)..];
+        crc = ~ieeeCLMUL(~crc, p.slice(0, @do));
+        p = p.slice(@do);
     }
     if (len(p) == 0) {
         return crc;

@@ -16,6 +16,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -102,10 +103,46 @@ func TestLinknameForwardTargetsMatchGoSource(t *testing.T) {
 			continue
 		}
 
+		// A HAND-OWNED package (isNonConvertedStdLibPackage: testing) is never emitted by the converter, so
+		// packageFuncAccess and its handle play no part: the target's accessibility is the hand-written
+		// file's. What must hold instead is that the hand-owned source declares it public static under the
+		// symbol's own name (testing.checkParallel, the push cryptotest's SetGlobalRandom pulls).
+		if isNonConvertedStdLibPackage(pkgPath) {
+			verifyHandOwnedForwardTarget(t, pkgPath, symbol)
+			continue
+		}
+
 		if !pkgHasLinknameHandle(t, goRoot, pkgPath, symbol) {
 			t.Errorf("whitelist entry %q: %s has a Go body but %s carries no one-arg `//go:linkname %s` handle — packageFuncAccess widens a forward target to `public` only on that handle, so the emitted forwarder would call an `internal` symbol across an assembly boundary (CS0122)", target, symbol, pkgPath, symbol)
 		}
 	}
+}
+
+// verifyHandOwnedForwardTarget checks a forward row whose target lives in a HAND-OWNED package: the package's
+// hand-written C# (src/core/<pkgPath>) declares the symbol public static, so the forwarder emitted in another
+// assembly can call it. A hand-owned package with no .cs at that path fails loudly rather than passing empty.
+func verifyHandOwnedForwardTarget(t *testing.T, pkgPath, symbol string) {
+	t.Helper()
+
+	dir := filepath.Join(repoRootFromPackageDir(t), "src", "core", filepath.FromSlash(pkgPath))
+	files, err := filepath.Glob(filepath.Join(dir, "*.cs"))
+
+	if err != nil || len(files) == 0 {
+		t.Errorf("forward row %s.%s: the hand-owned package has no .cs files at %s", pkgPath, symbol, dir)
+		return
+	}
+
+	declaration := regexp.MustCompile(`public static [^(\n]*\b` + regexp.QuoteMeta(symbol) + `\(`)
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+
+		if err == nil && declaration.Match(content) {
+			return
+		}
+	}
+
+	t.Errorf("forward row %s.%s: no hand-owned file in %s declares `public static ... %s(`, so the forwarder emitted in the pulling package would not compile", pkgPath, symbol, dir, symbol)
 }
 
 // verifyLinknameForwardDefinition checks a forward row whose symbol Go defines under another name: the
@@ -426,4 +463,208 @@ func unexportedSignatureTypes(decl *ast.FuncDecl, typeNames map[string]bool) []s
 	scan(decl.Type.Results, "result")
 
 	return uses
+}
+
+// TestLinknameForwardHandlesCoverEveryPullingTarget is the per-GOOS half that
+// TestLinknameForwardTargetsMatchGoSource cannot be: that guard ignores build constraints, so a handle
+// in ANY file satisfies it. packageFuncAccess widens a forward target only when the handle is in the
+// files THIS target's conversion reads, so a row whose handle builds on darwin alone but whose puller
+// also builds on linux passes there and is CS0122 in the linux corpus. Measured at the Go 1.26 hop:
+// internal/syscall/unix's utimes.go (unix) pulls syscall.utimensat, whose one-arg handle is only in
+// syscall_darwin.go.
+//
+// For every row whose target the converter emits with a body (unexported, not a definition row), each
+// corpus target (windows, linux, darwin; amd64; cgo off; purego) on which a file pulling it builds must
+// also build a file of the target's package carrying the handle — or the row must be in
+// linknameForwardHandleElsewhere, which widens without the local handle, and then must still need it.
+func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	if goRoot == "" {
+		t.Skip("GOROOT not resolvable; nothing to verify the registry against")
+	}
+
+	for target := range linknameForwardHandleElsewhere {
+		if !linknameForwardTargets[target] {
+			t.Errorf("linknameForwardHandleElsewhere entry %q has no linknameForwardTargets row, so it widens a symbol nothing forwards to", target)
+		}
+	}
+
+	pullers := linknamePullSites(t, goRoot)
+	checked := 0
+
+	for target := range linknameForwardTargets {
+		if _, isDefined := linknameForwardDefinitions[target]; isDefined {
+			continue
+		}
+
+		pkgPath, symbol, ok := splitLastDot(target)
+
+		// A hand-owned package's target is never converter-emitted, so no handle widens it (its public
+		// declaration is checked by TestLinknameForwardTargetsMatchGoSource instead).
+		if !ok || token.IsExported(symbol) || isNonConvertedStdLibPackage(pkgPath) || !anyDeclHasBody(findGoFuncDecls(t, goRoot, pkgPath, symbol)) {
+			continue
+		}
+
+		handled := handleTargets(t, goRoot, pkgPath, symbol)
+		var unhandled []string
+
+		for _, site := range pullers[target] {
+			for _, goos := range corpusGOOS {
+				if !handled[goos] && corpusTargetBuilds(goRoot, site.dir, site.name, goos) {
+					unhandled = append(unhandled, goos+" ("+site.pkg+"/"+site.name+")")
+				}
+			}
+		}
+
+		checked++
+		_, widenedElsewhere := linknameForwardHandleElsewhere[target]
+
+		switch {
+		case len(unhandled) > 0 && !widenedElsewhere:
+			t.Errorf("forward row %q: a puller builds where %s carries no one-arg `//go:linkname %s` handle: %s. packageFuncAccess leaves %s `internal` there and the forwarder is CS0122. Add the row to linknameForwardHandleElsewhere with Go's authorization, or give the pull a companion",
+				target, pkgPath, symbol, strings.Join(unhandled, ", "), symbol)
+		case len(unhandled) == 0 && widenedElsewhere:
+			t.Errorf("linknameForwardHandleElsewhere entry %q: every target a puller builds on now carries the handle, so the entry widens nothing the handle does not; remove it", target)
+		}
+	}
+
+	if checked == 0 {
+		t.Fatal("no forward row checked: the guard is vacuous")
+	}
+
+	t.Logf("checked %d forward rows; %d rows have a pulling file in GOROOT", checked, len(pullers))
+}
+
+var corpusGOOS = []string{"windows", "linux", "darwin"}
+
+// corpusTargetBuilds reports whether file name in dir is compiled by the corpus conversion for goos:
+// amd64, cgo off, and the purego tag the -stdlib default passes.
+func corpusTargetBuilds(goRoot string, dir string, name string, goos string) bool {
+	ctx := build.Default
+	ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goos, "amd64", false
+	ctx.BuildTags = []string{"purego"}
+
+	match, err := ctx.MatchFile(dir, name)
+
+	return err == nil && match
+}
+
+// handleTargets returns the corpus GOOS values on which a non-test file of pkgPath carrying the one-arg
+// `//go:linkname symbol` handle builds.
+func handleTargets(t *testing.T, goRoot string, pkgPath string, symbol string) map[string]bool {
+	t.Helper()
+
+	dir := filepath.Join(goRoot, "src", filepath.FromSlash(pkgPath))
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		t.Errorf("reading %s: %v", dir, err)
+		return nil
+	}
+
+	handled := map[string]bool{}
+	handle := "//go:linkname " + symbol
+
+	for _, entry := range entries {
+		name := entry.Name()
+
+		if !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		content, err := os.ReadFile(filepath.Join(dir, name))
+
+		if err != nil {
+			continue
+		}
+
+		found := false
+
+		for _, line := range strings.Split(string(content), "\n") {
+			if strings.TrimSpace(line) == handle {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			continue
+		}
+
+		for _, goos := range corpusGOOS {
+			if corpusTargetBuilds(goRoot, dir, name, goos) {
+				handled[goos] = true
+			}
+		}
+	}
+
+	return handled
+}
+
+// linknamePullSite is one Go file carrying a two-arg `//go:linkname <local> <target>` pull.
+type linknamePullSite struct {
+	pkg, dir, name string
+}
+
+var linknamePullDirective = regexp.MustCompile(`^\s*//go:linkname\s+\S+\s+(\S+)\s*$`)
+
+// linknamePullSites maps each linknameForwardTargets row to the GOROOT files that pull it, test files
+// included (the -tests conversion forwards their pulls too). cmd/ and testdata/ are never converted.
+func linknamePullSites(t *testing.T, goRoot string) map[string][]linknamePullSite {
+	t.Helper()
+
+	srcRoot := filepath.Join(goRoot, "src")
+	sites := map[string][]linknamePullSite{}
+
+	err := filepath.WalkDir(srcRoot, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if entry.IsDir() {
+			if rel, _ := filepath.Rel(srcRoot, path); rel == "cmd" || entry.Name() == "testdata" {
+				return filepath.SkipDir
+			}
+
+			return nil
+		}
+
+		if !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+
+		if err != nil || !strings.Contains(string(content), "//go:linkname") {
+			return nil
+		}
+
+		dir := filepath.Dir(path)
+		rel, _ := filepath.Rel(srcRoot, dir)
+		seen := map[string]bool{}
+
+		for _, line := range strings.Split(string(content), "\n") {
+			match := linknamePullDirective.FindStringSubmatch(line)
+
+			if match == nil || !linknameForwardTargets[match[1]] || seen[match[1]] {
+				continue
+			}
+
+			seen[match[1]] = true
+			sites[match[1]] = append(sites[match[1]], linknamePullSite{pkg: filepath.ToSlash(rel), dir: dir, name: filepath.Base(path)})
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("walking %s: %v", srcRoot, err)
+	}
+
+	return sites
 }

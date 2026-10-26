@@ -55,6 +55,12 @@ using static go.sync_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -64,7 +70,7 @@ using static go.sync_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROLI=")]
-[assembly: go.GoPositionMap("sync/hashtriemap.go", "hashtriemap.cs", "ACxisqiSqJKssqqiqJKqoqyyAAIQ0gACHAALAg==")]
+[assembly: go.GoPositionMap("sync/map.go", "map.cs", "ACtesqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
 [assembly: go.GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAJAgABEgAIBqampqaigoKmkg==")]
 // </GoSourcePositionMaps>
 
@@ -96,6 +102,7 @@ public static partial class sync_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsync() => builtin.initPackage(typeof(@internal.sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsynctest() => builtin.initPackage(typeof(@internal.synctest_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>

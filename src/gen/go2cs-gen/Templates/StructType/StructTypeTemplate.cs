@@ -43,9 +43,25 @@ internal class StructTypeTemplate : TemplateBase
     public HashSet<string> ReadOnlyZeroSizeMembers = [];
     public string[] ValueCloneFields = [];
 
+    // The embeds this struct's converter declaration carries as FIELDS (`/*embed*/ public T T;`), in Go order: the
+    // field is the embed's storage and its accessor, so the generator declares neither and stores through it.
+    private HashSet<string>? m_declaredEmbedFields;
+
+    private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=
+        Context.GetStructDeclaration(FullyQualifiedStructType) is (StructDeclarationSyntax declaration, _)
+            ? new HashSet<string>(declaration.Members.OfType<FieldDeclarationSyntax>()
+                .Where(MemberMarkers.HasEmbed)
+                .SelectMany(declared => declared.Declaration.Variables.Select(variable => variable.Identifier.Text)), StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+
+    // The l-value of an embed's storage: the declared field itself, or the legacy generator-declared backing field.
+    // A keyword-named embed composes the backing name from the UNESCAPED member name ('@' only leads an identifier).
+    private string EmbedStorage(string memberName) =>
+        DeclaredEmbedFields.Contains(memberName) ? $"this.{memberName}" : $"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)}";
+
     // The readonly zero-size members of a promoted (embedded) struct type, cached per type: from its
     // declaration when it is in this compilation, else from metadata, where a readonly INSTANCE field of a
-    // converted struct can only be one of the arc's (embeds are `partial ref` properties, not fields).
+    // converted struct can only be one of the arc's (a declared embed field is readonly only when the arc made it so).
     private readonly Dictionary<string, HashSet<string>> m_embedReadOnlyZeroSize = new(StringComparer.Ordinal);
 
     private bool IsReadOnlyZeroSizeMemberOf(string structTypeName, string memberName)
@@ -95,6 +111,11 @@ internal class StructTypeTemplate : TemplateBase
     private string? m_nonGenericStructName;
     public string NonGenericStructName => m_nonGenericStructName ??= GetSimpleName(StructName, true);
 
+    // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
+    // EXPLICITLY, through this struct's own ==, so the comparison runs in compiled code and no member is added.
+    private string GoEquatablePart =>
+        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
+
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)>? m_publicStructMembers;
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> PublicStructMembers =>
         m_publicStructMembers ??= StructMembers.Where(item =>
@@ -120,7 +141,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
+                {{ValueCloneImplementation}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
@@ -140,20 +161,13 @@ internal class StructTypeTemplate : TemplateBase
 
                 public static implicit operator {{StructName}}(NilType nil) => default({{StructName}});
 
-                public override string ToString() => string.Concat("{", string.Join(" ",
+                public override string ToString() => global::go.GoMethodText.Of(this) ?? string.Concat("{", string.Join(" ",
                 [
                     {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
-            }{{PromotedStructReceivers()}}
+            }{{GoEquatablePart}}{{PromotedStructReceivers()}}
         """;
 
-    // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
-    // constructor, which runs the field initializers and builds the embed boxes, as golib's
-    // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
-    // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
-    // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. A GENERIC
-    // struct cannot host a module initializer and has no closed type to register; the residual option B
-    // stated is closed by its construction hook instead (GoZeroConstructionHook; GolibTests' GoZeroResidualTests).
     // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
     // struct's own equality (HandWrittenEquality). Each carries the blank line that follows it in the
     // template, so the generated form is byte-identical to the unconditional one it replaced.
@@ -167,15 +181,21 @@ internal class StructTypeTemplate : TemplateBase
             ? string.Empty
             : $"\r\n{TypeElemIndent}public override int GetHashCode() => {HashCode};\r\n{TypeElemIndent}";
 
-    private string GoZeroRegistration =>
-        StructName.Contains('<') || !IsNeedy
-            ? string.Empty
-            : $"\r\n{TypeElemIndent}[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n" +
-              $"{TypeElemIndent}internal static void {TempVarMarker}RegisterGoZero() =>\r\n" +
-              $"{TypeElemIndent}    global::go.GoZeroFactory<{StructName}>.Create = static () => new {StructName}();\r\n";
+    // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
+    // constructor, which runs the field initializers and builds the embed fields, as golib's
+    // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
+    // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
+    // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. The
+    // TypeGenerator writes the registrations of a package's structs into ONE method that its module
+    // initializer defers to golib's first constructed zero (EmitGoTypeRegistrations), where a module
+    // initializer per struct compiled each one at startup. A GENERIC struct has no closed type to
+    // register; the residual option B stated is closed by its construction hook instead
+    // (GoZeroConstructionHook; GolibTests' GoZeroResidualTests). Null when nothing registers.
+    public string? GoZeroFactoryType =>
+        StructName.Contains('<') || !IsNeedy ? null : StructName;
 
     // The rule NeedsConstruction applies to a FIELD of this type, asked of this struct's own members:
-    // a promoted embed (its box is constructor-built), a fixed-size array field (`default` skips its
+    // a promoted embed (each is constructor-built), a fixed-size array field (`default` skips its
     // `= new(N)` initializer), or a value field whose own type needs construction.
     private bool IsNeedy => StructMembers.Any(member =>
         GetSimpleName(member.memberName) != "_" &&
@@ -277,7 +297,7 @@ internal class StructTypeTemplate : TemplateBase
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
     // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp
     // (ChanDirInitializerMembers) -- names its own zero here, generic or not, so golib never asks a type parameter for its
-    // constructor. A generic struct gains what the GoZero factory registration cannot give it (see GoZeroRegistration).
+    // constructor. A generic struct gains what the GoZero factory registration cannot give it (see GoZeroFactoryType).
     // The rule is what the constructor BUILDS, so it also counts a blank `_` fixed array, whose `= new(N)` initializer
     // the constructor runs although IsNeedy (the factory's rule) leaves an unobservable blank field out: golib built
     // every such struct through Activator before, and GolibTests' GoZeroConstructionGuardTests holds the two equal.
@@ -349,8 +369,13 @@ internal class StructTypeTemplate : TemplateBase
             // The composed field name must use the unescaped member name — a C#-keyword embed
             // (`type base struct{…}`) arrives escaped `@base`, but `ʗ@base` is invalid ('@' only
             // leads an identifier). The standalone member ACCESS sites keep `@base`.
+            // A converter-declared embed FIELD (`/*embed*/ public T T;`) is its own storage, declared in Go order by
+            // the converter, so the CLR lays it where Go does; only the legacy `partial ref` form is backed here.
             foreach ((string typeName, string memberName, _, _, _) in promotedStructs)
             {
+                if (DeclaredEmbedFields.Contains(memberName))
+                    continue;
+
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
@@ -385,6 +410,10 @@ internal class StructTypeTemplate : TemplateBase
             // member name; this one was the outlier.
             foreach ((string typeName, string memberName, _, _, _) in promotedStructs)
             {
+                // A declared embed field is already the accessor: `s.T` and `ref s.T` bind to it directly.
+                if (DeclaredEmbedFields.Contains(memberName))
+                    continue;
+
                 string memberScope = GetScope(GetSimpleName(memberName));
                 result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {memberScope} partial ref {typeName} {memberName} => ref {CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)};");
             }
@@ -469,7 +498,11 @@ internal class StructTypeTemplate : TemplateBase
                     // A depth-1 member that is a readonly zero-size field of the embed answers the shared slot
                     // (a writable ref to it is CS8160); deeper ones resolve through the intermediate type's own
                     // promoted accessor, which applies this same rule.
-                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // So does EVERY member promoted through an embed that is itself one of THIS struct's readonly zero-size
+                    // fields (the zero-size layout arc stamps a zero-size embed readonly): a zero-size struct's members are
+                    // all zero-size, and a writable ref into a readonly field is CS8162 (XpkgPromotedMethodSet's OuterS5,
+                    // promoting deepTok through `struct{ deepTok }`).
+                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedType)
                         : $"ref {EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 
@@ -529,7 +562,8 @@ internal class StructTypeTemplate : TemplateBase
                     string? pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
                     // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
-                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // Through a readonly zero-size embed of this struct too, as the accessor above.
+                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedFieldType)
                         : $"ref instance.{EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 
@@ -715,6 +749,11 @@ internal class StructTypeTemplate : TemplateBase
         }
     }
 
+    // The mark on a promoted method's by-value or `this ref` forwarder (golib's GoPromotedAttribute). A method the
+    // type declares looks the same otherwise, and reflect's binder reads the mark to raise Go's nil-pointer fault, not
+    // panicwrap, when a nil *T calls a promoted value method.
+    private const string PromotedMark = "[global::go.GoPromoted] ";
+
     private string PromotedStructReceivers()
     {
         (string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)[] promotedStructs = StructMembers.Where(item => item.isPromotedStruct).ToArray();
@@ -725,6 +764,13 @@ internal class StructTypeTemplate : TemplateBase
         StringBuilder result = new();
 
         result.Append("\r\n\r\n    // Promoted Struct Receivers");
+
+        // A GENERIC enclosing struct's forwarders carry its type parameters (methodTypeParams below), so they
+        // repeat its where clauses too: gen's `Array[T Value]` embeds valAny, and `initOp<T>(this ref Array<T>
+        // target, …)` with no `where T : Value` names an Array<T> its T does not satisfy (CS0314).
+        string structConstraints = Context.Compilation.FindTypeSymbol(FullyQualifiedStructType) is { IsGenericType: true } structSymbol
+            ? ImplementGenerator.GetGenericConstraintClause(structSymbol.TypeParameters)
+            : "";
 
         // Get all extension methods for the struct, any directly defined receivers
         // take precedence over promoted struct methods that have the same name
@@ -752,7 +798,7 @@ internal class StructTypeTemplate : TemplateBase
         // the same GetSimpleName call the forwarder emission uses, so both sides normalize to `Inner`.
         HashSet<string> pointerEmbedTypeNames = structDecl is null
             ? new(StringComparer.Ordinal)
-            : new(structDecl.GetEmbeddedPointerHopNames().Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
+            : new(structDecl.GetEmbeddedPointerHopNames(compilation!).Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
 
         // promotedStructType arrives as the qualified BOX form, so its GetSimpleName carries a trailing
         // `.Value` (the pointer deref) the embed keys above do not — strip it before the membership test.
@@ -1193,7 +1239,7 @@ internal class StructTypeTemplate : TemplateBase
                 string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
                 string receiver = ReceiverName(method.Parameters);
 
-                result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
+                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1201,7 +1247,7 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.Append($") => {receiver}.{embedAccess}.{method.Name}(");
+                result.Append($"){structConstraints} => {receiver}.{embedAccess}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.Append(");");
 
@@ -1214,7 +1260,7 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.AppendLine(")");
+                result.AppendLine($"){structConstraints}");
                 result.AppendLine("    {");
                 result.AppendLine($"        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;");
                 result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}{receiver}.{method.Name}(");
@@ -1244,9 +1290,29 @@ internal class StructTypeTemplate : TemplateBase
     // carries the `.Value` deref. The ONE statement of that test — EmbedHop renders the hop from it
     // and the promoted-method collection folds it down the embed path (MethodInfo.PathHasPointer) —
     // so the hop a forwarder spells and the method set it is placed in cannot disagree.
+    //
+    // Read off the box itself (UnboxedEmbedType), not off GetSimpleName's `.Value` suffix: for a GENERIC
+    // pointer embed that suffix follows the type arguments (`canonMap<T>.Value`), and stripping the
+    // arguments cut it away too, so Go 1.26 unique's `*canonMap[T]` read as a VALUE embed and every
+    // promotion through it skipped the deref (handle.cs:49,52 and uniqueMap<T>'s accessors).
     private static bool IsPointerHop(string embedTypeName) =>
-        StripGenericTypeArguments(GetSimpleName(embedTypeName, dropCollisionPrefix: true))
-            .EndsWith(".Value", StringComparison.Ordinal);
+        !ReferenceEquals(UnboxedEmbedType(embedTypeName), embedTypeName);
+
+    // The embed's type with its pointer box removed -- `global::go.ж<global::go.p.canonMap<T>>` (or the
+    // short `ж<canonMap<T>>`) to `global::go.p.canonMap<T>` -- and the SAME string instance for a value
+    // embed. Only a box at the top level counts: a value embed whose type ARGUMENT is a box
+    // (`nistCurve<ж<Point>>`) is a value embed.
+    private static string UnboxedEmbedType(string embedTypeName)
+    {
+        string bare = embedTypeName.StartsWith("global::", StringComparison.Ordinal) ? embedTypeName["global::".Length..] : embedTypeName;
+
+        if (bare.StartsWith("go.", StringComparison.Ordinal))
+            bare = bare["go.".Length..];
+
+        return bare.StartsWith($"{PointerPrefix}<", StringComparison.Ordinal) && bare.EndsWith(">", StringComparison.Ordinal)
+            ? bare[(PointerPrefix.Length + 1)..^1]
+            : embedTypeName;
+    }
 
     private string? m_enclosingGoPackage;
     private bool m_enclosingGoPackageResolved;
@@ -1538,22 +1604,6 @@ internal class StructTypeTemplate : TemplateBase
         return $"{pkg}{TempVarMarker}{structName.TrimStart('@')}{TempVarMarker}xpkg";
     }
 
-    // The premise XpkgClassName's uniqueness rests on, checked where it could fail: a package stem
-    // holding `ᴛ` makes the stem boundary ambiguous (stem `aᴛb` + struct `c` and stem `a` + struct
-    // `bᴛc` name one class), and the collision would otherwise surface as a bare CS0101 on a
-    // generated class with nothing pointing here. No Go package in the corpus has such a stem.
-    // RS2008 asks for analyzer release-tracking files; go2cs-gen is a source generator that ships
-    // with the converter and keeps none, and this is its one diagnostic.
-#pragma warning disable RS2008
-    private static readonly DiagnosticDescriptor s_xpkgStemMarker = new(
-        id: "GO2CS0001",
-        title: "Package class stem contains the lifted-name marker",
-        messageFormat: "Package class stem '{0}' contains '" + TempVarMarker + "': the cross-package forwarder class '{1}' may collide with another struct's (CS0101)",
-        category: "go2cs-gen",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
-#pragma warning restore RS2008
-
     private readonly StringBuilder m_xpkg = new();
 
     private Dictionary<string, int>? m_treeNameCounts;
@@ -1714,11 +1764,15 @@ internal class StructTypeTemplate : TemplateBase
 
                 if (member is IFieldSymbol field)
                 {
-                    // The INLINE embed field (`ʗ<Embed>`) is the one embed marker metadata always carries -- an
-                    // unexported embed (Mid2's `loc2`) has no accessor property at all -- so recurse through it.
-                    if (field.Name.StartsWith("ʗ", StringComparison.Ordinal))
+                    // An EMBED, in either stored form: the converter-declared embed field (`/*embed*/ internal loc2
+                    // loc2;`, known in metadata by its [GoMemberRecord]) or the legacy inline backing field (`ʗ<Embed>`).
+                    // Either is the one embed marker metadata always carries -- an unexported embed (Mid2's `loc2`) has
+                    // no accessor property at all -- so recurse through it.
+                    bool legacyInline = field.Name.StartsWith("ʗ", StringComparison.Ordinal);
+
+                    if (legacyInline || isGoEmbedded(field) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(field.Type))
                     {
-                        addTo(fieldsHere, GoName(field.Name[1..]), 1);
+                        addTo(fieldsHere, GoName(legacyInline ? field.Name[1..] : field.Name), 1);
 
                         ITypeSymbol inline = field.Type;
 
@@ -1798,9 +1852,10 @@ internal class StructTypeTemplate : TemplateBase
         if (!method.ReturnTypeIsPublic || !method.ParametersArePublic)
             return;
 
-        // The first forwarder this struct mints is where its sibling class comes into being.
+        // The first forwarder this struct mints is where its sibling class comes into being. GO2CS0001 checks
+        // XpkgClassName's uniqueness premise (see GeneratorDiagnostics.XpkgStemMarker).
         if (m_xpkg.Length == 0 && PackageName.Contains(TempVarMarker))
-            Context.ReportDiagnostic(Diagnostic.Create(s_xpkgStemMarker, Location.None, PackageName, XpkgClassName($"{PackageName}_package", NonGenericStructName)));
+            Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.XpkgStemMarker,Location.None, PackageName, XpkgClassName($"{PackageName}_package", NonGenericStructName)));
 
         string scope = Scope ?? "public";
         string qualified = $"global::{PackageNamespace}.{PackageName}_package.{StructName}";
@@ -1837,7 +1892,7 @@ internal class StructTypeTemplate : TemplateBase
         string recvMod = pointerSetOnly ? "ref " : "";
         string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
 
-        m_xpkg.Append($"\r\n    {goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
         m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
         m_xpkg.Append($"\r\n    {{\r\n        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n        {ret}{receiver}.{embedAccess}.{method.Name}({args});\r\n    }}");
     }
@@ -1903,8 +1958,15 @@ internal class StructTypeTemplate : TemplateBase
     // type PARAMETER names (`Point`); those must be rewritten to the instantiation's type ARGUMENTS
     // (`P256PointжnistPoint`) before promotion onto the enclosing struct — otherwise a promoted
     // accessor/forwarder references an out-of-scope `Point` (CS0246). Empty for a non-generic embed.
+    //
+    // A POINTER embed is mapped through its box: the instantiation is the box's ARGUMENT
+    // (`ж<canonMap<T>>` -> `canonMap<T>`), whose own arguments are the ones to substitute. Parsed off the
+    // box, the single argument was the whole inner type, and unique's `canonMap[T]` field
+    // `atomic.Pointer[indirect[T]]` promoted as `Pointer<Δindirect<canonMap<T>>>`.
     private Dictionary<string, string> GetEmbedTypeArgumentMap(string promotedStructType)
     {
+        promotedStructType = UnboxedEmbedType(promotedStructType);
+
         List<string> typeArguments = ParseTopLevelTypeArguments(promotedStructType);
 
         if (typeArguments.Count == 0)
@@ -2074,8 +2136,8 @@ internal class StructTypeTemplate : TemplateBase
             // PLAIN scalar/reference/slice/map members need no assignment — re-assigning `default!` would
             // NULL an array field's `= new(N)` backing (a `[N]T` field of `S{}` NREd on first index).
             // AppendZeroValueInitializers assigns only what `default` leaves broken: the promoted-embed
-            // boxes (readonly `ж<T>` fields with no initializer) and any plain struct-typed field whose
-            // own type needs construction (see AppendZeroValueInitializers).
+            // fields (a value embed by its own NilType ctor, a pointer embed as a nil box) and any plain
+            // struct-typed field whose own type needs construction (see AppendZeroValueInitializers).
             result.AppendLine($"public {NonGenericStructName}(NilType _)");
             result.AppendLine($"{TypeElemIndent}{{");
             AppendZeroValueInitializers(result);
@@ -2087,7 +2149,7 @@ internal class StructTypeTemplate : TemplateBase
             // constructor, which zeroes every field and SKIPS field initializers — leaving an array field's
             // backing null, so indexing/`len` on it throws NullReferenceException. (C# 11 auto-defaults any
             // field lacking an initializer; a slice/map/etc. field — which has no `= new(N)` initializer —
-            // stays its nil zero value, matching Go.) The promoted-embed boxes are allocated here too, so
+            // stays its nil zero value, matching Go.) The promoted-embed fields are built here too, so
             // `new S()` — the zero value golib's `@new<T>()`/`heap()` materialize — is fully usable.
             result.AppendLine();
             result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
@@ -2119,13 +2181,13 @@ internal class StructTypeTemplate : TemplateBase
     // Builds the zero value that golib's `@new<T>()`/`heap()` materialize into a FULLY USABLE
     // instance — shared by the NilType and parameterless constructors (the parameterized
     // constructors box/assign their incoming member values instead). Two things need it:
-    //   (1) every promoted-embed box — a readonly `ж<T>` field with no initializer, so it exists
-    //       only when a constructor allocates it; and
+    //   (1) every promoted-embed field — a value embed by its own NilType constructor, a pointer
+    //       embed as a nil `ж<T>` box rather than `default`'s raw null, so a deref panics as Go does; and
     //   (2) every plain (non-embed) struct-typed FIELD whose type itself needs construction — its
-    //       own promoted-embed box or fixed-array (`[N]T`) backing, at any depth. C# implicitly
+    //       own promoted embeds or fixed-array (`[N]T`) backing, at any depth. C# implicitly
     //       zeroes such a field to `default(FieldType)`, whose nested box/backing is null, so the
     //       first touch NREs (`@new<pp>()` — pp has a field `fmt`, and `fmt` embeds `fmtFlags`
-    //       whose box is null → clearflags). Constructing it via its own NilType constructor
+    //       when the embed was still a box → clearflags). Constructing it via its own NilType constructor
     //       recursively initializes its needy members, so a single-level `new FieldType(nil)` here
     //       fixes every depth. Reference fields (pointers/interfaces/delegates) keep their nil zero
     //       value (correct — a nil `*T` matches Go); a fixed-array FIELD self-initializes via its
@@ -2145,9 +2207,9 @@ internal class StructTypeTemplate : TemplateBase
             if (isPromotedStruct)
             {
                 result.Append($"{TypeElemIndent}    ");
-                // A keyword-named embed composes the box field from the UNESCAPED member name
+                // A keyword-named embed composes a legacy backing field from the UNESCAPED member name
                 // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
-                result.AppendLine($"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
+                result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
                 continue;
             }
 
@@ -2182,7 +2244,7 @@ internal class StructTypeTemplate : TemplateBase
     private readonly Dictionary<string, bool> m_needsConstructionCache = new(StringComparer.Ordinal);
 
     // Reports whether a value struct's zero value (`default(T)`) is broken — i.e. it has a
-    // promoted-embed box (constructor-allocated) or a fixed-array field (`= new(N)` initializer
+    // promoted embed (constructor-built) or a fixed-array field (`= new(N)` initializer
     // that `default` skips), directly or through a nested value-struct field — so a field of this
     // type must be constructed rather than left `default`. Only CONVERTER-GENERATED structs
     // (resolvable by syntax in this compilation) qualify: a `true` result guarantees the type has
@@ -2322,6 +2384,10 @@ internal class StructTypeTemplate : TemplateBase
                 // the `default` it replaced.
                 case IPropertySymbol { ReturnsByRef: true, IsIndexer: false }:
                     return true;
+                // A converter-declared embed FIELD answers as the property form did: every embed keeps the
+                // constructor route (see the syntax walk's isProperty arm), whatever its own type needs.
+                case IFieldSymbol embedField when MemberMarkers.IsGoEmbedded(embedField) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(embedField.Type):
+                    return true;
                 case IFieldSymbol { Type: { IsReferenceType: false } fieldType }:
                 {
                     // A fixed-size array field (`[N]T` → golib `array<T>`) carries a `= new(N)`
@@ -2396,7 +2462,7 @@ internal class StructTypeTemplate : TemplateBase
             // initializer. See GetChanDirInitializerMembers for why this is scoped to direction
             // stamps alone and never a general field-initializer fallback.
             result.AppendLine(isPromotedStruct ?
-                $"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = {memberValue};" :
+                $"{EmbedStorage(memberName)} = {memberValue};" :
                 IsFixedArrayMember(typeName, isReferenceType) ?
                     $"if ({memberName}.Source is not null) this.{memberName} = {memberName};" :
                     ChanDirInitializerMembers.Contains(memberName) ?

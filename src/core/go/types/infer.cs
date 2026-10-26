@@ -11,7 +11,6 @@ using token = global::go.go.token_package;
 using slices = slices_package;
 using strings = strings_package;
 using System.Runtime.CompilerServices;
-using ast = global::go.go.ast_package;
 using global::go.go;
 
 partial class types_package {
@@ -42,6 +41,8 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var @params = ref Ꮡparams.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
+        var untypedᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
+        var dirtyᴷ = new stackAppend<nint>();
 
         // Don't verify result conditions if there's no error handler installed:
         // in that case, an error leads to an exit panic and the result value may
@@ -208,7 +209,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // parameter declared by the current function and use it in the same
                         // function signature; hence we don't need to Unalias before the
                         // .(*TypeParam) type assertion above.
-                        untyped = append(untyped, i);
+                        untyped = append(untypedᴷ, untyped, i);
                     }
                 }
             }
@@ -287,7 +288,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                     }
                     case {} when single && !(~core).tilde: {
                         if (traceInference) {
-                            u.tracef("-> set type parameter %s to constraint core type %s"u8, tpar.OrTypedNil(), (~core).typ);
+                            u.tracef("-> set type parameter %s to constraint's common underlying type %s"u8, tpar.OrTypedNil(), (~core).typ);
                         }
                         // The corresponding type argument tx is unknown and the core term
                         // describes a single specific type and no tilde.
@@ -352,6 +353,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // Collect all remaining parameters that don't have a type yet and determine the
         // maximum untyped type for each of those parameters, if possible.
         map<ж<TypeParam>, ΔType> maxUntyped = default!;                                // lazily allocated (we may not need it)
+        untyped = move2heap(untypedᴷ, untyped);
         foreach (var (_, index) in untyped) {
             var tpar = (~@params.At(index)).typ._<ж<TypeParam>>(); // is type parameter (no alias) by construction of untyped
             if (u.at(tpar) == default!) {
@@ -428,7 +430,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         slice<nint> dirty = default!;
         foreach (var (i, typ) in inferred) {
             if (typ != default! && (i >= len(targs) || targs[i] == default!)) {
-                dirty = append(dirty, i);
+                dirty = append(dirtyᴷ, dirty, i);
             }
         }
 
@@ -452,7 +454,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // Note that if t0 was a signature, t1 must be a signature, and t1
                         // can only be a generic signature if it originated from a generic
                         // function argument. Those signatures are never defined types and
-                        // thus there is no need to call under below.
+                        // thus there is no need to call Underlying below.
                         // TODO(gri) Consider doing this in Checker.subst.
                         //           Then this would fall out automatically here and also
                         //           in instantiation (where we also explicitly nil out
@@ -720,12 +722,13 @@ internal static (ж<Δterm>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
     });
     if (n == 1) {
         if (debug) {
-            assert(debug && AreEqual(under((~single).typ), coreType(new TypeParamжΔType(Ꮡtpar))));
+            var (u, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!);
+            assert(AreEqual((~single).typ.Underlying(), u));
         }
         return (single, true);
     }
     {
-        var typ = coreType(new TypeParamжΔType(Ꮡtpar)); if (typ != default!) {
+        var (typ, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!); if (typ != default!) {
             // A core type is always an underlying type.
             // If any term of tpar has a tilde, we don't
             // have a precise core type and we must return
@@ -787,6 +790,7 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
         switch (typ.type()) {
         case ж<Basic> t: {
             // nothing to do
+
             // *Alias:
             //      This case should not occur because of Unalias(typ) at the top.
             break;

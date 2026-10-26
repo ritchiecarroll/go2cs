@@ -327,14 +327,14 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡ
     var (x, y, z) = (@new<bigꓸInt>(), @new<bigꓸInt>(), @new<bigꓸInt>());
 
     foreach (var (_, vᴛ1) in k) {
-        var @byte = vᴛ1;
+        var b = vᴛ1;
 
-        for (nint bitNum = 0; bitNum < 8; bitNum++) {
+        foreach (var _ᴛ1 in range(8)) {
             (x, y, z) = curve.doubleJacobian(x, y, z);
-            if ((byte)(@byte & 0x80) == 0x80) {
+            if ((byte)(b & 0x80) == 0x80) {
                 (x, y, z) = curve.addJacobian(ᏑBx, ᏑBy, Bz, x, y, z);
             }
-            @byte <<= (int)(1);
+            b <<= (int)(1);
         }
     }
 
@@ -362,7 +362,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
 }
 
 internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> Ꮡparams) {
-    foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new p256CurveжCurve(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
+    foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
         if (Ꮡparams == c.Params()) {
             return (c, true);
         }

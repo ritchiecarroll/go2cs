@@ -18,10 +18,13 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 partial class weak_test_package {
 
 partial struct T {
-    // N.B. This must contain a pointer, otherwise the weak handle might get placed
-    // in a tiny block making the tests in this package flaky.
+    // N.B. T is what it is to avoid having test values get tiny-allocated
+    // in the same block as the weak handle, but since the fix to
+    // go.dev/issue/76007, this should no longer be possible.
+    // TODO(mknyszek): Consider using tiny-allocated values for all the tests.
     internal ж<T> t;
     internal nint a;
+    internal nint b;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -76,12 +79,12 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     var bt = new slice<ж<T>>(10);
     var wt = new slice<weak.Pointer<T>>(10);
     var wo = new slice<weak.Pointer<nint>>(10);
-    foreach (var (i, _) in bt) {
+    foreach (var i in range(bt)) {
         bt[i] = @new<T>();
         wt[i] = weak.Make<T>(bt[i]);
         wo[i] = weak.Make<nint>(bt[i].of(T.Ꮡa));
     }
-    foreach (var (i, _) in bt) {
+    foreach (var i in range(bt)) {
         var st = wt[i].Value();
         if (st != bt[i]) {
             Ꮡt.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p"u8, st.OrTypedNil(), bt[i].OrTypedNil());
@@ -105,7 +108,7 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     }
     // bt is still referenced.
     Δruntime.GC();
-    foreach (var (i, _) in bt) {
+    foreach (var i in range(bt)) {
         var st = wt[i].Value();
         if (st != bt[i]) {
             Ꮡt.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p"u8, st.OrTypedNil(), bt[i].OrTypedNil());
@@ -130,7 +133,7 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     bt = default!;
     // bt is no longer referenced.
     Δruntime.GC();
-    foreach (var (i, _) in bt) {
+    foreach (var i in range(wt)) {
         var st = wt[i].Value();
         if (st != nil) {
             Ꮡt.Fatalf("expected weak pointer to be nil, got %p"u8, st.OrTypedNil());
@@ -180,6 +183,47 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
     Δruntime.GC();
     if (wt.Value() != nil) {
         Ꮡt.Errorf("weak pointer is non-nil even after finalization: %v"u8, wt);
+    }
+}
+
+public static void TestPointerCleanup(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    var bt = @new<T>();
+    ref var wt = ref heap<weak.Pointer<T>>(out var Ꮡwt);
+    wt = weak.Make<T>(bt);
+    var done = new channel<EmptyStruct>(1);
+    var doneʗ1 = done;
+    var wtʗ1 = wt;
+    Δruntime.AddCleanup(bt, (bool _) => {
+        if (wtʗ1.Value() != nil) {
+            Ꮡt.Errorf("weak pointer did not go nil before cleanup was executed"u8);
+        }
+        doneʗ1.ᐸꟷ(new EmptyStruct());
+    }, true, new object?[] { t }, new object?[] { wt });
+
+    // Make sure the weak pointer stays around while bt is live.
+    Δruntime.GC();
+    if (wt.Value() == nil) {
+        Ꮡt.Errorf("weak pointer went nil too soon"u8);
+    }
+    Δruntime.KeepAlive(bt.OrTypedNil());
+
+    // bt is no longer referenced.
+    //
+    // Run one cycle to queue the cleanup.
+    Δruntime.GC();
+    if (wt.Value() != nil) {
+        Ꮡt.Errorf("weak pointer did not go nil when cleanup was enqueued"u8);
+    }
+
+    // Wait for the cleanup to run.
+    ᐸꟷ(done);
+
+    // The weak pointer should still be nil after the cleanup runs.
+    Δruntime.GC();
+    if (wt.Value() != nil) {
+        Ꮡt.Errorf("weak pointer is non-nil even after cleanup: %v"u8, wt);
     }
 }
 
@@ -304,11 +348,100 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
 private static readonly object failedToLookUpSpecialAndˢ = (@string)"failed to look up special and made duplicate weak handle; see issue #70739"u8;
 
 public static void TestIssue70739(ж<testing.T> Ꮡt) {
-    var x = new slice<ж<nint>>((4 << (int)(16)));
-    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
-    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
+    var x = new slice<ж<nint>>((4 << 16));
+    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
+    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
     if (wx1 != wx2) {
         Ꮡt.Fatal(failedToLookUpSpecialAndˢ);
+    }
+}
+
+internal static ж<T> Ꮡimmortal = new StandardBox<T>(default(T));
+internal static ref T immortal => ref Ꮡimmortal.Value;
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object immortalWeakPointersToˢ = (@string)"immortal weak pointers to the same pointer not equal"u8;
+private static readonly object separateImmortalPointersˢ = (@string)"separate immortal pointers (same object) have the same pointer"u8;
+
+public static void TestImmortalPointer(ж<testing.T> Ꮡt) {
+    var w0 = weak.Make<T>(Ꮡimmortal);
+    if (weak.Make<T>(Ꮡimmortal) != w0) {
+        Ꮡt.Error(immortalWeakPointersToˢ);
+    }
+    var w0a = weak.Make<nint>(Ꮡimmortal.of(T.Ꮡa));
+    var w0b = weak.Make<nint>(Ꮡimmortal.of(T.Ꮡb));
+    if (w0a == w0b) {
+        Ꮡt.Error(separateImmortalPointersˢ);
+    }
+    {
+        var (got, want) = (w0.Value(), Ꮡimmortal); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+    {
+        var (got, want) = (w0a.Value(), Ꮡimmortal.of(T.Ꮡa)); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+    {
+        var (got, want) = (w0b.Value(), Ꮡimmortal.of(T.Ꮡb)); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+
+    // Run a couple of cycles.
+    Δruntime.GC();
+    Δruntime.GC();
+
+    // All immortal weak pointers should never get cleared.
+    {
+        var (got, want) = (w0.Value(), Ꮡimmortal); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+    {
+        var (got, want) = (w0a.Value(), Ꮡimmortal.of(T.Ꮡa)); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+    {
+        var (got, want) = (w0b.Value(), Ꮡimmortal.of(T.Ꮡb)); if (got != want) {
+            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        }
+    }
+}
+
+public static void TestPointerTiny(ж<testing.T> Ꮡt) {
+    Δruntime.GC(); // Clear tiny-alloc caches.
+
+    UntypedInt N = 1000;
+    var wps = new slice<weak.Pointer<nint>>(N);
+    foreach (var i in range(N)) {
+        // N.B. *x is just an int, so the value is very likely
+        // tiny-allocated alongside the weak handle, assuming bug
+        // from go.dev/issue/76007 exists.
+        var x = @new<nint>();
+        x.Value = i;
+        wps[i] = weak.Make<nint>(x);
+    }
+
+    // Get the cleanups to start running.
+    Δruntime.GC();
+
+    // Expect at least 3/4ths of the weak pointers to have gone nil.
+    //
+    // Note that we provide some leeway since it's possible our allocation
+    // gets grouped with some other long-lived tiny allocation, but this
+    // shouldn't be the case for the vast majority of allocations.
+    nint n = 0;
+    foreach (var (_, wp) in wps) {
+        if (wp.Value() == nil) {
+            n++;
+        }
+    }
+    const nint want = /* 3 * N / 4 */ 750;
+    if (n < want) {
+        Ꮡt.Fatalf("not enough weak pointers are nil: expected at least %v, got %v"u8, (nint)(want), n);
     }
 }
 

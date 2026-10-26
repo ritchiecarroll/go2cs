@@ -19,6 +19,8 @@ using strings = strings_package;
 using testing = testing_package;
 using unique = unique_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using go.net;
 using netip = go.net.netip_package;
@@ -223,7 +225,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
                 tΔ1.Fatal(err);
             }
             @string jswant = @""""u8 + wants + @""""u8;
-            @string jsback = ((@string)jsb);
+            @string jsback = (@string)jsb;
             if (jsback != jswant) {
                 tΔ1.Errorf("Marshal(Unmarshal(%q)) = %s, want %s"u8, testʗ1.@in, jsback, jswant);
             }
@@ -367,7 +369,7 @@ public static void TestAddrFromSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestIPv4Constructors(ж<testing.T> Ꮡt) {
+public static partial void TestIPv4Constructors(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (AddrFrom4(new byte[]{1, 2, 3, 4}.array()) != MustParseAddr("1.2.3.4"u8)) {
@@ -718,7 +720,7 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Marshal(%v) got error %v"u8, ip, err);
     }
-    @string back = ((@string)jsb);
+    @string back = (@string)jsb;
     if (back != orig) {
         Ꮡt.Errorf("Marshal(Unmarshal(%q)) got %q, want %q"u8, orig, back, orig);
     }
@@ -1092,15 +1094,19 @@ public static void TestAddrLessCompare(ж<testing.T> Ꮡt) {
         new(new netipꓸAddr(nil), new netipꓸAddr(nil), false),
         new(new netipꓸAddr(nil), mustIP("1.2.3.4"u8), true),
         new(mustIP("1.2.3.4"u8), new netipꓸAddr(nil), false),
+
         new(mustIP("1.2.3.4"u8), mustIP("0102:0304::0"u8), true),
         new(mustIP("0102:0304::0"u8), mustIP("1.2.3.4"u8), false),
         new(mustIP("1.2.3.4"u8), mustIP("1.2.3.4"u8), false),
+
         new(mustIP("::1"u8), mustIP("::2"u8), true),
         new(mustIP("::1"u8), mustIP(fooˢ), true),
         new(mustIP(fooˢ), mustIP("::2"u8), true),
         new(mustIP("::2"u8), mustIP("::3"u8), true),
+
         new(mustIP("::"u8), mustIP("0.0.0.0"u8), false),
         new(mustIP("0.0.0.0"u8), mustIP("::"u8), true),
+
         new(mustIP("::1%a"u8), mustIP("::1%b"u8), true),
         new(mustIP("::1%a"u8), mustIP("::1%a"u8), false),
         new(mustIP("::1%b"u8), mustIP("::1%a"u8), false),
@@ -1178,12 +1184,16 @@ public static void TestAddrPortCompare(ж<testing.T> Ꮡt) {
     var tests = new TestAddrPortCompare_tests[]{
         new(new AddrPort(nil), new AddrPort(nil), 0),
         new(new AddrPort(nil), mustIPPort("1.2.3.4:80"u8), -1),
+
         new(mustIPPort("1.2.3.4:80"u8), mustIPPort("1.2.3.4:80"u8), 0),
         new(mustIPPort("[::1]:80"u8), mustIPPort("[::1]:80"u8), 0),
+
         new(mustIPPort("1.2.3.4:80"u8), mustIPPort("2.3.4.5:22"u8), -1),
         new(mustIPPort("[::1]:80"u8), mustIPPort("[::2]:22"u8), -1),
+
         new(mustIPPort("1.2.3.4:80"u8), mustIPPort("1.2.3.4:443"u8), -1),
         new(mustIPPort("[::1]:80"u8), mustIPPort("[::1]:443"u8), -1),
+
         new(mustIPPort("1.2.3.4:80"u8), mustIPPort("[0102:0304::0]:80"u8), -1)
     }.slice();
     foreach (var (_, tt) in tests) {
@@ -1225,7 +1235,18 @@ internal static readonly @string fe8064ˢ = "fe80::/64"u8;
 internal static readonly @string fe9064ˢ = "fe90::/64"u8;
 internal static readonly @string fe8048ˢ = "fe80::/48"u8;
 internal static readonly @string fe808ˢ = "fe80::/8"u8;
-internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 1.2.3.4/24 1.2.3.0/28 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string fec010ˢ = "fec0::/10"u8;
+internal static readonly @string fe009ˢ = "fe00::/9"u8;
+internal static readonly @string f8006ˢ = "f800::/6"u8;
+internal static readonly @string e0004ˢ = "e000::/4"u8;
+internal static readonly @string ff008ˢ = "ff00::/8"u8;
+internal static readonly @string a0003ˢ = "a000::/3"u8;
+internal static readonly @string fc007ˢ = "fc00::/7"u8;
+internal static readonly @string c0003ˢ = "c000::/3"u8;
+internal static readonly @string fe8010ˢ = "fe80::/10"u8;
+internal static readonly @string f0005ˢ = "f000::/5"u8;
+internal static readonly @string a0003C0003E0004F0005F800ˢ = @"[0.0.0.0/8 0.0.0.0/32 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.0.0.0/29 192.0.0.8/32 192.0.0.9/32 192.0.0.10/32 192.0.0.170/32 192.0.2.0/24 192.31.196.0/24 192.52.193.0/24 192.88.99.0/24 192.168.0.0/16 192.175.48.0/24 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 240.0.0.0/4 255.255.255.255/32 ::/8 100::/8 200::/7 400::/6 800::/5 1000::/4 2000::/3 4000::/3 6000::/3 8000::/3 a000::/3 c000::/3 e000::/4 f000::/5 f800::/6 fc00::/7 fe00::/9 fe80::/10 fec0::/10 ff00::/8]"u8;
 
 internal partial struct TestPrefixCompare_tests /*dyn*/ {
     internal netipꓸPrefix a, b;
@@ -1236,13 +1257,20 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
     var tests = new TestPrefixCompare_tests[]{
         new(new netipꓸPrefix(nil), new netipꓸPrefix(nil), 0),
         new(new netipꓸPrefix(nil), mustPrefix("1.2.3.0/24"u8), -1),
+
         new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.0/24"u8), 0),
         new(mustPrefix(fe8064ˢ), mustPrefix(fe8064ˢ), 0),
+
         new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.4.0/24"u8), -1),
         new(mustPrefix(fe8064ˢ), mustPrefix(fe9064ˢ), -1),
+
         new(mustPrefix("1.2.0.0/16"u8), mustPrefix("1.2.0.0/24"u8), -1),
         new(mustPrefix(fe8048ˢ), mustPrefix(fe8064ˢ), -1),
-        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1)
+
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1),
+
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.4/24"u8), -1),
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.0/28"u8), -1)
     }.slice();
     foreach (var (_, tt) in tests) {
         nint gotΔ1 = tt.a.Compare(tt.b);
@@ -1269,11 +1297,71 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
         mustPrefix("1.2.0.0/16"u8),
         new netipꓸPrefix(nil),
         mustPrefix(fe8048ˢ),
-        mustPrefix("1.2.0.0/24"u8)
+        mustPrefix("1.2.0.0/24"u8),
+        mustPrefix("1.2.3.4/24"u8),
+        mustPrefix("1.2.3.0/28"u8)
     }.slice();
     slices.SortFunc<slice<netipꓸPrefix>, netipꓸPrefix>(values, ((Func<netipꓸPrefix, netipꓸPrefix, nint>)(netip.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidPrefix1200161200ˢ;
+    if (got != want) {
+        Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
+    }
+
+    // Lists from
+    // https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml and
+    // https://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xhtml,
+    // to verify that the sort order matches IANA's conventional
+    // ordering.
+    values = new netipꓸPrefix[]{
+        mustPrefix("0.0.0.0/8"u8),
+        mustPrefix("127.0.0.0/8"u8),
+        mustPrefix("10.0.0.0/8"u8),
+        mustPrefix("203.0.113.0/24"u8),
+        mustPrefix("169.254.0.0/16"u8),
+        mustPrefix("192.0.0.0/24"u8),
+        mustPrefix("240.0.0.0/4"u8),
+        mustPrefix("192.0.2.0/24"u8),
+        mustPrefix("192.0.0.170/32"u8),
+        mustPrefix("198.18.0.0/15"u8),
+        mustPrefix("192.0.0.8/32"u8),
+        mustPrefix("0.0.0.0/32"u8),
+        mustPrefix("192.0.0.9/32"u8),
+        mustPrefix("198.51.100.0/24"u8),
+        mustPrefix("192.168.0.0/16"u8),
+        mustPrefix("192.0.0.10/32"u8),
+        mustPrefix("192.175.48.0/24"u8),
+        mustPrefix("192.52.193.0/24"u8),
+        mustPrefix("100.64.0.0/10"u8),
+        mustPrefix("255.255.255.255/32"u8),
+        mustPrefix("192.31.196.0/24"u8),
+        mustPrefix("172.16.0.0/12"u8),
+        mustPrefix("192.0.0.0/29"u8),
+        mustPrefix("192.88.99.0/24"u8),
+        mustPrefix(fec010ˢ),
+        mustPrefix("6000::/3"u8),
+        mustPrefix(fe009ˢ),
+        mustPrefix("8000::/3"u8),
+        mustPrefix("0000::/8"u8),
+        mustPrefix("0400::/6"u8),
+        mustPrefix(f8006ˢ),
+        mustPrefix(e0004ˢ),
+        mustPrefix(ff008ˢ),
+        mustPrefix(a0003ˢ),
+        mustPrefix(fc007ˢ),
+        mustPrefix("1000::/4"u8),
+        mustPrefix("0800::/5"u8),
+        mustPrefix("4000::/3"u8),
+        mustPrefix("0100::/8"u8),
+        mustPrefix(c0003ˢ),
+        mustPrefix(fe8010ˢ),
+        mustPrefix("0200::/7"u8),
+        mustPrefix(f0005ˢ),
+        mustPrefix("2000::/3"u8)
+    }.slice();
+    slices.SortFunc(values, (netipꓸPrefix a, netipꓸPrefix b) => a.Compare(b));
+    got = fmt.Sprintf("%s"u8, values);
+    want = a0003C0003E0004F0005F800ˢ;
     if (got != want) {
         Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
     }
@@ -1507,7 +1595,7 @@ public static void TestPrefixMarshalUnmarshal(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("failed to marshal: %v"u8, err);
             }
 
-            @string back = ((@string)pb);
+            @string back = (@string)pb;
             if (orig != back) {
                 tΔ1.Errorf("Marshal = %q; want %q"u8, back, orig);
             }
@@ -1963,6 +2051,7 @@ public static void BenchmarkBinaryMarshalRoundTrip(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkStdIPv4(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var ipsᴷ = new stackAppend<net.IP>();
 
     b.ReportAllocs();
     var ips = new net.IP[]{}.slice();
@@ -1970,13 +2059,14 @@ public static void BenchmarkStdIPv4(ж<testing.B> Ꮡb) {
         var ip = net.IPv4(8, 8, 8, 8);
         ips = ips[..0];
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-            ips = append(ips, ip);
+            ips = append(ipsᴷ, ips, ip);
         }
     }
 }
 
 public static void BenchmarkIPv4(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var ipsᴷ = new stackAppend<netipꓸAddr>();
 
     b.ReportAllocs();
     var ips = new netipꓸAddr[]{}.slice();
@@ -1984,7 +2074,7 @@ public static void BenchmarkIPv4(ж<testing.B> Ꮡb) {
         var ip = IPv4(8, 8, 8, 8);
         ips = ips[..0];
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-            ips = append(ips, ip);
+            ips = append(ipsᴷ, ips, ip);
         }
     }
 }
@@ -2008,6 +2098,7 @@ internal static ip4i newip4i_v4(byte a, byte b, byte c, byte d) {
 // BenchmarkIPv4_inline benchmarks the candidate representation, ip4i.
 public static void BenchmarkIPv4_inline(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var ipsᴷ = new stackAppend<ip4i>();
 
     b.ReportAllocs();
     var ips = new ip4i[]{}.slice();
@@ -2015,13 +2106,14 @@ public static void BenchmarkIPv4_inline(ж<testing.B> Ꮡb) {
         var ip = newip4i_v4(8, 8, 8, 8);
         ips = ips[..0];
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-            ips = append(ips, ip.ΔClone());
+            ips = append(ipsᴷ, ips, ip.ΔClone());
         }
     }
 }
 
 public static void BenchmarkStdIPv6(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var ipsᴷ = new stackAppend<net.IP>();
 
     b.ReportAllocs();
     var ips = new net.IP[]{}.slice();
@@ -2029,13 +2121,14 @@ public static void BenchmarkStdIPv6(ж<testing.B> Ꮡb) {
         var ip = net.ParseIP(db81ˢ);
         ips = ips[..0];
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-            ips = append(ips, ip);
+            ips = append(ipsᴷ, ips, ip);
         }
     }
 }
 
 public static void BenchmarkIPv6(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var ipsᴷ = new stackAppend<netipꓸAddr>();
 
     b.ReportAllocs();
     var ips = new netipꓸAddr[]{}.slice();
@@ -2043,7 +2136,7 @@ public static void BenchmarkIPv6(ж<testing.B> Ꮡb) {
         var ip = mustIP(db81ˢ);
         ips = ips[..0];
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-            ips = append(ips, ip);
+            ips = append(ipsᴷ, ips, ip);
         }
     }
 }
@@ -2355,15 +2448,19 @@ public static void TestPrefixOverlaps(ж<testing.T> Ꮡt) {
         new(new netipꓸPrefix(nil), pfx("1.2.0.0/16"u8), false), // first zero
         new(pfx("1.2.0.0/16"u8), new netipꓸPrefix(nil), false), // second zero
         new(pfx("::0/3"u8), pfx("0.0.0.0/3"u8), false), // different families
+
         new(pfx("1.2.0.0/16"u8), pfx("1.2.0.0/16"u8), true), // equal
+
         new(pfx("1.2.0.0/16"u8), pfx("1.2.3.0/24"u8), true),
         new(pfx("1.2.3.0/24"u8), pfx("1.2.0.0/16"u8), true),
+
         new(pfx("1.2.0.0/16"u8), pfx("1.2.3.0/32"u8), true),
         new(pfx("1.2.3.0/32"u8), pfx("1.2.0.0/16"u8), true),
 
         // Match /0 either order
         new(pfx("1.2.3.0/32"u8), pfx("0.0.0.0/0"u8), true),
         new(pfx("0.0.0.0/0"u8), pfx("1.2.3.0/32"u8), true),
+
         new(pfx("1.2.3.0/32"u8), pfx("5.5.5.5/0"u8), true), // normalization not required; /0 means true
 
         // IPv6 overlapping

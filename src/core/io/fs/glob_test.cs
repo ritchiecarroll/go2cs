@@ -9,6 +9,8 @@ using path = path_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 
 partial class fs_test_package {
@@ -58,7 +60,7 @@ public static void TestGlobError(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestCVE202230630(ж<testing.T> Ꮡt) {
+public static partial void TestCVE202230630(ж<testing.T> Ꮡt) {
     // Prior to CVE-2022-30630, a stack exhaustion would occur given a large
     // number of separators. There is now a limit of 10,000.
     var (_, err) = Glob(os.DirFS("."u8), "/*"u8 + strings.Repeat("/"u8, 10001));
@@ -80,7 +82,7 @@ private static readonly @string txtˢ = "*.txt"u8;
 private static readonly @string readDirOnlyˢ = "readDirOnly"u8;
 private static readonly @string openOnlyˢ = "openOnly"u8;
 
-public static void TestGlobMethod(ж<testing.T> Ꮡt) {
+public static partial void TestGlobMethod(ж<testing.T> Ꮡt) {
     void check(@string desc, slice<@string> namesΔ1, error errΔ1) {
         Ꮡt.Helper();
         if (errΔ1 != default! || len(namesΔ1) != 1 || namesΔ1[0] != "hello.txt") {
@@ -93,7 +95,7 @@ public static void TestGlobMethod(ж<testing.T> Ꮡt) {
     check(readDirOnlyˢ, names, err);
 
     // Test that ReadDir uses Open when the method is not present.
-    (names, err) = Glob(new openOnly(testFsys), txtˢ);
+    (names, err) = Glob(new openOnly(new fstest_MapFSᴠFS(testFsys)), txtˢ);
     check(openOnlyˢ, names, err);
 }
 

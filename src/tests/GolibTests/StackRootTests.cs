@@ -28,7 +28,7 @@ public class StackRootTests
         Assert.AreEqual("runtime.Callers", frames[0].function);
         Assert.AreEqual("runtime.goexit", frames[^1].function, Describe(frames));
         Assert.AreEqual("runtime/asm_amd64.s", frames[^1].file);
-        Assert.AreEqual(1700L, frames[^1].line);
+        Assert.AreEqual(1771L, frames[^1].line);
     }
 
     [TestMethod]
@@ -40,7 +40,7 @@ public class StackRootTests
         Assert.AreEqual("runtime.goexit", frames[^1].function, Describe(frames));
         Assert.AreEqual("testing.tRunner", frames[^2].function, Describe(frames));
         Assert.AreEqual("testing/testing.go", frames[^2].file);
-        Assert.AreEqual(1792L, frames[^2].line);
+        Assert.AreEqual(2036L, frames[^2].line);
         Assert.IsTrue(frames[^3].function.StartsWith("stackrootprobe."), Describe(frames));
     }
 
@@ -91,7 +91,7 @@ public class StackRootTests
         return result;
     }
 
-    [GoStackRoot("testing.tRunner", "testing/testing.go", 1792)]
+    [GoStackRoot("testing.tRunner", "testing/testing.go", 2036)]
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static List<(string function, string file, long line)> TestRoot(int capacity, int skip) =>
         stackrootprobe_package.CallersHere(capacity, skip);

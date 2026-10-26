@@ -41,8 +41,8 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     nint count = default!;
     if (hdr < 128){
         // The table is compressed using an FSE. RFC 4.2.1.2.
-        if (builtin.len(r.fseScratch) < (1 << (int)(6))) {
-            r.fseScratch = new slice<fseEntry>((1 << (int)(6)));
+        if (builtin.len(r.fseScratch) < 1 << 6) {
+            r.fseScratch = new slice<fseEntry>((1 << 6));
         }
         var (fseBits, noff, errΔ1) = Ꮡr.readFSE(data, off, 255, 6, r.fseScratch);
         if (errΔ1 != default!) {
@@ -126,6 +126,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         off += (nint)hdr;
     } else {
         // The table is not compressed. Each weight is 4 bits.
+
         count = (nint)hdr - 127;
         if (off + ((count + 1) / 2) >= builtin.len(data)) {
             return (0, 0, io.ErrUnexpectedEOF);
@@ -133,7 +134,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         for (nint i = 0; i < count; i += 2) {
             var b = data[off];
             off++;
-            weights[i] = (uint8)((b >> (int)(4)));
+            weights[i] = (uint8)((b >> 4));
             weights[i + 1] = (uint8)((byte)(b & 0xf));
         }
     }
@@ -181,7 +182,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     count++;
     weightMark[highBit + 1]++;
 
-    if (weightMark[1] < 2 || (uint32)(weightMark[1] & 1) != 0) {
+    if (weightMark[1] < 2 || (weightMark[1] & 1) != 0) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
 
@@ -200,7 +201,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
             continue;
         }
         var length = ((uint32)1).Lsh((uint64)((uint8)(w - 1)));
-        var tval = (uint16)((uint16)((uint16)i << (int)(8)) | ((uint16)tableBits + 1 - (uint16)w));
+        var tval = (uint16)((uint16)((uint16)i << 8) | ((uint16)tableBits + 1 - (uint16)w));
         var start = weightMark[w];
         for (var j = (uint32)0; j < length; j++) {
             table[start + j] = tval;

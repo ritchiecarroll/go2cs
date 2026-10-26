@@ -84,8 +84,6 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
 
     foreach (var (dir, _) in dirFiles) {
-        @string dirΔ1 = dir;
-
         cpulimit.ᐸꟷ(new EmptyStruct());
         Ꮡwg.Add(1);
         var cʗ1 = c;
@@ -99,9 +97,9 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
                     ᐸꟷ(cpulimitʗ2);
                 }, ref ᒐ);
 
-                var (_, err) = cʗ1.getDirPackage(dirΔ1);
+                var (_, err) = cʗ1.getDirPackage(dir);
                 if (err != default!) {
-                    Ꮡt.Errorf("error checking %s: %v"u8, dirΔ1, err);
+                    Ꮡt.Errorf("error checking %s: %v"u8, dir, err);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -208,7 +206,7 @@ internal static @string firstComment(@string filename) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
-        array<byte> src = new(4096); /* (4 << (int)(10)) */                      // read at most 4KB
+        array<byte> src = new(4096); /* (4 << 10) */                      // read at most 4KB
         var (n, _) = f.Read(src[..]);
 
         @string first = default!;
@@ -389,6 +387,10 @@ internal static readonly @string issue49767Goˢ = "issue49767.go"u8;
 internal static readonly @string issue49814Goˢ = "issue49814.go"u8;
 internal static readonly @string issue56103Goˢ = "issue56103.go"u8;
 internal static readonly @string issue52697Goˢ = "issue52697.go"u8;
+internal static readonly @string issue68054Goˢ = "issue68054.go"u8;
+internal static readonly @string issue68580Goˢ = "issue68580.go"u8;
+internal static readonly @string issue73309Goˢ = "issue73309.go"u8;
+internal static readonly @string issue73309bGoˢ = "issue73309b.go"u8;
 internal static readonly @string bug514Goˢ = "bug514.go"u8;
 internal static readonly @string issue40954Goˢ = "issue40954.go"u8;
 internal static readonly @string issue42032Goˢ = "issue42032.go"u8;
@@ -428,6 +430,10 @@ public static void TestStdFixed(ж<testing.T> Ꮡt) {
         issue49814Goˢ, // go/types does not have constraints on array size
         issue56103Goˢ, // anonymous interface cycles; will be a type checker error in 1.22
         issue52697Goˢ, // go/types does not have constraints on stack size
+        issue68054Goˢ, // this test requires GODEBUG=gotypesalias=1
+        issue68580Goˢ, // this test requires GODEBUG=gotypesalias=1
+        issue73309Goˢ, // this test requires GODEBUG=gotypesalias=1
+        issue73309bGoˢ, // this test requires GODEBUG=gotypesalias=1
 
         // These tests requires runtime/cgo.Incomplete, which is only available on some platforms.
         // However, go/types does not know about build constraints.
@@ -453,7 +459,10 @@ public static void TestStdKen(ж<testing.T> Ꮡt) {
 // Package paths of excluded packages.
 internal static map<@string, bool> excluded = new map<@string, bool>{
     ["builtin"u8] = true,
-    ["cmd/compile/internal/ssa/_gen"u8] = true
+    ["cmd/compile/internal/ssa/_gen"u8] = true,
+    ["runtime/_mkmalloc"u8] = true,
+    ["simd/archsimd/_gen/simdgen"u8] = true,
+    ["simd/archsimd/_gen/unify"u8] = true
 };
 
 // printPackageMu synchronizes the printing of type-checked package files in
@@ -469,6 +478,8 @@ internal static readonly object packageˢ = (@string)"package"u8;
 
 // typecheckFiles typechecks the given package files.
 internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@string> filenames, types.Importer importer) {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     var fset = token.NewFileSet();
 
     // Parse package files.
@@ -479,7 +490,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
             return (default!, errΔ1);
         }
 
-        files = append(files, @file);
+        files = append(filesᴷ, files, @file);
     }
 
     if (testing.Verbose()) {

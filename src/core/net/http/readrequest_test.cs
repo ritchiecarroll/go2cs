@@ -34,6 +34,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // Baseline test; All Request fields included for template use
     new(
         "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Content-Length: 7\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8 + "abcdef\n???"u8,
+
         Ꮡ(new Request(
             Method: "GET"u8,
             URL: Ꮡ(new url.URL(
@@ -59,7 +60,9 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "www.techcrunch.com"u8,
             RequestURI: "http://www.techcrunch.com/"u8
         )),
+
         "abcdef\n"u8,
+
         noTrailer,
         noError
     ),
@@ -67,6 +70,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // GET request with no body (the normal case)
     new(
         "GET / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n\r\n"u8,
+
         Ꮡ(new Request(
             Method: "GET"u8,
             URL: Ꮡ(new url.URL(
@@ -81,6 +85,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "foo.com"u8,
             RequestURI: "/"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -90,6 +95,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // scheme-relative URI as a scheme-relative URI.
     new(
         "GET //user@host/is/actually/a/path/ HTTP/1.1\r\n"u8 + "Host: test\r\n\r\n"u8,
+
         Ꮡ(new Request(
             Method: "GET"u8,
             URL: Ꮡ(new url.URL(
@@ -104,6 +110,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "test"u8,
             RequestURI: "//user@host/is/actually/a/path/"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -144,6 +151,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "foo.com"u8,
             RequestURI: "/"u8
         )),
+
         "foobar"u8,
         new ΔHeader(new map<@string, slice<@string>>{
             ["Trailer-Key"u8] = new @string[]{"Trailer-Value"u8}.slice()
@@ -169,6 +177,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "foo.com"u8,
             RequestURI: "/"u8
         )),
+
         "foobar"u8,
         noTrailer,
         noError
@@ -187,6 +196,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // CONNECT request with domain name:
     new(
         "CONNECT www.google.com:443 HTTP/1.1\r\n\r\n"u8,
+
         Ꮡ(new Request(
             Method: "CONNECT"u8,
             URL: Ꮡ(new url.URL(
@@ -201,6 +211,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "www.google.com:443"u8,
             RequestURI: "www.google.com:443"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -209,6 +220,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // CONNECT request with IP address:
     new(
         "CONNECT 127.0.0.1:6060 HTTP/1.1\r\n\r\n"u8,
+
         Ꮡ(new Request(
             Method: "CONNECT"u8,
             URL: Ꮡ(new url.URL(
@@ -223,6 +235,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: "127.0.0.1:6060"u8,
             RequestURI: "127.0.0.1:6060"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -231,6 +244,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
     // CONNECT request for RPC:
     new(
         "CONNECT /_goRPC_ HTTP/1.1\r\n\r\n"u8,
+
         Ꮡ(new Request(
             Method: "CONNECT"u8,
             URL: Ꮡ(new url.URL(
@@ -245,6 +259,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Host: ""u8,
             RequestURI: "/_goRPC_"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -268,6 +283,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             ContentLength: 0,
             RequestURI: "*"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -291,6 +307,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             ContentLength: 0,
             RequestURI: "*"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -317,6 +334,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Close: true,
             RequestURI: "/"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -342,6 +360,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
             Close: true,
             RequestURI: "/"u8
         )),
+
         noBodyStr,
         noTrailer,
         noError
@@ -371,7 +390,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
 internal static ref slice<reqTest> reqTests => ref ᏑreqTests.ValueSlot;
 
 public static void TestReadRequest(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in reqTests) {
+    foreach (var i in range(reqTests)) {
         var tt = Ꮡ(reqTests, i);
         var (req, err) = ReadRequest(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader((~tt).Raw))));
         if (err != default!) {

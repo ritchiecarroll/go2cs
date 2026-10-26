@@ -6,7 +6,6 @@ namespace go.@internal.coverage;
 using json = encoding.json_package;
 using flag = flag_package;
 using coverage = go.@internal.coverage_package;
-using goexperiment = go.@internal.goexperiment_package;
 using testenv = go.@internal.testenv_package;
 using os = os_package;
 using exec = go.os.exec_package;
@@ -50,9 +49,6 @@ internal static readonly @string ofStatementsˢ = "of statements"u8;
 // relying on other test paths will provide a better signal when
 // running "go test -cover" for this package).
 public static void TestTestSupport(ж<testing.T> Ꮡt) {
-    if (!goexperiment.CoverageRedesign) {
-        return;
-    }
     if (testing.CoverMode() == ""u8) {
         return;
     }
@@ -165,9 +161,6 @@ internal static readonly @string othermetaˢ = "othermeta"u8;
 internal static readonly @string file2Txtˢ = "file2.txt"u8;
 
 public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
-    if (!goexperiment.CoverageRedesign) {
-        return;
-    }
     if (testing.CoverMode() == ""u8) {
         return;
     }
@@ -221,12 +214,12 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
 
     // Look for the expected things in the coverage profile.
     (var contents, err) = os.ReadFile(textfile);
-    @string strc = ((@string)contents);
+    @string strc = (@string)contents;
     if (err != default!) {
         Ꮡt.Fatalf("problems reading text file %s: %v"u8, textfile, err);
     }
     if (!strings.Contains(strc, token)) {
-        Ꮡt.Logf("content: %s\n"u8, ((@string)contents));
+        Ꮡt.Logf("content: %s\n"u8, (@string)contents);
         Ꮡt.Fatalf("cov profile does not contain aux meta content %q"u8, token);
     }
 }

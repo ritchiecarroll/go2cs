@@ -6,7 +6,7 @@ namespace go.@internal.trace;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
@@ -23,7 +23,7 @@ partial struct Writer {
     internal io.Writer w;
     internal slice<byte> buf;
     internal version.Version v;
-    internal slice<Δevent.Spec> specs;
+    internal slice<tracev2.EventSpec> specs;
 }
 
 // NewWriter creates a new byte format writer.

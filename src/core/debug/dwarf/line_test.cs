@@ -22,6 +22,7 @@ public static void TestLineELFGCC(ж<testing.T> Ꮡt) {
     //   # gcc --version | head -n1
     //   gcc (Ubuntu 4.8.2-19ubuntu1) 4.8.2
     //   # gcc -g -o line-gcc.elf line*.c
+
     // Line table based on readelf --debug-dump=rawline,decodedline
     var want = new dwarf.LineEntry[]{
         new(Address: 0x40059d, File: file1H, Line: 2, IsStmt: true),
@@ -36,6 +37,7 @@ public static void TestLineELFGCC(ж<testing.T> Ꮡt) {
         new(Address: 0x4005f5, File: file1C, Line: 8, IsStmt: true),
         new(Address: 0x4005ff, File: file1C, Line: 9, IsStmt: true),
         new(Address: 0x400601, EndSequence: true),
+
         new(Address: 0x400601, File: file2C, Line: 4, IsStmt: true),
         new(Address: 0x400605, File: file2C, Line: 5, IsStmt: true),
         new(Address: 0x40060f, File: file2C, Line: 6, IsStmt: true),
@@ -51,6 +53,7 @@ public static void TestLineELFGCCZstd(ж<testing.T> Ꮡt) {
     //   # gcc --version | head -n1
     //   gcc (Debian 12.2.0-10) 12.2.0
     //   # gcc -g -no-pie -Wl,--compress-debug-sections=zstd line*.c
+
     var zfile1H = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line1.h"u8));
     var zfile1C = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line1.c"u8));
     var zfile2C = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line2.c"u8));
@@ -69,6 +72,7 @@ public static void TestLineELFGCCZstd(ж<testing.T> Ꮡt) {
         new(Address: 0x401159, File: zfile1C, Line: 8, Column: 2, IsStmt: true),
         new(Address: 0x401168, File: zfile1C, Line: 9, Column: 1, IsStmt: true),
         new(Address: 0x40116a, EndSequence: true),
+
         new(Address: 0x40116a, File: zfile2C, Line: 4, Column: 1, IsStmt: true),
         new(Address: 0x40116e, File: zfile2C, Line: 5, Column: 2, IsStmt: true),
         new(Address: 0x40117d, File: zfile2C, Line: 6, Column: 1, IsStmt: true),
@@ -92,11 +96,12 @@ public static void TestLineGCCWindows(ж<testing.T> Ꮡt) {
     //   > gcc --version
     //   gcc (tdm64-1) 4.9.2
     //   > gcc -g -o line-gcc-win.bin line1.c C:\workdir\go\src\debug\dwarf\testdata\line2.c
+
     ж<dwarf.LineFile> toWindows(ж<dwarf.LineFile> lf) {
         ref var lf2 = ref heap<dwarf.LineFile>(out var Ꮡlf2);
         lf2 = lf.Value;
-        lf2.Name = strings.Replace(lf2.Name, homeAustinGoDevˢ, cWorkdirGoˢ, -1);
-        lf2.Name = strings.Replace(lf2.Name, "/"u8, "\\"u8, -1);
+        lf2.Name = strings.ReplaceAll(lf2.Name, homeAustinGoDevˢ, cWorkdirGoˢ);
+        lf2.Name = strings.ReplaceAll(lf2.Name, "/"u8, "\\"u8);
         return Ꮡlf2;
     }
     var file1CΔ1 = toWindows(dwarf_test_package.file1C);
@@ -117,6 +122,7 @@ public static void TestLineGCCWindows(ж<testing.T> Ꮡt) {
         new(Address: 0x40156d, File: file1CΔ1, Line: 8, IsStmt: true),
         new(Address: 0x401572, File: file1CΔ1, Line: 9, IsStmt: true),
         new(Address: 0x401578, EndSequence: true),
+
         new(Address: 0x401580, File: file2CΔ1, Line: 4, IsStmt: true),
         new(Address: 0x401588, File: file2CΔ1, Line: 5, IsStmt: true),
         new(Address: 0x401595, File: file2CΔ1, Line: 6, IsStmt: true),
@@ -135,6 +141,7 @@ public static void TestLineELFClang(ж<testing.T> Ꮡt) {
     //   # clang --version | head -n1
     //   Ubuntu clang version 3.4-1ubuntu3 (tags/RELEASE_34/final) (based on LLVM 3.4)
     //   # clang -g -o line-clang.elf line*.
+
     var want = new dwarf.LineEntry[]{
         new(Address: 0x400530, File: file1C, Line: 6, IsStmt: true),
         new(Address: 0x400534, File: file1C, Line: 7, IsStmt: true, PrologueEnd: true),
@@ -146,6 +153,7 @@ public static void TestLineELFClang(ж<testing.T> Ꮡt) {
         new(Address: 0x400571, File: file1H, Line: 5, IsStmt: true),
         new(Address: 0x400581, File: file1H, Line: 7, IsStmt: true),
         new(Address: 0x400583, EndSequence: true),
+
         new(Address: 0x400590, File: file2C, Line: 4, IsStmt: true),
         new(Address: 0x4005a0, File: file2C, Line: 5, IsStmt: true, PrologueEnd: true),
         new(Address: 0x4005a7, File: file2C, Line: 6, IsStmt: true),
@@ -362,7 +370,7 @@ internal static bool compareFiles(slice<ж<dwarf.LineFile>> a, slice<ж<dwarf.Li
     if (len(a) != len(b)) {
         return false;
     }
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (a[i] == nil && b[i] == nil) {
             continue;
         }
@@ -394,7 +402,7 @@ internal static bool compareLines(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> a, 
         return false;
     }
 
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         var (al, bl) = (a[i], b[i]);
         // If both are EndSequence, then the only other valid
         // field is Address. Otherwise, test equality of all
@@ -433,6 +441,7 @@ internal static slice<joinTest> joinTests = new joinTest[]{
     new(""u8, "b"u8, "b"u8),
     new("/a"u8, "b"u8, "/a/b"u8),
     new("/a/"u8, "b"u8, "/a/b"u8),
+
     new(@"C:\Windows\"u8, @"System32"u8, @"C:\Windows\System32"u8),
     new(@"C:\Windows\"u8, @""u8, @"C:\Windows\"u8),
     new(@"C:\"u8, @"Windows"u8, @"C:\Windows"u8),

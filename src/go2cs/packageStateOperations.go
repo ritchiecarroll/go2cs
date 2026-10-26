@@ -49,6 +49,12 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImportPragmas = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
+	packageHoistsLiterals = false
+	packagePlainLits = nil
+	packageStackAppendSites = nil
+	packageStackAppendBuffers = nil
+	packageStackAppendMoves = nil
+	packageStackAppendMovesWritten = nil
 	exportedTypeAliases = make(map[string]string)
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)
@@ -71,7 +77,8 @@ func resetPackageState(pkg *packages.Package) {
 	parsedPackageInfoFiles = hashset.NewHashSet([]string{})
 	interfaceImplementations = make(map[string]hashset.HashSet[string])
 	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
+	importedConstraintProxies = make(map[string]map[string][]string)
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
@@ -84,6 +91,8 @@ func resetPackageState(pkg *packages.Package) {
 	nameCollisions = make(map[string]bool)
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packageConstraintLiftNames = make(map[string]string)
+	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
@@ -94,6 +103,9 @@ func resetPackageState(pkg *packages.Package) {
 	metadataAnchorLocalTypes = false
 	packageManualTypeNames = make(map[string]bool)
 	packageAddressedGlobals = make(map[types.Object]bool)
+	packageRecoverForms = make(map[*ast.CallExpr]recoverCallSite)
+	packageRecovererFlagNames = make(map[*ast.FuncDecl]string)
+	packageDeferRecoverMarks = make(map[*ast.DeferStmt]bool)
 	packageMovedInitVars = make(map[types.Object]int)
 	packageMovedInitMethods = make(map[int]string)
 	packageHoistedLits = make(map[*ast.BasicLit]*hoistedLiteral)
@@ -119,6 +131,8 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageRefLoweringResult = nil
+	packageHandOwnedTypes = map[*types.TypeName]bool{}
+	packageHandOwnedVars = map[*types.Var]bool{}
 
 	// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
 	packageDoc = extractPackageDoc(pkg.Syntax)
@@ -207,6 +221,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		importAliasesEmitted:      hashset.HashSet[string]{},
 		importAliasTargets:        map[string]string{},
 		importPathAliases:         map[string]string{},
+		dotImportTargets:          map[string]string{},
 		typeAliasDeclarations:     &strings.Builder{},
 		standAloneComments:        map[token.Pos]string{},
 		sortedCommentPos:          []token.Pos{},

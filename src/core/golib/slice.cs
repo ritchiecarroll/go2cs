@@ -86,12 +86,16 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
         if (length + extra <= s.Capacity)
             return this;
 
-        nint capacity = s.Capacity == 0 ? length + extra : s.Capacity;
+        // Go's Value.Grow reaches growslice here (reflect_growslice asks for the old length plus extra), so the
+        // capacity is append's own, and the malloc is charged as growslice's is.
+        // An unnamed array element is sized by value: an element of the slice, else the length the slice
+        // recorded at its creation (a slice that has neither grows unrounded, and is recorded as such).
+        nint[]? elemDims = null;
 
-        while (capacity < length + extra)
-            capacity *= 2;
+        if (GoGrowthFacts<T>.SizedByValue)
+            elemDims = length > 0 ? GoGrowthFacts<T>.ValueDims(s[0]) : GoReflect.SliceElemArrayDims(s);
 
-        // Go's Value.Grow reaches growslice here, which mallocs the new backing; so is this one charged.
+        nint capacity = slice<T>.GrowCapacity(s, length + extra, elemDims);
         T[] backing = AllocationCounter.NewArray<T>(capacity);
 
         // Block copy, not an element loop: encoding/gob's decUint8Slice grows buffers past internal/saferio's 10 MiB
@@ -153,6 +157,12 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
     // The header-slice box's rebuild (HeaderSliceBox.Rebase; trim stage 3c-2a): a slice of this slice type's element over
     // native memory, through golib's single creation door. Reached through a zero value of the slice type.
     object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) => slice<T>.OverNativeMemory(address, len, cap);
+
+    // The slice-header box's commit (SliceHeaderBox.OnHeaderStore): a slice of this slice type's element over
+    // backing[low:high:max], SHARING the backing, or null when the backing is not exactly this element's array. Exactly,
+    // because array covariance would admit a string[] as an object[]. Reached through a zero value of the slice type.
+    object? IGoReflectSlice.ReflectRebase(Array backing, nint low, nint high, nint max) =>
+        backing.GetType() == typeof(T[]) ? (object)new slice<T>((T[])backing, low, high, max) : null;
 }
 
 /// <summary>
@@ -183,6 +193,9 @@ public interface IGoReflectSlice
 
     /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
     object ReflectOverNativeMemory(nuint address, nint len, nint cap);
+
+    /// <summary>A slice of this slice type's element over <paramref name="backing"/>[low:high:max], sharing it; null when the backing is not this element's array.</summary>
+    object? ReflectRebase(Array backing, nint low, nint high, nint max);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents
@@ -616,7 +629,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_capacity = capacity - low;
 
         // `make([]T, len, cap)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(m_array, capacity);
+        GoMemProfile.Charge<T>(m_array, capacity, GoAllocEntry.MakeSlice);
     }
 
     // A `make([]T, len[, cap])` whose ELEMENT zero value must itself be constructed, because
@@ -1369,11 +1382,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new SliceEnumerator(this);
     }
 
-    // IArray<T> derives from IEnumerable<(nint, T)>, which the public GetEnumerator() satisfied
+    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
     // implicitly while it returned the interface. It now returns the concrete struct, so the
     // interface contract needs this explicit member — the boxing path, taken only by a consumer that
     // asked for the interface.
-    IEnumerator<(nint, T)> IEnumerable<(nint, T)>.GetEnumerator()
+    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
     {
         return new Enumerator(this);
     }
@@ -1509,8 +1522,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // `et.Size_ == 0` to bump the length and return the same (zerobase) data pointer — so the
         // whole operation is the length/capacity arithmetic. Doing it here rather than falling
         // through keeps a `make([]struct{}, n)` slice from ever needing storage it has no reason to
-        // own, and keeps the growth rule identical to the backed path so `cap` still agrees with Go
-        // wherever Go's own answer is observable.
+        // own. Go's zero-size growslice returns cap = len, so a grown zero-size slice has exactly
+        // its new length as capacity.
         if (GoZeroSizeFacts<T>.IsZeroSize)
         {
             nint zeroSizeLength = slice.m_length + elems.Length;
@@ -1521,17 +1534,18 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
             // Nil source or beyond capacity: Go reallocates and DETACHES, so the result starts at
             // offset 0 exactly as the backed path's fresh array does.
-            nint zeroSizeCapacity = slice == nil ? elems.Length : CalculateNewCapacity(slice, zeroSizeLength);
-
-            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroSizeLength, zeroSizeCapacity);
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroSizeLength, zeroSizeLength);
         }
 
+        // A nil slice grows through growslice like any other: the first backing is the size class of
+        // what was appended (append([]byte(nil), 1) has cap 8), not the exact length.
         if (slice == nil)
         {
-            newArray = AllocationCounter.NewArray<T>(elems.Length);
-            GoMemProfile.Charge<T>(newArray, elems.Length);
+            nint firstCapacity = GrowCapacity(slice, elems.Length, AppendedElemDims(elems));
+            newArray = AllocationCounter.NewArray<T>(firstCapacity);
+            GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
             elems.CopyTo(newArray);
-            return new slice<T>(newArray);
+            return new slice<T>(newArray, 0, elems.Length);
         }
 
         if (elems.Length <= slice.Available)
@@ -1566,14 +1580,47 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // native backing this is the design's §2.3 answer verbatim: the new backing is MANAGED,
         // writes through the grown slice stop reaching the mapping, and the original slice still
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
-        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length);
+        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length, AppendedElemDims(elems));
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
         elems.CopyTo(newArray.AsSpan((int)slice.Length));
 
         return new slice<T>(newArray, 0, slice.Length + elems.Length);
+    }
+
+    // A slice-typed spread operand's elements appended to slice: the window arm of the ISlice<T> form below, and
+    // the whole of builtin.appendꓸꓸꓸ's exact slice<T> overload, which reaches it with no box.
+    internal static slice<T> AppendWindow(in slice<T> slice, in slice<T> window)
+    {
+        // Zero-size elements move no bytes, and their windows are the one place a LENGTH can
+        // legitimately exceed every span (`make([]struct{}, math.MaxInt)` is legal Go —
+        // slices' own TestConcat_too_large drives exactly these through Concat's Grow): route
+        // by arithmetic before any span form, mirroring the span core's own zero-size arm.
+        if (GoZeroSizeFacts<T>.IsZeroSize)
+        {
+            nint zeroAdded = window.m_length;
+
+            if (zeroAdded == 0)
+                return slice;
+
+            nint zeroLength = slice.m_length + zeroAdded;
+
+            if (slice != nil && zeroAdded <= slice.Available)
+                return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
+
+            // Go's zero-size growslice: cap = len, which also holds for the giant lengths only
+            // zero-size elements can reach.
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
+        }
+
+        if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
+            return Append(slice, window.ToSpan());
+
+        // A native window past the span ceiling cannot land in any managed backing either —
+        // Go's growslice answers the same impossible request with this panic.
+        throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
     }
 
     // The SLICE-SHAPED SPREAD route (the Span int32-ceiling arc): `append(s, t...)` arrives with
@@ -1592,40 +1639,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             return slice;
 
         if (elems is slice<T> window)
-        {
-            // Zero-size elements move no bytes, and their windows are the one place a LENGTH can
-            // legitimately exceed every span (`make([]struct{}, math.MaxInt)` is legal Go —
-            // slices' own TestConcat_too_large drives exactly these through Concat's Grow): route
-            // by arithmetic before any span form, mirroring the span core's own zero-size arm.
-            if (GoZeroSizeFacts<T>.IsZeroSize)
-            {
-                nint zeroAdded = window.m_length;
-
-                if (zeroAdded == 0)
-                    return slice;
-
-                nint zeroLength = slice.m_length + zeroAdded;
-
-                if (slice != nil && zeroAdded <= slice.Available)
-                    return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
-
-                nint zeroCapacity = slice == nil ? zeroAdded : CalculateNewCapacity(slice, zeroLength);
-
-                // The growth rule's even-rounding wraps past MaxInt for the giant lengths only
-                // zero-size elements can reach — exact need is the honest capacity there.
-                if (zeroCapacity < zeroLength)
-                    zeroCapacity = zeroLength;
-
-                return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroCapacity);
-            }
-
-            if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
-                return Append(slice, window.ToSpan());
-
-            // A native window past the span ceiling cannot land in any managed backing either —
-            // Go's growslice answers the same impossible request with this panic.
-            throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
-        }
+            return AppendWindow(slice, window);
 
         // A named-slice wrapper (or any foreign ISlice<T>): its own spread property is the same
         // zero-copy window projection the call boundary used to make — one interface call, now
@@ -1641,13 +1655,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // "this expression allocates only once". The converter emits `appendꓸꓸꓸ(x, makeꓸꓸꓸ<T>(n))`
     // for it, landing here.
     //
-    // Every arm mirrors what `Append(x, <n zeroes>)` does today, so the rewrite moves no cap() and no
-    // aliasing: the zero-size arm is Append(ISlice)'s (including its exact-need guard for the giant
-    // lengths only zero-size elements reach), a nil x gets an exact-length backing as the span core
-    // gives it, the in-place arm writes the n elements of the SHARED backing -- to zero, as Go clears
-    // them (the region beyond len may hold stale values from an earlier, longer window) -- and the
-    // growing arm takes CalculateNewCapacity and detaches, as the span core does. The one thing that
-    // differs is the make's own backing, which no longer exists.
+    // Every arm mirrors what `Append(x, <n zeroes>)` does, so the rewrite moves no cap() and no
+    // aliasing: the zero-size arm is Append(ISlice)'s (cap = len, Go's zero-size growslice), a nil x
+    // grows through GrowCapacity as the span core's does, the in-place arm writes the n elements of the
+    // SHARED backing -- to zero, as Go clears them (the region beyond len may hold stale values from an
+    // earlier, longer window) -- and the growing arm takes GrowCapacity and detaches, as the span core
+    // does. The one thing that differs is the make's own backing, which no longer exists.
     internal static slice<T> AppendZeroed(in slice<T> slice, nint count)
     {
         if (count == 0)
@@ -1660,21 +1673,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             if (slice != nil && count <= slice.Available)
                 return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
 
-            nint zeroCapacity = slice == nil ? count : CalculateNewCapacity(slice, zeroLength);
-
-            if (zeroCapacity < zeroLength)
-                zeroCapacity = zeroLength;
-
-            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroCapacity);
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
         }
 
         T[] newArray;
 
         if (slice == nil)
         {
-            newArray = AllocationCounter.NewArray<T>(count);
-            GoMemProfile.Charge<T>(newArray, count);
-            return new slice<T>(newArray);
+            nint firstCapacity = GrowCapacity(slice, count);
+            newArray = AllocationCounter.NewArray<T>(firstCapacity);
+            GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
+            return new slice<T>(newArray, 0, count);
         }
 
         if (count <= slice.Available)
@@ -1699,7 +1708,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         nint newCapacity = GrowCapacity(slice, slice.Length + count);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
 
@@ -1711,49 +1720,61 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return Append(slice, elems.AsSpan());
     }
 
-    // Go's growslice for an element type with storage (CENSUS-golib-int32-narrowings E1): a grown
-    // length no managed T[] can hold is Go's own recoverable "growslice: len out of range", and one
-    // that fits clamps the growth rule's capacity to that ceiling (Go would over-allocate past it;
-    // here that capacity does not exist), so an append that fits never escapes as the CLR's
-    // OutOfMemoryException.
-    internal static nint GrowCapacity(in slice<T> slice, nint neededLength)
+    // Go's growslice for an element type with storage: nextslicecap, then the allocator's size class for
+    // the element's Go size (GoGrowthFacts<T>.RoundUpCapacity), so cap() reads exactly what Go's would after
+    // any growth. A grown length no managed T[] can hold is Go's own recoverable "growslice: len out of
+    // range" (CENSUS-golib-int32-narrowings E1), and one that fits clamps the capacity to that ceiling (Go
+    // would over-allocate past it; here that capacity does not exist), so an append that fits never escapes
+    // as the CLR's OutOfMemoryException.
+    //
+    // elemDims is the array dims of an appended element when T is an unnamed array (GoGrowthFacts<T>.SizedByValue):
+    // array<E> is one C# type for every [N]E, so the Go size comes from the value, never from T. Growth appends
+    // at least one element, and every array<E> value carries its length. AppendZeroed passes none: the converter
+    // never emits `append(x, make(...)...)` for an element whose zero value must be constructed.
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength, nint[]? elemDims)
     {
         if (neededLength > Array.MaxLength)
             throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
 
-        return Math.Min(CalculateNewCapacity(slice, neededLength), Array.MaxLength);
+        nint newCap = GoGrowthFacts<T>.RoundUpCapacity(neededLength, NextSliceCap(neededLength, slice.Capacity), elemDims);
+
+        return Math.Min(newCap, Array.MaxLength);
     }
 
-    private static nint CalculateNewCapacity(in slice<T> slice, nint neededCapacity)
+    // The growth capacity for a caller with no element to read (an unnamed array element then grows unrounded,
+    // and is recorded as such).
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength) => GrowCapacity(slice, neededLength, null);
+
+    // The dims GrowCapacity reads for an unnamed array element: those of the first appended element.
+    private static nint[]? AppendedElemDims(ReadOnlySpan<T> elems) =>
+        GoGrowthFacts<T>.SizedByValue ? GoGrowthFacts<T>.ValueDims(elems[0]) : null;
+
+    // Go's nextslicecap (runtime/slice.go): double below 256 elements of capacity, then step by
+    // (newcap + 3*256) / 4, a smooth transition toward x1.25; a need past double the old capacity takes
+    // the need itself.
+    private static nint NextSliceCap(nint newLen, nint oldCap)
     {
-        nint capacity = slice.Capacity;
+        nint newcap = oldCap;
+        nint doublecap = newcap + newcap;
 
-        if (capacity > 1 && capacity % 2 != 0)
-            capacity++;
+        if (newLen > doublecap)
+            return newLen;
 
-        nint doubleCapacity = capacity + capacity;
+        const nint threshold = 256;
 
-        if (neededCapacity > doubleCapacity)
+        if (oldCap < threshold)
+            return doublecap;
+
+        while (true)
         {
-            if (neededCapacity % 2 != 0)
-                neededCapacity++;
+            newcap += (newcap + 3 * threshold) >> 2;
 
-            capacity = neededCapacity;
-        }
-        else
-        {
-            if (slice.Length < 1024)
-            {
-                capacity = doubleCapacity;
-            }
-            else
-            {
-                while (capacity < neededCapacity)
-                    capacity += capacity / 4;
-            }
+            // Also true when newcap overflowed, since newLen is positive.
+            if ((nuint)newcap >= (nuint)newLen)
+                break;
         }
 
-        return capacity;
+        return newcap <= 0 ? newLen : newcap;
     }
 }
 
@@ -1944,6 +1965,101 @@ public static class SliceExtensions
     public static slice<T> slice<T>(this array<T> array, nint low, nint high)
     {
         return array.Slice2(low, high);
+    }
+
+    // Go's slice of a POINTER-TO-ARRAY, `p[low:high:max]` with p a `*[N]T`, which Go dereferences for
+    // the expression: the converter emits these for an anonymous array's box (`p.slice(…)`), every
+    // form a call. A box over NATIVE memory answers its element window (TryGetNativeArrayView) and is
+    // sliced there, because it has no array<T> to dereference -- Go's *[N]T over native bytes points at
+    // bare elements with no header, and its Value refuses by name: os's createMountPoint,
+    // `(*[0xffff]uint16)(unsafe.Pointer(&buf.PathBuffer[0]))[:n:n]` over a reparse buffer viewed through
+    // unsafe.Pointer. The window's bounds are the array's LENGTH and its panics the array's texts
+    // ("with length"), exactly the checks of the array<T> overloads above. Every other box is
+    // dereferenced as `(~p)` was, so a managed array keeps its route, its checks and its nil panic.
+    // A box whose elements are native WORDS (a foreign pointer array, NativePointerArrayBox) is sliced by
+    // reading the words the slice spans, and no more: [low, max), or [low, high) for the 2-index and 1-index
+    // forms, whose capacity is then high - low (see that class's remarks).
+    public static slice<T> slice<T>(this ж<array<T>> pointer)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words?.Window(0, words.Length, words.Length) ?? view;
+
+        return (~pointer)[..];
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words is null ? nativeArraySlice2(view, low, view.Length) : nativeWordSlice2(words, low, words.Length);
+
+        return (~pointer).slice(low);
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words is null ? nativeArraySlice2(view, low, high) : nativeWordSlice2(words, low, high);
+
+        return (~pointer).slice(low, high);
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high, nint max)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+        {
+            if (words is not null)
+                return words.Window(low, high, max);
+
+            if (low < 0 || high < low || max < high || max > view.Length)
+                throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, max, view.Length);
+
+            return view.slice(low, high, max);
+        }
+
+        return (~pointer).slice(low, high, max);
+    }
+
+    // The native window of a pointer-to-array; false for every box that is not over native memory (one virtual
+    // call answering null). A nil pointer answers false too, so it meets the dereference's nil panic. A view of
+    // native WORDS answers through `words`, with `view` unset.
+    private static bool tryNativeArrayView<T>(ж<array<T>> pointer, out slice<T> view, out INativeWordArray<T>? words)
+    {
+        switch (pointer?.TryGetNativeArrayView(typeof(T)))
+        {
+            case slice<T> native:
+                view = native;
+                words = null;
+                return true;
+
+            case INativeWordArray<T> nativeWords:
+                view = default;
+                words = nativeWords;
+                return true;
+
+            default:
+                view = default;
+                words = null;
+                return false;
+        }
+    }
+
+    // nativeArraySlice2's checks, over a view of native words.
+    private static slice<T> nativeWordSlice2<T>(INativeWordArray<T> words, nint low, nint high)
+    {
+        if ((nuint)high > (nuint)words.Length || (nuint)low > (nuint)high)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, words.Length);
+
+        return words.Window(low, high, high);
+    }
+
+    // array<T>.Slice2's checks over a native window: high against the array's length, then low against high,
+    // both unsigned, with the array's text.
+    private static slice<T> nativeArraySlice2<T>(slice<T> view, nint low, nint high)
+    {
+        if ((nuint)high > (nuint)view.Length || (nuint)low > (nuint)high)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, view.Length);
+
+        return view.slice(low, high);
     }
 
     // Go's 2-index slice of a string LITERAL, which converted code holds as a `"..."u8` span: s[low:] and

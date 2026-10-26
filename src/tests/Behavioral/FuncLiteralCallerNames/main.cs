@@ -10,7 +10,7 @@ internal static partial @string who() {
     var pc = new slice<uintptr>(1);
 
     if (runtime.Callers(2, pc) == 0) {
-        return ""u8;
+        return "";
     }
 
     var frames = runtime.CallersFrames(pc);
@@ -19,82 +19,61 @@ internal static partial @string who() {
     return frame.Function;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sibling1ˢ = (@string)"sibling-1:"u8;
-private static readonly object sibling2ˢ = (@string)"sibling-2:"u8;
-
 internal static partial void siblings() {
     void f1() {
-        fmt.Println(sibling1ˢ, who());
+        fmt.Println("sibling-1:", who());
     }
     void f2() {
-        fmt.Println(sibling2ˢ, who());
+        fmt.Println("sibling-2:", who());
     }
     f1();
     f2();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nestedInnerˢ = (@string)"nested-inner:"u8;
-private static readonly object nestedOuterˢ = (@string)"nested-outer:"u8;
-private static readonly object afterNestˢ = (@string)"after-nest:"u8;
-
 internal static partial void nested() {
     var outer = () => {
         void inner() {
-            fmt.Println(nestedInnerˢ, who());
+            fmt.Println("nested-inner:", who());
         }
-        fmt.Println(nestedOuterˢ, who());
+        fmt.Println("nested-outer:", who());
         inner();
     };
     run(outer);
     void after() {
-        fmt.Println(afterNestˢ, who());
+        fmt.Println("after-nest:", who());
     }
     after();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object secondFnˢ = (@string)"second-fn:"u8;
-
 internal static partial void second() {
     void g() {
-        fmt.Println(secondFnˢ, who());
+        fmt.Println("second-fn:", who());
     }
     g();
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deep3ˢ = (@string)"deep-3:"u8;
-private static readonly object deep2ˢ = (@string)"deep-2:"u8;
-private static readonly object deep1ˢ = (@string)"deep-1:"u8;
 
 internal static partial void deep() {
     var l1 = () => {
         var l2 = () => {
             void l3() {
-                fmt.Println(deep3ˢ, who());
+                fmt.Println("deep-3:", who());
             }
             l3();
-            fmt.Println(deep2ˢ, who());
+            fmt.Println("deep-2:", who());
         };
         run(l2);
-        fmt.Println(deep1ˢ, who());
+        fmt.Println("deep-1:", who());
     };
     run(l1);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nestSibAˢ = (@string)"nest-sib-a:"u8;
-private static readonly object nestSibBˢ = (@string)"nest-sib-b:"u8;
-
 internal static partial void nestedSiblings() {
     var o = () => {
         void a() {
-            fmt.Println(nestSibAˢ, who());
+            fmt.Println("nest-sib-a:", who());
         }
         void b() {
-            fmt.Println(nestSibBˢ, who());
+            fmt.Println("nest-sib-b:", who());
         }
         a();
         b();
@@ -106,26 +85,19 @@ internal static partial void run(Action f) {
     f();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object viaArgˢ = (@string)"via-arg:"u8;
-
 internal static partial void viaArg() {
     run(() => {
-        fmt.Println(viaArgˢ, who());
+        fmt.Println("via-arg:", who());
     });
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object namedControlˢ = (@string)"named-control:"u8;
-private static readonly object deferredˢ = (@string)"deferred:"u8;
 
 internal static partial void deferred() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(namedControlˢ, who());
+        fmt.Println("named-control:", who());
 
         defer(() => {
-            fmt.Println(deferredˢ, who());
+            fmt.Println("deferred:", who());
         }, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

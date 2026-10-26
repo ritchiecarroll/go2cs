@@ -144,6 +144,7 @@ public static void WithRegion(context.Context ctx, @string regionType, Action fn
         //   longer.
         // This causes more churns in code than I hoped, and sometimes
         // makes the code less readable.
+
         var id = fromContext(ctx).Value.id;
         userRegion(id, regionStartCode, regionType);
         defer(userRegion, id, regionEndCode, regionType, ref ᒐ);
@@ -193,7 +194,7 @@ public static void End(this ж<Region> Ꮡr) {
 // The information is advisory only. The tracing status
 // may have changed by the time this function returns.
 public static bool IsEnabled() {
-    return Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Load();
+    return Ꮡtracing.of(traceMultiplexer.Ꮡenabled).Load();
 }
 
 //

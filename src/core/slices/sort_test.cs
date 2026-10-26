@@ -90,7 +90,7 @@ internal static nint intPairCmp(intPair x, intPair y) {
 
 // Record initial order in B.
 internal static void initB(this intPairs d) {
-    foreach (var (i, _) in d) {
+    foreach (var i in range(d)) {
         d[i].b = i;
     }
 }
@@ -281,14 +281,14 @@ public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
 
     var emptySliceʗ1 = emptySlice;
     if (!panics(() => {
-        Min<slice<nint>, nint>(emptySliceʗ1);
+        _ = Min<slice<nint>, nint>(emptySliceʗ1);
     })) {
         Ꮡt.Errorf("Min([]): got no panic, want panic"u8);
     }
 
     var emptySliceʗ2 = emptySlice;
     if (!panics(() => {
-        Max<slice<nint>, nint>(emptySliceʗ2);
+        _ = Max<slice<nint>, nint>(emptySliceʗ2);
     })) {
         Ꮡt.Errorf("Max([]): got no panic, want panic"u8);
     }
@@ -296,7 +296,7 @@ public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
     var emptySliceʗ3 = emptySlice;
     var intCmpʗ1 = intCmp;
     if (!panics(() => {
-        MinFunc(emptySliceʗ3, intCmpʗ1);
+        _ = MinFunc(emptySliceʗ3, intCmpʗ1);
     })) {
         Ꮡt.Errorf("MinFunc([]): got no panic, want panic"u8);
     }
@@ -304,7 +304,7 @@ public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
     var emptySliceʗ4 = emptySlice;
     var intCmpʗ2 = intCmp;
     if (!panics(() => {
-        MaxFunc(emptySliceʗ4, intCmpʗ2);
+        _ = MaxFunc(emptySliceʗ4, intCmpʗ2);
     })) {
         Ꮡt.Errorf("MaxFunc([]): got no panic, want panic"u8);
     }
@@ -332,14 +332,17 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
     var tests = new TestBinarySearch_tests[]{
         new(new @string[]{}.slice(), "foo"u8, 0, false),
         new(new @string[]{}.slice(), ""u8, 0, false),
+
         new(str1, "foo"u8, 0, true),
         new(str1, "bar"u8, 0, false),
         new(str1, "zx"u8, 1, false),
+
         new(str2, "aa"u8, 0, false),
         new(str2, "ab"u8, 0, true),
         new(str2, "ad"u8, 1, false),
         new(str2, "ca"u8, 1, true),
         new(str2, "ra"u8, 2, false),
+
         new(str3, "bb"u8, 0, false),
         new(str3, "mo"u8, 0, true),
         new(str3, "nb"u8, 1, false),
@@ -347,6 +350,7 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
         new(str3, "tr"u8, 2, false),
         new(str3, "vo"u8, 2, true),
         new(str3, "xr"u8, 3, false),
+
         new(str4, "aa"u8, 0, false),
         new(str4, "ab"u8, 0, true),
         new(str4, "ac"u8, 1, false),
@@ -357,10 +361,12 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
         new(str4, "dd"u8, 3, false),
         new(str4, "xy"u8, 3, true),
         new(str4, "zz"u8, 4, false),
+
         new(strRepeats, "da"u8, 2, true),
         new(strRepeats, "db"u8, 5, false),
         new(strRepeats, "ma"u8, 6, true),
         new(strRepeats, "mb"u8, 8, false),
+
         new(strSame, "xx"u8, 0, true),
         new(strSame, "ab"u8, 0, false),
         new(strSame, "zz"u8, 3, false)
@@ -465,7 +471,7 @@ public static void TestBinarySearchFunc(ж<testing.T> Ꮡt) {
     var cmp = (nint a, @string b) => strings.Compare(strconv.Itoa(a), b);
     var (pos, found) = BinarySearchFunc(data, (@string)"2", cmp);
     if (pos != 3 || !found) {
-        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)(3), true);
+        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)3, true);
     }
 }
 

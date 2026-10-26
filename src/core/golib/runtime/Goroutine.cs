@@ -24,6 +24,16 @@ namespace go.golib;
 /// dedicated thread, so a parked goroutine can never delay a not-yet-started one.
 /// </para>
 /// <para>
+/// <b>Reused once finished.</b> The thread is dedicated for the goroutine's whole life, and REUSED after
+/// it (<see cref="GoroutineThreadPool"/>), the way Go reuses an M: a finished goroutine's thread waits
+/// briefly for the next one instead of exiting, because creating a thread costs ~100 µs and does not get
+/// faster with more creators. A goroutine that finds no idle thread gets a new one, exactly as before, so
+/// reuse changes the cost of a <c>go</c> statement and never its capacity. Nothing of a goroutine survives
+/// on its thread into the next (GoroutineThreadState, whose census GolibTests' ThreadStateCensusTests keeps
+/// complete), and a goroutine that exits locked to its thread (<c>runtime.LockOSThread</c>) takes the
+/// thread with it, as Go's does.
+/// </para>
+/// <para>
 /// <b>Why not the ThreadPool.</b> Goroutines used to be <c>ThreadPool.QueueUserWorkItem</c> work
 /// items. A goroutine that parks — an unbuffered rendezvous, a full buffer, a blocked select, a
 /// <c>WaitGroup</c>, a sleep — blocks its thread for as long as it is parked, so on a SHARED pool
@@ -135,6 +145,14 @@ public sealed class Goroutine
     // Set on m_waitReason by the WAKER (Ready), cleared when the goroutine's outermost park scope
     // ends. Above every WaitReason value; Reason masks it off.
     private const int ReadiedFlag = 1 << 30;
+
+    // The managed id of the thread running this goroutine now, 0 while none is: set where a thread
+    // takes the identity (Adopt, EnterAsMain, RegisterMainGoroutine) and cleared where it gives it up.
+    // The execution tracer reads it to state a running goroutine in its own M's batch.
+    private int m_threadId;
+
+    /// <summary>The managed id of the thread running this goroutine, or 0 while no thread is.</summary>
+    internal int ThreadId => Volatile.Read(ref m_threadId);
 
     // The synctest bubble this goroutine belongs to (SyncTestBubble), set by its CREATOR before its
     // thread starts -- Go's newg.syncGroup = callergp.syncGroup -- and cleared when it exits. Read by
@@ -420,6 +438,7 @@ public sealed class Goroutine
     private static Scope Adopt(Goroutine goroutine)
     {
         t_current = goroutine;
+        Volatile.Write(ref goroutine.m_threadId, Environment.CurrentManagedThreadId);
 
         // A CPU sampler joins each sample to its thread's latest labels; a thread that starts a
         // goroutine starts with the inherited ones (or none), whatever the OS thread id last carried.
@@ -472,6 +491,7 @@ public sealed class Goroutine
             ?? throw new InvalidOperationException("the main goroutine has not been registered; golib's module initializer registers it before any goroutine can be entered");
 
         t_current = main;
+        Volatile.Write(ref main.m_threadId, Environment.CurrentManagedThreadId);
 
         return new Scope(main, owned: false);
     }
@@ -725,6 +745,13 @@ public sealed class Goroutine
     public static object? GetProfileLabels() => s_profileLabels.Value;
 
     /// <summary>
+    /// THIS goroutine's profile labels as another thread sees them, Go's <c>gp.labels</c> read by a
+    /// traceback of <c>gp</c> (runtime.Stack's goroutine header). The calling goroutine reads its own
+    /// through <see cref="GetProfileLabels"/>, which is authoritative for it; see m_profileLabels.
+    /// </summary>
+    internal object? ProfileLabels => Volatile.Read(ref m_profileLabels);
+
+    /// <summary>
     /// Accounts for a SYSTEM goroutine doing user work for the lifetime of the returned scope, so a
     /// profile of user goroutines includes it.
     /// </summary>
@@ -847,17 +874,10 @@ public sealed class Goroutine
     // detector built on it would kill a live program (a ticker worker parked on its channel beside a
     // `select {}` main). What IS provable is the FOREVER wait: nothing can ever wake a nil-channel op or
     // a `select {}`. The report is therefore Go's rule restricted to that shape: every user goroutine,
-    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and package
-    // time holds no pending timer (an AfterFunc can still start one -- checkdead waits for timers too).
+    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and no timer is
+    // pending (an AfterFunc can still start one -- checkdead waits for timers too).
     // A deadlock that involves an ordinary channel or sync wait is not reported; it blocks, as it did
     // before this rule existed for every shape but the nil-channel one.
-
-    private static Func<bool>? s_pendingTimerProbe;
-
-    /// <summary>
-    /// Registers package time's answer to "is any timer still pending?" (Go: checkdead's timer scan).
-    /// </summary>
-    public static void RegisterPendingTimerProbe(Func<bool> anyPending) => Volatile.Write(ref s_pendingTimerProbe, anyPending);
 
     // Waits nothing can ever end: a nil-channel receive or send, and a select with no live case.
     internal static bool IsForeverWait(WaitReason reason) =>
@@ -869,9 +889,11 @@ public sealed class Goroutine
     /// </summary>
     internal static bool AllGoroutinesForeverBlocked()
     {
-        // The timer probe FIRST: a timer that fires after this read starts its goroutine through Register,
-        // which the exclusive section below either sees whole or excludes whole.
-        if (Volatile.Read(ref s_pendingTimerProbe) is { } anyPending && anyPending())
+        // The timer heap FIRST (Go's checkdead timer scan; every runtime timer, package time's among them,
+        // is a GoTimer): a timer that fires after this read starts its goroutine through Register, which the
+        // exclusive section below either sees whole or excludes whole, and one that fired before it counts
+        // until its callback has returned.
+        if (GoTimer.AnyPending)
             return false;
 
         Goroutine[] live;
@@ -950,12 +972,13 @@ public sealed class Goroutine
     /// Starts <paramref name="body"/> as a goroutine.
     /// </summary>
     /// <remarks>
-    /// One dedicated background thread per goroutine — see the type remarks for why this is not a
-    /// pool work item. <c>IsBackground</c> is Go's exit semantics: when <c>main</c> returns the
-    /// process exits regardless of how many goroutines are still live or parked, which a foreground
-    /// thread would prevent. The <see cref="ExecutionContext"/> flows into the new thread exactly as
-    /// it did through <c>QueueUserWorkItem</c> — <c>Thread.Start</c> captures it the same way — which
-    /// is what keeps a failure inside a goroutine attributable to the test that spawned it.
+    /// One dedicated background thread per goroutine, reused once that goroutine has finished with it
+    /// (<see cref="GoroutineThreadPool"/>) -- see the type remarks for why this is not a .NET thread pool
+    /// work item. <c>IsBackground</c> is Go's exit semantics: when <c>main</c> returns the process exits
+    /// regardless of how many goroutines are still live or parked, which a foreground thread would
+    /// prevent. The creator's <see cref="ExecutionContext"/> is captured here and the body runs under it,
+    /// exactly as a new thread's start would have flowed it -- which is what keeps a failure inside a
+    /// goroutine attributable to the test that spawned it.
     /// </remarks>
     public static void Start(Action body) => Start(body, "", 0);
 
@@ -1065,14 +1088,16 @@ public sealed class Goroutine
         if (ExecutionTracer.Enabled)
             ExecutionTracer.OnCreate(goroutine);
 
-        Thread thread = new(() => Run(body, goroutine, bubble), s_stackReserve)
-        {
-            IsBackground = true
-        };
-
+        // On a REUSED goroutine-sized thread (GoroutineThreadPool), not a new one. Creating a thread costs
+        // ~100 µs and does not get faster with more creators (measured on a 16-thread laptop: 6-9.5k threads
+        // a second from 1 creator or 100), so a program that starts goroutines by the million spent its life
+        // creating threads: runtime's TestChanSendBarrier starts 10M and did not finish inside an hour, and
+        // TestConcurrentReadsAfterGrowth starved beside it (2026-10-23). The body runs under this creator's
+        // ExecutionContext, as a new thread's start would have flowed it, and the thread is reset before
+        // the next goroutine; one that exits locked to its thread takes the thread with it, as in Go.
         try
         {
-            thread.Start();
+            GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));
         }
         catch
         {
@@ -1145,10 +1170,15 @@ public sealed class Goroutine
     /// </remarks>
     internal static void RegisterMainGoroutine()
     {
+        // The main goroutine's exit is Go's runtime.main tail: a main that returns while another goroutine is
+        // panicking does not exit 0 before that goroutine's report (MainExit; the `defer wg.Done(); panic(v)` race).
+        MainExit.Install();
+
         if (t_current is not null)
             return;
 
         t_current = s_main = Register(isMain: true, creator: null, parentId: 0, entry: null, labels: null);
+        Volatile.Write(ref s_main.m_threadId, Environment.CurrentManagedThreadId);
     }
 
     // The first frame above golib's own launch machinery -- the `goǃ` rungs live on `builtin`, Start
@@ -1355,6 +1385,12 @@ public sealed class Goroutine
             // give the filter — which runs while the panicking stack is still standing — a place to
             // be attached.
         }
+
+        // The goroutine ended here (a return, a Goexit, a contained host failure), so no panic of its runs
+        // deferred calls any more and it must not keep a returning main waiting (MainExit). Deliberately NOT in
+        // the scope's Dispose: a panic escaping to the backstop disposes the scope on its way out, BEFORE the
+        // backstop starts its report (measured on net10.0), and clearing there let main exit 0 in between.
+        MainExit.PanicDefersEnded(GoThreadState.Current);
     }
 
     private static bool CanContain(Exception ex) =>
@@ -1364,6 +1400,12 @@ public sealed class Goroutine
     // CanContain has said no, which for a panic is unconditional.
     private static bool Observed(Exception ex)
     {
+        // Nothing catches this exception now: it escapes the goroutine to golib's backstop, which reports it and
+        // exits 2. That is Go's startpanic_m, marked HERE, in the first pass, because the second pass runs this
+        // goroutine's scope Dispose before the backstop starts, and a returning main must not exit 0 between
+        // them (MainExit).
+        MainExit.BeginFatal(2);
+
         if (Volatile.Read(ref s_panicObserver) is not { } observer)
             return false;
 
@@ -1485,6 +1527,9 @@ public sealed class Goroutine
 
             t_current = null;
 
+            // Only this thread's own claim: another thread may have taken the main identity since.
+            Interlocked.CompareExchange(ref m_goroutine.m_threadId, 0, Environment.CurrentManagedThreadId);
+
             if (m_owned)
             {
                 // A member leaves its bubble as it exits (Go: -> _Gdead). Running when it exits: a
@@ -1492,7 +1537,7 @@ public sealed class Goroutine
                 if (m_goroutine.m_bubble is { } bubble)
                 {
                     m_goroutine.m_bubble = null;
-                    bubble.Exited();
+                    bubble.Exited(m_goroutine);
                 }
 
                 // Go's goexit traces the destroy on the goroutine's own thread (ExecutionTracer, Q28).

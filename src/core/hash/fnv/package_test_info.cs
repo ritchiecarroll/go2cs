@@ -23,6 +23,12 @@ using static global::go.hash.fnv_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -31,7 +37,7 @@ using static global::go.hash.fnv_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/fnv/fnv_test.go", "fnv_test.cs", "ABYs7u7u7u7ugqaCpoKmgqaCpoKmgoKCgoKUgpSAggALCoIABxiykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6CpoKmgqaCpIKmgqaCgoKUgIK2gIK2goKAgraCgoKAgraUgoLGgoIACQ6CpoKmgqaCpoKmgqaigoKClJSCgoKC", "110-110:1;111-111:2;112-112:3;113-113:4;114-114:5;115-115:6;118-160:7")]
+[assembly: go.GoPositionMap("hash/fnv/fnv_test.go", "fnv_test.cs", "ABcigo6GAAcQspIAChbu7u7u7u6CpoKmgqaCpoKmgqaCgoKCgpSClICCAAsKggAHGLKSgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClICC/oKmgqaCpoKkgqaCpoKCgpSAgraAgraCgoCCtoKCgoCCtpSCgsaCggAJDoKmgqaCpoKmgqaCpqKCgoKUlIKCgoI=", "22-24:1;23-23:1.1;25-27:2;26-26:2.1;37-39:3;137-137:1;138-138:2;139-139:3;140-140:4;141-141:5;142-142:6;145-187:7", "", "27=Invoke/1/4/1,Invoke/2/4/2,Invoke/3/4/3,Invoke/4/4/4")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -46,6 +52,7 @@ public static partial class fnv_internal_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("test")] partial struct TestHashInterface_test {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -58,6 +65,7 @@ public static partial class fnv_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(go.encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

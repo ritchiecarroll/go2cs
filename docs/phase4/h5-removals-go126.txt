@@ -1,0 +1,56 @@
+# h5-removals-go126.txt — the EXPECTED set for H5c at the Go 1.26 hop (go1.24.13 -> go1.26.9, a folded hop).
+#
+# Same role as the 1.24 hop's h5-removals.txt, and read the same way: runbook H5c step 3 treats it as the EXPECTED
+# set, never as a delete list. A seeded root keeps every file the new pin no longer emits; reconvert-deletions.ps1
+# proposes the deletions, and this file names what those deletions must be. Paths are corpus-relative (under src/core).
+#
+# HOW THE ROWS WERE DERIVED (C2, 2026-10-15, at the campaign tip 83288cc484):
+#   `go list std` was run under each release's own GOROOT and go binary (GOTOOLCHAIN=local, CGO_ENABLED=0, tags
+#   purego,math_big_pure_go) for windows/amd64, linux/amd64 and darwin/amd64, and the go1.26.9 list was
+#   subtracted from the go1.24.13 list per target. The union is 12 packages: 10 removed on all three targets, plus
+#   internal/runtime/syscall (linux only) and vendor/golang.org/x/net/route (darwin only). Each of the 12 holds
+#   files under src/core at the tip. These are the census's §2 "Removed" rows
+#   (docs/phase4/CENSUS-go126-package-delta.md).
+#   The inputs COORD named are all inside this set:
+#   - the 5 removed POPULATION rows of census §3 (packages with tests): crypto/internal/hpke, go/ast/internal/tests,
+#     internal/itoa, internal/trace/internal/oldtrace, runtime/internal/wasitest;
+#   - the sources of the 4 agreed arcs (relocations-go1.26.9.tsv after the arc-5 drop): runtime/internal/wasitest,
+#     internal/trace/internal/oldtrace and go/ast/internal/tests are removed and listed. The fourth source, strconv,
+#     survives at 1.26 (a partial arc) and is NOT a removal. The dropped arc's source, runtime, also survives;
+#   - internal/runtime/syscall, as ruled (below).
+#   The other 6 have no tests, so no population row and no arc names them; go list does. They are:
+#   internal/trace/event, internal/trace/event/go122, internal/trace/internal/testgen/go122, log/slog/internal/slogtest,
+#   runtime/internal/startlinetest and vendor/golang.org/x/net/route. Left out, each would read as a package "absent at
+#   the target that H3 did not list" in step 3(a), a STOP.
+#
+# ⚠ internal/runtime/syscall IS NAMED BY FILE, NOT AS A DIRECTORY. It is the only removed package whose directory
+#   survives as the parent of 1.26 packages: internal/runtime/syscall/linux and internal/runtime/syscall/windows. Its
+#   1.24 per-GOOS folder linux/ is the same path as the new package internal/runtime/syscall/linux. Listing the
+#   directory would claim the new packages' files as expected deletions. So its 9 files are listed one by one: the 8
+#   of the 1.24 package (csproj, README, the two icons, and linux/{defs_linux, defs_linux_amd64, package_info,
+#   syscall_linux}.cs), plus the hand-owned linux/syscall_linux_impl.cs. They read "already gone" once G's pre-seat 1
+#   moves them, but they are still named, as ruled. Step 3 as written reads only directory rows; the H5c amendment of
+#   2026-10-15 beside it says how a FILE row is read.
+#
+# Nested removals are both listed, as at 1.24 (crypto/internal/edwards25519 and .../field): internal/trace/event and
+# internal/trace/event/go122.
+crypto/internal/hpke
+go/ast/internal/tests
+internal/itoa
+internal/trace/event
+internal/trace/event/go122
+internal/trace/internal/oldtrace
+internal/trace/internal/testgen/go122
+log/slog/internal/slogtest
+runtime/internal/startlinetest
+runtime/internal/wasitest
+vendor/golang.org/x/net/route
+internal/runtime/syscall/internal.runtime.syscall.csproj
+internal/runtime/syscall/README.md
+internal/runtime/syscall/go2cs.ico
+internal/runtime/syscall/go2cs.png
+internal/runtime/syscall/linux/defs_linux.cs
+internal/runtime/syscall/linux/defs_linux_amd64.cs
+internal/runtime/syscall/linux/package_info.cs
+internal/runtime/syscall/linux/syscall_linux.cs
+internal/runtime/syscall/linux/syscall_linux_impl.cs

@@ -23,7 +23,7 @@ internal static nint total(this ref inner i) {
 
 partial struct outer {
     internal nint tag;
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 internal static partial void viaParam(ж<outer> Ꮡo) {
@@ -42,7 +42,7 @@ internal static void clear(this ref flags f, flags bit) {
 
 partial struct chunk {
     internal uint16 inUse;
-    internal partial ref flags flags { get; }
+    /*embed*/ internal flags flags;
 }
 
 internal static void alloc(this ref chunk c, uint16 n) {

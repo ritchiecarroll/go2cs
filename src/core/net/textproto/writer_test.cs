@@ -17,7 +17,7 @@ internal static readonly @string fooDˢ = "foo %d"u8;
 public static void TestPrintfLine(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
-    var err = w.PrintfLine(fooDˢ, (nint)(123));
+    var err = w.PrintfLine(fooDˢ, (nint)123);
     {
         @string s = buf.String(); if (s != "foo 123\r\n"u8 || err != default!) {
             Ꮡt.Fatalf("s=%q; err=%s"u8, s, err);

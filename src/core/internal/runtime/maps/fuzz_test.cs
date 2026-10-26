@@ -1,8 +1,6 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// Package maps implements Go's builtin map type.
 namespace go.@internal.runtime;
 
 using bytes = bytes_package;
@@ -92,7 +90,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     }
 
     // Extra trailing bytes ignored.
-    b = append(b, (byte)(42));
+    b = append(b, (byte)42);
     got = decode(b);
     if (!reflect.DeepEqual(fc, got)) {
         Ꮡt.Errorf("encode-decode (extra byte) roundtrip got %+v want %+v"u8, got, fc);

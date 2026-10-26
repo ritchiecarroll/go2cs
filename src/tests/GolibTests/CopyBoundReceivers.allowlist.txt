@@ -24,6 +24,12 @@
 #      twin re-declared `this ref T` without [GoRecv]. 13 forwarders, all in fmt; they now repeat the mark and
 #      none is listed here.
 #
+# The Go 1.26 hop (2026-10-15) added 11 rows, all methods Go 1.25 introduced and go/types classifies VALUE on
+# every target OS (amd64, purego, math_big_pure_go): five *mspan methods promoted through sweepLocked's and
+# liveUserArenaChunk's embedded *mspan (mbitmap.go isFreeOrNewlyAllocated; mgcmark_greenteagc.go and its
+# nogreenteagc twin for initInlineMarkBits, moveInlineMarks, inlineMarkBits, scannedBitsForIndex), and
+# *canonMap[T].expand promoted through uniqueMap's embedded *canonMap[T] (unique/handle.go:67, canonmap.go:145).
+#
 # package<TAB>struct<TAB>method<TAB>target OSes
 archive.zip	fileWriter	ModTime	windows,linux,darwin
 archive.zip	fileWriter	Mode	windows,linux,darwin
@@ -183,17 +189,22 @@ runtime	liveUserArenaChunk	heapBits	windows,linux,darwin
 runtime	liveUserArenaChunk	heapBitsSmallForAddr	windows,linux,darwin
 runtime	liveUserArenaChunk	inList	windows,linux,darwin
 runtime	liveUserArenaChunk	initHeapBits	windows,linux,darwin
+runtime	liveUserArenaChunk	initInlineMarkBits	windows,linux,darwin
+runtime	liveUserArenaChunk	inlineMarkBits	windows,linux,darwin
 runtime	liveUserArenaChunk	isFree	windows,linux,darwin
+runtime	liveUserArenaChunk	isFreeOrNewlyAllocated	windows,linux,darwin
 runtime	liveUserArenaChunk	isUnusedUserArenaChunk	windows,linux,darwin
 runtime	liveUserArenaChunk	layout	windows,linux,darwin
 runtime	liveUserArenaChunk	markBitsForBase	windows,linux,darwin
 runtime	liveUserArenaChunk	markBitsForIndex	windows,linux,darwin
+runtime	liveUserArenaChunk	moveInlineMarks	windows,linux,darwin
 runtime	liveUserArenaChunk	newPinnerBits	windows,linux,darwin
 runtime	liveUserArenaChunk	nextFreeIndex	windows,linux,darwin
 runtime	liveUserArenaChunk	objBase	windows,linux,darwin
 runtime	liveUserArenaChunk	objIndex	windows,linux,darwin
 runtime	liveUserArenaChunk	pinnerBitSize	windows,linux,darwin
 runtime	liveUserArenaChunk	refillAllocCache	windows,linux,darwin
+runtime	liveUserArenaChunk	scannedBitsForIndex	windows,linux,darwin
 runtime	liveUserArenaChunk	typePointersOfType	windows,linux,darwin
 runtime	liveUserArenaChunk	writeHeapBitsSmall	windows,linux,darwin
 runtime	liveUserArenaChunk	writeUserArenaHeapBits	windows,linux,darwin
@@ -205,17 +216,22 @@ runtime	sweepLocked	heapBits	windows,linux,darwin
 runtime	sweepLocked	heapBitsSmallForAddr	windows,linux,darwin
 runtime	sweepLocked	inList	windows,linux,darwin
 runtime	sweepLocked	initHeapBits	windows,linux,darwin
+runtime	sweepLocked	initInlineMarkBits	windows,linux,darwin
+runtime	sweepLocked	inlineMarkBits	windows,linux,darwin
 runtime	sweepLocked	isFree	windows,linux,darwin
+runtime	sweepLocked	isFreeOrNewlyAllocated	windows,linux,darwin
 runtime	sweepLocked	isUnusedUserArenaChunk	windows,linux,darwin
 runtime	sweepLocked	layout	windows,linux,darwin
 runtime	sweepLocked	markBitsForBase	windows,linux,darwin
 runtime	sweepLocked	markBitsForIndex	windows,linux,darwin
+runtime	sweepLocked	moveInlineMarks	windows,linux,darwin
 runtime	sweepLocked	newPinnerBits	windows,linux,darwin
 runtime	sweepLocked	nextFreeIndex	windows,linux,darwin
 runtime	sweepLocked	objBase	windows,linux,darwin
 runtime	sweepLocked	objIndex	windows,linux,darwin
 runtime	sweepLocked	pinnerBitSize	windows,linux,darwin
 runtime	sweepLocked	refillAllocCache	windows,linux,darwin
+runtime	sweepLocked	scannedBitsForIndex	windows,linux,darwin
 runtime	sweepLocked	typePointersOfType	windows,linux,darwin
 runtime	sweepLocked	writeHeapBitsSmall	windows,linux,darwin
 runtime	sweepLocked	writeUserArenaHeapBits	windows,linux,darwin
@@ -226,3 +242,4 @@ runtime	traceWriter	varint	windows,linux,darwin
 runtime	traceWriter	varintAt	windows,linux,darwin
 runtime	traceWriter	varintReserve	windows,linux,darwin
 runtime	ΔfuncInfo	isInlined	windows,linux,darwin
+unique	uniqueMap	expand	windows,linux,darwin

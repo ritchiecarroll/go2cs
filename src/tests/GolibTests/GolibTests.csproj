@@ -43,6 +43,7 @@
        disagree; nothing is wrong with the code under test. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
+    <Compile Remove="LinuxPipelineEnvironmentTests.cs" />
     <Compile Remove="LinuxSignalMaskTests.cs" />
     <Compile Remove="LinuxSigpipeTests.cs" />
     <Compile Remove="LinuxSyscallClockTests.cs" />
@@ -105,6 +106,9 @@
          syscall's windows/ folder. -->
     <Compile Remove="WindowsTokenGroupsTranscriptionTests.cs" />
     <Compile Remove="SyscallGetStartupInfoWindowsTests.cs" />
+    <!-- internal/syscall/windows.QueryPerformanceCounter/Frequency, the two pushes runtime makes into that
+         windows-EXCLUSIVE package: declared nowhere else. -->
+    <Compile Remove="WindowsQueryPerformanceCounterTests.cs" />
 
     <!-- The token door lives in syscall/windows/dll_windows.cs, so SyscallN exists only on this
          flavour. Its REFUSAL arms are host-independent (the door throws in managed code before the
@@ -138,6 +142,10 @@
          folder declares. Same reason and same form as the three above; the syscall reference this
          project already carries needs no change, so only the gate FILE is conditional. -->
     <Compile Remove="WindowsNetDbTranscriptionTests.cs" />
+
+    <!-- The TXT payload pin drives syscall's DnsQuery transcription seam (transcribeDnsRecords) and its
+         DNSTXTData, both declared only in syscall's windows/ folder. Same reason and same form as above. -->
+    <Compile Remove="WindowsDnsTxtPayloadTests.cs" />
 
     <!-- TempDirCleanupOrderTests: ONE of its two arms is windows-only and the file follows that arm.
          EveryCleanupSucceedsWhenAChdirSitsBetweenTempDirCalls guards an ORDER that is
@@ -328,6 +336,10 @@
     <!-- GoZeroResidualTests: unique.uniqueMap[T] is the converted std's one GENERIC struct that go2cs-gen
          calls needy, so it is the real subject of the "no registration for a generic struct" arm. -->
     <ProjectReference Include="..\..\core\unique\unique.csproj" />
+    <!-- GodebugUpdateHookTests: the hand-owned internal/godebug's cache is kept by the runtime's update
+         hook, so the guard drives the REAL package through the REAL os.Setenv -> syscall -> runtime
+         path, and runs a child for the arms that need a process with no fips140 entry cached. -->
+    <ProjectReference Include="..\..\core\internal\godebug\internal.godebug.csproj" />
   </ItemGroup>
 
 </Project>

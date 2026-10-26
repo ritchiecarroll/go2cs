@@ -4,7 +4,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using goexperiment = @internal.goexperiment_package;
+using abi = @internal.abi_package;
+using goarch = @internal.goarch_package;
+using maps = @internal.runtime.maps_package;
 using testenv = @internal.testenv_package;
 using Δmath = math_package;
 using Δos = os_package;
@@ -17,12 +19,14 @@ using Δsync = sync_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
 
+[GoFieldAccess(typeof(abiꓸMapType))]
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -80,7 +84,7 @@ internal static void testMapNan(ж<testing.T> Ꮡt, map<float64, nint> m) {
         if (k == k) {
             Ꮡt.Error(nanDisappearedˢ);
         }
-        if (((nint)(v & (v - 1))) != 0) {
+        if ((v & (v - 1)) != 0) {
             Ꮡt.Error(valueWrongˢ);
         }
         s |= (nint)(v);
@@ -141,9 +145,9 @@ public static void TestMapAppendAssignment(ж<testing.T> Ꮡt) {
     var m = new map<nint, slice<nint>>(0);
 
     m[0] = default!;
-    m[0] = append(m[0], (nint)(12345));
-    m[0] = append(m[0], (nint)(67890));
-    (sinkAppend, m[0]) = (!sinkAppend, append(m[0], (nint)(123), (nint)(456)));
+    m[0] = append(m[0], (nint)12345);
+    m[0] = append(m[0], (nint)67890);
+    (sinkAppend, m[0]) = (!sinkAppend, append(m[0], (nint)123, (nint)456));
     var a = new nint[]{7, 8, 9, 0}.slice();
     m[0] = appendꓸꓸꓸ(m[0], a);
 
@@ -244,13 +248,13 @@ public static void TestGrowWithNegativeZero(ж<testing.T> Ꮡt) {
         } // ignore entries added to grow table
         cnt++;
         if (Δmath.Copysign(1.0D, k.x) < 0D){
-            if ((nint)(v & 16) == 0) {
+            if ((v & 16) == 0) {
                 Ꮡt.Error(keyValueNotUpdatedˢ);
             }
             negcnt++;
-            s |= (nint)((nint)(v & 15));
+            s |= (nint)((v & 15));
         } else {
-            if ((nint)(v & 16) == 16) {
+            if ((v & 16) == 16) {
                 Ꮡt.Error(keyValueNotUpdatedˢ2, k, v);
             }
             s |= (nint)(v);
@@ -301,7 +305,7 @@ public static void TestIterGrowAndDelete(ж<testing.T> Ꮡt) {
             }
             growflag = false;
         } else {
-            if ((nint)(k & 1) == 1) {
+            if ((k & 1) == 1) {
                 Ꮡt.Error(oddValueReturnedˢ);
             }
         }
@@ -337,7 +341,7 @@ public static void TestIterGrowWithGC(ж<testing.T> Ꮡt) {
             growflag = false;
         }
     }
-    if (bitmask != (1 << (int)(16)) - 1) {
+    if (bitmask != (1 << 16) - 1) {
         Ꮡt.Error(missingKeyˢ, bitmask);
     }
 }
@@ -921,31 +925,6 @@ public static void TestIncrementAfterBulkClearKeyStringValueInt(ж<testing.T> �
     }
 }
 
-public static void TestMapTombstones(ж<testing.T> Ꮡt) {
-    var m = new map<nint, nint>{};
-    UntypedInt N = 10000;
-    // Fill a map.
-    for (nint i = 0; i < N; i++) {
-        m[i] = i;
-    }
-    runtime_internal_test_package.MapTombstoneCheck(m);
-    // Delete half of the entries.
-    for (nint i = 0; i < N; i += 2) {
-        delete(m, i);
-    }
-    runtime_internal_test_package.MapTombstoneCheck(m);
-    // Add new entries to fill in holes.
-    for (nint i = N; i < (nint)(3 * N / 2); i++) {
-        m[i] = i;
-    }
-    runtime_internal_test_package.MapTombstoneCheck(m);
-    // Delete everything.
-    for (nint i = 0; i < (nint)(3 * N / 2); i++) {
-        delete(m, i);
-    }
-    runtime_internal_test_package.MapTombstoneCheck(m);
-}
-
 partial struct canString /*num:nint*/;
 
 internal static @string String(this canString c) {
@@ -1014,10 +993,10 @@ partial struct panicStructKey {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicˢ = "panic"u8;
+internal static readonly @string panicˢ2 = "panic"u8;
 
 internal static @string String(this panicStructKey p) {
-    return panicˢ;
+    return panicˢ2;
 }
 
 partial struct structKey {
@@ -1221,56 +1200,6 @@ public static void TestEmptyMapWithInterfaceKey(ж<testing.T> Ꮡt) {
     });
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object mapkeysNotImplementedForˢ = (@string)"mapkeys not implemented for swissmaps"u8;
-
-internal partial struct TestMapKeys_key /*dyn*/ {
-    internal @string s;
-    internal array<byte> pad = new(128); // sizeof(key) > abi.MapMaxKeyBytes
-}
-
-public static void TestMapKeys(ж<testing.T> Ꮡt) {
-    if (goexperiment.SwissMap) {
-        Ꮡt.Skip(mapkeysNotImplementedForˢ);
-    }
-    var m = new map<TestMapKeys_key, nint>{[new(s: "a"u8)] = 1, [new(s: "b"u8)] = 2};
-    ref var keys = ref heap<slice<TestMapKeys_key>>(out var Ꮡkeys);
-    keys = new slice<TestMapKeys_key>(0, () => new(), len(m));
-    runtime_internal_test_package.MapKeys(m, @unsafe.Pointer.FromPinnedBox(Ꮡkeys));
-    foreach (var (_, vᴛ1) in keys) {
-        var k = vᴛ1.ΔClone();
-
-        if (len(k.s) != 1) {
-            Ꮡt.Errorf("len(k.s) == %d, want 1"u8, len(k.s));
-        }
-    }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object mapvaluesNotImplementedˢ = (@string)"mapvalues not implemented for swissmaps"u8;
-
-internal partial struct TestMapValues_val /*dyn*/ {
-    internal @string s;
-    internal array<byte> pad = new(128); // sizeof(val) > abi.MapMaxElemBytes
-}
-
-public static void TestMapValues(ж<testing.T> Ꮡt) {
-    if (goexperiment.SwissMap) {
-        Ꮡt.Skip(mapvaluesNotImplementedˢ);
-    }
-    var m = new map<nint, TestMapValues_val>{[1] = new(s: "a"u8), [2] = new(s: "b"u8)};
-    ref var vals = ref heap<slice<TestMapValues_val>>(out var Ꮡvals);
-    vals = new slice<TestMapValues_val>(0, () => new(), len(m));
-    runtime_internal_test_package.MapValues(m, @unsafe.Pointer.FromPinnedBox(Ꮡvals));
-    foreach (var (_, vᴛ1) in vals) {
-        var v = vᴛ1.ΔClone();
-
-        if (len(v.s) != 1) {
-            Ꮡt.Errorf("len(v.s) == %d, want 1"u8, len(v.s));
-        }
-    }
-}
-
 internal static uintptr computeHash() {
     ref var v = ref heap(new EmptyStruct(), out var Ꮡv);
     return runtime_internal_test_package.MemHash(@unsafe.Pointer.FromPinnedBox(Ꮡv), 0, /* unsafe.Sizeof(v) */ (uintptr)0);
@@ -1282,7 +1211,7 @@ internal static readonly @string testRunˢ6 = "-test.run=^TestMemHashGlobalSeed$
 internal static uintptr subprocessHash(ж<testing.T> Ꮡt, @string env) {
     Ꮡt.Helper();
 
-    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ6));
+    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ6));
     cmd.Value.Env = append((~cmd).Env, "GO_TEST_SUBPROCESS_HASH=1"u8);
     if (env != ""u8) {
         cmd.Value.Env = append((~cmd).Env, env);
@@ -1293,7 +1222,7 @@ internal static uintptr subprocessHash(ж<testing.T> Ꮡt, @string env) {
         Ꮡt.Fatalf("cmd.Output got err %v want nil"u8, err);
     }
 
-    @string s = strings.TrimSpace(((@string)@out));
+    @string s = strings.TrimSpace((@string)@out);
     (var h, err) = strconv.ParseUint(s, 10, 64);
     if (err != default!) {
         Ꮡt.Fatalf("Parse output %q got err %v want nil"u8, s, err);
@@ -1384,6 +1313,66 @@ public static void TestMapIterDeleteReplace(ж<testing.T> Ꮡt) {
                 }
             }
         });
+    }
+}
+
+public static void TestHmapSize(ж<testing.T> Ꮡt) {
+    // The structure of Map is defined in internal/runtime/maps/map.go
+    // and in cmd/compile/internal/reflectdata/map.go and must be in sync.
+    // The size of Map should be 48 bytes on 64 bit and 32 bytes on 32 bit platforms.
+    var wantSize = (uintptr)(2 * 8 + 4 * goarch.PtrSize);
+    var gotSize = /* unsafe.Sizeof(maps.Map{}) */ (uintptr)48;
+    if (gotSize != wantSize) {
+        Ꮡt.Errorf("sizeof(maps.Map{})==%d, want %d"u8, gotSize, wantSize);
+    }
+}
+
+// See also reflect_test.TestGroupSizeZero.
+public static void TestGroupSizeZero(ж<testing.T> Ꮡt) {
+    map<EmptyStruct, EmptyStruct> m = default!;
+    var mTyp = abi.TypeOf(m);
+    var mt = mTyp.Reinterpret<abi.Type, abiꓸMapType>();
+
+    // internal/runtime/maps when create pointers to slots, even if slots
+    // are size 0. The compiler should have reserved an extra word to
+    // ensure that pointers to the zero-size type at the end of group are
+    // valid.
+    if (mt.Group.Size() <= 8) {
+        Ꮡt.Errorf("Group size got %d want >8"u8, mt.Group.Size());
+    }
+}
+
+public static void TestMapIterOrder(ж<testing.T> Ꮡt) {
+    var sizes = new nint[]{3, 7, 9, 15}.slice();
+    foreach (var (_, n) in sizes) {
+        for (nint i = 0; i < 1000; i++) {
+            // Make m be {0: true, 1: true, ..., n-1: true}.
+            var m = new map<nint, bool>();
+            for (nint iΔ1 = 0; iΔ1 < n; iΔ1++) {
+                m[iΔ1] = true;
+            }
+            // Check that iterating over the map produces at least two different orderings.
+            var mʗ1 = m;
+            slice<nint> ord() {
+                slice<nint> s = default!;
+                foreach (var (key, _) in mʗ1) {
+                    s = append(s, key);
+                }
+                return s;
+            }
+            var first = ord();
+            var ok = false;
+            for (nint @try = 0; @try < 100; @try++) {
+                if (!slices.Equal<slice<nint>, nint>(first, ord())) {
+                    ok = true;
+                    break;
+                }
+            }
+            if (!ok) {
+                Ꮡt.Errorf("Map with n=%d elements had consistent iteration order: %v"u8, n, first);
+                break;
+            }
+        }
     }
 }
 

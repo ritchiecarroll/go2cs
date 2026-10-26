@@ -161,7 +161,7 @@ public static void ExampleShuffle_slicesInUnison() {
         (numbersʗ1[i], numbersʗ1[j]) = (numbersʗ1[j], numbersʗ1[i]);
         (lettersʗ1[i], lettersʗ1[j]) = (lettersʗ1[j], lettersʗ1[i]);
     });
-    foreach (var (i, _) in numbers) {
+    foreach (var i in range(numbers)) {
         fmt.Printf("%c: %c\n"u8, letters[i], numbers[i]);
     }
 }

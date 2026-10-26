@@ -254,6 +254,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		siblingSignals := collectSiblingTestSignals(pkg.Dir, pkg.Name, options)
 		siblingTestFuncMethodNames = siblingSignals.funcMethodNames
 		siblingTestAddressedGlobalNames = siblingSignals.addressedGlobalNames
+		siblingTestMethodValues = siblingSignals.methodValues
 		siblingTestPublicizedTypeNames = siblingSignals.publicizedTypeNames
 		hasSiblingInternalTestFiles = siblingSignals.hasInternalTests
 		options.testFriendAssembly = hasSiblingInternalTestFiles
@@ -301,10 +302,25 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Refusing to convert: %s\n", err)
 		}
 
+		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
+		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
+		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
+		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
+		// (manualTypeReceiverRefusal.go).
+		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
 		currentPackageGorootVendored = isGorootVendoredDir(packageInputPath, options.goRoot)
+		packageHoistsLiterals = literalsHoistedFor(packageInputPath, options)
 
 		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
@@ -371,6 +387,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				collectCaptureModeMethods(pkg)
 				collectTypeSpecRHS(pkg)
 				collectHoistedLiterals(files, packageTypes, info, goosOfTarget(options.targetPlatform), nil, true)
+				collectHandOwnedDecls(files, packageTypes, info, goosOfTarget(options.targetPlatform))
 				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
 				collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
 				collectPublicizedTypes(packageTypes, fset)
@@ -443,6 +460,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// file's declarations) but has no other ordering dependency on the analyses above/below it.
 		needsNoInlining := computeNoInliningClosure(files, packageTypes, info, fixedSkipClosureApplies(packageInputPath, options.goRoot))
 
+		// Go's direct-call rule for recover: which recover() calls take the deferred-call mark and which defers
+		// set it (recoverForms.go). Package-wide, before any file is visited.
+		collectRecoverForms(files, packageTypes, info)
+
 		// Perform escape analysis for each file
 		// Identify capture-mode methods (those taking &recv.field) — across the package
 		// and its imports — before escape analysis, so a value var on which one is
@@ -458,8 +479,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// ("address-taken only into lowered positions → stack") is consulted by the escape
 		// analysis, and the signature/call-site emission reads the verdicts during the visits.
 		performRefLoweringAnalysis(files, packageTypes, info, options)
+		collectHandOwnedDecls(files, packageTypes, info, goosOfTarget(options.targetPlatform))
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
+
+		// Go's stack backing store for a non-escaping append: which appends take it is the compiler's own
+		// verdict, harvested per target (stackAppendHints.go).
+		collectStackAppendHints(files, fset, packageTypes, info, pkg.Dir, options)
 
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
@@ -604,6 +630,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Resolve any deferred cross-file dynamic (anonymous struct) type references
 		// now that every file's lifted names are registered in the shared registry.
 		resolveDynamicTypeMarkers(outputFileNames)
+		resolveDynamicInterfaceBases(outputFileNames)
+
+		// Inline-constraint records an instantiation deferred until its lift was named (the
+		// names are all registered now), ahead of the metadata file below.
+		replayDeferredConstraintRecords()
 
 		// Write project file with correct output type and unsafe code settings
 		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
@@ -626,6 +657,21 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			}
 
 			if err := stampDefaultGodebugProject(projectFileName, godebug); err != nil {
+				return err
+			}
+		}
+
+		// EVERY main package, single-package and -recurse alike, carries its module build info -- the `path`,
+		// `mod` and (under -recurse) `dep` lines runtime/debug.ReadBuildInfo reads (buildInfoStamp.go), one per module the
+		// program links (linkedProgramDependencies), each dep's
+		// sum from the main module's go.sum. Same project route as the DefaultGODEBUG above, for the same reason.
+		if pkg.Name == "main" {
+			moduleDir := moduleRootDir(pkg.Dir)
+			modulePath := directoryModulePath(pkg.Dir)
+			dependencies := linkedProgramDependencies(pkg, options.programDependencies)
+			modInfo := programModInfo(pkg.PkgPath, modulePath, dependencies, goSumHashes(moduleDir))
+
+			if err := stampModInfoProject(projectFileName, modInfo); err != nil {
 				return err
 			}
 		}
@@ -669,17 +715,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		restoreUnchangedMarkedSources(outputFileNames)
 
 		// Emit the ordered package-var initialization file (no-op unless any initializer was
-		// relocated for init-order correctness). Package (directory) conversions only. Under
-		// -tests, the ctor carries the erasable test hook so the internal test variant can
-		// append its own relocations (writeTestVariantInitFile) — like the IP-4 csproj
-		// exclusions, this production-file difference is intended -tests output, not drift.
+		// relocated for init-order correctness). Package (directory) conversions only. The same
+		// file from -stdlib and -tests: an internal test variant that adds relocations to this
+		// class runs them from its own module initializer (writeTestVariantInitFile).
 		if isDir {
 			// Go's InitOrder differs when the file set does, so package_init.cs is per-GOOS in the
 			// four packages where it varies (design §4.3) — routed by the same L3 rule, passed as
 			// the directory this writer joins its fixed file name onto.
 			packageInitDir := platformLayoutDir(packageOutputPath, goosOfTarget(options.targetPlatform), PackageInitFileName)
 
-			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName, options.convertTests); err != nil {
+			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName); err != nil {
 				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
 			}
 		}

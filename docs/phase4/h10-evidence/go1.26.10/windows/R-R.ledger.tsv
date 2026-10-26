@@ -1,0 +1,3 @@
+# h10 rebank ledger -- APPEND ONLY. utc	row	corpus_commit	converter_stamp	word	banked
+2026-10-26T05:35:29.9723396Z	net/http	e4c8e0bf54486aba99f26c4559c5552acdacf372	2026-10-26T05:15:19.2247398Z/22937600	PASS	yes
+2026-10-26T05:51:33.2328387Z	crypto/tls	e4c8e0bf54486aba99f26c4559c5552acdacf372	2026-10-26T05:15:19.2247398Z/22937600	PASS	yes

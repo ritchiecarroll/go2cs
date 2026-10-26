@@ -202,6 +202,7 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("^[a-c]*"u8, "x"u8, ""u8, "x"u8),
     new("[a-c]*$"u8, "x"u8, ""u8, "x"u8),
     new("^[a-c]*$"u8, "x"u8, ""u8, "x"u8),
+
     new("^[a-c]+"u8, "x"u8, "abcdabc"u8, "xdabc"u8),
     new("[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdx"u8),
     new("^[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdabc"u8),
@@ -302,7 +303,7 @@ public static void TestReplaceAll(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAll(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAll(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAll(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
@@ -327,7 +328,7 @@ public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
@@ -347,7 +348,7 @@ public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
@@ -372,7 +373,7 @@ public static void TestReplaceAllFunc(ж<testing.T> Ꮡt) {
         }
         // now try bytes
         var tcʗ1 = tc;
-        actual = ((@string)re.ReplaceAllFunc(slice<byte>(tc.input), (slice<byte> s) => slice<byte>(tcʗ1.replacement(((@string)s)))));
+        actual = (@string)re.ReplaceAllFunc(slice<byte>(tc.input), (slice<byte> s) => slice<byte>(tcʗ1.replacement((@string)s)));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q"u8,
                 tc.pattern, tc.input, actual, tc.output);
@@ -990,14 +991,15 @@ internal static @string sink;
 
 public static void BenchmarkQuoteMetaAll(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var specialsᴷ = new stackAppend<byte>();
 
     var specials = new slice<byte>(0);
     for (var i = (byte)0; i < utf8.RuneSelf; i++) {
         if (special(i)) {
-            specials = append(specials, i);
+            specials = append(specialsᴷ, specials, i);
         }
     }
-    @string s = ((@string)specials);
+    @string s = (@string)specials;
     b.SetBytes((int64)len(s));
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -1106,7 +1108,7 @@ internal static readonly object unexpectedSuccessˢ = (@string)"unexpected succe
 
 public static void TestUnmarshalText(ж<testing.T> Ꮡt) {
     var unmarshaled = @new<global::go.regexp_package.Regexp>();
-    foreach (var (i, _) in goodRe) {
+    foreach (var i in range(goodRe)) {
         var re = compileTest(Ꮡt, goodRe[i], ""u8);
         var (marshaled, err) = re.MarshalText();
         if (err != default!) {

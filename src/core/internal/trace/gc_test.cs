@@ -12,6 +12,7 @@ using time = time_package;
 using go.@internal;
 using go.@internal.trace;
 using static go.@internal.trace_internal_test_package;
+using version = go.@internal.trace.version_package;
 
 partial class trace_test_package {
 
@@ -73,7 +74,7 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
         if (len(worst) != len(test.worst)){
             Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
         } else {
-            foreach (var (i, _) in worst) {
+            foreach (var i in range(worst)) {
                 if (worst[i].MutatorUtil != test.worst[i]) {
                     Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
                     break;
@@ -122,7 +123,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
             for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);
-                foreach (var (i, _) in mud1) {
+                foreach (var i in range(mud1)) {
                     if (!aeq(mud1[i], mud2[i])) {
                         tΔ1.Errorf("for quantiles %v at window %v, want %v, got %v"u8, quantiles, window, mud2, mud1);
                         break;
@@ -136,7 +137,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
     var checkʗ1 = check;
     Ꮡt.Run("V2"u8, (ж<testing.T> tΔ2) => {
         @string testPath = testdataTestsGo122Gcˢ;
-        var (r, _, err) = testtrace.ParseFile(testPath);
+        var (r, _, _, err) = testtrace.ParseFile(testPath);
         if (err != default!) {
             tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
         }
@@ -164,7 +165,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     float64 mmu = default!;
 
     {
-        var max = ((time.Duration)(util[len(util) - 1].Time - util[0].Time)); if (window > max) {
+        var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
             window = max;
         }
     }

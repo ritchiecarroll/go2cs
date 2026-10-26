@@ -77,7 +77,7 @@ public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
 
     // Expect errors in line 17, 18, 20, no errors on other lines.
     var want = new @string[]{"x.go:17"u8, "x.go:18"u8, "x.go:20"u8}.slice();
-    var got = strings.Split(((@string)@out), "\n"u8);
+    var got = strings.Split((@string)@out, "\n"u8);
     if (got[len(got) - 1] == "") {
         got = got.slice(0, len(got) - 1); // remove last empty line
     }
@@ -90,7 +90,7 @@ public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("unexpected number of errors, want %d, got %d"u8, len(want), len(got));
     }
     if (Ꮡt.Failed()) {
-        Ꮡt.Logf("output:\n%s"u8, ((@string)@out));
+        Ꮡt.Logf("output:\n%s"u8, (@string)@out);
     }
 }
 

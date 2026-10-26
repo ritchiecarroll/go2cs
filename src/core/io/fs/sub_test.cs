@@ -36,7 +36,7 @@ public static void TestSub(ж<testing.T> Ꮡt) {
         }
         (var data, errΔ1) = ReadFile(subΔ1, goodbyeTxtˢ);
         if (((sstring)data) != "goodbye, world"u8 || errΔ1 != default!) {
-            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, ((@string)data), errΔ1, goodbyeWorldˢ);
+            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, (@string)data, errΔ1, goodbyeWorldˢ);
         }
 
         (var dirs, errΔ1) = ReadDir(subΔ1, "."u8);
@@ -54,7 +54,7 @@ public static void TestSub(ж<testing.T> Ꮡt) {
     check(subOnlyˢ, sub, err);
 
     // Test that Sub uses Open when the method is not present.
-    (sub, err) = Sub(new openOnly(testFsys), subˢ2);
+    (sub, err) = Sub(new openOnly(new fstest_MapFSᴠFS(testFsys)), subˢ2);
     check(openOnlyˢ, sub, err);
 
     (_, err) = sub.Open(nonexistˢ);

@@ -1,13 +1,12 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build unix
+//go:build unix || wasip1 || windows
 namespace go;
 
-using unix = @internal.syscall.unix_package;
 using Δio = io_package;
+using runtime = runtime_package;
 using syscall = syscall_package;
-using @internal.syscall;
 using fs = go.io.fs_package;
 
 partial class os_package {
@@ -37,7 +36,15 @@ internal static error removeAll(@string path) {
         // its parent directory
         var (parentDir, @base) = splitPath(path);
 
-        (var parent, err) = Open(parentDir);
+        nint flag = O_RDONLY;
+        if (runtime.GOOS == "windows"u8) {
+            // On Windows, the process might not have read permission on the parent directory,
+            // but still can delete files in it. See https://go.dev/issue/74134.
+            // We can open a file even if we don't have read permission by passing the
+            // O_WRONLY | O_RDWR flag, which is mapped to FILE_READ_ATTRIBUTES.
+            flag = (nint)(O_WRONLY | O_RDWR);
+        }
+        (var parent, err) = OpenFile(parentDir, flag, 0);
         if (IsNotExist(err)) {
             // If parent does not exist, base cannot exist. Fail silently
             return default!;
@@ -49,7 +56,7 @@ internal static error removeAll(@string path) {
         defer(() => parentʗ1.Close(), ref ᒐ);
 
         {
-            var errΔ1 = removeAllFrom(parent, @base); if (errΔ1 != default!) {
+            var errΔ1 = removeAllFrom((sysfdType)parent.Fd(), @base); if (errΔ1 != default!) {
                 {
                     var (pathErr, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
                         pathErr.Value.Path = parentDir + ((@string)(rune)PathSeparator) + (~pathErr).Path;
@@ -65,10 +72,9 @@ internal static error removeAll(@string path) {
     finally { ᒐ.Run(); }
 }
 
-internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
-    nint parentFd = (nint)Ꮡparent.Fd();
+internal static error removeAllFrom(sysfdType parentFd, @string @base) {
     // Simple case: if Unlink (aka remove) works, we're done.
-    var err = ignoringEINTR(() => unix.Unlinkat(parentFd, @base, 0));
+    var err = removefileat(parentFd, @base);
     if (err == default! || IsNotExist(err)) {
         return default!;
     }
@@ -90,15 +96,21 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
         const nint reqSize = 1024;
         nint respSize = default!;
 
-        // Open the directory to recurse into
+        // Open the directory to recurse into.
         var (@file, errΔ1) = openDirAt(parentFd, @base);
         if (errΔ1 != default!) {
             if (IsNotExist(errΔ1)) {
                 return default!;
             }
-            if (AreEqual(errΔ1, syscall.ENOTDIR) || AreEqual(errΔ1, unix.NoFollowErrno)) {
-                // Not a directory; return the error from the unix.Unlinkat.
+            if (AreEqual(errΔ1, syscall.ENOTDIR)) {
+                // Not a directory; return the error from the removefileat.
                 return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat"u8, Path: @base, Err: uErr)));
+            }
+            {
+                var (_, ok) = errΔ1._<errSymlink>(ᐧ); if (ok) {
+                    // Not a user-visible error.
+                    errΔ1 = uErr;
+                }
             }
             recurseErr = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openfdat"u8, Path: @base, Err: errΔ1)));
             break;
@@ -119,7 +131,7 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
 
             respSize = len(names);
             foreach (var (_, name) in names) {
-                var errΔ2 = removeAllFrom(@file, name);
+                var errΔ2 = removeAllFrom((sysfdType)@file.Fd(), name);
                 if (errΔ2 != default!) {
                     {
                         var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {
@@ -154,7 +166,7 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
     }
 
     // Remove the directory itself.
-    var unlinkError = ignoringEINTR(() => unix.Unlinkat(parentFd, @base, unix.AT_REMOVEDIR));
+    var unlinkError = removedirat(parentFd, @base);
     if (unlinkError == default! || IsNotExist(unlinkError)) {
         return default!;
     }
@@ -173,18 +185,12 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
 // This acts like openFileNolog rather than OpenFile because
 // we are going to (try to) remove the file.
 // The contents of this file are not relevant for test caching.
-internal static (ж<File>, error) openDirAt(nint dirfd, @string name) {
-    var (r, err) = ignoringEINTR2((nint, error) () => unix.Openat(dirfd, name, (nint)((nint)(nint)((nint)(nint)(O_RDONLY | (nint)syscall.O_CLOEXEC) | (nint)syscall.O_DIRECTORY) | (nint)syscall.O_NOFOLLOW), 0));
+internal static (ж<File>, error) openDirAt(sysfdType dirfd, @string name) {
+    var (fd, err) = rootOpenDir(dirfd, name);
     if (err != default!) {
         return (default!, err);
     }
-
-    if (!supportsCloseOnExec) {
-        syscall.CloseOnExec(r);
-    }
-
-    // We use kindNoPoll because we know that this is a directory.
-    return (newFile(r, name, kindNoPoll, false), default!);
+    return newDirFile(fd, name);
 }
 
 } // end os_package

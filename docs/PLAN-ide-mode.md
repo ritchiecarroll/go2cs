@@ -307,7 +307,7 @@ A hybrid, (b) or (c) fed by a richer table that marks statement starts, changes 
   5. The output directory always passed.
   6. VS Code Workspace Trust honoured.
 - **Exact version pin.** Each package version pins one tuple: converter build, `go.lib`, `go.gen` and `go.*` revision.
-  - The package writes `GoStdLibVersion` exactly. Today `-recurse=nuget` writes `1.24.13.*`, which floats to the newest NuGet revision; publishing a new go.* revision would silently change what yesterday's project runs.
+  - The package writes `GoStdLibVersion` exactly. Today `-recurse=nuget` writes the Go minor with a float (`1.26.*`), which takes the newest published release of that minor; publishing a new go.* revision would silently change what yesterday's project runs.
   - The converter hash goes into the stamp, and a mismatched converter is refused with a message naming both versions.
   - This needs a `go2cs -version` flag that prints the release tuple. None exists today; it is a small converter item.
 - **Converter delivery** (Q4): prebuilt RID-specific converter binaries, as a dotnet tool or inside the build package, shipping the AGPL text and a source link at the matching tag.

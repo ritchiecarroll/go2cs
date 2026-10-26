@@ -66,6 +66,12 @@ using static go.net.http.cgi_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -75,8 +81,8 @@ using static go.net.http.cgi_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSClPqigoKmgoKmgoKCpoKCgpSCppSCgpSmlIKmgoKmgsqCgpQADAiSlJSUpIKkgpSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
-[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKmgoKCgqaCgpSUgIKCgpS2gILIgoKUgILIgpSCgoLcgIK2lIKClJSCgpS4goKClMqClK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC", "", "", "180=NewWriter/1/1/3")]
-[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSUABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgqaClIKClICCtgANHICCpraAgpS2gqaigpSUgoKUpoKUgIK2goKUlIKAgsiCgILIgqaUkoKClJSCpoKCpu6ClIKCgqaCgoKUgIKkkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoCCgoKUgsiCgoKmgtyCgriUgoLutKSigpS4ooKCgoIAChYAChamgpSk2qY=", "221-224:1", "", "157=RequestURI/1/1/7;261=stderr/1/1/5")]
+[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKmgoKmkoCCtoKClJSAgoKClLaAgsiCgpSAgsiClIKCgtyAgraUgoKUlIKClLiCgoKUyoKUrsKCgpSClIKUyoKCgIKkAAsYgqaCpoKClIKUpoKUgpSCrsKClIKCgIKkgoI=", "", "", "186=NewWriter/1/1/3")]
+[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSUABs+goKUAAIUAAoCgoKAgoKCgoLIgqYACAbSgoKCpoKUgoKUgIK2AA0cgIKmtoCClLaCpqKClJSCgpSmgpSAgraCgpSUgoCCyIKAgsiCppSSgoKUlIKmgoKm7oKUgoKCpoKCgpSAgqSSpIKCgoKCgoKCgoKUgpSCgoKUgoKUgoKCgpSCgpSClIKClIKCgoKUtLaCgoKmgIKCgpSCyIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "159=RequestURI/1/1/7;263=stderr/1/1/5")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

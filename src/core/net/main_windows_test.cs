@@ -4,11 +4,13 @@
 namespace go;
 
 using poll = @internal.poll_package;
+using exec = go.os.exec_package;
+using syscall = syscall_package;
 using @internal;
+using go.os;
 using net.@internal;
 using socktest = net.@internal.socktest_package;
 using static go.net_package;
-using syscall = syscall_package;
 
 partial class net_internal_test_package {
 
@@ -46,6 +48,19 @@ internal static void forceCloseSockets() {
     foreach (var (s, _) in Ꮡsw.Sockets()) {
         poll.CloseFunc(s);
     }
+}
+
+internal static void addCmdInheritedHandle(ж<exec.Cmd> Ꮡcmd, uintptr fd) {
+    ref var cmd = ref Ꮡcmd.DerefOrNull();
+
+    // Inherited handles are not inherited by default in Windows.
+    // We need to set the handle inheritance flag explicitly.
+    // See https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa#parameters
+    // for more details.
+    if (cmd.SysProcAttr == nil) {
+        cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr(nil));
+    }
+    cmd.SysProcAttr.Value.AdditionalInheritedHandles = append((~cmd.SysProcAttr).AdditionalInheritedHandles, (syscallꓸHandle)fd);
 }
 
 } // end net_internal_test_package

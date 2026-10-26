@@ -4,12 +4,18 @@
 namespace go.hash;
 
 using encoding = encoding_package;
+using hash = hash_package;
+using testhash = @internal.testhash_package;
 using io = io_package;
 using testing = testing_package;
-using hash = hash_package;
+using @internal;
 using static go.hash.crc64_package;
 
 partial class crc64_internal_test_package {
+
+public static void TestCRC64Hash(ж<testing.T> Ꮡt) {
+    testhash.TestHash(Ꮡt, () => new crc64_internal_test_package.hash_Hash64ᴠHash(New(MakeTable(ISO))));
+}
 
 internal partial struct test {
     internal uint64 outISO;
@@ -194,7 +200,7 @@ internal static void bench(ж<testing.B> Ꮡb, uint64 poly, int64 size) {
 
     b.SetBytes(size);
     var data = new slice<byte>((nint)(size));
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
     var h = New(MakeTable(poly));
@@ -218,22 +224,22 @@ internal static readonly @string random16KBˢ = "Random16KB"u8;
 
 public static void BenchmarkCrc64(ж<testing.B> Ꮡb) {
     Ꮡb.Run(iso64kbˢ, (ж<testing.B> bΔ1) => {
-        bench(bΔ1, ISO, ((int64)64 << (int)(10)));
+        bench(bΔ1, ISO, (int64)64 << 10);
     });
     Ꮡb.Run(iso4kbˢ, (ж<testing.B> bΔ2) => {
-        bench(bΔ2, ISO, ((int64)4 << (int)(10)));
+        bench(bΔ2, ISO, (int64)4 << 10);
     });
     Ꮡb.Run(iso1kbˢ, (ж<testing.B> bΔ3) => {
-        bench(bΔ3, ISO, ((int64)1 << (int)(10)));
+        bench(bΔ3, ISO, (int64)1 << 10);
     });
     Ꮡb.Run(ecma64kbˢ, (ж<testing.B> bΔ4) => {
-        bench(bΔ4, ECMA, ((int64)64 << (int)(10)));
+        bench(bΔ4, ECMA, (int64)64 << 10);
     });
     Ꮡb.Run(random64KBˢ, (ж<testing.B> bΔ5) => {
-        bench(bΔ5, 0x777, ((int64)64 << (int)(10)));
+        bench(bΔ5, 0x777, (int64)64 << 10);
     });
     Ꮡb.Run(random16KBˢ, (ж<testing.B> bΔ6) => {
-        bench(bΔ6, 0x777, ((int64)16 << (int)(10)));
+        bench(bΔ6, 0x777, (int64)16 << 10);
     });
 }
 

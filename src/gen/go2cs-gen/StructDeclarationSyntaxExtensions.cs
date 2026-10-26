@@ -17,6 +17,39 @@ namespace go2cs;
 
 public static class StructDeclarationSyntaxExtensions
 {
+    /// <summary>
+    /// Whether an EMBEDDED field of <paramref name="type"/> promotes members: a converted Go type, or a pointer to
+    /// one. An embedded interface (its methods are providers, not promoted members) and an embedded predeclared
+    /// type (a C# primitive, golib's own <c>@string</c>, <c>uintptr</c>, <c>complex64</c>…, or the BCL's
+    /// <c>System.Numerics.Complex</c>, which is <c>complex128</c>) promote nothing and stay plain marked fields, as they
+    /// were before embeds were converter-declared.
+    /// </summary>
+    public static bool IsPromotingEmbedType(ITypeSymbol? type)
+    {
+        if (type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments: [var element] })
+            type = element;
+
+        // Any defined type the converter wrote (a struct, a defined numeric/slice/map wrapper, a defined func type's
+        // delegate) promotes its methods; only an interface and a predeclared type do not. complex128 is the one
+        // predeclared type that is neither a C# special type nor golib's: taken for a converted struct, an embedded
+        // complex128 was built as `new System.Numerics.Complex(nil)` (CS7036, text/template/parse's numberTest).
+        return type is INamedTypeSymbol { TypeKind: not (TypeKind.Interface or TypeKind.Error or TypeKind.TypeParameter), SpecialType: SpecialType.None } named &&
+               named.ContainingAssembly?.Name != "golib" &&
+               !IsPredeclaredComplex128(named);
+    }
+
+    // System.Numerics.Complex, the type go2cs maps Go's predeclared complex128 to (golib's `complex128` alias).
+    private static bool IsPredeclaredComplex128(INamedTypeSymbol type) =>
+        type is { Name: "Complex", ContainingNamespace: { Name: "Numerics", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } };
+
+    /// <summary>
+    /// Whether <paramref name="member"/> is a converter-declared promoting embed FIELD (not the legacy
+    /// <c>partial ref</c> property), the one form whose storage and accessor the generator must not declare.
+    /// </summary>
+    public static bool IsDeclaredEmbedField(this StructDeclarationSyntax structDeclaration, string memberName) =>
+        structDeclaration.Members.OfType<FieldDeclarationSyntax>().Any(declared =>
+            MemberMarkers.HasEmbed(declared) && declared.Declaration.Variables.Any(variable => variable.Identifier.Text == memberName));
+
     public static List<(string typeName, string fieldName, bool isReferenceType)> GetStructFields(
         this StructDeclarationSyntax structDeclaration, 
         GeneratorExecutionContext context)
@@ -114,8 +147,13 @@ public static class StructDeclarationSyntaxExtensions
                         bool isReferenceType = IsReferenceTypeOrUnconstrainedGeneric(typeSymbol);
                         bool isPublic = IsMemberTypePublic(typeSymbol);
 
+                        // A converter-declared EMBED (`/*embed*/ public T T;`, `/*embed*/ public ж<T> T;`) reports as
+                        // the promoted struct a `partial ref` embed property reports as: the field IS its storage
+                        // and its accessor, so the generator promotes through it and declares neither.
+                        bool isEmbed = MemberMarkers.HasEmbed(fieldDeclaration) && IsPromotingEmbedType(typeSymbol);
+
                         foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
-                            members.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType, false, isPublic));
+                            members.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType, isEmbed, isPublic));
 
                         break;
                     }
@@ -479,7 +517,9 @@ public static class StructDeclarationSyntaxExtensions
                 // parses as the base-access keyword (CS1519/CS1001/CS1002 in the generated forwarder).
                 Common.EscapeCsKeyword(member.Name),
                 IsReferenceTypeOrUnconstrainedGeneric(memberType),
-                member is IPropertySymbol,
+                // An embed: the legacy `partial ref` property, or a converter-declared embed FIELD, which metadata
+                // knows by the [GoMemberRecord] this generator wrote on its type (MemberMarkers.IsGoEmbedded).
+                member is IPropertySymbol || member is IFieldSymbol embedField && MemberMarkers.IsGoEmbedded(embedField) && IsPromotingEmbedType(embedField.Type),
                 IsMemberTypePublic(memberType)));
         }
 
@@ -542,7 +582,7 @@ public static class StructDeclarationSyntaxExtensions
         this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
-        string boxType = $"{PointerPrefix}<{structDeclaration.Identifier.Text}>";
+        string boxType = WithoutWhitespace($"{PointerPrefix}<{DeclaredTypeText(structDeclaration)}>");
 
         return compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
@@ -557,10 +597,21 @@ public static class StructDeclarationSyntaxExtensions
 
                 return firstParam is not null &&
                        firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
-                       (firstParam.Type?.ToString() ?? "") == boxType;
+                       WithoutWhitespace(firstParam.Type?.ToString() ?? "") == boxType;
             })
             .Select(method => method.GetMethodInfo(compilation));
     }
+
+    // A struct's type as its own methods spell it in a receiver: the name with its type PARAMETERS
+    // (`canonMap<T>`). The box receivers above were matched against the bare name (`ж<canonMap>`),
+    // which no GENERIC struct's method ever spells, so Go 1.26 unique's `*canonMap[T]` promoted none of
+    // its box-receiver methods (Load, LoadOrStore) into uniqueMap[T] -- CS1929 at unique/handle.cs:49,52.
+    private static string DeclaredTypeText(StructDeclarationSyntax structDeclaration) =>
+        structDeclaration.Identifier.Text + (structDeclaration.TypeParameterList?.ToString() ?? "");
+
+    // Type text compared with its whitespace removed, so `Map<K,V>` and `Map<K, V>` are one spelling.
+    private static string WithoutWhitespace(string typeText) =>
+        string.Concat(typeText.Where(character => !char.IsWhiteSpace(character)));
 
     /// <summary>
     /// Gets the embedded-POINTER hop properties on the struct — the `public partial ref
@@ -571,20 +622,50 @@ public static class StructDeclarationSyntaxExtensions
     /// forward through the hop the same way. The embedded type name lets the caller split the
     /// hop receiver per method: direct-ж primaries bind the box field itself (`this.F.M()`).
     /// </summary>
-    public static List<(string Name, string TypeName)> GetEmbeddedPointerHopNames(this StructDeclarationSyntax structDeclaration)
+    public static List<(string Name, string TypeName)> GetEmbeddedPointerHopNames(this StructDeclarationSyntax structDeclaration, Compilation compilation)
     {
         List<(string, string)> hops = [];
 
-        foreach (PropertyDeclarationSyntax property in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
+        foreach ((string name, TypeSyntax type) in structDeclaration.EmbedDeclarations(compilation))
         {
-            TypeSyntax type = property.Type is RefTypeSyntax refType ? refType.Type : property.Type;
             string typeText = type.ToString();
 
-            if (typeText.StartsWith("ж<") && typeText.EndsWith(">") && property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
-                hops.Add((property.Identifier.Text, typeText.Substring(2, typeText.Length - 3)));
+            if (typeText.StartsWith("ж<") && typeText.EndsWith(">"))
+                hops.Add((name, typeText.Substring(2, typeText.Length - 3)));
         }
 
         return hops;
+    }
+
+    /// <summary>
+    /// The struct's PROMOTING embeds as declared, in either form: a legacy <c>partial ref</c> embed property, or a
+    /// converter-declared <c>/*embed*/</c> field whose type promotes (<see cref="IsPromotingEmbedType"/>; the same
+    /// mark on an interface or predeclared embed promotes nothing and is not one). The field's type is read from
+    /// <paramref name="compilation"/>, which must be the compilation that owns the declaration's syntax tree.
+    /// </summary>
+    public static IEnumerable<(string Name, TypeSyntax Type)> EmbedDeclarations(this StructDeclarationSyntax structDeclaration, Compilation compilation)
+    {
+        SemanticModel? semanticModel = null;
+
+        foreach (MemberDeclarationSyntax member in structDeclaration.Members)
+        {
+            switch (member)
+            {
+                case PropertyDeclarationSyntax property when property.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)):
+                    yield return (property.Identifier.Text, property.Type is RefTypeSyntax refType ? refType.Type : property.Type);
+                    break;
+                case FieldDeclarationSyntax field when MemberMarkers.HasEmbed(field):
+                    semanticModel ??= compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+
+                    if (!IsPromotingEmbedType(semanticModel.GetTypeInfo(field.Declaration.Type).Type))
+                        break;
+
+                    foreach (VariableDeclaratorSyntax variable in field.Declaration.Variables)
+                        yield return (variable.Identifier.Text, field.Declaration.Type);
+
+                    break;
+            }
+        }
     }
 
     /// <summary>
@@ -594,16 +675,15 @@ public static class StructDeclarationSyntaxExtensions
     /// heap-boxes the field and emits a public static ref accessor (<c>Ꮡ{Embed}</c>), so a
     /// pointer-interface adapter can project the receiver box onto the embedded field's box.
     /// </summary>
-    public static List<(string Name, string TypeName)> GetEmbeddedValueHopNames(this StructDeclarationSyntax structDeclaration)
+    public static List<(string Name, string TypeName)> GetEmbeddedValueHopNames(this StructDeclarationSyntax structDeclaration, Compilation compilation)
     {
         List<(string, string)> hops = [];
 
-        foreach (PropertyDeclarationSyntax property in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
+        foreach ((string name, TypeSyntax type) in structDeclaration.EmbedDeclarations(compilation))
         {
-            TypeSyntax type = property.Type is RefTypeSyntax refType ? refType.Type : property.Type;
             string typeText = type.ToString();
 
-            if (typeText.StartsWith("ж<") || typeText.Contains('<') || !property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+            if (typeText.StartsWith("ж<") || typeText.Contains('<'))
                 continue;
 
             string simpleTypeName = typeText;
@@ -612,8 +692,8 @@ public static class StructDeclarationSyntaxExtensions
             if (lastDot >= 0)
                 simpleTypeName = simpleTypeName.Substring(lastDot + 1);
 
-            if (simpleTypeName == property.Identifier.Text || ShadowVarMarker + simpleTypeName == property.Identifier.Text)
-                hops.Add((property.Identifier.Text, typeText));
+            if (simpleTypeName == name || ShadowVarMarker + simpleTypeName == name)
+                hops.Add((name, typeText));
         }
 
         return hops;
@@ -644,7 +724,7 @@ public static class StructDeclarationSyntaxExtensions
         this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
-        return GetBoxReceiverMethodNames(structDeclaration.Identifier.Text, compilation);
+        return GetBoxReceiverMethodNames(DeclaredTypeText(structDeclaration), compilation);
     }
 
     /// <summary>
@@ -657,7 +737,7 @@ public static class StructDeclarationSyntaxExtensions
     /// </summary>
     public static HashSet<string> GetBoxReceiverMethodNames(string typeName, Compilation compilation)
     {
-        string boxType = $"ж<{typeName}>";
+        string boxType = WithoutWhitespace($"ж<{typeName}>");
 
         return new HashSet<string>(compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
@@ -672,7 +752,7 @@ public static class StructDeclarationSyntaxExtensions
 
                 return firstParam is not null &&
                        firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
-                       (firstParam.Type?.ToString() ?? "") == boxType;
+                       WithoutWhitespace(firstParam.Type?.ToString() ?? "") == boxType;
             })
             .Select(method => method.Identifier.Text), StringComparer.Ordinal);
     }

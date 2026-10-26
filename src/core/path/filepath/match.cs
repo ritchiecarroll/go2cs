@@ -31,12 +31,14 @@ public static error ErrBadPattern = errors.New("syntax error in pattern"u8);
 //		'[' [ '^' ] { character-range } ']'
 //		            character class (must be non-empty)
 //		c           matches character c (c != '*', '?', '\\', '[')
-//		'\\' c      matches character c
+//		'\\' c      matches character c (except on Windows)
 //
 //	character-range:
 //		c           matches character c (c != '\\', '-', ']')
-//		'\\' c      matches character c
+//		'\\' c      matches character c (except on Windows)
 //		lo '-' hi   matches character c for lo <= c <= hi
+//
+// Path segments in the pattern must be separated by [Separator].
 //
 // Match requires pattern to match all of name, not just a substring.
 // The only possible returned error is [ErrBadPattern], when pattern
@@ -52,7 +54,7 @@ Pattern:
         (star, chunk, pattern) = scanChunk(pattern);
         if (star && chunk == ""u8) {
             // Trailing * matches rest of string unless it has a /.
-            return (!strings.Contains(name, ((@string)(rune)Separator)), default!);
+            return (!strings.Contains(name, (@string)(rune)Separator), default!);
         }
         // Look for match at current position.
         var (t, ok, errΔ1) = matchChunk(chunk, name);
@@ -101,16 +103,12 @@ internal static (bool star, @string chunk, @string rest) scanChunk(@string patte
         star = true;
     }
     var inrange = false;
-    nint i = default!;
-Scan:
-    for (i = 0; i < len(pattern); i++) {
+    for (nint i = 0; i < len(pattern); i++) {
         switch (pattern[i]) {
         case (rune)'\\': {
-            if (runtime.GOOS != "windows"u8) {
-                // error check handled in matchChunk: bad pattern.
-                if (i + 1 < len(pattern)) {
-                    i++;
-                }
+            // error check handled in matchChunk: bad pattern.
+            if (runtime.GOOS != "windows"u8 && i + 1 < len(pattern)) {
+                i++;
             }
             break;
         }
@@ -124,14 +122,12 @@ Scan:
         }
         case (rune)'*': {
             if (!inrange) {
-                goto break_Scan;
+                return (star, pattern.slice(0, i), pattern.slice(i));
             }
             break;
         }}
-continue_Scan:;
     }
-break_Scan:;
-    return (star, pattern.slice(0, i), pattern.slice(i));
+    return (star, pattern, "");
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -145,9 +141,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
     // checking that the pattern is well-formed but no longer reading s.
     var failed = false;
     while (len(chunk) > 0) {
-        if (!failed && len(s) == 0) {
-            failed = true;
-        }
+        failed = failed || len(s) == 0;
         var exprᴛ1 = chunk[0];
         var matchᴛ1 = false;
         if (exprᴛ1 is (rune)'[') { matchᴛ1 = true;
@@ -188,20 +182,14 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                         }
                     }
                 }
-                if (loΔ1 <= r && r <= hiΔ1) {
-                    match = true;
-                }
+                match = match || loΔ1 <= r && r <= hiΔ1;
                 nrange++;
             }
-            if (match == negated) {
-                failed = true;
-            }
+            failed = failed || match == negated;
         }
         else if (exprᴛ1 is (rune)'?') { matchᴛ1 = true;
             if (!failed) {
-                if (s[0] == Separator) {
-                    failed = true;
-                }
+                failed = s[0] == Separator;
                 var (_, n) = utf8.DecodeRuneInString(s);
                 s = s.slice(n);
             }
@@ -218,9 +206,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
         }
         if (fallthrough || !matchᴛ1) { /* default: */
             if (!failed) {
-                if (chunk[0] != s[0]) {
-                    failed = true;
-                }
+                failed = chunk[0] != s[0];
                 s = s[1..];
             }
             chunk = chunk[1..];

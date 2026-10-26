@@ -42,14 +42,14 @@ internal static js j2 => 2;
 internal static js j3 => 3;
 internal static js numJS => 4;
 
-internal static slice<array<js>> jsTable = GoReflect.WithElemDims(new golib.SparseArray<array<js>>{
+[GoLazy] partial class lazyᴛjsTable { internal static slice<array<js>> jsTable = GoReflect.WithElemDims(new golib.SparseArray<array<js>>{
     [(int)j0] = new golib.SparseArray<js>{[(int)j1] = j2, [(int)j3] = j1}.array(4),
     [(int)j2] = new golib.SparseArray<js>{[(int)j0] = j3, [(int)j3] = j2}.array(4)
-}.slice(), 4);
+}.slice(), 4); }
 
 internal static slice<slice<@string>> sparseRows = new slice<@string>[]{
-    new golib.SparseArray<@string>{[2] = "two"u8, [0] = "zero"u8}.slice(),
-    new golib.SparseArray<@string>{[1] = "one"u8}.slice()
+    new golib.SparseArray<@string>{[2] = "two", [0] = "zero"}.slice(),
+    new golib.SparseArray<@string>{[1] = "one"}.slice()
 }.slice();
 
 internal static void Main() {

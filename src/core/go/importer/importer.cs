@@ -87,6 +87,8 @@ public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string comp
 //
 // Deprecated: Use [ForCompiler], which populates a FileSet
 // with the positions of objects created by the importer.
+//
+//go:fix inline
 public static types.Importer For(@string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
     return ForCompiler(token.NewFileSet(), compiler, lookup);
 }

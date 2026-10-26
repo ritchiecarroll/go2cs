@@ -6,10 +6,12 @@ namespace go.go;
 using fmt = fmt_package;
 using rand = math.rand_package;
 using slices = slices_package;
+using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using io = io_package;
 using math;
 using static global::go.go.token_package;
 
@@ -215,7 +217,7 @@ public static void TestFileSetPastEnd(ж<testing.T> Ꮡt) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
     {
-        var f = fset.File(((global::go.go.token_package.ΔPos)fset.Base())); if (f != nil) {
+        var f = fset.File((global::go.go.token_package.ΔPos)fset.Base()); if (f != nil) {
             Ꮡt.Errorf("got %v, want nil"u8, f.OrTypedNil());
         }
     }
@@ -229,7 +231,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> Ꮡt) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
     foreach (var (@file, pos) in offsets) {
-        var f = fset.File(((global::go.go.token_package.ΔPos)pos));
+        var f = fset.File((global::go.go.token_package.ΔPos)pos);
         if (f.Name() != @file) {
             Ꮡt.Errorf("got %q at position %d, want %q"u8, f.Name(), pos, @file);
         }
@@ -253,7 +255,7 @@ public static partial void TestFileSetRace(ж<testing.T> Ꮡt) {
         var rʗ1 = rΔ1;
         goǃ(() => {
             for (nint iΔ1 = 0; iΔ1 < 1000; iΔ1++) {
-                fsetʗ1.Position(((global::go.go.token_package.ΔPos)(nint)rʗ1.Int31n(max)));
+                fsetʗ1.Position((global::go.go.token_package.ΔPos)(nint)rʗ1.Int31n(max));
             }
             Ꮡstop.Done();
         });
@@ -562,16 +564,16 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // out-of-bounds positions must not lead to a panic when calling f.Offset
         {
             nint got = f.Offset(NoPos); if (got != 0) {
-                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(0));
+                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)0);
             }
         }
         {
-            nint got = f.Offset(((global::go.go.token_package.ΔPos)(-1))); if (got != 0) {
-                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(0));
+            nint got = f.Offset((global::go.go.token_package.ΔPos)(-1)); if (got != 0) {
+                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)0);
             }
         }
         {
-            nint got = f.Offset(((global::go.go.token_package.ΔPos)(@base + (nint)fsize + 1))); if (got != fsize) {
+            nint got = f.Offset((global::go.go.token_package.ΔPos)(@base + (nint)fsize + 1)); if (got != fsize) {
                 Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(fsize));
             }
         }
@@ -591,13 +593,13 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // out-of-bounds Pos values must not lead to a panic when calling f.Position
         @string want = fmt.Sprintf("%s:1:1"u8, f.Name());
         {
-            @string got = f.Position(((global::go.go.token_package.ΔPos)(-1))).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.ΔPos)(-1)).String(); if (got != want) {
                 Ꮡt.Errorf("position = %s, want %s"u8, got, want);
             }
         }
         want = fmt.Sprintf("%s:1:%d"u8, f.Name(), (nint)(fsize + 1));
         {
-            @string got = f.Position(((global::go.go.token_package.ΔPos)(fsize + 1))).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.ΔPos)(fsize + 1)).String(); if (got != want) {
                 Ꮡt.Errorf("position = %s, want %s"u8, got, want);
             }
         }
@@ -605,7 +607,7 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // check invariants
         UntypedInt xsize = /* fsize + 5 */ 10;
         for (nint offset = -xsize; offset < xsize; offset++) {
-            nint want1 = f.Offset(((global::go.go.token_package.ΔPos)((~f).@base + offset)));
+            nint want1 = f.Offset((global::go.go.token_package.ΔPos)((~f).@base + offset));
             {
                 nint got = f.Offset(f.Pos(offset)); if (got != want1) {
                     Ꮡt.Errorf("offset = %d, want %d"u8, got, want1);
@@ -622,6 +624,147 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string afterAddFileAbˢ = "after AddFile [AB]"u8;
+internal static readonly @string a14B510ˢ = "{A:1-4 B:5-10}"u8;
+internal static readonly @string afterAddExistingFilesˢ = "after AddExistingFiles []"u8;
+internal static readonly @string afterAddExistingFilesˢ2 = "after AddExistingFiles [CADC]"u8;
+internal static readonly @string a14B510C100105D200205ˢ = "{A:1-4 B:5-10 C:100-105 D:200-205}"u8;
+internal static readonly @string afterAddFileEˢ = "after AddFile [E]"u8;
+internal static readonly @string a14B510C100105D200205Eˢ = "{A:1-4 B:5-10 C:100-105 D:200-205 E:206-209}"u8;
+
+public static partial void TestFileSet_AddExistingFiles(ж<testing.T> Ꮡt) {
+    var fset = NewFileSet();
+
+    var fsetʗ1 = fset;
+    void check(@string descr, @string want) {
+        Ꮡt.Helper();
+        {
+            @string got = fsetString(fsetʗ1); if (got != want) {
+                Ꮡt.Errorf("%s: got %s, want %s"u8, descr, got, want);
+            }
+        }
+    }
+
+    var fileA = fset.AddFile("A"u8, -1, 3);
+    var fileB = fset.AddFile("B"u8, -1, 5);
+    _ = fileB;
+    check(afterAddFileAbˢ, a14B510ˢ);
+
+    fset.AddExistingFiles(); // noop
+    check(afterAddExistingFilesˢ, a14B510ˢ);
+
+    var fileC = NewFileSet().AddFile("C"u8, 100, 5);
+    var fileD = NewFileSet().AddFile("D"u8, 200, 5);
+    fset.AddExistingFiles(fileC, fileA, fileD, fileC);
+    check(afterAddExistingFilesˢ2, a14B510C100105D200205ˢ);
+
+    var fileE = fset.AddFile("E"u8, -1, 3);
+    _ = fileE;
+    check(afterAddFileEˢ, a14B510C100105D200205Eˢ);
+}
+
+internal static @string fsetString(ж<global::go.go.token_package.FileSet> Ꮡfset) {
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    Ꮡbuf.WriteRune((rune)'{');
+    @string sep = ""u8;
+    Ꮡfset.Iterate((ж<global::go.go.token_package.ΔFile> f) => {
+        fmt.Fprintf(new token_test_package.strings_BuilderжWriter(Ꮡbuf), "%s%s:%d-%d"u8, sep, f.Name(), f.Base(), f.End());
+        sep = " "u8;
+        return true;
+    });
+    Ꮡbuf.WriteRune((rune)'}');
+    return buf.String();
+}
+
+// Test that File() does not return the already removed file, while used concurrently.
+public static partial void TestRemoveFileRace(ж<testing.T> Ꮡt) {
+    var fset = NewFileSet();
+
+    // Create bunch of files.
+    slice<ж<global::go.go.token_package.ΔFile>> files = default!;
+    foreach (var i in range(20000)) {
+        var f = fset.AddFile("f"u8, -1, (i + 1) * 10);
+        files = append(files, f);
+    }
+
+    // governor goroutine
+    var (race1, race2) = (new channel<ж<global::go.go.token_package.ΔFile>>(0), new channel<ж<global::go.go.token_package.ΔFile>>(0));
+    var start = new channel<EmptyStruct>(0);
+    var filesʗ1 = files;
+    var race1ʗ1 = race1;
+    var race2ʗ1 = race2;
+    var startʗ1 = start;
+    goǃ(() => {
+        foreach (var (_, f) in filesʗ1) {
+            ᐸꟷ(startʗ1);
+            race1ʗ1.ᐸꟷ(f);
+            race2ʗ1.ᐸꟷ(f);
+        }
+        ᐸꟷ(startʗ1); // unlock main test goroutine
+        close(race1ʗ1);
+        close(race2ʗ1);
+    });
+
+    var fsetʗ1 = fset;
+    var race1ʗ2 = race1;
+    goǃ(() => {
+        foreach (var f in race1ʗ2) {
+            fsetʗ1.File(((global::go.go.token_package.ΔPos)f.Base()) + 5); // populates s.last with f
+        }
+    });
+
+    start.ᐸꟷ(new EmptyStruct());
+    foreach (var f in race2) {
+        fset.RemoveFile(f);
+        var got = fset.File(((global::go.go.token_package.ΔPos)f.Base()) + 5);
+        if (got != nil) {
+            Ꮡt.Fatalf("file was not removed correctly"u8);
+        }
+        start.ᐸꟷ(new EmptyStruct());
+    }
+}
+
+public static void TestRemovedFileFileReturnsNil(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<ж<global::go.go.token_package.ΔFile>>();
+
+    var fset = NewFileSet();
+
+    // Create bunch of files.
+    slice<ж<global::go.go.token_package.ΔFile>> files = default!;
+    foreach (var i in range(1000)) {
+        var f = fset.AddFile("f"u8, -1, (i + 1) * 100);
+        files = append(filesᴷ, files, f);
+    }
+
+    var filesʗ1 = files;
+    rand.Shuffle(len(files), (nint i, nint j) => {
+        (filesʗ1[i], filesʗ1[j]) = (filesʗ1[j], filesʗ1[i]);
+    });
+
+    foreach (var (_, f) in files) {
+        fset.RemoveFile(f);
+        {
+            var got = fset.File(((global::go.go.token_package.ΔPos)f.Base()) + 10); if (got != nil) {
+                Ꮡt.Fatalf("file was not removed correctly; got file with base: %v"u8, got.Base());
+            }
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string aGoˢ = "a.go"u8;
+
+public static void TestFile_End(ж<testing.T> Ꮡt) {
+    var f = NewFileSet().AddFile(aGoˢ, 100, 42);
+    @string got = fmt.Sprintf("%d, %d"u8, f.Base(), f.End());
+    {
+        @string want = "100, 142"u8; if (got != want) {
+            Ꮡt.Errorf("Base, End = %s, want %s"u8, got, want);
+        }
+    }
 }
 
 } // end token_internal_test_package

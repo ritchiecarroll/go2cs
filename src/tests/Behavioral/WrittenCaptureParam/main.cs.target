@@ -39,7 +39,7 @@ internal static @string /*result*/ declDeferObserver(fmt.Stringer xʗp, fmt.Stri
         (x, y) = (y, x);
         (x, var n) = swap(x);
         _ = n;
-        result = ""u8;
+        result = "";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -50,7 +50,7 @@ internal static @string declClosureWrite(fmt.Stringer sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
     void set() {
-        Ꮡs.ValueSlot = new label(name: "closure-set"u8);
+        Ꮡs.ValueSlot = new label(name: "closure-set");
     }
     (s, var n) = swap(s);
     set();
@@ -87,32 +87,25 @@ internal static (nint, nint) declSliceRedeclare(slice<nint> vʗp) {
 }
 
 internal static (slice<nint>, nint) grow(slice<nint> v) {
-    return (append(v.slice(0, len(v), len(v)), (nint)(99)), 1);
+    return (append(v.slice(0, len(v), len(v)), (nint)99), 1);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object declRedeclareˢ = (@string)"declRedeclare:"u8;
-private static readonly object declDeferObserverˢ = (@string)"declDeferObserver:"u8;
-private static readonly object declClosureWriteˢ = (@string)"declClosureWrite:"u8;
-private static readonly object litRedeclareˢ = (@string)"litRedeclare:"u8;
-private static readonly object declSliceRedeclareˢ = (@string)"declSliceRedeclare:"u8;
-
 internal static void Main() {
-    var a = new label(name: "alpha"u8);
-    var b = new label(name: "beta"u8);
+    var a = new label(name: "alpha");
+    var b = new label(name: "beta");
 
     var (before, after) = declRedeclare(a);
-    fmt.Println(declRedeclareˢ, before, after);
+    fmt.Println("declRedeclare:", before, after);
 
-    fmt.Println(declDeferObserverˢ, declDeferObserver(a, b));
+    fmt.Println("declDeferObserver:", declDeferObserver(a, b));
 
-    fmt.Println(declClosureWriteˢ, declClosureWrite(b));
+    fmt.Println("declClosureWrite:", declClosureWrite(b));
 
     (before, after) = litRedeclare(a);
-    fmt.Println(litRedeclareˢ, before, after);
+    fmt.Println("litRedeclare:", before, after);
 
     var (x, y) = declSliceRedeclare(new nint[]{1, 2, 3}.slice());
-    fmt.Println(declSliceRedeclareˢ, x, y);
+    fmt.Println("declSliceRedeclare:", x, y);
 }
 
 } // end main_package

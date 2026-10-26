@@ -6,6 +6,8 @@ namespace go.embed.@internal;
 using embed = embed_package;
 using os = os_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.embed.@internal.embedtest_internal_test_package;
 
 partial class embedtest_test_package {
@@ -48,7 +50,7 @@ internal static void testFiles(ж<testing.T> Ꮡt, embed.FS f, @string name, @st
     }
 }
 
-internal static void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
+internal static partial void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
     Ꮡt.Helper();
     if (s != data) {
         Ꮡt.Errorf("%v = %q, want %q"u8, name, s, data);
@@ -72,18 +74,18 @@ internal static readonly @string bbigˢ = "bbig"u8;
 public static void TestXGlobal(ж<testing.T> Ꮡt) {
     testFiles(Ꮡt, global, testdataHelloTxtˢ, helloWorldˢ);
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
     testString(Ꮡt, concurrency2, concurrency2ˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass2), glass2ˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass2, glass2ˢ, iCanEatGlassAndItDoesnTˢ);
 
     var (big, err) = os.ReadFile(testdataAsciiTxtˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    testString(Ꮡt, sbig, sbigˢ, ((@string)big));
-    testString(Ꮡt, sbig2, sbig2ˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig), bbigˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig2), bbigˢ, ((@string)big));
+    testString(Ꮡt, sbig, sbigˢ, (@string)big);
+    testString(Ꮡt, sbig2, sbig2ˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig, bbigˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig2, bbigˢ, (@string)big);
 
     if (Ꮡt.Failed()) {
         return;

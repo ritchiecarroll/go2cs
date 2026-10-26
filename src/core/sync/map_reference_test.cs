@@ -167,11 +167,12 @@ public static bool /*deleted*/ CompareAndDelete(this ж<RWMutexMap> Ꮡm, any ke
 
 public static void Range(this ж<RWMutexMap> Ꮡm, Func<any, any, bool> f) {
     ref var m = ref Ꮡm.DerefOrNull();
+    var keysᴷ = new stackAppend<any>();
 
     Ꮡm.of(RWMutexMap.Ꮡmu).RLock();
     var keys = new slice<any>(0, len(m.dirty));
     foreach (var (k, _) in m.dirty) {
-        keys = append(keys, k);
+        keys = append(keysᴷ, keys, k);
     }
     Ꮡm.of(RWMutexMap.Ꮡmu).RUnlock();
 
@@ -377,7 +378,7 @@ public static void Clear(this ж<DeepCopyMap> Ꮡm) {
         m.mu.Lock();
         ᒐd1 = true;
 
-        Ꮡm.of(DeepCopyMap.Ꮡclean).Store(((map<any, any>)default!));
+        Ꮡm.of(DeepCopyMap.Ꮡclean).Store((map<any, any>)default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }

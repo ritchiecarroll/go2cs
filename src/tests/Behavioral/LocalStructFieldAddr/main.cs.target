@@ -51,7 +51,7 @@ partial struct Embed {
 }
 
 partial struct Outer {
-    public partial ref Embed Embed { get; }
+    /*embed*/ public Embed Embed;
     internal nint other;
 }
 

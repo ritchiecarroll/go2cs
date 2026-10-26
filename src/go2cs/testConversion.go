@@ -683,6 +683,10 @@ type testManifest struct {
 	// sandbox construction. `omitempty` keeps every package that has none byte-identical to what a
 	// converter without this capability wrote.
 	FixtureLinks            []string          `json:"fixtureLinks,omitempty"`
+	// The //go:embed payloads the convert hashed into InputDigest (testEmbedPayloads), so validation in a
+	// process that does not convert hashes the same paths. `omitempty`: a package with none writes the
+	// manifest a converter without this field wrote.
+	EmbedPayloads           []string          `json:"embedPayloads,omitempty"`
 	Tests                   []testDeclaration `json:"tests"`
 	TestMain                *testDeclaration  `json:"testMain,omitempty"`
 	Dependencies            []string          `json:"dependencies"`
@@ -717,9 +721,10 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	siblingTestFuncMethodNames = nil
 
 	// Likewise for the addressed-global seed: each variant's universe already CONTAINS the
-	// `_test.go` files, so its own collectAddressedGlobals sees `&g` directly. The seed exists only
-	// for the production pass, which cannot.
+	// `_test.go` files, so its own collectAddressedGlobals sees `&g` (and `g.inc` as a value)
+	// directly. The seed exists only for the production pass, which cannot.
 	siblingTestAddressedGlobalNames = nil
+	siblingTestMethodValues = nil
 
 	// And likewise for the publicization seed: the in-package variant's own scope holds the
 	// production declaration AND the test file's exported consumer together, so its
@@ -963,7 +968,15 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		return err
 	}
 
-	if err := writeTestHost(outputPath, projectNamespace, production.PkgPath, declarations, testMain, fixtures, fixtureDirectories, fixtureLinks, packageModulePath(production), defaultGodebug); err != nil {
+	// The test binary's dep lines (buildInfoStamp.go testBinaryDependencies): a main package's own, outside the
+	// standard library only.
+	modulePath := packageModulePath(production)
+	var moduleDependencies []string
+	if modulePath != "" {
+		moduleDependencies = testBinaryDependencies(production, modulePath, goSumHashes(moduleRootDir(inputPath)))
+	}
+
+	if err := writeTestHost(outputPath, projectNamespace, production.PkgPath, declarations, testMain, fixtures, fixtureDirectories, fixtureLinks, modulePath, moduleDependencies, defaultGodebug); err != nil {
 		return err
 	}
 
@@ -1038,8 +1051,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		UnsupportedCapabilities: unsupportedList,
 	}
 
-	manifest.InputDigest, err = testInputDigest(inputPath, outputPath, options, manifest.ConverterRevision)
-	if err != nil {
+	if err = stampTestManifestDigest(&manifest, inputPath, outputPath, options); err != nil {
 		return err
 	}
 
@@ -1669,8 +1681,9 @@ func referenceModelTestPackageInfoSeed(projectNamespace, testClassName, goPackag
 
 // packageProductionInitHookMethod names the production-init forcing hook productionInitForcingHook
 // emits. Deliberately NOT in the shared symbol table beside PackageTestInitHookMethod: that table
-// carries the names BOTH sides need, and `initᴛᴛtests` is there because go2cs-gen's
-// PartialStubGenerator must recognize it and never stub it. This hook is emitted whole, with a
+// carries the names BOTH sides need, and `initᴛᴛtests` went there when it was a partial go2cs-gen's
+// PartialStubGenerator had to recognize and never stub (since H7 ruling F it is emitted whole, as a
+// module initializer, like this one). This hook is emitted whole, with a
 // body, so no generator ever sees an unimplemented partial to stub and no C# projection of the
 // name is owed. The doubled temp marker keeps it clear of the relocated-package-var method space
 // ("init" + marker + <var name>, initOrderOperations.go), and the `production` word keeps it clear
@@ -1805,7 +1818,9 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 
 func findProductionPackage(pkgs []*packages.Package, inputPath string) *packages.Package {
 	for _, pkg := range pkgs {
-		if pkg.Name == "main" || strings.Contains(pkg.ID, "[") {
+		// The synthetic test main (`<pkg>.test`, package main) and the test variants (`<pkg> [<pkg>.test]`) are not the
+		// production package. A MAIN package under test is: its ID is its bare import path.
+		if strings.Contains(pkg.ID, "[") || (pkg.Name == "main" && strings.HasSuffix(pkg.ID, ".test")) {
 			continue
 		}
 
@@ -2826,9 +2841,21 @@ type productionSeed struct {
 // processConversion (the per-file visitors share package-level state claimed at visit time; the
 // branch's concurrent goroutines reproduced exactly the nondeterminism master removed).
 func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPath, projectNamespace string, seed productionSeed, options Options) ([]string, hashset.HashSet[string], error) {
+	// A test file's instantiation is refused as a production one is (constraintProxyForwarding.go).
+	if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
+	if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	resetPackageState(pkg)
 	packageNamespace = projectNamespace
 	currentPackageGorootVendored = isGorootVendoredDir(pkg.Dir, options.goRoot)
+	packageHoistsLiterals = literalsHoistedFor(pkg.Dir, options)
 
 	// The lifted type names the production conversion already claimed (see
 	// productionLiftedTypeNames). Non-nil for the INTERNAL variant only — its test files emit into
@@ -2889,7 +2916,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	if productionName != "" {
 		productionInfoPath := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
-		loadPackageImplements(productionInfoPath, productionName)
+		loadPackageImplements(productionInfoPath, productionName, strings.TrimSuffix(pkg.PkgPath, "_test"))
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
@@ -2980,6 +3007,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// protection production code does — see callerInliningAnalysis.go.
 	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo, fixedSkipClosureApplies(pkg.Dir, options.goRoot))
 
+	// Go's direct-call rule for recover, over the test files as well (recoverForms.go).
+	collectRecoverForms(allEntries, pkg.Types, pkg.TypesInfo)
+
 	collectCaptureModeMethods(pkg)
 	collectTypeSpecRHS(pkg)
 
@@ -3011,8 +3041,10 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// an empty result. Runs BEFORE escape analysis, which consults the reversion verdicts; the
 	// signature/call-site emission reads the lowered sets during the visits.
 	performRefLoweringAnalysis(prodEntries, pkg.Types, pkg.TypesInfo, options)
+	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform))
 
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
+	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
 	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
@@ -3116,8 +3148,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	// Emit the variant's ordered relocated-initializer file (no-op unless the convert loop
 	// recorded any relocation). The internal variant shares the production `<pkg>_package`
-	// class: when the production package_init.cs exists it owns the single static-ctor slot,
-	// so the test side implements its erasable partial hook instead of a second ctor. The
+	// class on the recompile model: when the production package_init.cs exists it owns the single
+	// static-ctor slot, so the test side runs its relocations from a module initializer that forces
+	// that ctor first, instead of declaring a second ctor. The
 	// `_test.cs` suffix keeps the file out of the production csproj's compile set (the IP-4
 	// test-artifact exclusion) — it compiles only into the test assembly.
 	if len(packageMovedInitMethods) > 0 {
@@ -3130,7 +3163,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 		initFileName := fmt.Sprintf("package_init_%s_test.cs", variantKind)
 		variantClassName := getSanitizedImport(pkg.Name + PackageSuffix)
-		implementHook := false
+		productionOwnsCtor := false
 
 		if options.testClassNameOverride != "" {
 			variantClassName = options.testClassNameOverride
@@ -3142,10 +3175,10 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// CS0111 on the constructor itself, once crypto/x509's platform folder started
 			// compiling into its test assembly at all.
 			_, statErr := os.Stat(platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), PackageInitFileName))
-			implementHook = statErr == nil
+			productionOwnsCtor = statErr == nil
 		}
 
-		if err := writeTestVariantInitFile(outputPath, initFileName, packageNamespace, variantClassName, implementHook); err != nil {
+		if err := writeTestVariantInitFile(outputPath, initFileName, packageNamespace, variantClassName, productionOwnsCtor); err != nil {
 			return nil, nil, err
 		}
 
@@ -3153,6 +3186,8 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resolveDynamicTypeMarkers(resolveNames)
+	resolveDynamicInterfaceBases(resolveNames)
+	replayDeferredConstraintRecords()
 
 	for relPath, codes := range resolveWarningFacts(warningFacts, collectPackageVarWrites(pkg.Syntax, pkg.TypesInfo), true) {
 		testWarningFacts[relPath] = codes
@@ -3229,7 +3264,7 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 type conversionRecordSet struct {
 	interfaceImplements map[string]hashset.HashSet[string]
 	promotedImplements  map[string]hashset.HashSet[string]
-	proxies             map[string][2]string
+	proxies             map[string][3]string
 	implicitConvs       map[string]hashset.HashSet[string]
 	invertedConvs       map[string]hashset.HashSet[string]
 	indirectConvs       map[string]hashset.HashSet[string]
@@ -3241,7 +3276,7 @@ func newConversionRecordSet() conversionRecordSet {
 	return conversionRecordSet{
 		interfaceImplements: make(map[string]hashset.HashSet[string]),
 		promotedImplements:  make(map[string]hashset.HashSet[string]),
-		proxies:             make(map[string][2]string),
+		proxies:             make(map[string][3]string),
 		implicitConvs:       make(map[string]hashset.HashSet[string]),
 		invertedConvs:       make(map[string]hashset.HashSet[string]),
 		indirectConvs:       make(map[string]hashset.HashSet[string]),
@@ -3327,6 +3362,17 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 			return true
 		}
 
+		// A1, the one Q25 case that is sized and ruled (COORD 2026-10-16): a production pointer
+		// implementer of an interface declared in the external test package itself. The adapter is a
+		// class in the test compilation, so nothing mutates the production type and the reference model
+		// can host it. crypto/mlkem at Go 1.26: *DecapsulationKey768 against mlkem_test's
+		// decapsulationKey[E]. MEASURED before the cut, two-seeded on the five rows that took the
+		// recompile fallback: crypto/ecdh (lifted _ᴛ1/_ᴛ2) and crypto/mlkem move to the reference model,
+		// ecdh with an identical verdict set; crypto/sha3, net/netip and text/tabwriter emit identically.
+		if isTestLocalInterfaceName(ifaceName) {
+			return true
+		}
+
 		inner = strings.TrimPrefix(inner, "global::")
 
 		if strings.HasPrefix(inner, productionClassName+".") ||
@@ -3347,6 +3393,14 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 	}
 
 	return false
+}
+
+// isTestLocalInterfaceName reports whether a record's interface is declared in the external test
+// package: its outer name (before any type-argument list) is bare. The universe's error is bare too
+// and is not the test package's.
+func isTestLocalInterfaceName(ifaceName string) bool {
+	outer, _, _ := strings.Cut(strings.TrimPrefix(ifaceName, "global::"), "<")
+	return outer != "" && outer != "error" && !strings.Contains(outer, ".")
 }
 
 // isTestAnchoredConversionRecord decides the anchor for an EXTERNAL variant GoImplicitConv
@@ -4010,6 +4064,25 @@ func supportedTestCapabilities() []string {
 		// NOWHERE (net/http and runtime/debug only name it inside expected-traceback strings), and
 		// of the modules only testify's suite_test.go does, 8 tests admitted there.
 		"testing.RunTests",
+		// Go 1.25's Attr and Output and Go 1.26's ArtifactDir, on T and on the TB interface. The host
+		// implements all three (core/testing/testing.cs on TestExecution's ReportAttr, Output and
+		// ArtifactDir; === ATTR and === ARTIFACTS print in Go's layout), and TB's members forward to
+		// them as every TB member does. B and F carry compile-only stubs and stay unlisted.
+		//
+		// ROSTER IMPACT, measured before widening with THIS file's own analysis
+		// (analyzeTestingCapabilities + requiredFor over `std` with tests, go1.26.10, GOOS windows and
+		// linux identical): the three are called ONLY in testing's own tests (direct sites: T.Output 5,
+		// T.ArtifactDir 6, T.Attr 2; no TB spelling anywhere). 8 declarations are admitted, all in
+		// testing_test: TestArtifactDir, TestArtifactDirConsistent, TestArtifactDirExample,
+		// TestArtifactDirLongTestNameExample, TestArtifactDirSubtestExample, TestAttrExample,
+		// TestAttrInvalid and TestPanicHelper. 4 more stay gated on testing's unexported internals
+		// (package testing's TestOutput, TestOutputAfterComplete, TestOutputWriteAfterComplete, TestTRun).
+		//
+		// Most of the 8 are re-exec HELPERS, which is why the omission read as a host defect: an
+		// unregistered helper makes its parent's child process print only "PASS", so TestAttrSet,
+		// TestPanic's ten cases and the four TestArtifactDir* parents failed on output that never
+		// reached the host at all.
+		"T.Attr", "T.Output", "T.ArtifactDir", "TB.Attr", "TB.Output", "TB.ArtifactDir",
 	}
 	sort.Strings(capabilities)
 	return capabilities
@@ -4385,7 +4458,7 @@ func (a testCapabilityAnalysis) requiredFor(fn *types.Func) hashset.HashSet[stri
 	return required
 }
 
-func writeTestHost(outputPath, namespace, importPath string, declarations []testDeclaration, testMain *testDeclaration, fixtures, fixtureDirectories, fixtureLinks []string, modulePath string, defaultGodebug string) error {
+func writeTestHost(outputPath, namespace, importPath string, declarations []testDeclaration, testMain *testDeclaration, fixtures, fixtureDirectories, fixtureLinks []string, modulePath string, moduleDependencies []string, defaultGodebug string) error {
 	var b strings.Builder
 	b.WriteString("// Code generated by go2cs test conversion. DO NOT EDIT.\r\n")
 
@@ -4432,7 +4505,16 @@ func writeTestHost(outputPath, namespace, importPath string, declarations []test
 		}
 	}
 
-	if modulePath != "" {
+	// After the module path, a module package's dependency lines (testBinaryDependencies), each field separated by a
+	// C# `\t` escape, since a raw tab cannot sit in a C# string literal. Omitted when there are none, so a module
+	// host with no dependencies keeps its shape.
+	if modulePath != "" && len(moduleDependencies) > 0 {
+		b.WriteString(fmt.Sprintf("        }, \"%s\", new string[]\r\n        {\r\n", escapeCSharp(modulePath)))
+		for _, dependency := range moduleDependencies {
+			b.WriteString(fmt.Sprintf("            \"%s\",\r\n", strings.ReplaceAll(escapeCSharp(dependency), "\t", `\t`)))
+		}
+		b.WriteString("        });\r\n")
+	} else if modulePath != "" {
 		b.WriteString(fmt.Sprintf("        }, \"%s\");\r\n", escapeCSharp(modulePath)))
 	} else {
 		b.WriteString("        });\r\n")
@@ -4505,6 +4587,14 @@ var testProjectFixedReferences = []string{
 	// that adds one. Test projects are graph leaves, so the added edge introduces no cycle (a
 	// `sync.tests -> context -> sync` path is three distinct projects, not a loop).
 	`$(go2csPath)core/context/context.csproj`,
+	// `io` joins for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer, so every adapter
+	// body names `go.io_package.Writer`. testing.csproj reaches io only transitively (through fmt), and
+	// DisableTransitiveProjectReferences keeps that from reaching a test project, so a suite whose own
+	// imports never name io failed as context did: net/netip's T->TB and B->TB adapters gave CS0012 on
+	// the assembly, CS0234 on the namespace and CS9334 on Output()'s return type. 15 of the 224 test
+	// projects carried an adapter and no io reference when this was measured; it is fixed for all of
+	// them for the reason context is.
+	`$(go2csPath)core/io/io.csproj`,
 }
 
 func writeTestProject(projectFile, projectName, namespace, importPath string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
@@ -5938,10 +6028,10 @@ func isSelfProjectReference(reference, projectName string) bool {
 // `Verify`, `VerifyOptions`' fields, `loadSystemRoots`, `domainToReverseLabels` and every error
 // type's `Error()` method — 187 errors that name the TEST files, not the missing folder.
 //
-// The per-GOOS `package_init.cs` belongs in the set for the same reason: a `-tests` run rewrites it
-// to declare the `initᴛᴛtests()` partial hook the internal variant's package_init_internal_test.cs
-// implements, and a declaration in one compilation with its implementation in another is no hook at
-// all. Only the TARGET platform's folder is taken; the others are a different build.
+// The per-GOOS `package_init.cs` belongs in the set for the same reason: it holds the production
+// class's static ctor, which the internal variant's package_init_internal_test.cs forces before its
+// own relocations run, and a ctor missing from the test compilation leaves production's relocated
+// vars unset. Only the TARGET platform's folder is taken; the others are a different build.
 func productionCSFiles(outputPath string, goos string) ([]string, error) {
 	result, err := productionCSFilesIn(outputPath, "")
 
@@ -6603,11 +6693,53 @@ func warnRuntimeHostMarkerLost(fileName string) {
 		"so the test manifests' stale check no longer covers it; restore the marker if it is still hand-owned", fileName)
 }
 
+// stampTestManifestDigest is the CONVERT side of the manifest's staleness record, the one place both manifest writers
+// set it: the //go:embed payloads this conversion resolved, and the input digest over them. validateTestManifest is the
+// other side and recomputes over the RECORDED payloads, since a build/run/compare process never converts.
+func stampTestManifestDigest(manifest *testManifest, inputPath, outputPath string, options Options) error {
+	manifest.EmbedPayloads = testEmbedPayloads(inputPath)
+
+	digest, err := testInputDigest(inputPath, outputPath, options, manifest.ConverterRevision, manifest.EmbedPayloads)
+	if err != nil {
+		return err
+	}
+
+	manifest.InputDigest = digest
+	return nil
+}
+
+// testEmbedPayloads is the package's //go:embed payloads as the conversion just resolved them, folded to the
+// input-relative, slash-separated form testInputDigest tags, sorted. A payload outside the input tree is left out,
+// as it always was. Read at CONVERT time only (the registry is empty in a process that did not convert); the
+// manifest carries the result to validation.
+func testEmbedPayloads(inputPath string) []string {
+	var payloads []string
+
+	for _, payload := range embedPayloadPaths(currentEmbedTargets()) {
+		if rel, err := filepath.Rel(inputPath, payload); err == nil && !strings.HasPrefix(rel, "..") {
+			payloads = append(payloads, filepath.ToSlash(rel))
+		}
+	}
+
+	sort.Strings(payloads)
+
+	return slices.Compact(payloads)
+}
+
 // testInputDigest fingerprints everything that determines a test conversion's outputs: the
 // package's Go sources and testdata (globbed FRESH — never from a recorded list, F7), hand-owned
 // *_impl.cs companions in the output, the output-affecting conversion options, the staged
 // runtime sources, the target platform, the Go toolchain, and the converter revision.
-func testInputDigest(inputPath, outputPath string, options Options, revision string) (string, error) {
+//
+// embedPayloads are the package's //go:embed payloads, input-relative (testEmbedPayloads). They are
+// a PARAMETER, never read from the embed registry here, because only a conversion fills that
+// registry: a `-test-action build|run|compare` process validates without converting, so the payloads
+// a convert hashed dropped out of the recomputed digest and every package embedding a file outside
+// testdata/ (crypto/internal/fips140test, internal/trace/traceviewer, embed, embed/internal/embedtest)
+// was refused as stale right after its own convert. The convert records the list in the manifest and
+// validation hashes the SAME paths' current bytes. The list is a function of the Go sources, which
+// the fixture walk below already digests, so a new or removed directive moves the digest either way.
+func testInputDigest(inputPath, outputPath string, options Options, revision string, embedPayloads []string) (string, error) {
 	hash := sha256.New()
 
 	fixtures, err := testFixturePaths(inputPath)
@@ -6632,13 +6764,11 @@ func testInputDigest(inputPath, outputPath string, options Options, revision str
 	// payload need not live under `testdata` at all — crypto/internal/fips140test embeds
 	// `acvp_capabilities.json` from the package root, and internal/trace/traceviewer embeds
 	// `static/`. Without them, editing an embedded file would leave a prior comparison looking
-	// valid while the emission still carried yesterday's bytes. Absolute paths are folded to the
-	// same input-relative form the fixtures use, and a payload that IS a fixture dedupes with it
-	// because both spell the identical tagged path.
-	for _, payload := range embedPayloadPaths(currentEmbedTargets()) {
-		if rel, err := filepath.Rel(inputPath, payload); err == nil && !strings.HasPrefix(rel, "..") {
-			inputs = append(inputs, "source:"+filepath.ToSlash(rel))
-		}
+	// valid while the emission still carried yesterday's bytes. They arrive input-relative, the form
+	// the fixtures use, so a payload that IS a fixture dedupes with it because both spell the
+	// identical tagged path.
+	for _, payload := range embedPayloads {
+		inputs = append(inputs, "source:"+payload)
 	}
 
 	// TEST-file companions (`*_impl_test.cs`) are conversion inputs exactly as the production
@@ -6711,11 +6841,9 @@ func writeNoTestsManifest(production *packages.Package, inputPath, outputPath st
 		Fixtures: []string{}, FixtureDirectories: []string{}, Tests: []testDeclaration{}, Dependencies: []string{}, Capabilities: supportedTestCapabilities(),
 		RequiredCapabilities: []string{}, UnsupportedCapabilities: []string{},
 	}
-	digest, err := testInputDigest(inputPath, outputPath, options, manifest.ConverterRevision)
-	if err != nil {
+	if err := stampTestManifestDigest(&manifest, inputPath, outputPath, options); err != nil {
 		return fmt.Errorf("compute no-tests manifest input digest: %w", err)
 	}
-	manifest.InputDigest = digest
 
 	return writeJSONFile(filepath.Join(outputPath, testManifestFileName), manifest)
 }
@@ -7085,25 +7213,33 @@ func testPublishTimeout(options Options) time.Duration {
 // captured output (on stderr), and the exit code is the build's. Measured 2026-10-07 (SDK 10, a project whose
 // BaseOutputPath is redirected as a -recurse props does): the redirected path printed on success, and on a compile
 // error the CS line with exit 1.
+//
+// With -test-build-maxcpu N the publish carries -m:N, capping its MSBuild nodes; unset, it carries no -m and MSBuild
+// uses one node per logical processor. This publish is the only dotnet command a -tests run starts, so the flag caps
+// every build the pipeline does.
 func publishTestHostArgs(outputPath, testProject string, options Options) []string {
 	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
 
-	var targetOS []string
+	var buildArgs []string
 
 	if goos := goosOfTarget(options.targetPlatform); goos != "" {
-		targetOS = []string{"-p:GoTargetOS=" + goos}
+		buildArgs = []string{"-p:GoTargetOS=" + goos}
+	}
+
+	if options.testBuildMaxCPU > 0 {
+		buildArgs = append(buildArgs, "-m:"+strconv.Itoa(options.testBuildMaxCPU))
 	}
 
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
 		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
 
-		return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
+		return append(append(args, buildArgs...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 	}
 
 	args := []string{"publish", testProject, "-c", "Debug"}
 
-	return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
+	return append(append(args, buildArgs...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 }
 
 // withPublishBinlog appends `-bl:<binlog>` to a publish argument list when a binlog path is given, and
@@ -7173,10 +7309,30 @@ func testHostRunEnv(options Options) []string {
 	return nil
 }
 
-// testHostEnv is the converted host child's extra environment: the runtime settings (testHostRunEnv)
-// plus, for a package outside the standard library, its module's source root (testHostModuleEnv).
+// testHostEnv is the converted host child's extra environment: the runtime settings (testHostRunEnv), the
+// per-test deadline (testHostDeadlineEnv), and, for a package outside the standard library, its module's
+// source root (testHostModuleEnv).
 func testHostEnv(inputPath string, options Options) []string {
-	return append(testHostRunEnv(options), testHostModuleEnv(inputPath, options)...)
+	env := append(testHostRunEnv(options), testHostDeadlineEnv(options))
+	return append(env, testHostModuleEnv(inputPath, options)...)
+}
+
+// defaultTestDeadline is -test-deadline's default: below the longest row deadline the sweep passes and above
+// the longest single test a banked row runs at it. A row with a longer legitimate test takes a per-row floor
+// (run-validated-sweep.ps1 $testDeadlineFloors: crypto/dsa, go/parser), as COORD ruled option (A) on
+// 2026-10-17; runtime stays at the default, since its hangs are what the deadline is for.
+const defaultTestDeadline = 15 * time.Minute
+
+// testHostDeadlineEnv hands the converted host its per-test deadline (TestOptions.TestDeadline): a top-level
+// test still running at it is reported failed and abandoned, and the run goes on (TestRunner.WaitBounded,
+// DESIGN-object-lifetime-disclosure.md OQ-L3(b)). Through the environment, like the result file and never
+// on argv, because Go's test binary has no such flag and the Go side of the comparison stays unbounded. Always
+// passed, "0" for none, so the host never inherits a value from the shell that launched the converter.
+func testHostDeadlineEnv(options Options) string {
+	if options.testDeadline <= 0 {
+		return "GO2CS_TEST_DEADLINE=0"
+	}
+	return "GO2CS_TEST_DEADLINE=" + options.testDeadline.String()
 }
 
 // testHostModuleEnv hands a NON-standard-library package's host the root of the module it belongs to,
@@ -7445,7 +7601,8 @@ func validateTestManifest(inputPath, outputPath string, options Options) error {
 	}
 	// The digest recomputes over the CURRENT inputs (fresh fixture glob — a newly added testdata
 	// file is a staleness signal the manifest's recorded list could never carry, F7).
-	digest, err := testInputDigest(inputPath, outputPath, options, converterRevision())
+	// The payloads the convert recorded: this process may never have converted (build/run/compare).
+	digest, err := testInputDigest(inputPath, outputPath, options, converterRevision(), manifest.EmbedPayloads)
 	if err != nil {
 		return fmt.Errorf("validate test manifest inputs: %w", err)
 	}
@@ -7467,6 +7624,10 @@ type normalizedTestEvent struct {
 	// the record boundaries a disclosure's count pin needs survive only here.
 	Records        []string `json:"records,omitempty"`
 	RecordsDropped int      `json:"recordsDropped,omitempty"`
+
+	// Abandoned marks a fail the converted host's per-test watchdog reported: the test did not finish within
+	// -test-deadline and its thread was left running (TestEvent.Abandoned). go test's stream never carries it.
+	Abandoned bool `json:"abandoned,omitempty"`
 }
 
 type testComparison struct {
@@ -9032,6 +9193,42 @@ func testRunOrder(output string) map[string]int {
 	return order
 }
 
+// terminalAbandonedTests names each test whose terminal event in the converted host's stream is a fail the
+// per-test watchdog reported (normalizedTestEvent.Abandoned).
+func terminalAbandonedTests(output string) map[string]bool {
+	abandoned := make(map[string]bool)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		switch event.Action {
+		case "pass", "fail", "skip", "timeout", "infrastructure-error":
+			abandoned[event.Test] = event.Action == "fail" && event.Abandoned
+		}
+	}
+	return abandoned
+}
+
+// labelAbandonedTests marks each verdict mismatch whose C# side is the watchdog's: the row still FAILS, as
+// COORD ruled (an abandoned test counts as fail), but it reads as a test that did not finish within the
+// per-test deadline rather than as converted code that failed. A mismatch line starts with the test's name
+// and ": " (matchTerminalStatusesWithRecords). A test that hung inside a cascade is labelled by its own
+// event; the host's afterAbandoned tag on later events names the cascade's source.
+func labelAbandonedTests(mismatches []string, abandoned map[string]bool, deadline time.Duration) []string {
+	if len(abandoned) == 0 {
+		return mismatches
+	}
+	labelled := make([]string, len(mismatches))
+	for i, mismatch := range mismatches {
+		labelled[i] = mismatch
+		if name, _, found := strings.Cut(mismatch, ": "); found && abandoned[name] {
+			labelled[i] = fmt.Sprintf("%s (abandoned: did not finish within the per-test deadline %s; its goroutines were left running)", mismatch, deadline)
+		}
+	}
+	return labelled
+}
+
 // testRecords is one test's log-record list from the converted host's terminal event. Present is
 // false when the event carried no list, which a count-pinned disclosure refuses rather than
 // reading as zero records.
@@ -9831,6 +10028,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 
 	mismatches, skipped, disclosed, withdrawn := matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, csRecords)
+	mismatches = labelAbandonedTests(mismatches, terminalAbandonedTests(csOutput), options.testDeadline)
 	if len(mismatches) > 0 {
 		result.Matched = false
 		result.Errors = append(result.Errors, mismatches...)

@@ -27,11 +27,14 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     // Some nonsense.
     new("Empty"u8, new byte[]{}.slice(), "text/plain; charset=utf-8"u8),
     new("Binary"u8, new byte[]{1, 2, 3}.slice(), "application/octet-stream"u8),
+
     new("HTML document #1"u8, slice<byte>(@"<HtMl><bOdY>blah blah blah</body></html>"u8), "text/html; charset=utf-8"u8),
     new("HTML document #2"u8, slice<byte>(@"<HTML></HTML>"u8), "text/html; charset=utf-8"u8),
     new("HTML document #3 (leading whitespace)"u8, slice<byte>(@"   <!DOCTYPE HTML>..."u8), "text/html; charset=utf-8"u8),
     new("HTML document #4 (leading CRLF)"u8, slice<byte>("\r\n<html>..."u8), "text/html; charset=utf-8"u8),
+
     new("Plain text"u8, slice<byte>(@"This is not HTML. It has ☃ though."u8), "text/plain; charset=utf-8"u8),
+
     new("XML"u8, slice<byte>("\n<?xml!"u8), "text/xml; charset=utf-8"u8),
 
     // Image types.
@@ -50,6 +53,7 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     new("WAV audio #1"u8, slice<byte>(((@string)(new byte[]{0x52, 0x49, 0x46, 0x46, 0x62, 0xb8, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6d, 0x74, 0x20, 0x12, 0x00, 0x00, 0x00, 0x06}))), "audio/wave"u8),
     new("WAV audio #2"u8, slice<byte>("RIFF,\x00\x00\x00WAVEfmt \x12\x00\x00\x00\x06"u8), "audio/wave"u8),
     new("AIFF audio #1"u8, slice<byte>(((@string)(new byte[]{0x46, 0x4f, 0x52, 0x4d, 0x00, 0x00, 0x00, 0x00, 0x41, 0x49, 0x46, 0x46, 0x43, 0x4f, 0x4d, 0x4d, 0x00, 0x00, 0x00, 0x12, 0x00, 0x01, 0x00, 0x00, 0x57, 0x55, 0x00, 0x10, 0x40, 0x0d, 0xf3, 0x34}))), "audio/aiff"u8),
+
     new("OGG audio"u8, slice<byte>(((@string)(new byte[]{0x4f, 0x67, 0x67, 0x53, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7e, 0x46, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xf6, 0xb4, 0xfc, 0x01, 0x1e, 0x01, 0x76, 0x6f, 0x72}))), "application/ogg"u8),
     new("Must not match OGG"u8, slice<byte>("owow\x00"u8), "application/octet-stream"u8),
     new("Must not match OGG"u8, slice<byte>("oooS\x00"u8), "application/octet-stream"u8),
@@ -64,7 +68,9 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     // {"MS.FontObject", []byte("\x00\x00")},
     new("TTF sample  I"u8, slice<byte>("\x00\x01\x00\x00\x00\x17\x01\x00\x00\x04\x01\x60\x4f"u8), "font/ttf"u8),
     new("TTF sample II"u8, slice<byte>(((@string)(new byte[]{0x00, 0x01, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x80, 0x00, 0x03, 0x00, 0x60, 0x46}))), "font/ttf"u8),
+
     new("OTTO sample  I"u8, slice<byte>(((@string)(new byte[]{0x4f, 0x54, 0x54, 0x4f, 0x00, 0x0e, 0x00, 0x80, 0x00, 0x03, 0x00, 0x60, 0x42, 0x41, 0x53, 0x45}))), "font/otf"u8),
+
     new("woff sample  I"u8, slice<byte>("\x77\x4f\x46\x46\x00\x01\x00\x00\x00\x00\x30\x54\x00\x0d\x00\x00"u8), "font/woff"u8),
     new("woff2 sample"u8, slice<byte>("\x77\x4f\x46\x32\x00\x01\x00\x00\x00"u8), "font/woff2"u8),
     new("wasm sample"u8, slice<byte>("\x00\x61\x73\x6d\x01\x00"u8), "application/wasm"u8),
@@ -216,7 +222,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testM
         handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Write the input one byte at a time.
             var buf = slice<byte>(input);
-            foreach (var (i, _) in buf) {
+            foreach (var i in range(buf)) {
                 var (n, err) = w.Write(buf.slice(i, i + 1));
                 if (n != 1 || err != default!) {
                     Ꮡt.Errorf("w.Write(%q) = %v, %v want 1, nil"u8, input, n, err);
@@ -306,7 +312,7 @@ internal static void testSniffWriteSize(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Errorf("write of %d bytes wrote %d bytes"u8, size, written);
         }
     })));
-    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, (512 << (int)(10)), (1 << (int)(20))}.slice()) {
+    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, 512 << 10, 1 << 20}.slice()) {
         var (res, err) = (~cst).c.Get(fmt.Sprintf("%s/?size=%d"u8, (~(~cst).ts).URL, size));
         if (err != default!) {
             Ꮡt.Fatalf("size %d: %v"u8, size, err);

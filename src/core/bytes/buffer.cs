@@ -22,6 +22,12 @@ partial struct Buffer {
     internal readOp lastRead; // last read operation, so that Unread* can work correctly.
 }
 
+// Copying and modifying a non-zero Buffer is prone to error,
+// but we cannot employ the noCopy trick used by WaitGroup and Mutex,
+// which causes vet's copylocks checker to report misuse, as vet
+// cannot reliably distinguish the zero and non-zero cases.
+// See #26462, #25907, #47276, #48398 for history.
+
 // The readOp constants describe the last action performed on
 // the buffer, so that UnreadRune and UnreadByte can check for
 // invalid usage. opReadRuneX constants are chosen such that
@@ -75,7 +81,19 @@ public static @string String(this ж<Buffer> Ꮡb) {
         // Special case, useful in debugging.
         return nilˢ;
     }
-    return ((@string)(b.buf.slice(b.off)));
+    return (@string)(b.buf.slice(b.off));
+}
+
+// Peek returns the next n bytes without advancing the buffer.
+// If Peek returns fewer than n bytes, it also returns [io.EOF].
+// The slice is only valid until the next call to a read or write method.
+// The slice aliases the buffer content at least until the next buffer modification,
+// so immediate changes to the slice will affect the result of future reads.
+public static (slice<byte>, error) Peek(this ref Buffer b, nint n) {
+    if (b.Len() < n) {
+        return (b.buf.slice(b.off), io.EOF);
+    }
+    return (b.buf.slice(b.off, b.off + n), default!);
 }
 
 // empty reports whether the unread portion of the buffer is empty.
@@ -419,7 +437,7 @@ public static (rune r, nint size, error err) ReadRune(this ref Buffer b) {
     }
     (r, var n) = utf8.DecodeRune(b.buf.slice(b.off));
     b.off += n;
-    b.lastRead = ((readOp)(int8)n);
+    b.lastRead = (readOp)(int8)n;
     return (r, n, default!);
 }
 
@@ -503,7 +521,7 @@ public static (@string line, error err) ReadString(this ref Buffer b, byte delim
     error err = default!;
 
     (var Δslice, err) = b.readSlice(delim);
-    return (((@string)Δslice), err);
+    return ((@string)Δslice, err);
 }
 
 // NewBuffer creates and initializes a new [Buffer] using buf as its

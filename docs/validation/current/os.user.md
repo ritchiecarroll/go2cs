@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `os/user` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `bef7e02c4`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**17 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**23 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/os/user`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/os/user).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 2 of the matched tests identically.
 
@@ -33,9 +33,15 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestLookupGroup` | pass | pass |
 | `TestLookupGroupIdServiceAccount` | pass | pass |
 | `TestLookupGroupServiceAccount` | pass | pass |
+| `TestLookupGroupServiceAccount/NT_AUTHORITY\LOCAL_SERVICE` | pass | pass |
+| `TestLookupGroupServiceAccount/NT_AUTHORITY\NETWORK_SERVICE` | pass | pass |
+| `TestLookupGroupServiceAccount/NT_AUTHORITY\SYSTEM` | pass | pass |
 | `TestLookupId` | pass | pass |
 | `TestLookupIdServiceAccount` | pass | pass |
 | `TestLookupServiceAccount` | pass | pass |
+| `TestLookupServiceAccount/NT_AUTHORITY\LOCAL_SERVICE` | pass | pass |
+| `TestLookupServiceAccount/NT_AUTHORITY\NETWORK_SERVICE` | pass | pass |
+| `TestLookupServiceAccount/NT_AUTHORITY\SYSTEM` | pass | pass |
 
 ## Excluded declarations
 

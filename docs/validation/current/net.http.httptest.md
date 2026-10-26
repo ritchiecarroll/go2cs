@@ -6,17 +6,23 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http/httptest` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**55 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**62 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/http/httptest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/httptest).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
+| `TestBodyNotAllowed` | pass | pass |
+| `TestClientExampleCom` | pass | pass |
+| `TestClientExampleCom/http_example.com` | pass | pass |
+| `TestClientExampleCom/http_foo.example.com` | pass | pass |
+| `TestClientExampleCom/https_example.com` | pass | pass |
+| `TestClientExampleCom/https_foo.example.com` | pass | pass |
 | `TestCloseHijackedConnection` | pass | pass |
 | `TestNewRequest` | pass | pass |
 | `TestNewRequestWithContext` | pass | pass |
@@ -24,6 +30,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestNewRequestWithContext/GET_with_full_URL` | pass | pass |
 | `TestNewRequestWithContext/GET_with_full_https_URL` | pass | pass |
 | `TestNewRequestWithContext/OPTIONS_*` | pass | pass |
+| `TestNewRequestWithContext/Post_with_NoBody` | pass | pass |
 | `TestNewRequestWithContext/Post_with_known_length` | pass | pass |
 | `TestNewRequestWithContext/Post_with_unknown_length` | pass | pass |
 | `TestParseContentLength` | pass | pass |

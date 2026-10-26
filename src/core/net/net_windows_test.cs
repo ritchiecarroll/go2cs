@@ -20,6 +20,7 @@ using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
+using iter = iter_package;
 using static go.net_package;
 using ꓸꓸꓸstring = Span<@string>;
 
@@ -43,7 +44,7 @@ internal static (syscall.Errno, bool) toErrno(error err) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gotestDialAddrˢ = "GOTEST_DIAL_ADDR"u8;
-internal static readonly @string testRunˢ = "-test.run=TestAcceptIgnoreSomeErrors"u8;
+internal static readonly @string testRunˢ = "-test.run=^TestAcceptIgnoreSomeErrors$"u8;
 internal static readonly @string abcˢ = "abc"u8;
 
 // TestAcceptIgnoreSomeErrors tests that windows TCPListener.AcceptTCP
@@ -70,7 +71,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 var b = new slice<byte>(100);
                 (var n, errΔ1) = c.Read(b);
                 if (errΔ1 == default! || AreEqual(errΔ1, Δio.EOF)) {
-                    return (((@string)(b.slice(0, n))), default!);
+                    return ((@string)(b.slice(0, n)), default!);
                 }
                 var (errno, ok) = toErrno(errΔ1);
                 if (ok && ignoreSomeReadErrors && (errno == syscall.ERROR_NETNAME_DELETED || errno == syscall.WSAECONNRESET)) {
@@ -127,7 +128,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         // Start child process that connects to our listener.
-        var cmd = exec.Command(Δos.Args[0], testRunˢ);
+        var cmd = exec.Command(testenv.Executable(new net_test_package.testing_TжTB(Ꮡt)), testRunˢ);
         cmd.Value.Env = append(Δos.Environ(), "GOTEST_DIAL_ADDR="u8 + ln.Addr().String());
         (var stdout, err) = cmd.StdoutPipe();
         if (err != default!) {
@@ -232,7 +233,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
         (var @out, err) = exec.Command(powershellˢ, commandˢ, cmd).CombinedOutput();
         if (err != default!) {
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             error err2 = default!;
             (@out, err2) = Δos.ReadFile(f.Name());
@@ -240,7 +241,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
                 return (default!, err2);
             }
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             return (default!, fmt.Errorf("%s failed: %v"u8, args[0], err));
         }
@@ -298,12 +299,11 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
     //Metric                             : 10
     //...
     @string name = default!;
-    var lines = bytes.Split(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
-            name = ((@string)f);
+            name = (@string)f;
             continue;
         }
         bool isup = default!;
@@ -369,7 +369,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
     }
     slices.Sort<slice<@string>, @string>(want);
 
-    if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
+    if (!slices.Equal<slice<@string>, @string>(want, have)) {
         Ꮡt.Fatalf("unexpected interface list %q, want %q"u8, have, want);
     }
 }
@@ -397,8 +397,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
     @string addr = default!;
     @string subnetprefix = default!;
     bool processingOurInterface = default!;
-    var lines = bytes.Split(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (!processingOurInterface) {
             if (!bytes.HasPrefix(line, slice<byte>("Configuration for interface"u8))) {
                 continue;
@@ -419,7 +418,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
                 if (len(f) == 2) {
                     f = bytes.Split(f[0], new byte[]{(rune)'/'}.slice());
                     if (len(f) == 2) {
-                        subnetprefix = ((@string)bytes.TrimSpace(f[1]));
+                        subnetprefix = (@string)bytes.TrimSpace(f[1]);
                         if (addr != ""u8 && subnetprefix != ""u8) {
                             addrs = append(addrs, addr + "/"u8 + subnetprefix);
                         }
@@ -431,7 +430,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
         if (bytes.Contains(line, slice<byte>("IP Address:"u8))) {
             var f = bytes.Split(line, new byte[]{(rune)':'}.slice());
             if (len(f) == 2) {
-                addr = ((@string)bytes.TrimSpace(f[1]));
+                addr = (@string)bytes.TrimSpace(f[1]);
             }
         }
     }
@@ -464,11 +463,11 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
     //Address Type       : Other
     //Skip as Source     : false
     //
+
     // TODO: need to test ipv6 netmask too, but netsh does not outputs it
     @string addr = default!;
     var addrs = new slice<@string>(0);
-    var lines = bytes.Split(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (addr != ""u8) {
             if (len(line) == 0) {
                 addr = ""u8;
@@ -498,10 +497,10 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
         // Convert these to all hexadecimal fe80::5efe:c0a8:8c01 for later string comparisons.
         var ipv4Tail = Δregexp.MustCompile(dDDDˢ);
         if (ipv4Tail.Match(f[0])) {
-            f[0] = slice<byte>(ParseIP(((@string)f[0])).String());
+            f[0] = slice<byte>(ParseIP((@string)f[0]).String());
         }
 
-        addr = ((@string)bytes.ToLower(bytes.TrimSpace(f[0])));
+        addr = (@string)bytes.ToLower(bytes.TrimSpace(f[0]));
     }
     return addrs;
 }
@@ -568,7 +567,7 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
         want = appendꓸꓸꓸ(want, wantIPv6);
         slices.Sort<slice<@string>, @string>(want);
 
-        if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
+        if (!slices.Equal<slice<@string>, @string>(want, have)) {
             Ꮡt.Errorf("%s: unexpected addresses list %q, want %q"u8, ifi.Name, have, want);
         }
     }
@@ -675,8 +674,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         wantʗ1[cname] = addr;
         Ꮡgroup.ValueSlot = new map<@string, @string>();
     }
-    var lines = bytes.Split(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (len(line) == 0) {
             processGroup();
             continue;
@@ -685,7 +683,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         if (i == -1) {
             Ꮡt.Fatalf("line %q has no : in it"u8, line);
         }
-        group[((@string)(line.slice(0, i)))] = ((@string)bytes.TrimSpace(line.slice(i + 1)));
+        group[((@string)(line.slice(0, i)))] = (@string)bytes.TrimSpace(line.slice(i + 1));
     }
     processGroup();
 

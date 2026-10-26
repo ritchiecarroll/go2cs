@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -23,8 +22,6 @@ using static go.hash.maphash_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bytesKey, ж<bytesKey>>(Indirect = true)]
-[assembly: GoImplicitConv<hashSet, ж<hashSet>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -35,8 +32,8 @@ using static go.hash.maphash_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/maphash/maphash_test.go", "maphash_test.cs", "ABUmgoKCgpSCuIKCgoKCgpSCuIKCgoKUgpSClIKCgqaCgoKmgoKCuIKCgoKUlIKClLiCgoK4gIK2gIL4goKCgoKCgoKUgoKUgriEkoKCgoKUguiCgoKUgoKUgqaCgoKUgriigoKCgoKCgoK4ooKCgoKCgoKCgriigoKCgoKCgoKCuKKCgoKCgoKCgoKCuKKCggAXBoKCgoKCgoKCgoKCAAAQiIKClIKUgoKCgoKCgoKCgoKCpoKCgriUgtaikrKClIKCgpSCgoKCAAYQkoKUlIKC5oKCgoKCgoKCgoKCAAAQiIKClIKUgoKCgoKCgqaCgpKSgoKCguqikrKClIKSkoKCgoKClIKCgoKCgvqigoKCgoKClIKAgrai1IKCkoKUgoKClIIADAiCgpSClJKCkoKUgpaagpSCypLkgoKClKKCgoKCuKKCgoK4koKCgsqCgoKCyoKCgoIADQqCAAASgoKCgoKCgoKC", "55-60:1;61-66:2;67-72:3;283-299:1;370-393:1;399-409:1;438-441:1;450-453:2;468-475:1;477-483:2;485-491:3;497-499:1;504-509:1")]
-[assembly: go.GoPositionMap("hash/maphash/smhasher_test.go", "smhasher_test.cs", "ABo4mrKCgoKCgoKCgoKCgoKCgoLugoKCgqSCgoKCyoIABxCCpIKkgqSCpIKCgoKkgoKClIKCgqaUgoKCgoKmqJKCgoKClKiSgoKCgoKCgoKCgoKCyqiSgoKClIKCgpTokoKUgpSCgoKUpKKmpoKCgoLKgoKCgoKCgqbMkoKUgoKCgoKCgoKCgoKCgoKUlLqSgpSClIKCgoKCgoKCgqSigoKCqLKCgpSCgoK8ooKUgpSCgoKCgoKkooKCgqSigoKUgoKCgoIAECKCpIKkgqSCpIKkgqiSgpSClIKCgoKCgqSCgoKCuJSUgqaCgoKmgoKCAAkUgpSUgoKCgoKCgoKC3pKCpIKClIKUlIKCgoKCgqaUAAgKkoKUgoKCgtSigoKCgoKCgoKCgoKCgoKCgsrokoKUgoKCgoKClA==")]
+[assembly: go.GoPositionMap("hash/maphash/maphash_test.go", "maphash_test.cs", "ABYogoKCgpSCuIKCgoKCgpSCuIKCgoKUgpSClIKCgqaCgoKmgoKCuIKCgoKUlIKClLiCgoK4gIK2gIL4goKCgoKCgoKUgoKUgriEkoKCgoKUguiCgoKUgoKUgqaCgoKUgriigoKCgoKCgoK4ooKCgoKCgoKCgriigoKCgoKCgoKCuKKCgoKCgoKCgoKCuKKCggAXBoKCgoKCgoKCgoKCAAAQiIKClIKUgoKCgoKCgoKCgoKCpoKCgriUgtaikrKClIKCgpSCgoKCAAYQkoKUlIKC5oKCgoKCgoKCgoKCAAAQiIKClIKUgoKCgoKCgqaCgpKSgoKCguqikrKClIKSkoKCgoKClIKCgoKCgvqigoKCgoKClIKAgrai1IKCkoKUgoKClIIADAiCgpSClJKCkoKUgpaagpSCypKUgvaCgoKUooKCgoK4ooKCgriSgoKCyoKCgoLKgoKCggANCoIAABKCgoKCgoKCgoI=", "56-61:1;62-67:2;68-73:3;284-300:1;371-394:1;400-410:1;439-442:1;451-454:2;465-465:1;473-480:1;482-488:2;490-496:3;502-504:1;509-514:1")]
+[assembly: go.GoPositionMap("hash/maphash/smhasher_test.go", "smhasher_test.cs", "ABs4mrKCgoKCgoKCgoKCgoKCgoLugoKCgqSCgoKCyoIABxCCpIKkgqSCpIKCgoKkgoKClIKCgqaUgoKCgoKmqJKCgoKClKiSgoKCgoKCgoKCgoKCyqiSgoKClIKCgpTokoKUgpSCgoKUpKKmpoKCgoLKgoKCgoKCgqbMkoKUgoKCgoKCgoKCgoKCgoKUlLqSgpSClIKCgoKCgoKCgqSigoKCqLKCgpSCgoK8ooKUgpSCgoKCgoKkooKCgqSigoKUgoKCgoIAECKCpIKkgqSCpIKkgqiSgpSClIKCgoKCgqSCgoKCuJSUgqaCgoKmgoKCAAkUgpSUgoKCgoKCgoKC3pKCpIKClIKUlIKCgoKCgqaUAAgKkoKUgoKCgtSigoKCgoKCgoKCgoKCgoKCgsrokoKUgoKCgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -67,7 +64,9 @@ public static partial class maphash_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸmaps() => builtin.initPackage(typeof(@internal.runtime.maps_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));

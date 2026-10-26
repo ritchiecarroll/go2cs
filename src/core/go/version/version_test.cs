@@ -106,8 +106,8 @@ internal static void test1<In, Out>(ж<testing.T> Ꮡt, slice<testCase1<In, Out>
     Ꮡt.Helper();
     foreach (var (_, tt) in tests) {
         {
-            var @out = f(tt.@in); if (!reflect.DeepEqual(@out, tt.@out)) {
-                Ꮡt.Errorf("%s(%v) = %v, want %v"u8, name, tt.@in, @out, tt.@out);
+            var @out = f(tt.@in); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
+                Ꮡt.Errorf("%s(%v) = %v, want %v"u8, name, (tt.@in).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
             }
         }
     }
@@ -117,8 +117,8 @@ internal static void test2<In1, In2, Out>(ж<testing.T> Ꮡt, slice<testCase2<In
     Ꮡt.Helper();
     foreach (var (_, tt) in tests) {
         {
-            var @out = f(tt.in1, tt.in2); if (!reflect.DeepEqual(@out, tt.@out)) {
-                Ꮡt.Errorf("%s(%+v, %+v) = %+v, want %+v"u8, name, tt.in1, tt.in2, @out, tt.@out);
+            var @out = f(tt.in1, tt.in2); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
+                Ꮡt.Errorf("%s(%+v, %+v) = %+v, want %+v"u8, name, (tt.in1).OrTypedNilOf(), (tt.in2).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
             }
         }
     }

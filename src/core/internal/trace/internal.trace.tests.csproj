@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -103,11 +110,11 @@
   <ItemGroup>
     <Compile Include="batchcursor_test.cs" />
     <Compile Include="event_test.cs" />
+    <Compile Include="export_reader_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="gc_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="mud_test.cs" />
-    <Compile Include="oldtrace_test.cs" />
     <Compile Include="order_test.cs" />
     <Compile Include="package_info_internal_test.cs" />
     <Compile Include="package_init_internal_test.cs" />
@@ -115,6 +122,7 @@
     <Compile Include="reader_test.cs" />
     <Compile Include="summary_test.cs" />
     <Compile Include="trace_test.cs" />
+    <Compile Include="tracev1_test.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -124,29 +132,27 @@
     <None Include="batchcursor_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="event.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="event_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="export_reader_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="gc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="gc_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="generation.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/fmt_1_21_pprof_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/http_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/http_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_start_stop_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_start_stop_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/stress_start_stop_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/user_task_region_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/user_task_region_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal/oldtrace/testdata/user_task_region_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/fmt_1_21_pprof_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/http_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/http_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_start_stop_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_start_stop_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/stress_start_stop_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/user_task_region_1_11_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/user_task_region_1_19_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="internal/tracev1/testdata/user_task_region_1_21_good" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mud.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mud_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="oldtrace.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="oldtrace_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="order.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="order_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="parser.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="reader.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="reader_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="resources.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -192,7 +198,11 @@
     <None Include="testdata/tests/go122-syscall-steal-proc-simple.test" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="testdata/tests/go122-syscall-steal-proc-sitting-in-syscall.test" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="testdata/tests/go122-task-across-generations.test" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="testdata/tests/go123-sync.test" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="testdata/tests/go125-sync.test" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="trace_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="tracev1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="tracev1_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="value.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 
@@ -203,14 +213,13 @@
     <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/diff/internal.diff.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/go122/internal.trace.event.go122.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/internal.trace.event.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/internal/oldtrace/internal.trace.internal.oldtrace.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/raw/internal.trace.raw.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/internal/tracev1/internal.trace.internal.tracev1.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/version/internal.trace.version.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
@@ -220,6 +229,7 @@
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
+    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />

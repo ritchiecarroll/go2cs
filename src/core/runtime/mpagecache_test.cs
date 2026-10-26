@@ -71,7 +71,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Hi1"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, ((uint64)0x1 << (int)(63)), 0x1),
+            cache: runtime_internal_test_package.NewPageCache(@base, (uint64)0x1 << 63, 0x1),
             hits: new TestPageCacheAlloc_hit[]{
                 new(1, @base + (uintptr)(63 * runtime_internal_test_package.PageSize), 0),
                 new(1, 0, 0),
@@ -96,7 +96,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Lo2"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, 0x3, ((uint64)0x2 << (int)(62))),
+            cache: runtime_internal_test_package.NewPageCache(@base, 0x3, (uint64)0x2 << 62),
             hits: new TestPageCacheAlloc_hit[]{
                 new(2, @base, 0),
                 new(2, 0, 0),
@@ -104,7 +104,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Hi2"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, ((uint64)0x3 << (int)(62)), ((uint64)0x3 << (int)(62))),
+            cache: runtime_internal_test_package.NewPageCache(@base, (uint64)0x3 << 62, (uint64)0x3 << 62),
             hits: new TestPageCacheAlloc_hit[]{
                 new(2, @base + (uintptr)(62 * runtime_internal_test_package.PageSize), 2 * runtime_internal_test_package.PageSize),
                 new(2, 0, 0),
@@ -112,7 +112,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Swiss2"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, ((uint64)0x3333 << (int)(31)), ((uint64)0x3030 << (int)(31))),
+            cache: runtime_internal_test_package.NewPageCache(@base, (uint64)0x3333 << 31, (uint64)0x3030 << 31),
             hits: new TestPageCacheAlloc_hit[]{
                 new(2, @base + (uintptr)(31 * runtime_internal_test_package.PageSize), 0),
                 new(2, @base + (uintptr)(35 * runtime_internal_test_package.PageSize), 2 * runtime_internal_test_package.PageSize),
@@ -122,7 +122,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Hi53"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, (((((uint64)1 << (int)(53))) - 1) << (int)(10)), (((((uint64)1 << (int)(16))) - 1) << (int)(10))),
+            cache: runtime_internal_test_package.NewPageCache(@base, (((uint64)1 << 53) - 1) << 10, (((uint64)1 << 16) - 1) << 10),
             hits: new TestPageCacheAlloc_hit[]{
                 new(53, @base + (uintptr)(10 * runtime_internal_test_package.PageSize), 16 * runtime_internal_test_package.PageSize),
                 new(53, 0, 0),
@@ -130,7 +130,7 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         ["Full53"u8] = new(
-            cache: runtime_internal_test_package.NewPageCache(@base, ~(uint64)0, (((((uint64)1 << (int)(16))) - 1) << (int)(10))),
+            cache: runtime_internal_test_package.NewPageCache(@base, ~(uint64)0, (((uint64)1 << 16) - 1) << 10),
             hits: new TestPageCacheAlloc_hit[]{
                 new(53, @base, 16 * runtime_internal_test_package.PageSize),
                 new(53, 0, 0),
@@ -172,10 +172,11 @@ public static void TestPageCacheAlloc(ж<testing.T> Ꮡt) {
             }.slice()
         )
     };
-    foreach (var (name, test) in tests) {
-        ref var testΔ1 = ref heap<TestPageCacheAlloc_tests>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
+    foreach (var (name, vᴛ1) in tests) {
+        ref var test = ref heap(new TestPageCacheAlloc_tests(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             ref var c = ref heap<global::go.runtime_internal_test_package.PageCache>(out var Ꮡc);
             c = testʗ1.cache;
@@ -201,7 +202,7 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
         nuint start = (nuint)0;
         nuint size = (nuint)0;
         for (nint i = 0; i < 64; i++) {
-            if ((uint64)(bits & (((uint64)1).Lsh((int64)(i)))) != 0){
+            if ((bits & (((uint64)1).Lsh((int64)(i)))) != 0){
                 if (size == 0) {
                     start = (nuint)i + @base;
                 }
@@ -270,12 +271,17 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
 
         // Generate random cache.
         var cache = rand.Uint64();
-        var scav = (uint64)(rand.Uint64() & cache);
+        var scav = rand.Uint64() & cache;
 
         // Run the test.
         runTest(Ꮡt, @base, cache, scav);
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string allFreeˢ = "AllFree"u8;
+internal static readonly @string notContiguousˢ = "NotContiguous"u8;
+internal static readonly @string firstˢ = "First"u8;
 
 internal partial struct TestPageAllocAllocToCache_test /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> beforeAlloc;
@@ -290,23 +296,6 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingBecauseVirtualˢ);
     }
     var tests = new map<@string, TestPageAllocAllocToCache_test>{
-        ["AllFree"u8] = new(
-            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{}.slice()
-            },
-            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(1, 1), new(64, 64)}.slice()
-            },
-            hits: new global::go.runtime_internal_test_package.PageCache[]{
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), ~(uint64)0, 0x2),
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 64), ~(uint64)0, ~(uint64)0),
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 128), ~(uint64)0, 0),
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 192), ~(uint64)0, 0)
-            }.slice(),
-            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 256)}.slice()
-            }
-        ),
         ["ManyArena"u8] = new(
             beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
                 [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
@@ -327,42 +316,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
                 [runtime_internal_test_package.BaseChunkIdx + 2] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
             }
         ),
-        ["NotContiguous"u8] = new(
-            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 0)}.slice()
-            },
-            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(31, 67)}.slice()
-            },
-            hits: new global::go.runtime_internal_test_package.PageCache[]{
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0xff, 0), ~(uint64)0, (((((uint64)1 << (int)(33))) - 1) << (int)(31)))
-            }.slice(),
-            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 64)}.slice()
-            },
-            afterScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(64, 34)}.slice()
-            }
-        ),
-        ["First"u8] = new(
-            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 32), new(33, 31), new(96, 32)}.slice()
-            },
-            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(1, 4), new(31, 5), new(66, 2)}.slice()
-            },
-            hits: new global::go.runtime_internal_test_package.PageCache[]{
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), ((uint64)1 << (int)(32)), ((uint64)1 << (int)(32))),
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 64), (((uint64)1 << (int)(32))) - 1, ((uint64)0x3 << (int)(2)))
-            }.slice(),
-            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 128)}.slice()
-            }
-        ),
+
         ["Fail"u8] = new(
             beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
                 [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
@@ -384,7 +338,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
                 [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 4), new(11, 1)}.slice()
             },
             hits: new global::go.runtime_internal_test_package.PageCache[]{
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), ~(uint64)((uint64)(0x1 | ((0x3 << (int)(10))))), ((uint64)0x7 << (int)(1)))
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), ~(uint64)((uint64)(0x1 | (0x3 << 10))), (uint64)0x7 << 1)
             }.slice(),
             afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
                 [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 64)}.slice()
@@ -394,6 +348,61 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
             }
         )
     };
+    if (runtime_internal_test_package.PallocChunkPages >= 512) {
+        tests[allFreeˢ] = new TestPageAllocAllocToCache_test(
+            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{}.slice()
+            },
+            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(1, 1), new(64, 64)}.slice()
+            },
+            hits: new global::go.runtime_internal_test_package.PageCache[]{
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), ~(uint64)0, 0x2),
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 64), ~(uint64)0, ~(uint64)0),
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 128), ~(uint64)0, 0),
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 192), ~(uint64)0, 0)
+            }.slice(),
+            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 256)}.slice()
+            }
+        );
+        tests[notContiguousˢ] = new TestPageAllocAllocToCache_test(
+            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 0)}.slice()
+            },
+            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(31, 67)}.slice()
+            },
+            hits: new global::go.runtime_internal_test_package.PageCache[]{
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0xff, 0), ~(uint64)0, (((uint64)1 << 33) - 1) << 31)
+            }.slice(),
+            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 64)}.slice()
+            },
+            afterScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = new global::go.runtime_internal_test_package.BitRange[]{new(64, 34)}.slice()
+            }
+        );
+        tests[firstˢ] = new TestPageAllocAllocToCache_test(
+            beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 32), new(33, 31), new(96, 32)}.slice()
+            },
+            beforeScav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(1, 4), new(31, 5), new(66, 2)}.slice()
+            },
+            hits: new global::go.runtime_internal_test_package.PageCache[]{
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), (uint64)1 << 32, (uint64)1 << 32),
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 64), ((uint64)1 << 32) - 1, (uint64)0x3 << 2)
+            }.slice(),
+            afterAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
+                [runtime_internal_test_package.BaseChunkIdx] = new global::go.runtime_internal_test_package.BitRange[]{new(0, 128)}.slice()
+            }
+        );
+    }
     // Disable these tests on iOS since we have a small address space.
     // See #46860.
     if (runtime_internal_test_package.PageAlloc64Bit != 0 && goos.IsIos == 0) {
@@ -402,7 +411,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
         // This test is similar to the one with the same name for
         // pageAlloc.alloc and serves the same purpose.
         // See mpagealloc_test.go for details.
-        global::go.runtime_internal_test_package.ChunkIdx sumsPerPhysPage = ((global::go.runtime_internal_test_package.ChunkIdx)(nuint)(runtime_internal_test_package.PhysPageSize / runtime_internal_test_package.PallocSumBytes));
+        global::go.runtime_internal_test_package.ChunkIdx sumsPerPhysPage = (global::go.runtime_internal_test_package.ChunkIdx)(nuint)(runtime_internal_test_package.PhysPageSize / runtime_internal_test_package.PallocSumBytes);
         global::go.runtime_internal_test_package.ChunkIdx baseChunkIdx = (global::go.runtime_internal_test_package.ChunkIdx)(runtime_internal_test_package.BaseChunkIdx & ~(sumsPerPhysPage - 1));
         tests["DiscontiguousMappedSumBoundary"u8] = new TestPageAllocAllocToCache_test(
             beforeAlloc: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
@@ -414,7 +423,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
                 [baseChunkIdx + (nuint)chunkIdxBigJump] = new global::go.runtime_internal_test_package.BitRange[]{}.slice()
             },
             hits: new global::go.runtime_internal_test_package.PageCache[]{
-                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(baseChunkIdx + sumsPerPhysPage - 1, runtime_internal_test_package.PallocChunkPages - 64), ((uint64)1 << (int)(63)), 0),
+                runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(baseChunkIdx + sumsPerPhysPage - 1, runtime_internal_test_package.PallocChunkPages - 64), (uint64)1 << 63, 0),
                 runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(baseChunkIdx + (nuint)chunkIdxBigJump, 0), 1, 0),
                 runtime_internal_test_package.NewPageCache(0, 0, 0)
             }.slice(),
@@ -424,10 +433,11 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
             }
         );
     }
-    foreach (var (name, v) in tests) {
-        ref var vΔ1 = ref heap<TestPageAllocAllocToCache_test>(out var ᏑvΔ1);
-        vΔ1 = v;
-        var vʗ1 = vΔ1;
+    foreach (var (name, vᴛ1) in tests) {
+        ref var v = ref heap(new TestPageAllocAllocToCache_test(), out var Ꮡv);
+        v = vᴛ1;
+
+        var vʗ1 = v;
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {

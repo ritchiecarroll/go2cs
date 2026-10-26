@@ -54,6 +54,12 @@ using static go.@internal.xcoff_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,7 +68,7 @@ using static go.@internal.xcoff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEeYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gpSkpKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
+[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEiYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gpSkpKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
 [assembly: go.GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoKkgoCCpIKCgoKmgriCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCpIKAgqSCgoKCgoKUgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgsiCgIKkgoKCgoKCgqaCpoKmgpSClKbcgpSCgIKkpIKAgqTKgoCCtoKClIKAgqSCgqSCgIKkgoKUgoKCgILsgoKUgpSCgpSCgIKkgoKUgoCCpIKCgpSClIK4goCCpIKCgoKClIK4uAAICoKokoKCgpSokoKCgIKCgoKCgpS2pqaIsoKCgoKCgpS4gqrUgIKkgoKClIKAgqSCgqSCgIKkgoK4gIKkgoCCtpSCgoKCgoKCgoKCgoKClJSmrsKCgqaAgqSCgoKClIKAgqSCgoKkgoCCpIKCgriAgqSCgILIgoK4gIKkgoKCgoKUgoCCpIKUgoKUgoKCpqSCgIKkgpSCgpSUgoKClKassoKClII=")]
 // </GoSourcePositionMaps>
 
@@ -128,7 +134,7 @@ public static partial class xcoff_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsaferio() => builtin.initPackage(typeof(go.@internal.saferio_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

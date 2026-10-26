@@ -1,8 +1,6 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// Package maps implements Go's builtin map type.
 namespace go.@internal.runtime;
 
 using abi = go.@internal.abi_package;
@@ -13,7 +11,7 @@ partial class maps_package {
 
 internal const bool debugLog = false;
 
-internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -28,7 +26,7 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
     uint16 empty = default!;
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
-        for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+        for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
             var c = g.ctrls().get(j);
             switch (ᐧ) {
             case {} when c == ctrlDeleted: {
@@ -74,7 +72,7 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
         throw panic("invariant failed: found mismatched used slot count");
     }
 
-    var growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.SwissMapGroupSlots - t.used - deleted);
+    var growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots - t.used - deleted);
     if (growthLeft != t.growthLeft) {
         print((@string)"invariant failed: found "u8, t.growthLeft, (@string)" growthLeft, but expected "u8, growthLeft, (@string)"\n"u8);
         t.Print(Ꮡtyp, Ꮡm);
@@ -93,7 +91,7 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
     }
 }
 
-public static void Print(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -122,7 +120,7 @@ table{
 
         var g = t.groups.group(Ꮡtyp, i);
         var ctrls = g.ctrls();
-        for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+        for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
             print((@string)"\t\t\tslot "u8, j, (@string)"\n"u8);
 
             var c = ctrls.get(j);

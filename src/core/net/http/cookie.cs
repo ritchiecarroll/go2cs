@@ -105,7 +105,7 @@ public static (slice<ж<ΔCookie>>, error) ParseCookie(@string line) {
         if (!found) {
             return (default!, errEqualNotFoundInCookie);
         }
-        if (!isCookieNameValid(name)) {
+        if (!isToken(name)) {
             return (default!, errInvalidCookieName);
         }
         ref var quoted = ref heap<bool>(out var Ꮡquoted);
@@ -136,7 +136,7 @@ public static (ж<ΔCookie>, error) ParseSetCookie(@string line) {
         return (default!, errEqualNotFoundInCookie);
     }
     name = textproto.TrimString(name);
-    if (!isCookieNameValid(name)) {
+    if (!isToken(name)) {
         return (default!, errInvalidCookieName);
     }
     ref var quoted = ref heap<bool>(out var Ꮡquoted);
@@ -305,7 +305,7 @@ internal static readonly @string partitionedˢ = "; Partitioned"u8;
 public static @string String(this ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (Ꮡc == nil || !isCookieNameValid(c.Name)) {
+    if (Ꮡc == nil || !isToken(c.Name)) {
         return ""u8;
     }
     // extraCookieLength derived from typical length of cookie attributes
@@ -388,7 +388,7 @@ public static error Valid(this ж<ΔCookie> Ꮡc) {
     if (Ꮡc == nil) {
         return errors.New(httpNilCookieˢ);
     }
-    if (!isCookieNameValid(c.Name)) {
+    if (!isToken(c.Name)) {
         return errors.New(httpInvalidCookieNameˢ);
     }
     if (!c.Expires.IsZero() && !validCookieExpires(c.Expires)) {
@@ -461,7 +461,7 @@ internal static slice<ж<ΔCookie>> readCookies(ΔHeader h, @string filter) {
             ref var val = ref heap<@string>(out var Ꮡval);
             (name, val, _) = strings.Cut(part, "="u8);
             name = textproto.TrimString(name);
-            if (!isCookieNameValid(name)) {
+            if (!isToken(name)) {
                 continue;
             }
             if (filter != ""u8 && filter != name) {
@@ -507,7 +507,8 @@ internal static bool isCookieDomainName(@string s) {
     }
 
     if (s[0] == (rune)'.') {
-        // A cookie a domain attribute may start with a leading dot.
+        // A cookie domain attribute may start with a leading dot.
+        // Per RFC 6265 section 5.2.3, a leading dot is ignored.
         s = s[1..];
     }
     var last = (byte)(rune)'.';
@@ -583,9 +584,6 @@ internal static readonly @string cookieValueˢ = "Cookie.Value"u8;
 // See https://golang.org/issue/7243 for the discussion.
 internal static @string sanitizeCookieValue(@string v, bool quoted) {
     v = sanitizeOrWarn(cookieValueˢ, validCookieValueByte, v);
-    if (builtin.len(v) == 0) {
-        return v;
-    }
     if (strings.ContainsAny(v, " ,"u8) || quoted) {
         return @""""u8 + v + @""""u8;
     }
@@ -610,6 +608,8 @@ internal static bool validCookiePathByte(byte b) {
 }
 
 internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid, @string v) {
+    var bufᴷ = new stackAppend<byte>();
+
     var ok = true;
     for (nint i = 0; i < builtin.len(v); i++) {
         if (valid(v[i])) {
@@ -626,11 +626,11 @@ internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid
     for (nint i = 0; i < builtin.len(v); i++) {
         {
             var b = v[i]; if (valid(b)) {
-                buf = append(buf, b);
+                buf = append(bufᴷ, buf, b);
             }
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // parseCookieValue parses a cookie value according to RFC 6265.
@@ -656,13 +656,6 @@ internal static (@string value, bool quoted, bool ok) parseCookieValue(@string r
         }
     }
     return (raw, quoted, true);
-}
-
-internal static bool isCookieNameValid(@string raw) {
-    if (raw == ""u8) {
-        return false;
-    }
-    return strings.IndexFunc(raw, isNotToken) < 0;
 }
 
 } // end http_package

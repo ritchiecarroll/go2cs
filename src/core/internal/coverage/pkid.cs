@@ -32,7 +32,7 @@ partial class coverage_package {
 //    slot: 6 path='internal/runtime/math'  hard-coded id: 6
 //    slot: 7 path='internal/bytealg'  hard-coded id: 7
 //    slot: 8 path='internal/goexperiment'
-//    slot: 9 path='internal/runtime/syscall'  hard-coded id: 8
+//    slot: 9 path='internal/runtime/syscall/linux'  hard-coded id: 8
 //    slot: 10 path='runtime'  hard-coded id: 9
 //    fatal error: runtime.addCovMeta
 //
@@ -44,22 +44,34 @@ partial class coverage_package {
 // package runtime is fixed, and doesn't vary depending on OS/arch. If
 // this were to be the case, we would need a table of some sort below
 // as opposed to a fixed list.
-internal static array<@string> rtPkgs = new @string[]{
+[GoLazy] partial class lazyᴛrtPkgs { internal static array<@string> rtPkgs = new @string[]{
+    "internal/asan"u8,
+    "internal/byteorder"u8,
+    "internal/coverage/rtcov"u8,
     "internal/cpu"u8,
-    "internal/goarch"u8,
-    "internal/runtime/atomic"u8,
-    "internal/goos"u8,
-    "internal/chacha8rand"u8,
-    "internal/runtime/sys"u8,
-    "internal/abi"u8,
-    "internal/runtime/maps"u8,
-    "internal/runtime/math"u8,
     "internal/bytealg"u8,
+    "internal/goarch"u8,
+    "internal/abi"u8,
+    "internal/chacha8rand"u8,
+    "internal/godebugs"u8,
     "internal/goexperiment"u8,
-    "internal/runtime/syscall"u8,
+    "internal/goos"u8,
+    "internal/msan"u8,
+    "internal/profilerecord"u8,
+    "internal/race"u8,
+    "internal/runtime/atomic"u8,
+    "internal/runtime/exithook"u8,
+    "internal/runtime/gc"u8,
+    "internal/runtime/math"u8,
+    "internal/runtime/sys"u8,
+    "internal/runtime/maps"u8,
+    "internal/runtime/syscall/linux"u8,
+    "internal/runtime/syscall/windows"u8,
+    "internal/runtime/cgroup"u8,
+    "internal/strconv"u8,
     "internal/stringslite"u8,
     "runtime"u8
-}.array();
+}.array(); }
 
 // Scoping note: the constants and apis in this file are internal
 // only, not expected to ever be exposed outside of the runtime (unlike

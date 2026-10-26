@@ -129,7 +129,7 @@ public static void ExampleUntil() {
 public static void ExampleDuration_Abs() {
     var positiveDuration = (Δtime.Duration)(5000000000L);
     var negativeDuration = (Δtime.Duration)(-3000000000L);
-    var minInt64CaseDuration = ((Δtime.Duration)Δmath.MinInt64);
+    var minInt64CaseDuration = (Δtime.Duration)Δmath.MinInt64;
 
     var absPositive = positiveDuration.Abs();
     var absNegative = negativeDuration.Abs();
@@ -484,6 +484,7 @@ public static void ExampleParse() {
     // See the example for Time.Format for a thorough description of how
     // to define the layout string to parse a time.Time value; Parse and
     // Format use the same model to describe their input and output.
+
     // longForm shows by example how the reference time would be represented in
     // the desired layout.
     @string longForm = longFormᶜ;
@@ -832,8 +833,8 @@ public static void ExampleTime_String() {
     var timeWithoutNanoseconds = Δtime.Date(2000, 2, 1, 12, 13, 14, 0, Δtime.ΔUTC);
     @string withoutNanoseconds = timeWithoutNanoseconds.String();
 
-    fmt.Printf("withNanoseconds = %v\n"u8, ((@string)withNanoseconds));
-    fmt.Printf("withoutNanoseconds = %v\n"u8, ((@string)withoutNanoseconds));
+    fmt.Printf("withNanoseconds = %v\n"u8, withNanoseconds);
+    fmt.Printf("withoutNanoseconds = %v\n"u8, withoutNanoseconds);
 
     // Output:
     // withNanoseconds = 2000-02-01 12:13:14.000000015 +0000 UTC
@@ -851,15 +852,56 @@ public static void ExampleTime_Sub() {
     // difference = 12h0m0s
 }
 
+public static void ExampleTime_AppendBinary() {
+    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.ΔUTC);
+
+    slice<byte> buffer = default!;
+    (buffer, var err) = t.AppendBinary(buffer);
+    if (err != default!) {
+        throw panic(err);
+    }
+
+    Δtime.Time parseTime = default!;
+    err = parseTime.UnmarshalBinary(buffer[..]);
+    if (err != default!) {
+        throw panic(err);
+    }
+
+    fmt.Printf("t: %v\n"u8, t);
+    fmt.Printf("parseTime: %v\n"u8, parseTime);
+    fmt.Printf("equal: %v\n"u8, parseTime.Equal(t));
+
+    // Output:
+    // t: 2025-04-01 15:30:45.123456789 +0000 UTC
+    // parseTime: 2025-04-01 15:30:45.123456789 +0000 UTC
+    // equal: true
+}
+
 public static void ExampleTime_AppendFormat() {
     var t = Δtime.Date(2017, Δtime.November, 4, 11, 0, 0, 0, Δtime.ΔUTC);
     var text = slice<byte>("Time: "u8);
 
     text = t.AppendFormat(text, Δtime.Kitchen);
-    fmt.Println(((@string)text));
+    fmt.Println((@string)text);
 
     // Output:
     // Time: 11:00AM
+}
+
+public static void ExampleTime_AppendText() {
+    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.ΔUTC);
+
+    var buffer = slice<byte>("t: "u8);
+
+    (buffer, var err) = t.AppendText(buffer);
+    if (err != default!) {
+        throw panic(err);
+    }
+
+    fmt.Printf("%s\n"u8, buffer);
+
+    // Output:
+    // t: 2025-04-01T15:30:45.123456789Z
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

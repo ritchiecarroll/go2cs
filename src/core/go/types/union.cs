@@ -5,9 +5,9 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -123,7 +123,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
                 continue;
             }
 
-            var uΔ1 = under((~t).typ);
+            var uΔ1 = (~t).typ.Underlying();
             var (f, _) = uΔ1._<ж<Interface>>(ᐧ);
             if ((~t).tilde) {
                 if (f != nil) {

@@ -29,7 +29,7 @@ public static nint Getpagesize() {
 //
 // The methods of File are safe for concurrent use.
 partial struct File {
-    internal partial ref ж<@file> @file { get; } // os specific
+    /*embed*/ internal ж<@file> @file; // os specific
 }
 
 // The defined file mode bits are the most significant bits of the [FileMode].

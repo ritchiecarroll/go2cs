@@ -4,7 +4,9 @@
 namespace go;
 
 using errors = errors_package;
+using stringslite = @internal.stringslite_package;
 using slices = slices_package;
+using @internal;
 using ꓸꓸꓸany = Span<any>;
 
 partial class fmt_package {
@@ -19,14 +21,34 @@ partial class fmt_package {
 // order they appear in the arguments.
 // It is invalid to supply the %w verb with an operand that does not implement
 // the error interface. The %w verb is otherwise a synonym for %v.
-public static error Errorf(sstring format, params ꓸꓸꓸany aʗp) {
+public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
+    error err = default!;
+    var a = aʗp.sslice();
+
+    // This function has been split in a somewhat unnatural way
+    // so that both it and the errors.New call can be inlined.
+    {
+        err = errorf(format, a.ꓸꓸꓸ); if (err != default!) {
+            return err;
+        }
+    }
+    // No formatting was needed. We can avoid some allocations and other work.
+    // See https://go.dev/cl/708836 for details.
+    return errors.New(format);
+}
+
+// errorf formats and returns an error value, or nil if no formatting is required.
+internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
+    if (len(a) == 0 && stringslite.IndexByte(format, (rune)'%') == -1) {
+        return default!;
+    }
     var p = newPrinter();
     p.Value.wrapErrs = true;
     p.doPrintf(format, a);
     ref var s = ref heap<@string>(out var Ꮡs);
-    s = ((@string)(slice<byte>)(~p).buf);
+    s = (@string)(slice<byte>)(~p).buf;
     error err = default!;
     switch (len((~p).wrappedErrs)) {
     case 0: {

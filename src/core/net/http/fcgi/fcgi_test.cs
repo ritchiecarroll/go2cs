@@ -167,7 +167,7 @@ public static void TestGetValues(ж<testing.T> Ꮡt) {
 
     @string want = wantᶜ;
     {
-        @string got = ((@string)(~wc).buf); if (got != want) {
+        @string got = (@string)(~wc).buf; if (got != want) {
             Ꮡt.Errorf(" got: %q\nwant: %q\n"u8, got, want);
         }
     }
@@ -184,11 +184,11 @@ internal static slice<byte> nameValuePair11(@string nameData, @string valueData)
 }
 
 internal static slice<byte> makeRecord(global::go.net.http.fcgi_package.recType recordType, uint16 requestId, slice<byte> contentData) {
-    var requestIdB1 = (byte)((requestId >> (int)(8)));
+    var requestIdB1 = (byte)(requestId >> 8);
     var requestIdB0 = (byte)requestId;
 
     nint contentLength = len(contentData);
-    var contentLengthB1 = (byte)((contentLength >> (int)(8)));
+    var contentLengthB1 = (byte)(contentLength >> 8);
     var contentLengthB0 = (byte)contentLength;
     return bytes.Join(new slice<byte>[]{
         new byte[]{1, (byte)recordType, requestIdB1, requestIdB0, contentLengthB1,

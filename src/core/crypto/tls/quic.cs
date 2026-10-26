@@ -125,6 +125,11 @@ public static QUICEventKind QUICResumeSession => 8;
 // This event only occurs on client connections.
 public static QUICEventKind QUICStoreSession => 9;
 
+// QUICErrorEvent indicates that a fatal error has occurred.
+// The handshake cannot proceed and the connection must be closed.
+// QUICEvent.Err is set.
+public static QUICEventKind QUICErrorEvent => 10;
+
 // A QUICEvent is an event occurring on a QUIC connection.
 //
 // The type of event is specified by the Kind field.
@@ -140,6 +145,9 @@ partial struct QUICEvent {
     public uint16 Suite;
     // Set for QUICResumeSession and QUICStoreSession.
     public ж<SessionState> SessionState;
+    // Set for QUICErrorEvent.
+    // The error will wrap AlertError.
+    public error Err;
 }
 
 partial struct quicState {
@@ -153,9 +161,10 @@ partial struct quicState {
     internal bool started;
     internal channel<EmptyStruct> signalc; // handshake data is available to be read
     internal channel<EmptyStruct> blockedc; // handshake is waiting for data, closed when done
-    internal /*<-*/channel<EmptyStruct> cancelc = /*<-*/channel<EmptyStruct>.RecvOnly; // handshake has been canceled
+    internal context.Context ctx; // handshake context
     internal Action cancel;
     internal bool waitingForDrain;
+    internal bool errorReturned;
     // readbuf is shared between HandleData and the handshake goroutine.
     // HandshakeCryptoData passes ownership to the handshake goroutine by
     // reading from signalc, and reclaims ownership by reading from blockedc.
@@ -232,7 +241,7 @@ public static QUICEvent NextEvent(this ref QUICConn q) {
     {
         nint last = (~qs).nextEvent - 1; if (last >= 0 && len((~qs).events[last].Data) > 0) {
             // Write over some of the previous event's data,
-            // to catch callers erroniously retaining it.
+            // to catch callers erroneously retaining it.
             (~qs).events[last].Data[0] = 0;
         }
     }
@@ -240,6 +249,17 @@ public static QUICEvent NextEvent(this ref QUICConn q) {
         qs.Value.waitingForDrain = false;
         ᐸꟷ((~qs).signalc);
         ᐸꟷ((~qs).blockedc);
+    }
+    {
+        var err = q.conn.Value.handshakeErr; if (err != default!) {
+            if ((~qs).errorReturned) {
+                return new QUICEvent(Kind: QUICNoEvent);
+            }
+            qs.Value.errorReturned = true;
+            qs.Value.events = default!;
+            qs.Value.nextEvent = 0;
+            return new QUICEvent(Kind: QUICErrorEvent, Err: (~q.conn).handshakeErr);
+        }
     }
     if ((~qs).nextEvent >= len((~qs).events)) {
         qs.Value.events = (~qs).events[..0];
@@ -254,10 +274,11 @@ public static QUICEvent NextEvent(this ref QUICConn q) {
 
 // Close closes the connection and stops any in-progress handshake.
 public static error Close(this ref QUICConn q) {
-    if ((~(~q.conn).quic).cancel == default!) {
+    if ((~(~q.conn).quic).ctx == default!) {
         return default!; // never started
     }
     (~(~q.conn).quic).cancel();
+    ᐸꟷ((~(~q.conn).quic).signalc);
     foreach (var _ᴛ1 in (~(~q.conn).quic).blockedc) {
         // Wait for the handshake goroutine to return.
     }
@@ -293,7 +314,7 @@ public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level
         c.Value.quic.Value.readbuf = default!;
         while (q.conn.of(Conn.Ꮡhand).Len() >= 4 && (~q.conn).handshakeErr == default!) {
             var b = q.conn.of(Conn.Ꮡhand).Bytes();
-            nint n = (nint)((nint)(((nint)b[1] << (int)(16)) | ((nint)b[2] << (int)(8))) | (nint)b[3]);
+            nint n = (nint)b[1] << 16 | (nint)b[2] << 8 | (nint)b[3];
             if (n > maxHandshake) {
                 q.conn.Value.handshakeErr = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, (nint)(maxHandshake));
                 break;
@@ -332,6 +353,9 @@ internal static readonly @string tlsSendSessionTicketˢ3 = "tls: SendSessionTick
 // Currently, it can only be called once.
 public static error SendSessionTicket(this ref QUICConn q, QUICSessionTicketOptions opts) {
     var c = q.conn;
+    if ((~(~c).config).SessionTicketsDisabled) {
+        return default!;
+    }
     if (!c.of(Conn.ᏑisHandshakeComplete).Load()) {
         return quicError(errors.New(tlsSendSessionTicketˢ));
     }
@@ -392,17 +416,18 @@ internal static error quicError(error err) {
     if (err == default!) {
         return default!;
     }
-    ref var ae = ref heap(new AlertError(), out var Ꮡae);
-    if (errors.As(err, Ꮡae)) {
-        return err;
+    {
+        var (_, okΔ1) = errors.AsType<AlertError>(err); if (okΔ1) {
+            return err;
+        }
     }
-    ref var a = ref heap(new alert(), out var Ꮡa);
-    if (!errors.As(err, Ꮡa)) {
+    var (a, ok) = errors.AsType<alert>(err);
+    if (!ok) {
         a = alertInternalError;
     }
     // Return an error wrapping the original error and an AlertError.
     // Truncate the text of the alert to 0 characters.
-    return fmt.Errorf("%w%.0w"u8, err, ((AlertError)(uint8)a));
+    return fmt.Errorf("%w%.0w"u8, err, (AlertError)(uint8)a);
 }
 
 internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
@@ -542,29 +567,17 @@ internal static error quicWaitForSignal(this ж<Conn> Ꮡc) {
         // Send on blockedc to notify the QUICConn that the handshake is blocked.
         // Exported methods of QUICConn wait for the handshake to become blocked
         // before returning to the user.
-        var selᴛ3 = (~c.quic).blockedc.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-        var selᴛ4 = (~c.quic).cancelc;
-        switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-        case 0: {
-            break;
-        }
-        case 1 when selᴛ4.ꟷᐳ(out _): {
-            return Ꮡc.sendAlertLocked(alertCloseNotify);
-        }}
+        (~c.quic).blockedc.ᐸꟷ(new EmptyStruct());
         // The QUICConn reads from signalc to notify us that the handshake may
         // be able to proceed. (The QUICConn reads, because we close signalc to
         // indicate that the handshake has completed.)
-        var selᴛ5 = (~c.quic).signalc.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-        var selᴛ6 = (~c.quic).cancelc;
-        switch (select(selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-        case 0: {
-            c.hand.Write((~c.quic).readbuf);
-            c.quic.Value.readbuf = default!;
-            break;
-        }
-        case 1 when selᴛ6.ꟷᐳ(out _): {
+        (~c.quic).signalc.ᐸꟷ(new EmptyStruct());
+        if ((~c.quic).ctx.Err() != default!) {
+            // The connection has been canceled.
             return Ꮡc.sendAlertLocked(alertCloseNotify);
-        }}
+        }
+        c.hand.Write((~c.quic).readbuf);
+        c.quic.Value.readbuf = default!;
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

@@ -147,7 +147,7 @@ internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io
         var (buf, err) = read(new build_internal_test_package.strings_ReaderжReader(r));
         if (err != default!) {
             if (tt.err == ""u8){
-                Ꮡt.Errorf("#%d: err=%q, expected success (%q)"u8, i, err, ((@string)buf));
+                Ꮡt.Errorf("#%d: err=%q, expected success (%q)"u8, i, err, (@string)buf);
             } else 
             if (!strings.Contains(err.Error(), tt.err)) {
                 Ꮡt.Errorf("#%d: err=%q, expected %q"u8, i, err, tt.err);
@@ -159,7 +159,7 @@ internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io
             continue;
         }
 
-        @string @out = ((@string)buf);
+        @string @out = (@string)buf;
         if (@out != testOut) {
             Ꮡt.Errorf("#%d: wrong output:\nhave %q\nwant %q\n"u8, i, @out, testOut);
         }
@@ -254,7 +254,7 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
     // Convert tests not to return syntax errors.
     var tests = new slice<readTest>(len(readFailuresTests));
     copy(tests, readFailuresTests);
-    foreach (var (i, _) in tests) {
+    foreach (var i in range(tests)) {
         var tt = Ꮡ(tests, i);
         if (!strings.Contains((~tt).err, nulˢ)) {
             tt.Value.err = ""u8;

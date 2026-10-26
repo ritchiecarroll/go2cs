@@ -2,14 +2,14 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-1_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/database.sql.driver.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/database/sql/driver@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/database/sql/driver) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/database/sql/driver)
+[![Tests](https://img.shields.io/badge/Tests-1_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/database.sql.driver.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/database/sql/driver@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/database/sql/driver) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/database/sql/driver)
 
 From C#, call this package through the static class go.database.sql.driver_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package driver defines interfaces to be implemented by database drivers as used by package sql.
 
-Most code should use the [database/sql](https://pkg.go.dev/database/sql@go1.24.13) package.
+Most code should use the [database/sql](https://pkg.go.dev/database/sql@go1.26.10) package.
 
 The driver interface has evolved over time. Drivers should implement \[Connector] and \[DriverContext] interfaces. The Connector.Connect and Driver.Open methods should never return \[ErrBadConn]. \[ErrBadConn] should only be returned from \[Validator], \[SessionResetter], or a query method if the connection is already in an invalid (e.g. closed) state.
 

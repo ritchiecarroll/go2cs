@@ -18,7 +18,7 @@ public static UntypedInt ΔBlockSize => 16;
 // A Block is an instance of AES using a particular key.
 // It is safe for concurrent use.
 partial struct Block {
-    internal partial ref block block { get; }
+    /*embed*/ internal block block;
 }
 
 // blockExpanded is the block type used for all architectures except s390x,

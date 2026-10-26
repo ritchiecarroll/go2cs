@@ -5,25 +5,20 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string zeroˢ = "zero"u8;
-private static readonly @string oneˢ = "one"u8;
-private static readonly @string manyˢ = "many"u8;
-
 internal static partial @string classify(nint n) {
     var exprᴛ1 = n;
     var matchᴛ1 = false;
     if (exprᴛ1 is 0) { matchᴛ1 = true;
-        return zeroˢ;
+        return "zero";
     }
     if (exprᴛ1 is 1) { matchᴛ1 = true;
-        return oneˢ;
+        return "one";
     }
     if (exprᴛ1 is 2) { matchᴛ1 = true;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
-        return manyˢ;
+        return "many";
     }
     return default!;
 
@@ -92,24 +87,19 @@ internal static partial (nint r, bool ok) namedDefer(nint n) {
     ᒐdone: return (r, ok);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string intervalOnlyˢ = "interval-only"u8;
-private static readonly @string noneˢ = "none"u8;
-private static readonly @string bothOrIdleˢ = "both-or-idle"u8;
-
 internal static @string keepAlive(nint idle, nint interval) {
     switch (ᐧ) {
     case {} when idle < 0 && interval >= 0: {
-        return intervalOnlyˢ;
+        return "interval-only";
     }
     case {} when idle < 0 && interval < 0: {
-        return noneˢ;
+        return "none";
     }
     case {} when idle >= 0 && interval >= 0: {
         break;
     }}
 
-    return bothOrIdleˢ;
+    return "both-or-idle";
 }
 
 internal static partial nint leadingDefault(nint n) {
@@ -140,10 +130,6 @@ internal static nint waitObject0 = 0;
 
 internal static nint waitFailed = -1;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string failedˢ = "failed"u8;
-private static readonly @string unexpectedˢ = "unexpected"u8;
-
 internal static partial @string waitShape(nint s) {
     var exprᴛ1 = s;
     if (exprᴛ1 == waitObject0) {
@@ -152,13 +138,13 @@ internal static partial @string waitShape(nint s) {
         } while (false);
     }
     else if (exprᴛ1 == waitFailed) {
-        return failedˢ;
+        return "failed";
     }
     else { /* default: */
-        return unexpectedˢ;
+        return "unexpected";
     }
 
-    return "ok"u8;
+    return "ok";
 }
 
 internal static void Main() {

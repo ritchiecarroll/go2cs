@@ -18,11 +18,12 @@ using io = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using runtime = runtime_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using atomic = sync.atomic_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using fs = go.io.fs_package;
+using go;
 using go.@internal;
 using go.@internal.coverage;
 using go.io;
@@ -225,11 +226,11 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
             }
         }
         tlen += (uint64)entry.Len;
-        var ecm = ((coverage.CounterMode)entry.CounterMode);
+        var ecm = (coverage.CounterMode)entry.CounterMode;
         if (modeClash(ecm)) {
             return (default!, fmt.Errorf("coverage counter mode clash: package %s uses mode=%d, but package %s uses mode=%s\n"u8, ml[0].PkgPath, cmode, entry.PkgPath, ecm));
         }
-        var ecg = ((coverage.CounterGranularity)entry.CounterGranularity);
+        var ecg = (coverage.CounterGranularity)entry.CounterGranularity;
         if (granClash(ecg)) {
             return (default!, fmt.Errorf("coverage counter granularity clash: package %s uses gran=%d, but package %s uses gran=%s\n"u8, ml[0].PkgPath, cgran, entry.PkgPath, ecg));
         }
@@ -488,6 +489,7 @@ internal static readonly @string ioWriterˢ = "<io.Writer>"u8;
 
 internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metalist, coverage.CounterMode cmode, coverage.CounterGranularity gran, /*[16]*/ array<byte> finalHash) {
     finalHash = finalHash.Clone();
+    var blobsᴷ = new stackAppend<slice<byte>>();
 
     var mfw = encodemeta.NewCoverageMetaFileWriter(ioWriterˢ, w);
 
@@ -496,7 +498,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
         var e = vᴛ1.ΔClone();
 
         var sd = @unsafe.Slice(e.P, (nint)e.Len);
-        blobs = append(blobs, sd);
+        blobs = append(blobsᴷ, blobs, sd);
     }
     return mfw.Write(finalHash, blobs, cmode, gran);
 }
@@ -506,7 +508,7 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
         ctrs = ctrs[..0];
-        foreach (var (i, _) in actrs) {
+        foreach (var i in range(actrs)) {
             ctrs = append(ctrs, Ꮡ(actrs, i).Load());
         }
         return ctrs;

@@ -84,13 +84,13 @@ internal static slice<conversionTest> conversionTests() {
     return new conversionTest[]{
         // Exact conversions (destination pointer type matches source type)
         new(s: (@string)"foo"u8, d: Ꮡscanstr, wantstr: "foo"u8),
-        new(s: (nint)(123), d: Ꮡscanint, wantint: 123),
+        new(s: (nint)123, d: Ꮡscanint, wantint: 123),
         new(s: someTime, d: Ꮡscantime, wanttime: someTime),
 
         // To strings
         new(s: (@string)"string"u8, d: Ꮡscanstr, wantstr: "string"u8),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanstr, wantstr: "byteslice"u8),
-        new(s: (nint)(123), d: Ꮡscanstr, wantstr: "123"u8),
+        new(s: (nint)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (int8)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (int64)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (uint8)123, d: Ꮡscanstr, wantstr: "123"u8),
@@ -111,7 +111,7 @@ internal static slice<conversionTest> conversionTests() {
         new(s: default!, d: Ꮡscanbytes, wantbytes: default!),
         new(s: (@string)"string"u8, d: Ꮡscanbytes, wantbytes: slice<byte>("string"u8)),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanbytes, wantbytes: slice<byte>("byteslice"u8)),
-        new(s: (nint)(123), d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
+        new(s: (nint)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (int8)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (int64)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (uint8)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
@@ -124,7 +124,7 @@ internal static slice<conversionTest> conversionTests() {
         new(s: default!, d: Ꮡscanraw, wantraw: default!),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"byteslice"u8))),
         new(s: (@string)"string"u8, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"string"u8))),
-        new(s: (nint)(123), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
+        new(s: (nint)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int8)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int64)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (uint8)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
@@ -154,7 +154,7 @@ internal static slice<conversionTest> conversionTests() {
         new(s: (@string)"True"u8, d: Ꮡscanbool, wantbool: true),
         new(s: (@string)"TRUE"u8, d: Ꮡscanbool, wantbool: true),
         new(s: (@string)"1"u8, d: Ꮡscanbool, wantbool: true),
-        new(s: (nint)(1), d: Ꮡscanbool, wantbool: true),
+        new(s: (nint)1, d: Ꮡscanbool, wantbool: true),
         new(s: (int64)1, d: Ꮡscanbool, wantbool: true),
         new(s: (uint16)1, d: Ꮡscanbool, wantbool: true),
 
@@ -163,13 +163,13 @@ internal static slice<conversionTest> conversionTests() {
         new(s: (@string)"false"u8, d: Ꮡscanbool, wantbool: false),
         new(s: (@string)"FALSE"u8, d: Ꮡscanbool, wantbool: false),
         new(s: (@string)"0"u8, d: Ꮡscanbool, wantbool: false),
-        new(s: (nint)(0), d: Ꮡscanbool, wantbool: false),
+        new(s: (nint)0, d: Ꮡscanbool, wantbool: false),
         new(s: (int64)0, d: Ꮡscanbool, wantbool: false),
         new(s: (uint16)0, d: Ꮡscanbool, wantbool: false),
 
         // Not bools
         new(s: (@string)"yup"u8, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert ""yup"" into type bool"u8),
-        new(s: (nint)(2), d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"u8),
+        new(s: (nint)2, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"u8),
 
         // Floats
         new(s: (float64)1.5D, d: Ꮡscanf64, wantf64: (float64)1.5D),
@@ -472,7 +472,7 @@ public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
 public partial struct Valuer_V /*@string*/;
 
 public static (driverꓸValue, error) Value(this Valuer_V v) {
-    return (strings.ToUpper(((@string)v)), default!);
+    return (strings.ToUpper((@string)v), default!);
 }
 
 public partial struct Valuer_P /*@string*/;
@@ -486,7 +486,7 @@ public static (driverꓸValue, error) Value(this ж<Valuer_P> Ꮡp) {
     if (Ꮡp == nil) {
         return (nilToStrˢ, default!);
     }
-    return (strings.ToUpper(((@string)(p))), default!);
+    return (strings.ToUpper((@string)(p)), default!);
 }
 
 internal partial struct TestDriverArgs_tests /*dyn*/ {
@@ -500,7 +500,7 @@ public static void TestDriverArgs(ж<testing.T> Ꮡt) {
     ж<@string> nilStrPtr = default!;
     var tests = new slice<TestDriverArgs_tests>(5){
         [0] = new(
-            args: new any[]{((Valuer_V)(@string)fooˢ)}.slice(),
+            args: new any[]{(Valuer_V)(@string)fooˢ}.slice(),
             want: new driver.NamedValue[]{
                 new(
                     Ordinal: 1,
@@ -651,6 +651,7 @@ public static void TestDecimal(ж<testing.T> Ꮡt) {
 
         // Ensure reflection is not used to assign the value by using different types.
         new(name: "diff"u8, @in: new decFinite(exponent: -6), @out: new dec(exponent: -6)),
+
         new(name: "bad-form"u8, @in: new dec(form: 200), err: true)
     }.slice();
     foreach (var (_, vᴛ1) in list) {

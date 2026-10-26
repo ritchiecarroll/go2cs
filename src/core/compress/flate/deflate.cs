@@ -57,7 +57,7 @@ partial struct compressionLevel {
     internal nint level, good, lazy, nice, chain, fastSkipHashing;
 }
 
-internal static slice<compressionLevel> levels = new compressionLevel[]{
+[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = new compressionLevel[]{
     new(0, 0, 0, 0, 0, 0), // NoCompression.
     new(1, 0, 0, 0, 0, 0), // BestSpeed uses a custom algorithm; see deflatefast.go.
     // For levels 2-3 we don't bother trying with lazy matches.
@@ -71,25 +71,16 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
     new(7, 8, 32, 128, 256, skipNever),
     new(8, 32, 128, 258, 1024, skipNever),
     new(9, 32, 258, 258, 4096, skipNever)
-}.slice();
+}.slice(); }
 
 partial struct compressor {
-    internal partial ref compressionLevel compressionLevel { get; }
+    /*embed*/ internal compressionLevel compressionLevel;
     internal ж<huffmanBitWriter> w;
     internal Action<slice<byte>, slice<uint32>> bulkHasher;
     // compression algorithm
     internal Func<ж<compressor>, slice<byte>, nint> fill; // copy data to window
     internal Action<ж<compressor>> step;        // process window
     internal ж<deflateFast> bestSpeed;               // Encoder for BestSpeed
-    // Input hash chains
-    // hashHead[hashValue] contains the largest inputIndex with the specified hash value
-    // If hashHead[hashValue] is within the current window, then
-    // hashPrev[hashHead[hashValue] & windowMask] contains the previous index
-    // with the same hash value.
-    internal nint chainHead;
-    internal array<uint32> hashHead = new(hashSize);
-    internal array<uint32> hashPrev = new(windowSize);
-    internal nint hashOffset;
     // input window: unprocessed data is window[index:windowEnd]
     internal nint index;
     internal slice<byte> window;
@@ -104,6 +95,17 @@ partial struct compressor {
     internal nint offset;
     internal nint maxInsertIndex;
     internal error err;
+    // Input hash chains
+    // hashHead[hashValue] contains the largest inputIndex with the specified hash value
+    // If hashHead[hashValue] is within the current window, then
+    // hashPrev[hashHead[hashValue] & windowMask] contains the previous index
+    // with the same hash value.
+    // These are large and do not contain pointers, so put them
+    // near the end of the struct so the GC has to scan less.
+    internal nint chainHead;
+    internal array<uint32> hashHead = new(hashSize);
+    internal array<uint32> hashPrev = new(windowSize);
+    internal nint hashOffset;
     // hashMatch must be able to contain hashes for the maximum match length.
     internal array<uint32> hashMatch = new(maxMatchLength - 1);
 }
@@ -200,10 +202,10 @@ internal static void fillWindow(this ref compressor d, slice<byte> b) {
         d.bulkHasher(toCheck, dst);
         foreach (var (i, val) in dst) {
             nint di = i + index;
-            var hh = Ꮡ(d.hashHead, (uint32)(val & (uint32)hashMask));
+            var hh = Ꮡ(d.hashHead, (val & (uint32)hashMask));
             // Get previous value with the same hash.
             // Our chain should point to the previous value.
-            d.hashPrev[(nint)(di & (nint)windowMask)] = hh.Value;
+            d.hashPrev[(di & (nint)windowMask)] = hh.Value;
             // Set the head of the hash chain to us.
             hh.Value = (uint32)(di + d.hashOffset);
         }
@@ -263,7 +265,7 @@ internal static (nint length, nint offset, bool ok) findMatch(this ref compresso
             // hashPrev[i & windowMask] has already been overwritten, so stop now.
             break;
         }
-        i = (nint)d.hashPrev[(nint)(i & (nint)windowMask)] - d.hashOffset;
+        i = (nint)d.hashPrev[(i & (nint)windowMask)] - d.hashOffset;
         if (i < minIndex || i < 0) {
             break;
         }
@@ -287,7 +289,7 @@ internal static UntypedInt hashmul => 0x1e35a7bd;
 // of the supplied slice.
 // The caller must ensure that len(b) >= 4.
 internal static uint32 hash4(slice<byte> b) {
-    return ((((uint32)((uint32)((uint32)((uint32)b[3] | ((uint32)b[2] << (int)(8))) | ((uint32)b[1] << (int)(16))) | ((uint32)b[0] << (int)(24)))) * (uint32)hashmul) >> (int)((32 - hashBits)));
+    return (((uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24) * (uint32)hashmul) >> (int)(32 - hashBits);
 }
 
 // bulkHash4 will compute hashes using the same
@@ -296,12 +298,12 @@ internal static void bulkHash4(slice<byte> b, slice<uint32> dst) {
     if (len(b) < minMatchLength) {
         return;
     }
-    var hb = (uint32)((uint32)((uint32)((uint32)b[3] | ((uint32)b[2] << (int)(8))) | ((uint32)b[1] << (int)(16))) | ((uint32)b[0] << (int)(24)));
-    dst[0] = ((hb * (uint32)hashmul) >> (int)((32 - hashBits)));
+    var hb = (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
+    dst[0] = (hb * (uint32)hashmul) >> (int)(32 - hashBits);
     nint end = len(b) - (nint)minMatchLength + 1;
     for (nint i = 1; i < end; i++) {
-        hb = (uint32)(((hb << (int)(8))) | (uint32)b[i + 3]);
-        dst[i] = ((hb * (uint32)hashmul) >> (int)((32 - hashBits)));
+        hb = (hb << 8) | (uint32)b[i + 3];
+        dst[i] = (hb * (uint32)hashmul) >> (int)(32 - hashBits);
     }
 }
 
@@ -353,7 +355,7 @@ internal static void encSpeed(this ref compressor d) {
     d.tokens = d.bestSpeed.encode(d.tokens[..0], d.window.slice(0, d.windowEnd));
 
     // If we removed less than 1/16th, Huffman compress the block.
-    if (len(d.tokens) > d.windowEnd - ((d.windowEnd >> (int)(4)))){
+    if (len(d.tokens) > d.windowEnd - (d.windowEnd >> 4)){
         d.w.writeBlockHuff(false, d.window.slice(0, d.windowEnd));
     } else {
         d.w.writeBlockDynamic(d.tokens, false, d.window.slice(0, d.windowEnd));
@@ -415,9 +417,9 @@ Loop:
         if (d.index < d.maxInsertIndex) {
             // Update the hash
             var hash = hash4(d.window.slice(d.index, d.index + (nint)minMatchLength));
-            var hh = Ꮡ(d.hashHead, (uint32)(hash & (uint32)hashMask));
+            var hh = Ꮡ(d.hashHead, (hash & (uint32)hashMask));
             d.chainHead = (nint)(hh.Value);
-            d.hashPrev[(nint)(d.index & (nint)windowMask)] = (uint32)d.chainHead;
+            d.hashPrev[(d.index & (nint)windowMask)] = (uint32)d.chainHead;
             hh.Value = (uint32)(d.index + d.hashOffset);
         }
         nint prevLength = d.length;
@@ -462,8 +464,8 @@ Loop:
                         var hash = hash4(d.window.slice(index, index + (nint)minMatchLength));
                         // Get previous value with the same hash.
                         // Our chain should point to the previous value.
-                        var hh = Ꮡ(d.hashHead, (uint32)(hash & (uint32)hashMask));
-                        d.hashPrev[(nint)(index & (nint)windowMask)] = hh.Value;
+                        var hh = Ꮡ(d.hashHead, (hash & (uint32)hashMask));
+                        d.hashPrev[(index & (nint)windowMask)] = hh.Value;
                         // Set the head of the hash chain to us.
                         hh.Value = (uint32)(index + d.hashOffset);
                     }
@@ -692,8 +694,8 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, nint level) {
 // [Writer] with a preset dictionary. The returned [Writer] behaves
 // as if the dictionary had been written to it without producing
 // any compressed output. The compressed data written to w
-// can only be decompressed by a [Reader] initialized with the
-// same dictionary.
+// can only be decompressed by a reader initialized with the
+// same dictionary (see [NewReaderDict]).
 public static (ж<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<byte> dict) {
     var dw = Ꮡ(new dictWriter(w));
     var (zw, err) = NewWriter(new dictWriterжWriter(dw), level);
@@ -702,7 +704,7 @@ public static (ж<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<b
     }
     zw.of(Writer.Ꮡd).fillWindow(dict);
     zw.Value.dict = appendꓸꓸꓸ((~zw).dict, dict); // duplicate dictionary for Reset method.
-    return (zw, err);
+    return (zw, default!);
 }
 
 partial struct dictWriter {

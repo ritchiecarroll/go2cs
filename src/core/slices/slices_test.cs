@@ -16,6 +16,7 @@ using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class slices_test_package {
@@ -384,7 +385,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
         }
     }
 
-    var cmpIntString = (nint v1, @string v2) => strings.Compare(((@string)((rune)v1 - 1 + (rune)'a')), v2);
+    var cmpIntString = (nint v1, @string v2) => strings.Compare((@string)((rune)v1 - 1 + (rune)'a'), v2);
     {
         nint got = CompareFunc(s1, s3, cmpIntString); if (got != 0) {
             Ꮡt.Errorf("CompareFunc(%v, %v, cmpIntString) = %d, want 0"u8, s1, s3, got);
@@ -463,12 +464,12 @@ public static void TestIndexFunc(ж<testing.T> Ꮡt) {
     var s1 = new @string[]{"hi"u8, "HI"u8}.slice();
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(equal<@string>, (@string)"HI")); if (got != 1) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(1));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)1);
         }
     }
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(strings.EqualFold, (@string)"HI")); if (got != 0) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(0));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)0);
         }
     }
 }
@@ -584,7 +585,7 @@ public static void TestInsert(ж<testing.T> Ꮡt) {
         var n = testing.AllocsPerRun(10, () => {
             var sΔ1 = new nint[]{1, 2, 3}.slice();
             for (nint i = 0; i < count; i++) {
-                sΔ1 = Insert(sΔ1, 0, (nint)(1));
+                sΔ1 = Insert(sΔ1, 0, (nint)1);
             }
         });
         if (n > /* count / 2 */ 25D) {
@@ -941,7 +942,7 @@ public static void BenchmarkCompact_Large(ж<testing.B> Ꮡb) {
     });
     Ꮡb.Run(noDupˢ, (ж<testing.B> bΔ2) => {
         var ss = GoReflect.WithElemDims(new slice<BenchmarkCompact_Large_Large>(N), 16);
-        foreach (var (i, _) in ss) {
+        foreach (var i in range(ss)) {
             ss[i][0] = i;
         }
         bΔ2.ResetTimer();
@@ -1069,7 +1070,7 @@ public static void BenchmarkCompactFunc_Large(ж<testing.B> Ꮡb) {
     });
     Ꮡb.Run(noDupˢ, (ж<testing.B> bΔ3) => {
         var ss = new slice<BenchmarkCompactFunc_Large_Element>(N);
-        foreach (var (i, _) in ss) {
+        foreach (var i in range(ss)) {
             ss[i] = i;
         }
         bΔ3.ResetTimer();
@@ -1463,7 +1464,7 @@ public static void TestInsertGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Insert(b, len(b) - 1, (byte)(0));
+        b = Insert(b, len(b) - 1, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;
@@ -1481,7 +1482,7 @@ public static void TestReplaceGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Replace(b, len(b) - 2, len(b) - 1, (byte)(0), (byte)(0));
+        b = Replace(b, len(b) - 2, len(b) - 1, (byte)0, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;
@@ -1576,6 +1577,8 @@ internal partial struct TestConcat_too_large_cases /*dyn*/ {
 }
 
 public static void TestConcat_too_large(ж<testing.T> Ꮡt) {
+    var ssᴷ = new stackAppend<slice<TestConcat_too_large_void>>();
+
     var cases = new TestConcat_too_large_cases[]{
         new(
             lengths: new nint[]{0, 0}.slice(),
@@ -1612,7 +1615,7 @@ public static void TestConcat_too_large(ж<testing.T> Ꮡt) {
         ss = new slice<slice<TestConcat_too_large_void>>(0, len(tc.lengths));
         foreach (var (_, l) in tc.lengths) {
             var s = new slice<TestConcat_too_large_void>(l);
-            ss = append(ss, s);
+            ss = append(ssᴷ, ss, s);
         }
         ((Action)(() => {
             GoFrame ᒐ = default;
@@ -1724,6 +1727,8 @@ public static void TestRepeatPanics(ж<testing.T> Ꮡt) {
     }
 }
 
+internal static ж<nint> leak;
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object cloneKeepsAliveSDueToˢ = (@string)"clone keeps alive s due to array overlap"u8;
 
@@ -1734,6 +1739,127 @@ public static void TestIssue68488(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == Ꮡ(s, 0) || exprᴛ1 == Ꮡ(s, 1) || exprᴛ1 == Ꮡ(s, 2)) {
         Ꮡt.Error(cloneKeepsAliveSDueToˢ);
     }
+    leak = Ꮡ(s, 1); // see go.dev/issue/74387
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string appendSeqNilEmptyˢ = "AppendSeq(nil, empty)"u8;
+private static readonly @string insertNil0ˢ = "Insert(nil, 0)"u8;
+private static readonly @string insertEmpty0ˢ = "Insert(empty, 0)"u8;
+private static readonly @string deleteNil00ˢ = "Delete(nil, 0, 0)"u8;
+private static readonly @string deleteEmpty00ˢ = "Delete(empty, 0, 0)"u8;
+private static readonly @string deleteInt101ˢ = "Delete([]int{1}, 0, 1)"u8;
+private static readonly @string deleteFuncNilFˢ = "DeleteFunc(nil, f)"u8;
+private static readonly @string deleteFuncEmptyFˢ = "DeleteFunc(empty, f)"u8;
+private static readonly @string deleteFuncInt1Truthˢ = "DeleteFunc([]int{1}, truth)"u8;
+private static readonly @string replaceNil00ˢ = "Replace(nil, 0, 0)"u8;
+private static readonly @string replaceEmpty00ˢ = "Replace(empty, 0, 0)"u8;
+private static readonly @string replaceInt101ˢ = "Replace([]int{1}, 0, 1)"u8;
+private static readonly @string cloneNilˢ = "Clone(nil)"u8;
+private static readonly @string cloneEmptyˢ = "Clone(empty)"u8;
+private static readonly @string compactNilˢ = "Compact(nil)"u8;
+private static readonly @string compactEmptyˢ = "Compact(empty)"u8;
+private static readonly @string compactFuncNilˢ = "CompactFunc(nil)"u8;
+private static readonly @string compactFuncEmptyˢ = "CompactFunc(empty)"u8;
+private static readonly @string growNil0ˢ = "Grow(nil, 0)"u8;
+private static readonly @string growEmpty0ˢ = "Grow(empty, 0)"u8;
+private static readonly @string clipNilˢ = "Clip(nil)"u8;
+private static readonly @string clipEmptyˢ = "Clip(empty)"u8;
+private static readonly @string clipInt100ˢ = "Clip([]int{1}[:0:0])"u8;
+private static readonly @string concatNilEmptyˢ = "Concat(nil, ...empty...)"u8;
+private static readonly @string concatEmptyEmptyˢ = "Concat(empty, ...empty...)"u8;
+private static readonly @string concatˢ = "Concat()"u8;
+private static readonly @string repeatNil0ˢ = "Repeat(nil, 0)"u8;
+private static readonly @string repeatEmpty0ˢ = "Repeat(empty, 0)"u8;
+private static readonly @string repeatNil2ˢ = "Repeat(nil, 2)"u8;
+private static readonly @string repeatEmpty2ˢ = "Repeat(empty, 2)"u8;
+private static readonly @string collectEmptyˢ = "Collect(empty)"u8;
+private static readonly @string sortedEmptyˢ = "Sorted(empty)"u8;
+private static readonly @string sortedFuncEmptyˢ = "SortedFunc(empty)"u8;
+private static readonly @string sortedStableFuncEmptyˢ = "SortedStableFunc(empty)"u8;
+
+// This test asserts the behavior when the primary slice operand is nil.
+//
+// Some operations preserve the nilness of their operand while others
+// do not, but in all cases the behavior is documented.
+public static void TestNilness(ж<testing.T> Ꮡt) {
+    slice<nint> emptySlice = new nint[]{}.slice();
+    slice<nint> nilSlice = slice<nint>(default!);
+    Action<Func<nint, bool>> emptySeq = (Func<nint, bool> yield) => {
+    };
+    Func<nint, bool> truth = (nint _) => true;
+    Func<nint, nint, bool> equal = (nint x, nint y) => {
+        throw panic("unreachable");
+    };
+
+    void wantNil(slice<nint> Δslice, @string cond) {
+        if (Δslice != default!) {
+            Ꮡt.Errorf("%s != nil"u8, cond);
+        }
+    }
+    void wantNonNil(slice<nint> Δslice, @string cond) {
+        if (Δslice == default!) {
+            Ꮡt.Errorf("%s == nil"u8, cond);
+        }
+    }
+
+    // The update functions
+    //    Insert, AppendSeq, Delete, DeleteFunc, Clone, Compact, CompactFunc
+    // preserve nilness, like s[i:j].
+    wantNil(AppendSeq(nilSlice, new iter.Seq<nint>(emptySeq)), appendSeqNilEmptyˢ);
+    wantNonNil(AppendSeq(emptySlice, new iter.Seq<nint>(emptySeq)), appendSeqNilEmptyˢ);
+
+    wantNil(Insert<slice<nint>, nint>(nilSlice, 0), insertNil0ˢ);
+    wantNonNil(Insert<slice<nint>, nint>(emptySlice, 0), insertEmpty0ˢ);
+
+    wantNil(Delete<slice<nint>, nint>(nilSlice, 0, 0), deleteNil00ˢ);
+    wantNonNil(Delete<slice<nint>, nint>(emptySlice, 0, 0), deleteEmpty00ˢ);
+    wantNonNil(Delete<slice<nint>, nint>(new nint[]{1}.slice(), 0, 1), deleteInt101ˢ);
+
+    wantNil(DeleteFunc(nilSlice, truth), deleteFuncNilFˢ);
+    wantNonNil(DeleteFunc(emptySlice, truth), deleteFuncEmptyFˢ);
+    wantNonNil(DeleteFunc(new nint[]{1}.slice(), truth), deleteFuncInt1Truthˢ);
+
+    wantNil(Replace<slice<nint>, nint>(nilSlice, 0, 0), replaceNil00ˢ);
+    wantNonNil(Replace<slice<nint>, nint>(emptySlice, 0, 0), replaceEmpty00ˢ);
+    wantNonNil(Replace<slice<nint>, nint>(new nint[]{1}.slice(), 0, 1), replaceInt101ˢ);
+
+    wantNil(Clone<slice<nint>, nint>(nilSlice), cloneNilˢ);
+    wantNonNil(Clone<slice<nint>, nint>(emptySlice), cloneEmptyˢ);
+
+    wantNil(Compact<slice<nint>, nint>(nilSlice), compactNilˢ);
+    wantNonNil(Compact<slice<nint>, nint>(emptySlice), compactEmptyˢ);
+
+    wantNil(CompactFunc(nilSlice, equal), compactFuncNilˢ);
+    wantNonNil(CompactFunc(emptySlice, equal), compactFuncEmptyˢ);
+
+    wantNil(Grow<slice<nint>, nint>(nilSlice, 0), growNil0ˢ);
+    wantNonNil(Grow<slice<nint>, nint>(emptySlice, 0), growEmpty0ˢ);
+
+    wantNil(Clip<slice<nint>, nint>(nilSlice), clipNilˢ);
+    wantNonNil(Clip<slice<nint>, nint>(emptySlice), clipEmptyˢ);
+    wantNonNil(Clip<slice<nint>, nint>(new nint[]{1}.slice().slice(0, 0, 0)), clipInt100ˢ);
+
+    // Concat returns nil iff the result is empty.
+    // This is an unfortunate irregularity.
+    wantNil(Concat<slice<nint>, nint>(nilSlice, emptySlice, nilSlice, emptySlice), concatNilEmptyˢ);
+    wantNil(Concat<slice<nint>, nint>(emptySlice, emptySlice, nilSlice, emptySlice), concatEmptyEmptyˢ);
+    wantNil(Concat<slice<nint>, nint>(), concatˢ);
+
+    // Repeat never returns nil. Another irregularity.
+    wantNonNil(Repeat<slice<nint>, nint>(nilSlice, 0), repeatNil0ˢ);
+    wantNonNil(Repeat<slice<nint>, nint>(emptySlice, 0), repeatEmpty0ˢ);
+    wantNonNil(Repeat<slice<nint>, nint>(nilSlice, 2), repeatNil2ˢ);
+    wantNonNil(Repeat<slice<nint>, nint>(emptySlice, 2), repeatEmpty2ˢ);
+
+    // The collection functions
+    //     Collect, Sorted, SortedFunc, SortedStableFunc
+    // return nil given an empty sequence.
+    wantNil(Collect(new iter.Seq<nint>(emptySeq)), collectEmptyˢ);
+
+    wantNil(Sorted(new iter.Seq<nint>(emptySeq)), sortedEmptyˢ);
+    wantNil(SortedFunc<nint>(new iter.Seq<nint>(emptySeq), cmp.Compare<nint>), sortedFuncEmptyˢ);
+    wantNil(SortedStableFunc<nint>(new iter.Seq<nint>(emptySeq), cmp.Compare<nint>), sortedStableFuncEmptyˢ);
 }
 
 } // end slices_test_package

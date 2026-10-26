@@ -9,11 +9,13 @@
 // wrap it in our own nicer implementation.
 namespace go;
 
-using itoa = @internal.itoa_package;
-using runtimesyscall = @internal.runtime.syscall_package;
+using linux = @internal.runtime.syscall.linux_package;
+using strconv = @internal.strconv_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime.syscall;
 using go.sync;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
@@ -66,8 +68,8 @@ public static (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr trap, uint
     Errno err = default!;
 
     uintptr errno = default!;
-    (r1, r2, errno) = runtimesyscall.Syscall6(trap, a1, a2, a3, a4, a5, a6);
-    err = ((Errno)errno);
+    (r1, r2, errno) = linux.Syscall6(trap, a1, a2, a3, a4, a5, a6);
+    err = (Errno)errno;
     return (r1, r2, err);
 }
 
@@ -147,12 +149,7 @@ internal static bool isGroupMember(nint gid) {
         return false;
     }
 
-    foreach (var (_, g) in groups) {
-        if (g == gid) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains(groups, gid);
 }
 
 internal static bool isCapDacOverrideSet() {
@@ -166,7 +163,7 @@ internal static bool isCapDacOverrideSet() {
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);
 
-    return err == 0 && (uint32)(c.data[0].effective & capToMask(_CAP_DAC_OVERRIDE)) != 0;
+    return err == 0 && (c.data[0].effective & capToMask(_CAP_DAC_OVERRIDE)) != 0;
 }
 
 //sys	faccessat(dirfd int, path string, mode uint32) (err error)
@@ -203,7 +200,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
 
     ref var st = ref heap(new Stat_t(), out var Ꮡst);
     {
-        var errΔ2 = fstatat(dirfd, path, Ꮡst, (nint)(flags & (nint)_AT_SYMLINK_NOFOLLOW)); if (errΔ2 != default!) {
+        var errΔ2 = fstatat(dirfd, path, Ꮡst, flags & (nint)_AT_SYMLINK_NOFOLLOW); if (errΔ2 != default!) {
             return errΔ2;
         }
     }
@@ -215,7 +212,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
 
     // Fallback to checking permission bits.
     nint uid = default!;
-    if ((nint)(flags & (nint)_AT_EACCESS) != 0){
+    if ((flags & (nint)_AT_EACCESS) != 0){
         uid = Geteuid();
         if (uid != 0 && isCapDacOverrideSet()) {
             // If CAP_DAC_OVERRIDE is set, file access check is
@@ -228,11 +225,11 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     }
 
     if (uid == 0) {
-        if ((uint32)(mode & 1) == 0) {
+        if ((mode & 1) == 0) {
             // Root can read and write any file.
             return default!;
         }
-        if ((uint32)(st.Mode & 73) != 0) {
+        if ((st.Mode & 73) != 0) {
             // Root can execute any file that anybody can execute.
             return default!;
         }
@@ -241,23 +238,23 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
 
     uint32 fmode = default!;
     if ((uint32)uid == st.Uid){
-        fmode = (uint32)(((st.Mode >> (int)(6))) & 7);
+        fmode = (st.Mode >> 6) & 7;
     } else {
         nint gid = default!;
-        if ((nint)(flags & (nint)_AT_EACCESS) != 0){
+        if ((flags & (nint)_AT_EACCESS) != 0){
             gid = Getegid();
         } else {
             gid = Getgid();
         }
 
         if ((uint32)gid == st.Gid || isGroupMember((nint)st.Gid)){
-            fmode = (uint32)(((st.Mode >> (int)(3))) & 7);
+            fmode = (st.Mode >> 3) & 7;
         } else {
-            fmode = (uint32)(st.Mode & 7);
+            fmode = st.Mode & 7;
         }
     }
 
-    if ((uint32)(fmode & mode) == mode) {
+    if ((fmode & mode) == mode) {
         return default!;
     }
 
@@ -274,10 +271,10 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         if (AreEqual(err, ENOSYS)) {
             // fchmodat2 isn't available. If the flags are known to be valid,
             // return EOPNOTSUPP to indicate that fchmodat doesn't support them.
-            if ((nint)(flags & ~(nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0){
+            if ((flags & ~(nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0){
                 return EINVAL;
             } else 
-            if ((nint)(flags & (nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0) {
+            if ((flags & (nint)((nint)((nint)_AT_SYMLINK_NOFOLLOW | (nint)_AT_EMPTY_PATH))) != 0) {
                 return EOPNOTSUPP;
             }
         }
@@ -300,12 +297,12 @@ public static error /*err*/ Mknod(@string path, uint32 mode, nint dev) {
 }
 
 public static (nint fd, error err) Open(@string path, nint mode, uint32 perm) {
-    return openat(_AT_FDCWD, path, (nint)(mode | (nint)O_LARGEFILE), perm);
+    return openat(_AT_FDCWD, path, mode | (nint)O_LARGEFILE, perm);
 }
 
 //sys	openat(dirfd int, path string, flags int, mode uint32) (fd int, err error)
 public static (nint fd, error err) Openat(nint dirfd, @string path, nint flags, uint32 mode) {
-    return openat(dirfd, path, (nint)(flags | (nint)O_LARGEFILE), mode);
+    return openat(dirfd, path, flags | (nint)O_LARGEFILE, mode);
 }
 
 public static error Pipe(slice<nint> p) {
@@ -378,7 +375,7 @@ public static error /*err*/ Futimesat(nint dirfd, @string path, slice<Timeval> t
 public static error /*err*/ Futimes(nint fd, slice<Timeval> tv) {
     // Believe it or not, this is the best we can do on Linux
     // (and is what glibc does).
-    return Utimes("/proc/self/fd/"u8 + itoa.Itoa(fd), tv);
+    return Utimes("/proc/self/fd/"u8 + strconv.Itoa(fd), tv);
 }
 
 public const bool ImplementsGetwd = true;
@@ -403,7 +400,7 @@ public static (@string wd, error err) Getwd() {
         return ("", ENOENT);
     }
 
-    return (((@string)(buf.slice(0, n - 1))), default!);
+    return ((@string)(buf.slice(0, n - 1)), default!);
 }
 
 public static (slice<nint> gids, error err) Getgroups() {
@@ -419,7 +416,7 @@ public static (slice<nint> gids, error err) Getgroups() {
     }
 
     // Sanity check group count. Max is 1<<16 on Linux.
-    if (n < 0 || n > (1 << (int)(20))) {
+    if (n < 0 || n > 1 << 20) {
         return (default!, EINVAL);
     }
 
@@ -479,28 +476,28 @@ public static nint ExitStatus(this WaitStatus w) {
     if (!w.Exited()) {
         return -1;
     }
-    return (nint)((nint)(uint32)((w >> (int)(shift))) & 0xFF);
+    return (nint)(uint32)((w >> (int)(shift))) & 0xFF;
 }
 
 public static ΔSignal Signal(this WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
-    return ((ΔSignal)(nint)((uint32)((WaitStatus)(w & (uint32)mask))));
+    return (ΔSignal)(nint)((uint32)((WaitStatus)(w & (uint32)mask)));
 }
 
 public static ΔSignal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
-    return (ΔSignal)(((ΔSignal)(nint)((uint32)((w >> (int)(shift))))) & 0xFF);
+    return (ΔSignal)(((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) & 0xFF);
 }
 
 public static nint TrapCause(this WaitStatus w) {
     if (w.StopSignal() != SIGTRAP) {
         return -1;
     }
-    return ((nint)(uint32)((w >> (int)(shift))) >> (int)(8));
+    return (nint)(uint32)((w >> (int)(shift))) >> 8;
 }
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
@@ -512,13 +509,13 @@ public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, 
     ref var status = ref heap(new _C_int(), out var Ꮡstatus);
     (wpid, err) = wait4(pid, Ꮡstatus, options, Ꮡrusage);
     if (Ꮡwstatus != nil) {
-        wstatus = ((WaitStatus)(uint32)(int32)status);
+        wstatus = (WaitStatus)(uint32)(int32)status;
     }
     return (wpid, err);
 }
 
 public static error /*err*/ Mkfifo(@string path, uint32 mode) {
-    return Mknod(path, (uint32)(mode | (uint32)S_IFIFO), 0);
+    return Mknod(path, mode | (uint32)S_IFIFO, 0);
 }
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -533,23 +530,30 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     if (n > len(sa.raw.Path)) {
         return (default!, 0, EINVAL);
     }
-    if (n == len(sa.raw.Path) && name[0] != (rune)'@') {
+    // Abstract addresses start with NUL.
+    // '@' is also a valid way to specify abstract addresses.
+    var isAbstract = n > 0 && (name[0] == (rune)'@' || name[0] == (rune)'\x00');
+
+    // Non-abstract named addresses are NUL terminated.
+    // The length can't use the full capacity as we need to add NUL.
+    if (n == len(sa.raw.Path) && !isAbstract) {
         return (default!, 0, EINVAL);
     }
     sa.raw.Family = AF_UNIX;
     for (nint i = 0; i < n; i++) {
         sa.raw.Path[i] = (int8)name[i];
     }
-    // length is family (uint16), name, NUL.
-    var sl = ((_Socklen)2);
-    if (n > 0) {
-        sl += ((_Socklen)(uint32)n) + 1;
-    }
-    if (sa.raw.Path[0] == (rune)'@' || (sa.raw.Path[0] == 0 && sl > 3)) {
-        // Check sl > 3 so we don't change unnamed socket behavior.
+    // Length is family + name (+ NUL if non-abstract).
+    // Family is of type uint16 (2 bytes).
+    var sl = (_Socklen)(uint32)(2 + n);
+    if (isAbstract){
+        // Abstract addresses are not NUL terminated.
+        // We rewrite '@' prefix to NUL here.
         sa.raw.Path[0] = 0;
-        // Don't count trailing NUL for abstract address.
-        sl--;
+    } else 
+    if (n > 0) {
+        // Add NUL for non-abstract named addresses.
+        sl++;
     }
 
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
@@ -614,7 +618,7 @@ public static (array<byte> value, error err) GetsockoptInet4Addr(nint fd, nint l
     error err = default!;
 
     ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = ((_Socklen)4);
+    vallen = (_Socklen)4;
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue.at<byte>(0)), Ꮡvallen);
     return (value.Clone(), err);
 }
@@ -628,7 +632,7 @@ public static (array<byte> value, error err) GetsockoptInet4Addr(nint fd, nint l
 public static (ж<IPv6MTUInfo>, error) GetsockoptIPv6MTUInfo(nint fd, nint level, nint opt) {
     ref var value = ref heap(new IPv6MTUInfo(), out var Ꮡvalue);
     ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = ((_Socklen)SizeofIPv6MTUInfo);
+    vallen = (_Socklen)SizeofIPv6MTUInfo;
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
@@ -638,7 +642,7 @@ public static (ж<IPv6MTUInfo>, error) GetsockoptIPv6MTUInfo(nint fd, nint level
 public static (ж<Ucred>, error) GetsockoptUcred(nint fd, nint level, nint opt) {
     ref var value = ref heap(new Ucred(), out var Ꮡvalue);
     ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = ((_Socklen)SizeofUcred);
+    vallen = (_Socklen)SizeofUcred;
     var err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡvalue), Ꮡvallen);
     return (Ꮡvalue, err);
 }
@@ -701,8 +705,10 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
 
     // The peek requests are machine-size oriented, so we wrap it
     // to retrieve arbitrary-length data.
+
     // The ptrace syscall differs from glibc's ptrace.
     // Peeks returns the word in *data, not as the return value.
+
     ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
 
     // Leading edge. PEEKTEXT/PEEKDATA don't require aligned
@@ -749,6 +755,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
 
     // As for ptracePeek, we need to align our accesses to deal
     // with the possibility of straddling an invalid page.
+
     // Leading edge.
     nint n = 0;
     if (addr % (uintptr)sizeofPtr != 0) {
@@ -984,7 +991,7 @@ public static (uintptr r1, uintptr r2, Errno err) AllThreadsSyscall(uintptr trap
         return (minus1, minus1, ENOTSUP);
     }
     (r1, r2, var errno) = runtime_doAllThreadsSyscall(trap, a1, a2, a3, 0, 0, 0);
-    return (r1, r2, ((Errno)errno));
+    return (r1, r2, (Errno)errno);
 }
 
 // AllThreadsSyscall6 is like [AllThreadsSyscall], but extended to six
@@ -999,7 +1006,7 @@ public static (uintptr r1, uintptr r2, Errno err) AllThreadsSyscall6(uintptr tra
         return (minus1, minus1, ENOTSUP);
     }
     (r1, r2, var errno) = runtime_doAllThreadsSyscall(trap, a1, a2, a3, a4, a5, a6);
-    return (r1, r2, ((Errno)errno));
+    return (r1, r2, (Errno)errno);
 }
 
 // linked by runtime.cgocall.go
@@ -1023,7 +1030,7 @@ public static error /*err*/ Setegid(nint egid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setegid, (uintptr)egid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1043,7 +1050,7 @@ public static error /*err*/ Seteuid(nint euid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_seteuid, (uintptr)euid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1063,7 +1070,7 @@ public static error /*err*/ Setgid(nint gid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setgid, (uintptr)gid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1083,7 +1090,7 @@ public static error /*err*/ Setregid(nint rgid, nint egid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setregid, (uintptr)rgid, (uintptr)egid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1103,7 +1110,7 @@ public static error /*err*/ Setresgid(nint rgid, nint egid, nint sgid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setresgid, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1123,7 +1130,7 @@ public static error /*err*/ Setresuid(nint ruid, nint euid, nint suid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setresuid, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1143,7 +1150,7 @@ public static error /*err*/ Setreuid(nint ruid, nint euid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setreuid, (uintptr)ruid, (uintptr)euid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;
@@ -1163,7 +1170,7 @@ public static error /*err*/ Setuid(nint uid) {
     } else 
     {
         var ret = cgocaller(cgo_libc_setuid, (uintptr)uid); if (ret != 0) {
-            err = errnoErr(((Errno)ret));
+            err = errnoErr((Errno)ret);
         }
     }
     return err;

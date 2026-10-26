@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Println(err);
 
     (var b, err) = json.Marshal(t);
-    fmt.Println(((@string)b), err);
+    fmt.Println((@string)b, err);
 
     ref var c = ref heap(new Celsius(), out var Ꮡc);
     err = json.Unmarshal(slice<byte>(@"42"u8), Ꮡc);

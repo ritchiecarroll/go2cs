@@ -26,6 +26,13 @@
          values in a `map[string]any` (CS8974), and `init()` as a module initializer (CA2255). -->
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
   </PropertyGroup>
 
   <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit
@@ -153,6 +160,12 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/IndexExprCaseLabel&#10;mod&#9;go2cs/IndexExprCaseLabel&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

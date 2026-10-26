@@ -67,6 +67,12 @@ using static go.image.color_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -75,8 +81,8 @@ using static go.image.color_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKAgqSCpoKAgqSCpoKAgqSCgpSCpoKCgqaCgIKkgoKUgqaCgoKmgoCCpIKmgoCCpIKmgoCCpAAJFJSmgoCCpO6U3pKClKq2gpKCgoKCgpSmrgAaLoK6goKC")]
-[assembly: go.GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAcQ7oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABEkABAkgoIADBqCgpSmgoKUpoKClKa4lIKAgqSCggAJFJSCggAMGoKClKaCgpSmgoKUuILKlIKUpJSmgoKCpoKokoKCgoKClIKUgpSCgoKokoKCgoIAChaogoKCgriUgoCCpIKC")]
+[assembly: go.GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKAgqSCpoKAgqSCpoKAgqSCgpSCpoKCgqaCgIKkgoKUgqaCgoKmgoCCpIKmgoCCpIKmgoCCpAAJFJSmgoCCpO6U3pKClKrGgpKCgoKCgpSmrgAaLoK6goKC")]
+[assembly: go.GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAcQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABEkABEkgoIADBqCgpSmgoKUpoKClKa4lIKAgqSCggAJFJSCggAMGoKClKaCgpSmgoKUuILKlIKUpJSmgoKCpoKokoKCgoKClIKUgpSCgoKokoKCgoIACha4goKCgriUgoCCpIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

@@ -6,6 +6,7 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using hmac = go.crypto.@internal.fips140.hmac_package;
 using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -25,7 +26,7 @@ private static readonly @string pkbdf2KeyLengthMustBeˢ = "pkbdf2: keyLength mus
 private static readonly @string pbkdf2KeyLengthTooLongˢ = "pbkdf2: keyLength too long"u8;
 
 public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, slice<byte> salt, nint iter, nint keyLength)
-    where Hash : fips140.Hash
+    where Hash : hash.Hash
 {
     setServiceIndicator(salt, keyLength);
 
@@ -51,9 +52,9 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
         // U_1 = PRF(password, salt || uint(i))
         prf.Reset();
         prf.Write(salt);
-        buf[0] = (byte)((block >> (int)(24)));
-        buf[1] = (byte)((block >> (int)(16)));
-        buf[2] = (byte)((block >> (int)(8)));
+        buf[0] = (byte)(block >> 24);
+        buf[1] = (byte)(block >> 16);
+        buf[2] = (byte)(block >> 8);
         buf[3] = (byte)block;
         prf.Write(buf[..4]);
         dk = prf.Sum(dk);
@@ -66,7 +67,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             prf.Write(U);
             U = U[..0];
             U = prf.Sum(U);
-            foreach (var (x, _) in U) {
+            foreach (var x in range(U)) {
                 T[x] ^= (byte)(U[x]);
             }
         }
@@ -78,6 +79,7 @@ internal static void setServiceIndicator(slice<byte> salt, nint keyLength) {
     // The HMAC construction will handle the hash function considerations for the service
     // indicator. The remaining PBKDF2 considerations outlined by SP 800-132 pertain to
     // salt and keyLength.
+
     // The length of the randomly-generated portion of the salt shall be at least 128 bits.
     if (len(salt) < 128 / 8) {
         fips140.RecordNonApproved();

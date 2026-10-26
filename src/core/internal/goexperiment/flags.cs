@@ -14,32 +14,32 @@
 //
 // Experiments are exposed to the build in the following ways:
 //
-// - Build tag goexperiment.x is set if experiment x (lower case) is
-// enabled.
+//   - Build tag goexperiment.x is set if experiment x (lower case) is
+//     enabled.
 //
-// - For each experiment x (in camel case), this package contains a
-// boolean constant x and an integer constant xInt.
+//   - For each experiment x (in camel case), this package contains a
+//     boolean constant x and an integer constant xInt.
 //
-// - In runtime assembly, the macro GOEXPERIMENT_x is defined if
-// experiment x (lower case) is enabled.
+//   - In runtime assembly, the macro GOEXPERIMENT_x is defined if
+//     experiment x (lower case) is enabled.
 //
 // In the toolchain, the set of experiments enabled for the current
 // build should be accessed via objabi.Experiment.
 //
-// The set of experiments is included in the output of runtime.Version()
+// The set of experiments is included in the output of [runtime.Version]()
 // and "go version <binary>" if it differs from the default experiments.
 //
 // For the set of experiments supported by the current toolchain, see
 // "go doc goexperiment.Flags".
 //
-// Note that this package defines the set of experiments (in Flags)
+// Note that this package defines the set of experiments (in [Flags])
 // and records the experiments that were enabled when the package
 // was compiled (as boolean and integer constants).
 //
 // Note especially that this package does not itself change behavior
 // at run time based on the GOEXPERIMENT variable.
 // The code used in builds to interpret the GOEXPERIMENT variable
-// is in the separate package internal/buildcfg.
+// is in the separate package [internal/buildcfg].
 namespace go.@internal;
 
 partial class goexperiment_package {
@@ -53,7 +53,7 @@ partial class goexperiment_package {
 // tags, experiments use the strings.ToLower of their field name.
 //
 // For the baseline experimental configuration, see
-// [internal/buildcfg.ParseGOEXPERIMENT].
+// [internal/buildcfg.Experiment].
 //
 // If you change this struct definition, run "go generate".
 partial struct Flags {
@@ -82,9 +82,6 @@ partial struct Flags {
     // has been broken out to its own experiment that is disabled
     // by default.
     public bool HeapMinimum512KiB;
-    // CoverageRedesign enables the new compiler-based code coverage
-    // tooling.
-    public bool CoverageRedesign;
     // Arenas causes the "arena" standard library package to be visible
     // to the outside world.
     public bool Arenas;
@@ -95,27 +92,29 @@ partial struct Flags {
     // LoopVar changes loop semantics so that each iteration gets its own
     // copy of the iteration variable.
     public bool LoopVar;
-    // CacheProg adds support to cmd/go to use a child process to implement
-    // the build cache; see https://github.com/golang/go/issues/59719.
-    public bool CacheProg;
     // NewInliner enables a new+improved version of the function
     // inlining phase within the Go compiler.
     public bool NewInliner;
-    // RangeFunc enables range over func.
-    public bool RangeFunc;
-    // AliasTypeParams enables type parameters for alias types.
-    // Requires that gotypesalias=1 is set with GODEBUG.
-    // This flag will be removed with Go 1.25.
-    public bool AliasTypeParams;
-    // SwissMap enables the SwissTable-based map implementation.
-    public bool SwissMap;
-    // SpinbitMutex enables the new "spinbit" mutex implementation on supported
-    // platforms. See https://go.dev/issue/68578.
-    public bool SpinbitMutex;
-    // SyncHashTrieMap enables the HashTrieMap sync.Map implementation.
-    public bool SyncHashTrieMap;
-    // Synctest enables the testing/synctest package.
-    public bool Synctest;
+    // Dwarf5 enables DWARF version 5 debug info generation.
+    public bool Dwarf5;
+    // JSONv2 enables the json/v2 package.
+    public bool JSONv2;
+    // GreenTeaGC enables the Green Tea GC implementation.
+    public bool GreenTeaGC;
+    // RandomizedHeapBase enables heap base address randomization on 64-bit
+    // platforms.
+    public bool RandomizedHeapBase64;
+    // RuntimeFreegc enables the runtime to free and reuse memory more eagerly in some circumstances with compiler help.
+    public bool RuntimeFreegc;
+    // SizeSpecializedMalloc enables malloc implementations that are specialized per size class.
+    public bool SizeSpecializedMalloc;
+    // GoroutineLeakProfile enables the collection of goroutine leak profiles.
+    public bool GoroutineLeakProfile;
+    // SIMD enables the simd package and the compiler's handling
+    // of SIMD intrinsics.
+    public bool SIMD;
+    // RuntimeSecret enables the runtime/secret package.
+    public bool RuntimeSecret;
 }
 
 } // end goexperiment_package

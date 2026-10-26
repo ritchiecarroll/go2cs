@@ -17,7 +17,7 @@ partial class tls_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object roundUpBrokenˢ = (@string)"roundUp broken"u8;
 
-public static void TestRoundUp(ж<testing.T> Ꮡt) {
+public static partial void TestRoundUp(ж<testing.T> Ꮡt) {
     if (roundUp(0, 16) != 0 || roundUp(1, 16) != 16 || roundUp(15, 16) != 16 || roundUp(16, 16) != 16 || roundUp(17, 16) != 32) {
         Ꮡt.Error(roundUpBrokenˢ);
     }
@@ -100,7 +100,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
     config.BuildNameToCertificate();
 
     nint pointerToIndex(ж<global::go.crypto.tls_package.Certificate> c) {
-        foreach (var (i, _) in Ꮡconfig.Value.Certificates) {
+        foreach (var i in range(Ꮡconfig.Value.Certificates)) {
             if (c == Ꮡ(Ꮡconfig.Value.Certificates, i)) {
                 return i;
             }
@@ -196,7 +196,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                         return;
                     }
 
-                    nint length = (nint)(((nint)recordHeader[3] << (int)(8)) | (nint)recordHeader[4]);
+                    nint length = (nint)recordHeader[3] << 8 | (nint)recordHeader[4];
                     if (len(record) < length) {
                         record = new slice<byte>(length);
                     }
@@ -413,6 +413,54 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
         var (_, err) = tlsConn.Read(new slice<byte>(10));
         if (err.Error() != expectedErr) {
             Ꮡt.Fatalf("unexpected error: got %q, want %q"u8, err, expectedErr);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// TestKeyUpdateSpamPostHandshakeTLS13 tests that TLS 1.3 KeyUpdate messages do
+// not count as a state-advancing message after a handshake has been completed.
+public static partial void TestKeyUpdateSpamPostHandshakeTLS13(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
+        var serverʗ1 = server;
+        defer(() => serverʗ1.Close(), ref ᒐ);
+        var clientʗ1 = client;
+        defer(() => clientʗ1.Close(), ref ᒐ);
+
+        var clientʗ2 = client;
+        goǃ(() => {
+            var c = Client(clientʗ2, testConfig.Clone());
+            {
+                var errΔ1 = c.Handshake(); if (errΔ1 != default!) {
+                    Ꮡt.Error(errΔ1);
+                    return;
+                }
+            }
+            var (ku, err) = (Ꮡ(new keyUpdateMsg(nil))).marshal();
+            if (err != default!) {
+                Ꮡt.Error(err);
+                return;
+            }
+            var cs = cipherSuiteTLS13ByID((~c).cipherSuite);
+            for (nint i = 0; i <= maxUselessRecords; i++) {
+                c.writeRecordLocked(recordTypeHandshake, ku);
+                c.setWriteTrafficSecret(cs, QUICEncryptionLevelInitial, cs.nextTrafficSecret((~c).@out.trafficSecret));
+            }
+        });
+        var s = Server(server, testConfig.Clone());
+        {
+            var err = s.Handshake(); if (err != default!) {
+                Ꮡt.Fatal(err);
+            }
+        }
+        @string expectedErr = tlsTooManyNonAdvancingˢ;
+        {
+            var (_, err) = s.Read(new slice<byte>(1)); if (err == default! || err.Error() != expectedErr) {
+                Ꮡt.Fatalf("unexpected error: got %v, want %q"u8, err, expectedErr);
+            }
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

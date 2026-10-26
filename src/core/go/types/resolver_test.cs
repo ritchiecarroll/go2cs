@@ -48,6 +48,8 @@ internal static readonly @string testResolveIdentsˢ = "testResolveIdents"u8;
 internal static readonly @string mutexStringerErrorˢ = "[Mutex Stringer error]"u8;
 
 public static void TestResolveIdents(ж<testing.T> Ꮡt) {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
 
     var sources = new @string[]{
@@ -136,7 +138,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default!;
     foreach (var (_, src) in sources) {
-        files = append(files, mustParse(fset, src));
+        files = append(filesᴷ, files, mustParse(fset, src));
     }
 
     // resolve and type-check package AST

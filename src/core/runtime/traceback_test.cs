@@ -4,12 +4,17 @@
 namespace go;
 
 using bytes = bytes_package;
+using context = context_package;
 using fmt = fmt_package;
 using abi = @internal.abi_package;
+using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δregexp = regexp_package;
 using Δruntime = runtime_package;
 using Δdebug = global::go.runtime.debug_package;
+using pprof = global::go.runtime.pprof_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using Δsync = sync_package;
@@ -77,28 +82,28 @@ public static void TestTracebackInlined(ж<testing.T> Ꮡt) {
     }
 
     var checkʗ1 = check;
-    Ꮡt.Run(simpleˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(simpleˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         // Check a simple case of inlining
         var r = ttiSimple1();
         checkʗ1(tΔ2, r, runtimeTestTtiSimple3ˢ, runtimeTestTtiSimple2ˢ, runtimeTestTtiSimple1ˢ);
     });
 
     var checkʗ2 = check;
-    Ꮡt.Run(sigpanicˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(sigpanicˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         // Check that sigpanic from an inlined function prints correctly
         var r = ttiSigpanic1();
-        checkʗ2(tΔ3, r, runtimeTestTtiSigpanic1ˢ, panicˢ, runtimeTestTtiSigpanic3ˢ, runtimeTestTtiSigpanic2ˢ, runtimeTestTtiSigpanic1ˢ2);
+        checkʗ2(tΔ3, r, runtimeTestTtiSigpanic1ˢ, panicˢ2, runtimeTestTtiSigpanic3ˢ, runtimeTestTtiSigpanic2ˢ, runtimeTestTtiSigpanic1ˢ2);
     });
 
     var checkʗ3 = check;
-    Ꮡt.Run(wrapperˢ, (ж<testing.T> tΔ4) => {
+    Ꮡt.Run(wrapperˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4) => {
         // Check that a method inlined into a wrapper prints correctly
         var r = ttiWrapper1();
         checkʗ3(tΔ4, r, runtimeTestTtiWrapperM1ˢ, runtimeTestTtiWrapper1ˢ);
     });
 
     var checkʗ4 = check;
-    Ꮡt.Run(excludedˢ, (ж<testing.T> tΔ5) => {
+    Ꮡt.Run(excludedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ5) => {
         // Check that when F -> G is inlined and F is excluded from stack
         // traces, G still appears.
         var r = ttiExcluded1();
@@ -114,7 +119,7 @@ partial struct ttiResult {
 internal static partial ж<ttiResult> ttiLeaf() {
     // Get a printed stack trace.
     ref var printed = ref heap<@string>(out var Ꮡprinted);
-    printed = ((@string)Δdebug.Stack());
+    printed = (@string)Δdebug.Stack();
     return Ꮡ(new ttiResult(printed));
 }
 
@@ -316,7 +321,7 @@ internal static partial @string tte2(nint n) {
         throw panic("bad n");
     }
     if (n == 2) {
-        return ((@string)Δdebug.Stack());
+        return (@string)Δdebug.Stack();
     }
     return tte1(n - 1);
 }
@@ -807,12 +812,12 @@ public static partial void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            var buf = new slice<byte>((1 << (int)(10)));
+            var buf = new slice<byte>((1 << 10));
             // We collect the stack only for this goroutine (by passing
             // false to runtime.Stack). We expect to see the current
             // goroutine ID, and the parent goroutine ID in a message like
             // "created by ... in goroutine N".
-            @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
+            @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
             @string child = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
             if (!strings.Contains(stack, parent) || !strings.Contains(stack, child)) {
                 Ꮡt.Errorf("did not see parent (%s) and child (%s) IDs in stack, got %s"u8, parent, child, stack);
@@ -849,6 +854,7 @@ internal static readonly @string missingˢ = "missing ("u8;
 // check the result.
 internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string tb) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var tbsᴷ = new stackAppend<ж<traceback>>(moves: true);
 
     //lines := strings.Split(tb, "\n")
     //nLines := len(lines)
@@ -882,9 +888,9 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
         (line, tb, _) = strings.Cut(tb, "\n"u8);
         lineNo++;
         switch (ᐧ) {
-        case {} when strings.HasPrefix(line, goroutineˢ): {
+        case {} when strings.HasPrefix(line, goroutineˢ2): {
             cur = Ꮡ(new traceback(nil));
-            tbs = append(tbs, cur);
+            tbs = append(tbsᴷ, tbs, cur);
             break;
         }
         case {} when line == ""u8: {
@@ -896,7 +902,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             fatal(unexpectedIndentˢ);
             break;
         }
-        case {} when strings.HasPrefix(line, createdByˢ): {
+        case {} when strings.HasPrefix(line, createdByˢ2): {
             @string funcName = line[(int)(len("created by "))..];
             cur.Value.createdBy = parseFrame(funcName, ""u8);
             break;
@@ -921,6 +927,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             break;
         }}
     }
+    tbs = move2heap(tbsᴷ, tbs);
     return tbs;
 }
 
@@ -1002,6 +1009,117 @@ public static void TestTracebackGeneric(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("traceback contains shape name: got\n%s"u8, got);
         }
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestSanitizerˢ = (@string)"skipped test: sanitizer builds use cgo"u8;
+internal static readonly @string setCgoTracebackNoCgoˢ = "SetCgoTracebackNoCgo"u8;
+
+public static void TestSetCgoTracebackNoCgo(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestSanitizerˢ);
+    }
+
+    @string output = runTestProg(Ꮡt, testprogˢ, setCgoTracebackNoCgoˢ);
+    @string want = "OK\n"u8;
+    if (output != want) {
+        Ꮡt.Fatalf("want %s, got %s\n"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tracebacklabels1ˢ = "tracebacklabels=1"u8;
+internal static readonly @string foobarˢ = "foobar"u8;
+internal static readonly @string bazˢ = "baz"u8;
+internal static readonly @string fizzleˢ = "fizzle"u8;
+internal static readonly @string bitˢ = "bit"u8;
+internal static readonly @string bazˢ2 = "baz\n"u8;
+internal static readonly @string bItˢ = "b\u001bit"u8;
+internal static readonly @string fooBaRˢ = "foo\"ba\x00r"u8;
+internal static readonly @string foobaRˢ = "fooba\x00r"u8;
+internal static readonly @string fizzLeˢ = "fizz\tle"u8;
+internal static readonly @string boopˢ = "\U00045678boop"u8;
+internal static readonly @string fizZlEˢ = "fiz\\zl\re"u8;
+
+internal partial struct TestTracebackGoroutineLabels_type /*dyn*/ {
+    internal pprof.LabelSet l;
+    internal @string expTB;
+}
+
+public static void TestTracebackGoroutineLabels(ж<testing.T> Ꮡt) {
+    Ꮡt.Setenv(godebugˢ, tracebacklabels1ˢ);
+    foreach (var (_, vᴛ1) in new TestTracebackGoroutineLabels_type[]{
+        new(l: pprof.Labels(foobarˢ, bazˢ), expTB: @"{""foobar"": ""baz""}"u8),
+        // Make sure the keys are sorted because the runtime/pprof package sorts for consistency
+        new(l: pprof.Labels(foobarˢ, bazˢ, fizzleˢ, bitˢ), expTB: @"{""fizzle"": ""bit"", ""foobar"": ""baz""}"u8),
+        // make sure newlines get escaped
+        new(l: pprof.Labels(fizzleˢ, bitˢ, foobarˢ, bazˢ2), expTB: @"{""fizzle"": ""bit"", ""foobar"": ""baz\n""}"u8),
+        // make sure null and escape bytes are properly escaped
+        new(l: pprof.Labels(fizzleˢ, bItˢ, fooBaRˢ, bazˢ2), expTB: @"{""fizzle"": ""b\x1bit"", ""foo\""ba\x00r"": ""baz\n""}"u8),
+        // verify that simple 16-bit unicode runes are escaped with \u, including a greek upper-case sigma and an arbitrary unicode character.
+        new(l: pprof.Labels(fizzleˢ, "\u1234Σ", foobaRˢ, bazˢ2), expTB: @"{""fizzle"": ""\u1234\u03a3"", ""fooba\x00r"": ""baz\n""}"u8),
+        // verify that 32-bit unicode runes are escaped with \U along with tabs
+        new(l: pprof.Labels(fizzLeˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fizz\tle"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}"u8),
+        // verify carriage returns and backslashes get escaped along with our nulls, newlines and a 32-bit unicode character
+        new(l: pprof.Labels(fizZlEˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fiz\\zl\re"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}"u8)
+    }.slice()) {
+        ref var tbl = ref heap(new TestTracebackGoroutineLabels_type(), out var Ꮡtbl);
+        tbl = vᴛ1;
+
+        var tblʗ1 = tbl;
+        Ꮡt.Run(tbl.expTB, (ж<testing.T> tΔ1) => {
+            var tblʗ2 = tblʗ1;
+            var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                tΔ1.Helper();
+                var buf = new slice<byte>((1 << 10));
+                // We collect the stack only for this goroutine (by passing
+                // false to runtime.Stack). We expect to see the parent's goroutine labels in the traceback.
+                @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
+                if (!strings.Contains(stack, "labels:"u8 + tblʗ2.expTB)) {
+                    tΔ1.Errorf("failed to find goroutine labels with labels %s (as %s) got:\n%s\n---"u8, tblʗ2.l, tblʗ2.expTB, stack);
+                }
+            };
+            // Use a clean context so the testing package can add whatever goroutine labels it wants to the testing.T context.
+            var lblCtx = pprof.WithLabels(context.Background(), tblʗ1.l);
+            pprof.SetGoroutineLabels(lblCtx);
+            ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+            // make sure the labels are visible in a child goroutine
+            Ꮡwg.Go(verifyLabels);
+            // and in this parent goroutine
+            verifyLabels();
+            Ꮡwg.Wait();
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tracebacklabels0ˢ = "tracebacklabels=0"u8;
+internal static readonly @string labelsˢ = "labels:"u8;
+
+public static void TestTracebackGoroutineLabelsDisabledGODEBUG(ж<testing.T> Ꮡt) {
+    Ꮡt.Setenv(godebugˢ, tracebacklabels0ˢ);
+    ref var lbls = ref heap<pprof.LabelSet>(out var Ꮡlbls);
+    lbls = pprof.Labels(foobarˢ, bazˢ);
+    var lblsʗ1 = lbls;
+    var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        Ꮡt.Helper();
+        var buf = new slice<byte>((1 << 10));
+        // We collect the stack only for this goroutine (by passing
+        // false to runtime.Stack).
+        @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
+        if (strings.Contains(stack, labelsˢ)) {
+            Ꮡt.Errorf("found goroutine labels with labels %s  got:\n%s\n---"u8, lblsʗ1, stack);
+        }
+    };
+    // Use a clean context so the testing package can add whatever goroutine labels it wants to the testing.T context.
+    var lblCtx = pprof.WithLabels(context.Background(), lbls);
+    pprof.SetGoroutineLabels(lblCtx);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    // make sure the labels are visible in a child goroutine
+    Ꮡwg.Go(verifyLabels);
+    // and in this parent goroutine
+    verifyLabels();
+    Ꮡwg.Wait();
 }
 
 } // end runtime_test_package

@@ -10,6 +10,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using static go.log.slog_package;
 
@@ -18,7 +20,7 @@ partial class slog_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string groupˢ = "Group"u8;
 
-public static void TestKindString(ж<testing.T> Ꮡt) {
+public static partial void TestKindString(ж<testing.T> Ꮡt) {
     {
         @string got = KindGroup.String();
         @string want = groupˢ; if (got != want) {
@@ -170,7 +172,7 @@ internal partial struct TestAnyValue_type /*dyn*/ {
 
 public static void TestAnyValue(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestAnyValue_type[]{
-        new((nint)(1), IntValue(1)),
+        new((nint)1, IntValue(1)),
         new(1.5D, Float64Value(1.5D)),
         new((float32)2.5F, Float64Value(2.5D)),
         new((@string)"s"u8, StringValue("s"u8)),
@@ -339,7 +341,7 @@ public static void BenchmarkUnsafeStrings(ж<testing.B> Ꮡb) {
     var dst = new slice<global::go.log.slog_package.Value>(100);
     var src = new slice<global::go.log.slog_package.Value>(len(dst));
     Ꮡb.Logf("Value size = %d"u8, /* unsafe.Sizeof(Value{}) */ (uintptr)24);
-    foreach (var (i, _) in src) {
+    foreach (var i in range(src)) {
         src[i] = StringValue(fmt.Sprintf("string#%d"u8, i));
     }
     b.ResetTimer();

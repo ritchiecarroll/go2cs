@@ -9,14 +9,14 @@ using fmt = fmt_package;
 using os = os_package;
 using exec = go.os.exec_package;
 using Δruntime = runtime_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using go;
 using go.os;
-using Δsyscall = syscall_package;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class testenv_package {
@@ -271,7 +271,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
 
 // Command is like exec.Command, but applies the same changes as
 // testenv.CommandContext (with a default Context).
-public static ж<exec.Cmd> Command(testing.TB t, @string name, params ꓸꓸꓸstring argsʗp) {
+public static partial ж<exec.Cmd> Command(testing.TB t, @string name, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
     t.Helper();

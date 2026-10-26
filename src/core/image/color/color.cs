@@ -36,13 +36,13 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ΔRGBA c) {
     uint32 a = default!;
 
     r = (uint32)c.R;
-    r |= (uint32)((r << (int)(8)));
+    r |= (uint32)((r << 8));
     g = (uint32)c.G;
-    g |= (uint32)((g << (int)(8)));
+    g |= (uint32)((g << 8));
     b = (uint32)c.B;
-    b |= (uint32)((b << (int)(8)));
+    b |= (uint32)((b << 8));
     a = (uint32)c.A;
-    a |= (uint32)((a << (int)(8)));
+    a |= (uint32)((a << 8));
     return (r, g, b, a);
 }
 
@@ -71,19 +71,19 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA c) {
     uint32 a = default!;
 
     r = (uint32)c.R;
-    r |= (uint32)((r << (int)(8)));
+    r |= (uint32)((r << 8));
     r *= (uint32)c.A;
     r /= 0xff;
     g = (uint32)c.G;
-    g |= (uint32)((g << (int)(8)));
+    g |= (uint32)((g << 8));
     g *= (uint32)c.A;
     g /= 0xff;
     b = (uint32)c.B;
-    b |= (uint32)((b << (int)(8)));
+    b |= (uint32)((b << 8));
     b *= (uint32)c.A;
     b /= 0xff;
     a = (uint32)c.A;
-    a |= (uint32)((a << (int)(8)));
+    a |= (uint32)((a << 8));
     return (r, g, b, a);
 }
 
@@ -121,7 +121,7 @@ public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha c) {
     uint32 a = default!;
 
     a = (uint32)c.A;
-    a |= (uint32)((a << (int)(8)));
+    a |= (uint32)((a << 8));
     return (a, a, a, a);
 }
 
@@ -144,7 +144,7 @@ partial struct Gray {
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray c) {
     var y = (uint32)c.Y;
-    y |= (uint32)((y << (int)(8)));
+    y |= (uint32)((y << 8));
     return (y, y, y, 0xffff);
 }
 
@@ -199,7 +199,7 @@ internal static Color rgbaModel(Color c) {
         }
     }
     var (r, g, b, a) = c.RGBA();
-    return new ΔRGBA((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))), (uint8)((a >> (int)(8))));
+    return new ΔRGBA((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8), (uint8)(a >> 8));
 }
 
 internal static Color rgba64Model(Color c) {
@@ -220,7 +220,7 @@ internal static Color nrgbaModel(Color c) {
     }
     var (r, g, b, a) = c.RGBA();
     if (a == 0xffff) {
-        return new NRGBA((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))), 0xff);
+        return new NRGBA((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8), 0xff);
     }
     if (a == 0) {
         return new NRGBA(0, 0, 0, 0);
@@ -229,7 +229,7 @@ internal static Color nrgbaModel(Color c) {
     r = (r * 0xffff) / a;
     g = (g * 0xffff) / a;
     b = (b * 0xffff) / a;
-    return new NRGBA((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))), (uint8)((a >> (int)(8))));
+    return new NRGBA((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8), (uint8)(a >> 8));
 }
 
 internal static Color nrgba64Model(Color c) {
@@ -259,7 +259,7 @@ internal static Color alphaModel(Color c) {
         }
     }
     var (_, _, _, a) = c.RGBA();
-    return new Alpha((uint8)((a >> (int)(8))));
+    return new Alpha((uint8)(a >> 8));
 }
 
 internal static Color alpha16Model(Color c) {
@@ -288,7 +288,7 @@ internal static Color grayModel(Color c) {
     //
     // The 24 is 16 + 8. The 16 is the same as used in RGBToYCbCr. The 8 is
     // because the return value is 8 bit color, not 16 bit color.
-    var y = ((19595 * r + 38470 * g + 7471 * b + ((uint32)1 << (int)(15))) >> (int)(24));
+    var y = (19595 * r + 38470 * g + 7471 * b + ((uint32)1 << 15)) >> 24;
 
     return new Gray((uint8)y);
 }
@@ -306,7 +306,7 @@ internal static Color gray16Model(Color c) {
     // ycbcr.go.
     //
     // Note that 19595 + 38470 + 7471 equals 65536.
-    var y = ((19595 * r + 38470 * g + 7471 * b + ((uint32)1 << (int)(15))) >> (int)(16));
+    var y = (19595 * r + 38470 * g + 7471 * b + ((uint32)1 << 15)) >> 16;
 
     return new Gray16((uint16)y);
 }
@@ -326,6 +326,7 @@ public static Color Convert(this Palette p, Color c) {
 // R,G,B,A space.
 public static nint Index(this Palette p, Color c) {
     // A batch version of this computation is in image/draw/draw.go.
+
     var (cr, cg, cb, ca) = c.RGBA();
     nint ret = 0;
     var bestSum = unchecked((uint32)(4294967295UL));
@@ -370,7 +371,7 @@ internal static uint32 sqDiff(uint32 x, uint32 y) {
     // called in the hot paths (x,y loops), it is reduced to the below code
     // which is slightly faster. See TestSqDiff for correctness check.
     var d = x - y;
-    return ((d * d) >> (int)(2));
+    return (d * d) >> 2;
 }
 
 // Standard colors.

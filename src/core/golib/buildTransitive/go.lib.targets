@@ -84,6 +84,12 @@
     using per name (measured: identical Using items, Static casing included, emit once with no warning).
     A project reference to golib never imports buildTransitive, so the corpus is untouched.
     Set GoConsumerUsings=false to turn them off.
+
+    Each go.* or nugetgo.* package the consumer references directly adds two more from its own
+    build/<PackageId>.props (written when it was packed, by go.lib.pack.targets): its namespace, under the same
+    GoConsumerUsings switch, so its Go methods are in scope; and, OPT-IN, its package class as a global alias named
+    for the Go package (`hex` for go.encoding.hex_package). Set GoGlobalPackageAliases=true for the aliases. They
+    are off by default because a file that also declares the alias itself fails with CS1537.
   -->
   <ItemGroup Condition="'$(GoConsumerUsings)' != 'false'">
     <Using Include="go" />
@@ -131,4 +137,51 @@
 
   <!-- The symbol files beside a single-file host, on every publish (see the file). -->
   <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
+
+  <!--
+    THE BUILD-SIDE GO2CS DIAGNOSTIC REGISTRY. A GO2CS code in the range 3000-3999 is raised in the C# build by
+    go2cs's MSBuild targets, and this file is the only targets file that raises one. Each code is ONE property in
+    the block below, named Go2csDiagnostic<Name> and holding the code, and the task that raises it names the
+    property: <Error Code="$(Go2csDiagnostic<Name>)" ... /> or <Warning Code="$(Go2csDiagnostic<Name>)" ... />.
+    The other two sides keep their own registries: go2cs-gen's 0001-0999 in GeneratorDiagnostics.cs, the
+    converter's 1000-2999 in src/go2cs/diagnosticOutput.go. Every code has one row in docs/DiagnosticCodes.md,
+    and the repoguard test TestGo2csDiagnosticCodeRegistry fails by name on a code that is not registered, is
+    registered twice or outside its range, is never raised, or has no row.
+  -->
+  <PropertyGroup Label="Go2csDiagnosticCodes">
+    <Go2csDiagnosticCompilerFloor>GO2CS3001</Go2csDiagnosticCompilerFloor>
+  </PropertyGroup>
+
+  <!--
+    GO-STRING LITERALS IN ANY SLOTS, AND THE COMPILER THEY NEED. Outside the standard library the converter passes
+    Go's `fmt.Println("hello")` as a bare C# literal, and go2cs-gen's LiteralInterceptorGenerator intercepts the call
+    so the callee receives a Go string; without the interception the callee would see System.String. So:
+    - the interceptors' namespace is admitted (without it every intercepted call is CS9137);
+    - a go2cs-gen that cannot LOAD is an error, not the compiler's warning: CS8032 (cannot be instantiated), CS8034
+      (cannot be loaded), CS8784 (a generator failed to initialize), CS8785 (a generator threw), and CS9057 (the
+      generator references a newer compiler than the one running it). The build would otherwise go on without the
+      interceptors and exit 0. The repository's own projects get the same list from src/Directory.Build.props.
+    - GO2CS3001 refuses a compiler below Roslyn 4.14, the floor go2cs-gen is built against (GetInterceptableLocation),
+      read from $(CompilerApiVersion), which the SDK sets from the compiler the build runs. A .NET 10 SDK build runs
+      its own Roslyn 5.0; this catches an older compiler a host or a pinned Microsoft.Net.Compilers.Toolset brings.
+  -->
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
+    <Go2csCompilerFloor>4.14</Go2csCompilerFloor>
+  </PropertyGroup>
+
+  <Target Name="Go2csCompilerFloor" BeforeTargets="CoreCompile" Condition="'$(Language)' == 'C#' and '$(CompilerApiVersion)' != ''">
+    <PropertyGroup>
+      <_Go2csCompilerApi>$(CompilerApiVersion.Replace('roslyn', ''))</_Go2csCompilerApi>
+    </PropertyGroup>
+    <Error Code="$(Go2csDiagnosticCompilerFloor)"
+           Condition="$([MSBuild]::VersionLessThan('$(_Go2csCompilerApi)', '$(Go2csCompilerFloor)'))"
+           Text="The C# compiler (API $(CompilerApiVersion)) is older than Roslyn $(Go2csCompilerFloor), which go2cs-gen needs to box Go string literals in any slots; without it a converted program would see System.String where Go has a string. Build with a .NET 10 SDK and its own compiler." />
+  </Target>
+
+  <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
+       usings into build/<PackageId>.props at pack time (see the file). Inert unless the project's Product is go2cs
+       and it is being packed; the in-tree standard library imports the same file from src/Directory.Build.targets. -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.pack.targets" Condition="'$(GoLibPackTargetsImported)' != 'true'" />
 </Project>

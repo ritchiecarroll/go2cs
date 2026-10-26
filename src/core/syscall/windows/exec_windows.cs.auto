@@ -12,6 +12,7 @@ namespace go;
 
 using bytealg = @internal.bytealg_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using Δsync = sync_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
@@ -40,11 +41,11 @@ public static @string EscapeArg(@string s) {
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'"' or (rune)'\\' or (rune)' ' or (rune)'\t': {
+            // Some escaping required.
             var b = new slice<byte>(0, len(s) + 2);
             b = appendEscapeArg(b, s);
-            return ((@string)b);
+            return (@string)b;
         }}
-
     }
     return s;
 }
@@ -55,6 +56,7 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
     if (len(s) == 0) {
         return append(b, ((@string)@""""""u8).ꓸꓸꓸ);
     }
+
     var needsBackslash = false;
     var hasSpace = false;
     for (nint i = 0; i < len(s); i++) {
@@ -67,8 +69,8 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
             hasSpace = true;
             break;
         }}
-
     }
+
     if (!needsBackslash && !hasSpace) {
         // No special handling required; normal case.
         return append(b, s.ꓸꓸꓸ);
@@ -79,6 +81,7 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
         b = append(b, s.ꓸꓸꓸ);
         return append(b, (byte)((rune)'"'));
     }
+
     if (hasSpace) {
         b = append(b, (byte)((rune)'"'));
     }
@@ -101,7 +104,6 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
             b = append(b, (byte)((rune)'\\'));
             break;
         }}
-
         b = append(b, c);
     }
     if (hasSpace) {
@@ -110,20 +112,66 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
         }
         b = append(b, (byte)((rune)'"'));
     }
+
     return b;
 }
 
 // makeCmdLine builds a command line out of args by escaping "special"
 // characters and joining the arguments with spaces.
 internal static @string makeCmdLine(slice<@string> args) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     foreach (var (_, v) in args) {
         if (len(b) > 0) {
-            b = append(b, (byte)((rune)' '));
+            b = append(bᴷ, b, (byte)((rune)' '));
         }
         b = appendEscapeArg(b, v);
     }
-    return ((@string)b);
+    return (@string)b;
+}
+
+internal static slice<@string> envSorted(slice<@string> envv) {
+    if (len(envv) < 2) {
+        return envv;
+    }
+
+    var lowerKeyCache = new map<@string, slice<byte>>{}; // lowercased keys to avoid recomputing them in sort
+    var lowerKeyCacheʗ1 = lowerKeyCache;
+    slice<byte> lowerKey(@string kv) {
+        nint eq = bytealg.IndexByteString(kv, (rune)'=');
+        if (eq < 0) {
+            return default!;
+        }
+        @string k = kv.slice(0, eq);
+        var (v, ok) = lowerKeyCacheʗ1[k, ꟷ];
+        if (!ok) {
+            v = slice<byte>(k);
+            foreach (var (i, b) in v) {
+                // We only normalize ASCII for now.
+                // In practice, all environment variables are ASCII, and the
+                // syscall package can't import "unicode" anyway.
+                // Also, per https://nullprogram.com/blog/2023/08/23/ the
+                // sorting of environment variables doesn't really matter.
+                // TODO(bradfitz): use RtlCompareUnicodeString instead,
+                // per that blog post? For now, ASCII is good enough.
+                if ((rune)'a' <= b && b <= (rune)'z') {
+                    v[i] -= (byte)((rune)'a' - (rune)'A');
+                }
+            }
+            lowerKeyCacheʗ1[k] = v;
+        }
+        return v;
+    }
+
+    var lowerKeyʗ1 = lowerKey;
+    var cmpEnv = (@string a, @string b) => bytealg.Compare(lowerKeyʗ1(a), lowerKeyʗ1(b));
+
+    if (!slices.IsSortedFunc(envv, cmpEnv)) {
+        envv = slices.Clone<slice<@string>, @string>(envv);
+        slices.SortFunc(envv, cmpEnv);
+    }
+    return envv;
 }
 
 // createEnvBlock converts an array of environment strings into
@@ -135,6 +183,12 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     if (len(envv) == 0) {
         return (utf16.Encode(slice<rune>((@string)"\x00\x00")), default!);
     }
+
+    // https://learn.microsoft.com/en-us/windows/win32/procthread/changing-environment-variables
+    // says that: "All strings in the environment block must be sorted
+    // alphabetically by name."
+    envv = envSorted(envv);
+
     nint length = default!;
     foreach (var (_, s) in envv) {
         if (bytealg.IndexByteString(s, 0) != -1) {
@@ -143,6 +197,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
         length += len(s) + 1;
     }
     length += 1;
+
     var b = new slice<uint16>(0, length);
     foreach (var (_, s) in envv) {
         foreach (var (_, c) in s) {
@@ -178,7 +233,7 @@ public static (@string path, error err) FullPath(@string name) {
             return ("", err);
         }
         if (n <= (uint32)len(buf)) {
-            return (UTF16ToString(buf[..(int)(n)]), default!);
+            return (UTF16ToString(buf.slice(0, (nint)(n))), default!);
         }
     }
 }
@@ -248,14 +303,14 @@ internal static (@string name, error err) joinExeDirAndFName(@string dir, @strin
     }
 }
 
-[GoType] partial struct ProcAttr {
+partial struct ProcAttr {
     public @string Dir;
     public slice<@string> Env;
     public slice<uintptr> Files;
     public ж<SysProcAttr> Sys;
 }
 
-[GoType] partial struct SysProcAttr {
+partial struct SysProcAttr {
     public bool HideWindow;
     public @string CmdLine; // used if non-empty, else the windows command line is built by escaping the arguments passed to StartProcess
     public uint32 CreationFlags;
@@ -291,12 +346,14 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         if (sys == nil) {
             sys = ᏑzeroSysProcAttr;
         }
+
         if (len(attr.Files) > 3) {
             (pid, handle, err) = (0, 0, EWINDOWS); goto ᒐdone;
         }
         if (len(attr.Files) < 3) {
             (pid, handle, err) = (0, 0, EINVAL); goto ᒐdone;
         }
+
         if (len(attr.Dir) != 0) {
             // StartProcess assumes that argv0 is relative to attr.Dir,
             // because it implies Chdir(attr.Dir) before executing argv0.
@@ -314,6 +371,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         if (err != default!) {
             (pid, handle, err) = (0, 0, err); goto ᒐdone;
         }
+
         @string cmdline = default!;
         // Windows CreateProcess takes the command line as a single string:
         // use attr.CmdLine if set, else build the command line by escaping
@@ -323,6 +381,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         } else {
             cmdline = makeCmdLine(argv);
         }
+
         ж<uint16> argvp = default!;
         if (len(cmdline) != 0) {
             (argvp, err) = UTF16PtrFromString(cmdline);
@@ -330,6 +389,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
                 (pid, handle, err) = (0, 0, err); goto ᒐdone;
             }
         }
+
         ж<uint16> dirp = default!;
         if (len(attr.Dir) != 0) {
             (dirp, err) = UTF16PtrFromString(attr.Dir);
@@ -337,27 +397,29 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
                 (pid, handle, err) = (0, 0, err); goto ᒐdone;
             }
         }
+
         var (p, _) = GetCurrentProcess();
         var parentProcess = p;
         if ((~sys).ParentProcess != 0) {
             parentProcess = sys.Value.ParentProcess;
         }
         var fd = new slice<ΔHandle>(len(attr.Files));
-        foreach (var (i, _) in attr.Files) {
+        foreach (var i in range(attr.Files)) {
             if (attr.Files[i] > 0) {
-                var errΔ2 = DuplicateHandle(p, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
+                var errΔ2 = DuplicateHandle(p, (ΔHandle)attr.Files[i], parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
                 if (errΔ2 != default!) {
                     (pid, handle, err) = (0, 0, errΔ2); goto ᒐdone;
                 }
-                defer(DuplicateHandle, parentProcess, fd[i], (ΔHandle)(0), (ж<ΔHandle>)(nil), (uint32)(0), (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
+                defer(DuplicateHandle, parentProcess, fd[i], (ΔHandle)0, (ж<ΔHandle>)(nil), (uint32)0, (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
             }
         }
-        var si = @new<_STARTUPINFOEXW>();
-        (si.Value.ProcThreadAttributeList, err) = newProcThreadAttributeList(2);
+        (var procAttrList, err) = newProcThreadAttributeList(2);
         if (err != default!) {
             (pid, handle, err) = (0, 0, err); goto ᒐdone;
         }
-        defer(deleteProcThreadAttributeList, (~si).ProcThreadAttributeList, ref ᒐ);
+        var procAttrListʗ1 = procAttrList;
+        defer(procAttrListʗ1.delete, ref ᒐ);
+        var si = @new<_STARTUPINFOEXW>();
         si.Value.Cb = (uint32)/* unsafe.Sizeof(*si) */ (uintptr)112;
         si.Value.Flags = STARTF_USESTDHANDLES;
         if ((~sys).HideWindow) {
@@ -365,7 +427,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
             si.Value.ShowWindow = SW_HIDE;
         }
         if ((~sys).ParentProcess != 0) {
-            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, @unsafe.Pointer.FromBox(sys.of(SysProcAttr.ᏑParentProcess)), /* unsafe.Sizeof(sys.ParentProcess) */ (uintptr)8, nil, nil);
+            err = procAttrList.update(_PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, @unsafe.Pointer.FromBox(sys.of(SysProcAttr.ᏑParentProcess)), /* unsafe.Sizeof(sys.ParentProcess) */ (uintptr)8);
             if (err != default!) {
                 (pid, handle, err) = (0, 0, err); goto ᒐdone;
             }
@@ -373,31 +435,38 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         si.Value.StdInput = fd[0];
         si.Value.StdOutput = fd[1];
         si.Value.StdErr = fd[2];
+
         fd = appendꓸꓸꓸ(fd, (~sys).AdditionalInheritedHandles);
+
         // The presence of a NULL handle in the list is enough to cause PROC_THREAD_ATTRIBUTE_HANDLE_LIST
         // to treat the entire list as empty, so remove NULL handles.
         nint j = 0;
-        foreach (var (i, _) in fd) {
+        foreach (var i in range(fd)) {
             if (fd[i] != 0) {
                 fd[j] = fd[i];
                 j++;
             }
         }
-        fd = fd[..(int)(j)];
+        fd = fd.slice(0, j);
+
         var willInheritHandles = len(fd) > 0 && !(~sys).NoInheritHandles;
+
         // Do not accidentally inherit more than these handles.
         if (willInheritHandles) {
-            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_HANDLE_LIST, @unsafe.Pointer.FromBox(Ꮡ(fd, 0)), (uintptr)len(fd) * /* unsafe.Sizeof(fd[0]) */ (uintptr)8, nil, nil);
+            err = procAttrList.update(_PROC_THREAD_ATTRIBUTE_HANDLE_LIST, @unsafe.Pointer.FromBox(Ꮡ(fd, 0)), (uintptr)len(fd) * /* unsafe.Sizeof(fd[0]) */ (uintptr)8);
             if (err != default!) {
                 (pid, handle, err) = (0, 0, err); goto ᒐdone;
             }
         }
+
         (var envBlock, err) = createEnvBlock(attr.Env);
         if (err != default!) {
             (pid, handle, err) = (0, 0, err); goto ᒐdone;
         }
+
+        si.Value.ProcThreadAttributeList = procAttrList.list();
         var pi = @new<ProcessInformation>();
-        var flags = (uint32)((uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT) | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
+        var flags = (~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT | (uint32)_EXTENDED_STARTUPINFO_PRESENT;
         if ((~sys).Token != 0){
             err = CreateProcessAsUser((~sys).Token, argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
         } else {
@@ -409,6 +478,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         defer(CloseHandle, (~pi).Thread, ref ᒐ);
         runtime.KeepAlive(fd);
         runtime.KeepAlive(sys.OrTypedNil());
+
         (pid, handle, err) = ((nint)(~pi).ProcessId, (uintptr)(~pi).Process, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -5,6 +5,8 @@ namespace go;
 
 using errors = errors_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class errors_test_package {
 
@@ -29,7 +31,7 @@ public static void TestNewEqual(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestErrorMethod(ж<testing.T> Ꮡt) {
+public static partial void TestErrorMethod(ж<testing.T> Ꮡt) {
     var err = errors.New(abcˢ);
     if (err.Error() != "abc"u8) {
         Ꮡt.Errorf(@"New(""abc"").Error() = %q, want %q"u8, err.Error(), abcˢ);

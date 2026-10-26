@@ -66,7 +66,7 @@ internal static fs.FS makeTree() {
             fsysʗ1[path] = Ꮡ(new fstest.MapFile(Mode: ModeDir));
         }
     });
-    return fsys;
+    return new fstest_MapFSᴠFS(fsys);
 }
 
 // Assumes that each node name is unique. Good enough for a test.
@@ -115,6 +115,56 @@ public static void TestWalkDir(ж<testing.T> Ꮡt) {
     });
 }
 
+public static void TestWalkDirSymlink(ж<testing.T> Ꮡt) {
+    var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
+        ["link"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("dir"u8), Mode: ModeSymlink)),
+        ["dir/a"u8] = Ꮡ(new fstest.MapFile()),
+        ["dir/b/c"u8] = Ꮡ(new fstest.MapFile()),
+        ["dir/d"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("b"u8), Mode: ModeSymlink))
+    });
+
+    var wantTypes = new map<@string, fs.FileMode>{
+        ["link"u8] = ModeDir,
+        ["link/a"u8] = 0,
+        ["link/b"u8] = ModeDir,
+        ["link/b/c"u8] = 0,
+        ["link/d"u8] = ModeSymlink
+    };
+    var marks = new map<@string, nint>();
+    var marksʗ1 = marks;
+    var wantTypesʗ1 = wantTypes;
+    var walkFn = error (@string path, fs.DirEntry entry, error errΔ1) => {
+        marksʗ1[path]++;
+        {
+            var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok){
+                Ꮡt.Errorf("Unexpected path %q in walk"u8, path);
+            } else 
+            {
+                var got = entry.Type(); if (got != want) {
+                    Ꮡt.Errorf("%s entry type = %v; want %v"u8, path, got, want);
+                }
+            }
+        }
+        if (errΔ1 != default!) {
+            Ꮡt.Errorf("Walking %s: %v"u8, path, errΔ1);
+        }
+        return default!;
+    };
+
+    // Expect no errors.
+    var err = WalkDir(new fstest_MapFSᴠFS(fsys), linkˢ, new Func<@string, fs.DirEntry, error, error>(walkFn));
+    if (err != default!) {
+        Ꮡt.Fatalf("no error expected, found: %s"u8, err);
+    }
+    foreach (var (path, _) in wantTypes) {
+        {
+            nint got = marks[path]; if (got != 1) {
+                Ꮡt.Errorf("%s visited %d times; expected 1"u8, path, got);
+            }
+        }
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string badˢ = "bad"u8;
 private static readonly @string nextˢ = "next"u8;
@@ -136,7 +186,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
-        defer(os.Chmod, bad, (fs.FileMode)(448), ref ᒐ); // avoid errors on cleanup
+        defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
         var err = WalkDir(os.DirFS(dir), "."u8, error (@string path, fs.DirEntry d, error errΔ3) => {
             if (errΔ3 != default!) {

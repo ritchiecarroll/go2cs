@@ -123,14 +123,14 @@ internal static void itoa(ref slice<byte> buf, nint i, nint wid) {
 //   - file and line number (if corresponding flags are provided),
 //   - l.prefix (if it's not blank and Lmsgprefix is set).
 internal static void formatHeader(ref slice<byte> buf, time.Time t, @string prefix, nint flag, @string @file, nint line) {
-    if ((nint)(flag & (nint)Lmsgprefix) == 0) {
+    if ((flag & (nint)Lmsgprefix) == 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
-    if ((nint)(flag & (nint)((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)Lmicroseconds))) != 0) {
-        if ((nint)(flag & (nint)LUTC) != 0) {
+    if ((flag & (nint)((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)Lmicroseconds))) != 0) {
+        if ((flag & (nint)LUTC) != 0) {
             t = t.UTC();
         }
-        if ((nint)(flag & (nint)Ldate) != 0) {
+        if ((flag & (nint)Ldate) != 0) {
             var (year, month, day) = t.Date();
             itoa(ref buf, year, 4);
             buf = append(buf, (byte)((rune)'/'));
@@ -139,22 +139,22 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
             itoa(ref buf, day, 2);
             buf = append(buf, (byte)((rune)' '));
         }
-        if ((nint)(flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
+        if ((flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
             var (hour, min, sec) = t.Clock();
             itoa(ref buf, hour, 2);
             buf = append(buf, (byte)((rune)':'));
             itoa(ref buf, min, 2);
             buf = append(buf, (byte)((rune)':'));
             itoa(ref buf, sec, 2);
-            if ((nint)(flag & (nint)Lmicroseconds) != 0) {
+            if ((flag & (nint)Lmicroseconds) != 0) {
                 buf = append(buf, (byte)((rune)'.'));
                 itoa(ref buf, t.Nanosecond() / 1000, 6);
             }
             buf = append(buf, (byte)((rune)' '));
         }
     }
-    if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
-        if ((nint)(flag & (nint)Lshortfile) != 0) {
+    if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
+        if ((flag & (nint)Lshortfile) != 0) {
             @string @short = @file;
             for (nint i = len(@file) - 1; i > 0; i--) {
                 if (@file[i] == (rune)'/') {
@@ -169,7 +169,7 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
         itoa(ref buf, line, -1);
         buf = append(buf, ((@string)": "u8).ꓸꓸꓸ);
     }
-    if ((nint)(flag & (nint)Lmsgprefix) != 0) {
+    if ((flag & (nint)Lmsgprefix) != 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
 }
@@ -192,7 +192,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     // to place back in the pool.
     //
     // See https://go.dev/issue/23199
-    if (cap(p) > (64 << (int)(10))) {
+    if (cap(p) > 64 << 10) {
         p = default!;
     }
     ᏑbufferPool.Put(Ꮡp.OrTypedNil());
@@ -204,9 +204,10 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 // already a newline. Calldepth is used to recover the PC and is
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
-public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
-    calldepth++; // +1 for this frame.
-    return Ꮡl.output(0, calldepth, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+public static partial error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
+    return Ꮡl.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
+        return append(b, s.ꓸꓸꓸ);
+    });
 }
 
 // output can take either a calldepth or a pc to get source line information.
@@ -229,7 +230,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
 
         @string @file = default!;
         nint line = default!;
-        if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
+        if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
             if (pc == 0){
                 bool ok = default!;
                 (_, @file, line, ok) = runtime.Caller(calldepth);
@@ -300,53 +301,56 @@ public static partial void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    Ꮡl.Output(2, fmt.Sprint(v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    Ꮡl.Output(2, fmt.Sprintf(format, v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    Ꮡl.Output(2, fmt.Sprintln(v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
-    Ꮡl.Output(2, s);
+    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+public static partial void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
-    Ꮡl.Output(2, s);
+    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
-    Ꮡl.Output(2, s);
+    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
@@ -456,53 +460,56 @@ public static partial void Println(params ꓸꓸꓸany vʗp) {
 }
 
 // Fatal is equivalent to [Print] followed by a call to [os.Exit](1).
-public static void Fatal(params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatal(params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    std.Output(2, fmt.Sprint(v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    std.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalf is equivalent to [Printf] followed by a call to [os.Exit](1).
-public static void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    std.Output(2, fmt.Sprintf(format, v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    std.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalln is equivalent to [Println] followed by a call to [os.Exit](1).
-public static void Fatalln(params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+public static partial void Fatalln(params ꓸꓸꓸany vʗp) {
+    var v = vʗp.slice();
 
-    std.Output(2, fmt.Sprintln(v.ꓸꓸꓸ));
+    var vʗ1 = v;
+    std.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Panic is equivalent to [Print] followed by a call to panic().
-public static void Panic(params ꓸꓸꓸany vʗp) {
+public static partial void Panic(params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
-    std.Output(2, s);
+    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicf is equivalent to [Printf] followed by a call to panic().
-public static void Panicf(@string format, params ꓸꓸꓸany vʗp) {
+public static partial void Panicf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
-    std.Output(2, s);
+    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicln is equivalent to [Println] followed by a call to panic().
-public static void Panicln(params ꓸꓸꓸany vʗp) {
+public static partial void Panicln(params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
-    std.Output(2, s);
+    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
@@ -513,8 +520,10 @@ public static void Panicln(params ꓸꓸꓸany vʗp) {
 // frames to skip when computing the file name and line number
 // if [Llongfile] or [Lshortfile] is set; a value of 1 will print the details
 // for the caller of Output.
-public static error Output(nint calldepth, @string s) {
-    return std.Output(calldepth + 1, s); // +1 for this frame.
+public static partial error Output(nint calldepth, @string s) {
+    return std.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
+        return append(b, s.ꓸꓸꓸ);
+    });
 }
 
 } // end log_package

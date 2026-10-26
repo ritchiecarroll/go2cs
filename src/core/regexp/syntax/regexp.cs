@@ -74,7 +74,7 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
         }
     }
     else if (exprᴛ1 == OpLiteral || exprᴛ1 == OpCharClass) {
-        return slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
+        return (Flags)(x.Flags & FoldCase) == (Flags)(y.Flags & FoldCase) && slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
     }
     else if (exprᴛ1 == OpAlternate || exprᴛ1 == OpConcat) {
         return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, ((Func<ж<Regexp>, ж<Regexp>, bool>)(Equal)));
@@ -247,12 +247,12 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
             if ((printFlags)(f & flagS) != 0) {
                 Ꮡb.WriteString(@"s"u8);
             }
-            if ((printFlags)(f & ((((printFlags)(flagM | flagS)) << (int)(negShift)))) != 0) {
+            if ((printFlags)(f & (((printFlags)(flagM | flagS)) << (int)(negShift))) != 0) {
                 Ꮡb.WriteString(@"-"u8);
-                if ((printFlags)(f & ((flagM << (int)(negShift)))) != 0) {
+                if ((printFlags)(f & (flagM << (int)(negShift))) != 0) {
                     Ꮡb.WriteString(@"m"u8);
                 }
-                if ((printFlags)(f & ((flagS << (int)(negShift)))) != 0) {
+                if ((printFlags)(f & (flagS << (int)(negShift))) != 0) {
                     Ꮡb.WriteString(@"s"u8);
                 }
             }
@@ -356,7 +356,7 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
             Ꮡb.WriteRune((rune)')');
         }
         else if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest || exprᴛ1 == OpRepeat) {
-            var p = ((printFlags)0);
+            var p = (printFlags)0;
             var sub = re.Sub[0];
             if ((~sub).Op > OpCapture || (~sub).Op == OpLiteral && len((~sub).Rune) > 1) {
                 p = flagPrec;
@@ -390,7 +390,7 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
         }
         else if (exprᴛ1 == OpConcat) {
             foreach (var (_, sub) in re.Sub) {
-                var p = ((printFlags)0);
+                var p = (printFlags)0;
                 if ((~sub).Op == OpAlternate) {
                     p = flagPrec;
                 }

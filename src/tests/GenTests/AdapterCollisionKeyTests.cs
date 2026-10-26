@@ -83,6 +83,12 @@ public class AdapterCollisionKeyTests
                 public static void Register(System.Type boxType, System.Type interfaceType, System.Func<object, object> factory) { }
             }
 
+            public sealed class GoDeferredRegistrations
+            {
+                public static readonly GoDeferredRegistrations Adapters = new();
+                public void Defer(System.Action register) { }
+            }
+
             [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
             public class GoImplementAttribute<TStruct, TInterface> : System.Attribute
             {
@@ -401,7 +407,9 @@ public class AdapterCollisionKeyTests
 
         Assert.AreEqual("digestжkeyedLike", DeclaredAdapterName(adapter));
 
-        StringAssert.Contains(adapter, "class digestжkeyedLike : keyedLike<global::go.probe_package.named>, IжAdapter");
+        // The implemented interface is a type reference, named through its own class since the
+        // cross-class generic fix (CrossClassGenericInterfaceAdapterTests); the identifier is unchanged.
+        StringAssert.Contains(adapter, "class digestжkeyedLike : global::go.probe_package.keyedLike<global::go.probe_package.named>, IжAdapter");
         StringAssert.Contains(adapter, "public digestжkeyedLike(ж<digest> box)");
 
         List<Diagnostic> errors = Errors(updated).ToList();

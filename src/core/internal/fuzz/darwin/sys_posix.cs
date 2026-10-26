@@ -1,7 +1,7 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build darwin || freebsd || linux
+//go:build darwin || freebsd || linux || openbsd
 namespace go.@internal;
 
 using fmt = fmt_package;
@@ -31,11 +31,13 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint s
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
+    var errsᴷ = new stackAppend<error>();
+
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
     slice<error> errs = default!;
-    errs = append(errs,
+    errs = append(errsᴷ, errs,
         Δsyscall.Munmap(m.region),
         m.f.Close());
     if (m.removeOnClose) {

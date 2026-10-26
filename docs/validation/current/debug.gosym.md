@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `debug/gosym` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**10 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**10 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/debug/gosym`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/debug/gosym).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 3 of the matched tests identically.
+Both runtimes skip 4 of the matched tests identically.
 
 > Linux only: on Windows both runtimes skip TestSymVersion identically (skipIfNotELF), so the Windows row stays 10 matched / 0 disclosed and this entry never fires there.
 
@@ -26,7 +26,7 @@ Both runtimes skip 3 of the matched tests identically.
 | `TestIssue29551` | pass | pass |
 | `TestLineAline` | skip | skip |
 | `TestLineFromAline` | skip | skip |
-| `TestPCLine` | pass | pass |
+| `TestPCLine` | skip | skip |
 | `TestRemotePackage` | pass | pass |
 | `TestStandardLibPackage` | pass | pass |
 | `TestStandardLibPathPackage` | pass | pass |

@@ -344,7 +344,7 @@ internal static readonly @string samplesˢ = "samples"u8;
 internal static readonly @string cpuˢ = "cpu"u8;
 
 // build completes and returns the constructed profile.
-internal static void build(this ж<profileBuilder> Ꮡb) {
+internal static error build(this ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.end = time.Now();
@@ -370,8 +370,8 @@ internal static void build(this ж<profileBuilder> Ꮡb) {
         if ((~e).tag != nil) {
             var eʗ1 = e;
             labels = () => {
-                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.list) {
-                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.key, lbl.value, 0);
+                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.Set.List) {
+                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
         }
@@ -390,8 +390,11 @@ internal static void build(this ж<profileBuilder> Ꮡb) {
     // TODO: Anything for tagProfile_KeepFrames?
 
     b.pb.strings(tagProfile_StringTable, b.strings);
-    b.zw.Write(b.pb.data);
-    b.zw.Close();
+    var (_, err) = b.zw.Write(b.pb.data);
+    if (err != default!) {
+        return err;
+    }
+    return b.zw.Close();
 }
 
 // appendLocsForStack appends the location IDs for the given stack trace to the given
@@ -661,7 +664,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             }
             b.pbLine(tagLocation_Line, funcID, (int64)frame.Line);
         }
-        foreach (var (i, _) in b.mem) {
+        foreach (var i in range(b.mem)) {
             if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
                 b.pb.uint64Opt(tagLocation_MappingID, (uint64)(i + 1));
 
@@ -719,6 +722,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     // 7ffc342a2000-7ffc342c3000 rw-p 00000000 00:00 0                          [stack]
     // 7ffc34343000-7ffc34345000 r-xp 00000000 00:00 0                          [vdso]
     // ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
     ref var line = ref heap<slice<byte>>(out var Ꮡline);
     // next removes and returns the next field in the line.
     // It also removes from line any spaces following the field.
@@ -732,7 +736,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     while (len(data) > 0) {
         (line, data, _) = bytes.Cut(data, newline);
         var addr = next();
-        var (loStr, hiStr, ok) = strings_package.Cut(((@string)addr), "-"u8);
+        var (loStr, hiStr, ok) = strings_package.Cut((@string)addr, "-"u8);
         if (!ok) {
             continue;
         }
@@ -749,7 +753,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
             // Only interested in executable mappings.
             continue;
         }
-        (var offset, err) = strconv.ParseUint(((@string)next()), 16, 64);
+        (var offset, err) = strconv.ParseUint((@string)next(), 16, 64);
         if (err != default!) {
             continue;
         }
@@ -758,7 +762,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         if (line == default!) {
             continue;
         }
-        @string @file = ((@string)line);
+        @string @file = (@string)line;
 
         // Trim deleted file marker.
         @string deletedStr = deletedˢ;

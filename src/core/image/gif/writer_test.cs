@@ -14,6 +14,8 @@ using rand = math.rand_package;
 using os = os_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.image;
 using go.image.color;
 using math;
@@ -96,7 +98,7 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal int64 tolerance;
 }
 internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, ((int64)1 << (int)(12))),
+    new("../testdata/video-001.png"u8, (int64)1 << 12),
     new("../testdata/video-001.gif"u8, 0),
     new("../testdata/video-001.interlaced.gif"u8, 0)
 }.slice();
@@ -222,7 +224,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
     }
     if (go1Dot5Fields) {
         g0.Value.Disposal = new slice<byte>(len((~g0).Image));
-        foreach (var (i, _) in (~g0).Disposal) {
+        foreach (var i in range((~g0).Disposal)) {
             g0.Value.Disposal[i] = DisposalNone;
         }
         g0.Value.Config = new image.Config(
@@ -278,7 +280,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
         Ꮡt.Fatalf("image and disposal lengths differ: %d and %d"u8, len((~g1).Image), len((~g1).Disposal));
     }
 
-    foreach (var (i, _) in (~g0).Image) {
+    foreach (var i in range((~g0).Image)) {
         var (m0, m1) = ((~g0).Image[i], (~g1).Image[i]);
         if (m0.Bounds() != m1.Bounds()) {
             Ꮡt.Errorf("frame %d: bounds differ: %v and %v"u8, i, m0.Bounds(), m1.Bounds());
@@ -316,7 +318,7 @@ internal static readonly object expectedErrorFromˢ2 = (@string)"expected error 
 
 public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
     var images = new slice<ж<image.Paletted>>(2);
-    foreach (var (i, _) in images) {
+    foreach (var i in range(images)) {
         images[i] = image.NewPaletted(image.Rect(0, 0, 5, 5), palette.Plan9);
     }
 
@@ -335,7 +337,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
         Delay: new slice<nint>(len(images)),
         Disposal: new slice<byte>(1)
     ));
-    foreach (var (i, _) in (~g1).Disposal) {
+    foreach (var i in range((~g1).Disposal)) {
         g1.Value.Disposal[i] = DisposalNone;
     }
     {
@@ -348,7 +350,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ3 = (@string)"expected error from providing empty gif"u8;
 
-public static void TestEncodeZeroGIF(ж<testing.T> Ꮡt) {
+public static partial void TestEncodeZeroGIF(ж<testing.T> Ꮡt) {
     {
         var err = EncodeAll(io.Discard, Ꮡ(new GIF(nil))); if (err == default!) {
             Ꮡt.Error(expectedErrorFromˢ3);
@@ -455,7 +457,7 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
         uint32 rednessAt(nint x, nint y) {
             var (r, _, _, _) = mʗ1.At(x, y).RGBA();
             // Shift by 8 to convert from 16 bit color to 8 bit color.
-            return (r >> (int)(8));
+            return r >> 8;
         }
 
         // Round-tripping a still (non-animated) image.Image through
@@ -570,7 +572,7 @@ public static void TestEncodeBadPalettes(ж<testing.T> Ꮡt) {
         foreach (var (_, nilColors) in new bool[]{false, true}.slice()) {
             var pal = new Δcolor.Palette(n);
             if (!nilColors) {
-                foreach (var (i, _) in pal) {
+                foreach (var i in range(pal)) {
                     pal[i] = Δcolor.Black;
                 }
             }
@@ -603,7 +605,7 @@ internal static readonly object colorTablesMatchFalseˢ = (@string)"colorTablesM
 
 public static void TestColorTablesMatch(ж<testing.T> Ꮡt) {
     const nint trIdx = 100;
-    var global = ((Δcolor.Palette)palette.Plan9);
+    var global = (Δcolor.Palette)palette.Plan9;
     {
         var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
             Ꮡt.Fatalf("trIdx (%d) is already black"u8, (nint)(trIdx));
@@ -612,7 +614,7 @@ public static void TestColorTablesMatch(ж<testing.T> Ꮡt) {
 
     // Make a copy of the palette, substituting trIdx's slot with transparent,
     // just like decoder.decode.
-    var local = appendꓸꓸꓸ(((Δcolor.Palette)default!), global);
+    var local = appendꓸꓸꓸ((Δcolor.Palette)default!, global);
     local[trIdx] = new colorꓸRGBA(nil);
 
     const nint testLen = /* 3 * 256 */ 768;
@@ -742,7 +744,7 @@ public static void BenchmarkEncodeRandomPaletted(ж<testing.B> Ꮡb) {
 
     var paletted = image.NewPaletted(image.Rect(0, 0, 640, 480), palette.Plan9);
     var rnd = rand.New(rand.NewSource(123));
-    foreach (var (i, _) in (~paletted).Pix) {
+    foreach (var i in range((~paletted).Pix)) {
         paletted.Value.Pix[i] = (uint8)rnd.Intn(256);
     }
 

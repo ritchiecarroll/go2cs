@@ -8,11 +8,11 @@ using boring = go.crypto.@internal.boring_package;
 using rsa = go.crypto.@internal.fips140.rsa_package;
 using fips140hash = go.crypto.@internal.fips140hash_package;
 using fips140only = go.crypto.@internal.fips140only_package;
+using rand = go.crypto.@internal.rand_package;
 using errors = errors_package;
 using hash = hash_package;
 using io = io_package;
 using big = go.math.big_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.math;
@@ -68,9 +68,9 @@ internal static readonly @string cryptoRsaInvalidPssSaltˢ = "crypto/rsa: invali
 // used. If opts.Hash is set, it overrides hash.
 //
 // The signature is randomized depending on the message, key, and salt size,
-// using bytes from rand. Most applications should use [crypto/rand.Reader] as
-// rand.
-public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> digest, ж<PSSOptions> Ꮡopts) {
+// using bytes from random. Most applications should use [crypto/rand.Reader] as
+// random.
+public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> digest, ж<PSSOptions> Ꮡopts) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
 
@@ -84,7 +84,7 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
         hash = opts.Hash;
     }
 
-    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+    if (boring.Enabled && rand.IsDefaultReader(random)) {
         var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
         if (errΔ2 != default!) {
             return (default!, errΔ2);
@@ -100,10 +100,10 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
             return (default!, errΔ3);
         }
     }
-    if (fips140only.Enabled && !fips140only.ApprovedHash(h)) {
+    if (fips140only.Enforced() && !fips140only.ApprovedHash(h)) {
         return (default!, errors.New(cryptoRsaUseOfHashˢ));
     }
-    if (fips140only.Enabled && !fips140only.ApprovedRandomReader(rand)) {
+    if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(random)) {
         return (default!, errors.New(cryptoRsaOnlyCryptoRandˢ));
     }
 
@@ -113,12 +113,12 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
     }
 
     nint saltLength = Ꮡopts.saltLength();
-    if (fips140only.Enabled && saltLength > h.Size()) {
+    if (fips140only.Enforced() && saltLength > h.Size()) {
         return (default!, errors.New(cryptoRsaUseOfPssSaltˢ));
     }
     var exprᴛ1 = saltLength;
     if (exprᴛ1 == PSSSaltLengthAuto) {
-        (saltLength, err) = rsa.PSSMaxSaltLength(k.PublicKey(), new hash_HashᴠHash(h));
+        (saltLength, err) = rsa.PSSMaxSaltLength(k.PublicKey(), h);
         if (err != default!) {
             return (default!, fipsError(err));
         }
@@ -134,7 +134,7 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
         }
     }
 
-    var (ᴛ1, ᴛ2) = rsa.SignPSS(rand, k, new hash_HashᴠHash(h), digest, saltLength);
+    var (ᴛ1, ᴛ2) = rsa.SignPSS(random, k, h, digest, saltLength);
     return fipsError2(ᴛ1, ᴛ2);
 }
 
@@ -174,7 +174,7 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
             return errΔ4;
         }
     }
-    if (fips140only.Enabled && !fips140only.ApprovedHash(h)) {
+    if (fips140only.Enforced() && !fips140only.ApprovedHash(h)) {
         return errors.New(cryptoRsaUseOfHashˢ);
     }
 
@@ -184,18 +184,18 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
     }
 
     nint saltLength = Ꮡopts.saltLength();
-    if (fips140only.Enabled && saltLength > h.Size()) {
+    if (fips140only.Enforced() && saltLength > h.Size()) {
         return errors.New(cryptoRsaUseOfPssSaltˢ);
     }
     var exprᴛ1 = saltLength;
     if (exprᴛ1 == PSSSaltLengthAuto) {
-        return fipsError(rsa.VerifyPSS(k, new hash_HashᴠHash(h), digest, sig));
+        return fipsError(rsa.VerifyPSS(k, h, digest, sig));
     }
     if (exprᴛ1 == PSSSaltLengthEqualsHash) {
-        return fipsError(rsa.VerifyPSSWithSaltLength(k, new hash_HashᴠHash(h), digest, sig, h.Size()));
+        return fipsError(rsa.VerifyPSSWithSaltLength(k, h, digest, sig, h.Size()));
     }
     { /* default: */
-        return fipsError(rsa.VerifyPSSWithSaltLength(k, new hash_HashᴠHash(h), digest, sig, saltLength));
+        return fipsError(rsa.VerifyPSSWithSaltLength(k, h, digest, sig, saltLength));
     }
 }
 
@@ -218,6 +218,26 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
 // The message must be no longer than the length of the public modulus minus
 // twice the hash length, minus a further 2.
 public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
+    return encryptOAEP(hashΔ1, hashΔ1, random, Ꮡpub, msg, label);
+}
+
+// EncryptOAEPWithOptions encrypts the given message with RSA-OAEP using the
+// provided options.
+//
+// This function should only be used over [EncryptOAEP] when there is a need to
+// specify the OAEP and MGF1 hashes separately.
+//
+// See [EncryptOAEP] for additional details.
+public static (slice<byte>, error) EncryptOAEPWithOptions(io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, ж<OAEPOptions> Ꮡopts) {
+    ref var opts = ref Ꮡopts.DerefOrNull();
+
+    if (opts.MGFHash == 0) {
+        return encryptOAEP(opts.Hash.New(), opts.Hash.New(), random, Ꮡpub, msg, opts.Label);
+    }
+    return encryptOAEP(opts.Hash.New(), opts.MGFHash.New(), random, Ꮡpub, msg, opts.Label);
+}
+
+internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
     GoFrame ᒐ = default;
     try {
         ref var pub = ref Ꮡpub.DerefOrNull();
@@ -229,9 +249,9 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader rand
         }
 
         defer(hashΔ1.Reset, ref ᒐ);
+        defer(mgfHash.Reset, ref ᒐ);
 
-        if (boring.Enabled && AreEqual(random, boring.RandReader)) {
-            hashΔ1.Reset();
+        if (boring.Enabled && rand.IsDefaultReader(random)) {
             nint kΔ1 = pub.Size();
             if (len(msg) > kΔ1 - 2 * hashΔ1.Size() - 2) {
                 return (default!, ErrMessageTooLong);
@@ -240,7 +260,7 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader rand
             if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
-            return boring.EncryptRSAOAEP(hashΔ1, hashΔ1, bkey, msg, label);
+            return boring.EncryptRSAOAEP(hashΔ1, mgfHash, bkey, msg, label);
         }
         boring.UnreachableExceptTests();
 
@@ -251,10 +271,10 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader rand
                 return (default!, errΔ3);
             }
         }
-        if (fips140only.Enabled && !fips140only.ApprovedHash(hashΔ1)) {
+        if (fips140only.Enforced() && !fips140only.ApprovedHash(hashΔ1)) {
             return (default!, errors.New(cryptoRsaUseOfHashˢ));
         }
-        if (fips140only.Enabled && !fips140only.ApprovedRandomReader(random)) {
+        if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(random)) {
             return (default!, errors.New(cryptoRsaOnlyCryptoRandˢ));
         }
 
@@ -262,7 +282,7 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader rand
         if (err != default!) {
             return (default!, err);
         }
-        var (ᴛ3, ᴛ4) = rsa.EncryptOAEP(new hash_HashᴠHash(hashΔ1), new hash_HashᴠHash(hashΔ1), random, k, msg, label);
+        var (ᴛ3, ᴛ4) = rsa.EncryptOAEP(hashΔ1, mgfHash, random, k, msg, label);
         return fipsError2(ᴛ3, ᴛ4);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -322,7 +342,7 @@ internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mg
             return (default!, errΔ3);
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         if (!fips140only.ApprovedHash(hashΔ1) || !fips140only.ApprovedHash(mgfHash)) {
             return (default!, errors.New(cryptoRsaUseOfHashˢ));
         }
@@ -333,7 +353,7 @@ internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mg
         return (default!, err);
     }
 
-    var (ᴛ5, ᴛ6) = rsa.DecryptOAEP(new hash_HashᴠHash(hashΔ1), new hash_HashᴠHash(mgfHash), k, ciphertext, label);
+    var (ᴛ5, ᴛ6) = rsa.DecryptOAEP(hashΔ1, mgfHash, k, ciphertext, label);
     return fipsError2(ᴛ5, ᴛ6);
 }
 
@@ -382,7 +402,7 @@ public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey>
             return (default!, errΔ3);
         }
     }
-    if (fips140only.Enabled && !fips140only.ApprovedHash(fips140hash.Unwrap(hash.New()))) {
+    if (fips140only.Enforced() && !fips140only.ApprovedHash(fips140hash.Unwrap(hash.New()))) {
         return (default!, errors.New(cryptoRsaUseOfHashˢ));
     }
 
@@ -435,7 +455,7 @@ public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice
             return errΔ4;
         }
     }
-    if (fips140only.Enabled && !fips140only.ApprovedHash(fips140hash.Unwrap(hash.New()))) {
+    if (fips140only.Enforced() && !fips140only.ApprovedHash(fips140hash.Unwrap(hash.New()))) {
         return errors.New(cryptoRsaUseOfHashˢ);
     }
 
@@ -472,7 +492,7 @@ internal static readonly @string cryptoRsaUseOfPublicˢ = "crypto/rsa: use of pu
 internal static readonly @string cryptoRsaUseOfEvenPublicˢ = "crypto/rsa: use of even public exponent is not allowed in FIPS 140-only mode"u8;
 
 internal static error checkFIPS140OnlyPublicKey(ref PublicKey pub) {
-    if (!fips140only.Enabled) {
+    if (!fips140only.Enforced()) {
         return default!;
     }
     if (pub.N == nil) {
@@ -484,10 +504,10 @@ internal static error checkFIPS140OnlyPublicKey(ref PublicKey pub) {
     if (pub.N.BitLen() % 2 == 1) {
         return errors.New(cryptoRsaUseOfKeysWithˢ);
     }
-    if (pub.E <= (1 << (int)(16))) {
+    if (pub.E <= 1 << 16) {
         return errors.New(cryptoRsaUseOfPublicˢ);
     }
-    if ((nint)(pub.E & 1) == 0) {
+    if ((pub.E & 1) == 0) {
         return errors.New(cryptoRsaUseOfEvenPublicˢ);
     }
     return default!;
@@ -498,7 +518,7 @@ internal static readonly @string cryptoRsaUseOfMultiPrimeˢ = "crypto/rsa: use o
 internal static readonly @string cryptoRsaUseOfPrimesOfˢ = "crypto/rsa: use of primes of different sizes is not allowed in FIPS 140-only mode"u8;
 
 internal static error checkFIPS140OnlyPrivateKey(ref PrivateKey priv) {
-    if (!fips140only.Enabled) {
+    if (!fips140only.Enforced()) {
         return default!;
     }
     {

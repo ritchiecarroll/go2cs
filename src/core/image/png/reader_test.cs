@@ -383,7 +383,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 nint b = default!;
                 nint c = default!;
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
-                    b = (nint)(b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y));
+                    b = b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y);
                     c++;
                     if (c == 8 / bitdepth) {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x"u8, b);
@@ -790,8 +790,8 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
             {
                 var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0){
                     got = append(got,
-                        hex[(uint32)(0x0f & ((r >> (int)(12))))],
-                        hex[(uint32)(0x0f & ((r >> (int)(8))))],
+                        hex[(0x0f & (r >> 12))],
+                        hex[(0x0f & (r >> 8))],
                         (byte)((rune)' '));
                 } else {
                     got = append(got,
@@ -849,6 +849,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
         ),
 
         // The next three cases come from https://golang.org/issues/38435
+
         new(
             src: new byte[]{
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -863,6 +864,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
             width: 0x0000b504,
             height: 0x0000b504
         ),
+
         new(
             src: new byte[]{
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -875,6 +877,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
             width: 0x04000000,
             height: 0x00000001
         ),
+
         new(
             src: new byte[]{
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,

@@ -35,6 +35,20 @@ public class RuntimeStopTheWorldContractTests
 {
     private const int TimeoutMs = 30000;
 
+    // The holder is a GOROUTINE, not the thread it ran on: goroutine threads are reused (GoroutineThreadPool), so
+    // a holder keyed by managed thread id would let the thread's NEXT goroutine release a lock it never took.
+    [TestMethod]
+    public void AHolderIsItsGoroutineNotTheThreadItRanOn()
+    {
+        (bool sameThread, bool worldsemaStillHeld, bool metricsSemaStillHeld) = GoSemaHolderReuseProbe(TimeoutMs);
+
+        if (!sameThread)
+            Assert.Inconclusive("goroutine B never landed on goroutine A's reused thread; nothing to assert");
+
+        Assert.IsTrue(worldsemaStillHeld, "the next goroutine on the holder's thread released worldsema, which it never took");
+        Assert.IsTrue(metricsSemaStillHeld, "the next goroutine on the holder's thread released metricsSema, which it never took");
+    }
+
     [TestMethod]
     public void AStopTheWorldPairReleasesWorldsemaForTheNextCaller()
     {

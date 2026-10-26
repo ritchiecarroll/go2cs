@@ -9,6 +9,8 @@ using static go.html.template_package;
 using strings = strings_package;
 using testing = testing_package;
 using parse = text.template.parse_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.html;
 using io = io_package;
@@ -80,9 +82,9 @@ internal static readonly @string ltFooˢ = "&lt;foo>"u8;
 public static void TestRedefineAfterNonExecution(ж<testing.T> Ꮡt) {
     var c = newTestCase(Ꮡt);
     c.mustParse((~c).root, ifTemplateXEndDefineXFooˢ);
-    c.mustExecute((~c).root, (nint)(0), ""u8);
+    c.mustExecute((~c).root, (nint)0, ""u8);
     c.mustNotParse((~c).root, defineXBarEndˢ);
-    c.mustExecute((~c).root, (nint)(1), ltFooˢ);
+    c.mustExecute((~c).root, (nint)1, ltFooˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -138,9 +140,9 @@ internal static readonly @string defineXScriptEndˢ = @"{{define ""X""}}<script>
 public static void TestRedefineTopUse(ж<testing.T> Ꮡt) {
     var c = newTestCase(Ꮡt);
     c.mustParse((~c).root, templateXDefineXEndˢ);
-    c.mustExecute((~c).root, (nint)(42), @"42"u8);
+    c.mustExecute((~c).root, (nint)42, @"42"u8);
     c.mustNotParse((~c).root, defineXScriptEndˢ);
-    c.mustExecute((~c).root, (nint)(42), @"42"u8);
+    c.mustExecute((~c).root, (nint)42, @"42"u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -200,7 +202,7 @@ public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж
     // See #33671 and #37634 for more context on this.
     var tests = new TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped_tests[]{
         new("empty"u8, ""u8),
-        new("invalid"u8, ((@string)(rune)(-1))),
+        new("invalid"u8, (@string)(rune)(-1)),
         new("null"u8, "\u0000"u8),
         new("unit separator"u8, "\u001F"u8),
         new("tab"u8, "\t"u8),
@@ -277,7 +279,7 @@ internal static ж<template.Template> lookup(this ref testCase c, @string name) 
     return c.root.Lookup(name);
 }
 
-internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static partial void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);
@@ -286,7 +288,7 @@ internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, 
     }
 }
 
-internal static void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static partial void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);

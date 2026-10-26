@@ -82,7 +82,7 @@ internal static bool isGoFile(fs.FileInfo fi) {
 }
 
 internal partial struct bundle {
-    public partial ref ж<global::go.go.doc_package.Package> Package { get; }
+    /*embed*/ public ж<global::go.go.doc_package.Package> Package;
     public ж<token.FileSet> FSet;
 }
 
@@ -110,10 +110,11 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
         var fsetʗ1 = fset;
         var pkgʗ1 = pkg;
         Ꮡt.Run((~pkg).Name, (ж<testing.T> tΔ1) => {
+            var filesΔ1ᴷ = new stackAppend<ж<ast.File>>();
             @string importPath = dataDir + "/" + (~pkgʗ1).Name;
             slice<ж<ast.File>> filesΔ1 = default!;
             foreach (var (_, f) in (~pkgʗ1).Files) {
-                filesΔ1 = append(filesΔ1, f);
+                filesΔ1 = append(filesΔ1ᴷ, filesΔ1, f);
             }
             var (doc, errΔ2) = NewFromFiles(fsetʗ1, filesΔ1, importPath, mode);
             if (errΔ2 != default!) {
@@ -186,7 +187,7 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, ((global::go.go.doc_package.Mode)0));
+    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, (global::go.go.doc_package.Mode)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

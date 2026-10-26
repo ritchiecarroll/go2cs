@@ -9,6 +9,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using go.golib;
 
 namespace go;
@@ -38,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
+public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -49,6 +50,16 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
     private readonly IArray? m_foreign;
 
     private readonly nint m_index;
+
+    // The field-view list (ж.Views.cs): `&a[i].f` asks of() of an element box, often a fresh one per
+    // expression, so the weak-table fallback paid an insert under its lock on every such box.
+    internal ViewEntry? m_views;
+
+    // The deep funnel's run source (NativeStructMarshal.CallDeep): the fast arm's backing and absolute index.
+    // The foreign arm has no contiguous backing to copy a run from, so it answers none.
+    Array? IElementRun.RunBacking => m_backing;
+
+    nint IElementRun.RunIndex => m_index;
 
     // Create a new indexed reference into existing heap allocated collection storage. The fast
     // arm is taken ONLY for the three arms whose indexers ARE the canonical access (the ratified
@@ -128,6 +139,56 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
         return GoZeroSizeFacts<T>.IsZeroSize && ReferenceEquals(backing, GoZeroSizeFacts<T>.Storage) ? 0 : absoluteIndex;
     }
 
+    // The PERSISTENT element boxes of array backings (P-256 R3, COORD ruling 2026-10-22): one box per
+    // (backing, absolute index), kept for the backing's life, so `&a[i]` asked by two expressions answers
+    // the SAME box and the field views cached on it (m_views) are found again. Fiat's p256Table.Select
+    // reads `&table[i]` sixteen times a lookup and then three field views of each, and a fresh box per
+    // expression re-minted all of them every time. Equality was already (backing, index), so Go's
+    // `&a[i] == &a[i]` holds either way; this changes only how many objects answer it.
+    //
+    // SCOPED to an element type that has had a field view (BoxShape<T>.Slotted): only there does a
+    // persistent box have views to keep. Every other T keeps a fresh box per expression and pays
+    // nothing. The table is weak on the backing, so a backing nobody references is collected with its
+    // boxes (the box -> backing reference sits inside the value, which a ConditionalWeakTable does not
+    // count as a root).
+    //
+    // The slots come in chunks of ElementBoxChunk, each allocated on the first address taken inside it,
+    // so a big array addressed once pays one reference per chunk plus one chunk, not one reference per
+    // element: a [4096] array costs 64 chunk references and one 64-slot chunk on its first `&a[i]`.
+    private const int ElementBoxChunk = 64;
+
+    private static readonly ConditionalWeakTable<T[], ElemRefBox<T>?[]?[]> s_arrayElementBoxes = new();
+
+    /// <summary>
+    /// Go's <c>&amp;a[i]</c> for an array element, index already checked: the persistent box of
+    /// (backing, absolute index) when <typeparamref name="T"/> is <see cref="BoxShape{T}.Slotted"/>,
+    /// a fresh box otherwise.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ж<T> OfArrayElement(array<T> array, int index)
+    {
+        T[]? backing = array.Source;
+
+        // outside the scope the call site keeps the inlined fresh box it had before the table existed
+        if (!BoxShape<T>.Slotted || backing is null)
+            return new ElemRefBox<T>(array, index);
+
+        return persistentArrayElement(array, backing, index);
+    }
+
+    private static ж<T> persistentArrayElement(array<T> array, T[] backing, int index)
+    {
+        ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);
+        int slot = (int)array.Low + index;
+        int chunkIndex = slot / ElementBoxChunk;
+
+        // one chunk per range and one box per slot: a racing mint loses the exchange and takes the winner
+        ElemRefBox<T>?[] chunk = chunks[chunkIndex] ?? Interlocked.CompareExchange(ref chunks[chunkIndex], new ElemRefBox<T>?[Math.Min(ElementBoxChunk, backing.Length - chunkIndex * ElementBoxChunk)], null) ?? chunks[chunkIndex]!;
+        ref ElemRefBox<T>? box = ref chunk[slot % ElementBoxChunk];
+
+        return box ?? Interlocked.CompareExchange(ref box, new ElemRefBox<T>(array, index), null) ?? box!;
+    }
+
     internal ElemRefBox(array<T> array, int index)
     {
         if (array.Source is not null)
@@ -177,14 +238,23 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
     // A NATIVE-backed element's identity is its ADDRESS, exactly as NativeBox's is. The canonical
     // (object, index) pair cannot serve here: the foreign source is a boxed slice HEADER, and a
     // fresh box is a fresh object, so two pointers to ONE element would compare unequal — Go says
-    // `&a[i] == &a[i]`. Zero for every managed element, which keeps the canonical path unchanged.
+    // `&a[i] == &a[i]`. Zero for every managed element, which keeps the canonical path unchanged. An element
+    // of a foreign pointer array (NativePointerWords) is its word's address, the same fact.
     private nuint nativeElementIdentity()
     {
         unsafe
         {
-            return m_foreign is slice<T> ns && ns.IsNativeBacked ? ns.NativeElementAddress(m_index) : 0;
+            return m_foreign switch
+            {
+                slice<T> ns when ns.IsNativeBacked => ns.NativeElementAddress(m_index),
+                INativeWordElements words => words.ElementAddress(m_index),
+                _ => 0
+            };
         }
     }
+
+    // The element's native address, 0 for a managed element: array<T>.AliasPointer views native memory from it.
+    internal nuint NativeElementAddress => nativeElementIdentity();
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
@@ -405,6 +475,11 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
             // element as one taken through the slice it aliases.
             case array<T> arr when arr.Source is not null:
                 return (arr.Source, arr.Low + index);
+
+            // Words in foreign native memory (NativePointerWords) have no managed storage at all: the element's
+            // identity is its word's address (nativeElementIdentity), never a T[].
+            case INativeWordElements:
+                return (array, index);
 
             default:
                 return (array.Source ?? (object)array, index);

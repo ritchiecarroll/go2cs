@@ -6,8 +6,9 @@ namespace go;
 using errors = errors_package;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using unsafeheader = @internal.unsafeheader_package;
+using iter = iter_package;
 using Δmath = math_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
@@ -15,6 +16,7 @@ using @internal;
 using System.Runtime.CompilerServices;
 using Δsync = sync_package;
 
+[GoFieldAccess(typeof(nonEmptyInterface), typeof(unsafeheader.Slice))]
 partial class reflect_package {
 
 // Value is the reflection interface to a Go value.
@@ -55,11 +57,11 @@ partial struct ΔValue {
     //	- flagIndir: val holds a pointer to the data
     //	- flagAddr: v.CanAddr is true (implies flagIndir and ptr is non-nil)
     //	- flagMethod: v is a method value.
-    // If ifaceIndir(typ), code can assume that flagIndir is set.
+    // If !typ.IsDirectIface(), code can assume that flagIndir is set.
     //
     // The remaining 22+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
-    internal partial ref flag flag { get; }
+    /*embed*/ internal flag flag;
 }
 
 partial struct flag /*num:uintptr*/;
@@ -80,7 +82,7 @@ internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
 internal static ΔKind kind(this flag f) {
-    return ((ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask))));
+    return (ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask)));
 }
 
 internal static flag ro(this flag f) {
@@ -117,12 +119,18 @@ internal static @unsafe.Pointer pointer(this ΔValue v) {
 
 // packEface converts v to the empty interface.
 internal static any packEface(ΔValue v) {
+    return ~Ꮡ(new abi.EmptyInterface(
+        Type: v.typ(),
+        Data: (uintptr)packEfaceData(v)
+    )).Reinterpret<abi.EmptyInterface, any>();
+}
+
+// packEfaceData is a helper that packs the Data part of an interface,
+// if v were to be stored in an interface.
+internal static @unsafe.Pointer packEfaceData(ΔValue v) {
     var t = v.typ();
-    ref var i = ref heap<any>(out var Ꮡi);
-    var e = Ꮡi.Reinterpret<any, abi.EmptyInterface>();
-    // First, fill in the data portion of the interface.
     switch (ᐧ) {
-    case {} when t.IfaceIndir(): {
+    case {} when !t.IsDirectIface(): {
         if ((flag)(v.flag & flagIndir) == 0) {
             throw panic("bad indir");
         }
@@ -133,26 +141,17 @@ internal static any packEface(ΔValue v) {
             typedmemmove(t, c, ptr);
             ptr = c;
         }
-        e.Value.Data = ptr;
-        break;
+        return ptr;
     }
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        e.Value.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
-        break;
+        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
     }
     default: {
         // Value is direct, and so is the interface.
-        e.Value.Data = v.ptr;
-        break;
+        return v.ptr;
     }}
-    // Now, fill in the type portion. We're very careful here not
-    // to have any operation between the e.word and e.typ assignments
-    // that would let the garbage collector observe the partially-built
-    // interface value.
-    e.Value.Type = t;
-    return i;
 }
 
 // go2cs generated this placeholder — func unpackEface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -268,7 +267,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
     ж<abi.Type> rcvrtype = default!;
     if ((flag)(v.flag & flagMethod) != 0){
         rcvr = v;
-        (rcvrtype, t, fn) = methodReceiver(op, v, ((nint)(uintptr)v.flag >> (int)(flagMethodShift)));
+        (rcvrtype, t, fn) = methodReceiver(op, v, (nint)(uintptr)v.flag >> (int)(flagMethodShift));
     } else 
     if ((flag)(v.flag & flagIndir) != 0){
         fn = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
@@ -522,14 +521,14 @@ break_stepsLoop:;
             }
 
             // Handle pointers passed in registers.
-            if (!tv.IfaceIndir()) {
+            if (tv.IsDirectIface()) {
                 // Pointer-valued data gets put directly
                 // into v.ptr.
                 if (steps[0].kind != abiStepPointer) {
                     print((@string)"kind="u8, steps[0].kind, (@string)", type="u8, stringFor(tv), (@string)"\n"u8);
                     throw panic("mismatch between ABI description and types");
                 }
-                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], ((flag)(uintptr)(uint8)tv.Kind()));
+                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], (flag)(uintptr)(uint8)tv.Kind());
                 continue;
             }
 
@@ -621,11 +620,11 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
             @in = builtin.append(@in, Zero(new rtypeжΔType(toRType(typ))));
             continue;
         }
-        var v = new ΔValue(typ, nil, ((flag)(uintptr)(uint8)typ.Kind()));
+        var v = new ΔValue(typ, nil, (flag)(uintptr)(uint8)typ.Kind());
         var steps = abid.call.stepsForValue(i);
         {
             var st = steps[0]; if (st.kind == abiStepStack){
-                if (typ.IfaceIndir()){
+                if (!typ.IsDirectIface()){
                     // value cannot be inlined in interface data.
                     // Must make a copy, because f might keep a reference to it,
                     // and we cannot let f keep a reference to the stack frame
@@ -639,7 +638,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                     v.ptr = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(ptr, st.stkOff, ptrˢ));
                 }
             } else {
-                if (typ.IfaceIndir()){
+                if (!typ.IsDirectIface()){
                     // All that's left is values passed in registers that we need to
                     // create space for the values.
                     v.flag |= (flag)(flagIndir);
@@ -804,11 +803,11 @@ internal static (ж<abi.Type> rcvrtype, ж<funcType> t, @unsafe.Pointer fn) meth
             throw panic("reflect: " + op + " of unexported method");
         }
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        if ((~iface).itab == nil) {
+        if (iface.itab == nil) {
             throw panic("reflect: " + op + " of method on nil interface value");
         }
-        rcvrtype = iface.Value.itab.Value.Type;
-        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice((~iface).itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
+        rcvrtype = iface.itab.Value.Type;
+        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice(iface.itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
         t = tt.typeOff((~m).Typ).FuncType();
     } else {
         rcvrtype = v.typ();
@@ -837,9 +836,9 @@ internal static void storeRcvr(ΔValue v, @unsafe.Pointer p) {
     if (t.Kind() == abi.Interface){
         // the interface data word becomes the receiver word
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.Value.word;
+        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.word;
     } else 
-    if ((flag)(v.flag & flagIndir) != 0 && !t.IfaceIndir()){
+    if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()){
         ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value;
     } else {
         ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = v.ptr;
@@ -1261,6 +1260,24 @@ public static bool CanInterface(this ΔValue v) {
 
 // go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// go2cs generated this placeholder — func TypeAssert is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+internal partial interface packIfaceValueIntoEmptyIface_type /*dyn*/ {
+    void M();
+}
+
+// packIfaceValueIntoEmptyIface converts an interface Value into an empty interface.
+//
+// Precondition: v.kind() == Interface
+internal static any packIfaceValueIntoEmptyIface(ΔValue v) {
+    // Empty interface has one layout, all interfaces with
+    // methods have a second layout.
+    if (v.NumMethod() == 0) {
+        return ~(ж<any>)(uintptr)(v.ptr);
+    }
+    return ((ж<packIfaceValueIntoEmptyIface_type>)(uintptr)(v.ptr)).ValueSlot;
+}
+
 // go2cs generated this placeholder — func InterfaceData is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1334,7 +1351,7 @@ internal static nint lenNonSlice(this ΔValue v) {
         var exprᴛ1 = k;
         if (exprᴛ1 == Array) {
             var tt = v.typ().Reinterpret<abi.Type, arrayType>();
-            return (nint)(~tt).Len;
+            return (nint)tt.of(arrayType.ᏑLen).Value;
         }
         if (exprᴛ1 == Chan) {
             return chanlen((uintptr)v.pointer());
@@ -1361,7 +1378,7 @@ internal static nint lenNonSlice(this ΔValue v) {
 internal static ΔValue copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    if (typ.IfaceIndir()) {
+    if (!typ.IsDirectIface()) {
         // Copy result so future changes to the map
         // won't change the underlying value.
         @unsafe.Pointer c = (uintptr)unsafe_New(Ꮡtyp);
@@ -1393,6 +1410,10 @@ public static nint NumMethod(this ΔValue v) {
 // The arguments to a Call on the returned function should not include
 // a receiver; the returned function will always use v as the receiver.
 // It returns the zero Value if no method was found.
+//
+// Calling this method will cause the linker to retain all methods with this name in all packages.
+// If the linker can't determine the name, it will retain all exported methods.
+// This may make the executable binary larger but will not affect execution time.
 public static ΔValue MethodByName(this ΔValue v, @string name) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.MethodByName"u8, Invalid)));
@@ -1451,7 +1472,7 @@ public static bool OverflowInt(this ΔValue v, int64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
         var bitSize = v.typ().Size() * 8;
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowInt"u8, v.kind())));
@@ -1464,7 +1485,7 @@ public static bool OverflowUint(this ΔValue v, uint64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔUint || exprᴛ1 == Uintptr || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64) {
         var bitSize = v.typ_.Size() * 8; // ok to use v.typ_ directly as Size doesn't escape
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowUint"u8, v.kind())));
@@ -1596,7 +1617,7 @@ internal static ж<abi.Type> abiTypeSlow(this ΔValue v) {
 
     // Method value.
     // v.typ describes the receiver, not the method type.
-    nint i = ((nint)(uintptr)v.flag >> (int)(flagMethodShift));
+    nint i = (nint)(uintptr)v.flag >> (int)(flagMethodShift);
     if (v.typ().Kind() == abi.Interface) {
         // Method on interface.
         var tt = typ.Reinterpret<abi.Type, interfaceType>();
@@ -1635,6 +1656,51 @@ public static bool CanUint(this ΔValue v) {
 // go2cs generated this placeholder — func UnsafeAddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func UnsafePointer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+// Fields returns an iterator over each [StructField] of v along with its [Value].
+//
+// The sequence is equivalent to calling [Value.Field] successively
+// for each index i in the range [0, NumField()).
+//
+// It panics if v's Kind is not Struct.
+public static iter.Seq2<StructField, ΔValue> Fields(this ΔValue v) {
+    var t = v.Type();
+    if (t.Kind() != Struct) {
+        throw panic("reflect: Fields of non-struct type " + t.String());
+    }
+    var tʗ1 = t;
+    var vʗ1 = v;
+    return (Func<StructField, ΔValue, bool> yield) => {
+        foreach (var i in range(vʗ1.NumField())) {
+            if (!yield(tʗ1.Field(i), vʗ1.Field(i))) {
+                return;
+            }
+        }
+    };
+}
+
+// Methods returns an iterator over each [Method] of v along with the corresponding
+// method [Value]; this is a function with v bound as the receiver. As such, the
+// receiver shouldn't be included in the arguments to [Value.Call].
+//
+// The sequence is equivalent to calling [Value.Method] successively
+// for each index i in the range [0, NumMethod()).
+//
+// Methods panics if v is a nil interface value.
+//
+// Calling this method will force the linker to retain all exported methods in all packages.
+// This may make the executable binary larger but will not affect execution time.
+public static iter.Seq2<ΔMethod, ΔValue> Methods(this ΔValue v) {
+    var vʗ1 = v;
+    return (Func<ΔMethod, ΔValue, bool> yield) => {
+        var rtype = vʗ1.Type();
+        foreach (var i in range(vʗ1.NumMethod())) {
+            if (!yield(rtype.Method(i), vʗ1.Method(i))) {
+                return;
+            }
+        }
+    };
+}
 
 // StringHeader is the runtime representation of a string.
 // It cannot be used safely or portably and its representation may
@@ -1693,11 +1759,11 @@ internal static void grow(this ΔValue v, nint n) {
         throw panic("reflect.Value.Grow: negative len");
         break;
     }
-    case {} when (~p).Len + n is < 0: {
+    case {} when p.Len + n is < 0: {
         throw panic("reflect.Value.Grow: slice overflow");
         break;
     }
-    case {} when (~p).Len + n > (~p).Cap: {
+    case {} when p.Len + n > p.Cap: {
         var t = v.typ().Elem();
         p.Value = growslice(t, p.Value, n);
         break;
@@ -1837,7 +1903,7 @@ internal static ΔValue assignTo(this ΔValue v, @string context, ж<abi.Type> �
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new ΔValue(Ꮡdst, nil, ((flag)(uintptr)(nuint)ΔInterface));
+            return new ΔValue(Ꮡdst, nil, (flag)(uintptr)(nuint)ΔInterface);
         }
         var x = valueInterface(v, false);
         if (target == nil) {
@@ -1909,8 +1975,8 @@ public static bool Comparable(this ΔValue v) {
         return v.IsNil() || v.Elem().Comparable();
     }
     if (exprᴛ1 == Struct) {
-        for (nint i = 0; i < v.NumField(); i++) {
-            if (!v.Field(i).Comparable()) {
+        foreach (var (_, value) in range<StructField, ΔValue>(v.Fields().Invoke)) {
+            if (!value.Comparable()) {
                 return false;
             }
         }
@@ -2252,7 +2318,7 @@ internal static ΔValue cvtIntString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Int(); if ((int64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2263,7 +2329,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Uint(); if ((uint64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2271,7 +2337,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
 
 // convertOp: []byte -> string
 internal static ΔValue cvtBytesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.Bytes()), t);
+    return makeString(v.flag.ro(), (@string)v.Bytes(), t);
 }
 
 // convertOp: string -> []byte
@@ -2281,7 +2347,7 @@ internal static ΔValue cvtStringBytes(ΔValue v, ΔType t) {
 
 // convertOp: []rune -> string
 internal static ΔValue cvtRunesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.runes()), t);
+    return makeString(v.flag.ro(), (@string)v.runes(), t);
 }
 
 // convertOp: string -> []rune
@@ -2293,21 +2359,21 @@ internal static ΔValue cvtStringRunes(ΔValue v, ΔType t) {
 internal static ΔValue cvtSliceArrayPtr(ΔValue v, ΔType t) {
     nint n = t.Elem().Len();
     if (n > v.Len()) {
-        throw panic("reflect: cannot convert slice with length " + itoa.Itoa(v.Len()) + " to pointer to array with length " + itoa.Itoa(n));
+        throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to pointer to array with length " + strconv.Itoa(n));
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
-    return new ΔValue(t.common(), (~h).Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
+    return new ΔValue(t.common(), h.Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
 }
 
 // convertOp: []T -> [N]T
 internal static ΔValue cvtSliceArray(ΔValue v, ΔType t) {
     nint n = t.Len();
     if (n > v.Len()) {
-        throw panic("reflect: cannot convert slice with length " + itoa.Itoa(v.Len()) + " to array with length " + itoa.Itoa(n));
+        throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to array with length " + strconv.Itoa(n));
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
     var typ = t.common();
-    @unsafe.Pointer ptr = h.Value.Data;
+    @unsafe.Pointer ptr = h.Data;
     @unsafe.Pointer c = (uintptr)unsafe_New(typ);
     typedmemmove(typ, c, ptr);
     ptr = c;

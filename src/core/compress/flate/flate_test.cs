@@ -100,6 +100,7 @@ public static void TestStreams(ж<testing.T> Ꮡt) {
     // >>> import zlib
     // >>> zlib.decompress(hex_string.decode("hex"), -15) # Negative means raw DEFLATE
     // '\x11'
+
     var testCases = new TestStreams_testCases[]{new(
         "degenerate HCLenTree"u8,
         "05e0010000000000100000000000000000000000000000000000000000000000"u8 + "00000000000000000004"u8,
@@ -282,7 +283,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
 
     var readBuf = new slice<byte>(40);
     var data = new slice<byte>(maxSize);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
 

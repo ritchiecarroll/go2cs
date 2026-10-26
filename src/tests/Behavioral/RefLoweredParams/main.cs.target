@@ -24,11 +24,8 @@ internal static void @double(ref vec v) {
     v.y *= 2;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object shownˢ = (@string)"shown:"u8;
-
 internal static void showVec(ref vec v) {
-    fmt.Println(shownˢ, v.x, v.y);
+    fmt.Println("shown:", v.x, v.y);
 }
 
 internal static void boxedBump(ж<uint64> Ꮡout) {
@@ -50,11 +47,8 @@ internal static void bump(ref uint64 p) {
     p++;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferSeesˢ = (@string)"defer sees:"u8;
-
 internal static void printVal(ref uint64 p) {
-    fmt.Println(deferSeesˢ, p);
+    fmt.Println("defer sees:", p);
 }
 
 internal static void setVal(ref uint64 p, uint64 v, channel<bool> done) {
@@ -90,58 +84,48 @@ internal static uint64 /*result*/ deferWrites() {
 internal static partial uint64 goWrites() {
     ref var x = ref heap(new uint64(), out var Ꮡx);
     var done = new channel<bool>(0);
-    goǃ((ᴛ1, ᴛ2, ᴛ3) => setVal(ref ᴛ1.DerefOrNull(), ᴛ2, ᴛ3), Ꮡx, (uint64)(21), done);
+    goǃ((ᴛ1, ᴛ2, ᴛ3) => setVal(ref ᴛ1.DerefOrNull(), ᴛ2, ᴛ3), Ꮡx, (uint64)21, done);
     ᐸꟷ(done);
     return x;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object totalˢ = (@string)"total:"u8;
-private static readonly object vecˢ = (@string)"vec:"u8;
-private static readonly object vec2ˢ = (@string)"vec2:"u8;
-private static readonly object arrˢ = (@string)"arr:"u8;
-private static readonly object deferWroteˢ = (@string)"defer wrote:"u8;
-private static readonly object goSetˢ = (@string)"go set:"u8;
-private static readonly object guardedNilˢ = (@string)"guarded nil:"u8;
-private static readonly object guardedValˢ = (@string)"guarded val:"u8;
 
 internal static void Main() {
     uint64 total = default!;
     addTo(ref total, 5);
     addTo(ref total, 7);
-    fmt.Println(totalˢ, total);
+    fmt.Println("total:", total);
 
     ref var v = ref heap<vec>(out var Ꮡv);
     v = new vec(x: 1, y: 2);
     scale(ref v, 3);
-    fmt.Println(vecˢ, v.x, v.y);
+    fmt.Println("vec:", v.x, v.y);
 
     var p = Ꮡv;
     @double(ref (p).DerefOrNull());
-    fmt.Println(vec2ˢ, v.x, v.y);
+    fmt.Println("vec2:", v.x, v.y);
 
     var arr = new uint64[]{10, 20, 30}.array();
     addTo(ref arr[1], 1);
-    fmt.Println(arrˢ, arr[0], arr[1], arr[2]);
+    fmt.Println("arr:", arr[0], arr[1], arr[2]);
 
     var ᴛ1 = new vec(x: 4, y: 5);
     showVec(ref ᴛ1);
 
     deferReads();
-    fmt.Println(deferWroteˢ, deferWrites());
-    fmt.Println(goSetˢ, goWrites());
+    fmt.Println("defer wrote:", deferWrites());
+    fmt.Println("go set:", goWrites());
 
     var f = boxedBump;
     ref var n = ref heap(new uint64(), out var Ꮡn);
     n = 9;
     f(Ꮡn);
     boxedBump(Ꮡn);
-    fmt.Println((@string)"n:"u8, n);
+    fmt.Println("n:", n);
 
-    fmt.Println(guardedNilˢ, guarded(nil));
+    fmt.Println("guarded nil:", guarded(nil));
     ref var g = ref heap(new uint64(), out var Ꮡg);
     g = 8;
-    fmt.Println(guardedValˢ, guarded(Ꮡg));
+    fmt.Println("guarded val:", guarded(Ꮡg));
 }
 
 } // end main_package

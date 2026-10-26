@@ -41,8 +41,14 @@ using static global::go.encoding.json_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b4120656e636f64696e672f6a736f6e2e4e756d62657220226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b4120656e636f64696e672f6a736f6e2e4e756d6265727d", "Δtype")]
+[assembly: GoDynamicTypeLift("7374727563747b4620737472696e6720226a736f6e3a5c222d2c5c22227d", "Δtypeᴛ4")]
+[assembly: GoDynamicTypeLift("7374727563747b4620737472696e6720226a736f6e3a5c222d2c6f6d6974656d7074795c22227d", "Δtypeᴛ5")]
 [assembly: GoDynamicTypeLift("7374727563747b4e20656e636f64696e672f6a736f6e2e4e756d62657220226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ3")]
 [assembly: GoDynamicTypeLift("7374727563747b4e20656e636f64696e672f6a736f6e2e4e756d6265727d", "Δtypeᴛ2")]
+[assembly: GoDynamicTypeLift("7374727563747b5620696e747d", "NestedUnamed_F")]
+[assembly: GoDynamicTypeLift("7374727563747b5820666c6f6174363420226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ8")]
+[assembly: GoDynamicTypeLift("7374727563747b5820696e74363420226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ6")]
+[assembly: GoDynamicTypeLift("7374727563747b582075696e74363420226a736f6e3a5c222c737472696e675c22227d", "Δtypeᴛ7")]
 [assembly: GoDynamicTypeLift("7374727563747b656e636f64696e672f6a736f6e2e436173654e616d653b20696e20737472696e673b2070747220616e793b206f757420616e793b20657272206572726f723b207573654e756d62657220626f6f6c3b20676f6c64656e20626f6f6c3b20646973616c6c6f77556e6b6e6f776e4669656c647320626f6f6c7d", "unmarshalTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f757420737472696e677d", "encodeStringTestsᴛ1")]
 [assembly: GoTypeAlias("Token", "ΔToken")]
@@ -52,7 +58,7 @@ using static global::go.encoding.json_test_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<go.compress.gzip_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.@internal.zstd_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
@@ -65,6 +71,12 @@ using static global::go.encoding.json_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -73,8 +85,8 @@ using static global::go.encoding.json_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsgoKAgqSYpKeu9oKCmKSnrtaCgoKAgraCgqY=")]
-[assembly: go.GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp5z2goKYpKec1oKCgoCCtoKCpg==")]
+[assembly: go.GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABUwgoKAgqSYpKeu9oKCmKSnrtaCgoKAgraCgqY=")]
+[assembly: go.GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABUwgpikp5z2goKYpKec1oKCgoCCtoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -101,12 +113,12 @@ public static partial class json_test_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcompressꓸgzip() => builtin.initPackage(typeof(compress.gzip_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸjson() => builtin.initPackage(typeof(go.encoding.json_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸimage() => builtin.initPackage(typeof(image_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸzstd() => builtin.initPackage(typeof(@internal.zstd_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸmaps() => builtin.initPackage(typeof(maps_package));
@@ -127,6 +139,7 @@ public static partial class json_test_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
+    [GoInit] internal static void initᴛᴛimportꓸtestingꓸsynctest() => builtin.initPackage(typeof(go.testing.synctest_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
     // Go runs every `init` in the package under test - the production files' included -

@@ -108,6 +108,68 @@ public static partial class builtin
         return TypeParamCaster<T>.ToUInt64(value);
     }
 
+    /// <summary>
+    /// Go's <c>float64(v)</c> of a type-parameter value whose type set holds a FLOAT member, such as math/big's
+    /// <c>func csv[T int | float64](…)</c>. A float is the identity or a widening, and an integer is C#'s numeric
+    /// conversion, which rounds to nearest as Go's <c>float64(int)</c> does. The ladder folds per instantiation,
+    /// as <see cref="ConvertToUInt64{T}"/>'s does.
+    /// </summary>
+    public static double ConvertToFloat64<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(T value) where T : new()
+    {
+        if (typeof(T) == typeof(double)) return (double)(object)value!;
+        if (typeof(T) == typeof(float)) return (float)(object)value!;
+        if (typeof(T) == typeof(nint)) return (nint)(object)value!;
+        if (typeof(T) == typeof(long)) return (long)(object)value!;
+        if (typeof(T) == typeof(int)) return (int)(object)value!;
+        if (typeof(T) == typeof(short)) return (short)(object)value!;
+        if (typeof(T) == typeof(sbyte)) return (sbyte)(object)value!;
+        if (typeof(T) == typeof(nuint)) return (nuint)(object)value!;
+        if (typeof(T) == typeof(ulong)) return (ulong)(object)value!;
+        if (typeof(T) == typeof(uint)) return (uint)(object)value!;
+        if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
+        if (typeof(T) == typeof(byte)) return (byte)(object)value!;
+        if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
+
+        return TypeParamCaster<T>.ToFloat64(value);
+    }
+
+    /// <summary>
+    /// Go's <c>float32(v)</c> of a type-parameter value whose type set holds a FLOAT member. An integer converts to
+    /// float32 DIRECTLY, never through float64, so it rounds once as Go's does; a float64 rounds once to float32.
+    /// </summary>
+    public static float ConvertToFloat32<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(T value) where T : new()
+    {
+        if (typeof(T) == typeof(float)) return (float)(object)value!;
+        if (typeof(T) == typeof(double)) return (float)(double)(object)value!;
+        if (typeof(T) == typeof(nint)) return (nint)(object)value!;
+        if (typeof(T) == typeof(long)) return (long)(object)value!;
+        if (typeof(T) == typeof(int)) return (int)(object)value!;
+        if (typeof(T) == typeof(short)) return (short)(object)value!;
+        if (typeof(T) == typeof(sbyte)) return (sbyte)(object)value!;
+        if (typeof(T) == typeof(nuint)) return (nuint)(object)value!;
+        if (typeof(T) == typeof(ulong)) return (ulong)(object)value!;
+        if (typeof(T) == typeof(uint)) return (uint)(object)value!;
+        if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
+        if (typeof(T) == typeof(byte)) return (byte)(object)value!;
+        if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
+
+        return TypeParamCaster<T>.ToFloat32(value);
+    }
+
     // Reflection-cached bridge for a numeric wrapper instantiation: reads/writes the wrapper
     // through its Value member and single-argument constructor. A generated [GoType("num:*")]
     // wrapper exposes Value as a PROPERTY; handwritten wrappers (golib uintptr, the
@@ -177,6 +239,40 @@ public static partial class builtin
                 nuint nu => nu,
                 _ => unchecked((ulong)Convert.ToInt64(underlying))
             };
+        }
+
+        // A named numeric wrapper's underlying value as Go's float64 conversion of it: a float widens, an integer
+        // rounds to nearest (nint/nuint lack IConvertible, so they are matched first).
+        public static double ToFloat64(T value) => Underlying(value, "ConvertToFloat64") switch
+        {
+            double d => d,
+            float f => f,
+            nint ni => ni,
+            nuint nu => nu,
+            ulong u => u,
+            object other => Convert.ToDouble(other)
+        };
+
+        // The float32 twin: an integer converts to float32 directly, so it rounds once as Go's does.
+        public static float ToFloat32(T value) => Underlying(value, "ConvertToFloat32") switch
+        {
+            float f => f,
+            double d => (float)d,
+            nint ni => ni,
+            nuint nu => nu,
+            ulong u => u,
+            object other => Convert.ToSingle(other)
+        };
+
+        private static object Underlying(T value, string caller)
+        {
+            if (s_valueProperty is not null)
+                return s_valueProperty.GetValue(value)!;
+
+            if (s_valueField is not null)
+                return s_valueField.GetValue(value)!;
+
+            throw new NotSupportedException($"{caller}: no numeric wrapper surface on {typeof(T)}");
         }
     }
 

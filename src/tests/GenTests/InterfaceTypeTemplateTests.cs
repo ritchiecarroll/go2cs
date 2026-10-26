@@ -4,11 +4,13 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using go2cs.Templates.InterfaceType;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static go2cs.Symbols;
 
@@ -154,6 +156,19 @@ public class InterfaceTypeTemplateTests
     }
 
     [TestMethod]
+    public void BothShellsPrintTheDynamicValuesGoText()
+    {
+        // A shell stands in for a Go dynamic value, so its ToString is that value's: the value or its ж box,
+        // each of which answers its Go Error()/String() text through golib's GoMethodText.
+        string generated = GenerateShells("probe_type", Method("Reset", "void"));
+
+        AssertParses(generated);
+        Assert.AreEqual(2, generated.Split("public override string ToString()").Length - 1, "one ToString per shell (delegate and object)");
+        StringAssert.Contains(generated, "_ptr?.ToString() : m_target");
+        StringAssert.Contains(generated, "?.ToString() ?? \"<nil>\";");
+    }
+
+    [TestMethod]
     public void AnInterfaceWithNoShellsEmitsOnlyTheDeclaration()
     {
         // EmitShells is off for a constraint, generic, empty or ref-parameter-carrying interface.
@@ -177,5 +192,148 @@ public class InterfaceTypeTemplateTests
         Assert.IsFalse(generated.Contains("GoInterfaceShell"), "stamped a shell attribute with no shells emitted");
         Assert.IsFalse(generated.Contains($"{TempVarMarker}As"), "emitted the retired ᴛAs machinery");
         Assert.IsFalse(generated.Contains($"class {ShadowVarMarker}probe_type"), "emitted a shell class");
+    }
+
+    private static string GenerateOverload(string interfaceName, string? scope = "public", bool emitShells = false, bool emitOverload = true) =>
+        new InterfaceTypeTemplate
+        {
+            PackageNamespace = "go",
+            PackageName = "probe",
+            Scope = scope,
+            InterfaceName = interfaceName,
+            OperatorConstraints = [],
+            Methods = [Method("Scan", "void")],
+            EmitShells = emitShells,
+            EmitAssertOverload = emitOverload,
+            UsingStatements = []
+        }
+        .Generate();
+
+    // Go prints the static interface an assertion started from. golib's `_<T>(this object)` cannot see it, so
+    // an exported interface carries an extension overload that names it, binding ahead of the object form by
+    // identity conversion. It sits in a top-level `<pkg>_package_asserts` class: an overload that was a member
+    // of the package class would turn every `_ = x` and `out _` written inside that class into a method group.
+    [TestMethod]
+    public void AnInterfaceCarriesAStaticSourceAssertOverloadInATopLevelClass()
+    {
+        string generated = GenerateOverload("Reader");
+
+        AssertParses(generated);
+        StringAssert.Contains(generated, "public static partial class probe_package_asserts");
+        StringAssert.Contains(generated, $"public static {ShadowVarMarker}T _<");
+        StringAssert.Contains(generated, $">(this probe_package.Reader source) =>");
+        StringAssert.Contains(generated, $"source._<probe_package.Reader, {ShadowVarMarker}T>();");
+
+        // The class closes the package class first: it is a sibling of it, not nested in it.
+        int packageClassEnd = generated.IndexOf("\n}\r\n", System.StringComparison.Ordinal);
+        int assertsClass = generated.IndexOf("class probe_package_asserts", System.StringComparison.Ordinal);
+
+        Assert.IsTrue(packageClassEnd >= 0 && packageClassEnd < assertsClass, "the asserts class is nested in the package class");
+    }
+
+    // The type parameter is marker-named so an interface that is itself called T cannot be shadowed by it.
+    [TestMethod]
+    public void TheOverloadTypeParameterCannotShadowAnInterfaceNamedT()
+    {
+        string generated = GenerateOverload("T");
+
+        AssertParses(generated);
+        StringAssert.Contains(generated, ">(this probe_package.T source) =>");
+        StringAssert.Contains(generated, $"source._<probe_package.T, {ShadowVarMarker}T>();");
+    }
+
+    // database/sql's `decimal`: the declaration keeps its escape, and so does every use of the name.
+    [TestMethod]
+    public void AKeywordNamedInterfaceKeepsItsEscapeInTheOverload()
+    {
+        string generated = GenerateOverload("@decimal");
+
+        AssertParses(generated);
+        StringAssert.Contains(generated, ">(this probe_package.@decimal source) =>");
+        StringAssert.Contains(generated, $"source._<probe_package.@decimal, {ShadowVarMarker}T>();");
+    }
+
+    // An unexported Go interface is a PRIVATE nested type of the package class, which a sibling class cannot name
+    // in a signature, so it gets no overload (the converter spells its source explicitly). An internal one, such
+    // as a lifted anonymous interface, can be named, and the overload is no wider than it (CS0051).
+    [TestMethod]
+    public void OnlyANamableInterfaceGetsAnOverload()
+    {
+        Assert.IsTrue(GenerateOverload("message", "internal").Contains($"internal static {ShadowVarMarker}T _<"));
+        Assert.IsFalse(GenerateOverload("message", "private").Contains("_asserts"));
+        Assert.IsFalse(GenerateOverload("message", null).Contains("_asserts"));
+        Assert.IsFalse(GenerateOverload("message", "").Contains("_asserts"));
+        AssertParses(GenerateOverload("message", "internal"));
+    }
+
+    // A generic or constraint interface sets no flag, and its declaration is all that is emitted.
+    [TestMethod]
+    public void AnInterfaceWithoutTheFlagEmitsNoOverload()
+    {
+        Assert.IsFalse(GenerateShells("probe_type", Method("Scan", "void")).Contains(" _<"));
+        Assert.IsFalse(GenerateOverload("Reader", emitOverload: false).Contains("_asserts"));
+    }
+
+    [TestMethod]
+    public void TheOverloadFollowsTheShellsWithoutBreakingThem()
+    {
+        string generated = GenerateOverload("Reader", emitShells: true);
+
+        AssertParses(generated);
+        StringAssert.Contains(generated, "GoInterfaceShell");
+        Assert.IsTrue(generated.IndexOf("class ", System.StringComparison.Ordinal) < generated.IndexOf($"_<", System.StringComparison.Ordinal),
+            "the overload is emitted before the shells");
+    }
+
+    private static IEnumerable<MetadataReference> PlatformReferences() =>
+        ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
+            .Split(System.IO.Path.PathSeparator)
+            .Select(path => (MetadataReference)MetadataReference.CreateFromFile(path));
+
+    // The package class's own code writes `_ = x;` and `out _` (the converter emits both everywhere). The overload
+    // must not put a `_` member in that class, or those become method groups (CS1656, CS1657). Compiled for real,
+    // against the real golib `_<T>`, and with a second interface so the partial asserts class is declared twice, so a regression to a member of the package class fails here.
+    [TestMethod]
+    public void TheOverloadLeavesDiscardsInThePackageClassBound()
+    {
+        const string golibStub = """
+            namespace go.golib { }
+            namespace go
+            {
+                public static partial class probe_package
+                {
+                    public static void Discards(Reader reader)
+                    {
+                        _ = reader;
+                        _ = int.TryParse("1", out _);
+                    }
+
+                    public static string Call(Reader reader) => reader._<string>();
+                }
+            }
+            """;
+
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "DiscardProbe",
+            [CSharpSyntaxTree.ParseText(GenerateOverload("Reader")), CSharpSyntaxTree.ParseText(golibStub), CSharpSyntaxTree.ParseText(GenerateOverload("Writer"))],
+            PlatformReferences(),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        string[] errors = compilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Select(diagnostic => diagnostic.ToString())
+            .ToArray();
+
+        Assert.AreEqual(0, errors.Length, string.Join("\r\n", errors));
+
+        // And the call binds the overload, not golib's object form.
+        SyntaxTree tree = compilation.SyntaxTrees[1];
+        SemanticModel model = compilation.GetSemanticModel(tree);
+        InvocationExpressionSyntax call = tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>()
+            .Single(invocation => invocation.ToString() == "reader._<string>()");
+
+        IMethodSymbol bound = (IMethodSymbol)model.GetSymbolInfo(call).Symbol!;
+
+        Assert.AreEqual("probe_package_asserts", bound.ContainingType.Name);
     }
 }

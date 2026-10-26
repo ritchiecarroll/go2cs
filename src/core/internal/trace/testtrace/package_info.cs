@@ -10,6 +10,12 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using osꓸDirEntry = go.io.fs_package.DirEntry;
+global using osꓸFileInfo = go.io.fs_package.FileInfo;
+global using osꓸFileMode = go.io.fs_package.FileMode;
+global using osꓸPathError = go.io.fs_package.PathError;
+global using osꓸSignal = go.os_package.ΔSignal;
+global using runtimeꓸError = go.runtime_package.ΔError;
 global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
 global using traceꓸLabel = go.@internal.trace_package.ΔLabel;
 global using traceꓸLog = go.@internal.trace_package.ΔLog;
@@ -18,6 +24,7 @@ global using traceꓸRange = go.@internal.trace_package.ΔRange;
 global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
 global using traceꓸStack = go.@internal.trace_package.ΔStack;
 global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
+global using traceꓸSync = go.@internal.trace_package.ΔSync;
 global using traceꓸTask = go.@internal.trace_package.ΔTask;
 global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
@@ -49,10 +56,17 @@ using static go.@internal.trace.testtrace_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,9 +76,11 @@ using static go.@internal.trace.testtrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABUukgACENKClIKUgpSokoKCgoK2goKUgoKUpJSUpoKCgpSCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAgkoKClIKUgpSClIKClIKCgpSCgoKUgpSAgraCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ACxYkgAIGOKmgoKUpriUpqSClKaClKa2poK4gpSUgoCCxoKAgsaCgIIAEByCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgqSCppSCgoKUgpTagpKClIKUgpSCgoKUlIKUgqaCgoKClIKkgoKCgpSClOyClIKUpIK2gpTIgpSUlKbagoCCgpQACRCUpoKCpoKCgqaCgqaCgoKUgoKUpsLIgpSClIKClIKUgoKUgoKCgpSmtIK4lIIACBKipoI=", "321-337:1")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoK2goKUgoKUpJSUpoKCgpSCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSAgraCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABgokoKUuILulIK4uIKUgoKUgoKClIKCgpSClICCtqailIKCgpSSgIKk")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA4cooKUqqLKlA==")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyqSClKaClKa2poK4gpSUgoCCxoKAgsaCgIIAEByCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgqSCppSCgoKUgpTagpKClIKUgpSCgoKUlIKUgqaCgoKClIKkgoKCgpSClOyClIKUpIK2gpTIgpSUlKbagoCCgpQACRCUpoKCpoKCgqaCgqaCgoKUgoKUpsLIgpSClIKClIKUgoKUgoKCgpSmtIK4lIIACBKipoI=", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -98,13 +114,18 @@ public static partial class testtrace_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtrace() => builtin.initPackage(typeof(go.@internal.trace_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸraw() => builtin.initPackage(typeof(go.@internal.trace.raw_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸversion() => builtin.initPackage(typeof(go.@internal.trace.version_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtxtar() => builtin.initPackage(typeof(go.@internal.txtar_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }

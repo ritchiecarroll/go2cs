@@ -15,6 +15,11 @@ import (
 )
 
 func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
+	// A type argument taking a constraint proxy renders through the resolved type (see proxiedTypeInstantiation).
+	if render, ok := v.proxiedTypeInstantiation(indexListExpr); ok {
+		return render
+	}
+
 	callExprContext := DefaultCallExprContext()
 	callExprContext.sourceIsTypeParams = true
 
@@ -44,7 +49,7 @@ func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
 
 	// A PARTIAL Go instantiation of a generic FUNCTION completes from the resolved instance —
 	// C# has no partial instantiation (CS0305). See completedInstantiationTypeArgs.
-	if completed := v.completedInstantiationTypeArgs(indexListExpr.X, len(indices)); completed != nil {
+	if completed := v.completedInstantiationTypeArgs(indexListExpr.X, indices); completed != nil {
 		return fmt.Sprintf("%s<%s>", v.convExpr(indexListExpr.X, xContexts), strings.Join(completed, ", "))
 	}
 

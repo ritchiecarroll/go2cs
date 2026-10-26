@@ -14,7 +14,7 @@ partial class html_package {
 // These replacements permit compatibility with old numeric entities that
 // assumed Windows-1252 encoding.
 // https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
-internal static array<rune> replacementTable = new rune[]{
+[GoLazy] partial class lazyᴛreplacementTable { internal static array<rune> replacementTable = new rune[]{
     (rune)'\u20AC', // First entry is what 0x80 should be replaced with.
     (rune)'\u0081',
     (rune)'\u201A',
@@ -49,7 +49,7 @@ internal static array<rune> replacementTable = new rune[]{
     (rune)'\u0178' // Last entry is 0x9F.
     // 0x00->'\uFFFD' is handled programmatically.
     // 0x0D->'\u000D' is a no-op.
-}.array();
+}.array(); }
 
 // unescapeEntity reads an entity like "&lt;" from b[src:] and writes the
 // corresponding "<" to b[dst:], returning the incremented dst and src cursors.
@@ -192,16 +192,16 @@ internal static ж<strings.Replacer> htmlEscaper = strings.NewReplacer(
 
 // EscapeString escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// [UnescapeString](EscapeString(s)) == s always holds, but the converse isn't
 // always true.
 public static @string EscapeString(@string s) {
     return htmlEscaper.Replace(s);
 }
 
 // UnescapeString unescapes entities like "&lt;" to become "<". It unescapes a
-// larger range of entities than EscapeString escapes. For example, "&aacute;"
+// larger range of entities than [EscapeString] escapes. For example, "&aacute;"
 // unescapes to "á", as does "&#225;" and "&#xE1;".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// UnescapeString([EscapeString](s)) == s always holds, but the converse isn't
 // always true.
 public static @string UnescapeString(@string s) {
     nint i = strings.IndexByte(s, (rune)'&');
@@ -229,7 +229,7 @@ public static @string UnescapeString(@string s) {
         }
         (dst, src) = unescapeEntity(b, dst + i, src + i, entity, entity2);
     }
-    return ((@string)(b.slice(0, dst)));
+    return (@string)(b.slice(0, dst));
 }
 
 } // end html_package

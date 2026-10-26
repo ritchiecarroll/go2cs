@@ -36,13 +36,13 @@ partial class sync_package {
 // relation at all.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Mutex {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Mutex {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal isync.Mutex mu;
 }
 
 // A Locker represents an object that can be locked and unlocked.
-[GoType] partial interface Locker {
+partial interface Locker {
     void Lock();
     void Unlock();
 }

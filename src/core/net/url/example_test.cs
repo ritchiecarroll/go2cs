@@ -77,11 +77,12 @@ public static void ExampleValues() {
     v.Add(friendˢ, jessˢ);
     v.Add(friendˢ, sarahˢ);
     v.Add(friendˢ, zoeˢ);
-    // v.Encode() == "name=Ava&friend=Jess&friend=Sarah&friend=Zoe"
+    fmt.Println(v.Encode());
     fmt.Println(v.Get(nameˢ));
     fmt.Println(v.Get(friendˢ));
     fmt.Println(v[friendˢ]);
     // Output:
+    // friend=Jess&friend=Sarah&friend=Zoe&name=Ava
     // Ava
     // Jess
     // [Jess Sarah Zoe]
@@ -481,7 +482,7 @@ internal static @string toJSON(any m) {
     if (err != default!) {
         log.Fatal(err);
     }
-    return strings.ReplaceAll(((@string)js), ","u8, ", "u8);
+    return strings.ReplaceAll((@string)js, ","u8, ", "u8);
 }
 
 } // end url_test_package

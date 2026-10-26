@@ -10,9 +10,10 @@ using slicereader = go.@internal.coverage.slicereader_package;
 using stringtab = go.@internal.coverage.stringtab_package;
 using io = io_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using @unsafe = unsafe_package;
 using encoding;
+using go;
 using go.@internal;
 using go.@internal.coverage;
 

@@ -7,15 +7,16 @@ namespace go;
 using errorspkg = errors_package;
 using asan = @internal.asan_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
 using msan = @internal.msan_package;
 using oserror = @internal.oserror_package;
 using race = @internal.race_package;
+using strconv = @internal.strconv_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 
+[GoFieldAccess(typeof(RawSockaddrInet4), typeof(RawSockaddrInet6))]
 partial class syscall_package {
 
 public static nint Stdin = 0;
@@ -37,7 +38,7 @@ internal static nint clen(slice<byte> n) {
 
 // Mmap manager, for use by operating system-specific implementations.
 partial struct mmapper {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal map<ж<byte>, slice<byte>> active; // active mappings; key is last byte in mapping
     internal Func<uintptr, uintptr, nint, nint, nint, int64, (uintptr, error)> mmap;
     internal Func<uintptr, uintptr, error> munmap;
@@ -131,7 +132,7 @@ public static @string Error(this Errno e) {
             return s;
         }
     }
-    return "errno "u8 + itoa.Itoa((nint)(uintptr)e);
+    return "errno "u8 + strconv.Itoa((nint)(uintptr)e);
 }
 
 public static bool Is(this Errno e, error target) {
@@ -198,7 +199,7 @@ public static @string String(this ΔSignal s) {
             return str;
         }
     }
-    return "signal "u8 + itoa.Itoa((nint)s);
+    return "signal "u8 + strconv.Itoa((nint)s);
 }
 
 public static (nint n, error err) Read(nint fd, slice<byte> p) {
@@ -233,7 +234,7 @@ public static (nint n, error err) Write(nint fd, slice<byte> p) {
     if (faketime && (fd == 1 || fd == 2)){
         n = faketimeWrite(fd, p);
         if (n < 0) {
-            (n, err) = (0, errnoErr(((Errno)(uintptr)(-n))));
+            (n, err) = (0, errnoErr((Errno)(uintptr)(-n)));
         }
     } else {
         (n, err) = write(fd, p);
@@ -329,7 +330,7 @@ public static (nint value, error err) GetsockoptInt(nint fd, nint level, nint op
 
     ref var n = ref heap(new int32(), out var Ꮡn);
     ref var vallen = ref heap<_Socklen>(out var Ꮡvallen);
-    vallen = ((_Socklen)4);
+    vallen = (_Socklen)4;
     err = getsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡn), Ꮡvallen);
     return ((nint)n, err);
 }
@@ -350,8 +351,8 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
-    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.Addr = pp.Value.Addr.Clone();
+    from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
+    from.Addr = pp.Addr.Clone();
     return (n, err);
 }
 
@@ -369,9 +370,9 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
-    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.ZoneId = pp.Value.Scope_id;
-    from.Addr = pp.Value.Addr.Clone();
+    from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
+    from.ZoneId = pp.Scope_id;
+    from.Addr = pp.Addr.Clone();
     return (n, err);
 }
 
@@ -388,8 +389,8 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
-    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.Addr = pp.Value.Addr.Clone();
+    from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
+    from.Addr = pp.Addr.Clone();
     return (n, oobn, recvflags, err);
 }
 
@@ -406,9 +407,9 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
-    from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.ZoneId = pp.Value.Scope_id;
-    from.Addr = pp.Value.Addr.Clone();
+    from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
+    from.ZoneId = pp.Scope_id;
+    from.Addr = pp.Addr.Clone();
     return (n, oobn, recvflags, err);
 }
 
@@ -440,9 +441,13 @@ public static error /*err*/ Sendmsg(nint fd, slice<byte> p, slice<byte> oob, Soc
 internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet4> Ꮡto, nint flags) {
     error err = default!;
 
-    (var ptr, var salen, err) = Ꮡto.sockaddr();
-    if (err != default!) {
-        return (0, err);
+    @unsafe.Pointer ptr = default!;
+    _Socklen salen = default!;
+    if (Ꮡto != nil) {
+        (ptr, salen, err) = Ꮡto.sockaddr();
+        if (err != default!) {
+            return (0, err);
+        }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }
@@ -450,9 +455,13 @@ internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<
 internal static (nint n, error err) sendmsgNInet6(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet6> Ꮡto, nint flags) {
     error err = default!;
 
-    (var ptr, var salen, err) = Ꮡto.sockaddr();
-    if (err != default!) {
-        return (0, err);
+    @unsafe.Pointer ptr = default!;
+    _Socklen salen = default!;
+    if (Ꮡto != nil) {
+        (ptr, salen, err) = Ꮡto.sockaddr();
+        if (err != default!) {
+            return (0, err);
+        }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }

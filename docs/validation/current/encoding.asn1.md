@@ -6,18 +6,26 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `encoding/asn1` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**40 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**55 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/encoding/asn1`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/asn1).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
 | `TestBMPString` | pass | pass |
+| `TestBMPString/empty_string` | pass | pass |
+| `TestBMPString/invalid_length` | pass | pass |
+| `TestBMPString/invalid_noncharacter_0xfdd1` | pass | pass |
+| `TestBMPString/invalid_noncharacter_0xfffe` | pass | pass |
+| `TestBMPString/invalid_noncharacter_0xffff` | pass | pass |
+| `TestBMPString/invalid_surrogate` | pass | pass |
+| `TestBMPString/letterlike_symbols` | pass | pass |
+| `TestBMPString/rfc7292_example` | pass | pass |
 | `TestBitString` | pass | pass |
 | `TestBitStringAt` | pass | pass |
 | `TestBitStringRightAlign` | pass | pass |
@@ -27,6 +35,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestExplicitTaggedTime` | pass | pass |
 | `TestGeneralizedTime` | pass | pass |
 | `TestImplicitTaggedTime` | pass | pass |
+| `TestImplicitTypeRoundtrip` | pass | pass |
 | `TestInvalidUTF8` | pass | pass |
 | `TestIssue11130` | pass | pass |
 | `TestIssue68241` | pass | pass |
@@ -56,6 +65,12 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestUnexportedStructField` | pass | pass |
 | `TestUnmarshal` | pass | pass |
 | `TestUnmarshalInvalidUTF8` | pass | pass |
+| `TestUnmarshalNestingLimitSlice` | pass | pass |
+| `TestUnmarshalNestingLimitSlice/above_limit` | pass | pass |
+| `TestUnmarshalNestingLimitSlice/below_limit` | pass | pass |
+| `TestUnmarshalNestingLimitStruct` | pass | pass |
+| `TestUnmarshalNestingLimitStruct/above_limit` | pass | pass |
+| `TestUnmarshalNestingLimitStruct/below_limit` | pass | pass |
 | `TestUnmarshalWithNilOrNonPointer` | pass | pass |
 
 ## Excluded declarations

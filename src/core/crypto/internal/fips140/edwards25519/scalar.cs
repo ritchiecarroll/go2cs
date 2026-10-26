@@ -5,7 +5,9 @@ namespace go.crypto.@internal.fips140;
 
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
+using math;
 
 partial class edwards25519_package {
 
@@ -206,7 +208,7 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
 }
 
 // scalarMinusOneBytes is l - 1 in little endian.
-internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array();
+[GoLazy] partial class lazyᴛscalarMinusOneBytes { internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array(); }
 
 // isReduced returns whether the given scalar in 32-byte little endian encoded
 // form is reduced modulo l.
@@ -215,16 +217,23 @@ internal static bool isReduced(slice<byte> s) {
         return false;
     }
 
-    for (nint i = len(s) - 1; i >= 0; i--) {
-        switch (ᐧ) {
-        case {} when s[i] > scalarMinusOneBytes[i]: {
-            return false;
-        }
-        case {} when s[i] < scalarMinusOneBytes[i]: {
-            return true;
-        }}
-    }
-    return true;
+    var s0 = byteorder.LEUint64(s[..8]);
+    var s1 = byteorder.LEUint64(s[8..16]);
+    var s2 = byteorder.LEUint64(s[16..24]);
+    var s3 = byteorder.LEUint64(s[24..]);
+
+    var l0 = byteorder.LEUint64(scalarMinusOneBytes[..8]);
+    var l1 = byteorder.LEUint64(scalarMinusOneBytes[8..16]);
+    var l2 = byteorder.LEUint64(scalarMinusOneBytes[16..24]);
+    var l3 = byteorder.LEUint64(scalarMinusOneBytes[24..]);
+
+    // Do a constant time subtraction chain scalarMinusOneBytes - s. If there is
+    // a borrow at the end, then s > scalarMinusOneBytes.
+    var (_, b) = bits.Sub64(l0, s0, 0);
+    (_, b) = bits.Sub64(l1, s1, b);
+    (_, b) = bits.Sub64(l2, s2, b);
+    (_, b) = bits.Sub64(l3, s3, b);
+    return b == 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -289,13 +298,13 @@ public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     uint64 nonzero = default!;
     var ᴛ6 = diff.Value;
     fiatScalarNonzero(ref nonzero, ref ᴛ6);
-    nonzero |= (uint64)((nonzero >> (int)(32)));
-    nonzero |= (uint64)((nonzero >> (int)(16)));
-    nonzero |= (uint64)((nonzero >> (int)(8)));
-    nonzero |= (uint64)((nonzero >> (int)(4)));
-    nonzero |= (uint64)((nonzero >> (int)(2)));
-    nonzero |= (uint64)((nonzero >> (int)(1)));
-    return (nint)((nint)(~nonzero) & 1);
+    nonzero |= (uint64)((nonzero >> 32));
+    nonzero |= (uint64)((nonzero >> 16));
+    nonzero |= (uint64)((nonzero >> 8));
+    nonzero |= (uint64)((nonzero >> 4));
+    nonzero |= (uint64)((nonzero >> 2));
+    nonzero |= (uint64)((nonzero >> 1));
+    return (nint)(~nonzero) & 1;
 }
 
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
@@ -337,13 +346,13 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             bitBuf = digits[indexU64].Rsh(indexBit);
         } else {
             // Combine the current 64 bits with bits from the next 64
-            bitBuf = (uint64)((digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit))));
+            bitBuf = (digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit)));
         }
 
         // Add carry into the current window
-        var window = carry + ((uint64)(bitBuf & windowMask));
+        var window = carry + (bitBuf & windowMask);
 
-        if ((uint64)(window & 1) == 0) {
+        if ((window & 1) == 0) {
             // If the window value is even, preserve the carry and continue.
             // Why is the carry preserved?
             // If carry == 0 and window & 1 == 0,
@@ -378,13 +387,13 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     // Compute unsigned radix-16 digits:
     for (nint i = 0; i < 32; i++) {
         digits[2 * i] = (int8)((byte)(b[i] & 15));
-        digits[2 * i + 1] = (int8)((byte)(((b[i] >> (int)(4))) & 15));
+        digits[2 * i + 1] = (int8)((byte)((b[i] >> 4) & 15));
     }
 
     // Recenter coefficients:
     for (nint i = 0; i < 63; i++) {
-        var carry = (int8)(((int8)(digits[i] + 8) >> (int)(4)));
-        digits[i] -= (int8)(carry << (int)(4));
+        var carry = (int8)(((int8)(digits[i] + 8) >> 4));
+        digits[i] -= (int8)(carry << 4);
         digits[i + 1] += carry;
     }
 

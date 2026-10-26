@@ -158,7 +158,11 @@ public static void TestDecodeHeader(ж<testing.T> Ꮡt) {
         new("=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?="u8, "ab"u8),
         new("=?ISO-8859-1?Q?a?=  =?ISO-8859-1?Q?b?="u8, "ab"u8),
         new("=?ISO-8859-1?Q?a?= \r\n\t =?ISO-8859-1?Q?b?="u8, "ab"u8),
-        new("=?ISO-8859-1?Q?a_b?="u8, "a b"u8)
+        new("=?ISO-8859-1?Q?a_b?="u8, "a b"u8),
+        // Undecodable words
+        new("=?UTF-8?b?garbage?= =?UTF-8?b?QW5kcsOp?= =?UTF-8?b?garbage?="u8, "=?UTF-8?b?garbage?= André =?UTF-8?b?garbage?="u8),
+        new("=?UTF-8?b?QW5kcsOp"u8, "=?UTF-8?b?QW5kcsOp"u8),
+        new("=?UTF-8?x?y?=?UTF-8?x?y=?"u8, "=?UTF-8?x?y?=?UTF-8?x?y=?"u8)
     }.slice();
 
     foreach (var (_, test) in tests) {
@@ -210,7 +214,7 @@ public static void TestCharsetDecoder(ж<testing.T> Ꮡt) {
                 if (errΔ1 != default!) {
                     Ꮡt.Errorf("DecodeHeader(%q), error in reader: %v"u8, testʗ1.src, errΔ1);
                 }
-                @string gotΔ1 = ((@string)content);
+                @string gotΔ1 = (@string)content;
                 if (gotΔ1 != testʗ1.content[i]) {
                     Ꮡt.Errorf("DecodeHeader(%q), got content %q, want %q"u8, testʗ1.src, gotΔ1, testʗ1.content[i]);
                 }

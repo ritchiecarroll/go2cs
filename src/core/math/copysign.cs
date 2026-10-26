@@ -9,7 +9,7 @@ partial class math_package {
 // and the sign of sign.
 public static float64 Copysign(float64 f, float64 sign) {
     const uint64 signBit = /* 1 << 63 */ 9223372036854775808;
-    return Float64frombits((uint64)((uint64)(Float64bits(f) & ~signBit) | (uint64)(Float64bits(sign) & signBit)));
+    return Float64frombits((uint64)(Float64bits(f) & ~signBit) | (uint64)(Float64bits(sign) & signBit));
 }
 
 } // end math_package

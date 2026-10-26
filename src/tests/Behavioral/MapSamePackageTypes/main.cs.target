@@ -12,10 +12,10 @@ partial struct info {
     internal bool supported;
 }
 
-internal static map<OSArch, info> table = new map<OSArch, info>{
-    [new("linux"u8, "amd64"u8)] = new(supported: true),
-    [new("windows"u8, "386"u8)] = new(supported: false)
-};
+[GoLazy] partial class lazyᴛtable { internal static map<OSArch, info> table = new map<OSArch, info>{
+    [new("linux", "amd64")] = new(supported: true),
+    [new("windows", "386")] = new(supported: false)
+}; }
 
 partial struct Description {
     public @string Name;
@@ -23,17 +23,17 @@ partial struct Description {
 }
 
 internal static slice<Description> allDesc = new Description[]{
-    new(Name: "a"u8, ΔDescription: "first"u8),
-    new(Name: "b"u8, ΔDescription: "second"u8)
+    new(Name: "a", ΔDescription: "first"),
+    new(Name: "b", ΔDescription: "second")
 }.slice();
 
 internal static Description describe() {
-    return new Description(Name: "c"u8, ΔDescription: "third"u8);
+    return new Description(Name: "c", ΔDescription: "third");
 }
 
 internal static void Main() {
-    fmt.Println(table[new OSArch("linux"u8, "amd64"u8)].supported);
-    fmt.Println(table[new OSArch("windows"u8, "386"u8)].supported);
+    fmt.Println(table[new OSArch("linux", "amd64")].supported);
+    fmt.Println(table[new OSArch("windows", "386")].supported);
     fmt.Println(len(table));
 
     foreach (var (_, d) in allDesc) {

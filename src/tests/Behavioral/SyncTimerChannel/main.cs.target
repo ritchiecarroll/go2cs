@@ -16,38 +16,21 @@ internal static bool tryRecv(/*<-*/channel<time.Time> c) {
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object aStopAfterFirePendingˢ = (@string)"A stop-after-fire pending:"u8;
-private static readonly object staleˢ = (@string)"stale:"u8;
-private static readonly object bResetAfterFirePendingˢ = (@string)"B reset-after-fire pending:"u8;
-private static readonly object cLenˢ = (@string)"C len:"u8;
-private static readonly object capˢ = (@string)"cap:"u8;
-private static readonly object cReceiveˢ = (@string)"C receive:"u8;
-private static readonly object dTickerStopStaleˢ = (@string)"D ticker stop stale:"u8;
-private static readonly object eTickerResetStaleˢ = (@string)"E ticker reset stale:"u8;
-private static readonly object fResetToImminentˢ = (@string)"F reset-to-imminent delivered:"u8;
-private static readonly object gAfterfuncStopAfterFireˢ = (@string)"G afterfunc stop-after-fire pending:"u8;
-private static readonly object hAfterLenˢ = (@string)"H after len:"u8;
-private static readonly object hAfterReceiveˢ = (@string)"H after receive:"u8;
-private static readonly object iSecondStopPendingˢ = (@string)"I second stop pending:"u8;
-private static readonly object jBatchStopPendingˢ = (@string)"J batch stop pending:"u8;
-private static readonly object kBatchResetPendingˢ = (@string)"K batch reset pending:"u8;
-
 internal static void Main() {
     var a = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     var aPending = a.Stop();
-    fmt.Println(aStopAfterFirePendingˢ, aPending, staleˢ, tryRecv((~a).C));
+    fmt.Println("A stop-after-fire pending:", aPending, "stale:", tryRecv((~a).C));
 
     var b = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     var bPending = b.Reset(time.ΔHour);
-    fmt.Println(bResetAfterFirePendingˢ, bPending, staleˢ, tryRecv((~b).C));
+    fmt.Println("B reset-after-fire pending:", bPending, "stale:", tryRecv((~b).C));
 
     var c = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
-    fmt.Println(cLenˢ, len((~c).C), capˢ, cap((~c).C));
-    fmt.Println(cReceiveˢ, !(ᐸꟷ((~c).C)).IsZero());
+    fmt.Println("C len:", len((~c).C), "cap:", cap((~c).C));
+    fmt.Println("C receive:", !(ᐸꟷ((~c).C)).IsZero());
 
     time.Duration period = /* 200 * time.Microsecond */ 200000;
     nint dStale = 0;
@@ -59,7 +42,7 @@ internal static void Main() {
             dStale++;
         }
     }
-    fmt.Println(dTickerStopStaleˢ, dStale);
+    fmt.Println("D ticker stop stale:", dStale);
 
     nint eStale = 0;
     var tk = time.NewTicker(period);
@@ -72,7 +55,7 @@ internal static void Main() {
         tk.Reset(period);
     }
     tk.Stop();
-    fmt.Println(eTickerResetStaleˢ, eStale);
+    fmt.Println("E ticker reset stale:", eStale);
 
     nint fDelivered = 0;
     for (nint iΔ3 = 0; iΔ3 < 200; iΔ3++) {
@@ -81,7 +64,7 @@ internal static void Main() {
         ᐸꟷ((~t).C);
         fDelivered++;
     }
-    fmt.Println(fResetToImminentˢ, fDelivered);
+    fmt.Println("F reset-to-imminent delivered:", fDelivered);
 
     var done = new channel<bool>(1);
     var doneʗ1 = done;
@@ -89,17 +72,17 @@ internal static void Main() {
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
-    fmt.Println(gAfterfuncStopAfterFireˢ, g.Stop());
+    fmt.Println("G afterfunc stop-after-fire pending:", g.Stop());
 
     var h = time.After(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
-    fmt.Println(hAfterLenˢ, len(h), capˢ, cap(h));
-    fmt.Println(hAfterReceiveˢ, !(ᐸꟷ(h)).IsZero());
+    fmt.Println("H after len:", len(h), "cap:", cap(h));
+    fmt.Println("H after receive:", !(ᐸꟷ(h)).IsZero());
 
     var i = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
     i.Stop();
-    fmt.Println(iSecondStopPendingˢ, i.Stop(), staleˢ, tryRecv((~i).C));
+    fmt.Println("I second stop pending:", i.Stop(), "stale:", tryRecv((~i).C));
 
     const nint batch = 600;
     time.Duration armAt = /* 40 * time.Millisecond */ 40000000;
@@ -107,7 +90,7 @@ internal static void Main() {
     (nint, nint) stopRound(bool reset) {
         var start = time.Now();
         var timers = new slice<ж<time.Timer>>(batch);
-        foreach (var (n, _) in timers) {
+        foreach (var n in range(timers)) {
             timers[n] = time.NewTimer(armAt - time.Since(start));
         }
         time.Sleep(armAt - time.Since(start));
@@ -134,10 +117,10 @@ internal static void Main() {
     }
 
     var (jPending, jStale) = stopRound(false);
-    fmt.Println(jBatchStopPendingˢ, jPending, (@string)"of"u8, (nint)(batch), staleˢ, jStale);
+    fmt.Println("J batch stop pending:", jPending, "of", (nint)(batch), "stale:", jStale);
 
     var (kPending, kStale) = stopRound(true);
-    fmt.Println(kBatchResetPendingˢ, kPending, (@string)"of"u8, (nint)(batch), staleˢ, kStale);
+    fmt.Println("K batch reset pending:", kPending, "of", (nint)(batch), "stale:", kStale);
 }
 
 } // end main_package

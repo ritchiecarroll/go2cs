@@ -7,16 +7,16 @@ namespace go.go;
 using cmp = cmp_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using lazyregexp = @internal.lazyregexp_package;
-using path = path_package;
+using lazyregexp = global::go.@internal.lazyregexp_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
+using iter = iter_package;
 using ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>;
 
 partial class doc_package {
@@ -58,6 +58,7 @@ internal static readonly @string exampleˢ = "Example"u8;
 //     other than the example function.
 public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFilesʗp) {
     var testFiles = testFilesʗp.sslice();
+    var flistᴷ = new stackAppend<ж<Example>>();
 
     slice<ж<Example>> list = default!;
     foreach (var (_, @file) in testFiles) {
@@ -89,6 +90,11 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
                     continue; // function has params; not a valid example
                 }
             }
+            {
+                var results = f.Value.Type.Value.Results; if (results != nil && len((~results).List) != 0) {
+                    continue; // function has results; not a valid example
+                }
+            }
             if ((~f).Body == nil) { // ast.File.Body nil dereference (see issue 28044)
                 continue;
             }
@@ -99,7 +105,7 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             ref var output = ref heap<@string>(out var Ꮡoutput);
             ref var unordered = ref heap<bool>(out var Ꮡunordered);
             (output, unordered, var hasOutput) = exampleOutput((~f).Body, (~@file).Comments);
-            flist = append(flist, Ꮡ(new Example(
+            flist = append(flistᴷ, flist, Ꮡ(new Example(
                 Name: name[(int)(len("Example"))..],
                 Doc: doc,
                 Code: new ast.BlockStmtжNode((~f).Body),
@@ -175,6 +181,8 @@ internal static readonly @string mainˢ = "main"u8;
 // playExample synthesizes a new *ast.File based on the provided
 // file with the provided function body as the body of main.
 internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f) {
+    var blankImportsᴷ = new stackAppend<ast.Spec>();
+
     var body = f.Body;
 
     if (!strings.HasSuffix((~@file.Name).Name, testˢ2)) {
@@ -252,12 +260,12 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             // because the package syscall/js is not available in the playground.
             return default!;
         }
-        @string n = path.Base(p);
+        @string n = assumedPackageName(p);
         if ((~s).Name != nil) {
             n = s.Value.Name.Value.Name;
             var exprᴛ1 = n;
             if (exprᴛ1 == "_"u8) {
-                blankImports = append(blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
+                blankImports = append(blankImportsᴷ, blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
             }
             else if (exprᴛ1 == "."u8) {
@@ -269,10 +277,10 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             // Copy the spec and its path to avoid modifying the original.
             ref var spec = ref heap<ast.ImportSpec>(out var Ꮡspec);
             spec = s.Value;
-            ref var pathΔ1 = ref heap<ast.BasicLit>(out var ᏑpathΔ1);
-            pathΔ1 = (~s).Path.Value;
-            spec.Path = ᏑpathΔ1;
-            spec.Path.Value.ValuePos = groupStart(Ꮡspec);
+            ref var path = ref heap<ast.BasicLit>(out var Ꮡpath);
+            path = (~s).Path.Value;
+            spec.Path = Ꮡpath;
+            updateBasicLitPos(spec.Path, groupStart(Ꮡspec));
             namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
             delete(unresolved, n);
         }
@@ -372,6 +380,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     // transitively by the body, populating usedDecls and usedObjs. Then it
     // trims down the declarations to include only the symbols actually
     // referenced by the body.
+
     var unresolved = new map<@string, bool>();
     ref var depDecls = ref heap<slice<ast.Decl>>(out var ᏑdepDecls);
     var usedDecls = new map<ast.Decl, bool>(); // set of top-level decls reachable from the body
@@ -547,19 +556,16 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
 }
 
 internal static bool hasIota(ast.Spec s) {
-    var has = false;
-    ast.Inspect(s, (ast.Node n) => {
+    foreach (var n in range<ast.Node>(ast.Preorder(s).Invoke)) {
         // Check that this is the special built-in "iota" identifier, not
         // a user-defined shadow.
         {
             var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && (~id).Name == "iota"u8 && (~id).Obj == nil) {
-                has = true;
-                return false;
+                return true;
             }
         }
-        return true;
-    });
-    return has;
+    }
+    return false;
 }
 
 // findImportGroupStarts finds the start positions of each sequence of import
@@ -575,6 +581,8 @@ internal static slice<tokenꓸPos> findImportGroupStarts(slice<ж<ast.ImportSpec
 
 // Helper for findImportGroupStarts to ease testing.
 internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.ImportSpec>> origImps) {
+    var groupStartsᴷ = new stackAppend<ж<ast.ImportSpec>>(moves: true);
+
     // Copy to avoid mutation.
     var imps = new slice<ж<ast.ImportSpec>>(len(origImps));
     copy(imps, origImps);
@@ -583,10 +591,10 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     // Assume gofmt has been applied, so there is a blank line between adjacent imps
     // if and only if they are more than 2 positions apart (newline, tab).
     slice<ж<ast.ImportSpec>> groupStarts = default!;
-    tokenꓸPos prevEnd = ((tokenꓸPos)(-2));
+    tokenꓸPos prevEnd = (tokenꓸPos)(-2);
     foreach (var (_, imp) in imps) {
         if (imp.Pos() - prevEnd > 2) {
-            groupStarts = append(groupStarts, imp);
+            groupStarts = append(groupStartsᴷ, groupStarts, imp);
         }
         prevEnd = imp.End();
         // Account for end-of-line comments.
@@ -594,6 +602,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
             prevEnd = (~imp).Comment.End();
         }
     }
+    groupStarts = move2heap(groupStartsᴷ, groupStarts);
     return groupStarts;
 }
 
@@ -603,6 +612,8 @@ internal static readonly @string copyrightˢ = "Copyright"u8;
 // playExampleFile takes a whole file example and synthesizes a new *ast.File
 // such that the example is function main in package main.
 internal static ж<ast.File> playExampleFile(ref ast.File @file) {
+    var declsᴷ = new stackAppend<ast.Decl>(moves: true);
+
     // Strip copyright comment if present.
     var comments = @file.Comments;
     if (len(comments) > 0 && strings.HasPrefix(comments[0].Text(), copyrightˢ)) {
@@ -624,13 +635,14 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
                 d = new ast.FuncDeclжDecl(ᏑnewF);
             }
         }
-        decls = append(decls, d);
+        decls = append(declsᴷ, decls, d);
     }
 
     // Copy the File, as it may be used elsewhere.
     ref var f = ref heap<ast.File>(out var Ꮡf);
     f = @file;
     f.Name = ast.NewIdent(mainˢ);
+    decls = move2heap(declsᴷ, decls);
     f.Decls = decls;
     f.Comments = comments;
     return Ꮡf;
@@ -797,6 +809,19 @@ internal static (@string prefix, @string suffix, bool ok) splitExampleName(@stri
 internal static bool isExampleSuffix(@string s) {
     var (r, size) = utf8.DecodeRuneInString(s);
     return size > 0 && unicode.IsLower(r);
+}
+
+// updateBasicLitPos updates lit.Pos,
+// ensuring that lit.End is displaced by the same amount.
+// (See https://go.dev/issue/76395.)
+internal static void updateBasicLitPos(ж<ast.BasicLit> Ꮡlit, tokenꓸPos pos) {
+    ref var lit = ref Ꮡlit.DerefOrNull();
+
+    tokenꓸPos len = lit.End() - lit.Pos();
+    lit.ValuePos = pos;
+    if (lit.ValueEnd.IsValid()) {
+        lit.ValueEnd = pos + len;
+    }
 }
 
 } // end doc_package

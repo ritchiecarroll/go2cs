@@ -17,6 +17,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using quick = go.testing.quick_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.testing;
 using io = io_package;
@@ -35,7 +37,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
 
     var limbs = n.Bits();
     Ꮡx.reset(len(limbs));
-    foreach (var (i, _) in limbs) {
+    foreach (var i in range(limbs)) {
         x.limbs[i] = (nuint)limbs[i];
     }
     return Ꮡx;
@@ -43,16 +45,18 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
 
 internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     var bits = new slice<big.Word>(len(n.limbs));
-    foreach (var (i, _) in n.limbs) {
-        bits[i] = ((big.Word)n.limbs[i]);
+    foreach (var i in range(n.limbs)) {
+        bits[i] = (big.Word)n.limbs[i];
     }
     return @new<bigꓸInt>().SetBits(bits);
 }
 
 internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
+    var limbsᴷ = new stackAppend<@string>();
+
     slice<@string> limbs = default!;
-    foreach (var (i, _) in n.limbs) {
-        limbs = append(limbs, fmt.Sprintf("%016X"u8, n.limbs[len(n.limbs) - 1 - i]));
+    foreach (var i in range(n.limbs)) {
+        limbs = append(limbsᴷ, limbs, fmt.Sprintf("%016X"u8, n.limbs[len(n.limbs) - 1 - i]));
     }
     return "{"u8 + strings.Join(limbs, " "u8) + "}"u8;
 }
@@ -64,7 +68,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fi
 
     var limbs = new slice<nuint>(size);
     for (nint i = 0; i < size; i++) {
-        limbs[i] = (nuint)((nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL))));
+        limbs[i] = (nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL)));
     }
     return reflect.ValueOf(Ꮡ(new ΔNat(limbs)));
 }
@@ -80,7 +84,7 @@ internal static bool testModAddCommutative(ж<global::go.crypto.@internal.fips14
     return aPlusB.Equal(bPlusA) == 1;
 }
 
-public static void TestModAddCommutative(ж<testing.T> Ꮡt) {
+public static partial void TestModAddCommutative(ж<testing.T> Ꮡt) {
     var err = quick.Check(testModAddCommutative, Ꮡ(new quick.Config(nil)));
     if (err != default!) {
         Ꮡt.Error(err);
@@ -97,7 +101,7 @@ internal static bool testModSubThenAddIdentity(ж<global::go.crypto.@internal.fi
     return a.Equal(original) == 1;
 }
 
-public static void TestModSubThenAddIdentity(ж<testing.T> Ꮡt) {
+public static partial void TestModSubThenAddIdentity(ж<testing.T> Ꮡt) {
     var err = quick.Check(testModSubThenAddIdentity, Ꮡ(new quick.Config(nil)));
     if (err != default!) {
         Ꮡt.Error(err);

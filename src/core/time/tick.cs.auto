@@ -20,7 +20,7 @@ partial class time_package {
 
 // A Ticker holds a channel that delivers “ticks” of a clock
 // at intervals.
-[GoType] partial struct Ticker {
+partial struct Ticker {
     public /*<-*/channel<Time> C = /*<-*/channel<Time>.RecvOnly; // The channel on which the ticks are delivered.
     internal bool initTicker;
 }
@@ -49,7 +49,7 @@ public static ж<Ticker> NewTicker(Duration d) {
     // on the floor until the client catches up.
     var c = new channel<Time>(1);
     var t = newTimer(when(d), (int64)d, sendTime, c, (uintptr)syncTimer(c)).Reinterpret<Timer, Ticker>();
-    t.Value.C = c.WithDirection(GoChanDir.Recv);
+    t.of(Ticker.ᏑC).Value = c.WithDirection(GoChanDir.Recv);
     return t;
 }
 

@@ -88,9 +88,9 @@ internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
 }
 
 internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
-    var selᴛ21 = c;
-    switch (trySelect(ᐸꟷ(selᴛ21, ꓸꓸꓸ))) {
-    case 0 when selᴛ21.ꟷᐳ(out _): {
+    var selᴛ19 = c;
+    switch (trySelect(ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {
+    case 0 when selᴛ19.ꟷᐳ(out _): {
         return true;
     }
     default: {
@@ -189,23 +189,23 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
         return (0, os.ErrDeadlineExceeded);
     }}
 
-    var selᴛ22 = p.rdRx;
-    var selᴛ23 = p.localDone;
-    var selᴛ24 = p.remoteDone;
-    var selᴛ25 = Ꮡp.of(pipe.ᏑreadDeadline).wait();
-    switch (select(ᐸꟷ(selᴛ22, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ(selᴛ24, ꓸꓸꓸ), ᐸꟷ(selᴛ25, ꓸꓸꓸ))) {
-    case 0 when selᴛ22.ꟷᐳ(out var bw): {
+    var selᴛ20 = p.rdRx;
+    var selᴛ21 = p.localDone;
+    var selᴛ22 = p.remoteDone;
+    var selᴛ23 = Ꮡp.of(pipe.ᏑreadDeadline).wait();
+    switch (select(ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(selᴛ21, ꓸꓸꓸ), ᐸꟷ(selᴛ22, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ))) {
+    case 0 when selᴛ20.ꟷᐳ(out var bw): {
         nint nr = copy(b, bw);
         p.rdTx.ᐸꟷ(nr);
         return (nr, default!);
     }
-    case 1 when selᴛ23.ꟷᐳ(out _): {
+    case 1 when selᴛ21.ꟷᐳ(out _): {
         return (0, Δio.ErrClosedPipe);
     }
-    case 2 when selᴛ24.ꟷᐳ(out _): {
+    case 2 when selᴛ22.ꟷᐳ(out _): {
         return (0, Δio.EOF);
     }
-    case 3 when selᴛ25.ꟷᐳ(out _): {
+    case 3 when selᴛ23.ꟷᐳ(out _): {
         return (0, os.ErrDeadlineExceeded);
     }}
     return default!;
@@ -240,24 +240,24 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
         p.wrMu.Lock(); // Ensure entirety of b is written together
         defer(Ꮡp.of(pipe.ᏑwrMu).Unlock, ref ᒐ);
         for (var once = true; once || len(b) > 0; once = false) {
-            var selᴛ26 = p.wrTx.ᐸꟷ(b, ꓸꓸꓸ);
-            var selᴛ27 = p.localDone;
-            var selᴛ28 = p.remoteDone;
-            var selᴛ29 = Ꮡp.of(pipe.ᏑwriteDeadline).wait();
-            switch (select(selᴛ26, ᐸꟷ(selᴛ27, ꓸꓸꓸ), ᐸꟷ(selᴛ28, ꓸꓸꓸ), ᐸꟷ(selᴛ29, ꓸꓸꓸ))) {
+            var selᴛ24 = p.wrTx.ᐸꟷ(b, ꓸꓸꓸ);
+            var selᴛ25 = p.localDone;
+            var selᴛ26 = p.remoteDone;
+            var selᴛ27 = Ꮡp.of(pipe.ᏑwriteDeadline).wait();
+            switch (select(selᴛ24, ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ), ᐸꟷ(selᴛ27, ꓸꓸꓸ))) {
             case 0: {
                 nint nw = ᐸꟷ(p.wrRx);
                 b = b.slice(nw);
                 n += nw;
                 break;
             }
-            case 1 when selᴛ27.ꟷᐳ(out _): {
+            case 1 when selᴛ25.ꟷᐳ(out _): {
                 (n, err) = (n, Δio.ErrClosedPipe); goto ᒐdone;
             }
-            case 2 when selᴛ28.ꟷᐳ(out _): {
+            case 2 when selᴛ26.ꟷᐳ(out _): {
                 (n, err) = (n, Δio.ErrClosedPipe); goto ᒐdone;
             }
-            case 3 when selᴛ29.ꟷᐳ(out _): {
+            case 3 when selᴛ27.ꟷᐳ(out _): {
                 (n, err) = (n, os.ErrDeadlineExceeded); goto ᒐdone;
             }}
         }

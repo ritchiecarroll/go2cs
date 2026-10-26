@@ -39,6 +39,7 @@ namespace go;
 using System;
 using System.Runtime.CompilerServices;
 using go.golib;
+using abi = @internal.abi_package;
 using atomic = @internal.runtime.atomic_package;
 using @internal.runtime;
 
@@ -69,7 +70,15 @@ public static partial class runtime_package
         // Constructed per panic, as Go constructs them: neither touches a static of this package, so
         // registering them here runs nothing ahead of the package's own initialization.
         RuntimeErrorPanic.PlainErrorValue = static message => (error)(plainError)(@string)message;
+        RuntimeErrorPanic.ErrorStringValue = static message => (error)(errorString)(@string)message;
+        RuntimeErrorPanic.UnhashableKeyErrorValue = static unhashable => @internal.runtime.maps_package.unhashableKeyPanicValue(unhashable);
+        RuntimeErrorPanic.TypeAssertionErrorValue = static (source, concrete, asserted, missingMethod) =>
+            // Go's TypeAssertionError fields: the static source type (nil when asserting to an interface), the dynamic type (nil for a nil
+            // interface), the asserted type and the first method of it the dynamic type lacks.
+            Ꮡ(new TypeAssertionError(source is null ? nil : abi.synthType(source), concrete is null ? nil : abi.synthType(concrete), abi.synthType(asserted), missingMethod));
         RuntimeErrorPanic.BoundsErrorValue = static (x, y, signed, code) =>
-            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (boundsErrorCode)code);
+            // Go 1.26 moved the code to internal/abi (abi.BoundsErrorCode, bounds.go); the numbering is runtime's
+            // 1.24 boundsErrorCode verbatim, BoundsIndex .. BoundsConvert, so golib's code value carries over.
+            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (global::go.@internal.abi_package.BoundsErrorCode)code);
     }
 }

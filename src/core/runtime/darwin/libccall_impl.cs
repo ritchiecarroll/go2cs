@@ -73,10 +73,24 @@
 // discriminates by construction.
 //
 // WHAT IS REFUSED, LOUDLY AND BY NAME, NEVER WITH A DEFAULT. An argument whose number resolves to
-// no box (a reference-bearing args struct — mmap_args, mach_vm_region_args, proc_regionfilename_args
-// carry managed pointers and have no pinnable storage, so they never register), a field the
-// dispatcher cannot place in a register, or a null function pointer. A wrong layout would hand libc
-// garbage in registers; a throw that names the symbol is the honest answer.
+// no box, a field the dispatcher cannot place in a register (mmap_args carries managed pointers), or a
+// null function pointer. A wrong layout would hand libc garbage in registers; a throw that names the
+// symbol is the honest answer.
+//
+// THE TWO PPROF MEMBERS (2026-10-25). mach_vm_region_args and proc_regionfilename_args also carry
+// managed pointers, so the default dispatch refuses them ("cannot place in an integer register"). Since
+// the order-token cut their args box RESOLVES (FromPinnedBox mints a token that retains it), so the form
+// table below reads each one's fields by type: every pointer becomes its number (a reference-free box
+// pins and answers its address; machVMRegionBasicInfoData, which holds two fixed arrays, answers its
+// order token) and GoLibcCall.Call places them, marshalling a token's box into a Go-layout native copy
+// and back (NativeStructMarshal). They are reached from runtime/pprof's machVMInfo, which every proto
+// profile write calls on darwin (readMapping).
+//
+// KEVENT'S RESULT PROTOCOL (2026-10-26). kevent_trampoline hands back -errno when libc returns -1, and
+// the runtime's callers retry on -_EINTR. Its args struct has no result field, so the default dispatch
+// returned libc's raw -1: wakeNetpoll printed "netpollBreak write failed with 1" whatever the errno was,
+// and a signal during a poll became a fatal error instead of a retry. The form table names the rule
+// (GoLibcErrnoRule.NegatedErrno); pipe, read and write, whose trampolines share it, are hand-owned.
 //
 // Hand-owned (no libccall_impl.go exists, so a reconvert never regenerates this file). Declared
 // NON-partial: the registry displacement leaves a comment placeholder in sys_libc.cs, not a bodyless
@@ -95,6 +109,8 @@ partial class runtime_package {
 private const string libSystemPath = "/usr/lib/libSystem.B.dylib";
 
 private static nint s_libcCallErrnoReader;
+
+private static nint s_machTaskSelf;
 
 internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     nint entryPoint = unchecked((nint)(nuint)(uintptr)fn);
@@ -134,6 +150,15 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
         // pthread_self_trampoline: CALL libc_pthread_self; MOVQ AX, 0(BX) -- the result lands in the
         // block's first word (the pthread wrapper's value).
         return unchecked((int32)(uint32)GoLibcCall.CallStoringResultIntoBlock(entryPoint, argsBox, s_libcCallErrnoReader, symbol));
+    case "mach_vm_region":
+        return machVMRegion(entryPoint, argsBox, symbol);
+    case "proc_regionfilename":
+        return procRegionFilename(entryPoint, argsBox, symbol);
+    case "kevent":
+        // kevent_trampoline: CALL libc_kevent; CMPL AX, $-1; JNE ok; CALL libc_error; MOVLQSX (AX), AX;
+        // NEGQ AX -- a failure comes back as -errno, which netpoll, addWakeupEvent and wakeNetpoll compare
+        // against -_EINTR. kevent_args has no result field to carry that rule, so it is named here.
+        return unchecked((int32)(uint32)GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol, GoLibcErrnoRule.NegatedErrno));
     }
 
     nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);
@@ -143,6 +168,80 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     // family reads args.ret as well, which the dispatcher has already filled. Until increment 7 this
     // returned 0 on the belief that no caller read it.
     return unchecked((int32)(uint32)r);
+}
+
+// mach_vm_region_trampoline: the task port, read from libSystem's mach_task_self_ global as Go's
+// `MOVQ $libc_mach_task_self_(SB), DI; MOVL 0(DI), DI` reads it, then the args struct's six fields in
+// order. The seventh C argument goes on the stack on amd64; the native call's own ABI places it.
+// kern_return_t needs no errno: the result is the whole outcome, and machVMInfo reads it.
+private static unsafe int32 machVMRegion(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<mach_vm_region_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is not mach_vm_region_args (got {argsBox?.GetType().FullName ?? "null"})");
+    }
+
+    if (s_machTaskSelf == 0) {
+        s_machTaskSelf = GoCgoDynamicImports.Resolve("mach_task_self_", libSystemPath);
+    }
+
+    ref var args = ref box.Value;
+    nuint task = *(uint*)s_machTaskSelf;
+
+    nuint r = GoLibcCall.Call(entryPoint, [
+        task,
+        (uintptr)args.address,
+        (uintptr)args.size,
+        unchecked((nuint)(uint)(int32)args.flavor),
+        (uintptr)args.info,
+        (uintptr)args.count,
+        (uintptr)args.object_name
+    ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+    System.GC.KeepAlive(box);
+    return unchecked((int32)(uint32)r);
+}
+
+// proc_regionfilename_trampoline: pid, address, buffer, buffer_size, in the args struct's order. buf is
+// unsafe.SliceData of pprof's []byte, a reference-free element, so its number is the pinned address of
+// the slice's backing store and libc writes the file name straight into it. The result is the length.
+private static int32 procRegionFilename(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<proc_regionfilename_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is not proc_regionfilename_args (got {argsBox?.GetType().FullName ?? "null"})");
+    }
+
+    ref var args = ref box.Value;
+
+    nuint r = GoLibcCall.Call(entryPoint, [
+        unchecked((nuint)args.pid),
+        (nuint)args.address,
+        (uintptr)args.buf,
+        unchecked((nuint)args.bufSize)
+    ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+    System.GC.KeepAlive(box);
+    return unchecked((int32)(uint32)r);
+}
+
+// runtime.libc_error_addr, displaced (2026-10-15, the Go 1.26 hop's H6; manualTypeOperations.go names the reason).
+//
+// Go 1.26 reads errno through an ADDRESS: libc_error_addr(&p) runs libc_error_trampoline, which calls
+// __error() and stores the returned int* through the args word into p, and syscall_rawsyscalln then reads
+// *p. Here p is a ж<int32>, a managed reference, so the store has no faithful managed form: a native int*
+// cannot become a box, and the errno it points at is thread-local storage the next managed call may
+// overwrite. The managed runtime reads errno inside the call instead (GoLibcCall's errnoReader above,
+// s_libcCallErrnoReader).
+//
+// No managed path reaches this function at 5f78cf7691's emission:
+//   syscall_rawsyscalln  sys_darwin.cs; the body Go pushes into syscall.rawsyscalln by //go:linkname. syscall
+//                        bodies its own syscalln and rawsyscalln (syscall/darwin/syscall_darwin_impl.cs, on
+//                        GoLibcCall with errno read inside the call), so the pushed body is never called
+//   minit                os_darwin.cs; called from mstart1 (whose caller mstart0 is entered from assembly
+//                        only) and from needm (cgo callbacks, and signal paths behind sigtramp, which
+//                        sigaction_impl.cs never installs)
+// So it refuses BY NAME. A body that left p nil would make the caller read errno 0, a success, silently.
+// The displacement takes the function's lifted libc_error_addr_args with it (the two-seeded footprint
+// reads it gone from sys_darwin.cs and package_info.cs); libc_error_trampoline and its import record stay.
+internal static void libc_error_addr(ж<ж<int32>> Ꮡaddr) {
+    @throw("runtime: libc_error_addr reached: the managed runtime has no address for errno; GoLibcCall reads it inside the call (runtime/darwin/libccall_impl.cs)"u8);
 }
 
 } // end runtime_package

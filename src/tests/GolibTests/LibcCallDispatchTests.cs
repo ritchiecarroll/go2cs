@@ -85,6 +85,35 @@ public class LibcCallDispatchTests
         Assert.AreNotEqual((nuint)0, errnoFail, "and errno must be set");
     }
 
+    [TestMethod]
+    public unsafe void TheAlwaysReadRuleReadsErrnoAfterASuccessfulCall()
+    {
+        // Go 1.26's syscalln reads errno after every call and leaves the failure test to its caller. getpid
+        // cannot fail and does not touch errno, so the value planted just before it is what comes back;
+        // under Int32MinusOne the same call reports 0.
+        int* location = ((delegate* unmanaged[Cdecl]<int*>)ErrnoReader)();
+
+        *location = 4242;
+        nuint pid = GoLibcCall.Call(Export("getpid"), ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.AlwaysRead, ErrnoReader, out nuint errno);
+
+        Assert.AreEqual((nuint)Environment.ProcessId, pid);
+        Assert.AreEqual((nuint)4242, errno, "AlwaysRead must read errno on success too");
+
+        *location = 4242;
+        GoLibcCall.Call(Export("getpid"), ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.Int32MinusOne, ErrnoReader, out nuint errnoInt32);
+
+        Assert.AreEqual((nuint)0, errnoInt32, "the Int32 rule reads errno only on failure");
+    }
+
+    [TestMethod]
+    public void TheAlwaysReadRuleReportsAFailuresErrno()
+    {
+        nuint r = GoLibcCall.Call(Export("fcntl"), new nuint[] { unchecked((nuint)(uint)(-1)), F_GETFL, 0 }, GoLibcErrnoRule.AlwaysRead, ErrnoReader, out nuint errno);
+
+        Assert.AreEqual(-1, unchecked((int)(uint)r), "fcntl on a bad descriptor returns -1");
+        Assert.AreEqual((nuint)EBADF, errno);
+    }
+
     // The runtime.libcCall protocol, driven through the same shape runtime/darwin/sys_darwin.cs lifts:
     //     [GoType("dyn")] internal partial struct fcntl_args { internal int32 fd, cmd, arg; internal int32 ret, errno; }
     private struct FcntlArgs
@@ -290,5 +319,112 @@ public class LibcCallDispatchTests
         Assert.AreEqual(direct, r, "the form returns the register");
         Assert.AreEqual(direct, t.id, "and stores it into the block's first word, read back through the box");
         GC.KeepAlive(t);
+    }
+
+    // ---- kevent_trampoline's result protocol (GoLibcErrnoRule.NegatedErrno), on glibc ----
+    //
+    // Go's kevent_trampoline turns libc's -1 into -errno, and the runtime's three kevent callers compare
+    // the result against -_EINTR (netpoll also -_ETIMEDOUT). kevent_args has no result field, so before
+    // the rule the dispatcher returned the raw -1: wakeNetpoll printed "netpollBreak write failed with 1"
+    // whatever the errno was, and every EINTR retry was unreachable. glibc has no kevent, so a fake libc
+    // function stands in for it, setting errno through glibc's own __errno_location; fcntl on a bad
+    // descriptor measures the same rule against a real errno.
+    private const int EINTR = 4;
+
+    // The lifted struct sys_darwin.cs declares: [GoType("dyn")] internal partial struct kevent_args.
+    private struct KeventArgs
+    {
+        internal int kq;
+        internal uintptr ch;
+        internal int nch;
+        internal uintptr ev;
+        internal int nev;
+        internal uintptr ts;
+    }
+
+    private struct FcntlArgsWithoutResult
+    {
+        internal int fd, cmd, arg;
+    }
+
+    // int kevent(kq, changelist, nchanges, eventlist, nevents, timeout): a negative kq fails with EINTR,
+    // as a kevent interrupted by a signal does; otherwise it reports nevents events.
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static unsafe nuint FakeKevent(nuint kq, nuint ch, nuint nch, nuint ev, nuint nev, nuint ts)
+    {
+        if (unchecked((int)(uint)kq) < 0)
+        {
+            *((delegate* unmanaged[Cdecl]<int*>)s_errnoLocation)() = EINTR;
+            return unchecked((nuint)(-1));
+        }
+
+        return nev;
+    }
+
+    private static unsafe nint FakeKeventEntry
+    {
+        get
+        {
+            _ = ErrnoReader;
+            return (nint)(delegate* unmanaged[Cdecl]<nuint, nuint, nuint, nuint, nuint, nuint, nuint>)&FakeKevent;
+        }
+    }
+
+    [TestMethod]
+    public void TheGeneratedKeventDispatchHandsBackLibcsRawMinusOne()
+    {
+        ref KeventArgs args = ref heap(new KeventArgs { kq = -1, nev = 1 }, out ж<KeventArgs> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(FakeKeventEntry, Ꮡargs, ErrnoReader, "kevent");
+
+        Assert.AreEqual(-1, unchecked((int)(uint)r), "with no rule the register comes back as libc left it: the \"1\" wakeNetpoll printed");
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public void TheKeventTrampolineRuleReturnsNegatedErrno_EINTR()
+    {
+        ref KeventArgs args = ref heap(new KeventArgs { kq = -1, nev = 1 }, out ж<KeventArgs> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(FakeKeventEntry, Ꮡargs, ErrnoReader, "kevent", GoLibcErrnoRule.NegatedErrno);
+
+        Assert.AreEqual(-EINTR, unchecked((int)(uint)r), "kevent_trampoline: -1 becomes -errno, so `n == -_EINTR` can match");
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public void TheKeventTrampolineRuleReadsTheRealErrno_FcntlOnABadDescriptor()
+    {
+        ref FcntlArgsWithoutResult args = ref heap(new FcntlArgsWithoutResult { fd = -1, cmd = F_GETFL, arg = 0 }, out ж<FcntlArgsWithoutResult> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(Export("fcntl"), Ꮡargs, ErrnoReader, "fcntl", GoLibcErrnoRule.NegatedErrno);
+
+        Assert.AreEqual(-EBADF, unchecked((int)(uint)r), "the errno glibc set, read through __errno_location and negated");
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public unsafe void TheKeventTrampolineRuleLeavesASuccessfulCountAlone()
+    {
+        ref KeventArgs args = ref heap(new KeventArgs { kq = 3, nev = 2 }, out ж<KeventArgs> Ꮡargs);
+        *((delegate* unmanaged[Cdecl]<int*>)ErrnoReader)() = 4242;
+
+        nuint r = GoLibcCall.DispatchArgsStruct(FakeKeventEntry, Ꮡargs, ErrnoReader, "kevent", GoLibcErrnoRule.NegatedErrno);
+
+        Assert.AreEqual(2, unchecked((int)(uint)r), "a count is returned as is, whatever errno holds");
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public void ATrampolineRuleOnAStructWithAResultFieldIsRefusedByName()
+    {
+        ref FcntlArgs args = ref heap(new FcntlArgs { fd = -1, cmd = F_GETFL, arg = 0 }, out ж<FcntlArgs> Ꮡargs);
+
+        var ex = Assert.ThrowsException<InvalidOperationException>(() =>
+            GoLibcCall.DispatchArgsStruct(Export("fcntl"), Ꮡargs, ErrnoReader, "fcntl", GoLibcErrnoRule.NegatedErrno));
+
+        StringAssert.Contains(ex.Message, "fcntl", "the refusal names the symbol");
+        StringAssert.Contains(ex.Message, "result field", "and the reason");
+        GC.KeepAlive(args);
     }
 }

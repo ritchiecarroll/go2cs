@@ -1,0 +1,402 @@
+// GoMethodSetTests.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
+extern alias golib;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace go2cs.Tests;
+
+/// <summary>
+/// Guards the generated method set (golib's IGoMethodSet, MethodSet.cs): every value type with exported Go methods
+/// answers each one as a compiled delegate, unbound (receiver first) and bound (a method value), through T and through
+/// *T as Go's method sets allow, promoted methods, variadic tails and more than 16 parameters included. GolibTests hold
+/// golib to taking the arms; this holds the generator to writing arms that compile and behave as Go's method values do
+/// when executed.
+/// </summary>
+[TestClass]
+public class GoMethodSetTests
+{
+    private const string Path = @"C:\go2cs\src\core\mtest\mtest.cs";
+
+    // A plain struct with a value method, a pointer method emitted `this ref` (answered through RecvGenerator's ж twin),
+    // an unexported method, a variadic one, one with 16 parameters and one with 17 (its method value takes golib's ladder); a generic struct with a value and a pointer method
+    // over type parameters named apart from the type's; a struct named `file`, a contextual keyword the partial must
+    // escape (CS9056); and Outer, which declares no method and promotes Inner's value method and pointer method.
+    private const string Package =
+        """
+        namespace go;
+
+        [GoPackage("mtest")]
+        public static partial class mtest_package
+        {
+            public partial struct Plain { public nint n; }
+            public partial struct Pair<K, V> { public K k; public V v; }
+            public partial struct @file { public nint size; }
+            [GoType] public partial struct Inner { public nint i; }
+            [GoType] public partial struct Outer
+            {
+                /*embed*/ public Inner Inner;
+                public nint o;
+            }
+
+            public static nint Get(this Plain p) => p.n;
+
+            public static void Set(this ref Plain p, nint v) => p.n = v;
+
+            public static nint get(this Plain p) => p.n;
+
+            public static nint Sum(this Plain p, params Span<nint> more) => p.n + more.Length;
+
+            public static nint Wide(this Plain p, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8,
+                nint a9, nint a10, nint a11, nint a12, nint a13, nint a14, nint a15, nint a16) => p.n * 100 + a1 + a16;
+
+            public static nint Wider(this Plain p, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8,
+                nint a9, nint a10, nint a11, nint a12, nint a13, nint a14, nint a15, nint a16, nint a17) => p.n * 100 + a1 + a17;
+
+            public static nint Twice(this Inner x) => x.i * 2;
+
+            public static void Bump(this ref Inner x) => x.i++;
+
+            public static @string String<K, V>(this Pair<K, V> p) => (@string)$"{p.k}={p.v}";
+
+            public static nint Size(this ж<@file> f) => f.Value.size;
+
+            public static B Swap<A, B>(this ref Pair<A, B> p, B v)
+            {
+                B old = p.v;
+                p.v = v;
+                return old;
+            }
+
+            // Boxes for the family pins, which read the arms through golib's reflect.
+            public static object PlainBox() => Ꮡ(new Plain { n = 3 });
+
+            public static object OuterBox() => Ꮡ(new Outer { Inner = new Inner { i = 4 } });
+
+            // Executed by the nil pins: each *T arm of a value method through a nil pointer, bound and unbound, and a
+            // promoted method value written after its bind. Go binds without a panic and panics at the call: panicwrap
+            // for the type's own method, the nil-pointer fault for a promoted one; the write is seen at the call.
+            public static string NilProbe()
+            {
+                IGoMethodSet plain = default(Plain);
+                IGoMethodSet outer = default(Outer);
+                ж<Plain>? nilPlain = null;
+                ж<Outer>? nilOuter = null;
+
+                static string at(Func<Delegate?> bind, Func<Delegate, nint> call)
+                {
+                    Delegate? arm;
+
+                    try { arm = bind(); }
+                    catch (PanicException ex) { return "bind: " + ex.Message; }
+
+                    try { return "no panic: " + call(arm!); }
+                    catch (PanicException ex) { return "call: " + ex.Message; }
+                }
+
+                ж<Outer> outerBox = Ꮡ(new Outer { Inner = new Inner { i = 4 } });
+                Func<nint> twice = (Func<nint>)outer.ᴛMethod("Twice", true, true, outerBox)!;
+                outerBox.Value.Inner.i = 5;
+
+                return string.Join(" | ",
+                    at(() => plain.ᴛMethod("Get", true, true, nilPlain), static arm => ((Func<nint>)arm)()),
+                    at(() => plain.ᴛMethod("Get", true, false, null), arm => ((Func<ж<Plain>, nint>)arm)(nilPlain!)),
+                    at(() => plain.ᴛMethod("Get", true, true, ж<Plain>.NilBox), static arm => ((Func<nint>)arm)()),
+                    at(() => outer.ᴛMethod("Twice", true, true, nilOuter), static arm => ((Func<nint>)arm)()),
+                    at(() => outer.ᴛMethod("Twice", true, false, null), arm => ((Func<ж<Outer>, nint>)arm)(nilOuter!)),
+                    twice().ToString());
+            }
+
+            // Executed by the test: each arm, as reflect asks for it.
+            public static string Probe()
+            {
+                IGoMethodSet plain = default(Plain);
+                ж<Plain> box = Ꮡ(new Plain { n = 3 });
+
+                nint unboundT = ((Func<Plain, nint>)plain.ᴛMethod("Get", false, false, null)!)(new Plain { n = 1 });
+                nint unboundP = ((Func<ж<Plain>, nint>)plain.ᴛMethod("Get", true, false, null)!)(box);
+
+                // A method value through *T reads the pointee at each call, as Go's reflect does: a later Set reaches it.
+                Func<nint> boundP = (Func<nint>)plain.ᴛMethod("Get", true, true, box)!;
+                ((Action<ж<Plain>, nint>)plain.ᴛMethod("Set", true, false, null)!)(box, 4);
+                Action<nint> set = (Action<nint>)plain.ᴛMethod("Set", true, true, box)!;
+                set(5);
+
+                IGoMethodSet pair = default(Pair<@string, nint>);
+                ж<Pair<@string, nint>> pairBox = Ꮡ(new Pair<@string, nint> { k = "z", v = 26 });
+                @string text = ((Func<@string>)pair.ᴛMethod("String", false, true, pairBox.Value)!)();
+                nint old = ((Func<nint, nint>)pair.ᴛMethod("Swap", true, true, pairBox)!)(7);
+
+                // A variadic tail takes golib's ꓸꓸꓸ family; 16 parameters plus the receiver take golib's ladder past the BCL's.
+                nint sum = ((Funcꓸꓸꓸ<Plain, nint, nint>)plain.ᴛMethod("Sum", false, false, null)!)(new Plain { n = 1 }, 5, 6);
+                nint sumBound = ((Funcꓸꓸꓸ<nint, nint>)plain.ᴛMethod("Sum", true, true, box)!)();
+                nint wide = ((global::go.Func<Plain, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint>)
+                    plain.ᴛMethod("Wide", false, false, null)!)(new Plain { n = 2 }, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16);
+                nint wideBound = ((Func<nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, nint>)
+                    plain.ᴛMethod("Wide", false, true, new Plain { n = 3 })!)(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16);
+
+                // Promoted through the value embed: Twice in T's and *T's sets, Bump (a pointer method) in *T's alone.
+                IGoMethodSet outer = default(Outer);
+                ж<Outer> outerBox = Ꮡ(new Outer { Inner = new Inner { i = 4 } });
+                nint twice = ((Func<Outer, nint>)outer.ᴛMethod("Twice", false, false, null)!)(new Outer { Inner = new Inner { i = 5 } });
+                ((Action)outer.ᴛMethod("Bump", true, true, outerBox)!)();
+                nint twiceP = ((Func<ж<Outer>, nint>)outer.ᴛMethod("Twice", true, false, null)!)(outerBox);
+
+                return $"{unboundT} {unboundP} {boundP()} {box.Value.n} {text} {old} {pairBox.Value.v} " +
+                       $"{plain.ᴛMethod("Set", false, false, null) is null} {plain.ᴛMethod("get", false, false, null) is null} " +
+                       $"{pair.ᴛMethod("Swap", false, true, pairBox.Value) is null} " +
+                       $"{sum} {sumBound} {wide} {wideBound} {twice} {twiceP} {outerBox.Value.Inner.i} {outer.ᴛMethod("Bump", false, false, null) is null}";
+            }
+        }
+        """;
+
+    private const string TemplateUsings =
+        """
+        global using static go.builtin;
+        global using System;
+        global using System.Numerics;
+        global using any = System.Object;
+        """;
+
+    private static IEnumerable<MetadataReference> References()
+    {
+        string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
+
+        return trusted.Split(System.IO.Path.PathSeparator)
+            .Select(path => MetadataReference.CreateFromFile(path))
+            .Append(MetadataReference.CreateFromFile(typeof(golib::go.GoTypeAttribute).Assembly.Location));
+    }
+
+    private static (Dictionary<string, string> sources, Diagnostic[] errors, Compilation output) Run()
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation compilation = CSharpCompilation.Create("mtest",
+            [CSharpSyntaxTree.ParseText(Package, options, path: Path), CSharpSyntaxTree.ParseText(TemplateUsings, options, path: @"C:\go2cs\src\core\mtest\obj\mtest.GlobalUsings.g.cs")],
+            References(),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        // RecvGenerator runs too, so the ж twins the pointer arms call exist to resolve against.
+        CSharpGeneratorDriver.Create(new TypeGenerator(), new RecvGenerator())
+            .WithUpdatedParseOptions(options)
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        Dictionary<string, string> sources = output.SyntaxTrees.Except(compilation.SyntaxTrees)
+            .Where(tree => tree.FilePath.EndsWith(".MethodSet.g.cs", StringComparison.Ordinal))
+            .ToDictionary(tree => System.IO.Path.GetFileName(tree.FilePath), tree => tree.ToString());
+
+        // As in GoMethodSourceTests: the type's main generated part is left out (this harness's Roslyn cannot resolve its
+        // ToString's string.Join over the net10 reference assemblies); the real builds compile it. Its promoted-method
+        // forwarders, which the promoted arms call, are taken from it alone.
+        Compilation executed = compilation.AddSyntaxTrees(output.SyntaxTrees.Except(compilation.SyntaxTrees)
+            .Where(tree => tree.FilePath.EndsWith(".MethodSet.g.cs", StringComparison.Ordinal) ||
+                           tree.FilePath.EndsWith(".MethodSource.g.cs", StringComparison.Ordinal) ||
+                           tree.FilePath.Contains("go2cs.RecvGenerator"))
+            .Append(Forwarders(output.SyntaxTrees.Except(compilation.SyntaxTrees), options)));
+
+        Diagnostic[] errors = [.. executed.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)];
+
+        return (sources, errors, executed);
+    }
+
+    // The package class's static extension methods from the TypeGenerator's main parts: the promoted forwarders.
+    private static SyntaxTree Forwarders(IEnumerable<SyntaxTree> generated, CSharpParseOptions options)
+    {
+        IEnumerable<MethodDeclarationSyntax> forwarders = generated
+            .Where(tree => tree.FilePath.Contains("go2cs.TypeGenerator") && !tree.FilePath.EndsWith(".MethodSet.g.cs", StringComparison.Ordinal) &&
+                           !tree.FilePath.EndsWith(".MethodSource.g.cs", StringComparison.Ordinal))
+            .SelectMany(tree => tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())
+            .Where(method => method.Parent is ClassDeclarationSyntax && method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                             method.ParameterList.Parameters.FirstOrDefault()?.Modifiers.Any(SyntaxKind.ThisKeyword) == true);
+
+        return CSharpSyntaxTree.ParseText($"namespace go;\npublic static partial class mtest_package\n{{\n{string.Join("\n", forwarders.Select(method => method.ToFullString()))}\n}}\n",
+            options, path: @"C:\go2cs\src\core\mtest\obj\forwarders.g.cs");
+    }
+
+    [TestMethod]
+    public void EachExportedMethodIsACompiledDelegateUnboundAndBound()
+    {
+        (Dictionary<string, string> sources, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package, its method sets and the ж twins compile: " + string.Join("; ", errors.Take(3)));
+        Assert.AreEqual(5, sources.Count, "Plain, Pair, file, Inner and Outer each carry a method set");
+        StringAssert.Contains(sources.Single(source => source.Key.Contains("Outer")).Value, "case (\"Bump\", true):", "Outer's set holds its promoted pointer method");
+        StringAssert.Contains(sources.Single(source => source.Key.Contains("Plain")).Value, "partial struct Plain : global::go.IGoMethodSet");
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        System.Reflection.MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.mtest_package", throwOnError: true)!.GetMethod("Probe")!;
+
+        // unbound over T and *T; the *T method value reads 5 at its call, after both Sets; Set through the unbound func then the bound one;
+        // the generic pair; no arm for a pointer method through T, an unexported method, or Swap through T; the variadic
+        // tail unbound (1+2) and bound to the box (5+0); 16 parameters unbound (200+1+16) and bound (300+1+16); Outer's
+        // promoted Twice through T (10), Bump through *T then Twice through *T (5*2), Inner.i now 5, and no Bump through T.
+        Assert.AreEqual("1 3 5 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
+    }
+
+    // A variadic arm registers both of its signatures (receiver first, and the method value's) with golib before handing
+    // a delegate out, so reflect's Call closes its trampoline through compiled code (golib's GoReflect.VariadicRegistry.cs;
+    // the promoted probe's v.MethodByName("Join").Call threw NotSupportedException under Native AOT, 2026-10-21). The
+    // compile and the Probe run in the pin above prove the registrations bind and execute.
+    [TestMethod]
+    public void AVariadicArmRegistersItsSignatures()
+    {
+        (Dictionary<string, string> sources, Diagnostic[] errors, _) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+        string plain = sources.Single(source => source.Key.Contains("Plain")).Value;
+
+        foreach (string line in (string[])
+                 [
+                     "global::go.GoReflect.RegisterVariadicFunc<global::go.mtest_package.Plain, nint, nint>();",
+                     "global::go.GoReflect.RegisterVariadicFunc<global::go.ж<global::go.mtest_package.Plain>, nint, nint>();",
+                     "global::go.GoReflect.RegisterVariadicFunc<nint, nint>();"
+                 ])
+        {
+            StringAssert.Contains(plain, line);
+        }
+
+        Assert.AreEqual(4, Regex.Matches(plain, @"RegisterVariadic").Count, "Sum's two arms register two signatures each; no other method is variadic");
+    }
+
+    // golib takes a bound arm only when its delegate is of the type golib's binder builds (GoReflect.GoMethodValueType), so
+    // each family the generator spells for a method value is held to that type here: the BCL's Func through 16 parameters,
+    // golib's ladder from 17, the variadic family, and a promoted method. Each is asked through T and *T where Go's method
+    // set has it, and GoMethodValue must answer with the arm itself, not the binder.
+    [TestMethod]
+    public void EachFamilysBoundArmIsOfTheTypeTheBinderBuilds()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        Assembly assembly = Assembly.Load(image.ToArray());
+        Type plain = assembly.GetType("go.mtest_package+Plain", throwOnError: true)!;
+        Type outer = assembly.GetType("go.mtest_package+Outer", throwOnError: true)!;
+        Type package = assembly.GetType("go.mtest_package", throwOnError: true)!;
+        object plainBox = package.GetMethod("PlainBox")!.Invoke(null, null)!;
+        object outerBox = package.GetMethod("OuterBox")!.Invoke(null, null)!;
+
+        (string family, Type type, string method, object receiver)[] cases =
+        [
+            ("BCL Func, value receiver", plain, "Wide", Activator.CreateInstance(plain)!),
+            ("BCL Func, through *T", Box(plain), "Get", plainBox),
+            ("golib ladder, 17 parameters", plain, "Wider", Activator.CreateInstance(plain)!),
+            ("golib ladder, through *T", Box(plain), "Wider", plainBox),
+            ("variadic family", plain, "Sum", Activator.CreateInstance(plain)!),
+            ("variadic family, through *T", Box(plain), "Sum", plainBox),
+            ("promoted value method", outer, "Twice", Activator.CreateInstance(outer)!),
+            ("promoted pointer method, through *T", Box(outer), "Bump", outerBox)
+        ];
+
+        List<string> mismatches = [];
+
+        foreach ((string family, Type type, string method, object receiver) in cases)
+        {
+            bool pointer = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(golib::go.ж<>);
+            golib::go.IGoMethodSet set = (golib::go.IGoMethodSet)Activator.CreateInstance(pointer ? type.GetGenericArguments()[0] : type)!;
+            Delegate? arm = set.ᴛMethod(method, pointer, true, receiver);
+            int index = golib::go.GoReflect.GoMethodIndex(type, method);
+
+            if (arm is null || index < 0)
+            {
+                mismatches.Add($"{family}: no arm or no method ({method})");
+                continue;
+            }
+
+            Type binder = golib::go.GoReflect.GoMethodValueType(type, index);
+
+            if (arm.GetType() != binder)
+                mismatches.Add($"{family}: the arm is {arm.GetType()}, the binder builds {binder}");
+            else if (golib::go.GoReflect.GoMethodValue(type, index, receiver).Method != arm.Method)
+                mismatches.Add($"{family}: GoMethodValue did not answer with the arm");
+        }
+
+        Assert.AreEqual(0, mismatches.Count, string.Join("; ", mismatches));
+    }
+
+    private static Type Box(Type element) => typeof(golib::go.ж<>).MakeGenericType(element);
+
+    // Go's reflect holds the pointer in a method value through *T and reads the pointee when it is called (checked
+    // against Go 1.26.10): a nil *T binds, then panics at the call with panicwrap's text for the type's own method and
+    // the nil-pointer fault for a promoted one, bound or unbound; a write after the bind is seen at the call.
+    [TestMethod]
+    public void ANilPointerPanicsAtTheCallWithGosText()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        System.Reflection.MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.mtest_package", throwOnError: true)!.GetMethod("NilProbe")!;
+
+        const string panicwrap = "call: value method mtest.Plain.Get called using nil *Plain pointer";
+        const string fault = "call: runtime error: invalid memory address or nil pointer dereference";
+
+        Assert.AreEqual($"{panicwrap} | {panicwrap} | {panicwrap} | {fault} | {fault} | 10", probe.Invoke(null, null));
+    }
+
+    // An unbound arm that only passes its arguments through IS the method, as golib's binder hands it out
+    // (Delegate.CreateDelegate over the method): reflect tokens a func value by its target method, and Go's
+    // Type.Method(i).Func is the same code pointer as the method expression (reflect's TestNestedMethods and
+    // TestEmbeddedMethods). A value method through T, a pointer method, and a promoted method of either kind, generic
+    // and variadic and past 16 parameters included; a copy-bound method and a value method through *T wrap a call, as
+    // Go's own wrapper does, and are not asked.
+    [TestMethod]
+    public void EachPassThroughUnboundArmIsTheMethodItself()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        Assembly assembly = Assembly.Load(image.ToArray());
+        Type package = assembly.GetType("go.mtest_package", throwOnError: true)!;
+
+        (string type, string method, bool pointer)[] cases =
+        [
+            ("Plain", "Get", false), ("Plain", "Sum", false), ("Plain", "Wide", false), ("file", "Size", true),
+            ("Outer", "Twice", false), ("Outer", "Bump", true)
+        ];
+
+        List<string> mismatches = [];
+
+        foreach ((string type, string method, bool pointer) in cases)
+        {
+            golib::go.IGoMethodSet set = (golib::go.IGoMethodSet)Activator.CreateInstance(package.GetNestedType(type)!)!;
+
+            if (set.ᴛMethod(method, pointer, false, null) is not { } arm)
+                mismatches.Add($"{type}.{method}: no arm");
+            else if (arm.Method.Name != method || arm.Method.DeclaringType != package)
+                mismatches.Add($"{type}.{method}: the arm calls through {arm.Method.DeclaringType?.Name}.{arm.Method.Name}");
+        }
+
+        golib::go.IGoMethodSet pair = (golib::go.IGoMethodSet)Activator.CreateInstance(package.GetNestedType("Pair`2")!.MakeGenericType(typeof(golib::go.@string), typeof(nint)))!;
+
+        if (pair.ᴛMethod("String", false, false, null) is not { Method: { Name: "String", IsGenericMethod: true } })
+            mismatches.Add("Pair.String: the arm is not the closed generic method");
+
+        Assert.AreEqual(0, mismatches.Count, string.Join("; ", mismatches));
+    }
+}

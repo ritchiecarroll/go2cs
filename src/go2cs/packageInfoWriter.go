@@ -27,6 +27,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -225,7 +226,19 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// has a committed package_info.cs (F3 in docs/PLAN-linux-operation.md). The WRITE path is
 		// unchanged — each line is still emitted with "\r\n" — so output stays byte-identical.
 		packageInfoLines = splitLines(string(packageInfoBytes))
-	} else {
+
+		// A directory can change hands between releases: go1.26 split internal/runtime/syscall, and the
+		// 1.24 package's per-GOOS folder linux/ became the package internal/runtime/syscall/linux. The
+		// file found there is then ANOTHER package's, and adopting it copied that package's
+		// `using static <its class>;` into the new one (CS0234). Only a file whose [GoPackage] stamp names
+		// this package is adopted; anything else is replaced by the template, as if absent.
+		if owner, adopted := packageInfoBelongsHere(packageInfoLines); !adopted {
+			showWarning("\"%s\" is package %s's package_info.cs, not %s's; writing a fresh one from the template", packageInfoFileName, owner, packageName)
+			packageInfoLines = nil
+		}
+	}
+
+	if packageInfoLines == nil {
 		// Generate new package info file from template. The template is pinned CRLF at CHECKOUT
 		// (.gitattributes) and embedded at COMPILE time, so its endings are a property of the tree
 		// the converter was built from — an attribute added after a clone was materialized does not
@@ -381,6 +394,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// digits are the one encoding proof against every text transform between here and parsing.
 		for signature, typeName := range packageDynamicTypeNames {
 			lines.Add(fmt.Sprintf("[assembly: GoDynamicTypeLift(\"%s\", \"%s\")]", hex.EncodeToString([]byte(signature)), typeName))
+		}
+
+		// Publish every inline constraint lift that captures its own parameter, by DECLARATION (see
+		// GoInlineConstraintLiftAttribute), so another package instantiating the declaration names it too.
+		for _, record := range publishedInlineConstraintLiftRecords() {
+			lines.Add(record)
 		}
 
 		// Sort lines
@@ -606,8 +625,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
 		// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
-		// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
-		for _, proxy := range constraintProxies {
+		// so the element doubles as the dummy — except where the interface constrains itself (see
+		// constraintProxyFor). See constraintProxyArg / EmitConstraintProxy.
+		for key, proxy := range constraintProxies {
 			elementRef := qualifyLocalTypeRef(proxy[0])
 			interfaceRef := qualifyLocalTypeRef(proxy[1])
 
@@ -621,12 +641,21 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			// name becomes ambiguous — CS0104 ×8 in crypto/ecdsa's test half, the same
 			// duplicate-type shadow the reference model exists to eliminate. The production proxy
 			// is the single identity; defer to it. A test-DECLARED constraint interface still
-			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before.
-			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") {
+			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before. A BIND record
+			// (foreignConstraintProxy) declares no class, only this assembly's binding, so it is always written.
+			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") && !strings.HasPrefix(key, constraintProxyBindKey) {
 				continue
 			}
 
-			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
+			// The placeholder is the element, or — for an interface that constrains itself — the proxy,
+			// which is generated into the class carrying this record and so is named bare.
+			placeholderRef := elementRef
+
+			if proxy[2] != proxy[0] {
+				placeholderRef = proxy[2]
+			}
+
+			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, placeholderRef))
 		}
 
 		// Sort lines
@@ -890,6 +919,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// not re-emit -- which is the only route production records have into a recompile-model test
 	// assembly, whose compile set excludes package_info.cs in favor of the seeded test-info file.
 	packageInfoLines = applyGoSourcePositionMaps(packageInfoLines, packageInfoFileName, mergeExisting)
+	packageInfoLines = applyHoistedLiteralsStamp(packageInfoLines, packageInfoFileName)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 
 	// Remove trailing empty lines
@@ -911,6 +941,72 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	if _, err := writeSourceIfChanged(packageInfoFileName, []byte(contents.String())); err != nil {
 		log.Fatalf("Failed to write package info file \"%s\": %s\n", packageInfoFileName, err)
 	}
+}
+
+// hoistedLiteralsStampProseLines returns the comment above the [GoHoistedLiterals] stamp. Like every
+// emitted-artifact comment it states what the stamp says and why the shape is so, and nothing about how
+// it came to be.
+func hoistedLiteralsStampProseLines() []string {
+	return []string{
+		"// This package's string literals are hoisted to `static readonly` fields (the standard",
+		"// library's form, or -hoist-literals), so no converted file passes a bare literal for",
+		"// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip",
+		"// the assembly.",
+	}
+}
+
+// isHoistedLiteralsStampLine reports whether a line is the [GoHoistedLiterals] stamp, in either
+// qualification globalQualifyRooted gives it.
+func isHoistedLiteralsStampLine(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	return trimmed == "[assembly: go.GoHoistedLiterals]" || trimmed == "[assembly: global::go.GoHoistedLiterals]"
+}
+
+// applyHoistedLiteralsStamp writes the [GoHoistedLiterals] stamp (golib) into the info file of a package
+// whose literals are hoisted (literalsHoistedFor), immediately above the <GoSourcePositionMaps> prose, and
+// removes it from any other. It is regenerated on every write, so a persisted file never keeps a stale stamp.
+//
+// Only package_info.cs (the production assembly) and package_test_info.cs (the test assembly) carry it. A
+// test assembly also compiles package_info_internal_test.cs, and the attribute is single-use, so a stamp
+// there as well would be CS0579.
+func applyHoistedLiteralsStamp(packageInfoLines []string, packageInfoFileName string) []string {
+	prose := hoistedLiteralsStampProseLines()
+	kept := make([]string, 0, len(packageInfoLines))
+
+	for i := 0; i < len(packageInfoLines); i++ {
+		if !isHoistedLiteralsStampLine(packageInfoLines[i]) {
+			kept = append(kept, packageInfoLines[i])
+			continue
+		}
+
+		// The stamp's own prose, written just above it, and the blank line after it go with it.
+		if len(kept) >= len(prose) && slices.Equal(kept[len(kept)-len(prose):], prose) {
+			kept = kept[:len(kept)-len(prose)]
+		}
+
+		if i+1 < len(packageInfoLines) && strings.TrimSpace(packageInfoLines[i+1]) == "" {
+			i++
+		}
+	}
+
+	if base := filepath.Base(packageInfoFileName); !packageHoistsLiterals || base != PackageInfoFileName && base != testPackageInfoFileName {
+		return kept
+	}
+
+	anchor := slices.Index(kept, goSourcePositionMapsProseLines()[0])
+
+	if anchor < 0 {
+		anchor = slices.IndexFunc(kept, func(line string) bool { return strings.Contains(line, "<GoSourcePositionMaps>") })
+	}
+
+	if anchor < 0 {
+		showWarning("Package info file \"%s\" has no <GoSourcePositionMaps> section; its [GoHoistedLiterals] stamp was not emitted", packageInfoFileName)
+		return kept
+	}
+
+	block := append(append([]string(nil), prose...), "[assembly: "+globalQualifyRooted("go.GoHoistedLiterals")+"]", "")
+
+	return slices.Concat(kept[:anchor], block, kept[anchor:])
 }
 
 // applyGoSourcePositionMaps rewrites the <GoSourcePositionMaps> section of a package info file with
@@ -1019,6 +1115,69 @@ func goPackageImportPathStamp(namespace, name, importPath string) string {
 	}
 
 	return importPath
+}
+
+// packageInfoBelongsHere reports whether a persisted package_info.cs is the CURRENT package's, read from its
+// [GoPackage] stamps. One stamp naming this package -- its name, or its external test variant's -- is enough,
+// unless that stamp carries an explicit ImportPath naming another path. The NAME, not the namespace, is the
+// identity: a namespace can move under the same package (convergePackageNamespace exists for exactly that),
+// while a directory that changes hands brings another package's name with it. A file with no stamp at all
+// predates stamps and is adopted, as before. When it is not adopted, owner is the name its first stamp gives.
+func packageInfoBelongsHere(lines []string) (owner string, adopted bool) {
+	// No current package name is no identity to compare against (a metadata writer driven outside a
+	// package conversion, as the -tests whitebox unit tests do): adopt, as before.
+	if packageName == "" {
+		return "", true
+	}
+
+	productionName := strings.TrimSuffix(packageName, "_test")
+	productionPath := goReflectPackagePath(currentPackagePath)
+
+	if productionName != packageName {
+		productionPath = strings.TrimSuffix(productionPath, "_test")
+	}
+
+	stamps := 0
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if !strings.HasPrefix(trimmed, goPackageStampPrefix) {
+			continue
+		}
+
+		rest := trimmed[len(goPackageStampPrefix):]
+		end := strings.Index(rest, `"`)
+
+		if end < 0 {
+			continue
+		}
+
+		name := rest[:end]
+		stamps++
+
+		if stamps == 1 {
+			owner = name
+		}
+
+		if name != productionName && name != productionName+"_test" {
+			continue
+		}
+
+		const importPathKey = `ImportPath = "`
+
+		if i := strings.Index(rest, importPathKey); i >= 0 && productionPath != "" {
+			stamped := rest[i+len(importPathKey):]
+
+			if j := strings.Index(stamped, `"`); j >= 0 && strings.TrimSuffix(stamped[:j], "_test") != productionPath {
+				continue
+			}
+		}
+
+		return name, true
+	}
+
+	return owner, stamps == 0
 }
 
 // goPackageImportPathFor returns Go's import path for a package class that the CURRENT conversion

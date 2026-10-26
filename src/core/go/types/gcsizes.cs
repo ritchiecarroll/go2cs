@@ -26,7 +26,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
 
         // For arrays and structs, alignment is defined in terms
         // of alignment of the elements and fields, respectively.
-        var switchᴛ7 = under(T);
+        var switchᴛ7 = T.Underlying();
         switch (switchᴛ7.type()) {
         case ж<Array> t: {
             // spec: "For a variable x of array type: unsafe.Alignof(x)
@@ -127,7 +127,7 @@ internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fie
 internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var switchᴛ8 = under(T);
+    var switchᴛ8 = T.Underlying();
     switch (switchᴛ8.type()) {
     case ж<Basic> t: {
         assert(isTyped(T));

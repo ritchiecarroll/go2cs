@@ -8,10 +8,10 @@ namespace go.go;
 
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using strings = strings_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
 
@@ -105,7 +105,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
 
     // A generic (non-instantiated) function value cannot be assigned to a variable.
     {
-        var (sig, _) = under(x.typ)._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+        var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s"u8, Ꮡx.OrTypedNil(), context);
             x.mode = invalid;
             return;
@@ -304,7 +304,7 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         // avoid calling ExprString if not needed
         if (T != default!) {
             {
-                var (_, ok) = under(T)._<ж<ΔSignature>>(ᐧ); if (ok) {
+                var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
                     target = newTarget(T, ExprString(lhs));
                 }
             }
@@ -322,20 +322,24 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
 // operandTypes returns the list of types for the given operands.
 internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
     slice<ΔType> res = default!;
+    var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
-        res = append(res, (~x).typ);
+        res = append(resᴷ, res, (~x).typ);
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
 // varTypes returns the list of types for the given variables.
 internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
     slice<ΔType> res = default!;
+    var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
-        res = append(res, (~x).typ);
+        res = append(resᴷ, res, (~x).typ);
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
@@ -352,6 +356,8 @@ internal static readonly @string untypedˢ = "untyped "u8;
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
 internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> list, bool variadic, bool hasDots) {
+    var resᴷ = new stackAppend<@string>();
+
     assert(!(variadic && hasDots));
     slice<@string> res = default!;
     foreach (var (i, t) in list) {
@@ -373,7 +379,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
             } else {
                 // If we don't have a number, omit the "untyped" qualifier
                 // for compactness.
-                s = strings.Replace((~t._<ж<Basic>>()).name, untypedˢ, ""u8, -1);
+                s = strings.ReplaceAll((~t._<ж<Basic>>()).name, untypedˢ, ""u8);
             }
         }
         else if (!matchᴛ1) { /* default: */
@@ -397,7 +403,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
                 break;
             }}
         }
-        res = append(res, s);
+        res = append(resᴷ, res, s);
     }
     return "("u8 + strings.Join(res, ", "u8) + ")"u8;
 }
@@ -606,6 +612,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
 
 internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var newVarsᴷ = new stackAppend<ж<Var>>();
 
     nint top = len(check.delayed);
     var scope = check.scope;
@@ -656,10 +663,10 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
         }
 
         // declare new variable
-        var obj = NewVar(ident.Pos(), check.pkg, name, default!);
+        var obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default!);
         lhsVars[i] = obj;
         if (name != "_"u8) {
-            newVars = append(newVars, obj);
+            newVars = append(newVarsᴷ, newVars, obj);
         }
         check.recordDef(ident, new VarжObject(obj));
     }
@@ -667,7 +674,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     // create dummy variables where the lhs is invalid
     foreach (var (i, obj) in lhsVars) {
         if (obj == nil) {
-            lhsVars[i] = NewVar(lhs[i].Pos(), check.pkg, "_"u8, default!);
+            lhsVars[i] = newVar(LocalVar, lhs[i].Pos(), check.pkg, "_"u8, default!);
         }
     }
 

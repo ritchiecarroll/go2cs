@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
@@ -48,6 +49,12 @@ using static go.@internal.poll_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,13 +66,14 @@ using static go.@internal.poll_package;
 [assembly: go.GoPositionMap("internal/poll/errno_unix.go", "errno_unix.cs", "ABAqopSkpKSU")]
 [assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooDIuLiWkoKUygAIEsCigKKAyJaSgoKCgpSCgso=")]
 [assembly: go.GoPositionMap("internal/poll/fd_fsync_darwin.go", "fd_fsync_darwin.cs", "AAwg4oCCpIKCyoKU", "21-31:1")]
-[assembly: go.GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACZqAA4CgoKClIKClIIABkyigoKClIKCAAisAaKYwoKUrLKClKrCgpSs0oK8woKUrNKC")]
+[assembly: go.GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACZqAA4CgoKClIKClIIABkyigoKClIKCAAisAaKYwoKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
 [assembly: go.GoPositionMap("internal/poll/fd_opendir_darwin.go", "fd_opendir_darwin.cs", "AA0e1oKClIKCgoKmgoKUrA==")]
-[assembly: go.GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "AA8oxJKSkpKSkpKSAAgQooKCgpSCpoKClIKokoKUpoKClIKmgqaC1oKClIKmgqaCpoKClKaCAAkYgpSkpKSUgqiSqJKokqbCgoKCgqaAgqSCgpSCAAUeAAwC")]
+[assembly: go.GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "AA8oxJKSkpKSkpKSAAgQooKCgpSCpoKClIKokoKUpoKClIKmgqaC1oKClIKmgqaCpoKClKaCAAkYgpSkpKSUgqiSqJKokqbCgoKCgqaAgqSUgpSCAAUeAAwC")]
 [assembly: go.GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AAsgooKUqOKAgqSC2MKAgqSC3MKAgqSC3vKAgqSCggAFFPKCgoLMkoKCgg==", "38-40:1;49-51:1")]
-[assembly: go.GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "ACpu8qaClIKClIKmlKrmlJSCgqrCggAHELgABxCCpqjigIKkuIIADBbigIKkgtyUgIKkgpSCgoKCgoCCyILq6ICCpIKUmIKCgqaClIKCqOKAgqSCgIKkgoKCgpSCgoCCyILq4oCCpIKAgqSCgoKClIKCgILIgurigIKkgoCCpIKCgoKUgoKAgsiC6uKAgqSCgIKkgoKCgqaCgILIgurigIKkgoCCpIKCgoKmgoCCyILq4oCCpIKAgqSCgoKCpoKAgsiC6uKAgqSCgIKkgoKCgpSCgtyUlIKUgoCCtoKUgvwACQiAgqSCgoKCgpSCgpSClIKUgpSC/OKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSUgIKkgoKClJSkgoCCAAgOlOrCgIKkgtzCgIKkggAMEpKCgoKUyqSmqOKAgqSC3LKo4oCCpILY4oCCpIKAgqSCgpSAggAIDOKAgqSCgIKkgoKUgIIACAySgoKC", "640-642:1;651-653:1")]
+[assembly: go.GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "ACpu8qaClIKClIKmlKrmlJSCgqrCggAHELgABxCCpqjigIKkuIIADBbigIKkgtyUgIKkgpSCgoKCgoCCyILq6ICCpIKUloKUgoKo4oCCpIKAgqSCgoKClIKCgILIgurigIKkgoCCpIKCgoKUgoKAgsiC6uKAgqSCgIKkgoKCgpSCgoCCyILq4oCCpIKAgqSCgoKCpoKAgsiC6uKAgqSCgIKkgoKCgqaCgILIgurigIKkgoCCpIKCgoKmgoCCyILq4oCCpIKAgqSCgoKClIKC3JSUgpSCgIK2gpSC/AAJCICCpIKCgoKClIKClIKUgpSClIL84oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpIKAgqSCgoKUgoCCtoKU6uKAgqSCgIKkgoKClIKAgraClOrigIKkgoCCpIKCgpSCgIK2gpTq4oCCpJSAgqSCgoKUlKSCgIIACA6U6sKAgqSC3MKAgqSCAAwSkoKCgpTKpKao4oCCpILcsqjigIKkgtjigIKkgoCCpIKClICCAAgM4oCCpIKAgqSCgpSAggAIDJKCgoI=", "186-188:1;633-635:1;644-646:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABAgpNzawoKCgoKUgtjigIKkgtwACAKAgqSCgoKCgoKAgtrq4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/fd_writev_libc.go", "fd_writev_libc.cs", "AAse")]
+[assembly: go.GoPositionMap("internal/poll/fstatat_unix.go", "fstatat_unix.cs", "AAwcsoCCpII=", "19-21:1")]
 [assembly: go.GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYpg==")]
 [assembly: go.GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
 [assembly: go.GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
@@ -106,6 +114,7 @@ public static partial class poll_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(go.@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸunix() => builtin.initPackage(typeof(go.@internal.syscall.unix_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));

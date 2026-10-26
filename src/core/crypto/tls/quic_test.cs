@@ -6,7 +6,10 @@ namespace go.crypto;
 using bytes = bytes_package;
 using context = context_package;
 using errors = errors_package;
+using fmt = fmt_package;
 using reflect = reflect_package;
+using strings = strings_package;
+using sync = sync_package;
 using testing = testing_package;
 using static go.crypto.tls_package;
 
@@ -20,6 +23,7 @@ internal partial struct testQUICConn {
     internal global::go.crypto.tls_package.QUICSessionTicketOptions ticketOpts;
     internal Action<ж<global::go.crypto.tls_package.SessionState>> onResumeSession;
     internal slice<byte> gotParams;
+    internal error gotError;
     internal bool earlyDataRejected;
     internal bool complete;
 }
@@ -102,6 +106,7 @@ internal static error errTransportParametersRequired = errors.New("transport par
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string handshakeIncompleteˢ = "handshake incomplete"u8;
 internal static readonly @string unexpectedˢ2 = "unexpected QUICStoreSession event received by server"u8;
+internal static readonly @string unexpectedQUICErrorEventˢ = "unexpected QUICErrorEvent with no Err"u8;
 
 internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn> Ꮡcli, ж<testQUICConn> Ꮡsrv, Func<global::go.crypto.tls_package.QUICEvent, ж<testQUICConn>, ж<testQUICConn>, bool> onEvent) {
     ref var srv = ref Ꮡsrv.DerefOrNull();
@@ -121,6 +126,9 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
         var e = (~a).conn.NextEvent();
         if (onEvent != default! && onEvent(e, a, b)) {
             continue;
+        }
+        if ((~a).gotError != default! && e.Kind != QUICNoEvent) {
+            return fmt.Errorf("unexpected event %v after QUICErrorEvent"u8, e.Kind);
         }
         var exprᴛ1 = e.Kind;
         if (exprᴛ1 == QUICNoEvent) {
@@ -178,6 +186,12 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
         }
         else if (exprᴛ1 == QUICRejectedEarlyData) {
             a.Value.earlyDataRejected = true;
+        }
+        else if (exprᴛ1 == QUICErrorEvent) {
+            if (e.Err == default!) {
+                return errors.New(unexpectedQUICErrorEventˢ);
+            }
+            a.Value.gotError = e.Err;
         }
         if (e.Kind != QUICNoEvent) {
             idleCount = 0;
@@ -278,6 +292,20 @@ public static void TestQUICSessionResumption(ж<testing.T> Ꮡt) {
     if (!(~cli2).conn.ConnectionState().DidResume) {
         Ꮡt.Errorf("second connection did not use session resumption"u8);
     }
+
+    clientConfig.Value.TLSConfig.Value.SessionTicketsDisabled = true;
+    var cli3 = newTestQUICClient(Ꮡt, clientConfig);
+    (~cli3).conn.SetTransportParameters(default!);
+    var srv3 = newTestQUICServer(Ꮡt, serverConfig);
+    (~srv3).conn.SetTransportParameters(default!);
+    {
+        var err = runTestQUICConnection(context.Background(), cli3, srv3, default!); if (err != default!) {
+            Ꮡt.Fatalf("error during third connection handshake: %v"u8, err);
+        }
+    }
+    if ((~cli3).conn.ConnectionState().DidResume) {
+        Ꮡt.Errorf("third connection unexpectedly used session resumption"u8);
+    }
 }
 
 public static void TestQUICFragmentaryData(ж<testing.T> Ꮡt) {
@@ -296,7 +324,7 @@ public static void TestQUICFragmentaryData(ж<testing.T> Ꮡt) {
     var onEvent = (global::go.crypto.tls_package.QUICEvent e, ж<testQUICConn> src, ж<testQUICConn> dst) => {
         if (e.Kind == QUICWriteData) {
             // Provide the data one byte at a time.
-            foreach (var (i, _) in e.Data) {
+            foreach (var i in range(e.Data)) {
                 {
                     var err = (~dst).conn.HandleData(e.Level, e.Data.slice(i, i + 1)); if (err != default!) {
                         Ꮡt.Errorf("HandleData: %v"u8, err);
@@ -332,7 +360,7 @@ public static void TestQUICPostHandshakeClientAuthentication(ж<testing.T> Ꮡt)
     var certReq = @new<global::go.crypto.tls_package.certificateRequestMsgTLS13>();
     certReq.Value.ocspStapling = true;
     certReq.Value.scts = true;
-    certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms();
+    certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms(VersionTLS13);
     var (certReqBytes, err) = certReq.marshal();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -346,6 +374,9 @@ public static void TestQUICPostHandshakeClientAuthentication(ж<testing.T> Ꮡt)
         }
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unexpectedKeyUpdateˢ = "unexpected key update message"u8;
 
 public static void TestQUICPostHandshakeKeyUpdate(ж<testing.T> Ꮡt) {
     // RFC 9001, Section 6.
@@ -366,12 +397,13 @@ public static void TestQUICPostHandshakeKeyUpdate(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+    @string expectedErr = unexpectedKeyUpdateˢ;
     {
-        var errΔ2 = (~cli).conn.HandleData(QUICEncryptionLevelApplication, appendꓸꓸꓸ(new byte[]{
-            (byte)typeKeyUpdate,
-            (byte)0, (byte)0, (byte)len(keyUpdateBytes)
-        }.slice(), keyUpdateBytes)); if (!errors.Is(errΔ2, alertUnexpectedMessage)) {
-            Ꮡt.Fatalf("key update request: got error %v, want alertUnexpectedMessage"u8, errΔ2);
+        err = (~cli).conn.HandleData(QUICEncryptionLevelApplication, keyUpdateBytes); if (err == default!){
+            Ꮡt.Fatalf("key update request: expected error from post-handshake key update, got nil"u8);
+        } else 
+        if (!strings.Contains(err.Error(), expectedErr)) {
+            Ꮡt.Fatalf("key update request: got error %v, expected substring %q"u8, err, expectedErr);
         }
     }
 }
@@ -393,8 +425,8 @@ public static void TestQUICPostHandshakeMessageTooLarge(ж<testing.T> Ꮡt) {
     {
         var err = (~cli).conn.HandleData(QUICEncryptionLevelApplication, new byte[]{
             (byte)typeNewSessionTicket,
-            (byte)((size >> (int)(16))),
-            (byte)((size >> (int)(8))),
+            (byte)(size >> 16),
+            (byte)(size >> 8),
             (byte)size
         }.slice()); if (err == default!) {
             Ꮡt.Fatalf("%v-byte post-handshake message: got no error, want one"u8, size);
@@ -422,9 +454,57 @@ public static void TestQUICHandshakeError(ж<testing.T> Ꮡt) {
     if (!errors.Is(err, new tls_test_package.tls_AlertErrorᴠerror(((global::go.crypto.tls_package.AlertError)(uint8)alertBadCertificate)))) {
         Ꮡt.Errorf("connection handshake terminated with error %q, want alertBadCertificate"u8, err);
     }
-    ref var e = ref heap<ж<global::go.crypto.tls_package.CertificateVerificationError>>(out var Ꮡe);
-    if (!errors.As(err, Ꮡe)) {
-        Ꮡt.Errorf("connection handshake terminated with error %q, want CertificateVerificationError"u8, err);
+    {
+        var (_, ok) = errors.AsType<ж<global::go.crypto.tls_package.CertificateVerificationError>>(err); if (!ok) {
+            Ꮡt.Errorf("connection handshake terminated with error %q, want CertificateVerificationError"u8, err);
+        }
+    }
+
+    var ev = (~cli).conn.NextEvent();
+    if (ev.Kind != QUICErrorEvent) {
+        Ꮡt.Errorf("client.NextEvent: no QUICErrorEvent, want one"u8);
+    }
+    if (!AreEqual(ev.Err, err)) {
+        Ꮡt.Errorf("client.NextEvent: want same error returned by Start, got %v"u8, ev.Err);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string errorReturnedByˢ = "error returned by GetEncryptedClientHelloKeys"u8;
+
+// Test that we can report an error produced by the GetEncryptedClientHelloKeys function.
+public static void TestQUICECHKeyError(ж<testing.T> Ꮡt) {
+    var getECHKeysError = errors.New(errorReturnedByˢ);
+    var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
+    config.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+    config.Value.TLSConfig.Value.NextProtos = new @string[]{"h3"u8}.slice();
+    var getECHKeysErrorʗ1 = getECHKeysError;
+    config.Value.TLSConfig.Value.GetEncryptedClientHelloKeys = (slice<global::go.crypto.tls_package.EncryptedClientHelloKey>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> _Δp0) => (default!, getECHKeysErrorʗ1);
+    var cli = newTestQUICClient(Ꮡt, config);
+    (~cli).conn.SetTransportParameters(default!);
+    var srv = newTestQUICServer(Ꮡt, config);
+
+    {
+        var err = runTestQUICConnection(context.Background(), cli, srv, default!); if (!AreEqual(err, errTransportParametersRequired)) {
+            Ꮡt.Fatalf("handshake with no client parameters: %v; want errTransportParametersRequired"u8, err);
+        }
+    }
+    (~srv).conn.SetTransportParameters(default!);
+    {
+        var err = runTestQUICConnection(context.Background(), cli, srv, default!); if (err == default!) {
+            Ꮡt.Fatalf("handshake with GetEncryptedClientHelloKeys errors: nil, want error"u8);
+        }
+    }
+    if ((~srv).gotError == default!) {
+        Ꮡt.Fatalf("after GetEncryptedClientHelloKeys error, server did not see QUICErrorEvent"u8);
+    }
+    {
+        var (_, ok) = errors.AsType<global::go.crypto.tls_package.AlertError>((~srv).gotError); if (!ok) {
+            Ꮡt.Errorf("connection handshake terminated with error %T, want AlertError"u8, (~srv).gotError);
+        }
+    }
+    if (!errors.Is((~srv).gotError, getECHKeysError)) {
+        Ꮡt.Errorf("connection handshake terminated with error %v, want error returned by GetEncryptedClientHelloKeys"u8, (~srv).gotError);
     }
 }
 
@@ -508,6 +588,27 @@ public static void TestQUICStartContextPropagation(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void TestQUICContextCancelation(ж<testing.T> Ꮡt) {
+    var (ctx, cancel) = context.WithCancel(context.Background());
+    var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
+    config.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+    var cli = newTestQUICClient(Ꮡt, config);
+    (~cli).conn.SetTransportParameters(default!);
+    var srv = newTestQUICServer(Ꮡt, config);
+    (~srv).conn.SetTransportParameters(default!);
+    // Verify that canceling the connection context concurrently does not cause any races.
+    // See https://go.dev/issue/77274.
+    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+    var cliʗ1 = cli;
+    var ctxʗ1 = ctx;
+    var srvʗ1 = srv;
+    Ꮡwg.Go(() => {
+        _ = runTestQUICConnection(ctxʗ1, cliʗ1, srvʗ1, default!);
+    });
+    Ꮡwg.Go(cancel);
+    Ꮡwg.Wait();
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string clientParamsˢ = "client params"u8;
 internal static readonly @string serverParamsˢ = "server params"u8;
@@ -545,13 +646,13 @@ public static void TestQUICDelayedTransportParameters(ж<testing.T> Ꮡt) {
     }
 
     {
-        @string got = ((@string)(~cli).gotParams);
+        @string got = (@string)(~cli).gotParams;
         @string want = srvParams; if (got != want) {
             Ꮡt.Errorf("client got transport params: %q, want %q"u8, got, want);
         }
     }
     {
-        @string got = ((@string)(~srv).gotParams);
+        @string got = (@string)(~srv).gotParams;
         @string want = cliParams; if (got != want) {
             Ꮡt.Errorf("server got transport params: %q, want %q"u8, got, want);
         }

@@ -9,12 +9,14 @@ using des = go.crypto.des_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
 using fmt = fmt_package;
 using io = io_package;
-using rand = math.rand_package;
+using rand = go.math.rand_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using go.crypto.@internal;
-using math;
+using go.math;
 
 partial class cipher_test_package {
 
@@ -56,7 +58,21 @@ public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
     });
 }
 
-internal static io.Reader newRandReader(ж<testing.T> Ꮡt) {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string setIVˢ = "SetIV"u8;
+
+public static void TestCBCExtraMethods(ж<testing.T> Ꮡt) {
+    var (block, _) = aes.NewCipher(new slice<byte>(16));
+    var iv = new slice<byte>(block.BlockSize());
+    ref var s = ref heap<cipher.BlockMode>(out var Ꮡs);
+    s = cipher.NewCBCEncrypter(block, iv);
+    cryptotest.NoExtraMethods(Ꮡt, Ꮡs, setIVˢ);
+
+    s = cipher.NewCBCDecrypter(block, iv);
+    cryptotest.NoExtraMethods(Ꮡt, Ꮡs, setIVˢ);
+}
+
+internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
     var seed = time.Now().UnixNano();
     Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));

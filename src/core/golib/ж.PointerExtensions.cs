@@ -8,6 +8,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -105,18 +106,50 @@ public static class PointerExtensions
     /// design -- so this indexes it in place, bounded by the length it was minted with. Every other box
     /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
     /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
-    /// the emitted population).
+    /// the emitted population). A pointer array over FOREIGN memory reads its element's word in place
+    /// (<see cref="NativePointerArrayBox{E}"/>); that second test exists only for a reference-bearing
+    /// <typeparamref name="T"/>, a JIT-time constant, so an unmanaged element's read is unchanged.
     /// </remarks>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+        {
+            // An UNSIGNED index is checked at its full value before any narrowing, as array<T>'s ulong indexer does.
+            if (index >= (ulong)words.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, words.Length);
+
+            return ref words.ElementRef((nint)index);
+        }
+
+        return ref pointer.Value[index];
+    }
 
     /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's
@@ -181,6 +214,29 @@ public static class PointerExtensions
             return new StandardBox<TDst>(fn);
         }
 
+        // A reinterpret OF a reinterpret view re-views the chain's ROOT, the first box in it that is not itself a reinterpret
+        // view, so a chain of conversions is one view over one box: `(*T)((*U)((*V)(p)))` back to p's type is p itself, and
+        // any other target the root's storage can hold is a fresh view over the root. A view over the view aliased the right
+        // storage but compared unequal to a standard box or element reference it came from, and a narrowed view refused a
+        // widening its root holds ("invalid prefix downcast"). When the root cannot alias as TDst, the view-over-view below
+        // still aliases through the intermediate view.
+        //
+        // Every step is non-generic in the ROOT's type: a walk through IReinterpretView, a type test, and the root's own
+        // answers through IReinterpretSource. A generic virtual method here (the former IReinterpretRoot.AliasAs<TDst>)
+        // needs one body per box type times every TDst under Native AOT and stalled ILC's method-body folding
+        // (GenericVirtualMethodGuardTests).
+        if (box is IReinterpretView { ReinterpretRoot: not null })
+        {
+            object root = ReinterpretAliasing.UltimateRoot(box);
+
+            if (root is ж<TDst> same)
+                return same;
+
+            if (root is IReinterpretSource source &&
+                ReinterpretAliasing.HoldsForRoot(source, typeof(TDst), Unsafe.SizeOf<TDst>(), RuntimeHelpers.IsReferenceOrContainsReferences<TDst>()))
+                return new FieldRefBox<TDst>(root, ж<TDst>.RootReinterpretRef);
+        }
+
         if (ReinterpretAliasesStorage<T, TDst>.Value)
         {
             // Alias the SAME managed storage. Routing through ValueSlot (rather than a cached ref)
@@ -204,15 +260,38 @@ public static class PointerExtensions
         if (PrefixProjection<T, TDst>.Project is { } project && project(box) is { } projected)
             return projected;
 
+        // Go's PREFIX-DOWNCAST over a FIRST-FIELD VIEW — unique's canonMap stores every node as `&e.node` or
+        // `&i.node` and casts it back, `(*entry[T])(unsafe.Pointer(n))`. In Go the larger object is behind the
+        // pointer, and here it is too: the view's source is the parent box, at Go offset 0. Hand that box back
+        // (walking out through nested views that each sit at offset 0), so the downcast IS the parent pointer
+        // and a write through either is seen through the other. Nothing is allocated or pinned: the parent
+        // already exists and keeps its own storage and lifetime. A view whose offset-0 chain reaches no box of
+        // the destination type, where the destination embeds the source as its first field, has no such object
+        // behind it; the address route would read past the header, so it panics by name instead. A box that is
+        // NOT a view keeps the routes below exactly as before (internal/abi's synthesized descriptors among them).
+        // The arm is gated on the static PrefixChain pair, so the JIT folds it out of every other reinterpret.
+        if (PrefixChain<T, TDst>.Value && box is IFirstFieldView view)
+        {
+            if (FirstFieldParentOf<TDst>(view) is { } parent)
+                return parent;
+
+            throw RuntimeErrorPanic.InvalidPrefixDowncast(GoReflect.GoTypeName(typeof(TDst)), GoReflect.GoTypeName(typeof(T)));
+        }
+
         // A Go slice HEADER read over a golib slice<X> — `(*slice)(unsafe.Pointer(&b))`, emitted as
         // Reinterpret<slice<X>, Δsliceᴛ>(). Not an aliasing pair (five fields and a T[] against a pointer
         // and two integers) and not pinnable, so the address route below minted a NativeBox over the
         // PINNED managed struct whose first field read back the backing array's reference AS a pointer
         // (measured 2026-09-04: a type-confused System.Byte[], a native SIGSEGV on the first dereference).
         // The header box materializes Go's (array, len, cap) from the live slice instead; see its remarks
-        // for the write limit and the string half it deliberately leaves to Q44.
+        // for the write direction and its limits.
         if (SliceHeaderBox<T, TDst>.Applies)
             return SliceHeaderBox<T, TDst>.Mint(box);
+
+        // Its string half, `(*unsafeheader.String)(unsafe.Pointer(&s))`: Go's (Data, Len) over a @string window, which the
+        // address route below refused by name. Gated on the static source type, so the JIT folds it out of every other pair.
+        if (typeof(T) == typeof(@string) && StringHeaderBox<TDst>.Applies)
+            return StringHeaderBox<TDst>.Mint((ж<@string>)(object)box);
 
         // The MIRROR: a Go slice built FROM a header — `*(*[]T)(unsafe.Pointer(&sl))` over a
         // notInHeapSlice the runtime has just filled with a NATIVE base and (len, cap), emitted as
@@ -278,6 +357,28 @@ public static class PointerExtensions
     /// together are the boundary idiom this exists for, and they exclude the prefix-downcast
     /// idiom — see the call site.
     /// </remarks>
+    /// <summary>
+    /// Go's <c>(*TDst)(p)</c> for two struct types the converter knows cannot ALIAS in C#: identical ignoring tags,
+    /// but differing in the tags of a nested unnamed type held through a reference, which C# lifts to two classes.
+    /// </summary>
+    /// <remarks>
+    /// The conversion is valid Go and most of what follows it is exact here: a nil source gives the derived type's
+    /// nil, the result compares and hashes as a reinterpret view of <paramref name="box"/>, and converting it back
+    /// gives <paramref name="box"/> itself. Only a read or a write through it needs Go's aliased memory, and that
+    /// refuses by name (a plain "go2cs: pointer conversion" panic, never a runtime.Error) rather than copying, which is
+    /// what the converter emitted before. The converter prints a warning naming the site and the two classes.
+    /// </remarks>
+    public static ж<TDst> ReinterpretUnaliased<T, TDst>(this ж<T>? box)
+    {
+        if (box is null || box.IsNilPointer)
+            return ж<TDst>.NilBox;
+
+        if (box is IReinterpretView { ReinterpretRoot: not null } && ReinterpretAliasing.UltimateRoot(box) is ж<TDst> same)
+            return same;
+
+        return new FieldRefBox<TDst>(box, ж<T>.UnaliasedRef<TDst>);
+    }
+
     internal static class FuncCookieReinterpret<T, TDst>
     {
         /// <summary>
@@ -325,6 +426,51 @@ public static class PointerExtensions
             !RuntimeHelpers.IsReferenceOrContainsReferences<TDst>();
     }
 
+    // The parent a first-field view's offset-0 chain reaches, when one of them is a box of the destination
+    // type: `&e.node` answers `e`; `&p.second.node` answers the `p.second` view, never `p`.
+    private static ж<TDst>? FirstFieldParentOf<TDst>(IFirstFieldView view)
+    {
+        for (object? parent = view.FirstFieldParent; parent is not null; parent = (parent as IFirstFieldView)?.FirstFieldParent)
+        {
+            if (parent is ж<TDst> found)
+                return found;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Whether <typeparamref name="TDst"/> is a Go struct whose offset-0 FIRST-field chain reaches
+    /// <typeparamref name="T"/>: the prefix-embed shape, <c>type entry struct { node; ... }</c>, and its nesting
+    /// (<c>type pair struct { first entry; ... }</c> reaches <c>node</c> too). Only such a pair can be Go's prefix
+    /// downcast, so only it pays the view check; a static readonly bool lets the tier-1 JIT drop the arm for every
+    /// other pair.
+    /// </summary>
+    internal static class PrefixChain<T, TDst>
+    {
+        internal static readonly bool Value = Reaches(typeof(T), typeof(TDst));
+
+        private static bool Reaches(Type source, Type destination)
+        {
+            // A struct's first Go field is inline at offset 0; a pointer embed (a ж<X> box) is not, so the chain stops there.
+            // A primitive reads back as its own single field (Int32's m_value), so a field of the type it sits in ends it too.
+            Type current = destination;
+
+            for (int depth = 0; depth < 16 && current != source && current.IsValueType; depth++)
+            {
+                if (GoReflect.GoFields(current) is not [var first, ..] || first.Type == current)
+                    return false;
+
+                if (first.Type == source)
+                    return true;
+
+                current = first.Type;
+            }
+
+            return false;
+        }
+    }
+
     /// <summary>
     /// Whether reinterpreting a <c>ж&lt;<typeparamref name="T"/>&gt;</c> as a
     /// <c>ж&lt;<typeparamref name="TDst"/>&gt;</c> may ALIAS the source's managed storage, rather
@@ -368,67 +514,9 @@ public static class PointerExtensions
     /// </remarks>
     internal static class ReinterpretAliasesStorage<T, TDst>
     {
-        internal static readonly bool Value =
-            typeof(T).IsValueType && typeof(TDst).IsValueType &&
-            Unsafe.SizeOf<TDst>() <= Unsafe.SizeOf<T>() &&
-            ((!RuntimeHelpers.IsReferenceOrContainsReferences<T>() &&
-              !RuntimeHelpers.IsReferenceOrContainsReferences<TDst>()) ||
-             LayoutCompatible(typeof(T), typeof(TDst)));
-
-        // Layout compatibility, limited to the correspondences the converter actually generates —
-        // it is never a general claim about two arbitrary C# structs.
-        private static bool LayoutCompatible(Type src, Type dst)
-        {
-            if (src == dst)
-                return true;
-
-            // Go's struct-embedding idiom and the generated named-type wrappers: one side is a
-            // (possibly nested) single-field wrapper over the other, so the wrapped field starts at
-            // offset 0 and carries the whole layout.
-            if (UnwrapSingleField(src) == dst || UnwrapSingleField(dst) == src)
-                return true;
-
-            // Otherwise require the same fields in the same order, all the way down — two spellings
-            // of one shape (the `(*view)(unsafe.Pointer(h))` struct-pun).
-            Type[] srcFields = FieldTypes(src), dstFields = FieldTypes(dst);
-
-            if (srcFields.Length != dstFields.Length)
-                return false;
-
-            for (int i = 0; i < srcFields.Length; i++)
-            {
-                if (srcFields[i] != dstFields[i] && !LayoutCompatible(srcFields[i], dstFields[i]))
-                    return false;
-            }
-
-            return srcFields.Length > 0;
-        }
-
-        private static Type UnwrapSingleField(Type type)
-        {
-            // Bounded: each hop strictly descends into a field's type, and a struct cannot contain
-            // itself, so the chain terminates.
-            for (Type[] fields = FieldTypes(type); fields.Length == 1; fields = FieldTypes(type))
-                type = fields[0];
-
-            return type;
-        }
-
-        [UnconditionalSuppressMessage("Trimming", "IL2070",
-            Justification = "Reinterpreted Go struct surrogates are referenced by the converted code that reinterprets them.")]
-        private static Type[] FieldTypes(Type type)
-        {
-            if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
-                return [];
-
-            FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            Type[] fieldTypes = new Type[fields.Length];
-
-            for (int i = 0; i < fields.Length; i++)
-                fieldTypes[i] = fields[i].FieldType;
-
-            return fieldTypes;
-        }
+        internal static readonly bool Value = ReinterpretAliasing.Holds(
+            typeof(T), Unsafe.SizeOf<T>(), RuntimeHelpers.IsReferenceOrContainsReferences<T>(),
+            typeof(TDst), Unsafe.SizeOf<TDst>(), RuntimeHelpers.IsReferenceOrContainsReferences<TDst>());
     }
 
     /// <summary>
@@ -620,4 +708,130 @@ public static class PointerExtensions
 public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
+}
+
+/// <summary>
+/// A reinterpret view: the box it re-reads as another type, or null for any other view. Non-generic, so Reinterpret walks a chain
+/// to its root without knowing any type in it.
+/// </summary>
+internal interface IReinterpretView
+{
+    object? ReinterpretRoot { get; }
+}
+
+/// <summary>
+/// A box's answers about its own pointee, asked by Reinterpret of a chain's ROOT, whose type it does not know. Every member is
+/// NON-generic: a generic method here would be a generic virtual method on every ж&lt;T&gt; (GenericVirtualMethodGuardTests).
+/// </summary>
+internal interface IReinterpretSource
+{
+    Type PointeeType { get; }
+
+    int PointeeSize { get; }
+
+    bool PointeeContainsReferences { get; }
+
+    /// <summary>The pointee's storage as bytes, recomputed from the live box on each access (GC-safe, as ValueSlot is).</summary>
+    ref byte RawSlot { get; }
+}
+
+public abstract partial class ж<T> : IReinterpretSource
+{
+    Type IReinterpretSource.PointeeType => typeof(T);
+
+    int IReinterpretSource.PointeeSize => Unsafe.SizeOf<T>();
+
+    bool IReinterpretSource.PointeeContainsReferences => RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
+    ref byte IReinterpretSource.RawSlot => ref Unsafe.As<T, byte>(ref ValueSlot);
+
+    // The accessor of a reinterpret view over a chain's ROOT (PointerExtensions.Reinterpret): the root's own storage read as T,
+    // through IReinterpretSource, so it needs no type argument for the root's pointee. Static, so two such views of one root
+    // compare equal, as ReinterpretRef's do.
+    internal static ref T RootReinterpretRef(object source) => ref Unsafe.As<byte, T>(ref ((IReinterpretSource)source).RawSlot);
+}
+
+/// <summary>
+/// The ONE definition of when a reinterpret may alias managed storage, for both callers: ReinterpretAliasesStorage&lt;T, TDst&gt;
+/// (both types known) and Reinterpret of a chain's root (the root's type known only as a Type).
+/// </summary>
+internal static class ReinterpretAliasing
+{
+    private static readonly ConcurrentDictionary<(Type Root, Type Dst), bool> s_rootAliases = new();
+
+    internal static bool Holds(Type src, int srcSize, bool srcRefs, Type dst, int dstSize, bool dstRefs) =>
+        src.IsValueType && dst.IsValueType &&
+        dstSize <= srcSize &&
+        ((!srcRefs && !dstRefs) || LayoutCompatible(src, dst));
+
+    internal static bool HoldsForRoot(IReinterpretSource root, Type dst, int dstSize, bool dstRefs) =>
+        s_rootAliases.GetOrAdd((root.PointeeType, dst),
+            static (key, state) => Holds(key.Root, state.root.PointeeSize, state.root.PointeeContainsReferences, key.Dst, state.dstSize, state.dstRefs),
+            (root, dstSize, dstRefs));
+
+    // The first box of a reinterpret chain that is not itself a reinterpret view. Finite: each view's root was built before it.
+    internal static object UltimateRoot(object box)
+    {
+        object root = box;
+
+        while (root is IReinterpretView { ReinterpretRoot: { } next })
+            root = next;
+
+        return root;
+    }
+
+    // Layout compatibility, limited to the correspondences the converter actually generates —
+    // it is never a general claim about two arbitrary C# structs.
+    private static bool LayoutCompatible(Type src, Type dst)
+    {
+        if (src == dst)
+            return true;
+
+        // Go's struct-embedding idiom and the generated named-type wrappers: one side is a
+        // (possibly nested) single-field wrapper over the other, so the wrapped field starts at
+        // offset 0 and carries the whole layout.
+        if (UnwrapSingleField(src) == dst || UnwrapSingleField(dst) == src)
+            return true;
+
+        // Otherwise require the same fields in the same order, all the way down — two spellings
+        // of one shape (the `(*view)(unsafe.Pointer(h))` struct-pun).
+        Type[] srcFields = FieldTypes(src), dstFields = FieldTypes(dst);
+
+        if (srcFields.Length != dstFields.Length)
+            return false;
+
+        for (int i = 0; i < srcFields.Length; i++)
+        {
+            if (srcFields[i] != dstFields[i] && !LayoutCompatible(srcFields[i], dstFields[i]))
+                return false;
+        }
+
+        return srcFields.Length > 0;
+    }
+
+    private static Type UnwrapSingleField(Type type)
+    {
+        // Bounded: each hop strictly descends into a field's type, and a struct cannot contain
+        // itself, so the chain terminates.
+        for (Type[] fields = FieldTypes(type); fields.Length == 1; fields = FieldTypes(type))
+            type = fields[0];
+
+        return type;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Reinterpreted Go struct surrogates are referenced by the converted code that reinterprets them.")]
+    private static Type[] FieldTypes(Type type)
+    {
+        if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
+            return [];
+
+        FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        Type[] fieldTypes = new Type[fields.Length];
+
+        for (int i = 0; i < fields.Length; i++)
+            fieldTypes[i] = fields[i].FieldType;
+
+        return fieldTypes;
+    }
 }

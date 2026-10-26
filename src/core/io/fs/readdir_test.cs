@@ -9,6 +9,8 @@ using os = os_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -26,7 +28,7 @@ internal static (fs.File, error) Open(this readDirOnly _, @string name) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string subˢ = "sub(.)"u8;
 
-public static void TestReadDir(ж<testing.T> Ꮡt) {
+public static partial void TestReadDir(ж<testing.T> Ꮡt) {
     void check(@string desc, slice<fs.DirEntry> dirsΔ1, error errΔ1) {
         Ꮡt.Helper();
         if (errΔ1 != default! || len(dirsΔ1) != 2 || dirsΔ1[0].Name() != "hello.txt"u8 || dirsΔ1[1].Name() != "sub"u8) {
@@ -43,11 +45,11 @@ public static void TestReadDir(ж<testing.T> Ꮡt) {
     check(readDirOnlyˢ, dirs, err);
 
     // Test that ReadDir uses Open when the method is not present.
-    (dirs, err) = ReadDir(new openOnly(testFsys), "."u8);
+    (dirs, err) = ReadDir(new openOnly(new fstest_MapFSᴠFS(testFsys)), "."u8);
     check(openOnlyˢ, dirs, err);
 
     // Test that ReadDir on Sub of . works (sub_test checks non-trivial subs).
-    (var sub, err) = Sub(testFsys, "."u8);
+    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), "."u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -80,13 +82,14 @@ public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
         new(path: "adir"u8, wantMode: os.ModeDir, wantDir: true)
     }.slice();
 
-    foreach (var (_, test) in tests) {
-        ref var testΔ1 = ref heap<TestFileInfoToDirEntry_tests>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
+    foreach (var (_, vᴛ1) in tests) {
+        ref var test = ref heap(new TestFileInfoToDirEntry_tests(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
         var testFsʗ1 = testFs;
-        Ꮡt.Run(testΔ1.path, (ж<testing.T> tΔ1) => {
-            var (fi, err) = Stat(testFsʗ1, testʗ1.path);
+        Ꮡt.Run(test.path, (ж<testing.T> tΔ1) => {
+            var (fi, err) = Stat(new fstest_MapFSᴠFS(testFsʗ1), testʗ1.path);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
@@ -113,8 +116,8 @@ public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
 }
 
 internal static @string errorPath(error err) {
-    ref var perr = ref heap<ж<fs.PathError>>(out var Ꮡperr);
-    if (!errors.As(err, Ꮡperr)) {
+    var (perr, ok) = errors.AsType<ж<fs.PathError>>(err);
+    if (!ok) {
         return ""u8;
     }
     return (~perr).Path;

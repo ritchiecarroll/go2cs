@@ -112,6 +112,13 @@ param(
 
     [string] $TestConfig   = 'Release',
     [string] $TestTimeout  = '30m',
+    # The converted host's per-test deadline (-test-deadline), resolved per row against the sweep's
+    # $testDeadlineFloors exactly as -TestTimeout is against $longTimeouts. '0' turns it off.
+    [string] $TestDeadline = '15m',
+    # The converter's -test-build-maxcpu N for every row (each row's test-host publish runs with -m:N), by the sweep's
+    # own Get-TestBuildMaxCpuArgs. 0, the default, passes no flag: every row's argv is what it was before.
+    [ValidateRange(0, [int]::MaxValue)]
+    [int] $TestBuildMaxCpu = 0,
     [string] $Platform     = '',
 
     # Run ONE row, print the matched summary line beside the emitted TSV row, write nothing. The
@@ -666,6 +673,16 @@ if ($InstrumentSweep) {
     }, $true)
     if ($durationAst) { . ([scriptblock]::Create($durationAst.Extent.Text)) }
     else { $InstrumentProblems += "'$InstrumentSweep' defines no ConvertTo-GoDuration -- the deadline rule cannot be derived" }
+    # The per-test deadline's two rules come from the sweep the same way, so a row here gets the
+    # -test-deadline the sweep would give it, by the sweep's own reading.
+    foreach ($ruleName in @('Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs', 'Get-TestBuildMaxCpuArgs')) {
+        $ruleAst = $sweepAst.Find({
+            param($node)
+            $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $ruleName
+        }, $true)
+        if ($ruleAst) { . ([scriptblock]::Create($ruleAst.Extent.Text)) }
+        else { $InstrumentProblems += "'$InstrumentSweep' defines no $ruleName -- the per-test deadline cannot be derived" }
+    }
 } else {
     $InstrumentProblems += "no src/run-validated-sweep.ps1 under -Tree '$Tree' -- the deadline rule is derived from it"
 }
@@ -675,7 +692,7 @@ if ($InstrumentRoster) {
 } else {
     $InstrumentProblems += "no src/_roster.ps1 under -Tree '$Tree' -- the execution pins are derived from it"
 }
-foreach ($needed in @('ConvertTo-GoDuration', 'Get-RosterExecutionArgs', 'Get-ValidatedRosterRows')) {
+foreach ($needed in @('ConvertTo-GoDuration', 'Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs', 'Get-TestBuildMaxCpuArgs', 'Get-RosterExecutionArgs', 'Get-ValidatedRosterRows')) {
     if (-not (Get-Command -Name $needed -CommandType Function -ErrorAction SilentlyContinue)) {
         $InstrumentProblems += "the derived function '$needed' is not defined"
     }
@@ -707,6 +724,25 @@ function Get-RowConverterArgs([string] $Deadline, [string[]] $ExecArgs, [string]
                               [string[]] $Extra, [string] $GoDir, [string] $OutDir) {
     return @('-tests', '-test-action', 'all') + @($ExecArgs) +
            @('-test-timeout', $Deadline, '-go2cspath', $Go2csPath) + @($Extra) + @($GoDir, $OutDir)
+}
+
+# THE PER-TEST DEADLINE FLOORS, derived from the sweep's text exactly as the package floors are (below), and
+# never copied. Answers the table and the problems that refuse the leg: no table, an unterminated one, or
+# an ORPHAN -- a per-test floor on a row with no package floor, which bounds a test above its own package's
+# default deadline and so says nothing true. $PackageFloors is the derived $longTimeouts.
+function Get-SweepTestDeadlineFloors([string] $SweepSource, $PackageFloors) {
+    $floors = @{}
+    $problems = @()
+    $anchor = [regex]::Match($SweepSource, '\$testDeadlineFloors\s*=\s*@\{')
+    if (-not $anchor.Success) { return @{ Floors = $floors; Problems = @("no `$testDeadlineFloors table in run-validated-sweep.ps1") } }
+    $close = $SweepSource.IndexOf('}', $anchor.Index + $anchor.Length)
+    if ($close -lt 0) { return @{ Floors = $floors; Problems = @("the `$testDeadlineFloors table is unterminated") } }
+    $text = $SweepSource.Substring($anchor.Index + $anchor.Length, $close - ($anchor.Index + $anchor.Length))
+    foreach ($m in [regex]::Matches($text, "'([^']+)'\s*=\s*'([^']+)'")) { $floors[$m.Groups[1].Value] = $m.Groups[2].Value }
+    foreach ($row in @($floors.Keys | Sort-Object)) {
+        if (-not $PackageFloors.ContainsKey($row)) { $problems += "'$row' has a per-test deadline floor but no `$longTimeouts package floor" }
+    }
+    return @{ Floors = $floors; Problems = $problems }
 }
 
 # THE CORPUS PIN, from the tree's src/version.props (the runbook's source of record); $null if absent.
@@ -773,6 +809,39 @@ function Test-RowInvocationContract {
             $c[0], $(if ($c[1]) { $c[1] } else { '-' }), $got, $c[2], $(if ($pass) { 'ok' } else { 'FAILED' }), $c[3])
     }
 
+    # The PER-TEST deadline, by the sweep's own Resolve-RowTestDeadline: the longer of the ask and the floor,
+    # with '0' (off) longer than any duration.
+    $testDeadlineCases = @(
+        @('15m',   '',     '15m',  'no floor -- the ask (the default)'),
+        @('15m',   '120m', '120m', 'a floor RAISES the default (crypto/dsa)'),
+        @('150m',  '120m', '150m', 'an asked RAISE survives its floor'),
+        @('0',     '90m',  '0',    'an asked 0 turns it off whatever the floor'),
+        @('15m',   '0',    '0',    'a floor of 0 turns it off for its row'),
+        @('bogus', '90m',  '90m',  'an unreadable ask -- the floor (the safe branch)')
+    )
+    foreach ($c in $testDeadlineCases) {
+        $got  = Resolve-RowTestDeadline $c[0] $c[1]
+        $pass = [string]::Equals([string] $got, $c[2], [System.StringComparison]::Ordinal)
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    test-deadline asked {0,-6} floor {1,-5} -> {2,-5} (want {3,-4}) {4,-6} {5}" -f `
+            $c[0], $(if ($c[1]) { $c[1] } else { '-' }), $got, $c[2], $(if ($pass) { 'ok' } else { 'FAILED' }), $c[3])
+    }
+
+    # The table derivation and its orphan refusal, over a fixture sweep text.
+    $fixturePackageFloors = @{ 'fx/long' = '120m'; 'fx/other' = '60m' }
+    $derived = Get-SweepTestDeadlineFloors "`$testDeadlineFloors = @{ 'fx/long' = '120m' }" $fixturePackageFloors
+    $pass = ($derived.Problems.Count -eq 0) -and ($derived.Floors.Count -eq 1) -and ($derived.Floors['fx/long'] -eq '120m')
+    if (-not $pass) { $ok = $false }
+    Write-Host ("    test-deadline floors derived from a fixture: {0}" -f $(if ($pass) { 'ok' } else { 'FAILED' }))
+    $orphan = Get-SweepTestDeadlineFloors "`$testDeadlineFloors = @{ 'fx/long' = '120m'; 'fx/nofloor' = '90m' }" $fixturePackageFloors
+    $pass = ($orphan.Problems.Count -eq 1) -and ($orphan.Problems[0] -like "*'fx/nofloor'*")
+    if (-not $pass) { $ok = $false }
+    Write-Host ("    an orphan per-test floor is refused by name: {0}" -f $(if ($pass) { 'ok' } else { 'FAILED' }))
+    $absent = Get-SweepTestDeadlineFloors "`$longTimeouts = @{ 'fx/long' = '120m' }" $fixturePackageFloors
+    $pass = ($absent.Problems.Count -eq 1)
+    if (-not $pass) { $ok = $false }
+    Write-Host ("    a sweep with no per-test floor table is refused: {0}" -f $(if ($pass) { 'ok' } else { 'FAILED' }))
+
     # The pin half, over a FIXTURE roster read by the tree's own reader: the annotation grammar is
     # _roster.ps1's, and a fixture row that did not parse would make the tiered case read like a
     # wrapper defect. The separator is spelled by code point, as _roster.ps1 spells it.
@@ -803,14 +872,29 @@ function Test-RowInvocationContract {
     }
 
     # The composition: the argv a pinned, floored row hands the converter when a raise is asked.
-    $argv = (@(Get-RowConverterArgs (Resolve-RowDeadline '60m' '30m') @(Get-RowExecutionArgs 'fx/tiered' $byName 'Release') `
+    $argv = (@(Get-RowConverterArgs (Resolve-RowDeadline '60m' '30m') (@(Get-RowExecutionArgs 'fx/tiered' $byName 'Release') + @(Get-RowTestDeadlineArgs (Resolve-RowTestDeadline '15m' '120m'))) `
                                     'T/src' @() 'G/src/fx/tiered' 'T/src/core/fx/tiered')) -join ' '
-    $wantArgv = '-tests -test-action all -test-config Release -test-tiered -test-timeout 60m -go2cspath T/src G/src/fx/tiered T/src/core/fx/tiered'
+    $wantArgv = '-tests -test-action all -test-config Release -test-tiered -test-deadline 120m -test-timeout 60m -go2cspath T/src G/src/fx/tiered T/src/core/fx/tiered'
     $pass = [string]::Equals($argv, $wantArgv, [System.StringComparison]::Ordinal)
     if (-not $pass) { $ok = $false }
     Write-Host ("    argv {0}" -f $(if ($pass) { 'ok' } else { 'FAILED' }))
     Write-Host "      got : $argv"
     if (-not $pass) { Write-Host "      want: $wantArgv" }
+
+    # -TestBuildMaxCpu: the same row's argv with the flag asked (4) carries -test-build-maxcpu 4, and with the
+    # default (0) is byte-identical to the argv above. The composition is the row loop's own.
+    $cpuCases = @(
+        @(4, '-tests -test-action all -test-config Release -test-tiered -test-deadline 120m -test-build-maxcpu 4 -test-timeout 60m -go2cspath T/src G/src/fx/tiered T/src/core/fx/tiered'),
+        @(0, $wantArgv)
+    )
+    foreach ($c in $cpuCases) {
+        $got = (@(Get-RowConverterArgs (Resolve-RowDeadline '60m' '30m') (@(Get-RowExecutionArgs 'fx/tiered' $byName 'Release') + @(Get-RowTestDeadlineArgs (Resolve-RowTestDeadline '15m' '120m')) + @(Get-TestBuildMaxCpuArgs $c[0])) `
+                                       'T/src' @() 'G/src/fx/tiered' 'T/src/core/fx/tiered')) -join ' '
+        $pass = [string]::Equals($got, $c[1], [System.StringComparison]::Ordinal)
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    argv -TestBuildMaxCpu {0} {1}" -f $c[0], $(if ($pass) { 'ok' } else { 'FAILED' }))
+        if (-not $pass) { Write-Host "      got : $got"; Write-Host "      want: $($c[1])" }
+    }
     return $ok
 }
 
@@ -986,6 +1070,10 @@ if ($orphanFloors.Count -gt 0) {
           " -- each would run at the DEFAULT floor and be killed short. Map them here, or re-path the sweep's table, before running the leg.")
 }
 Write-Host "  deadline floors   : $($Floors.Count) derived from the sweep ($inherited inherited by a floored relocation)"
+$testDeadlineDerivation = Get-SweepTestDeadlineFloors $sweepSrc $Floors
+if ($testDeadlineDerivation.Problems.Count -gt 0) { Deny ("the per-test deadline floors cannot be derived: " + ($testDeadlineDerivation.Problems -join '; ')) }
+$TestDeadlineFloors = $testDeadlineDerivation.Floors
+Write-Host "  per-test floors   : $($TestDeadlineFloors.Count) derived from the sweep (asked -TestDeadline $TestDeadline; a floored row runs at the longer)"
 
 # ---------------------------------------------------------------- the deadline rule and the pins
 # The two derived rules (see THE PER-ROW INVOCATION above) refuse the leg by name if either failed to
@@ -1075,7 +1163,9 @@ foreach ($row in $rows) {
     if ($RosterByName.ContainsKey($row) -and $RosterByName[$row].Execution) {
         Write-Host "     execution: $($RosterByName[$row].Execution) (roster pin) -> $($rowExec -join ' ')"
     }
-    $convArgs = @(Get-RowConverterArgs $rowTimeout $rowExec (Join-Path $Tree 'src') $extra $goDir $outDir)
+    $rowTestDeadline = Resolve-RowTestDeadline $TestDeadline $TestDeadlineFloors[$row]
+    if ($TestDeadlineFloors.ContainsKey($row)) { Write-Host "     per-test deadline: $rowTestDeadline  (floor $($TestDeadlineFloors[$row]) derived, asked $TestDeadline -- the longer)" }
+    $convArgs = @(Get-RowConverterArgs $rowTimeout ($rowExec + @(Get-RowTestDeadlineArgs $rowTestDeadline) + @(Get-TestBuildMaxCpuArgs $TestBuildMaxCpu)) (Join-Path $Tree 'src') $extra $goDir $outDir)
 
     # ⚠⚠ THE CONVERTER'S STDERR IS A TERMINATING ERROR UNDER Stop, AND FAILING IS THE MEASUREMENT.
     # `GitTry` above carries this exact diagnosis for git: in 5.1 a native command's stderr becomes a

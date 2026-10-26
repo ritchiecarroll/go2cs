@@ -9,10 +9,10 @@ namespace GolibTests;
 
 /// <summary>
 /// Guards runtime-internal lock contention in the MUTEX PROFILE (census A3; runtime's
-/// TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1). Go's lock2 charges a contended wait to the
-/// M's mLockProfile (recordLock) and unlock2 captures the unlocker's stack -- starting at runtime.unlock,
-/// three frames above recordUnlock -- into the mutex bucket (recordUnlock/store). The managed lock core
-/// fed only the metric half (/sync/mutex/wait/total:seconds). Red while a contended runtime lock adds
+/// TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1). Since Go 1.25 the UNLOCKER of a contended
+/// lock charges the waiters' time and captures its own stack -- starting at runtime.unlock -- into the
+/// mutex bucket (unlock2Wake -> recordUnlock, then store at the outermost unlock). The managed lock core
+/// once fed only the metric half (/sync/mutex/wait/total:seconds). Red while a contended runtime lock adds
 /// nothing to the mutex profile.
 /// </summary>
 [TestClass]
@@ -66,17 +66,15 @@ public class RuntimeLockProfileTests
         return GoTotalMutexWaitTimeNanos() - waitBefore;
     }
 
-    private static void WithRuntimeLockProfiling(int contentionStacks, System.Action body)
+    private static void WithRuntimeLockProfiling(System.Action body)
     {
         nint previousFraction = SetMutexProfileFraction(1);
-        int previousStacks = GoSetRuntimeContentionStacks(contentionStacks);
         try
         {
             body();
         }
         finally
         {
-            GoSetRuntimeContentionStacks(previousStacks);
             SetMutexProfileFraction(previousFraction);
         }
     }
@@ -84,7 +82,7 @@ public class RuntimeLockProfileTests
     [TestMethod]
     public void AContendedRuntimeLockAddsOneMutexSampleAtRuntimeUnlock()
     {
-        WithRuntimeLockProfiling(1, () =>
+        WithRuntimeLockProfiling(() =>
         {
             int64 before = TotalAtFirstNamed("runtime.unlock");
 
@@ -96,25 +94,9 @@ public class RuntimeLockProfileTests
         });
     }
 
-    // GODEBUG runtimecontentionstacks=0, Go's default: the event is still counted, under the placeholder
-    // frame runtime._LostContendedRuntimeLock instead of the unlocker's stack (mprof.go captureStack).
-    [TestMethod]
-    public void WithContentionStacksOffTheSampleSitsAtTheLostPlaceholder()
-    {
-        WithRuntimeLockProfiling(0, () =>
-        {
-            int64 before = TotalAtFirstNamed("runtime._LostContendedRuntimeLock");
-            int64 unlockBefore = TotalAtFirstNamed("runtime.unlock");
-
-            long waited = ContendProbeOnce();
-
-            Assert.IsTrue(waited >= 40_000_000, $"the probe acquire was not contended (the wait metric grew {waited} ns): the arm measured nothing");
-            Assert.AreEqual(before + 1, TotalAtFirstNamed("runtime._LostContendedRuntimeLock"),
-                "with runtimecontentionstacks=0 the contended runtime lock's sample must sit at runtime._LostContendedRuntimeLock");
-            Assert.AreEqual(unlockBefore, TotalAtFirstNamed("runtime.unlock"),
-                "with runtimecontentionstacks=0 no sample may carry the unlocker's stack");
-        });
-    }
+    // (Go 1.25 deleted GODEBUG runtimecontentionstacks; go1.26.9's tree names it nowhere. The arm that set it
+    // to 0 and expected the runtime._LostContendedRuntimeLock placeholder went with it: the stack is always
+    // the unlocker's, and the placeholder now carries only the "lost" cycles storeSlow reports.)
 
     // CONTROL for the reader: sync.Mutex contention (class F (i), already modeled) is visible through the
     // same TotalAtFirstNamed, so a red on the arms above is the runtime-lock half missing, not a reader
@@ -122,7 +104,7 @@ public class RuntimeLockProfileTests
     [TestMethod]
     public void ControlTheReaderSeesASyncMutexHandoff()
     {
-        WithRuntimeLockProfiling(1, () =>
+        WithRuntimeLockProfiling(() =>
         {
             int64 before = TotalAtFirstNamed("sync.(*Mutex).Unlock");
             var box = new StrongBox<sync_package.Mutex>();

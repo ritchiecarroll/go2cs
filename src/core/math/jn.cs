@@ -84,7 +84,7 @@ public static float64 Jn(nint n, float64 x) {
     var sign = false;
     if (x < 0D) {
         x = -x;
-        if ((nint)(n & 1) == 1) {
+        if ((n & 1) == 1) {
             sign = true; // odd n and negative x
         }
     }
@@ -104,10 +104,11 @@ public static float64 Jn(nint n, float64 x) {
             //                 1    -s-c            -c+s
             //                 2    -s+c            -c-s
             //                 3     s+c             c-s
+
             float64 temp = default!;
             {
                 var (s, c) = Sincos(x);
-                switch ((nint)(n & 3)) {
+                switch ((n & 3)) {
                 case 0: {
                     temp = c + s;
                     break;
@@ -136,6 +137,7 @@ public static float64 Jn(nint n, float64 x) {
         if (x < TwoM29){ // x < 2**-29
             // x is tiny, return the first Taylor expansion of J(n,x)
             // J(n,x) = 1/n!*(x/2)**n  - ...
+
             if (n > 33){ // underflow
                 b = 0D;
             } else {
@@ -176,6 +178,7 @@ public static float64 Jn(nint n, float64 x) {
             // When Q(k) > 1e4	good for single
             // When Q(k) > 1e9	good for double
             // When Q(k) > 1e17	good for quadruple
+
             // determine k
             var w = (float64)(n + n) / x;
             var h = 2D / x;
@@ -260,7 +263,7 @@ public static float64 Yn(nint n, float64 x) {
         return Y0(x);
     }
     if (x == 0D) {
-        if (n < 0 && (nint)(n & 1) == 1) {
+        if (n < 0 && (n & 1) == 1) {
             return Inf(1);
         }
         return Inf(-1);
@@ -268,7 +271,7 @@ public static float64 Yn(nint n, float64 x) {
     var sign = false;
     if (n < 0) {
         n = -n;
-        if ((nint)(n & 1) == 1) {
+        if ((n & 1) == 1) {
             sign = true; // sign true if n < 0 && |n| odd
         }
     }
@@ -292,10 +295,11 @@ public static float64 Yn(nint n, float64 x) {
         //		   1	-s-c 		-c+s
         //		   2	-s+c		-c-s
         //		   3	 s+c		 c-s
+
         float64 temp = default!;
         {
             var (s, c) = Sincos(x);
-            switch ((nint)(n & 3)) {
+            switch ((n & 3)) {
             case 0: {
                 temp = s - c;
                 break;

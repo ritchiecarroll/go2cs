@@ -153,25 +153,25 @@ internal static (@string, contentType) stringify(params ꓸꓸꓸany argsʗp) {
             return (s, contentTypePlain);
         }
         case CSS s: {
-            return (((@string)s), contentTypeCSS);
+            return ((@string)s, contentTypeCSS);
         }
         case HTML s: {
-            return (((@string)s), contentTypeHTML);
+            return ((@string)s, contentTypeHTML);
         }
         case HTMLAttr s: {
-            return (((@string)s), contentTypeHTMLAttr);
+            return ((@string)s, contentTypeHTMLAttr);
         }
         case JS s: {
-            return (((@string)s), contentTypeJS);
+            return ((@string)s, contentTypeJS);
         }
         case JSStr s: {
-            return (((@string)s), contentTypeJSStr);
+            return ((@string)s, contentTypeJSStr);
         }
         case URL s: {
-            return (((@string)s), contentTypeURL);
+            return ((@string)s, contentTypeURL);
         }
         case Srcset s: {
-            return (((@string)s), contentTypeSrcset);
+            return ((@string)s, contentTypeSrcset);
         }}
     }
     nint i = 0;

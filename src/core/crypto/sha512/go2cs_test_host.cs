@@ -14,6 +14,7 @@ internal static class Go2CsTestHost
         });
         registry.Add("TestAllocations", sha512_internal_test_package.TestAllocations, "sha512_test.go", 903);
         registry.Add("TestBlockSize", sha512_internal_test_package.TestBlockSize, "sha512_test.go", 840);
+        registry.Add("TestExtraMethods", sha512_internal_test_package.TestExtraMethods, "sha512_test.go", 966);
         registry.Add("TestGolden", sha512_internal_test_package.TestGolden, "sha512_test.go", 680);
         registry.Add("TestGoldenMarshal", sha512_internal_test_package.TestGoldenMarshal, "sha512_test.go", 726);
         registry.Add("TestHash", sha512_internal_test_package.TestHash, "sha512_test.go", 943);

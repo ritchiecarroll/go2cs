@@ -25,7 +25,7 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
 
     var (pfd, network) = getPollFDAndNetwork(w);
     // TODO(panjf2000): same as File.spliceToFile.
-    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP(((@string)network))) {
+    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP((@string)network)) {
         return (written, handled, err);
     }
 
@@ -36,7 +36,7 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
 
     var pfdʗ1 = pfd;
     var rerr = sc.Read((uintptr fd) => {
-        (written, Ꮡerr.ValueSlot, handled) = poll.SendFile(pfdʗ1, (nint)fd, 0);
+        (written, Ꮡerr.ValueSlot, handled) = poll.SendFile(pfdʗ1, fd, 0);
         return true;
     });
 

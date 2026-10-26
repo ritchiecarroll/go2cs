@@ -163,6 +163,7 @@ public ref struct GoFrame
         // defer-cost cut; see GoThreadState).
         GoThreadState state = GoThreadState.Current;
         PanicException? owned = GoFuncRoot.ClaimPanic(state);
+        GoexitException? exiting = null;
 
         if (m_count > 0)
         {
@@ -306,6 +307,12 @@ public ref struct GoFrame
                         // called by its gopanic. A recovery that already completed nulled the entry.
                         PanicException? running = recorded ? state.Sequences![sequence].Panic : null;
 
+                        // Go's _panic.link, which the crash report prints: the first catch with a panic running is
+                        // the innermost panicking sequence, the panic gopanic found on the goroutine. A catch further
+                        // out sees the same panic re-raised and keeps the link it has.
+                        if (running is not null && !ReferenceEquals(running, raised))
+                            raised.Link ??= running;
+
                         // The entry (and its activation) exists from here on.
                         SetSequence(state, sequence, running);
                         recorded = true;
@@ -352,6 +359,22 @@ public ref struct GoFrame
                         // continue, whether or not the frame was already panicking — so the tail
                         // re-raises it even when nothing was claimed on entry.
                         owned = raised;
+
+                        // A panic raised in a normal return's deferred call starts running deferred calls too.
+                        MainExit.PanicDefersStarted(state);
+                    }
+                    catch (GoexitException goexit)
+                    {
+                        // A deferred call ran runtime.Goexit. Go's Goexit still runs this frame's
+                        // remaining deferred calls, a recover() in them reads nil, and the goroutine
+                        // exits after them. The panic this sequence was running is abandoned, but it
+                        // stays on the sequence, so a panic a later call raises still links to it.
+                        if (handling is null)
+                            ClearSlot(m_count);
+
+                        exiting = goexit;
+                        owned = null;
+                        state.RecoverablePanic = null;
                     }
                 }
             }
@@ -386,6 +409,17 @@ public ref struct GoFrame
             m_foreignRethrow = null;
             foreignRethrow.Throw();
         }
+
+        // A Goexit from a deferred call resumes once the remaining deferred calls have run, unless one
+        // of them raised a panic that is still unrecovered (thrown above).
+        if (exiting is not null)
+            throw exiting;
+
+        // This frame returns normally. With no outer sequence handling a panic, nothing is in flight on the
+        // goroutine any more (a recovery completed here, or a C# catch stopped the panic): it leaves Go's
+        // runningPanicDefers. One field read on the normal return.
+        if (state.RunningPanicDefers && state.HandledPanic is null)
+            MainExit.PanicDefersEnded(state);
     }
 
     // THE PANIC SEQUENCES (docs/phase4/DESIGN-panic-stack-frames.md §3.B). Go runs a panic's deferred
@@ -442,7 +476,62 @@ public ref struct GoFrame
 
         System.Reflection.MethodBase? catcher = site[^1].GetMethod();
 
+        // A deferred call that recovers is registered through RecoveringCall; the call it stands for is the one compared.
+        if (deferred.Target is RecoveringCall recovering)
+            deferred = recovering.Call;
+
         return catcher is not null && catcher != RunMethod && deferred.Method == catcher;
+    }
+
+    // GO'S DIRECT-CALL RULE FOR recover (COORD ruling 2026-10-22, Option B). recover returns nil unless it is called
+    // directly by the deferred function, and whether a function IS the deferred function depends on how it was called:
+    // `defer catchError(&err)` recovers, `defer func() { catchError(&err) }()` does not. A function whose body calls
+    // recover() opens with `var calledByDefer = GoFrame.TakeDeferredCall();` and hands that to its recover calls, and
+    // every defer of such a function registers with `recovers: true`, which wraps the call in RecoveringCall: it marks
+    // the thread just before the call and clears the mark after. The callee's first line takes the mark, so a
+    // converter thunk in between (`ᴛ1 => catchError(ref ᴛ1.DerefOrNull())`) changes nothing, and any other call of
+    // the function, a helper call included, finds it clear. Nothing is read from frames, and an unflagged defer and
+    // every other call pay nothing.
+
+    /// <summary>
+    /// Whether the running call of the calling function is the deferred call Go's <c>recover</c> rule asks about:
+    /// reads and clears the mark a <c>recovers: true</c> registration sets just before its call.
+    /// </summary>
+    /// <returns><c>true</c> when the caller was invoked as a deferred call; otherwise, <c>false</c>.</returns>
+    public static bool TakeDeferredCall()
+    {
+        GoThreadState state = GoThreadState.Current;
+        bool pending = state.DeferredCallPending;
+        state.DeferredCallPending = false;
+        return pending;
+    }
+
+    /// <summary>
+    /// Wraps a deferred call whose callee calls <c>recover</c>, so the callee can tell it was the deferred call
+    /// (see <see cref="TakeDeferredCall"/>); a nil call stays nil, to fault as Go's nil deferred func does.
+    /// </summary>
+    internal static Action? Recovering(Action? call, bool recovers) =>
+        recovers && call is not null ? new RecoveringCall(call).Invoke : call;
+
+    // A class rather than a lambda so ReRaisedByTheDeferredDelegate can see through it to the call it stands for.
+    internal sealed class RecoveringCall(Action call)
+    {
+        internal Action Call { get; } = call;
+
+        internal void Invoke()
+        {
+            GoThreadState state = GoThreadState.Current;
+            state.DeferredCallPending = true;
+
+            try
+            {
+                Call();
+            }
+            finally
+            {
+                state.DeferredCallPending = false;
+            }
+        }
     }
 
     // Identifies this thread for SiteOwnerThread: an object, so no two threads ever share one (a managed
@@ -617,5 +706,9 @@ public ref struct GoFrame
         panic.Recovered = false; // a panic arriving at a catch is in flight: unrecovered by definition
         GoFuncRoot.CapturedPanicValue = panic;
         GoFuncRoot.ArmPanicClaim(panic);
+
+        // The panic is about to run this frame's deferred calls: Go's runningPanicDefers, which keeps a
+        // returning main from exiting before this goroutine's report (MainExit).
+        MainExit.PanicDefersStarted(GoThreadState.Current);
     }
 }

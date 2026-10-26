@@ -119,6 +119,14 @@ internal static class NumericTypeTemplate
     // path: `elliptic.P256().Params().Double(Gx, Gy)` never returned, which is crypto/ecdsa's
     // P256/Generic subtest hanging every suite that includes it. `>>>` is left native: Go has no
     // unsigned-right-shift operator, so nothing converted ever calls it.
+    //
+    // The `int` count serves a literal or provably in-range count. An UNBOUNDED count takes the
+    // WIDE overloads instead, which the converter binds by passing the count widened exactly as it
+    // does for an unnamed operand (shiftCountUint64Operand): a `uint64` count keeps its full
+    // magnitude, so `w << (1 << 32)` is 0 rather than the `(int)` narrowing's `w << 0`, and an
+    // `int64` count binds golib's signed-count guard, which raises Go's "negative shift amount"
+    // panic where the narrowing read -1 as a huge count and answered 0. C# 11 lets a user-defined
+    // shift operator take a non-`int` count.
     private static string GetComplementOperator(string typeName, string targetTypeName) => typeName.StartsWith("float") || typeName.StartsWith("complex") ? "" :
        $"""
 
@@ -128,6 +136,14 @@ internal static class NumericTypeTemplate
                 public static {targetTypeName} operator <<({targetTypeName} value, int shift) => ({targetTypeName})value.m_value.Lsh((uint64)shift);
 
                 public static {targetTypeName} operator >>({targetTypeName} value, int shift) => ({targetTypeName})value.m_value.Rsh((uint64)shift);
+
+                public static {targetTypeName} operator <<({targetTypeName} value, uint64 shift) => ({targetTypeName})value.m_value.Lsh(shift);
+
+                public static {targetTypeName} operator >>({targetTypeName} value, uint64 shift) => ({targetTypeName})value.m_value.Rsh(shift);
+
+                public static {targetTypeName} operator <<({targetTypeName} value, int64 shift) => ({targetTypeName})value.m_value.Lsh(shift);
+
+                public static {targetTypeName} operator >>({targetTypeName} value, int64 shift) => ({targetTypeName})value.m_value.Rsh(shift);
 
                 public static {targetTypeName} operator >>>({targetTypeName} value, int shift) => ({targetTypeName})(value.m_value >>> shift);
 

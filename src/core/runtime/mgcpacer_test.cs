@@ -9,6 +9,8 @@ using rand = global::go.math.rand_package;
 using static runtime_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -33,7 +35,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "Steady"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -57,13 +59,13 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "SteadyBigStacks"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(132.0D),
             scanRate: constant(1024.0D),
             growthRate: constant(2.0D).sum(ramp(-1.0D, 12)),
             scannableFrac: constant(1.0D),
-            stackBytes: constant(2048D).sum(ramp((128 << (int)(20)), 8)),
+            stackBytes: constant(2048D).sum(ramp(128 << 20, 8)),
             length: 50,
             checker: (ж<testing.T> tΔ2, slice<gcCycleResult> c) => {
                 // Check the same conditions as the steady-state case, except the old pacer can't
@@ -84,7 +86,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "SteadyBigGlobals"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)128 << (int)(20)),
+            globalsBytes: ((uint64)128 << 20),
             nCores: 8,
             allocRate: constant(132.0D),
             scanRate: constant(1024.0D),
@@ -111,7 +113,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "StepAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D).sum(ramp(66.0D, 1).delay(50)),
             scanRate: constant(1024.0D),
@@ -133,7 +135,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "HeavyStepAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33D).sum(ramp(330D, 1).delay(50)),
             scanRate: constant(1024.0D),
@@ -155,7 +157,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "StepScannableFrac"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(128.0D),
             scanRate: constant(1024.0D),
@@ -179,7 +181,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "HighGOGC"u8,
             gcPercent: 1500,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: random(7D, 0x53).offset(165D),
             scanRate: constant(1024.0D),
@@ -219,7 +221,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "OscAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: oscillate(13D, 0D, 8).offset(67D),
             scanRate: constant(1024.0D),
@@ -242,7 +244,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "JitterAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: random(13D, 0xf).offset(132D),
             scanRate: constant(1024.0D),
@@ -266,7 +268,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "HeavyJitterAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: random(33.0D, 0x0).offset(330D),
             scanRate: constant(1024.0D),
@@ -294,7 +296,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "SmallHeapSlowAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(1.0D),
             scanRate: constant(2048.0D),
@@ -316,6 +318,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ11, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -329,7 +332,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "MediumHeapSlowAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(1.0D),
             scanRate: constant(2048.0D),
@@ -351,6 +354,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ12, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -364,7 +368,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             name: "LargeHeapSlowAlloc"u8,
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
-            globalsBytes: ((uint64)32 << (int)(10)),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(1.0D),
             scanRate: constant(2048.0D),
@@ -384,6 +388,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ13, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -399,8 +404,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // memory limit and the heap limit are identical.
             name: "SteadyMemoryLimit"u8,
             gcPercent: 100,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -411,7 +416,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             checker: (ж<testing.T> tΔ14, slice<gcCycleResult> c) => {
                 nint n = len(c);
                 {
-                    var peak = c[n - 1].heapPeak; if (peak >= applyMemoryLimitHeapGoalHeadroom(((uint64)512 << (int)(20)))) {
+                    var peak = c[n - 1].heapPeak; if (peak >= applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
                         tΔ14.Errorf("peak heap size reaches heap limit: %d"u8, peak);
                     }
                 }
@@ -429,8 +434,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // all the way to the peak.
             name: "SteadyMemoryLimitNoGCPercent"u8,
             gcPercent: -1,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -441,7 +446,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             checker: (ж<testing.T> tΔ15, slice<gcCycleResult> c) => {
                 nint n = len(c);
                 {
-                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom(((uint64)512 << (int)(20)))) {
+                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
                         tΔ15.Errorf("heap goal is not the heap limit: %d"u8, goal);
                     }
                 }
@@ -459,8 +464,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // the memory limit. It also makes sure GC utilization actually rises to push back.
             name: "ExceedMemoryLimit"u8,
             gcPercent: 100,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -494,8 +499,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // Same as the previous test, but with gcPercent = -1.
             name: "ExceedMemoryLimitNoGCPercent"u8,
             gcPercent: -1,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -507,7 +512,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 nint n = len(c);
                 if (n < 10) {
                     {
-                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom(((uint64)512 << (int)(20)))) {
+                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
                             tΔ17.Errorf("heap goal is not the heap limit: %d"u8, goal);
                         }
                     }
@@ -536,8 +541,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // This test ensures that the pacer maintains the memory limit as the heap grows.
             name: "MaintainMemoryLimit"u8,
             gcPercent: 100,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -550,7 +555,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 if (n > 12) {
                     // We're trying to saturate the memory limit.
                     {
-                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom(((uint64)512 << (int)(20)))) {
+                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
                             tΔ18.Errorf("heap goal is not the heap limit: %d"u8, goal);
                         }
                     }
@@ -570,8 +575,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // Same as the previous test, but with gcPercent = -1.
             name: "MaintainMemoryLimitNoGCPercent"u8,
             gcPercent: -1,
-            memoryLimit: ((int64)512 << (int)(20)),
-            globalsBytes: ((uint64)32 << (int)(10)),
+            memoryLimit: ((int64)512 << 20),
+            globalsBytes: ((uint64)32 << 10),
             nCores: 8,
             allocRate: constant(33.0D),
             scanRate: constant(1024.0D),
@@ -582,7 +587,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             checker: (ж<testing.T> tΔ19, slice<gcCycleResult> c) => {
                 nint n = len(c);
                 {
-                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom(((uint64)512 << (int)(20)))) {
+                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
                         tΔ19.Errorf("heap goal is not the heap limit: %d"u8, goal);
                     }
                 }
@@ -604,9 +609,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         // However, it is still possible to trigger this case if something exceptional
         // happens between calls to revise; the framework just doesn't support this yet.
     }.slice()) {
-        var eΔ1 = e;
-        var eʗ1 = eΔ1;
-        Ꮡt.Run((~eΔ1).name, (ж<testing.T> tΔ20) => {
+        var eʗ1 = e;
+        Ꮡt.Run((~e).name, (ж<testing.T> tΔ20) => {
             tΔ20.Parallel();
 
             var c = runtime_internal_test_package.NewGCController((~eʗ1).gcPercent, (~eʗ1).memoryLimit);
@@ -660,6 +664,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     //
                     // Note that this is an idealized view of the GC assist pacing
                     // mechanism.
+
                     // From the assist ratio and the alloc and scan rates, we can idealize what
                     // the GC CPU utilization looks like.
                     //
@@ -715,7 +720,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                         var actualScanned = globalsScanned + stackScanned + heapScanned; if (actualScanned < bytesScanned) {
                             // actualScanned = scanRate * rateConv * (t / revisePeriod) * nCores * u
                             // => t = actualScanned * revisePeriod / (scanRate * rateConv * nCores * u)
-                            actualElapsed = ((time.Duration)(int64)((float64)actualScanned * (float64)(int64)revisePeriod / (cycle.scanRate * rateConv * (float64)(~eʗ1).nCores * utilization)));
+                            actualElapsed = (time.Duration)(int64)((float64)actualScanned * (float64)(int64)revisePeriod / (cycle.scanRate * rateConv * (float64)(~eʗ1).nCores * utilization));
                             actualAllocated = (int64)(cycle.allocRate * rateConv * (float64)(int64)actualElapsed / (float64)(int64)revisePeriod * (float64)(~eʗ1).nCores * (1D - utilization));
                         }
                     }
@@ -874,12 +879,12 @@ internal static @string String(this ref gcCycleResult r) {
     return fmt.Sprintf("%d %2.1f%% %d->%d->%d (goal: %d)"u8, r.cycle, r.gcUtilization * 100D, r.heapLive, r.heapTrigger, r.heapPeak, r.heapGoal);
 }
 
-internal static void assertInEpsilon(ж<testing.T> Ꮡt, @string name, float64 a, float64 b, float64 epsilon) {
+internal static partial void assertInEpsilon(ж<testing.T> Ꮡt, @string name, float64 a, float64 b, float64 epsilon) {
     Ꮡt.Helper();
     assertInRange(Ꮡt, name, a, b - epsilon, b + epsilon);
 }
 
-internal static void assertInRange(ж<testing.T> Ꮡt, @string name, float64 a, float64 min, float64 max) {
+internal static partial void assertInRange(ж<testing.T> Ꮡt, @string name, float64 a, float64 min, float64 max) {
     Ꮡt.Helper();
     if (a < min || a > max) {
         Ꮡt.Errorf("%s not in range (%f, %f): %f"u8, name, min, max, a);

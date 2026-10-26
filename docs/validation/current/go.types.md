@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/types` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**574 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**597 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/types`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/types).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -52,12 +52,14 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestCheck/cycles4.go` | pass | pass |
 | `TestCheck/cycles5.go` | pass | pass |
 | `TestCheck/cycles5a.go` | pass | pass |
+| `TestCheck/cycles6.go` | pass | pass |
 | `TestCheck/decls0.go` | pass | pass |
 | `TestCheck/decls1.go` | pass | pass |
 | `TestCheck/decls2` | pass | pass |
 | `TestCheck/decls3.go` | pass | pass |
 | `TestCheck/decls4.go` | pass | pass |
 | `TestCheck/decls5.go` | pass | pass |
+| `TestCheck/doubled_labels.go` | pass | pass |
 | `TestCheck/errors.go` | pass | pass |
 | `TestCheck/expr0.go` | pass | pass |
 | `TestCheck/expr1.go` | pass | pass |
@@ -73,6 +75,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestCheck/go1_21_19.go` | pass | pass |
 | `TestCheck/go1_21_22.go` | pass | pass |
 | `TestCheck/go1_22_21.go` | pass | pass |
+| `TestCheck/go1_25.go` | pass | pass |
 | `TestCheck/go1_8.go` | pass | pass |
 | `TestCheck/go1_xx_19.go` | pass | pass |
 | `TestCheck/gotos.go` | pass | pass |
@@ -83,6 +86,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestCheck/init1.go` | pass | pass |
 | `TestCheck/init2.go` | pass | pass |
 | `TestCheck/issue25008` | pass | pass |
+| `TestCheck/issue70974.go` | pass | pass |
 | `TestCheck/issues0.go` | pass | pass |
 | `TestCheck/issues1.go` | pass | pass |
 | `TestCheck/labels.go` | pass | pass |
@@ -175,7 +179,6 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestFixedbugs/issue43109.go` | pass | pass |
 | `TestFixedbugs/issue43110.go` | pass | pass |
 | `TestFixedbugs/issue43124.go` | pass | pass |
-| `TestFixedbugs/issue43125.go` | pass | pass |
 | `TestFixedbugs/issue43190.go` | pass | pass |
 | `TestFixedbugs/issue43527.go` | pass | pass |
 | `TestFixedbugs/issue43671.go` | pass | pass |
@@ -370,6 +373,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestFixedbugs/issue67683.go` | pass | pass |
 | `TestFixedbugs/issue67872.go` | pass | pass |
 | `TestFixedbugs/issue67962.go` | pass | pass |
+| `TestFixedbugs/issue68162.go` | pass | pass |
 | `TestFixedbugs/issue68184.go` | pass | pass |
 | `TestFixedbugs/issue68903.go` | pass | pass |
 | `TestFixedbugs/issue68935.go` | pass | pass |
@@ -379,9 +383,24 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestFixedbugs/issue70150.go` | pass | pass |
 | `TestFixedbugs/issue70417.go` | pass | pass |
 | `TestFixedbugs/issue70526.go` | pass | pass |
+| `TestFixedbugs/issue70549.go` | pass | pass |
 | `TestFixedbugs/issue71131.go` | pass | pass |
 | `TestFixedbugs/issue71198.go` | pass | pass |
 | `TestFixedbugs/issue71284.go` | pass | pass |
+| `TestFixedbugs/issue72936.go` | pass | pass |
+| `TestFixedbugs/issue73428.go` | pass | pass |
+| `TestFixedbugs/issue75194.go` | pass | pass |
+| `TestFixedbugs/issue75883.go` | pass | pass |
+| `TestFixedbugs/issue75885.go` | pass | pass |
+| `TestFixedbugs/issue75918.go` | pass | pass |
+| `TestFixedbugs/issue75986.go` | pass | pass |
+| `TestFixedbugs/issue76103.go` | pass | pass |
+| `TestFixedbugs/issue76220.go` | pass | pass |
+| `TestFixedbugs/issue76366.go` | pass | pass |
+| `TestFixedbugs/issue76383.go` | pass | pass |
+| `TestFixedbugs/issue76384.go` | pass | pass |
+| `TestFixedbugs/issue76478.go` | pass | pass |
+| `TestFixedbugs/issue78163.go` | pass | pass |
 | `TestGCSizes` | pass | pass |
 | `TestGCSizes/issue60431` | pass | pass |
 | `TestGCSizes/issue60734` | pass | pass |
@@ -498,6 +517,8 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestIssue68877` | pass | pass |
 | `TestIssue69092` | pass | pass |
 | `TestIssue7245` | pass | pass |
+| `TestIssue73871` | pass | pass |
+| `TestIssue74181` | pass | pass |
 | `TestIssue7827` | pass | pass |
 | `TestIssue8518` | pass | pass |
 | `TestLocal` | pass | pass |
@@ -538,6 +559,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestObjectString/7` | pass | pass |
 | `TestObjectString/8` | pass | pass |
 | `TestObjectString/9` | pass | pass |
+| `TestPartialTypeCheckUndeclaredAliasPanic` | pass | pass |
 | `TestPkgNameOf` | pass | pass |
 | `TestPredicatesInfo` | pass | pass |
 | `TestQualifiedTypeString` | pass | pass |
@@ -590,6 +612,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestUnaliasTooSoonInCycle` | pass | pass |
 | `TestUsesInfo` | pass | pass |
 | `TestValuesInfo` | pass | pass |
+| `TestVarKind` | pass | pass |
 | `TestVersionIssue69477` | pass | pass |
 | `TestVersionWithoutPos` | pass | pass |
 | `TestZeroTok` | pass | pass |

@@ -54,15 +54,13 @@ using static go.@internal.profile_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Function, ж<Function>>(Indirect = true)]
-[assembly: GoImplicitConv<Label, ж<Label>>(Indirect = true)]
-[assembly: GoImplicitConv<Line, ж<Line>>(Indirect = true)]
-[assembly: GoImplicitConv<Location, ж<Location>>(Indirect = true)]
-[assembly: GoImplicitConv<Mapping, ж<Mapping>>(Indirect = true)]
-[assembly: GoImplicitConv<Options, ж<Options>>(Indirect = true)]
-[assembly: GoImplicitConv<Sample, ж<Sample>>(Indirect = true)]
-[assembly: GoImplicitConv<go.@internal.profile_package.ValueType, ж<go.@internal.profile_package.ValueType>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -72,12 +70,12 @@ using static go.@internal.profile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqyygpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSAgoK2goK4goKUgpSClIKUgpSCgoKCgoCCpLa4goKCuIKCgriCgoK4goKCuIKCgriCgpSClAALGIKCggAJGtKUgoKCgqaCgoKCgqaCgoKCgoCCgoKUtqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoK2AAcQgqaCgoKUgsgABxCCgoK4gqaCgoK2AAkUgqaCgoKCgoKCgoKCtgANHIKmgoKCgoLI3IKCgriCpoKCtgAHEIKmgoKCgoK2AA0cgoKCgpSmgoKUgoKUgg==", "", "", "38=addString/1/2/2,addString/2/2/3;53=addString/1/1/2")]
+[assembly: go.GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSAgoK2goK4goKUgpSClIKUgpSCgoKCgoCCpKa4goKCuIKCgriCgoK4goKCuIKCgriCgpSClAALGIKCggAJGtKUgoKCgqaCgoKCgqaCgoKCgoCCgoKUtqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoKmAAcQgqaCgoKUgrgABxCCgoK4gqaCgoKmAAkUgqaCgoKCgoKCgoKCpgANHIKmgoKCgoK43IKCgriCpoKCpgAHEIKmgoKCgoKmAA0cgoKCgpSmgoKUgoKUgg==", "", "", "41=addString/1/2/2,addString/2/2/3;56=addString/1/1/2")]
 [assembly: go.GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
-[assembly: go.GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgIKCgoKUgpS2goIACRaSqJKCgpSAgramAAgKpAATLrKCgILIgIK2poKmgqaCgoLcgoKCpqaCpoKCgoKCABAoooKUqMKCgoKCkoKClIKUgpSClJQACBKCgIKkgoKCgoKCgqaCgoKmgoKmgqaUuKaUgoKClIKUgpSUAAYSopSkpAAIEoKClLiCgpS+0oKCgoKClIKClJSmgoKClKaygoCCtoCCpKaCgpTKgqjCgoKUppSCgpSCupKUlIKmgoKkgpSClJSssoKCpoKokoKClMqCpoKCpoKCgqaClKaCpoKClA==")]
-[assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AAwq8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSAgraCgoK4goKCuIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqiSgoKmgoKUlIKClJQADBqigqaAgoK2gu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKmgILIgoCCgoKkAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgsiigoKCgoKUgoKUgoCCgraCuAAKHIKs0oKmgqaCgqaqog==", "", "", "198=Join/1/3/1,Join/2/3/2,Join/3/3/3;361=mapFunction/1/1/1")]
-[assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCytqkgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4")]
-[assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "AClYgoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCkqaCpoLWgoKCgoKUgoIACAqCgoKUgoKCgpSCgsaClIK0goKClIKUgrSClIK0ptaCgpSmooCCpIKChJKCgpSClICCtqaigIKkgqailIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKClIKClICCpJSUgoCCpIKmgoCCpIKmooKAgqSCpqKAgqSClJQ=")]
+[assembly: go.GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgIKCgoKUgpS2goIACRaSqJKCgpSAgramAAgKpAATLrKCgILIgIK2poKmgqaCgoLcgoKCpqaCpoKCgoKCABAoooKUqMKCgoKCkoKClIKUgoKUAAgSgoCCpIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQACBKCgpS4goKUvtKCgoKCgpSCgpSUpoKCgpSmsoKAgraAgqSmgoKUyoKowoKClKaUgoKUgrqylJSCpoKCpIKUgpSUrLKCgqaCqJKCgpTKgqaCgqaCgoKmgpSmgqaCgpQ=")]
+[assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSAgraCgoK4goKCuIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqjCgoKmgoKUlIKClJQADBqigqaAgoK2gu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKmgILIgoCCgoKkAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgsiigoKCgoKUgoKUgoCCgraCuAANHIKs0oKmgqaCgqaqog==", "", "", "202=Join/1/3/1,Join/2/3/2,Join/3/3/3;365=mapFunction/1/1/1")]
+[assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCytrEgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4")]
+[assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCkqaCpoKmooKCgIK21oKCgoKClIKCAAgKgoKClIKCgoKUgoLGgpSCtIKCgpSClIK0gpSCtKbWgoKUpqKAgqSCgoSSgoKUgpSAgramooCCpIKmopSClIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKUgpSCgoKUgIKklJSCgIKkgqaCgIKkgqaigoCCpIKmooCCpIKUlA==")]
 [assembly: go.GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgIKUgpSCguyUppSU3LiCgoKCgpSClIKClIKCAAUQopKUgoCCpIKAgraU")]
 // </GoSourcePositionMaps>
 
@@ -137,8 +135,9 @@ public static partial class profile_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>

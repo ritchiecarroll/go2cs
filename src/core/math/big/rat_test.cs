@@ -224,11 +224,10 @@ internal static slice<ratBinTestsᴛ1> ratBinTests = new ratBinTestsᴛ1[]{
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string addˢ2 = "Add"u8;
-internal static readonly @string addSymmetricˢ2 = "Add symmetric"u8;
+internal static readonly @string addSymmetricˢ = "Add symmetric"u8;
 internal static readonly @string subˢ2 = "Sub"u8;
-internal static readonly @string subSymmetricˢ2 = "Sub symmetric"u8;
-internal static readonly @string mulˢ2 = "Mul"u8;
-internal static readonly @string mulSymmetricˢ2 = "Mul symmetric"u8;
+internal static readonly @string subSymmetricˢ = "Sub symmetric"u8;
+internal static readonly @string mulSymmetricˢ = "Mul symmetric"u8;
 internal static readonly @string quoˢ = "Quo"u8;
 internal static readonly @string quoSymmetricˢ = "Quo symmetric"u8;
 
@@ -238,19 +237,19 @@ public static void TestRatBin(ж<testing.T> Ꮡt) {
         testRatBin(Ꮡt, i, addˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
 
         arg = new ratBinArg(test.y, test.x, test.sum);
-        testRatBin(Ꮡt, i, addSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
+        testRatBin(Ꮡt, i, addSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
 
         arg = new ratBinArg(test.sum, test.x, test.y);
         testRatBin(Ꮡt, i, subˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
 
         arg = new ratBinArg(test.sum, test.y, test.x);
-        testRatBin(Ꮡt, i, subSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
+        testRatBin(Ꮡt, i, subSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
 
         arg = new ratBinArg(test.x, test.y, test.prod);
         testRatBin(Ꮡt, i, mulˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
 
         arg = new ratBinArg(test.y, test.x, test.prod);
-        testRatBin(Ꮡt, i, mulSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
+        testRatBin(Ꮡt, i, mulSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
 
         if (test.x != "0"u8) {
             arg = new ratBinArg(test.prod, test.x, test.y);
@@ -655,11 +654,11 @@ internal static bool checkIsBestApprox64(ж<testing.T> Ꮡt, float64 f, ж<globa
 }
 
 internal static bool isEven32(float32 f) {
-    return (uint32)(math.Float32bits(f) & 1) == 0;
+    return (math.Float32bits(f) & 1) == 0;
 }
 
 internal static bool isEven64(float64 f) {
-    return (uint64)(math.Float64bits(f) & 1) == 0;
+    return (math.Float64bits(f) & 1) == 0;
 }
 
 public static void TestIsFinite(ж<testing.T> Ꮡt) {
@@ -780,7 +779,7 @@ public static void TestIssue34919(ж<testing.T> Ꮡt) {
         // A denominator of length 0 is interpreted as 1. Make sure that
         // "materialization" of the denominator doesn't lead to setting
         // the underlying array element 0 to 1.
-        var r = Ꮡ(new ΔRat(new ΔInt(abs: new nat(new global::go.math.big_package.Word[]{991}.slice())), new ΔInt(abs: new global::go.math.big_package.nat(0, 1))));
+        var r = Ꮡ(new ΔRat(new ΔInt(abs: new Δnat(new global::go.math.big_package.Word[]{991}.slice())), new ΔInt(abs: new global::go.math.big_package.Δnat(0, 1))));
         acc.f(r);
         {
             global::go.math.big_package.Word d = (~r).b.abs[..1][0]; if (d != 0) {

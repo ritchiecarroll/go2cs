@@ -66,7 +66,7 @@ public static void TestMarshalHash(ж<testing.T> Ꮡt) {
         var ttʗ1 = tt;
         Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             var buf = new slice<byte>(256);
-            foreach (var (i, _) in buf) {
+            foreach (var i in range(buf)) {
                 buf[i] = (byte)i;
             }
 

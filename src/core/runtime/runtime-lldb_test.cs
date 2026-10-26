@@ -37,7 +37,7 @@ internal static void checkLldbPython(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Skipf("skipping due to issue running lldb: %v\n%s"u8, err, @out);
     }
-    lldbPath = strings.TrimSpace(((@string)@out));
+    lldbPath = strings.TrimSpace((@string)@out);
 
     cmd = exec.Command(usrBinPython27ˢ, "-c"u8, importSysSysPathAppendˢ, lldbPath);
     (@out, err) = cmd.CombinedOutput();
@@ -56,15 +56,15 @@ internal static void checkLldbPython(ж<testing.T> Ꮡt) {
         if (err != default!){
             Ꮡt.Skipf("DevToolsSecurity failed: %v"u8, err);
         } else 
-        if (!strings.Contains(((@string)@out), enabledˢ)) {
-            Ꮡt.Skip(((@string)@out));
+        if (!strings.Contains((@string)@out, enabledˢ)) {
+            Ꮡt.Skip((@string)@out);
         }
         cmd = exec.Command(usrBinGroupsˢ);
         (@out, err) = cmd.CombinedOutput();
         if (err != default!){
             Ꮡt.Skipf("groups failed: %v"u8, err);
         } else 
-        if (!strings.Contains(((@string)@out), developerˢ)) {
+        if (!strings.Contains((@string)@out, developerˢ)) {
             Ꮡt.Skip(notInDeveloperGroupˢ);
         }
     }
@@ -203,7 +203,7 @@ public static void TestLldbPython(ж<testing.T> Ꮡt) {
     var (got, _) = cmd.CombinedOutput();
 
     if (((sstring)got) != expectedLldbOutput) {
-        if (strings.Contains(((@string)got), timeoutLaunchingˢ)) {
+        if (strings.Contains((@string)got, timeoutLaunchingˢ)) {
             Ꮡt.Skip(timeoutLaunchingˢ);
         }
         Ꮡt.Fatalf("Unexpected lldb output:\n%s"u8, got);

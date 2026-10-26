@@ -4,6 +4,7 @@
 namespace go;
 
 using bytes = bytes_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using testenv = @internal.testenv_package;
 using static os_package;
@@ -297,7 +298,7 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
 
         // If an error occurs make it more likely that removing the
         // temporary directory will succeed.
-        defer(Chmod, subdir, (fs.FileMode)(511), ref ᒐ);
+        defer(Chmod, subdir, (fs.FileMode)511, ref ᒐ);
 
         {
             var err = RemoveAll(subdir); if (err != default!) {
@@ -322,14 +323,7 @@ internal static readonly object removeAllSucceededˢ = (@string)"RemoveAll succe
 public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8 || exprᴛ1 == "windows"u8) {
-            Ꮡt.Skipf("skipping test on %s"u8, Δruntime.GOOS);
-        }
-
-        if (Getuid() == 0) {
-            Ꮡt.Skip(skippingTestWhenRunningˢ);
-        }
+        testRequiresPermissions(Ꮡt);
 
         Ꮡt.Parallel();
 
@@ -379,7 +373,7 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
 
             // Defer changing the mode back so that the deferred
             // RemoveAll(tempDir) can succeed.
-            defer(Chmod, d, (fs.FileMode)(511), ref ᒐ);
+            defer(Chmod, d, (fs.FileMode)511, ref ᒐ);
         }
 
         var err = RemoveAll(tempDir);
@@ -485,7 +479,7 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
-        defer(Chmod, path, (fs.FileMode)(493), ref ᒐ);
+        defer(Chmod, path, (fs.FileMode)493, ref ᒐ);
 
         // This call should not hang, even on a platform that disallows file deletion
         // from read-only directories.
@@ -527,7 +521,7 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string binStraceˢ = "/bin/strace"u8;
 internal static readonly @string subdirˢ = "subdir"u8;
 internal static readonly @string fcntlˢ = "fcntl"u8;
-internal static readonly @string testRunˢ3 = "-test.run=^TestRemoveAllNoFcntl$"u8;
+internal static readonly @string testRunˢ4 = "-test.run=^TestRemoveAllNoFcntl$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string envᶜ = "GO_TEST_REMOVE_ALL_NO_FCNTL"u8;
@@ -589,7 +583,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
         }
     }
 
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), binStraceˢ, "-f"u8, "-e", fcntlˢ, me, testRunˢ3);
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), binStraceˢ, "-f"u8, "-e", fcntlˢ, me, testRunˢ4);
     cmd = testenv.CleanCmdEnv(cmd);
     cmd.Value.Env = append((~cmd).Env, env + "=" + subdir);
     (var @out, err) = cmd.CombinedOutput();
@@ -604,6 +598,75 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
         nint got = bytes.Count(@out, slice<byte>("fcntl"u8)); if (got >= 100) {
             Ꮡt.Errorf("found %d fcntl calls, want < 100"u8, got);
         }
+    }
+}
+
+public static void TestRemoveAllTrailingSlash(ж<Δtesting.T> Ꮡt) {
+    var slashesᴷ = new stackAppend<@string>();
+
+    var slashes = new @string[]{"/"u8}.slice();
+    if (Δruntime.GOOS == "windows"u8) {
+        slashes = append(slashesᴷ, slashes, @"\"u8);
+    }
+    foreach (var (_, slash) in slashes) {
+        @string dir = makefs(Ꮡt, new @string[]{
+            "dir/a/file1"u8,
+            "dir/a/file2"u8,
+            "dir/file3"u8
+        }.slice());
+        @string path = dir + "/dir"u8;
+        {
+            var err = RemoveAll(path + slash); if (err != default!) {
+                Ꮡt.Fatal(err);
+            }
+        }
+        {
+            var (_, err) = Stat(path); if (!IsNotExist(err)) {
+                Ꮡt.Errorf("after RemoveAll(%q), directory still exists"u8, path + slash);
+            }
+        }
+    }
+}
+
+public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        testRequiresPermissions(Ꮡt);
+        @string dir = makefs(Ꮡt, new @string[]{
+            "parent/"u8,
+            "parent/link => target"u8
+        }.slice());
+        {
+            var errΔ1 = Chmod(dir + "/parent"u8, 365); if (errΔ1 != default!) {
+                Ꮡt.Fatal(errΔ1);
+            }
+        }
+        defer(() => {
+            Chmod(dir + "/parent"u8, 493);
+        }, ref ᒐ);
+
+        var err = RemoveAll(dir + "/parent/link"u8);
+        if (!errors.Is(err, ErrPermission)) {
+            Ꮡt.Fatalf("RemoveAll = %v; want ErrPermission"u8, err);
+        }
+        // Issue #78490: RemoveAll leaked errSymlink, which panics when printed.
+        _ = err.Error();
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestRunningAsˢ = (@string)"skipping test: running as root (which ignores file permissions)"u8;
+
+internal static void testRequiresPermissions(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Helper();
+    var exprᴛ1 = Δruntime.GOOS;
+    if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8 || exprᴛ1 == "windows"u8) {
+        Ꮡt.Skipf("skipping test: %s does not support chmod"u8, Δruntime.GOOS);
+    }
+    if (Getuid() == 0) {
+        Ꮡt.Skip(skippingTestRunningAsˢ);
     }
 }
 

@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,9 +29,11 @@ using static go.go.token_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/token/position_test.go", "position_test.cs", "ABEegoKUgpSClIL4goKUgoKCAAgGAAoggoKCgpSUpqKCgoKClIKCgriCgoKCpqaCgoKUgriCgpSClIK4goKCpoKClLiAgqSClIKUpoKUlIKClPiCgoKUgoKmgoKCgoK4goKCgqaUgoKCgpSClILMkoKClICCyIKCgoKClIKCgs6igoKUgoKCgoKCooKUpqqigryigpSmsoKClKaCAA0GggALFIKCgqaCgoKCgoKCqKKCpoKCgriCgoKUgoKClIKClIIACQiCgoKClIKCgoIACgqCgoKCgoKClJKAgraSgoCAkoK4goKCgqaCgoKmgoKCAAsGgqoARZQBspKCgoKUgty0goKCyoKCgqaAgqSAgqSAgsiAgqSAgsiCgIKkgoCCuJKCgoCCtoKAgtY=", "182-188:1;234-239:1;254-259:1;261-267:2;356-360:1;361-367:2;363-363:2.1;469-478:1;485-489:1")]
-[assembly: global::go.GoPositionMap("go/token/serialize_test.go", "serialize_test.cs", "AA8g8pS4goKClIKmgqaCgoKUgpSClIKCgqaCgoLc1oKChoCCgqSChoCCgqSAgsiCgpSCgpSCgoKCgqY=", "67-69:1;75-77:2")]
-[assembly: global::go.GoPositionMap("go/token/token_test.go", "token_test.cs", "ABASogAKILKSgII=", "27-31:1")]
+[assembly: global::go.GoPositionMap("go/token/export_test.go", "export_test.cs", "AAkSkA==")]
+[assembly: global::go.GoPositionMap("go/token/position_test.go", "position_test.cs", "ABMggoKUgpSClIL4goKUgoKCAAgGAAoggoKCgpSUpqKCgoKClIKCgriCgoKCpqaCgoKUgriCgpSClIK4goKCpoKClLiAgqSClIKUpoKUlIKClPiCgoKUgoKmgoKCgoK4goKCgqaUgoKCgpSClILMkoKClICCyIKCgoKClIKCgs6igoKUgoKCgoKCooKUpqqigryigpSmsoKClKaCAA0GggALFIKCgqaCgoKCgoKCqKKCpoKCgriCgoKUgoKClIKClIIACQiCgoKClIKCgoIACgqCgoKCgoKClJKAgraSgoCAkoK4goKCgqaCgoKmgoKCAAsGgqoARZQBspKCgoKUgty0goKCyoKCgqaAgqSAgqSAgsiAgqSAgsiCgIKkgoCCuJKCgoCCtoKAgtYACwSClJKCgILIgoKClIKUgoKClIKCpoKCgoKCgoKUgqiSlpKCgriCgsKCgoKUgoKmooK4goKCgoKUuKKWkoKCppKmgoKAggAICoKCgoCC", "183-189:1;235-240:1;255-260:1;262-268:2;357-361:1;362-368:2;364-364:2.1;470-479:1;486-490:1;545-550:1;574-578:1;597-606:1;608-612:2;635-637:1")]
+[assembly: global::go.GoPositionMap("go/token/serialize_test.go", "serialize_test.cs", "ABEi8pS4goKClIKmgoKCpoKCgpSClIKUgoKCpoKCgtzWgoKGgIKCpIKGgIKCpICCyIKClIKClIKCgoKCpg==", "70-72:1;78-80:2")]
+[assembly: global::go.GoPositionMap("go/token/token_test.go", "token_test.cs", "ABASogALILKSgII=", "27-31:1")]
+[assembly: global::go.GoPositionMap("go/token/tree_test.go", "tree_test.cs", "AA4cpIKCpoKCgoKSgqiSgoKCgsqCgoKClJSCgpS4goKUyoKCAAcQgoK4opI=", "76-76:1;83-85:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -60,7 +61,9 @@ public static partial class token_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸgob() => builtin.initPackage(typeof(encoding.gob_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸrandꓸv2() => builtin.initPackage(typeof(math.rand.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

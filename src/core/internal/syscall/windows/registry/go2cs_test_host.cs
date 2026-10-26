@@ -17,12 +17,12 @@ internal static class Go2CsTestHost
             "value.go",
             "zsyscall_windows.go",
         });
-        registry.Add("TestCreateOpenDeleteKey", registry_test_package.TestCreateOpenDeleteKey, "registry_test.go", 53);
-        registry.Add("TestExpandString", registry_test_package.TestExpandString, "registry_test.go", 525);
-        registry.Add("TestGetMUIStringValue", registry_test_package.TestGetMUIStringValue, "registry_test.go", 601);
-        registry.Add("TestInvalidValues", registry_test_package.TestInvalidValues, "registry_test.go", 536);
-        registry.Add("TestReadSubKeyNames", registry_test_package.TestReadSubKeyNames, "registry_test.go", 30);
-        registry.Add("TestValues", registry_test_package.TestValues, "registry_test.go", 493);
+        registry.Add("TestCreateOpenDeleteKey", registry_test_package.TestCreateOpenDeleteKey, "registry_test.go", 54);
+        registry.Add("TestExpandString", registry_test_package.TestExpandString, "registry_test.go", 511);
+        registry.Add("TestGetMUIStringValue", registry_test_package.TestGetMUIStringValue, "registry_test.go", 587);
+        registry.Add("TestInvalidValues", registry_test_package.TestInvalidValues, "registry_test.go", 522);
+        registry.Add("TestReadSubKeyNames", registry_test_package.TestReadSubKeyNames, "registry_test.go", 31);
+        registry.Add("TestValues", registry_test_package.TestValues, "registry_test.go", 479);
         return TestHost.Run(registry, args);
     }
 }

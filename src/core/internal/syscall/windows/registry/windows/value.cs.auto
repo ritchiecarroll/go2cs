@@ -18,6 +18,7 @@ using unicode;
 
 partial class registry_package {
 
+// Registry value types.
 public static UntypedInt NONE => 0;
 public static UntypedInt SZ => 1;
 public static UntypedInt EXPAND_SZ => 2;
@@ -31,8 +32,13 @@ public static UntypedInt FULL_RESOURCE_DESCRIPTOR => 9;
 public static UntypedInt RESOURCE_REQUIREMENTS_LIST => 10;
 public static UntypedInt QWORD => 11;
 
+// ErrShortBuffer is returned when the buffer was too short for the operation.
 public static syscall.Errno ErrShortBuffer = syscall.ERROR_MORE_DATA;
+
+// ErrNotExist is returned when a registry key or value does not exist.
 public static syscall.Errno ErrNotExist = syscall.ERROR_FILE_NOT_FOUND;
+
+// ErrUnexpectedType is returned by Get*Value when the value's type was unexpected.
 public static error ErrUnexpectedType = errors.New("unexpected key value type"u8);
 
 // GetValue retrieves the type and data for the specified value associated
@@ -59,7 +65,7 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
     }
     ref var l = ref heap<uint32>(out var Ꮡl);
     l = (uint32)len(buf);
-    err = syscall.RegQueryValueEx(((syscallꓸHandle)k), pname, nil, Ꮡvaltype, pbuf, Ꮡl);
+    err = syscall.RegQueryValueEx((syscallꓸHandle)k, pname, nil, Ꮡvaltype, pbuf, Ꮡl);
     if (err != default!) {
         return ((nint)l, valtype, err);
     }
@@ -77,9 +83,9 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
     ref var n = ref heap<uint32>(out var Ꮡn);
     n = (uint32)len(buf);
     while (ᐧ) {
-        err = syscall.RegQueryValueEx(((syscallꓸHandle)k), p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
+        err = syscall.RegQueryValueEx((syscallꓸHandle)k, p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
         if (err == default!) {
-            return (buf[..(int)(n)], t, default!);
+            return (buf.slice(0, (nint)(n)), t, default!);
         }
         if (!AreEqual(err, syscall.ERROR_MORE_DATA)) {
             return (default!, 0, err);
@@ -107,7 +113,6 @@ public static unsafe (@string val, uint32 valtype, error err) GetStringValue(thi
     else { /* default: */
         return ("", typ, ErrUnexpectedType);
     }
-
     if (len(data) == 0) {
         return ("", typ, default!);
     }
@@ -124,17 +129,20 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
     if (err != default!) {
         return ("", err);
     }
+
     var buf = new slice<uint16>(1024);
     ref var buflen = ref heap(new uint32(), out var Ꮡbuflen);
     ж<uint16> pdir = default!;
-    err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
-    if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) {
-        // Try fallback path
+
+    err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+    if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) { // Try fallback path
         // Try to resolve the string value using the system directory as
         // a DLL search path; this assumes the string value is of the form
         // @[path]\dllname,-strID but with no path given, e.g. @tzres.dll,-320.
+
         // This approach works with tzres.dll but may have to be revised
         // in the future to allow callers to provide custom search paths.
+
         @string s = default!;
         (s, err) = ExpandString("%SystemRoot%\\system32\\"u8);
         if (err != default!) {
@@ -144,19 +152,22 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
         if (err != default!) {
             return ("", err);
         }
-        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+
+        err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
-    while (AreEqual(err, syscall.ERROR_MORE_DATA)) {
-        // Grow buffer if needed
+
+    while (AreEqual(err, syscall.ERROR_MORE_DATA)) { // Grow buffer if needed
         if (buflen <= (uint32)len(buf)) {
             break; // Buffer not growing, assume race; break
         }
         buf = new slice<uint16>((nint)(buflen));
-        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+        err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
+
     if (err != default!) {
         return ("", err);
     }
+
     return (syscall.UTF16ToString(buf), default!);
 }
 
@@ -178,7 +189,7 @@ public static (@string, error) ExpandString(@string value) {
             return ("", errΔ1);
         }
         if (n <= (uint32)len(r)) {
-            return (syscall.UTF16ToString(r[..(int)(n)]), default!);
+            return (syscall.UTF16ToString(r.slice(0, (nint)(n))), default!);
         }
         r = new slice<uint16>((nint)(n));
     }
@@ -207,13 +218,13 @@ public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsV
         return (default!, typ, default!);
     }
     if (p[len(p) - 1] == 0) {
-        p = p[..(int)(len(p) - 1)]; // remove terminating null
+        p = p.slice(0, len(p) - 1); // remove terminating null
     }
     val = new slice<@string>(0, 5);
     nint from = 0;
     foreach (var (i, c) in p) {
         if (c == 0) {
-            val = append(val, syscall.UTF16ToString(p[(int)(from)..(int)(i)]));
+            val = append(val, syscall.UTF16ToString(p.slice(from, i)));
             from = i + 1;
         }
     }
@@ -246,7 +257,6 @@ public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k
     { /* default: */
         return (0, typ, ErrUnexpectedType);
     }
-
 }
 
 // GetBinaryValue retrieves the binary value for the specified
@@ -271,9 +281,9 @@ internal static error setValue(this Key k, @string name, uint32 valtype, slice<b
         return err;
     }
     if (len(data) == 0) {
-        return regSetValueEx(((syscallꓸHandle)k), p, 0, valtype, nil, 0);
+        return regSetValueEx((syscallꓸHandle)k, p, 0, valtype, nil, 0);
     }
-    return regSetValueEx(((syscallꓸHandle)k), p, 0, valtype, Ꮡ(data, 0), (uint32)len(data));
+    return regSetValueEx((syscallꓸHandle)k, p, 0, valtype, Ꮡ(data, 0), (uint32)len(data));
 }
 
 // SetDWordValue sets the data and type of a name value
@@ -281,7 +291,7 @@ internal static error setValue(this Key k, @string name, uint32 valtype, slice<b
 public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    return k.setValue(name, DWORD, (~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))[..]);
+    return k.setValue(name, DWORD, ((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))).slice());
 }
 
 // SetQWordValue sets the data and type of a name value
@@ -289,7 +299,7 @@ public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
 public static error SetQWordValue(this Key k, @string name, uint64 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    return k.setValue(name, QWORD, (~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue)))[..]);
+    return k.setValue(name, QWORD, ((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡvalue))).slice());
 }
 
 internal static unsafe error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
@@ -339,7 +349,11 @@ public static error SetBinaryValue(this Key k, @string name, slice<byte> value) 
 
 // DeleteValue removes a named value from the key k.
 public static error DeleteValue(this Key k, @string name) {
-    return regDeleteValue(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(name));
+    var (namep, err) = syscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        return err;
+    }
+    return regDeleteValue((syscallꓸHandle)k, namep);
 }
 
 // ReadValueNames returns the value names of key k.
@@ -355,7 +369,7 @@ loopItems:
         ref var l = ref heap<uint32>(out var Ꮡl);
         l = (uint32)len(buf);
         while (ᐧ) {
-            var errΔ1 = regEnumValue(((syscallꓸHandle)k), i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
+            var errΔ1 = regEnumValue((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
             if (errΔ1 == default!) {
                 break;
             }
@@ -370,7 +384,7 @@ loopItems:
             }
             return (names, errΔ1);
         }
-        names = append(names, syscall.UTF16ToString(buf[..(int)(l)]));
+        names = append(names, syscall.UTF16ToString(buf.slice(0, (nint)(l))));
 continue_loopItems:;
     }
 break_loopItems:;

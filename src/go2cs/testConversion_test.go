@@ -921,13 +921,16 @@ func TestConvertTestsRefusesHandOwnedAndToolchainPackages(t *testing.T) {
 // go.context_package.Context whether or not the suite mentions context. It cannot be import-derived
 // (Go's sources do not import context to call t.Context()) and it cannot arrive transitively
 // (DisableTransitiveProjectReferences is pinned by the sibling guard below), so fixed is the only
-// place it can live. This assertion is exact rather than a subset check on purpose: the set is the
+// place it can live. `io` joined for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer,
+// so every adapter body names go.io_package.Writer (net/netip: CS0012, CS0234, CS9334). This
+// assertion is exact rather than a subset check on purpose: the set is the
 // reference every test project pays for, and growing it should require saying so here.
 func TestTestProjectFixedReferencesRootedInCore(t *testing.T) {
 	want := []string{
 		`$(go2csPath)core/golib/golib.csproj`,
 		`$(go2csPath)core/testing/testing.csproj`,
 		`$(go2csPath)core/context/context.csproj`,
+		`$(go2csPath)core/io/io.csproj`,
 	}
 
 	if !reflect.DeepEqual(testProjectFixedReferences, want) {
@@ -1484,7 +1487,7 @@ func TestWriteTestHostUsesCSharpClassOverride(t *testing.T) {
 		Name: "TestInternal", Kind: "test", PackageName: "value", CSharpClassName: "value_internal_test_package",
 		Source: "value_test.go", Line: 12, Status: "included",
 	}}
-	if err := writeTestHost(dir, "go", "example/value", declarations, nil, nil, nil, nil, "", ""); err != nil {
+	if err := writeTestHost(dir, "go", "example/value", declarations, nil, nil, nil, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, testHostFileName))
@@ -1525,7 +1528,7 @@ func TestFixtureDirectoriesStagePackageShape(t *testing.T) {
 	}
 
 	out := t.TempDir()
-	if err := writeTestHost(out, "go", "os", nil, nil, []string{"read_test.go"}, directories, nil, "", ""); err != nil {
+	if err := writeTestHost(out, "go", "os", nil, nil, []string{"read_test.go"}, directories, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(out, testHostFileName))
@@ -1552,7 +1555,7 @@ func TestFixtureDirectoriesStagePackageShape(t *testing.T) {
 	// array, so its host stays byte-identical to one generated before this capability existed —
 	// which is what keeps a banked host out of the diff for a run environment that did not change.
 	bare := t.TempDir()
-	if err := writeTestHost(bare, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, "", ""); err != nil {
+	if err := writeTestHost(bare, "go", "cmp", nil, nil, []string{"cmp.go"}, nil, nil, "", nil, ""); err != nil {
 		t.Fatal(err)
 	}
 	data, err = os.ReadFile(filepath.Join(bare, testHostFileName))
@@ -1629,12 +1632,12 @@ func TestNestedSiblingTestdataIsStaged(t *testing.T) {
 	// F7: a nested fixture is a conversion INPUT, so adding one invalidates a prior comparison
 	// exactly as a top-level testdata file does.
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, out, options, "converter")
+	first, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	write("internal/oldtrace/testdata/http_1_19_good", "trace\n")
-	second, err := testInputDigest(dir, out, options, "converter")
+	second, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2903,14 +2906,14 @@ func TestInputDigestDetectsSourceChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(source, []byte("package value\nvar changed = true\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2927,7 +2930,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2939,7 +2942,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2955,11 +2958,11 @@ func TestInputDigestDetectsConversionOptionChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter")
+	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter")
+	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3118,6 +3121,46 @@ func TestTestingTBCapabilitiesAreSupported(t *testing.T) {
 		if !supported.Contains("TB." + member) {
 			t.Fatalf("TB.%s must be a supported capability — core/testing's TB declares it and T implements it", member)
 		}
+	}
+}
+
+// Go 1.25's Attr and Output and Go 1.26's ArtifactDir are supported on T and on TB. Their absence gated
+// testing's own re-exec helpers (TestAttrExample, TestPanicHelper, the TestArtifactDir* examples), so
+// each helper's parent read a child that printed only "PASS". Pins both spellings, a direct T call and a
+// TB helper reached transitively, and that the test is included.
+func TestTestingGo126CapabilitiesAreSupported(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/go126surface\n\ngo 1.26\n",
+		"value.go": "package go126surface\n",
+		"value_test.go": "package go126surface\n" +
+			"import \"testing\"\n" +
+			"func keep(tb testing.TB) { tb.Attr(\"k\", \"v\"); _ = tb.Output(); _ = tb.ArtifactDir() }\n" +
+			"func TestGo126(t *testing.T) { t.Attr(\"k\", \"v\"); t.Output().Write(nil); _ = t.ArtifactDir(); keep(t) }\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, internal := loadTestVariantForDir(t, dir)
+
+	analysis := analyzeTestingCapabilities(internal)
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
+
+	if len(declarations) != 1 || declarations[0].Name != "TestGo126" {
+		t.Fatalf("declarations = %#v, want just TestGo126", declarations)
+	}
+
+	required := hashset.NewHashSet(declarations[0].RequiredCapabilities)
+	for _, capability := range []string{"T.Attr", "T.Output", "T.ArtifactDir", "TB.Attr", "TB.Output", "TB.ArtifactDir"} {
+		if !required.Contains(capability) {
+			t.Fatalf("required capabilities %v do not contain %q", declarations[0].RequiredCapabilities, capability)
+		}
+	}
+
+	if declarations[0].Status != "included" {
+		t.Fatalf("TestGo126 status = %q reason %q, want included — core/testing implements Attr, Output and ArtifactDir", declarations[0].Status, declarations[0].Reason)
 	}
 }
 
@@ -3720,6 +3763,41 @@ func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
 	}
 	if !strings.Contains(contents, "[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]") {
 		t.Fatalf("the surviving record must be the bare-spelling pointer form:\n%s", contents)
+	}
+}
+
+// A1 guard (COORD ruling 2026-10-16): a PRODUCTION pointer implementer of an interface declared in
+// the external test package itself anchors test-side. The pointer adapter is a class in the test
+// compilation, so it mutates no production type and the reference model can host it. crypto/mlkem at Go
+// 1.26 is the instance: *DecapsulationKey768 against mlkem_test's decapsulationKey[E encapsulationKey];
+// crypto/ecdh's lifted test-local _ᴛ1/_ᴛ2 are the same shape. Production-anchored before, these records
+// forced the recompile fallback. The controls keep the production anchor: the universe's error (bare, but
+// not the test package's), a qualified interface, a qualified generic interface, and the VALUE form,
+// whose generated partial struct must merge with the production declaration.
+func TestExternalVariantTestLocalInterfaceAnchorsTestSide(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	cases := []struct {
+		iface string
+		impl  string
+		want  bool
+	}{
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<value_package.DecapKey>", true},            // test-local generic
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<global::go.value_package.DecapKey>", true}, // rooted implementer
+		{"_ᴛ2", PointerPrefix + "<go.value_package.PrivateKey>", true},                                      // lifted test-local
+		{"encapsulationKey", PointerPrefix + "<value_package.EncapKey>", true},                              // test-local, non-generic
+		{"error", PointerPrefix + "<value_package.Builder>", false},                                         // universe error
+		{"io.Writer", PointerPrefix + "<value_package.Builder>", false},                                     // qualified interface
+		{"iter_package.Seq<int>", PointerPrefix + "<value_package.Builder>", false},                         // qualified generic
+		{"decapsulationKey<encapsulationKey>", "value_package.DecapKey", false},                             // value form
+	}
+
+	for _, testCase := range cases {
+		if got := isTestAnchoredImplementRecord(testCase.iface, testCase.impl, "value_package", false); got != testCase.want {
+			t.Errorf("isTestAnchoredImplementRecord(%q, %q) = %v, want %v", testCase.iface, testCase.impl, got, testCase.want)
+		}
 	}
 }
 
@@ -4446,9 +4524,10 @@ func TestAliasScanCoversRecompiledProductionSources(t *testing.T) {
 // the TEST files rather than the missing folder.
 //
 // Three things are pinned: the target folder is taken, a NON-target folder is not (it is a
-// different build), and the per-GOOS `package_init.cs` is included — a `-tests` run rewrites it to
-// declare the `initᴛᴛtests()` partial the internal variant implements, and a declaration whose
-// implementation is in another compilation is no hook at all.
+// different build), and the per-GOOS `package_init.cs` is included — it holds the production static
+// ctor the internal variant's module initializer forces before its own relocations
+// (TestPackageInitIsIdenticalFromEitherMode), and a ctor left out of the compilation leaves
+// production's relocated vars unset.
 func TestProductionCSFilesTakeTheTargetPlatformFolder(t *testing.T) {
 	dir := t.TempDir()
 
@@ -4556,9 +4635,9 @@ func TestTestVariantContinuesProductionInitOrdinals(t *testing.T) {
 
 // X6 guard (the production static-ctor probe follows LAYOUT L3): the internal variant shares the
 // production `<pkg>_package` class, which has exactly one static-constructor slot. When the
-// production package_init.cs exists it owns that slot and the test side implements its erasable
-// `initᴛᴛtests()` partial hook instead of declaring a second ctor — and the probe deciding which
-// shape to emit is a file-exists check that looked FLAT only.
+// production package_init.cs exists it owns that slot and the test side emits an `initᴛᴛtests()`
+// module initializer that forces it, instead of declaring a second ctor — and the probe deciding
+// which shape to emit is a file-exists check that looked FLAT only.
 //
 // L3 keeps package_init.cs in the package's per-GOOS folder (Go's InitOrder differs when the file
 // set does), so an L3 package answered "no production ctor" and got a SECOND
@@ -4592,8 +4671,8 @@ func TestProductionInitProbeFollowsPlatformLayout(t *testing.T) {
 	}
 
 	// A package with no production static ctor at all must still answer "absent" — the test side
-	// owns the slot there, and a probe answering "present" would emit a hook implementation with no
-	// declaration to implement.
+	// owns the slot there, and a probe answering "present" would trade the variant's own static ctor
+	// for a module initializer that runs its relocations eagerly where nothing requires it.
 	empty := t.TempDir()
 	if _, err := os.Stat(platformLayoutPath(empty, "windows", PackageInitFileName)); err == nil {
 		t.Fatal("a package with no package_init.cs must probe as absent")

@@ -102,7 +102,7 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
         check.Value.scope = scope;
         check.Value.exprPos = pos;
         var checkʗ1 = check;
-        defer(checkʗ1.handleBailout, Ꮡerr, ref ᒐ);
+        defer(checkʗ1.handleBailout, Ꮡerr, ref ᒐ, recovers: true);
 
         // evaluate node
         ref var x = ref heap(new operand(), out var Ꮡx);

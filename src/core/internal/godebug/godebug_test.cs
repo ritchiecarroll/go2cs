@@ -106,7 +106,7 @@ public static void TestPanicNilRace(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingTestIntendedForˢ);
     }
     if (os.Getenv(godebugˢ) != "panicnil=1"u8) {
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(Ꮡt), os.Args[0], testRunTestPanicNilRaceˢ, testVˢ, testParallel2ˢ, testCount1ˢ));
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), testRunTestPanicNilRaceˢ, testVˢ, testParallel2ˢ, testCount1ˢ));
         cmd.Value.Env = append((~cmd).Env, "GODEBUG=panicnil=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         Ꮡt.Logf("output:\n%s"u8, @out);
@@ -142,8 +142,8 @@ private static readonly @string godebugTestGoˢ = "godebug_test.go"u8;
 private static readonly @string godebugTestGoˢ2 = "godebug_test.go:"u8;
 
 public static void TestCmdBisect(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
-    var (@out, err) = exec.Command("go"u8, runˢ, cmdVendorGolangOrgXToolsˢ, godebugBuggy1Patternˢ, os.Args[0], testRunˢ).CombinedOutput();
+    testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
+    var (@out, err) = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), runˢ, cmdVendorGolangOrgXToolsˢ, godebugBuggy1Patternˢ, os.Args[0], testRunˢ).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("exec bisect: %v\n%s"u8, err, @out);
     }
@@ -153,7 +153,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    foreach (var (i, line) in strings.Split(((@string)src), "\n"u8)) {
+    foreach (var (i, line) in strings.Split((@string)src, "\n"u8)) {
         if (strings.Contains(line, "BISECT"u8 + " "u8 + "BUG"u8)) {
             want = append(want, fmt.Sprintf("godebug_test.go:%d"u8, i + 1));
         }
@@ -161,7 +161,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(want);
 
     slice<@string> have = default!;
-    foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
             have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }
@@ -169,7 +169,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(have);
 
     if (!slices.Equal<slice<@string>, @string>(have, want)) {
-        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, ((@string)@out));
+        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, (@string)@out);
     }
 }
 
@@ -205,6 +205,46 @@ public static void TestBisectTestCase(ж<testing.T> Ꮡt) {
             Ꮡt.Error(bugˢ);
         }
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string fips140ˢ = "fips140"u8;
+private static readonly @string fips140Offˢ = "fips140=off"u8;
+private static readonly @string fips140Onˢ = "fips140=on"u8;
+private static readonly @string fips140ˢ2 = "fips140="u8;
+
+public static void TestImmutable(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        defer((@string godebug) => {
+            os.Setenv(godebugˢ, godebug);
+        }, os.Getenv(godebugˢ), ref ᒐ);
+
+        var setting = New(fips140ˢ);
+        @string value = setting.Value();
+
+        os.Setenv(godebugˢ, fips140Offˢ);
+        if (setting.Value() != value) {
+            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140=off"u8);
+        }
+
+        os.Setenv(godebugˢ, fips140Onˢ);
+        if (setting.Value() != value) {
+            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140=on"u8);
+        }
+
+        os.Setenv(godebugˢ, fips140ˢ2);
+        if (setting.Value() != value) {
+            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140="u8);
+        }
+
+        os.Setenv(godebugˢ, ""u8);
+        if (setting.Value() != value) {
+            Ꮡt.Errorf("Value() changed after setting GODEBUG="u8);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 } // end godebug_test_package

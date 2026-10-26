@@ -124,6 +124,9 @@ public abstract partial class ж<T>
         if (this is FieldRefBox<T> view)
             return ref view.m_views;
 
+        if (this is ElemRefBox<T> element)
+            return ref element.m_views;
+
         return ref s_views.GetOrCreateValue(this).Head;
     }
 
@@ -166,7 +169,7 @@ public abstract partial class ж<T>
 
         for (ViewEntry? e = viewsHead(); e is not null; e = e.Next)
         {
-            if (ReferenceEquals(e.Token, token) || e.Token.Equals(token))
+            if (sameAccessor(e.Token, token))
             {
                 view = (ж<TElem>)e.View;
                 return true;
@@ -176,6 +179,20 @@ public abstract partial class ж<T>
         view = null;
         return false;
     }
+
+    // Delegate.Equals, answered without it. Every `&x.f` site converts the accessor method group to its
+    // OWN cached delegate, so one field reaches a box's list as several instances, and a lookup compares
+    // its token against every entry ahead of its own. Delegate.Equals settles two distinct instances in
+    // the runtime's method-handle comparison, which made the walk most of the run time of crypto/x509's
+    // TestBetterTLS (P-256 field arithmetic, three views a point). For a single-cast delegate the same
+    // delegate type, target and method is Delegate.Equals' own answer; Method is cached on the delegate
+    // after its first read, and its handle names the one runtime method, as Delegate.Equals compares. A
+    // multicast delegate's Target and Method name only its LAST entry, so one still asks Delegate.Equals.
+    private static bool sameAccessor(Delegate entry, Delegate token) =>
+        ReferenceEquals(entry, token) ||
+        (entry.HasSingleTarget && token.HasSingleTarget
+            ? ReferenceEquals(entry.Target, token.Target) && entry.Method.MethodHandle.Equals(token.Method.MethodHandle) && entry.GetType() == token.GetType()
+            : entry.Equals(token));
 
     private ж<TElem> publishView<TElem>(Delegate token, FieldRefBox<TElem> view)
     {
@@ -193,7 +210,7 @@ public abstract partial class ж<T>
 
             for (ViewEntry? e = seen; e is not null; e = e.Next)
             {
-                if (ReferenceEquals(e.Token, token) || e.Token.Equals(token))
+                if (sameAccessor(e.Token, token))
                     return (ж<TElem>)e.View;
             }
 

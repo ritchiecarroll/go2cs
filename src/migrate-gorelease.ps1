@@ -392,6 +392,8 @@ $editableSites = @(
         Find = '\*\*\[Go {OLD}\]\(https://go\.dev/dl/\)\*\*(?= \(for the reference)'
         Replace = '**[Go {NEW}](https://go.dev/dl/)**'
         Expect = 1
+        Retired = 'f3871b52f0'
+        RetiredNote = 'the README became a short front page; its "Try it yourself" section and this prerequisite moved out, and the Requirements line below is the one place the release is stated'
         Note = 'the "Try it yourself" prerequisite -- a visitor installs this exact release or the sweep refuses'
     }
     # The Requirements line names the same link shape since 2026-09-24 (it read "Go 1.23+" until the
@@ -400,15 +402,18 @@ $editableSites = @(
     # which would misread a literal em dash -- \u2014 is the regex escape for the one that follows.
     @{
         File = 'docs/README.md'; Class = 'DOC-STATEMENT'
-        Find = '\*\*\[Go {OLD}\]\(https://go\.dev/dl/\)\*\*(?= \u2014 the converter is a Go program)'
+        # Re-anchored 2026-10-14 (the Go 1.26 hop's H2): f3871b52f0 reworded the line, which now reads
+        # "**[Go X](https://go.dev/dl/)**, exactly that release. The converter is a Go program ...".
+        Find = '\*\*\[Go {OLD}\]\(https://go\.dev/dl/\)\*\*(?=, exactly that release)'
         Replace = '**[Go {NEW}](https://go.dev/dl/)**'
         Expect = 1
         Note = 'the Requirements line -- the exact release go2cs is built with (src/go2cs/go.mod)'
     }
     @{
         File = 'docs/ValidatedTestPackages.md'; Class = 'DOC-STATEMENT'
-        Find = 'has its own Go {OLD} '
-        Replace = 'has its own Go {NEW} '
+        # Re-anchored 2026-10-14 (the Go 1.26 hop's H2): f86b299dc1's plain roster opening reads "has had its own Go X test suite".
+        Find = 'has had its own Go {OLD} '
+        Replace = 'has had its own Go {NEW} '
         Expect = 1
         Note = "roster preamble: the release each row's test suite comes from"
     }
@@ -602,6 +607,40 @@ $pathClasses = @(
     @{ Match = '^\.claude/rules/converter\.md$';          Class = 'MUST-NOT-CHANGE'; Note = 'H2->H5 WINDOW statements naming BOTH pins (the two-pin pairing), plus an illustrative forward-slash GOROOT spelling inside a dated finding; re-read at H5 when the window closes' }
     @{ Match = '^\.claude/rules/harness-gates\.md$';      Class = 'MUST-NOT-CHANGE'; Note = 'dated measurements and toolchain-resolution findings whose whole content is which release a reading was taken at (including a GOVERSION-vs-GoStdLibVersion FORMAT example)' }
     @{ Match = '^\.claude/skills/.+/SKILL\.md$';          Class = 'MUST-NOT-CHANGE'; Note = 'skill provenance: dated findings, stdlib census records and named test leaves, each true only of the release it names' }
+
+    # Classified 2026-10-14, the Go 1.26 hop's H2 (go1.24.13 -> go1.26.9), by READING every one of
+    # the 48 files the census reported UNCLASSIFIED, occurrence by occurrence. Not one states the
+    # corpus pin in the present tense: each is a dated finding, a measurement stamp, a worked example
+    # against an immutable published NuGet version, a hermetic fixture, or a tool's own build floor.
+    # One is regenerated (the comment census baseline). As above, each rule is keyed on a real class.
+    @{ Match = '^\.claude/coord-scripts/templates/';      Class = 'MUST-NOT-CHANGE'; Note = "COORD's train-kit templates: each train's kit is derived from them by COORD with that train's pins; a kit is never edited by this instrument" }
+    @{ Match = '^\.claude/rules/(corpus|golib-gen)\.md$'; Class = 'MUST-NOT-CHANGE'; Note = 'dated provenance and findings of the 1.23 -> 1.24 hop, each true only of the release it names' }
+    @{ Match = '^docs/BeforeAndAfterTheFaceLift\.md$';    Class = 'MUST-NOT-CHANGE'; Note = 'provenance comments citing Go source by FILE AND LINE at the release the before/after pairs were taken on' }
+    @{ Match = '^docs/KnownIssues\.md$';                  Class = 'MUST-NOT-CHANGE'; Note = 'dated measurements against published NuGet releases' }
+    @{ Match = '^docs/ValidatedModules\.md$';             Class = 'MUST-NOT-CHANGE'; Note = 'measurement environment stamp: the toolchain the module rows were validated on; the rows re-validate, the stamp moves with them' }
+    @{ Match = '^src/check-h5c-goos-child\.ps1$';         Class = 'MUST-NOT-CHANGE'; Note = "the F1 red-first fixture NAMES its hop: -ExpectSourceGo defaults to that hop's OUTGOING release" }
+    @{ Match = '^src/check-(h6-completeness|pack-paths|roster-format)\.ps1$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = 'illustrative comments, dated measurements, and self-test fixtures whose release is an INPUT' }
+    @{ Match = '^src/core/Directory\.Build\.props$';      Class = 'MUST-NOT-CHANGE'; Note = 'a dated comment naming the release rehearsal that found the case' }
+    @{ Match = '^src/core/(internal/sync/hashtriemap|runtime/runtime2|sync/mutex|sync/waitgroup)\.cs$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = 'whole-file hand-own (a .cs.auto sibling exists): comments record the Go surface measured at a named release; H6 re-audits them, never a substitution' }
+    @{ Match = '^src/gen/go2cs-gen/.+\.cs$';              Class = 'MUST-NOT-CHANGE'; Note = 'generator comments naming the rehearsal, or the Go source, a case came from' }
+    @{ Match = '^src/go2cs/internal/commentcensus/testdata/corpus_baseline\.txt$'
+                                                          Class = 'DERIVED-BY-REGEN'; Note = 'the census header names the GOROOT the baseline was measured against; GO2CS_COMMENT_CENSUS_UPDATE=1 rewrites it with the regen (H5)' }
+    @{ Match = '^src/go2cs/internal/repoguard/testdata/handowns-retired\.tsv$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = 'closed H6 records: each row states why a hand-own went away at the release it names' }
+    @{ Match = '^src/(handown-baseline|release-nuget|run-h10-recon)\.ps1$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = 'worked examples, dated findings, and self-test rows whose release is an INPUT (run-h10-recon matches a release WHOLE)' }
+    @{ Match = '^src/tests/Behavioral/BehavioralTests/.+\.cs$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = "MSTest comment recording Go's own answer measured on a named toolchain" }
+    @{ Match = '^src/tests/GenTests/.+\.cs$';             Class = 'MUST-NOT-CHANGE'; Note = 'generator-test comments naming the rehearsal or the Go release a case came from' }
+    @{ Match = '^src/tests/GolibTests/GolibTests\.csproj$'; Class = 'MUST-NOT-CHANGE'; Note = 'comments recording which packages a named release moved or removed' }
+    @{ Match = '^src/tests/PackageTests/';                Class = 'MUST-NOT-CHANGE'; Note = 'worked examples and red-first records against immutable published NuGet versions' }
+    @{ Match = '^src/tools/(alloc-units|crosspkg-census)/README\.md$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = "the tool's own build pin, tied to its go.mod floor (src/tools/<tool>/go.mod, above); re-pinning a tool is a per-module decision, never a substitution" }
+    @{ Match = '^src/tools/alloc-units/testdata/';        Class = 'MUST-NOT-CHANGE'; Note = 'hermetic fixture records: oracleGoVersion is fixture data' }
+    @{ Match = '^src/tools/nugetgo/';                     Class = 'MUST-NOT-CHANGE'; Note = 'published-closure examples and hermetic fixtures; a pack derives the release from its closure at run time' }
+    @{ Match = '^src/tools/pushnuget/';                   Class = 'MUST-NOT-CHANGE'; Note = 'dated release-rehearsal records and the fixture that reproduces one' }
 )
 
 # ---- resolve the two releases -------------------------------------------------------------------

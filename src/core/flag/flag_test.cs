@@ -336,7 +336,7 @@ public static void TestFlagSetParse(ж<testing.T> Ꮡt) {
 partial struct flagVar /*[]@string*/;
 
 internal static @string ΔString(this ref flagVar f) {
-    return fmt.Sprint(((slice<@string>)(f)));
+    return fmt.Sprint((slice<@string>)(f));
 }
 
 internal static error ΔSet(this ref flagVar f, @string value) {
@@ -477,7 +477,7 @@ public static void TestUserDefinedBool(ж<testing.T> Ꮡt) {
     }
 
     if (b.count != 4) {
-        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)(4), b.count);
+        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)4, b.count);
     }
 
     if (err == default!) {
@@ -930,7 +930,7 @@ public static void TestExitCode(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in tests) {
         var test = vᴛ1;
 
-        var cmd = exec.Command(Δos.Args[0], testRunTestExitCodeˢ);
+        var cmd = exec.Command(testenv.Executable(new flag_test_package.testing_TжTB(Ꮡt)), testRunTestExitCodeˢ);
         cmd.Value.Env = append(
             Δos.Environ(),
             "GO_CHILD_FLAG="u8 + test.flag,

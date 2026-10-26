@@ -22,15 +22,15 @@ internal static (fieldElement, error) fieldCheckReduced(uint16 a) {
     if (a >= q) {
         return (0, errors.New(unreducedFieldElementˢ));
     }
-    return (((fieldElement)a), default!);
+    return ((fieldElement)a, default!);
 }
 
 // fieldReduceOnce reduces a value a < 2q.
 internal static fieldElement fieldReduceOnce(uint16 a) {
     var x = (uint16)(a - (uint16)q);
     // If x underflowed, then x >= 2¹⁶ - q > 2¹⁵, so the top bit is set.
-    x += (uint16)(((x >> (int)(15))) * (uint16)q);
-    return ((fieldElement)x);
+    x += (uint16)((x >> 15) * (uint16)q);
+    return (fieldElement)x;
 }
 
 internal static fieldElement fieldAdd(fieldElement a, fieldElement b) {
@@ -49,7 +49,7 @@ internal static UntypedInt barrettShift => 24; // log₂(2¹² * 2¹²)
 // fieldReduce reduces a value a < 2q² using Barrett reduction, to avoid
 // potentially variable-time division.
 internal static fieldElement fieldReduce(uint32 a) {
-    var quotient = (uint32)((((uint64)a * (uint64)barrettMultiplier) >> (int)(barrettShift)));
+    var quotient = (uint32)(((uint64)a * (uint64)barrettMultiplier) >> (int)(barrettShift));
     return fieldReduceOnce((uint16)(a - quotient * (uint32)q));
 }
 
@@ -78,10 +78,11 @@ internal static fieldElement fieldAddMul(fieldElement a, fieldElement b, fieldEl
 internal static uint16 compress(fieldElement x, uint8 d) {
     // We want to compute (x * 2ᵈ) / q, rounded to nearest integer, with 1/2
     // rounding up (see FIPS 203, Section 2.3).
+
     // Barrett reduction produces a quotient and a remainder in the range [0, 2q),
     // such that dividend = quotient * q + remainder.
     var dividend = ((uint32)(uint16)x).Lsh((uint64)(d)); // x * 2ᵈ
-    var quotient = (uint32)(((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift)));
+    var quotient = (uint32)((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift));
     var remainder = dividend - quotient * (uint32)q;
 
     // Since the remainder is in the range [0, 2q), not [0, q), we need to
@@ -96,12 +97,12 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     //
     // Note that if remainder > x, then ⌊x⌋ - remainder underflows, and the top
     // bit of the difference will be set.
-    quotient += (uint32)((((uint32)(q / 2) - remainder) >> (int)(31)) & 1);
-    quotient += (uint32)((((uint32)(q + q / 2) - remainder) >> (int)(31)) & 1);
+    quotient += (((uint32)(q / 2) - remainder) >> 31 & 1);
+    quotient += (((uint32)(q + q / 2) - remainder) >> 31 & 1);
 
     // quotient might have overflowed at this point, so reduce it by masking.
     uint32 mask = (((uint32)1).Lsh((uint64)(d))) - 1;
-    return (uint16)((uint32)(quotient & mask));
+    return (uint16)(quotient & mask);
 }
 
 // decompress maps a number x between 0 and 2ᵈ-1 uniformly to the full range of
@@ -109,16 +110,17 @@ internal static uint16 compress(fieldElement x, uint8 d) {
 internal static fieldElement decompress(uint16 y, uint8 d) {
     // We want to compute (y * q) / 2ᵈ, rounded to nearest integer, with 1/2
     // rounding up (see FIPS 203, Section 2.3).
+
     var dividend = (uint32)y * (uint32)q;
     var quotient = dividend.Rsh((uint64)(d)); // (y * q) / 2ᵈ
 
     // The d'th least-significant bit of the dividend (the most significant bit
     // of the remainder) is 1 for the top half of the values that divide to the
     // same quotient, which are the ones that round up.
-    quotient += (uint32)(dividend.Rsh((uint64)((uint8)(d - 1))) & 1);
+    quotient += (dividend.Rsh((uint64)((uint8)(d - 1))) & 1);
 
     // quotient is at most (2¹¹-1) * q / 2¹¹ + 1 = 3328, so it didn't overflow.
-    return ((fieldElement)(uint16)quotient);
+    return (fieldElement)(uint16)quotient;
 }
 
 // ringElement is a polynomial, an element of R_q, represented as an array
@@ -132,7 +134,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldAdd(a[i], b[i]);
     }
     return s;
@@ -144,7 +146,7 @@ internal static T /*s*/ polySub<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldSub(a[i], b[i]);
     }
     return s;
@@ -158,10 +160,10 @@ internal static slice<byte> polyByteEncode<T>(slice<byte> b, T f)
 {
     var (@out, B) = sliceForAppend(b, encodingSize12);
     for (nint i = 0; i < n; i += 2) {
-        var x = (uint32)((uint32)(uint16)f[i] | ((uint32)(uint16)f[i + 1] << (int)(12)));
+        var x = (uint32)(uint16)f[i] | (uint32)(uint16)f[i + 1] << 12;
         B[0] = (uint8)x;
-        B[1] = (uint8)((x >> (int)(8)));
-        B[2] = (uint8)((x >> (int)(16)));
+        B[1] = (uint8)(x >> 8);
+        B[2] = (uint8)(x >> 16);
         B = B[3..];
     }
     return @out;
@@ -184,7 +186,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     }
     T f = GoZero<T>();
     for (nint i = 0; i < n; i += 2) {
-        var d = (uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16)));
+        var d = (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16;
         const uint32 mask12 = 0b1111_1111_1111;
         error err = default!;
         {
@@ -193,7 +195,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
             }
         }
         {
-            (f[i + 1], err) = fieldCheckReduced((uint16)((d >> (int)(12)))); if (err != default!) {
+            (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != default!) {
                 return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
             }
         }
@@ -231,11 +233,9 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
     f = f.Clone();
 
     (s, var b) = sliceForAppend(s, encodingSize1);
-    foreach (var (i, _) in b) {
-        b[i] = 0;
-    }
-    foreach (var (i, _) in f) {
-        b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)((i % 8)))));
+    clear(b);
+    foreach (var i in range(f)) {
+        b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)(i % 8))));
     }
     return s;
 }
@@ -247,8 +247,8 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 // followed by Decompress₁, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress1(ref array<byte> b) {
     ringElement f = default!;
-    foreach (var (i, _) in f) {
-        var b_i = (byte)(b[i / 8].Rsh((int64)((i % 8))) & 1);
+    foreach (var i in range(f)) {
+        var b_i = (byte)(b[i / 8].Rsh((int64)(i % 8)) & 1);
         UntypedInt halfQ = /* (q + 1) / 2 */ 1665; // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ); // 0 decompresses to 0, and 1 to ⌈q/2⌋
     }
@@ -265,7 +265,7 @@ internal static slice<byte> ringCompressAndEncode4(slice<byte> s, ringElement f)
 
     (s, var b) = sliceForAppend(s, encodingSize4);
     for (nint i = 0; i < n; i += 2) {
-        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << (int)(4))));
+        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << 4)));
     }
     return s;
 }
@@ -279,7 +279,7 @@ internal static ringElement ringDecodeAndDecompress4(ref array<byte> b) {
     ringElement f = default!;
     for (nint i = 0; i < n; i += 2) {
         f[i] = decompress((uint16)((byte)(b[i / 2] & 0b1111)), 4);
-        f[i + 1] = decompress((uint16)((b[i / 2] >> (int)(4))), 4);
+        f[i + 1] = decompress((uint16)(b[i / 2] >> 4), 4);
     }
     return f.Clone();
 }
@@ -296,14 +296,14 @@ internal static slice<byte> ringCompressAndEncode10(slice<byte> s, ringElement f
     for (nint i = 0; i < n; i += 4) {
         uint64 x = default!;
         x |= (uint64)((uint64)compress(f[i], 10));
-        x |= (uint64)(((uint64)compress(f[i + 1], 10) << (int)(10)));
-        x |= (uint64)(((uint64)compress(f[i + 2], 10) << (int)(20)));
-        x |= (uint64)(((uint64)compress(f[i + 3], 10) << (int)(30)));
+        x |= (uint64)(((uint64)compress(f[i + 1], 10) << 10));
+        x |= (uint64)(((uint64)compress(f[i + 2], 10) << 20));
+        x |= (uint64)(((uint64)compress(f[i + 3], 10) << 30));
         b[0] = (uint8)x;
-        b[1] = (uint8)((x >> (int)(8)));
-        b[2] = (uint8)((x >> (int)(16)));
-        b[3] = (uint8)((x >> (int)(24)));
-        b[4] = (uint8)((x >> (int)(32)));
+        b[1] = (uint8)(x >> 8);
+        b[2] = (uint8)(x >> 16);
+        b[3] = (uint8)(x >> 24);
+        b[4] = (uint8)(x >> 32);
         b = b[5..];
     }
     return s;
@@ -320,12 +320,12 @@ internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> 
     var b = bb[..];
     ringElement f = default!;
     for (nint i = 0; i < n; i += 4) {
-        var x = (uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32)));
+        var x = (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32;
         b = b[5..];
-        f[i] = decompress((uint16)((uint64)((x >> (int)(0)) & 0b11_1111_1111)), 10);
-        f[i + 1] = decompress((uint16)((uint64)((x >> (int)(10)) & 0b11_1111_1111)), 10);
-        f[i + 2] = decompress((uint16)((uint64)((x >> (int)(20)) & 0b11_1111_1111)), 10);
-        f[i + 3] = decompress((uint16)((uint64)((x >> (int)(30)) & 0b11_1111_1111)), 10);
+        f[i] = decompress((uint16)(x >> 0 & 0b11_1111_1111), 10);
+        f[i + 1] = decompress((uint16)(x >> 10 & 0b11_1111_1111), 10);
+        f[i + 2] = decompress((uint16)(x >> 20 & 0b11_1111_1111), 10);
+        f[i + 3] = decompress((uint16)(x >> 30 & 0b11_1111_1111), 10);
     }
     return f.Clone();
 }
@@ -337,6 +337,7 @@ internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> 
 // followed by ByteEncode, according to FIPS 203, Algorithm 5.
 internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, uint8 d) {
     f = f.Clone();
+    var sᴷ = new stackAppend<byte>(moves: true);
 
     byte b = default!;
     uint8 bIdx = default!;
@@ -349,7 +350,7 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
             bIdx += bits;
             cIdx += bits;
             if (bIdx == 8) {
-                s = append(s, b);
+                s = append(sᴷ, s, b);
                 b = 0;
                 bIdx = 0;
             }
@@ -358,6 +359,7 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
     if (bIdx != 0) {
         throw panic("mlkem: internal error: bitsFilled != 0");
     }
+    s = move2heap(sᴷ, s);
     return s;
 }
 
@@ -451,10 +453,10 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     ringElement f = default!;
     for (nint i = 0; i < n; i += 2) {
         var bΔ1 = B[i / 2];
-        var (b_7, b_6, b_5, b_4) = ((byte)((bΔ1 >> (int)(7))), (byte)((bΔ1 >> (int)(6)) & 1), (byte)((bΔ1 >> (int)(5)) & 1), (byte)((bΔ1 >> (int)(4)) & 1));
-        var (b_3, b_2, b_1, b_0) = ((byte)((bΔ1 >> (int)(3)) & 1), (byte)((bΔ1 >> (int)(2)) & 1), (byte)((bΔ1 >> (int)(1)) & 1), (byte)(bΔ1 & 1));
-        f[i] = fieldSub(((fieldElement)(uint16)((byte)(b_0 + b_1))), ((fieldElement)(uint16)((byte)(b_2 + b_3))));
-        f[i + 1] = fieldSub(((fieldElement)(uint16)((byte)(b_4 + b_5))), ((fieldElement)(uint16)((byte)(b_6 + b_7))));
+        var (b_7, b_6, b_5, b_4) = ((byte)((bΔ1 >> 7)), (byte)(bΔ1 >> 6 & 1), (byte)(bΔ1 >> 5 & 1), (byte)(bΔ1 >> 4 & 1));
+        var (b_3, b_2, b_1, b_0) = ((byte)(bΔ1 >> 3 & 1), (byte)(bΔ1 >> 2 & 1), (byte)(bΔ1 >> 1 & 1), (byte)(bΔ1 & 1));
+        f[i] = fieldSub((fieldElement)(uint16)((byte)(b_0 + b_1)), (fieldElement)(uint16)((byte)(b_2 + b_3)));
+        f[i + 1] = fieldSub((fieldElement)(uint16)((byte)(b_4 + b_5)), (fieldElement)(uint16)((byte)(b_6 + b_7)));
     }
     return f.Clone();
 }
@@ -466,7 +468,7 @@ partial struct nttElement /*[256]fieldElement*/;
 
 // gammas are the values ζ^2BitRev7(i)+1 mod q for each index i, according to
 // FIPS 203, Appendix A (with negative values reduced to positive).
-internal static array<fieldElement> gammas = new fieldElement[]{17, 3312, 2761, 568, 583, 2746, 2649, 680, 1637, 1692, 723, 2606, 2288, 1041, 1100, 2229, 1409, 1920, 2662, 667, 3281, 48, 233, 3096, 756, 2573, 2156, 1173, 3015, 314, 3050, 279, 1703, 1626, 1651, 1678, 2789, 540, 1789, 1540, 1847, 1482, 952, 2377, 1461, 1868, 2687, 642, 939, 2390, 2308, 1021, 2437, 892, 2388, 941, 733, 2596, 2337, 992, 268, 3061, 641, 2688, 1584, 1745, 2298, 1031, 2037, 1292, 3220, 109, 375, 2954, 2549, 780, 2090, 1239, 1645, 1684, 1063, 2266, 319, 3010, 2773, 556, 757, 2572, 2099, 1230, 561, 2768, 2466, 863, 2594, 735, 2804, 525, 1092, 2237, 403, 2926, 1026, 2303, 1143, 2186, 2150, 1179, 2775, 554, 886, 2443, 1722, 1607, 1212, 2117, 1874, 1455, 1029, 2300, 2110, 1219, 2935, 394, 885, 2444, 2154, 1175}.array();
+[GoLazy] partial class lazyᴛgammas { internal static array<fieldElement> gammas = new fieldElement[]{17, 3312, 2761, 568, 583, 2746, 2649, 680, 1637, 1692, 723, 2606, 2288, 1041, 1100, 2229, 1409, 1920, 2662, 667, 3281, 48, 233, 3096, 756, 2573, 2156, 1173, 3015, 314, 3050, 279, 1703, 1626, 1651, 1678, 2789, 540, 1789, 1540, 1847, 1482, 952, 2377, 1461, 1868, 2687, 642, 939, 2390, 2308, 1021, 2437, 892, 2388, 941, 733, 2596, 2337, 992, 268, 3061, 641, 2688, 1584, 1745, 2298, 1031, 2037, 1292, 3220, 109, 375, 2954, 2549, 780, 2090, 1239, 1645, 1684, 1063, 2266, 319, 3010, 2773, 556, 757, 2572, 2099, 1230, 561, 2768, 2466, 863, 2594, 735, 2804, 525, 1092, 2237, 403, 2926, 1026, 2303, 1143, 2186, 2150, 1179, 2775, 554, 886, 2443, 1722, 1607, 1212, 2117, 1874, 1455, 1029, 2300, 2110, 1219, 2935, 394, 885, 2444, 2154, 1175}.array(); }
 
 // nttMul multiplies two nttElements.
 //
@@ -488,7 +490,7 @@ internal static nttElement nttMul(nttElement f, nttElement g) {
 
 // zetas are the values ζ^BitRev7(k) mod q for each index k, according to FIPS
 // 203, Appendix A.
-internal static array<fieldElement> zetas = new fieldElement[]{1, 1729, 2580, 3289, 2642, 630, 1897, 848, 1062, 1919, 193, 797, 2786, 3260, 569, 1746, 296, 2447, 1339, 1476, 3046, 56, 2240, 1333, 1426, 2094, 535, 2882, 2393, 2879, 1974, 821, 289, 331, 3253, 1756, 1197, 2304, 2277, 2055, 650, 1977, 2513, 632, 2865, 33, 1320, 1915, 2319, 1435, 807, 452, 1438, 2868, 1534, 2402, 2647, 2617, 1481, 648, 2474, 3110, 1227, 910, 17, 2761, 583, 2649, 1637, 723, 2288, 1100, 1409, 2662, 3281, 233, 756, 2156, 3015, 3050, 1703, 1651, 2789, 1789, 1847, 952, 1461, 2687, 939, 2308, 2437, 2388, 733, 2337, 268, 641, 1584, 2298, 2037, 3220, 375, 2549, 2090, 1645, 1063, 319, 2773, 757, 2099, 561, 2466, 2594, 2804, 1092, 403, 1026, 1143, 2150, 2775, 886, 1722, 1212, 1874, 1029, 2110, 2935, 885, 2154}.array();
+[GoLazy] partial class lazyᴛzetas { internal static array<fieldElement> zetas = new fieldElement[]{1, 1729, 2580, 3289, 2642, 630, 1897, 848, 1062, 1919, 193, 797, 2786, 3260, 569, 1746, 296, 2447, 1339, 1476, 3046, 56, 2240, 1333, 1426, 2094, 535, 2882, 2393, 2879, 1974, 821, 289, 331, 3253, 1756, 1197, 2304, 2277, 2055, 650, 1977, 2513, 632, 2865, 33, 1320, 1915, 2319, 1435, 807, 452, 1438, 2868, 1534, 2402, 2647, 2617, 1481, 648, 2474, 3110, 1227, 910, 17, 2761, 583, 2649, 1637, 723, 2288, 1100, 1409, 2662, 3281, 233, 756, 2156, 3015, 3050, 1703, 1651, 2789, 1789, 1847, 952, 1461, 2687, 939, 2308, 2437, 2388, 733, 2337, 268, 641, 1584, 2298, 2037, 3220, 375, 2549, 2090, 1645, 1063, 319, 2773, 757, 2099, 561, 2466, 2594, 2804, 1092, 403, 1026, 1143, 2150, 2775, 886, 1722, 1212, 1874, 1029, 2110, 2935, 885, 2154}.array(); }
 
 // ntt maps a ringElement to its nttElement representation.
 //
@@ -510,7 +512,7 @@ internal static nttElement ntt(ringElement f) {
             }
         }
     }
-    return ((nttElement)(array<fieldElement>)f);
+    return (nttElement)(array<fieldElement>)f;
 }
 
 // inverseNTT maps a nttElement back to the ringElement it represents.
@@ -533,10 +535,10 @@ internal static ringElement inverseNTT(nttElement f) {
             }
         }
     }
-    foreach (var (i, _) in f) {
+    foreach (var i in range(f)) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
-    return ((ringElement)(array<fieldElement>)f);
+    return (ringElement)(array<fieldElement>)f;
 }
 
 // sampleNTT draws a uniformly random nttElement from a stream of uniformly
@@ -581,17 +583,17 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
             off = 0;
         }
         var d1 = (uint16)(byteorder.LEUint16(buf.slice(off)) & 0b1111_1111_1111);
-        var d2 = (uint16)((byteorder.LEUint16(buf.slice(off + 1)) >> (int)(4)));
+        var d2 = (uint16)((byteorder.LEUint16(buf.slice(off + 1)) >> 4));
         off += 3;
         if (d1 < q) {
-            a[j] = ((fieldElement)d1);
+            a[j] = (fieldElement)d1;
             j++;
         }
         if (j >= len(a)) {
             break;
         }
         if (d2 < q) {
-            a[j] = ((fieldElement)d2);
+            a[j] = (fieldElement)d2;
             j++;
         }
         if (j >= len(a)) {

@@ -171,7 +171,9 @@ internal static void writeError(this ref state s, error err) {
 internal static void errRecover(ref error errp) {
     GoFrame ᒐ = default;
     try {
-        var e = recover();
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
+        var e = recover(calledByDefer);
         if (e != default!) {
             switch (e.type()) {
             case {} Δerr when Δerr._<runtimeꓸError>(out var err): {
@@ -235,7 +237,7 @@ internal static error /*err*/ execute(this ж<Template> Ꮡt, io.Writer wr, any 
         ref var t = ref Ꮡt.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => errRecover(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => errRecover(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         var (value, ok) = data._<reflectꓸValue>(ᐧ);
         if (!ok) {
             value = reflect.ValueOf(data);
@@ -412,7 +414,7 @@ internal static (bool truth, bool ok) isTrue(reflectꓸValue val) {
     else if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
         truth = val.Complex() != 0D;
     }
-    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔInterface) {
+    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔInterface) {
         truth = !val.IsNil();
     }
     else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {

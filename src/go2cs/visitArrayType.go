@@ -253,7 +253,7 @@ func namedArrayElemDimsAttr(namedType types.Type) string {
 //     length lives only in the Go type, never in `array<T>`, so every element would keep a null
 //     backing: `len(x[1])` reports 0 (Go says 4) and the first indexed write panics; or
 //   - a struct whose own zero value needs construction — `default(T)` skips the generated
-//     constructor that runs its fixed-array field initializers and allocates its embed boxes.
+//     constructor that runs its fixed-array field initializers and builds its embed fields.
 //
 // A NAMED array element (`type row [4]byte`) needs no factory: its generated wrapper allocates its
 // backing lazily from its own known size (go2cs-gen's `m_value ??= new row(4)`).
@@ -301,8 +301,8 @@ func arrayLengthArgs(lengthExpr string, elemFactory string) string {
 //     zeroed elements. `new(N)` (plus arrayZeroValueArgs' element factory for a nested/needy
 //     element) builds it. A NAMED array type is excluded — its generated wrapper allocates its
 //     backing lazily from its own known size, exactly as arrayElemFactory documents;
-//   - a struct with a PROMOTED EMBED, whose readonly `ж<T>` box exists only when a constructor
-//     runs — `new(nil)`;
+//   - a struct with a PROMOTED EMBED, whose embed fields (a pointer embed's nil box) only a
+//     constructor builds — `new(nil)`;
 //   - a struct carrying a fixed-array field at any depth, whose `= new(N)` field initializer only
 //     runs inside an explicitly declared constructor — `new()` (go2cs-gen always emits the
 //     parameterless one for this reason).
@@ -354,6 +354,12 @@ func (v *Visitor) typeParamZero(t types.Type) string {
 		return ""
 	}
 
+	// A type parameter that carries an array-dims companion builds its zero from the dims the call
+	// site supplied, since an array type argument's length is not in its C# type (arrayDimsCompanion.go).
+	if companion := v.arrayDimsCompanionFor(t); companion != "" {
+		return fmt.Sprintf("GoArrayZero.Of<%s, %s>()", v.getCSharpTypeName(t), companion)
+	}
+
 	return fmt.Sprintf("GoZero<%s>()", v.getCSharpTypeName(t))
 }
 
@@ -375,7 +381,7 @@ func (v *Visitor) arrayElemFactory(elemType types.Type) string {
 	}
 
 	// Mirrors the zero-value construction the local/global variable paths already emit for these
-	// struct shapes (a promoted embed's readonly `ж<T>` box exists only when a constructor runs).
+	// struct shapes (a promoted embed's field, a pointer embed's nil box, is built only by a constructor).
 	if v.structHasPromotedEmbeds(elemType) {
 		return "new(nil)"
 	}

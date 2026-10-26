@@ -69,8 +69,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("part 1: ReadAll: %v"u8, err);
     }
     {
-        @string e = ((@string)fileContents);
-        @string g = ((@string)slurp); if (e != g) {
+        @string e = (@string)fileContents;
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 1: want contents %q, got %q"u8, e, g);
         }
     }
@@ -91,7 +91,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     }
     {
         @string e = valˢ;
-        @string g = ((@string)slurp); if (e != g) {
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 2: want contents %q, got %q"u8, e, g);
         }
     }
@@ -215,6 +215,30 @@ public static void TestSortedHeader(ж<testing.T> Ꮡt) {
     @string want = mimeboundaryA2B5B7B6C4M3ˢ;
     if (want != buf.String()) {
         Ꮡt.Fatalf("\n got: %q\nwant: %q\n"u8, buf.String(), want);
+    }
+}
+
+internal partial struct TestFileContentDisposition_tests /*dyn*/ {
+    internal @string fieldname;
+    internal @string filename;
+    internal @string want;
+}
+
+public static void TestFileContentDisposition(ж<testing.T> Ꮡt) {
+    var tests = new TestFileContentDisposition_tests[]{
+        new("somefield"u8, "somefile.txt"u8, @"form-data; name=""somefield""; filename=""somefile.txt"""u8),
+        new(@"field""withquotes"""u8, "somefile.txt"u8, @"form-data; name=""field\""withquotes\""""; filename=""somefile.txt"""u8),
+        new(@"somefield"u8, @"somefile""withquotes"".txt"u8, @"form-data; name=""somefield""; filename=""somefile\""withquotes\"".txt"""u8),
+        new(@"somefield\withbackslash"u8, "somefile.txt"u8, @"form-data; name=""somefield\\withbackslash""; filename=""somefile.txt"""u8),
+        new("somefield"u8, @"somefile\withbackslash.txt"u8, @"form-data; name=""somefield""; filename=""somefile\\withbackslash.txt"""u8),
+        new("a\rb\nc"u8, "e\rf\ng"u8, @"form-data; name=""a%0Db%0Ac""; filename=""e%0Df%0Ag"""u8)
+    }.slice();
+    foreach (var (i, tt) in tests) {
+        {
+            @string found = FileContentDisposition(tt.fieldname, tt.filename); if (found != tt.want) {
+                Ꮡt.Errorf(@"%d. found: ""%s""; want: ""%s"""u8, i, found, tt.want);
+            }
+        }
     }
 }
 

@@ -3,10 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using fmt = fmt_package;
 using token = global::go.go.token_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using global::go.go;
@@ -104,43 +106,51 @@ foo
     new(token.MUL, "*"u8, @operator),
     new(token.QUO, "/"u8, @operator),
     new(token.REM, "%"u8, @operator),
+
     new(token.AND, "&"u8, @operator),
     new(token.OR, "|"u8, @operator),
     new(token.XOR, "^"u8, @operator),
     new(token.SHL, "<<"u8, @operator),
     new(token.SHR, ">>"u8, @operator),
     new(token.AND_NOT, "&^"u8, @operator),
+
     new(token.ADD_ASSIGN, "+="u8, @operator),
     new(token.SUB_ASSIGN, "-="u8, @operator),
     new(token.MUL_ASSIGN, "*="u8, @operator),
     new(token.QUO_ASSIGN, "/="u8, @operator),
     new(token.REM_ASSIGN, "%="u8, @operator),
+
     new(token.AND_ASSIGN, "&="u8, @operator),
     new(token.OR_ASSIGN, "|="u8, @operator),
     new(token.XOR_ASSIGN, "^="u8, @operator),
     new(token.SHL_ASSIGN, "<<="u8, @operator),
     new(token.SHR_ASSIGN, ">>="u8, @operator),
     new(token.AND_NOT_ASSIGN, "&^="u8, @operator),
+
     new(token.LAND, "&&"u8, @operator),
     new(token.LOR, "||"u8, @operator),
     new(token.ARROW, "<-"u8, @operator),
     new(token.INC, "++"u8, @operator),
     new(token.DEC, "--"u8, @operator),
+
     new(token.EQL, "=="u8, @operator),
     new(token.LSS, "<"u8, @operator),
     new(token.GTR, ">"u8, @operator),
     new(token.ASSIGN, "="u8, @operator),
     new(token.NOT, "!"u8, @operator),
+
     new(token.NEQ, "!="u8, @operator),
     new(token.LEQ, "<="u8, @operator),
     new(token.GEQ, ">="u8, @operator),
     new(token.DEFINE, ":="u8, @operator),
     new(token.ELLIPSIS, "..."u8, @operator),
+
     new(token.LPAREN, "("u8, @operator),
     new(token.LBRACK, "["u8, @operator),
     new(token.LBRACE, "{"u8, @operator),
     new(token.COMMA, ","u8, @operator),
     new(token.PERIOD, "."u8, @operator),
+
     new(token.RPAREN, ")"u8, @operator),
     new(token.RBRACK, "]"u8, @operator),
     new(token.RBRACE, "}"u8, @operator),
@@ -154,21 +164,25 @@ foo
     new(token.CHAN, "chan"u8, keyword),
     new(token.CONST, "const"u8, keyword),
     new(token.CONTINUE, "continue"u8, keyword),
+
     new(token.DEFAULT, "default"u8, keyword),
     new(token.DEFER, "defer"u8, keyword),
     new(token.ELSE, "else"u8, keyword),
     new(token.FALLTHROUGH, "fallthrough"u8, keyword),
     new(token.FOR, "for"u8, keyword),
+
     new(token.FUNC, "func"u8, keyword),
     new(token.GO, "go"u8, keyword),
     new(token.GOTO, "goto"u8, keyword),
     new(token.IF, "if"u8, keyword),
     new(token.IMPORT, "import"u8, keyword),
+
     new(token.INTERFACE, "interface"u8, keyword),
     new(token.MAP, "map"u8, keyword),
     new(token.PACKAGE, "package"u8, keyword),
     new(token.RANGE, "range"u8, keyword),
     new(token.RETURN, "return"u8, keyword),
+
     new(token.SELECT, "select"u8, keyword),
     new(token.STRUCT, "struct"u8, keyword),
     new(token.SWITCH, "switch"u8, keyword),
@@ -243,7 +257,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         // check position
         if (tok == token.EOF) {
             // correction for EOF
-            epos.Line = newlineCount(((@string)source));
+            epos.Line = newlineCount((@string)source);
             epos.Column = 2;
         }
         checkPos(Ꮡt, lit, pos, epos);
@@ -268,7 +282,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         var exprᴛ1 = e.tok;
         if (exprᴛ1 == token.COMMENT) {
             // no CRs in comments
-            elit = ((@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*'));
+            elit = (@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*');
             //-style comment literal doesn't contain newline
             if (elit[1] == (rune)'/') {
                 elit = elit.slice(0, len(elit) - 1);
@@ -285,7 +299,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
                 // no CRs in raw string literals
                 elit = e.lit;
                 if (elit[0] == (rune)'`') {
-                    elit = ((@string)stripCR(slice<byte>(elit), false));
+                    elit = (@string)stripCR(slice<byte>(elit), false);
                 }
             } else 
             if (e.tok.IsKeyword()) {
@@ -327,7 +341,7 @@ public static void TestStripCR(ж<testing.T> Ꮡt) {
         new("/*\r/\r*\r/*/"u8, "/*/*\r/*/"u8),
         new("/*\r\r\r\r*/"u8, "/**/"u8)
     }.slice()) {
-        @string got = ((@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*'));
+        @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*');
         if (got != test.want) {
             Ꮡt.Errorf("stripCR(%q) = %q; want %q"u8, test.have, got, test.want);
         }
@@ -341,6 +355,8 @@ internal static readonly @string commentˢ3 = "COMMENT"u8;
 internal static readonly @string testSemisˢ = "TestSemis"u8;
 
 internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, global::go.go.scanner_package.Mode mode) {
+    var tokensᴷ = new stackAppend<@string>();
+
     if ((global::go.go.scanner_package.Mode)(mode & ScanComments) == 0) {
         want = strings.ReplaceAll(want, commentˢ, ""u8);
         want = strings.ReplaceAll(want, commentˢ2, ""u8); // if at end
@@ -365,7 +381,7 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
             }
         }
         lit = tok.String(); // "\n" => ";"
-        tokens = append(tokens, lit);
+        tokens = append(tokensᴷ, tokens, lit);
     }
     {
         @string got = strings.Join(tokens, " "u8); if (got != want) {
@@ -387,96 +403,114 @@ internal static array<semicolonTestsᴛ1> semicolonTests = new semicolonTestsᴛ
     new("'x'\n"u8, "CHAR ;"u8),
     new(@"""x"""u8 + "\n"u8, "STRING ;"u8),
     new("`x`\n"u8, "STRING ;"u8),
+
     new("+\n"u8, "+"u8),
     new("-\n"u8, "-"u8),
     new("*\n"u8, "*"u8),
     new("/\n"u8, "/"u8),
     new("%\n"u8, "%"u8),
+
     new("&\n"u8, "&"u8),
     new("|\n"u8, "|"u8),
     new("^\n"u8, "^"u8),
     new("<<\n"u8, "<<"u8),
     new(">>\n"u8, ">>"u8),
     new("&^\n"u8, "&^"u8),
+
     new("+=\n"u8, "+="u8),
     new("-=\n"u8, "-="u8),
     new("*=\n"u8, "*="u8),
     new("/=\n"u8, "/="u8),
     new("%=\n"u8, "%="u8),
+
     new("&=\n"u8, "&="u8),
     new("|=\n"u8, "|="u8),
     new("^=\n"u8, "^="u8),
     new("<<=\n"u8, "<<="u8),
     new(">>=\n"u8, ">>="u8),
     new("&^=\n"u8, "&^="u8),
+
     new("&&\n"u8, "&&"u8),
     new("||\n"u8, "||"u8),
     new("<-\n"u8, "<-"u8),
     new("++\n"u8, "++ ;"u8),
     new("--\n"u8, "-- ;"u8),
+
     new("==\n"u8, "=="u8),
     new("<\n"u8, "<"u8),
     new(">\n"u8, ">"u8),
     new("=\n"u8, "="u8),
     new("!\n"u8, "!"u8),
+
     new("!=\n"u8, "!="u8),
     new("<=\n"u8, "<="u8),
     new(">=\n"u8, ">="u8),
     new(":=\n"u8, ":="u8),
     new("...\n"u8, "..."u8),
+
     new("(\n"u8, "("u8),
     new("[\n"u8, "["u8),
     new("{\n"u8, "{"u8),
     new(",\n"u8, ","u8),
     new(".\n"u8, "."u8),
+
     new(")\n"u8, ") ;"u8),
     new("]\n"u8, "] ;"u8),
     new("}\n"u8, "} ;"u8),
     new(";\n"u8, ";"u8),
     new(":\n"u8, ":"u8),
+
     new("break\n"u8, "break ;"u8),
     new("case\n"u8, "case"u8),
     new("chan\n"u8, "chan"u8),
     new("const\n"u8, "const"u8),
     new("continue\n"u8, "continue ;"u8),
+
     new("default\n"u8, "default"u8),
     new("defer\n"u8, "defer"u8),
     new("else\n"u8, "else"u8),
     new("fallthrough\n"u8, "fallthrough ;"u8),
     new("for\n"u8, "for"u8),
+
     new("func\n"u8, "func"u8),
     new("go\n"u8, "go"u8),
     new("goto\n"u8, "goto"u8),
     new("if\n"u8, "if"u8),
     new("import\n"u8, "import"u8),
+
     new("interface\n"u8, "interface"u8),
     new("map\n"u8, "map"u8),
     new("package\n"u8, "package"u8),
     new("range\n"u8, "range"u8),
     new("return\n"u8, "return ;"u8),
+
     new("select\n"u8, "select"u8),
     new("struct\n"u8, "struct"u8),
     new("switch\n"u8, "switch"u8),
     new("type\n"u8, "type"u8),
     new("var\n"u8, "var"u8),
+
     new("foo//comment\n"u8, "IDENT COMMENT ;"u8),
     new("foo//comment"u8, "IDENT COMMENT ;"u8),
     new("foo/*comment*/\n"u8, "IDENT COMMENT ;"u8),
     new("foo/*\n*/"u8, "IDENT COMMENT ;"u8),
     new("foo/*comment*/    \n"u8, "IDENT COMMENT ;"u8),
     new("foo/*\n*/    "u8, "IDENT COMMENT ;"u8),
+
     new("foo    // comment\n"u8, "IDENT COMMENT ;"u8),
     new("foo    // comment"u8, "IDENT COMMENT ;"u8),
     new("foo    /*comment*/\n"u8, "IDENT COMMENT ;"u8),
     new("foo    /*\n*/"u8, "IDENT COMMENT ;"u8),
     new("foo    /*  */ /* \n */ bar/**/\n"u8, "IDENT COMMENT COMMENT ; IDENT COMMENT ;"u8),
     new("foo    /*0*/ /*1*/ /*2*/\n"u8, "IDENT COMMENT COMMENT COMMENT ;"u8),
+
     new("foo    /*comment*/    \n"u8, "IDENT COMMENT ;"u8),
     new("foo    /*0*/ /*1*/ /*2*/    \n"u8, "IDENT COMMENT COMMENT COMMENT ;"u8),
     new("foo	/**/ /*-------------*/       /*----\n*/bar       /*  \n*/baa\n"u8, "IDENT COMMENT COMMENT COMMENT ; IDENT COMMENT ; IDENT ;"u8),
     new("foo    /* an EOF terminates a line */"u8, "IDENT COMMENT ;"u8),
     new("foo    /* an EOF terminates a line */ /*"u8, "IDENT COMMENT COMMENT ;"u8),
     new("foo    /* an EOF terminates a line */ //"u8, "IDENT COMMENT COMMENT ;"u8),
+
     new("package main\n\nfunc main() {\n\tif {\n\t\treturn /* */ }\n}\n"u8, "package IDENT ; func IDENT ( ) { if { return COMMENT } ; } ;"u8),
     new("package main"u8, "package IDENT ;"u8)
 }.array();
@@ -526,6 +560,7 @@ internal static slice<segment> segments = new segment[]{
     new("\n//line bar:100\nb1"u8, "bar"u8, 100, 0),
     new("\n//line :100:10\nc1"u8, "bar"u8, 100, 10), // missing filename means current filename
     new("\n//line foo:100:10\nd1"u8, "foo"u8, 100, 10),
+
     new("\n/*line :100*/a2"u8, ""u8, 100, 0), // missing filename means empty filename
     new("\n/*line bar:100*/b2"u8, "bar"u8, 100, 0),
     new("\n/*line :100:10*/c2"u8, "bar"u8, 100, 10), // missing filename means current filename
@@ -840,6 +875,33 @@ public static void TestScanErrors(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void TestUTF16(ж<testing.T> Ꮡt) {
+    // This test doesn't fit within TestScanErrors because
+    // the latter assumes that there was only one error.
+    foreach (var (_, src) in new @string[]{
+        ((@string)(new byte[]{0xfe, 0xff, 0x00, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70})), // BOM + "package p" encoded as UTF-16 BE
+        ((@string)(new byte[]{0xff, 0xfe, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70, 0x00})) // BOM + "package p" encoded as UTF-16 LE
+    }.slice()) {
+        ref var got = ref heap<slice<@string>>(out var Ꮡgot);
+        var eh = (tokenꓸPosition posn, @string msg) => {
+            Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, fmt.Sprintf("#%d: %s"u8, posn.Offset, msg));
+        };
+        global::go.go.scanner_package.Scanner sc = default!;
+        sc.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), 0);
+        sc.Scan();
+
+        // We expect two errors:
+        // one from the decoder, one from the scanner.
+        var want = new @string[]{
+            "#0: illegal UTF-8 encoding (got UTF-16)"u8,
+            "#0: illegal character U+FFFD '�'"u8
+        }.slice();
+        if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            Ꮡt.Errorf("Scan(%q) returned errors %q, want %q"u8, src, got, want);
+        }
+    }
+}
+
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string srcᶜ1 = """
 
@@ -964,14 +1026,17 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.INT, "0b0"u8, "0b0"u8, ""u8),
         new(token.INT, "0b1010"u8, "0b1010"u8, ""u8),
         new(token.INT, "0B1110"u8, "0B1110"u8, ""u8),
+
         new(token.INT, "0b"u8, "0b"u8, "binary literal has no digits"u8),
         new(token.INT, "0b0190"u8, "0b0190"u8, "invalid digit '9' in binary literal"u8),
         new(token.INT, "0b01a0"u8, "0b01 a0"u8, ""u8), // only accept 0-9
+
         new(token.FLOAT, "0b."u8, "0b."u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b.1"u8, "0b.1"u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b1.0"u8, "0b1.0"u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b1e10"u8, "0b1e10"u8, "'e' exponent requires decimal mantissa"u8),
         new(token.FLOAT, "0b1P-1"u8, "0b1P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
+
         new(token.IMAG, "0b10i"u8, "0b10i"u8, ""u8),
         new(token.IMAG, "0b10.0i"u8, "0b10.0i"u8, "invalid radix point in binary literal"u8),
 
@@ -979,21 +1044,25 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.INT, "0o0"u8, "0o0"u8, ""u8),
         new(token.INT, "0o1234"u8, "0o1234"u8, ""u8),
         new(token.INT, "0O1234"u8, "0O1234"u8, ""u8),
+
         new(token.INT, "0o"u8, "0o"u8, "octal literal has no digits"u8),
         new(token.INT, "0o8123"u8, "0o8123"u8, "invalid digit '8' in octal literal"u8),
         new(token.INT, "0o1293"u8, "0o1293"u8, "invalid digit '9' in octal literal"u8),
         new(token.INT, "0o12a3"u8, "0o12 a3"u8, ""u8), // only accept 0-9
+
         new(token.FLOAT, "0o."u8, "0o."u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o.2"u8, "0o.2"u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o1.2"u8, "0o1.2"u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o1E+2"u8, "0o1E+2"u8, "'E' exponent requires decimal mantissa"u8),
         new(token.FLOAT, "0o1p10"u8, "0o1p10"u8, "'p' exponent requires hexadecimal mantissa"u8),
+
         new(token.IMAG, "0o10i"u8, "0o10i"u8, ""u8),
         new(token.IMAG, "0o10e0i"u8, "0o10e0i"u8, "'e' exponent requires decimal mantissa"u8),
 
         // 0-octals
         new(token.INT, "0"u8, "0"u8, ""u8),
         new(token.INT, "0123"u8, "0123"u8, ""u8),
+
         new(token.INT, "08123"u8, "08123"u8, "invalid digit '8' in octal literal"u8),
         new(token.INT, "01293"u8, "01293"u8, "invalid digit '9' in octal literal"u8),
         new(token.INT, "0F."u8, "0 F ."u8, ""u8), // only accept 0-9
@@ -1003,7 +1072,9 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         // decimals
         new(token.INT, "1"u8, "1"u8, ""u8),
         new(token.INT, "1234"u8, "1234"u8, ""u8),
+
         new(token.INT, "1f"u8, "1 f"u8, ""u8), // only accept 0-9
+
         new(token.IMAG, "0i"u8, "0i"u8, ""u8),
         new(token.IMAG, "0678i"u8, "0678i"u8, ""u8),
 
@@ -1011,29 +1082,37 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.FLOAT, "0."u8, "0."u8, ""u8),
         new(token.FLOAT, "123."u8, "123."u8, ""u8),
         new(token.FLOAT, "0123."u8, "0123."u8, ""u8),
+
         new(token.FLOAT, ".0"u8, ".0"u8, ""u8),
         new(token.FLOAT, ".123"u8, ".123"u8, ""u8),
         new(token.FLOAT, ".0123"u8, ".0123"u8, ""u8),
+
         new(token.FLOAT, "0.0"u8, "0.0"u8, ""u8),
         new(token.FLOAT, "123.123"u8, "123.123"u8, ""u8),
         new(token.FLOAT, "0123.0123"u8, "0123.0123"u8, ""u8),
+
         new(token.FLOAT, "0e0"u8, "0e0"u8, ""u8),
         new(token.FLOAT, "123e+0"u8, "123e+0"u8, ""u8),
         new(token.FLOAT, "0123E-1"u8, "0123E-1"u8, ""u8),
+
         new(token.FLOAT, "0.e+1"u8, "0.e+1"u8, ""u8),
         new(token.FLOAT, "123.E-10"u8, "123.E-10"u8, ""u8),
         new(token.FLOAT, "0123.e123"u8, "0123.e123"u8, ""u8),
+
         new(token.FLOAT, ".0e-1"u8, ".0e-1"u8, ""u8),
         new(token.FLOAT, ".123E+10"u8, ".123E+10"u8, ""u8),
         new(token.FLOAT, ".0123E123"u8, ".0123E123"u8, ""u8),
+
         new(token.FLOAT, "0.0e1"u8, "0.0e1"u8, ""u8),
         new(token.FLOAT, "123.123E-10"u8, "123.123E-10"u8, ""u8),
         new(token.FLOAT, "0123.0123e+456"u8, "0123.0123e+456"u8, ""u8),
+
         new(token.FLOAT, "0e"u8, "0e"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0E+"u8, "0E+"u8, "exponent has no digits"u8),
         new(token.FLOAT, "1e+f"u8, "1e+ f"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0p0"u8, "0p0"u8, "'p' exponent requires hexadecimal mantissa"u8),
         new(token.FLOAT, "1.0P-1"u8, "1.0P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
+
         new(token.IMAG, "0.i"u8, "0.i"u8, ""u8),
         new(token.IMAG, ".123i"u8, ".123i"u8, ""u8),
         new(token.IMAG, "123.123i"u8, "123.123i"u8, ""u8),
@@ -1046,8 +1125,10 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.INT, "0x1234"u8, "0x1234"u8, ""u8),
         new(token.INT, "0xcafef00d"u8, "0xcafef00d"u8, ""u8),
         new(token.INT, "0XCAFEF00D"u8, "0XCAFEF00D"u8, ""u8),
+
         new(token.INT, "0x"u8, "0x"u8, "hexadecimal literal has no digits"u8),
         new(token.INT, "0x1g"u8, "0x1 g"u8, ""u8),
+
         new(token.IMAG, "0xf00i"u8, "0xf00i"u8, ""u8),
 
         // hexadecimal floats
@@ -1056,6 +1137,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.FLOAT, "0xABCD.p+0"u8, "0xABCD.p+0"u8, ""u8),
         new(token.FLOAT, "0x.0189P-0"u8, "0x.0189P-0"u8, ""u8),
         new(token.FLOAT, "0x1.ffffp+1023"u8, "0x1.ffffp+1023"u8, ""u8),
+
         new(token.FLOAT, "0x."u8, "0x."u8, "hexadecimal literal has no digits"u8),
         new(token.FLOAT, "0x0."u8, "0x0."u8, "hexadecimal mantissa requires a 'p' exponent"u8),
         new(token.FLOAT, "0x.0"u8, "0x.0"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
@@ -1066,6 +1148,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.FLOAT, "0xeP-"u8, "0xeP-"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0x1234PAB"u8, "0x1234P AB"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0x1.2p1a"u8, "0x1.2p1 a"u8, ""u8),
+
         new(token.IMAG, "0xf00.bap+12i"u8, "0xf00.bap+12i"u8, ""u8),
 
         // separators
@@ -1077,6 +1160,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.IMAG, "10e+1_2_3i"u8, "10e+1_2_3i"u8, ""u8),
         new(token.INT, "0x_f00d"u8, "0x_f00d"u8, ""u8),
         new(token.FLOAT, "0x_f00d.0p1_2"u8, "0x_f00d.0p1_2"u8, ""u8),
+
         new(token.INT, "0b__1000"u8, "0b__1000"u8, "'_' must separate successive digits"u8),
         new(token.INT, "0o60___0"u8, "0o60___0"u8, "'_' must separate successive digits"u8),
         new(token.INT, "0466_"u8, "0466_"u8, "'_' must separate successive digits"u8),

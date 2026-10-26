@@ -41,6 +41,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
 internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
+
     // Since we don't know the set of needed file positions, we reserve
     // maxlines positions per file. We delay calling token.File.SetLines until
     // all positions have been calculated (by way of fakeFileSet.setLines), so
@@ -59,13 +60,13 @@ internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line
     }
 
     // Return a fake position assuming that f.file consists only of newlines.
-    return ((tokenꓸPos)((~f).@file.Base() + line - 1));
+    return (tokenꓸPos)((~f).@file.Base() + line - 1);
 }
 
 internal static void setLines(this ref fakeFileSet s) {
     ᏑfakeLinesOnce.Do(() => {
         fakeLines = new slice<nint>(maxlines);
-        foreach (var (i, _) in fakeLines) {
+        foreach (var i in range(fakeLines)) {
             fakeLines[i] = i;
         }
     });

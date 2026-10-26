@@ -24,15 +24,29 @@ partial struct netFD {
     internal ΔAddr raddr;
 }
 
+internal static @string name(this ref netFD fd) {
+    @string ls = default!;
+    @string rs = default!;
+    if (fd.laddr != default!) {
+        ls = fd.laddr.String();
+    }
+    if (fd.raddr != default!) {
+        rs = fd.raddr.String();
+    }
+    return fd.net + ":"u8 + ls + "->"u8 + rs;
+}
+
 internal static void setAddr(this ж<netFD> Ꮡfd, ΔAddr laddr, ΔAddr raddr) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.laddr = laddr;
     fd.raddr = raddr;
+    // TODO Replace with runtime.AddCleanup.
     runtime.SetFinalizer(Ꮡfd.OrTypedNil(), ((Func<ж<netFD>, error>)(Close)));
 }
 
 internal static error Close(this ж<netFD> Ꮡfd) {
+    // TODO Replace with runtime.AddCleanup.
     runtime.SetFinalizer(Ꮡfd.OrTypedNil(), default!);
     return Ꮡfd.of(netFD.Ꮡpfd).Close();
 }

@@ -51,7 +51,7 @@ partial struct commentInfo {
 
 partial struct printer {
     // Configuration (does not change after initialization)
-    public partial ref Config Config { get; }
+    /*embed*/ public Config Config;
     internal ж<token.FileSet> fset;
     // Current state
     internal slice<byte> output;  // raw printer result
@@ -80,7 +80,7 @@ partial struct printer {
     internal slice<ж<ast.CommentGroup>> comments; // may be nil
     internal bool useNodeComments;                // if not set, ignore lead and line comments of nodes
     // Information about p.comments[p.cindex]; set up by nextComment.
-    internal partial ref commentInfo commentInfo { get; }
+    /*embed*/ internal commentInfo commentInfo;
     // Cache of already computed node sizes.
     internal map<ast.Node, nint> nodeSizes;
     // Cache of most recently computed line position.
@@ -613,7 +613,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
                 }
                 // Shorten the computed common prefix by the length of
                 // suffix, if it is found as suffix of the prefix.
-                prefix = strings.TrimSuffix(prefix, ((@string)suffix));
+                prefix = strings.TrimSuffix(prefix, (@string)suffix);
             }
         }
     }
@@ -1241,7 +1241,7 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
     // get comments ready for use
     p.nextComment();
 
-    Ꮡp.print(((pmode)0));
+    Ꮡp.print((pmode)0);
 
     // format node
     switch (node.type()) {
@@ -1448,15 +1448,15 @@ partial struct Config {
     public nint Indent; // default: 0 (all code is indented at least by this much)
 }
 
-internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛprinterPool { internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new printer(
             // Whitespace sequences are short.
             wsbuf: new slice<whiteSpace>(0, 16),
             // We start the printer with a 16K output buffer, which is currently
             // larger than about 80% of Go files in the standard library.
-            output: new slice<byte>(0, (16 << (int)(10)))
+            output: new slice<byte>(0, (16 << 10))
         ))
-));
+)); }
 internal static ref sync.Pool printerPool => ref ᏑprinterPool.Value;
 
 internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> Ꮡfset, map<ast.Node, nint> nodeSizes) {
@@ -1478,7 +1478,7 @@ internal static void free(this ж<printer> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Hard limit on buffer size; see https://golang.org/issue/23199.
-    if (cap(p.output) > (64 << (int)(10))) {
+    if (cap(p.output) > 64 << 10) {
         return;
     }
 

@@ -16,7 +16,7 @@ namespace go;
 //  c.qcount < c.dataqsiz implies that c.sendq is empty.
 using abi = @internal.abi_package;
 using atomic = @internal.runtime.atomic_package;
-using math = @internal.runtime.math_package;
+using Δmath = @internal.runtime.math_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 partial class runtime_package {
 
 internal static UntypedInt maxAlign => 8;
-internal static uintptr hchanSize => /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 104;
+internal static uintptr hchanSize => /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 112;
 internal const bool debugChan = false;
 
 partial struct Δhchan {
@@ -34,7 +34,6 @@ partial struct Δhchan {
     internal nuint dataqsiz;          // size of the circular queue
     internal @unsafe.Pointer buf; // points to an array of dataqsiz elements
     internal uint16 elemsize;
-    internal bool synctest; // true if created in a synctest bubble
     internal uint32 closed;
     internal ж<timer> timer; // timer feeding this chan
     internal ж<_type> elemtype; // element type
@@ -42,6 +41,7 @@ partial struct Δhchan {
     internal nuint recvx;  // receive index
     internal waitq recvq;  // list of recv waiters
     internal waitq sendq;  // list of send waiters
+    internal ж<synctestBubble> bubble;
     // lock protects all fields in hchan, as well as several
     // fields in sudogs blocked on this channel.
     //
@@ -80,14 +80,14 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     var elem = t.Elem;
 
     // compiler checks this but be safe.
-    if ((~elem).Size_ >= ((uintptr)1 << (int)(16))) {
+    if ((~elem).Size_ >= (uintptr)1 << 16) {
         @throw(makechanInvalidChannelˢ);
     }
     if ((uintptr)(hchanSize % (uintptr)maxAlign) != 0 || (~elem).Align_ > maxAlign) {
         @throw(makechanBadAlignmentˢ);
     }
 
-    var (mem, overflow) = math.MulUintptr((~elem).Size_, (uintptr)size);
+    var (mem, overflow) = Δmath.MulUintptr((~elem).Size_, (uintptr)size);
     if (overflow || mem > (uintptr)((uintptr)maxAlloc - hchanSize) || size < 0) {
         throw panic(((plainError)(@string)makechanSizeOutOfRangeˢ));
     }
@@ -122,10 +122,12 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     c.Value.elemsize = (uint16)(~elem).Size_;
     c.Value.elemtype = elem;
     c.Value.dataqsiz = (nuint)size;
-    if ((~getg()).syncGroup != nil) {
-        c.Value.synctest = true;
+    {
+        var b = getg().Value.bubble; if (b != nil) {
+            c.Value.bubble = b;
+        }
     }
-    lockInit(c.of(runtime_package.Δhchan.Ꮡlock), lockRankHchan);
+    lockInit(ref (c.of(runtime_package.Δhchan.Ꮡlock)).DerefOrNull(), lockRankHchan);
 
     if (debugChan) {
         print((@string)"makechan: chan="u8, c.OrTypedNil(), (@string)"; elemsize="u8, (~elem).Size_, (@string)"; dataqsiz="u8, size, (@string)"\n"u8);
@@ -210,8 +212,8 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
     }
 
-    if (c.synctest && (~getg()).syncGroup == nil) {
-        throw panic(((plainError)(@string)sendOnSynctestChannelˢ));
+    if (c.bubble != nil && (~getg()).bubble != c.bubble) {
+        fatal(sendOnSynctestChannelˢ);
     }
 
     // Fast path: check for failed non-blocking operation without acquiring the lock.
@@ -287,11 +289,11 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     }
     // No stack splits between assigning elem and enqueuing mysg
     // on gp.waiting where copystack can find it.
-    mysg.Value.elem = ep;
+    mysg.of(sudog.Ꮡelem).set(ep);
     mysg.Value.waitlink = default!;
     mysg.Value.g = gp;
     mysg.Value.isSelect = false;
-    mysg.Value.c = Ꮡc;
+    mysg.of(sudog.Ꮡc).set(Ꮡc);
     gp.Value.waiting = mysg;
     gp.Value.param = default!;
     c.sendq.enqueue(mysg);
@@ -301,7 +303,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     // stack shrinking.
     gp.of(g.ᏑparkingOnChan).Store(true);
     var reason = waitReasonChanSend;
-    if (c.synctest) {
+    if (c.bubble != nil) {
         reason = waitReasonSynctestChanSend;
     }
     gopark(chanparkcommit, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(runtime_package.Δhchan.Ꮡlock)), reason, traceBlockChanSend, 2);
@@ -322,7 +324,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     if ((~mysg).releasetime > 0) {
         blockevent((~mysg).releasetime - t0, 2);
     }
-    mysg.Value.c = default!;
+    mysg.of(sudog.Ꮡc).set(nil);
     releaseSudog(mysg);
     if (closed) {
         if (c.closed == 0) {
@@ -343,9 +345,9 @@ internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
     ref var c = ref Ꮡc.DerefOrNull();
     ref var sg = ref Ꮡsg.DerefOrNull();
 
-    if (c.synctest && (~sg.g).syncGroup != (~getg()).syncGroup) {
+    if (c.bubble != nil && (~getg()).bubble != c.bubble) {
         unlockf();
-        throw panic(((plainError)(@string)sendOnSynctestChannelˢ));
+        fatal(sendOnSynctestChannelˢ);
     }
     if (raceenabled) {
         if (c.dataqsiz == 0){
@@ -363,9 +365,9 @@ internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
             c.sendx = c.recvx; // c.sendx = (c.sendx+1) % c.dataqsiz
         }
     }
-    if (sg.elem != nil) {
-        sendDirect(c.elemtype, ref (Ꮡsg).DerefOrNull(), ep);
-        sg.elem = default!;
+    if ((uintptr)sg.elem.get() != nil) {
+        sendDirect(c.elemtype, Ꮡsg, ep);
+        sg.elem.set(nil);
     }
     var gp = sg.g;
     unlockf();
@@ -417,33 +419,37 @@ internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
 // typedmemmove will call bulkBarrierPreWrite, but the target bytes
 // are not in the heap, so that will not help. We arrange to call
 // memmove and typeBitsBulkBarrier instead.
-internal static void sendDirect(ж<_type> Ꮡt, ref sudog sg, @unsafe.Pointer src) {
+internal static void sendDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer src) {
     ref var t = ref Ꮡt.DerefOrNull();
+    ref var sg = ref Ꮡsg.DerefOrNull();
 
     // src is on our stack, dst is a slot on another stack.
+
     // Once we read sg.elem out of sg, it will no longer
     // be updated if the destination's stack gets copied (shrunk).
     // So make sure that no preemption points can happen between read & use.
-    @unsafe.Pointer dst = sg.elem;
+    @unsafe.Pointer dst = (uintptr)sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     // No need for cgo write barrier checks because dst is always
     // Go memory.
     memmove(dst, src, t.Size_);
 }
 
-internal static void recvDirect(ж<_type> Ꮡt, ref sudog sg, @unsafe.Pointer dst) {
+internal static void recvDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer dst) {
     ref var t = ref Ꮡt.DerefOrNull();
+    ref var sg = ref Ꮡsg.DerefOrNull();
 
     // dst is on our stack or the heap, src is on another stack.
     // The channel is locked, so src will not move during this
     // operation.
-    @unsafe.Pointer src = sg.elem;
+    @unsafe.Pointer src = (uintptr)sg.elem.get();
     typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     memmove(dst, src, t.Size_);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string closeOfNilChannelˢ = "close of nil channel"u8;
+internal static readonly @string closeOfSynctestChannelˢ = "close of synctest channel from outside bubble"u8;
 internal static readonly @string closeOfClosedChannelˢ = "close of closed channel"u8;
 
 internal static void closechan(ж<Δhchan> Ꮡc) {
@@ -451,6 +457,9 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
 
     if (Ꮡc == nil) {
         throw panic(((plainError)(@string)closeOfNilChannelˢ));
+    }
+    if (c.bubble != nil && (~getg()).bubble != c.bubble) {
+        fatal(closeOfSynctestChannelˢ);
     }
 
     @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
@@ -475,9 +484,9 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         if (sg == nil) {
             break;
         }
-        if ((~sg).elem != nil) {
-            typedmemclr(c.elemtype, (~sg).elem);
-            sg.Value.elem = default!;
+        if ((uintptr)sg.of(sudog.Ꮡelem).get() != nil) {
+            typedmemclr(c.elemtype, (uintptr)sg.of(sudog.Ꮡelem).get());
+            sg.of(sudog.Ꮡelem).set(nil);
         }
         if ((~sg).releasetime != 0) {
             sg.Value.releasetime = cputicks();
@@ -497,7 +506,7 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         if (sg == nil) {
             break;
         }
-        sg.Value.elem = default!;
+        sg.of(sudog.Ꮡelem).set(nil);
         if ((~sg).releasetime != 0) {
             sg.Value.releasetime = cputicks();
         }
@@ -533,7 +542,7 @@ internal static bool empty(ж<Δhchan> Ꮡc) {
     // c.timer is also immutable (it is set after make(chan) but before any channel operations).
     // All timer channels have dataqsiz > 0.
     if (c.timer != nil) {
-        c.timer.maybeRunChan();
+        c.timer.maybeRunChan(Ꮡc);
     }
     return atomic.Loaduint(Ꮡc.of(runtime_package.Δhchan.Ꮡqcount)) == 0;
 }
@@ -569,6 +578,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
 
     // raceenabled: don't need to check ep, as it is always on the stack
     // or is new memory allocated by reflect.
+
     if (debugChan) {
         print((@string)"chanrecv: chan="u8, Ꮡc.OrTypedNil(), (@string)"\n"u8);
     }
@@ -581,12 +591,12 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         @throw(unreachableˢ);
     }
 
-    if (c.synctest && (~getg()).syncGroup == nil) {
-        throw panic(((plainError)(@string)receiveOnSynctestChannelˢ));
+    if (c.bubble != nil && (~getg()).bubble != c.bubble) {
+        fatal(receiveOnSynctestChannelˢ);
     }
 
     if (c.timer != nil) {
-        c.timer.maybeRunChan();
+        c.timer.maybeRunChan(Ꮡc);
     }
 
     // Fast path: check for failed non-blocking operation without acquiring the lock.
@@ -690,13 +700,13 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     }
     // No stack splits between assigning elem and enqueuing mysg
     // on gp.waiting where copystack can find it.
-    mysg.Value.elem = ep;
+    mysg.of(sudog.Ꮡelem).set(ep);
     mysg.Value.waitlink = default!;
     gp.Value.waiting = mysg;
 
     mysg.Value.g = gp;
     mysg.Value.isSelect = false;
-    mysg.Value.c = Ꮡc;
+    mysg.of(sudog.Ꮡc).set(Ꮡc);
     gp.Value.param = default!;
     c.recvq.enqueue(mysg);
     if (c.timer != nil) {
@@ -709,7 +719,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     // stack shrinking.
     gp.of(g.ᏑparkingOnChan).Store(true);
     var reason = waitReasonChanReceive;
-    if (c.synctest) {
+    if (c.bubble != nil) {
         reason = waitReasonSynctestChanReceive;
     }
     gopark(chanparkcommit, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(runtime_package.Δhchan.Ꮡlock)), reason, traceBlockChanRecv, 2);
@@ -728,7 +738,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     }
     var success = mysg.Value.success;
     gp.Value.param = default!;
-    mysg.Value.c = default!;
+    mysg.of(sudog.Ꮡc).set(nil);
     releaseSudog(mysg);
     return (true, success);
 }
@@ -751,9 +761,9 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
     ref var c = ref Ꮡc.DerefOrNull();
     ref var sg = ref Ꮡsg.DerefOrNull();
 
-    if (c.synctest && (~sg.g).syncGroup != (~getg()).syncGroup) {
+    if (c.bubble != nil && (~getg()).bubble != c.bubble) {
         unlockf();
-        throw panic(((plainError)(@string)receiveOnSynctestChannelˢ));
+        fatal(receiveOnSynctestChannelˢ);
     }
     if (c.dataqsiz == 0){
         if (raceenabled) {
@@ -761,7 +771,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
         }
         if (ep != nil) {
             // copy data from sender
-            recvDirect(c.elemtype, ref (Ꮡsg).DerefOrNull(), ep);
+            recvDirect(c.elemtype, Ꮡsg, ep);
         }
     } else {
         // Queue is full. Take the item at the
@@ -778,14 +788,14 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
             typedmemmove(c.elemtype, ep, qp);
         }
         // copy data from sender to queue
-        typedmemmove(c.elemtype, qp, sg.elem);
+        typedmemmove(c.elemtype, qp, (uintptr)sg.elem.get());
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
         }
         c.sendx = c.recvx; // c.sendx = (c.sendx+1) % c.dataqsiz
     }
-    sg.elem = default!;
+    sg.elem.set(nil);
     var gp = sg.g;
     unlockf();
     gp.Value.param = @unsafe.Pointer.FromPinnedBox(Ꮡsg);
@@ -876,7 +886,7 @@ internal static nint chanlen(ж<Δhchan> Ꮡc) {
     }
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
     if (c.timer != nil && async) {
-        c.timer.maybeRunChan();
+        c.timer.maybeRunChan(Ꮡc);
     }
     if (c.timer != nil && !async) {
         // timer channels have a buffered implementation

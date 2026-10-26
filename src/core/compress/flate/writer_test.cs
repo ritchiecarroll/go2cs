@@ -156,8 +156,8 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
     // Create a random, but compressible stream.
     var rng = rand.New(rand.NewSource(1));
     var t1 = new slice<byte>(length);
-    foreach (var (iΔ1, _) in t1) {
-        t1[iΔ1] = (byte)((int64)(rng.Int63() & 7));
+    foreach (var iΔ1 in range(t1)) {
+        t1[iΔ1] = (byte)(rng.Int63() & 7);
     }
 
     // Do our first encode.

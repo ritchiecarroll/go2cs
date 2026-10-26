@@ -43,11 +43,16 @@ using static go.crypto.rsa_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,10 +62,10 @@ using static go.crypto.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtYkqaigpQACBgADAKAgraCpoKCgpSUlJSAgqSClIKmgoKmgoKUlIKCtsiCuAADGAAJAoCCtoKCgpSAgqSmlICCpIKmgoKmgoKUlKSkAAMsABYCgIK2lIKCgoKUgoKUlJSUgIKkgpSCpoKClAAGGgAMAoLWooCCtoKChJSCgpSCgpSmgpSAgqSCgriCgqYABh4ADgKCgoKUpoCCtoKCgpSmgIKkgqaCgpQAAxYACAKCgoKUpoCCtoKCgpSAgqSmgIKkgqaCgpSmgpSkpJSmggAJBoKClIKUgpSClIKUgpTmgoKUgIKkgpSClA==", "", "", "303=Size/1/1/1")]
+[assembly: go.GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtakqaigpQACBgADAKAgraCpoKCgpSUlJSAgqSClIKmgoKmgoKUlIKCtsiCuAADGAAJAoCCtoKCgpSAgqSmlICCpIKmgoKmgoKUlKSkAAMsABICAAIUAAkCgpSmwoCCtoKUgoKClIKClJSUlICCpIKUgqaCgpQABhoADAKC1qKAgraCgoSUgoKUgoKUpoKUgIKkgoK4goKmAAYeAA4CgoKClKaAgraCgoKUpoCCpIKmgoKUAAMWAAgCgoKClKaAgraCgoKUgIKkpoCCpIKmgoKUpoKUpKSUpoIACQaCgpSClIKUgpSClIKU5oKClICCpIKUgpQ=", "", "", "323=Size/1/1/1")]
 [assembly: go.GoPositionMap("crypto/rsa/notboring.go", "notboring.cs", "AAsWgqSC")]
-[assembly: go.GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "ACFUAA8CgqaAgraUgoKmgoKClJSmgoKCgoKUgpSCgoKClKaCgpQAAhYACgKAgraCgoKUgoKUpoKClIKUAAJKACQCgIK2goKmgoKmpqaCggACEgALAoKmgoKCpoKCgoKUgoKmgoKUgoK4gtyUgoKCypSCgqiygoKmgoKCgri4")]
-[assembly: go.GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AEN6AAsi0qiSgoKUABo+kqqigoKUgpSClIKCpqrSAAIWAAgCgIK23NKCppSClMiAgoKAgqSAgqSU6AAdQviCuIKUgsqUgoKUgoKU1oKClAAFGgAKAoCCtoSCgpSCgoKCgoKCgoKCpgANHKaClIKUgqaCAAoWgqaClIIAESQABywAEwKClIKmlIKUgqaClKamgoK4lIKCAAsYgpSCgoKClLiCgoLKgoKCgoKClLimgoKUgoKC2IKAgrbcuLiYooKmgqaU9oKUgpSClIKUgpSCuIKmgpSCgoKmlIKmgoKCgoKC9oKUgoKUlIK4goKUgriClIKUgoKmgoKCgpSClIKCgqampoKCgpSmooKUgoKU", "", "", "380=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;587=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;599=Bytes/3/4/1,Bytes/4/4/1")]
+[assembly: go.GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "ACdkABECgqaAgraCgqaCgoKUlJSmgoKCgoKUgpSCgoKClKaCgpQAAhwADQKAgraCgoKUgoKUpoKClIKUAAJYACsCgIK2goKmgoKmpqaCggACEgALAoKmgoKCpoKCgoKUgoKmgoKUgoK4gtyUgoKCypSCgqiygoKmgoKCgri4")]
+[assembly: go.GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AER8AAog0qiSgoKUAB1EkqqigoKUgpSClIKCpqrSAAIWAAgCgIK23NKCppSClMiAgoKAgqSAgqSU6AAeQviCuIKUgpSCpoKClIKClIKUAAISwoKUgsqUgoKUgoKU1oKClAAFGgAKAoCCtoSCgpSCgoKCgoKCgoKCpgANHKaUgpSClIKmggAKFoKmgpSCABEkAAc0ABcCgpSCppSClIKmgpSmpoKCuJSCggALGIKUgoKCgpS4goKCyoKCgoKCgpS4poKClIKCgtiCgIK23Li4mKKCpoKmgpT2gpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoL2gpSCgpSUgriCgpSCuIKUgpSCgqaCgoKClIKUgoKCpqamgoKClKaigpSCgpQ=", "", "", "288=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;415=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;627=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;639=Bytes/3/4/1,Bytes/4/4/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -98,7 +103,7 @@ public static partial class rsa_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸbigmod() => builtin.initPackage(typeof(go.crypto.@internal.fips140.bigmod_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸrsa() => builtin.initPackage(typeof(go.crypto.@internal.fips140.rsa_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsubtle() => builtin.initPackage(typeof(go.crypto.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));

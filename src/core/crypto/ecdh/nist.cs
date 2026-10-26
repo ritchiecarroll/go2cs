@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using boring = go.crypto.@internal.boring_package;
 using ecdh = go.crypto.@internal.fips140.ecdh_package;
 using fips140only = go.crypto.@internal.fips140only_package;
+using rand = go.crypto.@internal.rand_package;
 using errors = errors_package;
 using io = io_package;
 using go.crypto.@internal;
@@ -30,10 +31,10 @@ internal static @string String(this ref nistCurve c) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string cryptoEcdhOnlyCryptoRandˢ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader rand) {
+internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+    if (boring.Enabled && rand.IsDefaultReader(r)) {
         var (key, bytes, errΔ1) = boring.GenerateKeyECDH(c.name);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -51,11 +52,13 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
         return (kΔ1, default!);
     }
 
-    if (fips140only.Enabled && !fips140only.ApprovedRandomReader(rand)) {
+    r = rand.CustomReader(r);
+
+    if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(r)) {
         return (default!, errors.New(cryptoEcdhOnlyCryptoRandˢ));
     }
 
-    var (privateKey, err) = c.generate(rand);
+    var (privateKey, err) = c.generate(r);
     if (err != default!) {
         return (default!, err);
     }
@@ -167,6 +170,7 @@ internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> �
     // at infinity, but in a prime order group such as the NIST curves that can
     // only be the result of a scalar multiplication if one of the inputs is the
     // zero scalar or the point at infinity.
+
     if (boring.Enabled) {
         return boring.ECDH(local.boring, remote.boring);
     }
@@ -182,7 +186,7 @@ public static ΔCurve P256() {
     return new nistCurveжΔCurve(p256);
 }
 
-internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
+[GoLazy] partial class lazyᴛp256 { internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
     name: "P-256"u8,
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), b),
@@ -190,7 +194,7 @@ internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
     sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdhꓸPublicKey> pub) => {
         return go.crypto.@internal.fips140.ecdh_package.ECDH<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), priv, pub);
     }
-));
+)); }
 
 // P384 returns a [Curve] which implements NIST P-384 (FIPS 186-3, section D.2.4),
 // also known as secp384r1.
@@ -201,7 +205,7 @@ public static ΔCurve P384() {
     return new nistCurveжΔCurve(p384);
 }
 
-internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
+[GoLazy] partial class lazyᴛp384 { internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
     name: "P-384"u8,
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), b),
@@ -209,7 +213,7 @@ internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
     sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdhꓸPublicKey> pub) => {
         return go.crypto.@internal.fips140.ecdh_package.ECDH<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), priv, pub);
     }
-));
+)); }
 
 // P521 returns a [Curve] which implements NIST P-521 (FIPS 186-3, section D.2.5),
 // also known as secp521r1.
@@ -220,7 +224,7 @@ public static ΔCurve P521() {
     return new nistCurveжΔCurve(p521);
 }
 
-internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
+[GoLazy] partial class lazyᴛp521 { internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
     name: "P-521"u8,
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), b),
@@ -228,6 +232,6 @@ internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
     sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdhꓸPublicKey> pub) => {
         return go.crypto.@internal.fips140.ecdh_package.ECDH<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), priv, pub);
     }
-));
+)); }
 
 } // end ecdh_package

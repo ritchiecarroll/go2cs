@@ -10,13 +10,18 @@ using go.@internal;
 partial class bytealg_package {
 
 // Offsets into internal/cpu records for use in assembly.
-internal static uintptr offsetX86HasSSE42 => /* unsafe.Offsetof(cpu.X86.HasSSE42) */ 84;
-internal static uintptr offsetX86HasAVX2 => /* unsafe.Offsetof(cpu.X86.HasAVX2) */ 67;
-internal static uintptr offsetX86HasPOPCNT => /* unsafe.Offsetof(cpu.X86.HasPOPCNT) */ 78;
+internal static uintptr offsetPPC64HasPOWER9 => /* unsafe.Offsetof(cpu.PPC64.IsPOWER9) */ 67;
+
+internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
+
+internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
+internal static uintptr offsetLOONG64HasLASX => /* unsafe.Offsetof(cpu.Loong64.HasLASX) */ 65;
 
 internal static uintptr offsetS390xHasVX => /* unsafe.Offsetof(cpu.S390X.HasVX) */ 80;
 
-internal static uintptr offsetPPC64HasPOWER9 => /* unsafe.Offsetof(cpu.PPC64.IsPOWER9) */ 67;
+internal static uintptr offsetX86HasSSE42 => /* unsafe.Offsetof(cpu.X86.HasSSE42) */ 97;
+internal static uintptr offsetX86HasAVX2 => /* unsafe.Offsetof(cpu.X86.HasAVX2) */ 68;
+internal static uintptr offsetX86HasPOPCNT => /* unsafe.Offsetof(cpu.X86.HasPOPCNT) */ 91;
 
 // MaxLen is the maximum length of the string to be searched for (argument b) in Index.
 // If MaxLen is not 0, make sure MaxLen >= 4.
@@ -37,7 +42,7 @@ public static (uint32, uint32) HashStr<T>(T sep)
     uint32 pow = 1;
     uint32 sq = PrimeRK;
     for (nint i = len(sep); i > 0; i >>= (int)(1)) {
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             pow *= sq;
         }
         sq *= sq;
@@ -57,7 +62,7 @@ public static (uint32, uint32) HashStrRev<T>(T sep)
     uint32 pow = 1;
     uint32 sq = PrimeRK;
     for (nint i = len(sep); i > 0; i >>= (int)(1)) {
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             pow *= sq;
         }
         sq *= sq;

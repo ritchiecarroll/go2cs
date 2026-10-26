@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `syscall` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `384dc371f`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**65 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**66 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/syscall`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/syscall).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -22,6 +22,7 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestChangingProcessParent` | pass | pass |
 | `TestComputerName` | pass | pass |
 | `TestEnv` | pass | pass |
+| `TestEnvBlockSorted` | pass | pass |
 | `TestEscapeArg` | pass | pass |
 | `TestExecErrPermutedFds` | pass | pass |
 | `TestGetStartupInfo` | pass | pass |
@@ -93,6 +94,7 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkErrnoString (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleLoadLibrary (example): example execution is deferred to Phase 4D
 - FuzzDecodeWTF16 (fuzz): fuzz execution is deferred to Phase 4D
 - FuzzEncodeWTF16 (fuzz): fuzz execution is deferred to Phase 4D

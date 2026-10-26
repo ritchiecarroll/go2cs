@@ -12,6 +12,8 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using net;
 using static go.mime.multipart_package;
@@ -44,10 +46,10 @@ public static void TestBoundaryLine(ж<testing.T> Ꮡt) {
 
 internal static @string escapeString(@string v) {
     var (bytes, _) = json.Marshal(v);
-    return ((@string)bytes);
+    return (@string)bytes;
 }
 
-internal static void expectEq(ж<testing.T> Ꮡt, @string expected, @string actual, @string what) {
+internal static partial void expectEq(ж<testing.T> Ꮡt, @string expected, @string actual, @string what) {
     if (expected == actual) {
         return;
     }
@@ -86,7 +88,7 @@ public static void TestNameAccessors(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static @string longLine = strings.Repeat("\n\n\r\r\r\n\r\u0000"u8, ((1 << (int)(20))) / 8);
+internal static @string longLine = strings.Repeat("\n\n\r\r\r\n\r\u0000"u8, (1 << 20) / 8);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string thisIsAMultiPartMessageˢ = """
@@ -461,7 +463,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Part %d: part.Header = %v, want %v"u8, i, (~part).Header, hdr);
         }
         (var data, err) = io.ReadAll(new global::go.mime.multipart_package.PartжReader(part));
-        expectEq(Ꮡt, body, ((@string)data), fmt.Sprintf("Part %d body"u8, i));
+        expectEq(Ꮡt, body, (@string)data, fmt.Sprintf("Part %d body"u8, i));
         if (err != default!) {
             Ꮡt.Fatalf("Part %d: ReadAll failed: %v"u8, i, err);
         }
@@ -492,6 +494,7 @@ public static void TestLineContinuation(ж<testing.T> Ꮡt) {
 
     // This body, extracted from an email, contains headers that span multiple
     // lines.
+
     // TODO: The original mail ended with a double-newline before the
     // final delimiter; this was manually edited to use a CRLF.
     @string testBody = appleMail2292336769ˢ;
@@ -570,6 +573,7 @@ internal static readonly @string divDirLtrHelloWorldDivˢ = @"<div dir=""ltr"">H
 
 public static void TestRawPart(ж<testing.T> Ꮡt) {
     // https://github.com/golang/go/issues/29090
+
     @string body = strings.Replace(contentTypeTextPlainˢ, "\n"u8, "\r\n"u8, -1);
 
     var r = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(body)), "0016e68ee29c5d515f04cedf6733"u8);
@@ -1023,6 +1027,7 @@ Body
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/alternative; boundary=""foo--"""u8}.slice()}), ""u8)
         }.slice()
     ),
+
     roundTripParseTest()
 }.slice();
 
@@ -1045,7 +1050,7 @@ Cases:
                 Ꮡt.Errorf("in test %q, error reading part: %v"u8, tt.name, err);
                 goto continue_Cases;
             }
-            got = append(got, new headerBody((~p).Header, ((@string)pbody)));
+            got = append(got, new headerBody((~p).Header, (@string)pbody));
         }
         if (!reflect.DeepEqual(tt.want, got)) {
             Ꮡt.Errorf("test %q:\n got: %v\nwant: %v"u8, tt.name, got, tt.want);
@@ -1079,7 +1084,7 @@ internal static (slice<headerBody>, error) partsFromReader(ж<global::go.mime.mu
         if (err != default!) {
             return (default!, fmt.Errorf("error reading part: %v"u8, err));
         }
-        got = append(got, new headerBody((~p).Header, ((@string)pbody)));
+        got = append(got, new headerBody((~p).Header, (@string)pbody));
     }
 }
 
@@ -1088,7 +1093,7 @@ internal static readonly @string keyˢ = "key"u8;
 
 public static void TestParseAllSizes(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    nint maxSize = (5 << (int)(10));
+    nint maxSize = 5 << 10;
     if (testing.Short()) {
         maxSize = 512;
     }

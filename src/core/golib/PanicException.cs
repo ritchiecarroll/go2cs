@@ -72,9 +72,12 @@ public class PanicException(object? state, Exception? innerException = null) :
     /// .NET type name. Both are why the method set is probed, not merely the interface.
     /// </para>
     /// <para>
-    /// The <c>Stringer</c> arm is not redundant with <c>ToString()</c>. A Go named type's generated
-    /// <c>ToString()</c> forwards to its UNDERLYING value (go2cs-gen's InheritedTypeTemplate), so
-    /// <c>panic(2 * time.Second)</c> would print <c>2000000000</c> where Go prints <c>2s</c>. The
+    /// The <c>Stringer</c> arm is not redundant with <c>ToString()</c>, although a converted value's
+    /// <c>ToString()</c> now returns the same text (<see cref="GoMethodText"/>): <c>ToString()</c> turns a
+    /// panicking method into fmt's <c>%!v(PANIC=…)</c> text, where Go's runtime reports
+    /// <c>panic while printing panic value</c>, and only a direct call lets the catch below see the
+    /// panic. Before that forward, a named type's <c>ToString()</c> printed its underlying value, so
+    /// <c>panic(2 * time.Second)</c> printed <c>2000000000</c> where Go prints <c>2s</c>. The
     /// method is found the way golib's <c>error&lt;T&gt;</c> finds <c>Error</c> — through the
     /// extension-method registry, which is where a converted Go method lives.
     /// </para>
@@ -90,33 +93,71 @@ public class PanicException(object? state, Exception? innerException = null) :
         {
             case null:
                 return "nil";
-            // Ahead of the method probes: this is the commonest panic value by far, and its own
-            // ToString is already the Go rendering.
+            // Ahead of the method probes: this is the commonest panic value by far. Go prints a string
+            // panic value, and the Error()/String() text below, through printindented.
             case @string text:
-                return text.ToString();
+                return Indented(text.ToString());
         }
 
         try
         {
             if (state is error goError)
-                return goError.Error().ToString();
+                return Indented(goError.Error().ToString());
 
             // The `error` arm above catches only what golib's own carrier holds. A CONVERTED Go
             // error implements no managed interface at all — the converter emits a Go method as an
             // extension method over its receiver — so the question has to be asked of the Go method
             // set, exactly as Go's `case error:` asks it of the dynamic type's.
             if (TryGoMethod(state, nameof(error.Error), out string errorText))
-                return errorText;
+                return Indented(errorText);
 
             if (TryGoMethod(state, "String", out string stringer))
-                return stringer;
+                return Indented(stringer);
         }
         catch (Exception ex) when (ex is not GoexitException)
         {
             return "panic while printing panic value";
         }
 
+        // printpanicval's basic arms, then printanycustomtype's: a named basic type prints as T(v).
+        if (BasicText(state) is { } basic)
+            return basic;
+
+        if (GoReflect.TryUnwrapWrapperValue(state, out object? underlying))
+        {
+            while (GoReflect.TryUnwrapWrapperValue(underlying, out object? inner))
+                underlying = inner;
+
+            string type = GoReflect.GoTypeName(state.GetType());
+
+            if (underlying is @string named)
+                return $"{type}(\"{Indented(named.ToString())}\")";
+
+            // printcomplex writes its own parentheses.
+            if (BasicText(underlying) is { } value)
+                return underlying is System.Numerics.Complex or complex64 ? type + value : $"{type}({value})";
+        }
+
         return state.ToString() ?? "nil";
+    }
+
+    // runtime/print.go's text for a value of a basic kind, or null for any other.
+    private static string? BasicText(object value)
+    {
+        return value switch
+        {
+            bool flag => flag ? "true" : "false",
+            sbyte or short or int or long or nint or byte or ushort or uint or ulong or nuint => ((IFormattable)value).ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            uintptr address => address.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            _ => GoPrintText.FloatText(value)
+        };
+    }
+
+    // runtime/error.go's printindented: every "\n" is followed by a TAB, so a multi-line value stays inside its
+    // report line's indentation.
+    private static string Indented(string text)
+    {
+        return text.Contains('\n') ? text.Replace("\n", "\n\t") : text;
     }
 
     // Go's `error`/`stringer` are the structural `interface{ Error() string }` and
@@ -272,6 +313,23 @@ public class PanicException(object? state, Exception? innerException = null) :
     /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal PanicException? Beneath { get; set; }
+
+    /// <summary>
+    /// Gets the panic this one was raised beneath — Go's <c>_panic.link</c>: the panic whose deferred call was running
+    /// when this one was raised, recovered or not, until that recovery completes. Unlike <see cref="Beneath"/> it does not
+    /// depend on which frame owns the site. Set once, by the innermost <see cref="GoFrame.Run"/> catch with a panic
+    /// running; <see cref="golib.CrashReport"/> prints the chain (Go's <c>printpanics</c>).
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal PanicException? Link { get; set; }
+
+    /// <summary>
+    /// Gets the C# string a Go string panic value arrived as, or <see langword="null"/>. A string LITERAL is interned, so
+    /// two panics of one constant hold the same reference here, as Go's two interface words share the constant's
+    /// deduplicated read-only data. The crash report compares it (Go's <c>preprintpanics</c>).
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal string? StringSource { get; init; }
 
     /// <summary>
     /// Gets how many catches have adopted this panic (each <c>IsPanic</c> filter that caught it). One

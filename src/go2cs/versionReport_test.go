@@ -79,7 +79,7 @@ func checkVersionReportValues(t *testing.T, values map[string]string, converter 
 
 	if version := goVersion(); version != "" {
 		want["go.toolchain"] = "go" + version
-		want["go.packages"] = version + ".*"
+		want["go.packages"] = minorFloatOf(version)
 	}
 
 	for key, value := range want {

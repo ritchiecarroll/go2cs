@@ -105,7 +105,7 @@ public static int64 Int63(this ref Rand r) {
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
 public static uint32 Uint32(this ref Rand r) {
-    return (uint32)((r.Int63() >> (int)(31)));
+    return (uint32)(r.Int63() >> 31);
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
@@ -113,18 +113,18 @@ public static uint64 Uint64(this ref Rand r) {
     if (r.s64 != default!) {
         return r.s64.Uint64();
     }
-    return (uint64)(((uint64)r.Int63() >> (int)(31)) | ((uint64)r.Int63() << (int)(32)));
+    return (uint64)r.Int63() >> 31 | (uint64)r.Int63() << 32;
 }
 
 // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
 public static int32 Int31(this ref Rand r) {
-    return (int32)((r.Int63() >> (int)(32)));
+    return (int32)(r.Int63() >> 32);
 }
 
 // Int returns a non-negative pseudo-random int.
 public static nint Int(this ref Rand r) {
     nuint u = (nuint)r.Int63();
-    return (nint)(((u << (int)(1)) >> (int)(1))); // clear sign bit if int == int32
+    return (nint)((u << 1) >> 1); // clear sign bit if int == int32
 }
 
 // Int63n returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -133,10 +133,10 @@ public static int64 Int63n(this ref Rand r, int64 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int63n");
     }
-    if ((int64)(n & (n - 1)) == 0) { // n is power of two, can mask
-        return (int64)(r.Int63() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return r.Int63() & (n - 1);
     }
-    var max = (int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n);
+    var max = (int64)(9223372036854775807UL - ((uint64)1 << 63) % (uint64)n);
     var v = r.Int63();
     while (v > max) {
         v = r.Int63();
@@ -150,10 +150,10 @@ public static int32 Int31n(this ref Rand r, int32 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int31n");
     }
-    if ((int32)(n & (n - 1)) == 0) { // n is power of two, can mask
-        return (int32)(r.Int31() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return r.Int31() & (n - 1);
     }
-    var max = (int32)((uint32)((2147483648L) - 1) - (((uint32)1 << (int)(31))) % (uint32)n);
+    var max = (int32)((uint32)((2147483648L) - 1) - ((uint32)1 << 31) % (uint32)n);
     var v = r.Int31();
     while (v > max) {
         v = r.Int31();
@@ -182,7 +182,7 @@ internal static int32 int31n(this ref Rand r, int32 n) {
             low = (uint32)prod;
         }
     }
-    return (int32)((prod >> (int)(32)));
+    return (int32)(prod >> 32);
 }
 
 // Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -381,7 +381,7 @@ partial struct runtimeSource {
 }
 
 internal static int64 Int63(this ref runtimeSource _) {
-    return (int64)((uint64)(runtime_rand() & (uint64)rngMask));
+    return (int64)(runtime_rand() & (uint64)rngMask);
 }
 
 internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) {

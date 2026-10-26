@@ -86,6 +86,11 @@ internal static slice<numberTest> numberTests = new numberTest[]{
     new("0xef"u8, true, true, true, false, 0xef, 0xef, 239D, 0D)
 }.slice();
 
+[GoInit] internal static void init() {
+    // Use a small stack limit for testing to avoid creating huge expressions.
+    maxStackDepth = 3;
+}
+
 public static void TestNumberParse(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -262,6 +267,7 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     new("comment trim left and right"u8, "x \r\n\t{{- /* */ -}}\n\n\ty"u8, noError, @"""x""""y"""u8),
     new("block definition"u8, @"{{block ""foo"" .}}hello{{end}}"u8, noError,
         @"{{template ""foo"" .}}"u8),
+
     new("newline in assignment"u8, "{{ $x \n := \n 1 \n }}"u8, noError, "{{$x := 1}}"u8),
     new("newline in empty action"u8, "{{\n}}"u8, hasError, "{{\n}}"u8),
     new("newline in pipeline"u8, "{{\n\"x\"\n|\nprintf\n}}"u8, noError, @"{{""x"" | printf}}"u8),
@@ -329,7 +335,16 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     new("wrong pipeline nil"u8, "{{'c'|nil}}"u8, hasError, ""u8),
     new("empty pipeline"u8, @"{{printf ""%d"" ( ) }}"u8, hasError, ""u8),
     // Missing pipeline in block
-    new("block definition"u8, @"{{block ""foo""}}hello{{end}}"u8, hasError, ""u8)
+    new("block definition"u8, @"{{block ""foo""}}hello{{end}}"u8, hasError, ""u8),
+
+    // Expression nested depth tests.
+    new("paren nesting normal"u8, "{{ (( 1 )) }}"u8, noError, "{{((1))}}"u8),
+    new("paren nesting at limit"u8, "{{ ((( 1 ))) }}"u8, noError, "{{(((1)))}}"u8),
+    new("paren nesting exceeds limit"u8, "{{ (((( 1 )))) }}"u8, hasError, "template: test:1: max expression depth exceeded"u8),
+    new("paren nesting in pipeline"u8, "{{ ((( 1 ))) | printf }}"u8, noError, "{{(((1))) | printf}}"u8),
+    new("paren nesting in pipeline exceeds limit"u8, "{{ (((( 1 )))) | printf }}"u8, hasError, "template: test:1: max expression depth exceeded"u8),
+    new("paren nesting with other constructs"u8, "{{ if ((( true ))) }}YES{{ end }}"u8, noError, "{{if (((true)))}}\"YES\"{{end}}"u8),
+    new("paren nesting with other constructs exceeds limit"u8, "{{ if (((( true )))) }}YES{{ end }}"u8, hasError, "template: test:1: max expression depth exceeded"u8)
 }.slice();
 
 internal static map<@string, any> builtins = new map<@string, any>{

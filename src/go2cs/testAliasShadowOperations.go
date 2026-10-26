@@ -39,6 +39,10 @@ type siblingTestSignals struct {
 	// siblingTestAddressedGlobalNames).
 	addressedGlobalNames []string
 
+	// methodValues are the method-value candidates the test half takes on a root it does not bind
+	// (see siblingTestMethodValues).
+	methodValues []siblingMethodValue
+
 	// publicizedTypeNames are the UNEXPORTED type names the test half reaches through one of its
 	// own EXPORTED members (see siblingTestPublicizedTypeNames).
 	publicizedTypeNames []string
@@ -66,6 +70,10 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 	buildContext.GOOS = targetParts[0]
 	buildContext.GOARCH = targetParts[1]
 	buildContext.BuildTags = append([]string(nil), options.buildTags...)
+	// The GOROOT's own release and tool tags, not this binary's: a go1.26-built go2cs reading a 1.24
+	// GOROOT's tests would otherwise select them by 1.26's experiments (see loaderToolTags).
+	buildContext.ReleaseTags = loaderReleaseTags(packageDir)
+	buildContext.ToolTags = loaderToolTags(packageDir)
 
 	entries, err := os.ReadDir(packageDir)
 	if err != nil {
@@ -74,6 +82,7 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 
 	names := hashset.HashSet[string]{}
 	addressed := hashset.HashSet[string]{}
+	methodValues := map[string]siblingMethodValue{}
 	publicized := hashset.HashSet[string]{}
 	hasInternal := false
 
@@ -101,7 +110,7 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 			}
 		}
 
-		collectSiblingAddressedNames(file, addressed)
+		collectSiblingAddressedNames(file, addressed, methodValues)
 		collectSiblingPublicizedTypeNames(file, publicized)
 	}
 
@@ -110,6 +119,18 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 		addressedGlobalNames: addressed.Keys(),
 		publicizedTypeNames:  publicized.Keys(),
 		hasInternalTests:     hasInternal,
+	}
+
+	methodValueKeys := make([]string, 0, len(methodValues))
+
+	for key := range methodValues {
+		methodValueKeys = append(methodValueKeys, key)
+	}
+
+	sort.Strings(methodValueKeys)
+
+	for _, key := range methodValueKeys {
+		signals.methodValues = append(signals.methodValues, methodValues[key])
 	}
 
 	sort.Strings(signals.funcMethodNames)
@@ -284,7 +305,13 @@ func addSiblingUnexportedTypeNames(expr ast.Expr, names hashset.HashSet[string])
 // enclosing top-level declaration — receiver, parameters, results, `:=`, `var`/`const`/`type`, range
 // and type-switch bindings, at any nesting depth — are excluded, which errs toward recording nothing
 // rather than boxing a global a test never addressed.
-func collectSiblingAddressedNames(file *ast.File, into hashset.HashSet[string]) {
+//
+// It also records, into methodValues, every selector the file takes as a VALUE (not a call's
+// function) on a chain of selectors and index expressions rooted at an identifier it does not bind:
+// `f := g.inc` takes `&g` when inc has a pointer receiver, which only the types can say, so the
+// production pass decides each candidate (siblingMethodValueRoot) and drops the field reads,
+// qualified names and value receivers this collects alongside.
+func collectSiblingAddressedNames(file *ast.File, into hashset.HashSet[string], methodValues map[string]siblingMethodValue) {
 	declared := hashset.HashSet[string]{}
 
 	for _, decl := range file.Decls {
@@ -311,7 +338,30 @@ func collectSiblingAddressedNames(file *ast.File, into hashset.HashSet[string]) 
 		local := siblingBoundNames(decl)
 		local.UnionWithSet(declared)
 
+		// A called selector binds its receiver in place (the production call arm's concern), so only
+		// a selector taken as a value is a method-value candidate.
+		called := map[*ast.SelectorExpr]bool{}
+
 		ast.Inspect(decl, func(node ast.Node) bool {
+			if call, ok := node.(*ast.CallExpr); ok {
+				if selector, isSelector := ast.Unparen(call.Fun).(*ast.SelectorExpr); isSelector {
+					called[selector] = true
+				}
+			}
+
+			return true
+		})
+
+		ast.Inspect(decl, func(node ast.Node) bool {
+			if selector, ok := node.(*ast.SelectorExpr); ok {
+				if root, path, chained := siblingSelectorChain(selector.X); chained && !called[selector] && !local.Contains(root) {
+					candidate := siblingMethodValue{root: root, path: path, method: selector.Sel.Name}
+					methodValues[strings.Join(append(append([]string{root}, path...), candidate.method), ".")] = candidate
+				}
+
+				return true
+			}
+
 			unary, ok := node.(*ast.UnaryExpr)
 
 			if !ok || unary.Op != token.AND {
@@ -344,6 +394,31 @@ func collectSiblingAddressedNames(file *ast.File, into hashset.HashSet[string]) 
 
 			return true
 		})
+	}
+}
+
+// siblingIndexStep marks an index expression in a siblingMethodValue path.
+const siblingIndexStep = "[]"
+
+// siblingSelectorChain splits a method-value operand into its root identifier and the field-name and
+// index steps from it, outermost last: `gh.t` is ("gh", ["t"]), `ga[i]` is ("ga", ["[]"]). Any other
+// shape (a call, a dereference, a literal) is not a chain.
+func siblingSelectorChain(expr ast.Expr) (root string, path []string, ok bool) {
+	for {
+		switch typed := expr.(type) {
+		case *ast.ParenExpr:
+			expr = typed.X
+		case *ast.SelectorExpr:
+			path = append([]string{typed.Sel.Name}, path...)
+			expr = typed.X
+		case *ast.IndexExpr:
+			path = append([]string{siblingIndexStep}, path...)
+			expr = typed.X
+		case *ast.Ident:
+			return typed.Name, path, true
+		default:
+			return "", nil, false
+		}
 	}
 }
 

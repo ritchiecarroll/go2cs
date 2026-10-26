@@ -409,6 +409,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
 internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
+    var termHashesᴷ = new stackAppend<@string>();
 
     assert(w.ctxt != nil);
     var first = true;
@@ -438,7 +439,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
                 buf.WriteByte((rune)'~');
             }
             newTypeHasher(Ꮡbuf, w.ctxt).typ((~Δterm).typ);
-            termHashes = append(termHashes, Ꮡbuf.String());
+            termHashes = append(termHashesᴷ, termHashes, Ꮡbuf.String());
         }
         slices.Sort<slice<@string>, @string>(termHashes);
         if (!first) {
@@ -503,9 +504,6 @@ internal static void typeName(this ref typeWriter w, ж<TypeName> Ꮡobj) {
     w.@string(obj.name);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string expectedStringTypeˢ = "expected string type"u8;
-
 internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var tup = ref Ꮡtup.DerefOrNull();
@@ -522,27 +520,28 @@ internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool vari
                 w.@byte((rune)' ');
             }
             var typ = v.Value.typ;
-            if (variadic && i == len(tup.vars) - 1) {
+            if (variadic && i == len(tup.vars) - 1){
                 {
-                    var (s, ok) = typ._<ж<Slice>>(ᐧ); if (ok){
+                    var (Δslice, ok) = typ._<ж<Slice>>(ᐧ); if (ok){
                         w.@string("..."u8);
-                        typ = s.Value.elem;
+                        Ꮡw.typ((~Δslice).elem);
                     } else {
-                        // special case:
-                        // append(s, "foo"...) leads to signature func([]byte, string...)
-                        {
-                            var (t, _) = under(typ)._<ж<Basic>>(ᐧ); if (t == nil || (~t).kind != ΔString) {
-                                w.error(expectedStringTypeˢ);
-                                continue;
-                            }
-                        }
+                        // append(slice, str...) entails various special
+                        // cases, especially in conjunction with generics.
+                        // str may be:
+                        // - a string,
+                        // - a TypeParam whose typeset includes string, or
+                        // - a named []byte slice type B resulting from
+                        //   a client instantiating append([]byte, T) at T=B.
+                        // For such cases we use the irregular notation
+                        // func([]byte, T...), with the dots after the type.
                         Ꮡw.typ(typ);
                         w.@string("..."u8);
-                        continue;
                     }
                 }
+            } else {
+                Ꮡw.typ(typ);
             }
-            Ꮡw.typ(typ);
         }
     }
     w.@byte((rune)')');
@@ -600,7 +599,7 @@ internal static @string subscript(uint64 x) {
             break;
         }
     }
-    return ((@string)(buf.slice(i)));
+    return (@string)(buf.slice(i));
 }
 
 } // end types_package

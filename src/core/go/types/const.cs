@@ -8,10 +8,10 @@ namespace go.go;
 
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using math = math_package;
 using ast = global::go.go.ast_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -31,7 +31,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
         // TODO(gri) We should report exactly what went wrong. At the
         //           moment we don't have the (go/constant) API for that.
         //           See also TODO in go/constant/value.go.
-        Ꮡcheck.error(((atPos)opPos), InvalidConstVal, constantResultIsNotˢ);
+        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢ);
         return;
     }
 
@@ -40,7 +40,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
     // x.typ cannot be a type parameter (type
     // parameters cannot be constant types).
     if (isTyped(x.typ)) {
-        Ꮡcheck.representable(Ꮡx, under(x.typ)._<ж<Basic>>());
+        Ꮡcheck.representable(Ꮡx, x.typ.Underlying()._<ж<Basic>>());
         return;
     }
 
@@ -51,7 +51,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
         if (op != ""u8) {
             op += " "u8;
         }
-        Ꮡcheck.errorf(((atPos)opPos), InvalidConstVal, "constant %soverflow"u8, op);
+        Ꮡcheck.errorf((atPos)opPos, InvalidConstVal, "constant %soverflow"u8, op);
         x.val = constant.MakeUnknown();
     }
 }
@@ -106,15 +106,15 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 }
                 if (exprᴛ1 == Int8) {
                     UntypedInt s = 8;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int16) {
                     UntypedInt s = 16;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int32) {
                     UntypedInt s = 32;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
                 }
                 if (exprᴛ1 == Int64 || exprᴛ1 == ΔUntypedInt) {
                     return true;
@@ -137,7 +137,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 }
                 if (exprᴛ1 == Uint32) {
                     UntypedInt s = 32;
-                    return 0 <= xΔ4 && xΔ4 <= (int64)(4294967295L);
+                    return 0 <= xΔ4 && xΔ4 <= (int64)4294967295L;
                 }
                 if (exprᴛ1 == Uint64) {
                     return 0 <= xΔ4;

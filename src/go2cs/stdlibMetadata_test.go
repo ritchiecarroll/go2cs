@@ -338,22 +338,23 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 }
 
 // TestStdLibExportedMetadataReadsAFlavorOnlyRecord is the POSITIVE arm for a package with NO reference
-// (windows) copy at all: internal/runtime/syscall is linux-only, so its only record is the `@linux`
-// section. Before the record carried non-reference flavors a linux conversion found nothing and fell
-// back to the derive-from-declarations path.
+// (windows) copy at all: crypto/x509/internal/macos is darwin-only, so its only record is the `@darwin`
+// section. Before the record carried non-reference flavors a darwin conversion found nothing and fell
+// back to the derive-from-declarations path. (Until 2026-10-14 the exemplar was the linux-only 1.24
+// internal/runtime/syscall, which go1.26 split into two packages; its removal is H5 pre-seat 1.)
 func TestStdLibExportedMetadataReadsAFlavorOnlyRecord(t *testing.T) {
-	lines, ok := stdLibExportedMetadata("internal.runtime.syscall", "linux")
+	lines, ok := stdLibExportedMetadata("crypto.x509.internal.macos", "darwin")
 
 	if !ok {
-		t.Fatal("a linux lookup of internal.runtime.syscall found no record: flavor-only sections are not consumed")
+		t.Fatal("a darwin lookup of crypto.x509.internal.macos found no record: flavor-only sections are not consumed")
 	}
 
 	if len(lines) == 0 || lines[0] != "// <ExportedTypeAliases>" {
-		t.Errorf("internal.runtime.syscall@linux does not read as a package_info record: %q", lines)
+		t.Errorf("crypto.x509.internal.macos@darwin does not read as a package_info record: %q", lines)
 	}
 
-	if _, ok := stdLibExportedMetadata("internal.runtime.syscall", stdlibmeta.ReferenceGOOS); ok {
-		t.Error("internal.runtime.syscall answered a windows lookup, but the package has no windows flavor")
+	if _, ok := stdLibExportedMetadata("crypto.x509.internal.macos", stdlibmeta.ReferenceGOOS); ok {
+		t.Error("crypto.x509.internal.macos answered a windows lookup, but the package has no windows flavor")
 	}
 }
 

@@ -68,22 +68,18 @@ internal static void bumpBox(ref Box b) {
     b.Tag += 10;
 }
 
-public static nint BumpedRecv(this Box bʗp) {
-    ref var b = ref heap(bʗp, out var Ꮡb);
-
+public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
     return b.Tag;
 }
 
-public static (nint, nint) ClippedRecv(this Box bʗp) {
-    ref var b = ref heap(bʗp, out var Ꮡb);
-
+public static (nint, nint) ClippedRecv(this Box b) {
     clip(ref b.R, 5, 5);
     return (b.R.Min, b.R.Max);
 }
 
-public static (nint, nint, nint) BumpedElemRecv(this Trio aʗp) {
-    ref var a = ref heap(aʗp.Clone(), out var Ꮡa);
+public static (nint, nint, nint) BumpedElemRecv(this Trio a) {
+    a = a.Clone();
 
     bump(ref a[1]);
     return (a[0], a[1], a[2]);
@@ -116,74 +112,55 @@ partial interface Bumper {
     nint BumpedRecv();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object paramˢ = (@string)"param       :"u8;
-private static readonly object paramFieldˢ = (@string)"param field :"u8;
-private static readonly object paramElemˢ = (@string)"param elem  :"u8;
-private static readonly object paramRoˢ = (@string)"param ro    :"u8;
-private static readonly object localˢ = (@string)"local       :"u8;
-private static readonly object plainˢ = (@string)"plain       :"u8;
-private static readonly object callerˢ = (@string)"caller      :"u8;
-private static readonly object recvˢ = (@string)"recv        :"u8;
-private static readonly object callerˢ2 = (@string)"caller:"u8;
-private static readonly object recvFieldˢ = (@string)"recv field  :"u8;
-private static readonly object recvElemˢ = (@string)"recv elem   :"u8;
-private static readonly object recvSliceˢ = (@string)"recv slice  :"u8;
-private static readonly object recvRoˢ = (@string)"recv ro     :"u8;
-private static readonly object recvPtrˢ = (@string)"recv ptr    :"u8;
-private static readonly object recvPlainˢ = (@string)"recv plain  :"u8;
-private static readonly object recvViaPtrˢ = (@string)"recv via ptr:"u8;
-private static readonly object recvIfaceˢ = (@string)"recv iface  :"u8;
-
 internal static void Main() {
     var p = clipParam(new Rect(0, 16));
-    fmt.Println(paramˢ, p.Min, p.Max);
+    fmt.Println("param       :", p.Min, p.Max);
 
     var b = bumpParamField(new Box(new Rect(1, 2), 3));
-    fmt.Println(paramFieldˢ, b.R.Min, b.R.Max, b.Tag);
+    fmt.Println("param field :", b.R.Min, b.R.Max, b.Tag);
 
     var a = bumpParamElem(new nint[]{7, 8, 9}.array());
-    fmt.Println(paramElemˢ, a[0], a[1], a[2]);
+    fmt.Println("param elem  :", a[0], a[1], a[2]);
 
     var (lo, hi) = readOnlyParam(new Rect(3, 4));
-    fmt.Println(paramRoˢ, lo, hi);
+    fmt.Println("param ro    :", lo, hi);
 
     var l = clipLocal();
-    fmt.Println(localˢ, l.Min, l.Max);
+    fmt.Println("local       :", l.Min, l.Max);
 
-    fmt.Println(plainˢ, plainParam(new Rect(2, 20)));
+    fmt.Println("plain       :", plainParam(new Rect(2, 20)));
 
     var orig = new Rect(0, 16);
     var clipped = clipParam(orig);
-    fmt.Println(callerˢ, orig.Min, orig.Max, (@string)"->"u8, clipped.Min, clipped.Max);
+    fmt.Println("caller      :", orig.Min, orig.Max, "->", clipped.Min, clipped.Max);
 
     var rb = new Box(new Rect(0, 16), 6);
-    fmt.Println(recvˢ, rb.BumpedRecv(), callerˢ2, rb.Tag);
+    fmt.Println("recv        :", rb.BumpedRecv(), "caller:", rb.Tag);
 
     var (rlo, rhi) = rb.ClippedRecv();
-    fmt.Println(recvFieldˢ, rlo, rhi, callerˢ2, rb.R.Min, rb.R.Max);
+    fmt.Println("recv field  :", rlo, rhi, "caller:", rb.R.Min, rb.R.Max);
 
     var rt = new Trio(new nint[]{7, 8, 9}.array());
     var (e0, e1, e2) = rt.BumpedElemRecv();
-    fmt.Println(recvElemˢ, e0, e1, e2, callerˢ2, rt[0], rt[1], rt[2]);
+    fmt.Println("recv elem   :", e0, e1, e2, "caller:", rt[0], rt[1], rt[2]);
 
     var rn = new Nums(new nint[]{1, 2, 3}.slice());
-    fmt.Println(recvSliceˢ, rn.BumpedElemSliceRecv(), callerˢ2, rn[1]);
+    fmt.Println("recv slice  :", rn.BumpedElemSliceRecv(), "caller:", rn[1]);
 
     var (rro, rrt) = rb.ReadOnlyRecv();
-    fmt.Println(recvRoˢ, rro, rrt);
+    fmt.Println("recv ro     :", rro, rrt);
 
     ref var rp = ref heap<Box>(out var Ꮡrp);
     rp = new Box(new Rect(0, 16), 6);
-    fmt.Println(recvPtrˢ, Ꮡrp.BumpedPtrRecv(), callerˢ2, rp.Tag);
+    fmt.Println("recv ptr    :", Ꮡrp.BumpedPtrRecv(), "caller:", rp.Tag);
 
-    fmt.Println(recvPlainˢ, rb.PlainRecv());
+    fmt.Println("recv plain  :", rb.PlainRecv());
 
     var rq = Ꮡ(new Box(new Rect(0, 16), 6));
-    fmt.Println(recvViaPtrˢ, (~rq).BumpedRecv(), callerˢ2, (~rq).Tag);
+    fmt.Println("recv via ptr:", (~rq).BumpedRecv(), "caller:", (~rq).Tag);
 
     Bumper iface = new Box(new Rect(0, 16), 6);
-    fmt.Println(recvIfaceˢ, iface.BumpedRecv());
+    fmt.Println("recv iface  :", iface.BumpedRecv());
 }
 
 } // end main_package

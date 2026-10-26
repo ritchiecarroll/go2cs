@@ -6,11 +6,11 @@ partial class main_package {
 
 internal static uint64 copysign(uint64 f, uint64 sign) {
     const uint64 signBit = /* 1 << 63 */ 9223372036854775808;
-    return (uint64)((uint64)(f & ~signBit) | (uint64)(sign & signBit));
+    return (uint64)(f & ~signBit) | (uint64)(sign & signBit);
 }
 
 internal static uint64 clearLow(uint64 x) {
-    return (uint64)(x & ~(uint64)1);
+    return x & ~(uint64)1;
 }
 
 internal static uint32 clearLow32(uint32 u) {

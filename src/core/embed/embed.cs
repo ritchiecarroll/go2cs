@@ -340,7 +340,7 @@ public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
     var list = new slice<fs.DirEntry>(len((~dir).files));
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         list[i] = new fileжDirEntry(Ꮡ((~dir).files, i));
     }
     return (list, default!);
@@ -454,7 +454,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         n = count;
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         list[i] = new fileжDirEntry(Ꮡ(d.files, d.offset + i));
     }
     d.offset += n;
@@ -468,7 +468,7 @@ internal static nint sortSearch(nint n, Func<nint, bool> f) {
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (!f(h)){
             i = h + 1; // preserves f(i-1) == false

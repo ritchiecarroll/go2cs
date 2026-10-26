@@ -57,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("OsGetpagesize.go", "OsGetpagesize.cs", "AA0cgoKCgg==")]
+[assembly: go.GoPositionMap("OsGetpagesize.go", "OsGetpagesize.cs", "AAgcgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

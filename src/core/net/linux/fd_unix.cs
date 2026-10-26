@@ -10,7 +10,6 @@ using os = os_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using time = time_package;
 
 partial class net_package {
@@ -42,23 +41,11 @@ internal static error init(this ж<netFD> Ꮡfd) {
     return Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true);
 }
 
-internal static @string name(this ref netFD fd) {
-    @string ls = default!;
-    @string rs = default!;
-    if (fd.laddr != default!) {
-        ls = fd.laddr.String();
-    }
-    if (fd.raddr != default!) {
-        rs = fd.raddr.String();
-    }
-    return fd.net + ":"u8 + ls + "->"u8 + rs;
-}
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string connectˢ = "connect"u8;
 internal static readonly @string getsockoptˢ = "getsockopt"u8;
 
-internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default!;
     error ret = default!;
     GoFrame ᒐ = default;
@@ -111,62 +98,41 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 (rsa, ret) = (default!, err); goto ᒐdone;
             }
         }
-        {
-            var (deadline, hasDeadline) = ctx.Deadline(); if (hasDeadline) {
-                Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(deadline);
-                defer(Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline, noDeadline, ref ᒐ);
-            }
-        }
 
-        // Start the "interrupter" goroutine, if this context might be canceled.
-        //
-        // The interrupter goroutine waits for the context to be done and
-        // interrupts the dial (by altering the fd's write deadline, which
-        // wakes up waitWrite).
         var ctxDone = ctx.Done();
         if (ctxDone != default!) {
-            // Wait for the interrupter goroutine to exit before returning
-            // from connect.
-            var done = new channel<EmptyStruct>(0);
-            var interruptRes = new channel<error>(0);
-            var doneʗ1 = done;
-            var interruptResʗ1 = interruptRes;
+            {
+                var (deadline, hasDeadline) = ctx.Deadline(); if (hasDeadline) {
+                    Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(deadline);
+                    defer(Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline, noDeadline, ref ᒐ);
+                }
+            }
+
+            // Load the hook function synchronously to prevent a race
+            // with test code that restores the old value.
+            var testHookCanceledDialΔ1 = testHookCanceledDial;
+            var testHookCanceledDialʗ1 = testHookCanceledDialΔ1;
+            var stop = context.AfterFunc(ctx, () => {
+                // Force the runtime's poller to immediately give up
+                // waiting for writability, unblocking waitWrite
+                // below.
+                _ = Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
+                testHookCanceledDialʗ1();
+            });
+            var stopʗ1 = stop;
             defer(() => {
-                builtin.close(doneʗ1);
-                {
-                    var ctxErr = ᐸꟷ(interruptResʗ1); if (ctxErr != default! && ret == default!) {
-                        // The interrupter goroutine called SetWriteDeadline,
-                        // but the connect code below had returned from
-                        // waitWrite already and did a successful connect (ret
-                        // == nil). Because we've now poisoned the connection
-                        // by making it unwritable, don't return a successful
-                        // dial. This was issue 16523.
-                        ret = mapErr(ctxErr);
-                        Ꮡfd.Close(); // prevent a leak
-                    }
+                if (!stopʗ1() && ret == default!) {
+                    // The context.AfterFunc has called or is about to call
+                    // SetWriteDeadline, but the connect code below had
+                    // returned from waitWrite already and did a successful
+                    // connect (ret == nil). Because we've now poisoned the
+                    // connection by making it unwritable, don't return a
+                    // successful dial. This was issue 16523.
+                    ret = mapErr(ctx.Err());
+                    // The caller closes fd on error, so there's no need to
+                    // wait for the SetWriteDeadline call to return.
                 }
             }, ref ᒐ);
-            var ctxDoneʗ1 = ctxDone;
-            var doneʗ2 = done;
-            var interruptResʗ2 = interruptRes;
-            goǃ(() => {
-                var selᴛ10 = ctxDoneʗ1;
-                var selᴛ11 = doneʗ2;
-                switch (select(ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-                case 0 when selᴛ10.ꟷᐳ(out _): {
-                    // Force the runtime's poller to immediately give up
-                    // waiting for writability, unblocking waitWrite
-                    // below.
-                    Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
-                    testHookCanceledDial();
-                    interruptResʗ2.ᐸꟷ(ctx.Err());
-                    break;
-                }
-                case 1 when selᴛ11.ꟷᐳ(out _): {
-                    interruptResʗ2.ᐸꟷ(default!);
-                    break;
-                }}
-            });
         }
 
         while (ᐧ) {
@@ -180,9 +146,9 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
             // details.
             {
                 var errΔ1 = fd.pfd.WaitWrite(); if (errΔ1 != default!) {
-                    var selᴛ12 = ctxDone;
-                    switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
-                    case 0 when selᴛ12.ꟷᐳ(out _): {
+                    var selᴛ10 = ctxDone;
+                    switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
+                    case 0 when selᴛ10.ꟷᐳ(out _): {
                         (rsa, ret) = (default!, mapErr(ctx.Err())); goto ᒐdone;
                     }
                     default: {
@@ -196,7 +162,7 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 (rsa, ret) = (default!, os.NewSyscallError(getsockoptˢ, err)); goto ᒐdone;
             }
             {
-                var errΔ1 = ((syscall.Errno)(uintptr)nerr);
+                var errΔ1 = (syscall.Errno)(uintptr)nerr;
                 var exprᴛ2 = errΔ1;
                 if (exprᴛ2 == syscall.EINPROGRESS || exprᴛ2 == syscall.EALREADY || exprᴛ2 == syscall.EINTR) {
                 }

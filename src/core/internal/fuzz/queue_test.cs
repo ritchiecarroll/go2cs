@@ -10,6 +10,7 @@ partial class fuzz_internal_test_package {
 
 public static void TestQueue(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var sᴷ = new stackAppend<nint>();
 
     // Zero valued queue should have 0 length and capacity.
     global::go.@internal.fuzz_package.queue q = default!;
@@ -56,7 +57,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
                 if (!AreEqual(got, want)){
                     Ꮡt.Fatalf("after removing %d of %d elements, got %d; want %d"u8, i + 1, r, got, want);
                 } else {
-                    s = append(s, got._<nint>());
+                    s = append(sᴷ, s, got._<nint>());
                 }
             }
             want = rem((want + 1), N);

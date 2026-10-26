@@ -26,7 +26,7 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("public key is not equal to itself: %v"u8, @public.OrTypedNil());
     }
     if (!@public.Equal(((crypto.Signer)new rsa_test_package.rsa_PrivateKeyжSigner(@private)).Public()._<ж<rsa.PublicKey>>().OrTypedNil())) {
-        Ꮡt.Errorf("private.Public() is not Equal to public: %q"u8, @public.OrTypedNil());
+        Ꮡt.Errorf("private.Public() is not Equal to public: %v"u8, @public.OrTypedNil());
     }
     if (!@private.Equal(@private.OrTypedNil())) {
         Ꮡt.Errorf("private key is not equal to itself: %v"u8, @private.OrTypedNil());
@@ -53,6 +53,13 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     }
     if (@private.Equal(other.OrTypedNil())) {
         Ꮡt.Errorf("different private keys are Equal"u8);
+    }
+
+    ref var noPrecomp = ref heap<rsa.PrivateKey>(out var ᏑnoPrecomp);
+    noPrecomp = @private.Value;
+    noPrecomp.Precomputed = new rsa.PrecomputedValues(nil);
+    if (!@private.Equal(ᏑnoPrecomp)) {
+        Ꮡt.Errorf("private key with no precomputation is not equal to itself: %v"u8, @private.OrTypedNil());
     }
 }
 

@@ -2,25 +2,31 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#delegates-to-value-receiver-instances)
 
-**A Go METHOD EXPRESSION** — `(*timers).run`, the *unbound* method as a func value whose first parameter is the receiver (runtime `time.go`'s `abi.FuncPCABIInternal((*timers).run)`) — selects a method off a **type**. Emitting the selector naively renders the type in value position (`(ж<timers>).run` — CS0119 + CS1503). Go types the expression as the func signature with the receiver prepended, so the converter renders that signature as the concrete delegate type and casts the method's static form to it: `(Func<ж<timers>, int64, int64>)(run)`. For a `this ref` method the `RecvGenerator`'s ж-overload matches the delegate exactly; a value-receiver method expression (`counter.get`) casts to its value-typed delegate (`(Func<counter, nint>)(get)`); a direct-ж method's primary form matches directly. (Guarded by the `MethodExpression` behavioral test — pointer- and value-receiver method expressions assigned, passed inline, and *invoked*, with mutations accumulating through the receiver box, values vs Go.)
+**A Go METHOD EXPRESSION** — `(*timers).run`, the *unbound* method as a func value whose first parameter is the receiver (runtime `time.go`'s `abi.FuncPCABIInternal((*timers).run)`) — selects a method off a **type**. Emitting the selector naively would render the type in value position (`(ж<timers>).run` — CS0119 + CS1503). Go types the expression as the func signature with the receiver prepended, so the converter renders that signature as the concrete delegate type and casts the method's static form to it; Go 1.26's `func (ts *timers) run(now int64, bubble *synctestBubble) int64` gives `(Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run)` (`src/core/runtime/time.cs`). For a `this ref` method the `RecvGenerator`'s ж-overload matches the delegate exactly; a value-receiver method expression (`counter.get`) casts to its value-typed delegate (`(Func<counter, nint>)(get)`); a direct-ж method's primary form matches directly. (Guarded by the `MethodExpression` behavioral test — pointer- and value-receiver method expressions assigned, passed inline, and *invoked*, with mutations accumulating through the receiver box, values vs Go.)
 
-A method expression on a **FOREIGN type** — `(*http.Request).Write` (net/http/httputil persist.go), or `(*Reader).ReadBytes` in an EXTERNAL test (`package bufio_test`) that dot-imports `bufio` — must additionally **qualify** the method's static form: the `this ref`/extension static (and its `RecvGenerator` ж-overload) lives in the *defining* package's class, so the bare name is CS0103 (a `using static` imports an extension method only for `recv.M()` invocation, never as a bare method group — so `(Func<…>)(ReadBytes)` cannot bind it; a same-named local method would instead mis-bind, CS0123). The qualifier is derived from the method's OWN package via `go/types` (`importQualifier(obj.Pkg().Name())`, with the file's import-alias override) — identical to how `getAliasQualifiedTypeName` qualifies the receiver type inside the delegate (`bufio.Reader`) — rather than by peeling the Go source spelling: a **dot-imported** type is a BARE ident (`Reader`), not a `pkg.T` selector, so the old source-peel silently dropped the qualifier and emitted the bare name. The result is `(Func<ж<http.Request>, io.Writer, error>)(http.Write)` / `(Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(bufio.ReadBytes)`. A same-package method expression keeps the bare name — the static is in scope — so existing emissions are unchanged. (Guarded by the `CrossPkgUser` extension — pointer-receiver `(*CrossPkgLib.Sensor).Calibrate` (write observed through the original receiver) plus value-receiver `Sensor.Hot` / `Celsius.Add` foreign method expressions, each invoked through its func value, output-compared vs Go — and by the `MethodExprDotImport` behavioral test, which dot-imports a sibling package and uses `(*Reader).Read` / `(*Reader).Peek` as func values; the pre-fix converter fails it with bare `(Read)`/`(Peek)` — CS0103 — exactly the bufio `TestUnreadByteOthers` failure.)
+A method expression on a **FOREIGN type** — `(*http.Request).Write` (net/http/httputil persist.go), or `(*Reader).ReadBytes` in an EXTERNAL test (`package bufio_test`) that dot-imports `bufio` — must additionally **qualify** the method's static form: the `this ref`/extension static (and its `RecvGenerator` ж-overload) lives in the *defining* package's class, so the bare name is CS0103 (a `using static` imports an extension method only for `recv.M()` invocation, never as a bare method group — so `(Func<…>)(ReadBytes)` cannot bind it; a same-named local method would instead mis-bind, CS0123). The qualifier is derived from the method's OWN package via `go/types` (`importQualifier(obj.Pkg().Name())`, with the file's import-alias override) — identical to how `getAliasQualifiedTypeName` qualifies the receiver type inside the delegate (`bufio.Reader`) — rather than by peeling the Go source spelling: a **dot-imported** type is a BARE ident (`Reader`), not a `pkg.T` selector, so a source-peel would silently drop the qualifier and emit the bare name. The result is `(Func<ж<http.Request>, io.Writer, error>)(http.Write)` / `(Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(bufio.ReadBytes)`. A same-package method expression keeps the bare name — the static is in scope. (Guarded by the `CrossPkgUser` extension — pointer-receiver `(*CrossPkgLib.Sensor).Calibrate` (write observed through the original receiver) plus value-receiver `Sensor.Hot` / `Celsius.Add` foreign method expressions, each invoked through its func value, output-compared vs Go — and by the `MethodExprDotImport` behavioral test, which dot-imports a sibling package and uses `(*Reader).Read` / `(*Reader).Peek` as func values; with the bare name it fails with `(Read)`/`(Peek)` — CS0103 — the shape of bufio's `TestUnreadByteOthers`.)
 
-The **bound method value** — `d.compute = metricReader(read).compute` (runtime `metrics.go`), `types.MethodVal` used as a *value* — forwards through a lambda that captures the receiver expression and carries the **method's own parameters**, explicitly typed: `(ж<statAggregate> p1, ж<metricValue> p2) => ((metricReader)read).compute(p1, p2)`. The previous emission hardcoded arity zero (`() => x.m()`), mismatching any non-nullary target delegate (CS1593). One documented divergence: the receiver expression is evaluated *inside* the lambda (per call), where Go binds it once at method-value creation — acceptable for the compile milestone and the simple receivers observed. (Guarded by the `MethodExpression` extension — a bound `c.add` invoked repeatedly, mutations accumulating through the bound receiver, values vs Go.)
+The **bound method value** — `d.compute = metricReader(read).compute` (runtime `metrics.go`), `types.MethodVal` used as a *value* — forwards through a lambda that carries the **method's own parameters**, explicitly typed, over the receiver evaluated once into a statement-level temp: `var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);` then `d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);` (src/core/runtime/metrics.cs). A fixed arity-zero lambda (`() => x.m()`) would mismatch any non-nullary target delegate (CS1593). The receiver is evaluated when the method value is created, as Go binds it (see *The receiver EXPRESSION is evaluated exactly once* below).<!-- An earlier form evaluated the receiver expression inside the lambda, per call: `(ж<statAggregate> p1, ж<metricValue> p2) => ((metricReader)read).compute(p1, p2)`. --> (Guarded by the `MethodExpression` extension — a bound `c.add` invoked repeatedly, mutations accumulating through the bound receiver, values vs Go.)
 
-An **INTERFACE-receiver** method value in assignment context is exempt from that lambda: an interface method is a genuine C# instance method, so a plain method **group** over the evaluated receiver expression both compiles and matches Go's bind-once semantics exactly — `f = conf.Sizes.Alignof` (go/types sizes.go, `conf` the `ref` receiver) emits `f = conf.Sizes.Alignof;`, evaluating `conf.Sizes` once at delegate creation. The synthesized lambda there was doubly wrong: it re-evaluated the receiver per call *and* captured `conf` — capturing a `ref` receiver is CS1628. This mirrors the value-context rule below, which already leaves interface receivers on the plain emission; whole-stdlib footprint of the change: sizes.cs ×6, database/sql convert.cs, debug/buildinfo, net/http h2_bundle — every hunk a lambda collapsing to its method group. (Guarded by the `IfaceFieldMethodValueBind` behavioral test — a method value on an interface field of a pointer receiver with the field REBOUND after the value is taken, proving bind-once, output-compared vs Go.)
+An **INTERFACE-receiver** method value in assignment context is exempt from that lambda: an interface method is a genuine C# instance method, so a plain method **group** over the evaluated receiver expression both compiles and matches Go's bind-once semantics exactly — `f = conf.Sizes.Alignof` (go/types sizes.go, `conf` the `ref` receiver) emits `f = conf.Sizes.Alignof;`, evaluating `conf.Sizes` once at delegate creation. A synthesized lambda there would be doubly wrong: it would re-evaluate the receiver per call *and* capture `conf` — capturing a `ref` receiver is CS1628. This mirrors the value-context rule below, which leaves interface receivers on the plain emission.<!-- the whole-stdlib footprint of the change (go/types sizes.cs ×6, database/sql convert.cs, debug/buildinfo, net/http h2_bundle) was every hunk a lambda collapsing to its method group --> (Guarded by the `IfaceFieldMethodValueBind` behavioral test — a method value on an interface field of a pointer receiver with the field REBOUND after the value is taken, proving bind-once, output-compared vs Go.)
 
-A **POINTER-receiver method value in a value context** — passed as a call argument rather than assigned: `s.nonDefaultOnce.Do(s.register)`, `registerMetric(…, s.nonDefault.Load)` (internal/godebug) — cannot use the bare selector: the `this ref` emission is an extension method whose first parameter is a **value type**, and C# cannot create a delegate from that (CS1113/CS1061). Go binds the receiver **address** once at method-value creation (`s.register` ≡ `(&s).register`), so the converter emits exactly that binding as a **box-bound method group** over the `RecvGenerator`'s ж-overload (class-typed, delegate-legal): `Ꮡs.register` for the receiver itself, `Ꮡs.of(Setting.ᏑnonDefault).Load` for a receiver value-field chain (the `&x.field` machinery renders the real field box). Unlike the assignment-context lambda above, this form matches Go's bind-once semantics exactly. A method whose body contains such a method value on its own receiver (or a value-field chain of it) is promoted to **direct-ж** by the capture-mode pre-pass (`bodyHasPointerMethodValueOnReceiver`) so the receiver box `Ꮡrecv` exists in scope. (Guarded by the `ReceiverFieldMethodCall` extension — method values on the receiver, on a receiver value field, and on a boxed local's field, passed as func values and invoked with mutations landing on the real storage, values vs Go.)
+A **POINTER-receiver method value in a value context** — passed as a call argument rather than assigned: `s.nonDefaultOnce.Do(s.register)`, `registerMetric(…, s.nonDefault.Load)` (internal/godebug) — cannot use the bare selector: the `this ref` emission is an extension method whose first parameter is a **value type**, and C# cannot create a delegate from that (CS1113/CS1061). Go binds the receiver **address** once at method-value creation (`s.register` ≡ `(&s).register`), so the converter emits exactly that binding as a **box-bound method group** over the `RecvGenerator`'s ж-overload (class-typed, delegate-legal): `Ꮡs.register` for the receiver itself, `s.setting.of(setting.ᏑnonDefault).Load` for a receiver field chain (the `&x.field` machinery renders the real field box). Like the once-evaluated lambda above, this form matches Go's bind-once semantics exactly. A method whose body contains such a method value on its own receiver (or a value-field chain of it) is promoted to **direct-ж** by the capture-mode pre-pass (`bodyHasPointerMethodValueOnReceiver`) so the receiver box `Ꮡrecv` exists in scope. (Guarded by the `ReceiverFieldMethodCall` extension — method values on the receiver, on a receiver value field, and on a boxed local's field, passed as func values and invoked with mutations landing on the real storage, values vs Go.)
 
-The **VALUE-receiver** analog captures rather than binds. When a value-receiver method value roots at the enclosing method's receiver — `kdf.hash.New` (crypto/internal/hpke's `hkdfKDF`, whose `hash` field is a `crypto.Hash` and `New` a value-receiver method; also crypto/tls's `c.hash.New`) — the emitted method is an extension over a **value** receiver, which likewise has no C# delegate (CS1113), so the converter synthesizes a wrapping lambda carrying the method's own parameters: `() => kdf.hash.New()`. But that lambda **captures the receiver**, and a non-direct-ж pointer-receiver method renders `this ref hkdfKDF kdf` whose `ref var kdf = ref Ꮡkdf.Value` alias cannot be captured by a C# closure (**CS1628** — "cannot use ref/in/out parameter inside a lambda"). So a method whose body contains such a method value is promoted to **direct-ж** by the capture-mode pre-pass (`bodyCapturesReceiverInValueMethodValue`, the value-receiver sibling of `bodyHasPointerMethodValueOnReceiver`), giving it a receiver box `Ꮡkdf` that the synthesized lambda references as a capturable reference: `() => Ꮡkdf.Value.hash.New()`. Two supporting pieces make the receiver render through its box inside the *synthesized* lambda (which has no `*ast.FuncLit` node): the capture-analysis walk now marks the **field-chain root** receiver box-ref, not only a bare-ident receiver (`kdf.hash.New` roots at `kdf`, not a bare ident); and the value-receiver synthesis renders the receiver expression in a lambda-conversion context (`conversionInLambda`) so `convIdent` emits the `Ꮡkdf.Value` box form. Same documented divergence as the other method-value forms — the receiver expression re-evaluates *inside* the lambda (per call), where Go's value-receiver method value binds a copy of it once at creation; acceptable for the compile milestone (the closure sees the same receiver instance, matching the pointer-receiver semantics of the enclosing method). This also cleared the identical latent CS1628 in crypto/tls's `key_schedule.cs` (`expandLabel`/`extract`/`finishedHash` each pass `c.hash.New` to `hkdf`/`hmac`, and the direct-ж fixpoint promoted their callers `deriveSecret`/`trafficKey`/… with call sites adapting to `Ꮡc.expandLabel` / `Ꮡsuite.trafficKey`). (Guarded by the `ReceiverCapturedInClosure` extension — a pointer-receiver method capturing its receiver through a value-receiver method value on a value field-chain (`w.id.render`) and on the bare receiver (`w.tag`), alongside the pre-existing func-literal capture, all invoked and output-compared vs Go; whole-stdlib reconvert diff: exactly hpke + the two crypto/tls files changed, nothing else.)
+The **VALUE-receiver** analog captures rather than binds. When a value-receiver method value roots at the enclosing method's receiver — crypto/tls's `c.hash.New` (`cipherSuiteTLS13`'s `hash` field is a `crypto.Hash`, and `New` a value-receiver method) — the emitted method is an extension over a **value** receiver, which likewise has no C# delegate (CS1113), so the converter synthesizes a wrapping lambda carrying the method's own parameters. But that lambda **captures the receiver**, and a non-direct-ж pointer-receiver method renders `this ref cipherSuiteTLS13 c`, whose `ref` alias cannot be captured by a C# closure (**CS1628** — "cannot use ref/in/out parameter inside a lambda"). So a method whose body contains such a method value is promoted to **direct-ж** by the capture-mode pre-pass (`bodyCapturesReceiverInValueMethodValue`, the value-receiver sibling of `bodyHasPointerMethodValueOnReceiver`), giving it a receiver box `Ꮡc` in place of the uncapturable `ref` alias. The lambda itself captures a once-evaluated temp of the receiver expression (see *The receiver EXPRESSION is evaluated exactly once* below): `var recvʗ1 = c.hash;` then `() => recvʗ1.New()` (crypto/tls `key_schedule.cs`).<!-- An earlier form referenced the box inside the lambda, per call: `() => Ꮡkdf.Value.hash.New()`; the go1.24 instance was crypto/internal/hpke's hkdfKDF, whose hash field was a crypto.Hash (`kdf.hash.New`). --> Two supporting pieces make the receiver render through its box inside the *synthesized* lambda (which has no `*ast.FuncLit` node): the capture-analysis walk marks the **field-chain root** receiver box-ref, not only a bare-ident receiver (`c.hash.New` roots at `c`, not a bare ident); and the value-receiver synthesis renders the receiver expression in a lambda-conversion context (`conversionInLambda`) so `convIdent` emits the box form. The temp is Go's copy, bound once at creation. In crypto/tls's `key_schedule.cs`, `nextTrafficSecret`, `trafficKey` and `finishedHash` each pass `c.hash.New` to `tls13.ExpandLabel` (and `finishedHash` to `hmac.New`), so each is emitted direct-ж (`this ж<cipherSuiteTLS13> Ꮡc`) and its call sites read `Ꮡsuite.trafficKey(…)`. (Guarded by the `ReceiverCapturedInClosure` extension — a pointer-receiver method capturing its receiver through a value-receiver method value on a value field-chain (`w.id.render`) and on the bare receiver (`w.tag`), alongside the pre-existing func-literal capture, all invoked and output-compared vs Go.)<!-- whole-stdlib reconvert diff at the change (go1.24): exactly crypto/internal/hpke + the two crypto/tls files changed, nothing else -->
 
-The **go-statement sibling** of the receiver-capture family: a `go` statement calling a **value-returning** method through the enclosing method's pointer receiver — `go q.conn.HandshakeContext(ctx)` inside `func (q *QUICConn) Start` (crypto/tls quic.go, CS1628) — is FORCED into the synthesized-lambda emission because `goǃ` has only void `Action` overloads (the x/net/nettest CS0407 form): `goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx)`. That lambda references the receiver exactly like the method-value cases above, but neither closure predicate sees it — there is no `*ast.FuncLit` and no method-VALUE expression, only a go-call whose lowering *will* synthesize one. The capture-mode pre-pass therefore also promotes on `bodyHasGoStmtLambdaCapturingReceiver`, which mirrors `visitGoStmt`'s lambda-form decision (a nullary call synthesizes a lambda only for a value-returning or named-func-type callee; a call with arguments does so when the callee returns a value or the arity mismatches — variadic never matches) and fires when the CALLEE expression references the receiver (arguments render outside the lambda, as `goǃ` call arguments). With the method direct-ж, the go-stmt capture analysis' existing box-ref marking of the receiver (`varIsDerefdPointerParam`) takes effect and the lambda renders the chain through the box: `goǃ(ᴛ1 => Ꮡq.Value.conn.HandshakeContext(ᴛ1), ctx)`. The method-group emissions are excluded and unchanged — a void matching-arity callee (os/exec's `go c.watchCtx(resultc)`) binds the receiver chain at delegate-creation time, outside any lambda; a `defer` sibling needs no equivalent because any function-level defer already promotes via `bodyWrappedInDeferContext`. **Known divergence (Phase-4 item):** the synthesized lambda reads the receiver chain (`Ꮡq.Value.conn`) at **goroutine-run time**, whereas Go evaluates the method-value receiver at **go-statement time** — `go q.conn.M(x); q.conn = other` deterministically calls the OLD conn in Go but races toward the NEW one here (arguments are statement-time in both). The same lazy-chain window already exists for every synthesized go-lambda over a non-receiver chain (the CS0407 discard form); the faithful fix for the whole class is hoisting the receiver-chain prefix into a statement-time temp before the lambda, which would also avoid the direct-ж signature flip — direct-ж was chosen here for machinery reuse under the compile-first milestone. (Guarded by `GoStmtReceiverLambda` — `go e.tally.bump(delta)` (argument arm) and `go e.tally.report()` (nullary arm), both value-returning through a pointer field of the receiver, with the goroutine's writes read back through the original receiver chain, output-compared vs Go.)
+The **go-statement sibling** of the receiver-capture family: a `go` statement calling a **value-returning** method through the enclosing method's pointer receiver — `go q.conn.HandshakeContext(ctx)` inside `func (q *QUICConn) Start` (crypto/tls quic.go, CS1628) — is FORCED into the synthesized-lambda emission because `goǃ` has only void `Action` overloads (the x/net/nettest CS0407 form): `goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx)`. That lambda references the receiver exactly like the method-value cases above, but neither closure predicate sees it — there is no `*ast.FuncLit` and no method-VALUE expression, only a go-call whose lowering *will* synthesize one. The capture-mode pre-pass therefore also promotes on `bodyHasGoStmtLambdaCapturingReceiver`, which mirrors `visitGoStmt`'s lambda-form decision (a nullary call synthesizes a lambda only for a value-returning or named-func-type callee; a call with arguments does so when the callee returns a value or the arity mismatches — variadic never matches) and fires when the CALLEE expression references the receiver (arguments render outside the lambda, as `goǃ` call arguments). With the method direct-ж, the go-stmt capture analysis' existing box-ref marking of the receiver (`varIsDerefdPointerParam`) takes effect and the lambda renders the chain through the box: `goǃ(ᴛ1 => Ꮡq.Value.conn.HandshakeContext(ᴛ1), ctx)`. The method-group emissions are excluded and unchanged — a void matching-arity callee (os/exec's `go c.watchCtx(resultc)`) binds the receiver chain at delegate-creation time, outside any lambda; a `defer` sibling needs no equivalent because any function-level defer already promotes via `bodyWrappedInDeferContext`. **Known divergence:**<!-- a Phase-4 item --> the synthesized lambda reads the receiver chain (`Ꮡq.Value.conn`) at **goroutine-run time**, whereas Go evaluates the method-value receiver at **go-statement time** — `go q.conn.M(x); q.conn = other` deterministically calls the OLD conn in Go but races toward the NEW one here (arguments are statement-time in both). The same lazy-chain window already exists for every synthesized go-lambda over a non-receiver chain (the CS0407 discard form); the faithful fix for the whole class is hoisting the receiver-chain prefix into a statement-time temp before the lambda, which would also avoid the direct-ж signature flip; direct-ж reuses the existing receiver-capture machinery.<!-- chosen under the compile-first milestone --> (Guarded by `GoStmtReceiverLambda` — `go e.tally.bump(delta)` (argument arm) and `go e.tally.report()` (nullary arm), both value-returning through a pointer field of the receiver, with the goroutine's writes read back through the original receiver chain, output-compared vs Go.)
 
-The **method-group** go statement needs the receiver box too. A void, non-variadic pointer-receiver callee called at its own arity on the enclosing method's receiver — `go t.loop()`, `go t.loopArg(9)` inside `func (t *tracker)` (gopkg.in/yaml.v3's tests), or `go t.in.send()` over a value field — binds the box group (`goǃ(Ꮡt.loop)`, `goǃ(Ꮡt.of(tracker.Ꮡin).send)`), exactly as a pointer-receiver method value does, and binds it at go-statement time as Go does. When no other trigger had promoted the method, the receiver was the `ref T` alias and the emission bound the `this ref` extension (`goǃ(t.loop)`, CS1113/CS1503) or named a box never declared (CS0103). The capture-mode pre-pass therefore also promotes on `bodyHasGoStmtBoxMethodGroupOnReceiver`, the method-group complement of `bodyHasGoStmtLambdaCapturingReceiver`; os/exec's `Start` and the other standard-library sites of this shape were already promoted by another trigger, which is why they compiled. (Guarded by `GoStmtReceiverBoxGroup` — the receiver arm, the argument arm and the value-field arm, with a deferred call and a pointer-parameter go statement as unchanged controls, output-compared vs Go.)
+The **method-group** go statement needs the receiver box too. A void, non-variadic pointer-receiver callee called at its own arity on the enclosing method's receiver — `go t.loop()`, `go t.loopArg(9)` inside `func (t *tracker)` (gopkg.in/yaml.v3's tests), or `go t.in.send()` over a value field — binds the box group (`goǃ(Ꮡt.loop)`, `goǃ(Ꮡt.of(tracker.Ꮡin).send)`), exactly as a pointer-receiver method value does, and binds it at go-statement time as Go does. Unless something promotes the method, the receiver is the `ref T` alias and the emission would bind the `this ref` extension (`goǃ(t.loop)`, CS1113/CS1503) or name a box never declared (CS0103). The capture-mode pre-pass therefore also promotes on `bodyHasGoStmtBoxMethodGroupOnReceiver`, the method-group complement of `bodyHasGoStmtLambdaCapturingReceiver`; os/exec's `Start` and the other standard-library sites of this shape are promoted by another trigger as well. (Guarded by `GoStmtReceiverBoxGroup` — the receiver arm, the argument arm and the value-field arm, with a deferred call and a pointer-parameter go statement as unchanged controls, output-compared vs Go.)
 
-A conversion to a **named func type** — `metricReader(read)` where `type metricReader func() uint64` — targets a C# **delegate declaration** (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast conversion (a `(metricReader)read` from `Func<ulong>` is CS0030); C# converts via **delegate creation**: `new metricReader(read)`, which accepts a compatible delegate or method group. The general conversion branch special-cases a named target whose underlying is a `*types.Signature`. Composed with the bound-value lambda this renders the full runtime `metrics.go` registration: `d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => new metricReader(read).compute(p1, p2)`. (Guarded by the `MethodExpression` extension — a named-func-type conversion with a bound method invoked through a func field, values vs Go.)
+A conversion to a **named func type** — `metricReader(read)` where `type metricReader func() uint64` — targets a C# **delegate declaration** (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast conversion (a `(metricReader)read` from `Func<ulong>` is CS0030); C# converts via **delegate creation**: `new metricReader(read)`, which accepts a compatible delegate or method group. The general conversion branch special-cases a named target whose underlying is a `*types.Signature`. Delegate creation is used where the operand cannot be nil — a function literal or a package-level function; any other operand (a func-typed parameter or variable, which can be nil at run time) routes through golib's `NilSafeDelegateConversion<TTarget, TSource>`, so a nil source converts to nil as in Go instead of throwing in the delegate constructor, and `T(nil)` emits `default(T)!`. Composed with the bound-value lambda this renders the full runtime `metrics.go` registration, where `read` is a parameter (guarded by the `MethodExpression` extension — a named-func-type conversion with a bound method invoked through a func field, values vs Go):
 
-A **GENERIC defined function type** — Go 1.23 `iter`'s `type Seq2[K, V any] func(yield func(K, V) bool)` — emits a **generic delegate**: `public delegate void Seq2<K, V>(Func<K, V, bool> yield);`. Two converter details make this work: the type parameters live on the NAMED type, not the `*ast.FuncType`'s signature, so the delegate declaration derives its generic definition from the TypeSpec's defined type (as the struct/array paths do — deriving from the signature emitted a non-generic `Seq2` whose `K`/`V` were undefined, CS0246/CS0308); and a **conversion to a generic instantiation** (`Seq2Like[string, int](fn)`) peels `IndexListExpr` (multi-parameter — the single-parameter `IndexExpr` already peeled) and resolves the *instantiated* target from the Fun expression's type (the TypeName resolves to the uninstantiated generic, against which convertibility fails), then routes through the same delegate-creation form: `new Seq2Like<@string, nint>((@string k, nint v) => …)`. The instantiated-target override is gated to uninstantiated-generic named targets so pointer conversions (`(*uint64)(p)`, whose Fun type is the full `*T` with the `*` re-applied separately) are untouched. (Guarded by the `GenericTypeInstantiation` extension — a generic defined func type declared, instantiated with two type arguments, and invoked both through a generic function and directly, values vs Go; clears the `iter` package's five wave-1 errors.)
+<!-- source: src/core/runtime/metrics.cs:565-566 -->
+```csharp
+    var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
+    d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
+```
+
+A **GENERIC defined function type** — Go 1.23 `iter`'s `type Seq2[K, V any] func(yield func(K, V) bool)` — emits a **generic delegate**: `public delegate void Seq2<K, V>(Func<K, V, bool> yield);`. Two converter details make this work: the type parameters live on the NAMED type, not the `*ast.FuncType`'s signature, so the delegate declaration derives its generic definition from the TypeSpec's defined type (as the struct/array paths do — deriving from the signature would emit a non-generic `Seq2` whose `K`/`V` are undefined, CS0246/CS0308); and a **conversion to a generic instantiation** (`Seq2Like[string, int](fn)`) peels `IndexListExpr` (multi-parameter — the single-parameter `IndexExpr` already peeled) and resolves the *instantiated* target from the Fun expression's type (the TypeName resolves to the uninstantiated generic, against which convertibility fails), then routes through the same delegate-creation form: `new Seq2Like<@string, nint>((@string k, nint v) => …)`. The instantiated-target override is gated to uninstantiated-generic named targets so pointer conversions (`(*uint64)(p)`, whose Fun type is the full `*T` with the `*` re-applied separately) are untouched. (Guarded by the `GenericTypeInstantiation` extension — a generic defined func type declared, instantiated with two type arguments, and invoked both through a generic function and directly, values vs Go.)<!-- cleared the iter package's five wave-1 errors at the time -->
 
 In Go a function is a value; a value-receiver method can be assigned to a variable, and the variable captures **its own copy** of the receiver value at the moment of assignment. This surprises many non-Go programmers:
 
@@ -48,7 +54,7 @@ func main() {
 This prints `Name = James` twice ([run it](https://play.golang.org/p/d-A5re1dfs8)) — `f1` bound a copy of `d`, so the later mutation is not observed. To preserve this semantic, the converter copies the receiver value into the delegate's capture rather than capturing the variable by reference, so the delegate executes against the snapshot taken at assignment time.
 
 ## A method value reassigned via `=` hoists its receiver capture
-The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`) before the lambda. In a `:=` **declaration** this hoists naturally, but a plain `=` **reassignment** to a pre-declared variable — database/sql's `checker = nvc.CheckNamedValue` — already wrote the LHS and `=` operator by the time the snapshot is generated, so writing it inline split the assignment into three token-broken pieces (CS1002). The converter routes the snapshot to the statement hoist buffer so it precedes the whole statement:
+The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`) before the lambda. In a `:=` **declaration** this hoists naturally, but a plain `=` **reassignment** to a pre-declared variable — database/sql's `checker = nvc.CheckNamedValue` — has already written the LHS and `=` operator by the time the snapshot is generated, so writing it inline would split the assignment into three token-broken pieces (CS1002). The converter routes the snapshot to the statement hoist buffer so it precedes the whole statement:
 
 ```go
 var checker func(*driver.NamedValue) error
@@ -59,45 +65,44 @@ var nvcʗ1 = nvc;
 checker = nvcʗ1.CheckNamedValue;
 ```
 
-This matches the `:=`-define path (which already hoists) and also covers a reassignment inside a tagless `switch` case. (Guarded by the `MethodValueReassignCapture` behavioral test.) `CheckNamedValue` here is an *interface* method, so the assignment binds a plain method group over the hoisted snapshot (see the interface-receiver rule above); a concrete-receiver method value keeps the param-carrying lambda form, referencing the snapshot the same way.
+This matches the `:=`-define path (which hoists too) and also covers a reassignment inside a tagless `switch` case. (Guarded by the `MethodValueReassignCapture` behavioral test.) `CheckNamedValue` here is an *interface* method, so the assignment binds a plain method group over the hoisted snapshot (see the interface-receiver rule above); a concrete-receiver method value keeps the param-carrying lambda form, referencing the snapshot the same way.
 
 ## A POINTER-receiver method value binds the ADDRESS in assignment context too
 Go's `sw.Closesocket`, where `Closesocket` has a `*Switch` receiver and `sw` is addressable, **is**
 `(&sw).Closesocket` — the address is taken once, at method-value creation (the same spec rule the
 heap-box arm above rests on). The VALUE-context arm — a method value passed as a call *argument* —
-already synthesized that `&` and bound the method group over the box. The **assignment**-context arm
-did not: it rendered the receiver expression plainly and forwarded through the param-carrying lambda,
-so the lambda body called the `this ref` `ж<T>` extension with a struct **value** receiver. net's six
-socket-hook installs in `main_windows_test.go` were five CS1929 plus one CS1501, the latter because
-the value receiver made a *different*, differently-arity'd overload the compiler's best candidate:
+synthesizes that `&` and binds the method group over the box, and the **assignment**-context arm does the
+same. Rendering the receiver expression plainly and forwarding through the param-carrying lambda would call
+the `this ref` `ж<T>` extension with a struct **value** receiver: net's six socket-hook installs in
+`main_windows_test.go` would be five CS1929 plus one CS1501, the latter because the value receiver makes a
+*different*, differently-arity'd overload the compiler's best candidate:
 
 ```go
 poll.CloseFunc = sw.Closesocket      // sw is a package-level socktest.Switch
 listenFunc     = sw.Listen
 ```
 ```csharp
-poll.CloseFunc = Ꮡsw.Closesocket;    // was (syscallꓸHandle p1) => sw.Closesocket(p1)
+poll.CloseFunc = Ꮡsw.Closesocket;    // not (syscallꓸHandle p1) => sw.Closesocket(p1)
 listenFunc     = Ꮡsw.Listen;
 ```
 
 The arm takes the value-context emission **wholesale** — a method GROUP over the box — rather than
-only re-pointing the forwarding lambda's receiver, because two things were wrong, not one:
+only re-pointing the forwarding lambda's receiver, because two things would be wrong, not one:
 
 - The **lambda** is unnecessary here. A pointer-receiver method value binds once and aliases, so the
   group is both simpler and strictly more faithful than the lambda's documented per-call receiver
   re-evaluation. (The lambda remains right for a *value* receiver, where C# cannot build a delegate
   over a value-type extension at all.)
-- The receiver **snapshot** was the deeper error, and only a local receiver exposes it. The snapshot
+- The receiver **snapshot** is the deeper error, and only a local receiver exposes it. The snapshot
   exists to preserve a value receiver's bind-a-COPY semantics, which a pointer receiver does not
   have — the escape analysis has already ruled the other way by heap-boxing the local (the rule
   *A pointer-receiver METHOD VALUE heap-boxes its receiver* above) — and it *renames* the receiver, so
-  the synthesized `&` produced `Ꮡcʗ1`, a box nothing declares (**CS0103**). `visitAssignStmt` now
+  the synthesized `&` would produce `Ꮡcʗ1`, a box nothing declares (**CS0103**). `visitAssignStmt`
   skips the snapshot for this shape at both of its method-value sites
   (`methodValueBindsReceiverAddress`).
 
-net's own sites never showed the second half: `sw` is package-level, so no capture snapshot is taken.
-The local-receiver form was broken before this change too — as CS1929 rather than CS0103 — so the
-guard moved the error rather than introducing it. A receiver expression that is *already* a pointer
+net's own sites never show the second half: `sw` is package-level, so no capture snapshot is taken.
+A receiver expression that is *already* a pointer
 keeps both its existing pointer-context rendering and its snapshot: Go copies the pointer there, which
 is exactly what the snapshot models. (Guarded by `MethodValueReassignCapture`'s `counter.bump` arm — a
 pointer-receiver method value assigned to a pre-declared func var, with the mutation read back through
@@ -106,11 +111,10 @@ the original local, output-compared vs Go.)
 ## A VALUE-receiver method value snapshots its receiver in EVERY position
 The receiver snapshot above exists because Go binds a value receiver by **copy at evaluation** — `x.M`
 saves the receiver when the method value is created, not when the resulting func is called. The two
-`visitAssignStmt` sites did that for assignment contexts. Every *other* position — a composite-literal
-element, a call argument — reached `convSelectorExpr`'s param-carrying lambda instead, which rendered
-the receiver **live** and so re-read it per call. The comment there recorded that as a caveat; it is
-observable, and it presents as three unrelated-looking symptoms depending only on how the enclosing
-slot happened to render the variable:
+`visitAssignStmt` sites do that for assignment contexts, and every *other* position — a composite-literal
+element, a call argument — reaches `convSelectorExpr`'s param-carrying lambda, which must not render
+the receiver **live** and so re-read it per call. That would be observable, and it presents as three
+unrelated-looking symptoms depending only on how the enclosing slot happens to render the variable:
 
 ```go
 x := frame{Name: "a"}
@@ -119,17 +123,17 @@ x.Name = "b"
 fmt.Println(parts[0](), parts[1]())   // Go: a b
 ```
 ```csharp
-// before — the receiver read from the box at CALL time, printing "b b"
+// a live receiver — read from the box at CALL time, printing "b b"
 var parts = new Func<@string>[]{ () => Ꮡx.Value.label(), () => Ꮡx.Value.Name }.slice();
 
-// after — the method value binds its own copy; the closure still sees the variable
+// emitted — the method value binds its own copy; the closure still sees the variable
 var xʗ1 = x;
 var parts = new Func<@string>[]{ () => xʗ1.label(), () => Ꮡx.Value.Name }.slice();
 ```
 
-Spelling the same shape `[]any{…}` renders the receiver as the bare ref-local alias instead
+Spelling the same shape `[]any{…}` would render a live receiver as the bare ref-local alias instead
 (`() => x.label()`), which a lambda cannot capture at all — **CS8175**, the loud member of the family
-and the one a `runtime -tests` conversion surfaced. Both close with the one snapshot; a fix that
+(a `runtime -tests` conversion has it). Both close with the one snapshot; a fix that
 instead routes the receiver through the box closes the loud member by converting it into the silent
 one.
 
@@ -147,7 +151,7 @@ Three properties make the snapshot correct rather than merely compiling:
 - **It is gated on a statement-level sink existing.** The declaration goes to `v.hoistedDecls`, the
   same buffer `convFuncLit` drains into for a func literal "on the RHS or inside a composite-literal
   element of it", which is what gives a nested element a valid declaration position. Where no sink
-  exists the previous rendering stands: never apply a rename you cannot also declare.
+  exists the lambda renders as before the snapshot rule: never apply a rename you cannot also declare.
 
 The **assignment** position needed the same treatment for a different immediate reason. There the
 snapshot is asked of the capture machinery, and it is delivered — until something heap-boxes the
@@ -160,29 +164,31 @@ x := frame{Name: "a"}
 f := func() string { return x.Name }   // heap-boxes x
 m := x.label
 x.Name = "b"
-fmt.Println(m(), f())                  // Go: a b   —   C# was: b b
+fmt.Println(m(), f())                  // Go: a b   —   without its own temp: b b
 ```
 
 So that site mints its own temp too, gated on the variable actually *being* box-ref, so the ordinary
-path keeps producing the one snapshot it already produces correctly — two would be a second copy of a
+path keeps producing the one snapshot it produces correctly — two would be a second copy of a
 single evaluation. It is gated on a value, non-interface receiver besides: a pointer receiver binds the
 ADDRESS and must not be copied, and marking one for snapshot is what turns this fix into CS1003/CS1002
-across production files. A census of the whole standard library found **54** assignment-context
-method-value sites, of which 8 are box-ref and **all 8 are pointer-receiver** (`database/sql`,
-`go/parser` ×4, `go/types` ×2, `net`) — so this arm fires nowhere in the corpus today and its emission
-is byte-identical. Both silent members are reachable and neither is currently reached: they close a
+across production files. A census of the whole standard library found that **every** box-ref
+assignment-context method-value site has a pointer receiver (in `database/sql`, `go/parser`,
+`go/types` and `net`) — so this arm fires nowhere in the corpus today and its emission
+is byte-identical.<!-- measured at the time: 54 assignment-context sites, 8 box-ref, all 8 pointer-receiver
+(database/sql, go/parser ×4, go/types ×2, net) --> Both silent members are reachable and neither is currently reached:
+they close a
 shape one refactor away, not an observed wrong answer.
 
 ## The receiver EXPRESSION is evaluated exactly once, for every kind and every shape
 The rule above is about the receiver's *value*; this one is about the *expression*. Go saves the
 receiver when the method value is created, so `f().M` calls `f` exactly once and `a.b.M` reads the path
-exactly once. Every wrapper-lambda emission deferred that expression into the lambda, re-doing it on
-each invocation. **Two independent mechanisms**, and the second is invisible if you only look for the
+exactly once. A wrapper lambda that defers that expression into its body re-does it on each invocation.
+**Two independent mechanisms** do that, and the second is invisible if you only look for the
 first:
 
 - **M1 — the expression is deferred.** Re-executes calls and re-reads paths per invocation. It is
-  **kind-independent**: measured red on a value receiver (`makeFrame().label`, Go calls it once, the
-  conversion called it per invocation) *and* on a pointer receiver (`makePtr().bump`, likewise). The
+  **kind-independent**: red on a value receiver (`makeFrame().label`: Go calls it once, a deferred
+  expression per invocation) *and* on a pointer receiver (`makePtr().bump`, likewise). The
   pointer case is reachable in exactly one shape — a call *returning a pointer*, since a value result
   is not addressable — which is why "pointer receivers emit method groups, so they already evaluate
   once" is true of every shape but that one, and false overall.
@@ -194,23 +200,25 @@ first:
 So a field chain is correct over a struct and broken over a pointer, with identical syntax — the
 discriminator is the base's storage, not the shape.
 
-The cut hoists the receiver into a statement-level temp and binds the temp. The temp is kind-correct
+The converter hoists the receiver into a statement-level temp and binds the temp. The temp is kind-correct
 **by construction**: whatever the arm already rendered is exactly what Go saves — a value copy, the
 bound `Ꮡ` address, or the interface value — so nothing derives the temp's content from the kind, which
 is where a shape-first version would snapshot a value and bind *its* address. The initializer is
 re-rendered in the ENCLOSING context, not reused from the caller: the caller's string is produced
 in-lambda, so a captured base reads as the capture machinery's snapshot name, and that snapshot is
 declared into the same hoist buffer *after* this temp — emitting `var recvʗ1 = h6ʗ1.f;` above
-`var h6ʗ1 = h6;`, **CS0841** on every captured base.
+`var h6ʗ1 = h6;` would be **CS0841** on every captured base.
 
 A bare ident receiver is left alone, which is not an exception: a local read has no side effect and
 nothing to alias, and the ident paths already produce a once-evaluated temp of their own. Most sites
-the cut rewrites were therefore *already correct, by accident of value semantics*; it makes them
-correct by construction, which is why its diff is wider than its behavioural yield.
+the hoist covers would be correct anyway, *by accident of value semantics*; the hoist makes them
+correct by construction.
 
 Restricted to a plain ident receiver of non-pointer type — the shape an emission-attached census of the
-whole standard library found (19 sites: `bytes` ×3, `strings` ×3, `encoding/json` ×8, `crypto/tls` ×3,
-`crypto/internal/hpke` ×2, of which 12 have an ident receiver). A pointer base auto-deref'd to a value
+whole standard library found (in `bytes`, `strings`, `encoding/json`, `crypto/tls` and
+`crypto/internal/hpke`, most with an ident receiver).<!-- measured at the time: 19 sites (bytes ×3, strings ×3,
+encoding/json ×8, crypto/tls ×3, crypto/internal/hpke ×2), 12 with an ident receiver --> A pointer base auto-deref'd to
+a value
 receiver needs the *deref* snapshotted rather than the pointer, and takes the rule in the next section.
 (Guarded by `MethodValueReceiverSnapshot`, which output-compares all five positions — typed element,
 `any` element, cross-statement independence, call argument, and the box-ref assignment — against
@@ -232,11 +240,11 @@ h.p.Name = "A"
 fmt.Println(fieldV(), h.p.label())  // Go: a A
 ```
 ```csharp
-// before — the receiver expression rendered as the box, per call
+// the receiver expression rendered as the box, per call
 var hʗ1 = h;
 var fieldV = () => hʗ1.p.label();   // CS1929: ж<frame> offered to label(frame)
 
-// after — the temp holds the DEREF, so it is the pointee's copy at evaluation
+// emitted — the temp holds the DEREF, so it is the pointee's copy at evaluation
 var recvʗ1 = ~h.p;
 var fieldV = () => recvʗ1.label();
 h.p.Value.Name = "A"u8;
@@ -256,13 +264,12 @@ rendering (`var recvʗ1 = p;`); and a **promoted** method reaches its receiver t
 machinery, so it keeps its existing emission. Both the assignment arm and the value (call-argument) arm
 take the hoist — the same defect stood in both, and fixing one of them is not the fix.
 
-Footprint, measured as two seeded whole-stdlib emissions diffed against **each other** (never against
-the committed tree, which is a moving baseline): **zero** in `src/core` — 0 changed files and 0 hunks
-across 6004 files per side, 0 unreadable, with both conversions exiting 0 and both emissions asserted
-to carry the run's own mtimes. The shape is unreached in the production corpus, which is why it was
-declined rather than guessed at when the evaluate-once family landed. It is *not* unreached in the behavioral corpus: `ReceiverCapturedInClosure`'s
+The shape is unreached in the converted standard library.<!-- Footprint, measured as two seeded whole-stdlib
+emissions diffed against each other: zero in src/core — no changed file and no hunk, nothing unreadable (6004
+files per side at the time), with both conversions exiting 0 and both emissions asserted to carry the run's own
+mtimes. --> It is *not* unreached in the behavioral corpus: `ReceiverCapturedInClosure`'s
 `viaBareMethodValue` is exactly it — a pointer RECEIVER ident under a value-receiver `tag` — and its
-golden re-baselines from `call(() => Ꮡw.Value.tag())` to a once-evaluated `var recvʗ1 = w;`. Its sibling
+golden carries a once-evaluated `var recvʗ1 = w;` (not `call(() => Ꮡw.Value.tag())`). Its sibling
 `viaFieldMethodValue` (`w.id.render`, a *value* field) is untouched, which is the narrowing working:
 what matters is the type of the receiver EXPRESSION, not of the base it is reached through. No output
 moves there — nothing writes between creation and call — so it is a correct-by-construction change with
@@ -270,9 +277,10 @@ no locally observable consumer, stated as such. (Guarded by `MethodValuePointeeC
 output-compares nine positions against `go run`: pointer field, repointed pointer, pointer local ident,
 call argument, a call-shaped pointer receiver counted for evaluate-once, a method with parameters, the
 value receiver's own mutation-does-not-reach-the-pointee direction, a pointer parameter, and a
-pointer-typed slice element. Eight of the nine positions are `CS1929` on the pre-cut converter — nine
-errors, the call-argument position carrying two sites — and the ninth, the pointer parameter, compiles
-there and silently reports the pointee as it stands at CALL time.)
+pointer-typed slice element. Without the hoist, eight of the nine positions are `CS1929` — nine errors, the
+call-argument position
+carrying two sites — and the ninth, the pointer parameter, compiles and silently reports the pointee as it
+stands at CALL time.)
 
 ## A bare function value in `:=` takes its named delegate type, not `var`
 Go's short-declaration from a bare function value whose type is a **named** func type — text/template/parse's `state := lexText`, where `lexText` is `func(*lexer) stateFn` and `type stateFn func(*lexer) stateFn` (the classic self-referential state machine) — infers the local as the *unnamed* signature. The converter cannot emit `var state = lexText;` (a C# method group has no `var`-inferable delegate type — CS8917), and typing the local structurally as `Func<ж<lexer>, stateFn>` makes it a **distinct** C# delegate from the `stateFn` the method group produces and that each `state = state(l)` reassignment yields (CS0029). It declares the local with the matching package named delegate instead:
@@ -312,7 +320,7 @@ _ = (Func<nint, nint>)((nint p1) => cʗ1.bump(p1));
 
 A package named func type whose underlying signature matches is preferred over the structural `Func<…>`/`Action<…>` render so the reader sees the Go type's own name; for a discard either is sound, since nothing observes the value. The parentheses around the RHS are load-bearing for the lambda form — `(Func<…>)(nint p1) => …` does not parse as a cast. A variadic signature takes the golib delegate family (`Funcꓸꓸꓸ<@string, any, @string>` for `fmt.Sprintf`), and a func-typed **variable** is left alone: it already has a C# type.
 
-Routing the named-type case through the *declaration* branch instead was the pre-fix behavior and is worse than the missing cast it fixed: `stateFn _ = lexText;` declares a local literally named `_`, which turns every other discard in the same scope into an assignment to it (CS0841 before it, CS0123/CS0029 after) and collides outright with a second one (CS0128). The blank test therefore short-circuits every declaration arm, not just the `var` one. (Guarded by the `BlankIdentifierCollision` extension — all seven RHS shapes plus the func-typed-variable and `:=`-named-delegate controls, proven failing-first at 11 diagnostics in 7 classes.)
+Routing the named-type case through the *declaration* branch instead would be worse than a missing cast: `stateFn _ = lexText;` declares a local literally named `_`, which turns every other discard in the same scope into an assignment to it (CS0841 before it, CS0123/CS0029 after) and collides outright with a second one (CS0128). The blank test therefore short-circuits every declaration arm, not just the `var` one. (Guarded by the `BlankIdentifierCollision` extension — all seven RHS shapes plus the func-typed-variable and `:=`-named-delegate controls, proven failing-first at 11 diagnostics in 7 classes.)
 
 ## Two `unsafe.Pointer`s compare as BOXES, not as addresses
 `unsafe.Pointer` is the one Go pointer that *carries* an address rather than *being* one, and its C# form says so: golib's `Pointer : ж<uintptr>`, whose `Value` **is** the address. That makes it the one type where the box and its value are both plausible comparands, and Go's rule picks the box — `p == q` is pointer identity.
@@ -327,7 +335,7 @@ if k != p { … }            // p ranges over testPointers(), whose first elemen
 if (k != p) { … }          // NOT k.Value != p.Value — that NREs on the nil element
 ```
 
-The pointer context is therefore suppressed for an equality comparison with `unsafe.Pointer` on both sides (`convBinaryExpr`), so `convIdent`'s `x.Value` arm — which is correct where an *address* is genuinely wanted — does not fire. The scope is exact: Go admits no other pairing without a conversion (`unsafe.Pointer == *T` and `== uintptr` are type errors), and comparison against untyped `nil` has its own arm and is unaffected. Corpus footprint is seven `runtime` sites (`alg`, `map`, `map_fast32/64`, `mbarrier`, `traceback`, `pprof/map`), each a deref-compare collapsing to a box compare, all verified compiling. (Guarded by the `ManagedAtomicPointer` extension — same-address, distinct-address and nil operands on both sides, a fresh conversion of one address compared against an earlier one, the nil-first table walk, and a selector-versus-ident pairing; the pre-fix converter fails it on both Target and Output, exiting 2 on the nil operand.)
+The pointer context is therefore suppressed for an equality comparison with `unsafe.Pointer` on both sides (`convBinaryExpr`), so `convIdent`'s `x.Value` arm — which is correct where an *address* is genuinely wanted — does not fire. The scope is exact: Go admits no other pairing without a conversion (`unsafe.Pointer == *T` and `== uintptr` are type errors), and comparison against untyped `nil` has its own arm and is unaffected. The corpus footprint is a handful of `runtime` sites (`alg`, `map`, `map_fast32/64`, `mbarrier`, `traceback`, `pprof/map`), each a deref-compare collapsing to a box compare, all verified compiling.<!-- seven sites at the time --> (Guarded by the `ManagedAtomicPointer` extension — same-address, distinct-address and nil operands on both sides, a fresh conversion of one address compared against an earlier one, the nil-first table walk, and a selector-versus-ident pairing; comparing `.Value` fails it on both Target and Output, exiting 2 on the nil operand.)
 
 ## A method VALUE is named as Go's `-fm` wrapper; a method EXPRESSION by its receiver type
 `runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()` is how Go code names a function value (go-cmp's `cmp/internal/function.NameOf`, every `t.Run(FuncForPC(fn.Pointer()).Name(), …)` in reflect's own suite). Go gives a method **two** functions. The method expression `T.M` / `(*T).M` is the method itself, named with its receiver type. Every method **value** `x.M` runs through one autogenerated wrapper, `T.M-fm`, whatever receiver bound it. One taken through an interface is named by the interface. The emission is unchanged; the runtime names what the emission already holds:
@@ -347,7 +355,8 @@ Three runtime rules make the names Go's. **A bound delegate tokens separately.**
 
 Go's `main` is emitted as C#'s entry point `Main`, and a Go function that is itself named `Main` is shadowed to `ΔMain`. So a receiver-less, parameterless `Main` in a package class is Go's `main`. Its own frame reads `main.main` and a literal inside it `main.main.funcN`, in a traceback, from `runtime.Caller`, and through `FuncForPC`.
 
-(Guarded by the `MethodValueFuncNames` behavioral test — 14 names against `go run`, 8 of them wrong before the change.)
+(Guarded by the `MethodValueFuncNames` behavioral test — 14 names against `go run`.)<!-- 8 of them wrong before the
+change -->
 
 A VALUE-receiver method value (`t.valueMethod`, Go `main.T.valueMethod-fm`) is the one shape whose emission holds no method to name. It is a lambda over a copy of the receiver (`() => tʗ1.valueMethod()`), so on its own it reads as its enclosing function's literal. The converter therefore **records** it, invisibly: the file's `GoPositionMap` record takes a fifth argument, `<goLine>=<pkg.Recv.Method>` per method value, beside the literal names:
 
@@ -359,9 +368,9 @@ The runtime names a lambda `<pkg.Recv.Method>-fm` when both facts agree: its Go 
 
 Two residuals, disclosed. A literal on the **same line** whose whole body is a call to the **same method** reads as the method value; Go names it `Outer.funcN`. And `runtime.Callers` still **counts** the wrapper's pc where Go's does not: the record needs the PDB, and a capture never reads it, so the frame is dropped at expansion, not at capture. (Guarded by the `MethodValueFmRecord` behavioral test — two method values, a same-method literal on its own line as the control, the receiver copy, and a `Callers` walk through `call(t.walk)`; 3 of its 7 lines differ on the runtime without the record.)
 
-**A function value written inside a multi-line statement is named by its place in the statement.** The record's line table has one entry per Go **statement**, so every lambda inside a table of rows — go-cmp's `tests := []struct{ fnc interface{}; want string }{ {func() {}, …}, {(myType{}).valueMethod, …} }` — resolves to the statement's first line, where neither the literal nor the method value is recorded, and fell to Roslyn's ordinal (`func0` for Go's `func1`). The record still holds each one on its own line. So when a lambda's line carries no entry, the runtime takes the enclosing function's lambdas that resolve to the same statement, in C# source order, and pairs them with the literals and method values that start inside the statement's Go span, in Go line order. It names a lambda that way only when the two lists have the same count, no two items share a Go line, and a method value's lambda calls a method of the recorded name (a composite-literal receiver, `(myType{}).valueMethod`, also constructs it, so the call need not be its only one). Anything else keeps today's name. Nothing in the emission or the record changes.
+**A function value written inside a multi-line statement is named by its place in the statement.** The record's line table has one entry per Go **statement**, so every lambda inside a table of rows — go-cmp's `tests := []struct{ fnc interface{}; want string }{ {func() {}, …}, {(myType{}).valueMethod, …} }` — resolves to the statement's first line, where neither the literal nor the method value is recorded, and would fall to Roslyn's ordinal (`func0` for Go's `func1`). The record still holds each one on its own line. So when a lambda's line carries no entry, the runtime takes the enclosing function's lambdas that resolve to the same statement, in C# source order, and pairs them with the literals and method values that start inside the statement's Go span, in Go line order. It names a lambda that way only when the two lists have the same count, no two items share a Go line, and a method value's lambda calls a method of the recorded name (a composite-literal receiver, `(myType{}).valueMethod`, also constructs it, so the call need not be its only one). Anything else keeps its ordinal name. Nothing in the emission or the record changes.
 
-**A promoted method value is named by the method it promotes.** `(&w).Write`, with `Write` promoted from an embedded `bytes.Buffer`, binds to go2cs-gen's forwarder on a generated class (`mainᴛWᴛxpkg`), which is not converted Go; Go names the value `bytes.(*Buffer).Write-fm`. The runtime follows a go2cs-gen forwarder to the call of its own name, for function values only, so a forwarder's frame keeps its name. (Both guarded by the `StatementTableFuncNames` behavioral test — a seven-row table: two literals, three value-receiver method values, a pointer-receiver control and a promoted `Write`; 6 of its 7 names differ on the runtime without the change.)
+**A promoted method value is named by the method it promotes.** `(&w).Write`, with `Write` promoted from an embedded `bytes.Buffer`, binds to go2cs-gen's forwarder on a generated class (`mainᴛWᴛxpkg`), which is not converted Go; Go names the value `bytes.(*Buffer).Write-fm`. The runtime follows a go2cs-gen forwarder to the call of its own name, for function values only, so a forwarder's frame keeps its name. (Both guarded by the `StatementTableFuncNames` behavioral test — a seven-row table: two literals, three value-receiver method values, a pointer-receiver control and a promoted `Write`; 6 of its 7 names differ without the pairing rule.)
 
 ---
 

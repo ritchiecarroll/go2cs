@@ -1,6 +1,7 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using strings = strings_package;
@@ -15,7 +16,7 @@ partial struct tagOptions /*@string*/;
 // comma-separated options.
 internal static (@string, tagOptions) parseTag(@string tag) {
     (tag, var opt, _) = strings.Cut(tag, ","u8);
-    return (tag, ((tagOptions)opt));
+    return (tag, (tagOptions)opt);
 }
 
 // Contains reports whether a comma-separated list of options
@@ -25,7 +26,7 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     if (len(o) == 0) {
         return false;
     }
-    @string s = ((@string)o);
+    @string s = (@string)o;
     while (s != ""u8) {
         @string name = default!;
         (name, s, _) = strings.Cut(s, ","u8);

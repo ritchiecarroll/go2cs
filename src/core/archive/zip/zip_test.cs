@@ -17,6 +17,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using static go.archive.zip_package;
@@ -517,7 +519,7 @@ internal static (nint n, error err) Write(this ref suffixSaver ss, slice<byte> p
 // generatesZip64 reports whether f wrote a zip64 file.
 // f is also responsible for closing w.
 internal static bool generatesZip64(ж<testing.T> Ꮡt, Action<ж<global::go.archive.zip_package.Writer>> f) {
-    var ss = Ꮡ(new suffixSaver(keep: (10 << (int)(20))));
+    var ss = Ꮡ(new suffixSaver(keep: (10 << 20)));
     var w = NewWriter(new zip_internal_test_package.suffixSaverжWriter(ss));
     f(w);
     return suffixIsZip64(Ꮡt, new zip_internal_test_package.suffixSaverжsizedReaderAt(ss));
@@ -558,7 +560,7 @@ internal static bool suffixIsZip64(ж<testing.T> Ꮡt, sizedReaderAt zip) {
         }
     }
 
-    var b = ((global::go.archive.zip_package.readBuf)d);
+    var b = (global::go.archive.zip_package.readBuf)d;
     {
         var sig = b.uint32(); if (sig != directory64EndSignature) {
             return false;
@@ -662,7 +664,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     }
     f._<ж<global::go.archive.zip_package.fileWriter>>().Value.crc32 = new fakeHash32(nil);
     var chunk = new slice<byte>(chunkSize);
-    foreach (var (i, _) in chunk) {
+    foreach (var i in range(chunk)) {
         chunk[i] = (rune)'.';
     }
     for (nint i = 0; i < chunks; i++) {
@@ -747,7 +749,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
 internal static readonly object notAZip64ˢ = (@string)"not a zip64"u8;
 
 // Issue 9857
-internal static void testZip64DirectoryRecordLength(ж<rleBuffer> Ꮡbuf, ж<testing.T> Ꮡt) {
+internal static partial void testZip64DirectoryRecordLength(ж<rleBuffer> Ꮡbuf, ж<testing.T> Ꮡt) {
     if (!suffixIsZip64(Ꮡt, new zip_internal_test_package.rleBufferжsizedReaderAt(Ꮡbuf))) {
         Ꮡt.Fatal(notAZip64ˢ);
     }
@@ -825,13 +827,13 @@ internal partial struct TestHeaderTooLongErr_type /*dyn*/ {
 public static void TestHeaderTooLongErr(ж<testing.T> Ꮡt) {
     slice<TestHeaderTooLongErr_type> headerTests = new TestHeaderTooLongErr_type[]{
         new(
-            name: strings.Repeat("x"u8, (1 << (int)(16))),
+            name: strings.Repeat("x"u8, 1 << 16),
             extra: new byte[]{}.slice(),
             wanterr: errLongName
         ),
         new(
             name: "long_extra"u8,
-            extra: bytes.Repeat(new byte[]{0xff}.slice(), (1 << (int)(16))),
+            extra: bytes.Repeat(new byte[]{0xff}.slice(), 1 << 16),
             wanterr: errLongExtra
         )
     }.slice();
@@ -863,7 +865,7 @@ public static void TestHeaderIgnoredSize(ж<testing.T> Ꮡt) {
     h = new FileHeader(
         Name: "foo.txt"u8,
         Method: Deflate,
-        Extra: new byte[]{(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)(8))), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8}.slice() // bad size but shouldn't be consulted
+        Extra: new byte[]{(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)8)), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8}.slice() // bad size but shouldn't be consulted
     );
     testValidHeader(Ꮡh, Ꮡt);
 }
@@ -889,12 +891,12 @@ public static void BenchmarkZip64Test(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        testZip64(new zip_test_package.testing_BжTB(Ꮡb), ((int64)1 << (int)(26)));
+        testZip64(new zip_test_package.testing_BжTB(Ꮡb), (int64)1 << 26);
     }
 }
 
 public static void BenchmarkZip64TestSizes(ж<testing.B> Ꮡb) {
-    foreach (var (_, size) in new int64[]{((int64)1 << (int)(12)), ((int64)1 << (int)(20)), ((int64)1 << (int)(26))}.slice()) {
+    foreach (var (_, size) in new int64[]{(int64)1 << 12, (int64)1 << 20, (int64)1 << 26}.slice()) {
         Ꮡb.Run(fmt.Sprint(size), (ж<testing.B> bΔ1) => {
             bΔ1.RunParallel((ж<testing.PB> pb) => {
                 while (pb.Next()) {
@@ -910,13 +912,13 @@ public static void TestSuffixSaver(ж<testing.T> Ꮡt) {
     var ss = Ꮡ(new suffixSaver(keep: keep));
     ss.Write(slice<byte>("abc"u8));
     {
-        @string got = ((@string)ss.Suffix()); if (got != "abc"u8) {
+        @string got = (@string)ss.Suffix(); if (got != "abc"u8) {
             Ꮡt.Errorf("got = %q; want abc"u8, got);
         }
     }
     ss.Write(slice<byte>("defghijklmno"u8));
     {
-        @string got = ((@string)ss.Suffix()); if (got != "fghijklmno"u8) {
+        @string got = (@string)ss.Suffix(); if (got != "fghijklmno"u8) {
             Ꮡt.Errorf("got = %q; want fghijklmno"u8, got);
         }
     }
@@ -937,7 +939,7 @@ public static void TestSuffixSaver(ж<testing.T> Ꮡt) {
                 continue;
             }
             @string want = "abcdefghijklmno"u8.slice((nint)(off), (nint)(off + (int64)size));
-            @string got = ((@string)(readBuf.slice(0, n)));
+            @string got = (@string)(readBuf.slice(0, n));
             if (err != default! || got != want) {
                 Ꮡt.Errorf("off %d, size %d = %v, %v (%q); want %q"u8, off, size, n, err, got, want);
             }

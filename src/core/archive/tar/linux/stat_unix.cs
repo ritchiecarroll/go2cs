@@ -20,7 +20,7 @@ partial class tar_package {
     sysStat = statUnix;
 }
 
-// userMap and groupMap caches UID and GID lookups for performance reasons.
+// userMap and groupMap cache UID and GID lookups for performance reasons.
 // The downside is that renaming uname or gname by the OS never takes effect.
 internal static ж<sync.Map> ᏑuserMap = new StandardBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map userMap => ref ᏑuserMap.Value;       // map[int]string
@@ -73,48 +73,48 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
         if (exprᴛ1 == "aix"u8) {
             uint32 major = default!;
             uint32 minor = default!;
-            major = (uint32)((((uint64)(dev & 0x3fffffff00000000UL)) >> (int)(32)));
-            minor = (uint32)((((uint64)(dev & 0x00000000ffffffffU)) >> (int)(0)));
+            major = (uint32)((dev & 0x3fffffff00000000UL) >> 32);
+            minor = (uint32)((dev & 0x00000000ffffffffU) >> 0);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "linux"u8) {
             // Copied from golang.org/x/sys/unix/dev_linux.go.
-            var major = (uint32)((((uint64)(dev & 0x00000000000fff00)) >> (int)(8)));
-            major |= (uint32)((uint32)((((uint64)(dev & 0xfffff00000000000UL)) >> (int)(32))));
-            var minor = (uint32)((((uint64)(dev & 0x00000000000000ff)) >> (int)(0)));
-            minor |= (uint32)((uint32)((((uint64)(dev & 0x00000ffffff00000UL)) >> (int)(12))));
+            var major = (uint32)((dev & 0x00000000000fff00) >> 8);
+            major |= (uint32)((uint32)((dev & 0xfffff00000000000UL) >> 32));
+            var minor = (uint32)((dev & 0x00000000000000ff) >> 0);
+            minor |= (uint32)((uint32)((dev & 0x00000ffffff00000UL) >> 12));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
             // Copied from golang.org/x/sys/unix/dev_darwin.go.
-            var major = (uint32)((uint64)(((dev >> (int)(24))) & 0xff));
-            var minor = (uint32)((uint64)(dev & 0xffffff));
+            var major = (uint32)((dev >> 24) & 0xff);
+            var minor = (uint32)(dev & 0xffffff);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "dragonfly"u8) {
             // Copied from golang.org/x/sys/unix/dev_dragonfly.go.
-            var major = (uint32)((uint64)(((dev >> (int)(8))) & 0xff));
-            var minor = (uint32)((uint64)(dev & 0xffff00ffU));
+            var major = (uint32)((dev >> 8) & 0xff);
+            var minor = (uint32)(dev & 0xffff00ffU);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "freebsd"u8) {
             // Copied from golang.org/x/sys/unix/dev_freebsd.go.
-            var major = (uint32)((uint64)(((dev >> (int)(8))) & 0xff));
-            var minor = (uint32)((uint64)(dev & 0xffff00ffU));
+            var major = (uint32)((dev >> 8) & 0xff);
+            var minor = (uint32)(dev & 0xffff00ffU);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "netbsd"u8) {
             // Copied from golang.org/x/sys/unix/dev_netbsd.go.
-            var major = (uint32)((((uint64)(dev & 0x000fff00)) >> (int)(8)));
-            var minor = (uint32)((((uint64)(dev & 0x000000ff)) >> (int)(0)));
-            minor |= (uint32)((uint32)((((uint64)(dev & 0xfff00000U)) >> (int)(12))));
+            var major = (uint32)((dev & 0x000fff00) >> 8);
+            var minor = (uint32)((dev & 0x000000ff) >> 0);
+            minor |= (uint32)((uint32)((dev & 0xfff00000U) >> 12));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "openbsd"u8) {
             // Copied from golang.org/x/sys/unix/dev_openbsd.go.
-            var major = (uint32)((((uint64)(dev & 0x0000ff00)) >> (int)(8)));
-            var minor = (uint32)((((uint64)(dev & 0x000000ff)) >> (int)(0)));
-            minor |= (uint32)((uint32)((((uint64)(dev & 0xffff0000U)) >> (int)(8))));
+            var major = (uint32)((dev & 0x0000ff00) >> 8);
+            var minor = (uint32)((dev & 0x000000ff) >> 0);
+            minor |= (uint32)((uint32)((dev & 0xffff0000U) >> 8));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else { /* default: */

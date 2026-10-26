@@ -117,7 +117,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
 }
 
 partial struct ProfileRecord {
-    public slice<ж<trace.Frame>> Stack;
+    public slice<trace.StackFrame> Stack;
     public uint64 Count;
     public time.Duration Time;
 }
@@ -136,31 +136,31 @@ public static ж<profile.Profile> BuildProfile(slice<ProfileRecord> prof) {
     foreach (var (_, rec) in prof) {
         slice<ж<profile.Location>> sloc = default!;
         foreach (var (_, frame) in rec.Stack) {
-            var loc = locs[(~frame).PC];
+            var loc = locs[frame.PC];
             if (loc == nil) {
-                var fn = funcs[(~frame).File + (~frame).Fn];
+                var fn = funcs[frame.File + frame.Func];
                 if (fn == nil) {
                     fn = Ꮡ(new profile.Function(
                         ID: (uint64)(len((~p).Function) + 1),
-                        Name: (~frame).Fn,
-                        SystemName: (~frame).Fn,
-                        Filename: (~frame).File
+                        Name: frame.Func,
+                        SystemName: frame.Func,
+                        Filename: frame.File
                     ));
                     p.Value.Function = append((~p).Function, fn);
-                    funcs[(~frame).File + (~frame).Fn] = fn;
+                    funcs[frame.File + frame.Func] = fn;
                 }
                 loc = Ꮡ(new profile.Location(
                     ID: (uint64)(len((~p).Location) + 1),
-                    Address: (~frame).PC,
+                    Address: frame.PC,
                     Line: new profile.Line[]{
                         new(
                             Function: fn,
-                            ΔLine: (int64)(~frame).Line
+                            ΔLine: (int64)frame.Line
                         )
                     }.slice()
                 ));
                 p.Value.Location = append((~p).Location, loc);
-                locs[(~frame).PC] = loc;
+                locs[frame.PC] = loc;
             }
             sloc = append(sloc, loc);
         }

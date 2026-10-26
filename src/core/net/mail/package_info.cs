@@ -49,6 +49,12 @@ using static go.net.mail_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -57,7 +63,7 @@ using static go.net.mail_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSCAAoYloKCgpSUgoKCgoKCAAwSkpSCgqaCuICCgpSCyoKCuKaCtoKUgoKCpgAFGOKmxpKCgpSokoKClAAKGJKokgAIFqKqotzEgpKmlLiCgoKUuIKmgpSCqJSCuIKmgoKmgtyClAAKEKKCgqaCpoKClJSClIKUgriClIKm5qKCgpSClIKUgpSClAAICLKCgoIACRSCgoKCgoKCuMqClpKCgoKmlIKCgriCgoKCgqamypSCgpSClJTcopSCgoKUpoKUgoKUlIKUgoKUlIKmAAgI8pSSkoK6koKClJSCgoK4gpSCgqaCqJKCgqaUgoK4goK46MKEkoKUgoKokoKClIKUyoKCuIKUgoKUlKaCgpSC2KSClJSCgpSUprqCpoLatra2qLSCAAgO4pSCgoKUprbqgpSCgoKUgpSCpuikgriCgoKClIKmgoKUgqaClKaCuIKm1oKClIKCuIKCgoKUgrimgoKUgqiSpoKmgqaCqJKUgoKmgIK2pqaUlIKCgqaCkoKSgpSClKamsoKCAAgSgoKSgoKUgoKUlIKCAAcQgrimAAYQgqqilLiUqKSClKiSgoKCgpKCgqaCqKSqoqqiqKSClA==", "518-522:1;774-774:1;872-882:1")]
+[assembly: go.GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7vikgoKmgriAgoKUgsqCgrimgraClIKCgqYABRjipsaSgoKUqJKCgpQAChiSqJIACBaiqqLcxIKSppS4goKClLiCpoKUgqiUgriCpoKCpoLcgpQAChCigoKmgqaCgpSUgpSClIK4gpSCpuaigoKUgpSClIKUgpQACAiygoKCAAkUgoKCgoKCgrjKgpaSgoKCppSCgoK4goKCgoKmpsqUgoKUgpSU3KKUgoKClKaClIKClJSClIKClJSCpgAICPKUkpKCupKCgpSUgoKCuIKUgoKmgqiSgoKmlIKCuIKCuOjShKiUgoKokoKClIKUyoKCuIKUgpS0goK0yIK4goKUgtjEgpSUgoKUlKbKgqaC2ra2tqi0ggAIDuKUgoKClKa26oKUgoKClIKUgqbopIK4goKCgpSCpoKClIKmgpSmgriCptaCgpSCgriCgoKClIK4poKClIKokqaCpoKmgqiSlIKCpoCCtqamlJSCgoKmgpKCkoKUgpSmprKCggAIEoKCkoKClIKClJSCggAHEIK4pgAGEIKqopS4lKikgpSokoKCgoKSgoKmgqikqqKqoqikgpQ=", "517-521:1;784-784:1;882-892:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

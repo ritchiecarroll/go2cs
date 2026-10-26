@@ -57,15 +57,15 @@ public static void TestParseNumeric(ж<testing.T> Ꮡt) {
         new(((@string)(new byte[]{0x80})), 0, true),
         new(((@string)(new byte[]{0x80, 0x00})), 0, true),
         new(((@string)(new byte[]{0x80, 0x00, 0x00})), 0, true),
-        new(((@string)(new byte[]{0xbf})), ((1 << (int)(6))) - 1, true),
-        new(((@string)(new byte[]{0xbf, 0xff})), ((1 << (int)(14))) - 1, true),
-        new(((@string)(new byte[]{0xbf, 0xff, 0xff})), ((1 << (int)(22))) - 1, true),
+        new(((@string)(new byte[]{0xbf})), (1 << 6) - 1, true),
+        new(((@string)(new byte[]{0xbf, 0xff})), (1 << 14) - 1, true),
+        new(((@string)(new byte[]{0xbf, 0xff, 0xff})), (1 << 22) - 1, true),
         new(((@string)(new byte[]{0xff})), -1, true),
         new(((@string)(new byte[]{0xff, 0xff})), -1, true),
         new(((@string)(new byte[]{0xff, 0xff, 0xff})), -1, true),
-        new(((@string)(new byte[]{0xc0})), -1 * ((1 << (int)(6))), true),
-        new(((@string)(new byte[]{0xc0, 0x00})), -1 * ((1 << (int)(14))), true),
-        new(((@string)(new byte[]{0xc0, 0x00, 0x00})), -1 * ((1 << (int)(22))), true),
+        new(((@string)(new byte[]{0xc0})), -1 * (1 << 6), true),
+        new(((@string)(new byte[]{0xc0, 0x00})), -1 * (1 << 14), true),
+        new(((@string)(new byte[]{0xc0, 0x00, 0x00})), -1 * (1 << 22), true),
         new(((@string)(new byte[]{0x87, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), 537795476381659745L, true),
         new(((@string)(new byte[]{0x80, 0x00, 0x00, 0x00, 0x07, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), 537795476381659745L, true),
         new(((@string)(new byte[]{0xf7, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), -615126028225187231L, true),
@@ -139,17 +139,17 @@ public static void TestFormatNumeric(ж<testing.T> Ꮡt) {
         new(-1, ((@string)(new byte[]{0xff})), true),
         new(-1, ((@string)(new byte[]{0xff, 0xff})), true),
         new(-1, ((@string)(new byte[]{0xff, 0xff, 0xff})), true),
-        new((((int64)1 << (int)(0))), "0"u8, false),
-        new(((1 << (int)(8))) - 1, ((@string)(new byte[]{0x80, 0xff})), true),
-        new((((int64)1 << (int)(8))), "0\x00"u8, false),
-        new(((1 << (int)(16))) - 1, ((@string)(new byte[]{0x80, 0xff, 0xff})), true),
-        new((((int64)1 << (int)(16))), "00\x00"u8, false),
-        new(-1 * ((1 << (int)(0))), ((@string)(new byte[]{0xff})), true),
-        new(-1 * ((1 << (int)(0))) - 1, "0"u8, false),
-        new(-1 * ((1 << (int)(8))), ((@string)(new byte[]{0xff, 0x00})), true),
-        new(-1 * ((1 << (int)(8))) - 1, "0\x00"u8, false),
-        new(-1 * ((1 << (int)(16))), ((@string)(new byte[]{0xff, 0x00, 0x00})), true),
-        new(-1 * ((1 << (int)(16))) - 1, "00\x00"u8, false),
+        new(((int64)1 << 0), "0"u8, false),
+        new((1 << 8) - 1, ((@string)(new byte[]{0x80, 0xff})), true),
+        new(((int64)1 << 8), "0\x00"u8, false),
+        new((1 << 16) - 1, ((@string)(new byte[]{0x80, 0xff, 0xff})), true),
+        new(((int64)1 << 16), "00\x00"u8, false),
+        new(-1 * (1 << 0), ((@string)(new byte[]{0xff})), true),
+        new(-1 * (1 << 0) - 1, "0"u8, false),
+        new(-1 * (1 << 8), ((@string)(new byte[]{0xff, 0x00})), true),
+        new(-1 * (1 << 8) - 1, "0\x00"u8, false),
+        new(-1 * (1 << 16), ((@string)(new byte[]{0xff, 0x00, 0x00})), true),
+        new(-1 * (1 << 16) - 1, "00\x00"u8, false),
         new(537795476381659745L, "0000000\x00"u8, false),
         new(537795476381659745L, ((@string)(new byte[]{0x80, 0x00, 0x00, 0x00, 0x07, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), true),
         new(-615126028225187231L, "0000000\x00"u8, false),
@@ -453,6 +453,78 @@ public static void TestFormatPAXRecord(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("formatPAXRecord(%q, %q): got %q, want %q"u8,
                 v.inKey, v.inVal, got, v.want);
         }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
+
+internal partial struct BenchmarkParsePAXTime_tests /*dyn*/ {
+    internal @string name;
+    internal @string @in;
+    internal time.Time want;
+    internal bool ok;
+}
+
+public static void BenchmarkParsePAXTime(ж<testing.B> Ꮡb) {
+    var tests = new BenchmarkParsePAXTime_tests[]{
+        new(
+            name: "NoNanos"u8,
+            @in: "123456"u8,
+            want: time.Unix(123456, 0),
+            ok: true
+        ),
+        new(
+            name: "ExactNanos"u8,
+            @in: "1.123456789"u8,
+            want: time.Unix(1, 123456789),
+            ok: true
+        ),
+        new(
+            name: "WithNanoPadding"u8,
+            @in: "1.123"u8,
+            want: time.Unix(1, 123000000),
+            ok: true
+        ),
+        new(
+            name: "WithNanoTruncate"u8,
+            @in: "1.123456789123"u8,
+            want: time.Unix(1, 123456789),
+            ok: true
+        ),
+        new(
+            name: "TrailingError"u8,
+            @in: "1.123abc"u8,
+            want: new time.Time(nil),
+            ok: false
+        ),
+        new(
+            name: "LeadingError"u8,
+            @in: "1.abc123"u8,
+            want: new time.Time(nil),
+            ok: false
+        )
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new BenchmarkParsePAXTime_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡb.Run(tt.name, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            while (bΔ1.Loop()) {
+                var (ts, err) = parsePAXTime(ttʗ1.@in);
+                if ((err == default!) != ttʗ1.ok) {
+                    if (err != default!) {
+                        bΔ1.Fatal(err);
+                    }
+                    bΔ1.Fatal(expectedErrorˢ);
+                }
+                if (!ts.Equal(ttʗ1.want)) {
+                    bΔ1.Fatalf("time mismatch: got %v, want %v"u8, ts, ttʗ1.want);
+                }
+            }
+        });
     }
 }
 

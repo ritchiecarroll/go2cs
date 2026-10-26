@@ -11,8 +11,8 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 
@@ -34,7 +34,7 @@ internal static operandMode commaok => 9;  // like value, but operand may be use
 internal static operandMode commaerr => 10; // like commaok, but second value is error, not boolean
 internal static operandMode cgofunc => 11;  // operand is a cgo function
 
-internal static array<@string> operandModeString = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛoperandModeString { internal static array<@string> operandModeString = new golib.SparseArray<@string>{
     [invalid] = "invalid operand"u8,
     [novalue] = "no value"u8,
     [Δbuiltinᴛ] = "built-in"u8,
@@ -47,7 +47,7 @@ internal static array<@string> operandModeString = new golib.SparseArray<@string
     [commaok] = "comma, ok expression"u8,
     [commaerr] = "comma, error expression"u8,
     [cgofunc] = "cgo function"u8
-}.array();
+}.array(); }
 
 // An operand represents an intermediate value during type checking.
 // Operands have an (addressing) mode, the expression evaluating to
@@ -213,7 +213,7 @@ internal static @string operandString(ref operand x, Func<ж<Package>, @string> 
                     @string what = compositeKind(x.typ);
                     if (what == ""u8) {
                         // x.typ must be basic type
-                        what = under(x.typ)._<ж<Basic>>().Value.name;
+                        what = x.typ.Underlying()._<ж<Basic>>().Value.name;
                     }
                     desc += what + " "u8;
                     break;
@@ -259,7 +259,7 @@ internal static readonly @string unionˢ = "union"u8;
 // ("array", "slice", etc.) or the empty string if typ is not
 // composite but a basic type.
 internal static @string compositeKind(ΔType typ) {
-    switch (under(typ).type()) {
+    switch (typ.Underlying().type()) {
     case ж<Basic>: {
         return ""u8;
     }
@@ -372,8 +372,8 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         return (true, 0);
     }
 
-    var Vu = under(V);
-    var Tu = under(T);
+    var Vu = V.Underlying();
+    var Tu = T.Underlying();
     var (Vp, _) = V._<ж<TypeParam>>(ᐧ);
     var (Tp, _) = T._<ж<TypeParam>>(ᐧ);
 

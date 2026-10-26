@@ -33,7 +33,7 @@ public static void TestAll(ж<testing.T> Ꮡt) {
         }
         Ꮡt.Fatal(err);
     }
-    @string doc = ((@string)data);
+    @string doc = (@string)data;
 
     var incs = incNonDefaults(Ꮡt);
 
@@ -82,7 +82,7 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> Ꮡt) {
     }
 
     var seen = new map<@string, bool>{};
-    foreach (var (_, dir) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, dir) in strings.Split((@string)@out, "\n"u8)) {
         if (dir == ""u8) {
             continue;
         }
@@ -105,6 +105,14 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> Ꮡt) {
         }
     }
     return seen;
+}
+
+public static void TestRemoved(ж<testing.T> Ꮡt) {
+    foreach (var (_, info) in godebugs.Removed) {
+        if (godebugs.Lookup(info.Name) != nil) {
+            Ꮡt.Fatalf("GODEBUG: %v exists in both Removed and All"u8, info.Name);
+        }
+    }
 }
 
 } // end godebugs_test_package

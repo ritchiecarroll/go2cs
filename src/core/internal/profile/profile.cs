@@ -285,7 +285,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
                 l.Value.Line = (~l).Line.slice(len((~l).Line) - 1);
             }
             if (!linenumber) {
-                foreach (var (i, _) in (~l).Line) {
+                foreach (var i in range((~l).Line)) {
                     (~l).Line[i].ΔLine = 0;
                 }
             }
@@ -304,10 +304,12 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
 public static @string String(this ref Profile p) {
+    var ssᴷ = new stackAppend<@string>();
+
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
     {
         var pt = p.PeriodType; if (pt != nil) {
-            ss = append(ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
+            ss = append(ssᴷ, ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
         }
     }
     ss = append(ss, fmt.Sprintf("Period: %d"u8, p.Period));
@@ -315,7 +317,7 @@ public static @string String(this ref Profile p) {
         ss = append(ss, fmt.Sprintf("Time: %v"u8, time.Unix(0, p.TimeNanos)));
     }
     if (p.DurationNanos != 0) {
-        ss = append(ss, fmt.Sprintf("Duration: %v"u8, ((time.Duration)p.DurationNanos)));
+        ss = append(ss, fmt.Sprintf("Duration: %v"u8, (time.Duration)p.DurationNanos));
     }
 
     ss = append(ss, "Samples:"u8);
@@ -362,7 +364,7 @@ public static @string String(this ref Profile p) {
         if (len((~l).Line) == 0) {
             ss = append(ss, locStr);
         }
-        foreach (var (li, _) in (~l).Line) {
+        foreach (var li in range((~l).Line)) {
             @string lnStr = "??"u8;
             {
                 var fn = (~l).Line[li].Function; if (fn != nil) {
@@ -468,7 +470,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         if (!compatibleValueTypes(p.SampleType[i], pb.SampleType[i])) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }
@@ -572,7 +574,7 @@ public static void Scale(this ref Profile p, float64 ratio) {
         return;
     }
     var ratios = new slice<float64>(len(p.SampleType));
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         ratios[i] = ratio;
     }
     p.ScaleN(ratios);

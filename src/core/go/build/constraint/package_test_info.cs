@@ -34,6 +34,12 @@ using static global::go.go.build.constraint_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -42,7 +48,7 @@ using static global::go.go.build.constraint_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/constraint/expr_test.go", "expr_test.cs", "ABMgABY0grKSgoIACQwAECiCspKCgoKCgpSClIKClJSC3OKCgIKAgoKkyIIACgYACx6CspKCgpSCAAkMAAkagrKSgoKUggAKDAAHGIKykoKClIKCgpSSgpSCgu4ADSKCspKCggAKDAAPKoKykoKCgpKClJSCgpSCAAsMAAoegrKSgoKUgoKCkoKUlIKClIKClIIADQyCABQqkoKCkoCCgpQADA6CggAMGpKCgpKC", "44-49:1;75-95:1;100-108:1;131-139:1;158-166:1;184-203:1;194-197:1.1;226-231:1;258-275:1;296-321:1;347-358:1;377-384:1", "", "20=tag/1/10/5,tag/2/10/9,not/1/2/9,tag/3/10/13,tag/4/10/13,and/1/3/13,not/2/2/13,tag/5/10/17,tag/6/10/17,tag/7/10/17,or/1/2/17,and/2/3/17,tag/8/10/21,tag/9/10/21,and/3/3/21,tag/10/10/21,or/2/2/21;142=tag/1/20/4,tag/2/20/5,tag/3/20/5,and/1/6/5,tag/4/20/6,tag/5/20/6,or/1/5/6,tag/6/20/7,tag/7/20/8,tag/8/20/8,tag/9/20/8,and/2/6/8,or/2/5/8,tag/10/20/9,tag/11/20/9,and/3/6/9,tag/12/20/9,or/3/5/9,tag/13/20/10,tag/14/20/10,tag/15/20/10,or/4/5/10,and/4/6/10,tag/16/20/11,tag/17/20/11,or/5/5/11,tag/18/20/11,and/5/6/11,tag/19/20/12,tag/20/20/12,and/6/6/12,not/1/1/12;247=tag/1/20/4,tag/2/20/5,tag/3/20/5,and/1/4/5,tag/4/20/6,tag/5/20/6,or/1/5/6,tag/6/20/7,tag/7/20/7,tag/8/20/7,and/2/4/7,or/2/5/7,tag/9/20/8,tag/10/20/8,and/3/4/8,tag/11/20/8,or/3/5/8,tag/12/20/9,tag/13/20/9,not/1/3/9,and/4/4/9,tag/14/20/9,not/2/3/9,or/4/5/9,tag/15/20/10,tag/16/20/10,or/5/5/10,tag/17/20/11,tag/18/20/12,not/3/3/12,tag/19/20/13,tag/20/20/14;281=tag/1/10/5,tag/2/10/6,tag/3/10/7,tag/4/10/7,or/1/2/7,tag/5/10/8,tag/6/10/8,or/2/2/8,tag/7/10/13,tag/8/10/13,and/1/2/13,tag/9/10/14,tag/10/10/14,and/2/2/14")]
+[assembly: global::go.GoPositionMap("go/build/constraint/expr_test.go", "expr_test.cs", "ABMgABY0grKSgoIACQwAECiCspKCgoKCgpSClIKClJSC3OKCgIKAgoKkyIIACgYACx6CspKCgpSCAAkMAAkagrKSgoKUggAKDAAHGIKykoKClIKCgpSSgpSCgu4ADSKCspKCggAKDAAQKoKykoKCgpKClJSCgpSCAAsMAAoegrKSgoKUgoKCkoKUlIKClIKClIIADQyCABQqkoKCkoCCgpQADA6CggAMGpKCgpKC", "44-49:1;75-95:1;100-108:1;131-139:1;158-166:1;184-203:1;194-197:1.1;226-231:1;258-275:1;296-321:1;347-358:1;377-384:1", "", "20=tag/1/10/5,tag/2/10/9,not/1/2/9,tag/3/10/13,tag/4/10/13,and/1/3/13,not/2/2/13,tag/5/10/17,tag/6/10/17,tag/7/10/17,or/1/2/17,and/2/3/17,tag/8/10/21,tag/9/10/21,and/3/3/21,tag/10/10/21,or/2/2/21;142=tag/1/20/4,tag/2/20/5,tag/3/20/5,and/1/6/5,tag/4/20/6,tag/5/20/6,or/1/5/6,tag/6/20/7,tag/7/20/8,tag/8/20/8,tag/9/20/8,and/2/6/8,or/2/5/8,tag/10/20/9,tag/11/20/9,and/3/6/9,tag/12/20/9,or/3/5/9,tag/13/20/10,tag/14/20/10,tag/15/20/10,or/4/5/10,and/4/6/10,tag/16/20/11,tag/17/20/11,or/5/5/11,tag/18/20/11,and/5/6/11,tag/19/20/12,tag/20/20/12,and/6/6/12,not/1/1/12;247=tag/1/20/4,tag/2/20/5,tag/3/20/5,and/1/4/5,tag/4/20/6,tag/5/20/6,or/1/5/6,tag/6/20/7,tag/7/20/7,tag/8/20/7,and/2/4/7,or/2/5/7,tag/9/20/8,tag/10/20/8,and/3/4/8,tag/11/20/8,or/3/5/8,tag/12/20/9,tag/13/20/9,not/1/3/9,and/4/4/9,tag/14/20/9,not/2/3/9,or/4/5/9,tag/15/20/10,tag/16/20/10,or/5/5/10,tag/17/20/11,tag/18/20/12,not/3/3/12,tag/19/20/13,tag/20/20/14;281=tag/1/10/5,tag/2/10/6,tag/3/10/7,tag/4/10/7,or/1/2/7,tag/5/10/8,tag/6/10/8,or/2/2/8,tag/7/10/13,tag/8/10/13,and/1/2/13,tag/9/10/14,tag/10/10/14,and/2/2/14")]
 [assembly: global::go.GoPositionMap("go/build/constraint/vers_test.go", "vers_test.cs", "AA8YAAwggoKCgpSCgoKSgpSC")]
 // </GoSourcePositionMaps>
 

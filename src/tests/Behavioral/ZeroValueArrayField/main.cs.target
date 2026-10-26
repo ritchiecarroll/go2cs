@@ -17,7 +17,7 @@ internal static partial ж<holder> makeHolder(@string name) {
         tail: new slice<nint>(2)
     ));
 
-    foreach (var (i, _) in (~h).tbl) {
+    foreach (var i in range((~h).tbl)) {
         h.Value.tbl[i] = len(name);
     }
 
@@ -26,11 +26,8 @@ internal static partial ж<holder> makeHolder(@string name) {
     return h;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcˢ = "abc"u8;
-
 internal static void Main() {
-    var h = makeHolder(abcˢ);
+    var h = makeHolder("abc");
     nint sum = 0;
 
     foreach (var (i, v) in (~h).tbl.ΔRangeSnapshot()) {
@@ -40,7 +37,7 @@ internal static void Main() {
     fmt.Println((~h).name, len((~h).tbl), sum, (~h).tbl[3], len((~h).tail));
 
     var src = new nint[]{1, 2, 3, 4, 5, 6, 7, 8}.array();
-    var g = new holder(name: "xyz"u8, tbl: src.Clone());
+    var g = new holder(name: "xyz", tbl: src.Clone());
     fmt.Println(g.tbl[0], g.tbl[7], len(g.tbl));
 }
 

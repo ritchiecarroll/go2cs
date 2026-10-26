@@ -40,6 +40,7 @@ public static ж<CoverageDataWriter> NewCoverageDataWriter(io.Writer w, coverage
     var r = Ꮡ(new CoverageDataWriter(
         stab: Ꮡ(new stringtab.Writer(nil)),
         w: bufio.NewWriter(w),
+
         tmp: new slice<byte>(64),
         cflavor: flav
     ));
@@ -83,7 +84,7 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     var zeros = new byte[]{0, 0, 0, 0}.slice();
     var rem = (uint32)sz % 4;
     if (rem != 0) {
-        var pad = zeros.slice(0, (nint)((4 - rem)));
+        var pad = zeros.slice(0, (nint)(4 - rem));
         {
             var (nw, err) = ws.Write(pad); if (err != default!){
                 return err;

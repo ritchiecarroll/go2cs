@@ -39,11 +39,17 @@ using static go.crypto.@internal.fips140.tls13_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, go.crypto.@internal.fips140_package.Hash>(Pointer = true)]
+[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,8 +59,8 @@ using static go.crypto.@internal.fips140.tls13_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "AA8egoK43IKCgoKCgIKk", "16-36:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABEo8gAIEpSCgoKCgoKCpqKClKaigpQAESii3IKqogAKEIKCAAUQoqqiAAcQgoIABRCiqqKqogAHFKIABRCiAAgMgoKCgqai", "76-76:1", "", "83=extract/1/1/1;109=extract/1/1/1;134=extract/1/1/1;166=deriveSecret/1/1/1;175=deriveSecret/1/1/1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgIKk", "16-36:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAARKKLcgqqiAAoQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACAyCgoKCpqI=", "76-76:1", "", "84=extract/1/1/1;110=extract/1/1/1;135=extract/1/1/1;167=deriveSecret/1/1/1;176=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -88,5 +94,6 @@ public static partial class tls13_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸhkdf() => builtin.initPackage(typeof(go.crypto.@internal.fips140.hkdf_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha256() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha256_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }

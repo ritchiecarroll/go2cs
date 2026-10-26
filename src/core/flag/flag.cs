@@ -139,7 +139,7 @@ internal static error Set(this ref boolValue b, @string s) {
     if (err != default!) {
         err = errParse;
     }
-    b = ((boolValue)v);
+    b = (boolValue)v;
     return err;
 }
 
@@ -178,7 +178,7 @@ internal static error Set(this ref intValue i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((intValue)(nint)v);
+    i = (intValue)(nint)v;
     return err;
 }
 
@@ -205,7 +205,7 @@ internal static error Set(this ref int64Value i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((int64Value)v);
+    i = (int64Value)v;
     return err;
 }
 
@@ -232,7 +232,7 @@ internal static error Set(this ref uintValue i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((uintValue)(nuint)v);
+    i = (uintValue)(nuint)v;
     return err;
 }
 
@@ -259,7 +259,7 @@ internal static error Set(this ref uint64Value i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((uint64Value)v);
+    i = (uint64Value)v;
     return err;
 }
 
@@ -282,16 +282,16 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
 }
 
 internal static error Set(this ref stringValue s, @string val) {
-    s = ((stringValue)val);
+    s = (stringValue)val;
     return default!;
 }
 
 internal static any Get(this ref stringValue s) {
-    return ((@string)(s));
+    return (@string)(s);
 }
 
 internal static @string String(this ref stringValue s) {
-    return ((@string)(s));
+    return (@string)(s);
 }
 
 // -- float64 Value
@@ -309,7 +309,7 @@ internal static error Set(this ref float64Value f, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    f = ((float64Value)v);
+    f = (float64Value)v;
     return err;
 }
 
@@ -336,12 +336,12 @@ internal static error Set(this ref durationValue d, @string s) {
     if (err != default!) {
         err = errParse;
     }
-    d = ((durationValue)v);
+    d = (durationValue)v;
     return err;
 }
 
 internal static any Get(this ref durationValue d) {
-    return ((time.Duration)d);
+    return (time.Duration)d;
 }
 
 internal static @string String(this ж<durationValue> Ꮡd) {
@@ -382,7 +382,7 @@ internal static @string String(this textValue v) {
         var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
             {
                 var (b, err) = m.MarshalText(); if (err == default!) {
-                    return ((@string)b);
+                    return (@string)b;
                 }
             }
         }
@@ -821,8 +821,7 @@ internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
 // Custom usage functions may choose to exit the program; by default exiting
 // happens anyway as the command line's error handling strategy is set to
 // [ExitOnError].
-public static Action Usage;
-internal static void initᴛUsage() { Usage = () => {
+[GoLazy] partial class lazyᴛUsage { public static Action Usage = () => {
     fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n"u8, os.Args[0]);
     PrintDefaults();
 }; }

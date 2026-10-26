@@ -10,9 +10,7 @@ namespace go.go;
 using errors = errors_package;
 using fmt = fmt_package;
 using token = global::go.go.token_package;
-using buildcfg = @internal.buildcfg_package;
-using static @internal.types.errors_package;
-using @internal;
+using static global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -92,11 +90,12 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
 //
 // For Named types the resulting instance may be unexpanded.
 //
-// check may be nil (when not type-checking syntax); pos is used only only if check is non-nil.
+// check may be nil (when not type-checking syntax); pos is used only if check is non-nil.
 internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔgenericType orig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
     ΔType res = default!;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
+    var ctxtsᴷ = new stackAppend<ж<Context>>();
 
     // The order of the contexts below matters: we always prefer instances in the
     // expanding instance context in order to preserve reference cycles.
@@ -105,7 +104,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     // recorded in expanding.inst.ctxt.
     slice<ж<Context>> ctxts = default!;
     if (Ꮡexpanding != nil) {
-        ctxts = append(ctxts, (~expanding.inst).ctxt);
+        ctxts = append(ctxtsᴷ, ctxts, (~expanding.inst).ctxt);
     }
     if (Ꮡctxt != nil) {
         ctxts = append(ctxts, Ꮡctxt);
@@ -148,10 +147,6 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
         break;
     }
     case ж<Alias> origΔ1: {
-        if (!buildcfg.Experiment.AliasTypeParams) {
-            assert(Ꮡexpanding == nil); // Alias instances cannot be reached from Named types
-        }
-
         // verify type parameter count (see go.dev/issue/71198 for a test case)
         var tparams = origΔ1.TypeParams();
         if (!Ꮡcheck.validateTArgLen(pos, (~origΔ1).obj.of(TypeName.Ꮡobject).Name(), tparams.Len(), len(targs))) {
@@ -225,7 +220,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 
     @string msg = Ꮡcheck.sprintf("%s type arguments for type %s: have %d, want %d"u8, qual, name, got, want);
     if (Ꮡcheck != nil) {
-        Ꮡcheck.error(((atPos)pos), WrongTypeArgCount, msg);
+        Ꮡcheck.error((atPos)pos, WrongTypeArgCount, msg);
         return false;
     }
 
@@ -264,13 +259,13 @@ internal static readonly @string satisfyˢ = "satisfy"u8;
 internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool constraint, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
-    var Vu = under(V);
-    var Tu = under(T);
+    var Vu = V.Underlying();
+    var Tu = T.Underlying();
     if (!isValid(Vu) || !isValid(Tu)) {
         return true; // avoid follow-on errors
     }
     {
-        var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid(under((~p).@base))) {
+        var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid((~p).@base.Underlying())) {
             return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
         }
     }
@@ -333,12 +328,12 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
         }
         // If T is comparable, V must be comparable.
         // If V is strictly comparable, we're done.
-        if (comparableType(V, false, /* strict comparability */ default!, default!)) {
+        if (comparableType(V, false, /* strict comparability */ default!) == nil) {
             return true;
         }
         // For constraint satisfaction, use dynamic (spec) comparability
         // so that ordinary, non-type parameter interfaces implement comparable.
-        if (constraint && comparableType(V, true, /* spec comparability */ default!, default!)) {
+        if (constraint && comparableType(V, true, /* spec comparability */ default!) == nil) {
             // V is comparable if we are at Go 1.20 or higher.
             if (Ꮡcheck == nil || Ꮡcheck.Value.allowVersion(go1_20)) {
                 return true;
@@ -381,7 +376,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
             // If V ∉ t.typ but V ∈ ~t.typ then remember this type
             // so we can suggest it as an alternative in the error
             // message.
-            if (Ꮡalt.ValueSlot == default! && !(~t).tilde && Identical((~t).typ, under((~t).typ))) {
+            if (Ꮡalt.ValueSlot == default! && !(~t).tilde && Identical((~t).typ, (~t).typ.Underlying())) {
                 ref var tt = ref heap<Δterm>(out var Ꮡtt);
                 tt = t.Value;
                 tt.tilde = true;

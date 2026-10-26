@@ -14,7 +14,7 @@ partial class rand_test_package {
 public static void TestText(ж<testing.T> Ꮡt) {
     var set = new map<@string, EmptyStruct>(); // hold every string produced
     array<map<rune, nint>> indexSet = new(26);                             // hold every char produced at every position
-    foreach (var (i, _) in indexSet) {
+    foreach (var i in range(indexSet)) {
         indexSet[i] = new map<rune, nint>();
     }
 
@@ -63,7 +63,7 @@ internal static void indexSetTable(ж<testing.T> Ꮡt, /*[26]*/ array<map<rune, 
     @string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"u8;
     @string line = "   "u8;
     foreach (var (_, r) in alphabet) {
-        line += fmt.Sprintf(" %3s"u8, ((@string)r));
+        line += fmt.Sprintf(" %3s"u8, (@string)r);
     }
     Ꮡt.Log(line);
     foreach (var (i, set) in indexSet.ΔRangeSnapshot()) {

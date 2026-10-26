@@ -25,7 +25,7 @@ internal static I back(int8 n) {
 internal static I pick(nint which) {
     switch (which) {
     case 0: {
-        return (nint)(42);
+        return (nint)42;
     }
     case 1: {
         return (@string)"go"u8;
@@ -37,27 +37,22 @@ internal static I pick(nint which) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object intˢ = (@string)"int"u8;
-private static readonly object pointˢ = (@string)"point"u8;
-private static readonly object otherˢ = (@string)"other"u8;
-
 internal static void Main() {
     any a = (int8)(-5);
-    any b = (nint)(42);
+    any b = (nint)42;
     any c = (@string)"go"u8;
     I d = new point(3, 4);
     I e = default!;
     fmt.Printf("%T %v | %T %v | %T %v | %T %v | %T %v\n"u8, a, a, b, b, c, c, d, d, e, e);
 
     show((int8)7);
-    show((nint)(9));
-    show((@string)"s"u8);
+    show((nint)9);
+    show("s");
     show(new point(5, 6));
     show(default!);
     anon((int8)7);
-    anon((nint)(9));
-    anon((@string)"s"u8);
+    anon((nint)9);
+    anon("s");
     anon(new point(5, 6));
     anon(default!);
 
@@ -70,24 +65,24 @@ internal static void Main() {
     fmt.Println(AreEqual(e, a), AreEqual(e, b), e == default!);
     {
         var (n, ok) = b._<nint>(ᐧ); if (ok) {
-            fmt.Println(intˢ, n + 1);
+            fmt.Println("int", n + 1);
         }
     }
     switch (d.type()) {
     case point v: {
-        fmt.Println(pointˢ, v.X + v.Y);
+        fmt.Println("point", v.X + v.Y);
         break;
     }
     default: {
         var v = d;
-        fmt.Println(otherˢ);
+        fmt.Println("other");
         break;
     }}
 
-    var list = new I[]{(int8)1, (nint)(2), (@string)"three"u8, new point(4, 4), default!}.slice();
+    var list = new I[]{(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default!}.slice();
     fmt.Println(len(list), list);
-    var m = new map<@string, I>{["n"u8] = (nint)(1), ["s"u8] = (@string)"one"u8};
-    fmt.Println(m["n"u8], m["s"u8]);
+    var m = new map<@string, I>{["n"] = (nint)1, ["s"] = (@string)"one"u8};
+    fmt.Println(m["n"], m["s"]);
 }
 
 } // end main_package

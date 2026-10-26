@@ -75,7 +75,7 @@ internal static UntypedInt adobeTransformYCbCrK => 2;
 // unzig maps from the zig-zag ordering to the natural ordering. For example,
 // unzig[3] is the column and row of the fourth element in zig-zag order. The
 // value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
-internal static array<nint> unzig = new nint[]{
+[GoLazy] partial class lazyᴛunzig { internal static array<nint> unzig = new nint[]{
     0, 1, 8, 16, 9, 2, 3, 10,
     17, 24, 32, 25, 18, 11, 4, 5,
     12, 19, 26, 33, 40, 48, 41, 34,
@@ -84,7 +84,7 @@ internal static array<nint> unzig = new nint[]{
     29, 22, 15, 23, 30, 37, 44, 51,
     58, 59, 52, 45, 38, 31, 39, 46,
     53, 60, 61, 54, 47, 55, 62, 63
-}.array();
+}.array(); }
 
 // Deprecated: Reader is not used by the [image/jpeg] package and should
 // not be used by others. It is kept for compatibility.
@@ -343,8 +343,8 @@ internal static error processSOF(this ref decoder d, nint n) {
     if (d.tmp[0] != 8) {
         return ((UnsupportedError)(@string)precisionˢ);
     }
-    d.height = ((nint)d.tmp[1] << (int)(8)) + (nint)d.tmp[2];
-    d.width = ((nint)d.tmp[3] << (int)(8)) + (nint)d.tmp[4];
+    d.height = ((nint)d.tmp[1] << 8) + (nint)d.tmp[2];
+    d.width = ((nint)d.tmp[3] << 8) + (nint)d.tmp[4];
     if ((nint)d.tmp[5] != d.nComp) {
         return ((FormatError)(@string)sofHasWrongLengthˢ);
     }
@@ -365,7 +365,7 @@ internal static error processSOF(this ref decoder d, nint n) {
         }
 
         var hv = d.tmp[7 + 3 * i];
-        nint h = (nint)((hv >> (int)(4)));
+        nint h = (nint)(hv >> 4);
         nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
             return ((FormatError)(@string)lumaChromaSubsamplingˢ);
@@ -476,7 +476,7 @@ loop:
         if (tq > maxTq) {
             return ((FormatError)(@string)badTqValueˢ);
         }
-        switch ((x >> (int)(4))) {
+        switch ((x >> 4)) {
         default: {
             return ((FormatError)(@string)badPqValueˢ);
         }
@@ -490,7 +490,7 @@ loop:
                     return errΔ3;
                 }
             }
-            foreach (var (i, _) in d.quant[tq]) {
+            foreach (var i in range(d.quant[tq])) {
                 d.quant[tq][i] = (int32)d.tmp[i];
             }
             break;
@@ -505,8 +505,8 @@ loop:
                     return errΔ4;
                 }
             }
-            foreach (var (i, _) in d.quant[tq]) {
-                d.quant[tq][i] = (int32)(((int32)d.tmp[2 * i] << (int)(8)) | (int32)d.tmp[2 * i + 1]);
+            foreach (var i in range(d.quant[tq])) {
+                d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
             }
             break;
         }}
@@ -532,7 +532,7 @@ internal static error processDRI(this ref decoder d, nint n) {
             return err;
         }
     }
-    d.ri = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1];
+    d.ri = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1];
     return default!;
 }
 
@@ -663,7 +663,7 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
                 return (default!, err);
             }
         }
-        nint n = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1] - 2;
+        nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
             return (default!, ((FormatError)(@string)shortSegmentLengthˢ));
         }

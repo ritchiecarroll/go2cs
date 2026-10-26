@@ -19,7 +19,7 @@ partial class net_package {
 // both address families are to be supported.
 // See inet6(4) for details.
 partial struct ipStackCapabilities {
-    public partial ref sync_package.Once Once { get; }             // guards following
+    /*embed*/ public sync_package.Once Once;             // guards following
     internal bool ipv4Enabled;
     internal bool ipv6Enabled;
     internal bool ipv4MappedIPv6Enabled;
@@ -139,15 +139,18 @@ internal static (addrList primaries, addrList fallbacks) partition(this addrList
 // and ipv6only. It returns every address when the filter is nil.
 // The result contains at least one address when error is nil.
 internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, ΔAddr> inetaddr, @string originalAddr) {
+    var addrsᴷ = new stackAppend<ΔAddr>(moves: true);
+
     addrList addrs = default!;
     foreach (var (_, ip) in ips) {
         if (filter == default! || filter(ip)) {
-            addrs = append(addrs, inetaddr(ip));
+            addrs = append(addrsᴷ, addrs, inetaddr(ip));
         }
     }
     if (len(addrs) == 0) {
         return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: originalAddr))));
     }
+    addrs = move2heap(addrsᴷ, addrs);
     return (addrs, default!);
 }
 

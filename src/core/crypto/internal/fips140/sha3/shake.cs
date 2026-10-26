@@ -24,16 +24,16 @@ partial struct SHAKE {
     internal slice<byte> initBlock;
 }
 
-internal static slice<byte> bytepad(slice<byte> data, nint rate) {
-    var @out = new slice<byte>(0, 9 + len(data) + rate - 1);
-    @out = appendꓸꓸꓸ(@out, leftEncode((uint64)rate));
-    @out = appendꓸꓸꓸ(@out, data);
+internal static void bytepadWrite(ж<SHAKE> Ꮡc, slice<byte> data, nint rate) {
+    var rateEnc = leftEncode((uint64)rate);
+    Ꮡc.Write(rateEnc);
+    Ꮡc.Write(data);
     {
-        nint padlen = rate - len(@out) % rate; if (padlen < rate) {
-            @out = appendꓸꓸꓸ(@out, makeꓸꓸꓸ<byte>(padlen));
+        nint padlen = rate - rem((len(rateEnc) + len(data)), rate); if (padlen < rate) {
+            const nint maxRate = /* rateK256 */ 168;
+            Ꮡc.Write(new slice<byte>(padlen, maxRate)); // explicit cap to allow stack allocation
         }
     }
-    return @out;
 }
 
 internal static slice<byte> leftEncode(uint64 x) {
@@ -50,15 +50,17 @@ internal static slice<byte> leftEncode(uint64 x) {
     return b;
 }
 
-internal static ж<SHAKE> newCShake(slice<byte> N, slice<byte> S, nint rate, nint outputLen, byte dsbyte) {
-    var c = Ꮡ(new SHAKE(d: new Digest(rate: rate, outputLen: outputLen, dsbyte: dsbyte)));
-    c.Value.initBlock = new slice<byte>(0, 9 + len(N) + 9 + len(S)); // leftEncode returns max 9 bytes
-    c.Value.initBlock = appendꓸꓸꓸ((~c).initBlock, leftEncode((uint64)len(N) * 8));
-    c.Value.initBlock = appendꓸꓸꓸ((~c).initBlock, N);
-    c.Value.initBlock = appendꓸꓸꓸ((~c).initBlock, leftEncode((uint64)len(S) * 8));
-    c.Value.initBlock = appendꓸꓸꓸ((~c).initBlock, S);
-    c.Write(bytepad((~c).initBlock, (~c).d.rate));
-    return c;
+internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S, nint rate, nint outputLen, byte dsbyte) {
+    ref var c = ref Ꮡc.DerefOrNull();
+
+    c.d = new Digest(rate: rate, outputLen: outputLen, dsbyte: dsbyte);
+    c.initBlock = new slice<byte>(0, 9 + len(N) + 9 + len(S)); // leftEncode returns max 9 bytes
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, leftEncode((uint64)len(N) * 8));
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, N);
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, leftEncode((uint64)len(S) * 8));
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, S);
+    bytepadWrite(Ꮡc, c.initBlock, c.d.rate);
+    return Ꮡc;
 }
 
 public static nint BlockSize(this ref SHAKE s) {
@@ -96,7 +98,7 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 
     s.d.Reset();
     if (len(s.initBlock) != 0) {
-        Ꮡs.Write(bytepad(s.initBlock, s.d.rate));
+        bytepadWrite(Ꮡs, s.initBlock, s.d.rate);
     }
 }
 
@@ -149,10 +151,19 @@ public static ж<SHAKE> NewShake256() {
 // cSHAKE is desired. S is a customization byte string used for domain
 // separation. When N and S are both empty, this is equivalent to NewShake128.
 public static ж<SHAKE> NewCShake128(slice<byte> N, slice<byte> S) {
+    // The actual logic is in a separate function to outline this allocation.
+    var c = Ꮡ(new SHAKE(nil));
+    return newCShake128(c, N, S);
+}
+
+internal static ж<SHAKE> newCShake128(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S) {
+    ref var c = ref Ꮡc.DerefOrNull();
+
     if (len(N) == 0 && len(S) == 0) {
-        return NewShake128();
+        c = NewShake128().Value.ΔClone();
+        return Ꮡc;
     }
-    return newCShake(N, S, rateK256, 32, dsbyteCShake);
+    return newCShake(Ꮡc, N, S, rateK256, 32, dsbyteCShake);
 }
 
 // NewCShake256 creates a new cSHAKE256 XOF.
@@ -161,10 +172,19 @@ public static ж<SHAKE> NewCShake128(slice<byte> N, slice<byte> S) {
 // cSHAKE is desired. S is a customization byte string used for domain
 // separation. When N and S are both empty, this is equivalent to NewShake256.
 public static ж<SHAKE> NewCShake256(slice<byte> N, slice<byte> S) {
+    // The actual logic is in a separate function to outline this allocation.
+    var c = Ꮡ(new SHAKE(nil));
+    return newCShake256(c, N, S);
+}
+
+internal static ж<SHAKE> newCShake256(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S) {
+    ref var c = ref Ꮡc.DerefOrNull();
+
     if (len(N) == 0 && len(S) == 0) {
-        return NewShake256();
+        c = NewShake256().Value.ΔClone();
+        return Ꮡc;
     }
-    return newCShake(N, S, rateK512, 64, dsbyteCShake);
+    return newCShake(Ꮡc, N, S, rateK512, 64, dsbyteCShake);
 }
 
 } // end sha3_package

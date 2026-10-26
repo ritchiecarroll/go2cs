@@ -34,7 +34,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
         }
     }
 
-    var data = ((block)r.compressedBuf);
+    var data = (block)r.compressedBuf;
     nint off = 0;
     r.buffer = r.buffer[..0];
 
@@ -137,13 +137,13 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
         if (off >= builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
-        seqCount = ((((nint)seqHdr - 128) << (int)(8))) + (nint)data[off];
+        seqCount = (((nint)seqHdr - 128) << 8) + (nint)data[off];
         off++;
     } else {
         if (off + 1 >= builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
-        seqCount = (nint)data[off] + (((nint)data[off + 1] << (int)(8))) + 0x7f00;
+        seqCount = (nint)data[off] + ((nint)data[off + 1] << 8) + 0x7f00;
         off += 2;
     }
 
@@ -161,17 +161,17 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
     // Set up the FSE tables used to decode the sequence codes.
 
     error err = default!;
-    (off, err) = Ꮡr.setSeqTable(data, off, seqLiteral, (byte)(((symMode >> (int)(6))) & 3));
+    (off, err) = Ꮡr.setSeqTable(data, off, seqLiteral, (byte)((symMode >> 6) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
 
-    (off, err) = Ꮡr.setSeqTable(data, off, seqOffset, (byte)(((symMode >> (int)(4))) & 3));
+    (off, err) = Ꮡr.setSeqTable(data, off, seqOffset, (byte)((symMode >> 4) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
 
-    (off, err) = Ꮡr.setSeqTable(data, off, seqMatch, (byte)(((symMode >> (int)(2))) & 3));
+    (off, err) = Ꮡr.setSeqTable(data, off, seqMatch, (byte)((symMode >> 2) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
@@ -275,6 +275,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Set up the initial states for the sequence code readers.
+
     ref var rbr = ref heap<reverseBitReader>(out var Ꮡrbr);
     (rbr, var err) = Ꮡr.makeReverseBitReader(data, builtin.len(data) - 1, off);
     if (err != default!) {
@@ -300,7 +301,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
 
     nint seq = 0;
     while (seq < seqCount) {
-        if (builtin.len(r.buffer) + builtin.len(litbuf) > (128 << (int)(10))) {
+        if (builtin.len(r.buffer) + builtin.len(litbuf) > 128 << 10) {
             return rbr.makeError(uncompressedSizeTooBigˢ);
         }
 

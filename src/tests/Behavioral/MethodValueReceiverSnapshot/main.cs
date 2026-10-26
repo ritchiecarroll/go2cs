@@ -30,39 +30,20 @@ internal static nint frameCalls;
 
 internal static frame makeFrame() {
     frameCalls++;
-    return new frame(Name: "made"u8);
+    return new frame(Name: "made");
 }
 
 internal static ж<frame> makePtr() {
     frameCalls++;
-    return Ꮡ(new frame(Name: "madeptr"u8));
+    return Ꮡ(new frame(Name: "madeptr"));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object typedˢ = (@string)"typed   "u8;
-private static readonly object boxedˢ = (@string)"boxed   "u8;
-private static readonly object distinctˢ = (@string)"distinct"u8;
-private static readonly object argumentˢ = (@string)"argument"u8;
-private static readonly object assignˢ = (@string)"assign  "u8;
-private static readonly object chainVˢ = (@string)"chainV  "u8;
-private static readonly object chainPˢ = (@string)"chainP  "u8;
-private static readonly object chainIˢ = (@string)"chainI  "u8;
-private static readonly object callOnceˢ = (@string)"callOnce"u8;
-private static readonly @string s10ˢ = "S10"u8;
-private static readonly object idxVˢ = (@string)"idxV    "u8;
-private static readonly object idxPˢ = (@string)"idxP    "u8;
-private static readonly object argPˢ = (@string)"argP    "u8;
-private static readonly object idxMapVˢ = (@string)"idxMapV "u8;
-private static readonly object ptrThruˢ = (@string)"ptrThru "u8;
-private static readonly @string p15ˢ = "P15"u8;
-private static readonly object chainPtrˢ = (@string)"chainPtr"u8;
-private static readonly @string n16ˢ = "N16"u8;
-private static readonly object chainIfPˢ = (@string)"chainIfP"u8;
-private static readonly object callPtrˢ = (@string)"callPtr "u8;
-
 internal static void Main() {
+    var s10ᴷ = new stackAppend<frame>();
+    var s11ᴷ = new stackAppend<frame>();
+
     ref var a = ref heap<frame>(out var Ꮡa);
-    a = new frame(Name: "a"u8);
+    a = new frame(Name: "a");
 
         var aʗ1 = a;
     var typed = new Func<@string>[]{
@@ -70,12 +51,12 @@ internal static void Main() {
         () => Ꮡa.Value.Name
     }.slice();
 
-    a.Name = "A"u8;
+    a.Name = "A";
 
-    fmt.Println(typedˢ, typed[0](), typed[1]());
+    fmt.Println("typed   ", typed[0](), typed[1]());
 
     ref var b = ref heap<frame>(out var Ꮡb);
-    b = new frame(Name: "b"u8, Inlined: true);
+    b = new frame(Name: "b", Inlined: true);
 
         var bʗ1 = b;
     var boxed = new any[]{
@@ -83,64 +64,64 @@ internal static void Main() {
         bool () => Ꮡb.Value.Inlined
     }.slice();
 
-    b.Name = "B"u8;
+    b.Name = "B";
 
-    fmt.Println(boxedˢ, boxed[0]._<Func<@string>>()(), boxed[1]._<Func<bool>>()());
+    fmt.Println("boxed   ", boxed[0]._<Func<@string>>()(), boxed[1]._<Func<bool>>()());
 
-    var c = new frame(Name: "p"u8);
+    var c = new frame(Name: "p");
     
     var cʗ1 = c;
     var first = () => cʗ1.label();
-    c.Name = "q"u8;
+    c.Name = "q";
     
     var cʗ2 = c;
     var second = () => cʗ2.label();
-    c.Name = "r"u8;
+    c.Name = "r";
 
-    fmt.Println(distinctˢ, first(), second(), c.label());
+    fmt.Println("distinct", first(), second(), c.label());
 
-    var d = new frame(Name: "d"u8);
+    var d = new frame(Name: "d");
     @string call(Func<@string> f) => f();
     var dʗ1 = d;
     @string got = call(() => dʗ1.label());
-    d.Name = "D"u8;
+    d.Name = "D";
 
     var dʗ2 = d;
-    fmt.Println(argumentˢ, got, call(() => dʗ2.label()));
+    fmt.Println("argument", got, call(() => dʗ2.label()));
 
     ref var e = ref heap<frame>(out var Ꮡe);
-    e = new frame(Name: "e"u8);
+    e = new frame(Name: "e");
     @string watch() => Ꮡe.Value.Name;
     var eʗ1 = e;
     
     var bound = () => eʗ1.label();
-    e.Name = "E"u8;
+    e.Name = "E";
 
-    fmt.Println(assignˢ, bound(), watch());
+    fmt.Println("assign  ", bound(), watch());
 
-    var h6 = new holder(f: new frame(Name: "f6"u8));
+    var h6 = new holder(f: new frame(Name: "f6"));
     var recvʗ1 = h6.f;
     
     var h6ʗ1 = h6;
     var chainV = () => recvʗ1.label();
-    h6.f.Name = "F6"u8;
+    h6.f.Name = "F6";
 
-    fmt.Println(chainVˢ, chainV());
+    fmt.Println("chainV  ", chainV());
 
     ref var h7 = ref heap<holder>(out var Ꮡh7);
-    h7 = new holder(f: new frame(Name: "f7"u8));
+    h7 = new holder(f: new frame(Name: "f7"));
     var chainP = Ꮡh7.of(holder.Ꮡf).bump;
     chainP();
 
-    fmt.Println(chainPˢ, h7.f.Name);
+    fmt.Println("chainP  ", h7.f.Name);
 
-    var h8 = new holder(i: new frame(Name: "i8"u8));
+    var h8 = new holder(i: new frame(Name: "i8"));
     
     var h8ʗ1 = h8;
     var chainI = h8ʗ1.i.label;
-    h8.i = new frame(Name: "I8"u8);
+    h8.i = new frame(Name: "I8");
 
-    fmt.Println(chainIˢ, chainI());
+    fmt.Println("chainI  ", chainI());
 
     frameCalls = 0;
     var recvʗ2 = makeFrame();
@@ -149,70 +130,70 @@ internal static void Main() {
     _ = callRecv();
     _ = callRecv();
 
-    fmt.Println(callOnceˢ, frameCalls);
+    fmt.Println("callOnce", frameCalls);
 
     var s10 = new slice<frame>(1, 1);
-    s10[0] = new frame(Name: "s10"u8);
+    s10[0] = new frame(Name: "s10");
     var recvʗ3 = s10[0];
     
     var s10ʗ1 = s10;
     var idxV = () => recvʗ3.label();
-    s10 = append(s10, new frame(Name: "grown"u8));
-    s10[0].Name = s10ˢ;
+    s10 = append(s10ᴷ, s10, new frame(Name: "grown"));
+    s10[0].Name = "S10";
 
-    fmt.Println(idxVˢ, idxV());
+    fmt.Println("idxV    ", idxV());
 
     var s11 = new slice<frame>(1, 1);
-    s11[0] = new frame(Name: "s11"u8);
+    s11[0] = new frame(Name: "s11");
     var idxP = Ꮡ(s11, 0).bump;
-    s11 = append(s11, new frame(Name: "grown"u8));
+    s11 = append(s11ᴷ, s11, new frame(Name: "grown"));
     idxP();
 
-    fmt.Println(idxPˢ, s11[0].Name);
+    fmt.Println("idxP    ", s11[0].Name);
 
     ref var p12 = ref heap<frame>(out var Ꮡp12);
-    p12 = new frame(Name: "p12"u8);
+    p12 = new frame(Name: "p12");
     Action hold(Action f) => f;
     var argP = hold(Ꮡp12.bump);
-    p12 = new frame(Name: "P12"u8);
+    p12 = new frame(Name: "P12");
     argP();
 
-    fmt.Println(argPˢ, p12.Name);
+    fmt.Println("argP    ", p12.Name);
 
-    var m13 = new map<@string, frame>{["k"u8] = new(Name: "m13"u8)};
-    var recvʗ4 = m13["k"u8];
+    var m13 = new map<@string, frame>{["k"] = new(Name: "m13")};
+    var recvʗ4 = m13["k"];
     
     var m13ʗ1 = m13;
     var idxMapV = () => recvʗ4.label();
-    m13["k"u8] = new frame(Name: "M13"u8);
+    m13["k"] = new frame(Name: "M13");
 
-    fmt.Println(idxMapVˢ, idxMapV());
+    fmt.Println("idxMapV ", idxMapV());
 
     ref var c14 = ref heap<frame>(out var Ꮡc14);
-    c14 = new frame(Name: "c14"u8);
+    c14 = new frame(Name: "c14");
     var thru = Ꮡc14.bump;
     thru();
     thru();
 
-    fmt.Println(ptrThruˢ, c14.Name);
+    fmt.Println("ptrThru ", c14.Name);
 
-    var p15 = Ꮡ(new holder(f: new frame(Name: "p15"u8)));
+    var p15 = Ꮡ(new holder(f: new frame(Name: "p15")));
     var recvʗ5 = (~p15).f;
     
     var p15ʗ1 = p15;
     var chainPtrBase = () => recvʗ5.label();
-    p15.Value.f.Name = p15ˢ;
+    p15.Value.f.Name = "P15";
 
-    fmt.Println(chainPtrˢ, chainPtrBase());
+    fmt.Println("chainPtr", chainPtrBase());
 
-    namer n16 = new frameжnamer(Ꮡ(new frame(Name: "n16"u8)));
+    namer n16 = new frameжnamer(Ꮡ(new frame(Name: "n16")));
     var h16 = new holder(i: n16);
     
     var h16ʗ1 = h16;
     var chainIfacePtr = h16ʗ1.i.label;
-    n16._<ж<frame>>().Value.Name = n16ˢ;
+    n16._<namer, ж<frame>>().Value.Name = "N16";
 
-    fmt.Println(chainIfPˢ, chainIfacePtr());
+    fmt.Println("chainIfP", chainIfacePtr());
 
     frameCalls = 0;
     var recvʗ6 = makePtr();
@@ -221,7 +202,7 @@ internal static void Main() {
     callPtr();
     callPtr();
 
-    fmt.Println(callPtrˢ, frameCalls);
+    fmt.Println("callPtr ", frameCalls);
 }
 
 } // end main_package

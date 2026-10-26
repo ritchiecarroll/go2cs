@@ -62,6 +62,14 @@ public class DarwinArm64VariadicSlotTests
     }
 
     [TestMethod]
+    public void TheKeventTrampolineStoresNothing()
+    {
+        // kevent_trampoline (six arguments, -1 becomes -errno) loads its registers from the args block and
+        // calls libc_kevent directly: no [sp] store, unlike runtime·syscall6 at the same arity.
+        Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(6, GoLibcErrnoRule.NegatedErrno, darwinArm64: true));
+    }
+
+    [TestMethod]
     public void NoOtherArityStoresAnything()
     {
         foreach (int arity in new[] { 0, 1, 2, 4, 5, 7, 8 })
@@ -74,6 +82,22 @@ public class DarwinArm64VariadicSlotTests
         // The linux and darwin/amd64 dispatch is untouched: x86-64 passes variadic arguments in registers.
         foreach (int arity in new[] { 3, 6, 9 })
             Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(arity, GoLibcErrnoRule.Int32MinusOne, darwinArm64: false), $"arity {arity}");
+
+        foreach (int arity in new[] { 3, 4, 6 })
+            Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(arity, GoLibcErrnoRule.AlwaysRead, darwinArm64: false), $"arity {arity}");
+    }
+
+    [TestMethod]
+    public void TheGo126SyscallNEntryKeysOnTheArityAlone()
+    {
+        // Go 1.26 runtime·syscallN_trampoline (sys_darwin_arm64.s): n == 3 stores a3, n == 4 and n == 6 store a4.
+        // A ninth argument already sits at [sp] as itself, so n == 9 stores nothing extra.
+        Assert.AreEqual(2, GoLibcCall.VariadicStackSlot(3, GoLibcErrnoRule.AlwaysRead, darwinArm64: true));
+        Assert.AreEqual(3, GoLibcCall.VariadicStackSlot(4, GoLibcErrnoRule.AlwaysRead, darwinArm64: true));
+        Assert.AreEqual(3, GoLibcCall.VariadicStackSlot(6, GoLibcErrnoRule.AlwaysRead, darwinArm64: true));
+
+        foreach (int arity in new[] { 0, 1, 2, 5, 7, 8, 9 })
+            Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(arity, GoLibcErrnoRule.AlwaysRead, darwinArm64: true), $"arity {arity}");
     }
 
     [TestMethod]

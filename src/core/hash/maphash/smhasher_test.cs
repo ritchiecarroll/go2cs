@@ -5,6 +5,7 @@
 namespace go.hash;
 
 using fmt = fmt_package;
+using maps = @internal.runtime.maps_package;
 using testenv = @internal.testenv_package;
 using math = math_package;
 using rand = go.math.rand_package;
@@ -12,8 +13,8 @@ using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using go.math;
 using static go.hash.maphash_package;
 
@@ -290,9 +291,9 @@ internal static void setbits(ж<hashSet> Ꮡh, slice<byte> b, nint i, nint k) {
         return;
     }
     for (nint j = i; j < len(b) * 8; j++) {
-        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(j & 7)))));
+        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)(j & 7))));
         setbits(Ꮡh, b, j + 1, k - 1);
-        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)((nint)(j & 7))))))));
+        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)(j & 7)))))));
     }
 }
 
@@ -308,10 +309,10 @@ public static void TestSmhasherPermutation(ж<testing.T> Ꮡt) {
     testenv.ParallelOn64Bit(Ꮡt);
     var h = newHashSet();
     permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7}.slice(), 8);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 8);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 8);
     permutation(Ꮡt, h, new uint32[]{0, 1}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(31))}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 6);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 31}.slice(), 20);
+    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 6);
 }
 
 internal static void permutation(ж<testing.T> Ꮡt, ж<hashSet> Ꮡh, slice<uint32> s, nint n) {
@@ -332,9 +333,9 @@ internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     }
     foreach (var (_, v) in s) {
         b[n] = (byte)v;
-        b[n + 1] = (byte)((v >> (int)(8)));
-        b[n + 2] = (byte)((v >> (int)(16)));
-        b[n + 3] = (byte)((v >> (int)(24)));
+        b[n + 1] = (byte)(v >> 8);
+        b[n + 2] = (byte)(v >> 16);
+        b[n + 3] = (byte)(v >> 24);
         genPerm(Ꮡh, b, s, n + 4);
     }
 }
@@ -365,7 +366,7 @@ internal static nint bits(this ref bytesKey k) {
 }
 
 internal static void flipBit(this ref bytesKey k, nint i) {
-    k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
+    k.b[(i >> 3)] ^= (byte)((byte)(((byte)1).Lsh((nuint)(i & 7))));
 }
 
 internal static uint64 hash(this ref bytesKey k) {
@@ -411,13 +412,13 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, key k) {
         // flip each bit, hash & compare the results
         for (nint i = 0; i < n; i++) {
             k.flipBit(i);
-            var d = (uint64)(h ^ k.hash());
+            var d = h ^ k.hash();
             k.flipBit(i);
 
             // record the effects of that bit flip
             var g = Ꮡ(grid, i);
             for (nint j = 0; j < hashSize; j++) {
-                g.Value[j] += (nint)((uint64)(d & 1));
+                g.Value[j] += (nint)(d & 1);
                 d >>= (int)(1);
             }
         }
@@ -465,10 +466,10 @@ internal static void windowed(ж<testing.T> Ꮡt, key k) {
 
     var h = newHashSet();
     for (nint r = 0; r < k.bits(); r++) {
-        for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {
+        for (nint i = 0; i < (nint)(1 << (int)(BITS)); i++) {
             k.clear();
             for (nint j = 0; j < BITS; j++) {
-                if ((nint)(i.Rsh((nuint)j) & 1) != 0) {
+                if ((i.Rsh((nuint)j) & 1) != 0) {
                     k.flipBit(rem((j + r), k.bits()));
                 }
             }
@@ -531,7 +532,7 @@ internal static readonly @string helloˢ = "hello"u8;
 
 // Make sure different seed values generate different hashes.
 public static void TestSmhasherSeed(ж<testing.T> Ꮡt) {
-    if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 == 4) {
+    if (!maps.Use64BitHash) {
         Ꮡt.Skip(bitPlatformsDonTHaveˢ);
     }
     Ꮡt.Parallel();
@@ -540,7 +541,7 @@ public static void TestSmhasherSeed(ж<testing.T> Ꮡt) {
     @string s = helloˢ;
     for (nint i = 0; i < N; i++) {
         h.addS_seed(s, new ΔSeed(s: (uint64)(i + 1)));
-        h.addS_seed(s, new ΔSeed(s: ((uint64)(i + 1) << (int)(32)))); // make sure high bits are used
+        h.addS_seed(s, new ΔSeed(s: ((uint64)(i + 1) << 32))); // make sure high bits are used
     }
     h.check(Ꮡt);
 }

@@ -83,12 +83,14 @@ internal static bool isName(ast.Node n, @string name) {
 }
 
 internal static bool balancedParentheses(@string s) {
+    var stackᴷ = new stackAppend<byte>();
+
     slice<byte> stack = default!;
     foreach (var (_, ch) in s) {
         byte open = default!;
         switch (ch) {
         case (rune)'(' or (rune)'[' or (rune)'{': {
-            stack = append(stack, (byte)ch);
+            stack = append(stackᴷ, stack, (byte)ch);
             continue;
             break;
         }

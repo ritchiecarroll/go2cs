@@ -7,12 +7,12 @@ namespace go.go;
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
@@ -105,7 +105,7 @@ internal static @string msg(this ref error_ err) {
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (i, _) in err.desc) {
+    foreach (var i in range(err.desc)) {
         var p = Ꮡ(err.desc, i);
         if (i > 0) {
             fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), (@string)"\n\t"u8);
@@ -161,7 +161,7 @@ internal static void report(this ref error_ err) {
     }
 
     if (multiError){
-        foreach (var (i, _) in err.desc) {
+        foreach (var i in range(err.desc)) {
             var p = Ꮡ(err.desc, i);
             check.handleError(i, (~p).posn, err.code, (~p).msg, err.soft);
         }
@@ -288,7 +288,7 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
 partial struct atPos /*global::go.go.token_package.ΔPos*/;
 
 internal static tokenꓸPos Pos(this atPos s) {
-    return ((tokenꓸPos)s);
+    return (tokenꓸPos)s;
 }
 
 // posSpan holds a position range along with a highlighted position within that

@@ -14,6 +14,9 @@ partial class reflect_test_package {
 
 partial struct N /*num:int8*/;
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string seqˢ = "Seq"u8;
+
 internal partial struct TestValueSeq_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸValue val;
@@ -39,7 +42,7 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
 
 
     var tests = new TestValueSeq_tests[]{
-        new("int"u8, ValueOf((nint)(4)), (ж<Δtesting.T> tΔ1, iter.Seq<reflectꓸValue> s) => {
+        new("int"u8, ValueOf((nint)4), (ж<Δtesting.T> tΔ1, iter.Seq<reflectꓸValue> s) => {
             var i = (int64)0;
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
                 if (v.Int() != i) {
@@ -188,7 +191,7 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
                 tΔ11.Fatalf("should loop four times"u8);
             }
         }),
-        new("method"u8, ValueOf(new methodIter(nil)).Method(0), (ж<Δtesting.T> tΔ12, iter.Seq<reflectꓸValue> s) => {
+        new("method"u8, ValueOf(new methodIter(nil)).MethodByName(seqˢ), (ж<Δtesting.T> tΔ12, iter.Seq<reflectꓸValue> s) => {
             var i = (int64)0;
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
                 if (v.Int() != i) {
@@ -200,8 +203,8 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
                 tΔ12.Fatalf("should loop four times"u8);
             }
         }),
-        new("type N int8"u8, ValueOf(((N)4)), (ж<Δtesting.T> tΔ13, iter.Seq<reflectꓸValue> s) => {
-            var i = ((N)0);
+        new("type N int8"u8, ValueOf((N)4), (ж<Δtesting.T> tΔ13, iter.Seq<reflectꓸValue> s) => {
+            var i = (N)0;
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
                 if (v.Int() != (int64)(int8)i) {
                     tΔ13.Fatalf("got %d, want %d"u8, v.Int(), i);
@@ -221,6 +224,9 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
         tc.check(Ꮡt, seq);
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string seq2ˢ = "Seq2"u8;
 
 internal partial struct TestValueSeq2_tests /*dyn*/ {
     internal @string name;
@@ -349,7 +355,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
                 tΔ6.Fatalf("should loop four times"u8);
             }
         }),
-        new("method"u8, ValueOf(new methodIter2(nil)).Method(0), (ж<Δtesting.T> tΔ7, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
+        new("method"u8, ValueOf(new methodIter2(nil)).MethodByName(seq2ˢ), (ж<Δtesting.T> tΔ7, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
             var i = (int64)0;
             foreach (var (v1, v2) in range<reflectꓸValue, reflectꓸValue>(s.Invoke)) {
                 if (v1.Int() != i) {
@@ -365,7 +371,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
             }
         }),
         new("[4]N"u8, ValueOf(new N[]{0, 1, 2, 3}.array()), (ж<Δtesting.T> tΔ8, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
-            var i = ((N)0);
+            var i = (N)0;
             foreach (var (v1, v2) in range<reflectꓸValue, reflectꓸValue>(s.Invoke)) {
                 if (v1.Int() != (int64)(int8)i) {
                     tΔ8.Fatalf("got %d, want %d"u8, v1.Int(), i);
@@ -383,7 +389,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
             }
         }),
         new("[]N"u8, ValueOf(new N[]{1, 2, 3, 4}.slice()), (ж<Δtesting.T> tΔ9, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
-            var i = ((N)0);
+            var i = (N)0;
             foreach (var (v1, v2) in range<reflectꓸValue, reflectꓸValue>(s.Invoke)) {
                 if (v1.Int() != (int64)(int8)i) {
                     tΔ9.Fatalf("got %d, want %d"u8, v1.Int(), i);
@@ -420,6 +426,10 @@ internal static void Seq(this methodIter _, Func<nint, bool> yield) {
     }
 }
 
+// For Type.CanSeq test.
+internal static void NonSeq(this methodIter _, Action<nint> yield) {
+}
+
 // methodIter2 is a type from which we can derive a method
 // value that is an iter.Seq2.
 partial struct methodIter2 {
@@ -431,6 +441,10 @@ internal static void Seq2(this methodIter2 _, Func<nint, nint, bool> yield) {
             return;
         }
     }
+}
+
+// For Type.CanSeq2 test.
+internal static void NonSeq2(this methodIter2 _, Action<nint, nint> yield) {
 }
 
 } // end reflect_test_package

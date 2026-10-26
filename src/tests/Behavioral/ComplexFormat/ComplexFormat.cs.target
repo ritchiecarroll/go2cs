@@ -5,9 +5,6 @@ using Δmath = math_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sprintˢ = (@string)"sprint:"u8;
-
 internal static void Main() {
     complex128 c128 = 2D + 3D.i();
     complex128 neg = 2D + -3D.i();
@@ -30,7 +27,7 @@ internal static void Main() {
     fmt.Println(nan);
     fmt.Println(2D + 3D.i());
     fmt.Printf("%v;%v\n"u8, c128, c64);
-    fmt.Println(sprintˢ, fmt.Sprint(neg));
+    fmt.Println("sprint:", fmt.Sprint(neg));
 
     fmt.Println(2748D.i());
     fmt.Println(83D.i());

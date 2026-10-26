@@ -20,12 +20,12 @@ internal static unsafe void Main() {
     fmt.Println(len(b), b[0], b[3], b[4], b[7]);
 
     ref var rb = ref heap(new array<uint16>(8), out var Ꮡrb);
-    foreach (var (i, _) in rb) {
+    foreach (var i in range(rb)) {
         rb[i] = (uint16)((rune)'a' + i);
     }
     nint n1 = 2;
     nint n2 = 5;
-    var sub = (~array<uint16>.AliasPointer(Ꮡrb.at<uint16>(0), 64)).slice(n1, n2, n2);
+    var sub = array<uint16>.AliasPointer(Ꮡrb.at<uint16>(0), 64).slice(n1, n2, n2);
     fmt.Println(len(sub), sub[0], sub[1], sub[2]);
 
     var words = new uint32[]{0x04030201, 0x08070605}.slice();

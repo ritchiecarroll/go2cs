@@ -25,7 +25,7 @@ partial struct AlgorithmIdentifier {
 
 partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
 
-internal static map<@string, @string> attributeTypeNames = new map<@string, @string>{
+[GoLazy] partial class lazyᴛattributeTypeNames { internal static map<@string, @string> attributeTypeNames = new map<@string, @string>{
     ["2.5.4.6"u8] = "C"u8,
     ["2.5.4.10"u8] = "O"u8,
     ["2.5.4.11"u8] = "OU"u8,
@@ -35,11 +35,13 @@ internal static map<@string, @string> attributeTypeNames = new map<@string, @str
     ["2.5.4.8"u8] = "ST"u8,
     ["2.5.4.9"u8] = "STREET"u8,
     ["2.5.4.17"u8] = "POSTALCODE"u8
-};
+}; }
 
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.
 public static @string String(this RDNSequence r) {
+    var escapedᴷ = new stackAppend<rune>();
+
     @string s = ""u8;
     for (nint i = 0; i < len(r); i++) {
         var rdn = r[len(r) - 1 - i];
@@ -84,7 +86,7 @@ public static @string String(this RDNSequence r) {
                 }}
 
                 if (escape){
-                    escaped = append(escaped, (rune)((rune)'\\'), c);
+                    escaped = append(escapedᴷ, escaped, (rune)'\\', c);
                 } else {
                     escaped = append(escaped, c);
                 }
@@ -269,6 +271,8 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
 // String returns the string form of n, roughly following
 // the RFC 2253 Distinguished Names syntax.
 public static @string String(this Name n) {
+    var rdnsᴷ = new stackAppend<RelativeDistinguishedNameSET>();
+
     RDNSequence rdns = default!;
     // If there are no ExtraNames, surface the parsed value (all entries in
     // Names) instead.
@@ -285,7 +289,7 @@ public static @string String(this Name n) {
             }
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
-            rdns = append(rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
+            rdns = append(rdnsᴷ, rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
         }
     }
     rdns = appendꓸꓸꓸ(rdns, n.ToRDNSequence());

@@ -12,15 +12,18 @@ namespace go.@internal.syscall;
 
 using fmt = fmt_package;
 using Δwindows = go.@internal.syscall.windows_package;
+using testenv = go.@internal.testenv_package;
 using os = os_package;
 using exec = go.os.exec_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using go.@internal;
 using go.@internal.syscall;
 using go.os;
 using io = io_package;
 
+[GoFieldAccess(typeof(Δwindows.TOKEN_MANDATORY_LABEL))]
 partial class windows_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -41,8 +44,10 @@ public static void TestRunAtLowIntegrity(ж<testing.T> Ꮡt) {
             os.Exit(0);
             return;
         }
-        var cmd = exec.Command(os.Args[0], testRunˢ, "--");
+
+        var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)), testRunˢ, "--");
         cmd.Value.Env = new @string[]{"GO_WANT_HELPER_PROCESS=1"u8}.slice();
+
         ref var token = ref heap<syscall.Token>(out var Ꮡtoken);
         (token, var err) = getIntegrityLevelToken(sidWilLow);
         if (err != default!) {
@@ -50,15 +55,18 @@ public static void TestRunAtLowIntegrity(ж<testing.T> Ꮡt) {
         }
         var tokenʗ1 = token;
         defer(() => tokenʗ1.Close(), ref ᒐ);
+
         cmd.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(
             Token: token
         ));
+
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         if (((sstring)@out) != sidWilLow) {
-            Ꮡt.Fatalf("Child process did not run as low integrity level: %s"u8, ((@string)@out));
+            Ꮡt.Fatalf("Child process did not run as low integrity level: %s"u8, (@string)@out);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -75,12 +83,16 @@ internal static (@string, error) getProcessIntegrityLevel() {
             return ("", err);
         }
         defer(() => procToken.Close(), ref ᒐ);
+
         (var p, err) = tokenGetInfo(procToken, syscall.TokenIntegrityLevel, 64);
         if (err != default!) {
             return ("", err);
         }
+
         var tml = (ж<Δwindows.TOKEN_MANDATORY_LABEL>)(uintptr)(p);
-        var sid = (~tml).Label.Sid;
+
+        var sid = tml.Label.Sid;
+
         return sid.String();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -110,11 +122,13 @@ internal static (syscall.Token, error) getIntegrityLevelToken(@string wns) {
     try {
         ref var procToken = ref heap(new syscall.Token(), out var ᏑprocToken);
         ref var token = ref heap(new syscall.Token(), out var Ꮡtoken);
+
         var (proc, err) = syscall.GetCurrentProcess();
         if (err != default!) {
             return (0, err);
         }
         defer(syscall.CloseHandle, proc, ref ᒐ);
+
         err = syscall.OpenProcessToken(proc,
             (uint32)((UntypedInt)((UntypedInt)(syscall.TOKEN_DUPLICATE | syscall.TOKEN_ADJUST_DEFAULT) | syscall.TOKEN_QUERY) | (uint32)syscall.TOKEN_ASSIGN_PRIMARY),
             ᏑprocToken);
@@ -123,21 +137,25 @@ internal static (syscall.Token, error) getIntegrityLevelToken(@string wns) {
         }
         var procTokenʗ1 = procToken;
         defer(() => procTokenʗ1.Close(), ref ᒐ);
+
         (var sid, err) = syscall.StringToSid(wns);
         if (err != default!) {
             return (0, err);
         }
+
         var tml = Ꮡ(new Δwindows.TOKEN_MANDATORY_LABEL(nil));
         tml.Value.Label.Attributes = Δwindows.SE_GROUP_INTEGRITY;
         tml.Value.Label.Sid = sid;
+
         err = Δwindows.DuplicateTokenEx(procToken, 0, nil, Δwindows.SecurityImpersonation,
             Δwindows.TokenPrimary, Ꮡtoken);
         if (err != default!) {
             return (0, err);
         }
+
         err = Δwindows.SetTokenInformation(token,
             syscall.TokenIntegrityLevel,
-            (uintptr)tml,
+            @unsafe.Pointer.FromPinnedBox(tml),
             tml.Size());
         if (err != default!) {
             token.Close();

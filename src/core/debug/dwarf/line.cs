@@ -150,7 +150,7 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
 
     // Create the LineReader.
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, ((Offset)(uint32)off), d.line.slice((nint)(off)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<ΔLineReader>(out var Ꮡr);
     r = new ΔLineReader(
@@ -205,9 +205,9 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     }
     Offset headerLength = default!;
     if (dwarf64){
-        headerLength = ((Offset)(uint32)buf.uint64());
+        headerLength = (Offset)(uint32)buf.uint64();
     } else {
-        headerLength = ((Offset)buf.uint32());
+        headerLength = (Offset)buf.uint32();
     }
     var programOffset = (~buf).off + headerLength;
     if (programOffset > r.endOffset) {
@@ -291,7 +291,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var dirFormat = r.readLNCTFormat();
         var c = buf.@uint();
         r.directories = new slice<@string>((nint)(c));
-        foreach (var (i, _) in r.directories) {
+        foreach (var i in range(r.directories)) {
             var (dir, _, _, err) = r.readLNCT(dirFormat, dwarf64);
             if (err != default!) {
                 return err;
@@ -301,7 +301,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var fileFormat = r.readLNCTFormat();
         c = buf.@uint();
         r.fileEntries = new slice<ж<LineFile>>((nint)(c));
-        foreach (var (i, _) in r.fileEntries) {
+        foreach (var i in range(r.fileEntries)) {
             ref var name = ref heap<@string>(out var Ꮡname);
             ref var mtime = ref heap<uint64>(out var Ꮡmtime);
             (name, mtime, var size, var err) = r.readLNCT(fileFormat, dwarf64);
@@ -329,9 +329,9 @@ partial struct lnctForm {
 internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
     var c = r.buf.uint8();
     var ret = new slice<lnctForm>(c);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         ret[i].lnct = (nint)r.buf.@uint();
-        ret[i].form = ((format)(uint32)r.buf.@uint());
+        ret[i].form = (format)(uint32)r.buf.@uint();
     }
     return ret;
 }
@@ -527,7 +527,7 @@ public static error Next(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
 
 // knownOpcodeLengths gives the opcode lengths (in varint arguments)
 // of known standard opcodes.
-internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
+[GoLazy] partial class lazyᴛknownOpcodeLengths { internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     [lnsCopy] = 0,
     [lnsAdvancePC] = 1,
     [lnsAdvanceLine] = 1,
@@ -541,7 +541,7 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     // lnsFixedAdvancePC takes a uint8 rather than a varint; it's
     // unclear what length the header is supposed to claim, so
     // ignore it.
-};
+}; }
 
 // step processes the next opcode and updates r.state. If the opcode
 // emits a row in the line table, this updates *entry and returns
@@ -563,7 +563,7 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
     var exprᴛ1 = opcode;
     if (exprᴛ1 is 0) {
         // Extended opcode [DWARF2 6.2.5.3]
-        var length = ((Offset)(uint32)r.buf.@uint());
+        var length = (Offset)(uint32)r.buf.@uint();
         var startOff = r.buf.off;
         var opcodeΔ2 = r.buf.uint8();
 
@@ -887,7 +887,7 @@ internal static (@string drive, @string rest) splitDrive(@string path) {
     }
     if (len(path) > 3 && (path[0] == (rune)'\\' || path[0] == (rune)'/') && (path[1] == (rune)'\\' || path[1] == (rune)'/')) {
         // Normalize the path so we can search for just \ below.
-        @string npath = strings.Replace(path, "/"u8, @"\"u8, -1);
+        @string npath = strings.ReplaceAll(path, "/"u8, @"\"u8);
         // Get the host part, which must be non-empty.
         nint slash1 = strings.IndexByte(npath[2..], (rune)'\\') + 2;
         if (slash1 > 2) {

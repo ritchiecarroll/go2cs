@@ -41,6 +41,18 @@ import (
 // It also silently re-arms the defect the hand-own existed to displace: the auto conversion at the
 // RIGHT address keeps shipping while the hand-own sits inert at the wrong one.
 //
+// ⚠ THE SECOND CAUSE, AND WHY THE POPULATION IS MARKED FILES PLUS `*_impl.cs` COMPANIONS. A Go
+// release can rename the PACKAGE while its directory stays put: go1.26 changed
+// crypto/x509/internal/macos from `package macOS` to `package macos`. The converter followed, so the
+// directory's class became `macos_package`, but the hand-written companion corefoundation_impl.cs
+// (26ebdaa8e5) kept `partial class macOS_package`. C# is case-sensitive, so that is an orphan class:
+// macos.syscall fell back to PartialStubGenerator's throwing body, and Certificate.Verify with system
+// roots threw again on macOS. The stub census found it at the go1.26.9 hop's H7 pass 8. This guard
+// did not, because a companion carries no [module: GoManualConversion] marker; only the demoted
+// principal of a Go file does. So a file is in the population if it is marked OR it is a `*_impl.cs`
+// companion, the converter's own predicate for a hand-written companion (packageInputDigest.go and
+// testConversion.go glob `*_impl.cs`, and refVerdictPublication.go reads the suffix as hand-owned).
+//
 // ⚠ HOP-INDEPENDENT BY CONSTRUCTION. It compares a file against its own directory and never against
 // a Go release, a GOROOT, a converted corpus or a built tree -- pure text, like the ValueClone stamp
 // guard it sits beside. Measured green on master's corpus (146 marked files) and on the 1.24.13
@@ -73,6 +85,10 @@ var (
 	handOwnNamespaceRe = regexp.MustCompile(`(?m)^namespace[\t ]+([^;{\r\n]+?)[\t ]*;[\t ]*\r?$`)
 	handOwnClassRe     = regexp.MustCompile(`(?m)^[\t ]*(?:public[\t ]+|internal[\t ]+)?(?:static[\t ]+)?partial[\t ]+(?:class|struct)[\t ]+([A-Za-z_@][A-Za-z0-9_@]*_package)\b`)
 )
+
+// isCompanionFile reports whether a file is a hand-written `*_impl.cs` companion, which is held to
+// its package's address whether or not it carries the manual-conversion marker.
+func isCompanionFile(path string) bool { return strings.HasSuffix(filepath.Base(path), "_impl.cs") }
 
 // isTestPackageClass reports whether a package class is one of the test-package variants. Both
 // `<pkg>_test_package` (Go's external test package) and `<pkg>_internal_test_package` end in the
@@ -171,7 +187,7 @@ func scanHandOwnAddresses(root string) (findings []addressFinding, marked, compa
 		}
 
 		for _, p := range paths {
-			if !handOwnAddressMarkerRe.Match(raws[p]) {
+			if !handOwnAddressMarkerRe.Match(raws[p]) && !isCompanionFile(p) {
 				continue
 			}
 			marked++
@@ -308,6 +324,15 @@ func TestHandOwnAddressScannerFiresAndAdmits(t *testing.T) {
 	write("internal/sync", "package_info.cs", "namespace go.@internal;\npublic static partial class sync_package\n{\n}\n")
 	write("internal/sync", "hashtriemap.cs", marker+"namespace go.@internal;\npartial class concurrent_package {\n}\n")
 
+	// BAD 3 -- the package-rename defect, in an UNMARKED companion: go1.26 renamed `package macOS` to
+	// `package macos`, and corefoundation_impl.cs kept the old class.
+	write("crypto/x509/internal/macos/darwin", "package_info.cs", "namespace go.crypto.x509.@internal;\npublic static partial class macos_package\n{\n}\n")
+	write("crypto/x509/internal/macos/darwin", "corefoundation_impl.cs", "namespace go.crypto.x509.@internal;\n\npartial class macOS_package\n{\n}\n")
+
+	// GOOD -- an unmarked companion spelled as its package does.
+	write("math", "package_info.cs", "namespace go;\npublic static partial class math_package\n{\n}\n")
+	write("math", "math_impl.cs", "namespace go;\npartial class math_package {\n}\n")
+
 	// GOOD -- same shape, spelled as its package does.
 	write("bytes", "package_info.cs", "namespace go;\npublic static partial class bytes_package\n{\n}\n")
 	write("bytes", "buffer_impl.cs", marker+"namespace go;\npartial class bytes_package {\n}\n")
@@ -326,14 +351,14 @@ func TestHandOwnAddressScannerFiresAndAdmits(t *testing.T) {
 	if err != nil {
 		t.Fatalf("scanning the planted tree: %v", err)
 	}
-	if marked != 4 {
-		t.Fatalf("expected 4 MARKED files (the unmarked plant must be skipped), got %d", marked)
+	if marked != 6 {
+		t.Fatalf("expected 6 hand-owned files (4 marked, 2 `*_impl.cs` companions; the unmarked plain plant must be skipped), got %d", marked)
 	}
-	if compared != 4 {
-		t.Fatalf("expected all 4 marked plants to have a sibling authority, got %d", compared)
+	if compared != 6 {
+		t.Fatalf("expected all 6 hand-owned plants to have a sibling authority, got %d", compared)
 	}
-	if len(findings) != 2 {
-		t.Fatalf("expected exactly 2 findings (one per axis), got %d: %v", len(findings), findings)
+	if len(findings) != 3 {
+		t.Fatalf("expected exactly 3 findings (one per axis, plus the companion's class), got %d: %v", len(findings), findings)
 	}
 
 	byFile := map[string]addressFinding{}
@@ -355,6 +380,14 @@ func TestHandOwnAddressScannerFiresAndAdmits(t *testing.T) {
 	}
 	if cls.Axis != "package class" || cls.Got != "concurrent_package" || cls.Want != "sync_package" {
 		t.Errorf("the class finding does not name both spellings: %+v", cls)
+	}
+
+	comp, ok := byFile["crypto/x509/internal/macos/darwin/corefoundation_impl.cs"]
+	if !ok {
+		t.Fatalf("the unmarked companion's class defect was not reported; got %v", findings)
+	}
+	if comp.Axis != "package class" || comp.Got != "macOS_package" || comp.Want != "macos_package" {
+		t.Errorf("the companion finding does not name both spellings: %+v", comp)
 	}
 }
 

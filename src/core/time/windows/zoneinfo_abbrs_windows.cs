@@ -12,7 +12,7 @@ partial struct abbr {
     internal @string dst;
 }
 
-internal static map<@string, abbr> abbrs = new map<@string, abbr>{
+[GoLazy] partial class lazyᴛabbrs { internal static map<@string, abbr> abbrs = new map<@string, abbr>{
     ["Egypt Standard Time"u8] = new("EET"u8, "EEST"u8), // Africa/Cairo
     ["Morocco Standard Time"u8] = new("+00"u8, "+01"u8), // Africa/Casablanca
     ["South Africa Standard Time"u8] = new("SAST"u8, "SAST"u8), // Africa/Johannesburg
@@ -152,6 +152,6 @@ internal static map<@string, abbr> abbrs = new map<@string, abbr>{
     ["Norfolk Standard Time"u8] = new("+11"u8, "+12"u8), // Pacific/Norfolk
     ["West Pacific Standard Time"u8] = new("+10"u8, "+10"u8), // Pacific/Port_Moresby
     ["Tonga Standard Time"u8] = new("+13"u8, "+13"u8) // Pacific/Tongatapu
-};
+}; }
 
 } // end time_package

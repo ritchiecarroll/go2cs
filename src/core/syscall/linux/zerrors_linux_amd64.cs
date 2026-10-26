@@ -1348,7 +1348,7 @@ public static ΔSignal SIGXCPU => /* Signal(0x18) */ 24;
 public static ΔSignal SIGXFSZ => /* Signal(0x19) */ 25;
 
 // Error table
-internal static array<@string> errors = new array<@string>(133){
+[GoLazy] partial class lazyᴛerrors { internal static array<@string> errors = new array<@string>(133){
     [1] = "operation not permitted"u8,
     [2] = "no such file or directory"u8,
     [3] = "no such process"u8,
@@ -1462,7 +1462,7 @@ internal static array<@string> errors = new array<@string>(133){
     [113] = "no route to host"u8,
     [114] = "operation already in progress"u8,
     [115] = "operation now in progress"u8,
-    [116] = "stale NFS file handle"u8,
+    [116] = "stale file handle"u8,
     [117] = "structure needs cleaning"u8,
     [118] = "not a XENIX named type file"u8,
     [119] = "no XENIX semaphores available"u8,
@@ -1479,10 +1479,10 @@ internal static array<@string> errors = new array<@string>(133){
     [130] = "owner died"u8,
     [131] = "state not recoverable"u8,
     [132] = "operation not possible due to RF-kill"u8
-};
+}; }
 
 // Signal table
-internal static array<@string> signals = new array<@string>(32){
+[GoLazy] partial class lazyᴛsignals { internal static array<@string> signals = new array<@string>(32){
     [1] = "hangup"u8,
     [2] = "interrupt"u8,
     [3] = "quit"u8,
@@ -1514,6 +1514,6 @@ internal static array<@string> signals = new array<@string>(32){
     [29] = "I/O possible"u8,
     [30] = "power failure"u8,
     [31] = "bad system call"u8
-};
+}; }
 
 } // end syscall_package

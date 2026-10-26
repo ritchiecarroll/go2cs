@@ -76,8 +76,7 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 }
 
 // funcMap maps command names to functions that render their inputs safe.
-internal static template.FuncMap funcMap;
-internal static void initᴛfuncMap() { funcMap = new text.template_package.FuncMap(new map<@string, any>{
+[GoLazy] partial class lazyᴛfuncMap { internal static template.FuncMap funcMap = new text.template_package.FuncMap(new map<@string, any>{
     ["_html_template_attrescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(attrEscaper)),
     ["_html_template_commentescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(commentEscaper)),
     ["_html_template_cssescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(cssEscaper)),
@@ -194,6 +193,8 @@ internal static context escape(this ref escaper e, context c, parse.Node n) {
 
 internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpllitinterp"u8);
 
+internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("htmlmetacontenturlescape"u8);
+
 // escapeAction escapes an action template node.
 internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -260,6 +261,20 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
         }
         else if (!matchᴛ1) { /* default: */
             throw panic(c.urlPart.String());
+        }
+    }
+    else if (exprᴛ1 == stateMetaContent) {
+        // Handled below in delim check.
+    }
+    else if (exprᴛ1 == stateMetaContentURL) {
+        if (htmlmetacontenturlescape.Value() != "0"u8){
+            s = append(s, "_html_template_urlfilter"u8);
+        } else {
+            // We don't have a great place to increment this, since it's hard to
+            // know if we actually escape any urls in _html_template_urlfilter,
+            // since it has no information about what context it is being
+            // executed in etc. This is probably the best we can do.
+            htmlmetacontenturlescape.IncNonDefault();
         }
     }
     else if (exprᴛ1 == stateJS) {
@@ -439,7 +454,7 @@ internal static @string normalizeEscFn(@string e) {
 
 // redundantFuncs[a][b] implies that funcMap[b](funcMap[a](x)) == funcMap[a](x)
 // for all x.
-internal static map<@string, map<@string, bool>> redundantFuncs = new map<@string, map<@string, bool>>{
+[GoLazy] partial class lazyᴛredundantFuncs { internal static map<@string, map<@string, bool>> redundantFuncs = new map<@string, map<@string, bool>>{
     ["_html_template_commentescaper"u8] = new map<@string, bool>{
         ["_html_template_attrescaper"u8] = true,
         ["_html_template_htmlescaper"u8] = true},
@@ -453,7 +468,7 @@ internal static map<@string, map<@string, bool>> redundantFuncs = new map<@strin
         ["_html_template_attrescaper"u8] = true},
     ["_html_template_urlescaper"u8] = new map<@string, bool>{
         ["_html_template_urlnormalizer"u8] = true}
-};
+}; }
 
 // appendCmd appends the given command to the end of the command pipeline
 // unless it is redundant with the last command.
@@ -579,7 +594,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
     if (nodeName == "range"u8) {
         e.rangeContext = Ꮡ(new rangeContext(outer: e.rangeContext));
     }
-    var c0 = e.escapeList(c, n.List);
+    var c0 = e.escapeList(c.clone(), n.List);
     if (nodeName == "range"u8) {
         if (c0.state != stateError) {
             c0 = joinRange(c0, ref (e.rangeContext).DerefOrNull());
@@ -610,7 +625,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
             return c0;
         }
     }
-    var c1 = e.escapeList(c, n.ElseList);
+    var c1 = e.escapeList(c.clone(), n.ElseList);
     return join(c0, c1, new parse.BranchNodeжNode(Ꮡn), nodeName);
 }
 
@@ -950,7 +965,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // Decode the value so non-HTML rules can easily handle
         //     <button onclick="alert(&quot;Hi!&quot;)">
         // without having to entity decode token boundaries.
-        for (var u = slice<byte>(html.UnescapeString(((@string)s))); len(u) != 0; ) {
+        for (var u = slice<byte>(html.UnescapeString((@string)s)); len(u) != 0; ) {
             var (c1, i1) = transitionFunc[c.state](c, u);
             (c, u) = (c1, u.slice(i1));
         }
@@ -960,7 +975,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
     var element = c.element;
 
     // If this is a non-JS "type" attribute inside "script" tag, do not treat the contents as JS.
-    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType(((@string)(s.slice(0, i))))) {
+    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType((@string)(s.slice(0, i)))) {
         element = elementNone;
     }
 

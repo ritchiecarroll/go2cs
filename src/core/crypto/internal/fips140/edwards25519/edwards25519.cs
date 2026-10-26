@@ -138,7 +138,7 @@ internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> 
     Ꮡy.Multiply(Ꮡv.of(Point.Ꮡy), ᏑzInv); // y = Y / Z
 
     var @out = copyFieldElement(Ꮡbuf, Ꮡy);
-    @out[31] |= (byte)((byte)((x.IsNegative() << (int)(7))));
+    @out[31] |= (byte)((byte)(x.IsNegative() << 7));
     return @out;
 }
 
@@ -163,6 +163,7 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     //
     // Read more at https://hdevalence.ca/blog/2020-10-04-its-25519am,
     // specifically the "Canonical A, R" section.
+
     var (y, err) = @new<field.Element>().SetBytes(x);
     if (err != default!) {
         return (default!, errors.New(edwards25519InvalidPointˢ));
@@ -188,7 +189,7 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
 
     // Select the negative square root if the sign bit is set.
     var xxNeg = @new<field.Element>().Negate(xx);
-    xx = xx.Select(xxNeg, xx, (nint)((x[31] >> (int)(7))));
+    xx = xx.Select(xxNeg, xx, (nint)(x[31] >> 7));
 
     Ꮡv.of(Point.Ꮡx).Set(xx);
     Ꮡv.of(Point.Ꮡy).Set(y);
@@ -431,7 +432,7 @@ public static nint Equal(this ж<Point> Ꮡv, ж<Point> Ꮡu) {
     Ꮡt3.Multiply(Ꮡv.of(Point.Ꮡy), Ꮡu.of(Point.Ꮡz));
     Ꮡt4.Multiply(Ꮡu.of(Point.Ꮡy), Ꮡv.of(Point.Ꮡz));
 
-    return (nint)(t1.Equal(Ꮡt2) & t3.Equal(Ꮡt4));
+    return t1.Equal(Ꮡt2) & t3.Equal(Ꮡt4);
 }
 
 // Constant-time operations

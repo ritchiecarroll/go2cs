@@ -560,3 +560,58 @@ func TestModuleToolchainRequestReadsGo124Grammar(t *testing.T) {
 		})
 	}
 }
+
+// minorFloatOf spells, independently of the converter, the $(GoStdLibVersion) float -recurse=nuget is
+// expected to write for a converting release: its first two components, then ".*" (1.26.10 -> 1.26.*).
+func minorFloatOf(release string) string {
+	parts := strings.SplitN(strings.TrimPrefix(release, "go"), ".", 3)
+
+	if len(parts) < 2 {
+		return release + ".*"
+	}
+
+	return parts[0] + "." + parts[1] + ".*"
+}
+
+// TestGoStdLibVersionFloatIsTheGuardsMinor holds the float to the compatibility guard: every release the
+// float matches is one checkNuGetStdLibCompatibility accepts, and a neighbouring minor is refused.
+func TestGoStdLibVersionFloatIsTheGuardsMinor(t *testing.T) {
+	tests := []struct {
+		release string
+		want    string
+	}{
+		{"1.26.5", "1.26.*"},
+		{"1.26.10", "1.26.*"},
+		{"go1.26.10", "1.26.*"},
+		{"1.27rc1", "1.27.*"},
+		{"1.24.13", "1.24.*"},
+		{"", ""},
+		{"devel +abc", ""},
+	}
+
+	for _, test := range tests {
+		got := goStdLibVersionFloat(test.release)
+
+		if got != test.want {
+			t.Errorf("goStdLibVersionFloat(%q) = %q, want %q", test.release, got, test.want)
+			continue
+		}
+
+		if got == "" {
+			continue
+		}
+
+		published := version.Lang(normalizeGoVersion(test.release))
+
+		if err := checkNuGetStdLibCompatibility(test.release, published); err != nil {
+			t.Errorf("the guard refuses %q against its own minor %q: %v", test.release, published, err)
+		}
+
+		minor, _ := strconv.Atoi(strings.Split(strings.TrimSuffix(got, ".*"), ".")[1])
+		neighbour := fmt.Sprintf("1.%d.0", minor+1)
+
+		if err := checkNuGetStdLibCompatibility(neighbour, published); err == nil {
+			t.Errorf("the guard accepts %q against %q; the float %q would not resolve it", neighbour, published, got)
+		}
+	}
+}

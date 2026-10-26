@@ -48,6 +48,12 @@ using static global::go.@internal.fuzz_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,12 +62,12 @@ using static global::go.@internal.fuzz_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/fuzz/encoding_test.go", "encoding_test.cs", "ACEcggDgAfgClKioAAkUspKCgoKUlIKUgoKmgoKUgoKCAAUSsoKCpoKCkoKCAAUSsoKCpoKCgpKCgtyCgoKCgoKUgoLKgoKCgoKClIKCyqKCgoKCgoKClIKUgpSCgpSClIKCgsqigoKCgoKCgoKClIKClIKClIKUgoLKooKClIKClIKClIKUgoI=", "202-215:1;224-249:2;264-269:1;285-290:1;334-352:1;367-382:1;390-405:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "AB4qggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAcQgoKCgqaClAAHEIKClAAHEIKCgpTugpKSgrqCgoKClIKUgIKkggAJErKWgoKCgoKUgpSAgg==", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;136-158:8;139-141:8.1;166-168:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA4eooKAkoKUAAcQkoKUlIKC2KSigoCSgpQABxCSgpSUgoLYpKKCgJKClAAQIoKigoLYpIKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
+[assembly: global::go.GoPositionMap("internal/fuzz/encoding_test.go", "encoding_test.cs", "ACIcggDgAfgClKioAAkUspKCgoKUlIKUgoKmgoKUgoKCAAUSsoKCppKSgoIABRKygoKmkoKSgoLcgoKCgoKClIKCyoKCgoKCgpSCgsqigoKCgoKCgpSClIKUgoKUgpSCgoLKooKCgoKCgoKCgpSCgpSCgpSClIKCyqKCgpSCgpSCgpSClIKC", "202-215:1;224-249:2;263-268:1;283-288:1;332-350:1;365-380:1;388-403:1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "AB4qggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAcQgoKCgqaClAAHEIKClAAHEIKCgpTuspKCuoKCgoKUgpSAgqSCAAkSspaCgoKCgpSClICC", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;135-157:8;138-140:8.1;165-167:1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA8eooKAkoKUAAcQkoKUlIKC2KSigoCSgpQABxCSgpSUgoLYpKKCgJKClAAQIoKigoLYpIKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAFDCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgsiCgoKAgqSAgpKC7IKCgoKAgpKClKSCgIK2goKAgg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABcslIKCgoKU1sKClIKAkpTKgoKUkoCCyIKClJSCgoKClLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigqa4koKUgoCCtpSCgoKCgoKCgoKigoKCgpSUgoLY", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;191-204:2;193-199:2.1", "", "148=TypeOf/1/1/1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoStJKAgqSAgsiCgoKAgqSAgpKC7IKCgoKAgpKClKSCgIK2goKAgg==")]
+[assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABgslIKCgoKU1sKClIKAkpTKgoKUkoCCyIKClJSCgoKClLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigqa4koKUgoCCtpSCgpKCgoKCgqKCgoKClJSCgtg=", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;190-203:2;192-198:2.1", "", "149=TypeOf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -97,7 +103,7 @@ public static partial class fuzz_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸsignal() => builtin.initPackage(typeof(global::go.os.signal_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(global::go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));

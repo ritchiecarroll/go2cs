@@ -17,7 +17,7 @@ using errors = errors_package;
 using io = io_package;
 using big = math.big_package;
 using fips140only = go.crypto.@internal.fips140only_package;
-using randutil = go.crypto.@internal.randutil_package;
+using rand = go.crypto.@internal.rand_package;
 using go.crypto.@internal;
 using math;
 
@@ -31,13 +31,13 @@ partial struct Parameters {
 
 // PublicKey represents a DSA public key.
 partial struct PublicKey {
-    public partial ref Parameters Parameters { get; }
+    /*embed*/ public Parameters Parameters;
     public ж<bigꓸInt> Y;
 }
 
 // PrivateKey represents a DSA private key.
 partial struct PrivateKey {
-    public partial ref PublicKey PublicKey { get; }
+    /*embed*/ public PublicKey PublicKey;
     public ж<bigꓸInt> X;
 }
 
@@ -69,7 +69,7 @@ internal static readonly @string cryptoDsaInvalidˢ = "crypto/dsa: invalid Param
 public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand, ParameterSizes sizes) {
     ref var @params = ref Ꮡparams.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return errors.New(cryptoDsaUseOfDsaIsNotˢ);
     }
 
@@ -183,7 +183,7 @@ internal static readonly @string cryptoDsaParametersNotˢ = "crypto/dsa: paramet
 public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return errors.New(cryptoDsaUseOfDsaIsNotˢ);
     }
 
@@ -230,19 +230,23 @@ internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> Ꮡk, ж<bigꓸInt> �
 // to the byte-length of the subgroup. This function does not perform that
 // truncation itself.
 //
+// Since Go 1.26, a secure source of random bytes is always used, and the Reader is
+// ignored unless GODEBUG=cryptocustomrand=1 is set. This setting will be removed
+// in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
+//
 // Be aware that calling Sign with an attacker-controlled [PrivateKey] may
 // require an arbitrary amount of CPU.
-public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
+public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
     ж<bigꓸInt> r = default!;
     ж<bigꓸInt> s = default!;
     error err = default!;
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, default!, errors.New(cryptoDsaUseOfDsaIsNotˢ));
     }
 
-    randutil.MaybeReadByte(rand);
+    random = rand.CustomReader(random);
 
     // FIPS 186-3, section 4.6
 
@@ -258,7 +262,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
         var k = @new<bigꓸInt>();
         var buf = new slice<byte>(n);
         while (ᐧ) {
-            (_, err) = io.ReadFull(rand, buf);
+            (_, err) = io.ReadFull(random, buf);
             if (err != default!) {
                 return (r, s, err);
             }
@@ -314,7 +318,7 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/dsa: use of DSA is not allowed in FIPS 140-only mode");
     }
 

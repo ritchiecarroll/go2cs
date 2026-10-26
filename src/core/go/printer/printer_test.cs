@@ -10,16 +10,16 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
-using diff = @internal.diff_package;
+using diff = global::go.@internal.diff_package;
 using io = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using testing = testing_package;
 using time = time_package;
-using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
+using global::go.@internal;
 using global::go.go;
 using path;
 using static global::go.go.printer_package;
@@ -100,7 +100,7 @@ internal static error checkEqual(@string aname, @string bname, slice<byte> a, sl
     if (bytes.Equal(a, b)) {
         return default!;
     }
-    return errors.New(((@string)diff.Diff(aname, a, bname, b)));
+    return errors.New((@string)diff.Diff(aname, a, bname, b));
 }
 
 internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden, checkMode mode) {
@@ -630,12 +630,12 @@ public static void TestBaseIndent(ж<testing.T> Ꮡt) {
         throw panic(err); // error in test
     }
 
-    for (nint indent = 0; indent < 4; indent++) {
-        ref var indentΔ1 = ref heap<nint>(out var ᏑindentΔ1);
-        indentΔ1 = indent;
+    for (nint indentᴛ1 = 0; indentᴛ1 < 4; indentᴛ1++) {
+        ref var indent = ref heap<nint>(out var Ꮡindent);
+        indent = indentᴛ1;
         var fileʗ1 = @file;
-        var indentʗ1 = indentΔ1;
-        Ꮡt.Run(fmt.Sprint(indentΔ1), (ж<testing.T> tΔ1) => {
+        var indentʗ1 = indent;
+        Ꮡt.Run(fmt.Sprint(indent), (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             (Ꮡ(new Config(Tabwidth: tabwidth, Indent: indentʗ1))).Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, fileʗ1.OrTypedNil());
@@ -658,6 +658,7 @@ public static void TestBaseIndent(ж<testing.T> Ꮡt) {
                 }
             }
         });
+        indentᴛ1 = indent;
     }
 }
 
@@ -984,6 +985,7 @@ public static void TestSourcePosNewline(ж<testing.T> Ꮡt) {
     // As a result, we cannot write a line directive with the correct path for a
     // filename containing newlines. We should return an error rather than
     // silently dropping or mangling it.
+
     @string fname = fooBarBarGoˢ;
     @string src = packageBarˢ;
     var fset = token.NewFileSet();

@@ -48,6 +48,18 @@ namespace go.testing_runtime;
 /// record COUNT, so a failure printing an extra assert beside the pinned one cannot be absorbed.
 /// </param>
 /// <param name="RecordsDropped">Records the log cap dropped, when it dropped any: a count pin cannot hold then.</param>
+/// <param name="Key">An <c>attr</c> event's key (Go 1.25's <c>TB.Attr</c>; test2json's <c>Key</c>).</param>
+/// <param name="Value">An <c>attr</c> event's value (test2json's <c>Value</c>).</param>
+/// <param name="Path">An <c>artifacts</c> event's directory (Go 1.26's <c>TB.ArtifactDir</c>; test2json's <c>Path</c>).</param>
+/// <param name="Abandoned">
+/// True on a <c>fail</c> the per-test watchdog reported (<see cref="TestExecution.Abandon"/>): the test did
+/// not finish within the deadline, and its thread was left running. Written only when true, so every other
+/// event's JSON is unchanged. The converter reads it by this JSON name to label the row.
+/// </param>
+/// <param name="AfterAbandoned">
+/// The first test the watchdog abandoned, on every event reported after it. That test's goroutines may still
+/// be running and may hold what this one needs, so a later failure can be a cascade; this names its source.
+/// </param>
 /// <remarks>
 /// The shape is deliberate: the Phase-4 pipeline runs the same suite twice — once here and once
 /// under real <c>go test -json</c> — and diffs the two verdict streams. Matching Go's event
@@ -62,7 +74,12 @@ public sealed record TestEvent(
     string? Source = null,
     int? Line = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<string>? Records = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? RecordsDropped = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? RecordsDropped = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Key = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Value = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Path = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] bool Abandoned = false,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? AfterAbandoned = null);
 
 /// <summary>
 /// Collects every <see cref="TestEvent"/> of a run and writes it out, either as <c>go test
@@ -83,6 +100,36 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     private readonly object m_syncRoot = new();
     private readonly List<TestEvent> m_events = [];
 
+    // The first test the watchdog abandoned (TestEvent.AfterAbandoned), under m_syncRoot.
+    private string? m_abandoned;
+
+    /// <summary>
+    /// Records that the watchdog abandoned <paramref name="test"/>: every event reported after this carries
+    /// it as <see cref="TestEvent.AfterAbandoned"/>. The FIRST abandoned test is kept, as the likeliest source.
+    /// </summary>
+    public void MarkAbandoned(string test)
+    {
+        lock (m_syncRoot)
+            m_abandoned ??= test;
+    }
+
+    /// <summary>The first test the watchdog abandoned in this run, or <c>null</c> when it has abandoned none.</summary>
+    public string? FirstAbandoned
+    {
+        get
+        {
+            lock (m_syncRoot)
+                return m_abandoned;
+        }
+    }
+
+    // Callers hold m_syncRoot. An abandoned verdict is not "after" an abandoned test: it is one.
+    private TestEvent StampAfterAbandoned(TestEvent testEvent) =>
+        m_abandoned is null || testEvent.Abandoned ? testEvent : testEvent with { AfterAbandoned = m_abandoned };
+
+    /// <summary>Whether this run emits <c>go test -json</c> events (otherwise Go's text output).</summary>
+    internal bool Json => json;
+
     public IReadOnlyList<TestEvent> Events
     {
         get
@@ -96,6 +143,7 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     {
         lock (m_syncRoot)
         {
+            testEvent = StampAfterAbandoned(testEvent);
             m_events.Add(testEvent);
 
             if (json)
@@ -104,7 +152,14 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
                 return;
             }
 
-            if (testEvent.Action == "run" && !verbose)
+            // A test's own lines are Go's text, which its TestExecution prints as Go's binary does (=== RUN,
+            // records, --- PASS/FAIL/SKIP, === ATTR, ...). This text mode prints the package's summary and the
+            // host's own diagnostics only.
+            if (!string.IsNullOrEmpty(testEvent.Test) && testEvent.Action is "run" or "pass" or "fail" or "skip" or "attr" or "artifacts")
+                return;
+
+            // Go's binary prints nothing as a run starts but its "-test.shuffle N" line, which TestRunner prints.
+            if (testEvent.Action == "run")
                 return;
 
             string output = string.IsNullOrWhiteSpace(testEvent.Output) ? "" : $" — {testEvent.Output}";
@@ -193,17 +248,23 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     /// "PASS\r\n" failed it (D5). The comparer splits on "\n" and reads either ending.
     /// </para>
     /// </remarks>
-    internal static void WriteEventLine(string line)
+    internal static void WriteEventLine(string line) => WriteText(line + "\n");
+
+    /// <summary>
+    /// Writes <paramref name="text"/> exactly as given (Go's text output: one or more whole lines) as ONE write,
+    /// the way <see cref="WriteEventLine"/> writes a line.
+    /// </summary>
+    internal static void WriteText(string text)
     {
         lock (s_eventLineLock)
         {
             if (!(ProcessConsoleForGuard ?? ConsoleOutIsTheProcessConsole()))
             {
-                Console.Out.Write(line + "\n");
+                Console.Out.Write(text);
                 return;
             }
 
-            byte[] bytes = Console.OutputEncoding.GetBytes(line + "\n");
+            byte[] bytes = Console.OutputEncoding.GetBytes(text);
             Stream stdout = StdoutForGuard ?? s_stdout.Value;
 
             // Anything already written through Console.Out stays ahead of this line.
@@ -231,7 +292,7 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     public void RecordPackage(string action, double elapsed = 0.0D, string? output = null)
     {
         lock (m_syncRoot)
-            m_events.Add(new TestEvent(package, "", action, elapsed, output));
+            m_events.Add(StampAfterAbandoned(new TestEvent(package, "", action, elapsed, output)));
     }
 
     public static readonly JsonSerializerOptions JsonOptions = new()

@@ -8,11 +8,11 @@ namespace go.go;
 using cmp = cmp_package;
 using heap = container.heap_package;
 using fmt = fmt_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using sort = sort_package;
 using container;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 
 partial class types_package {
 
@@ -33,7 +33,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
     // Compute the object dependency graph and initialize
     // a priority queue with the list of graph nodes.
     ref var pq = ref heap<nodeQueue>(out var Ꮡpq);
-    pq = ((nodeQueue)dependencyGraph(check.objMap));
+    pq = (nodeQueue)dependencyGraph(check.objMap);
     heap.Init(new nodeQueueжInterface(Ꮡpq));
 
     const bool debug = false;
@@ -240,6 +240,8 @@ internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
 // with any function nodes removed. The resulting graph contains only constants
 // and variables.
 internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> objMap) {
+    var funcGᴷ = new stackAppend<ж<graphNode>>();
+
     // M is the dependency (Object) -> graphNode mapping
     var M = new map<dependency, ж<graphNode>>();
     foreach (var (obj, _) in objMap) {
@@ -273,7 +275,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     foreach (var (_, n) in M) {
         {
             var (_, ok) = (~n).obj._<ж<Func>>(ᐧ); if (ok){
-                funcG = append(funcG, n);
+                funcG = append(funcGᴷ, funcG, n);
             } else {
                 G = append(G, n);
             }

@@ -68,6 +68,7 @@ public static uint32 Size(this HeaderField hf) {
     // length in octets (see Section 5.2), plus 32.  The size of
     // an entry is calculated using the length of the name and
     // value without any Huffman encoding applied."
+
     // This can overflow if somebody makes a large HeaderField
     // Name and/or Value by hand, but we don't care, because that
     // won't happen on the wire because the encoding doesn't allow
@@ -378,7 +379,7 @@ internal static error parseFieldIndexed(this ref Decoder d) {
     }
     var (hf, ok) = d.at(idx);
     if (!ok) {
-        return new DecodingError(((InvalidIndexError)(nint)idx));
+        return new DecodingError((InvalidIndexError)(nint)idx);
     }
     d.buf = buf;
     return d.callEmit(new HeaderField(Name: hf.Name, Value: hf.Value));
@@ -398,7 +399,7 @@ internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType i
     if (nameIdx > 0){
         var (ihf, ok) = d.at(nameIdx);
         if (!ok) {
-            return new DecodingError(((InvalidIndexError)(nint)nameIdx));
+            return new DecodingError((InvalidIndexError)(nint)nameIdx);
         }
         hf.Name = ihf.Name;
     } else {
@@ -552,7 +553,7 @@ partial struct undecodedString {
 
 internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
-        return (((@string)u.b), default!);
+        return ((@string)u.b, default!);
     }
     var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset(); // don't trust others

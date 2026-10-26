@@ -90,7 +90,7 @@ partial interface RecordUnion<ΔT> {
 }
 
 internal static T firstOf<T>(slice<T> p)
-    where T : /* RecordUnion */ new()
+    where T : /* RecordUnion = recordA | recordB | recordC */ new()
 {
     T zero = GoZero<T>();
 

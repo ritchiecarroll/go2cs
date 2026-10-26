@@ -46,6 +46,12 @@ using static go.@internal.coverage.pods_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -54,7 +60,7 @@ using static go.@internal.coverage.pods_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/pods/pods.go", "pods.cs", "ACtoAA0CgoKCgoKUgoKUgqaqogARXgAhAoKCgoKAgriAgvyCgoKAgoKCgpSAgoKClIKClILqgoKUlIKCgoCCpJTcgoKClJSGpqKCgg==", "170-175:1;189-191:2")]
+[assembly: go.GoPositionMap("internal/coverage/pods/pods.go", "pods.cs", "ACxoABACgoKCgoKUgoKUgqaqogARXgAhAoKCgoKAgriAgvyCgoKAgoKCgpSAgoKClIKClILqgoKUlIKCgoCCpJTcgoKClJSGpqKCgg==", "170-175:1;189-191:2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -87,7 +93,7 @@ public static partial class pods_package
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

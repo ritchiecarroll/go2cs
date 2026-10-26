@@ -89,7 +89,7 @@ internal static void init(this ref header h, recType recType, uint16 reqId, nint
     h.Type = recType;
     h.Id = reqId;
     h.ContentLength = (uint16)contentLength;
-    h.PaddingLength = (uint8)((nint)(-contentLength & 7));
+    h.PaddingLength = (uint8)(-contentLength & 7);
 }
 
 // conn sends records over rwc
@@ -231,13 +231,13 @@ internal static (uint32, nint) readSize(slice<byte> s) {
     }
     var size = (uint32)s[0];
     nint n = 1;
-    if ((uint32)(size & (((uint32)1 << (int)(7)))) != 0) {
+    if ((uint32)(size & ((uint32)1 << 7)) != 0) {
         if (len(s) < 4) {
             return (0, 0);
         }
         n = 4;
         size = binary.BigEndian.Uint32(s);
-        size &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(31))));
+        size &= unchecked((uint32)~(uint32)(((uint32)1 << 31)));
     }
     return (size, n);
 }
@@ -246,12 +246,12 @@ internal static @string readString(slice<byte> s, uint32 size) {
     if (size > (uint32)len(s)) {
         return ""u8;
     }
-    return ((@string)(s.slice(0, (nint)(size))));
+    return (@string)(s.slice(0, (nint)(size)));
 }
 
 internal static nint encodeSize(slice<byte> b, uint32 size) {
     if (size > 127) {
-        size |= (uint32)(((uint32)1 << (int)(31)));
+        size |= (uint32)(((uint32)1 << 31));
         binary.BigEndian.PutUint32(b, size);
         return 4;
     }
@@ -263,7 +263,7 @@ internal static nint encodeSize(slice<byte> b, uint32 size) {
 // Closed.
 partial struct bufWriter {
     internal io.Closer closer;
-    public partial ref ж<bufio_package.Writer> Writer { get; }
+    /*embed*/ public ж<bufio_package.Writer> Writer;
 }
 
 internal static error Close(this ref bufWriter w) {

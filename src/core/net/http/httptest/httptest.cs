@@ -42,9 +42,9 @@ internal static readonly @string httpsˢ = "https://"u8;
 //
 // An empty method means "GET".
 //
-// The provided body may be nil. If the body is of type *bytes.Reader,
-// *strings.Reader, or *bytes.Buffer, the Request.ContentLength is
-// set.
+// The provided body may be nil. If the body is of type [bytes.Reader],
+// [strings.Reader], [bytes.Buffer], or the value [http.NoBody],
+// the Request.ContentLength is set.
 //
 // NewRequest panics on error for ease of use in testing, where a
 // panic is acceptable.
@@ -85,6 +85,9 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             req.Value.ContentLength = -1;
             break;
         }}
+        if (AreEqual(body, http.NoBody)) {
+            req.Value.ContentLength = 0;
+        }
         {
             var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok){
                 req.Value.Body = rc;

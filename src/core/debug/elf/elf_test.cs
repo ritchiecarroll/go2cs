@@ -34,10 +34,11 @@ internal static slice<nameTest> nameTests = new nameTest[]{
     new(R_ALPHA_OP_PUSH, "R_ALPHA_OP_PUSH"u8),
     new(R_ARM_THM_ABS5, "R_ARM_THM_ABS5"u8),
     new(R_386_GOT32, "R_386_GOT32"u8),
+    new(R_LARCH_CALL36, "R_LARCH_CALL36"u8),
     new(R_PPC_GOT16_HI, "R_PPC_GOT16_HI"u8),
     new(R_SPARC_GOT22, "R_SPARC_GOT22"u8),
     new(ET_LOOS + 5, "ET_LOOS+5"u8),
-    new(((global::go.debug.elf_package.ProgFlag)0x50), "0x50"u8),
+    new((global::go.debug.elf_package.ProgFlag)0x50, "0x50"u8),
     new(COMPRESS_ZLIB + 2, "COMPRESS_ZSTD+1"u8)
 }.slice();
 

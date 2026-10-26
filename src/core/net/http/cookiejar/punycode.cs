@@ -31,6 +31,8 @@ internal const int32 tmin = 1;
 // The "while h < length(input)" line in the specification becomes "for
 // remaining != 0" in the Go code, because len(s) in Go is in bytes, not runes.
 internal static (@string, error) encode(@string prefix, @string s) {
+    var outputᴷ = new stackAppend<byte>();
+
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
@@ -38,7 +40,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     foreach (var (_, r) in s) {
         if (r < utf8.RuneSelf){
             b++;
-            output = append(output, (byte)r);
+            output = append(outputᴷ, output, (byte)r);
         } else {
             remaining++;
         }
@@ -94,7 +96,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 internal static byte encodeDigit(int32 digit) {

@@ -4,29 +4,15 @@
 namespace go.crypto;
 
 using bytes = bytes_package;
-using hpke = go.crypto.@internal.hpke_package;
+using hpke = go.crypto.hpke_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using slices = slices_package;
 using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
-using ecdh = go.crypto.ecdh_package;
-using go.crypto.@internal;
+using go.crypto;
 using vendor.golang.org.x.crypto;
 
 partial class tls_package {
-
-// sortedSupportedAEADs is just a sorted version of hpke.SupportedAEADS.
-// We need this so that when we insert them into ECHConfigs the ordering
-// is stable.
-internal static slice<uint16> sortedSupportedAEADs;
-
-[GoInit] internal static void init() {
-    foreach (var (aeadID, _) in hpke.SupportedAEADs) {
-        sortedSupportedAEADs = append(sortedSupportedAEADs, aeadID);
-    }
-    slices.Sort<slice<uint16>, uint16>(sortedSupportedAEADs);
-}
 
 public partial struct echCipher {
     public uint16 KDFID;
@@ -51,22 +37,36 @@ partial struct echConfig {
     public slice<echExtension> Extensions;
 }
 
-internal static error errMalformedECHConfig = errors.New("tls: malformed ECHConfigList"u8);
+internal static error errMalformedECHConfigList = errors.New("tls: malformed ECHConfigList"u8);
+
+partial struct echConfigErr {
+    internal @string field;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tlsMalformedECHConfigˢ = "tls: malformed ECHConfig"u8;
+
+internal static @string Error(this ref echConfigErr e) {
+    if (e.field == ""u8) {
+        return tlsMalformedECHConfigˢ;
+    }
+    return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
+}
 
 internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> enc) {
     ref var ec = ref heap(new echConfig(), out var Ꮡec);
 
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)enc);
-    ec.raw = ((slice<byte>)enc);
+    s = (cryptobyte.String)enc;
+    ec.raw = (slice<byte>)enc;
     if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑVersion))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("version"u8))));
     }
     if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑLength))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("length"u8))));
     }
     if (len(ec.raw) < (nint)ec.Length + 4) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("length"u8))));
     }
     ec.raw = ec.raw.slice(0, (uint16)(ec.Length + 4));
     if (ec.Version != extensionEncryptedClientHello) {
@@ -74,47 +74,47 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
         return (true, new echConfig(nil), default!);
     }
     if (!s.ReadUint8(Ꮡec.of(echConfig.ᏑConfigID))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("config_id"u8))));
     }
     if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑKemID))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("kem_id"u8))));
     }
     if (!readUint16LengthPrefixed(Ꮡs, Ꮡec.of(echConfig.ᏑPublicKey))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("public_key"u8))));
     }
     ref var ΔcipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
     if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites"u8))));
     }
     while (!ΔcipherSuites.Empty()) {
         ref var c = ref heap(new echCipher(), out var Ꮡc);
         if (!ΔcipherSuites.ReadUint16(Ꮡc.of(echCipher.ᏑKDFID))) {
-            return (false, new echConfig(nil), errMalformedECHConfig);
+            return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites kdf_id"u8))));
         }
         if (!ΔcipherSuites.ReadUint16(Ꮡc.of(echCipher.ᏑAEADID))) {
-            return (false, new echConfig(nil), errMalformedECHConfig);
+            return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites aead_id"u8))));
         }
         ec.SymmetricCipherSuite = append(ec.SymmetricCipherSuite, c);
     }
     if (!s.ReadUint8(Ꮡec.of(echConfig.ᏑMaxNameLength))) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("maximum_name_length"u8))));
     }
     ref var publicName = ref heap<cryptobyte.String>(out var ᏑpublicName);
     if (!s.ReadUint8LengthPrefixed(ᏑpublicName)) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("public_name"u8))));
     }
     ec.PublicName = publicName;
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     if (!s.ReadUint16LengthPrefixed(Ꮡextensions)) {
-        return (false, new echConfig(nil), errMalformedECHConfig);
+        return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("extensions"u8))));
     }
     while (!extensions.Empty()) {
         ref var e = ref heap(new echExtension(), out var Ꮡe);
         if (!extensions.ReadUint16(Ꮡe.of(echExtension.ᏑType))) {
-            return (false, new echConfig(nil), errMalformedECHConfig);
+            return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("extensions type"u8))));
         }
         if (!extensions.ReadUint16LengthPrefixed(Ꮡe.of(echExtension.ᏑData).Reinterpret<slice<byte>, cryptobyte.String>())) {
-            return (false, new echConfig(nil), errMalformedECHConfig);
+            return (false, new echConfig(nil), new echConfigErrжerror(Ꮡ(new echConfigErr("extensions data"u8))));
         }
         ec.Extensions = append(ec.Extensions, e);
     }
@@ -122,27 +122,24 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
     return (false, ec, default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tlsMalformedECHConfigˢ = "tls: malformed ECHConfig"u8;
-
 // parseECHConfigList parses a draft-ietf-tls-esni-18 ECHConfigList, returning a
 // slice of parsed ECHConfigs, in the same order they were parsed, or an error
 // if the list is malformed.
 internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
-    var s = ((cryptobyte.String)data);
+    var s = (cryptobyte.String)data;
     ref var length = ref heap(new uint16(), out var Ꮡlength);
     if (!s.ReadUint16(Ꮡlength)) {
-        return (default!, errMalformedECHConfig);
+        return (default!, errMalformedECHConfigList);
     }
     if (length != (uint16)(len(data) - 2)) {
-        return (default!, errMalformedECHConfig);
+        return (default!, errMalformedECHConfigList);
     }
     slice<echConfig> configs = default!;
     while (len(s) > 0) {
         if (len(s) < 4) {
             return (default!, errors.New(tlsMalformedECHConfigˢ));
         }
-        var configLen = (uint16)((uint16)((uint16)s[2] << (int)(8)) | (uint16)s[3]);
+        var configLen = (uint16)((uint16)((uint16)s[2] << 8) | (uint16)s[3]);
         var (skip, ec, err) = parseECHConfig(s);
         if (err != default!) {
             return (default!, err);
@@ -155,35 +152,12 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
     return (configs, default!);
 }
 
-internal static ж<echConfig> pickECHConfig(slice<echConfig> list) {
+internal static (ж<echConfig>, hpkeꓸPublicKey, hpke.KDF, hpke.AEAD) pickECHConfig(slice<echConfig> list) {
     foreach (var (_, vᴛ1) in list) {
         ref var ec = ref heap(new echConfig(), out var Ꮡec);
         ec = vᴛ1;
 
-        {
-            var (_, ok) = hpke.SupportedKEMs[ec.KemID, ꟷ]; if (!ok) {
-                continue;
-            }
-        }
-        bool validSCS = default!;
-        foreach (var (_, cs) in ec.SymmetricCipherSuite) {
-            {
-                var (_, ok) = hpke.SupportedAEADs[cs.AEADID, ꟷ]; if (!ok) {
-                    continue;
-                }
-            }
-            {
-                var (_, ok) = hpke.SupportedKDFs[cs.KDFID, ꟷ]; if (!ok) {
-                    continue;
-                }
-            }
-            validSCS = true;
-            break;
-        }
-        if (!validSCS) {
-            continue;
-        }
-        if (!validDNSName(((@string)ec.PublicName))) {
+        if (!validDNSName((@string)ec.PublicName)) {
             continue;
         }
         bool unsupportedExt = default!;
@@ -191,39 +165,39 @@ internal static ж<echConfig> pickECHConfig(slice<echConfig> list) {
             // If high order bit is set to 1 the extension is mandatory.
             // Since we don't support any extensions, if we see a mandatory
             // bit, we skip the config.
-            if ((uint16)(ext.Type & (uint16)((uint16)(1 << (int)(15)))) != 0) {
+            if ((uint16)(ext.Type & (uint16)((uint16)(1 << 15))) != 0) {
                 unsupportedExt = true;
             }
         }
         if (unsupportedExt) {
             continue;
         }
-        return Ꮡec;
-    }
-    return default!;
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tlsNoSupportedSymmetricˢ = "tls: no supported symmetric ciphersuites for ECH"u8;
-
-internal static (echCipher, error) pickECHCipherSuite(slice<echCipher> suites) {
-    foreach (var (_, s) in suites) {
-        // NOTE: all of the supported AEADs and KDFs are fine, rather than
-        // imposing some sort of preference here, we just pick the first valid
-        // suite.
-        {
-            var (_, ok) = hpke.SupportedAEADs[s.AEADID, ꟷ]; if (!ok) {
+        var (kem, err) = hpke.NewKEM(ec.KemID);
+        if (err != default!) {
+            continue;
+        }
+        (var pub, err) = kem.NewPublicKey(ec.PublicKey);
+        if (err != default!) {
+            // This is an error in the config, but killing the connection feels
+            // excessive.
+            continue;
+        }
+        foreach (var (_, cs) in ec.SymmetricCipherSuite) {
+            // All of the supported AEADs and KDFs are fine, rather than
+            // imposing some sort of preference here, we just pick the first
+            // valid suite.
+            var (kdf, errΔ1) = hpke.NewKDF(cs.KDFID);
+            if (errΔ1 != default!) {
                 continue;
             }
-        }
-        {
-            var (_, ok) = hpke.SupportedKDFs[s.KDFID, ꟷ]; if (!ok) {
+            (var aead, errΔ1) = hpke.NewAEAD(cs.AEADID);
+            if (errΔ1 != default!) {
                 continue;
             }
+            return (Ꮡec, pub, kdf, aead);
         }
-        return (s, default!);
     }
-    return (new echCipher(nil), errors.New(tlsNoSupportedSymmetricˢ));
+    return (default!, default!, default!, default!);
 }
 
 internal static (slice<byte>, error) encodeInnerClientHello(ж<clientHelloMsg> Ꮡinner, nint maxNameLength) {
@@ -276,8 +250,10 @@ internal static readonly @string tlsMalformedOuterClientˢ = "tls: malformed out
 internal static readonly @string tlsInvalidInnerClientˢ = "tls: invalid inner client hello"u8;
 
 internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHelloMsg hello) {
+    var rawExtensionsᴷ = new stackAppend<rawExtension>(moves: true);
+
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)hello.original);
+    s = (cryptobyte.String)hello.original;
     if (!s.Skip(4 + 2 + 32) || // header, version, random
         !skipUint8LengthPrefixed(Ꮡs) || // session ID
         !skipUint16LengthPrefixed(Ꮡs) || // cipher suites
@@ -296,8 +272,9 @@ internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHell
         if (!extensions.ReadUint16(Ꮡextension) || !extensions.ReadUint16LengthPrefixed(ᏑextData)) {
             return (default!, errors.New(tlsInvalidInnerClientˢ));
         }
-        rawExtensions = append(rawExtensions, new rawExtension(extension, extData));
+        rawExtensions = append(rawExtensionsᴷ, rawExtensions, new rawExtension(extension, extData));
     }
+    rawExtensions = move2heap(rawExtensionsᴷ, rawExtensions);
     return (rawExtensions, default!);
 }
 
@@ -317,7 +294,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     // to properly insert them into the inner hello. This _should_ result in raw
     // bytes which match the hello as it was generated by the client.
     ref var innerReader = ref heap<cryptobyte.String>(out var ᏑinnerReader);
-    innerReader = ((cryptobyte.String)encoded);
+    innerReader = (cryptobyte.String)encoded;
     ref var versionAndRandom = ref heap<slice<byte>>(out var ᏑversionAndRandom);
     ref var sessionID = ref heap<slice<byte>>(out var ᏑsessionID);
     ref var ΔcipherSuites = ref heap<slice<byte>>(out var ᏑcipherSuites);
@@ -357,6 +334,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
         });
         var rawOuterExtsʗ2 = rawOuterExtsʗ1;
         reconΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ5) => {
+            bool outerExtensionsSeen = default!;
             while (!Ꮡextensions.ValueSlot.Empty()) {
                 ref var extension = ref heap(new uint16(), out var Ꮡextension);
                 ref var extData = ref heap<cryptobyte.String>(out var ᏑextData);
@@ -365,18 +343,28 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
                     return;
                 }
                 if (extension == extensionECHOuterExtensions){
-                    if (!ᏑextData.ValueSlot.ReadUint8LengthPrefixed(ᏑextData)) {
+                    if (outerExtensionsSeen) {
+                        reconΔ5.SetError(errors.New(tlsInvalidOuterˢ));
+                        return;
+                    }
+                    outerExtensionsSeen = true;
+                    ref var outerExtensions = ref heap<cryptobyte.String>(out var ᏑouterExtensions);
+                    if (!ᏑextData.ValueSlot.ReadUint8LengthPrefixed(ᏑouterExtensions) || !ᏑextData.ValueSlot.Empty() || outerExtensions.Empty()) {
                         reconΔ5.SetError(errors.New(tlsInvalidInnerClientˢ));
                         return;
                     }
+                    // OuterExtensions reconstruction per RFC 9849, Appendix A.
+                    // i scans the outer extensions in order and never rewinds,
+                    // so a referenced type that is out of order or duplicated
+                    // cannot be found again and is rejected.
                     nint i = default!;
-                    while (!ᏑextData.ValueSlot.Empty()) {
+                    while (!outerExtensions.Empty()) {
                         ref var extType = ref heap(new uint16(), out var ᏑextType);
-                        if (!ᏑextData.ValueSlot.ReadUint16(ᏑextType)) {
+                        if (!outerExtensions.ReadUint16(ᏑextType)) {
                             reconΔ5.SetError(errors.New(tlsInvalidInnerClientˢ));
                             return;
                         }
-                        if (extType == extensionEncryptedClientHello) {
+                        if (extType == extensionEncryptedClientHello || extType == extensionECHOuterExtensions) {
                             reconΔ5.SetError(errors.New(tlsInvalidOuterˢ));
                             return;
                         }
@@ -394,6 +382,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
                         reconΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ6) => {
                             reconΔ6.AddBytes(rawOuterExtsʗ3[i].data);
                         });
+                        i++;
                     }
                 } else {
                     reconΔ5.AddUint16(extension);
@@ -425,7 +414,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
         // browsers like Chrome to ensure TLS implementations correctly ignore unknown values.
         // GREASE values follow a specific pattern: 0x?A0A, where ? can be any hex digit.
         // These values should be ignored when processing supported TLS versions.
-        if ((uint16)(v & 0x0F0F) == 0x0A0A && (uint16)(v & 0xff) == (uint16)((v >> (int)(8)))) {
+        if ((uint16)(v & 0x0F0F) == 0x0A0A && (uint16)(v & 0xff) == (uint16)((v >> 8))) {
             continue;
         }
 
@@ -446,7 +435,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     return (inner, default!);
 }
 
-internal static (slice<byte>, error) decryptECHPayload(ж<hpke.Receipient> Ꮡcontext, slice<byte> hello, slice<byte> payload) {
+internal static (slice<byte>, error) decryptECHPayload(ж<hpke.Recipient> Ꮡcontext, slice<byte> hello, slice<byte> payload) {
     ref var context = ref Ꮡcontext.DerefOrNull();
 
     var outerAAD = bytes.Replace(hello[4..], payload, new slice<byte>(len(payload)), 1);
@@ -571,13 +560,13 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
     var data = new slice<byte>(len(ext));
     copy(data, ext);
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
     ref var echInt = ref heap(new uint8(), out var ᏑechInt);
     if (!s.ReadUint8(ᏑechInt)) {
         err = errMalformedECHExt;
         return (echType, cs, configID, encap, payload, err);
     }
-    echType = ((echExtType)echInt);
+    echType = (echExtType)echInt;
     if (echType == innerECHExt) {
         if (!s.Empty()) {
             err = errMalformedECHExt;
@@ -615,18 +604,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
     return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default!);
 }
 
-internal static (slice<byte>, error) marshalEncryptedClientHelloConfigList(slice<EncryptedClientHelloKey> configs) {
-    var builder = cryptobyte.NewBuilder(default!);
-    var configsʗ1 = configs;
-    builder.AddUint16LengthPrefixed((ж<cryptobyte.Builder> builderΔ1) => {
-        foreach (var (_, c) in configsʗ1) {
-            builderΔ1.AddBytes(c.Config);
-        }
-    });
-    return builder.Bytes();
-}
-
-internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter) {
+internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var outer = ref Ꮡouter.DerefOrNull();
 
@@ -647,26 +625,41 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
         return (Ꮡouter, Ꮡ(new echServerContext(inner: true)), default!);
     }
 
-    if (len((~c.config).EncryptedClientHelloKeys) == 0) {
+    if (len(echKeys) == 0) {
         return (Ꮡouter, default!, default!);
     }
 
-    foreach (var (_, echKey) in (~c.config).EncryptedClientHelloKeys) {
+    foreach (var (_, echKey) in echKeys) {
         var (skip, config, errΔ1) = parseECHConfig(echKey.Config);
         if (errΔ1 != default! || skip) {
             Ꮡc.sendAlert(alertInternalError);
-            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKeys Config: %s"u8, errΔ1));
+            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKey Config: %s"u8, errΔ1));
         }
         if (skip) {
             continue;
         }
-        (var echPriv, errΔ1) = hpke.ParseHPKEPrivateKey(config.KemID, echKey.PrivateKey);
+        (var kem, errΔ1) = hpke.NewKEM(config.KemID);
         if (errΔ1 != default!) {
             Ꮡc.sendAlert(alertInternalError);
-            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKeys PrivateKey: %s"u8, errΔ1));
+            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKey Config KEM: %s"u8, errΔ1));
+        }
+        (var echPriv, errΔ1) = kem.NewPrivateKey(echKey.PrivateKey);
+        if (errΔ1 != default!) {
+            Ꮡc.sendAlert(alertInternalError);
+            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKey PrivateKey: %s"u8, errΔ1));
+        }
+        (var kdf, errΔ1) = hpke.NewKDF(echCiphersuite.KDFID);
+        if (errΔ1 != default!) {
+            Ꮡc.sendAlert(alertInternalError);
+            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKey Config KDF: %s"u8, errΔ1));
+        }
+        (var aead, errΔ1) = hpke.NewAEAD(echCiphersuite.AEADID);
+        if (errΔ1 != default!) {
+            Ꮡc.sendAlert(alertInternalError);
+            return (default!, default!, fmt.Errorf("tls: invalid EncryptedClientHelloKey Config AEAD: %s"u8, errΔ1));
         }
         var info = appendꓸꓸꓸ(slice<byte>("tls ech\x00"u8), echKey.Config);
-        (var hpkeContext, errΔ1) = hpke.SetupReceipient(hpke.DHKEM_X25519_HKDF_SHA256, echCiphersuite.KDFID, echCiphersuite.AEADID, echPriv, info, encap);
+        (var hpkeContext, errΔ1) = hpke.NewRecipient(encap, echPriv, kdf, aead, info);
         if (errΔ1 != default!) {
             // attempt next trial decryption
             continue;

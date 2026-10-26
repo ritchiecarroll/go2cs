@@ -37,6 +37,7 @@ using static go.net.http.httputil_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b436c6f736557726974652829206572726f727d", "copyFromBackend_type")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -63,11 +64,18 @@ using static go.net.http.httputil_package;
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
 [assembly: GoImplement<neverEnding, io_package.Reader>]
+[assembly: GoImplement<noopCloseReader, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -77,10 +85,10 @@ using static go.net.http.httputil_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoCCpICCpAAIEoCigKKAooCigKKAyIKClKqigpSClOzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKCgpTugoCCtgANFoKCgoCCtqiSgpSmAAosABICgoKClIKCuAAHEIKCpqaCgoKClIK4goKmgoKmlIKCgpSCgoK4goKUygAIEICigLaWsoKCgpSmgpSkgpSCgqaCgpSCgoKU", "119-121:1;130-144:2")]
+[assembly: go.GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoCCpICCpAAIEoCigKKAooCigKKAyIKClKqigpSClOzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgIK2AA0WgoKCgIK2qJKClKYACiwAEgKCgoKUgoK4AAcQgoKmpoKCgoKUgriCgqaCgqaUgoKClIKCgriCgpTKAAgQgKKAtpaygoKClKaClKSClIKCpoKClIKCgpQ=", "119-121:1;130-144:2")]
 [assembly: go.GoPositionMap("net/http/httputil/httputil.go", "httputil.cs", "AA4o4gACHAALAso=")]
 [assembly: go.GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABImpqa6ABEw8oKUrgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAIDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAWNPKClAAHGtKCgq4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1")]
-[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ACxsAAwCggAILAATAoKCgoKUlJSCgpQAbOgBgoKClKSUprKCuIKUgpSUpJQAAi4AFAKClKaigoKCgoKUuIKCggAJFAALGIKCpqKClKrSgpSAgoKCpAALBtKCgqaCAAsWgIKCgpKCsrQACQyCgpTupIKmgoKmgoKCppSCgoKU7oLKgoKmuIKCgqaUuIKUgLiCgoKUgtqApraYtIKCppSCgqaC1pSCgoKCgoK4goKUgqaUgqa4goKCgpSmlIKCyIKClJSUuKaCgqaigoLGAAQS8pSUpriopIKigIL+guzCuICCyIKmpsKUgsq2gpSmgoKClILaooKUgoKCgpSCgoKUgpSCpoKClMqigpQADBzigoKCgoKUgpSClJSC1tKCgoKUgqKk0oKCgoK0pIKClKbSgoKCgpSCgqaCgoKmgoKCgqaCxgAICJSUgoKUpJSCgoCCgqSAgoKkgpKSkqIACBCCgqaCgqaCgoKUgpSkgpS0tqaClKSklA==", "263-265:1;355-361:1;462-477:2;763-771:1;816-819:1", "", "690=NewResponseController/1/1/2")]
+[assembly: go.GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADF0AA4CggAILAATAoKCgoKUlJSCgpQAqwHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQACxiCgqaigpSq0oKUgIKCgqQADAbigoKmggALFoCCgoKSgrK0AAkMgoKUAAsY7qSCpoKCpoKCgqaUgoKClO6CyoKCpriCgoKmlLiClIC4goKClILayoKClIKUpoCmtpi0goKmlIKCpoLWlIKCgoKCgriCgpSCppSCpriCgoKClKaUgoLIgoKUlJS4poKCpqKCgsYABBLylJSmuKikgpKAgv6C7MK4gILIgqamwpSCyraClKaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCgpSCoqTSgoKCgrSkgoKUptKCgoKClIKCpoKCgqaCgoKCpoLGAAgIlJSCgpSklIKCgIKCpICCgqSCkpLIgoK0pAALEIKAgoLIgIKCtqaCgIKCyICCgramyoKCgpSUlICUpIKUpIKUtLamgpSkpJQABxCCgtaigpQ=", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "792=NewResponseController/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -95,11 +103,13 @@ public static partial class httputil_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface copyFromBackend_type {}
     internal partial struct delegateReader {}
     internal partial struct dumpConn {}
     internal partial struct failureToReadBody {}
     internal partial struct maxLatencyWriter {}
     internal partial struct neverEnding {}
+    internal partial struct noopCloseReader {}
     internal partial struct switchProtocolCopier {}
     public partial interface BufferPool {}
     public partial struct ClientConn {}
@@ -120,6 +130,7 @@ public static partial class httputil_package
     [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(go.@internal.godebug_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸmime() => builtin.initPackage(typeof(mime_package));
@@ -132,6 +143,7 @@ public static partial class httputil_package
     [GoInit] internal static void initᴛᴛimportꓸnetꓸurl() => builtin.initPackage(typeof(go.net.url_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸhttpꓸhttpguts() => builtin.initPackage(typeof(vendor.golang.org.x.net.http.httpguts_package));
     // </ImportInitializers>

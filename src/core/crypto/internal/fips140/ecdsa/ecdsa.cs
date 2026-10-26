@@ -9,6 +9,7 @@ using bigmod = go.crypto.@internal.fips140.bigmod_package;
 using drbg = go.crypto.@internal.fips140.drbg_package;
 using Δnistec = go.crypto.@internal.fips140.nistec_package;
 using errors = errors_package;
+using hash = hash_package;
 using io = io_package;
 using sync = sync_package;
 using go.crypto.@internal;
@@ -96,12 +97,12 @@ internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224Point�
     return c;
 }); }
 
-internal static slice<byte> p224Order = new byte[]{
+[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = new byte[]{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x16, 0xa2,
     0xe0, 0xb8, 0xf0, 0x3e, 0x13, 0xdd, 0x29, 0x45,
     0x5c, 0x5c, 0x2a, 0x3d
-}.slice();
+}.slice(); }
 
 public static ж<Curve<P256PointжPoint>> P256() {
     return _P256();
@@ -118,11 +119,11 @@ internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256Point�
     return c;
 }); }
 
-internal static slice<byte> p256Order = new byte[]{
+[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = new byte[]{
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
-    0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51}.slice();
+    0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51}.slice(); }
 
 public static ж<Curve<P384PointжPoint>> P384() {
     return _P384();
@@ -138,13 +139,13 @@ internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384Point�
     return c;
 }); }
 
-internal static slice<byte> p384Order = new byte[]{
+[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = new byte[]{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
     0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a,
-    0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73}.slice();
+    0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73}.slice(); }
 
 public static ж<Curve<P521PointжPoint>> P521() {
     return _P521();
@@ -160,7 +161,7 @@ internal static void initᴛ_P521() { _P521 = sync.OnceValue(ж<Curve<P521Point�
     return c;
 }); }
 
-internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
+[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -168,8 +169,15 @@ internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
     0x51, 0x86, 0x87, 0x83, 0xbf, 0x2f, 0x96, 0x6b,
     0x7f, 0xcc, 0x01, 0x48, 0xf7, 0x09, 0xa5, 0xd0,
     0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae,
-    0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09}.slice();
+    0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09}.slice(); }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string ecdsaInvalidPrivateKeyˢ = "ecdsa: invalid private key length"u8;
+internal static readonly @string ecdsaPrivateKeyIsZeroˢ = "ecdsa: private key is zero"u8;
+
+// NewPrivateKey creates a new ECDSA private key from the given D and Q byte
+// slices. D must be the fixed-length big-endian encoding of the private scalar,
+// and Q must be the compressed or uncompressed encoding of the public point.
 public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<byte> D, slice<byte> Q)
     where P : Point<P>
 {
@@ -180,14 +188,25 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (err != default!) {
         return (default!, err);
     }
+    if (len(D) != c.N.Size()) {
+        return (default!, errors.New(ecdsaInvalidPrivateKeyˢ));
+    }
     (var d, err) = bigmod.NewNat().SetBytes(D, c.N);
     if (err != default!) {
         return (default!, err);
+    }
+    if (d.IsZero() == 1) {
+        return (default!, errors.New(ecdsaPrivateKeyIsZeroˢ));
     }
     var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: d.Bytes(c.N)));
     return (priv, default!);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string ecdsaInvalidPublicKeyˢ = "ecdsa: invalid public key encoding"u8;
+
+// NewPublicKey creates a new ECDSA public key from the given Q byte slice.
+// Q must be the compressed or uncompressed encoding of the public point.
 public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> Q)
     where P : Point<P>
 {
@@ -196,6 +215,9 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     // SetBytes checks that Q is a valid point on the curve, and that its
     // coordinates are reduced modulo p, fulfilling the requirements of SP
     // 800-89, Section 5.3.2.
+    if (len(Q) < 1 || Q[0] == 0) {
+        return (default!, errors.New(ecdsaInvalidPublicKeyˢ));
+    }
     var (_, err) = c.newPoint().SetBytes(Q);
     if (err != default!) {
         return (default!, err);
@@ -299,9 +321,9 @@ internal static readonly @string ecdsaPrivateKeyDoesNotˢ = "ecdsa: private key 
 // the hash function H) using the private key, priv. If the hash is longer than
 // the bit-length of the private key's curve order, the hash will be truncated
 // to that length.
-public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> hash)
+public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> hashΔ1)
     where P : Point<P>
-    where H : fips140.Hash
+    where H : hash.Hash
 {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
@@ -330,9 +352,9 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     // per SP 800-90Ar1, Section 8.6.7, and the rest is a personalization
     // string, which per SP 800-90Ar1, Section 8.7.1 may contain secret
     // information.
-    var drbgΔ1 = newDRBG(h, Z, default!, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hash)}.slice()));
+    var drbgΔ1 = newDRBG(h, Z, default!, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1)}.slice()));
 
-    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hash);
+    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hashΔ1);
 }
 
 // SignDeterministic signs a hash (which shall be the result of hashing a
@@ -340,9 +362,9 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
 // hash is longer than the bit-length of the private key's curve order, the hash
 // will be truncated to that length. This applies Deterministic ECDSA as
 // specified in FIPS 186-5 and RFC 6979.
-public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, slice<byte> hash)
+public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, slice<byte> hashΔ1)
     where P : Point<P>
-    where H : fips140.Hash
+    where H : hash.Hash
 {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
@@ -352,8 +374,8 @@ public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, 
     }
     fips140.RecordApproved();
     fipsSelfTestDeterministic();
-    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hash), default!); // RFC 6979, Section 3.3
-    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hash);
+    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1), default!); // RFC 6979, Section 3.3
+    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hashΔ1);
 }
 
 // bits2octets as specified in FIPS 186-5, Appendix B.2.4 or RFC 6979,
@@ -374,6 +396,7 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.1
+
     var (k, R, err) = randomPoint(ref c, (slice<byte> b) => {
         Ꮡdrbg.Value.Generate(b);
         return default!;
@@ -482,7 +505,7 @@ internal static slice<byte> rightShift(slice<byte> b, nint shift) {
     for (nint i = len(b) - 1; i >= 0; i--) {
         b[i].RshAssign((int64)(shift));
         if (i > 0) {
-            b[i] |= (byte)(b[i - 1].Lsh((int64)((8 - shift))));
+            b[i] |= (byte)(b[i - 1].Lsh((int64)(8 - shift)));
         }
     }
     return b;
@@ -521,6 +544,7 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.2
+
     var (Q, err) = c.newPoint().SetBytes(pub.q);
     if (err != default!) {
         return err;

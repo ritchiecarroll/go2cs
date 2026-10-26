@@ -41,13 +41,13 @@ partial struct encBuffer {
     internal array<byte> scratch = new(64);
 }
 
-internal static ж<sync.Pool> ᏑencBufferPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛencBufferPool { internal static ж<sync.Pool> ᏑencBufferPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => {
         var e = @new<encBuffer>();
         e.Value.data = (~e).scratch[0..0];
         return e.OrTypedNil();
     }
-));
+)); }
 internal static ref sync.Pool encBufferPool => ref ᏑencBufferPool.Value;
 
 internal static void writeByte(this ref encBuffer e, byte c) {
@@ -119,7 +119,7 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
     }
 
     binary.BigEndian.PutUint64(state.buf[1..], x);
-    nint bc = (bits.LeadingZeros64(x) >> (int)(3)); // 8 - bytelen(x)
+    nint bc = bits.LeadingZeros64(x) >> 3; // 8 - bytelen(x)
     state.buf[bc] = (uint8)(bc - (nint)uint64Size); // and then we subtract 8 to get -bytelen(x)
 
     state.b.Write(state.buf.slice(bc, uint64Size + 1));
@@ -131,9 +131,9 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
 internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
-        x = (uint64)((uint64)((~i << (int)(1))) | 1);
+        x = (uint64)(~i << 1) | 1;
     } else {
-        x = (uint64)((i << (int)(1)));
+        x = (uint64)(i << 1);
     }
     state.encodeUint(x);
 }
@@ -490,18 +490,22 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     ref var ut = ref Ꮡut.DerefOrNull();
 
     // TODO: should we catch panics from the called method?
+
     slice<byte> data = default!;
     error err = default!;
     // We know it's one of these.
     var exprᴛ1 = ut.externalEnc;
     if (exprᴛ1 == xGob) {
-        (data, err) = v.Interface()._<GobEncoder>().GobEncode();
+        var (gobEncoder, _) = reflect.TypeAssert<GobEncoder>(v);
+        (data, err) = gobEncoder.GobEncode();
     }
     else if (exprᴛ1 == xBinary) {
-        (data, err) = v.Interface()._<encoding.BinaryMarshaler>().MarshalBinary();
+        var (binaryMarshaler, _) = reflect.TypeAssert<encoding.BinaryMarshaler>(v);
+        (data, err) = binaryMarshaler.MarshalBinary();
     }
     else if (exprᴛ1 == xText) {
-        (data, err) = v.Interface()._<encoding.TextMarshaler>().MarshalText();
+        var (textMarshaler, _) = reflect.TypeAssert<encoding.TextMarshaler>(v);
+        (data, err) = textMarshaler.MarshalText();
     }
     if (err != default!) {
         error_(err);
@@ -513,7 +517,7 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     enc.freeEncoderState(state);
 }
 
-internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>{
+[GoLazy] partial class lazyᴛencOpTable { internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>{
     [1] = encBool,
     [2] = encInt,
     [3] = encInt,
@@ -531,7 +535,7 @@ internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> e
     [15] = encComplex,
     [16] = encComplex,
     [24] = encString
-}.array(25);
+}.array(25); }
 
 // encOpFor returns (a pointer to) the encoding op for the base type under rt and
 // the indirection count to reach it.
@@ -743,7 +747,7 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect
     try {
         ref var ut = ref Ꮡut.DerefOrNull();
 
-        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡenc.of(Encoder.Ꮡerr), ref ᒐ);
+        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡenc.of(Encoder.Ꮡerr), ref ᒐ, recovers: true);
         var engine = getEncEngine(ref (Ꮡut).DerefOrNull(), default!);
         nint indir = ut.indir;
         if (ut.externalEnc != 0) {
@@ -752,7 +756,7 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect
         for (nint i = 0; i < indir; i++) {
             value = reflect.Indirect(value);
         }
-        if (ut.externalEnc == 0 && value.Type().Kind() == reflect.Struct){
+        if (ut.externalEnc == 0 && value.Kind() == reflect.Struct){
             Ꮡenc.encodeStruct(Ꮡb, engine, value);
         } else {
             Ꮡenc.encodeSingle(Ꮡb, engine, value);

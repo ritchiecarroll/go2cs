@@ -4,12 +4,11 @@
 namespace go.@internal;
 
 using fmt = fmt_package;
+using slices = slices_package;
 using strings = strings_package;
-using @event = go.@internal.trace.event_package;
-using go122 = go.@internal.trace.@event.go122_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
-using go.@internal.trace.@event;
 using io = io_package;
 using ꓸꓸꓸuint64 = Span<uint64>;
 
@@ -23,6 +22,7 @@ partial class trace_package {
 // add completed events to the ordering. Next is used to pick
 // off events in the ordering.
 partial struct ordering {
+    internal version.Version traceVer;
     internal map<GoID, ж<gState>> gStates;
     internal map<ProcID, ж<pState>> pStates; // TODO: The keys are dense, so this can be a slice.
     internal map<ThreadID, ж<mState>> mStates;
@@ -93,108 +93,112 @@ internal static (bool, error) Advance(this ж<ordering> Ꮡo, ж<baseEvent> Ꮡe
     return (ok, err);
 }
 
+internal static @string evName(this ref ordering o, tracev2.EventType typ) {
+    return o.traceVer.EventName(typ);
+}
+
 // type orderingHandleFunc is a methodless func type — rendered inline as its base delegate
 
 internal static array<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>> orderingDispatch;
 internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>>{
     // Procs.
-    [go122.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
-    [go122.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStart)),
-    [go122.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStop)),
-    [go122.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcSteal)),
-    [go122.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStatus)),
+    [tracev2.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
+    [tracev2.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStart)),
+    [tracev2.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStop)),
+    [tracev2.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcSteal)),
+    [tracev2.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStatus)),
 
     // Goroutines.
-    [go122.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
-    [go122.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreateSyscall)),
-    [go122.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStart)),
-    [go122.EvGoDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [go122.EvGoDestroySyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoDestroySyscall)),
-    [go122.EvGoStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [go122.EvGoBlock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [go122.EvGoUnblock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoUnblock)),
-    [go122.EvGoSyscallBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallBegin)),
-    [go122.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEnd)),
-    [go122.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEndBlocked)),
-    [go122.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+    [tracev2.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
+    [tracev2.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreateSyscall)),
+    [tracev2.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStart)),
+    [tracev2.EvGoDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
+    [tracev2.EvGoDestroySyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoDestroySyscall)),
+    [tracev2.EvGoStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
+    [tracev2.EvGoBlock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
+    [tracev2.EvGoUnblock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoUnblock)),
+    [tracev2.EvGoSyscallBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallBegin)),
+    [tracev2.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEnd)),
+    [tracev2.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEndBlocked)),
+    [tracev2.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
 
     // STW.
-    [go122.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
-    [go122.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
+    [tracev2.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
+    [tracev2.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
 
     // GC events.
-    [go122.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCActive)),
-    [go122.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCBegin)),
-    [go122.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCEnd)),
-    [go122.EvGCSweepActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepActive)),
-    [go122.EvGCSweepBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepBegin)),
-    [go122.EvGCSweepEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepEnd)),
-    [go122.EvGCMarkAssistActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeActive)),
-    [go122.EvGCMarkAssistBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
-    [go122.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
-    [go122.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
-    [go122.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
+    [tracev2.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCActive)),
+    [tracev2.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCBegin)),
+    [tracev2.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCEnd)),
+    [tracev2.EvGCSweepActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepActive)),
+    [tracev2.EvGCSweepBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepBegin)),
+    [tracev2.EvGCSweepEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepEnd)),
+    [tracev2.EvGCMarkAssistActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeActive)),
+    [tracev2.EvGCMarkAssistBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
+    [tracev2.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
+    [tracev2.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
+    [tracev2.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
 
     // Annotations.
-    [go122.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
-    [go122.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskBegin)),
-    [go122.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskEnd)),
-    [go122.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionBegin)),
-    [go122.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionEnd)),
-    [go122.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
+    [tracev2.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
+    [tracev2.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskBegin)),
+    [tracev2.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskEnd)),
+    [tracev2.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionBegin)),
+    [tracev2.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionEnd)),
+    [tracev2.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
 
     // Coroutines. Added in Go 1.23.
-    [go122.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
-    [go122.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
-    [go122.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
+    [tracev2.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
+    [tracev2.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
+    [tracev2.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
 
     // GoStatus event with a stack. Added in Go 1.23.
-    [go122.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+    [tracev2.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
 
     // Experimental events.
 
     // Experimental heap span events. Added in Go 1.23.
-    [go122.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
 
     // Experimental heap object events. Added in Go 1.23.
-    [go122.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
 
     // Experimental goroutine stack events. Added in Go 1.23.
-    [go122.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [go122.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree))
+    [tracev2.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree))
 }.array(256); }
 
 internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var pid = ref heap<ProcID>(out var Ꮡpid);
-    pid = ((ProcID)(int64)ev.args[0]);
-    ref var status = ref heap<go122.ProcStatus>(out var Ꮡstatus);
-    status = ((go122.ProcStatus)(uint8)ev.args[1]);
-    if ((nint)(uint8)status >= len(go122ProcStatus2ProcState)) {
+    pid = (ProcID)(int64)ev.args[0];
+    ref var status = ref heap<tracev2.ProcStatus>(out var Ꮡstatus);
+    status = (tracev2.ProcStatus)(uint8)ev.args[1];
+    if ((nint)(uint8)status >= len(tracev2ProcStatus2ProcState)) {
         return (curCtx, false, fmt.Errorf("invalid status for proc %d: %d"u8, pid, status));
     }
-    var oldState = go122ProcStatus2ProcState[status];
+    var oldState = tracev2ProcStatus2ProcState[status];
     {
         var (s, ok) = o.pStates[pid, ꟷ]; if (ok){
-            if (status == go122.ProcSyscallAbandoned && (~s).status == go122.ProcSyscall){
+            if (status == tracev2.ProcSyscallAbandoned && (~s).status == tracev2.ProcSyscall){
                 // ProcSyscallAbandoned is a special case of ProcSyscall. It indicates a
                 // potential loss of information, but if we're already in ProcSyscall,
                 // we haven't lost the relevant information. Promote the status and advance.
                 oldState = ProcRunning;
-                ev.args[1] = (uint64)(uint8)go122.ProcSyscall;
+                ev.args[1] = (uint64)(uint8)tracev2.ProcSyscall;
             } else 
-            if (status == go122.ProcSyscallAbandoned && (~s).status == go122.ProcSyscallAbandoned){
+            if (status == tracev2.ProcSyscallAbandoned && (~s).status == tracev2.ProcSyscallAbandoned){
                 // If we're passing through ProcSyscallAbandoned, then there's no promotion
                 // to do. We've lost the M that this P is associated with. However it got there,
                 // it's going to appear as idle in the API, so pass through as idle.
                 oldState = ProcIdle;
-                ev.args[1] = (uint64)(uint8)go122.ProcSyscallAbandoned;
+                ev.args[1] = (uint64)(uint8)tracev2.ProcSyscallAbandoned;
             } else 
             if ((~s).status != status) {
                 return (curCtx, false, fmt.Errorf("inconsistent status for proc %d: old %v vs. new %v"u8, pid, (~s).status, status));
@@ -213,7 +217,7 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
 
     // Bind the proc to the new context, if it's running.
     var newCtx = curCtx;
-    if (status == go122.ProcRunning || status == go122.ProcSyscall) {
+    if (status == tracev2.ProcRunning || status == tracev2.ProcSyscall) {
         newCtx.P = pid;
     }
     // If we're advancing through ProcSyscallAbandoned *but* oldState is running then we've
@@ -222,7 +226,7 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
     // thread it was bound to. Since this status is Running -> Running and Running is binding,
     // we need to make sure we emit it in the right context: the context to which it is bound.
     // Find it, and set our current context to it.
-    if (status == go122.ProcSyscallAbandoned && oldState == ProcRunning) {
+    if (status == tracev2.ProcSyscallAbandoned && oldState == ProcRunning) {
         // N.B. This is slow but it should be fairly rare.
         var found = false;
         foreach (var (mid, ms) in o.mStates) {
@@ -244,14 +248,14 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
 internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
 
     // Try to advance. We might fail here due to sequencing, because the P hasn't
     // had a status emitted, or because we already have a P and we're in a syscall,
     // and we haven't observed that it was stolen from us yet.
     var (state, ok) = o.pStates[pid, ꟷ];
-    if (!ok || (~state).status != go122.ProcIdle || !seq.succeeds((~state).seq) || curCtx.P != NoProc) {
+    if (!ok || (~state).status != tracev2.ProcIdle || !seq.succeeds((~state).seq) || curCtx.P != NoProc) {
         // We can't make an inference as to whether this is bad. We could just be seeing
         // a ProcStart on a different M before the proc's state was emitted, or before we
         // got to the right point in the trace.
@@ -262,13 +266,13 @@ internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж
     // We can advance this P. Check some invariants.
     //
     // We might have a goroutine if a goroutine is exiting a syscall.
-    var reqs = new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustNotHave, Goroutine: @event.MayHave);
+    var reqs = new schedReqs(M: mustHave, P: mustNotHave, G: mayHave);
     {
         var err = validateCtx(curCtx, reqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    state.Value.status = go122.ProcRunning;
+    state.Value.status = tracev2.ProcRunning;
     state.Value.seq = seq;
     var newCtx = curCtx;
     newCtx.P = pid;
@@ -290,18 +294,18 @@ internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<
     // ProcStop doesn't need a sequence number.
     var (state, ok) = o.pStates[curCtx.P, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for proc (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.P));
+        return (curCtx, false, fmt.Errorf("event %s for proc (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.P));
     }
-    if ((~state).status != go122.ProcRunning && (~state).status != go122.ProcSyscall) {
-        return (curCtx, false, fmt.Errorf("%s event for proc that's not %s or %s"u8, go122.EventString(ev.typ), go122.ProcRunning, go122.ProcSyscall));
+    if ((~state).status != tracev2.ProcRunning && (~state).status != tracev2.ProcSyscall) {
+        return (curCtx, false, fmt.Errorf("%s event for proc that's not %s or %s"u8, o.evName(ev.typ), tracev2.ProcRunning, tracev2.ProcSyscall));
     }
-    var reqs = new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MayHave);
+    var reqs = new schedReqs(M: mustHave, P: mustHave, G: mayHave);
     {
         var err = validateCtx(curCtx, reqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    state.Value.status = go122.ProcIdle;
+    state.Value.status = tracev2.ProcIdle;
     var newCtx = curCtx;
     newCtx.P = NoProc;
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
@@ -311,17 +315,17 @@ internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<
 internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.pStates[pid, ꟷ];
-    if (!ok || ((~state).status != go122.ProcSyscall && (~state).status != go122.ProcSyscallAbandoned) || !seq.succeeds((~state).seq)) {
+    if (!ok || ((~state).status != tracev2.ProcSyscall && (~state).status != tracev2.ProcSyscallAbandoned) || !seq.succeeds((~state).seq)) {
         // We can't make an inference as to whether this is bad. We could just be seeing
         // a ProcStart on a different M before the proc's state was emitted, or before we
         // got to the right point in the trace.
         return (curCtx, false, default!);
     }
     // We can advance this P. Check some invariants.
-    var reqs = new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MayHave, Goroutine: @event.MayHave);
+    var reqs = new schedReqs(M: mustHave, P: mayHave, G: mayHave);
     {
         var err = validateCtx(curCtx, reqs); if (err != default!) {
             return (curCtx, false, err);
@@ -337,18 +341,18 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     ev.extra(version.Go122)[0] = (uint64)(uint8)oldStatus;
 
     // Update the P's status and sequence number.
-    state.Value.status = go122.ProcIdle;
+    state.Value.status = tracev2.ProcIdle;
     state.Value.seq = seq;
 
     // If we've lost information then don't try to do anything with the M.
     // It may have moved on and we can't be sure.
-    if (oldStatus == go122.ProcSyscallAbandoned) {
+    if (oldStatus == tracev2.ProcSyscallAbandoned) {
         o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
         return (curCtx, true, default!);
     }
 
     // Validate that the M we're stealing from is what we expect.
-    var mid = ((ThreadID)(int64)ev.args[2]); // The M we're stealing from.
+    var mid = (ThreadID)(int64)ev.args[2]; // The M we're stealing from.
 
     var newCtx = curCtx;
     if (mid == curCtx.M) {
@@ -387,15 +391,15 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var gid = ref heap<GoID>(out var Ꮡgid);
-    gid = ((GoID)(int64)ev.args[0]);
-    var mid = ((ThreadID)(int64)ev.args[1]);
-    ref var status = ref heap<go122.GoStatus>(out var Ꮡstatus);
-    status = ((go122.GoStatus)(uint8)ev.args[2]);
+    gid = (GoID)(int64)ev.args[0];
+    var mid = (ThreadID)(int64)ev.args[1];
+    ref var status = ref heap<tracev2.GoStatus>(out var Ꮡstatus);
+    status = (tracev2.GoStatus)(uint8)ev.args[2];
 
-    if ((nint)(uint8)status >= len(go122GoStatus2GoState)) {
+    if ((nint)(uint8)status >= len(tracev2GoStatus2GoState)) {
         return (curCtx, false, fmt.Errorf("invalid status for goroutine %d: %d"u8, gid, status));
     }
-    var oldState = go122GoStatus2GoState[status];
+    var oldState = tracev2GoStatus2GoState[status];
     {
         var (s, ok) = o.gStates[gid, ꟷ]; if (ok){
             if ((~s).status != status) {
@@ -411,15 +415,15 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
             return (curCtx, false, fmt.Errorf("found goroutine status for new goroutine after the first generation: id=%v status=%v"u8, gid, status));
         }
     }
-    ev.args[2] = (uint64)(((uint64)(uint8)oldState << (int)(32)) | (uint64)(uint8)status); // Smuggle in the old state for StateTransition.
+    ev.args[2] = (uint64)(uint8)oldState << 32 | (uint64)(uint8)status; // Smuggle in the old state for StateTransition.
 
     var newCtx = curCtx;
     var exprᴛ1 = status;
-    if (exprᴛ1 == go122.GoRunning) {
+    if (exprᴛ1 == tracev2.GoRunning) {
         // Bind the goroutine to the new context, since it's running.
         newCtx.G = gid;
     }
-    else if (exprᴛ1 == go122.GoSyscall) {
+    else if (exprᴛ1 == tracev2.GoSyscall) {
         do {
             if (mid == NoThread) {
                 return (curCtx, false, fmt.Errorf("found goroutine %d in syscall without a thread"u8, gid));
@@ -476,7 +480,7 @@ internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<
 
     // Goroutines must be created on a running P, but may or may not be created
     // by a running goroutine.
-    var reqs = new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MayHave);
+    var reqs = new schedReqs(M: mustHave, P: mustHave, G: mayHave);
     {
         var err = validateCtx(curCtx, reqs); if (err != default!) {
             return (curCtx, false, err);
@@ -484,22 +488,22 @@ internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<
     }
     // If we have a goroutine, it must be running.
     {
-        var (state, ok) = o.gStates[curCtx.G, ꟷ]; if (ok && (~state).status != go122.GoRunning) {
-            return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+        var (state, ok) = o.gStates[curCtx.G, ꟷ]; if (ok && (~state).status != tracev2.GoRunning) {
+            return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
         }
     }
     // This goroutine created another. Add a state for it.
     ref var newgid = ref heap<GoID>(out var Ꮡnewgid);
-    newgid = ((GoID)(int64)ev.args[0]);
+    newgid = (GoID)(int64)ev.args[0];
     {
         var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
             return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) that already exists"u8, newgid));
         }
     }
-    ref var status = ref heap<go122.GoStatus>(out var Ꮡstatus);
-    status = go122.GoRunnable;
-    if (ev.typ == go122.EvGoCreateBlocked) {
-        status = go122.GoWaiting;
+    ref var status = ref heap<tracev2.GoStatus>(out var Ꮡstatus);
+    status = tracev2.GoRunnable;
+    if (ev.typ == tracev2.EvGoCreateBlocked) {
+        status = tracev2.GoWaiting;
     }
     o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: status, seq: makeSeq(gen, 0)));
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
@@ -513,34 +517,34 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
     // goroutine on some thread. They must *always* be advance-able,
     // since running goroutines are bound to their M.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~state).status != go122.GoRunning) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+    if ((~state).status != tracev2.GoRunning) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
     // Handle each case slightly differently; we just group them together
     // because they have shared preconditions.
     var newCtx = curCtx;
     var exprᴛ1 = ev.typ;
-    if (exprᴛ1 == go122.EvGoDestroy) {
+    if (exprᴛ1 == tracev2.EvGoDestroy) {
         // This goroutine is exiting itself.
         delete(o.gStates, curCtx.G);
         newCtx.G = NoGoroutine;
     }
-    else if (exprᴛ1 == go122.EvGoStop) {
+    else if (exprᴛ1 == tracev2.EvGoStop) {
         // Goroutine stopped (yielded). It's runnable but not running on this M.
-        state.Value.status = go122.GoRunnable;
+        state.Value.status = tracev2.GoRunnable;
         newCtx.G = NoGoroutine;
     }
-    else if (exprᴛ1 == go122.EvGoBlock) {
+    else if (exprᴛ1 == tracev2.EvGoBlock) {
         // Goroutine blocked. It's waiting now and not running on this M.
-        state.Value.status = go122.GoWaiting;
+        state.Value.status = tracev2.GoWaiting;
         newCtx.G = NoGoroutine;
     }
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
@@ -550,23 +554,23 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
 internal static (schedCtx, bool, error) advanceGoStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.gStates[gid, ꟷ];
-    if (!ok || (~state).status != go122.GoRunnable || !seq.succeeds((~state).seq)) {
+    if (!ok || (~state).status != tracev2.GoRunnable || !seq.succeeds((~state).seq)) {
         // We can't make an inference as to whether this is bad. We could just be seeing
         // a GoStart on a different M before the goroutine was created, before it had its
         // state emitted, or before we got to the right point in the trace yet.
         return (curCtx, false, default!);
     }
     // We can advance this goroutine. Check some invariants.
-    var reqs = new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MustNotHave);
+    var reqs = new schedReqs(M: mustHave, P: mustHave, G: mustNotHave);
     {
         var err = validateCtx(curCtx, reqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    state.Value.status = go122.GoRunning;
+    state.Value.status = tracev2.GoRunning;
     state.Value.seq = seq;
     var newCtx = curCtx;
     newCtx.G = gid;
@@ -578,16 +582,16 @@ internal static (schedCtx, bool, error) advanceGoUnblock(this ref ordering o, ж
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // N.B. These both reference the goroutine to unblock, not the current goroutine.
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.gStates[gid, ꟷ];
-    if (!ok || (~state).status != go122.GoWaiting || !seq.succeeds((~state).seq)) {
+    if (!ok || (~state).status != tracev2.GoWaiting || !seq.succeeds((~state).seq)) {
         // We can't make an inference as to whether this is bad. We could just be seeing
         // a GoUnblock on a different M before the goroutine was created and blocked itself,
         // before it had its state emitted, or before we got to the right point in the trace yet.
         return (curCtx, false, default!);
     }
-    state.Value.status = go122.GoRunnable;
+    state.Value.status = tracev2.GoRunnable;
     state.Value.seq = seq;
     // N.B. No context to validate. Basically anything can unblock
     // a goroutine (e.g. sysmon).
@@ -608,21 +612,21 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
     //
     // The current goroutine on the thread must be actively running.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     var (curGState, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~curGState).status != go122.GoRunning) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+    if ((~curGState).status != tracev2.GoRunning) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
-    var nextg = ((GoID)(int64)ev.args[0]);
+    var nextg = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]); // seq is for nextg, not curCtx.G.
     (var nextGState, ok) = o.gStates[nextg, ꟷ];
-    if (!ok || (~nextGState).status != go122.GoWaiting || !seq.succeeds((~nextGState).seq)) {
+    if (!ok || (~nextGState).status != tracev2.GoWaiting || !seq.succeeds((~nextGState).seq)) {
         // We can't make an inference as to whether this is bad. We could just be seeing
         // a GoSwitch on a different M before the goroutine was created, before it had its
         // state emitted, or before we got to the right point in the trace yet.
@@ -634,23 +638,23 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
     // (GoSwitch and GoSwitchDestroy will be interpreted as GoUnblock events
     // for nextg).
     var exprᴛ1 = ev.typ;
-    if (exprᴛ1 == go122.EvGoSwitch) {
+    if (exprᴛ1 == tracev2.EvGoSwitch) {
         // Goroutine blocked. It's waiting now and not running on this M.
-        curGState.Value.status = go122.GoWaiting;
+        curGState.Value.status = tracev2.GoWaiting;
 
         // Emit a GoBlock event.
         // TODO(mknyszek): Emit a reason.
-        o.queue.push(makeEvent(Ꮡevt, curCtx, go122.EvGoBlock, ev.time, 0, /* no reason */ 0 /* no stack */));
+        o.queue.push(makeEvent(Ꮡevt, curCtx, tracev2.EvGoBlock, ev.time, 0, /* no reason */ 0 /* no stack */));
     }
-    else if (exprᴛ1 == go122.EvGoSwitchDestroy) {
+    else if (exprᴛ1 == tracev2.EvGoSwitchDestroy) {
         // This goroutine is exiting itself.
         delete(o.gStates, curCtx.G);
 
         // Emit a GoDestroy event.
-        o.queue.push(makeEvent(Ꮡevt, curCtx, go122.EvGoDestroy, ev.time));
+        o.queue.push(makeEvent(Ꮡevt, curCtx, tracev2.EvGoDestroy, ev.time));
     }
     // Update the state of the next goroutine.
-    nextGState.Value.status = go122.GoRunning;
+    nextGState.Value.status = tracev2.GoRunning;
     nextGState.Value.seq = seq;
     var newCtx = curCtx;
     newCtx.G = nextg;
@@ -658,7 +662,7 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
     // Queue an event for the next goroutine starting to run.
     var startCtx = curCtx;
     startCtx.G = NoGoroutine;
-    o.queue.push(makeEvent(Ꮡevt, startCtx, go122.EvGoStart, ev.time, (uint64)(int64)nextg, ev.args[1]));
+    o.queue.push(makeEvent(Ꮡevt, startCtx, tracev2.EvGoStart, ev.time, (uint64)(int64)nextg, ev.args[1]));
     return (newCtx, true, default!);
 }
 
@@ -668,24 +672,24 @@ internal static (schedCtx, bool, error) advanceGoSyscallBegin(this ref ordering 
     // Entering a syscall requires an active running goroutine with a
     // proc on some thread. It is always advancable.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~state).status != go122.GoRunning) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+    if ((~state).status != tracev2.GoRunning) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
     // Goroutine entered a syscall. It's still running on this P and M.
-    state.Value.status = go122.GoSyscall;
+    state.Value.status = tracev2.GoSyscall;
     (var pState, ok) = o.pStates[curCtx.P, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, go122.EventString(ev.typ)));
+        return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, o.evName(ev.typ)));
     }
-    pState.Value.status = go122.ProcSyscall;
+    pState.Value.status = tracev2.ProcSyscall;
     // Validate the P sequence number on the event and advance it.
     //
     // We have a P sequence number for what is supposed to be a goroutine event
@@ -699,7 +703,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallBegin(this ref ordering 
     // to back off and see if any other events will advance. This is a running P.
     var pSeq = makeSeq(gen, ev.args[0]);
     if (!pSeq.succeeds((~pState).seq)) {
-        return (curCtx, false, fmt.Errorf("failed to advance %s: can't make sequence: %s -> %s"u8, go122.EventString(ev.typ), (~pState).seq, pSeq));
+        return (curCtx, false, fmt.Errorf("failed to advance %s: can't make sequence: %s -> %s"u8, o.evName(ev.typ), (~pState).seq, pSeq));
     }
     pState.Value.seq = pSeq;
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
@@ -713,28 +717,28 @@ internal static (schedCtx, bool, error) advanceGoSyscallEnd(this ref ordering o,
     // thread that EvGoSyscallStart happened, and the goroutine can't leave
     // that thread until its done.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~state).status != go122.GoSyscall) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+    if ((~state).status != tracev2.GoSyscall) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
-    state.Value.status = go122.GoRunning;
+    state.Value.status = tracev2.GoRunning;
 
     // Transfer the P back to running from syscall.
     (var pState, ok) = o.pStates[curCtx.P, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, go122.EventString(ev.typ)));
+        return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, o.evName(ev.typ)));
     }
-    if ((~pState).status != go122.ProcSyscall) {
-        return (curCtx, false, fmt.Errorf("expected proc %d in state %v, but got %v instead"u8, curCtx.P, go122.ProcSyscall, (~pState).status));
+    if ((~pState).status != tracev2.ProcSyscall) {
+        return (curCtx, false, fmt.Errorf("expected proc %d in state %v, but got %v instead"u8, curCtx.P, tracev2.ProcSyscall, (~pState).status));
     }
-    pState.Value.status = go122.ProcRunning;
+    pState.Value.status = tracev2.ProcRunning;
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default!);
 }
@@ -755,29 +759,29 @@ internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked(this ref orde
     if (curCtx.P != NoProc) {
         var (pState, okΔ1) = o.pStates[curCtx.P, ꟷ];
         if (!okΔ1) {
-            return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, go122.EventString(ev.typ)));
+            return (curCtx, false, fmt.Errorf("uninitialized proc %d found during %s"u8, curCtx.P, o.evName(ev.typ)));
         }
-        if ((~pState).status == go122.ProcSyscall) {
+        if ((~pState).status == tracev2.ProcSyscall) {
             return (curCtx, false, default!);
         }
     }
     // As mentioned above, we may have a P here if we ProcStart
     // before this event.
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MayHave, Goroutine: @event.MustHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~state).status != go122.GoSyscall) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
+    if ((~state).status != tracev2.GoSyscall) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
     var newCtx = curCtx;
     newCtx.G = NoGoroutine;
-    state.Value.status = go122.GoRunnable;
+    state.Value.status = tracev2.GoRunnable;
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default!);
 }
@@ -789,19 +793,19 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall(this ref ordering
     // being created out of a cgo callback. Such a goroutine
     // is 'created' in the syscall state.
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MayHave, Goroutine: @event.MustNotHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustNotHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     // This goroutine is effectively being created. Add a state for it.
     ref var newgid = ref heap<GoID>(out var Ꮡnewgid);
-    newgid = ((GoID)(int64)ev.args[0]);
+    newgid = (GoID)(int64)ev.args[0];
     {
         var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
             return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) in syscall that already exists"u8, newgid));
         }
     }
-    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: go122.GoSyscall, seq: makeSeq(gen, 0)));
+    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: tracev2.GoSyscall, seq: makeSeq(gen, 0)));
     // Goroutine is executing. Bind it to the context.
     var newCtx = curCtx;
     newCtx.G = newgid;
@@ -829,17 +833,17 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
     // eagerly by the runtime, and it might get stolen back later
     // (or never again, if the program is going to exit).
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MayHave, Goroutine: @event.MustHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
     // Check to make sure the goroutine exists in the right state.
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, go122.EventString(ev.typ), curCtx.G));
+        return (curCtx, false, fmt.Errorf("event %s for goroutine (%v) that doesn't exist"u8, o.evName(ev.typ), curCtx.G));
     }
-    if ((~state).status != go122.GoSyscall) {
-        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %v"u8, go122.EventString(ev.typ), GoSyscall));
+    if ((~state).status != tracev2.GoSyscall) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %v"u8, o.evName(ev.typ), GoSyscall));
     }
     // This goroutine is exiting itself.
     delete(o.gStates, curCtx.G);
@@ -850,18 +854,18 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
     if (curCtx.P != NoProc) {
         var (pState, okΔ1) = o.pStates[curCtx.P, ꟷ];
         if (!okΔ1) {
-            return (curCtx, false, fmt.Errorf("found invalid proc %d during %s"u8, curCtx.P, go122.EventString(ev.typ)));
+            return (curCtx, false, fmt.Errorf("found invalid proc %d during %s"u8, curCtx.P, o.evName(ev.typ)));
         }
-        if ((~pState).status != go122.ProcSyscall) {
-            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, (~pState).status, go122.EventString(ev.typ)));
+        if ((~pState).status != tracev2.ProcSyscall) {
+            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, (~pState).status, o.evName(ev.typ)));
         }
         // See the go122-create-syscall-reuse-thread-id test case for more details.
-        pState.Value.status = go122.ProcSyscallAbandoned;
+        pState.Value.status = tracev2.ProcSyscallAbandoned;
         newCtx.P = NoProc;
 
         // Queue an extra self-ProcSteal event.
-        var extra = makeEvent(Ꮡevt, curCtx, go122.EvProcSteal, ev.time, (uint64)(int64)curCtx.P);
-        extra.@base.extra(version.Go122)[0] = (uint64)(uint8)go122.ProcSyscall;
+        var extra = makeEvent(Ꮡevt, curCtx, tracev2.EvProcSteal, ev.time, (uint64)(int64)curCtx.P);
+        extra.@base.extra(version.Go122)[0] = (uint64)(uint8)tracev2.ProcSyscall;
         o.queue.push(extra);
     }
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
@@ -879,7 +883,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     // thing we have to be sure of is that a task didn't begin
     // after it had already begun. Task IDs are allowed to be
     // reused, so we don't care about a Begin after an End.
-    var id = ((TaskID)ev.args[0]);
+    var id = (TaskID)ev.args[0];
     {
         var (_, okΔ1) = o.activeTasks[id, ꟷ]; if (okΔ1) {
             return (curCtx, false, fmt.Errorf("task ID conflict: %d"u8, id));
@@ -887,7 +891,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     }
     // Get the parent ID, but don't validate it. There's no guarantee
     // we actually have information on whether it's active.
-    var parentID = ((TaskID)ev.args[1]);
+    var parentID = (TaskID)ev.args[1];
     if (parentID == BackgroundTask) {
         // Note: a value of 0 here actually means no parent, *not* the
         // background task. Automatic background task attachment only
@@ -898,14 +902,14 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
 
     // Validate the name and record it. We'll need to pass it through to
     // EvUserTaskEnd.
-    var nameID = ((stringID)ev.args[2]);
+    var nameID = (stringID)ev.args[2];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
     }
     o.activeTasks[id] = new taskState(name: name, parentID: parentID);
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -917,7 +921,7 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, 
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
-    var id = ((TaskID)ev.args[0]);
+    var id = (TaskID)ev.args[0];
     {
         var (ts, ok) = o.activeTasks[id, ꟷ]; if (ok){
             // Smuggle the task info. This may happen in a different generation,
@@ -933,7 +937,7 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, 
         }
     }
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -946,12 +950,12 @@ internal static (schedCtx, bool, error) advanceUserRegionBegin(this ref ordering
     ref var evt = ref Ꮡevt.DerefOrNull();
 
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    var tid = ((TaskID)ev.args[0]);
-    var nameID = ((stringID)ev.args[1]);
+    var tid = (TaskID)ev.args[0];
+    var nameID = (stringID)ev.args[1];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
@@ -974,12 +978,12 @@ internal static (schedCtx, bool, error) advanceUserRegionEnd(this ref ordering o
     ref var evt = ref Ꮡevt.DerefOrNull();
 
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    var tid = ((TaskID)ev.args[0]);
-    var nameID = ((stringID)ev.args[1]);
+    var tid = (TaskID)ev.args[0];
+    var nameID = (stringID)ev.args[1];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
@@ -1026,7 +1030,7 @@ internal static (schedCtx, bool, error) advanceGCActive(this ref ordering o, ж<
     }
     o.gcSeq = seq;
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1054,7 +1058,7 @@ internal static (schedCtx, bool, error) advanceGCBegin(this ref ordering o, ж<b
     o.gcSeq = seq;
     o.gcState = gcRunning;
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1079,7 +1083,7 @@ internal static (schedCtx, bool, error) advanceGCEnd(this ref ordering o, ж<bas
     o.gcSeq = seq;
     o.gcState = gcNotRunning;
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1092,7 +1096,7 @@ internal static (schedCtx, bool, error) advanceAnnotation(this ref ordering o, �
 
     // Handle simple instantaneous events that require a G.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1105,7 +1109,7 @@ internal static (schedCtx, bool, error) advanceHeapMetric(this ref ordering o, �
 
     // Handle allocation metrics, which don't require a G.
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MayHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1118,7 +1122,7 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin(this ref ordering o,
 
     // Handle sweep, which is bound to a P and doesn't require a G.
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MayHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1134,7 +1138,7 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin(this ref ordering o,
 internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     // N.B. In practice Ps can't block while they're sweeping, so this can only
     // ever reference curCtx.P. However, be lenient about this like we are with
     // GCMarkAssistActive; there's no reason the runtime couldn't change to block
@@ -1156,7 +1160,7 @@ internal static (schedCtx, bool, error) advanceGCSweepEnd(this ref ordering o, �
     ref var ev = ref Ꮡev.DerefOrNull();
 
     {
-        var errΔ1 = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MustHave, Goroutine: @event.MayHave)); if (errΔ1 != default!) {
+        var errΔ1 = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (errΔ1 != default!) {
             return (curCtx, false, errΔ1);
         }
     }
@@ -1173,13 +1177,13 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o,
 
     // Handle special goroutine-bound event ranges.
     {
-        var err = validateCtx(curCtx, @event.UserGoReqs); if (err != default!) {
+        var err = validateCtx(curCtx, userGoReqs); if (err != default!) {
             return (curCtx, false, err);
         }
     }
-    var desc = ((stringID)0);
-    if (ev.typ == go122.EvSTWBegin) {
-        desc = ((stringID)ev.args[0]);
+    var desc = (stringID)0;
+    if (ev.typ == tracev2.EvSTWBegin) {
+        desc = (stringID)ev.args[0];
     }
     var (gState, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -1197,13 +1201,13 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o,
 internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     // N.B. Like GoStatus, this can happen at any time, because it can
     // reference a non-running goroutine. Don't check anything about the
     // current scheduler context.
     var (gState, ok) = o.gStates[gid, ꟷ];
     if (!ok) {
-        return (curCtx, false, fmt.Errorf("uninitialized goroutine %d found during %s"u8, gid, go122.EventString(ev.typ)));
+        return (curCtx, false, fmt.Errorf("uninitialized goroutine %d found during %s"u8, gid, o.evName(ev.typ)));
     }
     {
         var err = gState.of(trace_package.gState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != default!) {
@@ -1218,7 +1222,7 @@ internal static (schedCtx, bool, error) advanceGoRangeEnd(this ref ordering o, �
     ref var ev = ref Ꮡev.DerefOrNull();
 
     {
-        var errΔ1 = validateCtx(curCtx, @event.UserGoReqs); if (errΔ1 != default!) {
+        var errΔ1 = validateCtx(curCtx, userGoReqs); if (errΔ1 != default!) {
             return (curCtx, false, errΔ1);
         }
     }
@@ -1230,7 +1234,7 @@ internal static (schedCtx, bool, error) advanceGoRangeEnd(this ref ordering o, �
     if (err != default!) {
         return (curCtx, false, err);
     }
-    if (ev.typ == go122.EvSTWEnd) {
+    if (ev.typ == tracev2.EvSTWEnd) {
         // Smuggle the kind into the event.
         // Don't use ev.extra here so we have symmetry with STWBegin.
         ev.args[0] = (uint64)desc;
@@ -1244,7 +1248,7 @@ internal static (schedCtx, bool, error) advanceAllocFree(this ref ordering o, ж
 
     // Handle simple instantaneous events that may or may not have a P.
     {
-        var err = validateCtx(curCtx, new @event.SchedReqs(Thread: @event.MustHave, Proc: @event.MayHave, Goroutine: @event.MayHave)); if (err != default!) {
+        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mayHave)); if (err != default!) {
             return (curCtx, false, err);
         }
     }
@@ -1266,28 +1270,28 @@ partial struct schedCtx {
 
 // validateCtx ensures that ctx conforms to some reqs, returning an error if
 // it doesn't.
-internal static error validateCtx(schedCtx ctx, @event.SchedReqs reqs) {
+internal static error validateCtx(schedCtx ctx, schedReqs reqs) {
     // Check thread requirements.
-    if (reqs.Thread == @event.MustHave && ctx.M == NoThread){
+    if (reqs.M == mustHave && ctx.M == NoThread){
         return fmt.Errorf("expected a thread but didn't have one"u8);
     } else 
-    if (reqs.Thread == @event.MustNotHave && ctx.M != NoThread) {
+    if (reqs.M == mustNotHave && ctx.M != NoThread) {
         return fmt.Errorf("expected no thread but had one"u8);
     }
 
     // Check proc requirements.
-    if (reqs.Proc == @event.MustHave && ctx.P == NoProc){
+    if (reqs.P == mustHave && ctx.P == NoProc){
         return fmt.Errorf("expected a proc but didn't have one"u8);
     } else 
-    if (reqs.Proc == @event.MustNotHave && ctx.P != NoProc) {
+    if (reqs.P == mustNotHave && ctx.P != NoProc) {
         return fmt.Errorf("expected no proc but had one"u8);
     }
 
     // Check goroutine requirements.
-    if (reqs.Goroutine == @event.MustHave && ctx.G == NoGoroutine){
+    if (reqs.G == mustHave && ctx.G == NoGoroutine){
         return fmt.Errorf("expected a goroutine but didn't have one"u8);
     } else 
-    if (reqs.Goroutine == @event.MustNotHave && ctx.G != NoGoroutine) {
+    if (reqs.G == mustNotHave && ctx.G != NoGoroutine) {
         return fmt.Errorf("expected no goroutine but had one"u8);
     }
     return default!;
@@ -1338,14 +1342,14 @@ partial struct userRegion {
 // they may have an optional subtype that describes the range
 // in more detail.
 partial struct rangeType {
-    internal @event.Type typ; // "Begin" event.
-    internal stringID desc;   // Optional subtype.
+    internal tracev2.EventType typ; // "Begin" event.
+    internal stringID desc;          // Optional subtype.
 }
 
 // makeRangeType constructs a new rangeType.
-internal static rangeType makeRangeType(@event.Type typ, stringID desc) {
+internal static rangeType makeRangeType(tracev2.EventType typ, stringID desc) {
     {
-        var styp = go122.Specs()[typ].StartEv; if (styp != go122.EvNone) {
+        var styp = tracev2.Specs()[typ].StartEv; if (styp != tracev2.EvNone) {
             typ = styp;
         }
     }
@@ -1355,17 +1359,17 @@ internal static rangeType makeRangeType(@event.Type typ, stringID desc) {
 // gState is the state of a goroutine at a point in the trace.
 partial struct gState {
     internal GoID id;
-    internal go122.GoStatus status;
+    internal tracev2.GoStatus status;
     internal seqCounter seq;
     // regions are the active user regions for this goroutine.
     internal slice<userRegion> regions;
     // rangeState is the state of special time ranges bound to this goroutine.
-    internal partial ref rangeState rangeState { get; }
+    /*embed*/ internal rangeState rangeState;
 }
 
 // beginRegion starts a user region on the goroutine.
 internal static error beginRegion(this ref gState s, userRegion r) {
-    s.regions = append(s.regions, r);
+    s.regions = builtin.append(s.regions, r);
     return default!;
 }
 
@@ -1387,10 +1391,10 @@ internal static error endRegion(this ref gState s, userRegion r) {
 // pState is the state of a proc at a point in the trace.
 partial struct pState {
     internal ProcID id;
-    internal go122.ProcStatus status;
+    internal tracev2.ProcStatus status;
     internal seqCounter seq;
     // rangeState is the state of special time ranges bound to this proc.
-    internal partial ref rangeState rangeState { get; }
+    /*embed*/ internal rangeState rangeState;
 }
 
 // mState is the state of a thread at a point in the trace.
@@ -1410,9 +1414,9 @@ partial struct rangeState {
 // Returns an error if the range is already in progress.
 internal static error beginRange(this ref rangeState s, rangeType typ) {
     if (s.hasRange(typ)) {
-        return fmt.Errorf("discovered event already in-flight for when starting event %v"u8, go122.Specs()[typ.typ].Name);
+        return fmt.Errorf("discovered event already in-flight for when starting event %v"u8, tracev2.Specs()[typ.typ].Name);
     }
-    s.inFlight = append(s.inFlight, typ);
+    s.inFlight = builtin.append(s.inFlight, typ);
     return default!;
 }
 
@@ -1423,29 +1427,24 @@ internal static error activeRange(this ref rangeState s, rangeType typ, bool isI
         if (s.hasRange(typ)) {
             return fmt.Errorf("found named active range already in first gen: %v"u8, typ);
         }
-        s.inFlight = append(s.inFlight, typ);
+        s.inFlight = builtin.append(s.inFlight, typ);
     } else 
     if (!s.hasRange(typ)) {
-        return fmt.Errorf("resource is missing active range: %v %v"u8, go122.Specs()[typ.typ].Name, s.inFlight);
+        return fmt.Errorf("resource is missing active range: %v %v"u8, tracev2.Specs()[typ.typ].Name, s.inFlight);
     }
     return default!;
 }
 
 // hasRange returns true if a special time range on the goroutine as in progress.
 internal static bool hasRange(this ref rangeState s, rangeType typ) {
-    foreach (var (_, ftyp) in s.inFlight) {
-        if (ftyp == typ) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains(s.inFlight, typ);
 }
 
 // endRange ends a special range in time on the goroutine.
 //
 // This must line up with the start event type  of the range the goroutine is currently in.
-internal static (stringID, error) endRange(this ref rangeState s, @event.Type typ) {
-    var st = go122.Specs()[typ].StartEv;
+internal static (stringID, error) endRange(this ref rangeState s, tracev2.EventType typ) {
+    var st = tracev2.Specs()[typ].StartEv;
     nint idx = -1;
     foreach (var (i, r) in s.inFlight) {
         if (r.typ == st) {
@@ -1454,7 +1453,7 @@ internal static (stringID, error) endRange(this ref rangeState s, @event.Type ty
         }
     }
     if (idx < 0) {
-        return (0, fmt.Errorf("tried to end event %v, but not in-flight"u8, go122.Specs()[st].Name));
+        return (0, fmt.Errorf("tried to end event %v, but not in-flight"u8, tracev2.Specs()[st].Name));
     }
     // Swap remove.
     var desc = s.inFlight[idx].desc;
@@ -1563,7 +1562,7 @@ internal static (T, bool) pop<T>(this ref queue<T> q) {
 // It's just a convenience function; it's always OK to construct
 // an Event manually if this isn't quite the right way to express
 // the contents of the event.
-internal static ΔEvent makeEvent(ж<evTable> Ꮡtable, schedCtx ctx, @event.Type typ, ΔTime time, params ꓸꓸꓸuint64 argsʗp) {
+internal static ΔEvent makeEvent(ж<evTable> Ꮡtable, schedCtx ctx, tracev2.EventType typ, ΔTime time, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     var ev = new ΔEvent(
@@ -1577,5 +1576,24 @@ internal static ΔEvent makeEvent(ж<evTable> Ꮡtable, schedCtx ctx, @event.Typ
     copy(ev.@base.args[..], args);
     return ev.ΔClone();
 }
+
+// schedReqs is a set of constraints on what the scheduling
+// context must look like.
+partial struct schedReqs {
+    public constraint M;
+    public constraint P;
+    public constraint G;
+}
+
+// constraint represents a various presence requirements.
+public partial struct constraint /*num:uint8*/;
+
+internal static constraint mustNotHave => /* iota */ 0;
+internal static constraint mayHave => 1;
+internal static constraint mustHave => 2;
+
+// userGoReqs is a common requirement among events that are running
+// or are close to running user code.
+internal static schedReqs userGoReqs = new schedReqs(M: mustHave, P: mustHave, G: mustHave);
 
 } // end trace_package

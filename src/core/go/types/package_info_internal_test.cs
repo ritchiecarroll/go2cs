@@ -34,9 +34,9 @@ using static go.go.types_internal_test_package;
 [assembly: global::go.GoPositionMap("go/types/context_test.go", "context_test.cs", "ABEcgoIAChzSlIKUlIKUlIKCpqaCgILagILagILIgII=")]
 [assembly: global::go.GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABAYgoKCgIK2goKAgraCgoCCAAgIggAGEoKC")]
 [assembly: global::go.GoPositionMap("go/types/sizeof_test.go", "sizeof_test.cs", "ABEakpQAH0iCgoKClII=")]
-[assembly: global::go.GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA0gkoKCgoKUpoKCuIIAChaAgtqCAAgSgoKCyoIACRSCgoIACAqCAA0ggoKCAAgKggAPJoKCgoIACAqCABEqgoKCggAJCoIAChyCgoKCAAkKggAMIIKCgoIACQqCABY0goKCggAJCoIAESqCgoKC")]
-[assembly: global::go.GoPositionMap("go/types/token_test.go", "token_test.cs", "AA4eAA0chJKCuJSCgoKCgg==")]
-[assembly: global::go.GoPositionMap("go/types/typeset_test.go", "typeset_test.cs", "ABEcgoLoggAXOIKCgoKokoKCuIKClIKCuIKC")]
+[assembly: global::go.GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA8gkoKCgoKUpoKCuIIAChaAgtqCAAgSgoKCyoIACRSCgoIACAqCAA0ggoKCAAgKggAPJoKCgoIACAqCABEqgoKCggAJCoIAChyCgoKCAAkKggAMIIKCgoIACQqCABY0goKCggAJCoIAESqCgoKC")]
+[assembly: global::go.GoPositionMap("go/types/token_test.go", "token_test.cs", "ABAeAA0chJKCuJSCgoKCgg==")]
+[assembly: global::go.GoPositionMap("go/types/typeset_test.go", "typeset_test.cs", "ABMcgoLoggAbOIKCgoKokoKCuIKClIKCuIKC")]
 [assembly: global::go.GoPositionMap("go/types/typeterm_test.go", "typeterm_test.cs", "AA8egoK2AAkUgoKAgtqCgoKUpoKCgpSmggAPIIKCgoKAgraCgILaggAgQoKCgoKCgILaggARJIKCgoKAgraCgILaggAJFIKCgoKAgtqCABImgoKCgoCC2oIACxiCgoKCgIK2goCC")]
 [assembly: global::go.GoPositionMap("go/types/util_test.go", "util_test.cs", "AA8igKSgooA=")]
 // </GoSourcePositionMaps>
@@ -87,6 +87,7 @@ public static partial class types_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
+    [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));

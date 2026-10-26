@@ -26,7 +26,7 @@ internal static class Go2CsTestHost
         registry.Add("TestOneByteReader_nonEmptyReader", iotest_internal_test_package.TestOneByteReader_nonEmptyReader, "reader_test.go", 15);
         registry.Add("TestReadLogger", iotest_internal_test_package.TestReadLogger, "logger_test.go", 85);
         registry.Add("TestReadLogger_errorOnRead", iotest_internal_test_package.TestReadLogger_errorOnRead, "logger_test.go", 122);
-        registry.Add("TestStringsReader", iotest_internal_test_package.TestStringsReader, "reader_test.go", 254);
+        registry.Add("TestStringsReader", iotest_internal_test_package.TestStringsReader, "reader_test.go", 253);
         registry.Add("TestTimeOutReader_emptyReader", iotest_internal_test_package.TestTimeOutReader_emptyReader, "reader_test.go", 153);
         registry.Add("TestTimeOutReader_nonEmptyReader", iotest_internal_test_package.TestTimeOutReader_nonEmptyReader, "reader_test.go", 118);
         registry.Add("TestTruncateWriter", iotest_internal_test_package.TestTruncateWriter, "writer_test.go", 24);

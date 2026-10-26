@@ -20,8 +20,10 @@ internal static class Go2CsTestHost
             "testdata/gcc-386-freebsd-exec",
             "testdata/gcc-amd64-linux-exec",
             "testdata/gcc-amd64-openbsd-debug-with-rela.obj",
+            "testdata/gcc-riscv64-linux-exec",
             "testdata/go-relocation-test-clang-arm.obj",
             "testdata/go-relocation-test-clang-x86.obj",
+            "testdata/go-relocation-test-gcc133-ppc.obj",
             "testdata/go-relocation-test-gcc424-x86-64.obj",
             "testdata/go-relocation-test-gcc441-x86-64.obj",
             "testdata/go-relocation-test-gcc441-x86.obj",
@@ -47,17 +49,17 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestCompressedDWARF", elf_internal_test_package.TestCompressedDWARF, "file_test.go", 1040);
-        registry.Add("TestCompressedSection", elf_internal_test_package.TestCompressedSection, "file_test.go", 1068);
-        registry.Add("TestDWARFRelocations", elf_internal_test_package.TestDWARFRelocations, "file_test.go", 995);
-        registry.Add("TestDynValue", elf_internal_test_package.TestDynValue, "file_test.go", 1481);
-        registry.Add("TestIssue10996", elf_internal_test_package.TestIssue10996, "file_test.go", 1470);
-        registry.Add("TestIssue59208", elf_internal_test_package.TestIssue59208, "file_test.go", 1499);
-        registry.Add("TestLargeNumberOfSections", elf_internal_test_package.TestLargeNumberOfSections, "file_test.go", 1227);
-        registry.Add("TestNames", elf_internal_test_package.TestNames, "elf_test.go", 44);
-        registry.Add("TestNoSectionOverlaps", elf_internal_test_package.TestNoSectionOverlaps, "file_test.go", 1153);
-        registry.Add("TestNobitsSection", elf_internal_test_package.TestNobitsSection, "file_test.go", 1201);
-        registry.Add("TestOpen", elf_internal_test_package.TestOpen, "file_test.go", 452);
+        registry.Add("TestCompressedDWARF", elf_internal_test_package.TestCompressedDWARF, "file_test.go", 1109);
+        registry.Add("TestCompressedSection", elf_internal_test_package.TestCompressedSection, "file_test.go", 1137);
+        registry.Add("TestDWARFRelocations", elf_internal_test_package.TestDWARFRelocations, "file_test.go", 1065);
+        registry.Add("TestDynValue", elf_internal_test_package.TestDynValue, "file_test.go", 1550);
+        registry.Add("TestIssue10996", elf_internal_test_package.TestIssue10996, "file_test.go", 1539);
+        registry.Add("TestIssue59208", elf_internal_test_package.TestIssue59208, "file_test.go", 1568);
+        registry.Add("TestLargeNumberOfSections", elf_internal_test_package.TestLargeNumberOfSections, "file_test.go", 1296);
+        registry.Add("TestNames", elf_internal_test_package.TestNames, "elf_test.go", 45);
+        registry.Add("TestNoSectionOverlaps", elf_internal_test_package.TestNoSectionOverlaps, "file_test.go", 1222);
+        registry.Add("TestNobitsSection", elf_internal_test_package.TestNobitsSection, "file_test.go", 1270);
+        registry.Add("TestOpen", elf_internal_test_package.TestOpen, "file_test.go", 498);
         registry.Add("TestSymbols", elf_internal_test_package.TestSymbols, "symbols_test.go", 15);
         return TestHost.Run(registry, args);
     }

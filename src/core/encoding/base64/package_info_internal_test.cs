@@ -5,8 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,7 +19,6 @@ using static go.encoding.base64_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<faultInjectReader, ж<faultInjectReader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -32,7 +29,7 @@ using static go.encoding.base64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "ABwyABk2kqiSgoKokqiS7JSCAAgQAAwayqKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKClIKClIKClIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCgrQACASCAA0mlIKkgpSCgIIACwqCAAoglIKkgpSCgIIACAqCgoKCgpSCgoKClIKClIKCpoKCgoKm6ISSAAwagoKCgpSAggARIoKCgpSCgtiSgoKCgoK4gqKClLSCxgAZCIIAACCUgoKCpoKCgoKmguiCgoKClIL4goKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoL6goKmgoK4goKCuIKCgg==", "269-273:1;442-445:1;530-537:1;539-541:2", "", "93=Strict/1/5/6,Strict/2/5/7,Strict/3/5/8,Strict/4/5/9,Strict/5/5/10")]
+[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "ABwyABk2kqiSgoKokqiS7JSCAAgQAAwayqKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKClIKClIKClIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCgrQACASiAA0mlIKkgpSCgIIACwqiAAoglIKkgpSCgIIACAqCgoKCgpSCgoKClIKClIKCpoKCgoKm6ISSAAwagoKCgpSAggARIoKCgpSCgtiSgoKCgoK4gqKClLSCxgAZCIIAACCUgoKCpoKCgoKmguiCgoKClIL4goKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoL6goKmgoK4goKCuIKCgg==", "269-273:1;442-445:1;530-537:1;539-541:2", "", "93=Strict/1/5/6,Strict/2/5/7,Strict/3/5/8,Strict/4/5/9,Strict/5/5/10")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

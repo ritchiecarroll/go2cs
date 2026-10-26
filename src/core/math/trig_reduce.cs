@@ -39,7 +39,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     // Extract out the integer and exponent such that,
     // x = ix * 2 ** exp.
     var ix = Float64bits(x);
-    nint exp = (nint)((uint64)((ix >> (int)(shift)) & (uint64)mask)) - (nint)bias - (nint)shift;
+    nint exp = (nint)(ix >> (int)(shift) & (uint64)mask) - (nint)bias - (nint)shift;
     ix &= unchecked((uint64)~(uint64)(((uint64)mask << (int)(shift))));
     ix |= (uint64)(((uint64)1 << (int)(shift)));
     // Use the exponent to extract the 3 appropriate uint64 digits from mPi4,
@@ -47,9 +47,9 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     // Note, exp >= -53 since x >= PI4 and exp < 971 for maximum float64.
     nuint digit = (nuint)(exp + 61) / 64;
     nuint bitshift = (nuint)(exp + 61) % 64;
-    var z0 = (uint64)((mPi4[digit].Lsh(bitshift)) | (mPi4[digit + 1].Rsh((64 - bitshift))));
-    var z1 = (uint64)((mPi4[digit + 1].Lsh(bitshift)) | (mPi4[digit + 2].Rsh((64 - bitshift))));
-    var z2 = (uint64)((mPi4[digit + 2].Lsh(bitshift)) | (mPi4[digit + 3].Rsh((64 - bitshift))));
+    var z0 = (mPi4[digit].Lsh(bitshift)) | (mPi4[digit + 1].Rsh((64 - bitshift)));
+    var z1 = (mPi4[digit + 1].Lsh(bitshift)) | (mPi4[digit + 2].Rsh((64 - bitshift)));
+    var z2 = (mPi4[digit + 2].Lsh(bitshift)) | (mPi4[digit + 3].Rsh((64 - bitshift)));
     // Multiply mantissa by the digits and extract the upper two digits (hi, lo).
     var (z2hi, _) = bits.Mul64(z2, ix);
     var (z1hi, z1lo) = bits.Mul64(z1, ix);
@@ -57,19 +57,19 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     var (lo, c) = bits.Add64(z1lo, z2hi, 0);
     var (hi, _) = bits.Add64(z0lo, z1hi, c);
     // The top 3 bits are j.
-    j = (hi >> (int)(61));
+    j = hi >> 61;
     // Extract the fraction and find its magnitude.
-    hi = (uint64)((hi << (int)(3)) | (lo >> (int)(61)));
+    hi = hi << 3 | lo >> 61;
     nuint lz = (nuint)bits.LeadingZeros64(hi);
     var e = (uint64)((nuint)bias - (lz + 1));
     // Clear implicit mantissa bit and shift into place.
-    hi = (uint64)((hi.Lsh((lz + 1))) | (lo.Rsh((64 - (lz + 1)))));
+    hi = (hi.Lsh((lz + 1))) | (lo.Rsh((64 - (lz + 1))));
     hi >>= (int)(64 - shift);
     // Include the exponent and convert to a float.
     hi |= (uint64)((e << (int)(shift)));
     z = Float64frombits(hi);
     // Map zeros to origin.
-    if ((uint64)(j & 1) == 1) {
+    if ((j & 1) == 1) {
         j++;
         j &= (uint64)(7);
         z--;
@@ -82,7 +82,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
 // that is, 4/pi = Sum mPi4[i]*2^(-64*i)
 // 19 64-bit digits and the leading one bit give 1217 bits
 // of precision to handle the largest possible float64 exponent.
-internal static array<uint64> mPi4 = new uint64[]{
+[GoLazy] partial class lazyᴛmPi4 { internal static array<uint64> mPi4 = new uint64[]{
     0x0000000000000001,
     0x45f306dc9c882a53UL,
     0xf84eafa3ea69bb81UL,
@@ -103,6 +103,6 @@ internal static array<uint64> mPi4 = new uint64[]{
     0x7a0e73ef14a525d4UL,
     0xd7f6bf623f1aba10UL,
     0xac06608df8f6d757UL
-}.array();
+}.array(); }
 
 } // end math_package

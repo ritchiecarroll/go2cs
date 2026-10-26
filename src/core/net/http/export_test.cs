@@ -13,6 +13,8 @@ using slices = slices_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using static global::go.net.http_package;
@@ -23,7 +25,6 @@ public static @string DefaultUserAgent;
 internal static void initᴛDefaultUserAgent() { DefaultUserAgent = defaultUserAgent; }
 public static Func<@string, net.Conn, net.Conn> NewLoggingConn;
 internal static void initᴛNewLoggingConn() { NewLoggingConn = newLoggingConn; }
-public static Func<slice<byte>, time.Time, slice<byte>> ExportAppendTime = appendTime;
 public static Func<ж<url.URL>, ж<url.URL>, @string, @string> ExportRefererForURL = (ж<url.URL> ᴛ0, ж<url.URL> ᴛ1, @string ᴛ2) => refererForURL(ᴛ0, ref ᴛ1.DerefOrNull(), ᴛ2);
 internal static Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>> ExportServerNewConn;
 internal static void initᴛExportServerNewConn() { ExportServerNewConn = ((Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>)(global::go.net.http_package.newConn)); }
@@ -74,7 +75,7 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingHttp2TestWhenˢ = (@string)"skipping HTTP/2 test when nethttpomithttp2 build tag in use"u8;
 
-public static void CondSkipHTTP2(testing.TB t) {
+public static partial void CondSkipHTTP2(testing.TB t) {
     if (omitBundledHTTP2) {
         t.Skip(skippingHttp2TestWhenˢ);
     }
@@ -202,7 +203,7 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
         ref var t = ref Ꮡt.DerefOrNull();
 
         slice<@string> ret = default!;
-        var noDialPool = (~t.h2transport._<ж<global::go.net.http_package.http2Transport>>()).ConnPool._<http2noDialClientConnPool>();
+        var noDialPool = (~t.h2transport._<global::go.net.http_package.h2Transport, ж<global::go.net.http_package.http2Transport>>()).ConnPool._<global::go.net.http_package.http2ClientConnPool, http2noDialClientConnPool>();
         var pool = noDialPool.http2clientConnPool;
 
         pool.of(global::go.net.http_package.http2clientConnPool.Ꮡmu).Lock();

@@ -61,7 +61,7 @@ public static nint Search(nint n, Func<nint, bool> f) {
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (!f(h)){
             i = h + 1; // preserves f(i-1) == false
@@ -106,7 +106,7 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
     i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (cmp(h) > 0){
             i = h + 1; // preserves cmp(i-1) > 0

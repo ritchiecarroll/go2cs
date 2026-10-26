@@ -110,6 +110,8 @@ internal static (netipꓸAddr, error) parseIPSlow(@string s) {
 // Both short forms may be present in a single address,
 // e.g. fe80::1.2.3.4.
 internal static (@string, error) normalizeIPv6Slow(@string orig) {
+    var fsᴷ = new stackAppend<@string>();
+
     @string s = orig;
 
     // Find and convert an IPv4 address in the final field, if any.
@@ -152,7 +154,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
         // Either side of the :: can be empty. We don't want empty
         // fields to feature in the final normalized address.
         if (lhs != ""u8) {
-            fs = append(fs, lhs);
+            fs = append(fsᴷ, fs, lhs);
         }
         fs = appendꓸꓸꓸ(fs, zeros.slice(0, 8 - nblocks));
         if (rhs != ""u8) {
@@ -179,7 +181,7 @@ internal static (netipꓸAddr, error) parseIPv4Slow(@string s) {
         return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, s));
     }
     array<byte> ret = new(4);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         var (val, err) = strconv.ParseUint(fs[i], 10, 8);
         if (err != default!) {
             return (new netipꓸAddr(nil), err);
@@ -199,7 +201,7 @@ internal static (byte, byte, error) parseWord(@string s) {
     if (err != default!) {
         return (0, 0, err);
     }
-    return ((uint8)((ret >> (int)(8))), (uint8)ret, default!);
+    return ((uint8)(ret >> 8), (uint8)ret, default!);
 }
 
 } // end netip_test_package

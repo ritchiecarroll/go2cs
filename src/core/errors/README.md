@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-61_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/errors.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/errors@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/errors) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/errors)
+[![Tests](https://img.shields.io/badge/Tests-80_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/errors.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/errors@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/errors) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/errors)
 
 From C#, call this package through the static class go.errors_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -18,7 +18,7 @@ An error e wraps another error if e's type has one of the methods
 
 If e.Unwrap() returns a non-nil error w or a slice containing w, then we say that e wraps w. A nil error returned from e.Unwrap() indicates that e does not wrap any error. It is invalid for an Unwrap method to return an \[]error containing a nil error value.
 
-An easy way to create wrapped errors is to call [fmt.Errorf](https://pkg.go.dev/fmt@go1.24.13#Errorf) and apply the %w verb to the error argument:
+An easy way to create wrapped errors is to call [fmt.Errorf](https://pkg.go.dev/fmt@go1.26.10#Errorf) and apply the %w verb to the error argument:
 
 	wrapsErr := fmt.Errorf("... %w ...", ..., err, ...)
 
@@ -34,12 +34,11 @@ is preferable to
 
 	if err == fs.ErrExist
 
-because the former will succeed if err wraps [io/fs.ErrExist](https://pkg.go.dev/io/fs@go1.24.13#ErrExist).
+because the former will succeed if err wraps [io/fs.ErrExist](https://pkg.go.dev/io/fs@go1.26.10#ErrExist).
 
-\[As] examines the tree of its first argument looking for an error that can be assigned to its second argument, which must be a pointer. If it succeeds, it performs the assignment and returns true. Otherwise, it returns false. The form
+\[AsType] examines the tree of its argument looking for an error whose type matches its type argument. If it succeeds, it returns the corresponding value of that type and true. Otherwise, it returns the zero value of that type and false. The form
 
-	var perr *fs.PathError
-	if errors.As(err, &perr) {
+	if perr, ok := errors.AsType[*fs.PathError](err); ok {
 		fmt.Println(perr.Path)
 	}
 
@@ -49,7 +48,7 @@ is preferable to
 		fmt.Println(perr.Path)
 	}
 
-because the former will succeed if err wraps an [\*io/fs.PathError](https://pkg.go.dev/io/fs@go1.24.13#PathError).
+because the former will succeed if err wraps an [\*io/fs.PathError](https://pkg.go.dev/io/fs@go1.26.10#PathError).
 
 ---
 

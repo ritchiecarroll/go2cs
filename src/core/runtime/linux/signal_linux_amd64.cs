@@ -130,4 +130,34 @@ internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
     ((ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
+// dumpSigStack prints a signal stack with the context, fpstate pointer field within that context and
+// the beginning of the fpstate annotated by C/F/S respectively
+internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintptr ctx) {
+    println(s);
+    println((@string)"SP:\t"u8, (Δhex)(uint64)sp);
+    println((@string)"ctx:\t"u8, (Δhex)(uint64)ctx);
+    var fpfield = ctx + /* unsafe.Offsetof(ucontext{}.uc_mcontext) */ (uintptr)40 + /* unsafe.Offsetof(mcontext{}.fpregs) */ (uintptr)184;
+    println((@string)"fpfield:\t"u8, (Δhex)(uint64)fpfield);
+    var fpbegin = (uintptr)(~(Ꮡ(new sigctxt(nil, (@unsafe.Pointer)ctx))).regs()).fpstate;
+    println((@string)"fpstate:\t"u8, (Δhex)(uint64)fpbegin);
+    hexdumpWords(sp, stackhi, (uintptr Δp, hexdumpMarker hm) => {
+        var exprᴛ1 = Δp;
+        if (exprᴛ1 == ctx) {
+            hm.start();
+            print((@string)"C"u8);
+            println();
+        }
+        else if (exprᴛ1 == fpfield) {
+            hm.start();
+            print((@string)"F"u8);
+            println();
+        }
+        else if (exprᴛ1 == fpbegin) {
+            hm.start();
+            print((@string)"S"u8);
+            println();
+        }
+    });
+}
+
 } // end runtime_package

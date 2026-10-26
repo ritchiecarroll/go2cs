@@ -13,7 +13,7 @@ using math;
 partial class sha3_package {
 
 // rc stores the round constants for use in the ι step.
-internal static array<uint64> rc = new uint64[]{
+[GoLazy] partial class lazyᴛrc { internal static array<uint64> rc = new uint64[]{
     0x0000000000000001,
     0x0000000000008082,
     0x800000000000808AUL,
@@ -38,7 +38,7 @@ internal static array<uint64> rc = new uint64[]{
     0x8000000000008080UL,
     0x0000000080000001U,
     0x8000000080008008UL
-}.array();
+}.array(); }
 
 // go2cs generated this placeholder — func keccakF1600Generic is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

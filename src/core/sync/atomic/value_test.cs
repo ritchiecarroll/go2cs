@@ -25,14 +25,14 @@ public static void TestValue(ж<testing.T> Ꮡt) {
     if (Ꮡv.Load() != default!) {
         Ꮡt.Fatal(initialValueIsNotNilˢ);
     }
-    Ꮡv.Store((nint)(42));
+    Ꮡv.Store((nint)42);
     var x = Ꮡv.Load();
     {
         var (xx, ok) = x._<nint>(ᐧ); if (!ok || xx != 42) {
             Ꮡt.Fatalf("wrong value: got %+v, want 42"u8, x);
         }
     }
-    Ꮡv.Store((nint)(84));
+    Ꮡv.Store((nint)84);
     x = Ꮡv.Load();
     {
         var (xx, ok) = x._<nint>(ᐧ); if (!ok || xx != 84) {
@@ -87,7 +87,7 @@ public static void TestValuePanic(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
-    Ꮡv.Store((nint)(42));
+    Ꮡv.Store((nint)42);
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -120,8 +120,8 @@ public static void TestValuePanic(ж<testing.T> Ꮡt) {
 
 public static partial void TestValueConcurrent(ж<testing.T> Ꮡt) {
     var tests = new slice<any>[]{
-        new any[]{(uint16)0, unchecked((uint16)(~(uint16)0)), (uint16)(1 + (2 << (int)(8))), (uint16)(3 + (4 << (int)(8)))}.slice(),
-        new any[]{(uint32)0, ~(uint32)0, (uint32)(1 + (2 << (int)(16))), (uint32)(3 + (4 << (int)(16)))}.slice(),
+        new any[]{(uint16)0, unchecked((uint16)(~(uint16)0)), (uint16)(1 + (2 << 8)), (uint16)(3 + (4 << 8))}.slice(),
+        new any[]{(uint32)0, ~(uint32)0, (uint32)(1 + (2 << 16)), (uint32)(3 + (4 << 16))}.slice(),
         new any[]{(uint64)0, ~(uint64)0, (uint64)(1 + 8589934592L), (uint64)(3 + 17179869184L)}.slice(),
         new any[]{complex(0D, 0D), complex(1D, 2D), complex(3D, 4D), complex(5D, 6D)}.slice()
     }.slice();
@@ -246,12 +246,12 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
         m = 1000;
         n = 1000;
     }
-    for (var i = (uint64)0; i < m * n; i += n) {
-        var iΔ1 = i;
+    for (var iᴛ1 = (uint64)0; iᴛ1 < m * n; iᴛ1 += n) {
+        var i = iᴛ1;
         Ꮡg.Add(1);
         goǃ(() => {
             uint64 c = default!;
-            for (var @new = iΔ1; @new < iΔ1 + n; @new++) {
+            for (var @new = i; @new < i + n; @new++) {
                 {
                     var old = Ꮡv.Swap(@new); if (old != default!) {
                         c += old._<uint64>();
@@ -335,18 +335,18 @@ public static void TestValue_CompareAndSwap(ж<testing.T> Ꮡt) {
 public static partial void TestValueCompareAndSwapConcurrent(ж<testing.T> Ꮡt) {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     ref var w = ref heap(new sync.WaitGroup(), out var Ꮡw);
-    Ꮡv.Store((nint)(0));
+    Ꮡv.Store((nint)0);
     nint m = 1000;
     nint n = 100;
     if (testing.Short()) {
         m = 100;
         n = 100;
     }
-    for (nint i = 0; i < m; i++) {
-        nint iΔ1 = i;
+    for (nint iᴛ1 = 0; iᴛ1 < m; iᴛ1++) {
+        var i = iᴛ1;
         Ꮡw.Add(1);
         goǃ(() => {
-            for (nint j = iΔ1; j < m * n; runtime.Gosched()) {
+            for (nint j = i; j < m * n; runtime.Gosched()) {
                 if (Ꮡv.CompareAndSwap(j, j + 1)) {
                     j += m;
                 }

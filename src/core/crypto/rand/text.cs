@@ -16,10 +16,10 @@ public static @string Text() {
     // ⌈log₃₂ 2¹²⁸⌉ = 26 chars
     var src = new slice<byte>(26);
     Read(src);
-    foreach (var (i, _) in src) {
+    foreach (var i in range(src)) {
         src[i] = base32alphabet[src[i] % 32];
     }
-    return ((@string)src);
+    return (@string)src;
 }
 
 } // end rand_package

@@ -9,8 +9,6 @@ global using static global::go.crypto.dsa_package;
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
-using big = go.math.big_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -23,9 +21,13 @@ using static global::go.crypto.dsa_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bigꓸInt, ж<bigꓸInt>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.dsa_package.PrivateKey, ж<global::go.crypto.dsa_package.PrivateKey>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -35,7 +37,7 @@ using static global::go.crypto.dsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/dsa/dsa_test.go", "dsa_test.cs", "AA8agoKCgoKmgriCgoKUgoKCpoKmgqaCgoKCgpSCgqaCgoKm1oKCpoKCgqaCgoKUpoIADBimggAJEoL4ps6CAAwYgoCC", "", "", "92=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9;109=fromHex/1/4/2,fromHex/2/4/3,fromHex/3/4/4,fromHex/4/4/6;137=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9")]
+[assembly: go.GoPositionMap("crypto/dsa/dsa_test.go", "dsa_test.cs", "ABEagoKCgoKmgriCgoKUgoKCpoKmgqaCgoKCgpSCgqaCgoKm1oKCpoKCgqaCgoKUpoIADBimggAJEoL4ps6CAAwYgoCC", "", "", "94=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9;111=fromHex/1/4/2,fromHex/2/4/3,fromHex/3/4/4,fromHex/4/4/6;139=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

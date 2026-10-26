@@ -188,7 +188,7 @@ public static nint IndexRune(slice<byte> s, rune r) {
 next:
             fails++;
             i++;
-            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> (int)(4)) && i < len(s))) {
+            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> 4) && i < len(s))) {
                 goto fallback;
             }
         }
@@ -293,7 +293,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= width) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -381,7 +381,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= size) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -470,12 +470,14 @@ public static slice<slice<byte>> SplitAfter(slice<byte> s, slice<byte> sep) {
     return genSplit(s, sep, len(sep), -1);
 }
 
-internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};
+[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1}; }
 
 // Fields interprets s as a sequence of UTF-8-encoded code points.
 // It splits the slice s around each instance of one or more consecutive white space
 // characters, as defined by [unicode.IsSpace], returning a slice of subslices of s or an
-// empty slice if s contains only white space.
+// empty slice if s contains only white space. Every element of the returned slice is
+// non-empty. Unlike [Split], leading and trailing runs of white space characters
+// are discarded.
 public static slice<slice<byte>> Fields(slice<byte> s) {
     // First count the fields.
     // This is an exact count if s is ASCII, otherwise it is an approximation.
@@ -487,7 +489,7 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         var r = s[iΔ1];
         setBits |= (byte)(r);
         nint isSpace = (nint)asciiSpace[r];
-        n += (nint)(wasSpace & ~isSpace);
+        n += (wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
 
@@ -536,11 +538,15 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 // FieldsFunc interprets s as a sequence of UTF-8-encoded code points.
 // It splits the slice s at each run of code points c satisfying f(c) and
 // returns a slice of subslices of s. If all code points in s satisfy f(c), or
-// len(s) == 0, an empty slice is returned.
+// len(s) == 0, an empty slice is returned. Every element of the returned slice is
+// non-empty. Unlike [Split], leading and trailing runs of code points
+// satisfying f(c) are discarded.
 //
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
+    var spansᴷ = new stackAppend<FieldsFunc_span>();
+
     var spans = new slice<FieldsFunc_span>(0, 32);
 
     // Find the field start and end indices.
@@ -549,14 +555,10 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
     // more efficient, possibly due to cache effects.
     nint start = -1; // valid span start if >= 0
     for (nint i = 0; i < len(s); ) {
-        nint size = 1;
-        var r = (rune)s[i];
-        if (r >= utf8.RuneSelf) {
-            (r, size) = utf8.DecodeRune(s.slice(i));
-        }
+        var (r, size) = utf8.DecodeRune(s.slice(i));
         if (f(r)){
             if (start >= 0) {
-                spans = append(spans, new FieldsFunc_span(start, i));
+                spans = append(spansᴷ, spans, new FieldsFunc_span(start, i));
                 start = -1;
             }
         } else {
@@ -635,11 +637,7 @@ public static slice<byte> Map(Func<rune, rune> mapping, slice<byte> s) {
     // fine. It could also shrink but that falls out naturally.
     var b = new slice<byte>(0, len(s));
     for (nint i = 0; i < len(s); ) {
-        nint wid = 1;
-        var r = (rune)s[i];
-        if (r >= utf8.RuneSelf) {
-            (r, wid) = utf8.DecodeRune(s.slice(i));
-        }
+        var (r, wid) = utf8.DecodeRune(s.slice(i));
         r = mapping(r);
         if (r >= 0) {
             b = utf8.AppendRune(b, r);
@@ -946,11 +944,7 @@ public static nint LastIndexFunc(slice<byte> s, Func<rune, bool> f) {
 internal static nint indexFunc(slice<byte> s, Func<rune, bool> f, bool truth) {
     nint start = 0;
     while (start < len(s)) {
-        nint wid = 1;
-        var r = (rune)s[start];
-        if (r >= utf8.RuneSelf) {
-            (r, wid) = utf8.DecodeRune(s.slice(start));
-        }
+        var (r, wid) = utf8.DecodeRune(s.slice(start));
         if (f(r) == truth) {
             return start;
         }
@@ -997,14 +991,14 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
         if (c >= utf8.RuneSelf) {
             return (@as.Clone(), false);
         }
-        @as[c / 32] |= (uint32)(((uint32)1 << (int)((c % 32))));
+        @as[c / 32] |= (uint32)(((uint32)1 << (int)(c % 32)));
     }
     return (@as.Clone(), true);
 }
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 
 // containsRune is a simplified version of strings.ContainsRune
@@ -1092,11 +1086,7 @@ internal static slice<byte> trimLeftASCII(slice<byte> s, ж<asciiSet> Ꮡas) {
 
 internal static slice<byte> trimLeftUnicode(slice<byte> s, @string cutset) {
     while (len(s) > 0) {
-        var r = (rune)s[0];
-        nint n = 1;
-        if (r >= utf8.RuneSelf) {
-            (r, n) = utf8.DecodeRune(s);
-        }
+        var (r, n) = utf8.DecodeRune(s);
         if (!containsRune(cutset, r)) {
             break;
         }
@@ -1164,41 +1154,34 @@ internal static slice<byte> trimRightUnicode(slice<byte> s, @string cutset) {
 // TrimSpace returns a subslice of s by slicing off all leading and
 // trailing white space, as defined by Unicode.
 public static slice<byte> TrimSpace(slice<byte> s) {
-    // Fast path for ASCII: look for the first ASCII non-space byte
-    nint start = 0;
-    for (; start < len(s); start++) {
-        var c = s[start];
+    // Fast path for ASCII: look for the first ASCII non-space byte.
+    foreach (var (lo, c) in s) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
-            // slower unicode-aware method on the remaining bytes
-            return TrimFunc(s.slice(start), Δunicode.IsSpace);
+            // slower unicode-aware method on the remaining bytes.
+            return TrimFunc(s.slice(lo), Δunicode.IsSpace);
         }
-        if (asciiSpace[c] == 0) {
-            break;
+        if (asciiSpace[c] != 0) {
+            continue;
+        }
+        s = s.slice(lo);
+        // Now look for the first ASCII non-space byte from the end.
+        for (nint hi = len(s) - 1; hi >= 0; hi--) {
+            var cΔ1 = s[hi];
+            if (cΔ1 >= utf8.RuneSelf) {
+                return TrimFunc(s.slice(0, hi + 1), Δunicode.IsSpace);
+            }
+            if (asciiSpace[cΔ1] == 0) {
+                // At this point, s[:hi+1] starts and ends with ASCII
+                // non-space bytes, so we're done. Non-ASCII cases have
+                // already been handled above.
+                return s.slice(0, hi + 1);
+            }
         }
     }
-
-    // Now look for the first ASCII non-space byte from the end
-    nint stop = len(s);
-    for (; stop > start; stop--) {
-        var c = s[stop - 1];
-        if (c >= utf8.RuneSelf) {
-            return TrimFunc(s.slice(start, stop), Δunicode.IsSpace);
-        }
-        if (asciiSpace[c] == 0) {
-            break;
-        }
-    }
-
-    // At this point s[start:stop] starts and ends with an ASCII
-    // non-space bytes, so we're done. Non-ASCII cases have already
-    // been handled above.
-    if (start == stop) {
-        // Special case to preserve previous TrimLeftFunc behavior,
-        // returning nil instead of empty slice if all spaces.
-        return default!;
-    }
-    return s.slice(start, stop);
+    // Special case to preserve previous TrimLeftFunc behavior,
+    // returning nil instead of empty slice if all spaces.
+    return default!;
 }
 
 // Runes interprets s as a sequence of UTF-8-encoded code points.
@@ -1239,19 +1222,22 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
     var t = new slice<byte>(len(s) + n * (len(@new) - len(old)));
     nint w = 0;
     nint start = 0;
-    for (nint i = 0; i < n; i++) {
-        nint j = start;
-        if (len(old) == 0){
-            if (i > 0) {
-                var (_, wid) = utf8.DecodeRune(s.slice(start));
-                j += wid;
-            }
-        } else {
-            j += Index(s.slice(start), old);
+    if (len(old) > 0){
+        foreach (var _ᴛ1 in range(n)) {
+            nint j = start + Index(s.slice(start), old);
+            w += copy(t.slice(w), s.slice(start, j));
+            w += copy(t.slice(w), @new);
+            start = j + len(old);
         }
-        w += copy(t.slice(w), s.slice(start, j));
+    } else { // len(old) == 0
         w += copy(t.slice(w), @new);
-        start = j + len(old);
+        foreach (var _ᴛ2 in range(n - 1)) {
+            var (_, wid) = utf8.DecodeRune(s.slice(start));
+            nint j = start + wid;
+            w += copy(t.slice(w), s.slice(start, j));
+            w += copy(t.slice(w), @new);
+            start = j;
+        }
     }
     w += copy(t.slice(w), s.slice(start));
     return t.slice(0, w);
@@ -1272,7 +1258,7 @@ public static slice<byte> ReplaceAll(slice<byte> s, slice<byte> old, slice<byte>
 public static bool EqualFold(slice<byte> s, slice<byte> t) {
     // ASCII fast path
     nint i = 0;
-    for (; i < len(s) && i < len(t); i++) {
+    for (nint n = min(len(s), len(t)); i < n; i++) {
         var sr = s[i];
         var tr = t[i];
         if ((byte)(sr | tr) >= utf8.RuneSelf) {
@@ -1302,20 +1288,10 @@ hasUnicode:
     t = t.slice(i);
     while (len(s) != 0 && len(t) != 0) {
         // Extract first rune from each.
-        rune sr = default!;
-        rune tr = default!;
-        if (s[0] < utf8.RuneSelf){
-            (sr, s) = ((rune)s[0], s[1..]);
-        } else {
-            var (rΔ1, size) = utf8.DecodeRune(s);
-            (sr, s) = (rΔ1, s.slice(size));
-        }
-        if (t[0] < utf8.RuneSelf){
-            (tr, t) = ((rune)t[0], t[1..]);
-        } else {
-            var (rΔ2, size) = utf8.DecodeRune(t);
-            (tr, t) = (rΔ2, t.slice(size));
-        }
+        var (sr, size) = utf8.DecodeRune(s);
+        s = s.slice(size);
+        (var tr, size) = utf8.DecodeRune(t);
+        t = t.slice(size);
 
         // If they match, keep going; if not, return false.
 
@@ -1426,7 +1402,7 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
         }
         i++;
         fails++;
-        if (fails >= 4 + (i >> (int)(4)) && i < t) {
+        if (fails >= 4 + (i >> 4) && i < t) {
             // Give up on IndexByte, it isn't skipping ahead
             // far enough to be better than Rabin-Karp.
             // Experiments (using IndexPeriodic) suggest

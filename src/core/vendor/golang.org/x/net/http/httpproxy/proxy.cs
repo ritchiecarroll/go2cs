@@ -63,7 +63,7 @@ partial struct Config {
 // config holds the parsed configuration for HTTP proxy settings.
 partial struct config {
     // Config represents the original configuration as defined above.
-    public partial ref Config Config { get; }
+    /*embed*/ public Config Config;
     // httpsProxy is the parsed URL of the HTTPSProxy if defined.
     internal ж<url.URL> httpsProxy;
     // httpProxy is the parsed URL of the HTTPProxy if defined.
@@ -198,7 +198,7 @@ internal static bool useProxy(this ref config cfg, @string addr) {
     (var nip, err) = netip.ParseAddr(host);
     net.IP ip = default!;
     if (err == default!) {
-        ip = ((net.IP)nip.AsSlice());
+        ip = (net.IP)nip.AsSlice();
         if (ip.IsLoopback()) {
             return false;
         }

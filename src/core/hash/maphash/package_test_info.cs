@@ -8,13 +8,21 @@ global using static global::go.hash.maphash_package;
 global using static global::go.hash.maphash_internal_test_package;
 
 // <ImportedTypeAliases>
+global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
+global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
+global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
+global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
+global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
+global using abiꓸName = go.@internal.abi_package.ΔName;
+global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
+global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
 global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -34,6 +42,12 @@ using static global::go.hash.maphash_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -69,7 +83,9 @@ public static partial class maphash_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸmaps() => builtin.initPackage(typeof(@internal.runtime.maps_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));

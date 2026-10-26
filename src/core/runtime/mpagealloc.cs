@@ -45,18 +45,23 @@
 // that a large amount of virtual address space may be reserved by the runtime.
 namespace go;
 
+using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
+using @internal;
 using @internal.runtime;
 
 partial class runtime_package {
 
 // The size of a bitmap chunk, i.e. the amount of bits (that is, pages) to consider
-// in the bitmap at once.
+// in the bitmap at once. It is 4MB on most platforms, except on Wasm it is 512KB.
+// We use a smaller chuck size on Wasm for the same reason as the smaller arena
+// size (see heapArenaBytes).
 internal static UntypedInt pallocChunkPages => /* 1 << logPallocChunkPages */ 512;
 internal static UntypedInt pallocChunkBytes => /* pallocChunkPages * pageSize */ 4194304;
-internal static UntypedInt logPallocChunkPages => 9;
-internal static UntypedInt logPallocChunkBytes => /* logPallocChunkPages + pageShift */ 22;
+internal static UntypedInt logPallocChunkPages => /* 9*(1-goarch.IsWasm) + 6*goarch.IsWasm */ 9;
+internal static UntypedInt logPallocChunkBytes => /* logPallocChunkPages + gc.PageShift */ 22;
 
 // The number of radix bits for each level.
 //
@@ -79,6 +84,8 @@ internal static UntypedInt summaryL0Bits => /* heapAddrBits - logPallocChunkByte
 // there should this change.
 internal static UntypedInt pallocChunksL2Bits => /* heapAddrBits - logPallocChunkBytes - pallocChunksL1Bits */ 13;
 internal static UntypedInt pallocChunksL1Shift => /* pallocChunksL2Bits */ 13;
+
+internal static readonly @string vmaNamePageAllocIndex = "page alloc index"u8;
 
 // maxSearchAddr returns the maximum searchAddr value, which indicates
 // that the heap has no free space.
@@ -103,7 +110,7 @@ partial struct chunkIdx /*num:nuint*/;
 // chunkIndex returns the global index of the palloc chunk containing the
 // pointer p.
 internal static chunkIdx chunkIndex(uintptr Δp) {
-    return ((chunkIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)pallocChunkBytes));
+    return (chunkIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)pallocChunkBytes);
 }
 
 // chunkBase returns the base address of the palloc chunk at index ci.
@@ -124,7 +131,7 @@ internal static nuint l1(this chunkIdx i) {
         // L1 map.
         return 0;
     } else {
-        return ((nuint)i >> (int)(pallocChunksL1Shift));
+        return (nuint)i >> (int)(pallocChunksL1Shift);
     }
 }
 
@@ -133,7 +140,7 @@ internal static nuint l2(this chunkIdx i) {
     if (pallocChunksL1Bits == 0){
         return (nuint)i;
     } else {
-        return (nuint)((nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1));
+        return (nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1);
     }
 }
 
@@ -230,6 +237,7 @@ partial struct pageAlloc {
     // heapAddrBits | L1 Bits | L2 Bits | L2 Entry Size
     // ------------------------------------------------
     // 32           | 0       | 10      | 128 KiB
+    // 32 (wasm)    | 0       | 13      | 128 KiB
     // 33 (iOS)     | 0       | 11      | 256 KiB
     // 48           | 13      | 13      | 1 MiB
     //
@@ -408,7 +416,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         if (Δp.chunks[c.l1()] == nil) {
             // Create the necessary l2 entry.
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
-            @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat);
+            @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat, vmaNamePageAllocIndex);
             if (r == nil) {
                 @throw(pageAllocOutOfMemoryˢ);
             }
@@ -522,7 +530,7 @@ internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npage
         if (alloc){
             builtin.clear(whole);
         } else {
-            foreach (var (i, _) in whole) {
+            foreach (var i in range(whole)) {
                 whole[i] = freeChunkSum;
             }
         }
@@ -731,8 +739,8 @@ internal static (uintptr, offAddr) find(this ref pageAlloc Δp, uintptr npages) 
         if (!(addrΔ1.add(size - 1).lessThan(ᏑfirstFree.Value.@base) || ᏑfirstFree.Value.bound.lessThan(addrΔ1))) {
             // This range only partially overlaps with the firstFree range,
             // so throw.
-            print((@string)"runtime: addr = "u8, ((Δhex)(uint64)addrΔ1.addr()), (@string)", size = "u8, size, (@string)"\n"u8);
-            print((@string)"runtime: base = "u8, ((Δhex)(uint64)ᏑfirstFree.Value.@base.addr()), (@string)", bound = "u8, ((Δhex)(uint64)ᏑfirstFree.Value.bound.addr()), (@string)"\n"u8);
+            print((@string)"runtime: addr = "u8, (Δhex)(uint64)addrΔ1.addr(), (@string)", size = "u8, size, (@string)"\n"u8);
+            print((@string)"runtime: base = "u8, (Δhex)(uint64)ᏑfirstFree.Value.@base.addr(), (@string)", bound = "u8, (Δhex)(uint64)ᏑfirstFree.Value.bound.addr(), (@string)"\n"u8);
             @throw(rangePartiallyOverlapsˢ);
         }
     }
@@ -763,8 +771,8 @@ nextLevel:
         // case the searchAddr should be the same as i after levelShift.
         nint j0 = 0;
         {
-            nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((nint)(searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
-                j0 = (nint)(searchIdxΔ1 & (entriesPerBlock - 1));
+            nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
+                j0 = searchIdxΔ1 & (entriesPerBlock - 1);
             }
         }
 
@@ -842,7 +850,7 @@ nextLevel:
         // lied to us. In either case, dump some useful state and throw.
         print((@string)"runtime: summary["u8, l - 1, (@string)"]["u8, lastSumIdx, (@string)"] = "u8, lastSum.start(), (@string)", "u8, lastSum.max(), (@string)", "u8, lastSum.end(), (@string)"\n"u8);
         print((@string)"runtime: level = "u8, l, (@string)", npages = "u8, npages, (@string)", j0 = "u8, j0, (@string)"\n"u8);
-        print((@string)"runtime: p.searchAddr = "u8, ((Δhex)(uint64)Δp.searchAddr.addr()), (@string)", i = "u8, i, (@string)"\n"u8);
+        print((@string)"runtime: p.searchAddr = "u8, (Δhex)(uint64)Δp.searchAddr.addr(), (@string)", i = "u8, i, (@string)"\n"u8);
         print((@string)"runtime: levelShift[level] = "u8, levelShift[l], (@string)", levelBits[level] = "u8, levelBits[l], (@string)"\n"u8);
         for (nint jΔ2 = 0; jΔ2 < len(entries); jΔ2++) {
             var sum = entries[jΔ2];
@@ -860,7 +868,7 @@ break_nextLevel:;
     //
     // After iterating over all levels, i must contain a chunk index which
     // is what the final level represents.
-    chunkIdx ci = ((chunkIdx)(nuint)i);
+    chunkIdx ci = (chunkIdx)(nuint)i;
     var (j, searchIdx) = Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).find(npages, 0);
     if (j == ~(nuint)0) {
         // We couldn't find any space in this chunk despite the summaries telling
@@ -916,7 +924,7 @@ internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc Δp, uintp
                 var (j, searchIdx) = Δp.chunkOf(i).of(pallocData.ᏑpallocBits).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
                 if (j == ~(nuint)0) {
                     print((@string)"runtime: max = "u8, max, (@string)", npages = "u8, npages, (@string)"\n"u8);
-                    print((@string)"runtime: searchIdx = "u8, chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = "u8, ((Δhex)(uint64)Δp.searchAddr.addr()), (@string)"\n"u8);
+                    print((@string)"runtime: searchIdx = "u8, chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = "u8, (Δhex)(uint64)Δp.searchAddr.addr(), (@string)"\n"u8);
                     @throw(badSummaryDataˢ);
                 }
                 addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
@@ -1004,6 +1012,47 @@ internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages
     Δp.update(@base, npages, true, false);
 }
 
+// markRandomPaddingPages marks the range of memory [base, base+npages*pageSize]
+// as both allocated and scavenged. This is used for randomizing the base heap
+// address. Both the alloc and scav bits are set so that the pages are not used
+// and so the memory accounting stats are correctly calculated.
+//
+// Similar to allocRange, it also updates the summaries to reflect the
+// newly-updated bitmap.
+//
+// p.mheapLock must be held.
+internal static void markRandomPaddingPages(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
+    assertLockHeld(Δp.mheapLock);
+
+    var limit = @base + npages * (uintptr)pageSize - 1;
+    chunkIdx sc = chunkIndex(@base);
+    chunkIdx ec = chunkIndex(limit);
+    nuint si = chunkPageIndex(@base);
+    nuint ei = chunkPageIndex(limit);
+    if (sc == ec){
+        var chunk = Δp.chunkOf(sc);
+        chunk.allocRange(si, ei + 1 - si);
+        Δp.scav.index.alloc(sc, ei + 1 - si);
+        chunk.of(pallocData.Ꮡscavenged).setRange(si, ei + 1 - si);
+    } else {
+        var chunk = Δp.chunkOf(sc);
+        chunk.allocRange(si, (nuint)pallocChunkPages - si);
+        Δp.scav.index.alloc(sc, (nuint)pallocChunkPages - si);
+        chunk.of(pallocData.Ꮡscavenged).setRange(si, (nuint)pallocChunkPages - si);
+        for (chunkIdx c = sc + 1; c < ec; c++) {
+            var chunkΔ1 = Δp.chunkOf(c);
+            chunkΔ1.allocAll();
+            Δp.scav.index.alloc(c, pallocChunkPages);
+            chunkΔ1.of(pallocData.Ꮡscavenged).setAll();
+        }
+        chunk = Δp.chunkOf(ec);
+        chunk.allocRange(0, ei + 1);
+        Δp.scav.index.alloc(ec, ei + 1);
+        chunk.of(pallocData.Ꮡscavenged).setRange(0, ei + 1);
+    }
+    Δp.update(@base, npages, true, true);
+}
+
 internal static uintptr pallocSumBytes => /* unsafe.Sizeof(pallocSum(0)) */ 8;
 
 // maxPackedValue is the maximum value that any of the three fields in
@@ -1025,41 +1074,41 @@ partial struct pallocSum /*num:uint64*/;
 // packPallocSum takes a start, max, and end value and produces a pallocSum.
 internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     if (max == maxPackedValue) {
-        return ((pallocSum)(uint64)(((uint64)1 << (int)(63))));
+        return (pallocSum)(uint64)((uint64)1 << 63);
     }
-    return ((pallocSum)((uint64)((uint64)(((uint64)((uint64)start & (uint64)((maxPackedValue - 1)))) | ((((uint64)((uint64)max & (uint64)((maxPackedValue - 1)))) << (int)(logMaxPackedValue)))) | ((((uint64)((uint64)end & (uint64)((maxPackedValue - 1)))) << (int)((2 * logMaxPackedValue)))))));
+    return (pallocSum)(((uint64)start & (uint64)(maxPackedValue - 1)) | (((uint64)max & (uint64)(maxPackedValue - 1)) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)(maxPackedValue - 1)) << (int)(2 * logMaxPackedValue)));
 }
 
 // start extracts the start value from a packed sum.
 internal static nuint start(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1))));
+    return (nuint)((uint64)Δp & (uint64)(maxPackedValue - 1));
 }
 
 // max extracts the max value from a packed sum.
 internal static nuint max(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1))));
+    return (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // end extracts the end value from a packed sum.
 internal static nuint end(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1))));
+    return (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // unpack unpacks all three values from the summary.
 internal static (nuint, nuint, nuint) unpack(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
-    return ((nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1)))));
+    return ((nuint)((uint64)Δp & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1)));
 }
 
 // mergeSummaries merges consecutive summaries which may each represent at

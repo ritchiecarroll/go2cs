@@ -141,8 +141,11 @@ public class LogAfterCompleteTests
         Assert.IsInstanceOfType(panic.State, typeof(@string),
             "the panicked value must be a Go string, or a converted recover().(string) cannot assert on it");
 
-        Assert.AreEqual($"Log in goroutine after {solo.Name} has completed: {LateRecord}", panic.State!.ToString(),
-            "the panic must carry Go's own text, composed exactly as testing.go:1029 composes it");
+        // Go 1.25 reshapes the record BEFORE the panic (1.26.9 testing.go:1028-1039: one trailing newline
+        // trimmed, later lines indented four spaces, a newline appended), so the text now ends in "\n";
+        // Go 1.24 used the record unchanged.
+        Assert.AreEqual($"Log in goroutine after {solo.Name} has completed: {LateRecord}\n", panic.State!.ToString(),
+            "the panic must carry Go's own text, composed exactly as Go 1.26's (*common).log composes it");
     }
 
     // MUST-NOT-REGRESS: a live test's own record still goes to the live test. This arm passes with the

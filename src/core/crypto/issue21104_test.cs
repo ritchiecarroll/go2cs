@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using aes = crypto.aes_package;
-using cipher = crypto.cipher_package;
-using rc4 = crypto.rc4_package;
+using aes = global::go.crypto.aes_package;
+using cipher = global::go.crypto.cipher_package;
+using rc4 = global::go.crypto.rc4_package;
 using testing = testing_package;
-using crypto;
+using global::go.crypto;
 
 partial class crypto_test_package {
 
@@ -87,7 +87,7 @@ internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherTe
             }
             @string plain = plainᶜ;
             if (plainTextʗ1[shorterLen] == plain[shorterLen]) {
-                Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, ((@string)plainTextʗ1));
+                Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, (@string)plainTextʗ1);
             }
         }, ref ᒐ);
         xor(plainText.slice(0, shorterLen), cipherText);

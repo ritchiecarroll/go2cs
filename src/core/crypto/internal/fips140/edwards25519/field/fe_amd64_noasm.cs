@@ -6,12 +6,12 @@ namespace go.crypto.@internal.fips140.edwards25519;
 
 partial class field_package {
 
-internal static void feMul(ж<Element> Ꮡv, ref Element x, ref Element y) {
-    feMulGeneric(Ꮡv, ref x, ref y);
+internal static void feMul(ref Element v, ref Element x, ref Element y) {
+    feMulGeneric(ref v, ref x, ref y);
 }
 
-internal static void feSquare(ж<Element> Ꮡv, ref Element x) {
-    feSquareGeneric(Ꮡv, ref x);
+internal static void feSquare(ref Element v, ref Element x) {
+    feSquareGeneric(ref v, ref x);
 }
 
 } // end field_package

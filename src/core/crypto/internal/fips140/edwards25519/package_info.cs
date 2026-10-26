@@ -41,9 +41,13 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<affineCached, ж<affineCached>>(Indirect = true)]
-[assembly: GoImplicitConv<projCached, ж<projCached>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,11 +57,11 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "ACdSooKCAAwekoKCgti6kurekqaCgoKCgqaCgoKCrOKCrsaipoKUooKClIKCpgAFEgAOEoKCAAcQgqaCpoKCuIKUgoKClKaygqqSgoKCpoKCgoKmgoKCgoKmgoKCgoK46pSCgoKCgqaCgoKUgoKCgoKssoKCgqiSgoKCpoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgqyygoKCgoKokpSygoKClKyygoKCgqiSgoKCqLKCgqiygoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "ABtyAB0CqrSCqOSCqOSCqNSCqOSCqMKCAAUS4oIADRyCgoKClNy0usKClIKCkpLs0oKUgqaSpLiYooKmgpSkpgAFHAAPCoKqooKCgoKolqKmsoKCkqjCgoKCkoKCgoKCgqzogoKUgpKCpoKUgqaClIKCgoKCgpSmuJTugqaCgpSCppSmgoKCpqaCgriCgoKm")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "ACdSooKCAAwekoKCgti6kurekqaCgoKCgqaCgoKCrOKCrsaipoKUooKClIKCpgAFEgAPEoKCAAcQgqaCpoKCuIKUgoKClKaygqqSgoKCpoKCgoKmgoKCgoKmgoKCgoK46pSCgoKCgqaCgoKUgoKCgoKssoKCgqiSgoKCpoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgqyygoKCgoKokpSygoKClKyygoKCgqiSgoKCqLKCgqiygoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB10AB0CqrSCqOSCqOSCqNSCqOSCqMKCAAUS4oIADRyCgoKClNy0usKClIKCkpLs0oKUgqaSpLiYooKmgoKClIKCgriCgoKCAAUcAA8KgqqigoKCgqiWoqaygoKSqMKCgoKSgoKCgoKCrOiCgpSCkoKmgpSCpoKUgoKCgoKClKa4lO6CpoKClIKmlKaCgoKmpoKCuIKCgqY=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_fiat.go", "scalar_fiat.cs", "ADqOAQAPAoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAhwACwKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCAAIaAAoCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIqABQCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAkWooKCgoKCuAAJGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCqqKClAAJGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCkoKCgqaCgoKSgoKCpqaC", "12-20:1;128-130:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5E1oKSkri6toKSkpS6toKSgpKSgrqSgpKCkpKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5A1oKSkri6toKSkpS6toKSgpKSgrqSgpKCkpKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -100,7 +104,6 @@ public static partial class edwards25519_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸcheck() => builtin.initPackage(typeof(go.crypto.@internal.fips140.check_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸedwards25519ꓸfield() => builtin.initPackage(typeof(go.crypto.@internal.fips140.edwards25519.field_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsubtle() => builtin.initPackage(typeof(go.crypto.@internal.fips140.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));

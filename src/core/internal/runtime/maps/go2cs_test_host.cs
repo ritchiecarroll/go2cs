@@ -9,26 +9,21 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("internal/runtime/maps", new string[]
         {
-            "export_noswiss_test.go",
-            "export_swiss_test.go",
             "export_test.go",
             "fuzz_test.go",
             "group.go",
             "map.go",
-            "map_swiss_test.go",
             "map_test.go",
             "runtime.go",
-            "runtime_fast32_swiss.go",
-            "runtime_fast64_swiss.go",
-            "runtime_faststr_swiss.go",
-            "runtime_noswiss.go",
-            "runtime_swiss.go",
+            "runtime_fast32.go",
+            "runtime_fast64.go",
+            "runtime_faststr.go",
             "table.go",
             "table_debug.go",
         });
         registry.Add("TestAlignUpPow2", maps_test_package.TestAlignUpPow2, "map_test.go", 558);
         registry.Add("TestCtrlSize", maps_test_package.TestCtrlSize, "map_test.go", 16);
-        registry.Add("TestEncodeDecode", maps_test_package.TestEncodeDecode, "fuzz_test.go", 69);
+        registry.Add("TestEncodeDecode", maps_test_package.TestEncodeDecode, "fuzz_test.go", 68);
         registry.Add("TestMapDelete", maps_test_package.TestMapDelete, "map_test.go", 98);
         registry.Add("TestMapDeleteClear", maps_test_package.TestMapDeleteClear, "map_test.go", 674);
         registry.Add("TestMapIndirect", maps_test_package.TestMapIndirect, "map_test.go", 632);
@@ -36,13 +31,14 @@ internal static class Go2CsTestHost
         registry.Add("TestMapSplit", maps_test_package.TestMapSplit, "map_test.go", 61);
         registry.Add("TestMapZeroSizeSlot", maps_test_package.TestMapZeroSizeSlot, "map_test.go", 602);
         registry.Add("TestTableClear", maps_test_package.TestTableClear, "map_test.go", 139);
-        registry.Add("TestTableGroupCount", maps_test_package.TestTableGroupCount, "map_swiss_test.go", 35);
+        registry.Add("TestTableGroupCount", maps_test_package.TestTableGroupCount, "map_test.go", 718);
         registry.Add("TestTableIteration", maps_test_package.TestTableIteration, "map_test.go", 279);
         registry.Add("TestTableIterationDelete", maps_test_package.TestTableIterationDelete, "map_test.go", 333);
         registry.Add("TestTableIterationGrowDelete", maps_test_package.TestTableIterationGrowDelete, "map_test.go", 405);
         registry.Add("TestTableIterationGrowDuplicate", maps_test_package.TestTableIterationGrowDuplicate, "map_test.go", 550);
         registry.Add("TestTableKeyUpdate", maps_test_package.TestTableKeyUpdate, "map_test.go", 176);
         registry.Add("TestTablePutDelete", maps_test_package.TestTablePutDelete, "map_test.go", 217);
+        registry.Add("TestTombstoneGrow", maps_test_package.TestTombstoneGrow, "map_test.go", 897);
         return TestHost.Run(registry, args);
     }
 }

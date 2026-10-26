@@ -51,7 +51,7 @@ internal static UntypedInt maxShift => /* _W - 4 */ 60;
 
 // Init initializes x to the decimal representation of m << shift (for
 // shift >= 0), or m >> -shift (for shift < 0).
-internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
+internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // special case 0
@@ -70,13 +70,13 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
         if (sΔ1 >= ntz) {
             sΔ1 = ntz; // shift at most ntz bits
         }
-        m = ((nat)default!).shr(m, sΔ1);
+        m = ((Δnat)default!).rsh(m, sΔ1);
         shift += (nint)sΔ1;
     }
 
     // Do any shift left in binary representation.
     if (shift > 0) {
-        m = ((nat)default!).shl(m, (nuint)shift);
+        m = ((Δnat)default!).lsh(m, (nuint)shift);
         shift = 0;
     }
 
@@ -94,21 +94,22 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
     // Do any (remaining) shift right in decimal representation.
     if (shift < 0) {
         while (shift < (nint)(-maxShift)) {
-            shr(ref (Ꮡx).DerefOrNull(), maxShift);
+            rsh(ref (Ꮡx).DerefOrNull(), maxShift);
             shift += maxShift;
         }
-        shr(ref (Ꮡx).DerefOrNull(), (nuint)(-shift));
+        rsh(ref (Ꮡx).DerefOrNull(), (nuint)(-shift));
     }
 }
 
-// shr implements x >> s, for s <= maxShift.
-internal static void shr(ref @decimal x, nuint s) {
+// rsh implements x >> s, for s <= maxShift.
+internal static void rsh(ref @decimal x, nuint s) {
     // Division by 1<<s using shift-and-subtract algorithm.
+
     // pick up enough leading digits to cover first shift
     nint r = 0; // read index
     Word n = default!;
-    while ((n >> (int)(s)) == 0 && r < len(x.mant)) {
-        Word ch = ((Word)(nuint)x.mant[r]);
+    while (n >> s == 0 && r < len(x.mant)) {
+        Word ch = (Word)(nuint)x.mant[r];
         r++;
         n = n * 10 + ch - (rune)'0';
     }
@@ -117,7 +118,7 @@ internal static void shr(ref @decimal x, nuint s) {
         x.mant = x.mant[..0];
         return;
     }
-    while ((n >> (int)(s)) == 0) {
+    while (n >> s == 0) {
         r++;
         n *= 10;
     }
@@ -125,11 +126,11 @@ internal static void shr(ref @decimal x, nuint s) {
 
     // read a digit, write a digit
     nint w = 0; // write index
-    Word mask = (((Word)1) << (int)(s)) - 1;
+    Word mask = (((Word)1) << s) - 1;
     while (r < len(x.mant)) {
-        Word ch = ((Word)(nuint)x.mant[r]);
+        Word ch = (Word)(nuint)x.mant[r];
         r++;
-        Word d = (n >> (int)(s));
+        Word d = n >> s;
         n &= (Word)(mask); // n -= d << s
         x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
@@ -138,7 +139,7 @@ internal static void shr(ref @decimal x, nuint s) {
 
     // write extra digits that still fit
     while (n > 0 && w < len(x.mant)) {
-        Word d = (n >> (int)(s));
+        Word d = n >> s;
         n &= (Word)(mask);
         x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
@@ -148,7 +149,7 @@ internal static void shr(ref @decimal x, nuint s) {
 
     // append additional digits that didn't fit
     while (n > 0) {
-        Word d = (n >> (int)(s));
+        Word d = n >> s;
         n &= (Word)(mask);
         x.mant = append(x.mant, (byte)(nuint)(d + (rune)'0'));
         n = n * 10;
@@ -158,6 +159,8 @@ internal static void shr(ref @decimal x, nuint s) {
 }
 
 internal static @string String(this ref @decimal x) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(x.mant) == 0) {
         return "0"u8;
     }
@@ -177,7 +180,7 @@ internal static @string String(this ref @decimal x) {
         // dd.ddd
         buf = new slice<byte>(0, 1 + len(x.mant));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(0, x.exp));
-        buf = append(buf, (byte)((rune)'.'));
+        buf = append(bufᴷ, buf, (byte)((rune)'.'));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(x.exp));
         break;
     }
@@ -189,14 +192,17 @@ internal static @string String(this ref @decimal x) {
         break;
     }}
 
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // appendZeros appends n 0 digits to buf and returns buf.
 internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
+    var bufᴷ = new stackAppend<byte>(moves: true);
+
     for (; n > 0; n--) {
-        buf = append(buf, (byte)((rune)'0'));
+        buf = append(bufᴷ, buf, (byte)((rune)'0'));
     }
+    buf = move2heap(bufᴷ, buf);
     return buf;
 }
 

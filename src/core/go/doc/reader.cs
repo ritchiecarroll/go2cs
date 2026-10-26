@@ -7,14 +7,14 @@ using cmp = cmp_package;
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using lazyregexp = @internal.lazyregexp_package;
+using lazyregexp = global::go.@internal.lazyregexp_package;
 using path = path_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
 
@@ -557,6 +557,8 @@ internal static ж<lazyregexp.Regexp> noteCommentRx = lazyregexp.New(@"^/[/*][ \
 // clean replaces each sequence of space, \r, or \t characters
 // with a single space and removes any trailing and leading spaces.
 internal static @string clean(@string s) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     var p = (byte)(rune)' ';
     for (nint i = 0; i < len(s); i++) {
@@ -565,7 +567,7 @@ internal static @string clean(@string s) {
             q = (rune)' ';
         }
         if (q != (rune)' ' || p != (rune)' ') {
-            b = append(b, q);
+            b = append(bᴷ, b, q);
             p = q;
         }
     }
@@ -575,7 +577,7 @@ internal static @string clean(@string s) {
             b = b.slice(0, n - 1);
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // readNote collects a single note from a sequence of comments.
@@ -1029,7 +1031,7 @@ public static bool IsPredeclared(@string s) {
     return predeclaredTypes[s] || predeclaredFuncs[s] || predeclaredConstants[s];
 }
 
-internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
+[GoLazy] partial class lazyᴛpredeclaredTypes { internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
     ["any"u8] = true,
     ["bool"u8] = true,
     ["byte"u8] = true,
@@ -1052,9 +1054,9 @@ internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
     ["uint32"u8] = true,
     ["uint64"u8] = true,
     ["uintptr"u8] = true
-};
+}; }
 
-internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
+[GoLazy] partial class lazyᴛpredeclaredFuncs { internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
     ["append"u8] = true,
     ["cap"u8] = true,
     ["clear"u8] = true,
@@ -1073,7 +1075,7 @@ internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
     ["println"u8] = true,
     ["real"u8] = true,
     ["recover"u8] = true
-};
+}; }
 
 internal static map<@string, bool> predeclaredConstants = new map<@string, bool>{
     ["false"u8] = true,

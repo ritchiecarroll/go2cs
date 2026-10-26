@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-231_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/math.big.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/math/big@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/math/big) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/math/big)
+[![Tests](https://img.shields.io/badge/Tests-248_matched_%2F_3_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/math.big.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/math/big@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/math/big) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/math/big)
 
 From C#, call this package through the static class go.math.big_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -65,7 +65,7 @@ Methods which don't require a result value to be passed in (for instance, \[Int.
 
 Various methods support conversions between strings and corresponding numeric values, and vice versa: \*\[Int], \*\[Rat], and \*\[Float] values implement the Stringer interface for a (default) string representation of the value, but also provide SetString methods to initialize a value from a string in a variety of supported formats (see the respective SetString documentation).
 
-Finally, \*\[Int], \*\[Rat], and \*\[Float] satisfy [fmt.Scanner](https://pkg.go.dev/fmt@go1.24.13#Scanner) for scanning and (except for \*\[Rat]) the Formatter interface for formatted printing.
+Finally, \*\[Int], \*\[Rat], and \*\[Float] satisfy [fmt.Scanner](https://pkg.go.dev/fmt@go1.26.10#Scanner) for scanning and (except for \*\[Rat]) the Formatter interface for formatted printing.
 
 ---
 

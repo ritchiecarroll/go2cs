@@ -132,6 +132,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
         Types: sortedTypes(r.types, (Mode)(mode & AllMethods) != 0),
         Vars: sortedValues(r.values, token.VAR),
         Funcs: sortedFuncs(r.funcs, true),
+
         importByName: r.importByName,
         syms: new map<@string, bool>()
     ));
@@ -163,6 +164,8 @@ internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
         p.collectValues((~t).Vars);
         p.collectFuncs((~t).Funcs);
         p.collectFuncs((~t).Methods);
+        p.collectInterfaceMethods(t);
+        p.collectStructFields(t);
     }
 }
 
@@ -182,6 +185,55 @@ internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
     }
 }
 
+// collectInterfaceMethods adds methods of interface types within t to p.syms.
+// Note that t.Methods will contain methods of non-interface types, but not interface types.
+// Adding interface methods to t.Methods might make sense, but would cause us to
+// include those methods in the documentation index. Adding interface methods to p.syms
+// here allows us to linkify references like [io.Reader.Read] without making any other
+// changes to the documentation formatting at this time.
+//
+// If we do start adding interface methods to t.Methods in the future,
+// collectInterfaceMethods can be dropped as redundant with collectFuncs(t.Methods).
+internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    foreach (var (_, s) in (~t.Decl).Specs) {
+        var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
+        if (!ok) {
+            continue;
+        }
+        var (list, isStruct) = fields((~spec).Type);
+        if (isStruct) {
+            continue;
+        }
+        foreach (var (_, field) in list) {
+            foreach (var (_, name) in (~field).Names) {
+                p.syms[t.Name + "."u8 + (~name).Name] = true;
+            }
+        }
+    }
+}
+
+internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    foreach (var (_, s) in (~t.Decl).Specs) {
+        var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
+        if (!ok) {
+            continue;
+        }
+        var (list, isStruct) = fields((~spec).Type);
+        if (!isStruct) {
+            continue;
+        }
+        foreach (var (_, field) in list) {
+            foreach (var (_, name) in (~field).Names) {
+                p.syms[t.Name + "."u8 + (~name).Name] = true;
+            }
+        }
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testGoˢ = "_test.go"u8;
 
@@ -189,6 +241,7 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 //
 // The package is specified by a list of *ast.Files and corresponding
 // file set, which must not be nil.
+//
 // NewFromFiles uses all provided files when computing documentation,
 // so it is the caller's responsibility to provide only the files that
 // match the desired build context. "go/build".Context.MatchFile can
@@ -209,6 +262,7 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
     ref var fset = ref Ꮡfset.DerefOrNull();
+    var testGoFilesᴷ = new stackAppend<ж<ast.File>>();
 
     // Check for invalid API usage.
     if (Ꮡfset == nil) {
@@ -235,53 +289,42 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     }}
 
     // Collect .go and _test.go files.
+    ref var pkgName = ref heap(new @string(), out var ᏑpkgName);
     map<@string, ж<ast.File>> goFiles = new map<@string, ж<ast.File>>();
     slice<ж<ast.File>> testGoFiles = default!;
-    foreach (var (i, _) in files) {
-        var f = Ꮡfset.File(files[i].Pos());
+    foreach (var (i, @file) in files) {
+        var f = Ꮡfset.File(@file.Pos());
         if (f == nil) {
             return (default!, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));
         }
         {
-            @string name = f.Name();
+            @string filename = f.Name();
             switch (ᐧ) {
-            case {} when strings.HasSuffix(name, ".go"u8) && !strings.HasSuffix(name, testGoˢ): {
-                goFiles[name] = files[i];
+            case {} when strings.HasSuffix(filename, testGoˢ): {
+                testGoFiles = append(testGoFilesᴷ, testGoFiles, @file);
                 break;
             }
-            case {} when strings.HasSuffix(name, testGoˢ): {
-                testGoFiles = append(testGoFiles, files[i]);
+            case {} when strings.HasSuffix(filename, ".go"u8): {
+                pkgName = @file.Value.Name.Value.Name;
+                goFiles[filename] = @file;
                 break;
             }
             default: {
-                return (default!, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, name));
+                return (default!, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, filename));
             }}
         }
     }
 
-    // TODO(dmitshur,gri): A relatively high level call to ast.NewPackage with a simpleImporter
-    // ast.Importer implementation is made below. It might be possible to short-circuit and simplify.
-
     // Compute package documentation.
-    var (pkg, _) = ast.NewPackage(Ꮡfset, goFiles, new Func<map<@string, ж<ast.Object>>, @string, (ж<ast.Object>, error)>(simpleImporter), nil); // Ignore errors that can happen due to unresolved identifiers.
+    //
+    // Since this package doesn't need Package.{Scope,Imports}, or
+    // handle errors, and ast.File's Scope field is unset in files
+    // parsed with parser.SkipObjectResolution, we construct the
+    // Package directly instead of calling [ast.NewPackage].
+    var pkg = Ꮡ(new ast.Package(Name: pkgName, Files: goFiles));
     var p = New(pkg, importPath, mode);
     classifyExamples(p, Examples(testGoFiles.ꓸꓸꓸ));
     return (p, default!);
-}
-
-// simpleImporter returns a (dummy) package object named by the last path
-// component of the provided package path (as is the convention for packages).
-// This is sufficient to resolve package identifiers without doing an actual
-// import. It never returns an error.
-internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Object>> imports, @string path) {
-    var pkg = imports[path];
-    if (pkg == nil) {
-        // note that strings.LastIndex returns -1 if there is no "/"
-        pkg = ast.NewObj(ast.Pkg, path.slice(strings.LastIndex(path, "/"u8) + 1));
-        pkg.Value.Data = ast.NewScope(nil).OrTypedNil(); // required by ast.NewPackage for dot-import
-        imports[path] = pkg;
-    }
-    return (pkg, default!);
 }
 
 // lookupSym reports whether the package has a given symbol or method.

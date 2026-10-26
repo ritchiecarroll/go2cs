@@ -28,6 +28,8 @@ partial class slog_package {
 //
 // Users of the slog package should not invoke Handler methods directly.
 // They should use the methods of [Logger] instead.
+//
+// Before implementing your own handler, consult https://go.dev/s/slog-handler-guide.
 partial interface ΔHandler {
     // Enabled reports whether the handler handles records at the given level.
     // The handler ignores records whose level is lower.
@@ -56,6 +58,9 @@ partial interface ΔHandler {
     //   - If a group's key is empty, inline the group's Attrs.
     //   - If a group has no Attrs (even if it has a non-empty key),
     //     ignore it.
+    //
+    // [Logger] discards any errors from Handle. Wrap the Handle method to
+    // process any errors from Handlers.
     error Handle(context.Context _Δp0, Record _Δp1);
     // WithAttrs returns a new Handler whose attributes consist of
     // both the receiver's attributes and the arguments.
@@ -312,7 +317,11 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         }
         // source
         if (h.opts.AddSource) {
-            Ꮡstate.appendAttr(Any(SourceKey, r.source().OrTypedNil()));
+            var src = r.Source();
+            if (src == nil) {
+                src = Ꮡ(new ΔSource(nil));
+            }
+            Ꮡstate.appendAttr(Any(SourceKey, src.OrTypedNil()));
         }
         key = MessageKey;
         @string msg = r.Message;
@@ -377,7 +386,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
     if ((~s.h).json) {
         // Close all open groups.
-        foreach ((_, _) in (~s.h).groups.slice(0, nOpenGroups)) {
+        foreach (var _ᴛ1 in range((~s.h).groups.slice(0, nOpenGroups))) {
             s.buf.WriteByte((rune)'}');
         }
         // Close the top-level object.
@@ -405,11 +414,11 @@ partial struct handleState {
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
-internal static ж<sync.Pool> ᏑgroupPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => {
+[GoLazy] partial class lazyᴛgroupPool { internal static ж<sync.Pool> ᏑgroupPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => {
     var s = new slice<@string>(0, 10);
     return Ꮡ(s);
 }
-));
+)); }
 internal static ref sync.Pool groupPool => ref ᏑgroupPool.Value;
 
 internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> Ꮡbuf, bool freeBuf, @string sep) {
@@ -521,7 +530,10 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     {
         var v = a.Value; if (v.Kind() == KindAny) {
             {
-                var (src, ok) = v.Any()._<ж<Source>>(ᐧ); if (ok) {
+                var (src, ok) = v.Any()._<ж<ΔSource>>(ᐧ); if (ok) {
+                    if (src.isEmpty()) {
+                        return false;
+                    }
                     if ((~s.h).json){
                         a.Value = src.group();
                     } else {
@@ -566,8 +578,7 @@ internal static void appendError(this ref handleState s, error err) {
 internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
-        // TODO: optimize by avoiding allocation.
-        s.appendString(((@string)(slice<byte>)s.prefix.ValueSlot) + key);
+        s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
     } else {
         s.appendString(key);
     }
@@ -577,6 +588,29 @@ internal static void appendKey(this ref handleState s, @string key) {
         s.buf.WriteByte((rune)'=');
     }
     s.sep = s.h.attrSep();
+}
+
+// appendTwoStrings implements appendString(prefix + key), but faster.
+internal static void appendTwoStrings(this ref handleState s, @string x, @string y) {
+    var buf = s.buf.ValueSlot;
+    switch (ᐧ) {
+    case {} when (~s.h).json: {
+        buf.WriteByte((rune)'"');
+        buf = appendEscapedJSONString(buf, x);
+        buf = appendEscapedJSONString(buf, y);
+        buf.WriteByte((rune)'"');
+        break;
+    }
+    case {} when !needsQuoting(x) && !needsQuoting(y): {
+        buf.WriteString(x);
+        buf.WriteString(y);
+        break;
+    }
+    default: {
+        buf = strconv.AppendQuote(buf, x + y);
+        break;
+    }}
+    s.buf.ValueSlot = buf;
 }
 
 internal static void appendString(this ref handleState s, @string str) {

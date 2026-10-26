@@ -288,13 +288,27 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// address, so `&zeroVal[0]` (reflect, pulling runtime.zeroVal) would reference a
 					// nonexistent `ᏑzeroVal` box (CS0103). Such a pull falls through to the addressed-
 					// global emission — the pre-feature behavior, which compiles.
-					if ref, pkgPath, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
+					if ref, pkgPath, lateBound, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
 						if i > 0 {
 							v.outputBuilder.WriteString(v.newline)
 						}
 
-						v.importQueue.Add(pkgPath)
 						csTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(def.Type(), false))
+
+						// A pull whose direct reference would close a project cycle (math/bits pulling
+						// runtime.overflowError at go1.26.9, where runtime imports math/bits) reaches the
+						// remote by name instead: the same storage, no ProjectReference. The one
+						// DynamicDependency keeps the remote's field under a trimmed or Native AOT publish.
+						if lateBound {
+							dot := strings.LastIndex(ref, ".")
+							class, remote := ref[:dot], ref[dot+1:]
+							typeName := fmt.Sprintf("%s, %s", class, strings.ReplaceAll(pkgPath, "/", "."))
+							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
+								getAccess(goIDName), csTypeName, csIDName, class, strings.ReplaceAll(pkgPath, "/", "."), csTypeName, typeName, remote, csTypeName, typeName, remote)
+							continue
+						}
+
+						v.importQueue.Add(pkgPath)
 						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
 						continue
 					}
@@ -410,10 +424,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 								// array (NRE on first element write).
 								v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, v.arrayZeroValueArgs(strconv.FormatInt(arrayType.Len(), 10), arrayType))
 							} else if v.structHasPromotedEmbeds(def.Type()) {
-								// A struct with a promoted embed stores it in a readonly `ж<T>`
-								// box only the constructors initialize — `default!` leaves the
-								// box null and the first promoted-member access NREs, so the
-								// zero value must construct through the NilType ctor.
+								// A struct with a promoted embed must construct through the NilType
+								// ctor, which builds each embed field (a value embed by its own
+								// `new T(nil)`, a pointer embed as a nil `ж<T>` box): `default!` leaves
+								// a pointer embed a raw null, so a promoted access NREs where Go panics.
 								v.writeOutput("%s %s = new(nil);", csTypeName, csIDName)
 							} else if v.structZeroValueNeedsConstruction(def.Type()) {
 								// A struct whose default(T) is broken by a fixed-size array
@@ -474,10 +488,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							arrayLenValue = v.arrayZeroValueArgs(arrayLenValue, def.Type())
 						}
 
-						// A promoted-embed struct global has the same null-box hazard as the
-						// local branch above: the readonly `ж<T>` embed boxes only exist when
-						// a constructor runs, so the zero value must be `new(nil)`, not the
-						// field's implicit default.
+						// A promoted-embed struct global has the same hazard as the local
+						// branch above: its embed fields (a pointer embed's nil box) are built
+						// only when a constructor runs, so the zero value must be `new(nil)`,
+						// not the field's implicit default.
 						hasPromotedEmbeds := v.structHasPromotedEmbeds(def.Type())
 
 						// A struct global whose default(T) is broken by a fixed-size array field
@@ -504,7 +518,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// alias conversions go2cs-gen already emits for named types. Identical
 							// spellings take no cast, so the common case stays byte-clean.
 							if base := embedBaseCSTypeName(kind, elementType); base != "" && base != csTypeName {
-								initializer = fmt.Sprintf("(%s)(%s)", csTypeName, initializer)
+								initializer = castOf(csTypeName, initializer)
 							}
 
 							if v.isAddressedGlobal(ident) {
@@ -596,9 +610,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// the lift arriving from the call-argument path under builtin new's UNNAMED
 							// parameter (an empty lift name — a whole-package syntax cascade). Mirrors
 							// the composite-literal lift above.
-							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" {
+							// Go 1.26's `new(expr)` names a VALUE: for a composite literal (`var cfg =
+							// new(struct{ … }{ … })`) the struct to lift is the literal's TYPE, under the var's
+							// name as for `new(T)`. Unlifted here, it arrived from builtin new's parameter path
+							// named after that parameter (`Δtype`).
+							typeArg := callExpr.Args[0]
+
+							if compositeLit, isLit := typeArg.(*ast.CompositeLit); isLit && v.info.Types[typeArg].IsValue() {
+								typeArg = compositeLit.Type
+							}
+
+							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" && typeArg != nil && v.info.Types[typeArg].IsType() {
 								if _, isBuiltin := v.info.ObjectOf(funIdent).(*types.Builtin); isBuiltin {
-									if subStructType, exprType := v.extractStructType(callExpr.Args[0]); subStructType != nil && !v.liftedTypeExists(subStructType) {
+									if subStructType, exprType := v.extractStructType(typeArg); subStructType != nil && !v.liftedTypeExists(subStructType) {
 										v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 									}
 								}
@@ -661,7 +685,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						// same cast back to the declared type as the assignment forms — Go wraps the
 						// arithmetic at the operand width, C# promotes it to int (CS0266 / lost wrap).
 						if narrowCast := v.narrowArithmeticCastTypeFor(def.Type(), valueSpec.Values[i], valExpr); len(narrowCast) > 0 {
-							valExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valExpr)
+							valExpr = castOf(narrowCast, valExpr)
 						}
 
 						// A directional channel var taking a BIDIRECTIONAL value narrows the Go
@@ -695,6 +719,42 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 						access := v.testDeclaredValueAccess(packageVarAccess(goIDName, v.getIdentType(ident)), ident.Pos(), v.getIdentType(ident))
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
+
+						// A var built on its first read (lazyPackageVarOperations.go): a ref property over a holder
+						// class, never relocated into package_init.cs (collectMovedInitVars skips it). A var
+						// lazyPackageVars LISTS but the predicate refuses is refused here by name.
+						if refusal, listed := packageLazyVarRefusals[def]; listed {
+							panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))
+						}
+
+						if isLazyPackageVar(def) {
+							globalHoist := &strings.Builder{}
+							savedGlobalHoist := v.globalDeclHoist
+							v.globalDeclHoist = globalHoist
+							v.inLazyInitializer = true
+							valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, emptyIfaceDeclType, context)
+							v.inLazyInitializer = false
+							v.globalDeclHoist = savedGlobalHoist
+
+							if globalHoist.Len() > 0 {
+								panic(fmt.Sprintf("@visitValueSpec - lazy package var %s cannot be built on its first read: its initializer spills a hoisted holder", goIDName))
+							}
+
+							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
+
+							writeTrailing := func() {
+								v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
+							}
+
+							// An addressed var keeps its box: the holder holds it, so `&X` and `X` read one storage.
+							if v.isAddressedGlobal(ident) {
+								v.writeLazyAddressedPackageVar(access, csTypeName, csIDName, valExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)), writeTrailing)
+							} else {
+								v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr, lazyPackageVarSnapshot(def), writeTrailing)
+							}
+
+							continue
+						}
 
 						// A package var whose initializer's Go init-order dependencies C#'s
 						// static-field-initializer order cannot reproduce (cross-file / same-file
@@ -969,7 +1029,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 			if c.Val().Kind() == constant.String && len(valueSpec.Values) >= i+1 {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-					constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					if isPlainStringLiteral(lit) {
+						// A function-local const in plain mode (collectPlainLocalConsts).
+						constVal = v.convBasicLit(lit, plainBasicLitContext())
+					} else {
+						constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					}
 				} else if s := constant.StringVal(c.Val()); !utf8.ValidString(s) || stringLiteralNeedsByteArray(c.Val().ExactString()) {
 					// A CONCATENATED string const folds to one value here; unlike a single *ast.BasicLit
 					// (handled by convBasicLit's byte-array machinery above) it bypassed that path, so a

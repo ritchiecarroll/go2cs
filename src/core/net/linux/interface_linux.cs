@@ -96,7 +96,7 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
             }
         }
         else if (exprᴛ1 == syscall.IFLA_IFNAME) {
-            ifi.Value.Name = ((@string)(a.Value.slice(0, len(a.Value) - 1)));
+            ifi.Value.Name = (@string)(a.Value.slice(0, len(a.Value) - 1));
         }
         else if (exprᴛ1 == syscall.IFLA_MTU) {
             ifi.Value.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
@@ -107,22 +107,22 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
 
 internal static Flags linkFlags(uint32 rawFlags) {
     Flags f = default!;
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_UP) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
         f |= (Flags)(FlagRunning);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
         f |= (Flags)(FlagBroadcast);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
         f |= (Flags)(FlagLoopback);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
         f |= (Flags)(FlagPointToPoint);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
         f |= (Flags)(FlagMulticast);
     }
     return f;
@@ -149,6 +149,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
 
 internal static (slice<ΔAddr>, error) addrTable(ж<Interface> Ꮡifi, slice<syscall.NetlinkMessage> msgs) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
+    var ifatᴷ = new stackAppend<ΔAddr>(moves: true);
 
     slice<ΔAddr> ifat = default!;
 loop:
@@ -169,13 +170,14 @@ loop:
                 }
                 var ifa = newAddr(ref (ifam).DerefOrNull(), attrs);
                 if (ifa != default!) {
-                    ifat = append(ifat, ifa);
+                    ifat = append(ifatᴷ, ifat, ifa);
                 }
             }
         }
 continue_loop:;
     }
 break_loop:;
+    ifat = move2heap(ifatᴷ, ifat);
     return (ifat, default!);
 }
 
@@ -223,6 +225,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
     GoFrame ᒐ = default;
     try {
         ref var ifi = ref Ꮡifi.DerefOrNull();
+        var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
 
         var (fd, err) = open(path);
         if (err != default!) {
@@ -253,12 +256,13 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                         (b[iΔ1 / 2], _) = xtoi2(f[0].slice(iΔ1, iΔ1 + 2), 0);
                     }
                     var i = ~Ꮡ(b[..4], 0).Reinterpret<byte, uint32>();
-                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)((i >> (int)(24))), (byte)((i >> (int)(16))), (byte)((i >> (int)(8))), (byte)i)));
-                    ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
+                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)(i >> 24), (byte)(i >> 16), (byte)(i >> 8), (byte)i)));
+                    ifmat = append(ifmatᴷ, ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
                 }
                 break;
             }}
         }
+        ifmat = move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -269,6 +273,7 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
     GoFrame ᒐ = default;
     try {
         ref var ifi = ref Ꮡifi.DerefOrNull();
+        var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
 
         var (fd, err) = open(path);
         if (err != default!) {
@@ -288,9 +293,10 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
                     (b[i / 2], _) = xtoi2(f[2].slice(i, i + 2), 0);
                 }
                 var ifma = Ꮡ(new IPAddr(IP: new IP(new byte[]{b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]}.slice())));
-                ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
+                ifmat = append(ifmatᴷ, ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
             }
         }
+        ifmat = move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

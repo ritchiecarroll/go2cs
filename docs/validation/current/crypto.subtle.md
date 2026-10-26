@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/subtle` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**9 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**10 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/subtle`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/subtle).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 2 of the matched tests identically.
+Both runtimes skip 3 of the matched tests identically.
 
 ## Verdicts
 
@@ -24,6 +24,7 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestConstantTimeCopy` | pass | pass |
 | `TestConstantTimeEq` | pass | pass |
 | `TestConstantTimeLessOrEq` | pass | pass |
+| `TestDITGoroutineInheritance` | skip | skip |
 | `TestDITPanic` | skip | skip |
 | `TestWithDataIndependentTiming` | skip | skip |
 | `TestXORBytes` | pass | pass |
@@ -40,4 +41,6 @@ the capability it needs.
 - BenchmarkConstantTimeByteEq (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkConstantTimeEq (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkConstantTimeLessOrEq (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkConstantTimeSelect (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkXORBytes (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkXORBytesAlignment (benchmark): benchmark execution is deferred to Phase 4D

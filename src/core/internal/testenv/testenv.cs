@@ -21,15 +21,17 @@ using os = os_package;
 using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using Δruntime = runtime_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
+using System.Runtime.CompilerServices;
 using fs = io.fs_package;
 using go;
 using go.@internal;
 using go.os;
 using io = io_package;
+using iter = iter_package;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
 
@@ -44,8 +46,13 @@ internal static slice<@string> origEnv = os.Environ();
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string goBuilderNameˢ = "GO_BUILDER_NAME"u8;
 
-// Builder reports the name of the builder running this test
-// (for example, "linux-amd64" or "windows-386-gce").
+// Builder reports the name of the builder running this test. For example,
+// "gotip-linux-amd64_avx512-test_only" or "go1.24-windows-arm64" on LUCI,
+// or "linux-amd64" on our old infrastructure. Prefer using runtime.GOOS,
+// runtime.GOARCH, race.Enabled, reading the OS version, checking CPU
+// feature flags with internal/cpu, etc. over parsing builder names when
+// possible. When matching builder names, prefer a fuzzy match instead
+// of a strict comparison.
 // If the test is not running on the build infrastructure,
 // Builder returns the empty string.
 public static @string Builder() {
@@ -91,7 +98,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
         return fmt.Errorf("%v: no tool reported"u8, cmd.OrTypedNil());
     }
     {
-        var (_, errΔ1) = exec.LookPath(((@string)@out)); if (errΔ1 != default!) {
+        var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
@@ -116,7 +123,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
             if (len(outΔ1) == 0) {
                 return fmt.Errorf("%v: no CC reported"u8, cmdΔ1.OrTypedNil());
             }
-            (_, errΔ2) = exec.LookPath(((@string)outΔ1));
+            (_, errΔ2) = exec.LookPath((@string)outΔ1);
             return errΔ2;
         }
     }
@@ -145,7 +152,7 @@ public static bool HasGoRun() {
 
 // MustHaveGoRun checks that the current system can run programs with “go run”.
 // If not, MustHaveGoRun calls t.Skip with an explanation.
-public static void MustHaveGoRun(testing.TB t) {
+public static partial void MustHaveGoRun(testing.TB t) {
     if (!HasGoRun()) {
         t.Helper();
         t.Skipf("skipping test: 'go run' not available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -165,7 +172,7 @@ public static bool HasParallelism() {
 
 // MustHaveParallelism checks that the current system can execute multiple
 // threads in parallel. If not, MustHaveParallelism calls t.Skip with an explanation.
-public static void MustHaveParallelism(testing.TB t) {
+public static partial void MustHaveParallelism(testing.TB t) {
     if (!HasParallelism()) {
         t.Helper();
         t.Skipf("skipping test: no parallelism available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -244,7 +251,7 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
             }
             return ("", fmt.Errorf("finding GOROOT: %w"u8, errΔ1));
         }
-        @string goMod = ((@string)b);
+        @string goMod = (@string)b;
 
         while (goMod != ""u8) {
             @string line = default!;
@@ -336,7 +343,7 @@ internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
     if (err != default!) {
         throw panic(fmt.Sprintf("%v: %v"u8, cmd.OrTypedNil(), @out));
     }
-    (var ok, err) = strconv.ParseBool(((@string)bytes.TrimSpace(@out)));
+    (var ok, err) = strconv.ParseBool((@string)bytes.TrimSpace(@out));
     if (err != default!) {
         throw panic(fmt.Sprintf("%v: non-boolean output %q"u8, cmd.OrTypedNil(), @out));
     }
@@ -344,7 +351,7 @@ internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
 });
 
 // MustHaveCGO calls t.Skip if cgo is not available.
-public static void MustHaveCGO(testing.TB t) {
+public static partial void MustHaveCGO(testing.TB t) {
     if (!HasCGO()) {
         t.Helper();
         t.Skipf("skipping test: no cgo"u8);
@@ -357,13 +364,27 @@ public static bool CanInternalLink(bool withCgo) {
     return !platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, withCgo);
 }
 
+// SpecialBuildTypes are interesting build types that may affect linking.
+partial struct SpecialBuildTypes {
+    public bool Cgo;
+    public bool Asan;
+    public bool Msan;
+    public bool Race;
+}
+
+// NoSpecialBuildTypes indicates a standard, no cgo go build.
+public static SpecialBuildTypes NoSpecialBuildTypes;
+
 // MustInternalLink checks that the current system can link programs with internal
 // linking.
 // If not, MustInternalLink calls t.Skip with an explanation.
-public static void MustInternalLink(testing.TB t, bool withCgo) {
-    if (!CanInternalLink(withCgo)) {
+public static void MustInternalLink(testing.TB t, SpecialBuildTypes with) {
+    if (with.Asan || with.Msan || with.Race) {
+        t.Skipf("skipping test: internal linking with sanitizers is not supported"u8);
+    }
+    if (!CanInternalLink(with.Cgo)) {
         t.Helper();
-        if (withCgo && CanInternalLink(false)) {
+        if (with.Cgo && CanInternalLink(false)) {
             t.Skipf("skipping test: internal linking on %s/%s is not supported with cgo"u8, Δruntime.GOOS, Δruntime.GOARCH);
         }
         t.Skipf("skipping test: internal linking on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -373,7 +394,7 @@ public static void MustInternalLink(testing.TB t, bool withCgo) {
 // MustInternalLinkPIE checks whether the current system can link PIE binary using
 // internal linking.
 // If not, MustInternalLinkPIE calls t.Skip with an explanation.
-public static void MustInternalLinkPIE(testing.TB t) {
+public static partial void MustInternalLinkPIE(testing.TB t) {
     if (!platform.InternalLinkPIESupported(Δruntime.GOOS, Δruntime.GOARCH)) {
         t.Helper();
         t.Skipf("skipping test: internal linking for buildmode=pie on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -383,7 +404,7 @@ public static void MustInternalLinkPIE(testing.TB t) {
 // MustHaveBuildMode reports whether the current system can build programs in
 // the given build mode.
 // If not, MustHaveBuildMode calls t.Skip with an explanation.
-public static void MustHaveBuildMode(testing.TB t, @string buildmode) {
+public static partial void MustHaveBuildMode(testing.TB t, @string buildmode) {
     if (!platform.BuildModeSupported(Δruntime.Compiler, buildmode, Δruntime.GOOS, Δruntime.GOARCH)) {
         t.Helper();
         t.Skipf("skipping test: build mode %s on %s/%s is not supported by the %s compiler"u8, buildmode, Δruntime.GOOS, Δruntime.GOARCH, Δruntime.Compiler);
@@ -416,7 +437,7 @@ public static bool HasLink() {
 
 // MustHaveLink reports whether the current system can use os.Link.
 // If not, MustHaveLink calls t.Skip with an explanation.
-public static void MustHaveLink(testing.TB t) {
+public static partial void MustHaveLink(testing.TB t) {
     if (!HasLink()) {
         t.Helper();
         t.Skipf("skipping test: hardlinks are not supported on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -425,7 +446,7 @@ public static void MustHaveLink(testing.TB t) {
 
 internal static ж<bool> flaky = flag.Bool("flaky"u8, false, "run known-flaky tests too"u8);
 
-public static void SkipFlaky(testing.TB t, nint issue) {
+public static partial void SkipFlaky(testing.TB t, nint issue) {
     if (!flaky.Value) {
         t.Helper();
         t.Skipf("skipping known flaky test without the -flaky flag; see golang.org/issue/%d"u8, issue);
@@ -458,7 +479,7 @@ public static bool CPUIsSlow() {
 // suspected to be slow.
 //
 // (This is useful for CPU-intensive tests that otherwise complete quickly.)
-public static void SkipIfShortAndSlow(testing.TB t) {
+public static partial void SkipIfShortAndSlow(testing.TB t) {
     if (testing.Short() && CPUIsSlow()) {
         t.Helper();
         t.Skipf("skipping test in -short mode on %s"u8, Δruntime.GOARCH);
@@ -469,7 +490,7 @@ public static void SkipIfShortAndSlow(testing.TB t) {
 private static readonly object skippingTestWithˢ = (@string)"skipping test with optimization disabled"u8;
 
 // SkipIfOptimizationOff skips t if optimization is disabled.
-public static void SkipIfOptimizationOff(testing.TB t) {
+public static partial void SkipIfOptimizationOff(testing.TB t) {
     if (OptimizationOff()) {
         t.Helper();
         t.Skip(skippingTestWithˢ);
@@ -510,7 +531,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
             t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~cmd).Stderr);
         }
 
-        foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+        foreach (var line in range<@string>(strings.SplitSeq((@string)@out, "\n"u8).Invoke)) {
             if (line == ""u8) {
                 continue;
             }

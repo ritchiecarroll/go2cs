@@ -52,6 +52,12 @@ using static go.@internal.buildcfg_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -60,8 +66,8 @@ using static go.@internal.buildcfg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABcukpKSkpKSkpKSkpKStAAGEJKCgriCgIKk1oKApKSkpKSC1oKClJSClIKqooKUgoKUgoKUgoKqooKClAAHEIKCgpSUAAsGopiClJSUgoKCgpSCgqaUpKSkgriClAAOHoKCgpSClAAIBrKqgpSCgoKCpoKCgqamlKaUpJSm1qKCqrSCpoKmhqaClIKSlJTogoCkpILWgoCkpILWgoCkpKSkgtaCgKSkpIKChoIABxCCgoKUgpTWooKUpNim1oKmgoKCpoLcgpTaopSkpKSkpKSklKaClKSCgpSkgoKUpIKCgoKmgoKmpKSkgoKUpIKClKSCgpSClJQ=", "314-316:1")]
-[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "AB8+goKCgpQADhzO2tKUgqaClKYACxYABxCUgoKCgoL+koK4ooKUuIKUgoKUgoKUuIKCpoKCpoKUqqKuwoKCgoKUgoKCgoKClIKClLiqoqqi", "109-112:1", "102=reflect.Value.SetBool")]
+[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkukpKSkpKSkpKSkpKStAAGEJKCgriCgIKk1oKApKSkpKSC1oKClJSClIKqooKClICCpICCpICCpIKUgIKCpICCpKqigoKUAAcQgoKClJQACwaimIKUlJSCgoKClIKCppSkpKSCuIKUAA4egoKClIKUAAgGsqqClIKCgoKmgoKCpqaUppSklKbWooKqtIKmgqaGpoKUgpKUlOiCgKSkgtaCgKSkgtaCgKSkpKSC1oKApKSkpIKChoIABRKygtaiggAKEKbWgqaCgoKmotyClOqilKSkpKSkpKSklKbClKSCgpS0goKUtIKCgoKmgoKmpKSkgoKUtIKClIKUpJSUgpQ=", "326-328:1")]
+[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQADhzO2tKUgqQACxiU/gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -94,7 +100,7 @@ public static partial class buildcfg_package
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

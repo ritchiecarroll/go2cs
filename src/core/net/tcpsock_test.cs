@@ -40,28 +40,28 @@ public static void BenchmarkTCP4PersistentTimeout(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object ipv6IsNotSupportedˢ = (@string)"ipv6 is not supported"u8;
 
-public static void BenchmarkTCP6OneShot(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6OneShot(ж<testing.B> Ꮡb) {
     if (!supportsIPv6()) {
         Ꮡb.Skip(ipv6IsNotSupportedˢ);
     }
     benchmarkTCP(Ꮡb, false, false, "[::1]:0"u8);
 }
 
-public static void BenchmarkTCP6OneShotTimeout(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6OneShotTimeout(ж<testing.B> Ꮡb) {
     if (!supportsIPv6()) {
         Ꮡb.Skip(ipv6IsNotSupportedˢ);
     }
     benchmarkTCP(Ꮡb, false, true, "[::1]:0"u8);
 }
 
-public static void BenchmarkTCP6Persistent(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6Persistent(ж<testing.B> Ꮡb) {
     if (!supportsIPv6()) {
         Ꮡb.Skip(ipv6IsNotSupportedˢ);
     }
     benchmarkTCP(Ꮡb, true, false, "[::1]:0"u8);
 }
 
-public static void BenchmarkTCP6PersistentTimeout(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6PersistentTimeout(ж<testing.B> Ꮡb) {
     if (!supportsIPv6()) {
         Ꮡb.Skip(ipv6IsNotSupportedˢ);
     }
@@ -203,7 +203,7 @@ public static void BenchmarkTCP4ConcurrentReadWrite(ж<testing.B> Ꮡb) {
     benchmarkTCPConcurrentReadWrite(Ꮡb, "127.0.0.1:0"u8);
 }
 
-public static void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> Ꮡb) {
     if (!supportsIPv6()) {
         Ꮡb.Skip(ipv6IsNotSupportedˢ);
     }
@@ -373,20 +373,27 @@ internal static slice<resolveTCPAddrTest> resolveTCPAddrTests;
 internal static void initᴛresolveTCPAddrTests() { resolveTCPAddrTests = new resolveTCPAddrTest[]{
     new("tcp"u8, "127.0.0.1:0"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!),
     new("tcp4"u8, "127.0.0.1:65535"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 65535)), default!),
+
     new("tcp"u8, "[::1]:0"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 0)), default!),
     new("tcp6"u8, "[::1]:65535"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 65535)), default!),
+
     new("tcp"u8, "[::1%en0]:1"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 1, Zone: "en0"u8)), default!),
     new("tcp6"u8, "[::1%911]:2"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 2, Zone: "911"u8)), default!),
+
     new(""u8, "127.0.0.1:0"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!), // Go 1.0 behavior
     new(""u8, "[::1]:0"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 0)), default!), // Go 1.0 behavior
+
     new("tcp"u8, ":12345"u8, Ꮡ(new TCPAddr(Port: 12345)), default!),
+
     new("http"u8, "127.0.0.1:0"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"http"u8))),
+
     new("tcp"u8, "127.0.0.1:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
     new("tcp"u8, "[::ffff:127.0.0.1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("::ffff:127.0.0.1"u8), Port: 80)), default!),
     new("tcp"u8, "[2001:db8::1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"u8), Port: 80)), default!),
     new("tcp4"u8, "127.0.0.1:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
     new("tcp4"u8, "[::ffff:127.0.0.1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
     new("tcp6"u8, "[2001:db8::1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"u8), Port: 80)), default!),
+
     new("tcp4"u8, "[2001:db8::1]:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1"u8)))),
     new("tcp6"u8, "127.0.0.1:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "127.0.0.1"u8)))),
     new("tcp6"u8, "[::ffff:127.0.0.1]:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "::ffff:127.0.0.1"u8))))
@@ -588,6 +595,9 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
 
+        // Optimizations are required to remove the allocs.
+        testenv.SkipIfOptimizationOff(new net_test_package.testing_TжTB(Ꮡt));
+
         ref var err = ref heap<error>(out var Ꮡerr);
         (var ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
@@ -631,7 +641,7 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
             }
         });
         if (allocs > 0D) {
-            Ꮡt.Fatalf("got %v; want 0"u8, allocs);
+            Ꮡt.Errorf("got %v; want 0"u8, allocs);
         }
 
         ref var bufwrt = ref heap(new array<byte>(128), out var Ꮡbufwrt);
@@ -664,7 +674,7 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
             }
         });
         if (allocs > 0D) {
-            Ꮡt.Fatalf("got %v; want 0"u8, allocs);
+            Ꮡt.Errorf("got %v; want 0"u8, allocs);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -799,8 +809,8 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
 
-                nint x = (nint)((1 << (int)(30)));
-                x = x * 5 + (1 << (int)(20)); // just over 5 GB on 64-bit, just over 1GB on 32-bit
+                nint x = (nint)(1 << 30);
+                x = x * 5 + (1 << 20); // just over 5 GB on 64-bit, just over 1GB on 32-bit
                 var done = new channel<nint>(0);
                 var doneʗ1 = done;
                 var lnʗ2 = ln;
@@ -996,7 +1006,7 @@ public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
-        var got = ((time.Duration)(-1));
+        var got = (time.Duration)(-1);
         testHookSetKeepAlive = (global::go.net_package.KeepAliveConfig cfg) => {
             got = cfg.Idle;
         };
@@ -1026,6 +1036,7 @@ public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
         // Regression test for https://go.dev/issue/50216:
         // after calling Close on a Listener, the fake net implementation would
         // erroneously Accept a connection dialed before the call to Close.
+
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);

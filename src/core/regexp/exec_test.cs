@@ -81,6 +81,8 @@ internal static readonly @string bz2ˢ = ".bz2"u8;
 internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
+        var strᴷ = new stackAppend<@string>();
+
         var (f, err) = Δos.Open(@file);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -137,7 +139,7 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                     Ꮡt.Fatalf("%s:%d: unquote %s: %v"u8, @file, linenoΔ1, line, errΔ2);
                 }
                 if (inStrings) {
-                    str = append(str, q);
+                    str = append(strᴷ, str, q);
                     continue;
                 }
                 // Is a regexp.
@@ -191,7 +193,7 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 if (len(res) != len(run)) {
                     Ꮡt.Fatalf("%s:%d: have %d test results, want %d"u8, @file, linenoΔ1, len(res), len(run));
                 }
-                foreach (var (i, _) in res) {
+                foreach (var i in range(res)) {
                     var (have, suffix) = run[i](re, refull, text);
                     var want = parseResult(Ꮡt, @file, linenoΔ1, res[i]);
                     if (!slices.Equal<slice<nint>, nint>(have, want)) {
@@ -644,6 +646,7 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
     bool compiled = default!;
     bool matched = default!;
     slice<nint> pos = default!;
+    var xᴷ = new stackAppend<nint>(moves: true);
 
     //   Field 4: the test outcome. This is either one of the posix error
     //     codes (with REG_ omitted) or the match array, a list of (m,n)
@@ -710,7 +713,7 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
                 return (ok, compiled, matched, pos);
             }
         }
-        x = append(x, v);
+        x = append(xᴷ, x, v);
         s = s.slice(i + 1);
     }
     if (len(x) % 2 != 0) {
@@ -719,6 +722,7 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
     }
     ok = true;
     matched = true;
+    x = move2heap(xᴷ, x);
     pos = x;
     return (ok, compiled, matched, pos);
 }
@@ -731,7 +735,7 @@ internal static slice<byte> makeText(nint n) {
     }
     text = new slice<byte>(n);
     var x = ~(uint32)0;
-    foreach (var (i, _) in text) {
+    foreach (var i in range(text)) {
         x += x;
         x ^= (uint32)(1);
         if ((int32)x < 0) {
@@ -759,7 +763,7 @@ public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
             ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
             size = vᴛ1;
 
-            if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+            if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
                 continue;
             }
             var t = makeText(size.n);
@@ -792,7 +796,7 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
         ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
         size = vᴛ1;
 
-        if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+        if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
             continue;
         }
         var t = makeText(size.n);
@@ -827,10 +831,10 @@ partial struct benchSizesᴛ1 /*dyn*/ {
 internal static slice<benchSizesᴛ1> benchSizes = new benchSizesᴛ1[]{
     new("16"u8, 16),
     new("32"u8, 32),
-    new("1K"u8, (1 << (int)(10))),
-    new("32K"u8, (32 << (int)(10))),
-    new("1M"u8, (1 << (int)(20))),
-    new("32M"u8, (32 << (int)(20)))
+    new("1K"u8, 1 << 10),
+    new("32K"u8, 32 << 10),
+    new("1M"u8, 1 << 20),
+    new("32M"u8, 32 << 20)
 }.slice();
 
 public static void TestLongest(ж<testing.T> Ꮡt) {

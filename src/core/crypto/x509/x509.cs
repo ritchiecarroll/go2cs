@@ -26,9 +26,9 @@ using ecdh = go.crypto.ecdh_package;
 using ecdsa = go.crypto.ecdsa_package;
 using ed25519 = go.crypto.ed25519_package;
 using elliptic = go.crypto.elliptic_package;
-using cryptorand = go.crypto.rand_package;
 using rsa = go.crypto.rsa_package;
 using sha1 = go.crypto.sha1_package;
+using sha256 = go.crypto.sha256_package;
 using pkix = go.crypto.x509.pkix_package;
 using asn1 = encoding.asn1_package;
 using pem = encoding.pem_package;
@@ -96,9 +96,6 @@ public static (any pub, error err) ParsePKIXPublicKey(slice<byte> derBytes) {
     return parsePublicKey(ref pki);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509InvalidEllipticCurveˢ2 = "x509: invalid elliptic curve public key"u8;
-
 internal static (slice<byte> publicKeyBytes, pkix.AlgorithmIdentifier publicKeyAlgorithm, error err) marshalPublicKey(any pub) {
     slice<byte> publicKeyBytes = default!;
     pkix.AlgorithmIdentifier publicKeyAlgorithm = default!;
@@ -124,10 +121,10 @@ internal static (slice<byte> publicKeyBytes, pkix.AlgorithmIdentifier publicKeyA
         if (!ok) {
             return (default!, new pkix.AlgorithmIdentifier(nil), errors.New(x509UnsupportedEllipticˢ));
         }
-        if (!(~pubΔ1).Curve.IsOnCurve((~pubΔ1).X, (~pubΔ1).Y)) {
-            return (default!, new pkix.AlgorithmIdentifier(nil), errors.New(x509InvalidEllipticCurveˢ2));
+        (publicKeyBytes, err) = pubΔ1.Bytes();
+        if (err != default!) {
+            return (default!, new pkix.AlgorithmIdentifier(nil), err);
         }
-        publicKeyBytes = elliptic.Marshal((~pubΔ1).Curve, (~pubΔ1).X, (~pubΔ1).Y);
         publicKeyAlgorithm.Algorithm = oidPublicKeyECDSA;
         slice<byte> paramBytes = default!;
         (paramBytes, err) = asn1.Marshal(oid);
@@ -277,7 +274,7 @@ internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
             return details.hash;
         }
     }
-    return ((crypto.Hash)0);
+    return (crypto.Hash)0;
 }
 
 public static @string String(this SignatureAlgorithm algo) {
@@ -410,7 +407,7 @@ internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDeta
     new(ECDSAWithSHA256, "ECDSA-SHA256"u8, oidSignatureECDSAWithSHA256, emptyRawValue, ECDSA, crypto.SHA256, false),
     new(ECDSAWithSHA384, "ECDSA-SHA384"u8, oidSignatureECDSAWithSHA384, emptyRawValue, ECDSA, crypto.SHA384, false),
     new(ECDSAWithSHA512, "ECDSA-SHA512"u8, oidSignatureECDSAWithSHA512, emptyRawValue, ECDSA, crypto.SHA512, false),
-    new(PureEd25519, "Ed25519"u8, oidSignatureEd25519, emptyRawValue, Ed25519, ((crypto.Hash)0), /* no pre-hashing */ false)
+    new(PureEd25519, "Ed25519"u8, oidSignatureEd25519, emptyRawValue, Ed25519, (crypto.Hash)0, /* no pre-hashing */ false)
 }.slice(); }
 
 internal static asn1.RawValue emptyRawValue = new asn1.RawValue(nil);
@@ -422,9 +419,9 @@ internal static asn1.RawValue emptyRawValue = new asn1.RawValue(nil);
 //   - maskGenAlgorithm always contains the default mgf1SHA1 identifier
 //   - saltLength contains the length of the associated hash
 //   - trailerField always contains the default trailerFieldBC value
-internal static asn1.RawValue pssParametersSHA256 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 162, 3, 2, 1, 32}.slice());
-internal static asn1.RawValue pssParametersSHA384 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 162, 3, 2, 1, 48}.slice());
-internal static asn1.RawValue pssParametersSHA512 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 162, 3, 2, 1, 64}.slice());
+[GoLazy] partial class lazyᴛpssParametersSHA256 { internal static asn1.RawValue pssParametersSHA256 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 162, 3, 2, 1, 32}.slice()); }
+[GoLazy] partial class lazyᴛpssParametersSHA384 { internal static asn1.RawValue pssParametersSHA384 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 162, 3, 2, 1, 48}.slice()); }
+[GoLazy] partial class lazyᴛpssParametersSHA512 { internal static asn1.RawValue pssParametersSHA512 = new asn1.RawValue(FullBytes: new byte[]{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 162, 3, 2, 1, 64}.slice()); }
 
 // pssParameters reflects the parameters in an AlgorithmIdentifier that
 // specifies RSA PSS. See RFC 3447, Appendix A.2.3.
@@ -617,15 +614,16 @@ internal static (asn1.ObjectIdentifier, bool) oidFromECDHCurve(ecdhꓸCurve curv
 // a bitmap of the KeyUsage* constants.
 partial struct KeyUsage /*num:nint*/;
 
-public static KeyUsage KeyUsageDigitalSignature => /* 1 << iota */ 1;
-public static KeyUsage KeyUsageContentCommitment => 2;
-public static KeyUsage KeyUsageKeyEncipherment => 4;
-public static KeyUsage KeyUsageDataEncipherment => 8;
-public static KeyUsage KeyUsageKeyAgreement => 16;
-public static KeyUsage KeyUsageCertSign => 32;
-public static KeyUsage KeyUsageCRLSign => 64;
-public static KeyUsage KeyUsageEncipherOnly => 128;
-public static KeyUsage KeyUsageDecipherOnly => 256;
+//go:generate stringer -linecomment -type=KeyUsage,ExtKeyUsage -output=x509_string.go
+public static KeyUsage KeyUsageDigitalSignature => /* 1 << iota */ 1;        // digitalSignature
+public static KeyUsage KeyUsageContentCommitment => 2;       // contentCommitment
+public static KeyUsage KeyUsageKeyEncipherment => 4;         // keyEncipherment
+public static KeyUsage KeyUsageDataEncipherment => 8;        // dataEncipherment
+public static KeyUsage KeyUsageKeyAgreement => 16;            // keyAgreement
+public static KeyUsage KeyUsageCertSign => 32;                // keyCertSign
+public static KeyUsage KeyUsageCRLSign => 64;                 // cRLSign
+public static KeyUsage KeyUsageEncipherOnly => 128;            // encipherOnly
+public static KeyUsage KeyUsageDecipherOnly => 256;            // decipherOnly
 
 // RFC 5280, 4.2.1.12  Extended Key Usage
 //
@@ -639,6 +637,8 @@ public static KeyUsage KeyUsageDecipherOnly => 256;
 //	id-kp-emailProtection        OBJECT IDENTIFIER ::= { id-kp 4 }
 //	id-kp-timeStamping           OBJECT IDENTIFIER ::= { id-kp 8 }
 //	id-kp-OCSPSigning            OBJECT IDENTIFIER ::= { id-kp 9 }
+//
+// https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml#smi-numbers-1.3.6.1.5.5.7.3
 internal static asn1.ObjectIdentifier oidExtKeyUsageAny = new asn1.ObjectIdentifier(new nint[]{2, 5, 29, 37, 0}.slice());
 internal static asn1.ObjectIdentifier oidExtKeyUsageServerAuth = new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 5, 5, 7, 3, 1}.slice());
 internal static asn1.ObjectIdentifier oidExtKeyUsageClientAuth = new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 5, 5, 7, 3, 2}.slice());
@@ -658,27 +658,27 @@ internal static asn1.ObjectIdentifier oidExtKeyUsageMicrosoftKernelCodeSigning =
 // Each of the ExtKeyUsage* constants define a unique action.
 partial struct ExtKeyUsage /*num:nint*/;
 
-public static ExtKeyUsage ExtKeyUsageAny => /* iota */ 0;
-public static ExtKeyUsage ExtKeyUsageServerAuth => 1;
-public static ExtKeyUsage ExtKeyUsageClientAuth => 2;
-public static ExtKeyUsage ExtKeyUsageCodeSigning => 3;
-public static ExtKeyUsage ExtKeyUsageEmailProtection => 4;
-public static ExtKeyUsage ExtKeyUsageIPSECEndSystem => 5;
-public static ExtKeyUsage ExtKeyUsageIPSECTunnel => 6;
-public static ExtKeyUsage ExtKeyUsageIPSECUser => 7;
-public static ExtKeyUsage ExtKeyUsageTimeStamping => 8;
-public static ExtKeyUsage ExtKeyUsageOCSPSigning => 9;
-public static ExtKeyUsage ExtKeyUsageMicrosoftServerGatedCrypto => 10;
-public static ExtKeyUsage ExtKeyUsageNetscapeServerGatedCrypto => 11;
-public static ExtKeyUsage ExtKeyUsageMicrosoftCommercialCodeSigning => 12;
-public static ExtKeyUsage ExtKeyUsageMicrosoftKernelCodeSigning => 13;
+public static ExtKeyUsage ExtKeyUsageAny => /* iota */ 0;                             // anyExtendedKeyUsage
+public static ExtKeyUsage ExtKeyUsageServerAuth => 1;                      // serverAuth
+public static ExtKeyUsage ExtKeyUsageClientAuth => 2;                      // clientAuth
+public static ExtKeyUsage ExtKeyUsageCodeSigning => 3;                     // codeSigning
+public static ExtKeyUsage ExtKeyUsageEmailProtection => 4;                 // emailProtection
+public static ExtKeyUsage ExtKeyUsageIPSECEndSystem => 5;                  // ipsecEndSystem
+public static ExtKeyUsage ExtKeyUsageIPSECTunnel => 6;                     // ipsecTunnel
+public static ExtKeyUsage ExtKeyUsageIPSECUser => 7;                       // ipsecUser
+public static ExtKeyUsage ExtKeyUsageTimeStamping => 8;                    // timeStamping
+public static ExtKeyUsage ExtKeyUsageOCSPSigning => 9;                     // OCSPSigning
+public static ExtKeyUsage ExtKeyUsageMicrosoftServerGatedCrypto => 10;      // msSGC
+public static ExtKeyUsage ExtKeyUsageNetscapeServerGatedCrypto => 11;       // nsSGC
+public static ExtKeyUsage ExtKeyUsageMicrosoftCommercialCodeSigning => 12;  // msCodeCom
+public static ExtKeyUsage ExtKeyUsageMicrosoftKernelCodeSigning => 13;      // msKernelCode
 
 // extKeyUsageOIDs contains the mapping between an ExtKeyUsage and its OID.
 partial struct extKeyUsageOIDsᴛ1 /*dyn*/ {
     internal ExtKeyUsage extKeyUsage;
     internal asn1.ObjectIdentifier oid;
 }
-internal static slice<extKeyUsageOIDsᴛ1> extKeyUsageOIDs = new extKeyUsageOIDsᴛ1[]{
+[GoLazy] partial class lazyᴛextKeyUsageOIDs { internal static slice<extKeyUsageOIDsᴛ1> extKeyUsageOIDs = new extKeyUsageOIDsᴛ1[]{
     new(ExtKeyUsageAny, oidExtKeyUsageAny),
     new(ExtKeyUsageServerAuth, oidExtKeyUsageServerAuth),
     new(ExtKeyUsageClientAuth, oidExtKeyUsageClientAuth),
@@ -693,7 +693,7 @@ internal static slice<extKeyUsageOIDsᴛ1> extKeyUsageOIDs = new extKeyUsageOIDs
     new(ExtKeyUsageNetscapeServerGatedCrypto, oidExtKeyUsageNetscapeServerGatedCrypto),
     new(ExtKeyUsageMicrosoftCommercialCodeSigning, oidExtKeyUsageMicrosoftCommercialCodeSigning),
     new(ExtKeyUsageMicrosoftKernelCodeSigning, oidExtKeyUsageMicrosoftKernelCodeSigning)
-}.slice();
+}.slice(); }
 
 internal static (ExtKeyUsage eku, bool ok) extKeyUsageFromOID(asn1.ObjectIdentifier oid) {
     ExtKeyUsage eku = default!;
@@ -717,6 +717,19 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
         }
     }
     return (oid, ok);
+}
+
+// OID returns the ASN.1 object identifier of the EKU.
+public static ΔOID OID(this ExtKeyUsage eku) {
+    var (asn1OID, ok) = oidFromExtKeyUsage(eku);
+    if (!ok) {
+        throw panic("x509: internal error: known ExtKeyUsage has no OID");
+    }
+    var (oid, err) = OIDFromASN1OID(asn1OID);
+    if (err != default!) {
+        throw panic("x509: internal error: known ExtKeyUsage has invalid OID");
+    }
+    return oid;
 }
 
 // A Certificate represents an X.509 certificate.
@@ -815,7 +828,7 @@ partial struct Certificate {
     // See CreateCertificate for context about how this field and the PolicyIdentifiers field
     // interact.
     // In Go 1.22, encoding/gob cannot handle and ignores this field.
-    public slice<OID> Policies;
+    public slice<ΔOID> Policies;
     // InhibitAnyPolicy and InhibitAnyPolicyZero indicate the presence and value
     // of the inhibitAnyPolicy extension.
     //
@@ -882,10 +895,10 @@ partial struct Certificate {
 partial struct PolicyMapping {
     // IssuerDomainPolicy contains a policy OID the issuing certificate considers
     // equivalent to SubjectDomainPolicy in the subject certificate.
-    public OID IssuerDomainPolicy;
+    public ΔOID IssuerDomainPolicy;
     // SubjectDomainPolicy contains a OID the issuing certificate considers
     // equivalent to IssuerDomainPolicy in the subject certificate.
-    public OID SubjectDomainPolicy;
+    public ΔOID SubjectDomainPolicy;
 }
 
 // ErrUnsupportedAlgorithm results from attempting to perform an operation that
@@ -897,7 +910,7 @@ public static error ErrUnsupportedAlgorithm = errors.New("x509: cannot verify si
 partial struct InsecureAlgorithmError /*num:nint*/;
 
 public static @string Error(this InsecureAlgorithmError e) {
-    return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, ((SignatureAlgorithm)(nint)e));
+    return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, (SignatureAlgorithm)(nint)e);
 }
 
 // ConstraintViolationError results when a requested usage is not permitted by
@@ -1116,9 +1129,9 @@ public partial struct distributionPointName {
 }
 
 internal static byte reverseBitsInAByte(byte @in) {
-    var b1 = (byte)((@in >> (int)(4)) | (byte)(@in << (int)(4)));
-    var b2 = (byte)((byte)((b1 >> (int)(2)) & 0x33) | (byte)((byte)(b1 << (int)(2)) & 0xcc));
-    var b3 = (byte)((byte)((b2 >> (int)(1)) & 0x55) | (byte)((byte)(b2 << (int)(1)) & 0xaa));
+    var b1 = (byte)(@in >> 4 | (byte)(@in << 4));
+    var b2 = (byte)((byte)(b1 >> 2 & 0x33) | (byte)((byte)(b1 << 2) & 0xcc));
+    var b3 = (byte)((byte)(b2 >> 1 & 0x55) | (byte)((byte)(b2 << 1) & 0xaa));
     return b3;
 }
 
@@ -1128,7 +1141,7 @@ internal static byte reverseBitsInAByte(byte @in) {
 internal static nint asn1BitLength(slice<byte> bitString) {
     nint bitLen = builtin.len(bitString) * 8;
 
-    foreach (var (i, _) in bitString) {
+    foreach (var i in range(bitString)) {
         var b = bitString[builtin.len(bitString) - i - 1];
 
         for (nuint bit = (nuint)0; bit < 8; bit++) {
@@ -1460,7 +1473,7 @@ internal static (pkix.Extension, error) marshalKeyUsage(KeyUsage ku) {
 
     array<byte> a = new(2);
     a[0] = reverseBitsInAByte((byte)(nint)ku);
-    a[1] = reverseBitsInAByte((byte)(nint)((ku >> (int)(8))));
+    a[1] = reverseBitsInAByte((byte)(nint)((ku >> 8)));
 
     nint l = 1;
     if (a[1] != 0) {
@@ -1513,7 +1526,7 @@ internal static (pkix.Extension, error) marshalBasicConstraints(bool isCA, nint 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidPolicyObjectˢ = "invalid policy object identifier"u8;
 
-internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> policies, slice<asn1.ObjectIdentifier> policyIdentifiers) {
+internal static (pkix.Extension, error) marshalCertificatePolicies(slice<ΔOID> policies, slice<asn1.ObjectIdentifier> policyIdentifiers) {
     var ext = new pkix.Extension(Id: oidExtensionCertificatePolicies);
 
     var b = cryptobyte.NewBuilder(new slice<byte>(0, 128));
@@ -1523,7 +1536,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
         if (x509usepolicies.Value() != "0"u8){
             x509usepolicies.IncNonDefault();
             foreach (var (_, vᴛ1) in policiesʗ1) {
-                ref var v = ref heap(new OID(), out var Ꮡv);
+                ref var v = ref heap(new ΔOID(), out var Ꮡv);
                 v = vᴛ1;
 
                 var vʗ1 = v;
@@ -1651,14 +1664,8 @@ internal static (SignatureAlgorithm, pkix.AlgorithmIdentifier, error) signingPar
 }
 
 internal static (slice<byte>, error) signTBS(slice<byte> tbs, crypto.Signer key, SignatureAlgorithm sigAlg, io.Reader rand) {
-    var signed = tbs;
     ref var hashFunc = ref heap<crypto.Hash>(out var ᏑhashFunc);
     hashFunc = sigAlg.hashFunc();
-    if (hashFunc != 0) {
-        var h = hashFunc.New();
-        h.Write(signed);
-        signed = h.Sum(default!);
-    }
 
     crypto.SignerOpts signerOpts = hashFunc;
     if (sigAlg.isRSAPSS()) {
@@ -1668,7 +1675,7 @@ internal static (slice<byte>, error) signTBS(slice<byte> tbs, crypto.Signer key,
         )));
     }
 
-    var (signature, err) = key.Sign(rand, signed, signerOpts);
+    var (signature, err) = crypto.SignMessage(key, rand, tbs, signerOpts);
     if (err != default!) {
         return (default!, err);
     }
@@ -1690,6 +1697,7 @@ internal static slice<byte> emptyASN1Subject = new byte[]{0x30, 0}.slice();
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string x509CertificatePrivateˢ = "x509: certificate private key does not implement crypto.Signer"u8;
 internal static readonly @string x509SerialNumberMustBeˢ = "x509: serial number must be positive"u8;
+internal static readonly @string x509InvalidMaxPathLenˢ = "x509: invalid MaxPathLen, must be greater or equal to -1"u8;
 internal static readonly @string x509OnlyCAsAreAllowedToˢ = "x509: only CAs are allowed to specify MaxPathLen"u8;
 internal static readonly @string x509InternalErrorˢ = "x509: internal error: supported public key does not implement Equal"u8;
 internal static readonly @string x509ProvidedPrivateKeyˢ = "x509: provided PrivateKey doesn't match parent's PublicKey"u8;
@@ -1739,7 +1747,7 @@ internal static readonly @string x509ProvidedPrivateKeyˢ = "x509: provided Priv
 //
 // The currently supported key types are *rsa.PublicKey, *ecdsa.PublicKey and
 // ed25519.PublicKey. pub must be a supported key type, and priv must be a
-// crypto.Signer with a supported public key.
+// crypto.Signer or crypto.MessageSigner with a supported public key.
 //
 // The AuthorityKeyId will be taken from the SubjectKeyId of parent, if any,
 // unless the resulting certificate is self-signed. Otherwise the value from
@@ -1768,27 +1776,21 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
 
     var serialNumber = template.SerialNumber;
     if (serialNumber == nil) {
-        // Generate a serial number following RFC 5280 Section 4.1.2.2 if one is not provided.
-        // Requirements:
-        //   - serial number must be positive
-        //   - at most 20 octets when encoded
-        var maxSerial = big.NewInt(1).Lsh(big.NewInt(1), 20 * 8);
-        while (ᐧ) {
-            error errΔ1 = default!;
-            (serialNumber, errΔ1) = cryptorand.Int(rand, maxSerial);
-            if (errΔ1 != default!) {
+        // Generate a serial number following RFC 5280, Section 4.1.2.2 if one
+        // is not provided. The serial number must be positive and at most 20
+        // octets *when encoded*.
+        var serialBytes = new slice<byte>(20);
+        {
+            var (_, errΔ1) = io.ReadFull(rand, serialBytes); if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
-            // If the serial is exactly 20 octets, check if the high bit of the first byte is set.
-            // If so, generate a new serial, since it will be padded with a leading 0 byte during
-            // encoding so that the serial is not interpreted as a negative integer, making it
-            // 21 octets.
-            {
-                var serialBytes = serialNumber.Bytes(); if (builtin.len(serialBytes) > 0 && (builtin.len(serialBytes) < 20 || (byte)(serialBytes[0] & 0x80) == 0)) {
-                    break;
-                }
-            }
         }
+        // If the top bit is set, the serial will be padded with a leading zero
+        // byte during encoding, so that it's not interpreted as a negative
+        // integer. This padding would make the serial 21 octets so we clear the
+        // top bit to ensure the correct length in all cases.
+        serialBytes[0] &= (byte)(0b0111_1111);
+        serialNumber = @new<bigꓸInt>().SetBytes(serialBytes);
     }
 
     // RFC 5280 Section 4.1.2.2: serial number must be positive
@@ -1798,6 +1800,10 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
     // serial. For now we accept these non-conformant serials.
     if (serialNumber.Sign() == -1) {
         return (default!, errors.New(x509SerialNumberMustBeˢ));
+    }
+
+    if (template.BasicConstraintsValid && template.MaxPathLen < -1) {
+        return (default!, errors.New(x509InvalidMaxPathLenˢ));
     }
 
     if (template.BasicConstraintsValid && !template.IsCA && template.MaxPathLen != -1 && (template.MaxPathLen != 0 || template.MaxPathLenZero)) {
@@ -1834,12 +1840,22 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
 
     var subjectKeyId = template.SubjectKeyId;
     if (builtin.len(subjectKeyId) == 0 && template.IsCA) {
-        // SubjectKeyId generated using method 1 in RFC 5280, Section 4.2.1.2:
-        //   (1) The keyIdentifier is composed of the 160-bit SHA-1 hash of the
-        //   value of the BIT STRING subjectPublicKey (excluding the tag,
-        //   length, and number of unused bits).
-        var h = sha1.Sum(publicKeyBytes);
-        subjectKeyId = h[..];
+        if (x509sha256skid.Value() == "0"u8){
+            x509sha256skid.IncNonDefault();
+            // SubjectKeyId generated using method 1 in RFC 5280, Section 4.2.1.2:
+            //   (1) The keyIdentifier is composed of the 160-bit SHA-1 hash of the
+            //   value of the BIT STRING subjectPublicKey (excluding the tag,
+            //   length, and number of unused bits).
+            var h = sha1.Sum(publicKeyBytes);
+            subjectKeyId = h[..];
+        } else {
+            // SubjectKeyId generated using method 1 in RFC 7093, Section 2:
+            //    1) The keyIdentifier is composed of the leftmost 160-bits of the
+            //    SHA-256 hash of the value of the BIT STRING subjectPublicKey
+            //    (excluding the tag, length, and number of unused bits).
+            var h = sha256.Sum256(publicKeyBytes);
+            subjectKeyId = h[..20];
+        }
     }
     {
         var (privPub, okΔ1) = key.Public()._<alreadyInChain_pubKeyEqual>(ᐧ); if (!okΔ1){
@@ -1884,6 +1900,8 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
         SignatureValue: new asn1.BitString(Bytes: signature, BitLength: builtin.len(signature) * 8)
     ));
 }
+
+internal static ж<godebug.Setting> x509sha256skid = godebug.New("x509sha256skid"u8);
 
 // pemCRLPrefix is the magic string that indicates that we have a PEM encoded
 // CRL.
@@ -2150,10 +2168,10 @@ internal partial struct CreateCertificateRequest_attr /*dyn*/ {
 //   - Attributes (deprecated)
 //
 // priv is the private key to sign the CSR with, and the corresponding public
-// key will be included in the CSR. It must implement crypto.Signer and its
-// Public() method must return a *rsa.PublicKey or a *ecdsa.PublicKey or a
-// ed25519.PublicKey. (A *rsa.PrivateKey, *ecdsa.PrivateKey or
-// ed25519.PrivateKey satisfies this.)
+// key will be included in the CSR. It must implement crypto.Signer or
+// crypto.MessageSigner and its Public() method must return a *rsa.PublicKey or
+// a *ecdsa.PublicKey or a ed25519.PublicKey. (A *rsa.PrivateKey,
+// *ecdsa.PrivateKey or ed25519.PrivateKey satisfies this.)
 //
 // The returned slice is the certificate request in DER encoding.
 public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader rand, ж<CertificateRequest> Ꮡtemplate, any priv) {
@@ -2327,9 +2345,12 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
         RawTBSCertificateRequest: @in.TBSCSR.Raw,
         RawSubjectPublicKeyInfo: @in.TBSCSR.PublicKey.Raw,
         RawSubject: @in.TBSCSR.Subject.FullBytes,
+
         Signature: @in.SignatureValue.RightAlign(),
         SignatureAlgorithm: getSignatureAlgorithmFromAI(@in.SignatureAlgorithm),
+
         PublicKeyAlgorithm: getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm),
+
         Version: @in.TBSCSR.Version,
         Attributes: parseRawAttributes(@in.TBSCSR.RawAttributes)
     ));
@@ -2506,8 +2527,9 @@ internal static readonly @string x509CrlNumberExceeds20ˢ = "x509: CRL number ex
 // CreateRevocationList creates a new X.509 v2 [Certificate] Revocation List,
 // according to RFC 5280, based on template.
 //
-// The CRL is signed by priv which should be the private key associated with
-// the public key in the issuer certificate.
+// The CRL is signed by priv which should be a crypto.Signer or
+// crypto.MessageSigner associated with the public key in the issuer
+// certificate.
 //
 // The issuer may not be nil, and the crlSign bit must be set in [KeyUsage] in
 // order to use it as a CRL issuer.
@@ -2585,7 +2607,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
             // Only add a reasonCode extension if the reason is non-zero, as per
             // RFC 5280 Section 5.3.1.
             if (rce.ReasonCode != 0) {
-                var (reasonBytes, errΔ1) = asn1.Marshal(((asn1.Enumerated)rce.ReasonCode));
+                var (reasonBytes, errΔ1) = asn1.Marshal((asn1.Enumerated)rce.ReasonCode);
                 if (errΔ1 != default!) {
                     return (default!, errΔ1);
                 }

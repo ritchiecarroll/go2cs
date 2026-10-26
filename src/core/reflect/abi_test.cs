@@ -19,6 +19,7 @@ using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go.math;
 using global::go.testing;
+using iter = iter_package;
 using static global::go.reflect_internal_test_package;
 
 partial class reflect_test_package {
@@ -73,7 +74,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r0, a0);
         }
         if ((~s).Value != 1) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(1));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)1);
         }
 
         (s, i) = makeMethodValue(regsAndStackCallˢ);
@@ -86,7 +87,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r1, a1);
         }
         if ((~s).Value != 2) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(2));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)2);
         }
 
         (s, i) = makeMethodValue(spillStructCallˢ);
@@ -96,7 +97,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r2, a2);
         }
         if ((~s).Value != 3) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(3));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)3);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillIntˢ);
@@ -106,10 +107,10 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3a, a2);
         }
         if (r3b != 42) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)(42));
+            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)42);
         }
         if ((~s).Value != 4) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(4));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)4);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillPtrˢ);
@@ -124,7 +125,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r4b.OrTypedNil(), Ꮡvb);
         }
         if ((~s).Value != 5) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(5));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)5);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -203,11 +204,11 @@ public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
                     tΔ1.Fatalf("test case has different number of inputs and outputs: %d in, %d out"u8, typ.NumIn(), typ.NumOut());
                 }
                 slice<reflectꓸValue> args = default!;
-                for (nint i = 0; i < typ.NumIn(); i++) {
-                    args = append(args, genValue(tΔ1, typ.In(i), rʗ1));
+                foreach (var arg in range<reflectꓸType>(typ.Ins().Invoke)) {
+                    args = append(args, genValue(tΔ1, arg, rʗ1));
                 }
                 var results = fnʗ1.Call(args);
-                foreach (var (i, _) in results) {
+                foreach (var i in range(results)) {
                     var (x, y) = (args[i].Interface(), results[i].Interface());
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
@@ -254,13 +255,14 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
             var fnTypʗ1 = fnTyp;
             var rʗ1 = r;
             Ꮡt.Run(Δruntime.FuncForPC(callFnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
+                var argsᴷ = new stackAppend<reflectꓸValue>();
                 var args = new reflectꓸValue[]{fnʗ1}.slice();
                 for (nint i = 0; i < fnTypʗ1.NumIn() - 1; i++) {
                     /* last one is magic type */
-                    args = append(args, genValue(tΔ1, fnTypʗ1.In(i), rʗ1));
+                    args = append(argsᴷ, args, genValue(tΔ1, fnTypʗ1.In(i), rʗ1));
                 }
                 var results = callFnʗ1.Call(args);
-                foreach (var (i, _) in results) {
+                foreach (var i in range(results)) {
                     var (x, y) = (args[i + 1].Interface(), results[i].Interface());
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
@@ -952,36 +954,36 @@ partial struct Struct5 {
 
 // Struct6 has a nested struct.
 partial struct Struct6 {
-    public partial ref Struct1 Struct1 { get; }
+    /*embed*/ public Struct1 Struct1;
 }
 
 // Struct7 is a struct with a nested array-typed field
 // that cannot be passed in registers as a result.
 partial struct Struct7 {
-    public partial ref Struct1 Struct1 { get; }
-    public partial ref Struct2 Struct2 { get; }
+    /*embed*/ public Struct1 Struct1;
+    /*embed*/ public Struct2 Struct2;
 }
 
 // Struct8 is large aggregate struct type that may be
 // passed in registers.
 partial struct Struct8 {
-    public partial ref Struct5 Struct5 { get; }
-    public partial ref Struct1 Struct1 { get; }
+    /*embed*/ public Struct5 Struct5;
+    /*embed*/ public Struct1 Struct1;
 }
 
 // Struct9 is a type that has an array type nested
 // 2 layers deep, and as a result needs to be passed
 // on the stack.
 partial struct Struct9 {
-    public partial ref Struct1 Struct1 { get; }
-    public partial ref Struct7 Struct7 { get; }
+    /*embed*/ public Struct1 Struct1;
+    /*embed*/ public Struct7 Struct7;
 }
 
 // Struct10 is a struct type that is too large to be
 // passed in registers.
 partial struct Struct10 {
-    public partial ref Struct5 Struct5 { get; }
-    public partial ref Struct8 Struct8 { get; }
+    /*embed*/ public Struct5 Struct5;
+    /*embed*/ public Struct8 Struct8;
 }
 
 // Struct11 is a struct type that has several reference
@@ -994,7 +996,7 @@ partial struct Struct11 {
 // paths.
 partial struct Struct12 {
     public nint A;
-    public partial ref Struct11 Struct11 { get; }
+    /*embed*/ public Struct11 Struct11;
 }
 
 // Struct13 tests an empty field.

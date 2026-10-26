@@ -19,8 +19,8 @@ partial struct DecapsulationKey1024 {
     internal array<byte> z = new(32); // implicit rejection sampling seed
     internal array<byte> ρ = new(32); // sampleNTT seed for A, stored for the encapsulation key
     internal array<byte> h = new(32); // H(ek), stored for ML-KEM.Decaps_internal
-    internal partial ref encryptionKey1024 encryptionKey1024 { get; }
-    internal partial ref decryptionKey1024 decryptionKey1024 { get; }
+    /*embed*/ internal encryptionKey1024 encryptionKey1024;
+    /*embed*/ internal decryptionKey1024 decryptionKey1024;
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -44,12 +44,12 @@ public static slice<byte> TestingOnlyExpandedBytes1024(ж<DecapsulationKey1024> 
     var b = new slice<byte>(0, decapsulationKeySize1024);
 
     // ByteEncode₁₂(s)
-    foreach (var (i, _) in dk.s) {
+    foreach (var i in range(dk.s)) {
         b = polyByteEncode(b, dk.s[i]);
     }
 
     // ByteEncode₁₂(t) || ρ
-    foreach (var (i, _) in dk.t) {
+    foreach (var i in range(dk.t)) {
         b = polyByteEncode(b, dk.t[i]);
     }
     b = appendꓸꓸꓸ(b, dk.ρ[..]);
@@ -76,7 +76,7 @@ public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKe
 partial struct EncapsulationKey1024 {
     internal array<byte> ρ = new(32); // sampleNTT seed for A
     internal array<byte> h = new(32); // H(ek)
-    internal partial ref encryptionKey1024 encryptionKey1024 { get; }
+    /*embed*/ internal encryptionKey1024 encryptionKey1024;
 }
 
 // Bytes returns the encapsulation key as a byte slice.
@@ -87,7 +87,7 @@ public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) {
 }
 
 internal static slice<byte> bytes(this ref EncapsulationKey1024 ek, slice<byte> b) {
-    foreach (var (i, _) in ek.t) {
+    foreach (var i in range(ek.t)) {
         b = polyByteEncode(b, ek.t[i]);
     }
     b = appendꓸꓸꓸ(b, ek.ρ[..]);
@@ -117,6 +117,7 @@ public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
 internal static readonly @string mlKemPctˢ = "ML-KEM PCT"u8;
 
 internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<DecapsulationKey1024> Ꮡdk) {
+    fipsSelfTest();
     ref var d = ref heap(new array<byte>(32), out var Ꮡd);
     drbg.Read(d[..]);
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
@@ -130,6 +131,7 @@ internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<Decapsulati
 // GenerateKeyInternal1024 is a derandomized version of GenerateKey1024,
 // exclusively for use in tests.
 public static ж<DecapsulationKey1024> GenerateKeyInternal1024(/*[32]*/ ж<array<byte>> Ꮡd, /*[32]*/ ж<array<byte>> Ꮡz) {
+    fipsSelfTest();
     var dk = Ꮡ(new DecapsulationKey1024(nil));
     kemKeyGen1024(dk, Ꮡd, ref (Ꮡz).DerefOrNull());
     return dk;
@@ -175,7 +177,7 @@ public static (ж<DecapsulationKey1024>, error) TestingOnlyNewDecapsulationKey10
     }
 
     var dk = Ꮡ(new DecapsulationKey1024(nil));
-    foreach (var (i, _) in (~dk).s) {
+    foreach (var i in range((~dk).s)) {
         error errΔ1 = default!;
         (dk.Value.s[i], errΔ1) = polyByteDecode<nttElement>(b[..(int)(encodingSize12)]);
         if (errΔ1 != default!) {
@@ -237,20 +239,20 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
 
     byte N = default!;
     var s = Ꮡdk.of(DecapsulationKey1024.Ꮡs);
-    foreach (var (i, _) in s.Value) {
+    foreach (var i in range(s, 4)) {
         s.Value[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
     var e = GoReflect.WithElemDims(new slice<nttElement>(k1024), 256);
-    foreach (var (i, _) in e) {
+    foreach (var i in range(e)) {
         e[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
 
     var t = Ꮡdk.of(DecapsulationKey1024.Ꮡt);
-    foreach (var (i, _) in t.Value) { // t = A ◦ s + e
+    foreach (var i in range(t, 4)) { // t = A ◦ s + e
         t.Value[i] = e[i].Clone();
-        foreach (var (j, _) in s.Value) {
+        foreach (var j in range(s, 4)) {
             t.Value[i] = polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k1024 + j], s.Value[j]));
         }
     }
@@ -298,6 +300,7 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this �
 }
 
 internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> Ꮡcc) {
+    fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
     // Note that the modulus check (step 2 of the encapsulation key check from
@@ -309,6 +312,7 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
 public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> Ꮡm) {
+    fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1568));
     return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
 }
@@ -357,7 +361,7 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
     h.Write(ekPKE);
     h.Sum(ek.h[..0]);
 
-    foreach (var (i, _) in ek.t) {
+    foreach (var i in range(ek.t)) {
         error err = default!;
         (ek.t[i], err) = polyByteDecode<nttElement>(ekPKE[..(int)(encodingSize12)]);
         if (err != default!) {
@@ -385,29 +389,30 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
 
     byte N = default!;
     var (r, e1) = (GoReflect.WithElemDims(new slice<nttElement>(k1024), 256), GoReflect.WithElemDims(new slice<ringElement>(k1024), 256));
-    foreach (var (i, _) in r) {
+    foreach (var i in range(r)) {
         r[i] = ntt(samplePolyCBD(rnd, N));
         N++;
     }
-    foreach (var (i, _) in e1) {
+    foreach (var i in range(e1)) {
         e1[i] = samplePolyCBD(rnd, N);
         N++;
     }
     var e2 = samplePolyCBD(rnd, N);
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k1024), 256); // NTT⁻¹(AT ◦ r) + e1
-    foreach (var (i, _) in u) {
-        u[i] = e1[i].Clone();
-        foreach (var (j, _) in r) {
+    foreach (var i in range(u)) {
+        nttElement uHat = default!;
+        foreach (var j in range(r)) {
             // Note that i and j are inverted, as we need the transposed of A.
-            u[i] = polyAdd<ringElement>(u[i], inverseNTT(nttMul(ex.a[j * (nint)k1024 + i], r[j])));
+            uHat = polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k1024 + i], r[j]));
         }
+        u[i] = polyAdd(e1[i], inverseNTT(uHat));
     }
 
     var μ = ringDecodeAndDecompress1(ref (Ꮡm).DerefOrNull());
 
     nttElement vNTT = default!;                  // t⊺ ◦ r
-    foreach (var (i, _) in ex.t) {
+    foreach (var i in range(ex.t)) {
         vNTT = polyAdd(vNTT, nttMul(ex.t[i], r[i]));
     }
     var v = polyAdd(polyAdd(inverseNTT(vNTT), e2), μ);
@@ -431,6 +436,7 @@ internal static readonly @string mlkemInvalidCiphertextˢ = "mlkem: invalid ciph
 //
 // The shared key must be kept secret.
 public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
+    fipsSelfTest();
     if (len(ciphertext) != CiphertextSize1024) {
         return (default!, errors.New(mlkemInvalidCiphertextˢ));
     }
@@ -474,7 +480,7 @@ internal static slice<byte> pkeDecrypt1024(ref decryptionKey1024 dx, /*[1568]*/ 
     ref var c = ref Ꮡc.DerefOrNull();
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k1024), 256);
-    foreach (var (i, _) in u) {
+    foreach (var i in range(u)) {
         var bΔ1 = Ꮡ(array<byte>.Alias(c.slice((nint)encodingSize11 * i, (nint)encodingSize11 * (i + 1)), 352));
         u[i] = ringDecodeAndDecompress11(bΔ1);
     }
@@ -483,7 +489,7 @@ internal static slice<byte> pkeDecrypt1024(ref decryptionKey1024 dx, /*[1568]*/ 
     var v = ringDecodeAndDecompress5(b);
 
     nttElement mask = default!;                  // s⊺ ◦ NTT(u)
-    foreach (var (i, _) in dx.s) {
+    foreach (var i in range(dx.s)) {
         mask = polyAdd(mask, nttMul(dx.s[i], ntt(u[i])));
     }
     var w = polySub(v, inverseNTT(mask));

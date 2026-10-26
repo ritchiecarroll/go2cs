@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace go;
@@ -125,6 +126,55 @@ public interface IGoFieldBoxSource
     object? FieldBox(string field, object parentBox);
 }
 
+/// <summary>
+/// A converted GENERIC type's Go methods, closed over its own type arguments: implemented by go2cs-gen on the generated
+/// part of every generic type with Go methods, so golib's method-set candidate source hands reflect and the interface
+/// shells a method compiled code instantiated, where it would otherwise need <c>MethodInfo.MakeGenericMethod</c>, which
+/// Native AOT answers only for an instantiation it happened to compile.
+/// </summary>
+/// <remarks>
+/// A Go method of <c>Pair[K, V]</c> is emitted as the generic extension method <c>String&lt;K, V&gt;(this Pair&lt;K, V&gt;)</c>.
+/// Each arm returns the <see cref="Delegate.Method"/> of a delegate the generated part creates over the type's own type
+/// parameters, so each instantiation the program constructs compiles its own closed methods. Reached like
+/// <see cref="IGoFieldBoxSource"/>, through the type's zero value; read by <c>TypeExtensions.GetGoMethodSetCandidates</c>.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoMethodSource
+{
+    /// <summary>
+    /// The method named <paramref name="name"/> (its metadata name, as reflection reads it), closed over this type's type
+    /// arguments, or <c>null</c> when the type has no such method. <paramref name="pointerReceiver"/> asks for a
+    /// pointer-receiver method, in its bindable <c>ж&lt;T&gt;</c> form; otherwise the value-receiver method (or its
+    /// copy-bound <c>this ref T</c> form).
+    /// </summary>
+    MethodInfo? GoMethod(string name, bool pointerReceiver);
+}
+
+/// <summary>
+/// A converted value type's exported Go methods as COMPILED delegates: implemented by go2cs-gen (MethodSet.cs) on the
+/// generated part of every value type with exported Go methods, so reflect's <c>Type.Method(i).Func</c> and
+/// <c>Value.Method(i)</c> hand out delegates compiled code created, where reflect would otherwise instantiate a
+/// <c>Func</c>/<c>Action</c> over the receiver's type at run time, which Native AOT cannot do for a value-type receiver.
+/// </summary>
+/// <remarks>
+/// Reached ONLY from reflect's method paths, through the type's zero value (the unbound func) or the receiver (a method
+/// value), never through a table registration fills: a program that reaches no reflect method access calls no
+/// implementation of this slot, so Native AOT compiles none of its arms (G's ruling, 2026-10-19). Read by
+/// <c>GoReflect.GeneratedMethod</c>.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoMethodSet
+{
+    /// <summary>
+    /// The method <paramref name="method"/> (its emitted name, as golib's method table holds it) of this type, reached
+    /// through <c>*T</c> when <paramref name="pointer"/> is set: the UNBOUND func (receiver first, a <c>ж&lt;T&gt;</c>
+    /// box for <c>*T</c>) when <paramref name="bound"/> is clear, otherwise the METHOD VALUE with
+    /// <paramref name="receiver"/> (a value of this type, or its box for <c>*T</c>, possibly a nil one) bound into it.
+    /// <c>null</c> when the type has no generated arm for it.
+    /// </summary>
+    Delegate? ᴛMethod(string method, bool pointer, bool bound, object? receiver);
+}
+
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>
 public static class GoTypeOps
 {
@@ -166,15 +216,21 @@ public static class GoTypeOps
     /// In order: a builtin's (and a pointer to one); a value type's own source, reached through a zero value of it (its
     /// members read nothing of the value); and otherwise the fallback, which closes the operations over the type at run
     /// time: a pointer, an interface, a func type -- reference types, whose instantiation Native AOT loads (measured). That
-    /// is the one dynamic-code site left on these paths, the boundary trim stage 3d annotates.
+    /// is the one dynamic-code site left on these paths, the boundary trim stage 3d annotates. A type found in none of
+    /// these first runs the escape registries loaded assemblies deferred (<see cref="GoDeferredRegistrations.EscapeRegistry"/>),
+    /// so the fallback never caches over a registered container.
     /// </remarks>
-    public static IGoTypeOps Of(Type type) => s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
+    public static IGoTypeOps Of(Type type) =>
+        s_ops.TryGetValue(type, out IGoTypeOps? ops) || GoDeferredRegistrations.EscapeRegistry.Run() && s_ops.TryGetValue(type, out ops)
+            ? ops
+            : s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
 
     /// <summary>
     /// Registers operations a converted package's generated escape registry names: a closed container (array, slice,
     /// map, chan) the package converts to an interface, or reaches through such a value's fields (trim stage 3c-2b(iii),
     /// go2cs-gen's EscapeRegistryGenerator). Only an interface value reaches reflect, and the registering package's module
-    /// initializer runs before any of its code, so the operations are here before the value is.
+    /// initializer queues its registry before any of its code runs (<see cref="GoDeferredRegistrations.EscapeRegistry"/>), so
+    /// <see cref="Of"/> finds the operations on its first miss for the value's type.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static void Register(IGoTypeOps ops) => s_ops.TryAdd(ops.Type, ops);

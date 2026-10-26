@@ -83,7 +83,7 @@ internal static error Close(this ref fakeConnector c) {
 }
 
 internal partial struct fakeDriverCtx {
-    internal partial ref fakeDriver fakeDriver { get; }
+    /*embed*/ internal fakeDriver fakeDriver;
 }
 
 internal static driver.DriverContext _ᴛ1ʗ = new sql_internal_test_package.fakeDriverCtxжDriverContext(Ꮡ(new fakeDriverCtx(nil)));
@@ -223,7 +223,7 @@ public static void TestDrivers(ж<testing.T> Ꮡt) {
 
 // hook to simulate connection failures
 partial struct hookOpenErrᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal Func<error> fn;
 }
 internal static ж<hookOpenErrᴛ1> ᏑhookOpenErr = new StandardBox<hookOpenErrᴛ1>(new hookOpenErrᴛ1(nil));
@@ -433,7 +433,7 @@ internal static (driver.Tx, error) Begin(this ж<fakeConn> Ꮡc) {
 }
 
 partial struct hookPostCloseConnᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal Action<ж<fakeConn>, error> fn;
 }
 internal static ж<hookPostCloseConnᴛ1> ᏑhookPostCloseConn = new StandardBox<hookPostCloseConnᴛ1>(new hookPostCloseConnᴛ1(nil));
@@ -932,7 +932,7 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
 }
 
 internal static driverꓸValue valueFromPlaceholderName(slice<driver.NamedValue> args, @string name) {
-    foreach (var (i, _) in args) {
+    foreach (var i in range(args)) {
         if (args[i].Name == name) {
             return args[i].Value;
         }
@@ -1115,13 +1115,13 @@ rows:
                 nint idx = t.columnIndex(wcol.Column);
                 if (idx == -1) {
                     t.of(sql_internal_test_package.Δtable.Ꮡmu).Unlock();
-                    return (default!, fmt.Errorf("fakedb: invalid where clause column %q"u8, wcol));
+                    return (default!, fmt.Errorf("fakedb: invalid where clause column %v"u8, wcol));
                 }
                 var tcol = (~trow).cols[idx];
                 {
                     var (bs, okΔ1) = tcol._<slice<byte>>(ᐧ); if (okΔ1) {
                         // lazy hack to avoid sprintf %v on a []byte
-                        tcol = ((@string)bs);
+                        tcol = (@string)bs;
                     }
                 }
                 any argValue = default!;
@@ -1240,7 +1240,7 @@ internal static void touchMem(this ref rowsCursor rc) {
 
 internal static void invalidateDriverOwnedMemory(this ref rowsCursor rc) {
     foreach (var (_, buf) in rc.driverOwnedMemory) {
-        foreach (var (i, _) in buf) {
+        foreach (var i in range(buf)) {
             buf[i] = (rune)'x';
         }
     }

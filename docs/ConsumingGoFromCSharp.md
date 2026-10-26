@@ -66,6 +66,11 @@ There are two ways to get one:
 The C# you write is the same either way. The `go.*` packages are built and versioned together, so use one version
 of them in a project.
 
+**A converted project takes the newest `go.*` release of its Go minor.** `-recurse=nuget` sets `GoStdLibVersion` to
+the converting toolchain's minor with a float, for example `1.26.*`, so a restore picks up later go2cs releases and
+patch hops of that minor without a reconversion. To pin one exact version, set `GoStdLibVersion` yourself, for
+example `dotnet build -p:GoStdLibVersion=1.26.10.1`.
+
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).
 
@@ -114,9 +119,13 @@ time.Duration timeout = 90 * time.ΔSecond;
 @string shown = timeout.String();   // a Go method: found through `using go;`
 ```
 
-**Packages from NuGet bring two of these for you.** Every `go.*` and `nugetgo.*` package adds `using go;` and
-`using static go.builtin;` to your project as global usings; set the MSBuild property `GoConsumerUsings` to `false`
-to turn them off. A conversion you reference as projects does not add them, so write them yourself, as
+**Packages from NuGet bring the usings for you.** Every `go.*` and `nugetgo.*` package adds `using go;` and
+`using static go.builtin;` to your project as global usings, and each package you reference directly also adds its
+own namespace, such as `go.encoding` for `go.encoding.hex`, so its Go methods are in scope. Set the MSBuild property
+`GoConsumerUsings` to `false` to turn them off. Writing the same usings in a file as well does no harm. Set
+`GoGlobalPackageAliases` to `true` to get each directly referenced package's alias as well, named for the Go
+package (`hex` for `go.encoding.hex_package`); it is off by default, because a file that also declares that alias
+fails with CS1537. A conversion you reference as projects adds none of these, so write them yourself, as
 `Program.cs` does.
 
 **Lowercase aliases raise warning CS8981**, which notes that an all-lowercase name may become a C# keyword one day.
@@ -148,7 +157,7 @@ itself, through `using go;`, always works and reads a little noisier:
 | `func (b *Builder) WriteString(s string) (int, error)` | `public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s)` |
 | `func (uuid *UUID) UnmarshalText(data []byte) error` | `public static error UnmarshalText(this ref UUID uuid, slice<byte> data)` |
 | `type Duration int64` | `partial struct Duration` |
-| `const Second Duration = 1000 * Millisecond` | `public static Duration ΔSecond` |
+| `const Second Duration = 1000 * Millisecond` | `public static Duration ΔSecond => 1000000000` |
 | `var ErrSyntax = errors.New("invalid syntax")` | `public static error ErrSyntax` |
 | `type Writer interface { Write(p []byte) (n int, err error) }` | `partial interface Writer { (nint n, error err) Write(slice<byte> p); }` |
 
@@ -194,22 +203,22 @@ Go's `int` is a native-sized integer, so it is C# `nint`, and C# `int` is Go's `
 | `float32`, `float64` | `float`, `double` |
 
 So `len` returns `nint`, and so does `strconv.Atoi`. Hold the result in `var` or `nint`, or cast it where you need
-an `int`. A C# integer literal is an `int`, so cast the values you `append` to a `slice<nint>`:
+an `int`. C# integer literals `append` to a `slice<nint>` as they are:
 
 ```csharp
 var size = len("héllo");            // nint, Go's int: 6 bytes
 int small = (int)len("héllo");      // C# int is Go's int32, so cast when you need one
 var (num, aerr) = strconv.Atoi("42");   // (nint, error)
 slice<nint> nums = new nint[] { 1, 2, 3 };
-nums = append(nums, (nint)4, (nint)5);  // literals are C# int: cast them to Go's int
+nums = append(nums, 4, 5);              // C# int literals append to a slice<nint>
 ```
 
 ## Strings
 
 A Go string is `@string`: a UTF-8 string, like Go's. (`string` is a C# keyword, and `@` lets the name be used
 anyway.) It converts to and from `System.String` implicitly, transcoding between UTF-16 and UTF-8, so a C# string
-goes wherever Go takes a string, and a `"..."u8` literal goes in with no conversion at all. An `@string` compares
-with a C# string literal directly.
+goes wherever Go takes a string, and a `"..."u8` literal goes in as its UTF-8 bytes, with no transcoding. An
+`@string` compares with a C# string literal directly.
 
 ```csharp
 @string hello = "héllo, 世界";      // System.String converts to @string (UTF-16 to UTF-8)
@@ -231,9 +240,34 @@ fmt.Println(diskFull, wait);        // disk full 1.5s
 Console.WriteLine($"{diskFull.Error()} after {wait.String()}");    // disk full after 1.5s
 ```
 
-`Console.WriteLine(x)` and `$"{x}"` call .NET's `ToString()` instead. Strings, slices and maps print as Go prints
-them either way, but some values show what they are made of: a `Duration` prints its count of nanoseconds, and an
-error can print as an address. `fmt.Sprintf("%v", x)` gives the Go text as an `@string`.
+`Console.WriteLine(x)`, `$"{x}"` and a debugger call .NET's `ToString()`, and it gives the same text. A converted
+value's `ToString()` returns its `Error()`, else its `String()`, chosen the way `fmt`'s `%v` chooses: for a pointer,
+`Error()` wins over `String()` whichever of them has the pointer receiver. A value with neither method prints its
+fields or its underlying value, and a pointer with neither prints its address.
+
+```csharp
+Console.WriteLine($"{diskFull} after {wait}");                    // disk full after 1.5s
+```
+
+A method that panics prints Go's `%!v(PANIC=String method: …)` text instead of throwing. A Go func value (a .NET
+delegate) keeps its .NET text. A value of a generic Go type prints its fields or its underlying value, not its
+`String()` or `Error()`, because its methods are generic extension methods, which `ToString()` does not call. A
+`*big.Float` prints its `String()`, 10 significant digits, where `%v` calls its `Format` method and prints the
+shortest exact text.
+`fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
+print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
+type-parameter value in generic code too.
+<!-- A pointer: src/core/golib/builtin.cs:3171 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3172 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+     The run-time unwrap of a named basic type:
+     src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
+     Guard:
+     src/tests/GolibTests/PrintFloatArgumentTests.cs:78 (`ANamedBasicTypePrintsItsUnderlyingValueNeverItsStringMethod`).
+     Probe at 3e3f18925a: func show[T any](v T) { println(v) } emits println((v).OrTypedNilOf()), which passes the
+     boxed value to that unwrap; go1.26.10 prints 1000000000 for show(time.Second). -->
+
+A debugger display also calls `ToString()`, so it runs the type's `String()`. A `String()` that blocks or runs long
+hits the debugger's evaluation timeout.
 
 `fmt` formats Go values, so give it a `slice<T>` rather than a C# array:
 
@@ -293,6 +327,22 @@ static nint ParsePort(@string text)
 }
 ```
 
+`Must()` does this in one call, on a bare `error` result or on up to three values before the `error`: it returns the
+values when the error is nil, and otherwise throws `GoErrorException`. That is a `PanicException`, as a failed Go
+`Must` panics, and its `Err` is the original error, so `errors.Is` still works:
+
+```csharp
+nint port = strconv.Atoi("8080").Must();    // the value, or a GoErrorException
+try
+{
+    strconv.Atoi("eighty").Must();
+}
+catch (GoErrorException ex) when (errors.Is(ex.Err, strconv.ErrSyntax))
+{
+    // ex.Message is the error's text: strconv.Atoi: parsing "eighty": invalid syntax
+}
+```
+
 ## Panics and exceptions
 
 A Go `panic` that is not recovered reaches C# as a `PanicException`. Its `State` is the value Go passed to
@@ -345,12 +395,11 @@ nint letters = 0;
 foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
 ```
 
-A slice is both a sequence of values and a sequence of `(index, value)` pairs, so LINQ cannot infer which one you
-mean. Name the element type first, or copy the slice into a list or an array:
+`foreach` gives a slice's `(index, value)` pairs, as Go's `range` does, and LINQ sees the slice as its values. The
+same holds for a Go array and for a named slice or array type:
 
 ```csharp
-IEnumerable<@string> seq = words;   // name the element type, then LINQ works
-// seq.Count(w => len(w) == 5) == 2
+// words.Count(w => len(w) == 5) == 2
 List<@string> list = new(words);
 @string[] array = words.ToArray();
 ```
@@ -467,11 +516,23 @@ var mailbox = new channel<@string>(1);
 // mailbox.TryReceive(out var got) is true, with got == "hi"
 ```
 
+`ReceiveAsync` and `SendAsync` are the awaitable forms of `Receive` and `Send`, for C# code that must not block a
+thread. They are the same channel operations, waiting in the channel's own queue with Go's rules, and they take a
+`CancellationToken`: a canceled receive takes no value, and a canceled send delivers nothing.
+
+```csharp
+var replies = new channel<nint>(0);
+Task<nint> reply = replies.ReceiveAsync();      // awaitable: no thread waits for the sender
+goǃ(() => replies.Send(99));
+// reply completes with 99
+```
+
 A few things behave as Go's runtime does, so they are worth knowing from the C# side:
 
-- Each goroutine runs on its own thread.
+- Each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
+  once it ends, so starting one usually costs a hand-off rather than a new thread.
 - `Send`, `Receive` and `WaitGroup.Wait` block the calling thread until they can complete. Keep them off a UI
-  thread, or run them inside `Task.Run`.
+  thread: await `ReceiveAsync` or `SendAsync` instead, or run them inside `Task.Run`.
 - A panic that a goroutine does not recover ends the process, as it does in Go. The goroutine runs on its own
   thread, so a `try`/`catch` around `goǃ` cannot see it; catch it inside the goroutine's own body instead, or
   let it end the program as Go would.
@@ -520,6 +581,14 @@ foreach (var (key, _) in set) keySum += key;   // a Go map: (key, value) pairs
 slice<int> keys = set.Keys();
 ```
 
+`AsReadOnlySet()` hands any Go map's keys, a plain `map<K,V>` or a named map type like `HashSet<T>`, to C# code
+that takes an `IReadOnlySet<K>`. The view is live and read-only, and a nil map is the empty set:
+
+```csharp
+IReadOnlySet<int> members = set.AsReadOnlySet();    // a live, read-only view of the keys
+// members.Contains(4) is true
+```
+
 <a id="rough-edges"></a>
 
 ## Good to know
@@ -533,20 +602,32 @@ Each item is a first surprise, and what to write instead.
   with a conversion you reference as projects, or with `GoConsumerUsings` set to `false`, add
   `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
-- **`append(nums, 4, 5)` is ambiguous on a `slice<nint>`.** Cast the literals: `append(nums, (nint)4, (nint)5)`.
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
-- **LINQ cannot infer a slice's element type.** Write `IEnumerable<T> e = s;` first, or use `new List<T>(s)` or
-  `s.ToArray()` ([Slices](#slices)).
-- **`$"{d}"` prints a `Duration` in nanoseconds.** Print Go values through `fmt`, or call `.String()` or `.Error()`
+- **`foreach (var v in s)` gives a tuple, not a value.** `foreach` over a slice gives `(index, value)` pairs: write
+  `foreach (var (_, v) in s)` for the values, or use LINQ ([Slices](#slices)).
+- **`$"{f}"` on a Go func value prints the delegate's .NET type name.** Print it through `fmt` instead
   ([Printing Go values](#printing-go-values)).
 - **A copy of a Go array value shares its bytes.** `var b = a;` on a `uuid.UUID` copies the C# struct, not the
   array inside it: write `a.Clone()`.
 - **A Go map type is not an `ISet<T>`.** It is an `IDictionary<K,V>`; hashset's `HashSet<T>` is
-  `IDictionary<T, EmptyStruct>`. Use its Go methods, `len` and `foreach`, or pass it where an `IDictionary` goes.
+  `IDictionary<T, EmptyStruct>`. Use its Go methods, `len` and `foreach`, pass it where an `IDictionary` goes, or
+  call `AsReadOnlySet()` for an `IReadOnlySet<T>` of its keys ([Generics: hashset](#generics-hashset)).
 - **Errors are values, not exceptions.** Check `err != nil` after each call that can fail, and throw where your C#
-  wants an exception ([Errors](#errors)).
-- **A channel call blocks its thread.** Keep `Send`, `Receive` and `Wait` off a UI thread, or wrap them in
-  `Task.Run`.
+  wants an exception, or call `Must()` ([Errors](#errors)).
+- **A channel call blocks its thread.** Keep `Send`, `Receive` and `Wait` off a UI thread: await `ReceiveAsync`
+  or `SendAsync`, or wrap them in `Task.Run`.
+- **Startup is faster from `dotnet publish`.** The converted packages are IL that the JIT compiles the first time
+  each method runs. ReadyToRun compiles it ahead of time, and the .NET SDK applies ReadyToRun only when it
+  publishes: `dotnet run` and `dotnet build` never do. A program that go2cs converts sets
+  `<PublishReadyToRun>true</PublishReadyToRun>` in its project. In your own project that references `go.*`
+  packages, add that property and run the output of `dotnet publish -c Release`. On linux-x64, ReadyToRun cut a
+  converted program's median startup by about a third.
+  <!-- The converter's Exe template: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`
+       (with PublishTrimmed, scoped off Library projects). The figure: P1's measurement of PerfStartup
+       (src/tests/Performance/PerfStartup) at a5aa6a23f7 on linux-x64, median 488 ms under the JIT and 329 ms with
+       ReadyToRun (-33%). Checked with .NET SDK 10.0.112 on linux-x64: `dotnet publish -c Release` with the
+       property infers the runtime identifier and writes a ReadyToRun image; `dotnet build` of the same project
+       does not. -->
 - **Glyphs.** Consumer code rarely types one: `var` hides `ж<T>`, `@new<T>()` stands in for `Ꮡ`, channels have
   `Send` and `Receive`, and aliases keep call sites Go-shaped. What remains is `goǃ`, which completion lists when
   you type `go`, `ꟷ` in a map's comma-ok read, and the occasional `Δ` name such as `time.ΔSecond`. Every glyph

@@ -34,6 +34,17 @@ internal static readonly @string newton = "../testdata/Isaac.Newton-Opticks.txt"
 internal static UntypedInt newtonLen => 567198;
 internal static readonly @string newtonSHA256 = "d4a9ac22462b35e7821a4f2706c211093da678620a8f9997989ee7cf8d507bbd"u8;
 
+internal static void hookSupportsSendfile(ж<testing.T> Ꮡt) {
+    if (Δruntime.GOOS == "windows"u8) {
+        var origHook = testHookSupportsSendfile;
+        testHookSupportsSendfile = () => true;
+        var origHookʗ1 = origHook;
+        Ꮡt.Cleanup(() => {
+            testHookSupportsSendfile = origHookʗ1;
+        });
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object internalPollSendFileˢ = (@string)"internal/poll.SendFile called multiple times, want one call"u8;
 internal static readonly object internalPollSendFileWasˢ = (@string)"internal/poll.SendFile was not called, want it to be"u8;
@@ -43,13 +54,14 @@ internal static readonly object internalPollSendFileˢ2 = (@string)"internal.pol
 // expectSendfile runs f, and verifies that internal/poll.SendFile successfully handles
 // a write to wantConn during f's execution.
 //
-// On platforms where supportsSendfile is false, expectSendfile runs f but does not
+// On platforms where supportsSendfile() is false, expectSendfile runs f but does not
 // expect a call to SendFile.
 internal static void expectSendfile(ж<testing.T> Ꮡt, global::go.net_package.Conn wantConn, Action f) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Helper();
-        if (!supportsSendfile) {
+        hookSupportsSendfile(Ꮡt);
+        if (!supportsSendfile()) {
             f();
             return;
         }
@@ -62,7 +74,7 @@ internal static void expectSendfile(ж<testing.T> Ꮡt, global::go.net_package.C
         bool gotHandled = default!;
         ref var gotFD = ref heap<ж<poll.FD>>(out var ᏑgotFD);
         ref var gotErr = ref heap<error>(out var ᏑgotErr);
-        poll.TestHookDidSendFile = (ж<poll.FD> dstFD, nint src, int64 written, error err, bool handled) => {
+        poll.TestHookDidSendFile = (ж<poll.FD> dstFD, uintptr src, int64 written, error err, bool handled) => {
             if (called) {
                 Ꮡt.Error(internalPollSendFileˢ);
             }
@@ -166,26 +178,18 @@ internal static partial void testSendfile(ж<testing.T> Ꮡt, @string filePath, 
                     // Return file data using io.Copy, which should use
                     // sendFile if available.
                     int64 sbytes = default!;
-                    var exprᴛ1 = Δruntime.GOOS;
-                    if (exprᴛ1 == "windows"u8) {
-                        // Windows is not using sendfile for some reason:
-                        // https://go.dev/issue/67042
-                        (sbytes, ᏑerrΔ2.ValueSlot) = Δio.Copy(new net_test_package.net_ConnᴠWriter(connʗ1), new net_test_package.os_FileжReader(f));
-                    }
-                    else { /* default: */
-                        var connʗ3 = connʗ1;
-                        var fʗ2 = f;
-                        expectSendfile(Ꮡt, connʗ1, () => {
-                            if (limit > 0){
-                                (sbytes, ᏑerrΔ2.ValueSlot) = Δio.CopyN(new net_test_package.net_ConnᴠWriter(connʗ3), new net_test_package.os_FileжReader(fʗ2), limit);
-                                if (AreEqual(ᏑerrΔ2.ValueSlot, Δio.EOF) && limit > size) {
-                                    ᏑerrΔ2.ValueSlot = default!;
-                                }
-                            } else {
-                                (sbytes, ᏑerrΔ2.ValueSlot) = Δio.Copy(new net_test_package.net_ConnᴠWriter(connʗ3), new net_test_package.os_FileжReader(fʗ2));
+                    var connʗ3 = connʗ1;
+                    var fʗ2 = f;
+                    expectSendfile(Ꮡt, connʗ1, () => {
+                        if (limit > 0){
+                            (sbytes, ᏑerrΔ2.ValueSlot) = Δio.CopyN(new net_test_package.net_ConnᴠWriter(connʗ3), new net_test_package.os_FileжReader(fʗ2), limit);
+                            if (AreEqual(ᏑerrΔ2.ValueSlot, Δio.EOF) && limit > size) {
+                                ᏑerrΔ2.ValueSlot = default!;
                             }
-                        });
-                    }
+                        } else {
+                            (sbytes, ᏑerrΔ2.ValueSlot) = Δio.Copy(new net_test_package.net_ConnᴠWriter(connʗ3), new net_test_package.os_FileжReader(fʗ2));
+                        }
+                    });
                     if (ᏑerrΔ2.ValueSlot != default!) {
                         errcʗ2.ᐸꟷ(ᏑerrΔ2.ValueSlot);
                         return;
@@ -761,7 +765,7 @@ public static void BenchmarkSendFile(ж<testing.B> Ꮡb) {
 
 internal static void benchmarkSendFile(ж<testing.B> Ꮡb, @string proto) {
     for (nint i = 0; i <= 10; i++) {
-        nint size = ((nint)1).Lsh((int64)((i + 10)));
+        nint size = ((nint)1).Lsh((int64)(i + 10));
         var bench = new sendFileBench(
             proto: proto,
             chunkSize: size
@@ -840,7 +844,7 @@ internal static ж<Δos.File> createTempFile(testing.TB tb, int64 size) {
     return f;
 }
 
-internal static Δio.Reader newRandReader(testing.TB tb) {
+internal static partial Δio.Reader newRandReader(testing.TB tb) {
     var seed = time.Now().UnixNano();
     tb.Logf("Deterministic RNG seed based on timestamp: 0x%x"u8, seed);
     return new net_test_package.rand_RandжReader(rand.New(rand.NewSource(seed)));

@@ -45,7 +45,9 @@ internal static slice<respTest> respTests = new respTest[]{
     // Unchunked response without Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -59,6 +61,7 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: -1
         ),
+
         "Body here\n"u8
     ),
 
@@ -66,7 +69,9 @@ internal static slice<respTest> respTests = new respTest[]{
     // Connection headers.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -78,13 +83,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: -1
         ),
+
         "Body here\n"u8
     ),
 
     // Unchunked HTTP/1.1 204 response without Content-Length.
     new(
         "HTTP/1.1 204 No Content\r\n"u8 + "\r\n"u8 + "Body should not be read!\n"u8,
+
         "HTTP/1.1 204 No Content\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "204 No Content"u8,
             StatusCode: 204,
@@ -96,13 +104,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: false,
             ContentLength: 0
         ),
+
         ""u8
     ),
 
     // Unchunked response with Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -117,13 +128,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: 10
         ),
+
         "Body here\n"u8
     ),
 
     // Chunked response without Content-Length.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "0a\r\n"u8 + "Body here\n\r\n"u8 + "09\r\n"u8 + "continued\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "13\r\n"u8 + "Body here\ncontinued\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -136,13 +150,16 @@ internal static slice<respTest> respTests = new respTest[]{
             ContentLength: -1,
             TransferEncoding: new @string[]{"chunked"u8}.slice()
         ),
+
         "Body here\ncontinued"u8
     ),
 
     // Trailer header but no TransferEncoding
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Trailer: Content-MD5, Content-Sources\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -158,13 +175,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: 10
         ),
+
         "Body here\n"u8
     ),
 
     // Chunked response with Content-Length.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "0a\r\n"u8 + "Body here\n\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "a\r\n"u8 + "Body here\n\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -177,13 +197,16 @@ internal static slice<respTest> respTests = new respTest[]{
             ContentLength: -1,
             TransferEncoding: new @string[]{"chunked"u8}.slice()
         ),
+
         "Body here\n"u8
     ),
 
     // Chunked response in response to a HEAD request
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -196,13 +219,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: false,
             ContentLength: -1
         ),
+
         ""u8
     ),
 
     // Content-Length in response to a HEAD request
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -215,13 +241,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: 256
         ),
+
         ""u8
     ),
 
     // Content-Length in response to a HEAD request with HTTP/1.1
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -234,13 +263,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: false,
             ContentLength: 256
         ),
+
         ""u8
     ),
 
     // No Content-Length or Chunked in response to a HEAD request
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -253,13 +285,16 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: -1
         ),
+
         ""u8
     ),
 
     // explicit Content-Length of 0.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -273,6 +308,7 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: false,
             ContentLength: 0
         ),
+
         ""u8
     ),
 
@@ -280,7 +316,9 @@ internal static slice<respTest> respTests = new respTest[]{
     // (permitted by RFC 7230, section 3.1.2)
     new(
         "HTTP/1.0 303 \r\n\r\n"u8,
+
         "HTTP/1.0 303 \r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "303 "u8,
             StatusCode: 303,
@@ -292,6 +330,7 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: -1
         ),
+
         ""u8
     ),
 
@@ -299,7 +338,9 @@ internal static slice<respTest> respTests = new respTest[]{
     // (not permitted by RFC 7230, but we'll accept it anyway)
     new(
         "HTTP/1.0 303\r\n\r\n"u8,
+
         "HTTP/1.0 303 303\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "303"u8,
             StatusCode: 303,
@@ -311,6 +352,7 @@ internal static slice<respTest> respTests = new respTest[]{
             Close: true,
             ContentLength: -1
         ),
+
         ""u8
     ),
 
@@ -323,7 +365,9 @@ Content-Type: multipart/byteranges; boundary=18a75608c8f47cef
 
 some body
 """u8.Raw(),
+
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Connection: close\r\n"u8 + "Content-Type: multipart/byteranges; boundary=18a75608c8f47cef\r\n"u8 + "\r\n"u8 + "some body"u8,
+
         new Response(
             Status: "206 Partial Content"u8,
             StatusCode: 206,
@@ -337,13 +381,16 @@ some body
             Close: true,
             ContentLength: -1
         ),
+
         "some body"u8
     ),
 
     // Unchunked response without Content-Length, Request is nil
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -356,13 +403,16 @@ some body
             Close: true,
             ContentLength: -1
         ),
+
         "Body here\n"u8
     ),
 
     // 206 Partial Content. golang.org/issue/8923
     new(
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Content-Type: text/plain; charset=utf-8\r\n"u8 + "Accept-Ranges: bytes\r\n"u8 + "Content-Range: bytes 0-5/1862\r\n"u8 + "Content-Length: 6\r\n\r\n"u8 + "foobar"u8,
+
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Content-Length: 6\r\n"u8 + "Accept-Ranges: bytes\r\n"u8 + "Content-Range: bytes 0-5/1862\r\n"u8 + "Content-Type: text/plain; charset=utf-8\r\n"u8 + "\r\n"u8 + "foobar"u8,
+
         new Response(
             Status: "206 Partial Content"u8,
             StatusCode: 206,
@@ -378,13 +428,16 @@ some body
             }),
             ContentLength: 6
         ),
+
         "foobar"u8
     ),
 
     // Both keep-alive and close, on the same Connection line. (Issue 8840)
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "Connection: keep-alive, close\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -399,13 +452,16 @@ some body
             Close: true,
             ContentLength: 256
         ),
+
         ""u8
     ),
 
     // Both keep-alive and close, on different Connection lines. (Issue 8840)
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "Connection: keep-alive\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
+
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -420,6 +476,7 @@ some body
             Close: true,
             ContentLength: 256
         ),
+
         ""u8
     ),
 
@@ -427,7 +484,9 @@ some body
     // Without a Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Transfer-Encoding: bogus\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -439,6 +498,7 @@ some body
             Close: true,
             ContentLength: -1
         ),
+
         "Body here\n"u8
     ),
 
@@ -446,7 +506,9 @@ some body
     // With a Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Transfer-Encoding: bogus\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -460,11 +522,15 @@ some body
             Close: true,
             ContentLength: 10
         ),
+
         "Body here\n"u8
     ),
+
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Encoding: gzip\r\n"u8 + "Content-Length: 23\r\n"u8 + "Connection: keep-alive\r\n"u8 + "Keep-Alive: timeout=7200\r\n\r\n"u8 + ((@string)(new byte[]{0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x73, 0xf3, 0xf7, 0x07, 0x00, 0xab, 0x27, 0xd4, 0x1a, 0x03, 0x00, 0x00, 0x00})),
+
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 23\r\n"u8 + "Connection: keep-alive\r\n"u8 + "Content-Encoding: gzip\r\n"u8 + "Keep-Alive: timeout=7200\r\n\r\n"u8 + ((@string)(new byte[]{0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x73, 0xf3, 0xf7, 0x07, 0x00, 0xab, 0x27, 0xd4, 0x1a, 0x03, 0x00, 0x00, 0x00})),
+
         new Response(
             Status: "200 OK"u8,
             StatusCode: 200,
@@ -487,7 +553,9 @@ some body
     // Issue 19989: two spaces between HTTP version and status.
     new(
         "HTTP/1.0  401 Unauthorized\r\n"u8 + "Content-type: text/html\r\n"u8 + "WWW-Authenticate: Basic realm=\"\"\r\n\r\n"u8 + "Your Authentication failed.\r\n"u8,
+
         "HTTP/1.0 401 Unauthorized\r\n"u8 + "Connection: close\r\n"u8 + "Content-Type: text/html\r\n"u8 + "Www-Authenticate: Basic realm=\"\"\r\n"u8 + "\r\n"u8 + "Your Authentication failed.\r\n"u8,
+
         new Response(
             Status: "401 Unauthorized"u8,
             StatusCode: 401,
@@ -673,7 +741,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             fatalf("ReadFull only read %d bytes"u8, n);
         }
         if (test.compressed == false && !bytes.Equal(bytes.Repeat(new byte[]{(rune)'x'}.slice(), 2500), rbuf)) {
-            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, ((@string)rbuf));
+            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, (@string)rbuf);
         }
         (~resp).Body.Close();
 
@@ -681,7 +749,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
         checkErr(err, readAllOnRemainderˢ);
         {
             @string e = nextRequestHereˢ;
-            @string g = ((@string)rest); if (e != g) {
+            @string g = (@string)rest; if (e != g) {
                 g = regexp.MustCompile(@"(xx+)"u8).ReplaceAllStringFunc(g, (@string match) => fmt.Sprintf("x(repeated x%d)"u8, builtin.len(match)));
                 fatalf("remainder = %q, expected %q"u8, g, e);
             }
@@ -825,7 +893,7 @@ internal static readonly @string doneˢ = "999 Done"u8;
 internal static readonly @string http12ˢ = "HTTP/1.2"u8;
 internal static readonly @string http20ˢ = "HTTP/2.0"u8;
 internal static readonly @string http1100000000002ˢ = "HTTP/1.100000000002"u8;
-internal static readonly @string http11ˢ2 = "HTTP/1.-1"u8;
+internal static readonly @string http11ˢ = "HTTP/1.-1"u8;
 internal static readonly @string httpABˢ = "HTTP/A.B"u8;
 internal static readonly @string http1ˢ = "HTTP/1"u8;
 internal static readonly @string contentLength10Contentˢ = "Content-Length: 10\r\nContent-Length: 7\r\n\r\nGopher hey\r\n"u8;
@@ -905,10 +973,11 @@ public static void TestReadResponseErrors(ж<testing.T> Ꮡt) {
         version(http12ˢ, default!),
         version(http20ˢ, default!),
         version(http1100000000002ˢ, true),
-        version(http11ˢ2, true),
+        version(http11ˢ, true),
         version(httpABˢ, true),
         version(http1ˢ, true),
-        version(http11ˢ, true),
+        version(http11ˢ2, true),
+
         contentLength("200 OK"u8, contentLength10Contentˢ, errMultiCL),
         contentLength("200 OK"u8, contentLength7Contentˢ, default!),
         contentLength("201 OK"u8, contentLength0Contentˢ, errMultiCL),

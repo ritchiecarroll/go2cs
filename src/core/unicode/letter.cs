@@ -87,7 +87,7 @@ internal static UntypedInt linearMax => 18;
 // is16 reports whether r is in the sorted slice of 16-bit ranges.
 internal static bool is16(slice<Range16> ranges, uint16 r) {
     if (len(ranges) <= linearMax || r <= MaxLatin1) {
-        foreach (var (i, _) in ranges) {
+        foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
             if (r < (~range_).Lo) {
                 return false;
@@ -103,7 +103,7 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
         if ((~range_).Lo <= r && r <= (~range_).Hi) {
             return (~range_).Stride == 1 || (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
@@ -120,7 +120,7 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
 // is32 reports whether r is in the sorted slice of 32-bit ranges.
 internal static bool is32(slice<Range32> ranges, uint32 r) {
     if (len(ranges) <= linearMax) {
-        foreach (var (i, _) in ranges) {
+        foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
             if (r < (~range_).Lo) {
                 return false;
@@ -136,7 +136,7 @@ internal static bool is32(slice<Range32> ranges, uint32 r) {
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = ranges[m];
         if (range_.Lo <= r && r <= range_.Hi) {
             return range_.Stride == 1 || (r - range_.Lo) % range_.Stride == 0;
@@ -214,7 +214,7 @@ internal static ж<CaseRange> lookupCaseRange(rune r, slice<CaseRange> caseRange
     nint lo = 0;
     nint hi = len(caseRange);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var cr = Ꮡ(caseRange, m);
         if ((rune)(~cr).Lo <= r && r <= (rune)(~cr).Hi) {
             return cr;
@@ -242,7 +242,7 @@ internal static rune convertCase(nint _case, rune r, ref CaseRange cr) {
         // bit in the sequence offset.
         // The constants UpperCase and TitleCase are even while LowerCase
         // is odd so we take the low bit from _case.
-        return (rune)cr.Lo + ((rune)((rune)((r - (rune)cr.Lo) & ~1) | (rune)((nint)(_case & 1))));
+        return (rune)cr.Lo + ((rune)((r - (rune)cr.Lo) & ~1) | (rune)(_case & 1));
     }
     return r + delta;
 }
@@ -302,7 +302,7 @@ public static rune ToTitle(rune r) {
 
 // ToUpper maps the rune to upper case giving priority to the special mapping.
 public static rune ToUpper(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(UpperCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(UpperCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToUpper(r);
     }
@@ -311,7 +311,7 @@ public static rune ToUpper(this SpecialCase special, rune r) {
 
 // ToTitle maps the rune to title case giving priority to the special mapping.
 public static rune ToTitle(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(TitleCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(TitleCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToTitle(r);
     }
@@ -320,7 +320,7 @@ public static rune ToTitle(this SpecialCase special, rune r) {
 
 // ToLower maps the rune to lower case giving priority to the special mapping.
 public static rune ToLower(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(LowerCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(LowerCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToLower(r);
     }
@@ -367,7 +367,7 @@ public static rune SimpleFold(rune r) {
     nint lo = 0;
     nint hi = len(caseOrbit);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         if ((rune)caseOrbit[m].From < r){
             lo = m + 1;
         } else {

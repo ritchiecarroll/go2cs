@@ -42,6 +42,12 @@ using static go.@internal.zstd_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,12 +57,12 @@ using static go.@internal.zstd_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABg0kgAGEqKCgpSCgoKUqJKCgoKokoKCupIADyDSgoKUAAcQqJKCpoKCrLKCgpSCgoKClKiS", "", "", "93=LeadingZeros8/1/1/6")]
-[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gqaAgraCgpSCgpSUlIKCppSCppSmABcyABo20oKmgoKCpoKCkoKClIKUgpSCyoKUgoKUuIKCgqaCgqaCgqbc0oKmgoK4gpSCuO6ClIKAgraCgriClJSCgpSUgpSUgIK2goK4gpSU+MaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKAgtqUgqbosoIABxCCgoKCgoKUgoKUgpTKgoKClIKU")]
+[assembly: go.GoPositionMap("internal/zstd/block.go", "block.cs", "AA8i0oK4gqaAgraCgpSCgpSUlIKCppSCppSmABcyABo20oKmgoKCpoKCkoKClIKUgpSCyoKUgoKUuIKCgqaCgqaCgqbc0oKmgoK4gpSCuO6ClIKAgraCgriClJSCgpSUgpSUgIK2goK4gpSU+NaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKAgtqUgqbosoIABxCCgoKCgoKUgoKUgpTKgoKClIKU")]
 [assembly: go.GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABcwAAgCgoCCtoKCysqmpqaUlIKAgra4goKCgoKAgraCgoKCgIL+lIKmgqaCpoKClIKCpoKClIKmgoKUlIKUgpSUgoK4gqaCppSAgrbssoKUlIKClIKCuIKCgoKCgoKCuIKmgoKClIKmlIKCpgAULAAZMJKCuIKClIKUgoKClJTYkoK4ggAUKoKClIKUAAcSABcykoK4goKUgpSCgoKUlNwAGzgAECI=")]
-[assembly: go.GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABQuAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmqIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
-[assembly: go.GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAAIDKKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK46sKqlIKUgoKCgpTGgpSCgoK0gpSCgoLsgqaCgqaCqIKmgoKUlIKUgriC7oKClKaCptjWgoKmgoKUgoKmgoKCgqbq5oKUgtyCgqaCgoKUgoKUlIKClIKUgpSCypKCppKCppKCppKCpoKCgpSUlIKClIKUkoKUgqaCgqaCgqaCgqaCgoKUgoKmgoKUgoKUgoKm", "289-295:1")]
+[assembly: go.GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABQuAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
+[assembly: go.GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAAIDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4+sKqlIKUgoKCgpTGgpSCgoK0gpSCgoLsgqaCgqaCuIKmgoKUlIKUgriC7oKClKaCptjmgoKmgoKUgoKmgoKCgqb65oKUgtyCgqaCgoKUgoKUlIKClIKUgpSCypKCppKCppKCppKCpoKCgpSUlIKClIKUkoKUgqaCgqaCgqaCgqaCgoKUgoKmgoKUgoKUgoKm", "289-295:1")]
 [assembly: go.GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
-[assembly: go.GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSClKiSlIKCgqaCgoKCgoKCpoKCgoKCpoKCupKCgpSIgoKCppSCgoKCgoKCgpSCgoKClIKCgoKmgoKCgpSokoKCgqiSgoKC", "", "", "89=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
+[assembly: go.GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "87=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
 [assembly: go.GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygIKkgoKosoCCpIKCqLKCgIKklKiygoCCtgAICJKCpoCUgpS2gIKUgoCCpIKmtqaAgqSUlIKCpoKClKaCpoKCuIKAgraUlICCuqKUgoKCgoKCpoLKgpSCgtyCgoKUtLS0tLTsgqiSgqaUgoKmgoKCgoKCgpSokpSAgraUgoKCpoCCpoKClIKClIKCuIKClIK2goKClIIACAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKAgraCgoKmlKaqooKClAAIEoKmgqaCpoKClKaCpoKClA==")]
 // </GoSourcePositionMaps>
 

@@ -12,6 +12,8 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using go.os;
 using path;
@@ -42,8 +44,9 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
         new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_CREAT), default!),
         new(@file, (nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE), default!),
         new(@file, (nint)((nint)(nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE) | Δos.O_TRUNC), default!),
+        new(@file, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default!),
+        new(dir, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default!),
         new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_TRUNC), syscall.ERROR_ACCESS_DENIED),
-        new(dir, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), syscall.EISDIR),
         new(dir, syscall.O_WRONLY, syscall.EISDIR),
         new(dir, syscall.O_RDWR, syscall.EISDIR)
     }.slice();
@@ -132,15 +135,15 @@ public static void ExampleLoadLibrary() {
         }
         var (r, _, _) = syscall.Syscall((uintptr)proc, 0, 0, 0, 0);
         var major = (byte)r;
-        var minor = (uint8)((r >> (int)(8)));
-        var build = (uint16)((r >> (int)(16)));
+        var minor = (uint8)(r >> 8);
+        var build = (uint16)(r >> 16);
         print((@string)"windows version "u8, major, (@string)"."u8, minor, (@string)" (Build "u8, build, (@string)")\n"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestTOKEN_ALL_ACCESS(ж<testing.T> Ꮡt) {
+public static partial void TestTOKEN_ALL_ACCESS(ж<testing.T> Ꮡt) {
     if (syscall.TOKEN_ALL_ACCESS != 0xF01FF) {
         Ꮡt.Errorf("TOKEN_ALL_ACCESS = %x, want 0xF01FF"u8, (nint)(syscall.TOKEN_ALL_ACCESS));
     }
@@ -221,7 +224,7 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     }
     (@out, err) = exec.Command(exe).Output();
     if (err != default!) {
-        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, (@string)@out);
     }
 
     (var hostname, err) = Δos.Hostname();
@@ -229,7 +232,7 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
 
-    @string have = strings.ReplaceAll(((@string)@out), "\n"u8, ""u8);
+    @string have = strings.ReplaceAll((@string)@out, "\n"u8, ""u8);
     have = strings.ReplaceAll(have, "\r"u8, ""u8);
     @string want = fmt.Sprintf("%sHello World%s"u8, hostname, hostname);
     if (have != want) {
@@ -353,6 +356,15 @@ public static void FuzzUTF16FromString(ж<testing.F> Ꮡf) {
             t.Fatalf("len(%04x) > len(%q)+1"u8, res, tst);
         }
     });
+}
+
+public static void BenchmarkErrnoString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    b.ReportAllocs();
+    while (Ꮡb.Loop()) {
+        _ = ((syscall.Errno)2).Error();
+    }
 }
 
 } // end syscall_test_package

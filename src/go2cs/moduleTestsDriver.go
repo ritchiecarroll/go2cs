@@ -236,6 +236,7 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		pkgOptions.recurseOutputRoot = outRoot
 		pkgOptions.mainModulePath = converter.options.mainModulePath
 		pkgOptions.mainModuleDir = converter.options.mainModuleDir
+		pkgOptions.programDependencies = converter.sortedThirdPartyModules()
 
 		outputDir := converter.outputDirFor(pkg.Path)
 		fmt.Printf("\n-tests %s -> %s\n", pkg.Path, outputDir)

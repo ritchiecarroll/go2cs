@@ -90,10 +90,10 @@ public static void TestCmpIfaceConcreteAlloc(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingOnNonGcCompilerˢ);
     }
 
-    var n = testing.AllocsPerRun(1, () => {
+    var n = testing.AllocsPerRun(100, () => {
         _ = AreEqual(e, ts);
         _ = AreEqual(i1, ts);
-        _ = AreEqual(e, (nint)(1));
+        _ = AreEqual(e, (nint)1);
     });
 
     if (n > 0D) {
@@ -335,17 +335,17 @@ public static void BenchmarkAssertE2E2Blank(ж<testing.B> Ꮡb) {
 
 public static void TestNonEscapingConvT2E(ж<testing.T> Ꮡt) {
     var m = new map<any, bool>();
-    m[(nint)(42)] = true;
-    if (!m[(nint)(42)]) {
+    m[(nint)42] = true;
+    if (!m[(nint)42]) {
         Ꮡt.Fatalf("42 is not present in the map"u8);
     }
-    if (m[(nint)(0)]) {
+    if (m[(nint)0]) {
         Ꮡt.Fatalf("0 is present in the map"u8);
     }
 
     var mʗ1 = m;
     var n = testing.AllocsPerRun(1000, () => {
-        if (mʗ1[(nint)(0)]) {
+        if (mʗ1[(nint)0]) {
             Ꮡt.Fatalf("0 is present in the map"u8);
         }
     });

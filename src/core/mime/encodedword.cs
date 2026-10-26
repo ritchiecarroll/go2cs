@@ -154,7 +154,7 @@ internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
             }
             default: {
                 Ꮡbuf.WriteByte((rune)'=');
-                Ꮡbuf.WriteByte(upperhex[(b >> (int)(4))]);
+                Ꮡbuf.WriteByte(upperhex[(b >> 4)]);
                 Ꮡbuf.WriteByte(upperhex[(byte)(b & 0x0f)]);
                 break;
             }}
@@ -286,8 +286,8 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         var (content, err) = decode(encoding, text);
         if (err != default!) {
             betweenWords = false;
-            Ꮡbuf.WriteString(header.slice(0, start + 2));
-            header = header.slice(start + 2);
+            Ꮡbuf.WriteString(header.slice(0, end));
+            header = header.slice(end);
             continue;
         }
 
@@ -442,7 +442,7 @@ internal static (byte, error) readHexByte(byte a, byte b) {
             return (0, err);
         }
     }
-    return ((byte)((byte)(hb << (int)(4)) | lb), default!);
+    return ((byte)((byte)(hb << 4) | lb), default!);
 }
 
 internal static (byte, error) fromHex(byte b) {

@@ -10,6 +10,6 @@ partial class goversion_package {
 //
 // It should be updated at the start of each development cycle to be
 // the version of the next Go 1.x release. See go.dev/issue/40705.
-public static UntypedInt Version => 24;
+public static UntypedInt Version => 26;
 
 } // end goversion_package

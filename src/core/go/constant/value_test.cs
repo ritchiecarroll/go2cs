@@ -33,12 +33,15 @@ internal static slice<@string> intTests = new @string[]{
     @"0o0 = 0"u8,
     @"0o1234 = 01234"u8,
     @"0o01234567 = 01234567"u8,
+
     @"0O0 = 0"u8,
     @"0O1234 = 01234"u8,
     @"0O01234567 = 01234567"u8,
+
     @"0o_0 = 0"u8,
     @"0o_1234 = 01234"u8,
     @"0o0123_4567 = 01234567"u8,
+
     @"0O_0 = 0"u8,
     @"0O_1234 = 01234"u8,
     @"0O0123_4567 = 01234567"u8,
@@ -47,9 +50,11 @@ internal static slice<@string> intTests = new @string[]{
     @"0b0 = 0"u8,
     @"0b1011 = 0xb"u8,
     @"0b00101101 = 0x2d"u8,
+
     @"0B0 = 0"u8,
     @"0B1011 = 0xb"u8,
     @"0B00101101 = 0x2d"u8,
+
     @"0b_0 = 0"u8,
     @"0b10_11 = 0xb"u8,
     @"0b_0010_1101 = 0x2d"u8
@@ -60,20 +65,26 @@ internal static slice<@string> floatTests = new @string[]{
     // decimal floats
     @"1_2_3. = 123."u8,
     @"0_123. = 123."u8,
+
     @"0_0e0 = 0."u8,
     @"1_2_3e0 = 123."u8,
     @"0_123e0 = 123."u8,
+
     @"0e-0_0 = 0."u8,
     @"1_2_3E+0 = 123."u8,
     @"0123E1_2_3 = 123e123"u8,
+
     @"0.e+1 = 0."u8,
     @"123.E-1_0 = 123e-10"u8,
     @"01_23.e123 = 123e123"u8,
+
     @".0e-1 = .0"u8,
     @".123E+10 = .123e10"u8,
     @".0123E123 = .0123e123"u8,
+
     @"1_2_3.123 = 123.123"u8,
     @"0123.01_23 = 123.0123"u8,
+
     @"1e-1000000000 = 0"u8,
     @"1e+1000000000 = ?"u8,
     @"6e5518446744 = ?"u8,
@@ -83,17 +94,22 @@ internal static slice<@string> floatTests = new @string[]{
     @"0x0.p+0 = 0."u8,
     @"0Xdeadcafe.p-10 = 0xdeadcafe/1024"u8,
     @"0x1234.P84 = 0x1234000000000000000000000"u8,
+
     @"0x.1p-0 = 1/16"u8,
     @"0X.deadcafep4 = 0xdeadcafe/0x10000000"u8,
     @"0x.1234P+12 = 0x1234/0x10"u8,
+
     @"0x0p0 = 0."u8,
     @"0Xdeadcafep+1 = 0x1bd5b95fc"u8,
     @"0x1234P-10 = 0x1234/1024"u8,
+
     @"0x0.0p0 = 0."u8,
     @"0Xdead.cafep+1 = 0x1bd5b95fc/0x10000"u8,
     @"0x12.34P-10 = 0x1234/0x40000"u8,
+
     @"0Xdead_cafep+1 = 0xdeadcafep+1"u8,
     @"0x_1234P-10 = 0x1234p-10"u8,
+
     @"0X_dead_cafe.p-10 = 0xdeadcafe.p-10"u8,
     @"0x12_34.P1_2_3 = 0x1234.p123"u8
 }.slice();
@@ -101,12 +117,15 @@ internal static slice<@string> floatTests = new @string[]{
 internal static slice<@string> imagTests = new @string[]{
     @"1_234i = 1234i"u8,
     @"1_234_567i = 1234567i"u8,
+
     @"0.i = 0i"u8,
     @"123.i = 123i"u8,
     @"0123.i = 123i"u8,
+
     @"0.e+1i = 0i"u8,
     @"123.E-1_0i = 123e-10i"u8,
     @"01_23.e123i = 123e123i"u8,
+
     @"1e-1000000000i = 0i"u8,
     @"1e+1000000000i = ?"u8,
     @"6e5518446744i = ?"u8,
@@ -173,6 +192,7 @@ internal static slice<@string> opTests = new @string[]{
     @"- ? = ?"u8,
     @"^ 0 = -1"u8,
     @"^ ? = ?"u8,
+
     @"! true = false"u8,
     @"! false = true"u8,
     @"! ? = ?"u8,
@@ -184,6 +204,7 @@ internal static slice<@string> opTests = new @string[]{
     @"""foo"" + """" = ""foo"""u8,
     @""""" + ""bar"" = ""bar"""u8,
     @"""foo"" + ""bar"" = ""foobar"""u8,
+
     @"0 + 0 = 0"u8,
     @"0 + 0.1 = 0.1"u8,
     @"0 + 0.1i = 0.1i"u8,
@@ -191,12 +212,14 @@ internal static slice<@string> opTests = new @string[]{
     @"1e100 + 1e100 = 2e100"u8,
     @"? + 0 = ?"u8,
     @"0 + ? = ?"u8,
+
     @"0 - 0 = 0"u8,
     @"0 - 0.1 = -0.1"u8,
     @"0 - 0.1i = -0.1i"u8,
     @"1e100 - 1e100 = 0"u8,
     @"? - 0 = ?"u8,
     @"0 - ? = ?"u8,
+
     @"0 * 0 = 0"u8,
     @"1 * 0.1 = 0.1"u8,
     @"1 * 0.1i = 0.1i"u8,
@@ -204,6 +227,7 @@ internal static slice<@string> opTests = new @string[]{
     @"? * 0 = ?"u8,
     @"0 * ? = ?"u8,
     @"0 * 1e+1000000000 = ?"u8,
+
     @"0 / 0 = ""division_by_zero"""u8,
     @"10 / 2 = 5"u8,
     @"5 / 3 = 5/3"u8,
@@ -211,24 +235,29 @@ internal static slice<@string> opTests = new @string[]{
     @"? / 0 = ?"u8,
     @"0 / ? = ?"u8,
     @"0 * 1e+1000000000i = ?"u8,
+
     @"0 % 0 = ""runtime_error:_integer_divide_by_zero"""u8, // TODO(gri) should be the same as for /
     @"10 % 3 = 1"u8,
     @"? % 0 = ?"u8,
     @"0 % ? = ?"u8,
+
     @"0 & 0 = 0"u8,
     @"12345 & 0 = 0"u8,
     @"0xff & 0xf = 0xf"u8,
     @"? & 0 = ?"u8,
     @"0 & ? = ?"u8,
+
     @"0 | 0 = 0"u8,
     @"12345 | 0 = 12345"u8,
     @"0xb | 0xa0 = 0xab"u8,
     @"? | 0 = ?"u8,
     @"0 | ? = ?"u8,
+
     @"0 ^ 0 = 0"u8,
     @"1 ^ -1 = -2"u8,
     @"? ^ 0 = ?"u8,
     @"0 ^ ? = ?"u8,
+
     @"0 &^ 0 = 0"u8,
     @"0xf &^ 1 = 0xe"u8,
     @"1 &^ 0xf = 0"u8,
@@ -248,34 +277,40 @@ internal static slice<@string> opTests = new @string[]{
     @"false == true = false"u8,
     @"true == false = false"u8,
     @"true == true = true"u8,
+
     @"false != false = false"u8,
     @"false != true = true"u8,
     @"true != false = true"u8,
     @"true != true = false"u8,
+
     @"""foo"" == ""bar"" = false"u8,
     @"""foo"" != ""bar"" = true"u8,
     @"""foo"" < ""bar"" = false"u8,
     @"""foo"" <= ""bar"" = false"u8,
     @"""foo"" > ""bar"" = true"u8,
     @"""foo"" >= ""bar"" = true"u8,
+
     @"0 == 0 = true"u8,
     @"0 != 0 = false"u8,
     @"0 < 10 = true"u8,
     @"10 <= 10 = true"u8,
     @"0 > 10 = false"u8,
     @"10 >= 10 = true"u8,
+
     @"1/123456789 == 1/123456789 == true"u8,
     @"1/123456789 != 1/123456789 == false"u8,
     @"1/123456789 < 1/123456788 == true"u8,
     @"1/123456788 <= 1/123456789 == false"u8,
     @"0.11 > 0.11 = false"u8,
     @"0.11 >= 0.11 = true"u8,
+
     @"? == 0 = false"u8,
     @"? != 0 = false"u8,
     @"? < 10 = false"u8,
     @"? <= 10 = false"u8,
     @"? > 10 = false"u8,
     @"? >= 10 = false"u8,
+
     @"0 == ? = false"u8,
     @"0 != ? = false"u8,
     @"0 < ? = false"u8,
@@ -474,17 +509,21 @@ internal static global::go.go.constant_package.Value val(@string lit) {
 
 internal static map<@string, token.Token> optab = new map<@string, token.Token>{
     ["!"u8] = token.NOT,
+
     ["+"u8] = token.ADD,
     ["-"u8] = token.SUB,
     ["*"u8] = token.MUL,
     ["/"u8] = token.QUO,
     ["%"u8] = token.REM,
+
     ["<<"u8] = token.SHL,
     [">>"u8] = token.SHR,
+
     ["&"u8] = token.AND,
     ["|"u8] = token.OR,
     ["^"u8] = token.XOR,
     ["&^"u8] = token.AND_NOT,
+
     ["=="u8] = token.EQL,
     ["!="u8] = token.NEQ,
     ["<"u8] = token.LSS,
@@ -496,9 +535,10 @@ internal static map<@string, token.Token> optab = new map<@string, token.Token>{
 internal static void panicHandler(ж<global::go.go.constant_package.Value> Ꮡv) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var v = ref Ꮡv.DerefOrNull();
 
-        var switchᴛ1 = recover();
+        var switchᴛ1 = recover(calledByDefer);
         switch (switchᴛ1.type()) {
         case null: {
             // nothing to do
@@ -528,7 +568,7 @@ internal static global::go.go.constant_package.Value /*z*/ doOp(global::go.go.co
     try {
         ref var z = ref Ꮡz.ValueSlot;
 
-        defer(panicHandler, Ꮡz, ref ᒐ);
+        defer(panicHandler, Ꮡz, ref ᒐ, recovers: true);
 
         if (x == default!) {
             z = UnaryOp(op, y, 0); goto ᒐdone;
@@ -619,7 +659,7 @@ public static void TestUnknown(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (_, val) in values) {
         var (x, y) = (val, u);
-        foreach (var (i, _) in new nint[]{}.array(2)) {
+        foreach (var i in range(new nint[]{}.array(2))) {
             if (i == 1) {
                 (x, y) = (y, x);
             }
@@ -631,6 +671,11 @@ public static void TestUnknown(ж<testing.T> Ꮡt) {
             {
                 var got = Compare(x, token.EQL, y); if (got) {
                     Ꮡt.Errorf("%s == %s: got true; want false"u8, x, y);
+                }
+            }
+            {
+                var got = Compare(x, token.NEQ, y); if (got) {
+                    Ꮡt.Errorf("%s != %s: got true; want false"u8, x, y);
                 }
             }
         }
@@ -664,7 +709,7 @@ public static void TestMakeFloat64(ж<testing.T> Ꮡt) {
     }
 
     // infinity
-    foreach (var (sign, _) in new nint[]{-1, 1}.slice()) {
+    foreach (var sign in range(new nint[]{-1, 1}.slice())) {
         var arg = math.Inf(sign);
         var val = MakeFloat64(arg);
         if (val.Kind() != Unknown) {
@@ -686,10 +731,12 @@ public static void TestMake(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new makeTestCase[]{
         new(Bool, false, false),
         new(ΔString, (@string)"hello"u8, (@string)"hello"u8),
+
         new(Int, (int64)1, (int64)1),
         new(Int, big.NewInt(10).OrTypedNil(), (int64)10),
         new(Int, @new<bigꓸInt>().Lsh(big.NewInt(1), 62).OrTypedNil(), (int64)(4611686018427387904L)),
         dup(Int, @new<bigꓸInt>().Lsh(big.NewInt(1), 63).OrTypedNil()),
+
         new(Float, big.NewFloat(0D).OrTypedNil(), floatVal0.val.OrTypedNil()),
         dup(Float, big.NewFloat(2.0D).OrTypedNil()),
         dup(Float, big.NewRat(1, 3).OrTypedNil())

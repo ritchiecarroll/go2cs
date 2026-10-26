@@ -15,8 +15,9 @@ import (
 	"unicode/utf8"
 )
 
-// embedMarker marks a Go EMBEDDED field that has no `partial ref` shape to say so (a predeclared type, a
-// pointer to one, an interface): `/*embed*/ public Reader Reader;`. go2cs-gen's MemberRecordGenerator reads
+// embedMarker marks every Go EMBEDDED field the converter declares: `/*embed*/ public Reader Reader;`. Since owner
+// ruling (A) (2026-10-16) that is every embed, a promoting one (a defined type, or a pointer to one) included,
+// which go2cs-gen promotes through and declares no storage for. go2cs-gen's MemberRecordGenerator reads
 // it (MemberMarkers.Embed, src/gen/go2cs-gen/MemberRecordGenerator.cs) and records it on the struct, which
 // is where golib's reflection reads it back (docs/PLAN-marker-comment-parity.md, 5.6).
 const embedMarker = "/*embed*/"

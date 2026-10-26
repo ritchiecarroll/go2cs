@@ -28,6 +28,12 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -37,7 +43,7 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_alias_test.go", "fe_alias_test.cs", "AAwYgqLGgILIgILIuIKy1oCCyIKAgraCgILIgILIgoCCtoKAgraCgILIAAkcAAoCABAwggALIIKUtKSC", "13-28:1;32-74:1;102-104:1;111-114:2;118-120:3;124-126:4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAsYABEmogAIEqKClKrCroLEgoKmgoKCgpSmgILIgoKCgoKmgoKCgqaCgoKCgoKCggAJCIKiuJSUgIK2osqCgpSAgqgACh6ygoKCyoKClKaCspSCgpSCpoKUlICCyrKCpoKigoKUgriCpoKCgpSokpSCgoKClIK4poKCgIIACRLekoKkgoKUgqaUgoKUlIKUgriCkqSCgqaCgriCkoKkgoKUgqaUgoKUlIKClIKmkoKAgpKCyIKSpKSClIKmlIKmlIK4gpKCgqaClIKCpqaAggALCIQAKFyCgoKCgoLKgpKClIKUgqamgIK2griCgpKkgpSCpqaAgsiCgpKSkqSClIKCpqiAgsiCgoKU", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;517-529:1;537-553:1", "", "42=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;86=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;109=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;611=isInBounds/2/2/1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAsYABEmogAIEqKClKrCroLEgoKmgoKCgpSmgILIgoKCgoKmgoKCgqaCgoKCgoKCggAJCIKiuJSUgIK2osqCgpSAgqgACh6ygoKCyoKClKaCspSCgpSCpoKUlICCysKCpoKigoKUgriCpoKCgpSokpSCgoKClIK4poKCgIIACRLekoKkgoKUgqaUgoKUlIKUgriCkqSCgqaCgriCkoKkgoKUgqaUgoKUlIKClIKmkoKAgpKCyIKSpKSClIKmlIKmlIK4gpKCgqaClIKCpqaAggALCIQAKFyCgoKCgoLKgoKSpIKUgqamgILIgoKSkpKkgpSCgqaogILIgoKClA==", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;513-529:1", "", "42=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;86=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;109=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;585=isInBounds/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

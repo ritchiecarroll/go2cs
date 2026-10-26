@@ -4,6 +4,7 @@
 namespace go.log;
 
 using time = time_package;
+using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
 
 partial class slog_package {
@@ -67,6 +68,17 @@ public static Attr Group(@string key, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     return new Attr(key, GroupValue(argsToAttrSlice(args).ꓸꓸꓸ));
+}
+
+// GroupAttrs returns an Attr for a Group [Value]
+// consisting of the given Attrs.
+//
+// GroupAttrs is a more efficient version of [Group]
+// that accepts only [Attr] values.
+public static Attr GroupAttrs(@string key, params ꓸꓸꓸAttr attrsʗp) {
+    var attrs = attrsʗp.sslice();
+
+    return new Attr(key, GroupValue(attrs.ꓸꓸꓸ));
 }
 
 internal static slice<Attr> argsToAttrSlice(slice<any> args) {

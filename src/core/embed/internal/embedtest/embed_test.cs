@@ -9,6 +9,8 @@ using reflect = reflect_package;
 using slices = slices_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -38,7 +40,7 @@ internal static void testFiles(ж<testing.T> Ꮡt, embed.FS f, @string name, @st
     }
 }
 
-internal static void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
+internal static partial void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
     Ꮡt.Helper();
     if (s != data) {
         Ꮡt.Errorf("%v = %q, want %q"u8, name, s, data);
@@ -96,7 +98,7 @@ public static void TestGlobal(ж<testing.T> Ꮡt) {
     }
 
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
 }
 
 //go:embed testdata

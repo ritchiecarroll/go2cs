@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using syntaxꓸError = go.regexp.syntax_package.ΔError;
-using syntax = go.regexp.syntax_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,9 +43,13 @@ using static go.regexp_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<syntax.Prog, ж<syntax.Prog>>(Indirect = true)]
-[assembly: GoImplicitConv<thread, ж<thread>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,7 +62,7 @@ using static go.regexp_package;
 [assembly: go.GoPositionMap("regexp/backtrack.go", "backtrack.cs", "AC5igoKClKaigqqigpSqoqzSlIKUpoKClIKmgpSUgqaClJSCvKKCgpSCquaCusKUgoKUgoKCAAgSgoKClISUmAAKFJSCgpSCgsqmgoKCpoKCpoKClIKCpoKClIKCpoKClIKCpoKClIKCppSClJSClIK4goKUgqaCyoLcgpSAgsiCuIK4AAKBAgADigKosoKClJSmgoKmgoKUgoIACBSCgpSCgoKUpoKUlJSUgqaCgoI=")]
 [assembly: go.GoPositionMap("regexp/exec.go", "exec.cs", "ADZwooKmooKmooKCgqamgpKClLiCgpSClKaCgpSqooKAgoKUgqSCAAkUgqaCgpSCgoKUlIKClJSClIKCgpSUgoKUlIKUgpSUrNKCgpSCgpSCgpKCgpSCgpSUgoKUlJSUlIKClIKCpoKClJSCgoKUppSCgoKUlIKosoKCpgACEPKCgoKCgpSCgpSCgpqCgpSUgoKmlKakpKQAAjEAATaClIKmrgAIAoKClICCtoKCgoKClILMgoKkgoK2gqSCgoKClIK2gpSUgpSCAAJFAAFKAAoUgoKClKaigqiygoKmgoKUpoKCppSCkoKClIKClJSClJaClIKCgoKUgoKCmIKCgpSkgraC6oLIgqSkpIKUpIKUAAJNAAFSgpSCgoKCuIKCgqaCgqiSruKUpoKmgpSCpoKUgoKCpoKC", "", "", "468=canCheckPrefix/1/1/1")]
 [assembly: go.GoPositionMap("regexp/onepass.go", "onepass.cs", "ACRSAAkCgoKUgoKCgqaCqJKCgpSGlK7igoKUgpSmgoKUlAAJFIKmooKCpoKCpoKClKaCgriCgpSCgqaCAAwcgpbSgoKClJaSkoKCgoK4goKClIKCgoKmgpS0tLSkgqbYkoK2pILMksqCAAcQgqqClIKCgoKCppSUuIKCgoKSgoKUgsqCAANLAAJUppKeAAgEgqYABhLCgoKClIKklIKCgoKmgoKUgoK4lIKCxoKUgoKCtoKCgoKCtrSCgpSCgoKClIKCgoKClJSUgoKClMSCgpSClIKCgoKUlJSCgoKUxIKClIKCxIKClIKCgoK2poKCgoKCgoKCpoKCpq7igqaElIKCgoLKgoKcgraCgpQAAxeCAAUippSClA==", "170-175:1;178-187:2;308-434:1")]
-[assembly: go.GoPositionMap("regexp/regexp.go", "regexp.cs", "AGbOAZIAAhYACAKSAAIaAAoCAAIsABMCAAIS4qaCgoKUkpSCgoKUkoKUAAoWgoKUlKaCpoKCgpSUAAgUvtKCgpSCgoKCgtyCgpSCgpSosoKCgqiSmKSCgoKUpqSkpIKClKSCgoKCgqYAAj8AA06ygoKUrLKCgpSmgoKUqJIAAhDSAAIU8oKCgrgAEyiCgoKClJSmgqaipqKmgpSCgoK4goKCpgAHEIKCgoKUlKaCpqKmoqaClIKCgriCgoKmAAkUgoKWgoKClIKmgqaCpoKmgqyyqqKqoqqirNKCgpSs0oKClKzSgoKUrNKCgpSGrLIAAhLChqaigoKCgoKUlIKmgoKCgriClO6ClJaSgpSUgpKmlMqClKas0oKClIKigpSUrLIAAxLCAAYSkqaCgr60koKCuIKmgoKCgoKClIKUAAIQ0pSUgoKUrNKCgpSmgoKCpoKUppSCgoKUgpSClKaUlIKCzqKCgoKUrsKCgpQAAhDSgoKClK7CgoKUAAIQ0oKClAACEPKCgoKUgoKCpgACKAARAqyypoKCgoKUgoKUgoKUgpSClIKCgoKUuIKCgpSUyoKsAAgCgpSCgoKUgoKCgpSUlJSCgpSUuIKCgoKUpoKmgoIAAhDyAAIQ8oKCgpSCgoKmAAIQ8gACEPIABBLCgpSCkoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCkoKUgoKCppSuwoKUgoKClJSuwoKUgoKClIKCgqaUAAIQ0oKUgoKClJQAAiYAEgSCpoKmgpSCgoKCpoKClKaCpgACEuKuwqqigoKUgg==", "577-579:1;587-589:1;597-599:1;677-682:1;690-692:1;700-702:1;1082-1087:1;1100-1105:1;1118-1123:1;1136-1141:1;1154-1165:1;1178-1183:1;1196-1207:1;1221-1226:1", "", "188=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
+[assembly: go.GoPositionMap("regexp/regexp.go", "regexp.cs", "AGbOAZIAAhYACAKSAAIaAAoCAAIsABMCAAIS4qaCgoKUkpSCgoKUkoKUAAoWgoKUlKaCpoKCgpSUAAgUvtKCgpSCgoKCgtyCgpSCgpSosoKCgqiSmKSCgoKUpqSkpIKClKSCgoKCgqYAAj8AA06ygoKUrLKCgpSmgoKUqJIAAhDSAAIU8oKCgrgAEyiCgpSmgqaipqKmgpSCpoKUAAcQgoKUpoKmoqaipoKUgqaClAAJFIKCloKCgpSCpoKmgqaCpoKssqqiqqKqoqzSgoKUrNKCgpSs0oKClKzSgoKUhqyyAAISwoamooKCgoKClJSCpoKCgoK4gpTugpSWkoKUlIKSppTKgpSmrNKCgpSCooKUlKyyAAMSwgAGEpKmgoK+tJKCgriCpoKCgoKCgpSClAACENKUlIKClKzSgoKUpoKCgqaClKaUgoKClIKUgpSmlJSCgs6igoKClK7CgoKUAAIQ0oKCgpSuwoKClAACENKCgpQAAhDygoKClIKCgqYAAigAEQKssqaCgoKClIKClIKClIKUgpSCgoKClLiCgoKUlMqCrAAIAoKUgoKClIKCgoKUlJSUgoKUlLiCgoKClKaCpoKCAAIQ8gACEPKCgoKUgoKCpgACEPIAAhDyAAQSwoKUgpKClJSuwoKUgoKClJSuwoKUgoKClJSuwoKUgoKClJSuwoKUgpKClIKCgqaUrsKClIKCgpSUrsKClIKCgpSCgoKmlAACENKClIKCgpSUAAImABIEgqaCpoKUgoKCgqaCgpSmgqYAAhLirsKqooKClII=", "557-559:1;567-569:1;577-579:1;657-662:1;670-672:1;680-682:1;1062-1067:1;1080-1085:1;1098-1103:1;1116-1121:1;1134-1145:1;1158-1163:1;1176-1187:1;1201-1206:1", "", "188=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -42,27 +42,28 @@ internal static array<nuint> levelBits = new nuint[]{
 // pointer p by doing:
 //
 //	p >> levelShift[l]
-internal static array<nuint> levelShift = new nuint[]{
+[GoLazy] partial class lazyᴛlevelShift { internal static array<nuint> levelShift = new nuint[]{
     heapAddrBits - summaryL0Bits,
     heapAddrBits - summaryL0Bits - 1 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 2 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 3 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 4 * summaryLevelBits
-}.array();
+}.array(); }
 
 // levelLogPages is log2 the maximum number of runtime pages in the address space
 // a summary in the given level represents.
 //
 // The leaf level always represents exactly log2 of 1 chunk's worth of pages.
-internal static array<nuint> levelLogPages = new nuint[]{
+[GoLazy] partial class lazyᴛlevelLogPages { internal static array<nuint> levelLogPages = new nuint[]{
     logPallocChunkPages + 4 * summaryLevelBits,
     logPallocChunkPages + 3 * summaryLevelBits,
     logPallocChunkPages + 2 * summaryLevelBits,
     logPallocChunkPages + 1 * summaryLevelBits,
     logPallocChunkPages
-}.array();
+}.array(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string pageSummaryˢ = "page summary"u8;
 internal static readonly @string failedToReservePageˢ = "failed to reserve page summary memory"u8;
 
 // sysInit performs architecture-dependent initialization of fields
@@ -76,7 +77,7 @@ internal static void sysInit(this ref pageAlloc Δp, bool test) {
 
         // Reserve b bytes of memory anywhere in the address space.
         var b = alignUp((uintptr)entries * pallocSumBytes, physPageSize);
-        @unsafe.Pointer r = (uintptr)sysReserve(nil, b);
+        @unsafe.Pointer r = (uintptr)sysReserve(nil, b, pageSummaryˢ);
         if (r == nil) {
             @throw(failedToReservePageˢ);
         }
@@ -90,6 +91,7 @@ internal static void sysInit(this ref pageAlloc Δp, bool test) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sysGrowBoundsNotAlignedˢ = "sysGrow bounds not aligned to pallocChunkBytes"u8;
+internal static readonly @string pageAllocˢ = "page alloc"u8;
 
 // sysGrow performs architecture-dependent operations on heap
 // growth for the page allocator, such as mapping in new memory
@@ -105,7 +107,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
-        print((@string)"runtime: base = "u8, ((Δhex)(uint64)@base), (@string)", limit = "u8, ((Δhex)(uint64)limit), (@string)"\n"u8);
+        print((@string)"runtime: base = "u8, (Δhex)(uint64)@base, (@string)", limit = "u8, (Δhex)(uint64)limit, (@string)"\n"u8);
         @throw(sysGrowBoundsNotAlignedˢ);
     }
 
@@ -152,7 +154,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     nint inUseIndex = Δp.inUse.findSucc(@base);
 
     // Walk up the radix tree and map summaries in as needed.
-    foreach (var (l, _) in Δp.summary) {
+    foreach (var l in range(Δp.summary)) {
         // Figure out what part of the summary array this new address space needs.
         var (needIdxBase, needIdxLimit) = addrRangeToSummaryRange(l, makeAddrRange(@base, limit));
 
@@ -184,14 +186,14 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
         }
 
         // Map and commit need.
-        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), Δp.sysStat);
+        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), Δp.sysStat, pageAllocˢ);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
         Δp.summaryMappedReady += need.size();
     }
-
-    // Update the scavenge index.
-    Δp.summaryMappedReady += Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).sysGrow(@base, limit, Δp.sysStat);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string scavengeIndexˢ = "scavenge index"u8;
 
 // sysGrow increases the index's backing store in response to a heap growth.
 //
@@ -200,7 +202,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
-        print((@string)"runtime: base = "u8, ((Δhex)(uint64)@base), (@string)", limit = "u8, ((Δhex)(uint64)limit), (@string)"\n"u8);
+        print((@string)"runtime: base = "u8, (Δhex)(uint64)@base, (@string)", limit = "u8, (Δhex)(uint64)limit, (@string)"\n"u8);
         @throw(sysGrowBoundsNotAlignedˢ);
     }
     var scSize = /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
@@ -239,7 +241,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 
     // If we've got something to map, map it, and update the slice bounds.
     if (need.size() != 0) {
-        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), ᏑsysStat);
+        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), ᏑsysStat, scavengeIndexˢ);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
         // Update the indices only after the new memory is valid.
         if (haveMax == 0 || needMin < haveMin) {
@@ -256,9 +258,9 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 //
 // Returns the amount of memory added to sysStat.
 internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
-    var n = (uintptr)(((uintptr)1 << (int)(heapAddrBits))) / (uintptr)pallocChunkBytes;
+    var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
-    @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes);
+    @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes, scavengeIndexˢ);
     ref var sl = ref heap<notInHeapSlice>(out var Ꮡsl);
     sl = new notInHeapSlice((ж<notInHeap>)(uintptr)(r), (nint)n, (nint)n);
     s.chunks = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<atomicScavChunkData>>();

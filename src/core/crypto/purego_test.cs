@@ -7,10 +7,10 @@ using build = global::go.go.build_package;
 using testenv = @internal.testenv_package;
 using Δlog = log_package;
 using Δos = os_package;
-using exec = global::go.os.exec_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
+using exec = global::go.os.exec_package;
 using global::go.go;
 using global::go.os;
 
@@ -22,36 +22,37 @@ private static readonly @string cryptoˢ = "crypto/..."u8;
 private static readonly @string mathBigˢ = "math/big"u8;
 private static readonly @string toolˢ = "tool"u8;
 private static readonly @string distˢ = "dist"u8;
-private static readonly @string boringˢ = "/boring"u8;
+private static readonly @string boringˢ2 = "/boring"u8;
 
 // TestPureGoTag checks that when built with the purego build tag, crypto
 // packages don't require any assembly. This is used by alternative compilers
 // such as TinyGo. See also the "crypto/...:purego" test in cmd/dist, which
 // ensures the packages build correctly.
 public static void TestPureGoTag(ж<testing.T> Ꮡt) {
-    var cmd = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), listˢ, "-e", cryptoˢ, mathBigˢ);
-    cmd.Value.Env = append((~cmd).Env, "GOOS=linux"u8);
+    var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), listˢ, "-e", cryptoˢ, mathBigˢ);
+    cmd = testenv.CleanCmdEnv(cmd);
+    cmd.Value.Env = append(cmd.Environ(), "GOOS=linux"u8, "GOFIPS140=off");
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
     var (@out, err) = cmd.Output();
     if (err != default!) {
         Δlog.Fatalf("loading package list: %v\n%s"u8, err, @out);
     }
-    var pkgs = strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8);
+    var pkgs = strings.Split(strings.TrimSpace((@string)@out), "\n"u8);
 
-    cmd = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, distˢ, listˢ);
+    cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, distˢ, listˢ);
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
-    (@out, err) = cmd.Output();
+    (@out, err) = testenv.CleanCmdEnv(cmd).Output();
     if (err != default!) {
         Δlog.Fatalf("loading architecture list: %v\n%s"u8, err, @out);
     }
     var allGOARCH = new map<@string, bool>();
-    foreach (var (_, pair) in strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8)) {
+    foreach (var (_, pair) in strings.Split(strings.TrimSpace((@string)@out), "\n"u8)) {
         @string GOARCH = strings.Split(pair, "/"u8)[1];
         allGOARCH[GOARCH] = true;
     }
 
     foreach (var (_, pkgName) in pkgs) {
-        if (strings.Contains(pkgName, boringˢ)) {
+        if (strings.Contains(pkgName, boringˢ2)) {
             continue;
         }
 

@@ -7,7 +7,7 @@ partial class runtime_package {
 
 internal static UntypedInt fastlogNumBits => 5;
 
-internal static array<float64> fastlog2Table = new float64[]{
+[GoLazy] partial class lazyᴛfastlog2Table { internal static array<float64> fastlog2Table = new float64[]{
     0D,
     0.0443941193584535D,
     0.08746284125033943D,
@@ -41,6 +41,6 @@ internal static array<float64> fastlog2Table = new float64[]{
     0.9541963103868752D,
     0.9772799234999164D,
     1D
-}.array();
+}.array(); }
 
 } // end runtime_package

@@ -17,7 +17,7 @@
 //
 // Note that the examples in this package assume a Unix system.
 // They may not run on Windows, and they do not run in the Go Playground
-// used by golang.org and godoc.org.
+// used by go.dev and pkg.go.dev.
 //
 // # Executables in the current directory
 //
@@ -101,6 +101,7 @@ using filepath = path.filepath_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using atomic = sync.atomic_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
@@ -108,6 +109,7 @@ using @internal.syscall;
 using System.Runtime.CompilerServices;
 using fs = go.io.fs_package;
 using path;
+using sync;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class exec_package {
@@ -154,8 +156,8 @@ partial struct Cmd_cachedLookExtensions /*dyn*/ {
 
 // Cmd represents an external command being prepared or run.
 //
-// A Cmd cannot be reused after calling its [Cmd.Run], [Cmd.Output] or [Cmd.CombinedOutput]
-// methods.
+// A Cmd cannot be reused after calling its [Cmd.Start], [Cmd.Run],
+// [Cmd.Output], or [Cmd.CombinedOutput] methods.
 partial struct Cmd {
     // Path is the path of the command to run.
     //
@@ -345,6 +347,10 @@ partial struct Cmd {
     // the work of resolving the extension, so Start doesn't need to do it again.
     // This is only used on Windows.
     internal Cmd_cachedLookExtensions cachedLookExtensions;
+    // startCalled records that Start was attempted, regardless of outcome.
+    // (Until go.dev/issue/77075 is resolved, we use atomic.SwapInt32,
+    // not atomic.Bool.Swap, to avoid triggering the copylocks vet check.)
+    internal int32 startCalled;
 }
 
 // A ctxResult reports the result of watching the Context associated with a
@@ -671,7 +677,8 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 
         // Check for doubled Start calls before we defer failure cleanup. If the prior
         // call to Start succeeded, we don't want to spuriously close its pipes.
-        if (c.Process != nil) {
+        // It is an error to call Start twice even if the first call did not create a process.
+        if (atomic.SwapInt32(Ꮡc.of(Cmd.ᏑstartCalled), 1) != 0) {
             return errors.New(execAlreadyStartedˢ);
         }
 
@@ -683,6 +690,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             if (!started) {
                 closeDescriptors(Ꮡc.Value.parentIOPipes);
                 Ꮡc.Value.parentIOPipes = default!;
+                Ꮡc.Value.goroutine = default!; // aid GC, finalization of pipe fds
             }
         }, ref ᒐ);
 
@@ -933,7 +941,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
 // An ExitError reports an unsuccessful exit by a command.
 partial struct ExitError {
-    public partial ref ж<os_package.ProcessState> ProcessState { get; }
+    /*embed*/ public ж<os_package.ProcessState> ProcessState;
     // Stderr holds a subset of the standard error output from the
     // Cmd.Output method if standard error was not otherwise being
     // collected.
@@ -1096,7 +1104,7 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
 
     var captureErr = c.Stderr == default!;
     if (captureErr) {
-        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << (int)(10)))));
+        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << 10))));
     }
 
     var err = Ꮡc.Run();

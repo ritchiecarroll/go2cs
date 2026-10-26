@@ -38,7 +38,7 @@ partial struct FileHeader {
 
 // A File represents an open Plan 9 a.out file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     internal io.Closer closer;
 }
@@ -54,7 +54,7 @@ partial struct SectionHeader {
 
 // A Section represents a single section in a Plan 9 a.out file.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -177,7 +177,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     )
     ));
 
-    if ((uint32)((~ph).Magic & (uint32)Magic64) != 0) {
+    if (((~ph).Magic & (uint32)Magic64) != 0) {
         {
             var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, f.of(File.ᏑEntry)); if (errΔ3 != default!) {
                 return (default!, errΔ3);
@@ -297,7 +297,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
         ts.Value.Value = s.value;
         switch (s.typ) {
         default: {
-            ts.Value.Name = ((@string)s.name);
+            ts.Value.Name = (@string)s.name;
             break;
         }
         case (rune)'z' or (rune)'Z': {

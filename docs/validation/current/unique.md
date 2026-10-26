@@ -6,17 +6,32 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `unique` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**21 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**27 matched · 12 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/unique`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/unique).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
+| `TestCanonMap` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMap/LoadEmpty` | pass | pass |
+| `TestCanonMap/LoadOrStore` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMap/LoadOrStore/ConcurrentUnsharedKeys` | pass | pass |
+| `TestCanonMap/LoadOrStore/Sequential` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapBadHash` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapBadHash/LoadEmpty` | pass | pass |
+| `TestCanonMapBadHash/LoadOrStore` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapBadHash/LoadOrStore/ConcurrentUnsharedKeys` | pass | pass |
+| `TestCanonMapBadHash/LoadOrStore/Sequential` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapTruncHash` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapTruncHash/LoadEmpty` | pass | pass |
+| `TestCanonMapTruncHash/LoadOrStore` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestCanonMapTruncHash/LoadOrStore/ConcurrentUnsharedKeys` | pass | pass |
+| `TestCanonMapTruncHash/LoadOrStore/Sequential` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestHandle` | pass | pass |
 | `TestHandle/testEface/"hello"` | pass | pass |
 | `TestHandle/testEface/<nil>` | pass | pass |
@@ -30,6 +45,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestHandle/testStruct/unique.testStruct{z:0.5,_b:"184"}` | pass | pass |
 | `TestHandle/testZeroSize/unique.testZeroSize{}` | pass | pass |
 | `TestHandleUnsafeString` | pass | pass |
+| `TestMakeAllocs` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestMakeCloneSeq` | pass | pass |
 | `TestMakeCloneSeq/testEface` | pass | pass |
 | `TestMakeCloneSeq/testIntArray` | pass | pass |
@@ -39,17 +55,34 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestMakeCloneSeq/testStringStructArrayStruct` | pass | pass |
 | `TestMakeCloneSeq/testStruct` | pass | pass |
 | `TestMakeClonesStrings` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestNestedHandle` | pass | fail ([disclosed](#disclosed-divergences)) |
 
 ## Disclosed divergences
 
-A disclosed divergence is a specific Go assertion the managed CLR *provably cannot* satisfy — not
+A disclosed divergence is a specific Go assertion this conversion does not satisfy — not
 a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's
 hand-owned [`go2cs_test_disclosures.json`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unique/go2cs_test_disclosures.json);
 a disclosed test that fails any *other* way is still a hard mismatch.
 
+The **Class** column says which kind each one is: a `deferred` entry is an assertion the managed
+CLR *can* meet, pinned against the named plan that will retire it; every other class is one it
+*provably cannot* satisfy.
+
 | Test | Class | Pinned reason |
 |:--|:--|:--|
+| `TestCanonMap` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMap/LoadOrStore` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMap/LoadOrStore/Sequential` | `codegen-liveness` | codegen-liveness: LoadOrStore/Sequential stores 128 keys, keeps their canonical pointers in a local slice `refs`, then runs `runtime.KeepAlive(refs); refs = nil` and drains the cleanup queue, asserting every key was evicted. Go's liveness maps drop the slice's backing array at `refs = nil`. In the converted test something in the test's own frame keeps that backing array, and through it every key, reachable until the subtest returns. Which slot was not isolated; the likely one is an address-exposed copy of the slice header, which the test passes by value to append and to KeepAlive and which the CLR's GC info reports live for the whole method (the mechanism sync's TestOnceXGC entries measured). MEASURED on linux (Release host), each arm with tiering off, as the -tests pipeline runs it, and again under tiering: (a) the test as converted FAILS on every key at both settings; (b) the same body with ONLY the store phase (refs, the appends, the first drain, the presence checks and the KeepAlive) moved into its own [NoInlining] method PASSES at both, with all 128 keys reclaimed and every cleanup run. Arm (b) runs weak.Make, the map's cleanup registered through runtime.AddCleanup and the cleanup-queue drain unchanged, so those work and the only thing holding the keys is the test's own frame. That is the host's liveness model, not an unbuilt feature. |
+| `TestCanonMapBadHash` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMapBadHash/LoadOrStore` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMapBadHash/LoadOrStore/Sequential` | `codegen-liveness` | codegen-liveness: LoadOrStore/Sequential, over a map whose hash is a constant so every key collides, stores 128 keys, keeps their canonical pointers in a local slice `refs`, then runs `runtime.KeepAlive(refs); refs = nil` and drains the cleanup queue, asserting every key was evicted. Go's liveness maps drop the slice's backing array at `refs = nil`. In the converted test something in the test's own frame keeps that backing array, and through it every key, reachable until the subtest returns. Which slot was not isolated; the likely one is an address-exposed copy of the slice header, which the test passes by value to append and to KeepAlive and which the CLR's GC info reports live for the whole method (the mechanism sync's TestOnceXGC entries measured). MEASURED on linux (Release host), each arm with tiering off, as the -tests pipeline runs it, and again under tiering: (a) the test as converted FAILS on every key at both settings; (b) the same body with ONLY the store phase (refs, the appends, the first drain, the presence checks and the KeepAlive) moved into its own [NoInlining] method PASSES at both, with all 128 keys reclaimed and every cleanup run. Arm (b) runs weak.Make, the map's cleanup registered through runtime.AddCleanup and the cleanup-queue drain unchanged, so those work and the only thing holding the keys is the test's own frame. That is the host's liveness model, not an unbuilt feature. |
+| `TestCanonMapTruncHash` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMapTruncHash/LoadOrStore` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestCanonMapTruncHash/LoadOrStore/Sequential` | `codegen-liveness` | codegen-liveness: LoadOrStore/Sequential, over a map whose hash keeps only its low 4 bits so the keys collide in 16 groups, stores 128 keys, keeps their canonical pointers in a local slice `refs`, then runs `runtime.KeepAlive(refs); refs = nil` and drains the cleanup queue, asserting every key was evicted. Go's liveness maps drop the slice's backing array at `refs = nil`. In the converted test something in the test's own frame keeps that backing array, and through it every key, reachable until the subtest returns. Which slot was not isolated; the likely one is an address-exposed copy of the slice header, which the test passes by value to append and to KeepAlive and which the CLR's GC info reports live for the whole method (the mechanism sync's TestOnceXGC entries measured). MEASURED on linux (Release host), each arm with tiering off, as the -tests pipeline runs it, and again under tiering: (a) the test as converted FAILS on every key at both settings; (b) the same body with ONLY the store phase (refs, the appends, the first drain, the presence checks and the KeepAlive) moved into its own [NoInlining] method PASSES at both, with all 128 keys reclaimed and every cleanup run. Arm (b) runs weak.Make, the map's cleanup registered through runtime.AddCleanup and the cleanup-queue drain unchanged, so those work and the only thing holding the keys is the test's own frame. That is the host's liveness model, not an unbuilt feature. |
+| `TestMakeAllocs` | `deferred` | TestMakeAllocs runs testing.AllocsPerRun over Make legs and expects Go's exact count per run: 0 for a string, byte-slice or integer key, 1 where the key is first converted to any. Every leg that reaches the map lookup reads 8 to 10, an allocation COUNT per run in Go's own unit from go2cs's runtime counter, which counts only golib's own allocation sites and so is a lower bound. One mechanism accounts for 8 of them, read from a probe that recorded the stack of every charged allocation (Release, tiering off): Go's lookup line `hash := m.hash(abi.NoEscape(unsafe.Pointer(&key)), m.seed)` (canonmap.go:38) takes the address of a key Go keeps on the stack, while the converted Load boxes the key on the heap to take its address (2 objects, the box and its pinnable slot), and abi.NoEscape (2), unsafe.Pointer's FromPinnedBox (2), the box's element view (1) and the address-of helper (1) charge the rest. Go allocates none of these. The legs that read more add a charge of their own: stack string 2 and the three bytes legs 1 each, in the test's own closure (the string built from bytes), and large number 1 more on the lookup path. The two to-any legs read 8 against Go's 1, because the interface box Go counts is a C# box the counter does not see. The two create legs match. Deferred: the surplus is named and sits on the lookup path; the handles Make returns are correct. |
+| `TestMakeAllocs` | `deferred` | The pair leg calls Make over an UNNAMED array type argument, `Make[[2]string]`. C# spells every Go [N]T as one array type, so a descriptor built from the type alone carries no length, and the descriptor refuses Size by name rather than answer 0 (an answer of 0 sent Make down Go's zero-size arm, where two different pairs shared one handle). The refusal is a panic inside AllocsPerRun's warm-up call, so the test stops there and its two later legs, pair from stack and pair to any, do not run. Go reads 0 allocations for the pair legs and 1 for pair to any. A defined array type (`type N [2]string`) and a live value both carry their length, and every instantiation of this shape in the standard library is in a test file. Deferred: carrying the length for a type-only descriptor changes Make's public signature, and the refusal is the honest answer until that is designed. |
 | `TestMakeClonesStrings` | `codegen-liveness` | codegen-liveness: Go's liveness maps drop a local at its LAST USE, so the test's cloned string is unreachable before runtime.GC() and the finalizer on its backing runs inside the one-second wait. The converted @string is a 16-byte readonly struct (byte[] + int + int -- exactly one managed reference), and the host keeps a caller frame slot rooted while the local remains in scope, so the backing survives the collection and the wait times out with Go's own message. MEASURED with a six-arm instrument, ONE ARM PER PROCESS, every arm also run under Go as its own oracle, and two controls that disagree in both directions at every configuration (a deliberately rooted referent reads RETAINED; a plainly dead byte slice, sharing none of the string machinery, reads COLLECTED). Readings as Go / Release+TC0 / Release-tiered / Debug -- (1) caller slot LIVE: COLLECTED / RETAINED / RETAINED / RETAINED; (2) caller slot OVERWRITTEN: COLLECTED / COLLECTED / RETAINED / RETAINED; (3) by-value hand-off to a callee THEN overwritten: COLLECTED / COLLECTED / RETAINED / RETAINED; (4) the real unique.Make call THEN overwritten, handle KeepAlive'd across the collection: COLLECTED / COLLECTED / RETAINED / RETAINED. Arms 2, 3 and 4 are identical in all four columns, so neither the callee's by-value copy nor the intern map nor the handle holds the caller's bytes: the clone half and the referent bridge both work, measured rather than argued, and the pin is SOLELY the caller's frame slot. This test's own shape is arm 1 -- it never overwrites its local -- which retains at every configuration. Optimization honours an overwritten slot at Release+TC0 and does not under tiering or in Debug, and it frees a merely-dead-but-in-scope slot at NO configuration measured. That is the host's liveness model, a representational fact rather than an unbuilt feature, which is why this is disclosed and not billed as work. |
+| `TestNestedHandle` | `codegen-liveness` | codegen-liveness: the test builds n1, n2 and n3 with nestHandle, each holding a Handle to the canonical copy of the value below it, checks the three Values, then drains the maps and asserts the bottom value n0 is gone. Go's liveness drops n1 to n3 at their last use, so the whole chain is collectable at the drain. The converted test keeps them as in-scope locals of its own frame, and n1's handle still points at n0's canonical copy, so the drain cannot reclaim it. MEASURED on linux (Release host), each arm with tiering off, as the -tests pipeline runs it, and again under tiering: (a) the test as converted FAILS at both settings; (b) the same body with ONLY n1 to n3 and the three checks moved into their own [NoInlining] method PASSES at both. Arm (b) runs the handle chain, the map's cleanup and the drain unchanged, so those work and the only thing holding n0's copy is the test's own frame, the same in-scope-slot retention TestMakeClonesStrings measured at every configuration. |
 
 ## Excluded declarations
 

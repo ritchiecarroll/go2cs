@@ -3,10 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using bits = go.math.bits_package;
 using Δruntime = runtime_package;
 using static sort_package;
 using stringspkg = strings_package;
 using testing = testing_package;
+using go.math;
 using sort = sort_package;
 using static go.sort_internal_test_package;
 
@@ -81,14 +83,17 @@ public static void TestFind(ж<testing.T> Ꮡt) {
     var tests = new TestFind_tests[]{
         new(new @string[]{}.slice(), "foo"u8, 0, false),
         new(new @string[]{}.slice(), ""u8, 0, false),
+
         new(str1, "foo"u8, 0, true),
         new(str1, "bar"u8, 0, false),
         new(str1, "zx"u8, 1, false),
+
         new(str2, "aa"u8, 0, false),
         new(str2, "ab"u8, 0, true),
         new(str2, "ad"u8, 1, false),
         new(str2, "ca"u8, 1, true),
         new(str2, "ra"u8, 2, false),
+
         new(str3, "bb"u8, 0, false),
         new(str3, "mo"u8, 0, true),
         new(str3, "nb"u8, 1, false),
@@ -96,6 +101,7 @@ public static void TestFind(ж<testing.T> Ꮡt) {
         new(str3, "tr"u8, 2, false),
         new(str3, "vo"u8, 2, true),
         new(str3, "xr"u8, 3, false),
+
         new(str4, "aa"u8, 0, false),
         new(str4, "ab"u8, 0, true),
         new(str4, "ac"u8, 1, false),
@@ -106,10 +112,12 @@ public static void TestFind(ж<testing.T> Ꮡt) {
         new(str4, "dd"u8, 3, false),
         new(str4, "xy"u8, 3, true),
         new(str4, "zz"u8, 4, false),
+
         new(strRepeats, "da"u8, 2, true),
         new(strRepeats, "db"u8, 5, false),
         new(strRepeats, "ma"u8, 6, true),
         new(strRepeats, "mb"u8, 8, false),
+
         new(strSame, "xx"u8, 0, true),
         new(strSame, "ab"u8, 0, false),
         new(strSame, "zz"u8, 3, false)
@@ -135,13 +143,10 @@ public static void TestFind(ж<testing.T> Ꮡt) {
 // log2 computes the binary logarithm of x, rounded up to the next integer.
 // (log2(0) == 0, log2(1) == 0, log2(2) == 1, log2(3) == 2, etc.)
 internal static nint log2(nint x) {
-    nint n = 0;
-    for (nint p = 1; p < x; p += p) {
-        // p == 2**n
-        n++;
+    if (x < 1) {
+        return 0;
     }
-    // p/2 < x <= p == 2**n
-    return n;
+    return bits.Len((nuint)(x - 1));
 }
 
 public static void TestSearchEfficiency(ж<testing.T> Ꮡt) {

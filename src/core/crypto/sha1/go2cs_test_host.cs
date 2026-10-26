@@ -10,7 +10,6 @@ internal static class Go2CsTestHost
         TestRegistry registry = new("crypto/sha1", new string[]
         {
             "example_test.go",
-            "fallback_test.go",
             "issue15617_test.go",
             "sha1.go",
             "sha1_test.go",
@@ -24,14 +23,14 @@ internal static class Go2CsTestHost
         {
             "_asm",
         });
-        registry.Add("TestAllocations", sha1_internal_test_package.TestAllocations, "sha1_test.go", 233);
-        registry.Add("TestBlockGeneric", sha1_internal_test_package.TestBlockGeneric, "sha1_test.go", 160);
-        registry.Add("TestBlockSize", sha1_internal_test_package.TestBlockSize, "sha1_test.go", 152);
-        registry.Add("TestGolden", sha1_internal_test_package.TestGolden, "sha1_test.go", 62);
-        registry.Add("TestGoldenMarshal", sha1_internal_test_package.TestGoldenMarshal, "sha1_test.go", 99);
-        registry.Add("TestLargeHashes", sha1_internal_test_package.TestLargeHashes, "sha1_test.go", 212);
-        registry.Add("TestSHA1Hash", sha1_internal_test_package.TestSHA1Hash, "sha1_test.go", 248);
-        registry.Add("TestSize", sha1_internal_test_package.TestSize, "sha1_test.go", 145);
+        registry.Add("TestAllocations", sha1_internal_test_package.TestAllocations, "sha1_test.go", 223);
+        registry.Add("TestBlockSize", sha1_internal_test_package.TestBlockSize, "sha1_test.go", 157);
+        registry.Add("TestExtraMethods", sha1_internal_test_package.TestExtraMethods, "sha1_test.go", 244);
+        registry.Add("TestGolden", sha1_internal_test_package.TestGolden, "sha1_test.go", 61);
+        registry.Add("TestGoldenMarshal", sha1_internal_test_package.TestGoldenMarshal, "sha1_test.go", 101);
+        registry.Add("TestLargeHashes", sha1_internal_test_package.TestLargeHashes, "sha1_test.go", 200);
+        registry.Add("TestSHA1Hash", sha1_internal_test_package.TestSHA1Hash, "sha1_test.go", 238);
+        registry.Add("TestSize", sha1_internal_test_package.TestSize, "sha1_test.go", 150);
         return TestHost.Run(registry, args);
     }
 }

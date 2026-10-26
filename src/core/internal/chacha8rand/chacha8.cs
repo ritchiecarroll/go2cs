@@ -8,9 +8,15 @@
 namespace go.@internal;
 
 using byteorder = go.@internal.byteorder_package;
+using cpu = go.@internal.cpu_package;
+using @unsafe = unsafe_package;
 using go.@internal;
 
 partial class chacha8rand_package {
+
+// Offsets into internal/cpu records for use in assembly.
+internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
+internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
 
 internal static UntypedInt ctrInc => 4; // increment counter by 4 between block calls
 internal static UntypedInt ctrMax => 16; // reseed when counter reaches 16
@@ -48,7 +54,7 @@ public static (uint64, bool) Next(this ref State s) {
         return (0, false);
     }
     s.i = i + 1;
-    return (s.buf[(uint32)(i & 31)], true); // i&31 eliminates bounds check
+    return (s.buf[(i & 31)], true); // i&31 eliminates bounds check
 }
 
 // Init seeds the State with the given seed value.
@@ -112,7 +118,7 @@ public static void Reseed(this ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var (i, _) in seed) {
+    foreach (var i in range(seed)) {
         while (ᐧ) {
             var (x, ok) = s.Next();
             if (ok) {
@@ -164,7 +170,7 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
     if (used > (uint64)((ctrMax / ctrInc) * chunk - reseed)) {
         return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
-    foreach (var (i, _) in s.seed) {
+    foreach (var i in range(s.seed)) {
         s.seed[i] = byteorder.LEUint64(data.slice((2 + i) * 8));
     }
     s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);

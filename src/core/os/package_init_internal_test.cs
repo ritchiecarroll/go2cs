@@ -6,10 +6,9 @@ namespace go;
 
 partial class os_internal_test_package {
     static os_internal_test_package() {
-        initᴛLstatP();
         initᴛErrWriteAtInAppendMode();
-        initᴛTestingForceReadDirLstat();
         initᴛErrPatternHasSeparator();
+        initᴛErrPathEscapes();
         initᴛAddExtendedPrefix();
         initᴛNewConsoleFile();
         initᴛAllowReadDirFileID();

@@ -44,13 +44,14 @@ type Options struct {
 	targetPlatforms     []string // -platforms: the full requested list (len 1 for every ordinary run); targetPlatform is its first entry
 	platformCensusDir   string   // -platform-census: staging + manifest directory for a multi-target emission census (no corpus output)
 	alwaysWriteSources  bool     // set ONLY by runCensusTarget: write every converted .cs even when unchanged (writeSourceIfChanged)
-	platformStageDir    string   // -platform-stage: where a multi-target EMISSION stages its per-target conversions; a temporary directory this run owns and removes when empty
+	platformStageDir    string   // -platform-stage: where a multi-target EMISSION stages its per-target conversions; when empty, .go2cs-platform-stage under the output root, which this run locks, reclaims and removes
 	refCensusPath       string   // -ref-census: JSON output path for the ж-box A1 ref-lowering census (analysis only, no corpus output)
 	dualRecv            bool     // -dual-recv: B′ S0 — eligible pointer-receiver methods emit the `[GoRecv] this ref T` PRIMARY (R3 arms; the ж twin is minted by RecvGenerator). Flag-gated and corpus-inert: default off, scratch-root regens only until S2's own rebank ride
 	dualRecvParams      bool     // -dual-recv-params: B′ S1 (requires -dual-recv) — the PARAMETER half: primaries lower their pointer params (twin ref-forwards), the §4.2 call-site table lands corpus-wide, and the §4.3 X3 method-call arm relaxes for directly-selectable methods (feMul/feSquare unstrip). Kept a SEPARATE flag so `-dual-recv` alone still emits the S0 floor after S1 lands — the measurability condition (coordinator, 2026-09-03)
 	buildTags           []string // -tags: build tags applied to package loading AND constraint evaluation
 	tagsExplicit        bool     // whether -tags was passed on the command line (vs. the -stdlib purego default)
 	indentSpaces        int
+	hoistLiterals       bool // -hoist-literals: hoist value-slot string literals to `static readonly` fields, as the standard library always does (literalsHoistedFor); default off, so a user package emits plain literals
 	preferVarDecl       bool
 	useChannelOperators bool
 	includeComments     bool
@@ -63,6 +64,7 @@ type Options struct {
 	convertTests           bool          // convert the package's _test.go variants into a runnable test project
 	testAction             string        // convert | build | run | compare | all
 	testTimeout            time.Duration // per-child-command timeout for test build/run/compare actions
+	testDeadline           time.Duration // the converted host's per-test deadline (GO2CS_TEST_DEADLINE); 0 is none
 	testFilter             string        // -run regex handed VERBATIM to BOTH compare sides, and to the host under -test-action run (block-gated census)
 	testPackagePath        string        // import path of the package under test (self-import binding, IP-3)
 	testPackageName        string        // package name of the package under test (self-import binding, IP-3)
@@ -72,6 +74,7 @@ type Options struct {
 	testMetadataAnchorName string        // C# class that owns test-generated adapters under reference models
 	testConfig             string        // -test-config Debug|Release: publish/run configuration for the converted test host (default Debug -- unchanged pipeline behavior); Release also publishes with an explicit -p:go2csPath, replacing the Debug-conditional csproj-template default. See docs/phase4 tiering census
 	testTiered             bool          // -test-tiered: explicit opt-back-IN to the CLR's default tiered JIT when testConfig is Release (Release's own default is DOTNET_TieredCompilation=0, for deterministic timing-bounded verdicts -- see the tiering census); meaningless when testConfig is Debug
+	testBuildMaxCPU        int           // -test-build-maxcpu N: the test host's dotnet publish runs with -m:N (at most N MSBuild nodes); 0, the default, passes no -m, so MSBuild picks its own count as before
 	testPublishBinlog      bool          // -test-publish-binlog: the test host's dotnet publish writes bin/tests/publish.binlog from the first attempt and keeps it only when the publish fails (see preparePublishBinlog); off by default, since it costs ~35% of a warm publish
 	testModuleDisclosures  string        // -module-disclosures: the committed tree of third-party module rows' disclosure manifests, <root>/<module>@<version>/<pkg>/go2cs_test_disclosures.json; consulted only when the output directory holds none, and only for the resolved version (moduleDisclosureRoot.go)
 	testAllowHandOwn       bool          // -test-allow-handown: deliberately convert a package the -stdlib queue skips (testing, unsafe, ...) into a SCRATCH root; refused by default because the default output path IS the hand-owned tree -- see requireConvertibleTestTarget
@@ -106,6 +109,10 @@ type Options struct {
 	// inputDigest is the GoInputDigest the package being converted records in its project (packageInputDigest.go): set
 	// per package before its project file is written, and "" for every project that records none.
 	inputDigest string
+
+	// programDependencies is the -recurse closure's third-party modules, in path order: a main package's
+	// build-info `dep` lines (buildInfoStamp.go). Set per package by the -recurse drivers; nil otherwise.
+	programDependencies []thirdPartyModule
 }
 
 // packageUnderTestPath returns the import path of the package under test, whichever field the

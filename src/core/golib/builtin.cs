@@ -69,7 +69,7 @@ public static partial class builtin
         InitializeLinuxStdDescriptorHygiene();
         InitializeDarwinStdDescriptorHygiene();
 
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        go.golib.MainExit.InstallBackstop(CurrentDomain_UnhandledException);
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
 
         // Go's runtime.osinit opts every Windows process into long-path handling before any user
@@ -110,6 +110,15 @@ public static partial class builtin
             // and reporting the wrapper instead is what made an escaped panic print a CLR dump.
             if (CrashReport.TryUnwrapPanic(ex, out PanicException? panic, out Exception? thrown))
             {
+                // Go's gopanic, once the defers have run out: "If we're tracing, flush the current
+                // generation to make the trace more readable" (runtime/panic.go), before anything is
+                // printed. The advance returns once the trace's reader has taken the generation, so a
+                // program tracing to stdout (runtime's TestCrashWhileTracing child) gets a complete
+                // generation out before it dies. Like Go's, it would wait forever for a reader that is
+                // itself the panicking goroutine.
+                if (go.golib.ExecutionTracer.Enabled)
+                    go.golib.ExecutionTracer.Advance(stop: false);
+
                 // Go's crash report, in Go's own format: the panic value, a blank line, the
                 // goroutine header, and the Go-spelled traceback — plus a copy to the descriptor
                 // debug.SetCrashOutput configured, if any. See CrashReport and
@@ -130,7 +139,7 @@ public static partial class builtin
                 Console.Error.WriteLine($"unhandled exception: {e.ExceptionObject}");
             }
 
-            Environment.Exit(2);
+            go.golib.MainExit.FatalExit(2);
         }
     }
 
@@ -279,7 +288,7 @@ public static partial class builtin
     /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    public static PanicException panic(object? state)
+    public static PanicException panic([GoTakesCSharpString] object? state)
     {
         // Go's `panic` takes an `any`, so the value's DYNAMIC TYPE is observable: a recovering
         // comparison (`if p != "x"`), a type assertion (`err.(string)`), and a `case string:` arm
@@ -299,7 +308,7 @@ public static partial class builtin
             state = nilPanicValue();
 
         // An explicit panic: runtime.Callers splices gopanic straight over its site (PanicFaultKind).
-        return new PanicException(state is string s ? (@string)s : state) { FaultKind = PanicFaultKind.Explicit };
+        return new PanicException(state is string s ? (@string)s : state) { FaultKind = PanicFaultKind.Explicit, StringSource = state as string };
     }
 
     /// <summary>
@@ -322,9 +331,11 @@ public static partial class builtin
     /// nil too, so its sequence's tail knows not to re-raise it (docs/phase4/DESIGN-recover-model.md).
     /// It used to read and clear the one captured-panic slot, which a nested panic overwrote.
     /// <para>
-    /// Known divergence, accepted: a recover() in a HELPER the deferred function calls still
-    /// recovers here, where Go's returns nil. The panic stops early instead of reaching an outer
-    /// recover or crashing.
+    /// This form is the one a function literal that IS the deferred function calls (`defer func() { recover() }()`),
+    /// which is direct by construction. A named function that calls recover passes whether its running call is the
+    /// deferred one (<see cref="recover(bool)"/>), and a literal that is not the deferred literal is checked by its
+    /// caller (<see cref="recoverChecked"/>): Go's rule that only a function called DIRECTLY by the deferred call
+    /// recovers (GoFrame.TakeDeferredCall).
     /// </para>
     /// </remarks>
     public static object? recover()
@@ -347,6 +358,43 @@ public static partial class builtin
             state.CapturedPanic = null;
 
         return panic.State;
+    }
+
+    /// <summary>
+    /// Go's <c>recover</c> in a named function: recovers only when the running call of that function is the
+    /// deferred call itself, and returns nil otherwise (a helper call reads nil, and the panic continues).
+    /// </summary>
+    /// <param name="calledByDefer">The function's own <c>GoFrame.TakeDeferredCall()</c>, taken on entry.</param>
+    /// <returns>Recovered panic state, or <c>null</c>.</returns>
+    public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;
+
+    /// <summary>
+    /// Go's <c>recover</c> in a function literal that is not itself the deferred literal (it reaches its deferred
+    /// call through a func value): recovers only when the literal's caller is the deferred-call machinery.
+    /// </summary>
+    /// <returns>Recovered panic state, or <c>null</c>.</returns>
+    /// <remarks>
+    /// The rare form: a literal deferred directly needs no check (<see cref="recover()"/>), and a named function
+    /// passes its own flag (<see cref="recover(bool)"/>). Here the caller is read from the stack, and only while a
+    /// panic is waiting to be recovered, so a call with nothing to recover pays nothing. NoInlining keeps this frame,
+    /// so the caller and the caller's caller are frames 1 and 2.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "A frame whose method cannot be read (trimmed or Native AOT metadata) recovers, as every recover " +
+                        "did before the direct-call rule: the answer degrades to the old one, never to a lost recover.")]
+    public static object? recoverChecked()
+    {
+        PanicException? panic = GoThreadState.Current.RecoverablePanic;
+
+        if (panic is null || panic.Recovered)
+            return null;
+
+        // The literal's caller is golib's when the defer machinery invoked it: GoFrame.Run, a registration rung's
+        // argument closure or RecoveringCall. Any Go function in that place makes the literal a helper.
+        System.Reflection.MethodBase? caller = new System.Diagnostics.StackFrame(2, false).GetMethod();
+
+        return caller is null || caller.DeclaringType?.Assembly == typeof(builtin).Assembly ? recover() : null;
     }
 
     /// <summary>
@@ -386,7 +434,16 @@ public static partial class builtin
     /// slice = append(slice, elem1, elem2)
     /// slice = append(slice, anotherSlice...)
     /// </code>
+    /// <para>
+    /// Lowest priority: whenever a <see cref="slice{T}"/> overload also applies, this one is set aside.
+    /// Without that, <c>append(nums, 4, 5)</c> on a <c>slice&lt;nint&gt;</c> was CS0121: the C# int literals
+    /// inferred <c>T = int</c> here, an exact match for the elements, while every <see cref="slice{T}"/>
+    /// overload matched the slice exactly. The priority changes only calls that were that ambiguity: a call
+    /// this overload binds alone (a first argument typed <see cref="ISlice"/>) still binds it. Measured
+    /// 2026-10-16 by marking it obsolete: no call in go2cs-stdlib.slnx or go2cs.slnx bound it.
+    /// </para>
     /// </remarks>
+    [OverloadResolutionPriority(-1)]
     public static slice<T> append<T>(ISlice slice, params T[] elems)
     {
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
@@ -472,6 +529,19 @@ public static partial class builtin
     public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)
     {
         return go.slice<T>.Append(slice, elems);
+    }
+
+    /// <summary>
+    /// The exact twin of the spread above for a <see cref="slice{T}"/> operand, which takes the operand as
+    /// the slice it is. Without it a slice operand binds the <see cref="ISlice{T}"/> form, whose interface
+    /// parameter BOXES the struct: 56 B per call that AllocationCounter never sees, on every converted
+    /// <c>append(s, t...)</c>. Go 1.26's bytes TestReplace read it as 56 objects per run for
+    /// <c>append([]byte(nil), s...)</c>, which allocates nothing in Go. A named slice (a go2cs-gen wrapper)
+    /// binds here too, through its implicit conversion to <see cref="slice{T}"/> (a view of the same window).
+    /// </summary>
+    public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)
+    {
+        return go.slice<T>.AppendWindow(slice, elems);
     }
 
     /// <summary>
@@ -741,14 +811,12 @@ public static partial class builtin
     /// <c>for i := range n</c>) so a <c>var i</c> loop variable infers <c>nint</c> rather than a C#
     /// <c>int</c> — the latter subtly diverges from Go's index type and makes downstream generic calls
     /// like <c>append(s, i)</c> ambiguous. Producing values 0..n-1 (and no iterations when n &lt;= 0)
-    /// matches Go's integer-range semantics exactly.
+    /// matches Go's integer-range semantics exactly. The result is a struct (<see cref="RangeOverInt{T}"/>), so the
+    /// loop allocates nothing, as Go's does.
     /// </remarks>
-    public static IEnumerable<nint> range(nint n)
+    public static RangeOverInt<nint> range(nint n)
     {
-        for (nint i = 0; i < n; i++)
-        {
-            yield return i;
-        }
+        return new RangeOverInt<nint>(n);
     }
 
     /// <summary>
@@ -768,7 +836,7 @@ public static partial class builtin
     /// width made <c>append(s, i)</c> ambiguous, CS0121). Measured, not reasoned: the generic really
     /// does take the literal, so the tie-break that prefers a non-generic candidate never applies.
     /// </remarks>
-    public static IEnumerable<nint> range(int n)
+    public static RangeOverInt<nint> range(int n)
     {
         return range((nint)n);
     }
@@ -796,12 +864,9 @@ public static partial class builtin
     /// integer type, so no <c>T.Zero</c> — and therefore no <c>INumberBase</c> — is needed.
     /// </para>
     /// </remarks>
-    public static IEnumerable<T> range<T>(T n) where T : struct, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IIncrementOperators<T>
+    public static RangeOverInt<T> range<T>(T n) where T : struct, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IIncrementOperators<T>
     {
-        for (T i = default; i < n; i++)
-        {
-            yield return i;
-        }
+        return new RangeOverInt<T>(n);
     }
 
     /// <summary>
@@ -1558,8 +1623,14 @@ public static partial class builtin
     /// </remarks>
     public static T GoZero<T>() =>
         GoZeroFactory<T>.Create is { } create ? create() :
-        ZeroFacts<T>.IsConstructed ? (T)((IGoZeroConstructed)(object)default(T)!).GoZeroNew() :
+        ZeroFacts<T>.IsConstructed ? ConstructedZero<T>() :
         default!;
+
+    // A constructed zero with no factory yet: the package's factories are registered on the first such ask
+    // (GoDeferredRegistrations.ZeroFactories), and a generic struct, which has none, is built through its hook.
+    private static T ConstructedZero<T>() =>
+        GoDeferredRegistrations.ZeroFactories.Run() && GoZeroFactory<T>.Create is { } create ? create() :
+        (T)((IGoZeroConstructed)(object)default(T)!).GoZeroNew();
 
     /// <summary>
     /// Determines whether <c>default(T)</c> is already the Go zero value for <typeparamref name="T"/>
@@ -2254,7 +2325,7 @@ public static partial class builtin
     /// for pure-ASCII values, so the C# <see cref="string.Length"/> shortcut is wrong for
     /// any multi-byte rune (<c>len("a☺b☻")</c> is 8, not 4).
     /// </remarks>
-    public static nint len(string str)
+    public static nint len([GoTakesCSharpString] string str)
     {
         return Encoding.UTF8.GetByteCount(str);
     }
@@ -2389,7 +2460,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2605,7 +2676,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, int index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, index);
+        return ElemRefBox<T>.OfArrayElement(target, index);
     }
 
     /// <summary>
@@ -2618,7 +2689,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, nint index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, (int)index);
+        return ElemRefBox<T>.OfArrayElement(target, (int)index);
     }
 
     /// <summary>
@@ -2632,7 +2703,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, ulong index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, (int)index);
+        return ElemRefBox<T>.OfArrayElement(target, (int)index);
     }
 
     /// <summary>
@@ -2697,12 +2768,28 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
     {
-        // A reference-bearing element cannot alias native bytes: its elements live in a managed store that
-        // SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
         if (ShadowArrayBox<T>.Needed)
+        {
+            // A POINTER element over memory the Go runtime did not allocate is a foreign address, read from its
+            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory). Ownership is asked FIRST, so
+            // the runtime's own arena never reaches the door, which is E's registered opener (NativeArrayOpeners).
+            if (address != 0 && !GoOsMemory.Owns(address) && ForeignPointerElement<T>.Type is { } element)
+                return (ж<array<T>>)NativeArrayOpeners.OpenPointerArray(element, address, length);
+
+            // Any other reference-bearing element cannot alias native bytes: its elements live in a managed store
+            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox). Over foreign
+            // memory that store refuses every read by name.
             return ShadowArrayBox<T>.Over(address, length);
+        }
 
         return NativeArrayBox<T>.Over(address, length);
+    }
+
+    // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
+    private static class ForeignPointerElement<T>
+    {
+        internal static readonly Type? Type =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>) ? typeof(T).GetGenericArguments()[0] : null;
     }
 
     /// <summary>
@@ -2743,10 +2830,16 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
     {
-        if (field is not INativeRooted { NativeGoFieldAddress: var address and not 0 })
-            return null;
+        // A field view of a native box IS a native box at the field's Go offset (ж.of), so its own root address is
+        // the field's; a one-hop field reference still answers through NativeGoFieldAddress.
+        nuint address = field switch
+        {
+            INativeRooted { NativeGoFieldAddress: var fieldAddress and not 0 } => fieldAddress,
+            INativeRooted { NativeRootAddress: var rootAddress and not 0 } => rootAddress,
+            _ => 0
+        };
 
-        return NativeArrayPointer<T>(address, length);
+        return address == 0 ? null : NativeArrayPointer<T>(address, length);
     }
 
     /// <summary>
@@ -2849,7 +2942,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2895,7 +2988,7 @@ public static partial class builtin
         ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2972,6 +3065,8 @@ public static partial class builtin
 
                 if (args[i] is @string text)
                     sink.Write(text.ToSpan());
+                else if (args[i] is IRuntimePrintable printable)
+                    printable.RuntimePrint(); // runtime.hex and runtime.quoted: printhex and printquoted
                 else
                     writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
             }
@@ -3050,7 +3145,8 @@ public static partial class builtin
     // Console.Error is a TextWriter.Synchronized wrapper; its private _out is the writer it guards. The dependency keeps
     // that BCL field in a trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md); were it missing, the answer is
     // the conservative one, "not the process's stderr", which writes through the TextWriter as before this existed.
-    [DynamicDependency("_out", "System.IO.TextWriter+SyncTextWriter", "System.Private.CoreLib")]
+    // The trimmer reads the type name as a documentation ID, so the nested type is TextWriter.SyncTextWriter.
+    [DynamicDependency("_out", "System.IO.TextWriter.SyncTextWriter", "System.Private.CoreLib")]
     [UnconditionalSuppressMessage("Trimming", "IL2075",
         Justification = "The writer is the BCL's SyncTextWriter, whose _out the DynamicDependency on this method keeps.")]
     private static bool IsProcessStandardError(System.IO.TextWriter error)
@@ -3062,16 +3158,18 @@ public static partial class builtin
     }
 
     // Formats a single print/println argument the way gc's runtime printer does where the BCL
-    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False), and
-    // a nil interface prints its two zero words, "(0x0,0x0)", where arg.ToString() threw a
-    // NullReferenceException that surfaced as a Go nil dereference out of the println itself.
+    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False), a
+    // basic value prints its runtime-printer text (GoPrintText), and a nil interface prints its
+    // two zero words, "(0x0,0x0)", where arg.ToString() threw a Go nil dereference out of println.
     private static string? printArg(object? arg)
     {
         return arg switch
         {
             null => "(0x0,0x0)",
             bool value => value ? "true" : "false",
-            _ => arg.ToString()
+            // A pointer prints its ADDRESS whatever its methods: gc's printpointer never calls String().
+            IPrintPointer pointer => pointer.PrintPointer(),
+            _ => GoPrintText.Text(arg) ?? arg.ToString()
         };
     }
 
@@ -3090,7 +3188,7 @@ public static partial class builtin
     #else
         // A bare "\n", as Go's runtime writes "fatal error: ..." on every OS (see println).
         Console.Error.Write(message + "\n");
-        Environment.Exit((int)code);
+        go.golib.MainExit.Exit((int)code);
     #endif
     }
 
@@ -3109,13 +3207,59 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target)
     {
+        if (AssertHit(target, out T hit))
+            return hit;
+
         if (TryTypeAssert(target, out T value))
             return value;
 
         while (target is IInterfaceAdapter interfaceAdapter)
             target = interfaceAdapter.Value!;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
+    }
+
+    // The head of every `x.(T)`: a HIT it can prove cheaply, or false to send the assertion to TryTypeAssert's
+    // body. Inlined, it is specialized for the call site's T. TryTypeAssert<T> runs as ONE shared body for every
+    // reference T (every pointer and every interface), where each `is T`, typeof(T) and per-T static is a runtime
+    // lookup, so a pointer assert cost ~14 ns where Go's is one compare (~1 ns). Here T is exact.
+    //
+    // It answers only what the body would answer, and only where that is cheap to prove:
+    //  - a concrete T other than object: `target is T`. No adapter is ever a concrete Go type, so this is the body's
+    //    own `case T`; a raw string asserted to @string, a typed nil func and every miss fall through.
+    //  - an interface T on a RAW value (not an adapter, not a typed nil func): `target is T`, then the itab slot.
+    //    An adapter falls through because the body unwraps it first: the Go dynamic value is the one it wraps,
+    //    even when the adapter implements T itself.
+    // `any` (object) is neither, so it always takes the body, which unwraps an interface adapter to its value.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AssertHit<T>(object? target, out T value)
+    {
+        if (!typeof(T).IsInterface)
+        {
+            if (typeof(T) != typeof(object) && target is T typed)
+            {
+                value = typed;
+                return true;
+            }
+        }
+        else if (target is not null and not IGoAdapter and not NilFuncValue)
+        {
+            if (target is T direct)
+            {
+                value = direct;
+                return true;
+            }
+
+            if (Itab<T>.TryGetResolver(target.GetType(), AdapterRegistry.Epoch, out Func<object, object>? resolve) &&
+                resolve is not null && resolve(target) is T resolved)
+            {
+                value = resolved;
+                return true;
+            }
+        }
+
+        value = default!;
+        return false;
     }
 
     /// <summary>
@@ -3496,6 +3640,9 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, bool _)
     {
+        if (AssertHit(target, out T hit))
+            return (hit, true);
+
         return TryTypeAssert(target, out T? value) ? (value, true) : (GoZero<T>(), false);
     }
 
@@ -3513,7 +3660,7 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, out T? value)
     {
-        if (TryTypeAssert(target, out value))
+        if (AssertHit(target, out value) || TryTypeAssert(target, out value))
             return true;
 
         value = GoZero<T>();
@@ -3548,9 +3695,9 @@ public static partial class builtin
             // so a `case *T:` label (emitted `case ж<T> t:`) must match the box. One created from
             // a VALUE this assembly cannot partial is a generated IValueAdapter wrapping a copy,
             // whose Go dynamic type is the struct — so `case color.NRGBA:` must match that copy.
-            // A null Box (interface holding a nil *T) stays wrapped: Go would still match
-            // `case *T:` there, but no C# type pattern can bind null — the adapter at least keeps
-            // `case null:` (Go `case nil:`) a non-match, since such an interface value is NOT nil.
+            // A nil *T held in an interface unwraps to the shared ж<T>.NilBox, which the adapter's ctor
+            // puts in place of a null box: `case *T:` matches it with a nil t, as in Go (TypeSwitchNilPointer),
+            // and `case null:` (Go `case nil:`) does not, since such an interface value is NOT nil.
             target = UnwrapAdapter(target);
         }
 
@@ -3916,10 +4063,10 @@ public static partial class builtin
         // the original interface value; Go compares such interfaces by instance value.
         // Unwrap both sides so the comparison below sees the root values.
         while (left is IInterfaceAdapter leftInterfaceAdapter)
-            left = leftInterfaceAdapter.Value;
+            left = interfaceAdapterValue(leftInterfaceAdapter);
 
         while (right is IInterfaceAdapter rightInterfaceAdapter)
-            right = rightInterfaceAdapter.Value;
+            right = interfaceAdapterValue(rightInterfaceAdapter);
 
         // An interface value created from a Go POINTER is a generated IжAdapter wrapping the
         // receiver box; Go compares such interfaces (against each other, or against a raw
@@ -3946,25 +4093,6 @@ public static partial class builtin
         if (right is IValueAdapter { Value: not null } rightValueAdapter)
             right = rightValueAdapter.Value;
 
-        // Two adapters BOTH still wrapping a nil delegate (neither matched the guard above) are
-        // exactly Go's "comparing uncomparable type" case: func values are comparable only to
-        // nil, never to each other — and that holds even when both sides are nil (verified
-        // against go1.23.12: two independently-nil-wrapped values of one named func type panic
-        // on `==`, where either compared to a literal nil correctly answers false via the null
-        // checks below). Left unguarded, this reaches the shells' generated Equals override,
-        // which calls m_value.Equals(...) on a null m_value and crashes — the general
-        // exception-to-panic translation downstream then reports Go's WRONG panic ("invalid
-        // memory address or nil pointer dereference" instead of "comparing uncomparable type"),
-        // which is what this check preempts. Rhymes with the registererr chip's Defect B
-        // (reflectPointerToken): the same null-Value shell reaching a path built only for the
-        // non-null shape.
-        if (left is IValueAdapter { Value: null } && right is IValueAdapter { Value: null } &&
-            GoReflect.ValueAdapterWrappedType(left.GetType()) is { } leftWrapped &&
-            leftWrapped == GoReflect.ValueAdapterWrappedType(right.GetType()))
-        {
-            throw RuntimeErrorPanic.ComparingUncomparableType(GetGoTypeName(leftWrapped));
-        }
-
         // Check if both are null
         if (left is null && right is null)
             return true;
@@ -3973,15 +4101,17 @@ public static partial class builtin
         if (left is null || right is null)
             return false;
 
-        Type leftType = left.GetType();
+        // Check if both are the same type. A nil func is a typed value inside an interface that reaches here as a
+        // carrier, not as its func type (equalityDynamicType), so it meets the same type match and the same
+        // comparability gate as any other func value: Go panics comparing two of one func type, nil or not.
+        Type leftType = equalityDynamicType(left);
 
-        // Check if both are the same type
-        if (leftType != right.GetType())
+        if (leftType != equalityDynamicType(right))
             return false;
 
         // Go's `==` on two interface values PANICS when their shared dynamic type has no equal
         // algorithm — "runtime error: comparing uncomparable type map[string]int" — and the C#
-        // answered quietly instead, for every shape but the nil-func-adapter one handled above.
+        // answered quietly instead.
         // Measured against go1.23.12: a map, slice or func held in an interface; a struct or an
         // array that TRANSITIVELY contains one; and a named type whose underlying type is any of
         // those, which panics under its OWN name (`main.myMap`, not `map[string]int`).
@@ -3994,6 +4124,41 @@ public static partial class builtin
         // admitted, so a panic raised here is a panic Go raises too.
         if (!isComparableType(leftType))
             throw RuntimeErrorPanic.ComparingUncomparableType(uncomparableTypeName(leftType, left));
+
+        // THE TYPED PATH. Both sides are one comparable type here, so the type's own `==` decides, called in
+        // compiled code: a generated type (go2cs-gen's struct and inherited-type templates) and golib's own
+        // comparable types implement IGoEquatable through their `==`, and a boxed BCL primitive compares with
+        // its own operator (IEEE for double, float and Complex: NaN is unequal to itself, as in Go). The
+        // reflective operator below remained the route for every one of them and cost 85-156 ns and 144 bytes a
+        // compare (P2, linux, Release), on the hit path of `err == io.EOF` and of every Errno test in the
+        // poller's retry loops; this path allocates nothing and needs no run-time code, so Native AOT has it.
+        // Object.Equals is NOT used: a named float's generated Equals is NaN-equal where its `==` is not.
+        if (left is IGoEquatable equatable)
+            return equatable.GoEquals(right);
+
+        switch (left)
+        {
+            case int value: return value == (int)right;
+            case long value: return value == (long)right;
+            case uint value: return value == (uint)right;
+            case ulong value: return value == (ulong)right;
+            case nint value: return value == (nint)right;
+            case nuint value: return value == (nuint)right;
+            case short value: return value == (short)right;
+            case ushort value: return value == (ushort)right;
+            case byte value: return value == (byte)right;
+            case sbyte value: return value == (sbyte)right;
+            case bool value: return value == (bool)right;
+            case char value: return value == (char)right;
+            case double value: return value == (double)right;
+            case float value: return value == (float)right;
+            case System.Numerics.Complex value: return value == (System.Numerics.Complex)right;
+            case string value: return string.Equals(value, (string)right, StringComparison.Ordinal);
+        }
+
+        // Anything left reaches its operator by reflection, as every comparison did before the typed path; each is
+        // counted (EqualityFallbacks), so a type that should have taken the typed path shows up by name.
+        EqualityFallbacks.Record(leftType);
 
         // Get equality "==" operator for type using reflection,
         // lookup is cached for performance.
@@ -4049,6 +4214,32 @@ public static partial class builtin
         return s_comparableTypes.GetOrAdd(type, static t => GoReflect.IsComparable(t));
     }
 
+    // The managed type standing for an AreEqual operand's Go dynamic type. A nil func inside an interface arrives as a
+    // carrier whose own class is not its type: the canonical NilFuncValue (a func boxed into `any`), or a generated
+    // value shell still wrapping its null delegate (AreEqual unwraps only a non-null one). Each answers the func type it
+    // carries, so two nil funcs of one type, or a nil and a non-nil one, reach the comparability gate and panic as in
+    // Go -- before anything can call a shell's Equals over its null value. GoReflect.GoDynamicTypeOf reads the same two
+    // carriers but also canonicalizes pointer box classes, which this type match has never done.
+    private static Type equalityDynamicType(object value) => value switch
+    {
+        NilFuncValue nilFunc => nilFunc.Type,
+        IValueAdapter { Value: null } shell => GoReflect.ValueAdapterWrappedType(shell.GetType()) ?? shell.GetType(),
+        _ => value.GetType()
+    };
+
+    // The value an interface adapter stands in for. A runtime shell over a nil func (go2cs-gen's generic shell, closed
+    // over the delegate type: what asserting a typed nil func to an interface literal builds) holds a null delegate, and
+    // unwrapping it to null would turn Go's typed nil func into the nil interface; it answers the canonical NilFuncValue
+    // for its delegate type instead, the encoding a nil func has everywhere else in interface space.
+    private static object? interfaceAdapterValue(IInterfaceAdapter adapter)
+    {
+        if (adapter.Value is { } value)
+            return value;
+
+        return adapter.GetType() is { IsGenericType: true } shellType && shellType.GetGenericArguments() is [var target] &&
+            typeof(Delegate).IsAssignableFrom(target) ? GoReflect.CanonicalNilFunc(target) : null;
+    }
+
     // Go names the offending type in the message exactly as `%T` spells it, and for an ARRAY that
     // includes the length — `[1][]int`, never `[][]int`. A managed array<T> does not carry its
     // length in its Type (only the value knows), so the dims come off the live operand through the
@@ -4081,6 +4272,23 @@ public static partial class builtin
             null => false,
             _ => Cache<TInterface>.Implements(value.GetType())
         };
+    }
+
+    /// <summary>
+    /// Checks whether a value of the managed type <paramref name="valueType"/> implements the interface
+    /// <typeparamref name="TInterface"/>, decided on the TYPE alone, through the same cached method-set probe
+    /// <see cref="Implements{TInterface}(object?)"/> uses.
+    /// </summary>
+    /// <remarks>
+    /// For a caller that must answer before it has a value to hand over, and must not allocate one to ask:
+    /// reflect.TypeAssert[I] over a concrete Value, whose failing assertion Go answers without allocating.
+    /// </remarks>
+    /// <typeparam name="TInterface">Interface type to check.</typeparam>
+    /// <param name="valueType">Managed type of the value.</param>
+    /// <returns><c>true</c> if a value of <paramref name="valueType"/> implements <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
+    public static bool TypeImplements<TInterface>(Type? valueType)
+    {
+        return valueType is not null && (typeof(TInterface).IsAssignableFrom(valueType) || Cache<TInterface>.Implements(valueType));
     }
 
     // Per-interface structural-implementation cache, reached from the `_ =>` arm of Implements above.
@@ -4218,4 +4426,33 @@ public static partial class builtin
     /// <param name="value">UTF-8 bytes.</param>
     /// <returns>Heap allocated string.</returns>
     public static @string str(ReadOnlySpan<byte> value) => (@string)value;
+
+    /// <summary>
+    /// Type asserts <paramref name="target"/>, whose Go static type is the interface <typeparamref name="TSource"/>, as
+    /// type <typeparamref name="T"/>; a failure panics with that source type in the text, as Go's does.
+    /// </summary>
+    /// <typeparam name="TSource">Static interface type of <paramref name="target"/>.</typeparam>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
+    /// <remarks>
+    /// The plain <c>_&lt;T&gt;(this object)</c> form cannot see the static type, so it names the source "interface {}";
+    /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
+    /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
+    /// </remarks>
+    public static T _<TSource, [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(this TSource target)
+    {
+        if (AssertHit((object?)target, out T hit))
+            return hit;
+
+        if (TryTypeAssert((object?)target, out T value))
+            return value;
+
+        throw RuntimeErrorPanic.TypeAssertion(typeof(TSource), target, typeof(T));
+    }
 }

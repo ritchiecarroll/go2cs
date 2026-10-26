@@ -8,6 +8,7 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using Δtesting = testing_package;
 using static time_package;
+using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.time_internal_test_package;
@@ -21,6 +22,8 @@ internal partial struct TestTicker_type /*dyn*/ {
 }
 
 public static void TestTicker(ж<Δtesting.T> Ꮡt) {
+    var errsᴷ = new stackAppend<@string>();
+
     Ꮡt.Parallel();
 
     // We want to test that a ticker takes as much time as expected.
@@ -75,7 +78,7 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
         var target = 3 * delta * ((Δtime.Duration)(int64)(count / 2));
         var slop = target * 3 / 10;
         if (dt < target - slop || dt > target + slop) {
-            errs = append(errs, fmt.Sprintf("%d %s ticks then %d %s ticks took %s, expected [%s,%s]"u8, count / 2, delta, count / 2, delta * 2, dt, target - slop, target + slop));
+            errs = append(errsᴷ, errs, fmt.Sprintf("%d %s ticks then %d %s ticks took %s, expected [%s,%s]"u8, count / 2, delta, count / 2, delta * 2, dt, target - slop, target + slop));
             if (dt > target + slop) {
                 // System may be overloaded; sleep a bit
                 // in the hopes it will recover.
@@ -133,7 +136,7 @@ public static void TestTeardown(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test the Tick convenience wrapper.
-public static void TestTick(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTick(ж<Δtesting.T> Ꮡt) {
     // Test that giving a negative duration returns nil.
     {
         var got = Tick(-1); if (got != default!) {
@@ -184,9 +187,13 @@ internal static readonly object timerExpiredˢ = (@string)"timer expired"u8;
 public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        if (Δruntime.GOOS == "android"u8 || Δruntime.GOOS == "ios"u8) {
+        if (Δruntime.GOOS == "android"u8 || Δruntime.GOOS == "ios"u8 || Δruntime.GOOS == "plan9"u8) {
             Ꮡt.Skipf("skipping on %s - too slow"u8, Δruntime.GOOS);
         }
+        if (Δtesting.Short() && Δruntime.NumCPU() < 2) {
+            Ꮡt.Skipf("skipping in short mode, insufficient CPUs"u8);
+        }
+
         Ꮡt.Parallel();
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
@@ -233,6 +240,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
+                var qᴷ = new stackAppend<Action>();
                 defer(Ꮡwg.Done, ref ᒐ);
                 defer(ᴛ1 => close(ᴛ1), outQʗ1, ref ᒐ);
                 slice<Action> q = default!;
@@ -255,7 +263,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
                         if (!ok) {
                             return;
                         }
-                        q = append(q, f);
+                        q = append(qᴷ, q, f);
                         break;
                     }
                     case 2 when selᴛ23.ꟷᐳ(out _): {
@@ -331,6 +339,7 @@ public static void BenchmarkTickerResetNaive(ж<Δtesting.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestTimerGCWithˢ = (@string)"skipping TestTimerGC with asynctimerchan=1"u8;
 internal static readonly @string afterˢ = "After"u8;
 internal static readonly @string tickˢ = "Tick"u8;
 internal static readonly @string newTimerˢ = "NewTimer"u8;
@@ -338,7 +347,11 @@ internal static readonly @string newTickerˢ = "NewTicker"u8;
 internal static readonly @string newTimerStopˢ = "NewTimerStop"u8;
 internal static readonly @string newTickerStopˢ = "NewTickerStop"u8;
 
-public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTimerGC(ж<Δtesting.T> Ꮡt) {
+    if (time_internal_test_package.AsynctimerChan.Value() == "1"u8) {
+        Ꮡt.Skip(skippingTestTimerGCWithˢ);
+    }
+
     void run(ж<Δtesting.T> tΔ1, @string what, Action f) {
         tΔ1.Helper();
         tΔ1.Run(what, (ж<Δtesting.T> tΔ2) => {
@@ -423,7 +436,7 @@ partial interface timer {
 // tickerTimer is a Timer with Reset and Stop methods that return bools,
 // to have the same signatures as Timer.
 partial struct tickerTimer {
-    public partial ref ж<time_package.Ticker> Ticker { get; }
+    /*embed*/ public ж<time_package.Ticker> Ticker;
     internal bool stopped;
 }
 

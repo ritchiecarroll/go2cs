@@ -12,16 +12,6 @@ using static go.unicode.utf8_package;
 partial class utf8_test_package {
 
 // Validate the constants redefined from unicode.
-[GoInit] internal static void init() {
-    if (MaxRune != unicode.MaxRune) {
-        throw panic("utf8.MaxRune is wrong");
-    }
-    if (RuneError != unicode.ReplacementChar) {
-        throw panic("utf8.RuneError is wrong");
-    }
-}
-
-// Validate the constants redefined from unicode.
 public static void TestConstants(ж<testing.T> Ꮡt) {
     if (MaxRune != unicode.MaxRune) {
         Ꮡt.Errorf("utf8.MaxRune is wrong: %x should be %x"u8, (int32)(MaxRune), (int32)(unicode.MaxRune));
@@ -99,7 +89,7 @@ public static void TestFullRune(ж<testing.T> Ꮡt) {
         if (FullRune(b1)) {
             Ꮡt.Errorf("FullRune(%q) = true, want false"u8, b1);
         }
-        @string s1 = ((@string)b1);
+        @string s1 = (@string)b1;
         if (FullRuneInString(s1)) {
             Ꮡt.Errorf("FullRune(%q) = true, want false"u8, s1);
         }
@@ -189,12 +179,12 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
         }
         (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
-        s = ((@string)b);
+        s = (@string)b;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
@@ -204,12 +194,12 @@ public static void TestDecodeSurrogateRune(ж<testing.T> Ꮡt) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRune(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
         @string s = m.str;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
@@ -509,14 +499,24 @@ internal static slice<ValidTest> validTests = new ValidTest[]{
     new(((@string)new byte[]{66, 250}.slice()), false),
     new(((@string)new byte[]{66, 250, 67}.slice()), false),
     new("a\uFFFDb"u8, true),
-    new(((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf}))), true), // U+10FFFF
-    new(((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80}))), false), // U+10FFFF+1; out of range
-    new(((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf}))), false), // 0x1FFFFF; out of range
-    new(((@string)((@string)(new byte[]{0xfb, 0xbf, 0xbf, 0xbf, 0xbf}))), false), // 0x3FFFFFF; out of range
-    new(((@string)((@string)(new byte[]{0xc0, 0x80}))), false), // U+0000 encoded in two bytes: incorrect
-    new(((@string)((@string)(new byte[]{0xed, 0xa0, 0x80}))), false), // U+D800 high surrogate (sic)
-    new(((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf}))), false) // U+DFFF low surrogate (sic)
+    new((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf})), true), // U+10FFFF
+    new((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80})), false), // U+10FFFF+1; out of range
+    new((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf})), false), // 0x1FFFFF; out of range
+    new((@string)((@string)(new byte[]{0xfb, 0xbf, 0xbf, 0xbf, 0xbf})), false), // 0x3FFFFFF; out of range
+    new((@string)((@string)(new byte[]{0xc0, 0x80})), false), // U+0000 encoded in two bytes: incorrect
+    new((@string)((@string)(new byte[]{0xed, 0xa0, 0x80})), false), // U+D800 high surrogate (sic)
+    new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false) // U+DFFF low surrogate (sic)
 }.slice();
+
+[GoInit] internal static void init() {
+    foreach (var i in range(100)) {
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8, @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})), @out: false));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8 + strings.Repeat("b"u8, i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})) + strings.Repeat("b"u8, i), @out: false));
+    }
+}
 
 public static void TestValid(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in validTests) {
@@ -830,8 +830,8 @@ public static void BenchmarkDecodeASCIIRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var a = new byte[]{(rune)'a'}.slice();
-    for (nint i = 0; i < b.N; i++) {
-        DecodeRune(a);
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRune(a);
     }
 }
 
@@ -839,10 +839,31 @@ public static void BenchmarkDecodeJapaneseRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var nihon = slice<byte>("本"u8);
-    for (nint i = 0; i < b.N; i++) {
-        DecodeRune(nihon);
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRune(nihon);
     }
 }
+
+public static void BenchmarkDecodeASCIIRuneInString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    @string a = "a"u8;
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRuneInString(a);
+    }
+}
+
+public static void BenchmarkDecodeJapaneseRuneInString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    @string nihon = "本"u8;
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRuneInString(nihon);
+    }
+}
+
+internal static rune runeSink;
+internal static nint sizeSink;
 
 // boolSink is used to reference the return value of benchmarked
 // functions to avoid dead code elimination.

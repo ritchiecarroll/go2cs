@@ -11,7 +11,7 @@ using binary = encoding.binary_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using rand = math.rand_package;
+using rand = go.math.rand_package;
 using net = net_package;
 using os = os_package;
 using path = path_package;
@@ -23,7 +23,7 @@ using testing = testing_package;
 using compress;
 using encoding;
 using go.debug;
-using math;
+using go.math;
 using static go.debug.elf_package;
 
 partial class elf_internal_test_package {
@@ -450,6 +450,52 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             new("main"u8, 18, 0, false, 0, 1, 0, 44, ""u8, ""u8),
             new("puts"u8, 16, 0, false, 0, 0, 0, 0, ""u8, ""u8)
         }.slice()
+    ),
+    new(
+        "testdata/gcc-riscv64-linux-exec"u8,
+        new FileHeader(ELFCLASS64, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0, binary.LittleEndian, ET_EXEC, EM_RISCV, 0x10460),
+        new global::go.debug.elf_package.SectionHeader[]{
+            new(""u8, SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
+            new(".interp"u8, SHT_PROGBITS, SHF_ALLOC, 0x10270, 0x270, 0x21, 0x0, 0x0, 0x1, 0x0, 0x21),
+            new(".note.gnu.build-id"u8, SHT_NOTE, SHF_ALLOC, 0x10294, 0x294, 0x24, 0x0, 0x0, 0x4, 0x0, 0x24),
+            new(".note.ABI-tag"u8, SHT_NOTE, SHF_ALLOC, 0x102b8, 0x2b8, 0x20, 0x0, 0x0, 0x4, 0x0, 0x20),
+            new(".gnu.hash"u8, SHT_GNU_HASH, SHF_ALLOC, 0x102d8, 0x2d8, 0x30, 0x5, 0x0, 0x8, 0x0, 0x30),
+            new(".dynsym"u8, SHT_DYNSYM, SHF_ALLOC, 0x10308, 0x308, 0x60, 0x6, 0x1, 0x8, 0x18, 0x60),
+            new(".dynstr"u8, SHT_STRTAB, SHF_ALLOC, 0x10368, 0x368, 0x4a, 0x0, 0x0, 0x1, 0x0, 0x4a),
+            new(".gnu.version"u8, SHT_GNU_VERSYM, SHF_ALLOC, 0x103b2, 0x3b2, 0x8, 0x5, 0x0, 0x2, 0x2, 0x8),
+            new(".gnu.version_r"u8, SHT_GNU_VERNEED, SHF_ALLOC, 0x103c0, 0x3c0, 0x30, 0x6, 0x1, 0x8, 0x0, 0x30),
+            new(".rela.plt"u8, SHT_RELA, SHF_ALLOC + SHF_INFO_LINK, 0x103f0, 0x3f0, 0x30, 0x5, 0x14, 0x8, 0x18, 0x30),
+            new(".plt"u8, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR, 0x10420, 0x420, 0x40, 0x0, 0x0, 0x10, 0x10, 0x40),
+            new(".text"u8, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR, 0x10460, 0x460, 0xd8, 0x0, 0x0, 0x4, 0x0, 0xd8),
+            new(".rodata"u8, SHT_PROGBITS, SHF_ALLOC, 0x10538, 0x538, 0x15, 0x0, 0x0, 0x8, 0x0, 0x15),
+            new(".eh_frame_hdr"u8, SHT_PROGBITS, SHF_ALLOC, 0x10550, 0x550, 0x24, 0x0, 0x0, 0x4, 0x0, 0x24),
+            new(".eh_frame"u8, SHT_PROGBITS, SHF_ALLOC, 0x10578, 0x578, 0x6c, 0x0, 0x0, 0x8, 0x0, 0x6c),
+            new(".preinit_array"u8, SHT_PREINIT_ARRAY, SHF_WRITE + SHF_ALLOC, 0x11e00, 0xe00, 0x8, 0x0, 0x0, 0x1, 0x8, 0x8),
+            new(".init_array"u8, SHT_INIT_ARRAY, SHF_WRITE + SHF_ALLOC, 0x11e08, 0xe08, 0x8, 0x0, 0x0, 0x8, 0x8, 0x8),
+            new(".fini_array"u8, SHT_FINI_ARRAY, SHF_WRITE + SHF_ALLOC, 0x11e10, 0xe10, 0x8, 0x0, 0x0, 0x8, 0x8, 0x8),
+            new(".dynamic"u8, SHT_DYNAMIC, SHF_WRITE + SHF_ALLOC, 0x11e18, 0xe18, 0x1d0, 0x6, 0x0, 0x8, 0x10, 0x1d0),
+            new(".got"u8, SHT_PROGBITS, SHF_WRITE + SHF_ALLOC, 0x11fe8, 0xfe8, 0x8, 0x0, 0x0, 0x8, 0x8, 0x8),
+            new(".got.plt"u8, SHT_PROGBITS, SHF_WRITE + SHF_ALLOC, 0x11ff0, 0xff0, 0x20, 0x0, 0x0, 0x8, 0x8, 0x20),
+            new(".sdata"u8, SHT_PROGBITS, SHF_WRITE + SHF_ALLOC, 0x12010, 0x1010, 0x8, 0x0, 0x0, 0x8, 0x0, 0x8),
+            new(".bss"u8, SHT_NOBITS, SHF_WRITE + SHF_ALLOC, 0x12018, 0x1018, 0x8, 0x0, 0x0, 0x1, 0x0, 0x8),
+            new(".comment"u8, SHT_PROGBITS, SHF_MERGE + SHF_STRINGS, 0x0, 0x1018, 0x26, 0x0, 0x0, 0x1, 0x1, 0x26),
+            new(".riscv.attributes"u8, SHT_RISCV_ATTRIBUTES, 0x0, 0x0, 0x103e, 0x66, 0x0, 0x0, 0x1, 0x0, 0x66),
+            new(".shstrtab"u8, SHT_STRTAB, 0x0, 0x0, 0x10a4, 0xff, 0x0, 0x0, 0x1, 0x0, 0xff)
+        }.slice(),
+        new global::go.debug.elf_package.ProgHeader[]{
+            new(PT_PHDR, PF_R, 0x40, 0x10040, 0x10040, 0x230, 0x230, 0x8),
+            new(PT_INTERP, PF_R, 0x270, 0x10270, 0x10270, 0x21, 0x21, 0x1),
+            new(PT_RISCV_ATTRIBUTES, PF_R, 0x103e, 0x0, 0x0, 0x66, 0x0, 0x1),
+            new(PT_LOAD, PF_X + PF_R, 0x0, 0x10000, 0x10000, 0x5e4, 0x5e4, 0x1000),
+            new(PT_LOAD, PF_W + PF_R, 0xe00, 0x11e00, 0x11e00, 0x218, 0x220, 0x1000),
+            new(PT_DYNAMIC, PF_W + PF_R, 0xe18, 0x11e18, 0x11e18, 0x1d0, 0x1d0, 0x8),
+            new(PT_NOTE, PF_R, 0x294, 0x10294, 0x10294, 0x44, 0x44, 0x4),
+            new(PT_GNU_EH_FRAME, PF_R, 0x550, 0x10550, 0x10550, 0x24, 0x24, 0x4),
+            new(PT_GNU_STACK, PF_W + PF_R, 0x0, 0x0, 0x0, 0x0, 0x0, 0x10),
+            new(PT_GNU_RELRO, PF_R, 0xe00, 0x11e00, 0x11e00, 0x200, 0x200, 0x1)
+        }.slice(),
+        new @string[]{"libc.so.6"u8}.slice(),
+        default!
     )
 }.slice());
 internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
@@ -457,7 +503,7 @@ internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
 public static void TestOpen(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (i, _) in fileTests) {
+        foreach (var i in range(fileTests)) {
             var tt = Ꮡ(fileTests, i);
 
             ж<global::go.debug.elf_package.File> f = default!;
@@ -1008,15 +1054,40 @@ internal static slice<relocationTest> relocationTests = new relocationTest[]{
                 }.slice(), 2)
             )
         }.slice()
+    ),
+    new(
+        "testdata/go-relocation-test-gcc133-ppc.obj"u8,
+        new relocationTestEntry[]{
+            new(
+                entry: Ꮡ(new dwarf.Entry(
+                    Offset: 0xc,
+                    Tag: dwarf.TagCompileUnit,
+                    Children: true,
+                    Field: new dwarf.Field[]{
+                        new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C17 13.3.0 -msecure-plt -g2 -fstack-protector-strong"u8, Class: dwarf.ClassString),
+                        new(Attr: dwarf.AttrLanguage, Val: (int64)29, Class: dwarf.ClassConstant),
+                        new(Attr: dwarf.AttrName, Val: (@string)"hello.c"u8, Class: dwarf.ClassString),
+                        new(Attr: dwarf.AttrCompDir, Val: (@string)"/home/exedev"u8, Class: dwarf.ClassString),
+                        new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
+                        new(Attr: dwarf.AttrHighpc, Val: (int64)68, Class: dwarf.ClassConstant),
+                        new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
+                    }.slice()
+                )),
+                pcRanges: GoReflect.WithElemDims(new array<uint64>[]{
+                    new uint64[]{0, 0x44}.array()
+                }.slice(), 2)
+            )
+        }.slice()
     )
 }.slice();
 
 public static void TestDWARFRelocations(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in relocationTests) {
-        ref var testΔ1 = ref heap<relocationTest>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.@file, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in relocationTests) {
+        ref var test = ref heap(new relocationTest(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.@file, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var (f, err) = Open(testʗ1.@file);
             if (err != default!) {
@@ -1085,7 +1156,7 @@ public static void TestCompressedDWARF(ж<testing.T> Ꮡt) {
         n++;
     }
     if (n != 18) {
-        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)(18), n);
+        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)18, n);
     }
 }
 
@@ -1326,6 +1397,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
         //   [65295] .symtab_shndx     SYMTAB SECTION  00000000 13ed1c 03fc28 04     65294   0  4
         //   [65296] .strtab           STRTAB          00000000 17e944 08f74d 00      0   0  1
         //   [65297] .shstrtab         STRTAB          00000000 20e091 0cf3bb 00      0   0  1
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
         {
@@ -1351,7 +1423,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
             // last 48 bytes.
             buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x03FC28 - 12 * 4));
             for (nint i = 0; i < 12; i++) {
-                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)((nint)(0xFF00 | i)));
+                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)(0xFF00 | i));
             }
 
             // Write section [65296].
@@ -1628,7 +1700,7 @@ public static void BenchmarkSymbols64(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 73) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(73));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)73);
             }
         }
     }
@@ -1658,7 +1730,7 @@ public static void BenchmarkSymbols32(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 74) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(74));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)74);
             }
         }
     }

@@ -2,88 +2,16 @@
   "schemaVersion": 1,
   "disclosures": [
     {
-      "name": "TestPanic/root_test_panics",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_cleanup",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_outer_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_middle_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_inner_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_cleanup",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_outer_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_middle_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_inner_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestTBHelper",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and requires the child's output to match a regex naming Go's own SOURCE POSITIONS (`helperfuncs_test.go:15: 0`) inside Go's `--- FAIL:` layout. The host reports its own positions and its own layout, and t.Helper's whole purpose - attributing a log line to the CALLER - is asserted here through that text. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestTBHelperParallel",
-      "class": "host-identity",
-      "signature": "parallelTestHelper gave 6 lines of output; want 7",
-      "reason": "counts the LINES of the re-exec'd child's output and requires exactly 7 in Go's verbose layout (one `--- FAIL`, five parallel log lines, a final `FAIL`). The host's reporter produces 6 lines of its own form. The pinned count is the captured signature: a different count is a different failure and must go red. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
       "name": "TestMorePanic",
       "class": "host-identity",
       "signature": "INFRASTRUCTURE-ERROR TestGoexitInCleanupAfterPanicHelper",
-      "reason": "re-execs the binary and matches the child's panic/Goexit report against Go's text. The host classifies a runtime.Goexit escaping a cleanup after a panic as an INFRASTRUCTURE-ERROR row in its own vocabulary, where Go prints its panic layout. Same channel, same ruling. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
+      "reason": "re-execs the binary and matches the child's panic/Goexit report against Go's text with an unanchored regexp. Neither case reaches Go's crash: the host CONTAINS a test-body or cleanup panic (a record, the one test failed, the run continues) where Go's tRunner reaches doPanic, the runtime prints the panic chain and the binary exits 2. Case 2 (Issue 48515, t.Run during t.Cleanup) PASSES, but only on a SUBSTRING: the host refuses with Go's \"testing: t.Run called during t.Cleanup\", and the regexp finds \"panic: testing: t.Run called during t.Cleanup\" inside the host's own \"cleanup panic: ...\" record, where Go prints \"panic: testing: t.Run called during t.Cleanup [recovered, repanicked]\" and crashes. Case 1 (Issue 48502, runtime.Goexit in t.Cleanup after a panic) FAILS: the host reports the cleanup's Goexit as an INFRASTRUCTURE-ERROR row with CLR stack traces, where Go prints \"panic: die\" over a TAB-indented \"panic: test executed panic(nil) or runtime.Goexit\". Both retire with claude/r-go-exact-test-panic (Go's doPanic plus the crash-report chain, with a pipeline re-launch so the tail stays measured), ruled by COORD 2026-10-20."
     },
     {
       "name": "TestAllocsPerRun",
       "class": "structural",
       "signature": "go2cs: testing.AllocsPerRun counted",
-      "reason": "exact-count AllocsPerRun asserts (want 1 for each of five `new(T)` closures). The managed shim is deliberately byte-derived - the CLR has no malloc counter - so it reports go2cs-runtime object allocations and returns 2 where Go returns 1. [SUPERSEDED 2026-09-23: the host reports a COUNT from golib's counter; see the RELABEL paragraph.]. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> STRUCTURAL, on a RE-GROUNDED proof (not the edwards/nistec analogy, which X(3) reverses). WANT: 1 per new(T) leg. READING: the four unmanaged legs print 2 (`AllocsPerRun(100, alloc complex128) = 2, want 1`), COUNT by construction (each run mints a counted box, so testing.cs:750 takes the COUNT arm); the new(*byte) leg's first-call note reads 1 per run -- 100 go2cs-runtime object allocations (5,600 bytes) over 100 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 126 (claude/coord-h10-readings ac9f8251ee) -- and passes. PROOF, with the object Go never allocates named: in Go too, `global = new(T)` escapes into `any` and costs one malloc (allocs_test.go:9-20). For an unmanaged T the managed pointer needs ADDRESS-STABLE storage, because through the interface it is reachable by reflect and unsafe as an integer address. Go's non-moving heap gives that for free; the CLR's compacting GC does not. So ж<T> over an unmanaged T allocates an eager pinnable T[1] slot beside the box (golib/ж.StandardBox.cs:61-67; AllocationCounter.cs:39-42): THE SLOT IS THE OBJECT GO NEVER ALLOCATES. The two nameable alternatives fail. (a) A pointer that IS the pinned array -- the box pinning itself -- roots itself through the strong pinned handle and can never die, a structural leak; and a lazily created slot breaks heap()'s ref alias, because storage handed out by ref must never migrate (DESIGN-zh-box-reduction.md:444-452). (b) Whole-program X3 analysis selecting a slot-free box kind is refused because the pointer flows into `any`, where every later use is outside the analysis. The new(*byte) leg is the control: a managed element type needs no slot and reads 1. No plan and no floor field; the signature is unchanged (the count-free convention, ledger 2026-09-22 04:57). Re-banked after the batch-8c STAMP, since testing diverges before it. The 8c STAMP (1719e3b87f, ledger 49cb270339) confirmed the testing row at 53 matched + 15 disclosed at the 8c tree."
+      "reason": "exact-count AllocsPerRun asserts (want 1 for each of five `new(T)` closures). The managed shim is deliberately byte-derived - the CLR has no malloc counter - so it reports go2cs-runtime object allocations and returns 2 where Go returns 1. [SUPERSEDED 2026-09-23: the host reports a COUNT from golib's counter; see the RELABEL paragraph.]. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> STRUCTURAL, on a RE-GROUNDED proof (not the edwards/nistec analogy, which X(3) reverses). WANT: 1 per new(T) leg. READING: the four unmanaged legs print 2 (`AllocsPerRun(100, alloc complex128) = 2, want 1`), COUNT by construction (each run mints a counted box, so testing.cs:750 takes the COUNT arm); the new(*byte) leg's first-call note reads 1 per run -- 100 go2cs-runtime object allocations (5,600 bytes) over 100 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 126 (claude/coord-h10-readings ac9f8251ee) -- and passes. PROOF, with the object Go never allocates named: in Go too, `global = new(T)` escapes into `any` and costs one malloc (allocs_test.go:9-20). For an unmanaged T the managed pointer needs ADDRESS-STABLE storage, because through the interface it is reachable by reflect and unsafe as an integer address. Go's non-moving heap gives that for free; the CLR's compacting GC does not. So ж<T> over an unmanaged T allocates an eager pinnable T[1] slot beside the box (golib/ж.StandardBox.cs:61-67; AllocationCounter.cs:39-42): THE SLOT IS THE OBJECT GO NEVER ALLOCATES. The two nameable alternatives fail. (a) A pointer that IS the pinned array -- the box pinning itself -- roots itself through the strong pinned handle and can never die, a structural leak; and a lazily created slot breaks heap()'s ref alias, because storage handed out by ref must never migrate (DESIGN-zh-box-reduction.md:444-452). (b) Whole-program X3 analysis selecting a slot-free box kind is refused because the pointer flows into `any`, where every later use is outside the analysis. The new(*byte) leg is the control: a managed element type needs no slot and reads 1. No plan and no floor field; the signature is unchanged (the count-free convention, ledger 2026-09-22 04:57). Re-banked after the batch-8c STAMP, since testing diverges before it. The 8c STAMP (1719e3b87f, ledger 49cb270339) confirmed the testing row at 53 matched + 15 disclosed at the 8c tree. READ AT go1.26.10 (2026-10-25, G): 1 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 100 go2cs-runtime object allocations (5,600 bytes) over 100 runs, alloc-units-windows.tsv line 186 (claude/g-pass2-plan 966562828d); linux: 100 go2cs-runtime object allocations (5,600 bytes) over 100 runs, alloc-units-linux.tsv line 173 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND."
     }
   ]
 }

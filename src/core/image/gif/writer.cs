@@ -13,10 +13,12 @@ using palette = go.image.color.palette_package;
 using draw = go.image.draw_package;
 using byteorder = go.@internal.byteorder_package;
 using io = io_package;
+using bits = math.bits_package;
 using compress;
 using go.@internal;
 using go.image;
 using go.image.color;
+using math;
 
 partial class gif_package {
 
@@ -24,15 +26,11 @@ partial class gif_package {
 internal static UntypedInt gcLabel => 0xF9;
 internal static UntypedInt gcBlockSize => 0x04;
 
-internal static array<nint> log2Lookup = new nint[]{2, 4, 8, 16, 32, 64, 128, 256}.array();
-
 internal static nint log2(nint x) {
-    foreach (var (i, v) in log2Lookup.ΔRangeSnapshot()) {
-        if (x <= v) {
-            return i;
-        }
+    if (x < 2) {
+        return 0;
     }
-    return -1;
+    return bits.Len((nuint)(x - 1)) - 1;
 }
 
 // writer is a buffered writer.
@@ -206,7 +204,7 @@ internal static readonly @string gifCannotEncodeColorˢ = "gif: cannot encode co
 internal static readonly @string gifCannotEncodeColorˢ2 = "gif: cannot encode color table with nil entries"u8;
 
 internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette p, nint size) {
-    if ((nuint)size >= (nuint)len(log2Lookup)) {
+    if ((nuint)size >= 8) {
         return (0, errors.New(gifCannotEncodeColorˢ));
     }
     foreach (var (i, c) in p) {
@@ -223,14 +221,14 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
                 (r, g, b) = (rgba.R, rgba.G, rgba.B);
             } else {
                 var (rr, gg, bb, _) = c.RGBA();
-                (r, g, b) = ((uint8)((rr >> (int)(8))), (uint8)((gg >> (int)(8))), (uint8)((bb >> (int)(8))));
+                (r, g, b) = ((uint8)(rr >> 8), (uint8)(gg >> 8), (uint8)(bb >> 8));
             }
         }
         dst[3 * i + 0] = r;
         dst[3 * i + 1] = g;
         dst[3 * i + 2] = b;
     }
-    nint n = log2Lookup[size];
+    nint n = ((nint)1).Lsh((int64)(size + 1));
     if (n > len(p)) {
         // Pad with black.
         clear(dst.slice(3 * len(p), 3 * n));
@@ -266,7 +264,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     }
 
     var b = pm.Bounds();
-    if (b.Min.X < 0 || b.Max.X >= (1 << (int)(16)) || b.Min.Y < 0 || b.Max.Y >= (1 << (int)(16))) {
+    if (b.Min.X < 0 || b.Max.X >= 1 << 16 || b.Min.Y < 0 || b.Max.Y >= 1 << 16) {
         e.err = errors.New(gifImageBlockIsTooLargeˢ);
         return;
     }
@@ -294,9 +292,9 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
         e.buf[1] = gcLabel; // Graphic Control Label.
         e.buf[2] = gcBlockSize; // Block Size.
         if (transparentIndex != -1){
-            e.buf[3] = (byte)(0x01 | (byte)(disposal << (int)(2)));
+            e.buf[3] = (byte)(0x01 | (byte)(disposal << 2));
         } else {
-            e.buf[3] = (byte)(0x00 | (byte)(disposal << (int)(2)));
+            e.buf[3] = (byte)(0x00 | (byte)(disposal << 2));
         }
         byteorder.LEPutUint16(e.buf[4..6], (uint16)delay); // Delay Time (1/100ths of a second)
 
@@ -458,7 +456,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
 
     // Check for bounds and size restrictions.
     var b = m.Bounds();
-    if (b.Dx() >= (1 << (int)(16)) || b.Dy() >= (1 << (int)(16))) {
+    if (b.Dx() >= 1 << 16 || b.Dy() >= 1 << 16) {
         return errors.New(gifImageIsTooLargeToˢ);
     }
 

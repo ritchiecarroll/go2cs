@@ -145,7 +145,7 @@ internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) 
     // separately as underflow, so fill that in manually and then iterate
     // over the rest.
     hist.Value.counts[0] = Ꮡh.of(timeHistogram.Ꮡunderflow).Load();
-    foreach (var (i, _) in h.counts) {
+    foreach (var i in range(h.counts)) {
         hist.Value.counts[i + 1] = Ꮡ(h.counts, i).Load();
     }
     hist.Value.counts[len((~hist).counts) - 1] = Ꮡh.of(timeHistogram.Ꮡoverflow).Load();
@@ -175,7 +175,7 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint j = 0; j < timeHistNumSubBuckets; j++) {
         // No bucket bit for the first few buckets. Just sub-bucket bits after the
         // min bucket bit.
-        var bucketNanos = ((uint64)j << (int)((timeHistMinBucketBits - 1 - timeHistSubBucketBits)));
+        var bucketNanos = (uint64)j << (int)(timeHistMinBucketBits - 1 - timeHistSubBucketBits);
         // Convert nanoseconds to seconds via a division.
         // These values will all be exactly representable by a float64.
         b[j + 1] = (float64)bucketNanos / 1e9D;
@@ -185,9 +185,9 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint i = timeHistMinBucketBits; i < timeHistMaxBucketBits; i++) {
         for (nint j = 0; j < timeHistNumSubBuckets; j++) {
             // Set the bucket bit.
-            var bucketNanos = ((uint64)1).Lsh((int64)((i - 1)));
+            var bucketNanos = ((uint64)1).Lsh((int64)(i - 1));
             // Set the sub-bucket bits.
-            bucketNanos |= (uint64)(((uint64)j).Lsh((int64)((i - 1 - (nint)timeHistSubBucketBits))));
+            bucketNanos |= (uint64)(((uint64)j).Lsh((int64)(i - 1 - (nint)timeHistSubBucketBits)));
             // The index for this bucket is going to be the (i+1)'th bucket
             // (note that we're starting from zero, but handled the first bucket
             // earlier, so we need to compensate), and the j'th sub bucket.
@@ -199,7 +199,7 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
         }
     }
     // Overflow bucket.
-    b[len(b) - 2] = (float64)(((uint64)1 << (int)((timeHistMaxBucketBits - 1)))) / 1e9D;
+    b[len(b) - 2] = (float64)((uint64)1 << (int)(timeHistMaxBucketBits - 1)) / 1e9D;
     b[len(b) - 1] = float64Inf();
     return b;
 }

@@ -49,6 +49,7 @@ partial struct largeScalar /*[4194305]byte*/;
 partial struct largePointer /*[524289]ж<smallPointer>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object triggersSegvWithGodebugˢ = (@string)"triggers SEGV with GODEBUG=clobberfree=1"u8;
 internal static readonly @string allocˢ = "Alloc"u8;
 internal static readonly @string structˢ = "struct{}"u8;
 internal static readonly @string structˢ2 = "[]struct{}"u8;
@@ -57,6 +58,11 @@ internal static readonly @string intCap0ˢ = "[]int (cap 0)"u8;
 public static void TestUserArena(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        if (runtime_internal_test_package.Clobberfree()) {
+            // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+            Ꮡt.Skip(triggersSegvWithGodebugˢ);
+        }
+
         // Set GOMAXPROCS to 2 so we don't run too many of these
         // tests in parallel.
         defer(GOMAXPROCS, GOMAXPROCS(2), ref ᒐ);
@@ -73,57 +79,57 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
             runSubTestUserArenaNew(tΔ1, spm, true);
 
             var mse = @new<mediumScalarEven>();
-            foreach (var (i, _) in mse.Value) {
+            foreach (var i in range(mse, 8192)) {
                 mse.Value[i] = 121;
             }
             runSubTestUserArenaNew(tΔ1, mse, true);
 
             var mso = @new<mediumScalarOdd>();
-            foreach (var (i, _) in mso.Value) {
+            foreach (var i in range(mso, 3321)) {
                 mso.Value[i] = 122;
             }
             runSubTestUserArenaNew(tΔ1, mso, true);
 
             var mpe = @new<mediumPointerEven>();
-            foreach (var (i, _) in mpe.Value) {
+            foreach (var i in range(mpe, 1024)) {
                 mpe.Value[i] = sp;
             }
             runSubTestUserArenaNew(tΔ1, mpe, true);
 
             var mpo = @new<mediumPointerOdd>();
-            foreach (var (i, _) in mpo.Value) {
+            foreach (var i in range(mpo, 1023)) {
                 mpo.Value[i] = sp;
             }
             runSubTestUserArenaNew(tΔ1, mpo, true);
 
             var ls = @new<largeScalar>();
-            foreach (var (i, _) in ls.Value) {
+            foreach (var i in range(ls, 4194305)) {
                 ls.Value[i] = 123;
             }
             // Not in parallel because we don't want to hold this large allocation live.
             runSubTestUserArenaNew(tΔ1, ls, false);
 
             var lp = @new<largePointer>();
-            foreach (var (i, _) in lp.Value) {
+            foreach (var i in range(lp, 524289)) {
                 lp.Value[i] = sp;
             }
             // Not in parallel because we don't want to hold this large allocation live.
             runSubTestUserArenaNew(tΔ1, lp, false);
 
             var sss = new slice<smallScalar>(25);
-            foreach (var (i, _) in sss) {
+            foreach (var i in range(sss)) {
                 sss[i] = new smallScalar(12);
             }
             runSubTestUserArenaSlice(tΔ1, sss, true);
 
             var mpos = GoReflect.WithElemDims(new slice<mediumPointerOdd>(5), 1023);
-            foreach (var (i, _) in mpos) {
+            foreach (var i in range(mpos)) {
                 mpos[i] = mpo.Value.Clone();
             }
             runSubTestUserArenaSlice(tΔ1, mpos, true);
 
             var sps = new slice<smallPointer>((nint)(runtime_internal_test_package.UserArenaChunkBytes / /* unsafe.Sizeof(smallPointer{}) */ (uintptr)8 + 1));
-            foreach (var (i, _) in sps) {
+            foreach (var i in range(sps)) {
                 sps[i] = sp.Value;
             }
             // Not in parallel because we don't want to hold this large allocation live.
@@ -133,7 +139,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
             tΔ1.Run(structˢ, (ж<testing.T> tΔ2) => {
                 var arena = runtime_internal_test_package.NewUserArena();
                 ref var x = ref heap<any>(out var Ꮡx);
-                x = ((ж<EmptyStruct>)nil);
+                x = (ж<EmptyStruct>)nil;
                 arena.New(Ꮡx);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
@@ -179,6 +185,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
 
 internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalue, bool parallel) {
     Ꮡt.Run(reflect.TypeOf(Ꮡvalue.OrTypedNil()).Elem().Name(), (ж<testing.T> tΔ1) => {
+        var arenaValuesᴷ = new stackAppend<ж<S>>();
         if (parallel) {
             tΔ1.Parallel();
         }
@@ -198,16 +205,16 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
         var arenaValues = new slice<ж<S>>(0, n);
         for (nint j = 0; j < n; j++) {
             ref var x = ref heap<any>(out var Ꮡx);
-            x = ((ж<S>)nil);
+            x = (ж<S>)nil;
             arena.New(Ꮡx);
             var s = x._<ж<S>>();
             s.ValueSlot = Ꮡvalue.ValueSlot;
-            arenaValues = append(arenaValues, s);
+            arenaValues = append(arenaValuesᴷ, arenaValues, s);
         }
         // Check integrity of allocated data.
         foreach (var (_, s) in arenaValues) {
             if (!AreEqual(s.ValueSlot, Ꮡvalue.ValueSlot)) {
-                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, s.ValueSlot, Ꮡvalue.ValueSlot);
+                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, (s.ValueSlot).OrTypedNilOf(), (Ꮡvalue.ValueSlot).OrTypedNilOf());
             }
         }
 
@@ -219,6 +226,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
 internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> value, bool parallel) {
     var valueʗ1 = value;
     Ꮡt.Run("[]"u8 + reflect.TypeOf(value).Elem().Name(), (ж<testing.T> tΔ1) => {
+        var arenaValuesᴷ = new stackAppend<slice<S>>();
         if (parallel) {
             tΔ1.Parallel();
         }
@@ -240,15 +248,15 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
             ref var sl = ref heap<slice<S>>(out var Ꮡsl);
             arena.Slice(Ꮡsl, cap(valueʗ1));
             copy(sl, valueʗ1);
-            arenaValues = append(arenaValues, sl);
+            arenaValues = append(arenaValuesᴷ, arenaValues, sl);
         }
         // Check integrity of allocated data.
         foreach (var (_, sl) in arenaValues) {
-            foreach (var (i, _) in sl) {
+            foreach (var i in range(sl)) {
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
-                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, got, want, i);
+                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, (got).OrTypedNilOf(), (want).OrTypedNilOf(), i);
                 }
             }
         }
@@ -263,6 +271,11 @@ internal static readonly @string freeˢ = "Free"u8;
 internal static readonly @string finalizerˢ = "Finalizer"u8;
 
 public static void TestUserArenaLiveness(ж<testing.T> Ꮡt) {
+    if (runtime_internal_test_package.Clobberfree()) {
+        // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+    }
+
     Ꮡt.Run(freeˢ, (ж<testing.T> tΔ1) => {
         testUserArenaLiveness(tΔ1, false);
     });
@@ -298,7 +311,7 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
         }
 
         ref var x = ref heap<any>(out var Ꮡx);
-        x = ((ж<smallPointerMix>)nil);
+        x = (ж<smallPointerMix>)nil;
         arena.New(Ꮡx);
         var v = x._<ж<smallPointerMix>>();
 
@@ -368,9 +381,15 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
 internal static readonly object heapAllocationKeptAliveˢ = (@string)"heap allocation kept alive through non-pointer reference"u8;
 
 public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
+    if (runtime_internal_test_package.Clobberfree()) {
+        // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+    }
+
     // This is a regression test for a serious issue wherein if pointer bits
     // aren't properly cleared, it's possible to allocate scalar data down
     // into a previously pointer-ful area, causing misinterpretation by the GC.
+
     // Create a large object, grab a pointer into it, and free it.
     var x = Ꮡ(new array<byte>(8388608));
     var xp = (uintptr)x.at<byte>(124);
@@ -385,7 +404,7 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
     var a = runtime_internal_test_package.NewUserArena();
     for (nint i = 0; i < (nint)((uintptr)(runtime_internal_test_package.UserArenaChunkBytes / (uintptr)goarch.PtrSize) * 3); i++) {
         ref var xΔ1 = ref heap<any>(out var ᏑxΔ1);
-        xΔ1 = ((ж<smallPointer>)nil);
+        xΔ1 = (ж<smallPointer>)nil;
         a.New(ᏑxΔ1);
     }
     a.Free();
@@ -397,7 +416,7 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
     a = runtime_internal_test_package.NewUserArena();
     for (nint i = 0; i < (nint)((uintptr)(runtime_internal_test_package.UserArenaChunkBytes / (uintptr)goarch.PtrSize) * 2); i++) {
         ref var xΔ2 = ref heap<any>(out var ᏑxΔ2);
-        xΔ2 = ((ж<smallScalar>)nil);
+        xΔ2 = (ж<smallScalar>)nil;
         a.New(ᏑxΔ2);
         var v = xΔ2._<ж<smallScalar>>();
         // Write a pointer that should not keep x alive.
@@ -494,7 +513,7 @@ public static void TestUserArenaClonePointer(ж<testing.T> Ꮡt) {
 
     // Clone should make a copy of an arena-allocated smallScalar.
     ref var i = ref heap<any>(out var Ꮡi);
-    i = ((ж<smallScalar>)nil);
+    i = (ж<smallScalar>)nil;
     a.New(Ꮡi);
     var xArena = i._<ж<smallScalar>>();
     var xArenaCopy = runtime_internal_test_package.UserArenaClone(xArena);
@@ -530,7 +549,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     if (len(b) != len(bCopy)){
         Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(b), len(bCopy));
     } else {
-        foreach (var (i, _) in b) {
+        foreach (var i in range(b)) {
             if (b[i] != bCopy[i]) {
                 Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, b[i], bCopy[i]);
             }
@@ -546,7 +565,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     if (len(bSub) != len(bSubCopy)){
         Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(bSub), len(bSubCopy));
     } else {
-        foreach (var (i, _) in bSub) {
+        foreach (var i in range(bSub)) {
             if (bSub[i] != bSubCopy[i]) {
                 Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, bSub[i], bSubCopy[i]);
             }

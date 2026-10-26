@@ -5,7 +5,8 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using math = @internal.runtime.math_package;
+using goexperiment = @internal.goexperiment_package;
+using Δmath = @internal.runtime.math_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -49,7 +50,7 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
     uintptr copymem = default!;
     if ((uintptr)tolen > (uintptr)fromlen){
         bool overflow = default!;
-        (tomem, overflow) = math.MulUintptr(et.Size_, (uintptr)tolen);
+        (tomem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)tolen);
         if (overflow || tomem > maxAlloc || tolen < 0) {
             panicmakeslicelen();
         }
@@ -111,14 +112,14 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
 internal static @unsafe.Pointer makeslice(ж<_type> Ꮡet, nint len, nint cap) {
     ref var et = ref Ꮡet.DerefOrNull();
 
-    var (mem, overflow) = math.MulUintptr(et.Size_, (uintptr)cap);
+    var (mem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)cap);
     if (overflow || mem > maxAlloc || len < 0 || len > cap) {
         // NOTE: Produce a 'len out of range' error instead of a
         // 'cap out of range' error when someone does make([]T, bignumber).
         // 'cap out of range' is true too, but since the cap is only being
         // supplied implicitly, saying len is clearer.
         // See golang.org/issue/4085.
-        var (memΔ1, overflowΔ1) = math.MulUintptr(et.Size_, (uintptr)len);
+        var (memΔ1, overflowΔ1) = Δmath.MulUintptr(et.Size_, (uintptr)len);
         if (overflowΔ1 || memΔ1 > maxAlloc || len < 0) {
             panicmakeslicelen();
         }
@@ -261,7 +262,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     default: {
         lenmem = (uintptr)oldLen * et.Size_;
         newlenmem = (uintptr)newLen * et.Size_;
-        (capmem, overflow) = math.MulUintptr(et.Size_, (uintptr)newcap);
+        (capmem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)newcap);
         capmem = roundupsize(capmem, noscan);
         newcap = (nint)(capmem / et.Size_);
         capmem = (uintptr)newcap * et.Size_;
@@ -311,6 +312,46 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     return new Δsliceᴛ(Δp.Value, newLen, newcap);
 }
 
+// growsliceNoAlias is like growslice but only for the case where
+// we know that oldPtr is not aliased.
+//
+// In other words, the caller must know that there are no other references
+// to the backing memory of the slice being grown aside from the slice header
+// that will be updated with new backing memory when growsliceNoAlias
+// returns, and therefore oldPtr must be the only pointer to its referent
+// aside from the slice header updated by the returned slice.
+//
+// In addition, oldPtr must point to the start of the allocation and match
+// the pointer that was returned by mallocgc. In particular, oldPtr must not
+// be an interior pointer, such as after a reslice.
+//
+// See freegc for details.
+internal static Δsliceᴛ growsliceNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet) {
+    ref var et = ref Ꮡet.DerefOrNull();
+
+    var s = growslice(oldPtr, newLen, oldCap, num, Ꮡet);
+    if (goexperiment.RuntimeFreegc && oldPtr != nil && oldPtr != s.Δarray) {
+        {
+            var gp = getg(); if ((uintptr)oldPtr < (~gp).stack.lo || (~gp).stack.hi <= (uintptr)oldPtr) {
+                // oldPtr does not point into the current stack, and it is not
+                // the data pointer for s after the grow, so attempt to free it.
+                // (Note that freegc also verifies that oldPtr does not point into our stack,
+                // but checking here first is slightly cheaper for the case when
+                // oldPtr is on the stack and freegc would be a no-op.)
+                //
+                // TODO(thepudds): it may be that oldPtr==s.array only when elemsize==0,
+                // so perhaps we could prohibit growsliceNoAlias being called in that case
+                // and eliminate that check here, or alternatively, we could lean into
+                // freegc being a no-op for zero-sized allocations (that is, no check of
+                // oldPtr != s.array here and just let freegc return quickly).
+                var noscan = !et.Pointers();
+                freegc(oldPtr, (uintptr)oldCap * et.Size_, noscan);
+            }
+        }
+    }
+    return s;
+}
+
 // nextslicecap computes the next appropriate slice length.
 internal static nint nextslicecap(nint newLen, nint oldCap) {
     nint newcap = oldCap;
@@ -327,7 +368,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
         // Transition from growing 2x for small slices
         // to growing 1.25x for large slices. This formula
         // gives a smooth-ish transition between the two.
-        newcap += ((newcap + (nint)(3 * threshold)) >> (int)(2));
+        newcap += ((newcap + (nint)(3 * threshold)) >> 2);
 
         // We need to check `newcap >= newLen` and whether `newcap` overflowed.
         // newLen is guaranteed to be larger than zero, hence
@@ -425,7 +466,139 @@ internal static slice<byte> bytealg_MakeNoZero(nint len) {
         panicmakeslicelen();
     }
     var cap = roundupsize((uintptr)len, true);
-    return @unsafe.Slice((ж<byte>)(uintptr)(mallocgc((uintptr)cap, nil, false)), cap).slice(0, len);
+    return @unsafe.Slice((ж<byte>)(uintptr)(mallocgc(cap, nil, false)), cap).slice(0, len);
+}
+
+// moveSlice copies the input slice to the heap and returns it.
+// et is the element type of the slice.
+internal static (@unsafe.Pointer, nint, nint) moveSlice(ж<_type> Ꮡet, @unsafe.Pointer old, nint len, nint cap) {
+    ref var et = ref Ꮡet.DerefOrNull();
+
+    if (cap == 0) {
+        if (old != nil) {
+            old = @unsafe.Pointer.FromBox(Ꮡzerobase);
+        }
+        return (old, 0, 0);
+    }
+    var capmem = (uintptr)cap * et.Size_;
+    @unsafe.Pointer @new = (uintptr)mallocgc(capmem, Ꮡet, true);
+    bulkBarrierPreWriteSrcOnly((uintptr)@new, (uintptr)old, capmem, Ꮡet);
+    memmove(@new, old, capmem);
+    return (@new, len, cap);
+}
+
+// moveSliceNoScan is like moveSlice except the element type is known to
+// not have any pointers. We instead pass in the size of the element.
+internal static (@unsafe.Pointer, nint, nint) moveSliceNoScan(uintptr elemSize, @unsafe.Pointer old, nint len, nint cap) {
+    if (cap == 0) {
+        if (old != nil) {
+            old = @unsafe.Pointer.FromBox(Ꮡzerobase);
+        }
+        return (old, 0, 0);
+    }
+    var capmem = (uintptr)cap * elemSize;
+    @unsafe.Pointer @new = (uintptr)mallocgc(capmem, nil, false);
+    memmove(@new, old, capmem);
+    return (@new, len, cap);
+}
+
+// moveSliceNoCap is like moveSlice, but can pick any appropriate capacity
+// for the returned slice.
+// Elements between len and cap in the returned slice will be zeroed.
+internal static (@unsafe.Pointer, nint, nint) moveSliceNoCap(ж<_type> Ꮡet, @unsafe.Pointer old, nint len) {
+    ref var et = ref Ꮡet.DerefOrNull();
+
+    if (len == 0) {
+        if (old != nil) {
+            old = @unsafe.Pointer.FromBox(Ꮡzerobase);
+        }
+        return (old, 0, 0);
+    }
+    var lenmem = (uintptr)len * et.Size_;
+    var capmem = roundupsize(lenmem, false);
+    var cap = capmem / et.Size_;
+    @unsafe.Pointer @new = (uintptr)mallocgc(cap * et.Size_, Ꮡet, true);
+    bulkBarrierPreWriteSrcOnly((uintptr)@new, (uintptr)old, lenmem, Ꮡet);
+    memmove(@new, old, lenmem);
+    return (@new, len, (nint)cap);
+}
+
+// moveSliceNoCapNoScan is a combination of moveSliceNoScan and moveSliceNoCap.
+internal static (@unsafe.Pointer, nint, nint) moveSliceNoCapNoScan(uintptr elemSize, @unsafe.Pointer old, nint len) {
+    if (len == 0) {
+        if (old != nil) {
+            old = @unsafe.Pointer.FromBox(Ꮡzerobase);
+        }
+        return (old, 0, 0);
+    }
+    var lenmem = (uintptr)len * elemSize;
+    var capmem = roundupsize(lenmem, true);
+    @unsafe.Pointer @new = (uintptr)mallocgc(capmem, nil, false);
+    memmove(@new, old, lenmem);
+    if (capmem > lenmem) {
+        memclrNoHeapPointers((uintptr)add(@new, lenmem), capmem - lenmem);
+    }
+    return (@new, len, (nint)(capmem / elemSize));
+}
+
+// growsliceBuf is like growslice, but we can use the given buffer
+// as a backing store if we want. bufPtr must be on the stack.
+internal static Δsliceᴛ growsliceBuf(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
+    ref var et = ref Ꮡet.DerefOrNull();
+
+    if (newLen > bufLen) {
+        // Doesn't fit, process like a normal growslice.
+        return growslice(oldPtr, newLen, oldCap, num, Ꮡet);
+    }
+    nint oldLen = newLen - num;
+    if (oldPtr != bufPtr && oldLen != 0) {
+        // Move data to start of buffer.
+        // Note: bufPtr is on the stack, so no write barrier needed.
+        memmove(bufPtr, oldPtr, (uintptr)oldLen * et.Size_);
+    }
+    // Pick a new capacity.
+    //
+    // Unlike growslice, we don't need to double the size each time.
+    // The work done here is not proportional to the length of the slice.
+    // (Unless the memmove happens above, but that is rare, and in any
+    // case there are not many elements on this path.)
+    //
+    // Instead, we try to just bump up to the next size class.
+    // This will ensure that we don't waste any space when we eventually
+    // call moveSlice with the resulting slice.
+    nint newCap = (nint)(roundupsize((uintptr)newLen * et.Size_, !et.Pointers()) / et.Size_);
+
+    // Zero slice beyond newLen.
+    // The buffer is stack memory, so NoHeapPointers is ok.
+    // Caller will overwrite [oldLen:newLen], so we don't need to zero that portion.
+    // If et.Pointers(), buffer is at least initialized so we don't need to
+    // worry about the caller overwriting junk in [oldLen:newLen].
+    if (newLen < newCap) {
+        memclrNoHeapPointers((uintptr)add(bufPtr, (uintptr)newLen * et.Size_), (uintptr)(newCap - newLen) * et.Size_);
+    }
+
+    return new Δsliceᴛ(bufPtr.Value, newLen, newCap);
+}
+
+// growsliceBufNoAlias is a combination of growsliceBuf and growsliceNoAlias.
+// bufPtr must be on the stack.
+internal static Δsliceᴛ growsliceBufNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
+    ref var et = ref Ꮡet.DerefOrNull();
+
+    var s = growsliceBuf(oldPtr, newLen, oldCap, num, Ꮡet, bufPtr, bufLen);
+    if (goexperiment.RuntimeFreegc && oldPtr != bufPtr && oldPtr != nil && oldPtr != s.Δarray) {
+        // oldPtr is not bufPtr (the stack buffer) and it is not
+        // the data pointer for s after the grow, so attempt to free it.
+        // (Note that freegc does a broader check that oldPtr does not point into our stack,
+        // but checking here first is slightly cheaper for a common case when oldPtr is bufPtr
+        // and freegc would be a no-op.)
+        //
+        // TODO(thepudds): see related TODO in growsliceNoAlias about possibly eliminating
+        // the oldPtr != s.array check.
+        var noscan = !et.Pointers();
+        freegc(oldPtr, (uintptr)oldCap * et.Size_, noscan);
+    }
+    return s;
 }
 
 } // end runtime_package

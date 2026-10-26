@@ -226,8 +226,8 @@ partial struct Parser {
 
 // parseDoc is parsing state for a single doc comment.
 partial struct parseDoc {
-    public partial ref ж<Parser> Parser { get; }
-    public partial ref ж<Doc> Doc { get; }
+    /*embed*/ public ж<Parser> Parser;
+    /*embed*/ public ж<Doc> Doc;
     internal map<@string, ж<LinkDef>> links;
     internal slice<@string> lines;
     internal Func<@string, @string, bool> lookupSym;
@@ -333,14 +333,14 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
     foreach (var (_, b) in (~d).Content) {
         switch (b.type()) {
         case ж<Paragraph> bΔ1: {
-            bΔ1.Value.Text = d.parseLinkedText(((@string)((~bΔ1).Text[0]._<Plain>())));
+            bΔ1.Value.Text = d.parseLinkedText((@string)((~bΔ1).Text[0]._<Plain>()));
             break;
         }
         case ж<List> bΔ1: {
             foreach (var (_, i) in (~bΔ1).Items) {
                 foreach (var (_, c) in (~i).Content) {
                     var pΔ1 = c._<ж<Paragraph>>();
-                    pΔ1.Value.Text = d.parseLinkedText(((@string)((~pΔ1).Text[0]._<Plain>())));
+                    pΔ1.Value.Text = d.parseLinkedText((@string)((~pΔ1).Text[0]._<Plain>()));
                 }
             }
             break;
@@ -369,6 +369,8 @@ internal static spanKind spanOldHeading => 4;
 internal static spanKind spanPara => 5;
 
 internal static slice<span> parseSpans(slice<@string> lines) {
+    var spansᴷ = new stackAppend<span>(moves: true);
+
     slice<span> spans = default!;
 
     // The loop may process a line twice: once as unindented
@@ -502,12 +504,13 @@ Spans:
             }
         }
 
-        spans = append(spans, new span(start, end, kind));
+        spans = append(spansᴷ, spans, new span(start, end, kind));
         i = end;
 continue_Spans:;
     }
 break_Spans:;
 
+    spans = move2heap(spansᴷ, spans);
     return spans;
 }
 
@@ -655,14 +658,18 @@ internal static Block heading(this ref parseDoc d, @string line) {
 
 // code returns a code block built from the lines.
 internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
+    var bodyᴷ = new stackAppend<@string>();
+
     var body = unindent(lines);
-    body = append(body, ""u8); // to get final \n from Join
+    body = append(bodyᴷ, body, ""u8); // to get final \n from Join
     return Ꮡ(new Code(Text: strings.Join(body, "\n"u8)));
 }
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
 internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
+    var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
+
     // Is this a block of known links? Handle.
     slice<ж<LinkDef>> defs = default!;
     foreach (var (_, line) in lines) {
@@ -670,8 +677,9 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
         if (!ok) {
             goto NoDefs;
         }
-        defs = append(defs, def);
+        defs = append(defsᴷ, defs, def);
     }
+    defs = move2heap(defsᴷ, defs);
     foreach (var (_, def) in defs) {
         d.Links = append(d.Links, def);
         if (d.links[(~def).Text] == nil) {
@@ -716,6 +724,8 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
 internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
+    var textᴷ = new stackAppend<@string>();
+
     var (num, _, _) = listMarker(lines[0]);
     ж<List> list = Ꮡ(new List(ForceBlankBefore: forceBlankBefore));
     ref var item = ref heap<ж<ListItem>>(out var Ꮡitem);
@@ -751,7 +761,7 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
             flush();
             continue;
         }
-        text = append(text, strings.TrimSpace(line));
+        text = append(textᴷ, text, strings.TrimSpace(line));
     }
     flush();
     return list;
@@ -816,6 +826,7 @@ internal static bool isList(@string line) {
 // map[ast.Expr]TypeAndValue as containing a link.
 internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) {
     ref var d = ref Ꮡd.DerefOrNull();
+    var bufᴷ = new stackAppend<byte>();
 
     ref var @out = ref heap<slice<ΔText>>(out var Ꮡout);
     nint wrote = 0;
@@ -865,7 +876,7 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
             break;
         }}
         if (start >= 0 && i != start) {
-            buf = append(buf, c);
+            buf = append(bufᴷ, buf, c);
         }
     }
 
@@ -959,7 +970,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
     void flush(nint i) {
         writeUntilʗ1(i);
         if (Ꮡw.Value.Len() > 0) {
-            @out = append(@out, (ΔText)(((Plain)Ꮡw.Value.String())));
+            @out = append(@out, (ΔText)((Plain)Ꮡw.Value.String()));
             Ꮡw.Value.Reset();
         }
     }
@@ -991,7 +1002,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                     }
                     flush(i);
                     if (url == ""u8){
-                        @out = append(@out, (ΔText)(((Italic)id)));
+                        @out = append(@out, (ΔText)((Italic)id));
                     } else {
                         @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: new ΔText[]{((Italic)id)}.slice(), URL: url)))));
                     }
@@ -1039,6 +1050,8 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
 // The caller should skip over the first len(url) bytes of s
 // before further processing.
 internal static (@string url, bool ok) autoURL(@string s) {
+    var stkᴷ = new stackAppend<byte>();
+
     // Find the ://. Fast path to pick off non-URL,
     // since we call this at every position in the string.
     // The shortest possible URL is ftp://x, 7 bytes.
@@ -1110,7 +1123,7 @@ Path:
         }
         switch (s[i]) {
         case (rune)'(': {
-            stk = append(stk, (byte)((rune)')'));
+            stk = append(stkᴷ, stk, (byte)((rune)')'));
             break;
         }
         case (rune)'{': {
@@ -1172,7 +1185,7 @@ internal static bool isHost(byte c) {
 	1<<':' */
             maskᶜ;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL))) != 0;
 }
 
 // isPunct reports whether c is a punctuation byte that can appear
@@ -1190,7 +1203,7 @@ internal static bool isPunct(byte c) {
 	1<<'?' |
 	1<<'!' */ 10088151134830067712;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (/* mask >> 64 */ 0UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -1227,7 +1240,7 @@ internal static bool isPath(byte c) {
 	1<<'%' */
             maskᶜ1;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (8070450526610784255UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (8070450526610784255UL))) != 0;
 }
 
 // isName reports whether s is a capitalized Go identifier (like Name).
@@ -1284,7 +1297,7 @@ internal static bool isIdentASCII(byte c) {
 	1<<'_' */
             maskᶜ2;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460745995190270UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460745995190270UL))) != 0;
 }
 
 // validImportPath reports whether path is a valid import path.
@@ -1348,7 +1361,7 @@ internal static bool importPathOK(byte c) {
 	1<<'+' */
             maskᶜ3;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (5188146764422578174UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (5188146764422578174UL))) != 0;
 }
 
 } // end comment_package

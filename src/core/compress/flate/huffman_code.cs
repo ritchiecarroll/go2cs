@@ -99,7 +99,7 @@ internal static ж<huffmanEncoder> generateFixedLiteralEncoding() {
 internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
     var h = newHuffmanEncoder(30);
     var codes = h.Value.codes;
-    foreach (var (ch, _) in codes) {
+    foreach (var ch in range(codes)) {
         codes[ch] = new hcode(code: reverseBits((uint16)ch, 5), len: 5);
     }
     return h;
@@ -324,7 +324,7 @@ partial struct byLiteral /*[]literalNode*/;
 internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byLiteral)a);
+    s = (byLiteral)a;
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
@@ -345,7 +345,7 @@ partial struct byFreq /*[]literalNode*/;
 internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byFreq)a);
+    s = (byFreq)a;
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 

@@ -15,10 +15,12 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
@@ -37,6 +39,7 @@ using static go.reflect_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b4d28297d", "packIfaceValueIntoEmptyIface_type")]
 [assembly: GoDynamicTypeLift("7374727563747b6220626f6f6c3b207820616e797d", "dummyᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b206d2073796e632e4d61707d", "funcLookupCacheᴛ1")]
 [assembly: GoTypeAlias("Bool", "const:ΔBool")]
@@ -65,12 +68,17 @@ using static go.reflect_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
 [assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 [assembly: GoImplicitConv<flag, ΔKind>(Inverted = true, ValueType = "uintptr")]
 [assembly: GoImplicitConv<ΔKind, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 [assembly: GoImplicitConv<ΔKind, flag>(Inverted = true, ValueType = "nuint")]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -81,13 +89,13 @@ using static go.reflect_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("reflect/abi.go", "abi.cs", "AFS4AYKClIKClIKCgqyygoKClJSu9IKCAA4egriCpoKClAACEgAJBIKSgoIABxCClIKClAAElgEACQKClIKUgpSCgoKU3JQAAhLigpSClILclK7CgtwAIEiCgoKCgoKCgoKCgoKCgqaigoKClLgACBKmuJaSgoKCgpSmpoKCgpSCgoKCyriCuJbsgoKCgpSCgu6CrNKs0qzSlKSkvrKUpKQ=")]
-[assembly: go.GoPositionMap("reflect/badlinkname.go", "badlinkname.cs", "AAw6ABACAAIU9qampqampqampqampqampqampqampqampqampqam")]
+[assembly: go.GoPositionMap("reflect/badlinkname.go", "badlinkname.cs", "AAw6ABICAAIU9qampqampqampqampqampqampqampqampqampqam")]
 [assembly: go.GoPositionMap("reflect/float32reg_generic.go", "float32reg_generic.cs", "AAogwoKmgg==")]
 [assembly: go.GoPositionMap("reflect/iter.go", "iter.cs", "AAoWtoKUgqaClIIABRrygoKGppSkpKSkpKSkpKSktIKUgoKCguqCgoLagoKC2oKCgoLagoKCygACENKCgoampIKUgoKCguqCgoLagoKC2oKCgoLK", "14-28:1;40-45:1;41-43:1.1;74-81:2;83-89:3;91-97:4;99-106:5;108-114:6;126-131:1;127-129:1.1;138-145:2;147-153:3;155-161:4;163-170:5")]
-[assembly: go.GoPositionMap("reflect/makefunc.go", "makefunc.cs", "ABqcAQAPJPKCuIKCtpSmggANHJSmggACEAAPLAAOAqaCyg==")]
-[assembly: go.GoPositionMap("reflect/map_swiss.go", "map_swiss.cs", "AB/EAQAHEoKUgqYACRSUAAkUgqYAA1jSgoKmgqzSgoKmABv+A9I=", "", "", "59=TypeFor/1/1/3,ArrayOf/1/1/7")]
-[assembly: go.GoPositionMap("reflect/type.go", "type.cs", "ALkChgWCpoIADlCCpoKmgqaCpoKmggAVKoKClIKCgoKUpoKCpoIAFjSSqJKClKYAHUYACA4ACA4ACCAAEQiiqqKssqaipqKmoqaCAAQWgKSigpSCgpSmgKSApICkgoKClAAKsAGCAAQsggAEFoKmgoKClAAKPqKClIIAEHaigpSklKaigpSklKaigpSCgpSmooKUgoKUpqKUpKSUpqKClIKClIKClIKmopSkpJSmooKUgoKUgoKUggACKgASAvaClKSklKjCgpSCgoKCgoKmgoKokKbSgpSCgoKCpgARKpIADCTSggACEgAICJSCgpSCgu6CgpSClIKmgoKClJSClIKUgoKClKaosoKUgoKCgoKUgIKkuIKCgoKUAAgSlAACEOzigoKCgoKUlJQACBYADBKCAAEQAAwOlIKCgtyCgriUgoKUgoKUgoLKlJSUgoKCgoLcgpSCgoKUgpSCgpSCgoKmgqaq9IKCgoKClIK4gpSqoqiSAAYa8AAEEKKCgriAgsiCgoKClIKqwoKkgu6UlIKmgqiygpQABBqCgpSCpoKClKaCAAS4AQAICgACEAAJBILKgqaCuKaygqaCpgAJ+gEACQIAAiQADwKClIK4koKUgpQABxCCgoKUpgAjuAGigoKCgoKUgqYACRQAB8ABgqiygoKCgpSCgpSmgoKCkoKUgoKUlIKUqsKUpKSCpIKCgqa2urKU2qSCpIKCgqa2urKUpIKkgoKCpqS8woKCgoKCgoIAEnSSAAIS4oKCpoK4qJKUgoKUpKSClKSCgpSkgoKCpqaqooKClAAEsgWCrLKCpqaCgriCyqzSlJSCgoKCpoKUgqYABe4BgoKUggASYAAMAoKUgpSCgIKCyKYACBKCpoKClJSmpsqCAAgUkriCpoIABFSSgoCCpA==", "1297-1297:1;2784-2786:1", "", "1459=TypeOf/1/2/3,TypeOf/2/2/7,ArrayOf/1/1/7;1737=IsExported/1/1/1,newName/1/1/1,common/1/1/2;1830=align/1/1/6")]
-[assembly: go.GoPositionMap("reflect/value.go", "value.cs", "AFGqAYKmgoKUrAAIDKyygpSClKiSgoKUlIKmgoKCgpTYxuyCAAw0goKUABjUAYKmAAMagpSCpqSClIKUgoKUAAQm0gACENIAEUSUgqqCgpKClKaCpoKCgoKClIKUgqaClIKUgqaCgqaCgIK2lIKCgoKCgIKklIKCgqaCgpSWtpaSgoK4ppSCgtyCuIC0pIKkpKSkuKKCuIKCgqaCgpSmtoKCuJSUlJTIgpSCpPyCppSCuIK4poKmgoKCgqa4uIKCgqaClIKAuILKyKaCgpSCAAsYgoKUgqSCpIKkpKa4AAcuABcC3JSClKaCgoKCgpSCgoCCyoKClJSmpoKCgpSCpIKkgqSk3IKClLa4goKCuIKCgoKWgpaCABAigoKCpsqCpqa2goLuyIKUgqQACRDcygACFAALAoKCgoKUgoKUgoKUgoKUgoKClIKClJKClK7CgpSCkoKUvKIACCwAFQKCAAkUgpK4gqaA2LaCpKSkyIKCpoKClAAMGoCClIKClKamgoK2tqSkpraAgoKCpqSkpKa2uJSCgoKUtoKkpKTKpoKmygAKFoKUgIKClNrKgqbK2LKCgoKUAAQagoKUpKSClJQABCSSlKQACdQBsoKUgoKCgoKUppSuwoKUgoKCgoKUppSssoKAgqSuwoCCpKiSlKQABSIAA2KSlKQABTKSgpQACsAB0gAEmgGigpSUgoKUgoKmgoKUlIKUgoKClJSCAAAQlJQABHaiAAQagoCkgqSktqSClKSqwqaCgpQABDjSgpSClAACENKClIKUgoKUAAQaooKUpJSqooKUpJSmgoKUqqKClIKClKqigpSCgpQACJIB0oKCAAQ8soKCABjqArKCggANlgKCgrgAAhDSgoKuwoKCAAQYkqaCgpSmgoKmgoLKgpSCgpSCpoKClIKokpSkACiCAoKCAAYW8gAEIJKClLS0ggAXoAIALawC9gAMhgGygpQADogB8oKmuIKCpriUgoKUgpSUuAAEJqKCgriUgsaCgrauwoKUppSCgqaUpqaCgqamAAMYAAgCgpSCpoKmgsqYpKSkpKSkxoKUgpSUgoKmxoKCgqa0AANRAAFWqtKUlKSkuJSkpLiUpKS4lLiClKTKgpSkyoK4griCyoK4hqaCgpSmqqKCgpSkpKSUqqKCgpSklKiSgoKCqqKCgpSklKaCgoKCpoKCgoKmgoKCggACEuKokqiSqJKokqiSqJK4lKiSqJKCgIKkqJKCgIKkqJKokqiSqJKokoKClIKokoKClIKCgoKClKiSgoKClIKCgpSokoKCgpSUqJKCgoKUrMamAAIUAAkGpIKCppKWpqYAAhgACgKCgqikooKCqKampAABOAAbBJrKyszc3NaklqaqsoIACRrCgg==", "", "", "961=add/1/2/1,add/2/2/2;2105=Kind/2/2/1,nameFor/2/2/1,elem/1/2/2,elem/2/2/2,haveIdenticalUnderlyingType/1/1/2")]
+[assembly: go.GoPositionMap("reflect/makefunc.go", "makefunc.cs", "ABueAQAPJPKCuIKCtpSmggANHJSmggACEAASLAALAu6Cgso=")]
+[assembly: go.GoPositionMap("reflect/map.go", "map.cs", "ABS2AQAIEoKUgqYACRSUAAkUgqYAA1jSgoKmgqzSgoKmABv2A9I=", "", "", "49=TypeFor/1/1/3,ArrayOf/1/1/7")]
+[assembly: go.GoPositionMap("reflect/type.go", "type.cs", "ANUCxgWCpoIADlCCpoKmgqaCpoKmggAVKoKClIKCgoKUpoKCpoIAFjSSqJKClKYAHUYACA4ACA4ACCAAEQiiqqKssqaipqKmoqaCAAQWgKSigpSCgpSmgKSApICkgoKClAAKsAGCAAQsggAEFoKmgoKClAAKPqKClIIAEHaigpSklKaigpSklKaigpSCgpSmooKUgoKUpqKUpKSUpqKClIKClIKClIKmopSkpJSmooKUgoKUgoKUgqaigpSCgoLcgoKCgtyigpSCgoLcooKUgoKCAAUwABIC9oKUpKSUqMKClIKCgoKCgqaCgqiQptKClIKCgoKmABEqkgAMJNKCAAISAAkIlIKClIKC7oKClIKUgqaCgoKUlIKUgpSCgoKUpqiygpSCgoKCgpSAgqS4goKCgpQACBKUAAIQ7OKCgoKCgpSUlAAIFgAOEoIAARAADA6UgoKC3IKCuJSCgpSCgpSCgsqUlJSCgoKCgtyClIKCgpSClIKClIKCgqaCpqr0goKCgoKUgriClKqiAAQUkgAGHgAJAAAEEKKCgriAgsiCgoKClIKqwoKkgu6UlIKmgqiygpQABBqCgpSCpoKClKaCAAS4AQAICgACEAAJBILKgqaCuKaygqaCpgAJ+gEACQIAAiQAEQKClIK4koKUgpQABxCCgoKUpgAkuAGigoKCgoKUgqYACRQAB8ABgqjCgoKCgpSCgpSmgoKCkoKUgoKUlIKUqsKUpKSCpIKCgqa2urKU2qSCpIKCgqa2urKUpIKkgoKCpqS8woKCgoKCgoIAEnSSAAIS4oKCpoK4qJKUgoKUpKSClKSCgpSkgoKCpqaqooKClAAEsAWCrLKCpqaCgriCyqzSlJSCgoKCpoKUgqYABewBgoKUggASYAAMAoKUgpSCgIKCyKYACBKCpoKClJSmpsqCAAgUkriCpoI=", "964-970:1;974-980:1;987-993:1;1000-1006:1;1378-1378:1;2871-2873:1", "", "1552=TypeOf/1/2/3,TypeOf/2/2/7,ArrayOf/1/1/7;1831=IsExported/1/1/1,newName/1/1/1,common/1/1/2;1924=align/1/1/6")]
+[assembly: go.GoPositionMap("reflect/value.go", "value.cs", "AFOsAYKmgoKUrAAIDKyygpSClKiSAAUQooKUgqaCgoKClMi2AA00goKUABjUAYKmAAMagpSCpqSClIKUgoKUAAQm0gACENIAEUiUgqqCgpKClKaCpoKCgoKClIKUgqaClIKUgqaCgqaCgIK2lIKCgoKCgIKklIKCgqaCgpSWtpaSgoK4ppSCgtyCuIC0pIKkpKSkuKKCuIKCgqaCgpSmtoKCuJSUlJTIgpSCpPyCppSCuIK4poKmgoKCgqa4uIKCgqaClIKAuILKyKaCgpSCAAsYgoKUgqSCpIKkpKa4AAcuABcC3JSClKaCgoKCgpSCgoCCyoKClJSmpoKCgpSCpIKkgqSk3IKClLa4goKCuIKCgoKWgpaCABAigoKCpsqCpqa2goLuyIKUgqQACRDcygACFAALAoKCgoKUgoKUgoKUgoKUgoKClIKClJKClK7CgpSCkoKUvKIACCwAFQKCAAkUgpK4gqaA2LaCpKSkyIKCpoKClAAMGoCClIKClKamgoK2tqSkpraAgoKCpqSkpKa2uJSCgoKUtoKkpKTKpoKmygAKFoKUgIKClNrKgqbK2LKCgoKUAAQagoKUpKSClJQABCSSlKQACdwBsoKUgoKCgoKUppSuwoKUgoKCgoKUppSssoKAgqSuwoCCpKiSlKQABSIAA2KSlKQABTKSgpQADOQB1oKUAAZ00gAEpgGigpSUgoKUgoKmgoKUlIKUgoKClJSCAAAQlJQABHaiAAQagoCkgqSktqSClKSqwqaCgpQABD7SgpSClAACGAAJAoKUgpSCgpQABBqigpSklKqigpSklKaCgpSqooKUgoKUqqKClIKClAAIkgHSgoIABDyygoIAGOoCsoKCAA2WAoKCuAACENKCgq7CgoIABBiSpoKClKaCgqaCgsqClIKClIKmgoKUgqiSlKQADdgB4oKClKKCggAFIgALApKCgoIAIEKCggAGFvIABCCSgpS0tIIAF6ACAC2sAvYADIYBsoKUAA6IAfKCpriCgqa4lIKClIKUlLgABCaigoK4lILGgoK2rsKClKaUgoKmlKamgoKmpgADGAAIAoKUgqaCpoLKmKSkpKSkpMaClIKUlIKCpsaCgoKmtAADUQABVqrSlJSkpLiUpKS4lKSkuJS4gpSkyoKUpMqCuIK4gsqCuIamgoKUpqqigoKUpKSklKqigoKUpJSokoKCgqqigoKUpJSmgoKCgqaCgoKCpoKCgoIAAhLiqJKokqiSqJKokqiSuJSokqiSgoCCpKiSgoCCpKiSqJKokqiSqJKCgpSCqJKCgpSCgoKCgpSokoKCgpSCgoKUqJKCgoKUlKiSgoKClKzGpgACFAAJBqSCgqaSlqamAAIYAAoCgoKopKKCgqimpqQAATgAGwSaysrM3NzWpJamqrKCAAkawoI=", "2649-2655:1;2670-2677:1", "", "122=typ/1/1/1,packEfaceData/1/1/2;960=add/1/2/1,add/2/2/2;2171=Kind/2/2/1,nameFor/2/2/1,elem/1/2/2,elem/2/2/2,haveIdenticalUnderlyingType/1/1/2")]
 [assembly: go.GoPositionMap("reflect/visiblefields.go", "visiblefields.cs", "AAcgAAkCgpSClNy4goKCgpSmlJQACR7SgpSCgoKCgoCCgsqCkpSmtqaCgpSCgpSCppQ=", "", "", "24=NumField/1/1/3")]
 // </GoSourcePositionMaps>
 
@@ -103,6 +111,7 @@ public static partial class reflect_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface packIfaceValueIntoEmptyIface_type {}
     [GoValueClone("inRegPtrs", "outRegPtrs")] internal partial struct abiDesc {}
     internal partial struct abiSeq {}
     internal partial struct abiStep {}
@@ -157,6 +166,7 @@ public static partial class reflect_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸmaps() => builtin.initPackage(typeof(@internal.runtime.maps_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsys() => builtin.initPackage(typeof(@internal.runtime.sys_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));

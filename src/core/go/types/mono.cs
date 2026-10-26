@@ -7,8 +7,8 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -86,6 +86,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
     // iterations, we run until we either reach a fixed point or we've
     // found a path of length |V|. This allows us to terminate earlier
     // when there are no cycles, which should be the common case.
+
     var again = true;
     while (again) {
         again = false;
@@ -116,6 +117,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
 
 internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var stackᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
 
     slice<nint> stack = default!;
     var seen = new slice<bool>(len(check.mono.vertices));
@@ -125,7 +127,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     // start by walking backwards along the path until we find a vertex
     // that appears twice.
     while (!seen[v]) {
-        stack = append(stack, v);
+        stack = append(stackᴷ, stack, v);
         seen[v] = true;
         v = check.mono.edges[check.mono.vertices[v].pre].src;
     }
@@ -144,6 +146,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     err.addf(new TypeNameжpositioner(obj0), "instantiation cycle:"u8);
 
     var qf = RelativeTo(check.pkg);
+    stack = move2heap(stackᴷ, stack);
     foreach (var (_, vΔ1) in stack) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;
@@ -154,11 +157,11 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
             break;
         }
         case ж<Named>: {
-            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }
         case ж<TypeParam>: {
-            err.addf(((atPos)edge.pos), "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }}
     }
@@ -217,10 +220,10 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
     ref var @do = ref heap<Action<ΔType>>(out var Ꮡdo);
     var flowʗ1 = flow;
     @do = (ΔType typ) => {
-        var switchᴛ10 = Unalias(typ);
-        switch (switchᴛ10.type()) {
+        var switchᴛ9 = Unalias(typ);
+        switch (switchᴛ9.type()) {
         default: {
-            var typΔ1 = switchᴛ10;
+            var typΔ1 = switchᴛ9;
             throw panic("unexpected type");
             break;
         }
@@ -378,6 +381,7 @@ internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weig
         dst: dst,
         src: src,
         weight: weight,
+
         pos: pos,
         typ: typ
     ));

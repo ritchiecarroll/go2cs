@@ -13,6 +13,7 @@ using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 
+[GoFieldAccess(typeof(abiꓸInterfaceType), typeof(abi.EmptyInterface), typeof(abi.NonEmptyInterface), typeof(abiꓸStructType))]
 partial class maps_package {
 
 // This package contains the implementation of Go's builtin map type.
@@ -23,7 +24,7 @@ partial class maps_package {
 //
 // Terminology:
 // - Slot: A storage location of a single key/element pair.
-// - Group: A group of abi.SwissMapGroupSlots (8) slots, plus a control word.
+// - Group: A group of abi.MapGroupSlots (8) slots, plus a control word.
 // - Control word: An 8-byte word which denotes whether each slot is empty,
 //   deleted, or used. If a slot is used, its control byte also contains the
 //   lower 7 bits of the hash (H2).
@@ -115,7 +116,7 @@ partial class maps_package {
 // Note that each table has its own load factor and grows independently. If the
 // 1st bucket grows, it will split. We'll need 2 bits to select tables, though
 // we'll have 3 tables total rather than 4. We support this by allowing
-// multiple indicies to point to the same table. This example:
+// multiple indices to point to the same table. This example:
 //
 //	directory (globalDepth=2)
 //	+----+
@@ -183,7 +184,7 @@ partial class maps_package {
 // Extracts the H1 portion of a hash: the 57 upper bits.
 // TODO(prattmic): what about 32-bit systems?
 internal static uintptr h1(uintptr h) {
-    return (h >> (int)(7));
+    return h >> 7;
 }
 
 // Extracts the H2 portion of a hash: the 7 bits not used for h1.
@@ -193,6 +194,7 @@ internal static uintptr h2(uintptr h) {
     return (uintptr)(h & 0x7f);
 }
 
+// Note: changes here must be reflected in cmd/compile/internal/reflectdata/map.go:MapType.
 partial struct ΔMap {
     // The number of filled slots (i.e. the number of elements in all
     // tables). Excludes deleted slots.
@@ -211,7 +213,7 @@ partial struct ΔMap {
     // details.
     //
     // Small map optimization: if the map always contained
-    // abi.SwissMapGroupSlots or fewer entries, it fits entirely in a
+    // abi.MapGroupSlots or fewer entries, it fits entirely in a
     // single group. In that case dirPtr points directly to a single group.
     //
     // dirPtr *group
@@ -231,13 +233,20 @@ partial struct ΔMap {
     // multiple concurrent writers, then toggling increases the probability
     // that both sides will detect the race.
     internal uint8 writing;
+    // tombstonePossible is false if we know that no table in this map
+    // contains a tombstone.
+    internal bool tombstonePossible;
     // clearSeq is a sequence counter of calls to Clear. It is used to
     // detect map clears during iteration.
     internal uint64 clearSeq;
 }
 
+// Use 64-bit hash on 64-bit systems, except on Wasm, where we use
+// 32-bit hash (see runtime/hash32.go).
+public const bool Use64BitHash = /* goarch.PtrSize == 8 && goarch.IsWasm == 0 */ true;
+
 internal static uint8 depthToShift(uint8 depth) {
-    if (goarch.PtrSize == 4) {
+    if (!Use64BitHash) {
         return (uint8)(32 - depth);
     }
     return (uint8)(64 - depth);
@@ -248,7 +257,7 @@ internal static uint8 depthToShift(uint8 depth) {
 // maxAlloc should be runtime.maxAlloc.
 //
 // TODO(prattmic): Put maxAlloc somewhere accessible.
-public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMap> Ꮡm, uintptr maxAlloc) {
+public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> Ꮡm, uintptr maxAlloc) {
     ref var mt = ref Ꮡmt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -258,7 +267,7 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
 
     m.seed = (uintptr)rand();
 
-    if (hint <= abi.SwissMapGroupSlots) {
+    if (hint <= abi.MapGroupSlots) {
         // A small map can fill all 8 slots, so no need to increase
         // target capacity.
         //
@@ -268,9 +277,11 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
         //
         // Thus we just return without allocating. (We'll save the
         // allocation completely if no assignment comes.)
+
         // Note that the compiler may have initialized m.dirPtr with a
         // pointer to a stack-allocated group, in which case we already
         // have a group. The control word is already initialized.
+
         return Ꮡm;
     }
 
@@ -278,7 +289,7 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
 
     // Set initial capacity to hold hint entries without growing in the
     // average case.
-    var targetCapacity = (hint * (uintptr)abi.SwissMapGroupSlots) / (uintptr)maxAvgGroupLoad;
+    var targetCapacity = (hint * (uintptr)abi.MapGroupSlots) / (uintptr)maxAvgGroupLoad;
     if (targetCapacity < hint) { // overflow
         return Ꮡm; // return an empty map.
     }
@@ -305,7 +316,7 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
 
     var directory = new slice<ж<table>>((nint)(dirSize));
 
-    foreach (var (i, _) in directory) {
+    foreach (var i in range(directory)) {
         // TODO: Think more about initial table capacity.
         directory[i] = newTable(Ꮡmt, (uint64)targetCapacity / dirSize, i, m.globalDepth);
     }
@@ -327,7 +338,7 @@ internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
-    return (hash >> (int)(((uint8)(m.globalShift & 63))));
+    return hash >> (int)((uint8)(m.globalShift & 63));
 }
 
 internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
@@ -363,7 +374,7 @@ internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<ta
             var t = m.directoryAt((uintptr)i);
             newDir[2 * i] = t;
             newDir[2 * i + 1] = t;
-            // t may already exist in multiple indicies. We should
+            // t may already exist in multiple indices. We should
             // only update t.index once. Since the index must
             // increase, seeing the original index means this must
             // be the first time we've encountered this table.
@@ -378,7 +389,7 @@ internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<ta
         m.dirLen = len(newDir);
     }
 
-    // N.B. left and right may still consume multiple indicies if the
+    // N.B. left and right may still consume multiple indices if the
     // directory has grown multiple times since old was last split.
     left.index = old.index;
     m.replaceTable(Ꮡleft);
@@ -394,14 +405,14 @@ public static uint64 Used(this ref ΔMap m) {
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) Get(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     return m.getWithoutKey(Ꮡtyp, key);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string concurrentMapReadAndMapˢ = "concurrent map read and map write"u8;
 
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -422,7 +433,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔM
     return m.directoryAt(idx).getWithKey(Ꮡtyp, hash, key);
 }
 
-internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -444,22 +455,17 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi.S
     return m.directoryAt(idx).getWithoutKey(Ꮡtyp, hash, key);
 }
 
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
         data: m.dirPtr
     );
 
-    var h2Δ1 = (uint8)h2(hash);
-    var ctrls = g.ctrls().Value;
+    var match = (~g.ctrls()).matchH2(h2(hash));
 
-    for (var i = (uintptr)0; i < abi.SwissMapGroupSlots; i++) {
-        var c = (uint8)(uint64)ctrls;
-        ctrls >>= (int)(8);
-        if (c != h2Δ1) {
-            continue;
-        }
+    while (match != 0) {
+        var i = match.first();
 
         @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
@@ -473,12 +479,16 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
             }
             return (slotKey, slotElem, true);
         }
+
+        match = match.removeFirst();
     }
 
+    // No match here means key is not in the map.
+    // (A single group means no need to probe or check for empty).
     return (default!, default!, false);
 }
 
-public static void Put(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
+public static void Put(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     @unsafe.Pointer slotElem = (uintptr)Ꮡm.PutSlot(Ꮡtyp, key);
@@ -492,7 +502,7 @@ internal static readonly @string concurrentMapWritesˢ = "concurrent map writes"
 // should be written.
 //
 // PutSlot never returns nil.
-public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -511,7 +521,7 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> 
     }
 
     if (m.dirLen == 0) {
-        if (m.used < abi.SwissMapGroupSlots) {
+        if (m.used < abi.MapGroupSlots) {
             @unsafe.Pointer elem = (uintptr)m.putSlotSmall(Ꮡtyp, hash, key);
 
             if (m.writing == 0) {
@@ -548,7 +558,7 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string smallMapWithNoEmptySlotˢ = "small map with no empty slot (concurrent map writes?)"u8;
 
-internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -606,13 +616,13 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapTy
         slotElem = emem;
     }
 
-    g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+    g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
 
     return slotElem;
 }
 
-internal static void growToSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void growToSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
     var grp = newGroups(ref (Ꮡtyp).DerefOrNull(), 1);
     m.dirPtr = grp.data;
 
@@ -622,16 +632,16 @@ internal static void growToSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) 
     g.ctrls().setEmpty();
 }
 
-internal static void growToTable(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void growToTable(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    var tab = newTable(Ꮡtyp, 2 * abi.SwissMapGroupSlots, 0, 0);
+    var tab = newTable(Ꮡtyp, 2 * abi.MapGroupSlots, 0, 0);
 
     var g = new groupReference(
         data: m.dirPtr
     );
 
-    for (var i = (uintptr)0; i < abi.SwissMapGroupSlots; i++) {
+    for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
         if (((ctrl)(g.ctrls().get(i) & ctrlEmpty)) == ctrlEmpty) {
             // Empty
             continue;
@@ -663,7 +673,7 @@ internal static void growToTable(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) 
     m.globalShift = depthToShift(m.globalDepth);
 }
 
-public static void Delete(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+public static void Delete(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -690,7 +700,9 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @uns
         m.deleteSmall(Ꮡtyp, hash, key);
     } else {
         var idx = m.directoryIndex(hash);
-        m.directoryAt(idx).Delete(Ꮡtyp, Ꮡm, hash, key);
+        if (m.directoryAt(idx).Delete(Ꮡtyp, Ꮡm, hash, key)) {
+            m.tombstonePossible = true;
+        }
     }
 
     if (m.used == 0) {
@@ -706,7 +718,7 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @uns
     m.writing ^= (uint8)(1);
 }
 
-internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -757,10 +769,10 @@ internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, 
 }
 
 // Clear deletes all entries from the map resulting in an empty map.
-public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
+public static void Clear(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    if (Ꮡm == nil || m.Used() == 0) {
+    if (Ꮡm == nil || m.Used() == 0 && !m.tombstonePossible) {
         return;
     }
 
@@ -782,9 +794,10 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
             lastTab = t;
         }
         m.used = 0;
-        m.clearSeq++;
+        m.tombstonePossible = false;
         // TODO: shrink directory?
     }
+    m.clearSeq++;
 
     // Reset the hash seed to make it more difficult for attackers to
     // repeatedly trigger hash collisions. See https://go.dev/issue/25237.
@@ -796,7 +809,7 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
     m.writing ^= (uint8)(1);
 }
 
-internal static void clearSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static void clearSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -807,7 +820,145 @@ internal static void clearSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     g.ctrls().setEmpty();
 
     m.used = 0;
-    m.clearSeq++;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string concurrentMapCloneAndMapˢ = "concurrent map clone and map write"u8;
+
+public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp) {
+    ref var m = ref Ꮡm.DerefOrNull();
+
+    // Note: this should never be called with a nil map.
+    if (m.writing != 0) {
+        fatal(concurrentMapCloneAndMapˢ);
+    }
+
+    // Shallow copy the Map structure.
+    var m2 = @new<ΔMap>();
+    m2.Value = m;
+    Ꮡm = m2; m = ref Ꮡm.DerefOrNull();
+
+    // We need to just deep copy the dirPtr field.
+    if (m.dirPtr == nil){
+        // delayed group allocation, nothing to do.
+    } else 
+    if (m.dirLen == 0){
+        // Clone one group.
+        var oldGroup = new groupReference(data: m.dirPtr);
+        var newGroup = new groupReference(data: newGroups(ref (Ꮡtyp).DerefOrNull(), 1).data);
+        cloneGroup(Ꮡtyp, newGroup, oldGroup);
+        m.dirPtr = newGroup.data;
+    } else {
+        // Clone each (different) table.
+        var oldDir = @unsafe.Slice((ж<ж<table>>)(uintptr)(m.dirPtr), m.dirLen);
+        var newDir = new slice<ж<table>>(m.dirLen);
+        foreach (var (i, t) in oldDir) {
+            if (i > 0 && t == oldDir[i - 1]) {
+                newDir[i] = newDir[i - 1];
+                continue;
+            }
+            newDir[i] = t.clone(Ꮡtyp);
+        }
+        m.dirPtr = @unsafe.Pointer.FromBox(Ꮡ(newDir, 0));
+    }
+
+    return Ꮡm;
+}
+
+internal static error mapKeyError(ж<abiꓸMapType> Ꮡt, @unsafe.Pointer p) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (!t.HashMightPanic()) {
+        return default!;
+    }
+    return mapKeyError2(t.Key, p);
+}
+
+internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if ((abi.TFlag)(t.TFlag & abi.TFlagRegularMemory) != 0) {
+        return default!;
+    }
+    var exprᴛ1 = t.Kind();
+    if (exprᴛ1 == abi.Float32 || exprᴛ1 == abi.Float64 || exprᴛ1 == abi.Complex64 || exprᴛ1 == abi.Complex128 || exprᴛ1 == abi.ΔString) {
+        return default!;
+    }
+    if (exprᴛ1 == abi.Interface) {
+        var i = Ꮡt.Reinterpret<abi.Type, abiꓸInterfaceType>();
+        ж<abi.Type> tΔ2 = default!;
+        ж<@unsafe.Pointer> pdata = default!;
+        if (len(i.Methods) == 0){
+            var a = (ж<abi.EmptyInterface>)(uintptr)(p);
+            tΔ2 = a.Type;
+            if (tΔ2 == nil) {
+                return default!;
+            }
+            pdata = a.of(abi.EmptyInterface.ᏑData);
+        } else {
+            var a = (ж<abi.NonEmptyInterface>)(uintptr)(p);
+            if (a.ITab == nil) {
+                return default!;
+            }
+            tΔ2 = a.ITab.Value.Type;
+            pdata = a.of(abi.NonEmptyInterface.ᏑData);
+        }
+
+        if ((~tΔ2).Equal == default!) {
+            return new unhashableTypeError(tΔ2);
+        }
+
+        if (tΔ2.IsDirectIface()){
+            return mapKeyError2(tΔ2, @unsafe.Pointer.FromBox(pdata));
+        } else {
+            return mapKeyError2(tΔ2, pdata.Value);
+        }
+    }
+    if (exprᴛ1 == abi.Array) {
+        var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
+        for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
+            {
+                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * (~a.of(abiꓸArrayType.ᏑElem).Value).Size_)); if (err != default!) {
+                    return err;
+                }
+            }
+        }
+        return default!;
+    }
+    if (exprᴛ1 == abi.Struct) {
+        var s = Ꮡt.Reinterpret<abi.Type, abiꓸStructType>();
+        foreach (var (_, f) in s.Fields) {
+            if (f.Name.IsBlank()) {
+                continue;
+            }
+            {
+                var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != default!) {
+                    return err;
+                }
+            }
+        }
+        return default!;
+    }
+    { /* default: */
+        // Should never happen, keep this case for robustness.
+        return new unhashableTypeError(Ꮡt);
+    }
+}
+
+partial struct unhashableTypeError {
+    internal ж<abi.Type> typ;
+}
+
+internal static void RuntimeError(this unhashableTypeError _) {
+}
+
+internal static @string Error(this unhashableTypeError e) {
+    return "hash of unhashable type: "u8 + typeString(e.typ);
+}
+
+// Pushed from runtime
+//
+//go:linkname typeString
+internal static partial @string typeString(ж<abi.Type> typ);
 
 } // end maps_package

@@ -6,12 +6,13 @@
 // go, webkit, and chromium open source projects.
 // We benchmark converting between the JSON form
 // and in-memory data structures.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
-using gzip = compress.gzip_package;
 using fmt = fmt_package;
 using testenv = @internal.testenv_package;
+using zstd = @internal.zstd_package;
 using io = io_package;
 using os = os_package;
 using reflect = reflect_package;
@@ -23,7 +24,6 @@ using testing = testing_package;
 using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using compress;
 using static go.encoding.json_package;
 
 partial class json_internal_test_package {
@@ -49,22 +49,19 @@ internal static ж<codeResponse> ᏑcodeStruct = new StandardBox<codeResponse>(d
 internal static ref codeResponse codeStruct => ref ᏑcodeStruct.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataCodeJsonGzˢ = "testdata/code.json.gz"u8;
+internal static readonly @string internalJsontestTestdataˢ = "internal/jsontest/testdata/golang_source.json.zst"u8;
 
 internal static void codeInit() {
     GoFrame ᒐ = default;
     try {
-        var (f, err) = os.Open(testdataCodeJsonGzˢ);
+        var (f, err) = os.Open(internalJsontestTestdataˢ);
         if (err != default!) {
             throw panic(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        (var gz, err) = gzip.NewReader(new json_test_package.os_FileжReader(f));
-        if (err != default!) {
-            throw panic(err);
-        }
-        (var data, err) = io.ReadAll(new json_test_package.gzip_ReaderжReader(gz));
+        var gz = zstd.NewReader(new json_test_package.os_FileжReader(f));
+        (var data, err) = io.ReadAll(new json_test_package.zstd_ReaderжReader(gz));
         if (err != default!) {
             throw panic(err);
         }
@@ -88,8 +85,8 @@ internal static void codeInit() {
             for (nint i = 0; i < len(data) && i < len(codeJSON); i++) {
                 if (data[i] != codeJSON[i]) {
                     println((@string)"re-marshal: changed at byte"u8, i);
-                    println((@string)"orig: "u8, ((@string)(codeJSON.slice(i - 10, i + 10))));
-                    println((@string)"new: "u8, ((@string)(data.slice(i - 10, i + 10))));
+                    println((@string)"orig: "u8, (@string)(codeJSON.slice(i - 10, i + 10)));
+                    println((@string)"new: "u8, (@string)(data.slice(i - 10, i + 10)));
                     break;
                 }
             }
@@ -607,7 +604,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
         Index: new nint[]{0}.slice()
     )
     }.slice();
-    foreach (var (i, _) in types) {
+    foreach (var i in range(types)) {
         fs[0].Name = fmt.Sprintf("TypeFieldsCache%d"u8, i);
         types[i] = reflect.StructOf(fs);
     }

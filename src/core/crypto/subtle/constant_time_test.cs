@@ -5,6 +5,8 @@ namespace go.crypto;
 
 using testing = testing_package;
 using quick = go.testing.quick_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.testing;
 using static go.crypto.subtle_package;
 
@@ -74,7 +76,7 @@ internal static nint eq(int32 a, int32 b) {
     return 0;
 }
 
-public static void TestConstantTimeEq(ж<testing.T> Ꮡt) {
+public static partial void TestConstantTimeEq(ж<testing.T> Ꮡt) {
     var err = quick.CheckEqual(ConstantTimeEq, eq, nil);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -104,7 +106,7 @@ internal static slice<byte> constantTimeCopyWrapper(nint v, slice<byte> x, slice
     return x;
 }
 
-public static void TestConstantTimeCopy(ж<testing.T> Ꮡt) {
+public static partial void TestConstantTimeCopy(ж<testing.T> Ꮡt) {
     var err = quick.CheckEqual(constantTimeCopyWrapper, makeCopy, nil);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -133,6 +135,20 @@ public static void TestConstantTimeLessOrEq(ж<testing.T> Ꮡt) {
 }
 
 internal static uint8 benchmarkGlobal;
+
+public static void BenchmarkConstantTimeSelect(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    nint x = (nint)benchmarkGlobal;
+    nint y = default!;
+    nint z = default!;
+
+    foreach (var _ᴛ1 in range(b.N)) {
+        (y, z, x) = (ConstantTimeSelect(x, y, z), y, z);
+    }
+
+    benchmarkGlobal = (uint8)x;
+}
 
 public static void BenchmarkConstantTimeByteEq(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

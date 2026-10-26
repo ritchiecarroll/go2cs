@@ -269,7 +269,7 @@ partial class runtime_package
             // Nothing further can be said; the exit below is the part that must happen.
         }
 
-        Environment.Exit(2);
+        global::go.golib.MainExit.Exit(2);
     }
 
     // installPosixSignal (called under s_sigPosixLock) creates the PERSISTENT registration for sig
@@ -342,6 +342,18 @@ partial class runtime_package
         for (int signum = 1; signum <= 31; signum++)
         {
             if (signum == 9 || signum == 17)
+                continue;
+
+            // SIGPIPE (13) is never seeded, for the two reasons the linux flavour's seed records. Go's own
+            // initsig seeds only the signals it declines to handle (sigInstallGoHandler respects an inherited
+            // SIG_IGN for SIGHUP and SIGINT alone) and installs its handler on SIGPIPE whatever it inherited,
+            // so a Go program started with SIGPIPE ignored still dies on EPIPE to stdout or stderr. And the
+            // SIG_IGN this read would see is not the parent's anyway: the CLR sets it at startup, before any
+            // managed code (measured on linux 2026-09-26; C1's darwin disposition map reads PIPE ignored), so
+            // seeding it made runtime.sigpipe return at signal_ignored in EVERY converted darwin process and
+            // dieFromSignal never ran: os's TestStdPipe child exited 0 after its EPIPE to fd 1/2, on both mac
+            // RIDs at 233420f422, where Go's dies by SIGPIPE.
+            if (signum == 13)
                 continue;
 
             ulong handler;

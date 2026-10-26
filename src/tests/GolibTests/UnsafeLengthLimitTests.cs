@@ -74,7 +74,7 @@ public unsafe class UnsafeLengthLimitTests
         slice<byte> source = Source();
 
         PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.Slice(Ꮡ(source, 0), -1L));
-        StringAssert.Contains(ex.Message, "len is negative");
+        StringAssert.Contains(ex.Message, "runtime error: unsafe.Slice: len out of range");
     }
 
     [TestMethod]
@@ -141,7 +141,8 @@ public unsafe class UnsafeLengthLimitTests
     // SpanLength checked only the UPPER bound before narrowing, so a length BELOW Int32.MinValue
     // (-(2^32) + 5 as an int64) truncated to a small POSITIVE int and came back as a five-element
     // slice: the same silent wrap in the other direction (TRAIN J review, 2026-09-29). Go's own answer to
-    // any negative length is "len is negative", decided on the full-width value before narrowing.
+    // any negative length is "unsafe.Slice: len out of range" (runtime/unsafe.go panicunsafeslicelen), decided on the
+    // full-width value before narrowing.
     [TestMethod]
     public void SliceRefusesANegativeLengthBelowInt32AsNegativeNotAShortSlice()
     {
@@ -149,7 +150,7 @@ public unsafe class UnsafeLengthLimitTests
         long length = -(1L << 32) + 5;
 
         PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.Slice(Ꮡ(source, 0), length), "a huge negative length must not wrap to a positive one");
-        StringAssert.Contains(ex.Message, "len is negative");
+        StringAssert.Contains(ex.Message, "runtime error: unsafe.Slice: len out of range");
     }
 
     [TestMethod]
@@ -159,7 +160,7 @@ public unsafe class UnsafeLengthLimitTests
         long length = -(1L << 32) + 5;
 
         PanicException ex = Assert.ThrowsException<PanicException>(() => @unsafe.String(Ꮡ(source, 0), length), "a huge negative length must not wrap to a positive one");
-        StringAssert.Contains(ex.Message, "len is negative");
+        StringAssert.Contains(ex.Message, "runtime error: unsafe.String: len out of range");
     }
 
     // The offset of unsafe.Add already had the full-width negative check; this arm keeps it.

@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAswgKaA7qKCgIKUtqIAEQSEgpCmkKaQppCmgpCmgpCmgpCmgpCmkJKQkrCm", "35-41:1;48-48:1;51-51:2;54-54:3;57-57:4;61-61:5;65-65:6;69-69:7;73-73:8;76-76:9;77-77:10;78-78:11")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAw2gKaA7qKCgIKClLaipISCkKaQppCmkKaCkKaCkKaCkKaCkKaQkpCSsKY=", "38-45:1;52-52:1;55-55:2;58-58:3;61-61:4;65-65:5;69-69:6;73-73:7;77-77:8;80-80:9;81-81:10;82-82:11")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -77,5 +78,6 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }

@@ -7,10 +7,12 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using fs = global::go.io.fs_package;
+using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
 using global::go.go;
 using global::go.io;
+using io = io_package;
 using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
@@ -787,7 +789,8 @@ internal static slice<parseDepthTestsᴛ1> parseDepthTests = new parseDepthTests
     new(name: "forrange2"u8, format: "package main; func main() { «for x, y = range z { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
     new(name: "go"u8, format: "package main; func main() { «go func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: GoStmt, FuncLit
     new(name: "defer"u8, format: "package main; func main() { «defer func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: DeferStmt, FuncLit
-    new(name: "select"u8, format: "package main; func main() { «select { default: «» }» }"u8, scope: true)
+    new(name: "select"u8, format: "package main; func main() { «select { default: «» }» }"u8, scope: true),
+    new(name: "block"u8, format: "package main; func main() { «{«»}» }"u8, scope: true)
 }.slice();
 
 // split splits pre«mid»post into pre, mid, post.
@@ -1049,6 +1052,162 @@ public static void TestEmptyFileHasValidStartEnd(ж<testing.T> Ꮡt) {
         if (got != test.want) {
             Ꮡt.Fatalf("src = %q: got %s, want %s"u8, test.src, got, test.want);
         }
+    }
+}
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ4 = """
+package main
+func test() {
+//line a:15:1
+	//
+}
+
+"""u8.Raw();
+
+public static void TestCommentGroupWithLineDirective(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ4;
+    var fset = token.NewFileSet();
+    var (f, err) = ParseFile(fset, testGoˢ, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+
+    var wantCommentGroups = new ж<ast.CommentGroup>[]{
+        Ꮡ(new ast.CommentGroup(
+            List: new ж<ast.Comment>[]{
+                Ꮡ(new ast.Comment(
+                    Slash: ((tokenꓸPos)28),
+                    Text: "//line a:15:1"u8)),
+                Ꮡ(new ast.Comment(
+                    Slash: ((tokenꓸPos)43),
+                    Text: "//"u8))
+            }.slice()))
+    }.slice();
+
+    if (!reflect.DeepEqual((~f).Comments, wantCommentGroups)) {
+        ref var got = ref heap(new strings.Builder(), out var Ꮡgot);
+        ref var want = ref heap(new strings.Builder(), out var Ꮡwant);
+        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡgot), fset, (~f).Comments, default!);
+        ast.Fprint(new parser_test_package.strings_BuilderжWriter(Ꮡwant), fset, wantCommentGroups, default!);
+        Ꮡt.Fatalf("unexpected f.Comments got:\n%v\nwant:\n%v"u8, got.String(), want.String());
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object missingLineCommentˢ = (@string)"missing line comment"u8;
+internal static readonly object missingDocCommentˢ = (@string)"missing doc comment"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ5 = """
+package test
+
+var _ int; /* line comment */
+// Doc comment
+func _() {}
+
+var _ int; /* line comment */
+// Some comment
+
+func _() {}
+
+"""u8.Raw();
+
+// TestBothLineAndLeadComment makes sure that we populate the
+// p.lineComment field even though there is a comment after the
+// line comment.
+public static void TestBothLineAndLeadComment(ж<testing.T> Ꮡt) {
+    @string src = srcᶜ5;
+
+    var fset = token.NewFileSet();
+    var (f, _) = ParseFile(fset, ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
+
+    var lineComment = (~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>().Value.Comment;
+    var docComment = (~f).Decls[1]._<ж<ast.FuncDecl>>().Value.Doc;
+
+    if (lineComment == nil) {
+        Ꮡt.Fatal(missingLineCommentˢ);
+    }
+    if (docComment == nil) {
+        Ꮡt.Fatal(missingDocCommentˢ);
+    }
+
+    if ((~(~lineComment).List[0]).Text != "/* line comment */"u8) {
+        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""/* line comment */"""u8, (~(~lineComment).List[0]).Text);
+    }
+    if ((~(~docComment).List[0]).Text != "// Doc comment"u8) {
+        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""// Doc comment"""u8, (~(~docComment).List[0]).Text);
+    }
+
+    var lineComment2 = (~(~f).Decls[2]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>().Value.Comment;
+    if (lineComment2 == nil) {
+        Ꮡt.Fatal(missingLineCommentˢ);
+    }
+    if ((~(~lineComment).List[0]).Text != "/* line comment */"u8) {
+        Ꮡt.Errorf(@"unexpected line comment got = %q; want ""/* line comment */"""u8, (~(~lineComment).List[0]).Text);
+    }
+
+    var docComment2 = (~f).Decls[3]._<ж<ast.FuncDecl>>().Value.Doc;
+    if (docComment2 != nil) {
+        Ꮡt.Errorf("unexpected doc comment %v"u8, docComment2.OrTypedNil());
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string abcˢ = "`abc\n`"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string stringlitᶜ = "`abc\r\n`"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string srcᶜ6 = "package p\n\nimport `abc\r\n` ;\n\ntype _ struct{ x int `abc\r\n` }\n\nconst _ = `abc\r\n` ;\n";
+
+// Tests of BasicLit.End() method, which in go1.26 started precisely
+// recording the Value token's end position instead of heuristically
+// computing it, which is inaccurate for strings containing "\r".
+public static void TestBasicLit_End(ж<testing.T> Ꮡt) {
+    // lit is a raw string literal containing [a b c \r \n],
+    // denoting "abc\n", because the scanner normalizes \r\n to \n.
+    @string stringlit = stringlitᶜ;
+
+    // The semicolons exercise the case in which the next token
+    // (a SEMICOLON implied by a \n) isn't immediate but follows
+    // some horizontal space.
+    @string src = srcᶜ6;
+
+    var fset = token.NewFileSet();
+    var (f, _) = ParseFile(fset, ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
+    var tokFile = fset.File(f.Pos());
+
+    nint count = 0;
+    var fsetʗ1 = fset;
+    var tokFileʗ1 = tokFile;
+    ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
+        {
+            var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok) {
+                count++;
+                nint start = tokFileʗ1.Offset(lit.Pos());
+                nint end = tokFileʗ1.Offset(lit.End());
+
+                // Check BasicLit.Value.
+                {
+                    @string want = abcˢ; if ((~lit).Value != want) {
+                        Ꮡt.Errorf("%s: BasicLit.Value = %q, want %q"u8, fsetʗ1.Position(lit.Pos()), (~lit).Value, want);
+                    }
+                }
+
+                // Check source extent.
+                {
+                    @string got = src.slice(start, end); if (got != stringlit) {
+                        Ꮡt.Errorf("%s: src[BasicLit.Pos:End] = %q, want %q"u8, fsetʗ1.Position(lit.Pos()), got, stringlit);
+                    }
+                }
+            }
+        }
+        return true;
+    });
+    if (count != 3) {
+        Ꮡt.Errorf("found %d BasicLit, want 3"u8, count);
     }
 }
 

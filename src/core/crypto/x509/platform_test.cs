@@ -209,14 +209,15 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ecdsa.GenerateKey failed: %s"u8, err);
     }
 
-    foreach (var (_, tc) in tests) {
-        ref var tcΔ1 = ref heap<TestPlatformVerifier_tests>(out var ᏑtcΔ1);
-        tcΔ1 = tc;
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tc = ref heap(new TestPlatformVerifier_tests(), out var Ꮡtc);
+        tc = vᴛ1;
+
         var leafKeyʗ1 = leafKey;
-        var tcʗ1 = tcΔ1;
+        var tcʗ1 = tc;
         var testRootʗ1 = testRoot;
         var testRootKeyʗ1 = testRootKey;
-        Ꮡt.Run(tcΔ1.name, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var parent = testRootʗ1;
             if (tcʗ1.selfSigned) {

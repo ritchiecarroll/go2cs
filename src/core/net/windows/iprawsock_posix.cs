@@ -67,11 +67,11 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if (len(b) < 20) {
         return n;
     }
-    nint l = ((nint)((byte)(b[0] & 0x0f)) << (int)(2));
+    nint l = (nint)((byte)(b[0] & 0x0f)) << 2;
     if (20 > l || l > len(b)) {
         return n;
     }
-    if ((byte)((b[0] >> (int)(4))) != 4) {
+    if ((byte)((b[0] >> 4)) != 4) {
         return n;
     }
     copy(b, b.slice(l));

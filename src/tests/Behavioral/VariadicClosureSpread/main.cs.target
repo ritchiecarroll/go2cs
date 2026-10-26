@@ -11,8 +11,8 @@ internal static void Main() {
         var a = aʗp.sslice();
         return fmt.Sprintf(f, a.ꓸꓸꓸ);
     }
-    fmt.Println(format("%s=%d"u8, (@string)"x"u8, (nint)(1)));
-    fmt.Println(format("%s=%d"u8, (@string)"y"u8, (nint)(2)));
+    fmt.Println(format("%s=%d", (@string)"x"u8, (nint)1));
+    fmt.Println(format("%s=%d", (@string)"y"u8, (nint)2));
 
     nint sum(params ꓸꓸꓸnint numsʗp) {
         var nums = numsʗp.sslice();

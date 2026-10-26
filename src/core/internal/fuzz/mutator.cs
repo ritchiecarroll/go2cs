@@ -56,6 +56,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
     // TODO(katiehockman): pull some of these functions into helper methods and
     // test that each case is working as expected.
     // TODO(katiehockman): perform more types of mutations for []byte.
+
     // maxPerVal will represent the maximum number of bytes that each value be
     // allowed after mutating, giving an equal amount of capacity to each line.
     // Allow a little wiggle room for the encoding.
@@ -130,7 +131,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
             copy(m.scratch, v);
         }
         Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
-        vals[i] = ((@string)m.scratch);
+        vals[i] = (@string)m.scratch;
         break;
     }
     case slice<byte> v: {
@@ -276,8 +277,7 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
 
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
-internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators;
-internal static void initᴛbyteSliceMutators() { byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
+[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,
@@ -334,7 +334,7 @@ internal static slice<int32> interesting32 = new int32[]{-2147483648, -100663046
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     foreach (var (_, v) in interesting8) {
         interesting16 = append(interesting16, (int16)v);
     }

@@ -14,22 +14,19 @@ internal static handler wrap(handler h) {
     return h;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string labelˢ = "label"u8;
-
 internal static (handler, @string, error) makeHandlers(@string prefix) {
     var allowed = new @string[]{prefix + "-a"u8, prefix + "-b"u8}.slice();
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
-    }), labelˢ, default!);
+    }), "label", default!);
 }
 
 internal static handler makeSingle(@string tag) {
-    var counts = new map<@string, nint>{["x"u8] = len(tag)};
+    var counts = new map<@string, nint>{["x"] = len(tag)};
     var countsʗ1 = counts;
     return new handler((@string msg) => {
-        fmt.Println(countsʗ1["x"u8], msg);
+        fmt.Println(countsʗ1["x"], msg);
     });
 }
 
@@ -41,22 +38,16 @@ internal static handler makePlain(nint n) {
     });
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pingˢ = "ping"u8;
-private static readonly @string fourˢ = "four"u8;
-private static readonly @string pongˢ = "pong"u8;
-private static readonly @string plainˢ = "plain"u8;
-
 internal static void Main() {
-    var (h, label, err) = makeHandlers("go"u8);
+    var (h, label, err) = makeHandlers("go");
     fmt.Println(label, err);
-    h.invoke(pingˢ);
+    h.invoke("ping");
 
-    var s = makeSingle(fourˢ);
-    s(pongˢ);
+    var s = makeSingle("four");
+    s("pong");
 
     var p = makePlain(3);
-    p(plainˢ);
+    p("plain");
 }
 
 } // end main_package

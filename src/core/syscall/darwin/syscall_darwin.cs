@@ -13,6 +13,7 @@ namespace go;
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
 using @internal;
+using ꓸꓸꓸuintptr = Span<uintptr>;
 
 partial class syscall_package {
 
@@ -243,7 +244,7 @@ public static error /*err*/ Kill(nint pid, ΔSignal signum) {
 //sys   openat(fd int, path string, flags int, perm uint32) (fdret int, err error)
 //sys	getcwd(buf []byte) (n int, err error)
 [GoInit] internal static void initΔ1() {
-    execveDarwin = execve;
+    execveLibc = execve;
 }
 
 public static (uintptr dir, error err) fdopendir(nint fd) {
@@ -275,95 +276,185 @@ internal static (nint n, error err) readlen(nint fd, ж<byte> Ꮡbuf, nint nbuf)
     return (n, err);
 }
 
-public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uintptr> Ꮡbasep) {
-    nint n = default!;
-    error err = default!;
-    GoFrame ᒐ = default;
-    try {
-        // Simulate Getdirentries using fdopendir/readdir_r/closedir.
-        // We store the number of entries to skip in the seek
-        // offset of fd. See issue #31368.
-        // It's not the full required semantics, but should handle the case
-        // of calling Getdirentries or ReadDirent repeatedly.
-        // It won't handle assigning the results of lseek to *basep, or handle
-        // the directory being edited underfoot.
-        (var skip, err) = Seek(fd, 0, 1 /* SEEK_CUR */);
-        if (err != default!) {
-            (n, err) = (0, err); goto ᒐdone;
-        }
+// go2cs generated this placeholder — func Getdirentries is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-        // We need to duplicate the incoming file descriptor
-        // because the caller expects to retain control of it, but
-        // fdopendir expects to take control of its argument.
-        // Just Dup'ing the file descriptor is not enough, as the
-        // result shares underlying state. Use openat to make a really
-        // new file descriptor referring to the same directory.
-        (var fd2, err) = openat(fd, "."u8, O_RDONLY, 0);
-        if (err != default!) {
-            (n, err) = (0, err); goto ᒐdone;
-        }
-        (var d, err) = fdopendir(fd2);
-        if (err != default!) {
-            Close(fd2);
-            (n, err) = (0, err); goto ᒐdone;
-        }
-        defer(closedir, d, ref ᒐ);
-
-        int64 cnt = default!;
-        while (ᐧ) {
-            ref var entry = ref heap(new Dirent(), out var Ꮡentry);
-            ref var entryp = ref heap<ж<Dirent>>(out var Ꮡentryp);
-            var e = readdir_r(d, Ꮡentry, Ꮡentryp);
-            if (e != 0) {
-                (n, err) = (n, errnoErr(e)); goto ᒐdone;
-            }
-            if (entryp == nil) {
-                break;
-            }
-            if (skip > 0) {
-                skip--;
-                cnt++;
-                continue;
-            }
-            nint reclen = (nint)entry.Reclen;
-            if (reclen > len(buf)) {
-                // Not enough room. Return for now.
-                // The counter will let us know where we should start up again.
-                // Note: this strategy for suspending in the middle and
-                // restarting is O(n^2) in the length of the directory. Oh well.
-                break;
-            }
-            // Copy entry into return buffer.
-            copy(buf, @unsafe.Slice(Ꮡentry.Reinterpret<Dirent, byte>(), reclen));
-            buf = buf.slice(reclen);
-            n += reclen;
-            cnt++;
-        }
-        // Set the seek offset of the input fd to record
-        // how many files we've already returned.
-        (_, err) = Seek(fd, cnt, 0 /* SEEK_SET */);
-        if (err != default!) {
-            goto ᒐdone;
-        }
-
-        (n, err) = (n, default!);
+// errno return e if int32(r) is -1, else it returns 0.
+//
+//go:nosplit
+//go:norace
+internal static Errno errno(uintptr r, Errno e) {
+    if ((int32)r == -1) {
+        return e;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-    ᒐdone: return (n, err);
+    return 0;
+}
+
+// errnoX return e if r is -1, else it returns 0.
+//
+//go:nosplit
+//go:norace
+internal static Errno errnoX(uintptr r, Errno e) {
+    if (r == ~(uintptr)0) {
+        return e;
+    }
+    return 0;
+}
+
+// errnoPtr return e if r is 0, else it returns 0.
+//
+//go:nosplit
+//go:norace
+internal static Errno errnoPtr(uintptr r, Errno e) {
+    if (r == 0) {
+        return e;
+    }
+    return 0;
+}
+
+//go:cgo_import_dynamic libc_error __error "/usr/lib/libSystem.B.dylib"
+// golang.org/x/sys linknames the following syscalls.
+// Do not remove or change the type signature.
+// N.B. For the Syscall functions below:
+//
+// //go:uintptrkeepalive because the uintptr argument may be converted pointers
+// that need to be kept alive in the caller.
+//
+// //go:nosplit because stack copying does not account for uintptrkeepalive, so
+// the stack must not grow. Stack copying cannot blindly assume that all
+// uintptr arguments are pointers, because some values may look like pointers,
+// but not really be pointers, and adjusting their value would break the call.
+//
+// //go:norace, on RawSyscall, to avoid race instrumentation if RawSyscall is
+// called after fork, or from a signal handler.
+//
+// //go:linkname to ensure ABI wrappers are generated for external callers
+// (notably x/sys/unix assembly).
+
+//go:linkname syscall
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = syscalln(fn, a1, a2, a3);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname syscallX
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscallX(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = syscalln(fn, a1, a2, a3);
+    return (r1, r2, errnoX(r1, err));
+}
+
+// syscall.syscall6 is meant for package syscall (and x/sys),
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/tetratelabs/wazero
+//
+// See go.dev/issue/67401.
+//
+//go:linkname syscall6
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname syscall6X
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6);
+    return (r1, r2, errnoX(r1, err));
+}
+
+// syscall9 is used in [internal/syscall/unix].
+//
+//go:linkname syscall9
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname rawSyscall
+//go:nosplit
+//go:norace
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = rawsyscalln(fn, a1, a2, a3);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname rawSyscall6
+//go:nosplit
+//go:norace
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = rawsyscalln(fn, a1, a2, a3, a4, a5, a6);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname rawSyscall9
+//go:nosplit
+//go:norace
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) rawSyscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+    Errno err = default!;
+
+    (r1, r2, err) = rawsyscalln(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    return (r1, r2, errno(r1, err));
+}
+
+//go:linkname syscallPtr
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, Errno err) syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+    uintptr r1 = default!;
+    uintptr r2 = default!;
+
+    (r1, r2, var e1) = syscalln(fn, a1, a2, a3);
+    return (r1, r2, errnoPtr(r1, e1));
 }
 
 // Implemented in the runtime package (runtime/sys_darwin.go)
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3);
 
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
+//go:noescape
+internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp);
 
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
-
-internal static partial (uintptr r1, uintptr r2, Errno err) rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3);
-
-internal static partial (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
-
-internal static partial (uintptr r1, uintptr r2, Errno err) syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3);
+//go:noescape
+internal static partial (uintptr r1, uintptr r2, Errno err) rawsyscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp);
 
 } // end syscall_package

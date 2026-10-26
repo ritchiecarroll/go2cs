@@ -323,10 +323,7 @@ public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
     if (b.r == b.w) {
         return (0, 0, b.readErr());
     }
-    (r, size) = ((rune)b.buf[b.r], 1);
-    if (r >= utf8.RuneSelf) {
-        (r, size) = utf8.DecodeRune(b.buf.slice(b.r, b.w));
-    }
+    (r, size) = utf8.DecodeRune(b.buf.slice(b.r, b.w));
     b.r += size;
     b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = size;
@@ -476,6 +473,7 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
     slice<slice<byte>> fullBuffers = default!;
     nint totalLen = default!;
     error err = default!;
+    var fullBuffersᴷ = new stackAppend<slice<byte>>(moves: true);
 
     slice<byte> frag = default!;
     // Use ReadSlice to look for delim, accumulating full buffers.
@@ -492,11 +490,12 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
 
         // Make a copy of the buffer.
         var buf = bytes.Clone(frag);
-        fullBuffers = append(fullBuffers, buf);
+        fullBuffers = append(fullBuffersᴷ, fullBuffers, buf);
         totalLen += len(buf);
     }
 
     totalLen += len(frag);
+    fullBuffers = move2heap(fullBuffersᴷ, fullBuffers);
     return (fullBuffers, frag, totalLen, err);
 }
 
@@ -513,7 +512,7 @@ public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var buf = new slice<byte>(n);
     n = 0;
     // Copy full pieces and fragment in.
-    foreach (var (i, _) in full) {
+    foreach (var i in range(full)) {
         n += copy(buf.slice(n), full[i]);
     }
     copy(buf.slice(n), frag);
@@ -551,9 +550,11 @@ public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
     b.lastByte = -1;
     b.lastRuneSize = -1;
 
-    (n, err) = b.writeBuf(w);
-    if (err != default!) {
-        return (n, err);
+    if (b.r < b.w) {
+        (n, err) = b.writeBuf(w);
+        if (err != default!) {
+            return (n, err);
+        }
     }
 
     {
@@ -784,7 +785,7 @@ public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
         n = b.Available();
         if (n < utf8.UTFMax) {
             // Can only happen if buffer is silly small.
-            return b.WriteString(((@string)r));
+            return b.WriteString((@string)r);
         }
     }
     size = utf8.EncodeRune(b.buf.slice(b.n), r);
@@ -889,8 +890,8 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
 // ReadWriter stores pointers to a [Reader] and a [Writer].
 // It implements [io.ReadWriter].
 partial struct ReadWriter {
-    public partial ref ж<Reader> Reader { get; }
-    public partial ref ж<Writer> Writer { get; }
+    /*embed*/ public ж<Reader> Reader;
+    /*embed*/ public ж<Writer> Writer;
 }
 
 // NewReadWriter allocates a new [ReadWriter] that dispatches to r and w.

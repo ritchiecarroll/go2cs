@@ -9,6 +9,7 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
 
@@ -210,6 +211,12 @@ internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
 }
 
+public static (hash.Cloner, error) Clone(this ref Digest d) {
+    ref var r = ref heap<Digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new DigestжCloner(Ꮡr), default!);
+}
+
 // New returns a new Digest computing the SHA-512 hash.
 public static ж<Digest> New() {
     var d = Ꮡ(new Digest(size: size512));
@@ -263,7 +270,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
         p = p.slice(n);
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        nint n = len(p) & ~(nint)(chunk - 1);
         block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         p = p.slice(n);
     }

@@ -29,7 +29,7 @@ internal static slice<@string> lookupTestIPs = new @string[]{"8.8.8.8"u8, "1.1.1
 
 internal static @string toJson(any v) {
     var (data, _) = json.Marshal(v);
-    return ((@string)data);
+    return (@string)data;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -37,22 +37,20 @@ internal static readonly @string defaultˢ = "default/"u8;
 
 internal static void testLookup(ж<testing.T> Ꮡt, Action<ж<testing.T>, ж<global::go.net_package.Resolver>, @string> fn) {
     foreach (var (_, def) in new bool[]{true, false}.slice()) {
-        var defΔ1 = def;
         foreach (var (_, server) in nslookupTestServers) {
-            @string serverΔ1 = server;
             @string name = default!;
-            if (defΔ1){
+            if (def){
                 name = defaultˢ;
             } else {
                 name = "go/"u8;
             }
-            Ꮡt.Run(name + serverΔ1, (ж<testing.T> tΔ1) => {
+            Ꮡt.Run(name + server, (ж<testing.T> tΔ1) => {
                 tΔ1.Parallel();
                 var r = DefaultResolver;
-                if (!defΔ1) {
+                if (!def) {
                     r = Ꮡ(new Resolver(PreferGo: true));
                 }
-                fn(tΔ1, r, serverΔ1);
+                fn(tΔ1, r, server);
             });
         }
     }
@@ -355,9 +353,9 @@ internal static (@string, error) ping(@string name) {
     var cmd = exec.Command(pingˢ, "-n"u8, "1", "-a", name);
     var (stdoutStderr, err) = cmd.CombinedOutput();
     if (err != default!) {
-        return ("", fmt.Errorf("%v: %v"u8, err, ((@string)stdoutStderr)));
+        return ("", fmt.Errorf("%v: %v"u8, err, (@string)stdoutStderr));
     }
-    @string r = strings.ReplaceAll(((@string)stdoutStderr), "\r\n"u8, "\n"u8);
+    @string r = strings.ReplaceAll((@string)stdoutStderr, "\r\n"u8, "\n"u8);
     return (r, default!);
 }
 

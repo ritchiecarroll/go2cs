@@ -128,7 +128,7 @@ partial class reflect_package {
                 "carries no field list, so any register assignment for it would be vacuous. See " +
                 "docs/phase4/DESIGN-descriptor-cargo.md.");
         }
-        foreach (var (i, _) in (~st).Fields) {
+        foreach (var i in range((~st).Fields)) {
             var f = Ꮡ((~st).Fields, i);
             if (!a.regAssign((~f).Typ, offset + (~f).Offset)) {
                 return false;
@@ -137,7 +137,7 @@ partial class reflect_package {
         return true;
     }
     else { /* default: */
-        print((@string)"t.Kind == "u8, t.Kind(), (@string)"\n"u8);
+        print((@string)"t.Kind == "u8, (uint8)(t.Kind()), (@string)"\n"u8);
         throw panic("unknown type kind");
     }
 
@@ -163,7 +163,7 @@ internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Typ
     if (!t.Pointers()) {
         return;
     }
-    var exprᴛ1 = ((ΔKind)(nuint)((uint8)((abiꓸKind)(t.Kind_ & abi.KindMask))));
+    var exprᴛ1 = ((ΔKind)(nuint)((uint8)t.Kind()));
     if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔSlice || exprᴛ1 == ΔString || exprᴛ1 == ΔUnsafePointer) {
         while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
             // 1 pointer at start of representation
@@ -194,7 +194,7 @@ internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Typ
         if (st == nil) {
             throw panic("reflect: addTypeBits cannot read the fields of struct descriptor " + stringFor(Ꮡt));
         }
-        foreach (var (i, _) in (~st).Fields) {
+        foreach (var i in range((~st).Fields)) {
             // apply fields
             var f = Ꮡ((~st).Fields, i);
             addTypeBits(Ꮡbv, offset + (~f).Offset, (~f).Typ);

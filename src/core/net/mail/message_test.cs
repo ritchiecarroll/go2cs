@@ -4,6 +4,7 @@
 namespace go.net;
 
 using bytes = bytes_package;
+using fmt = fmt_package;
 using io = io_package;
 using mime = mime_package;
 using reflect = reflect_package;
@@ -108,7 +109,7 @@ public static void TestParsing(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("test #%d: Failed reading body: %v"u8, i, err);
             continue;
         }
-        @string bodyStr = ((@string)body);
+        @string bodyStr = (@string)body;
         if (bodyStr != test.body) {
             Ꮡt.Errorf("test #%d: Incorrectly parsed message body.\nGot:\n%+v\nWant:\n%+v"u8,
                 i, bodyStr, test.body);
@@ -1248,6 +1249,39 @@ public static void TestEmptyAddress(ж<testing.T> Ꮡt) {
     (list, err) = ParseAddressList(aBCDˢ);
     if (builtin.len(list) > 0 || err == default!) {
         Ꮡt.Errorf(@"ParseAddressList("""") = %v, %v, want nil, error"u8, list, err);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string utf8QHelloˢ = "=?utf-8?q?hello?= "u8;
+
+public static void BenchmarkConsumePhrase(ж<testing.B> Ꮡb) {
+    foreach (var (_, n) in new nint[]{10, 100, 1000, 10000}.slice()) {
+        Ꮡb.Run(fmt.Sprintf("words-%d"u8, n), (ж<testing.B> bΔ1) => {
+            ref var input = ref heap<@string>(out var Ꮡinput);
+            input = strings.Repeat(utf8QHelloˢ, n) + "<user@example.com>"u8;
+            while (bΔ1.Loop()) {
+                (Ꮡ(new addrParser(s: input))).consumePhrase();
+            }
+        });
+    }
+}
+
+public static void BenchmarkConsumeComment(ж<testing.B> Ꮡb) {
+    foreach (var (_, n) in new nint[]{10, 100, 1000, 10000}.slice()) {
+        Ꮡb.Run(fmt.Sprintf("depth-%d"u8, n), (ж<testing.B> bΔ1) => {
+            // Build a deeply nested comment: (((...a...)))
+            @string open = strings.Repeat("("u8, n);
+            @string close = strings.Repeat(")"u8, n);
+            // consumeComment expects the leading '(' already consumed,
+            // so we start with one fewer opening paren and the parser
+            // will handle nesting from there.
+            @string input = open.slice(0, n - 1) + "a" + close;
+            while (bΔ1.Loop()) {
+                var p = new addrParser(s: input);
+                p.consumeComment();
+            }
+        });
     }
 }
 

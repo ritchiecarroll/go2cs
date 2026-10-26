@@ -28,7 +28,7 @@ internal static array<@string> stringsData = new @string[]{""u8, "Hello"u8, "foo
 
 public static void TestSortIntSlice(ж<testing.T> Ꮡt) {
     var data = ints.Clone();
-    var a = ((sort.IntSlice)(data[0..]));
+    var a = (sort.IntSlice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, ints);
@@ -38,7 +38,7 @@ public static void TestSortIntSlice(ж<testing.T> Ꮡt) {
 
 public static void TestSortFloat64Slice(ж<testing.T> Ꮡt) {
     var data = float64s.Clone();
-    var a = ((sort.Float64Slice)(data[0..]));
+    var a = (sort.Float64Slice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, float64s);
@@ -51,7 +51,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
     var slice1 = slices.Clone<slice<float64>, float64>(float64s[..]);
     var slice2 = slices.Clone<slice<float64>, float64>(float64s[..]);
 
-    Sort((sort.Interface)(((sort.Float64Slice)slice1)));
+    Sort((sort.Interface)((sort.Float64Slice)slice1));
     slices.Sort<slice<float64>, float64>(slice2);
 
     // Compare for equality using cmp.Compare, which considers NaNs equal.
@@ -62,7 +62,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
 
 public static void TestSortStringSlice(ж<testing.T> Ꮡt) {
     var data = stringsData.Clone();
-    var a = ((sort.StringSlice)(data[0..]));
+    var a = (sort.StringSlice)(data[0..]);
     Sort((sort.Interface)(a));
     if (!IsSorted(a)) {
         Ꮡt.Errorf("sorted %v"u8, stringsData);
@@ -134,9 +134,9 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
 
     var data = ints.Clone();
     var data1 = ints.Clone();
-    var a = ((sort.IntSlice)(data[0..]));
+    var a = (sort.IntSlice)(data[0..]);
     Sort((sort.Interface)(a));
-    var r = ((sort.IntSlice)(data1[0..]));
+    var r = (sort.IntSlice)(data1[0..]);
     Sort(Reverse(r));
     for (nint i = 0; i < len(data); i++) {
         if (a[i] != r[len(data) - 1 - i]) {
@@ -151,20 +151,20 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
 public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
     // Special slice used to trigger breakPatterns.
     var data = new slice<nint>(30);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = 10;
     }
     data[(len(data) / 4) * 1] = 0;
     data[(len(data) / 4) * 2] = 1;
     data[(len(data) / 4) * 3] = 2;
-    Sort((sort.Interface)(((sort.IntSlice)data)));
+    Sort((sort.Interface)((sort.IntSlice)data));
 }
 
 public static void TestReverseRange(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var data = new nint[]{1, 2, 3, 4, 5, 6, 7}.slice();
-    sort_internal_test_package.ReverseRange(((sort.IntSlice)data), 0, len(data));
+    sort_internal_test_package.ReverseRange((sort.IntSlice)data, 0, len(data));
     for (nint i = len(data) - 1; i > 0; i--) {
         if (data[i] > data[i - 1]) {
             Ꮡt.Fatalf("reverseRange didn't work"u8);
@@ -173,7 +173,7 @@ public static void TestReverseRange(ж<testing.T> Ꮡt) {
 
     var data1 = new nint[]{1, 2, 3, 4, 5, 6, 7}.slice();
     var data2 = new nint[]{1, 2, 5, 4, 3, 6, 7}.slice();
-    sort_internal_test_package.ReverseRange(((sort.IntSlice)data1), 2, 5);
+    sort_internal_test_package.ReverseRange((sort.IntSlice)data1, 2, 5);
     foreach (var (i, v) in data1) {
         if (v != data2[i]) {
             Ꮡt.Fatalf("reverseRange didn't work"u8);
@@ -231,9 +231,9 @@ public static void BenchmarkSortString1K(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var unsorted = new slice<@string>((1 << (int)(10)));
-    foreach (var (i, _) in unsorted) {
-        unsorted[i] = strconv.Itoa((nint)(i ^ 0x2cc));
+    var unsorted = new slice<@string>((1 << 10));
+    foreach (var i in range(unsorted)) {
+        unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
 
@@ -249,9 +249,9 @@ public static void BenchmarkSortString1K_Slice(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var unsorted = new slice<@string>((1 << (int)(10)));
-    foreach (var (i, _) in unsorted) {
-        unsorted[i] = strconv.Itoa((nint)(i ^ 0x2cc));
+    var unsorted = new slice<@string>((1 << 10));
+    foreach (var i in range(unsorted)) {
+        unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
 
@@ -268,16 +268,16 @@ public static void BenchmarkStableString1K(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var unsorted = new slice<@string>((1 << (int)(10)));
-    foreach (var (i, _) in unsorted) {
-        unsorted[i] = strconv.Itoa((nint)(i ^ 0x2cc));
+    var unsorted = new slice<@string>((1 << 10));
+    foreach (var i in range(unsorted)) {
+        unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
 
     for (nint i = 0; i < b.N; i++) {
         copy(data, unsorted);
         b.StartTimer();
-        Stable(((sort.StringSlice)data));
+        Stable((sort.StringSlice)data);
         b.StopTimer();
     }
 }
@@ -287,9 +287,9 @@ public static void BenchmarkSortInt1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(10)));
+        var data = new slice<nint>((1 << 10));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
-            data[iΔ1] = (nint)(iΔ1 ^ 0x2cc);
+            data[iΔ1] = iΔ1 ^ 0x2cc;
         }
         b.StartTimer();
         Ints(data);
@@ -302,7 +302,7 @@ public static void BenchmarkSortInt1K_Sorted(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(10)));
+        var data = new slice<nint>((1 << 10));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
             data[iΔ1] = iΔ1;
         }
@@ -317,7 +317,7 @@ public static void BenchmarkSortInt1K_Reversed(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(10)));
+        var data = new slice<nint>((1 << 10));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
             data[iΔ1] = len(data) - iΔ1;
         }
@@ -332,7 +332,7 @@ public static void BenchmarkSortInt1K_Mod8(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(10)));
+        var data = new slice<nint>((1 << 10));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
             data[iΔ1] = iΔ1 % 8;
         }
@@ -346,15 +346,15 @@ public static void BenchmarkStableInt1K(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var unsorted = new slice<nint>((1 << (int)(10)));
-    foreach (var (i, _) in unsorted) {
-        unsorted[i] = (nint)(i ^ 0x2cc);
+    var unsorted = new slice<nint>((1 << 10));
+    foreach (var i in range(unsorted)) {
+        unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
     for (nint i = 0; i < b.N; i++) {
         copy(data, unsorted);
         b.StartTimer();
-        Stable(((sort.IntSlice)data));
+        Stable((sort.IntSlice)data);
         b.StopTimer();
     }
 }
@@ -363,9 +363,9 @@ public static void BenchmarkStableInt1K_Slice(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var unsorted = new slice<nint>((1 << (int)(10)));
-    foreach (var (i, _) in unsorted) {
-        unsorted[i] = (nint)(i ^ 0x2cc);
+    var unsorted = new slice<nint>((1 << 10));
+    foreach (var i in range(unsorted)) {
+        unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
     for (nint i = 0; i < b.N; i++) {
@@ -382,9 +382,9 @@ public static void BenchmarkSortInt64K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(16)));
+        var data = new slice<nint>((1 << 16));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
-            data[iΔ1] = (nint)(iΔ1 ^ 0xcccc);
+            data[iΔ1] = iΔ1 ^ 0xcccc;
         }
         b.StartTimer();
         Ints(data);
@@ -397,9 +397,9 @@ public static void BenchmarkSortInt64K_Slice(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(16)));
+        var data = new slice<nint>((1 << 16));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
-            data[iΔ1] = (nint)(iΔ1 ^ 0xcccc);
+            data[iΔ1] = iΔ1 ^ 0xcccc;
         }
         b.StartTimer();
         var dataʗ1 = data;
@@ -413,12 +413,12 @@ public static void BenchmarkStableInt64K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     for (nint i = 0; i < b.N; i++) {
-        var data = new slice<nint>((1 << (int)(16)));
+        var data = new slice<nint>((1 << 16));
         for (nint iΔ1 = 0; iΔ1 < len(data); iΔ1++) {
-            data[iΔ1] = (nint)(iΔ1 ^ 0xcccc);
+            data[iΔ1] = iΔ1 ^ 0xcccc;
         }
         b.StartTimer();
-        Stable(((sort.IntSlice)data));
+        Stable((sort.IntSlice)data);
         b.StopTimer();
     }
 }
@@ -665,7 +665,7 @@ public static void TestAdversary(ж<testing.T> Ꮡt) {
 
 public static void TestStableInts(ж<testing.T> Ꮡt) {
     var data = ints.Clone();
-    Stable(((sort.IntSlice)(data[0..])));
+    Stable((sort.IntSlice)(data[0..]));
     if (!IntsAreSorted(data[0..])) {
         Ꮡt.Errorf("nsorted %v\n   got %v"u8, ints, data);
     }
@@ -692,7 +692,7 @@ internal static void Swap(this intPairs d, nint i, nint j) {
 
 // Record initial order in B.
 internal static void initB(this intPairs d) {
-    foreach (var (i, _) in d) {
+    foreach (var i in range(d)) {
         d[i].b = i;
     }
 }

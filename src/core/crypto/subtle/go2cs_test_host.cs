@@ -22,6 +22,7 @@ internal static class Go2CsTestHost
         registry.Add("TestConstantTimeCopy", subtle_internal_test_package.TestConstantTimeCopy, "constant_time_test.go", 102);
         registry.Add("TestConstantTimeEq", subtle_internal_test_package.TestConstantTimeEq, "constant_time_test.go", 72);
         registry.Add("TestConstantTimeLessOrEq", subtle_internal_test_package.TestConstantTimeLessOrEq, "constant_time_test.go", 120);
+        registry.Add("TestDITGoroutineInheritance", subtle_internal_test_package.TestDITGoroutineInheritance, "dit_test.go", 67);
         registry.Add("TestDITPanic", subtle_internal_test_package.TestDITPanic, "dit_test.go", 41);
         registry.Add("TestWithDataIndependentTiming", subtle_internal_test_package.TestWithDataIndependentTiming, "dit_test.go", 13);
         registry.Add("TestXORBytes", subtle_test_package.TestXORBytes, "xor_test.go", 15);

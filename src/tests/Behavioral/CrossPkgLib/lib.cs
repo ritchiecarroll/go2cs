@@ -71,11 +71,8 @@ partial interface Reporter {
     @string Report();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string countˢ = "count"u8;
-
 public static @string Report(this ref Meter m) {
-    return countˢ;
+    return "count";
 }
 
 partial struct Alarm {
@@ -185,7 +182,7 @@ public static snapshot Peek() {
 partial struct Ticks /*num:uintptr*/;
 
 partial struct Device {
-    public partial ref Sensor Sensor { get; }
+    /*embed*/ public Sensor Sensor;
     public nint Serial;
 }
 
@@ -223,7 +220,7 @@ internal static void emitNode(this ref Leaf l) {
 }
 
 internal static @string nodeTag(this ref Leaf l) {
-    return "lf"u8;
+    return "lf";
 }
 
 public static ж<Leaf> NewLeaf(@string text) {
@@ -239,18 +236,15 @@ public static @string Emit(this ref EmitBase e) {
 }
 
 partial struct Branch {
-    public partial ref EmitBase EmitBase { get; }
+    /*embed*/ public EmitBase EmitBase;
     public nint Kind;
 }
 
 internal static void emitNode(this ref Branch b) {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string brnˢ = "brn"u8;
-
 internal static @string nodeTag(this ref Branch b) {
-    return brnˢ;
+    return "brn";
 }
 
 public static ж<Branch> NewBranch(@string label, nint kind) {

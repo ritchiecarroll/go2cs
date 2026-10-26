@@ -16,6 +16,8 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.path;
 using io;
 using static go.path.filepath_internal_test_package;
@@ -132,7 +134,7 @@ internal static readonly object skippingAllocsPerRunˢ = (@string)"skipping Allo
 public static void TestClean(ж<testing.T> Ꮡt) {
     var tests = cleantests;
     if (runtime.GOOS == "windows"u8){
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             tests[i].result = filepath.FromSlash(tests[i].result);
         }
         tests = appendꓸꓸꓸ(tests, wincleantests);
@@ -308,7 +310,7 @@ public static void TestLocalize(ж<testing.T> Ꮡt) {
     }
     else if (exprᴛ1 == "windows"u8) {
         tests = appendꓸꓸꓸ(tests, winlocalizetests);
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             tests[i].want = filepath.FromSlash(tests[i].want);
         }
     }
@@ -331,7 +333,7 @@ internal static UntypedInt sep => /* filepath.Separator */ 92;
 
 internal static slice<PathTest> slashtests = new PathTest[]{
     new(""u8, ""u8),
-    new("/"u8, ((@string)(rune)sep)),
+    new("/"u8, (@string)(rune)sep),
     new("/a/b"u8, ((@string)new byte[]{sep, (rune)'a', sep, (rune)'b'}.slice())),
     new("a//b"u8, ((@string)new byte[]{(rune)'a', sep, sep, (rune)'b'}.slice()))
 }.slice();
@@ -809,7 +811,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
 
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
-    Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
         var Walk = (@string root) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
         checkʗ1(tΔ2, Walk, td);
@@ -817,7 +819,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
     });
     var checkʗ2 = check;
     var walkDirFnʗ1 = walkDirFn;
-    Ꮡt.Run(walkDirˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
         var WalkDir = (@string root) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
         checkʗ2(tΔ3, WalkDir, td);
@@ -886,7 +888,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
 
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
-    Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
         var Walk = (@string _) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
         checkʗ1(tΔ2, Walk, td);
@@ -894,7 +896,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
     });
     var checkʗ2 = check;
     var walkDirFnʗ1 = walkDirFn;
-    Ꮡt.Run(walkDirˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
         var WalkDir = (@string _) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
         checkʗ2(tΔ3, WalkDir, td);
@@ -1010,7 +1012,7 @@ public static void TestWalkSymlinkRoot(ж<testing.T> Ꮡt) {
     // Walk should report the symlink itself (since it is the last pathname component);
     // but if it does end in a slash, Walk should walk the directory to which the symlink
     // refers (since it must be fully resolved before walking).
-    foreach (var (_, tt) in new TestWalkSymlinkRoot_type[]{
+    foreach (var (_, vᴛ1) in new TestWalkSymlinkRoot_type[]{
         new(
             desc: "no slash"u8,
             root: link,
@@ -1044,10 +1046,11 @@ public static void TestWalkSymlinkRoot(ж<testing.T> Ꮡt) {
 
         )
     }.slice()) {
-        ref var ttΔ1 = ref heap<TestWalkSymlinkRoot_type>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.desc, (ж<testing.T> tΔ1) => {
+        ref var tt = ref heap(new TestWalkSymlinkRoot_type(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.desc, (ж<testing.T> tΔ1) => {
             ref var walked = ref heap<slice<@string>>(out var Ꮡwalked);
             var err = filepath.Walk(ttʗ1.root, error (@string path, fs.FileInfo info, error errΔ1) => {
                 if (errΔ1 != default!) {
@@ -1102,7 +1105,7 @@ public static void TestBase(ж<testing.T> Ꮡt) {
     var tests = basetests;
     if (runtime.GOOS == "windows"u8) {
         // make unix tests work on windows
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             tests[i].result = filepath.Clean(tests[i].result);
         }
         // add windows specific tests
@@ -1152,7 +1155,7 @@ public static void TestDir(ж<testing.T> Ꮡt) {
     var tests = dirtests;
     if (runtime.GOOS == "windows"u8){
         // make unix tests work on windows
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             tests[i].result = filepath.Clean(tests[i].result);
         }
         // add windows specific tests
@@ -1205,12 +1208,14 @@ internal static slice<IsAbsTest> winisabstests = new IsAbsTest[]{
 }.slice();
 
 public static void TestIsAbs(ж<testing.T> Ꮡt) {
+    var testsᴷ = new stackAppend<IsAbsTest>();
+
     slice<IsAbsTest> tests = default!;
     if (runtime.GOOS == "windows"u8){
         tests = appendꓸꓸꓸ(tests, winisabstests);
         // All non-windows tests should fail, because they have no volume letter.
         foreach (var (_, test) in isabstests) {
-            tests = append(tests, new IsAbsTest(test.path, false));
+            tests = append(testsᴷ, tests, new IsAbsTest(test.path, false));
         }
         // All non-windows test should work as intended if prefixed with volume letter.
         foreach (var (_, test) in isabstests) {
@@ -1525,6 +1530,7 @@ internal static readonly object chdirFailedˢ = (@string)"chdir failed: "u8;
 
 public static void TestAbs(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var extraᴷ = new stackAppend<@string>();
 
     @string root = Ꮡt.TempDir();
     Ꮡt.Chdir(root);
@@ -1549,7 +1555,7 @@ public static void TestAbs(ж<testing.T> Ꮡt) {
                 continue;
             }
             path = vol + path;
-            extra = append(extra, path);
+            extra = append(extraᴷ, extra, path);
         }
         tests = appendꓸꓸꓸ(slices.Clip<slice<@string>, @string>(tests), extra);
     }
@@ -1656,6 +1662,7 @@ internal static slice<RelTests> reltests = new RelTests[]{
     new("/../../a/b"u8, "/../../a/b/c/d"u8, "c/d"u8),
     new("."u8, "a/b"u8, "a/b"u8),
     new("."u8, ".."u8, ".."u8),
+    new(""u8, "../../."u8, "../.."u8),
 
     // can't do purely lexically
     new(".."u8, "."u8, "err"u8),
@@ -1678,7 +1685,7 @@ internal static slice<RelTests> winreltests = new RelTests[]{
 public static void TestRel(ж<testing.T> Ꮡt) {
     var tests = appendꓸꓸꓸ(new RelTests[]{}.slice(), reltests);
     if (runtime.GOOS == "windows"u8) {
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             tests[i].want = filepath.FromSlash(tests[i].want);
         }
         tests = appendꓸꓸꓸ(tests, winreltests);
@@ -1878,7 +1885,7 @@ public static void TestIssue29372(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
 
-    @string pathSeparator = ((@string)(rune)filepath.Separator);
+    @string pathSeparator = (@string)(rune)filepath.Separator;
     var tests = new @string[]{
         path + strings.Repeat(pathSeparator, 1),
         path + strings.Repeat(pathSeparator, 2),
@@ -1898,6 +1905,8 @@ public static void TestIssue29372(ж<testing.T> Ꮡt) {
 
 // Issue 30520 part 1.
 public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
+    var ddᴷ = new stackAppend<@string>();
+
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
 
     Ꮡt.Parallel();
@@ -1927,17 +1936,17 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
 
     // Count the number of ".." elements to get to the root directory.
     @string vol = filepath.VolumeName(evalTmpDir);
-    nint c = strings.Count(evalTmpDir.slice(len(vol)), ((@string)(rune)os.PathSeparator));
+    nint c = strings.Count(evalTmpDir.slice(len(vol)), (@string)(rune)os.PathSeparator);
     slice<@string> dd = default!;
     for (nint i = 0; i < c + 2; i++) {
-        dd = append(dd, ".."u8);
+        dd = append(ddᴷ, dd, ".."u8);
     }
 
-    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
 
     // Try different numbers of "..".
     foreach (var (_, i) in new nint[]{c, c + 1, c + 2}.slice()) {
-        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), ((@string)(rune)os.PathSeparator)), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), (@string)(rune)os.PathSeparator), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
         var (resolved, errΔ4) = filepath.EvalSymlinks(check);
         switch (ᐧ) {
         case {} when runtime.GOOS == "darwin"u8 && errors.Is(errΔ4, fs.ErrNotExist): {
@@ -2029,7 +2038,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
-        defer(os.Chmod, bad, (fs.FileMode)(448), ref ᒐ); // avoid errors on cleanup
+        defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
         var err = filepath.WalkDir(dir, error (@string path, fs.DirEntry d, error errΔ3) => {
             if (errΔ3 != default!) {
@@ -2093,6 +2102,21 @@ public static void TestEvalSymlinksTooManyLinks(ж<testing.T> Ꮡt) {
     (_, err) = filepath.EvalSymlinks(dir);
     if (err == default!) {
         Ꮡt.Fatal(expectedErrorGotNilˢ);
+    }
+}
+
+public static void BenchmarkIsLocal(ж<testing.B> Ꮡb) {
+    var tests = islocaltests;
+    if (runtime.GOOS == "windows"u8) {
+        tests = appendꓸꓸꓸ(tests, winislocaltests);
+    }
+    if (runtime.GOOS == "plan9"u8) {
+        tests = appendꓸꓸꓸ(tests, plan9islocaltests);
+    }
+    while (Ꮡb.Loop()) {
+        foreach (var (_, test) in tests) {
+            filepath.IsLocal(test.path);
+        }
     }
 }
 

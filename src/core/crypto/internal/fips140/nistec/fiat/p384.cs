@@ -91,13 +91,8 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P384Element>().Sub(
         @new<P384Element>(), @new<P384Element>().One()).Bytes();
-    foreach (var (i, _) in v) {
-        if (v[i] < minusOneEncoding[i]) {
-            break;
-        }
-        if (v[i] > minusOneEncoding[i]) {
-            return (default!, errors.New(invalidP384Elementˢ));
-        }
+    if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
+        return (default!, errors.New(invalidP384Elementˢ));
     }
 
     ref var @in = ref heap(new array<byte>(48), out var Ꮡin);
@@ -160,7 +155,7 @@ public static ж<P384Element> Select(this ж<P384Element> Ꮡv, ж<P384Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p384Selectznz(ref ᴛ3, ((p384Uint1)(uint64)cond),
+    p384Selectznz(ref ᴛ3, (p384Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

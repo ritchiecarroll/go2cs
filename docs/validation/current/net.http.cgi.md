@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http/cgi` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**38 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**39 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/http/cgi`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/cgi).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -38,6 +38,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestEnvOverride` | pass | pass |
 | `TestHandlerStderr` | pass | pass |
 | `TestHostingOurselves` | pass | pass |
+| `TestIncludedServerProtocol` | pass | pass |
 | `TestInternalRedirect` | pass | pass |
 | `TestKillChildAfterCopyError` | pass | pass |
 | `TestNilRequestBody` | pass | pass |

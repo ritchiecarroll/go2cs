@@ -46,6 +46,8 @@ partial struct pair {
 // to wait longer (to be patient) for the diff, meaning that it is a slower algorithm,
 // when in fact the algorithm is faster than the standard one.
 public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName, slice<byte> @new) {
+    var ctextᴷ = new stackAppend<@string>();
+
     if (bytes.Equal(old, @new)) {
         return default!;
     }
@@ -92,7 +94,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         // Emit the mismatched lines before start into this chunk.
         // (No effect on first sentinel iteration, when start = {0,0}.)
         foreach (var (_, s) in x.slice(done.x, start.x)) {
-            ctext = append(ctext, "-"u8 + s);
+            ctext = append(ctextᴷ, ctext, "-"u8 + s);
             count.x++;
         }
         foreach (var (_, s) in y.slice(done.y, start.y)) {
@@ -166,7 +168,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 // If the file does not end in a newline, one is supplied
 // along with a warning about the missing newline.
 internal static slice<@string> lines(slice<byte> x) {
-    var l = strings.SplitAfter(((@string)x), "\n"u8);
+    var l = strings.SplitAfter((@string)x, "\n"u8);
     if (l[len(l) - 1] == ""){
         l = l.slice(0, len(l) - 1);
     } else {
@@ -186,6 +188,10 @@ internal static slice<@string> lines(slice<byte> x) {
 // Subsequence Problem,” Princeton TR #170 (January 1975),
 // available at https://research.swtch.com/tgs170.pdf.
 internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
+    var yiᴷ = new stackAppend<nint>();
+    var xiᴷ = new stackAppend<nint>();
+    var invᴷ = new stackAppend<nint>(moves: true);
+
     // Count the number of times each string appears in a and b.
     // We only care about 0, 1, many, counted as 0, -1, -2
     // for the x side and 0, -4, -8 for the y side.
@@ -218,14 +224,14 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     foreach (var (i, s) in y) {
         if (m[s] == -1 + -4) {
             m[s] = len(yi);
-            yi = append(yi, i);
+            yi = append(yiᴷ, yi, i);
         }
     }
     foreach (var (i, s) in x) {
         {
             var (j, ok) = m[s, ꟷ]; if (ok && j >= 0) {
-                xi = append(xi, i);
-                inv = append(inv, j);
+                xi = append(xiᴷ, xi, i);
+                inv = append(invᴷ, inv, j);
             }
         }
     }
@@ -234,11 +240,12 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     // In those terms, A = J = inv and B = [0, n).
     // We add sentinel pairs {0,0}, and {len(x),len(y)}
     // to the returned sequence, to help the processing loop.
+    inv = move2heap(invᴷ, inv);
     var J = inv;
     nint n = len(xi);
     var T = new slice<nint>(n);
     var L = new slice<nint>(n);
-    foreach (var (i, _) in T) {
+    foreach (var i in range(T)) {
         T[i] = n + 1;
     }
     for (nint iᴛ1 = 0; iᴛ1 < n; iᴛ1++) {

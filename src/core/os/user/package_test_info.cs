@@ -17,7 +17,8 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-using testing = go.testing_package;
+global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
+global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,8 +33,13 @@ using static global::go.os.user_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.os.user_package.User, ж<global::go.os.user_package.User>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -43,8 +49,8 @@ using static global::go.os.user_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/user_test.go", "user_test.cs", "AAwcgsaCgoK4woKClIKCgoKUpoKUgrSktIK4soKUgpSClIKUgriClIKCgpTugoKUpoKUgoKClLiCgpTWgoKCuKKCgpSClIKCgpS4griClIKmgoKUgrTUgoKCuIKUgoKClLiCgpSCuIKCgqY=", "27-29:1;122-124:1")]
-[assembly: go.GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACU80oKGspSCgoakgpSUlpKUgoKCpoKEkoKCgoKCptqCgqaCgIKCtoKmkoCCgsjussqUgoKClIKClIKClIKCgoCCpIKUgoKU1qKClJKCptyCsoCCpJSCpoKUlIKUosSkooKUkoK4poCCpIKClLiCgpSi9IKmpoKCgoKUgoKCgpSClIKCgoKCuJSUgoKmgpSC+AAFEoKCgoKCgpSCyoKCgoKCgpSClILKgoKCgoKClILKgoKCgoKClII=", "38-49:1;94-100:2;135-137:1;161-180:1;200-206:1")]
+[assembly: go.GoPositionMap("os/user/user_test.go", "user_test.cs", "AA8egsaCgoK4woKClIKCgoKUpoKUgrSktIK4soKUgpSClIKUgriClIKCgpTugoKUpoKUgoKClLiCgpTWgoKCuKKCgpSClIKCgpS4griClIKmgoKUgrTUgoKCuIKUgoKClLiCgpSC", "28-30:1;123-125:1")]
+[assembly: go.GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACdA0oKGspSCgoakgpSUlpKUgoKCpoKEkoKCgoKCptqCgqaCgIKCtoKmkoCCgsjussqUgoKClIKClIKClIKCgoCCpIKUgoKU1qKClJKCptyCsoCCpJSCpoKUlIKUosSkooKUkoK4poCCpIKClLiCgpSi9IKmpoKCgoKUgoKCgpSClIKCgoKCuJSUgoKmgpSCuKaClKbmAAUSgoKykoKCgoKUgpSClMqCgoKCgoKUgpSCgpTcgoKykoKCgoKUgpSC3IKCgoKCgpSC", "40-51:1;96-102:2;137-139:1;163-182:1;202-208:1;289-303:1;331-344:1")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
@@ -78,8 +84,10 @@ public static partial class user_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));

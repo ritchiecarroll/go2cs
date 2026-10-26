@@ -14,6 +14,8 @@ partial class printer_package {
 // formatDocComment reformats the doc comment list,
 // returning the canonical formatting.
 internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> list) {
+    var directivesᴷ = new stackAppend<ж<ast.Comment>>(moves: true);
+
     // Extract comment text (removing comment markers).
     @string kind = default!;
     @string text = default!;
@@ -45,7 +47,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             }
             // Accumulate //go:build etc lines separately.
             if (isDirective(after)) {
-                directives = append(directives, c);
+                directives = append(directivesᴷ, directives, c);
                 continue;
             }
             Ꮡb.WriteString(strings.TrimPrefix(after, " "u8));
@@ -66,7 +68,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     var d = Ꮡp.Parse(text);
 
     ref var pr = ref heap(new comment.Printer(), out var Ꮡpr);
-    text = ((@string)Ꮡpr.Comment(d));
+    text = (@string)Ꮡpr.Comment(d);
 
     // For /* */ comment, return one big comment with text inside.
     ref var slash = ref heap<tokenꓸPos>(out var Ꮡslash);
@@ -102,6 +104,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             Slash: slash,
             Text: "//"u8
         )));
+        directives = move2heap(directivesᴷ, directives);
         foreach (var (_, c) in directives) {
             @out = append(@out, Ꮡ(new ast.Comment(
                 Slash: slash,

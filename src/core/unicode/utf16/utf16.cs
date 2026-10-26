@@ -33,7 +33,7 @@ public static bool IsSurrogate(rune r) {
 // the Unicode replacement code point U+FFFD.
 public static rune DecodeRune(rune r1, rune r2) {
     if (surr1 <= r1 && r1 < surr2 && surr2 <= r2 && r2 < surr3) {
-        return (rune)(((r1 - (rune)surr1) << (int)(10)) | (r2 - (rune)surr2)) + (rune)surrSelf;
+        return ((r1 - (rune)surr1) << 10 | (r2 - (rune)surr2)) + (rune)surrSelf;
     }
     return replacementChar;
 }
@@ -46,7 +46,7 @@ public static (rune r1, rune r2) EncodeRune(rune r) {
         return (replacementChar, replacementChar);
     }
     r -= surrSelf;
-    return ((rune)surr1 + (rune)(((r >> (int)(10))) & 0x3ff), (rune)surr2 + (rune)(r & 0x3ff));
+    return ((rune)surr1 + ((r >> 10) & 0x3ff), (rune)surr2 + (r & 0x3ff));
 }
 
 // RuneLen returns the number of 16-bit words in the UTF-16 encoding of the rune.
@@ -128,6 +128,8 @@ public static slice<rune> Decode(slice<uint16> s) {
 // decode appends to buf the Unicode code point sequence represented
 // by the UTF-16 encoding s and return the extended buffer.
 internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
+    var bufᴷ = new stackAppend<rune>(moves: true);
+
     for (nint i = 0; i < len(s); i++) {
         rune ar = default!;
         {
@@ -150,8 +152,9 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
                 break;
             }}
         }
-        buf = append(buf, ar);
+        buf = append(bufᴷ, buf, ar);
     }
+    buf = move2heap(bufᴷ, buf);
     return buf;
 }
 

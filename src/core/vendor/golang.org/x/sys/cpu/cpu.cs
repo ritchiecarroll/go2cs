@@ -74,6 +74,9 @@ partial struct X86ᴛ1 /*dyn*/ {
     public bool HasSSSE3; // Supplemental streaming SIMD extension 3
     public bool HasSSE41; // Streaming SIMD extension 4 and 4.1
     public bool HasSSE42; // Streaming SIMD extension 4 and 4.2
+    public bool HasAVXIFMA; // Advanced vector extension Integer Fused Multiply Add
+    public bool HasAVXVNNI; // Advanced vector extension Vector Neural Network Instructions
+    public bool HasAVXVNNIInt8; // Advanced vector extension Vector Neural Network Int8 instructions
     internal CacheLinePad __;
 }
 public static ж<X86ᴛ1> ᏑX86 = new StandardBox<X86ᴛ1>(default(X86ᴛ1));
@@ -152,6 +155,19 @@ partial struct ARMᴛ1 /*dyn*/ {
 }
 public static ARMᴛ1 ARM;
 
+// The booleans in Loong64 contain the correspondingly named cpu feature bit.
+// The struct is padded to avoid false sharing.
+partial struct Loong64ᴛ1 /*dyn*/ {
+    internal CacheLinePad _;
+    public bool HasLSX; // support 128-bit vector extension
+    public bool HasLASX; // support 256-bit vector extension
+    public bool HasCRC32; // support CRC instruction
+    public bool HasLAM_BH; // support AM{SWAP/ADD}[_DB].{B/H} instruction
+    public bool HasLAMCAS; // support AMCAS[_DB].{B/H/W/D} instruction
+    internal CacheLinePad __;
+}
+public static Loong64ᴛ1 Loong64;
+
 // MIPS64X contains the supported CPU features of the current mips64/mips64le
 // platforms. If the current platform is not mips64/mips64le or the current
 // operating system is not Linux then all feature flags are false.
@@ -226,6 +242,17 @@ partial struct RISCV64ᴛ1 /*dyn*/ {
     public bool HasZba; // Address generation instructions extension
     public bool HasZbb; // Basic bit-manipulation extension
     public bool HasZbs; // Single-bit instructions extension
+    public bool HasZvbb; // Vector Basic Bit-manipulation
+    public bool HasZvbc; // Vector Carryless Multiplication
+    public bool HasZvkb; // Vector Cryptography Bit-manipulation
+    public bool HasZvkt; // Vector Data-Independent Execution Latency
+    public bool HasZvkg; // Vector GCM/GMAC
+    public bool HasZvkn; // NIST Algorithm Suite (AES/SHA256/SHA512)
+    public bool HasZvknc; // NIST Algorithm Suite with carryless multiply
+    public bool HasZvkng; // NIST Algorithm Suite with GCM
+    public bool HasZvks; // ShangMi Algorithm Suite
+    public bool HasZvksc; // ShangMi Algorithm Suite with carryless multiplication
+    public bool HasZvksg; // ShangMi Algorithm Suite with GCM
     internal CacheLinePad __;
 }
 public static RISCV64ᴛ1 RISCV64;
@@ -290,14 +317,14 @@ field:
         }
 
         if (key == "all"u8) {
-            foreach (var (iΔ1, _) in options) {
+            foreach (var iΔ1 in range(options)) {
                 options[iΔ1].Specified = true;
                 options[iΔ1].Enable = enable || options[iΔ1].Required;
             }
             goto continue_field;
         }
 
-        foreach (var (iΔ2, _) in options) {
+        foreach (var iΔ2 in range(options)) {
             if (options[iΔ2].Name == key) {
                 options[iΔ2].Specified = true;
                 options[iΔ2].Enable = enable;

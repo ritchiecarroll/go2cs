@@ -123,6 +123,34 @@ public static class TestHost
         return loaded;
     }
 
+    /// <summary>
+    /// Whether a test binary's entry assembly tests a MAIN package: the package's production sources compile into the
+    /// test assembly, so a main package under test is the one whose converted <c>main_package</c> class is there.
+    /// </summary>
+    /// <remarks>
+    /// Matched by NAME, in any namespace: a module-root main converts into a namespace of its own module path
+    /// (<c>go.example.com</c> for <c>example.com/app</c>), not into <c>go</c>. A main package cannot be imported, so the
+    /// only <c>main_package</c> a test assembly can hold is the package under test.
+    /// </remarks>
+    public static bool HostsMainPackage(Assembly? entryAssembly)
+    {
+        if (entryAssembly is null)
+            return false;
+
+        Type?[] types;
+
+        try
+        {
+            types = entryAssembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            types = ex.Types;
+        }
+
+        return types.Any(static type => type?.Name == "main_package");
+    }
+
     public static int Run(TestRegistry registry, string[] args)
     {
         // Before anything else, so no test -- on any thread, under any token -- is the first to bind an
@@ -134,6 +162,12 @@ public static class TestHost
         // never runs a test must not pay for it. Enabled at the very top of the run rather than
         // lazily, so that everything a test can observe is inside the counting window.
         AllocationCounter.Enable();
+
+        // The test binary's build info, as `go test` links it in: `path <package>.test` -- bare for a main
+        // package, whose own build info cmd/go's test main copies -- plus `mod <module> (devel)` outside the
+        // standard library, then a main package's `dep` lines. Registered from the values the host passes its registry,
+        // so runtime/debug.ReadBuildInfo answers; a host with no dependencies is unchanged.
+        GoModInfoAttribute.Register(registry.Package, registry.ModulePath, HostsMainPackage(Assembly.GetEntryAssembly()), registry.ModuleDependencies);
 
         // The run's own command line, announced once so nothing downstream has to ask the PROCESS
         // for it. See TestFlagBridge.HostCommandLine: in a real converted test binary this array
@@ -157,6 +191,19 @@ public static class TestHost
             Console.Error.WriteLine(ex.Message);
             return 2;
         }
+
+        // The pipeline's three settings are this run's ALONE, and Parse cleared them from the CLR
+        // environment only. On unix a converted child inherits syscall.envs instead (windows' converted
+        // syscall reads the process environment itself, so it was never stale there), the snapshot syscall's static
+        // initializer took -- before Parse whenever that ran first (a module initializer, or syscall being
+        // the package under test) -- so a test re-executing this host handed its child the parent's absolute
+        // GO2CS_TEST_RESULT, and each child's exit flush truncated the parent's results file: 4 helpers of
+        // the linux syscall row wrote it before the parent's final write, and on darwin a child's 3-event
+        // record survived (go1.26.10, 2026-10-25). Cleared from the converted environment too
+        // (PublishSandboxMarker's two-environment argument). Guarded by GolibTests' LinuxPipelineEnvironmentTests
+        // (built with GoTargetOS=linux).
+        foreach (string taken in TestOptions.PipelineEnvironmentVariables)
+            PublishEnvironmentVariable(taken, null);
 
         ShortMode = options.Short;
         VerboseMode = options.Verbose;
@@ -517,6 +564,11 @@ public static class TestHost
                 // whose reader observes the CLR store this run would otherwise have left set. Nothing
                 // to put back is the common case and costs a bool test.
                 PackageAncestry.RestoreJunctionGodebug();
+
+                // The staged-toolchain directory composer lives exactly as long as the staged ancestry it
+                // names: the next host in the in-process tier must not start a toolchain child against a
+                // run root that no longer exists.
+                PackageAncestry.ReleaseStagedToolchainDirectory();
             }
             catch
             {
@@ -791,8 +843,9 @@ public static class TestHost
             if (!OwnerIsLive(ownerId, ownerName) || !Directory.Exists(runRoot))
                 return null;
 
-            // The containment test: this process was started somewhere the owner controls.
-            if (!IsWithin(workingDirectory, runRoot) && !IsWithin(workingDirectory, markerDirectory))
+            // The containment test: this process was started somewhere the owner controls. Asked through
+            // symlinks (IsWithinCanonical), because the two sides spell one directory differently on darwin.
+            if (!IsWithinCanonical(workingDirectory, runRoot) && !IsWithinCanonical(workingDirectory, markerDirectory))
                 return null;
 
             return runRoot;
@@ -877,6 +930,69 @@ public static class TestHost
             return false;
         }
     }
+
+    /// <summary>
+    /// <see cref="IsWithin"/>, widened on unix by SYMLINK EQUIVALENCE and by nothing else: true when the
+    /// lexical test is, or when the two paths' realpath(3) forms pass it.
+    /// </summary>
+    /// <remarks>
+    /// The marker's run root is the parent's spelling, built from <see cref="Path.GetTempPath"/> -- on
+    /// darwin <c>$TMPDIR</c>, <c>/var/folders/…</c> -- while a helper's working directory is getcwd()'s,
+    /// which is PHYSICAL: <c>/private/var/folders/…</c>, <c>/var</c> being a symlink. Compared lexically,
+    /// net/http/cgi's children (spawned with cmd.Dir inside the parent's sandbox, the environment marker
+    /// filtered away) failed containment, sandboxed afresh under <c>/tmp</c>, and answered TestDir's and
+    /// TestEnvOverride's os.Getwd() with the new GUID root, on both mac RIDs (go1.26.10 D-W1, run
+    /// 40218859736). Windows keeps the lexical comparison (COORD's ruling), and linux's temp paths are
+    /// physical, so the widening changes no answer there: every pair the lexical test admitted is still
+    /// admitted, and the realpath arm admits only a pair naming the SAME directory tree, never a sibling or
+    /// a prefix-sharing name. A path realpath cannot resolve answers through the lexical test alone.
+    /// Guarded by GolibTests' HelperSandboxContainmentTests.
+    /// </remarks>
+    internal static bool IsWithinCanonical(string candidate, string root)
+    {
+        if (IsWithin(candidate, root))
+            return true;
+
+        if (OperatingSystem.IsWindows())
+            return false;
+
+        string? canonicalCandidate = RealPath(candidate);
+        string? canonicalRoot = RealPath(root);
+
+        return canonicalCandidate is not null && canonicalRoot is not null && IsWithin(canonicalCandidate, canonicalRoot);
+    }
+
+    // realpath(3) with a NULL buffer: libc allocates the result, which is freed here. Null on any failure,
+    // and on windows, where it is never called. INTERNAL for PackageAncestry's toolchain-child composer.
+    internal static string? RealPath(string path)
+    {
+        try
+        {
+            IntPtr resolved = realpath(Path.GetFullPath(path), IntPtr.Zero);
+
+            if (resolved == IntPtr.Zero)
+                return null;
+
+            try
+            {
+                return Marshal.PtrToStringUTF8(resolved);
+            }
+            finally
+            {
+                free(resolved);
+            }
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or ArgumentException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    [DllImport("libc", SetLastError = true, EntryPoint = "realpath")]
+    private static extern IntPtr realpath([MarshalAs(UnmanagedType.LPUTF8Str)] string path, IntPtr resolved);
+
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void free(IntPtr pointer);
 
     /// <summary>
     /// Sets an environment variable in BOTH environments this process has — the CLR's, which the
@@ -1314,7 +1430,7 @@ public static class TestHost
             // Reporting the death must never be what prevents it.
         }
 
-        (exit ?? Environment.Exit)(2);
+        (exit ?? global::go.golib.MainExit.Exit)(2);
     }
 
     /// <summary>

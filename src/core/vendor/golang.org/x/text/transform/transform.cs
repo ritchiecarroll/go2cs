@@ -325,7 +325,7 @@ public static error Close(this ref Writer w) {
 }
 
 partial struct nop {
-    public partial ref NopResetter NopResetter { get; }
+    /*embed*/ public NopResetter NopResetter;
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
@@ -343,7 +343,7 @@ internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF
 }
 
 partial struct discard {
-    public partial ref NopResetter NopResetter { get; }
+    /*embed*/ public NopResetter NopResetter;
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
@@ -410,7 +410,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     }
     // Allocate intermediate buffers.
     var b = GoReflect.WithElemDims(new slice<array<byte>>(len(t) - 1, () => new(4096)), 4096);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         (~c).link[i + 1].b = b[i][..];
     }
     return new chainжTransformer(c);
@@ -595,7 +595,7 @@ internal static slice<byte> grow(slice<byte> b, nint n) {
     if (m <= 256){
         m *= 2;
     } else {
-        m += (m >> (int)(1));
+        m += (m >> 1);
     }
     var buf = new slice<byte>(m);
     copy(buf, b.slice(0, n));
@@ -643,6 +643,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     nint pPrefix = 0;
     while (ᐧ) {
         // Invariant: pDst == pPrefix && pSrc == pPrefix.
+
         nint nΔ1 = copy(src, s.slice(pSrc));
         (nDst, nSrc, err) = t.Transform(dst, src.slice(0, nΔ1), pSrc + nΔ1 == len(s));
         pDst += nDst;
@@ -666,7 +667,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
             // Equal so far and !atEOF, so continue checking.
         } else 
         if (err != default! || pPrefix == len(s)) {
-            return (((@string)(s.slice(0, pPrefix))), pPrefix, err);
+            return ((@string)(s.slice(0, pPrefix)), pPrefix, err);
         }
     }
     // Post-condition: pDst == pPrefix + nDst && pSrc == pPrefix + nSrc.
@@ -689,7 +690,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     // Prevent duplicate Transform calls with atEOF being true at the end of
     // the input. Also return if we have an unrecoverable error.
     if ((err == default! && pSrc == len(s)) || (err != default! && !AreEqual(err, ErrShortDst) && !AreEqual(err, ErrShortSrc))) {
-        return (((@string)(dst.slice(0, pDst))), pSrc, err);
+        return ((@string)(dst.slice(0, pDst)), pSrc, err);
     }
 
     // Transform the remaining input, growing dst and src buffers as necessary.
@@ -709,14 +710,14 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
         } else 
         if (AreEqual(errΔ2, ErrShortSrc)){
             if (atEOF) {
-                return (((@string)(dst.slice(0, pDst))), pSrc, errΔ2);
+                return ((@string)(dst.slice(0, pDst)), pSrc, errΔ2);
             }
             if (nSrcΔ1 == 0) {
                 src = grow(src, 0);
             }
         } else 
         if (errΔ2 != default! || pSrc == len(s)) {
-            return (((@string)(dst.slice(0, pDst))), pSrc, errΔ2);
+            return ((@string)(dst.slice(0, pDst)), pSrc, errΔ2);
         }
     }
 }

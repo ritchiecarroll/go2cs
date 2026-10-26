@@ -22,9 +22,8 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     }.slice()) {
         ref var pw = ref heap<pkgbits.PkgEncoder>(out var Ꮡpw);
         pw = pkgbits.NewPkgEncoder(version, -1);
-        ref var w = ref heap<pkgbits.Encoder>(out var Ꮡw);
-        w = Ꮡpw.NewEncoder(pkgbits.RelocMeta, pkgbits.SyncPublic);
-        Ꮡw.Flush();
+        var w = Ꮡpw.NewEncoder(pkgbits.SectionMeta, pkgbits.SyncPublic);
+        w.Flush();
 
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         _ = Ꮡpw.DumpTo(new strings_BuilderжWriter(Ꮡb));
@@ -32,10 +31,10 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
 
         ref var pr = ref heap<pkgbits.PkgDecoder>(out var Ꮡpr);
         pr = pkgbits.NewPkgDecoder(packageIdˢ, input);
-        var r = Ꮡpr.NewDecoder(pkgbits.RelocMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
+        var r = Ꮡpr.NewDecoder(pkgbits.SectionMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
 
         if (r.Version() != w.Version()) {
-            Ꮡt.Errorf("Expected reader version %q to be the writer version %q"u8, r.Version(), w.Version());
+            Ꮡt.Errorf("Expected reader version %d to be the writer version %d"u8, r.Version(), w.Version());
         }
     }
 }

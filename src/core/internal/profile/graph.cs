@@ -267,12 +267,8 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         if (dw == 0 && w == 0) {
             continue;
         }
-        foreach (var (k, _) in seenNode) {
-            delete(seenNode, k);
-        }
-        foreach (var (k, _) in seenEdge) {
-            delete(seenEdge, k);
-        }
+        clear(seenNode);
+        clear(seenEdge);
         ж<Node> parent = default!;
         // A residual edge goes over one or more nodes that were not kept.
         var residual = false;
@@ -396,7 +392,7 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
             lines = new Line[]{new()}.slice(); // Create empty line to include location info.
         }
         var nodes = new Nodes(len(lines));
-        foreach (var (ln, _) in lines) {
+        foreach (var ln in range(lines)) {
             nodes[ln] = nm.findOrInsertLine(l, lines[ln], Ꮡo);
         }
         locations.add((~l).ID, nodes);
@@ -469,6 +465,8 @@ internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
 
 // String returns a text representation of a graph, for debugging purposes.
 public static @string String(this ref Graph g) {
+    var sᴷ = new stackAppend<@string>();
+
     slice<@string> s = default!;
 
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
@@ -488,7 +486,7 @@ public static @string String(this ref Graph g) {
         foreach (var (_, to) in (~n).Out) {
             @out = append(@out, nodeIndex[(~to).Dest]);
         }
-        s = append(s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
+        s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
     }
     return strings.Join(s, "\n"u8);
 }

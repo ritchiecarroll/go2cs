@@ -246,9 +246,65 @@ public static class AdapterBinder
         // Value-typed: the reflective tier first — it needs no generic instantiation, which is the
         // only form guaranteed available under Native AOT — belting to the delegate tier when the
         // interface has a member the invoker cannot forward and no object shell was emitted.
-        return isValueType
-            ? BuildObjectShellFactory(valueType, spec) ?? BuildGenericShellFactory(valueType, spec)
-            : BuildGenericShellFactory(valueType, spec) ?? BuildObjectShellFactory(valueType, spec);
+        if (isValueType)
+        {
+            // P3 eligibility (DESIGN-iface-shell-caching 6.4): the object shell holds the boxed value
+            // by reference, so it is cached; the generic shell over a value type COPIES the struct in
+            // its constructor, so it is never cached.
+            Func<object, object>? objectShell = BuildObjectShellFactory(valueType, spec);
+
+            return objectShell is not null ?
+                CacheShellInstances(objectShell) :
+                BuildGenericShellFactory(valueType, spec);
+        }
+
+        // A reference-typed dynamic value: either tier holds the same reference.
+        Func<object, object>? factory = BuildGenericShellFactory(valueType, spec) ?? BuildObjectShellFactory(valueType, spec);
+
+        return factory is null ? null : CacheShellInstances(factory);
+    }
+
+    // The last shell this factory built, with the value it wraps (DESIGN-iface-shell-caching 12, the
+    // 2026-10-21 rework). A re-assert of that same value returns that same shell instead of building a
+    // new one; any other value is a miss that builds its shell and takes the slot. A miss costs one small
+    // pair and a handle write, so a new value per assert costs about what it cost with no cache at all.
+    // The table this replaced paid an insert and a dependent handle per new value, and kept growing.
+    //
+    // The pair is held WEAKLY, because the shell holds its value: a strong slot would keep the last value
+    // asserted through each factory alive, which Go can observe through a finalizer or a weak pointer. A
+    // collection may therefore empty the slot while the value lives; the next assert of it is a miss.
+    // A null value (a typed nil func) has no identity to key on and is built fresh every time.
+    private static Func<object, object> CacheShellInstances(Func<object, object> factory)
+    {
+#if GO2CS_NO_SHELL_CACHE
+        // The control arm of src/tests/Performance/run-shell-churn-bound.ps1 (golib.csproj's
+        // Go2csNoShellCache): every assert builds its shell, as before the cache existed.
+        return factory;
+#else
+        WeakReference<LastShell> slot = new(null!);
+
+        return value =>
+        {
+            if (value is null)
+                return factory(value!);
+
+            if (slot.TryGetTarget(out LastShell? last) && ReferenceEquals(last.Value, value))
+                return last.Shell;
+
+            object shell = factory(value);
+            slot.SetTarget(new LastShell(value, shell));
+
+            return shell;
+        };
+#endif
+    }
+
+    // One immutable pair, so a reader racing a writer sees an old pair or a new one, never a value from
+    // one beside a shell from the other.
+    private sealed class LastShell(object value, object shell)
+    {
+        public readonly object Value = value;
+        public readonly object Shell = shell;
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2059", Justification = GoTypeRegistry.RegisteredGenericJustification)]
@@ -337,7 +393,9 @@ public static class AdapterBinder
 
             MethodInfo? bound = isPointer ? byPtr ?? byVal : byVal;
 
-            if (bound is null || bound.IsGenericMethodDefinition || bound.ContainsGenericParameters)
+            // A generic type's method arrives CLOSED over the value's type arguments: the candidate source closes it
+            // (GoTypeExtensions.CloseGoMethod), so no open definition reaches this binder.
+            if (bound is null)
                 return false;
 
             invokers[i] = MethodInvoker.Create(bound);

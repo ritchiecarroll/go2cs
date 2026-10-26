@@ -9,6 +9,7 @@ using filepath = global::go.path.filepath_package;
 using testing = testing_package;
 using fstest = global::go.testing.fstest_package;
 using fs = global::go.io.fs_package;
+using global::go.net;
 using global::go.path;
 using global::go.testing;
 using static global::go.net.http_package;
@@ -45,7 +46,7 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
         defer(os.Remove, fname, ref ᒐ);
 
         var tr = Ꮡ(new Transport(nil));
-        tr.RegisterProtocol(fileˢ, NewFileTransport(((global::go.net.http_package.Dir)dname)));
+        tr.RegisterProtocol(fileˢ, NewFileTransport((global::go.net.http_package.Dir)dname));
         var c = Ꮡ(new Client(Transport: new global::go.net.http_package.TransportжRoundTripper(tr)));
 
         var fooURLs = new @string[]{"file:///foo.txt"u8, "file://../foo.txt"u8}.slice();
@@ -65,7 +66,12 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
             (~resΔ1).Body.Close();
             check("ReadAll "u8 + urlstr, errΔ1);
             if (((sstring)slurp) != "Bar"u8) {
-                Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
+                Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, (@string)slurp, barˢ);
+            }
+            {
+                @string got = (~(~resΔ1).Request).URL.String(); if (got != urlstr) {
+                    Ꮡt.Errorf("for %s, Response.Request.URL = %s, want = %s"u8, urlstr, got, urlstr);
+                }
             }
         }
 
@@ -92,7 +98,7 @@ public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
     });
 
     var tr = Ꮡ(new Transport(nil));
-    tr.RegisterProtocol(fileˢ, NewFileTransportFS(fsys));
+    tr.RegisterProtocol(fileˢ, NewFileTransportFS(new http_test_package.fstest_MapFSᴠFS(fsys)));
     var c = Ꮡ(new Client(Transport: new global::go.net.http_package.TransportжRoundTripper(tr)));
 
     foreach (var (fname, mfile) in fsys) {
@@ -112,7 +118,7 @@ public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
         (~resΔ1).Body.Close();
         check("ReadAll "u8 + urlstr, errΔ1);
         if (((sstring)slurp) != ((sstring)(~mfile).Data)) {
-            Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
+            Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, (@string)slurp, barˢ);
         }
     }
 

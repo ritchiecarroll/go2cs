@@ -103,13 +103,15 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
 
 // extractCAPS extracts capital letters from description desc.
 internal static @string extractCAPS(@string desc) {
+    var shortᴷ = new stackAppend<rune>();
+
     slice<rune> @short = default!;
     foreach (var (_, c) in desc) {
         if ((rune)'A' <= c && c <= (rune)'Z') {
-            @short = append(@short, c);
+            @short = append(shortᴷ, @short, c);
         }
     }
-    return ((@string)@short);
+    return (@string)@short;
 }
 
 // abbrev returns the abbreviations to use for the given zone z.
@@ -142,7 +144,7 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
     // d.Day is week within the month (1 to 5, where 5 is last week of the month)
     // d.Hour, d.Minute and d.Second are absolute time
     nint day = 1;
-    var t = Date(year, ((ΔMonth)(nint)d.Month), day, (nint)d.Hour, (nint)d.Minute, (nint)d.Second, 0, ΔUTC);
+    var t = Date(year, (ΔMonth)(nint)d.Month, day, (nint)d.Hour, (nint)d.Minute, (nint)d.Second, 0, ΔUTC);
     nint i = (nint)d.DayOfWeek - (nint)t.Weekday();
     if (i < 0) {
         i += 7;
@@ -154,7 +156,7 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
         } else {
             // "Last" instance of the day.
             day += 4 * 7;
-            if (day > daysIn(((ΔMonth)(nint)d.Month), year)) {
+            if (day > daysIn((ΔMonth)(nint)d.Month, year)) {
                 day -= 7;
             }
         }
@@ -234,7 +236,7 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
     }
 }
 
-internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
+[GoLazy] partial class lazyᴛusPacific { internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: 8 * 60,
     StandardName: new uint16[]{
         (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
@@ -245,10 +247,10 @@ internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<s
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 3, Day: 2, Hour: 2),
     DaylightBias: -60
-));
+)); }
 internal static ref syscall.Timezoneinformation usPacific => ref ᏑusPacific.Value;
 
-internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
+[GoLazy] partial class lazyᴛaus { internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: -10 * 60,
     StandardName: new uint16[]{
         (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
@@ -259,7 +261,7 @@ internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 10, Day: 1, Hour: 2),
     DaylightBias: -60
-));
+)); }
 internal static ref syscall.Timezoneinformation aus => ref Ꮡaus.Value;
 
 internal static void initLocal() {

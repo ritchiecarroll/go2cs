@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,16 +42,33 @@ public class ExecutionTracerTests
     private const byte EvGoBlock = 20;
     private const byte EvGoUnblock = 21;
     private const byte EvGoStatus = 25;
+    private const byte EvUserTaskBegin = 40;
+    private const byte EvUserTaskEnd = 41;
+    private const byte EvUserRegionBegin = 42;
+    private const byte EvUserRegionEnd = 43;
+    private const byte EvUserLog = 44;
+    private const byte EvSync = 50;
+    private const byte EvClockSnapshot = 51;
+    private const byte EvEndOfGeneration = 52;
 
     // Runs `window` between Start and Stop with a reader draining, and returns every byte read.
-    private static byte[] Trace(Action window)
+    private static byte[] Trace(Action window) => Trace(window, onChunk: null);
+
+    // The same, with `onChunk` called on the reader thread after each chunk it takes, before it reads
+    // again: the place a subscriber does its work, which the advance contract orders against.
+    private static byte[] Trace(Action window, Action<byte[]>? onChunk)
     {
         MemoryStream bytes = new();
 
         Thread reader = new(() =>
         {
             while (ExecutionTracer.Read() is { } chunk)
-                bytes.Write(chunk);
+            {
+                lock (bytes)
+                    bytes.Write(chunk);
+
+                onChunk?.Invoke(chunk);
+            }
         });
 
         Assert.IsTrue(ExecutionTracer.Start(), "no trace may be running when an arm starts one");
@@ -77,19 +95,109 @@ public class ExecutionTracerTests
         ExecutionTracer.Stop();
         ExecutionTracer.Stop();
 
-        Assert.AreEqual("go 1.23 trace\0\0\0", Encoding.ASCII.GetString(trace, 0, 16), "the header the go1.24.13 runtime writes");
-        Assert.IsTrue(trace.Length > 16, "a stopped trace carries at least its frequency batch after the header");
+        Assert.AreEqual("go 1.26 trace\0\0\0", Encoding.ASCII.GetString(trace, 0, 16), "the header the go1.26 runtime writes");
+        Assert.IsTrue(trace.Length > 16, "a stopped trace carries at least its sync batch after the header");
     }
 
     [TestMethod]
-    public void OneGenerationWithExactlyOneFrequencyAndOneStringsBatch()
+    public void EveryGenerationHasOneSyncBatchAndEndsWithItsEndOfGenerationSignal()
     {
-        List<Batch> batches = Parse(Trace(() => { }));
+        // Two advances inside the window, and the stop's own: three generations.
+        List<Batch> items = Parse(Trace(() =>
+        {
+            ExecutionTracer.Advance(false);
+            ExecutionTracer.Advance(false);
+        }));
 
-        Assert.IsTrue(batches.All(b => b.Gen == 1), "the whole window is one generation");
-        Assert.AreEqual(1, batches.Count(b => b.Payload[0] == EvFrequency), "exactly one frequency batch, as the parser requires");
-        Assert.AreEqual(1, batches.Count(b => b.Payload[0] == EvStrings), "one strings batch");
-        Assert.IsTrue(batches.All(b => b.Payload.Length <= 64 << 10), "no batch payload over 64 KiB");
+        List<List<Batch>> generations = Generations(items);
+        Assert.AreEqual(3, generations.Count, "two advances and a stop end three generations, each with its in-band end signal");
+        Assert.AreEqual(EvEndOfGeneration, items[^1].Payload[0], "the stream ends with an end-of-generation signal (Go 1.26's parser refuses a truncated generation)");
+
+        for (int i = 0; i < generations.Count; i++)
+        {
+            List<Batch> generation = generations[i];
+            ulong gen = (ulong)i + 1;
+
+            Assert.IsTrue(generation.All(b => b.Gen == gen), $"generation {gen}'s batches all carry its number");
+
+            Batch sync = generation.Single(b => b.Payload[0] == EvSync);
+            Assert.AreEqual(ulong.MaxValue, sync.M, "the sync batch belongs to no M, as Go's unsafeTraceWriter(gen, nil) writes it");
+            CollectionAssert.AreEqual(new[] { EvFrequency, EvClockSnapshot }, SyncEvents(sync).ToArray(), "the sync batch: one frequency, one clock snapshot");
+
+            Assert.AreEqual(1, generation.Count(b => b.Payload[0] == EvStrings), $"generation {gen} has one strings batch");
+            Assert.IsTrue(generation.All(b => b.Payload.Length <= 64 << 10), "no batch payload over 64 KiB");
+        }
+    }
+
+    [TestMethod]
+    public void AdvanceReturnsOnlyAfterTheReaderHasTakenTheGeneration()
+    {
+        // flightrecorder.go:127: "traceAdvance blocks until the tracer goroutine has actually written
+        // everything out", which WriteTo's read of the ring depends on. Go's reader releases the
+        // advance (doneSema) when it comes back to ReadTrace after the end-of-generation chunk.
+        // The reader here dawdles after that chunk; Advance must not return before it is back.
+        long readerBack = 0;
+        long advanceReturned = 0;
+        int endSignals = 0;
+
+        Trace(() =>
+        {
+            ExecutionTracer.Advance(false);
+            Interlocked.Exchange(ref advanceReturned, Stopwatch.GetTimestamp());
+        },
+        chunk =>
+        {
+            if (chunk is [EvEndOfGeneration] && Interlocked.Increment(ref endSignals) == 1)
+            {
+                Thread.Sleep(300);
+                Interlocked.Exchange(ref readerBack, Stopwatch.GetTimestamp());
+            }
+        });
+
+        Assert.IsTrue(Volatile.Read(ref endSignals) >= 1, "the advance must send its end-of-generation signal to the reader");
+        Assert.IsTrue(Volatile.Read(ref readerBack) != 0 && Volatile.Read(ref advanceReturned) >= Volatile.Read(ref readerBack),
+            "Advance(false) returned before the reader had finished with the generation it ended");
+    }
+
+    [TestMethod]
+    public void UserAnnotationsAreTracedOnTheCallersGoroutine()
+    {
+        using ManualResetEventSlim done = new();
+        Goroutine? annotator = null;
+
+        byte[] trace = Trace(() =>
+        {
+            Goroutine.Start(() =>
+            {
+                annotator = Goroutine.Current;
+                ExecutionTracer.OnUserTaskBegin(7, 0, "task"u8);
+                ExecutionTracer.OnUserRegion(7, 0, "region"u8);
+                ExecutionTracer.OnUserLog(7, "message"u8, "hello"u8);
+                ExecutionTracer.OnUserRegion(7, 1, "region"u8);
+                ExecutionTracer.OnUserTaskEnd(7);
+                done.Set();
+            });
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)));
+        });
+
+        List<Batch> batches = Parse(trace).Where(b => b.Payload[0] != EvEndOfGeneration).ToList();
+        Dictionary<ulong, string> strings = Strings(batches);
+        List<(byte Type, ulong[] Args)> events = batches.Where(b => b.Payload[0] is not (EvSync or EvStrings)).SelectMany(Events).ToList();
+
+        (byte _, ulong[] begin) = events.Single(e => e.Type == EvUserTaskBegin);
+        Assert.AreEqual(7UL, begin[0]);
+        Assert.AreEqual("task", strings[begin[2]]);
+
+        (byte _, ulong[] log) = events.Single(e => e.Type == EvUserLog);
+        Assert.AreEqual(7UL, log[0]);
+        Assert.AreEqual("message", strings[log[1]]);
+        Assert.AreEqual("hello", strings[log[2]]);
+
+        Assert.AreEqual("region", strings[events.Single(e => e.Type == EvUserRegionBegin).Args[1]]);
+        Assert.AreEqual("region", strings[events.Single(e => e.Type == EvUserRegionEnd).Args[1]]);
+        Assert.AreEqual(7UL, events.Single(e => e.Type == EvUserTaskEnd).Args[0]);
+        Assert.IsNotNull(annotator);
     }
 
     [TestMethod]
@@ -120,9 +228,9 @@ public class ExecutionTracerTests
             SpinWait.SpinUntil(() => Goroutine.FromId(child!.Id) is null, TimeSpan.FromSeconds(10));
         });
 
-        List<Batch> batches = Parse(trace);
+        List<Batch> batches = Parse(trace).Where(b => b.Payload[0] != EvEndOfGeneration).ToList();
         Dictionary<ulong, string> strings = Strings(batches);
-        List<(byte Type, ulong[] Args)> events = batches.Where(b => b.Payload[0] is not (EvFrequency or EvStrings)).SelectMany(Events).ToList();
+        List<(byte Type, ulong[] Args)> events = batches.Where(b => b.Payload[0] is not (EvSync or EvStrings)).SelectMany(Events).ToList();
         ulong id = (ulong)child!.Id;
 
         Assert.IsTrue(events.Any(e => e.Type == EvGoCreate && e.Args[0] == id), "GoCreate for the child, on the creating thread");
@@ -140,6 +248,8 @@ public class ExecutionTracerTests
 
     internal sealed record Batch(ulong Gen, ulong M, ulong Timestamp, byte[] Payload);
 
+    // Every batch in stream order, with each in-band end-of-generation signal as an item of its own
+    // (Gen 0, M 0, its one byte as the payload), where Go 1.26's reader meets it.
     internal static List<Batch> Parse(byte[] trace)
     {
         List<Batch> batches = [];
@@ -147,6 +257,12 @@ public class ExecutionTracerTests
 
         while (at < trace.Length)
         {
+            if (trace[at] == EvEndOfGeneration)
+            {
+                batches.Add(new Batch(0, 0, 0, [trace[at++]]));
+                continue;
+            }
+
             Assert.AreEqual(EvEventBatch, trace[at++], "every batch opens with EvEventBatch");
             ulong gen = UVarint(trace, ref at), m = UVarint(trace, ref at), ts = UVarint(trace, ref at);
             int length = (int)UVarint(trace, ref at);
@@ -155,6 +271,54 @@ public class ExecutionTracerTests
         }
 
         return batches;
+    }
+
+    // The batches of each generation, split at its end-of-generation signal. A generation without one
+    // at the end of the stream is returned too, so an arm can see it is missing its signal.
+    private static List<List<Batch>> Generations(List<Batch> items)
+    {
+        List<List<Batch>> generations = [];
+        List<Batch> current = [];
+
+        foreach (Batch item in items)
+        {
+            if (item.Payload[0] == EvEndOfGeneration)
+            {
+                generations.Add(current);
+                current = [];
+                continue;
+            }
+
+            current.Add(item);
+        }
+
+        if (current.Count > 0)
+            generations.Add(current);
+
+        return generations;
+    }
+
+    // The event types inside a sync batch, after its EvSync header.
+    private static IEnumerable<byte> SyncEvents(Batch sync)
+    {
+        Assert.AreEqual(EvSync, sync.Payload[0]);
+        int at = 1;
+
+        while (at < sync.Payload.Length)
+        {
+            byte type = sync.Payload[at++];
+            int args = type switch
+            {
+                EvFrequency => 1,
+                EvClockSnapshot => 4,
+                _ => throw new AssertFailedException($"a sync batch carries only frequency and clock snapshot events, not {type}")
+            };
+
+            for (int i = 0; i < args; i++)
+                UVarint(sync.Payload, ref at);
+
+            yield return type;
+        }
     }
 
     private static Dictionary<ulong, string> Strings(List<Batch> batches)
@@ -185,6 +349,11 @@ public class ExecutionTracerTests
         EvGoBlock => 2,
         EvGoUnblock => 3,
         EvGoStatus => 3,
+        EvUserTaskBegin => 4,
+        EvUserTaskEnd => 2,
+        EvUserRegionBegin => 3,
+        EvUserRegionEnd => 3,
+        EvUserLog => 4,
         _ => throw new AssertFailedException($"the tracer wrote event type {type}, which it never promises")
     };
 

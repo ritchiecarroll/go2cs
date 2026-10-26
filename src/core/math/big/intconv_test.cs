@@ -5,7 +5,9 @@ namespace go.math;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
+using Δrand = go.math.rand.rand_package;
 using testing = testing_package;
+using go.math.rand;
 using io = io_package;
 using static go.math.big_package;
 
@@ -136,7 +138,7 @@ public static void TestAppendText(ж<testing.T> Ꮡt) {
         nint i = len(buf);
         buf = z.Append(buf, @base);
         {
-            @string got = ((@string)(buf.slice(i))); if (got != test.@out) {
+            @string got = (@string)(buf.slice(i)); if (got != test.@out) {
                 Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.@out);
             }
         }
@@ -240,6 +242,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("<nil>"u8, "%x"u8, "<nil>"u8),
     new("<nil>"u8, "%#x"u8, "<nil>"u8),
     new("<nil>"u8, "%#y"u8, "%!y(big.Int=<nil>)"u8),
+
     new("10"u8, "%b"u8, "1010"u8),
     new("10"u8, "%o"u8, "12"u8),
     new("10"u8, "%d"u8, "10"u8),
@@ -249,6 +252,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-10"u8, "%X"u8, "-A"u8),
     new("10"u8, "%y"u8, "%!y(big.Int=10)"u8),
     new("-10"u8, "%y"u8, "%!y(big.Int=-10)"u8),
+
     new("10"u8, "%#b"u8, "0b1010"u8),
     new("10"u8, "%#o"u8, "012"u8),
     new("10"u8, "%O"u8, "0o12"u8),
@@ -262,6 +266,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-10"u8, "%#X"u8, "-0XA"u8),
     new("10"u8, "%#y"u8, "%!y(big.Int=10)"u8),
     new("-10"u8, "%#y"u8, "%!y(big.Int=-10)"u8),
+
     new("1234"u8, "%d"u8, "1234"u8),
     new("1234"u8, "%3d"u8, "1234"u8),
     new("1234"u8, "%4d"u8, "1234"u8),
@@ -285,6 +290,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("1234"u8, "%-6d"u8, "1234  "u8),
     new("1234"u8, "%-06d"u8, "1234  "u8),
     new("-1234"u8, "%-06d"u8, "-1234 "u8),
+
     new("1234"u8, "%.3d"u8, "1234"u8),
     new("1234"u8, "%.4d"u8, "1234"u8),
     new("1234"u8, "%.5d"u8, "01234"u8),
@@ -293,6 +299,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%.4d"u8, "-1234"u8),
     new("-1234"u8, "%.5d"u8, "-01234"u8),
     new("-1234"u8, "%.6d"u8, "-001234"u8),
+
     new("1234"u8, "%8.3d"u8, "    1234"u8),
     new("1234"u8, "%8.4d"u8, "    1234"u8),
     new("1234"u8, "%8.5d"u8, "   01234"u8),
@@ -301,6 +308,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%8.4d"u8, "   -1234"u8),
     new("-1234"u8, "%8.5d"u8, "  -01234"u8),
     new("-1234"u8, "%8.6d"u8, " -001234"u8),
+
     new("1234"u8, "%+8.3d"u8, "   +1234"u8),
     new("1234"u8, "%+8.4d"u8, "   +1234"u8),
     new("1234"u8, "%+8.5d"u8, "  +01234"u8),
@@ -309,6 +317,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%+8.4d"u8, "   -1234"u8),
     new("-1234"u8, "%+8.5d"u8, "  -01234"u8),
     new("-1234"u8, "%+8.6d"u8, " -001234"u8),
+
     new("1234"u8, "% 8.3d"u8, "    1234"u8),
     new("1234"u8, "% 8.4d"u8, "    1234"u8),
     new("1234"u8, "% 8.5d"u8, "   01234"u8),
@@ -317,6 +326,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "% 8.4d"u8, "   -1234"u8),
     new("-1234"u8, "% 8.5d"u8, "  -01234"u8),
     new("-1234"u8, "% 8.6d"u8, " -001234"u8),
+
     new("1234"u8, "%.3x"u8, "4d2"u8),
     new("1234"u8, "%.4x"u8, "04d2"u8),
     new("1234"u8, "%.5x"u8, "004d2"u8),
@@ -325,6 +335,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%.4x"u8, "-04d2"u8),
     new("-1234"u8, "%.5x"u8, "-004d2"u8),
     new("-1234"u8, "%.6x"u8, "-0004d2"u8),
+
     new("1234"u8, "%8.3x"u8, "     4d2"u8),
     new("1234"u8, "%8.4x"u8, "    04d2"u8),
     new("1234"u8, "%8.5x"u8, "   004d2"u8),
@@ -333,6 +344,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%8.4x"u8, "   -04d2"u8),
     new("-1234"u8, "%8.5x"u8, "  -004d2"u8),
     new("-1234"u8, "%8.6x"u8, " -0004d2"u8),
+
     new("1234"u8, "%+8.3x"u8, "    +4d2"u8),
     new("1234"u8, "%+8.4x"u8, "   +04d2"u8),
     new("1234"u8, "%+8.5x"u8, "  +004d2"u8),
@@ -341,6 +353,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%+8.4x"u8, "   -04d2"u8),
     new("-1234"u8, "%+8.5x"u8, "  -004d2"u8),
     new("-1234"u8, "%+8.6x"u8, " -0004d2"u8),
+
     new("1234"u8, "% 8.3x"u8, "     4d2"u8),
     new("1234"u8, "% 8.4x"u8, "    04d2"u8),
     new("1234"u8, "% 8.5x"u8, "   004d2"u8),
@@ -353,6 +366,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "% 8.6x"u8, " -0004d2"u8),
     new("-1234"u8, "% 8.7x"u8, "-00004d2"u8),
     new("-1234"u8, "% 8.8x"u8, "-000004d2"u8),
+
     new("1234"u8, "%-8.3d"u8, "1234    "u8),
     new("1234"u8, "%-8.4d"u8, "1234    "u8),
     new("1234"u8, "%-8.5d"u8, "01234   "u8),
@@ -365,7 +379,9 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%-8.6d"u8, "-001234 "u8),
     new("-1234"u8, "%-8.7d"u8, "-0001234"u8),
     new("-1234"u8, "%-8.8d"u8, "-00001234"u8),
+
     new("16777215"u8, "%b"u8, "111111111111111111111111"u8), // 2**24 - 1
+
     new("0"u8, "%.d"u8, ""u8),
     new("0"u8, "%.0d"u8, ""u8),
     new("0"u8, "%3.d"u8, ""u8)
@@ -388,13 +404,14 @@ public static void TestFormat(ж<testing.T> Ꮡt) {
     }
 }
 
-partial struct scanTestsᴛ1 /*dyn*/ {
+internal partial struct scanTest {
     internal @string input;
     internal @string format;
     internal @string output;
     internal nint remaining;
 }
-internal static slice<scanTestsᴛ1> scanTests = new scanTestsᴛ1[]{
+
+internal static slice<scanTest> scanTests = new scanTest[]{
     new("1010"u8, "%b"u8, "10"u8, 0),
     new("0b1010"u8, "%v"u8, "10"u8, 0),
     new("12"u8, "%o"u8, "10"u8, 0),
@@ -409,8 +426,27 @@ internal static slice<scanTestsᴛ1> scanTests = new scanTestsᴛ1[]{
     new("0xA"u8, "%v"u8, "10"u8, 0),
     new("0 "u8, "%v"u8, "0"u8, 1),
     new("2+3"u8, "%v"u8, "2"u8, 2),
-    new("0XABC 12"u8, "%v"u8, "2748"u8, 3)
+    new("0XABC 12"u8, "%v"u8, "2748"u8, 3),
+
+    new("10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000022222223333333333444444444"u8, "%x"u8, "72999049881955123498258745691204661198291656115976958889267080286388402675338838184094604981077942396458276955120179409196748346461468914795561487752253275293347599221664790586512596660792869956"u8, 0),
+    new("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff33377fffffffffffffffffffffffffffffffffffffffffffff0000000000022222eee1"u8, "%x"u8, "1167984798111281975972139931059274579172666497855631342228273284582214442805421410945513679697247078343332431249286160621687557589604464869034163736183926240549918956767671325412748661204059352801"u8, 0),
+    new("5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d7a11c7772cba02c22f9711078d51a3797eb18e691295293284d988e349fa6deba46b25a4ecd9f715"u8, "%x"u8, "419981998319789881681348172155240145539175961318447822049735313481433836043208347786919222066492311384432264836938599791362288343314139526391998172436831830624710446410781662672086936222288181013"u8, 0),
+    new("92fcad4b5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d799c32fe2f3cc5422f9711078d51a3797eb18e691295293284d8f5e69caf6decddfe1df6"u8, "%x"u8, "670619546945481998414061201992255225716434798957375727890607516800039934374391281275121813279544891602026798031004764406015624866771554937391445093144221697436880587924204655403711377861305572854"u8, 0),
+    new("10000000000000000000000200000000000000000000003000000000000000000000040000000000000000000000500000000000000000000006"u8, "%d"u8, "10000000000000000000000200000000000000000000003000000000000000000000040000000000000000000000500000000000000000000006"u8, 0)
 }.slice();
+
+[GoInit] internal static void init() {
+    foreach (var i in range(200)) {
+        var d = new slice<byte>(i + 1);
+        foreach (var j in range(d)) {
+            d[j] = (byte)((rune)'0' + Δrand.N((byte)10));
+        }
+        if (d[0] == (rune)'0') {
+            d[0] = (rune)'1';
+        }
+        scanTests = append(scanTests, new scanTest(input: ((@string)d), format: "%d"u8, output: ((@string)d)));
+    }
+}
 
 public static void TestScan(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

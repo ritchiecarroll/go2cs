@@ -5,8 +5,10 @@ namespace go.@internal;
 
 using bytealg = go.@internal.bytealg_package;
 using stringslite = go.@internal.stringslite_package;
+using windows = go.@internal.syscall.windows_package;
 using Δsyscall = syscall_package;
 using go.@internal;
+using go.@internal.syscall;
 
 partial class filepathlite_package {
 
@@ -82,7 +84,7 @@ internal static (@string, error) localize(@string path) {
                 buf[i] = (rune)'\\';
             }
         }
-        path = ((@string)buf);
+        path = (@string)buf;
     }
     return (path, default!);
 }
@@ -113,15 +115,14 @@ internal static bool isReservedName(@string name) {
         return true;
     }
     // The path element is a reserved name with an extension.
-    // Some Windows versions consider this a reserved name,
-    // while others do not. Use FullPath to see if the name is
-    // reserved.
-    {
-        var (p, _) = Δsyscall.FullPath(name); if (len(p) >= 4 && p[..4] == @"\\.\") {
-            return true;
-        }
+    // Since Windows 11, reserved names with extensions are no
+    // longer reserved. For example, "CON.txt" is a valid file
+    // name. Use RtlIsDosDeviceName_U to see if the name is reserved.
+    var (p, err) = Δsyscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        return false;
     }
-    return false;
+    return windows.RtlIsDosDeviceName_U(p) > 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -303,11 +304,6 @@ internal static (@string before, @string after, bool found) cutPath(@string path
         }
     }
     return (path, "", false);
-}
-
-// isUNC reports whether path is a UNC path.
-internal static bool isUNC(@string path) {
-    return len(path) > 1 && IsPathSeparator(path[0]) && IsPathSeparator(path[1]);
 }
 
 // postClean adjusts the results of Clean to avoid turning a relative path

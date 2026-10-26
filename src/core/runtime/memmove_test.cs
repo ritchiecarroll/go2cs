@@ -6,6 +6,8 @@ namespace go;
 using rand = crypto.rand_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
+using asan = @internal.asan_package;
+using msan = @internal.msan_package;
 using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using static runtime_package;
@@ -34,28 +36,28 @@ public static void TestMemmove(ж<testing.T> Ꮡt) {
     var src = new slice<byte>(size);
     var dst = new slice<byte>(size);
     for (nint i = 0; i < size; i++) {
-        src[i] = (byte)(128 + ((nint)(i & 127)));
+        src[i] = (byte)(128 + (i & 127));
     }
     for (nint i = 0; i < size; i++) {
-        dst[i] = (byte)((nint)(i & 127));
+        dst[i] = (byte)(i & 127);
     }
     for (nint n = 0; n <= size; n++) {
         for (nint x = 0; x <= size - n; x++) { // offset in src
             for (nint y = 0; y <= size - n; y++) { // offset in dst
                 copy(dst.slice(y, y + n), src.slice(x, x + n));
                 for (nint i = 0; i < y; i++) {
-                    if (dst[i] != (byte)((nint)(i & 127))) {
+                    if (dst[i] != (byte)(i & 127)) {
                         Ꮡt.Fatalf("prefix dst[%d] = %d"u8, i, dst[i]);
                     }
                 }
                 for (nint i = y; i < y + n; i++) {
-                    if (dst[i] != (byte)(128 + ((nint)((i - y + x) & 127)))) {
+                    if (dst[i] != (byte)(128 + ((i - y + x) & 127))) {
                         Ꮡt.Fatalf("copied dst[%d] = %d"u8, i, dst[i]);
                     }
-                    dst[i] = (byte)((nint)(i & 127)); // reset dst
+                    dst[i] = (byte)(i & 127); // reset dst
                 }
                 for (nint i = y + n; i < size; i++) {
-                    if (dst[i] != (byte)((nint)(i & 127))) {
+                    if (dst[i] != (byte)(i & 127)) {
                         Ꮡt.Fatalf("suffix dst[%d] = %d"u8, i, dst[i]);
                     }
                 }
@@ -104,7 +106,7 @@ public static void TestMemmoveAlias(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object shortˢ = (@string)"-short"u8;
-internal static readonly object skippingLargeMemmoveTestˢ = (@string)"skipping large memmove test under race detector"u8;
+internal static readonly object skippingLargeMemmoveTestˢ = (@string)"skipping large memmove test under sanitizers"u8;
 
 public static void TestMemmoveLarge0x180000(ж<testing.T> Ꮡt) {
     if (testing.Short() && testenv.Builder() == ""u8) {
@@ -112,7 +114,7 @@ public static void TestMemmoveLarge0x180000(ж<testing.T> Ꮡt) {
     }
 
     Ꮡt.Parallel();
-    if (race.Enabled) {
+    if (race.Enabled || asan.Enabled || msan.Enabled) {
         Ꮡt.Skip(skippingLargeMemmoveTestˢ);
     }
     testSize(Ꮡt, 0x180000);
@@ -124,7 +126,7 @@ public static void TestMemmoveOverlapLarge0x120000(ж<testing.T> Ꮡt) {
     }
 
     Ꮡt.Parallel();
-    if (race.Enabled) {
+    if (race.Enabled || asan.Enabled || msan.Enabled) {
         Ꮡt.Skip(skippingLargeMemmoveTestˢ);
     }
     testOverlap(Ꮡt, 0x120000);
@@ -231,10 +233,8 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
 
     foreach (var (_, backward) in new bool[]{true, false}.slice()) {
         foreach (var (_, n) in new nint[]{3, 4, 5, 6, 7, 8, 9, 10, 15, 25, 49}.slice()) {
-            nint nΔ1 = n;
-
             // test copying [N]*int.
-            var sz = (uintptr)(nΔ1 * (nint)runtime_internal_test_package.PtrSize);
+            var sz = (uintptr)(n * (nint)runtime_internal_test_package.PtrSize);
             @string name = fmt.Sprint(sz);
             if (backward){
                 name += "-backward"u8;
@@ -245,13 +245,13 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
                 // Use overlapping src and dst to force forward/backward copy.
                 array<ж<nint>> s = new(100);
                 ref var src = ref heap<slice<ж<nint>>>(out var Ꮡsrc);
-                Ꮡsrc.ValueSlot = s.slice(nΔ1 - 1, 2 * nΔ1 - 1);
+                Ꮡsrc.ValueSlot = s.slice(n - 1, 2 * n - 1);
                 ref var dst = ref heap<slice<ж<nint>>>(out var Ꮡdst);
-                Ꮡdst.ValueSlot = s.slice(0, nΔ1);
+                Ꮡdst.ValueSlot = s.slice(0, n);
                 if (backward) {
                     (Ꮡsrc.ValueSlot, Ꮡdst.ValueSlot) = (Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 }
-                foreach (var (i, _) in Ꮡsrc.ValueSlot) {
+                foreach (var i in range(Ꮡsrc.ValueSlot)) {
                     Ꮡsrc.ValueSlot[i] = Ꮡx;
                 }
                 builtin.clear(Ꮡdst.ValueSlot);
@@ -273,7 +273,7 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
                 }
 
                 while (Ꮡready.Load() != 2) {
-                    foreach (var (i, _) in Ꮡdst.ValueSlot) {
+                    foreach (var i in range(Ꮡdst.ValueSlot)) {
                         var p = Ꮡdst.ValueSlot[i];
                         if (p != nil && p != Ꮡx) {
                             tΔ1.Fatalf("got partially updated pointer %p at dst[%d], want either nil or %p"u8, p.OrTypedNil(), i, Ꮡx);
@@ -307,6 +307,7 @@ public static void BenchmarkMemmove(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizes, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n);
         var y = new slice<byte>(n);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x, y);
         }
@@ -316,6 +317,7 @@ public static void BenchmarkMemmove(ж<testing.B> Ꮡb) {
 public static void BenchmarkMemmoveOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 16);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x.slice(16, n + 16), x.slice(0, n));
         }
@@ -326,6 +328,7 @@ public static void BenchmarkMemmoveUnalignedDst(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizes, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 1);
         var y = new slice<byte>(n);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x[1..], y);
         }
@@ -335,6 +338,7 @@ public static void BenchmarkMemmoveUnalignedDst(ж<testing.B> Ꮡb) {
 public static void BenchmarkMemmoveUnalignedDstOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 16);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x.slice(16, n + 16), x.slice(1, n + 1));
         }
@@ -345,6 +349,7 @@ public static void BenchmarkMemmoveUnalignedSrc(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizes, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n);
         var y = new slice<byte>(n + 1);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x, y[1..]);
         }
@@ -381,6 +386,7 @@ public static void BenchmarkMemmoveUnalignedSrcDst(ж<testing.B> Ꮡb) {
 public static void BenchmarkMemmoveUnalignedSrcOverlap(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, bufSizesOverlap, (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n + 1);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             copy(x.slice(1, n + 1), x.slice(0, n));
         }
@@ -431,10 +437,10 @@ public static void BenchmarkMemclr(ж<testing.B> Ꮡb) {
         });
     }
     foreach (var (_, m) in new nint[]{1, 4, 8, 16, 64}.slice()) {
-        var x = new slice<byte>((m << (int)(20)));
+        var x = new slice<byte>((m << 20));
         var xʗ2 = x;
         Ꮡb.Run(fmt.Sprint(m, (@string)"M"u8), (ж<testing.B> bΔ2) => {
-            bΔ2.SetBytes((int64)((m << (int)(20))));
+            bΔ2.SetBytes((int64)(m << 20));
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 runtime_internal_test_package.MemclrBytes(xʗ2);
             }
@@ -458,10 +464,10 @@ public static void BenchmarkMemclrUnaligned(ж<testing.B> Ꮡb) {
 
     foreach (var (_, off) in new nint[]{0, 1, 4, 7}.slice()) {
         foreach (var (_, m) in new nint[]{1, 4, 8, 16, 64}.slice()) {
-            var x = new slice<byte>(((m << (int)(20))) + off);
+            var x = new slice<byte>((m << 20) + off);
             var xʗ2 = x;
             Ꮡb.Run(fmt.Sprint(off, m, (@string)"M"u8), (ж<testing.B> bΔ2) => {
-                bΔ2.SetBytes((int64)((m << (int)(20))));
+                bΔ2.SetBytes((int64)(m << 20));
                 for (nint i = 0; i < (~bΔ2).N; i++) {
                     runtime_internal_test_package.MemclrBytes(xʗ2.slice(off));
                 }
@@ -473,6 +479,7 @@ public static void BenchmarkMemclrUnaligned(ж<testing.B> Ꮡb) {
 public static void BenchmarkGoMemclr(ж<testing.B> Ꮡb) {
     benchmarkSizes(Ꮡb, new nint[]{5, 16, 64, 256}.slice(), (ж<testing.B> bΔ1, nint n) => {
         var x = new slice<byte>(n);
+        bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             builtin.clear(x);
         }
@@ -519,11 +526,11 @@ public static void BenchmarkMemclrRange(ж<testing.B> Ꮡb) {
         var buffer = new slice<byte>(maxLen);
 
         @string text = ""u8;
-        if (minLen >= ((1 << (int)(20)))){
-            text = fmt.Sprint((minLen >> (int)(20)), (@string)"M "u8, ((maxLen + ((1 << (int)(20)) - 1)) >> (int)(20)), (@string)"M"u8);
+        if (minLen >= (1 << 20)){
+            text = fmt.Sprint(minLen >> 20, (@string)"M "u8, (maxLen + ((1 << 20) - 1)) >> 20, (@string)"M"u8);
         } else 
-        if (minLen >= ((1 << (int)(10)))){
-            text = fmt.Sprint((minLen >> (int)(10)), (@string)"K "u8, ((maxLen + ((1 << (int)(10)) - 1)) >> (int)(10)), (@string)"K"u8);
+        if (minLen >= (1 << 10)){
+            text = fmt.Sprint(minLen >> 10, (@string)"K "u8, (maxLen + ((1 << 10) - 1)) >> 10, (@string)"K"u8);
         } else {
             text = fmt.Sprint(minLen, (@string)" "u8, maxLen);
         }
@@ -537,6 +544,50 @@ public static void BenchmarkMemclrRange(ж<testing.B> Ꮡb) {
                 }
             }
         });
+    }
+}
+
+public static void BenchmarkClearFat3(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(3));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(3);
+    }
+}
+
+public static void BenchmarkClearFat4(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<uint32>(1));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new uint32[]{}.array(1);
+    }
+}
+
+public static void BenchmarkClearFat5(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(5));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(5);
+    }
+}
+
+public static void BenchmarkClearFat6(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(6));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(6);
     }
 }
 
@@ -559,6 +610,28 @@ public static void BenchmarkClearFat8(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         p.Value = new uint32[]{}.array(2);
+    }
+}
+
+public static void BenchmarkClearFat9(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(9));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(9);
+    }
+}
+
+public static void BenchmarkClearFat10(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(10));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(10);
     }
 }
 
@@ -625,6 +698,28 @@ public static void BenchmarkClearFat16(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         p.Value = new uint32[]{}.array(4);
+    }
+}
+
+public static void BenchmarkClearFat18(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<byte>(18));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new byte[]{}.array(18);
+    }
+}
+
+public static void BenchmarkClearFat20(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new array<uint32>(5));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = new uint32[]{}.array(5);
     }
 }
 
@@ -771,6 +866,54 @@ public static void BenchmarkClearFat1040(ж<testing.B> Ꮡb) {
     }
 }
 
+public static void BenchmarkCopyFat3(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(3);
+    var p = Ꮡ(new array<byte>(3));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat4(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<uint32> x = new(1); /* 4 / 4 */
+    var p = Ꮡ(new array<uint32>(1));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat5(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(5);
+    var p = Ꮡ(new array<byte>(5));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat6(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(6);
+    var p = Ꮡ(new array<byte>(6));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
 public static void BenchmarkCopyFat7(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -788,6 +931,30 @@ public static void BenchmarkCopyFat8(ж<testing.B> Ꮡb) {
 
     array<uint32> x = new(2); /* 8 / 4 */
     var p = Ꮡ(new array<uint32>(2));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat9(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(9);
+    var p = Ꮡ(new array<byte>(9));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat10(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(10);
+    var p = Ꮡ(new array<byte>(10));
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -860,6 +1027,30 @@ public static void BenchmarkCopyFat16(ж<testing.B> Ꮡb) {
 
     array<uint32> x = new(4); /* 16 / 4 */
     var p = Ꮡ(new array<uint32>(4));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat18(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<byte> x = new(18);
+    var p = Ꮡ(new array<byte>(18));
+    runtime_internal_test_package.Escape(p);
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = x.Clone();
+    }
+}
+
+public static void BenchmarkCopyFat20(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    array<uint32> x = new(5); /* 20 / 4 */
+    var p = Ꮡ(new array<uint32>(5));
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -1044,7 +1235,7 @@ public static void BenchmarkMemclrKnownSize1(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1059,7 +1250,7 @@ public static void BenchmarkMemclrKnownSize2(ж<testing.B> Ꮡb) {
 
     b.SetBytes(2);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1074,7 +1265,7 @@ public static void BenchmarkMemclrKnownSize4(ж<testing.B> Ꮡb) {
 
     b.SetBytes(4);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1089,7 +1280,7 @@ public static void BenchmarkMemclrKnownSize8(ж<testing.B> Ꮡb) {
 
     b.SetBytes(8);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1104,7 +1295,7 @@ public static void BenchmarkMemclrKnownSize16(ж<testing.B> Ꮡb) {
 
     b.SetBytes(16);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1119,7 +1310,7 @@ public static void BenchmarkMemclrKnownSize32(ж<testing.B> Ꮡb) {
 
     b.SetBytes(32);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1134,7 +1325,7 @@ public static void BenchmarkMemclrKnownSize64(ж<testing.B> Ꮡb) {
 
     b.SetBytes(64);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1149,7 +1340,7 @@ public static void BenchmarkMemclrKnownSize112(ж<testing.B> Ꮡb) {
 
     b.SetBytes(112);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1164,7 +1355,7 @@ public static void BenchmarkMemclrKnownSize128(ж<testing.B> Ꮡb) {
 
     b.SetBytes(128);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1179,7 +1370,7 @@ public static void BenchmarkMemclrKnownSize192(ж<testing.B> Ꮡb) {
 
     b.SetBytes(192);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1194,7 +1385,7 @@ public static void BenchmarkMemclrKnownSize248(ж<testing.B> Ꮡb) {
 
     b.SetBytes(248);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1209,7 +1400,7 @@ public static void BenchmarkMemclrKnownSize256(ж<testing.B> Ꮡb) {
 
     b.SetBytes(256);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1224,7 +1415,7 @@ public static void BenchmarkMemclrKnownSize512(ж<testing.B> Ꮡb) {
 
     b.SetBytes(512);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1239,7 +1430,7 @@ public static void BenchmarkMemclrKnownSize1024(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1024);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1254,7 +1445,7 @@ public static void BenchmarkMemclrKnownSize4096(ж<testing.B> Ꮡb) {
 
     b.SetBytes(4096);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1269,12 +1460,138 @@ public static void BenchmarkMemclrKnownSize512KiB(ж<testing.B> Ꮡb) {
 
     b.SetBytes(524288);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
 
     memclrSink = x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize112_T /*dyn*/ {
+    internal array<int8> x = new(112);
+}
+
+public static void BenchmarkMemmoveKnownSize112(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize112_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize112_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)112);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize128_T /*dyn*/ {
+    internal array<int8> x = new(128);
+}
+
+public static void BenchmarkMemmoveKnownSize128(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize128_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize128_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)128);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize192_T /*dyn*/ {
+    internal array<int8> x = new(192);
+}
+
+public static void BenchmarkMemmoveKnownSize192(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize192_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize192_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)192);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize248_T /*dyn*/ {
+    internal array<int8> x = new(248);
+}
+
+public static void BenchmarkMemmoveKnownSize248(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize248_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize248_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)248);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize256_T /*dyn*/ {
+    internal array<int8> x = new(256);
+}
+
+public static void BenchmarkMemmoveKnownSize256(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize256_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize256_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)256);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize512_T /*dyn*/ {
+    internal array<int8> x = new(512);
+}
+
+public static void BenchmarkMemmoveKnownSize512(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize512_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize512_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)512);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
+}
+
+internal partial struct BenchmarkMemmoveKnownSize1024_T /*dyn*/ {
+    internal array<int8> x = new(1024);
+}
+
+public static void BenchmarkMemmoveKnownSize1024(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var p = Ꮡ(new BenchmarkMemmoveKnownSize1024_T(nil));
+    var q = Ꮡ(new BenchmarkMemmoveKnownSize1024_T(nil));
+
+    b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)1024);
+    for (nint i = 0; i < b.N; i++) {
+        p.Value = q.Value.ΔClone();
+    }
+
+    memclrSink = (~p).x[..];
 }
 
 } // end runtime_test_package

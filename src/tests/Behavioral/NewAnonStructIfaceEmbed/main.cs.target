@@ -11,11 +11,8 @@ partial interface badge {
 partial struct gold {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goldˢ = "gold"u8;
-
 internal static @string label(this gold _) {
-    return goldˢ;
+    return "gold";
 }
 
 
@@ -23,9 +20,6 @@ partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ internal badge badge;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object localˢ = (@string)"local:"u8;
 
 internal static void Main() {
     badge b = new reservedᴛ1жbadge(reserved);
@@ -38,7 +32,7 @@ internal static void Main() {
     local.Value.badge = new gold(nil);
 
     badge b2 = new reservedᴛ1жbadge(local);
-    fmt.Println(localˢ, b2.label());
+    fmt.Println("local:", b2.label());
 }
 
 } // end main_package

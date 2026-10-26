@@ -93,27 +93,16 @@ internal static nint sliceFieldAddress() {
     return h.sl[1];
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closureLocalˢ = (@string)"closureLocal:"u8;
-private static readonly object fieldArrayMethodˢ = (@string)"fieldArrayMethod:"u8;
-private static readonly object nestedFieldArrayMethodˢ = (@string)"nestedFieldArrayMethod:"u8;
-private static readonly object localArrayMethodˢ = (@string)"localArrayMethod:"u8;
-private static readonly object explicitAddressˢ = (@string)"explicitAddress:"u8;
-private static readonly object paramAddressˢ = (@string)"paramAddress:"u8;
-private static readonly object methodValueˢ = (@string)"methodValue:"u8;
-private static readonly object localTypeCallˢ = (@string)"localTypeCall:"u8;
-private static readonly object sliceFieldAddressˢ = (@string)"sliceFieldAddress:"u8;
-
 internal static void Main() {
-    fmt.Println(closureLocalˢ, closureLocal());
-    fmt.Println(fieldArrayMethodˢ, fieldArrayMethod());
-    fmt.Println(nestedFieldArrayMethodˢ, nestedFieldArrayMethod());
-    fmt.Println(localArrayMethodˢ, localArrayMethod());
-    fmt.Println(explicitAddressˢ, explicitAddress());
-    fmt.Println(paramAddressˢ, paramAddress(new hist(nil)));
-    fmt.Println(methodValueˢ, methodValue());
-    fmt.Println(localTypeCallˢ, localTypeCall());
-    fmt.Println(sliceFieldAddressˢ, sliceFieldAddress());
+    fmt.Println("closureLocal:", closureLocal());
+    fmt.Println("fieldArrayMethod:", fieldArrayMethod());
+    fmt.Println("nestedFieldArrayMethod:", nestedFieldArrayMethod());
+    fmt.Println("localArrayMethod:", localArrayMethod());
+    fmt.Println("explicitAddress:", explicitAddress());
+    fmt.Println("paramAddress:", paramAddress(new hist(nil)));
+    fmt.Println("methodValue:", methodValue());
+    fmt.Println("localTypeCall:", localTypeCall());
+    fmt.Println("sliceFieldAddress:", sliceFieldAddress());
 }
 
 } // end main_package

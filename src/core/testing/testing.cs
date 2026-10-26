@@ -8,6 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Security;
 using go.testing_runtime;
 using any = System.Object;
 using ꓸꓸꓸany = System.Span<System.Object>;
@@ -62,6 +64,11 @@ public static partial class testing_package
     public struct M
     {
         internal TestRunner? Runner;
+
+        // Go's m.numRun and m.afterOnce: a TestMain may call m.Run more than once (go.dev/issue/23129), and
+        // only the first run's m.after closes the test log.
+        internal int NumRun;
+        internal bool AfterDone;
 
         public M(NilType _) { }
     }
@@ -144,6 +151,10 @@ public static partial class testing_package
     /// </remarks>
     public interface TB
     {
+        // Go 1.26 adds ArtifactDir and Go 1.25 Attr, at the head of TB in Go's own order
+        // (testing.go's `type TB interface`); Output, from 1.25, closes it, after Context.
+        @string ArtifactDir();
+        void Attr(@string key, @string value);
         void Cleanup(Action cleanup);
         void Error(params ꓸꓸꓸany args);
         void Errorf(@string format, params ꓸꓸꓸany args);
@@ -169,6 +180,7 @@ public static partial class testing_package
         bool Skipped();
         @string TempDir();
         context_package.Context Context();
+        io_package.Writer Output();
     }
 
     /// <summary>
@@ -319,7 +331,17 @@ public static partial class testing_package
         internal bool DetachedSkipped;
     }
 
-    [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
+    // THE API FRAMES THE HOST'S WALKS COUNT carry [MethodImpl(NoInlining)]: Log, Logf, Error, Errorf, Fatal,
+    // Fatalf, Skip, Skipf, Helper, Attr, Cleanup and Run. TestExecution.FramesPastHost skips exactly ONE API
+    // function and names the frame after it -- Go's callSite(3), Helper's caller, Cleanup's pc, Run's creator --
+    // so a JIT that inlines the API method into the test's frame removes the frame the skip counts. Measured under
+    // Release with TieredCompilation=0 (the banks' configuration of record): Attr's refusal read "???:1", and a
+    // helper in a cleanup was attributed to its own line instead of the Cleanup call. Tiered, the methods were
+    // never inlined, which is why the default run stayed green.
+    // They carry [DynamicSecurityMethod] beside it for the same frame, seen one call earlier: the JIT never
+    // implicitly TAIL-CALLS a method so marked, so a test or helper whose last statement is t.Errorf(...) keeps
+    // the frame the report names (golib's DynamicSecurityMethodAttribute; on linux/amd64 the tail call erased it).
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -327,11 +349,11 @@ public static partial class testing_package
             return;
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.Fail();
     }
 
-    [GoRecv] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -339,7 +361,7 @@ public static partial class testing_package
             return;
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.Fail();
     }
 
@@ -361,8 +383,10 @@ public static partial class testing_package
     /// </remarks>
     [GoRecv] public static (time_package.Time deadline, bool ok) Deadline(this ref T t)
     {
-        // Touch the execution so an unattached T fails the same way every other member does.
-        _ = t.RequiredExecution;
+        // Touch the execution so an unattached T fails the same way every other member does. Inside a
+        // synctest bubble Go panics instead of answering a real-clock deadline (testing.go:2164).
+        if (t.RequiredExecution.IsSynctest)
+            throw builtin.panic(TestExecution.DeadlineInsideBubbleText);
 
         if (TestHost.PackageDeadlineUtc is not { } deadline)
             return (default!, false);
@@ -407,7 +431,7 @@ public static partial class testing_package
     [GoRecv] public static bool Failed(this ref T t) =>
         t.Execution is { } execution ? execution.Failed : t.DetachedFailed;
 
-    [GoRecv] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -415,11 +439,11 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.FailNow();
     }
 
-    [GoRecv] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -427,28 +451,39 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.FailNow();
     }
 
-    [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
-        t.Execution?.Log(Sprint(args));
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
+        t.Execution?.LogFromCaller(Sprintln(args));
 
-    [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
-        t.Execution?.Log(Sprintf(format, args));
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
+        t.Execution?.LogFromCaller(Sprintf(format, args));
 
-    [GoRecv] public static void Helper(this ref T t) => t.Execution?.Helper();
+    // Go's Helper (testing.go:1272) records the CALLER of t.Helper: the first Go frame past this API.
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Helper(this ref T t)
+    {
+        if (t.Execution is not { } execution)
+            return;
+
+        foreach (go.runtime_package.Frame frame in TestExecution.FramesPastHost(TestExecution.Callers()))
+        {
+            execution.Helper(frame.Function.ToString());
+            return;
+        }
+    }
 
     [GoRecv] public static @string Name(this ref T t) =>
         t.Execution is { } execution ? execution.Name : (@string)"";
 
-    [GoRecv] public static void Cleanup(this ref T t, Action cleanup) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Cleanup(this ref T t, Action cleanup) =>
         t.Execution?.Cleanup(cleanup);
 
-    [GoRecv] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
         t.RequiredExecution.Run(name.ToString(), test);
 
-    [GoRecv] public static void Skip(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skip(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -456,11 +491,11 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.SkipNow();
     }
 
-    [GoRecv] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -468,7 +503,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.SkipNow();
     }
 
@@ -487,7 +522,19 @@ public static partial class testing_package
     [GoRecv] public static bool Skipped(this ref T t) =>
         t.Execution is { } execution ? execution.Skipped : t.DetachedSkipped;
 
-    [GoRecv] public static @string TempDir(this ref T t) => t.RequiredExecution.TempDir();
+    /// <summary>
+    /// Go's <c>TempDir</c> (testing.go:1422): <c>makeTempDir</c>, and <c>Fatalf("TempDir: %v", err)</c> when
+    /// it cannot make one.
+    /// </summary>
+    [GoRecv] public static @string TempDir(this ref T t)
+    {
+        (string? dir, string? error) = t.RequiredExecution.MakeTempDir();
+
+        if (error is not null)
+            t.Fatalf("TempDir: %v", (@string)error);
+
+        return dir!;
+    }
 
     [GoRecv] public static void Setenv(this ref T t, @string key, @string value) =>
         t.RequiredExecution.Setenv(key.ToString(), value.ToString());
@@ -499,30 +546,88 @@ public static partial class testing_package
     [GoRecv] public static context_package.Context Context(this ref T t) =>
         t.RequiredExecution.Context();
 
+    /// <summary>
+    /// Go 1.25's <c>Attr</c> (testing.go:1604): Errorf on a key holding Unicode whitespace or a value
+    /// holding a carriage return or newline, each in Go's text; otherwise an <c>attr</c> event under
+    /// chatty output.
+    /// </summary>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Attr(this ref T t, @string key, @string value)
+    {
+        string k = key.ToString();
+        string v = value.ToString();
+
+        // unicode.IsSpace over the key's runes (strings.ContainsFunc); an invalid byte decodes to
+        // U+FFFD, which is not a space, as Go's range over a string reads it.
+        foreach (System.Text.Rune rune in k.EnumerateRunes())
+        {
+            if (System.Text.Rune.IsWhiteSpace(rune))
+            {
+                t.Errorf("disallowed whitespace in attribute key %q", key);
+                return;
+            }
+        }
+
+        if (v.AsSpan().IndexOfAny('\r', '\n') >= 0)
+        {
+            t.Errorf("disallowed newline in attribute value %q", value);
+            return;
+        }
+
+        t.RequiredExecution.ReportAttr(k, v);
+    }
+
+    /// <summary>Go 1.25's <c>Output</c> (testing.go:1114): a writer onto the test's log.</summary>
+    [GoRecv] public static io_package.Writer Output(this ref T t) => t.RequiredExecution.Output();
+
+    /// <summary>
+    /// Go 1.26's <c>ArtifactDir</c> (testing.go:1333): one directory per test, and
+    /// <c>Fatalf("ArtifactDir: %v", err)</c> when it cannot be made.
+    /// </summary>
+    [GoRecv] public static @string ArtifactDir(this ref T t)
+    {
+        (string? dir, string? error) = t.RequiredExecution.ArtifactDir();
+
+        if (error is not null)
+            t.Fatalf("ArtifactDir: %v", (@string)error);
+
+        return dir!;
+    }
+
     [GoRecv] public static void Parallel(this ref T t) => t.RequiredExecution.Parallel();
 
     // RecvGenerator intentionally handles ordinary receiver signatures. C# params
     // collections use Span<T>, which is ref-like and needs explicit pointer receiver
     // overloads for converted closures that retain *testing.T rather than a ref local.
-    public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
+    //
+    // They carry [MethodImpl(NoInlining)] as RecvGenerator's own overloads of the marked members do
+    // (HasNoInliningMark), for the same reason as the members above, seen from the test's side: inlined into
+    // the test, the call the test's frame is suspended in targets THIS overload while the frame inside is the
+    // ref one, so runtime's resolver no longer recognises the call (suspendedAtReportedCall) and names the line
+    // of the next call instead. Measured under Release with TieredCompilation=0: TestTBHelper's record 8
+    // (`t.Error("8")` at helper_test.go:22, just before a `return`) read helper_test.go:26, the t.Parallel()
+    // after the block; tier-0, which inlines nothing, read :22.
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
 
-    public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
 
-    public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
 
-    public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
 
-    public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
 
-    public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
 
-    public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
 
-    public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
 
     [GoRecv] public static nint Run(this ref M m)
     {
         TestRunner runner = m.Runner ?? throw new InvalidOperationException("testing.M is not attached to a test registry");
+
+        // Go counts every m.Run first (`m.numRun++`), before the parse.
+        m.NumRun++;
 
         // Go's M.Run opens with exactly this, under exactly this reasoning -- its comment reads
         // "TestMain may have already called flag.Parse.":
@@ -547,7 +652,27 @@ public static partial class testing_package
         if (runner.Listing)
             return runner.ListTests();
 
-        return runner.RunAll();
+        // m.before's testlog block, then the tests, then writeProfiles' (go1.26.9 testing.go:2339-2357,
+        // 2697-2706, run from m.after, which Go defers): an open or close failure prints Go's message and
+        // exits 2, as Go's does. m.after runs writeProfiles under m.afterOnce (:2683-2686), so only the FIRST
+        // run closes the log; a later run's log stays open and unflushed, as Go leaves it.
+        if (runner.TestLogFile is not { } testLog)
+            return runner.RunAll();
+
+        TestLogBridge.ExitIfFailed(TestLogBridge.Open(testLog, firstRun: m.NumRun == 1));
+
+        try
+        {
+            return runner.RunAll();
+        }
+        finally
+        {
+            if (!m.AfterDone)
+            {
+                m.AfterDone = true;
+                TestLogBridge.ExitIfFailed(TestLogBridge.Close(testLog));
+            }
+        }
     }
 
     // Compile-only B surface (see struct B above) — never executed, never throwing. The
@@ -643,6 +768,14 @@ public static partial class testing_package
     // to anything expecting a usable context gets one that is merely never canceled, instead of a
     // nil dereference. The "nothing went wrong" value for a context is a live one.
     [GoRecv] public static context_package.Context Context(this ref B b) => context_package.Background();
+
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on B, compile-only like the rest of this surface:
+    // never executed, so a discarding writer and an empty directory name are enough.
+    [GoRecv] public static void Attr(this ref B b, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref B b) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref B b) => (@string)"";
 
     /// <summary>
     /// Go 1.24's <c>B.Loop</c> — <c>for b.Loop() { … }</c>, the replacement for <c>for i := 0; i &lt; b.N; i++</c>.
@@ -783,6 +916,13 @@ public static partial class testing_package
 
     [GoRecv] public static context_package.Context Context(this ref F f) => context_package.Background();
 
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on F, compile-only as for B above.
+    [GoRecv] public static void Attr(this ref F f, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref F f) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref F f) => (@string)"";
+
     // Params-taking F members need the same explicit ж<F> overloads as T's and B's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
     [GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany args) { }
@@ -836,6 +976,31 @@ public static partial class testing_package
     public static void Skip(this ж<F> f, params ꓸꓸꓸany args) => Skip(ref f.Value, args);
 
     public static void Skipf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Skipf(ref f.Value, format, args);
+
+    /// <summary>
+    /// Go 1.25's <c>testingSynctestTest</c> (testing.go:2125): runs <paramref name="f"/> with a new T
+    /// inside the caller's synctest bubble and reports whether it passed.
+    /// </summary>
+    /// <remarks>
+    /// Go reaches it through a push linkname, <c>//go:linkname testingSynctestTest
+    /// testing/synctest.testingSynctestTest</c>, so testing/synctest declares it without a body. That
+    /// package's companion forwards here; it is public because the companion is in another assembly.
+    /// synctest.Test calls it from inside a bubble it has just made.
+    /// </remarks>
+    public static bool testingSynctestTest(ж<T> t, Action<ж<T>> f) => t.Value.RequiredExecution.RunSynctest(f);
+
+    /// <summary>
+    /// Go 1.26's <c>checkParallel</c> (testing.go:1826): panics with Go's parallel-conflict text when
+    /// <paramref name="t"/> or any ancestor is parallel, and otherwise makes a later <c>t.Parallel</c>
+    /// refuse, exactly as <c>Setenv</c> and <c>Chdir</c> do.
+    /// </summary>
+    /// <remarks>
+    /// Go reaches it through a pull linkname, <c>//go:linkname testingCheckParallel
+    /// testing.checkParallel</c>, from testing/cryptotest's <c>SetGlobalRandom</c>, which mutates the
+    /// whole process's randomness and so must refuse a parallel test. The converter forwards that pull here
+    /// (linknameForwardTargets); it is public because cryptotest is another assembly.
+    /// </remarks>
+    public static void checkParallel(ж<T> t) => t.Value.RequiredExecution.CheckParallel();
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, which
@@ -931,6 +1096,10 @@ public static partial class testing_package
     /// </remarks>
     public static double AllocsPerRun(nint runs, Action f)
     {
+        // Go 1.25: the first thing AllocsPerRun does (allocs.go:21-23), before its warmup run.
+        if (TestExecution.ParallelTestsRunning)
+            throw builtin.panic("testing: AllocsPerRun called during parallel test");
+
         // Warmup run outside the measurement window (Go does the same): first-call lazy
         // initialization — and JIT compilation here — must not count against f.
         f();
@@ -1016,6 +1185,9 @@ public static partial class testing_package
     // graph still acyclic on all three targets, and the closure and build-time cost that was
     // accepted for it) are recorded in TestFormat's remarks.
     private static string Sprint(ReadOnlySpan<any> args) => TestFormat.Sprint(args);
+
+    // fmt.Sprintln with its newline kept: what Go's Log/Error/Fatal/Skip pass to (*common).log, which trims one itself.
+    private static string Sprintln(ReadOnlySpan<any> args) => TestFormat.Sprintln(args);
 
     private static string Sprintf(@string format, ReadOnlySpan<any> args) => TestFormat.Sprintf(format, args);
 }

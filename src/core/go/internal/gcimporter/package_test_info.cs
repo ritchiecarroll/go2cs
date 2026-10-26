@@ -44,6 +44,12 @@ using static global::go.go.@internal.gcimporter_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -52,7 +58,7 @@ using static global::go.go.@internal.gcimporter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIACAz0goKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbUgoKClICCgqTWtIKmlLiUgoKUgpSAuIKCgvr0ooK4gtyCgIKAgtiUgriCgoKmgpSmkoKCgpS4yoKCgpSCgoKUlIKClIKClIKUgriCgpTYqrKCgoKUlKaCgoKClLaCgpQADQaipoKmgoKCpoKCgoCCtpSCgoKUgpSUgriClIKWyoIAARLKgpS4gsqCgqamgoKmgqaCgqaCgpKAgtYACQSCgpSmgqiSgoKCgpSUgoKCgriCgqbmABcwgqaCpoKCgoKUgpSCgoKmgoKCpoKCpoCC3rSCgqaCgriCgoKCgpSCypSAggAICoKmgqaUgoKCgpSAgoKCgoIADRCSpoKmgoKCgqaCgoKCgJIACgiipoKmgoLKgoKmgqamgoLG5KKmgqaCgpSmogAIBIKmgriCgoKCqJKCgoKmgriCgoK4goK4gviipoKmgpQADRyCgoKAgtbUgqaCptaCpoK4goKAgvaCpoKm1oKmgqbWgqaCpqaCgoKCgpSmooKCgoLWooCCpIKC3IAAEgSCpoKmgoKAgraUlIKCppKCgpSmqgACEKaCgoLCgoCCxKQ=", "165-214:1;380-384:1;794-803:1;821-826:2", "", "285=Default/1/1/1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIACAz0goKUgpSCgoKmgoKCgoKClKaCgoKCgoKUgqbUgoKClICCgqTWtIKmlLiUgoKUgpSAuIKCgvr0ooK4gtyCgIKAgtiUgriCgoKmgpSmkoKCgpS4yoKCgpSCgoKUlIKClIKClIKUgriCgpTYqtKCgoKUlKaCgoKClLaCgpQADQaipoKmgoKCpoKCgoCCtpSCgoKUgpSUgriClIKWyoIAARLKgpS4gsqCgqamgoKmgqaCgqaCgpKAgtYACQSCgpSmgqiSgoKCgpSUgoKCgriCgqbmABcwgqaCpoKCgoKUgpSCgoKmgoKCpoKCpoCC3rSCgqaCgriCgoKCgpSCypSAggAICoKmgqaUgoKCgpSAgoKCgoIADRCSpoKmgoKCgqaCgoKCgJIACgiipoKmgoLKgoKmgqamgoLG5KKmgqaCgpSmogAIBIKmgriCgoKCqJKCgoKmgriCgoK4goK4gviipoKmgpQADRyCgoKAgtbUgqaCptaCpoK4goKAgvaCpoKm1oKmgqbWgqaCpqaCgoKCgpSmooKCgoLWooCCpIKC3IAAEgSCpoKmgoKAgraUlIKCppKCgpSmqgACEKaCgoLCgoCCxKQ=", "165-214:1;380-384:1;794-803:1;821-826:2", "", "287=Default/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

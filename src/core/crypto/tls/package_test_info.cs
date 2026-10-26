@@ -17,6 +17,8 @@ global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using execꓸError = go.os.exec_package.ΔError;
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
+global using hpkeꓸKEM = go.crypto.hpke_package.ΔKEM;
+global using hpkeꓸPublicKey = go.crypto.hpke_package.ΔPublicKey;
 global using jsonꓸToken = object;
 global using jsonꓸΔToken = object;
 global using netꓸAddr = go.net_package.ΔAddr;
@@ -32,13 +34,15 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using templateꓸError = go.html.template_package.ΔError;
+global using templateꓸFuncMap = go.text.template_package.FuncMap;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tls13ꓸExporterMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔExporterMasterSecret;
 global using tls13ꓸHandshakeSecret = go.crypto.@internal.fips140.tls13_package.ΔHandshakeSecret;
 global using tls13ꓸMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔMasterSecret;
-using testing = go.testing_package;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,24 +66,23 @@ using static global::go.crypto.tls_test_package;
 [assembly: GoImplement<global::go.crypto.tls_package.Conn, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<global::go.crypto.tls_package.SessionState, global::go.crypto.tls_package.handshakeMessage>(Pointer = true)]
 [assembly: GoImplement<global::go.crypto.tls_package.alert, error>]
+[assembly: GoImplement<go.crypto.ecdsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<hash_package.Hash, global::go.crypto.tls_package.transcriptHash>]
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<testing_package.B, testing_package.TB>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.tls_package.Config, ж<global::go.crypto.tls_package.Config>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.tls_package.QUICConfig, ж<global::go.crypto.tls_package.QUICConfig>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.tls_package.clientHelloMsg, ж<global::go.crypto.tls_package.clientHelloMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.tls_package.serverHelloDoneMsg, ж<global::go.crypto.tls_package.serverHelloDoneMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.tls_package.serverHelloMsg, ж<global::go.crypto.tls_package.serverHelloMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.tls_package.ΔConnectionState, ж<global::go.crypto.tls_package.ΔConnectionState>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -120,9 +123,11 @@ public static partial class tls_test_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸecdsa() => builtin.initPackage(typeof(go.crypto.ecdsa_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸed25519() => builtin.initPackage(typeof(go.crypto.ed25519_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸelliptic() => builtin.initPackage(typeof(go.crypto.elliptic_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸfips140() => builtin.initPackage(typeof(go.crypto.fips140_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸtls13() => builtin.initPackage(typeof(go.crypto.@internal.fips140.tls13_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸhpke() => builtin.initPackage(typeof(go.crypto.@internal.hpke_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrsa() => builtin.initPackage(typeof(go.crypto.rsa_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha256() => builtin.initPackage(typeof(go.crypto.sha256_package));
@@ -137,6 +142,7 @@ public static partial class tls_test_package
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸhtmlꓸtemplate() => builtin.initPackage(typeof(html.template_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸobscuretestdata() => builtin.initPackage(typeof(go.@internal.obscuretestdata_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
@@ -149,6 +155,7 @@ public static partial class tls_test_package
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));

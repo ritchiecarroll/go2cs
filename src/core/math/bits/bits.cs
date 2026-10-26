@@ -52,19 +52,19 @@ public static nint LeadingZeros64(uint64 x) {
 // See http://keithandkatie.com/keith/papers/debruijn.html
 internal static UntypedInt deBruijn32 => 0x077CB531;
 
-internal static array<byte> deBruijn32tab = new byte[]{
+[GoLazy] partial class lazyᴛdeBruijn32tab { internal static array<byte> deBruijn32tab = new byte[]{
     0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
     31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-}.array();
+}.array(); }
 
 internal static UntypedInt deBruijn64 => 0x03f79d71b4ca8b09;
 
-internal static array<byte> deBruijn64tab = new byte[]{
+[GoLazy] partial class lazyᴛdeBruijn64tab { internal static array<byte> deBruijn64tab = new byte[]{
     0, 1, 56, 2, 57, 49, 28, 3, 61, 58, 42, 50, 38, 29, 17, 4,
     62, 47, 59, 36, 45, 43, 51, 22, 53, 39, 33, 30, 24, 18, 12, 5,
     63, 55, 48, 27, 60, 41, 37, 16, 46, 35, 44, 21, 52, 32, 23, 11,
     54, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9, 13, 8, 7, 6
-}.array();
+}.array(); }
 
 // TrailingZeros returns the number of trailing zero bits in x; the result is [UintSize] for x == 0.
 public static nint TrailingZeros(nuint x) {
@@ -85,7 +85,7 @@ public static nint TrailingZeros16(uint16 x) {
         return 16;
     }
     // see comment in TrailingZeros64
-    return (nint)deBruijn32tab[((uint32)((uint16)(x & ((uint16)0 - x))) * (uint32)deBruijn32 >> (int)((32 - 5)))];
+    return (nint)deBruijn32tab[((uint32)((uint16)(x & ((uint16)0 - x))) * (uint32)deBruijn32 >> (int)(32 - 5))];
 }
 
 // TrailingZeros32 returns the number of trailing zero bits in x; the result is 32 for x == 0.
@@ -94,7 +94,7 @@ public static nint TrailingZeros32(uint32 x) {
         return 32;
     }
     // see comment in TrailingZeros64
-    return (nint)deBruijn32tab[(((uint32)(x & ((uint32)0 - x))) * (uint32)deBruijn32 >> (int)((32 - 5)))];
+    return (nint)deBruijn32tab[((x & ((uint32)0 - x)) * (uint32)deBruijn32 >> (int)(32 - 5))];
 }
 
 // TrailingZeros64 returns the number of trailing zero bits in x; the result is 64 for x == 0.
@@ -113,7 +113,7 @@ public static nint TrailingZeros64(uint64 x) {
     // find by how many bits it was shifted by looking at which six bit
     // substring ended up at the top of the word.
     // (Knuth, volume 4, section 7.3.1)
-    return (nint)deBruijn64tab[(((uint64)(x & ((uint64)0 - x))) * (uint64)deBruijn64 >> (int)((64 - 6)))];
+    return (nint)deBruijn64tab[((x & ((uint64)0 - x)) * (uint64)deBruijn64 >> (int)(64 - 6))];
 }
 
 // --- OnesCount ---
@@ -142,12 +142,12 @@ public static nint OnesCount8(uint8 x) {
 
 // OnesCount16 returns the number of one bits ("population count") in x.
 public static nint OnesCount16(uint16 x) {
-    return (nint)((byte)(pop8tab[(x >> (int)(8))] + pop8tab[(uint16)(x & 0xff)]));
+    return (nint)((byte)(pop8tab[(x >> 8)] + pop8tab[(uint16)(x & 0xff)]));
 }
 
 // OnesCount32 returns the number of one bits ("population count") in x.
 public static nint OnesCount32(uint32 x) {
-    return (nint)((byte)(pop8tab[(x >> (int)(24))] + pop8tab[(uint32)((x >> (int)(16)) & 0xff)] + pop8tab[(uint32)((x >> (int)(8)) & 0xff)] + pop8tab[(uint32)(x & 0xff)]));
+    return (nint)((byte)(pop8tab[(x >> 24)] + pop8tab[(x >> 16 & 0xff)] + pop8tab[(x >> 8 & 0xff)] + pop8tab[(x & 0xff)]));
 }
 
 // OnesCount64 returns the number of one bits ("population count") in x.
@@ -172,13 +172,13 @@ public static nint OnesCount64(uint64 x) {
     // more, but it saves at best one instruction, so we leave
     // it alone for clarity.
     UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
-    x = (uint64)((x >> (int)(1)) & ((uint64)((uint64)m0 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m0 & (uint64)m)));
-    x = (uint64)((x >> (int)(2)) & ((uint64)((uint64)m1 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m1 & (uint64)m)));
-    x = (uint64)(((x >> (int)(4)) + x) & ((uint64)((uint64)m2 & (uint64)m)));
-    x += (x >> (int)(8));
-    x += (x >> (int)(16));
-    x += (x >> (int)(32));
-    return (nint)((nint)x & (nint)((1 << (int)(7)) - 1));
+    x = (uint64)(x >> 1 & ((uint64)((uint64)m0 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m0 & (uint64)m)));
+    x = (uint64)(x >> 2 & ((uint64)((uint64)m1 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m1 & (uint64)m)));
+    x = (uint64)(((x >> 4) + x) & ((uint64)((uint64)m2 & (uint64)m)));
+    x += (x >> 8);
+    x += (x >> 16);
+    x += (x >> 32);
+    return (nint)x & (nint)((1 << 7) - 1);
 }
 
 // --- RotateLeft ---
@@ -200,7 +200,7 @@ public static nuint RotateLeft(nuint x, nint k) {
 // This function's execution time does not depend on the inputs.
 public static uint8 RotateLeft8(uint8 x, nint k) {
     UntypedInt n = 8;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
+    nuint s = (nuint)k & (nuint)(n - 1);
     return (uint8)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
@@ -210,7 +210,7 @@ public static uint8 RotateLeft8(uint8 x, nint k) {
 // This function's execution time does not depend on the inputs.
 public static uint16 RotateLeft16(uint16 x, nint k) {
     UntypedInt n = 16;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
+    nuint s = (nuint)k & (nuint)(n - 1);
     return (uint16)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
@@ -220,8 +220,8 @@ public static uint16 RotateLeft16(uint16 x, nint k) {
 // This function's execution time does not depend on the inputs.
 public static uint32 RotateLeft32(uint32 x, nint k) {
     UntypedInt n = 32;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint32)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
+    nuint s = (nuint)k & (nuint)(n - 1);
+    return x.Lsh(s) | x.Rsh(((nuint)n - s));
 }
 
 // RotateLeft64 returns the value of x rotated left by (k mod 64) bits.
@@ -230,8 +230,8 @@ public static uint32 RotateLeft32(uint32 x, nint k) {
 // This function's execution time does not depend on the inputs.
 public static uint64 RotateLeft64(uint64 x, nint k) {
     UntypedInt n = 64;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint64)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
+    nuint s = (nuint)k & (nuint)(n - 1);
+    return x.Lsh(s) | x.Rsh(((nuint)n - s));
 }
 
 // --- Reverse ---
@@ -251,24 +251,24 @@ public static uint8 Reverse8(uint8 x) {
 
 // Reverse16 returns the value of x with its bits in reversed order.
 public static uint16 Reverse16(uint16 x) {
-    return (uint16)((uint16)rev8tab[(x >> (int)(8))] | (uint16)((uint16)rev8tab[(uint16)(x & 0xff)] << (int)(8)));
+    return (uint16)((uint16)rev8tab[(x >> 8)] | (uint16)((uint16)rev8tab[(uint16)(x & 0xff)] << 8));
 }
 
 // Reverse32 returns the value of x with its bits in reversed order.
 public static uint32 Reverse32(uint32 x) {
     UntypedInt m = /* 1<<32 - 1 */ 4294967295;
-    x = (uint32)((uint32)((x >> (int)(1)) & ((uint32)((uint32)m0 & (uint32)m))) | ((uint32)(x & ((uint32)((uint32)m0 & (uint32)m))) << (int)(1)));
-    x = (uint32)((uint32)((x >> (int)(2)) & ((uint32)((uint32)m1 & (uint32)m))) | ((uint32)(x & ((uint32)((uint32)m1 & (uint32)m))) << (int)(2)));
-    x = (uint32)((uint32)((x >> (int)(4)) & ((uint32)((uint32)m2 & (uint32)m))) | ((uint32)(x & ((uint32)((uint32)m2 & (uint32)m))) << (int)(4)));
+    x = (uint32)(x >> 1 & ((uint32)((uint32)m0 & (uint32)m))) | (uint32)(x & ((uint32)((uint32)m0 & (uint32)m))) << 1;
+    x = (uint32)(x >> 2 & ((uint32)((uint32)m1 & (uint32)m))) | (uint32)(x & ((uint32)((uint32)m1 & (uint32)m))) << 2;
+    x = (uint32)(x >> 4 & ((uint32)((uint32)m2 & (uint32)m))) | (uint32)(x & ((uint32)((uint32)m2 & (uint32)m))) << 4;
     return ReverseBytes32(x);
 }
 
 // Reverse64 returns the value of x with its bits in reversed order.
 public static uint64 Reverse64(uint64 x) {
     UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
-    x = (uint64)((uint64)((x >> (int)(1)) & ((uint64)((uint64)m0 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m0 & (uint64)m))) << (int)(1)));
-    x = (uint64)((uint64)((x >> (int)(2)) & ((uint64)((uint64)m1 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m1 & (uint64)m))) << (int)(2)));
-    x = (uint64)((uint64)((x >> (int)(4)) & ((uint64)((uint64)m2 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m2 & (uint64)m))) << (int)(4)));
+    x = (uint64)(x >> 1 & ((uint64)((uint64)m0 & (uint64)m))) | (uint64)(x & ((uint64)((uint64)m0 & (uint64)m))) << 1;
+    x = (uint64)(x >> 2 & ((uint64)((uint64)m1 & (uint64)m))) | (uint64)(x & ((uint64)((uint64)m1 & (uint64)m))) << 2;
+    x = (uint64)(x >> 4 & ((uint64)((uint64)m2 & (uint64)m))) | (uint64)(x & ((uint64)((uint64)m2 & (uint64)m))) << 4;
     return ReverseBytes64(x);
 }
 
@@ -288,7 +288,7 @@ public static nuint ReverseBytes(nuint x) {
 //
 // This function's execution time does not depend on the inputs.
 public static uint16 ReverseBytes16(uint16 x) {
-    return (uint16)((x >> (int)(8)) | (uint16)(x << (int)(8)));
+    return (uint16)(x >> 8 | (uint16)(x << 8));
 }
 
 // ReverseBytes32 returns the value of x with its bytes in reversed order.
@@ -296,8 +296,8 @@ public static uint16 ReverseBytes16(uint16 x) {
 // This function's execution time does not depend on the inputs.
 public static uint32 ReverseBytes32(uint32 x) {
     UntypedInt m = /* 1<<32 - 1 */ 4294967295;
-    x = (uint32)((uint32)((x >> (int)(8)) & ((uint32)((uint32)m3 & (uint32)m))) | ((uint32)(x & ((uint32)((uint32)m3 & (uint32)m))) << (int)(8)));
-    return (uint32)((x >> (int)(16)) | (x << (int)(16)));
+    x = (uint32)(x >> 8 & ((uint32)((uint32)m3 & (uint32)m))) | (uint32)(x & ((uint32)((uint32)m3 & (uint32)m))) << 8;
+    return x >> 16 | x << 16;
 }
 
 // ReverseBytes64 returns the value of x with its bytes in reversed order.
@@ -305,9 +305,9 @@ public static uint32 ReverseBytes32(uint32 x) {
 // This function's execution time does not depend on the inputs.
 public static uint64 ReverseBytes64(uint64 x) {
     UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
-    x = (uint64)((uint64)((x >> (int)(8)) & ((uint64)((uint64)m3 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m3 & (uint64)m))) << (int)(8)));
-    x = (uint64)((uint64)((x >> (int)(16)) & ((uint64)((uint64)m4 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m4 & (uint64)m))) << (int)(16)));
-    return (uint64)((x >> (int)(32)) | (x << (int)(32)));
+    x = (uint64)(x >> 8 & ((uint64)((uint64)m3 & (uint64)m))) | (uint64)(x & ((uint64)((uint64)m3 & (uint64)m))) << 8;
+    x = (uint64)(x >> 16 & ((uint64)((uint64)m4 & (uint64)m))) | (uint64)(x & ((uint64)((uint64)m4 & (uint64)m))) << 16;
+    return x >> 32 | x << 32;
 }
 
 // --- Len ---
@@ -329,45 +329,45 @@ public static nint Len8(uint8 x) {
 public static nint /*n*/ Len16(uint16 x) {
     nint n = default!;
 
-    if (x >= (uint16)(1 << (int)(8))) {
+    if (x >= (uint16)(1 << 8)) {
         x >>= (int)(8);
         n = 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // Len32 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint /*n*/ Len32(uint32 x) {
     nint n = default!;
 
-    if (x >= ((uint32)1 << (int)(16))) {
+    if (x >= (uint32)1 << 16) {
         x >>= (int)(16);
         n = 16;
     }
-    if (x >= ((uint32)1 << (int)(8))) {
+    if (x >= (uint32)1 << 8) {
         x >>= (int)(8);
         n += 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint /*n*/ Len64(uint64 x) {
     nint n = default!;
 
-    if (x >= ((uint64)1 << (int)(32))) {
+    if (x >= (uint64)1 << 32) {
         x >>= (int)(32);
         n = 32;
     }
-    if (x >= ((uint64)1 << (int)(16))) {
+    if (x >= (uint64)1 << 16) {
         x >>= (int)(16);
         n += 16;
     }
-    if (x >= ((uint64)1 << (int)(8))) {
+    if (x >= (uint64)1 << 8) {
         x >>= (int)(8);
         n += 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // --- Add with carry ---
@@ -384,26 +384,11 @@ public static (uint32 sum, uint32 carryOut) Add32(uint32 x, uint32 y, uint32 car
 
     var sum64 = (uint64)x + (uint64)y + (uint64)carry;
     sum = (uint32)sum64;
-    carryOut = (uint32)((sum64 >> (int)(32)));
+    carryOut = (uint32)(sum64 >> 32);
     return (sum, carryOut);
 }
 
-// Add64 returns the sum with carry of x, y and carry: sum = x + y + carry.
-// The carry input must be 0 or 1; otherwise the behavior is undefined.
-// The carryOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry) {
-    uint64 sum = default!;
-    uint64 carryOut = default!;
-
-    sum = x + y + carry;
-    // The sum will overflow if both top bits are set (x & y) or if one of them
-    // is (x | y), and a carry from the lower place happened. If such a carry
-    // happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
-    carryOut = (((uint64)(((uint64)(x & y)) | ((uint64)(((uint64)(x | y)) & ~sum)))) >> (int)(63));
-    return (sum, carryOut);
-}
+// go2cs generated this placeholder — func Add64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Subtract with borrow ---
 // go2cs generated this placeholder — func Sub is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -422,24 +407,11 @@ public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 b
     // bit of y is set (^x & y) or if they are the same (^(x ^ y)) and a borrow
     // from the lower place happens. If that borrow happens, the result will be
     // 1 - 1 - 1 = 0 - 0 - 1 = 1 (& diff).
-    borrowOut = (((uint32)(((uint32)(~x & y)) | ((uint32)(~((uint32)(x ^ y)) & diff)))) >> (int)(31));
+    borrowOut = ((~x & y) | (~(x ^ y) & diff)) >> 31;
     return (diff, borrowOut);
 }
 
-// Sub64 returns the difference of x, y and borrow: diff = x - y - borrow.
-// The borrow input must be 0 or 1; otherwise the behavior is undefined.
-// The borrowOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow) {
-    uint64 diff = default!;
-    uint64 borrowOut = default!;
-
-    diff = x - y - borrow;
-    // See Sub32 for the bit logic.
-    borrowOut = (((uint64)(((uint64)(~x & y)) | ((uint64)(~((uint64)(x ^ y)) & diff)))) >> (int)(63));
-    return (diff, borrowOut);
-}
+// go2cs generated this placeholder — func Sub64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Full-width multiply ---
 // go2cs generated this placeholder — func Mul is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -454,33 +426,11 @@ public static (uint32 hi, uint32 lo) Mul32(uint32 x, uint32 y) {
     uint32 lo = default!;
 
     var tmp = (uint64)x * (uint64)y;
-    (hi, lo) = ((uint32)((tmp >> (int)(32))), (uint32)tmp);
+    (hi, lo) = ((uint32)(tmp >> 32), (uint32)tmp);
     return (hi, lo);
 }
 
-// Mul64 returns the 128-bit product of x and y: (hi, lo) = x * y
-// with the product bits' upper half returned in hi and the lower
-// half returned in lo.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
-    uint64 hi = default!;
-    uint64 lo = default!;
-
-    const uint64 mask32 = /* 1<<32 - 1 */ 4294967295;
-    var x0 = (uint64)(x & mask32);
-    var x1 = (x >> (int)(32));
-    var y0 = (uint64)(y & mask32);
-    var y1 = (y >> (int)(32));
-    var w0 = x0 * y0;
-    var t = x1 * y0 + (w0 >> (int)(32));
-    var w1 = (uint64)(t & mask32);
-    var w2 = (t >> (int)(32));
-    w1 += x0 * y1;
-    hi = x1 * y1 + w2 + (w1 >> (int)(32));
-    lo = x * y;
-    return (hi, lo);
-}
+// go2cs generated this placeholder — func Mul64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Full-width divide ---
 
@@ -508,7 +458,7 @@ public static (uint32 quo, uint32 rem) Div32(uint32 hi, uint32 lo, uint32 y) {
     if (y != 0 && y <= hi) {
         throw panic(overflowError);
     }
-    var z = (uint64)(((uint64)hi << (int)(32)) | (uint64)lo);
+    var z = (uint64)hi << 32 | (uint64)lo;
     (quo, rem) = ((uint32)(z / (uint64)y), (uint32)(z % (uint64)y));
     return (quo, rem);
 }
@@ -535,11 +485,11 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
 
     UntypedInt two32 = /* 1 << 32 */ 4294967296;
     const uint64 mask32 = /* two32 - 1 */ 4294967295;
-    var yn1 = (y >> (int)(32));
+    var yn1 = y >> 32;
     var yn0 = (uint64)(y & mask32);
-    var un32 = (uint64)(hi.Lsh(s) | lo.Rsh((64 - s)));
+    var un32 = hi.Lsh(s) | lo.Rsh((64 - s));
     var un10 = lo.Lsh(s);
-    var un1 = (un10 >> (int)(32));
+    var un1 = un10 >> 32;
     var un0 = (uint64)(un10 & mask32);
     var q1 = un32 / yn1;
     var rhat = un32 - q1 * yn1;
@@ -581,7 +531,7 @@ public static nuint Rem(nuint hi, nuint lo, nuint y) {
 // for y == 0 (division by zero) but, unlike [Div32], it doesn't panic
 // on a quotient overflow.
 public static uint32 Rem32(uint32 hi, uint32 lo, uint32 y) {
-    return (uint32)(((uint64)(((uint64)hi << (int)(32)) | (uint64)lo)) % (uint64)y);
+    return (uint32)(((uint64)hi << 32 | (uint64)lo) % (uint64)y);
 }
 
 // Rem64 returns the remainder of (hi, lo) divided by y. Rem64 panics

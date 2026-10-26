@@ -23,6 +23,7 @@ public static void TestIsIdentifier(ж<testing.T> Ꮡt) {
         new("SpaceSuffix"u8, "foo "u8, false),
         new("Number"u8, "123"u8, false),
         new("Keyword"u8, "func"u8, false),
+
         new("LettersASCII"u8, "foo"u8, true),
         new("MixedASCII"u8, "_bar123"u8, true),
         new("UppercaseKeyword"u8, "Func"u8, true),

@@ -7,6 +7,8 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.go;
 using static global::go.go.types_package;
 
@@ -26,7 +28,7 @@ internal static map<token.Token, token.Token> assignOps = new map<token.Token, t
     [token.AND_NOT_ASSIGN] = token.AND_NOT
 };
 
-public static void TestZeroTok(ж<testing.T> Ꮡt) {
+public static partial void TestZeroTok(ж<testing.T> Ꮡt) {
     // zero value for token.Token must be token.ILLEGAL
     token.Token zero = default!;
     if (token.ILLEGAL != zero) {
@@ -37,7 +39,7 @@ public static void TestZeroTok(ж<testing.T> Ꮡt) {
 public static void TestAssignOp(ж<testing.T> Ꮡt) {
     // there are fewer than 256 tokens
     for (nint i = 0; i < 256; i++) {
-        token.Token tok = ((token.Token)i);
+        token.Token tok = (token.Token)i;
         token.Token got = assignOp(tok);
         token.Token want = assignOps[tok];
         if (got != want) {

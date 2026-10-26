@@ -36,6 +36,12 @@ using static global::go.@internal.coverage.cfile_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -44,8 +50,8 @@ using static global::go.@internal.coverage.cfile_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cfile/emitdata_test.go", "emitdata_test.cs", "ACowgoKUgpSCgoKCgsqCgoKCgpSCgpSCuIKClIKClIKClIKClIKClIKClIKClIKClIKCAAMW8oKUgoKUlIKCgoCCAAkKkoKCgoKUgoCCpKaCgoCCpNyygoKigoKUgpSUgpSmgoKCgoKUpoKUgoKCgpSCgoKCgpSUgoKCpoKUppSCgoKCgpS4goKCgtaCgoKClIKC3IKClIKCgoKUgpKCpoKCgpSClIK4goKCgoKCgpSCgoCCpIK4goKCgoKCgpSC6IKkgqaAgqSUgoKClIKitoKCgoKCgoKUgriCgoKCgoKClIK4goKCgpSCgpSCgoCCgqSC+IKCgoK4goKmgoKCpoLmgoKCgriCgqaCgoK4guaCgoKCuIKCpoKCgriCAAkGgoKUgqaCgoKCgpSCggAKCIKClILKgoTcgoKCgriCgoKCAA0KgoKUlIKUgoKCgqaCgoKmgoKCgoKCyoKUgoKCgqaCgpSC", "57-60:1;61-64:2;65-68:3;69-72:4;73-76:5;77-80:6;81-84:7;85-88:8;89-92:9;226-265:1;269-284:1;288-298:1;302-320:1;324-334:1;338-348:1;352-369:1", "", "553=HasCGO/1/1/1")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/ts_test.go", "ts_test.cs", "AB4qgoCCgILG7sKClIKUgqaCgpSCuICClMiCgoKCAAMiAA0CgpSCgIIAEx7EgoCCpIKCgoCCyIKClIKCpoLmgoKUgpSCgqbKgoCCpKaCuIKClICCuJKClIKUgILIgoKClIKC", "", "", "60=CoverMode/1/1/1;65=CoverMode/1/1/1;176=CoverMode/1/1/1;211=CoverMode/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emitdata_test.go", "emitdata_test.cs", "ACkugoKUgoKCgoLKgoKCgoKUgoKUgriCgpSCgpSCgpSCgpSCgpSCgpSCgpSCgpSCggADFvKClIKClJSCgoKAggAJCrKCgoKClIKAgqSmgoKAgqTcsoKCooKClIKUlIKUpoKCgoKClKaClIKCgoKUgoKCgoKUlIKCgqaClKaUgoKCgoKUuIKCgoLWgoKCgpSCgtyCgpSCgoKClIKSgqaCgoKUgpSCuIKCgoKCgoKUgoKAgqSCuIKCgoKCgoKUguiCpIKmgIKklIKCgpSCoraCgoKCgoKClIK4goKCgoKCgpSCuIKCgoKUgoKUgoKAgoKkgviCgoKCuIKCpoKCgqaC5oKCgoK4goKmgoKCuILmgoKCgriCgqaCgoK4ggAJBoKClIKmgoKCgoKUgoIACgiCgsqChNyCgoKCuIKCgoIADQqCgpSUgpSCgoKCpoKCgqaCgoKCgoLKgpSCgoKCpoKClII=", "53-56:1;57-60:2;61-64:3;65-68:4;69-72:5;73-76:6;77-80:7;81-84:8;85-88:9;222-261:1;265-280:1;284-294:1;298-316:1;320-330:1;334-344:1;348-365:1", "", "548=HasCGO/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/ts_test.go", "ts_test.cs", "AB0ogoCCgILG7sKClIKmgoKUgriAgpTIgoKCggADIgANAoKUgoCCABMexIKAgqSCgoKAgsiCgpSCgqaC5oKClIKCpsqCgIKkpoK4goKUgIK4koKUgpSAgsiCgoKUgoI=", "", "", "56=CoverMode/1/1/1;61=CoverMode/1/1/1;169=CoverMode/1/1/1;204=CoverMode/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

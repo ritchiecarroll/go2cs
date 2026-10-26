@@ -130,14 +130,14 @@ internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> Ꮡi) {
 partial struct lazyFlag /*num:uint64*/;
 
 internal static lazyFlag newLazyFlag(rune r1, rune r2) {
-    return ((lazyFlag)((uint64)(((uint64)r1 << (int)(32)) | (uint64)(uint32)r2)));
+    return (lazyFlag)((uint64)r1 << 32 | (uint64)(uint32)r2);
 }
 
 internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     if (op == 0) {
         return true;
     }
-    var r1 = (rune)(uint64)((f >> (int)(32)));
+    var r1 = (rune)(uint64)((f >> 32));
     if ((syntax.EmptyOp)(op & syntax.EmptyBeginLine) != 0) {
         if (r1 != (rune)'\n' && r1 >= 0) {
             return false;
@@ -188,7 +188,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
         return false;
     }
     m.matched = false;
-    foreach (var (iΔ1, _) in m.matchcap) {
+    foreach (var iΔ1 in range(m.matchcap)) {
         m.matchcap[iΔ1] = -1;
     }
     var (runq, nextq) = (Ꮡm.of(machine.Ꮡq0), Ꮡm.of(machine.Ꮡq1));
@@ -365,7 +365,7 @@ Again:
         goto Again;
     }
     else if (exprᴛ1 == syntax.InstEmptyWidth) {
-        if (cond.match(((syntax.EmptyOp)(uint8)(~i).Arg))) {
+        if (cond.match((syntax.EmptyOp)(uint8)(~i).Arg)) {
             pc = i.Value.Out;
             goto Again;
         }
@@ -443,7 +443,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     }
 
     var matched = false;
-    foreach (var (iΔ1, _) in (~m).matchcap) {
+    foreach (var iΔ1 in range((~m).matchcap)) {
         m.Value.matchcap[iΔ1] = -1;
     }
 
@@ -465,7 +465,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     nint pc = re.onepass.Value.Start;
     var inst = Ꮡ((~re.onepass).Inst, pc);
     // If there is a simple literal prefix, skip over it.
-    if (pos == 0 && flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg)) && len(re.prefix) > 0 && i.canCheckPrefix()) {
+    if (pos == 0 && flag.match((syntax.EmptyOp)(uint8)(~inst).Arg) && len(re.prefix) > 0 && i.canCheckPrefix()) {
         // Match requires literal prefix; fast search for it.
         if (!i.hasPrefix(Ꮡre)) {
             goto Return;
@@ -518,7 +518,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
             continue;
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
-            if (!flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg))) {
+            if (!flag.match((syntax.EmptyOp)(uint8)(~inst).Arg)) {
                 goto Return;
             }
             continue;
