@@ -295,6 +295,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsRetiredAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsProvenanceNotes_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsExcludedLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsFragmentLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
