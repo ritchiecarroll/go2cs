@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -30,7 +31,9 @@ type Options struct {
 	provenance          bool   // -provenance: deterministic source-file comment; default off
 	goRoot              string
 	goPath              string
-	go2csPath           string
+	go2csPath           string // -go2cspath: absolute once parsed (absoluteGo2CSPath)
+	singleFileInput     string // single-file input (`go2cs example.go [out.cs]`): the named .go file, absolute; empty for a package
+	singleFileOutput    string // single-file input: the one .cs file it converts to (singleFileOutputPath)
 	convertStdLib       bool
 	convertTimeout      time.Duration // -convert-timeout: per-package cap the -stdlib driver applies to one package's conversion; zero means an Options built in code rather than from the command line, which takes defaultConvertTimeout
 	recurse             bool
@@ -334,6 +337,62 @@ func parseBuildTags(value string) []string {
 // imports and every one of them would otherwise repeat the same advice). Package-level and
 // test-pinnable in the goModCache manner: a test saves it, resets it, and restores it on cleanup.
 var go2csRootWarned bool
+
+// absoluteGo2CSPath anchors the runtime root, from -go2cspath or GO2CSPATH, to the working directory the converter
+// was started in. A relative root otherwise travels as written into every child that reads it -- the -tests flow's
+// `dotnet publish -p:go2csPath=...` and its environment -- and dotnet runs from the project directory, so the root
+// resolved there instead of where the user typed it.
+func absoluteGo2CSPath(path string) string {
+	if len(path) == 0 || filepath.IsAbs(path) {
+		return path
+	}
+
+	if abs, err := filepath.Abs(path); err == nil {
+		return abs
+	}
+
+	return path
+}
+
+// singleFileOutputPath is the one .cs file a single-file conversion (`go2cs example.go [out.cs]`) writes: the file the
+// user named when the output argument ends in .cs and is not an existing directory, otherwise <name>.cs inside the
+// directory the user named, and <name>.cs beside the input when no output was given.
+func singleFileOutputPath(inputFile string, outputArg string) string {
+	name := strings.TrimSuffix(filepath.Base(inputFile), filepath.Ext(inputFile)) + ".cs"
+
+	if len(outputArg) == 0 {
+		return filepath.Join(filepath.Dir(inputFile), name)
+	}
+
+	if info, err := os.Stat(outputArg); err == nil && info.IsDir() {
+		return filepath.Join(outputArg, name)
+	}
+
+	if strings.EqualFold(filepath.Ext(outputArg), ".cs") {
+		return outputArg
+	}
+
+	return filepath.Join(outputArg, name)
+}
+
+// isSingleFileInput reports whether path is the .go file a single-file conversion named. os.SameFile, not a string
+// compare, because the loader reports a file through whatever spelling it resolved (a symlinked temp root, a
+// short-name directory on windows).
+func isSingleFileInput(path string, options Options) bool {
+	if len(options.singleFileInput) == 0 {
+		return false
+	}
+
+	named, err := os.Stat(options.singleFileInput)
+
+	if err != nil {
+		return false
+	}
+
+	loaded, err := os.Stat(path)
+
+	return err == nil && os.SameFile(named, loaded)
+}
 
 // resolveGo2CSPath settles the runtime/stdlib root a conversion resolves its references AND its
 // imported-type-alias metadata against — the converter's -go2cspath (env GO2CSPATH, default

@@ -28837,4 +28837,37 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — P1 (.2 seat #5, R's finding): single-file output naming and a relative `-go2cspath` — FIXED on `claude/p1-cli-paths`
+
+**Found by R on windows and linux** (the 1.26.10.1 docs veracity review); measured again by P1 on linux at master
+d269ef477b with the converter built from that tree.
+
+**(a) Single-file input.** The usage text's own examples are `go2cs example.go conv/example.cs` and `go2cs example.go`.
+
+| command | before | after |
+|---|---|---|
+| `go2cs example.go conv/example.cs` | `conv/example.cs.cs`, plus a project DIRECTORY `conv/example.cs/` | `conv/example.cs`; project and `package_info.cs` in `conv/` |
+| `go2cs example.go conv` (a directory) | `conv.cs` beside the module; project in `conv/`, `package_info.cs` in the module directory | `conv/example.cs`; project and `package_info.cs` in `conv/` |
+| `go2cs example.go` | a file named `..cs` | `example.cs` beside the input |
+
+Root: main.go replaced the input file with its directory before the output was settled, and the driver's
+single-file branch named the output `TrimSuffix(<output path>, ".go") + ".cs"`, which only works when the output path
+is the .go file itself. It also wrote EVERY file of the package to that one name, so in a multi-file package the
+last file won. Now main.go settles the one output file first (`singleFileOutputPath`: the named `.cs`, else
+`<name>.cs` in the named directory, else beside the input), and the driver writes only the named file there. The
+package's other files are still visited, for the package-wide state the named file's emission reads, and are not
+written. For a one-file package, single-file and package mode now emit byte-identical `example.cs` and `.csproj`.
+
+**(b) A relative `-go2cspath`** (or `GO2CSPATH`) was carried as written into the `-tests` flow's
+`dotnet publish -p:go2csPath=...` and the child environment, and dotnet runs from the project directory, so the
+root resolved there. It is now made absolute against the working directory when the command line is parsed.
+
+**Guard:** `src/go2cs/cliPaths_test.go`, four CLI tests that re-execute the test binary as the converter from a
+real working directory. Red first at d269ef477b, green with the fix. Run on linux only; windows not run on this box.
+
+**Emission:** package (directory) conversions take the `isDir` branches, which are unchanged, so the corpus and the
+behavioral goldens do not move.
+
+— P1 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
