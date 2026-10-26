@@ -33,7 +33,7 @@ internal static void initᴛA() {
     A = must(ᴛ1, ᴛ2);
 }
 
-public static ж<Sum> ᏑAddressed = new StandardBox<Sum>(default(Sum));
+public static ж<Sum> ᏑAddressed = new StaticBox<Sum>(default(Sum));
 public static ref Sum Addressed => ref ᏑAddressed.Value;
 internal static void initᴛAddressed() {
     var (ᴛ3, ᴛ4) = build(B);
