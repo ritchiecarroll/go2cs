@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+r3	net	osx-arm64	555	551	3	4	1	failing	yes	505	3	-	yes
+r3	net	osx-x64	555	551	3	4	1	failing	yes	505	3	-	yes

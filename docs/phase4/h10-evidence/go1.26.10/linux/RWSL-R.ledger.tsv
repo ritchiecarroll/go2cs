@@ -1,0 +1,5 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+net/http	e4c8e0bf54486aba99f26c4559c5552acdacf372	e4c8e0bf54486aba99f26c4559c5552acdacf372	1792994451	PASS	0	2026-10-26T06:12:08Z
+crypto/tls	e4c8e0bf54486aba99f26c4559c5552acdacf372	e4c8e0bf54486aba99f26c4559c5552acdacf372	1792994451	PASS	0	2026-10-26T06:25:56Z
+runtime	e4c8e0bf54486aba99f26c4559c5552acdacf372	e4c8e0bf54486aba99f26c4559c5552acdacf372	1792994451	PASS	0	2026-10-26T07:26:33Z
+# runtime: the converter summary reads "Validated 11091 tests ... 70 disclosed-divergent", and 11091 + 70 = 11161, the verdict names on each side. The TSV disclosed column (76) counts the comparison record's disclosure list, which adds 6 host-fatal disclosures (TestEmptySlice, TestEmptyString, TestMkmalloc, TestPanicSystemstack, TestProfBufWakeup, TestSetPanicOnFault) whose tests are skipped on the C# side and carry no verdict. The row's reading of record is 11091 + 70.

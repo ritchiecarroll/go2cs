@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+r1	runtime	osx-arm64	11122	10856	40	266	232	failing	-	11080	66	-	yes
+r1	runtime	osx-x64	-	-	-	-	-	no artifact: upload ENOTFOUND (runner DNS), not a code result	-	11080	66	-	-
