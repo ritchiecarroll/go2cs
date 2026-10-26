@@ -108,6 +108,13 @@ is exactly what the snapshot models. (Guarded by `MethodValueReassignCapture`'s 
 pointer-receiver method value assigned to a pre-declared func var, with the mutation read back through
 the original local, output-compared vs Go.)
 
+**Limitation: a package variable of ANOTHER package binds a copy.** A same-package variable whose method
+value is taken is backed by a heap box (`public static ж<counter> ᏑC`), so `f := C.bump` emits
+`var f = ᏑC.bump;` and the method's writes reach `C`. An imported package's variable has no box the
+importer can name: `g := lib.V.Bump`, with `Bump` a pointer-receiver method of `lib.Counter`, emits
+`var g = Ꮡ(lib.V).Bump;`, and `Ꮡ(value)` boxes a **copy** of `lib.V`, so `g()` does not change `lib.V`
+where Go's `(&lib.V).Bump` does. The same holds when the method value is passed as an argument.
+
 ## A VALUE-receiver method value snapshots its receiver in EVERY position
 The receiver snapshot above exists because Go binds a value receiver by **copy at evaluation** — `x.M`
 saves the receiver when the method value is created, not when the resulting func is called. The two

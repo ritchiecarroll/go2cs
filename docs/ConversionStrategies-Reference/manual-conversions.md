@@ -304,7 +304,7 @@ The `os.(*File).readdir` row is the one that cost something: unscoped, the entry
 What a scope deliberately does **not** express is a per-platform *signature*. The registry decides whether a declaration is hand-owned; the hand-owned file decides what it looks like. Guarded by `manualConversionScope_test.go`, whose fixture is the `lock_sema`/`lock_futex` pair at their real 4-vs-2 arity, plus a typo guard — a scope naming an unknown GOOS matches nothing, which would silently turn a hand-own off everywhere and is otherwise unreportable, since "not hand-owned" is a legitimate answer for every other declaration.
 
 
-**`crypto/subtle`'s word-at-a-time XOR (`core/crypto/internal/fips140/subtle/xor_generic.cs`, whole-file — `crypto/subtle.XORBytes` delegates to it).** `xorBytes` XORs a machine WORD at a time by reinterpreting its three byte slices as `[]uintptr` (`unsafe.Slice((*uintptr)(unsafe.Pointer(&x[0])), len(x)/wordSize)`). A `uintptr[]` view over a `byte[]` does not exist in the managed model — golib's `slice<T>` is a window on a real `T[]` — so the converted `words()` could only SNAPSHOT the bytes into a detached `slice<uintptr>`, and the word loop XORed the snapshot and dropped it: for every length that is a multiple of 8, `XORBytes` wrote **nothing**. The whole file is hand-owned (marked `[module: GoManualConversion]`) and does the same reinterpret the managed way, `MemoryMarshal.Cast<byte, ulong>` over the slices' own spans — a genuine aliasing view, so the word writes land in place — keeping Go's word-at-a-time behavior and the performance contract crypto/cipher's CTR and GCM modes depend on. Only Go's `supportsUnaligned`/`aligned` gate is dropped (it exists for architectures whose unaligned word loads fault). Full detail: *`unsafe.Slice` over MANAGED element storage ALIASES it*. Guarded by crypto/subtle's own suite (7/7, no disclosures, over the full 1..1024 x 8 x 8 x 8 alignment matrix).
+**`crypto/subtle`'s word-at-a-time XOR (`core/crypto/internal/fips140/subtle/xor_generic.cs`, whole-file — `crypto/subtle.XORBytes` delegates to it).** `xorBytes` XORs a machine WORD at a time by reinterpreting its three byte slices as `[]uintptr` (`unsafe.Slice((*uintptr)(unsafe.Pointer(&x[0])), len(x)/wordSize)`). A `uintptr[]` view over a `byte[]` does not exist in the managed model — golib's `slice<T>` is a window on a real `T[]` — so the converted `words()` could only SNAPSHOT the bytes into a detached `slice<uintptr>`, and the word loop XORed the snapshot and dropped it: for every length that is a multiple of 8, `XORBytes` wrote **nothing**. The whole file is hand-owned (marked `[module: GoManualConversion]`) and does the same reinterpret the managed way, `MemoryMarshal.Cast<byte, ulong>` over the slices' own spans — a genuine aliasing view, so the word writes land in place — keeping Go's word-at-a-time behavior and the performance contract crypto/cipher's CTR and GCM modes depend on. Only Go's `supportsUnaligned`/`aligned` gate is dropped (it exists for architectures whose unaligned word loads fault). Full detail: *`unsafe.Slice` over MANAGED element storage ALIASES it*. Guarded by crypto/subtle's own suite (validated in full, no disclosures, over the full 1..1024 x 8 x 8 x 8 alignment matrix).
 
 **`sync/atomic.Value` (`core/sync/atomic/value.cs`, whole-file).** Go's `atomic.Value` stores and loads an `any` atomically by reinterpreting the interface's internal two-word `(type, data)` layout: `(*efaceWords)(unsafe.Pointer(&v))`, then `atomic.LoadPointer`/`StorePointer`/`CompareAndSwapPointer` on the `typ` and `data` slots, with a `firstStoreInProgress` sentinel guarding the first store. That layout is a Go runtime detail with **no managed equivalent** — an `any` here is a single `System.Object` reference (one word), and reinterpreting a managed reference as a raw address to poke type/data words simply NREs (the same managed-referent-through-`unsafe.Pointer` wall as the guintptr family). The first *operational* hit was `internal/testlog`'s package-level `var logger atomic.Value`, loaded during `os.Getenv` — so `atomic.Value.Load()` NRE'd on the zero value before any store. The whole file is hand-rewritten (marked `[module: GoManualConversion]`) to store the `any` **directly** in the `Value.v` field and use `Volatile.Read`/`Interlocked.CompareExchange` for the acquire/release ordering and CAS the literal conversion cannot provide; the nil-store and inconsistent-type panics, and `CompareAndSwap`'s by-value comparison (`AreEqual`, matching Go's `i != old`), preserve the spec. Guarded by the `AtomicValue` behavioral test (Load-nil / Store / Swap / CompareAndSwap over typed string values, output-compared vs Go).
 
@@ -326,14 +326,16 @@ of reflectlite's bridged surface too
 (`Interface()` through `valueInterface`, `Elem`/`IsNil`/`Set`, the type relations and naming — see
 *The reflectlite MINI-BRIDGE* below).<!-- history: a Phase-4 bridge increment; Phase-1 synthetic abi.Type -->
 Verified by the sort differential: `TestSlice` flips to pass — `sort.Slice` sorts through the
-managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path. Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim measures allocated **bytes** on the calling thread instead (`GC.GetAllocatedBytesForCurrentThread()` — precise, and inherently thread-scoped, which stands in for the GOMAXPROCS pinning; like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The mapping is deliberately honest rather than count-approximating: **zero maps exactly** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards), while a nonzero result is the average allocated bytes per run, floored at 1 so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* therefore diverges as a loud failure in the differential oracle instead of silently passing — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` (shim).
+managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path.
 
-**That no COUNT is available is measured, not assumed, and a nonzero result says which unit it is in.**<!-- r56d --> The value the shim returns is rendered by Go's own `"got %v allocs"` format, so a byte figure was reaching the page wearing the word *allocs* — `crypto/internal/nistec`'s row reads `got 21964011.0`, and nothing on it said that was 21 MB rather than 22 million objects. Since a disclosed divergence may never paper over a go2cs-owned defect, an invisible unit at the seam is itself the defect. The survey behind the claim (net9.0/9.0.18, x64) is recorded on the declaration: the whole public `GC` surface exposes byte totals only; `GetAllocatedBytesForCurrentThread` is exact (40.000 B/object over 1, 10, 1e3 and 1e5 allocations of a 40-byte type) yet cannot separate count from size, one `byte[40000]` and 1,000 40-byte objects both reading ≈40,000 B; `GCAllocationTick` is a byte-threshold *sample*, 378 events per 1,000,000 allocations (one per ≈105,820 B); `GCSampledObjectAllocation` — whose `ObjectCountForTypeSample` payload *would* be a count — raises **zero** events through an in-process `EventListener` in every configuration tried (High `0x200000`, Low `0x2000000`, both, and all keywords `0xFFFFFFFFFFFF`, at Verbose and Informational), with the GC keyword's own tick count as the live positive control; `System.Runtime`'s 27 EventCounters offer only `alloc-rate`, bytes per interval; and runtime events reach an in-process listener **asynchronously** — zero visible immediately after the measured loop, settling ≈117 ms later — so no event-derived figure could be returned by a synchronous call anyway. Accordingly a **nonzero** result records its unit once on the running test (`TestExecution.NoteMeasurementUnitOnce`), landing beside the assert's own message and riding the `TestEvent` into `results.json`; the **zero** case is deliberately left silent, because there the two units agree exactly (0 bytes ⟺ 0 allocations) and a test that passes on the zero answer keeps its output byte-identical to before the seam existed. A true count *is* obtainable from go2cs's own runtime rather than the CLR's — golib allocates essentially every Go-semantic object, so counting there mirrors what Go's `Mallocs` already is, a runtime-owned counter rather than a platform facility (proven by measurement: nistec's P256 body allocates 241,077 golib objects per run for its 21,963,547 bytes) — but it is deliberately not taken, since a count that silently omits allocation sites is worse than an honest byte figure and an audited-total census of golib's allocation sites is a design-with-user arc.
+**`testing.AllocsPerRun` (`core/testing/testing.cs`, the hand-owned `testing` package).** Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim counts go2cs's own runtime allocations instead: golib's `AllocationCounter` is charged at golib's allocation sites, which is the structural mirror of Go's `Mallocs`, and its tally is per thread, which stands in for the GOMAXPROCS pinning (like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The count covers golib's sites only — allocations the C# compiler emits in converted code (closures, params arrays, interface boxing) and BCL internals are outside it — so it is a LOWER BOUND, and the shim also measures allocated **bytes** on the calling thread (`GC.GetAllocatedBytesForCurrentThread()`) as a cross-check. **Zero bytes maps exactly to 0** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards); nonzero bytes with a nonzero count report the count per run; nonzero bytes with a ZERO count — allocations the counter did not see — report the byte figure per run, because reporting the zero would be a false pass. Any nonzero result is floored at 1 so amortized sub-one-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* can therefore still diverge, as a loud failure in the differential oracle — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` and `TestingRuntimeTests.AllocsPerRunReportsAGolibObjectCountAndFallsBackToBytesWhenNothingIsCounted` (shim).
+
+**That the CLR offers no COUNT is measured, not assumed, and a nonzero result says which unit it is in.**<!-- r56d --> The value the shim returns is rendered by Go's own `"got %v allocs"` format, so a byte figure was reaching the page wearing the word *allocs* — `crypto/internal/nistec`'s row reads `got 21964011.0`, and nothing on it said that was 21 MB rather than 22 million objects. Since a disclosed divergence may never paper over a go2cs-owned defect, an invisible unit at the seam is itself the defect. The survey behind the claim (net9.0/9.0.18, x64) is recorded on the declaration: the whole public `GC` surface exposes byte totals only; `GetAllocatedBytesForCurrentThread` is exact (40.000 B/object over 1, 10, 1e3 and 1e5 allocations of a 40-byte type) yet cannot separate count from size, one `byte[40000]` and 1,000 40-byte objects both reading ≈40,000 B; `GCAllocationTick` is a byte-threshold *sample*, 378 events per 1,000,000 allocations (one per ≈105,820 B); `GCSampledObjectAllocation` — whose `ObjectCountForTypeSample` payload *would* be a count — raises **zero** events through an in-process `EventListener` in every configuration tried (High `0x200000`, Low `0x2000000`, both, and all keywords `0xFFFFFFFFFFFF`, at Verbose and Informational), with the GC keyword's own tick count as the live positive control; `System.Runtime`'s 27 EventCounters offer only `alloc-rate`, bytes per interval; and runtime events reach an in-process listener **asynchronously** — zero visible immediately after the measured loop, settling ≈117 ms later — so no event-derived figure could be returned by a synchronous call anyway. Accordingly a **nonzero** result records its unit — and both numbers, the count and the bytes — once on the running test (`TestExecution.NoteMeasurementUnitOnce`), landing beside the assert's own message and riding the `TestEvent` into `results.json`; the **zero** case is deliberately left silent, because there the two units agree exactly (0 bytes ⟺ 0 allocations) and a test that passes on the zero answer keeps its output byte-identical to before the seam existed. A true count *is* obtainable from go2cs's own runtime rather than the CLR's — golib allocates essentially every Go-semantic object, so counting there mirrors what Go's `Mallocs` already is, a runtime-owned counter rather than a platform facility (proven by measurement: nistec's P256 body allocates 241,077 golib objects per run for its 21,963,547 bytes) — and that is the count the shim reports: a count that silently omitted allocation sites would be worse than an honest byte figure, so it is taken with its coverage boundary stated (golib's sites only, a lower bound) and the byte cross-check above, which falls back to bytes whenever the counter saw nothing.
 
 The strings suite exposed the two divergence classes this mapping discloses (full analysis:
 `docs/phase4/StringsBytes-BlockerMap.md`, *AllocsPerRun divergence analysis*): **count-shape
-asserts** (`TestBuilderAllocs` wants exactly 1 malloc; the shim reports bytes, so any nonzero
-diverges loudly — by design), and **allocation-profile divergences**, where the zero-shape itself
+asserts** (`TestBuilderAllocs` wants exactly 1 malloc; the shim's golib object count for the converted
+body is higher than that, so it diverges loudly — by design), and **allocation-profile divergences**, where the zero-shape itself
 is unsatisfiable because the managed model allocates where Go's compiler doesn't: an addressed
 local (`var b Builder` + pointer-receiver calls) heap-boxes per run where Go stack-allocates
 (`TestBuilderGrow`'s growLen=0 leg), and `string(r)` materializes a `byte[]` where Go uses a
@@ -380,7 +382,7 @@ signature pin is the integrity guard: a pinned test failing with ANY other signa
 index-semantics leg regressing) is still a mismatch, a pinned test in any other status pair
 (including C#=infrastructure-error) is still a mismatch, and a package with no manifest compares
 strictly — sort and utf8 are unaffected. The validation summary discloses the reclassified rows
-alongside the excluded declarations (`… 7 disclosed-divergent (alloc-profile), …`), subtracting
+alongside the excluded declarations (`… N disclosed-divergent (deferred), …`), subtracting
 them from the validated count, and the nonzero C# host exit the disclosed failures cause is
 forgiven only when `go test` itself was clean and every divergence matched its pin (zero
 mismatches — a truncated host run surfaces as one-sided rows and stays fatal). An empty
@@ -388,14 +390,15 @@ signature (which would substring-match anything) and duplicate names are load-ti
 silent no-ops. Guards: `TestDisclosedDivergenceOracle` (signature match discloses / different
 signature still fails / no manifest strict / direction+status pairs never widen) and
 `TestDisclosureManifestLoading` (absent-file no-op; empty-signature and duplicate rejection).
-First users: `bytes` (7 alloc-profile rows) and `strings` (3 alloc-count-semantics + 1
+First users (history; both manifests have since been relabeled, and every row in them is now `deferred`):
+`bytes` (7 alloc-profile rows) and `strings` (3 alloc-count-semantics + 1
 alloc-profile), both validated with it.<!-- history: Phase-4 validated packages #3 and #4; utf16 was #5 -->
 `unicode/utf16` is the first
 to reuse the mechanism as a general tool rather than a bytes/strings special case: its lone
 `TestAllocationsDecode` asserts `Decode` returns its non-escaping `[]rune` with **zero** allocations —
 which Go reaches only through escape analysis (the test guards itself with `testenv.SkipIfOptimizationOff`),
-and which the managed runtime provably cannot, since a returned `slice<rune>` is always a heap allocation.
-It discloses one `alloc-profile` row (signature `"Decode allocated "`) while `TestDecode` independently
+and which the converted code does not reach today, since the returned `slice<rune>` is a heap allocation.
+It discloses one row, classed `deferred` because a named plan would remove that allocation (signature `"Decode allocated "`), while `TestDecode` independently
 proves the decoded output is correct — the disclosure covers exactly the allocation profile, nothing else.
 
 **A pin whose GO side is not deterministic — the `hostConditional` annotation.**<!-- ruled by the coordinator 2026-08-20 --> A disclosure asserts *Go passes, C# provably cannot*, so it is only stable
@@ -422,8 +425,8 @@ the marker **and** the one sentence naming the environmental dependency (so a ro
 without saying what it depends on; a blank one is a load-time error, like an empty signature). An
 annotated row is accepted in **exactly two shapes** and accounts as **disclosed — never as matching**
 in both: Go pass / C# fail (the pinned divergence) and Go fail / C# fail (agreement, where the Go
-premise itself fails). The roster arithmetic is therefore host-stable — `crypto/tls` reads 400 + 2 on
-every machine. Go-side subtest children of an annotated row ride the existing withdrawal rule in the
+premise itself fails). The roster arithmetic is therefore host-stable — `crypto/tls` reads the same validated and
+disclosed counts on every machine. Go-side subtest children of an annotated row ride the existing withdrawal rule in the
 second shape too, because shape (b) is precisely the shape in which Go DID reach its fan-out;
 without that, `TestBogoSuite`'s 3,243 case rows land as one-sided mismatches on a run where the
 converted side never moved. **The tolerance is confined to the half that was never deterministic:**
@@ -463,7 +466,7 @@ slice back through the aliased box), and the hand-owned `rtype.Field` stamps the
 `StructField.Index` — an empty Index made the auto `FieldByIndex` return the struct ITSELF, so
 gob's `encodeStruct` walked every wireType field as the whole struct. Demonstrated consumers:
 encoding/gob's init + Encoder/Decoder engines (a struct round-trips end-to-end), go/token's
-`TestSerialization` (FileSet through gob, 31/31), internal/fmtsort (3/3). Registered in
+`TestSerialization` (FileSet through gob), internal/fmtsort. Registered in
 `manualConversionFuncs["reflect"]`; the validated fmtsort/go-token test suites are the operational guards.
 
 **The type NAME is a descriptor read too — `reflectlite`'s `rtype.String`.**<!-- history: 2026-08-02 --> The same
@@ -606,11 +609,11 @@ pointer-receiver call MUTATING the receiver across calls, a value-receiver metho
 pointer, a no-result method, `MethodByName` round-tripping to the same index (and both absent-name
 forms), the unbound `Method.Func` called receiver-first, promoted-embed ordering, and an interface
 table whose method value dispatches to the dynamic value. Demonstrated consumers: `math/rand`
-**43/43** and `math/rand/v2` **36/36** validate at their full counts with `TestRegress`
+and `math/rand/v2` validate in full with `TestRegress`
 genuinely walking (the converted bridge reports `*rand.Rand NumMethod: 16` in Go's order and
 `Intn(1000000000) = 526058514`, matching `go run` — where before the pair it reported 0 and the
-test passed VACUOUSLY, executing none of its 320 golden comparisons); `time` goes 146 → **148**
-pass of 159 as its two JSON rows re-land. The next gaps this recorded — `MakeFunc`,
+test passed VACUOUSLY, executing none of its 320 golden comparisons); `time`'s two JSON rows
+re-landed with it (146 → 148 pass of 159 when measured). The next gaps this recorded — `MakeFunc`,
 variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — are hand-owned too
 (`manualConversionFuncs["reflect"]`; `rtype.Name` through the `TFlagNamed` stamp below).
 
@@ -707,8 +710,8 @@ from the wire entirely, visible as `v = "", want "forty-two"` on the value field
 fields of the same type passed.
 
 **Deliberately not populated as Go's: `MapType().Hasher` and `Key.Equal` cannot be honored at all.**
-The remaining `unique`/`net` wall is a map descriptor whose `Hasher`/`Key`/`Elem` are unpopulated, so
-`concurrent.NewHashTrieMap`'s delegate construction fails on the first field it touches. Populating
+Without the hand-own described below, the `unique`/`net` wall is a map descriptor whose `Hasher`/`Key`/`Elem`
+are unpopulated, so the auto-converted hash-trie map's delegate construction fails on the first field it touches. Populating
 them looks like the same shape as the reads above and **is not**, because the contract differs in
 kind: `Hasher(unsafe.Pointer, uintptr) uintptr` must hash *the value at an address*, and the address
 the call site produces cannot name a managed value. Measured, three ways: two boxes holding equal
@@ -725,10 +728,11 @@ not be populated to look truthful** — and it is why the fix sits one layer dow
 here (the `HashTrieMap` hand-own below takes it; `MapType()` itself is synthesized with a
 seed-only `Hasher` that ignores the address, which is a different contract — see *`abi.Type`'s
 SPECIALIZATIONS are synthesized*). The remedy is one layer down and outside these files:
-`internal/concurrent.HashTrieMap`
+`internal/sync.HashTrieMap` (`internal/concurrent.HashTrieMap` at Go 1.23)
 is a managed-referent raw-metal case whose *contract* (a concurrent map over comparable `K`) the CLR
-answers natively while its *mechanism* (hash the bytes at an address) it cannot, so it wants a
-hand-owned `_impl.cs` on the `sync.Mutex` precedent.
+answers natively while its *mechanism* (hash the bytes at an address) it cannot, so it is hand-owned
+whole-file (`src/core/internal/sync/hashtriemap.cs`) on the `sync.Mutex` precedent — see
+[`internal/sync.HashTrieMap`](#internalsynchashtriemap--a-managed-map-where-go-seeds-itself-from-maptypehasher).
 
 **Pointer order tokens — `Value.Pointer()`/`UnsafePointer()` (golib `PointerOrderToken`).** Go
 programs order pointers *arithmetically* (`cmp.Compare(a.Pointer(), b.Pointer())` —
@@ -995,7 +999,7 @@ a whole-struct comparison that can never succeed no matter how carefully the tes
 `compress/flate`'s `TestWriterReset` nils `fill`/`step`/`bulkHasher`/`bestSpeed`, copies `hashMatch`, and
 substitutes `tokens`/`window` precisely so `DeepEqual` can compare everything else — and it failed at
 **all ten** compression levels. That was the package's only failing test; with the arm corrected
-`compress/flate` validates **64 / 64**. The diagnosis is worth recording because every *individual*
+`compress/flate` validates in full. The diagnosis is worth recording because every *individual*
 field compared equal (through `Field(i).Interface()`, which re-boxes and so re-enters the invalid-value
 path) while the enclosing struct did not — the discrepancy between the two is what named the arm. The
 `DeepEqual` guard gains nine cases: nil-func struct fields equal, one side non-nil, a struct with a
@@ -1397,7 +1401,7 @@ of through it — `runtime/metrics/sample.cs` is hand-owned and its `Read` marsh
 `registerPoolCleanup` pattern), preserving the batch semantics while the metrics table and every compute
 closure stay auto-converted — so the `runtime_readMetrics` row exists for a conversion into a root WITHOUT
 the hand-own, where the bodyless declaration reappears and must announce the wall rather than fabricate past
-it. `runtime/metrics` validates 2 of 2 on this arrangement.
+it. `runtime/metrics` validates in full on this arrangement.
 
 **`os/signal`'s six primitives — the push that needed an OS EDGE and a real BLOCK before it could be
 honored**.<!-- 2026-08-14 --> `os/signal` declares six symbols the runtime defines, all bare shape: five under one
@@ -2055,9 +2059,9 @@ prohibition, since the returned number would look truthful while meaning somethi
 placeholder comment where the bodyless partial was. A/B footprint: **one corpus file**. Demonstrated
 consumer: `internal/cpu`'s own `TestDisableSSE3`, whose first statement is
 `if GetGOAMD64level() > 1 { t.Skip(…) }` — against the unimplemented `PartialStubGenerator` stub that
-guard was an infrastructure-error, and it was the package's only divergence (7 of 8). With the constant in
+guard was an infrastructure-error, and it was the package's only divergence. With the constant in
 place the test reads 1, walks on into `runDebugOptionsTest`, and skips exactly where Go does:
-`internal/cpu` validates **8 of 8**.
+`internal/cpu` validates in full.
 
 ## `StructField.Tag` is a REAL read — the converter has always emitted the tag, nothing had ever read it
 
@@ -3407,7 +3411,7 @@ The transfer itself is golib's (`go.golib.Coro`), not `iter`'s, because it is a 
 
 **`runtime.NumGoroutine` was wired in the same change, and it had never answered truthfully.** Its Go body is `gcount()`, which derives the live count by SUBTRACTION over scheduler state the managed model never populates — `allglen`, less `sched.gFree.n`, less `sched.ngsys`, less each P's `gFree.n`. Every term was zero, and `gcount`'s own `if n < 1 { n = 1 }` floor then turned the nonsense into a plausible-looking constant: **`NumGoroutine()` returned 1 for every program, forever** — exactly the shape of wrong that survives unnoticed, because a single-goroutine program's answer really is 1. golib's `Goroutine` registry had maintained the true count all along (it is what the SIGQUIT dump already printed), so this is a WIRING rather than an approximation: a `manualConversionFuncs` entry displaces the auto body and `managed_impl.cs` returns `Goroutine.Count`. Go's staleness caveat carries over unchanged and for the same reason; `gcount`'s floor does not, since the registry cannot report fewer than the caller's own goroutine.
 
-Guarded on both sides: `iter`'s converted suite validates **28/28** against `go test` (goroutine accounting, double-next/double-yield, panic-through on `next` and on `stop`, Goexit across the boundary, immediate stop), and the `IterPullRendezvous` behavioral test pins the rendezvous semantics against `go run` in the corpus gate — deliberately printing no goroutine counts, since a count is stable in Go only under the stabilization loop that suite uses, and a flaky stdout comparison would fire across the whole corpus rather than in one package.
+Guarded on both sides: `iter`'s converted suite validates in full against `go test` (goroutine accounting, double-next/double-yield, panic-through on `next` and on `stop`, Goexit across the boundary, immediate stop), and the `IterPullRendezvous` behavioral test pins the rendezvous semantics against `go run` in the corpus gate — deliberately printing no goroutine counts, since a count is stable in Go only under the stabilization loop that suite uses, and a flaky stdout comparison would fire across the whole corpus rather than in one package.
 
 ## `sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin
 
@@ -3806,7 +3810,13 @@ The naming rule itself is unchanged; what is recorded here is the **reading**. A
 consults a frame set at Release+TC0 — a relative-depth assert, a count of host frames, a traceback
 grepped for a literal's name — is reading an inlining decision unless every frame it depends on is
 pinned, and a frame inlined away is indistinguishable from one the Go-frame filter above declined to
-report. Same family as reflect's `valueMethodName`, whose faithfully transcribed stack climb was
+report. In converted code the converter does that pinning: a function on a `runtime.Caller`/`Callers`
+path is emitted `partial`, and go2cs-gen writes its declaring part with
+`[MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod]` (the second attribute also stops
+the CLR from tail-calling it), while a function literal on such a path carries
+`[MethodImpl(MethodImplOptions.NoInlining)]` inline — see
+[The no-inline mark rides a generated declaring part](source-generators.md#the-no-inline-mark-rides-a-generated-declaring-part).
+Same family as reflect's `valueMethodName`, whose faithfully transcribed stack climb was
 correct in Debug and could not work in Release, and which was replaced by a `[CallerMemberName]`
 thread precisely because a compile-time constant is the one answer no tiering or inlining decision
 can move ([`DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md)); and the sibling of
@@ -3956,7 +3966,8 @@ program's frame names with `go run`.
 
 ## `codegen-liveness` — a frame holds what Go has already dropped
 
-A second disclosed-divergence class alongside `alloc-profile`, first pinned by `sync` (packages
+A second disclosed-divergence class alongside `alloc-profile` (a label since retired in favor of
+`deferred`/`structural`; see below), first pinned by `sync` (packages
 `TestOnceXGC` ×3 subtests and `TestPoolGC`). Go's GC consults **per-safepoint liveness maps**: a
 local dies at its last use, even in the middle of a running function. The CLR's GC info is
 conservative in two ways that a GC-lifetime test can see from inside its own frame:
@@ -3992,7 +4003,7 @@ between matched and `codegen-liveness` once its subtest names match Go's.
 
 ## `host-limit` — the third disclosed-divergence class: what the test HOST cannot BE
 
-`alloc-profile` and `codegen-liveness` both name something the managed runtime cannot **measure**.
+`alloc-profile` (now `deferred`/`structural`) and `codegen-liveness` both name something the managed runtime cannot **measure**.
 `host-limit` names something the converted test binary cannot **be** — a property of the deployment
 shape rather than of an assertion.
 <!-- history: ruled 2026-08-15 and first pinned by os/exec, whose 25 leaf rows under TestCommand and
@@ -4156,16 +4167,19 @@ variable, if set at process start"*, so a later `os.Setenv` neither does nor sho
 Note this is the only *read* path that was broken — on Windows `syscall.Environ`/`Getenv` go straight
 to `GetEnvironmentStringsW` and never consulted `envs`.
 
-⚠ **`defaultGOROOT` is a LINK-TIME constant and stays empty — a separate, open root.** `runtime.GOROOT()`
+**`defaultGOROOT` is a LINK-TIME constant, so it arrives through its own environment variable.**<!-- history: this entry first read "defaultGOROOT is a LINK-TIME constant and stays empty — a separate, open root", when TestBug3486 skipped where Go passed; the -tests pipeline has since exported the root. --> `runtime.GOROOT()`
 falls back to `defaultGOROOT` when the environment does not set `GOROOT`, and Go's is written by
 `cmd/link` at build time (measured: with `GOROOT` unset, a real Go binary still answers
-`runtime.GOROOT()` as its install directory). A converted assembly has no linker to write it, so it
-answers `""` — exactly Go's own `-trimpath` case, which `testenv.findGOROOT` handles by walking up
-from the working directory for `GOROOT/src/go.mod` and, failing that, **skipping** the test. So
-`TestBug3486` now reaches its own decision instead of infrastructure-erroring, but skips where Go
-passes. Fabricating a value at runtime (probing `PATH` for the Go installation) would invent behavior
-Go does not have; the honest remedies are all at build time — e.g. having the converter carry its
-`-goroot` into assembly metadata — and that needs a design decision, not a local fix. Left empty and named.
+`runtime.GOROOT()` as its install directory). A converted assembly has no linker to write it, so the
+same module initializer copies it once at start-up from the `GO2CS_DEFAULT_GOROOT` environment
+variable (`goenvs_impl.cs`), and the `-tests` pipeline sets that variable, beside `GOROOT` itself, to the
+GOROOT it converted from (`testConversion.go`). It is deliberately not the `GOROOT` variable: Go's own
+tests run children with `GOROOT=` (runtime/debug's `TestStack`) and expect `runtime.GOROOT()` to fall
+back to the link-time root, and an ambient `GOROOT` can name an unrelated Go install. Outside the
+pipeline, with the variable unset, `defaultGOROOT` stays `""` — exactly Go's own `-trimpath` case,
+which `testenv.findGOROOT` handles by walking up from the working directory for `GOROOT/src/go.mod`
+and, failing that, **skipping** the test. Fabricating a value at runtime (probing `PATH` for the Go
+installation) would invent behavior Go does not have, so nothing does.
 
 **`os.runtime_rand` — `core/os/tempfile_impl.cs`.** The throwing stub took out every `os.CreateTemp`
 and `os.MkdirTemp` before either could pick a name, which is what made `io`'s `OffsetWriter` tests
@@ -4180,7 +4194,7 @@ first use, every member documented thread-safe — and `NextBytes` fills the ful
 It is deliberately **not** a cryptographic source: security against a local attacker comes from
 `O_EXCL`/`Mkdir` failing, exactly as in Go.
 
-**Reach, measured** — an A/B over the two `*_impl.cs` files against one binary, with `path/filepath`
+**Reach, measured** (history: the A/B taken when these two files landed) — an A/B over the two `*_impl.cs` files against one binary, with `path/filepath`
 bucketed **per test** because its unrelated `FindFirstFile` root kills the host mid-suite and makes
 every later verdict read `C#=""`:
 
@@ -4191,15 +4205,15 @@ every later verdict read `C#=""`:
 
 `path/filepath`'s entire gain is `testenv.MustHaveSymlink`'s bucket turning into **skips that match
 Go's skips** — `runtime_rand` sat under `MustHaveSymlink`'s `os.MkdirTemp` probe, so C# could not
-reach the point where Go decides it lacks the symlink privilege. What remains there is two roots,
+reach the point where Go decides it lacks the symlink privilege. What remained there then was two roots,
 neither of them this one: **seven** tests reach the `FindFirstFile` struct-marshalling defect (one
 hard `AccessViolation`, six `IndexOutOfRangeException` in `PinnedBuffer` — the same clobbered
 `WIN32_FIND_DATAW`), and **one** is `TestBug3486` on `defaultGOROOT` above.
 
 The `envs` half has its own **positive control**: export `GOROOT` into the host's environment and
-`TestBug3486` *passes*, nothing else changed. That is what isolates the residual to the empty
-link-time constant rather than to the snapshot — and it is the same probe to re-run if a future
-build-time `GOROOT` remedy is tried.
+`TestBug3486` *passes*, nothing else changed. That isolated the residual to the empty link-time
+constant rather than to the snapshot; the `-tests` pipeline now exports both `GOROOT` and
+`GO2CS_DEFAULT_GOROOT` to the host (above).
 
 ## `reflect.ArrayOf` composes a descriptor; it does not reconstruct a linker record
 
@@ -4400,8 +4414,8 @@ and wrong about the two halves every test does: the **pin bit** (`isPinned`, rea
 check) and the **lifetime hold** (a pinned object stays alive until `Unpin`). Meanwhile the converted
 `isPinned` nil-dereferenced in `spanOf` (`mheap_.arenas` is never allocated) and the converted
 `cgoCheckPointer` returned silently at `debug.cgocheck == 0` — Go's default of 1 is set by
-`parsedebugvars` on the `schedinit` path the managed host never runs, the same silently-unreached
-init as `internal/cpu`'s feature flags.
+`parsedebugvars` on the `schedinit` path, which the managed host did not run at the time (it now runs
+at start-up, in `goenvs_impl.cs`).
 
 **The emitted form.** Five bodies are displaced through `manualConversionFuncs["runtime"]` —
 `Pinner.Pin`, `Pinner.Unpin`, `isPinned`, `pinnerGetPinCounter`, `cgoCheckPointer` — into one flat
@@ -4428,12 +4442,17 @@ reads a pointee's words without descending). A `NativeBox`, a native-backed slic
 nothing resolves are not Go pointers; a channel, a map and a closure are Go pointers to unpinnable
 heap objects and always fail; a string literal's bytes are a heap `byte[]` here where Go's are
 RODATA — the one divergence the runtime suite reaches, disclosed as `runtime-capability` on
-`TestPinnerConstStringData`'s exact signature. `GODEBUG=cgocheck=0` disables the check, read once.
+`TestPinnerConstStringData`'s exact signature. The check is on by default (Go's `cgocheck=1`, set by
+`parsedebugvars` at start-up) and reads `debug.cgocheck` on every call, as Go's does, so a start-time
+`GODEBUG=cgocheck=0` disables it.
 
 **One converter shape tolerated.** `internal/fmtsort`'s test init passes
 `reflect.ValueOf(ch).UnsafePointer()` to `Pin`, and the converter wraps that `unsafe.Pointer`-typed
-call result in `(uintptr)` on its way into the `any` parameter — so `Pin` accepts a `uintptr` as the
-projected form of a pointer, resolving it through the record and no-op'ing on a miss. The
+call result in `(uintptr)` on its way into the `any` parameter (today the number is then re-wrapped,
+`@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(ch).UnsafePointer())`, so it arrives as an
+`unsafe.Pointer` with no retained source) — so `Pin` accepts a bare number, as a `uintptr` or inside such
+an `unsafe.Pointer`, as the projected form of a pointer, resolving it through the record and
+no-op'ing on a miss. The
 accommodation retires with the converter fix.<!-- routed to the Q49 bridge class --> Design, per-row classification
 and the prediction on record: `docs/phase4/DESIGN-runtime-pinner.md`; guards: GolibTests
 `RuntimePinnerTests` (every "passes" arm followed by the same check with the pin removed, which must

@@ -377,12 +377,19 @@ removed, so modifiers, return type (tuple element names included), type paramete
 file repeats the source file's `extern alias` and `using` directives, except `global using` (already in
 scope everywhere; repeating an alias one is CS1537), then the namespace's own usings, then the namespace
 and the containing type chain re-opened as `partial`. The attribute is written fully qualified, so it
-binds whatever the file's usings are. A default parameter value would have to move to the declaring part
+binds whatever the file's usings are. When the compilation can see golib's public
+`System.Security.DynamicSecurityMethodAttribute` (every converted project can), the same attribute list also
+carries `global::System.Security.DynamicSecurityMethod`:
+`[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Security.DynamicSecurityMethod]`.
+For that attribute the C# compiler sets `RequireSecObject`, and the CLR then never tail-calls into the method, so
+`runtime.Caller` sees the caller's frame as well as the method's own (`NoInliningPartials.CallerFrameMarkAvailable`,
+`CallerFrameAttribute`). A default parameter value would have to move to the declaring part
 (CS1066 on the implementing one); the converter writes none on a carrier.
 
 **Readers of the mark.** `RecvGenerator` makes a pointer-receiver method's `ж<T>` overload no-inline when
 the method is, and `StrGenerator` does the same for an `sstring` twin's `@string` forwarder
-(`RecvGenerator.HasNoInliningMark`). Neither sees another generator's output, so both test the carrier
+(`RecvGenerator.HasNoInliningMark`); both forwarders carry `DynamicSecurityMethod` beside the mark under the same
+condition. Neither sees another generator's output, so both test the carrier
 shape as well as the attribute.
 
 **Failure mode.** If the generator does not run, every carrier is CS0759 (an implementing part with no
@@ -398,6 +405,7 @@ attribute in its compiled metadata.
   gain nothing, that a hand-owned declaration-plus-body pair gains nothing, that a carrier beside a
   `global using` alias compiles, and that the `ж<T>` overloads of `ptr` and `get<T>` are no-inline while
   an unmarked method's is not.
+* GolibTests `TailCallFrameGuardTests` guards the `DynamicSecurityMethod` caller-frame mark.
 * Behavioral `NoInlinePartial` runs with tiered compilation off (`runtimeconfig.template.json`), so the
   first call is optimized code, and compares its output with `go run`: every shape prints the frame
   `runtime.Caller` names. Built with a generator that writes the declaring part without the attribute,

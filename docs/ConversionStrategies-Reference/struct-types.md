@@ -1342,7 +1342,7 @@ different renderers, and each needed the convention applied at its own site:
    which swaps a `/vN` tail for the Go package name.
 3. **Cross-package reference metadata** — `PackageInfo.RootPackageName` (`importOperations.go`) is the
    code-facing qualifier that keys imported-alias loading and the foreign-implement records that cast
-   sites reference (`GoImplement<…rand_package.PCG, …rand_package.Source>(Pointer = true)`). It was the
+   sites reference (crypto/ecdsa's `GoImplement<go.math.rand.rand_package.ChaCha8, io_package.Reader>(Pointer = true)`). It was the
    path's last segment (`v2`); `rootPackageNameFromPathParts` returns the parent segment for a
    `/vN` tail. `PackageName` stays path-formed — it also names the referenced `.csproj`, which IS
    `math.rand.v2.csproj`.
@@ -1354,8 +1354,10 @@ different renderers, and each needed the convention applied at its own site:
 The convention is that a package literally named `vN` would instead need the type-graph name; the
 stdlib has none, so the regex/parent-segment rule holds corpus-wide. Guarded by the `VersionedImport`
 behavioral test — a `main` importing a sibling `vlib/v2` module (`package vlib`) that mirrors
-math/rand/v2's shape: a struct field `ж<vlib.Rand>` (renderer #2), a `*PCG → Source` pointer cast
-recorded as `go.vlib.vlib_package.PCG` (#3/#4), output-compared vs `go run` across all four phases.
+math/rand/v2's shape: a struct field `ж<Δvlib.Rand>` (renderer #2) and a `*PCG → Source` pointer cast, output-compared vs
+`go run` across all four phases. The producer records that pair itself (`GoImplement<PCG, Source>(Pointer = true)` in
+`vlib`'s `package_info.cs`), so the consumer emits the producer's adapter `new Δvlib.PCGжSource(…)` through the
+`using Δvlib = go.vlib.vlib_package;` alias and records no foreign pair of its own.
 (sort's test suite imports math/rand/v2, so it needs this to validate.)
 
 ## A C# keyword inside a dotted import-path element
@@ -1529,7 +1531,7 @@ the field constructor's user-defined conversion without ambiguity, producing the
 is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `database/sql`'s
 `stubDriverStmt{nil}` is the same root. <!-- ×9 in archive/tar, the last wall in front of that package's 97 verdicts. -->
 
-**An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import pl "PALib"` with `pl.B2{V: 1}`, where `B2` is an exported alias, cannot render `new pl.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new PALibꓸB2(…)` as the canonical import does. Every other member keeps the file's alias (`new pl.Box(…)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
+**An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
 ---
 

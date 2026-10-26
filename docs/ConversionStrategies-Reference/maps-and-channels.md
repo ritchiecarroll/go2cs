@@ -790,7 +790,7 @@ regressed the legacy Sending path). -->
   descriptors — invisible to overload resolution at every emitted call site — and
   `select(params SelectOp[])` partitions out nil channels (never registered), locks the distinct
   cores in `Id` order, scans a Fisher-Yates-shuffled poll order, and **commits exactly one ready op
-  under the held locks** (uniform-random single-fire, gaps 3+4); otherwise it parks one
+  under the held locks** (uniform-random single-fire); otherwise it parks one
   `SelectState`-linked waiter per case, where a single `winner` CAS is the single-fire authority
   every waker — plain send, plain receive, another select's commit, AND close — must win before
   touching a waiter. Publish-before-signal ordering and park-outside-the-lock discipline throughout.

@@ -798,8 +798,9 @@ of `p`. A **value-receiver** method value (`c.peek`) copies the receiver at eval
 which is what the existing lambda-snapshot emission (`var cʗ1 = c; … cʗ1.peek()`) already does.
 (Guarded by `MethodValueReceiverEscape` — local, value parameter, named result, value-field chain,
 named-slice, and closure-formed method values, plus all three negative controls, output-compared vs
-Go. Note the still-open residue: a method value bound to a *variable* — `f := c.dec` — takes the
-lambda-snapshot path, which copies the receiver even when the local is promoted.)
+Go.) A method value bound to a *variable* — `f := c.dec`, `var g func(int, int) int = c.dec`, or
+`h = c.dec` — binds the same box (`var f = Ꮡc.dec;`), so a call through the variable writes `c`; no
+behavioral test guards that form.
 
 A **blank-identifier element** in a split multi-assign is a C# discard, never a declaration. Go's `_, _, _, _ = a, b, c, d` (a common "mark these used" idiom) is emitted as one bare discard per element with **no** `var` — the per-element discard test keys off each LHS ident, not just the single-LHS case, so every blank stays a discard:
 

@@ -62,21 +62,20 @@ back through the base and value-compared vs Go.)
 **A `make` length/capacity/size-hint of a non-`int` integer type is cast to `nint`.** The golib allocating constructors all take `nint` — `slice<T>(nint length, nint capacity)`, `map<K,V>(nint capacity)`, `channel<T>(nint capacity)` — and C# does **not** implicitly convert a `uintptr`/`uint`/`uint32`/`uint64`/`int64` (C# `nuint`/`uint`/`ulong`/`long`) to `nint`. So `make([]byte, n/goarch.PtrSize)` with a `uintptr` length would leave `new slice<byte>(n / …)` with no applicable constructor, and overload resolution falls onto `slice<T>(T[])` — reported as `CS1503` ("cannot convert `nuint` to `byte[]`"); a map/chan with a `uintptr` hint is a direct `nuint`→`nint` CS1503. The converter casts each such length/capacity/hint argument to `nint`: `new slice<byte>((nint)(n / goarch.PtrSize))` (both args of `make([]byte, l, c)`), `new map<K,V>((nint)(hint))`, `new channel<T>((nint)(size))`. A plain `int` (`nint`) and an untyped-constant argument (`make([]byte, 4)` → a bare `4`) bind directly and are **left uncast** (no golden churn) — as are the widening `int8`/`int16`/`uint8`/`uint16` kinds. (Guarded by the `MakeSliceUintptrLen` behavioral test — `uintptr`/`uint`/`uint32`/`uint64` slice lengths, a `uintptr` len+cap, a `uintptr` map hint and chan size, and int/untyped controls, all `len`/`cap`/element values verified vs Go; runtime hits this in `mbitmap`'s `make([]byte, n/goarch.PtrSize)`.)
 
 **Slicing a pointer-to-array.** Go lets a `*[N]T` be sliced directly — `p[lo:hi:max]`, `p[:]` — auto-dereferencing the
-array. The C# box `ж<array<T>>` has no `.slice()` or range-indexer (`[a..b]`) members (its underlying `array<T>` does),
-so the converter dereferences first: `p[1:3:4]` → `(~p).slice(1, 3, 4)`, `p[:]` → `(~p)[..]`, `p[2:]` → `(~p)[2..]`.
-Without the deref the call binds to the box and fails (CS1929). The resulting slice shares the array's backing storage,
-matching Go. (The `(*[N]T)(ptr)[:n]` pointer-*cast* form is different — see *Pointer-cast slice* below.) A deref-aliased
-pointer **parameter** or **receiver** is the exception: it is emitted as the pointed-to *value*, not a box, so a `~` on
-it would deref a non-pointer (CS0023). When that value is a **named** array type — `b *pageBits` emitted
-`ref pageBits b`, where `pageBits` is `[N]uint64` — the wrapper has no slice/range members, so its underlying `array<T>`
-is reached via `.Value`: `b[:2]` → `b.Value[..2]`. When it is an **anonymous** array (`p *[N]T` → `ref array<T> p`) the
-value already *is* the `array<T>` and is sliced directly (`p[:]` → `p[..]`). Only a pointer-to-array **box** (a local, a
-field, a call result) gets the `~` deref. (Guarded by the `PointerArraySlice` behavioral test — local box, named-array
-receiver, and named-array parameter; runtime hits this in `select.go`'s `cas1[:ncases:ncases]` / `mprof.go`'s
-`stk[:n:n]` (locals) and `mpallocbits.go`'s `pageBits` receiver methods (`clear(b[:])`).) An index-only
-`for i := range p` over a `*[N]T` reads no element: it passes the type's length beside the pointer (`range(p, N)`), so a
-nil `p` ranges N times as in Go, and a deref-aliased pointer receiver ranges as the array it addresses (`range(b)`) —
-see
+array. A box over an anonymous array, `ж<array<T>>`, is sliced through golib's `slice` extension overloads on the box,
+every form a call: `p[1:3:4]` → `p.slice(1, 3, 4)`, `p[:]` → `p.slice()`, `p[2:]` → `p.slice(2)`. Each overload
+dereferences a managed array and slices a box over native memory through its element window, and the resulting slice shares the array's backing storage, matching Go. A box over a **named** array type
+dereferences through `.Value` and slices the wrapper: `g[1:3]` → `g.Value[1..3]`. (The `(*[N]T)(ptr)[:n]`
+pointer-*cast* form is different — see *Pointer-cast slice* below.) A deref-aliased pointer **parameter** or
+**receiver** is emitted as the pointed-to *value*, not a box. When that value is a **named** array type — `b *pageBits`
+emitted `ref pageBits b`, where `pageBits` is `[N]uint64` — its underlying `array<T>` is reached via `.Value`:
+`b[:2]` → `b.Value[..2]`. When it is an **anonymous** array (`p *[N]T` → `ref array<T> p`) the value already *is* the
+`array<T>` and is sliced directly (`p[:]` → `p[..]`). (Guarded by the `PointerArraySlice` behavioral test — local box,
+named-array receiver, and named-array parameter; runtime hits this in `select.go`'s `cas1[:ncases:ncases]` /
+`mprof.go`'s `stk[:n:n]` (locals) and `mpallocbits.go`'s `pageBits` receiver methods (`clear(b[:])`).) An index-only
+`for i := range p` over a `*[N]T` reads no element: a box passes the type's length beside the pointer (`range(p, N)`),
+so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or receiver ranges the count itself
+(`range(N)`) — see
 [An index-only range over a slice or array reads no element](labels-and-loop-variables.md#an-index-only-range-over-a-slice-or-array-reads-no-element).
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
@@ -118,13 +117,14 @@ of *every* `[]T` — built from a `ReadOnlySpan<T>` over the raw pointer:
 supports both, since it is `IArray<T>`.) The `ReadOnlySpan<T>` constructor takes a C# `int`, so a Go `int`/`uint` length
 (`nint`/`nuint`) is narrowed via `getRangeIndexer` (through the underlying for a named numeric); an int literal is left
 as-is. The slice **copies** the pointed-to memory (`ReadOnlySpan.ToArray()`), which is self-consistent for code that
-only uses the resulting slice (e.g. runtime's `printDebugLog` ranges `state` and writes `&state[i]`, never re-reading
-the raw buffer; `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast
+only uses the resulting slice (e.g. runtime's `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast
 form, it is memory-layout-dependent code whose raw values flow through the `unsafe.Pointer`=`nuint` round-trip (a
 transient `fixed` address → not GC-stable), so the runtime values are not the contract — only compilable, rangeable,
-element-addressable C#. (Guarded by the `PointerCastSliceRange` behavioral Compile + target test — index range, value
-range, and `&s[i]` element-address over a pointer-cast slice; runtime's `debuglog` `printDebugLog` and `os_windows` are
-the standard-library sites. The length narrowing is covered by `StdLibInternalAbi`.)
+element-addressable C#. No behavioral test emits this Span form: the `PointerCastSliceRange` test's source is already a `*[4]int`, so its
+`(*[4]int)(unsafe.Pointer(&arr))[:4]` is an identity cast that the converter collapses to the array box and slices
+directly (`Ꮡarr.slice(0, 4)`), and that test guards the index range, value range and `&s[i]` element-address over the
+result. The standard-library sites of the Span form are runtime's `os_windows`, `heapdump` and `mbitmap`. The length
+narrowing is covered by `StdLibInternalAbi`.
 
 An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the element-array projection instead — `{rA, rB}` (inferred `[]rank`) → `new rank[]{rA, rB}.slice()`, and an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
 
@@ -661,7 +661,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 210, 213-215 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-215 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);

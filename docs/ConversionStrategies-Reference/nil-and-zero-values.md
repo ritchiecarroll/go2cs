@@ -235,7 +235,7 @@ genuine null would itself throw. **The ADDRESS arm needs the same predicate as t
 only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer where the caller meant
 nil — a quietly wrong call rather than a crash.
 
-Measured corpus-wide over every tracked `.cs` under `src/core`, the split was total: <!-- 2026-09-02 -->
+**History.** Measured corpus-wide over every tracked `.cs` under `src/core` before the fix, the split was total: <!-- 2026-09-02 -->
 every site in `syscall/linux/structclass_linux_impl.cs` and
 `syscall/linux/zsyscall_linux_amd64_impl.cs` carried the one-sided form, while every
 `syscall/windows/*` site used the predicate — one hand-own family written
