@@ -1,13 +1,13 @@
-# Comment and spacing census of src/core against GOROOT go1.26.10: 1729 files, 46765 Go comment groups.
+# Comment and spacing census of src/core against GOROOT go1.26.10: 1728 files, 46727 Go comment groups.
 # Written by TestCommentParityCensus with GO2CS_COMMENT_CENSUS_UPDATE=1; one defect class per line.
 # Lower a count only in the commit whose corpus re-emission lowers it (see corpus_test.go).
 blank2:member-boundary	15
 body:extra:after-lowered-switch	50
-body:extra:after-named-result-locals	48
+body:extra:after-named-result-locals	46
 body:extra:after-param-prelude	173
-body:extra:unexplained	2386
-body:go-blank-cs-none	1776
-body:go-blank-unmapped	2042
+body:extra:unexplained	2384
+body:go-blank-cs-none	1775
+body:go-blank-unmapped	2041
 eol:cs-ragged-run	957
 eol:misaligned	941
 eol:missing	7
@@ -22,7 +22,7 @@ misplaced:decl-doc/anchor-differs	72
 misplaced:field-doc/anchor-differs	10
 misplaced:free-in-type/anchor-differs	17
 misplaced:free-stmt/anchor-differs	212
-misplaced:free-top-level/anchor-differs	4
+misplaced:free-top-level/anchor-differs	3
 misplaced:in-composite-literal/anchor-differs	31
 misplaced:in-composite-literal/trailing-to-own-line	4
 misplaced:in-expression/anchor-differs	1
@@ -41,7 +41,7 @@ missed:spec-doc-in-group	2
 missed:trailing-spec	91
 partial:field-doc	1
 top:go-blank-cs-none	58
-top:go-none-cs-blank	1073
+top:go-none-cs-blank	1069
 top:unmapped:func	48
 top:unmapped:type-alias	29
 top:unmapped:type-other	70

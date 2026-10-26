@@ -2100,10 +2100,19 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// hand-own's two measured walls, whole-file there; registry-displaced here so the rest of
 		// exec_unix.cs keeps reconverting), and the generated pipe wrapper hands the keystone the address
 		// of a managed [2]int32 (runtime's increment-4 shape, one package over).
-		"forkExec":  goosDarwin,
-		"Exec":      goosDarwin,
-		"pipe":      goosDarwin,
-		"ConnectEx": goosWindows,
+		"forkExec": goosDarwin,
+		"Exec":     goosDarwin,
+		"pipe":     goosDarwin,
+		// darwin's two remaining pointer-holding libc arguments on the os/net paths (2026-10-25,
+		// COORD ruling (a)): writev's []Iovec (each Base a ж<byte>) and Getdirentries' readdir_r
+		// (&entry a reference-bearing Dirent, &entryp a ж<ж<Dirent>>). The libc funnel leaves a token
+		// for any pointee holding a non-nil pointer (the 2026-09-27 ruling), so writev read EFAULT at
+		// net's TestBuffers_WriteTo and readdir_r's userspace store killed syscall's TestDirent with
+		// SIGBUS. Native mirrors in syscall/darwin/writev_darwin_impl.cs and
+		// getdirentries_darwin_impl.cs; poll's darwin writev forwards to this writev by linkname.
+		"writev":        goosDarwin,
+		"Getdirentries": goosDarwin,
+		"ConnectEx":     goosWindows,
 		// The same seam from the WRITE side, and the multicast half of net's residual.
 		// `ip_mreq` is two INLINE in_addr; converted, IPMreq holds both as golib `array<byte>`
 		// MANAGED REFERENCES, and the generated wrapper handed them to setsockopt via
