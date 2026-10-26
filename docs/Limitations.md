@@ -282,9 +282,13 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
   [Requirements](README.md#requirements) when you convert, and when you `go install` the converter from a
   clone; `go2cs -version` should show that one release throughout. Rebuild after every pull. Each
   [GitHub release](https://github.com/ritchiecarroll/go2cs/releases) also carries the converter prebuilt
-  for six platforms. Converted projects and the `go.*` packages target `net10.0`.
+  for six platforms. From the 1.26.10.2 release on, its Windows executables are Authenticode-signed and its
+  `SHA256SUMS` carries a GPG signature (`SHA256SUMS.asc`) by the key that signs the release tag. Converted projects
+  and the `go.*` packages target `net10.0`.
   <!-- .github/workflows/release-binaries.yml: a nuget-N.N.N.N tag builds the converter for six platforms and drafts a
-       GitHub Release with the archives, SHA256SUMS and the attestation bundle. -->
+       GitHub Release with the archives, SHA256SUMS and the attestation bundle. src/sign-release-binaries.ps1 (the
+       release machine) signs the Windows executables and SHA256SUMS on the draft; .github/workflows/attest-release.yml
+       attests the archives as the draft then holds them. -->
 * **Where it runs.** The standard library is validated on x64 Windows and x64 Linux (glibc, on
   Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)).
   macOS, Intel and Apple silicon, has packages and runs the README walkthrough, and is being validated

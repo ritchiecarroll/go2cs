@@ -353,4 +353,12 @@ Write-Host "    git push && git push origin nuget-$ver" -ForegroundColor DarkGra
 Write-Host ''
 Write-Host "  docs/validation/$ver is FROZEN from here -- it is the proof every $ver package's"
 Write-Host '  green badge links and packs as VALIDATION.md.'
+Write-Host ''
+Write-Host '  The tag push starts release-binaries.yml, which drafts the GitHub Release. When the draft is up, sign the'
+Write-Host '  Windows executables and SHA256SUMS here (one PIN prompt), then attest what the draft holds:'
+Write-Host ''
+Write-Host "    .\sign-release-binaries.ps1 -Tag nuget-$ver -Apply" -ForegroundColor DarkGray
+Write-Host "    gh workflow run attest-release.yml -f tag=nuget-$ver" -ForegroundColor DarkGray
+Write-Host ''
+Write-Host '  Publish the draft only after that workflow succeeds.'
 exit 0
