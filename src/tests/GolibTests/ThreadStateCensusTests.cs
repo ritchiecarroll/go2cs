@@ -70,6 +70,7 @@ public class ThreadStateCensusTests
         ("golib/GoFrame.cs|t_threadToken", Disposition.KeptThreadResource, "[ThreadStatic] private static object? t_threadToken;", "this thread's identity for a panic's SiteOwnerThread: a thread property, not goroutine state"),
         ("golib/GoexitException.cs|t_started", Disposition.GolibReset, "internal static void ResetThread() => t_started = false;", "whether a Goexit has been raised on this goroutine (GoFuncRoot.ResetThread calls GoexitException.ResetThread)"),
         ("golib/runtime/GoschedBackoff.cs|t_consecutiveInertYields", Disposition.GolibReset, "internal static void ResetThread() => t_consecutiveInertYields = 0;", "a Gosched backoff streak"),
+        ("golib/runtime/GoroutineThreadPool.cs|t_stackReserve", Disposition.KeptThreadResource, "private static int t_stackReserve;", "the stack reservation this pooled thread was created with: a property of the thread, which only ever runs goroutines of that reservation"),
         ("golib/runtime/Goroutine.cs|t_current", Disposition.RetiredByRun, "t_current = null;", "the goroutine identity; Goroutine.Run's scope retires it"),
         ("golib/runtime/Goroutine.cs|s_profileLabels", Disposition.FlowsWithContext, "AsyncLocal<object?> s_profileLabels", "pprof labels, inherited at goroutine creation"),
         ("runtime/stubs_impl.cs|t_getg", Disposition.Registered, "GoroutineThreadState.Register(static () => t_getg = null)", "getg()'s cache of the goroutine's g"),

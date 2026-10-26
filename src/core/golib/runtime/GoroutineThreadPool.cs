@@ -47,15 +47,25 @@ internal static class GoroutineThreadPool
     /// <summary>How long an idle worker waits for its next body before its thread exits.</summary>
     internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);
 
-    private static readonly ConcurrentStack<Worker> s_idle = new();
-    private static int s_idleCount;
+    // One pool per stack reserve, so a worker only ever runs bodies its stack was sized for: a goroutine the
+    // converter proved bounded (Goroutine.BoundedStackReserve) never lends its small stack to one that may recurse.
+    private static readonly Pool s_default = new(Goroutine.StackReserve);
+    private static readonly Pool s_bounded = new(Goroutine.BoundedStackReserve);
+
     private static long s_created;
+
+    // The reserve the current thread's stack was created with, 0 on a thread this pool did not create.
+    [ThreadStatic]
+    private static int t_stackReserve;
 
     /// <summary>Threads this pool has created, for the guard's reuse assertion.</summary>
     internal static long Created => Interlocked.Read(ref s_created);
 
-    /// <summary>Workers currently waiting for a body.</summary>
-    internal static int IdleCount => Volatile.Read(ref s_idleCount);
+    /// <summary>Workers currently waiting for a body, across both reserves.</summary>
+    internal static int IdleCount => s_default.IdleCount + s_bounded.IdleCount;
+
+    /// <summary>The stack reserve the current worker thread was created with; 0 off a pooled worker.</summary>
+    internal static int CurrentStackReserve => t_stackReserve;
 
     /// <summary>
     /// GolibTests' seam: runs on a worker after a body's goroutine has ended and before its thread is
@@ -67,29 +77,47 @@ internal static class GoroutineThreadPool
     /// Runs <paramref name="work"/> on a pooled worker (or a new one), under the caller's
     /// ExecutionContext. Returns once the work is handed over, not when it finishes.
     /// </summary>
-    internal static void Run(Action work)
+    internal static void Run(Action work) => Run(work, GoStack.Default);
+
+    /// <summary>
+    /// Runs <paramref name="work"/> on a pooled worker whose stack reserve suits <paramref name="stack"/>.
+    /// </summary>
+    internal static void Run(Action work, GoStack stack) =>
+        (stack == GoStack.Bounded ? s_bounded : s_default).Run(work);
+
+    // The workers that share one stack reserve.
+    private sealed class Pool(int stackReserve)
     {
-        ExecutionContext? context = ExecutionContext.Capture();
+        internal readonly int StackReserve = stackReserve;
+        internal readonly ConcurrentStack<Worker> Idle = new();
+        internal int IdleWorkers;
 
-        // LIFO: the most recently idled worker is the warmest. The count is given back only for a worker
-        // actually claimed: a worker that idled out left its entry here and gave its own count back as it
-        // retired, so decrementing for that entry too drove the count below zero and let the cap admit twice
-        // MaxIdle (G's review, 2026-10-23).
-        while (s_idle.TryPop(out Worker? worker))
+        internal int IdleCount => Volatile.Read(ref IdleWorkers);
+
+        internal void Run(Action work)
         {
-            if (worker.TryAssign(work, context))
-            {
-                Interlocked.Decrement(ref s_idleCount);
-                return;
-            }
-        }
+            ExecutionContext? context = ExecutionContext.Capture();
 
-        Worker created = new();
-        Interlocked.Increment(ref s_created);
-        created.Start(work, context);
+            // LIFO: the most recently idled worker is the warmest. The count is given back only for a worker
+            // actually claimed: a worker that idled out left its entry here and gave its own count back as it
+            // retired, so decrementing for that entry too drove the count below zero and let the cap admit twice
+            // MaxIdle (G's review, 2026-10-23).
+            while (Idle.TryPop(out Worker? worker))
+            {
+                if (worker.TryAssign(work, context))
+                {
+                    Interlocked.Decrement(ref IdleWorkers);
+                    return;
+                }
+            }
+
+            Worker created = new(this);
+            Interlocked.Increment(ref s_created);
+            created.Start(work, context);
+        }
     }
 
-    private sealed class Worker
+    private sealed class Worker(Pool pool)
     {
         private const int Idle = 0, Assigned = 1, Retired = 2;
 
@@ -103,7 +131,7 @@ internal static class GoroutineThreadPool
             m_work = work;
             m_context = context;
 
-            Thread thread = new(loop, Goroutine.StackReserve)
+            Thread thread = new(loop, pool.StackReserve)
             {
                 IsBackground = true
             };
@@ -131,6 +159,8 @@ internal static class GoroutineThreadPool
 
         private void loop()
         {
+            t_stackReserve = pool.StackReserve;
+
             while (true)
             {
                 Action work = m_work!;
@@ -159,14 +189,14 @@ internal static class GoroutineThreadPool
                 GoroutineThreadState.ResetForReuse();
                 Thread.CurrentThread.Name = null;
 
-                if (Interlocked.Increment(ref s_idleCount) > MaxIdle)
+                if (Interlocked.Increment(ref pool.IdleWorkers) > MaxIdle)
                 {
-                    Interlocked.Decrement(ref s_idleCount);
+                    Interlocked.Decrement(ref pool.IdleWorkers);
                     return;
                 }
 
                 Volatile.Write(ref m_state, Idle);
-                s_idle.Push(this);
+                pool.Idle.Push(this);
 
                 if (m_signal.Wait(IdleTimeout))
                     continue;
@@ -177,7 +207,7 @@ internal static class GoroutineThreadPool
                 {
                     // The stack entry stays behind and is skipped by TryAssign; the count it held is
                     // given back here, where the worker stops being available.
-                    Interlocked.Decrement(ref s_idleCount);
+                    Interlocked.Decrement(ref pool.IdleWorkers);
                     return;
                 }
 
