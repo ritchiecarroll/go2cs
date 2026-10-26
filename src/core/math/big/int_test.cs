@@ -14,6 +14,8 @@ using strings = strings_package;
 using testing = testing_package;
 using quick = go.testing.quick_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.math;
 using go.testing;
@@ -159,7 +161,7 @@ internal static slice<byte> mulBytes(slice<byte> x, slice<byte> y) {
             nint carry = 0;
             for (nint iΔ1 = len(x) - 1; iΔ1 >= 0; iΔ1--) {
                 nint t = (nint)z[k] + (nint)x[iΔ1] * d + carry;
-                (z[k], carry) = ((byte)t, (t >> (int)(8)));
+                (z[k], carry) = ((byte)t, t >> 8);
                 k--;
             }
             z[k] = (byte)carry;
@@ -190,7 +192,7 @@ internal static bool checkMul(slice<byte> a, slice<byte> b) {
     return Ꮡz1.Cmp(Ꮡz2) == 0;
 }
 
-public static void TestMul(ж<testing.T> Ꮡt) {
+public static partial void TestMul(ж<testing.T> Ꮡt) {
     {
         var err = quick.Check(checkMul, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -368,7 +370,7 @@ public static void TestDivisionSigns(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static global::go.math.big_package.nat Δnorm(global::go.math.big_package.nat x) {
+internal static global::go.math.big_package.Δnat Δnorm(global::go.math.big_package.Δnat x) {
     nint i = len(x);
     while (i > 0 && x[i - 1] == 0) {
         i--;
@@ -377,7 +379,7 @@ internal static global::go.math.big_package.nat Δnorm(global::go.math.big_packa
 }
 
 public static void TestBits(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new global::go.math.big_package.nat[]{
+    foreach (var (_, test) in new global::go.math.big_package.Δnat[]{
         default!,
         new global::go.math.big_package.Word[]{0}.slice(),
         new global::go.math.big_package.Word[]{1}.slice(),
@@ -397,7 +399,7 @@ public static void TestBits(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("SetBits(%v): got negative result"u8, test);
         }
 
-        var bits = ((global::go.math.big_package.nat)z.Bits());
+        var bits = (global::go.math.big_package.Δnat)z.Bits();
         if (bits.cmp(want) != 0) {
             Ꮡt.Errorf("%v.Bits() = %v; want %v"u8, z.abs, bits, want);
         }
@@ -419,7 +421,7 @@ internal static bool checkSetBytes(slice<byte> b) {
     return hex1 == hex2;
 }
 
-public static void TestSetBytes(ж<testing.T> Ꮡt) {
+public static partial void TestSetBytes(ж<testing.T> Ꮡt) {
     {
         var err = quick.Check(checkSetBytes, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -437,7 +439,7 @@ internal static bool checkBytes(slice<byte> b) {
     return bytes_package.Equal(b, b2);
 }
 
-public static void TestBytes(ж<testing.T> Ꮡt) {
+public static partial void TestBytes(ж<testing.T> Ꮡt) {
     {
         var err = quick.Check(checkBytes, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -523,8 +525,9 @@ internal static readonly @string expectedR32ᶜ = "39614081266355540837921718287
 public static void TestQuoStepD6(ж<testing.T> Ꮡt) {
     // See Knuth, Volume 2, section 4.3.1, exercise 21. This code exercises
     // a code path which only triggers 1 in 10^{-19} cases.
-    var u = Ꮡ(new ΔInt(false, new nat(new global::go.math.big_package.Word[]{0, 0, unchecked((nuint)(9223372036854775809UL)), unchecked((nuint)(9223372036854775807UL))}.slice())));
-    var v = Ꮡ(new ΔInt(false, new nat(new global::go.math.big_package.Word[]{5, unchecked((nuint)(9223372036854775810UL)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice())));
+
+    var u = Ꮡ(new ΔInt(false, new Δnat(new global::go.math.big_package.Word[]{0, 0, unchecked((nuint)(9223372036854775809UL)), unchecked((nuint)(9223372036854775807UL))}.slice())));
+    var v = Ꮡ(new ΔInt(false, new Δnat(new global::go.math.big_package.Word[]{5, unchecked((nuint)(9223372036854775810UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())));
 
     var r = @new<global::go.math.big_package.ΔInt>();
     (var q, r) = @new<global::go.math.big_package.ΔInt>().QuoRem(u, v, r);
@@ -624,7 +627,9 @@ internal static slice<expTestsᴛ1> expTests = new expTestsᴛ1[]{
     new("0x8000000000000000"u8, "1000"u8, "6719"u8, "1603"u8),
     new("0x8000000000000000"u8, "1000000"u8, "6719"u8, "3199"u8),
     new("0x8000000000000000"u8, "-1000000"u8, "6719"u8, "3663"u8), // 3663 = ModInverse(3199, 6719) Issue #25865
+
     new("0xffffffffffffffffffffffffffffffff"u8, "0x12345678123456781234567812345678123456789"u8, "0x01112222333344445555666677778889"u8, "0x36168FA1DB3AAE6C8CE647E137F97A"u8),
+
     new(
         "2938462938472983472983659726349017249287491026512746239764525612965293865296239471239874193284792387498274256129746192347"u8,
         "298472983472983471903246121093472394872319615612417471234712061"u8,
@@ -650,6 +655,7 @@ internal static slice<expTestsᴛ1> expTests = new expTestsᴛ1[]{
     new("0xffffffffffffffff00000001"u8, "0xffffffffffffffff00000001"u8, "0xffffffffffffffff00000001"u8, "0"u8),
     new("0xffffffffffffffffffffffff00000001"u8, "0xffffffffffffffffffffffff00000001"u8, "0xffffffffffffffffffffffff00000001"u8, "0"u8),
     new("0xffffffffffffffffffffffffffffffff00000001"u8, "0xffffffffffffffffffffffffffffffff00000001"u8, "0xffffffffffffffffffffffffffffffff00000001"u8, "0"u8),
+
     new(
         "2"u8,
         "0xB08FFB20760FFED58FADA86DFEF71AD72AA0FA763219618FE022C197E54708BB1191C66470250FCE8879487507CEE41381CA4D932F81C2B3F1AB20B539D50DCD"u8,
@@ -702,7 +708,7 @@ public static void TestExp(ж<testing.T> Ꮡt) {
         if (m == nil) {
             // The result should be the same as for m == 0;
             // specifically, there should be no div-zero panic.
-            m = Ꮡ(new ΔInt(abs: new nat(new global::go.math.big_package.Word[]{}.slice()))); // m != nil && len(m.abs) == 0
+            m = Ꮡ(new ΔInt(abs: new Δnat(new global::go.math.big_package.Word[]{}.slice()))); // m != nil && len(m.abs) == 0
             var z2 = @new<global::go.math.big_package.ΔInt>().Exp(x, y, m);
             if (z2.Cmp(z1) != 0) {
                 Ꮡt.Errorf("#%d: got %x want %x"u8, i, z2.OrTypedNil(), z1.OrTypedNil());
@@ -872,6 +878,7 @@ internal static slice<gcdTestsᴛ1> gcdTests = new gcdTestsᴛ1[]{
     new("935"u8, "-3"u8, "8"u8, "64515"u8, "24310"u8),
     new("935"u8, "-3"u8, "-8"u8, "64515"u8, "-24310"u8),
     new("935"u8, "3"u8, "-8"u8, "-64515"u8, "-24310"u8),
+
     new("1"u8, "-9"u8, "47"u8, "120"u8, "23"u8),
     new("7"u8, "1"u8, "-2"u8, "77"u8, "35"u8),
     new("935"u8, "-3"u8, "8"u8, "64515"u8, "24310"u8),
@@ -1173,10 +1180,10 @@ public static void TestCmpAbs(ж<testing.T> Ꮡt) {
                 ref var b = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡb);
                 Ꮡa.Set(x);
                 Ꮡb.Set(y);
-                if ((nint)(k & 1) != 0) {
+                if ((k & 1) != 0) {
                     Ꮡa.Neg(Ꮡa);
                 }
-                if ((nint)(k & 2) != 0) {
+                if ((k & 2) != 0) {
                     Ꮡb.Neg(Ꮡb);
                 }
 
@@ -1523,7 +1530,7 @@ public static void BenchmarkBitset(ж<testing.B> Ꮡb) {
     z.SetBit(z, 512, 1);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
-        z.SetBit(z, (nint)(i & 512), 1);
+        z.SetBit(z, i & 512, 1);
     }
 }
 
@@ -1534,7 +1541,7 @@ public static void BenchmarkBitsetNeg(ж<testing.B> Ꮡb) {
     z.SetBit(z, 512, 0);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
-        z.SetBit(z, (nint)(i & 512), 0);
+        z.SetBit(z, i & 512, 0);
     }
 }
 
@@ -1545,7 +1552,7 @@ public static void BenchmarkBitsetOrig(ж<testing.B> Ꮡb) {
     altSetBit(z, z, 512, 1);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
-        altSetBit(z, z, (nint)(i & 512), 1);
+        altSetBit(z, z, i & 512, 1);
     }
 }
 
@@ -1556,7 +1563,7 @@ public static void BenchmarkBitsetNegOrig(ж<testing.B> Ꮡb) {
     altSetBit(z, z, 512, 0);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
-        altSetBit(z, z, (nint)(i & 512), 0);
+        altSetBit(z, z, i & 512, 0);
     }
 }
 
@@ -1727,7 +1734,7 @@ public static void BenchmarkModInverse(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var p = @new<global::go.math.big_package.ΔInt>().SetInt64(1); // Mersenne prime 2**1279 -1
-    p.Value.abs = (~p).abs.shl((~p).abs, 1279);
+    p.Value.abs = (~p).abs.lsh((~p).abs, 1279);
     p.Sub(p, intOne);
     var x = @new<global::go.math.big_package.ΔInt>().Sub(p, intOne);
     var z = @new<global::go.math.big_package.ΔInt>();
@@ -1808,7 +1815,7 @@ public static void TestModSqrt(ж<testing.T> Ꮡt) {
     // exhaustive test for small values
     for (nint n = 3; n < 100; n++) {
         Ꮡmod.SetInt64((int64)n);
-        if (!mod.ProbablyPrime(10)) {
+        if (!Ꮡmod.ProbablyPrime(10)) {
             continue;
         }
         var isSquare = new slice<bool>(n);
@@ -2072,7 +2079,7 @@ public static void TestFillBytes(ж<testing.T> Ꮡt) {
 
             // Way larger, checking all bytes get zeroed.
             Ꮡbuf.ValueSlot = new slice<byte>(100);
-            foreach (var (i, _) in Ꮡbuf.ValueSlot) {
+            foreach (var i in range(Ꮡbuf.ValueSlot)) {
                 Ꮡbuf.ValueSlot[i] = 0xff;
             }
             checkResultʗ1(tΔ2, x.FillBytes(Ꮡbuf.ValueSlot), x);
@@ -2103,7 +2110,7 @@ public static void TestNewIntMinInt64(ж<testing.T> Ꮡt) {
 
 public static void TestNewIntAllocs(ж<testing.T> Ꮡt) {
     testenv.SkipIfOptimizationOff(new big_test_package.testing_TжTB(Ꮡt));
-    foreach (var (_, n) in new int64[]{0, 7, -7, ((int64)1 << (int)(30)), ((int64)(-1) << (int)(30)), 1125899906842624L, -1125899906842624L}.slice()) {
+    foreach (var (_, n) in new int64[]{0, 7, -7, (int64)1 << 30, (int64)(-1) << 30, 1125899906842624L, -1125899906842624L}.slice()) {
         var x = NewInt(3);
         var xʗ1 = x;
         var got = testing.AllocsPerRun(100, () => {

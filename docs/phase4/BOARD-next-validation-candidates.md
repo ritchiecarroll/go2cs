@@ -28419,4 +28419,92 @@ changed), P256 16,149 -> 7,331 (likely P2's P-256 R3 persistent element boxes, b
 
 — G (2026-10-25)
 
+## 2026-10-25 — G (COORD's ruling, H's measurement): crypto/tls TestBogoSuite's fan-out is lost to the converted shim's PER-PROCESS cost, not to a go1.26.10 regression — .2 CANDIDATE (owner, 2026-10-25): the shim's per-process cost is the lever
+
+**Measured (H, 2026-10-25, one desktop box, the standard 600 s wall).** The converted runner's counter stood at about 331 of
+6,473 when the wall hit, at 603 s (that total includes the tests bogo_config.json disables; the suite RUNS 3,526, with about one shim launch each, 3,527 measured, against 3,418 and 3,419 at go1.24.13); Go's own TestBogoSuite passes standalone in 43.8 s on the same box.
+A same-box A/B against the 1.24.13.7 tree read the same, so this is not a go1.26.10 regression, and per-test timing
+shows uniform slowness, not a stall. Each converted shim launch costs about **10 s** against Go's **85 ms**:
+
+| Part of one shim launch | Converted (tiering off) | Note |
+|:--|--:|:--|
+| process start + package init | about 3 to 3.7 s | 2.4 to 2.5 s with tiered JIT |
+| cold JIT of the handshake path | about 6.5 s | repeated in every process, since tiering-off re-JITs every method |
+| whole suite, projected | about 77 min | 3,527 launches x 10.4 s over about 7.9 concurrent; a 40 m runner wall does not clear on a desktop host either |
+
+**What it costs the roster.** `crypto/tls` banks 1,393 + 2 at go1.26.10: the root reads Go pass / converted fail under
+its `host-limit` pin, and its 3,526 fan-out rows are withdrawn with it. The go1.24.13 bank claimed them only with the
+runner wall raised to 40 m on an 8-core host; the one standard-wall completion on record is 213 s on a 48-vCPU host.
+
+**The lever (a .2 candidate, owner ruling 2026-10-25; G sizes it). The row commits at 1,393 + 2 for this publish.** Cut the per-process cost, not the wall: ReadyToRun-compiled
+test hosts (P1's R2R data exists; the pin's own record measured R2R startup at 0.74 s against 2.61 s), and/or tiered
+JIT for spawned child test processes instead of tiering-off. Either could bring one launch from ~10 s toward 1 to 2 s
+and BoGo inside 600 s on a desktop host, which would reclaim the fan-out with no wall change.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (COORD's ruling): two rows banked on ONE skip/skip verdict — the 100% must not hide them
+
+`internal/trace/testtrace` and `crypto/internal/fips140only` banked in the re-bank's first windows wave on a single
+verdict that BOTH sides skip: testtrace's `TestConvertDump` is a conversion tool that skips unless `-convert` names a
+trace file, and fips140only's `TestFIPS140Only` needs a FIPS 140-capable build. Each row's text says so. Real evidence
+for either needs that tool input or a FIPS-capable host; until then they count toward 238 / 238 without exercising
+their package.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (COORD's ruling, P2's L2 finding): the converted test host's temp root is long enough to break unix-socket tests under an ordinary TMPDIR — POST-PUBLISH, shorten the root
+
+**What happens.** The converted test host roots every run at `go2cs-tests/<pkg>/<32 hex>/.tmp` under `TMPDIR`, about
+60 bytes more than Go's own `t.TempDir` uses. A unix-socket test binds a path inside it, and Linux limits `sun_path` to
+108 bytes. Under `TMPDIR=/dev/shm/p2-h10-tmp`, `bufio` `TestCopyUnixpacket`'s socket path reached 116 bytes: `bind`
+returned EINVAL and the converted side SKIPPED a test Go passed. The re-bank works around it by host checklist
+(runbook lesson 88: `TMPDIR` of 10 bytes or less), which a user running the converted tests will not know.
+
+**The fix, post-publish.** Shorten the harness's temp root so the socket path no longer depends on the host's
+`TMPDIR` length, for example a short hash under `TMPDIR` rather than the package path plus a 32-hex run id.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (COORD's ruling, the linux-leg review): should `runtime/pprof`'s six host-fatal pins be scoped `["linux"]`? — POST-PUBLISH, a question, no change now
+
+`runtime/pprof`'s manifest has 14 pins, none OS-scoped. Windows discloses 8; linux discloses all 14. The six
+`host-fatal` pins (`TestBlockProfile`, `TestMutexProfile`, `TestMutexProfileRateAdjust`, `TestProfileRecordNullPadding`,
+`TestProfilerStackDepth`, `TestBlockMutexProfileInlineExpansion`) name tests the windows proof page never lists, so on
+windows they can never fire. Unscoped, they are harmless today, but they cannot be proven in scope on windows either,
+and a pin that cannot fire on a platform reads like coverage it is not. Owed: read each test's windows status (filtered
+by declaration, or not built), then scope the six `["linux"]` if every one is linux-only by construction, or keep them
+unscoped with the reason stated. darwin's reading decides whether `["linux", "darwin"]` is the right scope.
+
+— G (2026-10-25)
+
+## 2026-10-25 — C2 (owner's ruling, R's diagnosis): the address of ANOTHER package's exported value variable binds a copy — POST-PUBLISH, the .2 headline
+
+**What happens.** An importer that takes the address of another package's exported variable whose type is not a pointer
+binds `Ꮡ(lib.V)`, a box of a COPY, so writes through it never reach the variable. It covers `&lib.V`, a
+pointer-receiver method value `lib.V.M` used as a value, and `flag.BoolVar(&lib.Flag, ...)`. A direct call
+`lib.V.M()` is unaffected (it passes the static field by `ref`). The owner decides whether a variable has a box from
+its own syntax, so it never sees an importer's need: `importedGlobalIsBoxed` binds the owner's box only when
+`scanAddressedGlobals` or `markExportedBoxOnlyGlobals` gave it one. Confirmed by R on windows/amd64 and linux/amd64 at
+`9b0269c2e8` (`f := lib.G.Inc`: Go 1, converted 0; `&lib.G2`: Go 5, converted 0); C2's probe at `233420f422`
+(linux/amd64) reads the same four emissions. Not a hop regression: the go1.24.13 tree emits the same lines.
+
+**Census (R, std plus all its tests, through the converter's own scan):** cross-package method values 0; explicit `&` 6,
+all in tests: four of fips140test's `&checktest.RODATA`/`DATA` section-address probes, `&unicode.Categories` (an address
+probe), and slog's benchmark `flag.BoolVar(&internal.IgnorePC, ...)`, wrong only when `-nopc` is passed. The behavioral
+corpus was not measured for this shape.
+
+**Options (R):**
+- (a) Widen `markExportedBoxOnlyGlobals` to exported value variables with any pointer method: about 10 more boxed
+  variables per flavour (the `net.IP` family). Fixes method values only.
+- (b) Box EVERY exported value variable: 179 more on windows, interface-typed variables not counted. Fixes `&` too.
+- (c) A golib ref-accessor box at the importer: no owner change, but pointer identity breaks
+  (`&lib.G == &lib.G` is false across sites).
+
+**Ruled (owner, 2026-10-25):** 1.26 ships the same-package method-value fix (R's seat F1) and documents the
+cross-package case in `docs/Limitations.md` and `docs/KnownIssues.md`. The .2 fix takes option (b), with a full
+re-bank, since every exported value variable's emission changes.
+
+— C2 (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -111,7 +111,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
     var testʗ7 = test;
     Ꮡt.Run(allˢ, (ж<testing.T> tΔ8) => {
         var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
-        foreach (var (i, _) in want.Value) {
+        foreach (var i in range(want, 8)) {
             want.Value[i] = ~(uint64)0;
         }
         testʗ7(tΔ8, 0, runtime_internal_test_package.PallocChunkPages, want);
@@ -122,7 +122,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
 internal static void invertPallocBits(ж<global::go.runtime_internal_test_package.ΔPallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    foreach (var (i, _) in b) {
+    foreach (var i in range(8)) {
         b[i] = ~b[i];
     }
 }
@@ -253,7 +253,7 @@ public static void TestPallocBitsSummarizeRandom(ж<testing.T> Ꮡt) {
     var b = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
     for (nint i = 0; i < 1000; i++) {
         // Randomize bitmap.
-        foreach (var (iΔ1, _) in b.Value) {
+        foreach (var iΔ1 in range(b, 8)) {
             b.Value[iΔ1] = rand.Uint64();
         }
         // Check summary against reference implementation.

@@ -161,7 +161,7 @@ internal static (nint index, nint closeCalls) differ(ж<global::go.image.jpeg_pa
     ref var b1 = ref Ꮡb1.DerefOrNull();
 
     index = -1;
-    foreach (var i in range(b0)) {
+    foreach (var i in range(64)) {
         var delta = b0[i] - b1[i];
         if (delta < -ok || ok < delta) {
             if (index < 0) {

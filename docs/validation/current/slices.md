@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `slices` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-26 · converter `d78c1e815`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**121 matched · 2 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**122 matched · 2 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/slices`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/slices).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -118,6 +118,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestMinMax/[7]` | pass | pass |
 | `TestMinMaxNaNs` | pass | pass |
 | `TestMinMaxPanics` | pass | pass |
+| `TestNilness` | pass | pass |
 | `TestRepeat` | pass | pass |
 | `TestRepeatPanics` | pass | pass |
 | `TestReplace` | pass | pass |
@@ -154,8 +155,8 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestConcat` | `alloc-count-semantics` | exact-count allocBytes/AllocsPerRun asserts (want 1 allocation per Concat): the managed measurement mixes golib's object counter with byte-derived readings the CLR regime cannot denominate in Go mallocs (measured: want 1, reading 2 for the value cases and 280 for the empty case at the B2 kind-split emission with the slice-shaped spread landed), so no allocation behavior can satisfy the count assert. AMENDED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): STAYS alloc-count-semantics on leg 1's unit -- `Concat([[]])` reads BYTES 168 B per run (840 bytes over 5 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 101 (claude/coord-h10-readings ac9f8251ee)), the counter charging none of it. Legs 2-4 print 2 against want 1, COUNT by construction: Grow's make plus append (slices.cs:441), the append-of-make idiom of docs/phase4/DESIGN-slice-idiom-allocations.md §B (REC-C, append-of-make), whose recognition predicts them 2 -> 1. The 'byte-derived shim' premise above is stale: the host reports a COUNT whenever golib charged anything. |
-| `TestInsert` | `deferred` | an allocation BUDGET assert (want < 25 inserting 50 elements): Go's Insert rotates through two in-place appends whose temporaries escape analysis keeps on the stack, while the managed model heap-boxes each rotation temporary — 242 golib objects at the B2 kind-split emission with the slice-shaped spread landed, a structural stack-vs-heap profile no slimming brings under the budget. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. Magnitude is not a structural proof; both families are REC-C's, not zh-box's. |
+| `TestConcat` | `alloc-count-semantics` | exact-count allocBytes/AllocsPerRun asserts (want 1 allocation per Concat): the managed measurement mixes golib's object counter with byte-derived readings the CLR regime cannot denominate in Go mallocs (measured: want 1, reading 2 for the value cases and 280 for the empty case at the B2 kind-split emission with the slice-shaped spread landed), so no allocation behavior can satisfy the count assert. AMENDED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): STAYS alloc-count-semantics on leg 1's unit -- `Concat([[]])` reads BYTES 168 B per run (840 bytes over 5 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 101 (claude/coord-h10-readings ac9f8251ee)), the counter charging none of it. Legs 2-4 print 2 against want 1, COUNT by construction: Grow's make plus append (slices.cs:441), the append-of-make idiom of docs/phase4/DESIGN-slice-idiom-allocations.md §B (REC-C, append-of-make), whose recognition predicts them 2 -> 1. The 'byte-derived shim' premise above is stale: the host reports a COUNT whenever golib charged anything. READ AT go1.26.10 (2026-10-25, G): 112 bytes per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 560 bytes over 5 runs, no object charged to golib's counter, alloc-units-windows.tsv line 166 (claude/g-pass2-plan 966562828d); linux: 560 bytes over 5 runs, no object charged to golib's counter, alloc-units-linux.tsv line 153 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit BYTES: golib's counter charged no object on this path, so bytes is the measurable figure. |
+| `TestInsert` | `deferred` | an allocation BUDGET assert (want < 25 inserting 50 elements): Go's Insert rotates through two in-place appends whose temporaries escape analysis keeps on the stack, while the managed model heap-boxes each rotation temporary — 242 golib objects at the B2 kind-split emission with the slice-shaped spread landed, a structural stack-vs-heap profile no slimming brings under the budget. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. Magnitude is not a structural proof; both families are REC-C's, not zh-box's. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 58 per run at go1.24.13 to 55 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 

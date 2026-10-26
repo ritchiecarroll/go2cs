@@ -37,6 +37,12 @@ using static global::go.@internal.zstd_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -45,11 +51,11 @@ using static global::go.@internal.zstd_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/zstd/fse_test.go", "fse_test.cs", "AA0cAAcQ7gAOFsIAFjqCkpKCgoCCtoKAgraC", "72-87:1")]
-[assembly: go.GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "ABAgAA4gsoKUgpSCggADEOKUgriCgoKUgpSCgoKCgoKAgraCgoKUgv7ilIK4goCkgoKUgoKCgoKClIKCAAsagoKUgoKCgoKC2A==", "39-42:1;65-83:1;97-97:1;99-139:2")]
+[assembly: go.GoPositionMap("internal/zstd/fse_test.go", "fse_test.cs", "AA0cAAcQ7gAOFsIAFjqykoKCgIK2goCCtoI=", "71-86:1")]
+[assembly: go.GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "ABAgAA4gsoKUgpSCggADEOKUgriCgoKUgpSCgoKCgoKAgraCgoKUgv7ilIK4goCkgoKUgoKCgoKClIKCAAwagoKUgoKCgoKC2A==", "39-42:1;65-83:1;97-97:1;99-139:2")]
 [assembly: go.GoPositionMap("internal/zstd/window_test.go", "window_test.cs", "AAwaooKUpoKSgoKCgoKUsgAHFKKClIKClIKCgpSCpoKmkoKCgpSC", "29-31:1")]
-[assembly: go.GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "ABMeAAocgoKCgoKAggAJCoKCpoKCpoKCgpSCgpSCpoKCgviCgoKU1qKUgpSCgoKUgpSCgoKCgoCCpIKCgqaCgoKUgg==", "92-114:1")]
-[assembly: go.GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "ACEuACG0AYKCkpKCgoKUgoLcgoKCgpKygoKCgpSCggAKGpKCgoKmgpTmgoKClAAHGLKUlJKCgoKCgoCCgraUgpSqooKmgpSUgoKCpoLqkoKClIKCgpSCgoKU+oKCgqaCgoKygoKUgviCgoKmgoKCpoKCgqaCgoCCpJSCggAIDIKCgoKC3KKClJSUgpSCgoKC", "116-126:1;135-146:1;158-163:1;192-204:1;264-268:1;286-303:1;309-314:1")]
+[assembly: go.GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "ABQeAAocgoKCgoKAggAJCoKCpoKCpoKCgpSCgpSCpoKCgviCgoKU1qKUgpSCgoKUgpSCgoKCgoCCpIKCgqaCgoKUgg==", "92-114:1")]
+[assembly: go.GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "ACEuACK0AYKykoKCgpSCgtyCgoKysoKCgoKUgoIAChqSgoKCpoKU5oKCgpQABxiylJSSgoKCgoKAgoK2lIKUqqKCpoKUlIKCgqaC6pKCgpSCgoKUgoKClPqCgoKmgoKCsoKClIL4goKCpoKCgqaCgoKmgoKAgqSUgoIACAyCgoKCgtyigpSUlIKUgoKCgg==", "115-125:1;133-144:1;156-161:1;190-202:1;262-266:1;284-301:1;307-312:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -83,7 +89,7 @@ public static partial class zstd_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));

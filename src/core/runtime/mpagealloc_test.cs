@@ -215,7 +215,7 @@ public static void TestPageAllocGrow(ж<testing.T> Ꮡt) {
                 if (len(got) != len(want)){
                     tΔ1.Fail();
                 } else {
-                    foreach (var (i, _) in want) {
+                    foreach (var i in range(want)) {
                         if (!want[i].ΔEquals(got[i])) {
                             tΔ1.Fail();
                             break;

@@ -14,7 +14,6 @@ internal static class Go2CsTestHost
             "example_pool_test.go",
             "example_test.go",
             "export_test.go",
-            "hashtriemap.go",
             "map.go",
             "map_bench_test.go",
             "map_reference_test.go",
@@ -40,8 +39,8 @@ internal static class Go2CsTestHost
         {
             "atomic",
         });
-        registry.Add("TestCompareAndSwap_NonExistingKey", sync_test_package.TestCompareAndSwap_NonExistingKey, "map_test.go", 293);
-        registry.Add("TestConcurrentClear", sync_test_package.TestConcurrentClear, "map_test.go", 316);
+        registry.Add("TestCompareAndSwap_NonExistingKey", sync_test_package.TestCompareAndSwap_NonExistingKey, "map_test.go", 291);
+        registry.Add("TestConcurrentClear", sync_test_package.TestConcurrentClear, "map_test.go", 314);
         registry.Add("TestConcurrentRange", sync_test_package.TestConcurrentRange, "map_test.go", 159);
         registry.Add("TestCondBroadcast", sync_test_package.TestCondBroadcast, "cond_test.go", 79);
         registry.Add("TestCondCopy", sync_test_package.TestCondCopy, "cond_test.go", 241);
@@ -49,44 +48,46 @@ internal static class Go2CsTestHost
         registry.Add("TestCondSignalGenerations", sync_test_package.TestCondSignalGenerations, "cond_test.go", 52);
         registry.Add("TestCondSignalStealing", sync_test_package.TestCondSignalStealing, "cond_test.go", 187);
         registry.Add("TestIssue40999", sync_test_package.TestIssue40999, "map_test.go", 220);
-        registry.Add("TestMapClearOneAllocation", sync_test_package.TestMapClearOneAllocation, "map_test.go", 361);
+        registry.Add("TestIssue76126", sync_test_package.TestIssue76126, "waitgroup_test.go", 120);
+        registry.Add("TestMapClearOneAllocation", sync_test_package.TestMapClearOneAllocation, "map_test.go", 359);
         registry.Add("TestMapMatchesDeepCopy", sync_test_package.TestMapMatchesDeepCopy, "map_test.go", 147);
         registry.Add("TestMapMatchesHashTrieMap", sync_test_package.TestMapMatchesHashTrieMap, "map_test.go", 153);
         registry.Add("TestMapMatchesRWMutex", sync_test_package.TestMapMatchesRWMutex, "map_test.go", 141);
-        registry.Add("TestMapRangeNestedCall", sync_test_package.TestMapRangeNestedCall, "map_test.go", 243);
-        registry.Add("TestMapRangeNoAllocations", sync_test_package.TestMapRangeNoAllocations, "map_test.go", 301);
+        registry.Add("TestMapRangeNestedCall", sync_test_package.TestMapRangeNestedCall, "map_test.go", 241);
+        registry.Add("TestMapRangeNoAllocations", sync_test_package.TestMapRangeNoAllocations, "map_test.go", 299);
         registry.Add("TestMutex", sync_test_package.TestMutex, "mutex_test.go", 75);
-        registry.Add("TestMutexFairness", sync_test_package.TestMutexFairness, "mutex_test.go", 199);
+        registry.Add("TestMutexFairness", sync_test_package.TestMutexFairness, "mutex_test.go", 198);
         registry.Add("TestMutexMisuse", sync_test_package.TestMutexMisuse, "mutex_test.go", 189);
-        registry.Add("TestNilPool", sync_test_package.TestNilPool, "pool_test.go", 250);
+        registry.Add("TestNilPool", sync_test_package.TestNilPool, "pool_test.go", 262);
         registry.Add("TestOnce", sync_test_package.TestOnce, "once_test.go", 26);
         registry.Add("TestOnceFunc", sync_test_package.TestOnceFunc, "oncefunc_test.go", 20);
-        registry.Add("TestOnceFuncGoexit", sync_test_package.TestOnceFuncGoexit, "oncefunc_test.go", 143);
-        registry.Add("TestOnceFuncPanic", sync_test_package.TestOnceFuncPanic, "oncefunc_test.go", 101);
-        registry.Add("TestOnceFuncPanicNil", sync_test_package.TestOnceFuncPanicNil, "oncefunc_test.go", 128);
-        registry.Add("TestOnceFuncPanicTraceback", sync_test_package.TestOnceFuncPanicTraceback, "oncefunc_test.go", 166);
+        registry.Add("TestOnceFuncGoexit", sync_test_package.TestOnceFuncGoexit, "oncefunc_test.go", 164);
+        registry.Add("TestOnceFuncPanic", sync_test_package.TestOnceFuncPanic, "oncefunc_test.go", 122);
+        registry.Add("TestOnceFuncPanicNil", sync_test_package.TestOnceFuncPanicNil, "oncefunc_test.go", 149);
+        registry.Add("TestOnceFuncPanicTraceback", sync_test_package.TestOnceFuncPanicTraceback, "oncefunc_test.go", 187);
         registry.Add("TestOncePanic", sync_test_package.TestOncePanic, "once_test.go", 42);
-        registry.Add("TestOnceValue", sync_test_package.TestOnceValue, "oncefunc_test.go", 32);
-        registry.Add("TestOnceValuePanic", sync_test_package.TestOnceValuePanic, "oncefunc_test.go", 110);
-        registry.Add("TestOnceValues", sync_test_package.TestOnceValues, "oncefunc_test.go", 51);
-        registry.Add("TestOnceValuesPanic", sync_test_package.TestOnceValuesPanic, "oncefunc_test.go", 119);
-        registry.Add("TestOnceXGC", sync_test_package.TestOnceXGC, "oncefunc_test.go", 188);
+        registry.Add("TestOnceValue", sync_test_package.TestOnceValue, "oncefunc_test.go", 39);
+        registry.Add("TestOnceValuePanic", sync_test_package.TestOnceValuePanic, "oncefunc_test.go", 131);
+        registry.Add("TestOnceValues", sync_test_package.TestOnceValues, "oncefunc_test.go", 65);
+        registry.Add("TestOnceValuesPanic", sync_test_package.TestOnceValuesPanic, "oncefunc_test.go", 140);
+        registry.Add("TestOnceXGC", sync_test_package.TestOnceXGC, "oncefunc_test.go", 209);
         registry.Add("TestParallelReaders", sync_test_package.TestParallelReaders, "rwmutex_test.go", 50);
         registry.Add("TestPool", sync_test_package.TestPool, "pool_test.go", 21);
-        registry.Add("TestPoolChain", sync_test_package.TestPoolChain, "pool_test.go", 171);
-        registry.Add("TestPoolDequeue", sync_test_package.TestPoolDequeue, "pool_test.go", 167);
+        registry.Add("TestPoolChain", sync_test_package.TestPoolChain, "pool_test.go", 183);
+        registry.Add("TestPoolDequeue", sync_test_package.TestPoolDequeue, "pool_test.go", 179);
         registry.Add("TestPoolGC", sync_test_package.TestPoolGC, "pool_test.go", 95);
         registry.Add("TestPoolNew", sync_test_package.TestPoolNew, "pool_test.go", 62);
         registry.Add("TestPoolRelease", sync_test_package.TestPoolRelease, "pool_test.go", 100);
-        registry.Add("TestPoolStress", sync_test_package.TestPoolStress, "pool_test.go", 137);
+        registry.Add("TestPoolStress", sync_test_package.TestPoolStress, "pool_test.go", 149);
         registry.Add("TestRLocker", sync_test_package.TestRLocker, "rwmutex_test.go", 156);
         registry.Add("TestRWMutex", sync_test_package.TestRWMutex, "rwmutex_test.go", 110);
         registry.Add("TestRace", sync_test_package.TestRace, "cond_test.go", 131);
         registry.Add("TestSemaphore", sync_test_package.TestSemaphore, "mutex_test.go", 29);
-        registry.Add("TestWaitGroup", sync_test_package.TestWaitGroup, "waitgroup_test.go", 39);
-        registry.Add("TestWaitGroupAlign", sync_test_package.TestWaitGroupAlign, "waitgroup_test.go", 88);
-        registry.Add("TestWaitGroupMisuse", sync_test_package.TestWaitGroupMisuse, "waitgroup_test.go", 49);
-        registry.Add("TestWaitGroupRace", sync_test_package.TestWaitGroupRace, "waitgroup_test.go", 63);
+        registry.Add("TestWaitGroup", sync_test_package.TestWaitGroup, "waitgroup_test.go", 44);
+        registry.Add("TestWaitGroupAlign", sync_test_package.TestWaitGroupAlign, "waitgroup_test.go", 93);
+        registry.Add("TestWaitGroupGo", sync_test_package.TestWaitGroupGo, "waitgroup_test.go", 106);
+        registry.Add("TestWaitGroupMisuse", sync_test_package.TestWaitGroupMisuse, "waitgroup_test.go", 54);
+        registry.Add("TestWaitGroupRace", sync_test_package.TestWaitGroupRace, "waitgroup_test.go", 68);
         return TestHost.Run(registry, args);
     }
 }

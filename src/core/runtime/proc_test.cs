@@ -671,7 +671,7 @@ internal static array<uint64> padData = new(128);
 internal static void stackGrowthRecursive(nint i) {
     array<uint64> pad = new(128);
     pad = padData.Clone();
-    foreach (var (j, _) in pad) {
+    foreach (var j in range(pad)) {
         if (pad[j] != 0) {
             return;
         }
@@ -732,11 +732,11 @@ internal static nint bigframe(channel<nint> stop) {
 internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    foreach (var (i, _) in x) {
+    foreach (var i in range(8192)) {
         x[i] = (byte)i;
     }
     nint sum = 0;
-    foreach (var (i, _) in x) {
+    foreach (var i in range(8192)) {
         sum += (nint)x[i];
     }
 
@@ -1415,6 +1415,7 @@ public static void TestTraceSTW(ж<testing.T> Ꮡt) {
     // M, startTheWorldWithSema calls wakep to start a spinning M. The
     // spinning M may steal a goroutine from another P if that P is too
     // slow to start.
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }
@@ -1455,6 +1456,7 @@ public static void TestTraceGCSTW(ж<testing.T> Ꮡt) {
     //
     // procresize assigns GC workers to previously-idle Ps to avoid
     // changing what the previously-running Ps are doing.
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }
@@ -1491,6 +1493,8 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @st
     GoFrame ᒐ = default;
     try {
         ref var err = ref Ꮡerr.ValueSlot;
+        var pRunningᴷ = new stackAppend<trace.ProcID>();
+        var gRunningᴷ = new stackAppend<trace.GoID>();
 
         Ꮡt.Logf("Run %d"u8, run);
 
@@ -1718,7 +1722,7 @@ findEnd:
                             // migrate anywhere.
                             continue;
                         }
-                        pRunning = append(pRunning, p);
+                        pRunning = append(pRunningᴷ, pRunning, p);
 
                         var m = ev.Thread();
                         if (m != (~gs).M) {
@@ -1760,7 +1764,7 @@ findEnd:
                         }
 
                         if (!slices.Contains(gRunning, goid)) {
-                            gRunning = append(gRunning, goid);
+                            gRunning = append(gRunningᴷ, gRunning, goid);
                         }
 
                         if (p != (~gs).P || m != (~gs).M) {

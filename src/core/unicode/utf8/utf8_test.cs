@@ -12,16 +12,6 @@ using static go.unicode.utf8_package;
 partial class utf8_test_package {
 
 // Validate the constants redefined from unicode.
-[GoInit] internal static void init() {
-    if (MaxRune != unicode.MaxRune) {
-        throw panic("utf8.MaxRune is wrong");
-    }
-    if (RuneError != unicode.ReplacementChar) {
-        throw panic("utf8.RuneError is wrong");
-    }
-}
-
-// Validate the constants redefined from unicode.
 public static void TestConstants(ж<testing.T> Ꮡt) {
     if (MaxRune != unicode.MaxRune) {
         Ꮡt.Errorf("utf8.MaxRune is wrong: %x should be %x"u8, (int32)(MaxRune), (int32)(unicode.MaxRune));
@@ -518,6 +508,16 @@ internal static slice<ValidTest> validTests = new ValidTest[]{
     new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false) // U+DFFF low surrogate (sic)
 }.slice();
 
+[GoInit] internal static void init() {
+    foreach (var i in range(100)) {
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8, @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})), @out: false));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8 + strings.Repeat("b"u8, i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})) + strings.Repeat("b"u8, i), @out: false));
+    }
+}
+
 public static void TestValid(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in validTests) {
         if (Valid(slice<byte>(tt.@in)) != tt.@out) {
@@ -830,8 +830,8 @@ public static void BenchmarkDecodeASCIIRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var a = new byte[]{(rune)'a'}.slice();
-    for (nint i = 0; i < b.N; i++) {
-        DecodeRune(a);
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRune(a);
     }
 }
 
@@ -839,10 +839,31 @@ public static void BenchmarkDecodeJapaneseRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var nihon = slice<byte>("本"u8);
-    for (nint i = 0; i < b.N; i++) {
-        DecodeRune(nihon);
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRune(nihon);
     }
 }
+
+public static void BenchmarkDecodeASCIIRuneInString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    @string a = "a"u8;
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRuneInString(a);
+    }
+}
+
+public static void BenchmarkDecodeJapaneseRuneInString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    @string nihon = "本"u8;
+    foreach (var _ᴛ1 in range(b.N)) {
+        (runeSink, sizeSink) = DecodeRuneInString(nihon);
+    }
+}
+
+internal static rune runeSink;
+internal static nint sizeSink;
 
 // boolSink is used to reference the return value of benchmarked
 // functions to avoid dead code elimination.

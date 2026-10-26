@@ -39,16 +39,21 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> tcpListenerTests = new pro
     new("tcp"u8, "0.0.0.0"u8),
     new("tcp"u8, "::ffff:0.0.0.0"u8),
     new("tcp"u8, "::"u8),
+
     new("tcp"u8, "127.0.0.1"u8),
     new("tcp"u8, "::ffff:127.0.0.1"u8),
     new("tcp"u8, "::1"u8),
+
     new("tcp4"u8, ""u8),
     new("tcp4"u8, "0.0.0.0"u8),
     new("tcp4"u8, "::ffff:0.0.0.0"u8),
+
     new("tcp4"u8, "127.0.0.1"u8),
     new("tcp4"u8, "::ffff:127.0.0.1"u8),
+
     new("tcp6"u8, ""u8),
     new("tcp6"u8, "::"u8),
+
     new("tcp6"u8, "::1"u8)
 }.slice();
 
@@ -96,16 +101,21 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> udpListenerTests = new pro
     new("udp"u8, "0.0.0.0"u8),
     new("udp"u8, "::ffff:0.0.0.0"u8),
     new("udp"u8, "::"u8),
+
     new("udp"u8, "127.0.0.1"u8),
     new("udp"u8, "::ffff:127.0.0.1"u8),
     new("udp"u8, "::1"u8),
+
     new("udp4"u8, ""u8),
     new("udp4"u8, "0.0.0.0"u8),
     new("udp4"u8, "::ffff:0.0.0.0"u8),
+
     new("udp4"u8, "127.0.0.1"u8),
     new("udp4"u8, "::ffff:127.0.0.1"u8),
+
     new("udp6"u8, ""u8),
     new("udp6"u8, "::"u8),
+
     new("udp6"u8, "::1"u8)
 }.slice();
 
@@ -190,16 +200,19 @@ internal static slice<dualStackTCPListenerTestsᴛ1> dualStackTCPListenerTests =
     new("tcp"u8, ""u8, "tcp"u8, ""u8, syscall.EADDRINUSE),
     new("tcp"u8, ""u8, "tcp"u8, "0.0.0.0"u8, syscall.EADDRINUSE),
     new("tcp"u8, "0.0.0.0"u8, "tcp"u8, ""u8, syscall.EADDRINUSE),
+
     new("tcp"u8, ""u8, "tcp"u8, "::"u8, syscall.EADDRINUSE),
     new("tcp"u8, "::"u8, "tcp"u8, ""u8, syscall.EADDRINUSE),
     new("tcp"u8, "0.0.0.0"u8, "tcp"u8, "::"u8, syscall.EADDRINUSE),
     new("tcp"u8, "::"u8, "tcp"u8, "0.0.0.0"u8, syscall.EADDRINUSE),
     new("tcp"u8, "::ffff:0.0.0.0"u8, "tcp"u8, "::"u8, syscall.EADDRINUSE),
     new("tcp"u8, "::"u8, "tcp"u8, "::ffff:0.0.0.0"u8, syscall.EADDRINUSE),
+
     new("tcp4"u8, ""u8, "tcp6"u8, ""u8, default!),
     new("tcp6"u8, ""u8, "tcp4"u8, ""u8, default!),
     new("tcp4"u8, "0.0.0.0"u8, "tcp6"u8, "::"u8, default!),
     new("tcp6"u8, "::"u8, "tcp4"u8, "0.0.0.0"u8, default!),
+
     new("tcp"u8, "127.0.0.1"u8, "tcp"u8, "::1"u8, default!),
     new("tcp"u8, "::1"u8, "tcp"u8, "127.0.0.1"u8, default!),
     new("tcp4"u8, "127.0.0.1"u8, "tcp6"u8, "::1"u8, default!),
@@ -280,16 +293,19 @@ internal static slice<dualStackTCPListenerTestsᴛ1> dualStackUDPListenerTests =
     new("udp"u8, ""u8, "udp"u8, ""u8, syscall.EADDRINUSE),
     new("udp"u8, ""u8, "udp"u8, "0.0.0.0"u8, syscall.EADDRINUSE),
     new("udp"u8, "0.0.0.0"u8, "udp"u8, ""u8, syscall.EADDRINUSE),
+
     new("udp"u8, ""u8, "udp"u8, "::"u8, syscall.EADDRINUSE),
     new("udp"u8, "::"u8, "udp"u8, ""u8, syscall.EADDRINUSE),
     new("udp"u8, "0.0.0.0"u8, "udp"u8, "::"u8, syscall.EADDRINUSE),
     new("udp"u8, "::"u8, "udp"u8, "0.0.0.0"u8, syscall.EADDRINUSE),
     new("udp"u8, "::ffff:0.0.0.0"u8, "udp"u8, "::"u8, syscall.EADDRINUSE),
     new("udp"u8, "::"u8, "udp"u8, "::ffff:0.0.0.0"u8, syscall.EADDRINUSE),
+
     new("udp4"u8, ""u8, "udp6"u8, ""u8, default!),
     new("udp6"u8, ""u8, "udp4"u8, ""u8, default!),
     new("udp4"u8, "0.0.0.0"u8, "udp6"u8, "::"u8, default!),
     new("udp6"u8, "::"u8, "udp4"u8, "0.0.0.0"u8, default!),
+
     new("udp"u8, "127.0.0.1"u8, "udp"u8, "::1"u8, default!),
     new("udp"u8, "::1"u8, "udp"u8, "127.0.0.1"u8, default!),
     new("udp4"u8, "127.0.0.1"u8, "udp6"u8, "::1"u8, default!),
@@ -561,6 +577,7 @@ partial struct ipv4MulticastListenerTestsᴛ1 /*dyn*/ {
 internal static slice<ipv4MulticastListenerTestsᴛ1> ipv4MulticastListenerTests;
 internal static void initᴛipv4MulticastListenerTests() { ipv4MulticastListenerTests = new ipv4MulticastListenerTestsᴛ1[]{
     new("udp"u8, Ꮡ(new UDPAddr(IP: IPv4(224, 0, 0, 254), Port: 12345))),
+
     new("udp4"u8, Ꮡ(new UDPAddr(IP: IPv4(224, 0, 0, 254), Port: 12345)))
 }.slice(); }
 
@@ -636,6 +653,7 @@ internal static slice<ipv4MulticastListenerTestsᴛ1> ipv6MulticastListenerTests
     new("udp"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff05::114"u8), Port: 12345))),
     new("udp"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff08::114"u8), Port: 12345))),
     new("udp"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff0e::114"u8), Port: 12345))),
+
     new("udp6"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff01::114"u8), Port: 12345))),
     new("udp6"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff02::114"u8), Port: 12345))),
     new("udp6"u8, Ꮡ(new UDPAddr(IP: ParseIP("ff04::114"u8), Port: 12345))),
@@ -661,7 +679,8 @@ public static void TestIPv6MulticastListener(ж<testing.T> Ꮡt) {
     if (!supportsIPv6()) {
         Ꮡt.Skip(iPv6IsNotSupportedˢ);
     }
-    if (Δos.Getuid() != 0) {
+    // On Windows, the test can be run by non-admin users.
+    if (Δruntime.GOOS != "windows"u8 && Δos.Getuid() != 0) {
         Ꮡt.Skip(mustBeRootˢ);
     }
 
@@ -733,7 +752,7 @@ internal static error checkMulticastListener(ж<global::go.net_package.UDPConn> 
 
 internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "windows"u8) {
+    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
         return (true, default!); // not implemented yet
     }
     if (exprᴛ1 == "linux"u8) {

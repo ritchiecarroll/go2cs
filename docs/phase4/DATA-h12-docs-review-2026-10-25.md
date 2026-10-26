@@ -266,3 +266,12 @@ a named basic type, and an empty variadic call passes a nil slice (`parts == nil
 ### HISTORY-KEPT: native-narrow TARGET32BIT strategy comment; multi-result ᴛAs retirement and itab-cache folding.
 ### UNVERIFIED: nugetgo uuid/hashset publication (external); println fix from code; des/nistec UL tables; point-in-time "cleared N CSxxxx" asides.
 ### OTHER: README headings with fleet vocabulary from shadowing.md "(Phase-4D file exclusion)" and pointers.md "club-41 mop-up batch"; README missing: defer-panic-recover.md#only-the-function-the-defer-calls-directly-recovers, labels ΔrangeSnapshot heading, manual-conversions sockaddr linux heading, struct-embedding.md#an-embedded-predeclared-type-is-a-plain-field-marked-embed; guard failure multi-assignment.md:483 (wrapped link) is gR2's.
+
+## Amendment 2026-10-26 (C2): finding 3 is fixed
+
+H's seat (claude/h-range-nil-ptrarray, converter commit 55ffd992e1, tip 2497787ecd; COORD's in-hop ruling) emits
+the count range `range(N)` for an index-only range over a `*[N]T` parameter or pointer receiver, so a nil one ranges
+`N` times as Go does. This branch merged that tip: labels-and-loop-variables.md takes H's present-tense rule, and the
+Loops paragraph of ConversionStrategies.md states the same rule, with no divergence left on either page. The entries
+above that describe finding 3 as a divergence (the CODE line and the two MATERIAL / page notes) record the review
+at 799ea678a2 and are left as written.

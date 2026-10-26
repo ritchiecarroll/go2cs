@@ -22,27 +22,37 @@ partial class sync_test_package {
 // We assume that the Once.Do tests have already covered parallelism.
 public static void TestOnceFunc(ж<Δtesting.T> Ꮡt) {
     nint calls = 0;
-    var f = Δsync.OnceFunc(() => {
+    var of = () => {
         calls++;
-    });
+    };
+    ref var f = ref heap<Action>(out var Ꮡf);
+    f = Δsync.OnceFunc(of);
     var allocs = Δtesting.AllocsPerRun(10, f);
     if (calls != 1) {
         Ꮡt.Errorf("want calls==1, got %d"u8, calls);
     }
     if (allocs != 0D) {
-        Ꮡt.Errorf("want 0 allocations per call, got %v"u8, allocs);
+        Ꮡt.Errorf("want 0 allocations per call to f, got %v"u8, allocs);
+    }
+    var ofʗ1 = of;
+    allocs = Δtesting.AllocsPerRun(10, () => {
+        Ꮡf.ValueSlot = Δsync.OnceFunc(ofʗ1);
+    });
+    if (allocs > 2D) {
+        Ꮡt.Errorf("want at most 2 allocations per call to OnceFunc, got %v"u8, allocs);
     }
 }
 
 public static void TestOnceValue(ж<Δtesting.T> Ꮡt) {
     nint calls = 0;
-    var f = Δsync.OnceValue(nint () => {
+    var of = () => {
         calls++;
         return calls;
-    });
-    var fʗ1 = f;
+    };
+    ref var f = ref heap<Func<nint>>(out var Ꮡf);
+    f = Δsync.OnceValue(of);
     var allocs = Δtesting.AllocsPerRun(10, () => {
-        fʗ1();
+        Ꮡf.ValueSlot();
     });
     nint value = f();
     if (calls != 1) {
@@ -52,19 +62,27 @@ public static void TestOnceValue(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("want value==1, got %d"u8, value);
     }
     if (allocs != 0D) {
-        Ꮡt.Errorf("want 0 allocations per call, got %v"u8, allocs);
+        Ꮡt.Errorf("want 0 allocations per call to f, got %v"u8, allocs);
+    }
+    var ofʗ1 = of;
+    allocs = Δtesting.AllocsPerRun(10, () => {
+        Ꮡf.ValueSlot = Δsync.OnceValue(ofʗ1);
+    });
+    if (allocs > 2D) {
+        Ꮡt.Errorf("want at most 2 allocations per call to OnceValue, got %v"u8, allocs);
     }
 }
 
 public static void TestOnceValues(ж<Δtesting.T> Ꮡt) {
     nint calls = 0;
-    var f = Δsync.OnceValues((nint, nint) () => {
+    var of = () => {
         calls++;
         return (calls, calls + 1);
-    });
-    var fʗ1 = f;
+    };
+    ref var f = ref heap<Func<(nint, nint)>>(out var Ꮡf);
+    f = Δsync.OnceValues(of);
     var allocs = Δtesting.AllocsPerRun(10, () => {
-        fʗ1();
+        Ꮡf.ValueSlot();
     });
     var (v1, v2) = f();
     if (calls != 1) {
@@ -74,7 +92,14 @@ public static void TestOnceValues(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("want v1==1 and v2==2, got %d and %d"u8, v1, v2);
     }
     if (allocs != 0D) {
-        Ꮡt.Errorf("want 0 allocations per call, got %v"u8, allocs);
+        Ꮡt.Errorf("want 0 allocations per call to f, got %v"u8, allocs);
+    }
+    var ofʗ1 = of;
+    allocs = Δtesting.AllocsPerRun(10, () => {
+        Ꮡf.ValueSlot = Δsync.OnceValues(ofʗ1);
+    });
+    if (allocs > 2D) {
+        Ꮡt.Errorf("want at most 2 allocations per call to OnceValues, got %v"u8, allocs);
     }
 }
 
@@ -238,6 +263,9 @@ internal static readonly object wrappedFunctionShouldBeˢ = (@string)"wrapped fu
 
 public static void TestOnceXGC(ж<Δtesting.T> Ꮡt) {
 
+
+
+
     var fns = new map<@string, Func<slice<byte>, Action>>{
         ["OnceFunc"u8] = (slice<byte> buf) => {
             var bufʗ1 = buf;
@@ -266,6 +294,35 @@ public static void TestOnceXGC(ж<Δtesting.T> Ꮡt) {
             return () => {
                 fʗ2();
             };
+        },
+        ["OnceFunc panic"u8] = (slice<byte> buf) => {
+            var bufʗ4 = buf;
+            return Δsync.OnceFunc(() => {
+                bufʗ4[0] = 1;
+                throw panic("test panic");
+            });
+        },
+        ["OnceValue panic"u8] = (slice<byte> buf) => {
+            var bufʗ5 = buf;
+            var f = Δsync.OnceValue(any () => {
+                bufʗ5[0] = 1;
+                throw panic("test panic");
+            });
+            var fʗ3 = f;
+            return () => {
+                fʗ3();
+            };
+        },
+        ["OnceValues panic"u8] = (slice<byte> buf) => {
+            var bufʗ6 = buf;
+            var f = Δsync.OnceValues((any, any) () => {
+                bufʗ6[0] = 1;
+                throw panic("test panic");
+            });
+            var fʗ4 = f;
+            return () => {
+                fʗ4();
+            };
         }
     };
     foreach (var (n, fn) in fns) {
@@ -273,35 +330,57 @@ public static void TestOnceXGC(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Run(n, (ж<Δtesting.T> tΔ1) => {
             var buf = new slice<byte>(1024);
             ref var gc = ref heap(new atomic.Bool(), out var Ꮡgc);
-            Δruntime.SetFinalizer(Ꮡ(buf, 0), (ж<byte> _) => {
-                Ꮡgc.Store(true);
-            });
+            Δruntime.AddCleanup(Ꮡ(buf, 0), (ж<atomic.Bool> g) => {
+                g.Store(true);
+            }, Ꮡgc);
             var f = fnʗ1(buf);
-            gcwaitfin();
+            runCleanups();
             if (Ꮡgc.Load() != false) {
                 tΔ1.Fatal(wrappedFunctionGarbageˢ);
             }
-            f();
-            gcwaitfin();
+            var fʗ5 = f;
+            ((Action)(() => {
+                GoFrame ᒐ = default;
+                try {
+                    defer(() => {
+                        recover();
+                    }, ref ᒐ);
+                    fʗ5();
+                }
+                catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                finally { ᒐ.Run(); }
+            }))();
+            runCleanups();
             if (Ꮡgc.Load() != true) {
                 // Even if f is still alive, the function passed to Once(Func|Value|Values)
                 // is not kept alive after the first call to f.
                 tΔ1.Fatal(wrappedFunctionShouldBeˢ);
             }
-            f();
+            var fʗ6 = f;
+            ((Action)(() => {
+                GoFrame ᒐ = default;
+                try {
+                    defer(() => {
+                        recover();
+                    }, ref ᒐ);
+                    fʗ6();
+                }
+                catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                finally { ᒐ.Run(); }
+            }))();
         });
     }
 }
 
-// gcwaitfin performs garbage collection and waits for all finalizers to run.
-internal static void gcwaitfin() {
+// runCleanups performs garbage collection and waits for all cleanups to run.
+internal static void runCleanups() {
     Δruntime.GC();
-    runtime_blockUntilEmptyFinalizerQueue(Δmath.MaxInt64);
+    runtime_blockUntilEmptyCleanupQueue(Δmath.MaxInt64);
 }
 
-//go:linkname runtime_blockUntilEmptyFinalizerQueue runtime.blockUntilEmptyFinalizerQueue
-/*linkname*/ internal static partial bool runtime_blockUntilEmptyFinalizerQueue(int64 _) {
-    return Δruntime.blockUntilEmptyFinalizerQueue(_);
+//go:linkname runtime_blockUntilEmptyCleanupQueue
+/*linkname*/ internal static partial bool runtime_blockUntilEmptyCleanupQueue(int64 _) {
+    return Δruntime.sync_test_runtime_blockUntilEmptyCleanupQueue(_);
 }
 
 internal static Action onceFunc = Δsync.OnceFunc(() => {
@@ -309,6 +388,8 @@ internal static Action onceFunc = Δsync.OnceFunc(() => {
 
 internal static ж<Δsync.Once> ᏑonceFuncOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceFuncOnce => ref ᏑonceFuncOnce.Value;
+
+internal static Action onceFuncFunc;
 
 internal static void doOnceFunc() {
     ᏑonceFuncOnce.Do(() => {
@@ -319,6 +400,7 @@ internal static void doOnceFunc() {
 internal static readonly @string vOnceˢ = "v=Once"u8;
 internal static readonly @string vGlobalˢ = "v=Global"u8;
 internal static readonly @string vLocalˢ = "v=Local"u8;
+internal static readonly @string vMakeˢ = "v=Make"u8;
 
 public static void BenchmarkOnceFunc(ж<Δtesting.B> Ꮡb) {
     Ꮡb.Run(vOnceˢ, (ж<Δtesting.B> bΔ1) => {
@@ -348,6 +430,13 @@ public static void BenchmarkOnceFunc(ж<Δtesting.B> Ꮡb) {
             f();
         }
     });
+    Ꮡb.Run(vMakeˢ, (ж<Δtesting.B> bΔ4) => {
+        bΔ4.ReportAllocs();
+        for (nint i = 0; i < (~bΔ4).N; i++) {
+            onceFuncFunc = Δsync.OnceFunc(() => {
+            });
+        }
+    });
 }
 
 internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
@@ -355,6 +444,8 @@ internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
 internal static ж<Δsync.Once> ᏑonceValueOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceValueOnce => ref ᏑonceValueOnce.Value;
 internal static nint onceValueValue;
+
+internal static Func<nint> onceValueFunc;
 
 internal static nint doOnceValue() {
     ᏑonceValueOnce.Do(() => {
@@ -397,6 +488,82 @@ public static void BenchmarkOnceValue(ж<Δtesting.B> Ꮡb) {
                     bΔ3.Fatalf("want %d, got %d"u8, want, got);
                 }
             }
+        }
+    });
+    Ꮡb.Run(vMakeˢ, (ж<Δtesting.B> bΔ4) => {
+        bΔ4.ReportAllocs();
+        for (nint i = 0; i < (~bΔ4).N; i++) {
+            onceValueFunc = Δsync.OnceValue(nint () => 42);
+        }
+    });
+}
+
+internal static UntypedInt onceValuesWant1 => 42;
+internal const bool onceValuesWant2 = true;
+
+internal static Func<(nint, bool)> onceValues = Δsync.OnceValues((nint, bool) () => (onceValuesWant1, onceValuesWant2));
+
+internal static ж<Δsync.Once> ᏑonceValuesOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once onceValuesOnce => ref ᏑonceValuesOnce.Value;
+internal static nint onceValuesValue1;
+internal static bool onceValuesValue2;
+
+internal static Func<(nint, bool)> onceValuesFunc;
+
+internal static (nint, bool) doOnceValues() {
+    ᏑonceValuesOnce.Do(() => {
+        onceValuesValue1 = onceValuesWant1;
+        onceValuesValue2 = onceValuesWant2;
+    });
+    return (onceValuesValue1, onceValuesValue2);
+}
+
+public static void BenchmarkOnceValues(ж<Δtesting.B> Ꮡb) {
+    // See BenchmarkOnceFunc
+    Ꮡb.Run(vOnceˢ, (ж<Δtesting.B> bΔ1) => {
+        bΔ1.ReportAllocs();
+        for (nint i = 0; i < (~bΔ1).N; i++) {
+            {
+                var (got1, got2) = doOnceValues(); if (got1 != onceValuesWant1){
+                    bΔ1.Fatalf("value 1: got %d, want %d"u8, got1, (nint)(onceValuesWant1));
+                } else 
+                if (got2 != onceValuesWant2) {
+                    bΔ1.Fatalf("value 2: got %v, want %v"u8, got2, onceValuesWant2);
+                }
+            }
+        }
+    });
+    Ꮡb.Run(vGlobalˢ, (ж<Δtesting.B> bΔ2) => {
+        bΔ2.ReportAllocs();
+        for (nint i = 0; i < (~bΔ2).N; i++) {
+            {
+                var (got1, got2) = onceValues(); if (got1 != onceValuesWant1){
+                    bΔ2.Fatalf("value 1: got %d, want %d"u8, got1, (nint)(onceValuesWant1));
+                } else 
+                if (got2 != onceValuesWant2) {
+                    bΔ2.Fatalf("value 2: got %v, want %v"u8, got2, onceValuesWant2);
+                }
+            }
+        }
+    });
+    Ꮡb.Run(vLocalˢ, (ж<Δtesting.B> bΔ3) => {
+        bΔ3.ReportAllocs();
+        var onceValuesΔ1 = Δsync.OnceValues((nint, bool) () => (onceValuesWant1, onceValuesWant2));
+        for (nint i = 0; i < (~bΔ3).N; i++) {
+            {
+                var (got1, got2) = onceValuesΔ1(); if (got1 != onceValuesWant1){
+                    bΔ3.Fatalf("value 1: got %d, want %d"u8, got1, (nint)(onceValuesWant1));
+                } else 
+                if (got2 != onceValuesWant2) {
+                    bΔ3.Fatalf("value 2: got %v, want %v"u8, got2, onceValuesWant2);
+                }
+            }
+        }
+    });
+    Ꮡb.Run(vMakeˢ, (ж<Δtesting.B> bΔ4) => {
+        bΔ4.ReportAllocs();
+        for (nint i = 0; i < (~bΔ4).N; i++) {
+            onceValuesFunc = Δsync.OnceValues((nint, bool) () => (onceValuesWant1, onceValuesWant2));
         }
     });
 }

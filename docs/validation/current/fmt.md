@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `fmt` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**62 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**62 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/fmt`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/fmt).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -94,7 +94,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestCountMallocs` | `deferred` | An AllocsPerRun family over 16 Sprintf/Fprintf legs, each bounded by Go's own mallocTest count (0 to 4). 15 of the 16 legs exceed their bound in the converted run; Sprintf("") (no arguments) is the one that passes. DEFERRED, not alloc-count-semantics: the run's unit note reads `counted ... go2cs-runtime object allocations ... an allocation COUNT per run` -- Go's own unit. ONE mechanism is named and read at the 1.24.13 hop, and it is paid by every leg with arguments: the variadic pack. The call site is C# 13 `params Span<any>` (the compiler's stack pack, like Go's non-escaping ...any backing array), and Sprintf/Fprintf's first act, `aʗp.slice()`, copies it to the heap (golib slice.cs `slice<T>(this Span<T>)` -> AllocationCounter.CopyOf) -- one charged array per call where Go allocates none. That it is the no-argument leg that passes is consistent with it. The REST of each leg's surplus is NOT yet attributed (Sprintf("xxx") has no pack and reads 2 against 1), so this entry is deferred on a partially named mechanism and says so. |
+| `TestCountMallocs` | `deferred` | An AllocsPerRun family over 24 Sprintf/Fprintf/Errorf legs. Since Go 1.26 each leg must EQUAL Go's own mallocTest count (0 to 4); Go 1.24 asserted at most that count, and its message read `want <=`. 20 of the 24 legs differ in the converted run. Sprintf("") and Sprintf("xxx") match, and two noliteral legs (Fprintf(buf, "%x") and Fprintf(buf, "%v")) match only because one extra charge offsets one uncounted interface box. DEFERRED, not alloc-count-semantics: the run's unit note reads `counted ... go2cs-runtime object allocations ... an allocation COUNT per run` -- Go's own unit. ONE mechanism is named and read, and it is paid by every Sprintf/Fprintf leg with arguments: the variadic pack. The call site is C# 13 `params Span<any>` (the compiler's stack pack, like Go's non-escaping ...any backing array), and Sprintf/Fprintf's first act, `aʗp.slice()`, copies it to the heap (golib slice.cs `slice<T>(this Span<T>)` -> AllocationCounter.CopyOf) -- one charged array per call where Go allocates none. On 8 legs it is the whole difference: each reads Go's count plus one. The REST is NOT yet attributed: 6 Sprintf/Fprintf legs carry 1 or 2 more than the pack, Fprintf(buf, "%x %x %x") over three pointer arguments carries 12 more, and the 4 Errorf legs differ by 2 to 7 (Errorf copies its arguments through `sslice()`, not the charged `slice()`). One leg reads BELOW Go, Fprintf(buf, "%v") of a []int at 3 against 4; the equality assertion now reports it, and the counter's coverage allows it, because C# boxing is not counted. So this entry is deferred on a partially named mechanism and says so. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 20 per run at go1.24.13 to 1 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 

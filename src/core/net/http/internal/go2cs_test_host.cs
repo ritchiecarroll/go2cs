@@ -14,6 +14,7 @@ internal static class Go2CsTestHost
         }, new string[]
         {
             "ascii",
+            "httpcommon",
             "testcert",
         });
         registry.Add("TestChunk", internal_internal_test_package.TestChunk, "chunked_test.go", 17);

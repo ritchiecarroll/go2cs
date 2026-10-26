@@ -88,6 +88,8 @@ internal partial struct TestReplacer_testCase /*dyn*/ {
 
 // TestReplacer tests the replacer implementations.
 public static void TestReplacer(ж<testing.T> Ꮡt) {
+    var sᴷ = new stackAppend<@string>();
+
     slice<TestReplacer_testCase> testCases = default!;
 
     // str converts 0xff to "\xff". This isn't just string(b) since that converts to UTF-8.
@@ -97,7 +99,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     // inc maps "\x00"->"\x01", ..., "a"->"b", "b"->"c", ..., "\xff"->"\x00".
     s = default!;
     for (nint i = 0; i < 256; i++) {
-        s = append(s, str((byte)i), str((byte)(i + 1)));
+        s = append(sᴷ, s, str((byte)i), str((byte)(i + 1)));
     }
     var inc = NewReplacer(s.ꓸꓸꓸ);
 
@@ -106,9 +108,11 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(capitalLetters, "brad"u8, "BrAd"u8),
         new TestReplacer_testCase(capitalLetters, Repeat("a"u8, (32 << 10) + 123), Repeat("A"u8, (32 << 10) + 123)),
         new TestReplacer_testCase(capitalLetters, ""u8, ""u8),
+
         new TestReplacer_testCase(inc, "brad"u8, "csbe"u8),
         new TestReplacer_testCase(inc, ((@string)(new byte[]{0x00, 0xff})), "\x01\x00"u8),
         new TestReplacer_testCase(inc, ""u8, ""u8),
+
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "a", "2"), "brad"u8, "br1d"u8));
 
     // repeat maps "a"->"a", "b"->"bb", "c"->"ccc", ...
@@ -128,9 +132,11 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(htmlEscaper, "I <3 escaping & stuff"u8, "I &lt;3 escaping &amp; stuff"u8),
         new TestReplacer_testCase(htmlEscaper, "&&&"u8, "&amp;&amp;&amp;"u8),
         new TestReplacer_testCase(htmlEscaper, ""u8, ""u8),
+
         new TestReplacer_testCase(repeat, "brad"u8, "bbrrrrrrrrrrrrrrrrrradddd"u8),
         new TestReplacer_testCase(repeat, "abba"u8, "abbbba"u8),
         new TestReplacer_testCase(repeat, ""u8, ""u8),
+
         new TestReplacer_testCase(NewReplacer("a"u8, "11", "a", "22"), "brad"u8, "br11d"u8));
 
     // The remaining test cases have variable length old strings.
@@ -139,8 +145,11 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(htmlUnescaper, "&amp;amp;"u8, "&amp;"u8),
         new TestReplacer_testCase(htmlUnescaper, "&lt;b&gt;HTML&apos;s neat&lt;/b&gt;"u8, "<b>HTML's neat</b>"u8),
         new TestReplacer_testCase(htmlUnescaper, ""u8, ""u8),
+
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "a", "2", xxxˢ, xxxˢ), "brad"u8, "br1d"u8),
+
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "aa", "2", aaaˢ, "3"), "aaaa"u8, "1111"u8),
+
         new TestReplacer_testCase(NewReplacer(aaaˢ, "3", "aa", "2", "a", "1"), "aaaa"u8, "31"u8));
 
     // gen1 has multiple old strings of variable length. There is no
@@ -208,16 +217,19 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     testCases = append(testCases,
         new TestReplacer_testCase(foo1, "fofoofoo12foo32oo"u8, "fofooA2C2oo"u8),
         new TestReplacer_testCase(foo1, ""u8, ""u8),
+
         new TestReplacer_testCase(foo2, "fofoofoo12foo32oo"u8, "fofooA2Doo"u8),
         new TestReplacer_testCase(foo2, ""u8, ""u8),
+
         new TestReplacer_testCase(foo3, "fofoofoo12foo32oo"u8, "fofooBDoo"u8),
         new TestReplacer_testCase(foo3, ""u8, ""u8),
+
         new TestReplacer_testCase(foo4, "fofoofoo12foo32oo"u8, "fofooBDoo"u8),
         new TestReplacer_testCase(foo4, ""u8, ""u8));
 
     // genAll maps "\x00\x01\x02...\xfe\xff" to "[all]", amongst other things.
     var allBytes = new slice<byte>(256);
-    foreach (var (i, _) in allBytes) {
+    foreach (var i in range(allBytes)) {
         allBytes[i] = (byte)i;
     }
     @string allString = (@string)allBytes;
@@ -242,22 +254,28 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     testCases = append(testCases,
         new TestReplacer_testCase(blankToX1, "foo"u8, "XfXoXoX"u8),
         new TestReplacer_testCase(blankToX1, ""u8, "X"u8),
+
         new TestReplacer_testCase(blankToX2, "foo"u8, "XfXoXoX"u8),
         new TestReplacer_testCase(blankToX2, ""u8, "X"u8),
+
         new TestReplacer_testCase(blankHighPriority, "oo"u8, "XOXOX"u8),
         new TestReplacer_testCase(blankHighPriority, "ii"u8, "XiXiX"u8),
         new TestReplacer_testCase(blankHighPriority, "oiio"u8, "XOXiXiXOX"u8),
         new TestReplacer_testCase(blankHighPriority, "iooi"u8, "XiXOXOXiX"u8),
         new TestReplacer_testCase(blankHighPriority, ""u8, "X"u8),
+
         new TestReplacer_testCase(blankLowPriority, "oo"u8, "OOX"u8),
         new TestReplacer_testCase(blankLowPriority, "ii"u8, "XiXiX"u8),
         new TestReplacer_testCase(blankLowPriority, "oiio"u8, "OXiXiOX"u8),
         new TestReplacer_testCase(blankLowPriority, "iooi"u8, "XiOOXiX"u8),
         new TestReplacer_testCase(blankLowPriority, ""u8, "X"u8),
+
         new TestReplacer_testCase(blankNoOp1, "foo"u8, "foo"u8),
         new TestReplacer_testCase(blankNoOp1, ""u8, ""u8),
+
         new TestReplacer_testCase(blankNoOp2, "foo"u8, "foo"u8),
         new TestReplacer_testCase(blankNoOp2, ""u8, ""u8),
+
         new TestReplacer_testCase(blankFoo, "foobarfoobaz"u8, "XRXZX"u8),
         new TestReplacer_testCase(blankFoo, "foobar-foobaz"u8, "XRX-XZX"u8),
         new TestReplacer_testCase(blankFoo, ""u8, "X"u8));
@@ -365,6 +383,7 @@ internal partial struct TestGenericTrieBuilding_testCases /*dyn*/ {
 // trie if it ends with a "+".
 public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var wantbufᴷ = new stackAppend<byte>();
 
     var testCases = new TestGenericTrieBuilding_testCases[]{
         new("abc;abdef;abdefgh;xx;xy;z"u8, """
@@ -431,7 +450,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
         var wantbuf = new slice<byte>(0, len(tc.@out));
         for (nint i = 0; i < len(tc.@out); i++) {
             if (tc.@out[i] != (rune)'\t') {
-                wantbuf = append(wantbuf, tc.@out[i]);
+                wantbuf = append(wantbufᴷ, wantbuf, tc.@out[i]);
             }
         }
         @string want = (@string)wantbuf;

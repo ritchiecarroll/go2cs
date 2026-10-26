@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"golang.org/x/mod/modfile"
+	"golang.org/x/mod/module"
+	"golang.org/x/tools/go/packages"
 )
 
 // The module half of a program's build info: the `path`, `mod` and `dep` lines cmd/go links into a Go binary
@@ -100,4 +102,129 @@ func stampModInfoProject(projectFileName string, value string) error {
 		"  </ItemGroup>\r\n\r\n"
 
 	return insertProjectItem(projectFileName, item)
+}
+
+// testBinaryDependencies is a converted test host's `dep` lines, as cmd/go links them into a test binary. A test of a
+// MAIN package copies that package's own build info (cmd/go/internal/load/test.go TestPackagesAndErrors), whose deps
+// setBuildInfo collects by walking the package's imports and recording each module once, outside the main module. A
+// test of any other package gets build info re-derived for the test main before its imports are known, so it lists
+// NO deps (measured: go1.26.10, linux/amd64, a module package importing golang.org/x/sync). The walk is therefore the
+// production package's import closure, test-only imports excluded, and nothing for a non-main package. A
+// standard-library package carries no module. Each entry is a dep line's fields joined by tabs -- path, version and
+// the go.sum `h1:` hash, sorted as cmd/go sorts them -- and a REPLACED module keeps only path and version, as
+// programModInfo writes it.
+func testBinaryDependencies(production *packages.Package, mainModulePath string, sums map[string]string) []string {
+	if production == nil || production.Name != "main" {
+		return nil
+	}
+
+	modules := linkedModules(production, mainModulePath)
+
+	sorted := make([]module.Version, 0, len(modules))
+
+	for version := range modules {
+		sorted = append(sorted, version)
+	}
+
+	module.Sort(sorted)
+
+	lines := make([]string, 0, len(sorted))
+
+	for _, version := range sorted {
+		path, revision := version.Path, version.Version
+
+		if revision == "" {
+			revision = "(devel)"
+		}
+
+		if modules[version].Replace != nil {
+			lines = append(lines, path+"\t"+revision)
+			continue
+		}
+
+		lines = append(lines, path+"\t"+revision+"\t"+sums[path+" "+version.Version])
+	}
+
+	return lines
+}
+
+// linkedModules is the set of modules a program links, as cmd/go's setBuildInfo collects it: walk the package's import
+// closure and record each package's module once, keyed by path and version, skipping the main module and the standard
+// library (whose packages carry no module).
+func linkedModules(production *packages.Package, mainModulePath string) map[module.Version]*packages.Module {
+	visited := map[*packages.Package]bool{}
+	modules := map[module.Version]*packages.Module{}
+	queue := []*packages.Package{production}
+
+	for len(queue) > 0 {
+		pkg := queue[0]
+		queue = queue[1:]
+
+		if visited[pkg] {
+			continue
+		}
+
+		visited[pkg] = true
+
+		if pkg.Module != nil && pkg.Module.Path != mainModulePath {
+			modules[module.Version{Path: pkg.Module.Path, Version: pkg.Module.Version}] = pkg.Module
+		}
+
+		for _, imported := range pkg.Imports {
+			queue = append(queue, imported)
+		}
+	}
+
+	return modules
+}
+
+// linkedProgramDependencies narrows a -recurse closure's third-party modules to the ones the program links: Go's build
+// info lists only those (setBuildInfo walks the program's imports), so a module's second program that imports fewer
+// dependencies carries fewer dep lines. A conversion loads no module data, so each package of the program's import
+// closure is matched to the closure module whose path is the longest prefix of its import path. The closure keeps
+// supplying each module's version and replacement; nil stays nil.
+func linkedProgramDependencies(program *packages.Package, closure []thirdPartyModule) []thirdPartyModule {
+	if closure == nil || program == nil {
+		return closure
+	}
+
+	linked := map[string]bool{}
+	visited := map[*packages.Package]bool{}
+	queue := []*packages.Package{program}
+
+	for len(queue) > 0 {
+		pkg := queue[0]
+		queue = queue[1:]
+
+		if visited[pkg] {
+			continue
+		}
+
+		visited[pkg] = true
+		owner := ""
+
+		for _, dependency := range closure {
+			if (pkg.PkgPath == dependency.path || strings.HasPrefix(pkg.PkgPath, dependency.path+"/")) && len(dependency.path) > len(owner) {
+				owner = dependency.path
+			}
+		}
+
+		if owner != "" {
+			linked[owner] = true
+		}
+
+		for _, imported := range pkg.Imports {
+			queue = append(queue, imported)
+		}
+	}
+
+	dependencies := make([]thirdPartyModule, 0, len(closure))
+
+	for _, dependency := range closure {
+		if linked[dependency.path] {
+			dependencies = append(dependencies, dependency)
+		}
+	}
+
+	return dependencies
 }

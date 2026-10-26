@@ -23,6 +23,8 @@ internal static readonly @string selectNameFromUsersWhereˢ = "SELECT name FROM 
 public static void ExampleDB_QueryContext() {
     GoFrame ᒐ = default;
     try {
+        var namesᴷ = new stackAppend<@string>();
+
         nint age = 27;
         var (rows, err) = db.QueryContext(ctx, selectNameFromUsersWhereˢ, age);
         if (err != default!) {
@@ -41,7 +43,7 @@ public static void ExampleDB_QueryContext() {
                     log.Fatal(errΔ1);
                 }
             }
-            names = append(names, name);
+            names = append(namesᴷ, names, name);
         }
         // If the database is being written to ensure to check for Close
         // errors that may be returned from the driver. The query may
@@ -193,6 +195,7 @@ public static void ExampleDB_PingContext() {
         //
         // When used in long running service Ping may be part of the health
         // checking system.
+
         var (ctxΔ1, cancel) = context.WithTimeout(sql_test_package.ctx, 1 * time.ΔSecond);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
@@ -479,6 +482,8 @@ public static void ExampleStmt_QueryRowContext() {
 public static void ExampleRows() {
     GoFrame ᒐ = default;
     try {
+        var namesᴷ = new stackAppend<@string>();
+
         nint age = 27;
         var (rows, err) = db.QueryContext(ctx, selectNameFromUsersWhereˢ, age);
         if (err != default!) {
@@ -495,7 +500,7 @@ public static void ExampleRows() {
                     log.Fatal(errΔ1);
                 }
             }
-            names = append(names, name);
+            names = append(namesᴷ, names, name);
         }
         // Check for errors from iterating over rows.
         {

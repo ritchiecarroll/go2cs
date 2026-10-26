@@ -22,9 +22,7 @@ partial struct afterFuncContext {
     internal error err;
 }
 
-internal static context.Context newAfterFuncContext() {
-    return new context_test_package.afterFuncContextжContext(Ꮡ(new afterFuncContext(nil)));
-}
+internal static context.Context _ᴛ1ʗ = new context_test_package.afterFuncContextжContext(((ж<afterFuncContext>)nil));
 
 internal static (time.Time, bool) Deadline(this ref afterFuncContext c) {
     return (new time.Time(nil), false);

@@ -7,6 +7,7 @@ global using syscallDescriptor = go.syscall_package.ΔHandle;
 
 namespace go;
 
+using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using godebug = @internal.godebug_package;
@@ -21,20 +22,29 @@ using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using Δruntime = runtime_package;
 using slices = slices_package;
+using strconv = strconv_package;
 using strings = strings_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using syscall = syscall_package;
 using Δtesting = testing_package;
+using time = time_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
 using @internal.syscall.windows;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using context = context_package;
 using go.io;
 using go.os;
 using go.path;
+using go.sync;
 using static go.os_internal_test_package;
 using unicode;
 
+[GoFieldAccess(typeof(windows.MountPointReparseBuffer), typeof(windows.SymbolicLinkReparseBuffer))]
 partial class os_test_package {
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
@@ -68,9 +78,6 @@ public static void TestSameWindowsFile(ж<Δtesting.T> Ꮡt) {
     }
 
     @string p = filepath.VolumeName(path) + filepath.Base(path);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
     (var ia3, err) = Δos.Stat(p);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -258,12 +265,12 @@ internal static error createMountPoint(@string link, ж<reparseData> Ꮡtarget) 
     var buflen = (uint16)((uint16)/* unsafe.Offsetof(buf.PathBuffer) */ (uintptr)8 + target.pathBuffeLen()); // see ReparseDataLength documentation
     var byteblob = new slice<byte>(buflen);
     buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();
-    buf.Value.SubstituteNameOffset = target.substituteName.offset;
-    buf.Value.SubstituteNameLength = target.substituteName.length;
-    buf.Value.PrintNameOffset = target.printName.offset;
-    buf.Value.PrintNameLength = target.printName.length;
+    buf.SubstituteNameOffset = target.substituteName.offset;
+    buf.SubstituteNameLength = target.substituteName.length;
+    buf.PrintNameOffset = target.printName.offset;
+    buf.PrintNameLength = target.printName.length;
     nint pbuflen = len(target.pathBuf);
-    copy((~array<uint16>.AliasPointer(buf.at(windows.MountPointReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
+    copy(array<uint16>.AliasPointer(buf.at(windows.MountPointReparseBuffer.ᏑPathBuffer, 0), 2048).slice(0, pbuflen, pbuflen), target.pathBuf);
 
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = windows.IO_REPARSE_TAG_MOUNT_POINT;
@@ -279,6 +286,8 @@ internal static readonly @string mklinkˢ = "mklink"u8;
 internal static readonly object skippingUseMklinkCmdTestˢ = (@string)@"skipping ""use_mklink_cmd"" test, mklink does not supports directory junctions"u8;
 
 public static void TestDirectoryJunction(ж<Δtesting.T> Ꮡt) {
+    var testsᴷ = new stackAppend<dirLinkTest>();
+
     slice<dirLinkTest> tests = new dirLinkTest[]{
         new(
             // Create link similar to what mklink does, by inserting \??\ at the front of absolute target.
@@ -304,9 +313,9 @@ public static void TestDirectoryJunction(ж<Δtesting.T> Ꮡt) {
         )
     }.slice();
     var (output, _) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    var mklinkSupportsJunctionLinks = strings.Contains(((@string)output), " /J "u8);
+    var mklinkSupportsJunctionLinks = strings.Contains((@string)output, " /J "u8);
     if (mklinkSupportsJunctionLinks){
-        tests = append(tests,
+        tests = append(testsᴷ, tests,
             new dirLinkTest(
                 name: "use_mklink_cmd"u8,
                 isMountPoint: true,
@@ -336,7 +345,7 @@ internal static error enableCurrentThreadPrivilege(@string privilegeName) {
         if (err != default!) {
             return err;
         }
-        defer(syscall.CloseHandle, ((syscallꓸHandle)(uintptr)t), ref ᒐ);
+        defer(syscall.CloseHandle, (syscallꓸHandle)(uintptr)t, ref ᒐ);
 
         ref var tp = ref heap(new windows.TOKEN_PRIVILEGES(), out var Ꮡtp);
 
@@ -363,15 +372,15 @@ internal static error createSymbolicLink(@string link, ж<reparseData> Ꮡtarget
     var buflen = (uint16)((uint16)/* unsafe.Offsetof(buf.PathBuffer) */ (uintptr)12 + target.pathBuffeLen()); // see ReparseDataLength documentation
     var byteblob = new slice<byte>(buflen);
     buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.SymbolicLinkReparseBuffer>();
-    buf.Value.SubstituteNameOffset = target.substituteName.offset;
-    buf.Value.SubstituteNameLength = target.substituteName.length;
-    buf.Value.PrintNameOffset = target.printName.offset;
-    buf.Value.PrintNameLength = target.printName.length;
+    buf.SubstituteNameOffset = target.substituteName.offset;
+    buf.SubstituteNameLength = target.substituteName.length;
+    buf.PrintNameOffset = target.printName.offset;
+    buf.PrintNameLength = target.printName.length;
     if (isrelative) {
-        buf.Value.Flags = windows.SYMLINK_FLAG_RELATIVE;
+        buf.Flags = windows.SYMLINK_FLAG_RELATIVE;
     }
     nint pbuflen = len(target.pathBuf);
-    copy((~array<uint16>.AliasPointer(buf.at(windows.SymbolicLinkReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
+    copy(array<uint16>.AliasPointer(buf.at(windows.SymbolicLinkReparseBuffer.ᏑPathBuffer, 0), 2048).slice(0, pbuflen, pbuflen), target.pathBuf);
 
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = syscall.IO_REPARSE_TAG_SYMLINK;
@@ -387,11 +396,13 @@ internal static readonly object skippingUseMklinkCmdTestˢ2 = (@string)@"skippin
 public static void TestDirectorySymbolicLink(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var testsᴷ = new stackAppend<dirLinkTest>();
+
         slice<dirLinkTest> tests = default!;
         var (output, _) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-        var mklinkSupportsDirectorySymbolicLinks = strings.Contains(((@string)output), " /D "u8);
+        var mklinkSupportsDirectorySymbolicLinks = strings.Contains((@string)output, " /D "u8);
         if (mklinkSupportsDirectorySymbolicLinks){
-            tests = append(tests,
+            tests = append(testsᴷ, tests,
                 new dirLinkTest(
                     name: "use_mklink_cmd"u8,
                     mklink: (@string link, @string target) => {
@@ -690,7 +701,7 @@ public static void TestShareNotExistError(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object osIsNotExistSyscallErrnoˢ = (@string)"os.IsNotExist(syscall.Errno(53)) is false, but want true"u8;
 
-public static void TestBadNetPathError(ж<Δtesting.T> Ꮡt) {
+public static partial void TestBadNetPathError(ж<Δtesting.T> Ꮡt) {
     syscall.Errno ERROR_BAD_NETPATH = /* syscall.Errno(53) */ 53;
     if (!Δos.IsNotExist(ERROR_BAD_NETPATH)) {
         Ꮡt.Fatal(osIsNotExistSyscallErrnoˢ);
@@ -763,7 +774,7 @@ public static void TestOpenVolumeName(ж<Δtesting.T> Ꮡt) {
         }
         slices.Sort<slice<@string>, @string>(have);
 
-        if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
+        if (!slices.Equal<slice<@string>, @string>(want, have)) {
             Ꮡt.Fatalf("unexpected file list %q, want %q"u8, have, want);
         }
     }
@@ -839,7 +850,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                             if (n > consoleSize) {
                                 n = consoleSize;
                             }
-                            n = copy((~array<uint16>.AliasPointer(bufΔ1, 10000)).slice(0, n, n), Ꮡs16.ValueSlot);
+                            n = copy(array<uint16>.AliasPointer(bufΔ1, 10000).slice(0, n, n), Ꮡs16.ValueSlot);
                             Ꮡs16.ValueSlot = Ꮡs16.ValueSlot.slice(n);
                             read.Value = (uint32)n;
                             tΔ1.Logf("read %d -> %d"u8, toread, read.Value);
@@ -853,7 +864,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                             var (n, errΔ1) = testConsoleʗ1.Read(chunk);
                             buf = appendꓸꓸꓸ(buf, chunk.slice(0, n));
                             if (AreEqual(errΔ1, Δio.EOF)){
-                                all = append(all, ((@string)buf));
+                                all = append(all, (@string)buf);
                                 if (len(all) >= 5) {
                                     break;
                                 }
@@ -912,17 +923,20 @@ public static void TestStatPagefile(ж<Δtesting.T> Ꮡt) {
 internal static (slice<@string>, error) syscallCommandLineToArgv(@string cmd) {
     GoFrame ᒐ = default;
     try {
+        var argsᴷ = new stackAppend<@string>(moves: true);
+
         ref var argc = ref heap(new int32(), out var Ꮡargc);
         var (argv, err) = syscall.CommandLineToArgv(Ꮡ(syscall.StringToUTF16(cmd), 0), Ꮡargc);
         if (err != default!) {
             return (default!, err);
         }
-        defer(syscall.LocalFree, ((syscallꓸHandle)(uintptr)argv), ref ᒐ);
+        defer(syscall.LocalFree, (syscallꓸHandle)(uintptr)argv, ref ᒐ);
 
         slice<@string> args = default!;
         foreach (var (_, v) in (argv.Value).slice(0, argc)) {
-            args = append(args, syscall.UTF16ToString((v.Value)[..]));
+            args = append(argsᴷ, args, syscall.UTF16ToString((v.Value)[..]));
         }
+        args = move2heap(argsᴷ, args);
         return (args, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1053,11 +1067,11 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
         var args = os_internal_test_package.CommandLineToArgv(exe + cmdΔ1);
         var (outΔ1, errΔ2) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), args[0], args[1..].ꓸꓸꓸ).CombinedOutput();
         if (errΔ2 != default!) {
-            Ꮡt.Fatalf("running %q failed: %v\n%v"u8, args, errΔ2, ((@string)outΔ1));
+            Ꮡt.Fatalf("running %q failed: %v\n%v"u8, args, errΔ2, (@string)outΔ1);
         }
         {
             @string want = fmt.Sprintf("%q"u8, args);
-            @string have = ((@string)outΔ1); if (want != have) {
+            @string have = (@string)outΔ1; if (want != have) {
                 Ꮡt.Errorf("wrong output of executing %q: have %q want %q"u8, args, have, want);
                 continue;
             }
@@ -1419,11 +1433,11 @@ public static void TestRootDirAsTemp(ж<Δtesting.T> Ꮡt) {
     cmd.Value.Env = append((~cmd).Env, "TEMP="u8 + newtmp);
     (var output, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("Failed to spawn child process: %v %q"u8, err, ((@string)output));
+        Ꮡt.Fatalf("Failed to spawn child process: %v %q"u8, err, (@string)output);
     }
     {
         @string want = newtmp;
-        @string have = ((@string)output); if (have != want) {
+        @string have = (@string)output; if (have != want) {
             Ꮡt.Fatalf("unexpected child process output %q, want %q"u8, have, want);
         }
     }
@@ -1441,7 +1455,7 @@ internal static @string replaceDriveWithVolumeID(ж<Δtesting.T> Ꮡt, @string p
     if (err != default!) {
         Ꮡt.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
     }
-    @string vol = strings.Trim(((@string)@out), " \n\r"u8);
+    @string vol = strings.Trim((@string)@out, " \n\r"u8);
     return filepath.Join(vol, path.slice(len(filepath.VolumeName(path))));
 }
 
@@ -1744,7 +1758,7 @@ public static void TestIllformedUTF16FileName(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestUTF16Alloc(ж<Δtesting.T> Ꮡt) {
+public static partial void TestUTF16Alloc(ж<Δtesting.T> Ꮡt) {
     void allowsPerRun(nint want, Action f) {
         Ꮡt.Helper();
         nint got = (nint)Δtesting.AllocsPerRun(5, f);
@@ -1854,6 +1868,1044 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+public static void TestReadWriteFileOverlapped(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // See https://go.dev/issue/15388.
+        Ꮡt.Parallel();
+
+        @string name = filepath.Join(Ꮡt.TempDir(), testTxtˢ);
+        var (f, err) = Δos.OpenFile(name, (nint)((nint)(nint)(Δos.O_RDWR | Δos.O_CREATE) | (nint)windows.O_FILE_FLAG_OVERLAPPED), 438);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var fʗ1 = f;
+        defer(() => fʗ1.Close(), ref ᒐ);
+
+        var data = slice<byte>("test"u8);
+        (var n, err) = f.Write(data);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        if (n != len(data)) {
+            Ꮡt.Fatalf("Write = %d; want %d"u8, n, len(data));
+        }
+
+        {
+            var (_, errΔ1) = f.Seek(0, Δio.SeekStart); if (errΔ1 != default!) {
+                Ꮡt.Fatal(errΔ1);
+            }
+        }
+
+        (var got, err) = Δio.ReadAll(new os_test_package.os_FileжReader(f));
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        if (!bytes.Equal(got, data)) {
+            Ꮡt.Fatalf("Read = %q; want %q"u8, got, data);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string testVˢ = "-test.v"u8;
+
+public static void TestStdinOverlappedPipe(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // Test that we can read from a named pipe open with FILE_FLAG_OVERLAPPED.
+        // See https://go.dev/issue/15388.
+        if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
+            ref var buf = ref heap(new @string(), out var Ꮡbuf);
+            var (_, errΔ1) = fmt.Scanln(Ꮡbuf);
+            if (errΔ1 != default!) {
+                fmt.Print(errΔ1);
+                Δos.Exit(1);
+            }
+            fmt.Println(buf);
+            Δos.Exit(0);
+        }
+
+        Ꮡt.Parallel();
+        @string name = pipeName();
+
+        // Create the read handle inherited by the child process.
+        var r = newPipe(new os_test_package.testing_TжTB(Ꮡt), name, false, true);
+        var rʗ1 = r;
+        defer(() => rʗ1.Close(), ref ᒐ);
+
+        // Create a write handle.
+        var (w, err) = Δos.OpenFile(name, Δos.O_WRONLY, 438);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var wʗ1 = w;
+        defer(() => wʗ1.Close(), ref ᒐ);
+
+        // Write some data to the pipe. The child process will read it.
+        var want = slice<byte>("test\n"u8);
+        {
+            var (_, errΔ2) = w.Write(want); if (errΔ2 != default!) {
+                Ꮡt.Fatal(errΔ2);
+            }
+        }
+
+        // Create a child process that will read from the pipe
+        // and write the data to stdout.
+        var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), fmt.Sprintf("-test.run=^%s$"u8, Ꮡt.Name()), testVˢ);
+        cmd = testenv.CleanCmdEnv(cmd);
+        cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+        cmd.Value.Stdin = new os_test_package.os_FileжReader(r);
+        (var got, err) = cmd.CombinedOutput();
+        if (err != default!) {
+            Ꮡt.Fatalf("running %q failed: %v\n%s"u8, cmd.OrTypedNil(), err, got);
+        }
+
+        if (!bytes.Contains(got, want)) {
+            Ꮡt.Fatalf("output %q does not contain %q"u8, got, want);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static ж<Δos.File> newFileOverlapped(Δtesting.TB t, @string name, bool overlapped) {
+    nint flags = (nint)(Δos.O_RDWR | Δos.O_CREATE);
+    if (overlapped) {
+        flags |= (nint)(windows.O_FILE_FLAG_OVERLAPPED);
+    }
+    var (f, err) = Δos.OpenFile(name, flags, 438);
+    if (err != default!) {
+        t.Fatal(err);
+    }
+    var fʗ1 = f;
+    t.Cleanup(() => {
+        {
+            var errΔ1 = fʗ1.Close(); if (errΔ1 != default! && !errors.Is(errΔ1, Δos.ErrClosed)) {
+                t.Fatal(errΔ1);
+            }
+        }
+    });
+    return f;
+}
+
+internal static Func<@string> currentProcess = Δsync.OnceValue(@string () => {
+    // Convert the process ID to a string.
+    return strconv.FormatUint((uint64)Δos.Getpid(), 10);
+});
+
+internal static ж<atomic.Uint64> ᏑpipeCounter = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ref atomic.Uint64 pipeCounter => ref ᏑpipeCounter.Value;
+
+internal static ж<Δos.File> newBytePipe(Δtesting.TB t, @string name, bool overlapped) {
+    return newPipe(t, name, false, overlapped);
+}
+
+internal static ж<Δos.File> newMessagePipe(Δtesting.TB t, @string name, bool overlapped) {
+    return newPipe(t, name, true, overlapped);
+}
+
+internal static @string pipeName() {
+    return @"\\.\pipe\go-os-test-"u8 + currentProcess() + @"-"u8 + strconv.FormatUint(ᏑpipeCounter.Add(1), 10);
+}
+
+internal static ж<Δos.File> newPipe(Δtesting.TB t, @string name, bool message, bool overlapped) {
+    var (wname, err) = syscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        t.Fatal(err);
+    }
+    // Create the read handle.
+    nint flags = windows.PIPE_ACCESS_DUPLEX;
+    if (overlapped) {
+        flags |= (nint)(windows.O_FILE_FLAG_OVERLAPPED);
+    }
+    nint typ = (nint)((nint)windows.PIPE_TYPE_BYTE | (nint)windows.PIPE_READMODE_BYTE);
+    if (message) {
+        typ = (nint)((nint)windows.PIPE_TYPE_MESSAGE | (nint)windows.PIPE_READMODE_MESSAGE);
+    }
+    (var h, err) = windows.CreateNamedPipe(wname, (uint32)flags, (uint32)typ, 1, 4096, 4096, 0, nil);
+    if (err != default!) {
+        t.Fatal(err);
+    }
+    var f = Δos.NewFile((uintptr)h, name);
+    var fʗ1 = f;
+    t.Cleanup(() => {
+        {
+            var errΔ1 = fʗ1.Close(); if (errΔ1 != default! && !errors.Is(errΔ1, Δos.ErrClosed)) {
+                t.Fatal(errΔ1);
+            }
+        }
+    });
+    return f;
+}
+
+internal static partial void testReadWrite(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡfdr, ж<Δos.File> Ꮡfdw) {
+    var write = new channel<@string>(1);
+    var read = new channel<EmptyStruct>(1);
+    var readʗ1 = read;
+    var writeʗ1 = write;
+    goǃ(() => {
+        foreach (var s in writeʗ1) {
+            var (n, err) = Ꮡfdw.Write(slice<byte>(s));
+            readʗ1.ᐸꟷ(new EmptyStruct());
+            if (err != default!) {
+                Ꮡt.Error(err);
+            }
+            if (n != len(s)) {
+                Ꮡt.Errorf("expected to write %d bytes, got %d"u8, len(s), n);
+            }
+        }
+    });
+    foreach (var i in range(10)) {
+        @string s = strconv.Itoa(i);
+        write.ᐸꟷ(s);
+        ᐸꟷ(read);
+        var buf = new slice<byte>(len(s));
+        var (_, err) = Δio.ReadFull(new os_test_package.os_FileжReader(Ꮡfdr), buf);
+        if (err != default!) {
+            Ꮡt.Fatalf("read failed: %v"u8, err);
+        }
+        if (!bytes.Equal(buf, slice<byte>(s))) {
+            Ꮡt.Fatalf("expected %q, got %q"u8, s, buf);
+        }
+    }
+    close(read);
+    close(write);
+}
+
+internal partial struct testPreadPwrite_op /*dyn*/ {
+    internal @string s;
+    internal int64 off;
+}
+
+internal static partial void testPreadPwrite(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡfdr, ж<Δos.File> Ꮡfdw) {
+    var write = new channel<testPreadPwrite_op>(1);
+    var read = new channel<EmptyStruct>(1);
+    var readʗ1 = read;
+    var writeʗ1 = write;
+    goǃ(() => {
+        foreach (var iᴛ1 in writeʗ1) {
+            ref var o = ref heap(new testPreadPwrite_op(), out var Ꮡo);
+            o = iᴛ1;
+
+            var (n, err) = Ꮡfdw.WriteAt(slice<byte>(o.s), o.off);
+            readʗ1.ᐸꟷ(new EmptyStruct());
+            if (err != default!) {
+                Ꮡt.Error(err);
+            }
+            if (n != len(o.s)) {
+                Ꮡt.Errorf("expected to write %d bytes, got %d"u8, len(o.s), n);
+            }
+        }
+    });
+    foreach (var i in range(10)) {
+        var off = (int64)(i % 3); // exercise some back and forth
+        @string s = strconv.Itoa(i);
+        write.ᐸꟷ(new testPreadPwrite_op(s, off));
+        ᐸꟷ(read);
+        var buf = new slice<byte>(len(s));
+        var (n, err) = Ꮡfdr.ReadAt(buf, off);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        if (n != len(s)) {
+            Ꮡt.Fatalf("expected to read %d bytes, got %d"u8, len(s), n);
+        }
+        if (!bytes.Equal(buf, slice<byte>(s))) {
+            Ꮡt.Fatalf("expected %q, got %q"u8, s, buf);
+        }
+    }
+    close(read);
+    close(write);
+}
+
+internal static void testFileReadEOF(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡf) {
+    var (end, err) = Ꮡf.Seek(0, Δio.SeekEnd);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    array<byte> buf = new(1);
+    (var n, err) = Ꮡf.Read(buf[..]);
+    if (err != default! && !AreEqual(err, Δio.EOF)) {
+        Ꮡt.Errorf("expected EOF, got %v"u8, err);
+    }
+    if (n != 0) {
+        Ꮡt.Errorf("expected 0 bytes, got %d"u8, n);
+    }
+
+    (n, err) = Ꮡf.ReadAt(buf[..], end);
+    if (err != default! && !AreEqual(err, Δio.EOF)) {
+        Ꮡt.Errorf("expected EOF, got %v"u8, err);
+    }
+    if (n != 0) {
+        Ꮡt.Errorf("expected 0 bytes, got %d"u8, n);
+    }
+}
+
+internal partial struct TestFile_tests /*dyn*/ {
+    internal @string name;
+    internal bool overlappedRead;
+    internal bool overlappedWrite;
+}
+
+public static void TestFile(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    var tests = new TestFile_tests[]{
+        new("overlapped"u8, true, true),
+        new("overlapped-read"u8, true, false),
+        new("overlapped-write"u8, false, true),
+        new("sync"u8, false, false)
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestFile_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+            tΔ1.Parallel();
+            @string name = filepath.Join(tΔ1.TempDir(), fooˢ);
+            var rh = newFileOverlapped(new os_test_package.testing_TжTB(tΔ1), name, ttʗ1.overlappedRead);
+            var wh = newFileOverlapped(new os_test_package.testing_TжTB(tΔ1), name, ttʗ1.overlappedWrite);
+            testReadWrite(tΔ1, rh, wh);
+            testPreadPwrite(tΔ1, rh, wh);
+            testFileReadEOF(tΔ1, rh);
+        });
+    }
+}
+
+public static void TestFileOverlappedSeek(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = filepath.Join(Ꮡt.TempDir(), fooˢ);
+    var f = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var content = slice<byte>("foo"u8);
+    {
+        var (_, errΔ1) = f.Write(content); if (errΔ1 != default!) {
+            Ꮡt.Fatal(errΔ1);
+        }
+    }
+    // Check that the file pointer is at the expected offset.
+    var (n, err) = f.Seek(0, Δio.SeekCurrent);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    if (n != (int64)len(content)) {
+        Ꮡt.Errorf("expected file pointer to be at offset %d, got %d"u8, len(content), n);
+    }
+    // Set the file pointer to the start of the file.
+    {
+        var (_, errΔ2) = f.Seek(0, Δio.SeekStart); if (errΔ2 != default!) {
+            Ꮡt.Fatal(errΔ2);
+        }
+    }
+    // Read the first byte.
+    array<byte> buf = new(1);
+    {
+        var (_, errΔ3) = f.Read(buf[..]); if (errΔ3 != default!) {
+            Ꮡt.Fatal(errΔ3);
+        }
+    }
+    if (!bytes.Equal(buf[..], content[..(int)(len(buf))])) {
+        Ꮡt.Errorf("expected %q, got %q"u8, content[..(int)(len(buf))], buf[..]);
+    }
+    // Check that the file pointer is at the expected offset.
+    (n, err) = f.Seek(0, Δio.SeekCurrent);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    if (n != (int64)len(buf)) {
+        Ꮡt.Errorf("expected file pointer to be at offset %d, got %d"u8, len(buf), n);
+    }
+    {
+        (n, err) = f.Seek(1, Δio.SeekStart); if (err != default!){
+            Ꮡt.Fatal(err);
+        } else 
+        if (n != 1) {
+            Ꮡt.Errorf("expected file pointer to be at offset %d, got %d"u8, (nint)1, n);
+        }
+    }
+    {
+        (n, err) = f.Seek(-1, Δio.SeekEnd); if (err != default!){
+            Ꮡt.Fatal(err);
+        } else 
+        if (n != (int64)(len(content) - 1)) {
+            Ꮡt.Errorf("expected file pointer to be at offset %d, got %d"u8, len(content) - 1, n);
+        }
+    }
+    {
+        var (_, errΔ4) = f.Seek(-1, Δio.SeekStart); if (!errors.Is(errΔ4, windows.ERROR_NEGATIVE_SEEK)) {
+            Ꮡt.Errorf("expected ERROR_NEGATIVE_SEEK, got %v"u8, errΔ4);
+        }
+    }
+    {
+        var (_, errΔ5) = f.Seek(0, -1); if (!errors.Is(errΔ5, windows.ERROR_INVALID_PARAMETER)) {
+            Ꮡt.Errorf("expected ERROR_INVALID_PARAMETER, got %v"u8, errΔ5);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestAccessDeniedˢ = (@string)"skipping test: access denied"u8;
+
+public static void TestFileOverlappedReadAtSeekVolume(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // Test that we can use File.ReadAt and File.Seek with an overlapped volume handle.
+        // See https://go.dev/issues/74951.
+        Ꮡt.Parallel();
+        @string name = @"\\.\"u8 + filepath.VolumeName(Ꮡt.TempDir());
+        var (f, err) = Δos.OpenFile(name, (nint)((nint)(nint)(Δos.O_RDWR | Δos.O_CREATE) | (nint)windows.O_FILE_FLAG_OVERLAPPED), 438);
+        if (err != default!) {
+            if (errors.Is(err, syscall.ERROR_ACCESS_DENIED)) {
+                Ꮡt.Skip(skippingTestAccessDeniedˢ);
+            }
+            Ꮡt.Fatal(err);
+        }
+        var fʗ1 = f;
+        defer(() => fʗ1.Close(), ref ᒐ);
+
+        array<byte> buf = new(0);
+        {
+            var (_, errΔ1) = f.ReadAt(buf[..], 0); if (errΔ1 != default!) {
+                Ꮡt.Fatal(errΔ1);
+            }
+        }
+        {
+            var (_, errΔ2) = f.Seek(0, Δio.SeekCurrent); if (errΔ2 != default!) {
+                Ꮡt.Fatal(errΔ2);
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+public static void TestPipe(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        Ꮡt.Parallel();
+        var (r, w, err) = Δos.Pipe();
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        var rʗ1 = r;
+        var wʗ1 = w;
+        defer(() => {
+            {
+                var errΔ1 = rʗ1.Close(); if (errΔ1 != default!) {
+                    Ꮡt.Fatal(errΔ1);
+                }
+            }
+            {
+                var errΔ2 = wʗ1.Close(); if (errΔ2 != default!) {
+                    Ꮡt.Fatal(errΔ2);
+                }
+            }
+        }, ref ᒐ);
+        testReadWrite(Ꮡt, r, w);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal partial struct TestNamedPipe_tests /*dyn*/ {
+    internal @string name;
+    internal bool overlappedRead;
+    internal bool overlappedWrite;
+}
+
+public static void TestNamedPipe(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    var tests = new TestNamedPipe_tests[]{
+        new("overlapped"u8, true, true),
+        new("overlapped-write"u8, false, true),
+        new("overlapped-read"u8, true, false),
+        new("sync"u8, false, false)
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestNamedPipe_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+            tΔ1.Parallel();
+            @string name = pipeName();
+            var pipe = newBytePipe(new os_test_package.testing_TжTB(tΔ1), name, ttʗ1.overlappedWrite);
+            var @file = newFileOverlapped(new os_test_package.testing_TжTB(tΔ1), name, ttʗ1.overlappedRead);
+            testReadWrite(tΔ1, pipe, @file);
+        });
+    }
+}
+
+public static void TestPipeMessageReadEOF(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = pipeName();
+    var pipe = newMessagePipe(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true);
+
+    var (_, err) = pipe.Write(default!);
+    if (err != default!) {
+        Ꮡt.Error(err);
+    }
+
+    array<byte> buf = new(10);
+    (var n, err) = @file.Read(buf[..]);
+    if (!AreEqual(err, Δio.EOF)) {
+        Ꮡt.Errorf("expected EOF, got %v"u8, err);
+    }
+    if (n != 0) {
+        Ꮡt.Errorf("expected 0 bytes, got %d"u8, n);
+    }
+}
+
+public static void TestPipeClosedEOF(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = pipeName();
+    var pipe = newBytePipe(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true);
+
+    pipe.Close();
+
+    array<byte> buf = new(10);
+    var (n, err) = @file.Read(buf[..]);
+    if (!AreEqual(err, Δio.EOF)) {
+        Ꮡt.Errorf("expected EOF, got %v"u8, err);
+    }
+    if (n != 0) {
+        Ꮡt.Errorf("expected 0 bytes, got %d"u8, n);
+    }
+}
+
+public static void TestPipeReadTimeout(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = pipeName();
+    _ = newBytePipe(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true);
+
+    var err = @file.SetReadDeadline(time.Now().Add(time.Millisecond));
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+
+    array<byte> buf = new(10);
+    (_, err) = @file.Read(buf[..]);
+    if (!errors.Is(err, Δos.ErrDeadlineExceeded)) {
+        Ꮡt.Errorf("expected deadline exceeded, got %v"u8, err);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object tookTooLongToCancelˢ = (@string)"took too long to cancel"u8;
+
+public static partial void TestPipeCanceled(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = pipeName();
+    _ = newBytePipe(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true);
+    var ch = new channel<EmptyStruct>(1);
+    var chʗ1 = ch;
+    var fileʗ1 = @file;
+    goǃ(() => {
+        while (ᐧ) {
+            var selᴛ5 = chʗ1;
+            switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+            case 0 when selᴛ5.ꟷᐳ(out _): {
+                return;
+            }
+            default: {
+                var (sc, errΔ1) = fileʗ1.SyscallConn();
+                if (errΔ1 != default!) {
+                    Ꮡt.Error(errΔ1);
+                    return;
+                }
+                {
+                    var errΔ2 = sc.Control((uintptr fd) => {
+                        syscall.CancelIoEx((syscallꓸHandle)fd, nil);
+                    }); if (errΔ2 != default!) {
+                        Ꮡt.Error(errΔ2);
+                        return;
+                    }
+                }
+                time.Sleep(100 * time.Millisecond);
+                break;
+            }}
+        }
+    });
+    array<byte> tmp = new(1);
+    // Read will block until the cancel is complete.
+    var (_, err) = @file.Read(tmp[..]);
+    ch.ᐸꟷ(new EmptyStruct());
+    if (errors.Is(err, Δos.ErrDeadlineExceeded)) {
+        Ꮡt.Skip(tookTooLongToCancelˢ);
+    }
+    if (!errors.Is(err, syscall.ERROR_OPERATION_ABORTED)) {
+        Ꮡt.Errorf("expected ERROR_OPERATION_ABORTED, got %v"u8, err);
+    }
+}
+
+internal static error iocpAssociateFile(ж<Δos.File> Ꮡf, syscallꓸHandle iocp) {
+    var (_, err) = windows.CreateIoCompletionPort((syscallꓸHandle)Ꮡf.Fd(), iocp, 0, 0);
+    return err;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object unexpectedQueuedˢ = (@string)"unexpected queued completion"u8;
+
+public static partial void TestFileAssociatedWithExternalIOCP(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        // Test that a caller can associate an overlapped handle to an external IOCP
+        // after the handle has been passed to os.NewFile.
+        // Also test that the File can perform I/O after it is associated with the
+        // external IOCP and that those operations do not post to the external IOCP.
+        Ꮡt.Parallel();
+        @string name = pipeName();
+        var pipe = newMessagePipe(new os_test_package.testing_TжTB(Ꮡt), name, true);
+        _ = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, true); // just open a pipe client
+
+        // Use a file to exercise WriteAt.
+        var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), filepath.Join(Ꮡt.TempDir(), "a"), true);
+
+        var (iocp, err) = windows.CreateIoCompletionPort(syscall.InvalidHandle, 0, 0, 0);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        defer(() => {
+            if (iocp == syscall.InvalidHandle) {
+                // Already closed at the end of the test.
+                return;
+            }
+            {
+                var errΔ1 = syscall.CloseHandle(iocp); if (errΔ1 != default!) {
+                    Ꮡt.Fatal(errΔ1);
+                }
+            }
+        }, ref ᒐ);
+
+        var ch = new channel<error>(1);
+        var chʗ1 = ch;
+        goǃ(() => {
+            ref var bytes = ref heap(new uint32(), out var Ꮡbytes);
+            ref var key = ref heap(new uint32(), out var Ꮡkey);
+            ref var overlapped = ref heap<ж<syscall.Overlapped>>(out var Ꮡoverlapped);
+            var errΔ2 = syscall.GetQueuedCompletionStatus(iocp, Ꮡbytes, Ꮡkey, Ꮡoverlapped, syscall.INFINITE);
+            chʗ1.ᐸꟷ(errΔ2);
+        });
+
+        {
+            var errΔ3 = iocpAssociateFile(pipe, iocp); if (errΔ3 != default!) {
+                Ꮡt.Fatal(errΔ3);
+            }
+        }
+        {
+            var errΔ4 = iocpAssociateFile(@file, iocp); if (errΔ4 != default!) {
+                Ꮡt.Fatal(errΔ4);
+            }
+        }
+
+        {
+            var (_, errΔ5) = pipe.Write(slice<byte>("hello"u8)); if (errΔ5 != default!) {
+                Ꮡt.Fatal(errΔ5);
+            }
+        }
+        {
+            var (_, errΔ6) = @file.Write(slice<byte>("hello"u8)); if (errΔ6 != default!) {
+                Ꮡt.Fatal(errΔ6);
+            }
+        }
+        {
+            var (_, errΔ7) = @file.WriteAt(slice<byte>("hello"u8), 0); if (errΔ7 != default!) {
+                Ꮡt.Fatal(errΔ7);
+            }
+        }
+
+        // Wait fot he goroutine to call GetQueuedCompletionStatus.
+        time.Sleep(100 * time.Millisecond);
+
+        // Trigger ERROR_ABANDONED_WAIT_0.
+        {
+            var errΔ8 = syscall.CloseHandle(iocp); if (errΔ8 != default!) {
+                Ꮡt.Fatal(errΔ8);
+            }
+        }
+
+        // Wait for the completion to be posted to the IOCP.
+        err = ᐸꟷ(ch);
+        iocp = syscall.InvalidHandle;
+        syscall.Errno ERROR_ABANDONED_WAIT_0 = /* syscall.Errno(735) */ 735;
+        var exprᴛ1 = err;
+        if (AreEqual(exprᴛ1, ERROR_ABANDONED_WAIT_0)) {
+            // This is what we expect.
+        }
+        else if (AreEqual(exprᴛ1, default!)) {
+            Ꮡt.Error(unexpectedQueuedˢ);
+        }
+        else { /* default: */
+            Ꮡt.Error(err);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+public static partial void TestFileWriteFdRace(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        Ꮡt.Parallel();
+
+        var f = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), filepath.Join(Ꮡt.TempDir(), "a"), true);
+
+        ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+        Ꮡwg.Add(2);
+
+        var fʗ1 = f;
+        goǃ(() => {
+            GoFrame ᒐ = default;
+            try {
+                defer(Ꮡwg.Done, ref ᒐ);
+                var (n, errΔ1) = fʗ1.Write(slice<byte>("hi"u8));
+                if (errΔ1 != default!) {
+                    // We look at error strings as the
+                    // expected errors are OS-specific.
+                    switch (ᐧ) {
+                    case {} when errors.Is(errΔ1, windows.ERROR_INVALID_HANDLE): {
+                        // Ignore an expected error.
+                        break;
+                    }
+                    default: {
+                        // Unexpected error.
+                        Ꮡt.Error(errΔ1);
+                        break;
+                    }}
+                    return;
+                }
+                if (n != 2) {
+                    Ꮡt.Errorf("wrote %d bytes, expected 2"u8, n);
+                    return;
+                }
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+        var fʗ2 = f;
+        goǃ(() => {
+            GoFrame ᒐ = default;
+            try {
+                defer(Ꮡwg.Done, ref ᒐ);
+                fʗ2.Fd();
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+        Ꮡwg.Wait();
+
+        var (iocp, err) = windows.CreateIoCompletionPort(syscall.InvalidHandle, 0, 0, 0);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        defer(syscall.CloseHandle, iocp, ref ᒐ);
+        {
+            var errΔ2 = iocpAssociateFile(f, iocp); if (errΔ2 != default!) {
+                Ꮡt.Fatal(errΔ2);
+            }
+        }
+
+        {
+            var (_, errΔ3) = f.Write(slice<byte>("hi"u8)); if (errΔ3 != default!) {
+                Ꮡt.Error(errΔ3);
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal partial struct TestSplitPath_type /*dyn*/ {
+    internal @string path, wantDir, wantBase;
+}
+
+public static void TestSplitPath(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    foreach (var (_, tt) in new TestSplitPath_type[]{
+        new(@"a"u8, @"."u8, @"a"u8),
+        new(@"a\"u8, @"."u8, @"a"u8),
+        new(@"a\\"u8, @"."u8, @"a"u8),
+        new(@"a\b"u8, @"a"u8, @"b"u8),
+        new(@"a\\b"u8, @"a"u8, @"b"u8),
+        new(@"a\b\"u8, @"a"u8, @"b"u8),
+        new(@"a\b\c"u8, @"a\b"u8, @"c"u8),
+        new(@"\a"u8, @"\"u8, @"a"u8),
+        new(@"\a\"u8, @"\"u8, @"a"u8),
+        new(@"\a\b"u8, @"\a"u8, @"b"u8),
+        new(@"\a\b\"u8, @"\a"u8, @"b"u8),
+        new(@"\a\b\c"u8, @"\a\b"u8, @"c"u8),
+        new(@"\\a"u8, @"\\a"u8, @"."u8),
+        new(@"\\a\"u8, @"\\a\"u8, @"."u8),
+        new(@"\\\a"u8, @"\\\a"u8, @"."u8),
+        new(@"\\\a\"u8, @"\\\a"u8, @"."u8),
+        new(@"\\a\b\c"u8, @"\\a\b"u8, @"c"u8),
+        new(@"c:"u8, @"c:"u8, @"."u8),
+        new(@"c:\"u8, @"c:\"u8, @"."u8),
+        new(@"c:\a"u8, @"c:\"u8, @"a"u8),
+        new(@"c:a"u8, @"c:"u8, @"a"u8),
+        new(@"c:a\b\"u8, @"c:a"u8, @"b"u8),
+        new(@"c:base"u8, @"c:"u8, @"base"u8),
+        new(@"a/b/c"u8, @"a/b"u8, @"c"u8),
+        new(@"a/b/c/"u8, @"a/b"u8, @"c"u8),
+        new(@"\\?\c:\a"u8, @"\\?\c:\"u8, @"a"u8)
+    }.slice()) {
+        {
+            var (dir, @base) = os_internal_test_package.SplitPath(tt.path); if (dir != tt.wantDir || @base != tt.wantBase) {
+                Ꮡt.Errorf("splitPath(%q) = %q, %q, want %q, %q"u8, tt.path, dir, @base, tt.wantDir, tt.wantBase);
+            }
+        }
+    }
+}
+
+internal partial struct TestOpenFileFlags_tests /*dyn*/ {
+    internal uint32 flag;
+    internal uint32 wantMode;
+}
+
+public static void TestOpenFileFlags(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+
+    // The only way to retrieve some of the flags passed in CreateFile
+    // is using NtQueryInformationFile, which returns the file flags
+    // NT equivalent. Note that FILE_SYNCHRONOUS_IO_NONALERT is always
+    // set when FILE_FLAG_OVERLAPPED is not passed.
+    // The flags that can't be retrieved using NtQueryInformationFile won't
+    // be tested in here, but we at least know that the logic to handle them is correct.
+    var tests = new TestOpenFileFlags_tests[]{
+        new(0, windows.FILE_SYNCHRONOUS_IO_NONALERT),
+        new(windows.O_FILE_FLAG_OVERLAPPED, 0),
+        new(windows.O_FILE_FLAG_NO_BUFFERING, (uint32)((uint32)windows.FILE_NO_INTERMEDIATE_BUFFERING | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT)),
+        new((uint32)((uint32)windows.O_FILE_FLAG_NO_BUFFERING | (uint32)windows.O_FILE_FLAG_OVERLAPPED), windows.FILE_NO_INTERMEDIATE_BUFFERING),
+        new(windows.O_FILE_FLAG_SEQUENTIAL_SCAN, (uint32)((uint32)windows.FILE_SEQUENTIAL_ONLY | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT)),
+        new(windows.O_FILE_FLAG_WRITE_THROUGH, (uint32)((uint32)windows.FILE_WRITE_THROUGH | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT))
+    }.slice();
+    foreach (var (i, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestOpenFileFlags_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(strconv.Itoa(i), (ж<Δtesting.T> tΔ1) => {
+            GoFrame ᒐ = default;
+            try {
+                tΔ1.Parallel();
+                var (f, err) = Δos.OpenFile(filepath.Join(tΔ1.TempDir(), testTxtˢ), (nint)((nint)(nint)((nint)syscall.O_RDWR | (nint)syscall.O_CREAT) | (nint)ttʗ1.flag), 438);
+                if (err != default!) {
+                    tΔ1.Fatal(err);
+                }
+                var fʗ1 = f;
+                defer(() => fʗ1.Close(), ref ᒐ);
+                ref var info = ref heap(new windows.FILE_MODE_INFORMATION(), out var Ꮡinfo);
+                {
+                    var errΔ1 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK(nil)),
+                        @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ1 != default!) {
+                        tΔ1.Fatal(errΔ1);
+                    }
+                }
+                if (info.Mode != ttʗ1.wantMode) {
+                    tΔ1.Errorf("file mode = 0x%x; want 0x%x"u8, info.Mode, ttʗ1.wantMode);
+                }
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+    }
+}
+
+public static void TestOpenFileDeleteOnClose(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = filepath.Join(Ꮡt.TempDir(), testTxtˢ);
+    var (f, err) = Δos.OpenFile(name, (nint)((nint)(UntypedInt)(syscall.O_RDWR | syscall.O_CREAT) | (nint)windows.O_FILE_FLAG_DELETE_ON_CLOSE), 438);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    {
+        var errΔ1 = f.Close(); if (errΔ1 != default!) {
+            Ꮡt.Fatal(errΔ1);
+        }
+    }
+    // The file should be deleted after closing.
+    {
+        var (_, errΔ2) = Δos.Stat(name); if (!errors.Is(errΔ2, Δos.ErrNotExist)) {
+            Ꮡt.Errorf("expected file to be deleted, got %v"u8, errΔ2);
+        }
+    }
+}
+
+public static void TestOpenFileFlagInvalid(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    // invalidFileFlag is the only value in the file flag range that is not supported,
+    // as it is not defined in the Windows API.
+    UntypedInt invalidFileFlag = 0x00400000;
+    var (f, err) = Δos.OpenFile(filepath.Join(Ꮡt.TempDir(), testTxtˢ), (nint)((nint)(UntypedInt)(syscall.O_RDWR | syscall.O_CREAT) | (nint)invalidFileFlag), 438);
+    if (!errors.Is(err, Δos.ErrInvalid)) {
+        Ꮡt.Fatalf("expected os.ErrInvalid, got %v"u8, err);
+    }
+    f.Close();
+}
+
+public static void TestOpenFileTruncateNamedPipe(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        Ꮡt.Parallel();
+        @string name = pipeName();
+        var pipe = newBytePipe(new os_test_package.testing_TжTB(Ꮡt), name, false);
+        var pipeʗ1 = pipe;
+        defer(() => pipeʗ1.Close(), ref ᒐ);
+
+        var (f, err) = Δos.OpenFile(name, (nint)((nint)(nint)(Δos.O_TRUNC | Δos.O_RDWR) | Δos.O_CREATE), 438);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        f.Close();
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object newFileReturnedNilˢ = (@string)"NewFile returned nil"u8;
+
+internal partial struct TestFileKeepsCompletionNotificationModes_type /*dyn*/ {
+    internal @string name;
+    internal uint8 modes;
+}
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string wantᶜ = "hello"u8;
+
+public static void TestFileKeepsCompletionNotificationModes(ж<Δtesting.T> Ꮡt) {
+    // NewFile must preserve completion notification modes and perform I/O
+    // correctly with each combination. See go.dev/issue/80979.
+    Ꮡt.Parallel();
+    foreach (var (_, vᴛ1) in new TestFileKeepsCompletionNotificationModes_type[]{
+        new("none"u8, 0),
+        new("skipSuccess"u8, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS),
+        new("skipEvent"u8, syscall.FILE_SKIP_SET_EVENT_ON_HANDLE),
+        new("both"u8, (uint8)((uint8)syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS | (uint8)syscall.FILE_SKIP_SET_EVENT_ON_HANDLE))
+    }.slice()) {
+        ref var tt = ref heap(new TestFileKeepsCompletionNotificationModes_type(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+            GoFrame ᒐ = default;
+            try {
+                tΔ1.Parallel();
+                @string name = filepath.Join(tΔ1.TempDir(), fileˢ2);
+                var (namep, err) = syscall.UTF16PtrFromString(name);
+                if (err != default!) {
+                    tΔ1.Fatal(err);
+                }
+                (var h, err) = syscall.CreateFile(namep, (uint32)((uint32)syscall.GENERIC_READ | (uint32)syscall.GENERIC_WRITE),
+                    0, nil, syscall.CREATE_ALWAYS, syscall.FILE_FLAG_OVERLAPPED, 0);
+                if (err != default!) {
+                    tΔ1.Fatal(err);
+                }
+                {
+                    var errΔ1 = syscall.SetFileCompletionNotificationModes(h, ttʗ1.modes); if (errΔ1 != default!) {
+                        syscall.CloseHandle(h);
+                        tΔ1.Fatal(errΔ1);
+                    }
+                }
+                var f = Δos.NewFile((uintptr)h, name);
+                if (f == nil) {
+                    syscall.CloseHandle(h);
+                    tΔ1.Fatal(newFileReturnedNilˢ);
+                }
+                var fʗ1 = f;
+                defer(() => fʗ1.Close(), ref ᒐ);
+
+                // Query h directly: calling f.Fd would disassociate it from the poller.
+                ref var info = ref heap(new windows.FILE_IO_COMPLETION_NOTIFICATION_INFORMATION(), out var Ꮡinfo);
+                {
+                    var errΔ2 = windows.NtQueryInformationFile(h, Ꮡ(new windows.IO_STATUS_BLOCK(nil)),
+                        @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileIoCompletionNotificationInformation); if (errΔ2 != default!) {
+                        tΔ1.Fatal(errΔ2);
+                    }
+                }
+                if (info.Flags != (uint32)ttʗ1.modes) {
+                    tΔ1.Fatalf("completion modes = %#x; want %#x"u8, info.Flags, ttʗ1.modes);
+                }
+                // Check that NewFile has initialized the runtime poller.
+                {
+                    var errΔ3 = f.SetDeadline(new time.Time(nil)); if (errΔ3 != default!) {
+                        tΔ1.Fatal(errΔ3);
+                    }
+                }
+                @string want = wantᶜ;
+                {
+                    var (n, errΔ4) = f.Write(slice<byte>(want)); if (errΔ4 != default! || n != len(want)) {
+                        tΔ1.Fatalf("Write = %d, %v; want %d, nil"u8, n, errΔ4, len(want));
+                    }
+                }
+                var buf = new slice<byte>(len(want));
+                {
+                    var (n, errΔ5) = f.ReadAt(buf, 0); if (errΔ5 != default! || n != len(want)) {
+                        tΔ1.Fatalf("ReadAt = %d, %v; want %d, nil"u8, n, errΔ5, len(want));
+                    }
+                }
+                if (((sstring)buf) != want) {
+                    tΔ1.Fatalf("ReadAt returned %q; want %q"u8, buf, want);
+                }
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        });
+    }
+}
+
+public static void TestNewFileStdinBlocked(ж<Δtesting.T> Ꮡt) {
+    // See https://go.dev/issue/75949.
+    Ꮡt.Parallel();
+
+    // Use a subprocess to test that os.NewFile on a blocked stdin works.
+    // Can't do it in the same process because os.NewFile would close
+    // stdin for the whole test process once the test ends.
+    if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
+        // In the child process, just exit.
+        // If we get here, the os package successfully initialized.
+        Δos.Exit(0);
+    }
+    @string name = pipeName();
+    var stdin = newBytePipe(new os_test_package.testing_TжTB(Ꮡt), name, false);
+    var @file = newFileOverlapped(new os_test_package.testing_TжTB(Ꮡt), name, false);
+
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    var stdinʗ1 = stdin;
+    Ꮡwg.Go(() => {
+        // Block stdin on a read.
+        {
+            var (_, err) = stdinʗ1.Read(new slice<byte>(1)); if (err != default!) {
+                Ꮡt.Error(err);
+            }
+        }
+    });
+
+    time.Sleep(100 * time.Millisecond); // Give time for the read to start.
+    var cmd = testenv.CommandContext(new os_test_package.testing_TжTB(Ꮡt), Ꮡt.Context(), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), fmt.Sprintf("-test.run=^%s$"u8, Ꮡt.Name()));
+    cmd.Value.Env = cmd.Environ();
+    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Value.Stdin = new os_test_package.os_FileжReader(stdin);
+    {
+        var err = cmd.Run(); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+    // Unblock the read to let the goroutine exit.
+    {
+        var (_, err) = @file.Write(new slice<byte>(1)); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+    Ꮡwg.Wait(); // Don't leave goroutines behind.
 }
 
 } // end os_test_package

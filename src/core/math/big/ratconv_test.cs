@@ -156,6 +156,7 @@ internal static slice<StringTest> setStringTests2 = new StringTest[]{
     new("-0o10/1"u8, "-8"u8, true),
     new("0x10/1"u8, "16"u8, true),
     new("0x10/0x20"u8, "1/2"u8, true),
+
     new("0010"u8, "10"u8, true), // 0-prefix is ignored in this case (not a fraction)
     new("0x10.0"u8, "16"u8, true),
     new("0x1.8"u8, "3/2"u8, true),
@@ -173,6 +174,7 @@ internal static slice<StringTest> setStringTests2 = new StringTest[]{
     new("0xdead/0B1101_1110_1010_1101"u8, "1"u8, true),
     new("0B1101_1110_1010_1101/0XD_E_A_D"u8, "1"u8, true),
     new("1_000.0"u8, "1000"u8, true),
+
     new("0x_10.0"u8, "16"u8, true),
     new("0x1_0.0"u8, "16"u8, true),
     new("0x1.8_0"u8, "3/2"u8, true),
@@ -355,6 +357,7 @@ internal static slice<@string> float64inputs = new @string[]{
     "459926601011e+15"u8,
 
     // Constants plundered from strconv/atof_test.go.
+
     "0"u8,
     "1"u8,
     "+1"u8,
@@ -461,10 +464,12 @@ internal static slice<@string> float64inputs = new @string[]{
     // The exact halfway between smallest normal and largest denormal:
     // 2^-1022 - 2^-1075.  (Rounds to 2^-1022.)
     "2.225073858507201136057409796709131975935e-308"u8,
+
     "1152921504606846975"u8, //   1<<60 - 1
     "-1152921504606846975"u8, // -(1<<60 - 1)
     "1152921504606846977"u8, //   1<<60 + 1
     "-1152921504606846977"u8, // -(1<<60 + 1)
+
     "1/3"u8
 }.slice();
 
@@ -637,6 +642,7 @@ public static void TestIssue45910(ж<testing.T> Ꮡt) {
         new("1e-1000000"u8, true),
         new("1e+1000000"u8, true),
         new("1e+1000001"u8, false),
+
         new("0p1000000000000"u8, true),
         new("1p-10000001"u8, false),
         new("1p-10000000"u8, true),
@@ -684,6 +690,7 @@ public static void TestFloatPrec(ж<testing.T> Ꮡt) {
         new("1/14"u8, 1, false, "0.1"u8), // 0.0(714285)
         new("1/15"u8, 1, false, "0.1"u8), // 0.0(6)
         new("1/16"u8, 4, true, "0.0625"u8), // 0.0625
+
         new("10/2"u8, 0, true, "5"u8), // 5
         new("10/3"u8, 0, false, "3"u8), // 3.(3)
         new("10/6"u8, 0, false, "2"u8), // 1.(6)

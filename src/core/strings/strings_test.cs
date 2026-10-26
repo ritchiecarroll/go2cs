@@ -5,6 +5,7 @@ namespace go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
+using asan = @internal.asan_package;
 using Δio = io_package;
 using iter = iter_package;
 using Δmath = math_package;
@@ -16,6 +17,7 @@ using testing = testing_package;
 using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
+using @internal;
 using go.math;
 using go.unicode;
 using static go.strings_internal_test_package;
@@ -310,10 +312,10 @@ public static void TestIndexRandom(ж<testing.T> Ꮡt) {
     for (nint times = 0; times < 10; times++) {
         for (nint strLen = 5 + rand.Intn(5); strLen < 140; strLen += 10) { // Arbitrary
             var s1 = new slice<byte>(strLen);
-            foreach (var (i, _) in s1) {
+            foreach (var i in range(s1)) {
                 s1[i] = chars[rand.Intn(len(chars))];
             }
-            @string s = ((@string)s1);
+            @string s = (@string)s1;
             for (nint i = 0; i < 50; i++) {
                 nint begin = rand.Intn(len(s) + 1);
                 nint end = begin + rand.Intn(len(s) + 1 - begin);
@@ -734,10 +736,10 @@ internal static slice<StringTest> trimSpaceTests = new StringTest[]{
 
 internal static @string tenRunes(rune ch) {
     var r = new slice<rune>(10);
-    foreach (var (i, _) in r) {
+    foreach (var i in range(r)) {
         r[i] = ch;
     }
-    return ((@string)r);
+    return (@string)r;
 }
 
 // User-defined self-inverse mapping function
@@ -765,7 +767,7 @@ internal static readonly @string abc123ˢ2 = "abc123"u8;
 public static void TestMap(ж<testing.T> Ꮡt) {
     // Run a couple of awful growth/shrinkage tests
     @string a = tenRunes((rune)'a');
-    // 1.  Grow. This triggers two reallocations in Map.
+    // 1. Grow. This triggers two reallocations in Map.
     var maxRune = rune (rune _) => Δunicode.MaxRune;
     @string m = Map(maxRune, a);
     @string expect = tenRunes(Δunicode.MaxRune);
@@ -1285,10 +1287,10 @@ public static void TestCaseConsistency(ж<testing.T> Ꮡt) {
         numRunes = 1000;
     }
     var a = new slice<rune>(numRunes);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = (rune)i;
     }
-    @string s = ((@string)a);
+    @string s = (@string)a;
     // convert the cases.
     @string upper = ToUpper(s);
     @string lower = ToLower(s);
@@ -1326,14 +1328,14 @@ public static void TestCaseConsistency(ж<testing.T> Ꮡt) {
 	*/
 }
 
-internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << (int)(16)))) + "z"u8;
+internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << 16))) + "z"u8;
 
 internal static @string longSpaces = ((Func<@string>)(() => {
     var b = new slice<byte>(200);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (rune)' ';
     }
-    return ((@string)b);
+    return (@string)b;
 }))();
 
 partial struct RepeatTestsᴛ1 /*dyn*/ {
@@ -1355,7 +1357,7 @@ public static slice<RepeatTestsᴛ1> RepeatTests = new RepeatTestsᴛ1[]{
     new("\t\t\t\t"u8, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"u8, 4),
     new(" "u8, longSpaces, len(longSpaces)),
     // Tests for results over the chunkLimit
-    new(((@string)(rune)0), ((@string)new slice<byte>((1 << (int)(16)))), (1 << (int)(16))),
+    new((@string)(rune)0, (@string)new slice<byte>((1 << 16)), 1 << 16),
     new(longString, longString + longString, 2)
 }.slice();
 
@@ -1436,7 +1438,7 @@ public static void TestRepeatCatchesOverflow(ж<testing.T> Ꮡt) {
         [3] = new("gopher"u8, 0, ""u8),
         [4] = new("-"u8, -1, "negative"u8),
         [5] = new("--"u8, -102, "negative"u8),
-        [6] = new(((@string)new slice<byte>(255)), (nint)((~(nuint)0) / 255 + 1), "overflow"u8)
+        [6] = new((@string)new slice<byte>(255), (nint)((~(nuint)0) / 255 + 1), "overflow"u8)
     });
 
     const bool is64Bit = /* 1<<(^uintptr(0)>>63)/2 != 0 */ true;
@@ -1485,7 +1487,7 @@ public static void TestRunes(ж<testing.T> Ꮡt) {
         }
         if (!tt.lossy) {
             // can only test reassembly if we didn't lose information
-            @string s = ((@string)a);
+            @string s = (@string)a;
             if (s != tt.@in) {
                 Ꮡt.Errorf("string([]rune(%q)) = %x; want %x"u8, tt.@in, s, tt.@in);
             }
@@ -1649,7 +1651,19 @@ public static slice<ReplaceTestsᴛ1> ReplaceTests = new ReplaceTestsᴛ1[]{
 }.slice();
 
 public static void TestReplace(ж<testing.T> Ꮡt) {
-    foreach (var (_, tt) in ReplaceTests) {
+    foreach (var (_, vᴛ1) in ReplaceTests) {
+        ref var tt = ref heap(new ReplaceTestsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        if (!asan.Enabled) { // See issue #72973.
+            var ttʗ1 = tt;
+            var allocs = testing.AllocsPerRun(10, () => {
+                Replace(ttʗ1.@in, ttʗ1.old, ttʗ1.@new, ttʗ1.n);
+            });
+            if (allocs > 1D) {
+                Ꮡt.Errorf("Replace(%q, %q, %q, %d) allocates %.2f objects"u8, tt.@in, tt.old, tt.@new, tt.n, allocs);
+            }
+        }
         {
             @string s = Replace(tt.@in, tt.old, tt.@new, tt.n); if (s != tt.@out) {
                 Ꮡt.Errorf("Replace(%q, %q, %q, %d) = %q, want %q"u8, tt.@in, tt.old, tt.@new, tt.n, s, tt.@out);
@@ -1661,6 +1675,73 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("ReplaceAll(%q, %q, %q) = %q, want %q"u8, tt.@in, tt.old, tt.@new, s, tt.@out);
             }
         }
+    }
+}
+
+public static void FuzzReplace(ж<testing.F> Ꮡf) {
+    ref var f = ref Ꮡf.DerefOrNull();
+
+    foreach (var (_, tt) in ReplaceTests) {
+        f.Add(tt.@in, tt.old, tt.@new, tt.n);
+    }
+    Ꮡf.Fuzz((ж<testing.T> t, @string @in, @string old, @string @new, nint n) => {
+        @string differentImpl(@string inΔ1, @string oldΔ1, @string newΔ1, nint nΔ1) {
+            ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
+            if (nΔ1 < 0) {
+                nΔ1 = Δmath.MaxInt;
+            }
+            for (nint i = 0; i < len(inΔ1); ) {
+                if (nΔ1 == 0) {
+                    Ꮡout.WriteString(inΔ1.slice(i));
+                    break;
+                }
+                if (HasPrefix(inΔ1.slice(i), oldΔ1)) {
+                    Ꮡout.WriteString(newΔ1);
+                    i += len(oldΔ1);
+                    nΔ1--;
+                    if (len(oldΔ1) != 0) {
+                        continue;
+                    }
+                    if (i == len(inΔ1)) {
+                        break;
+                    }
+                }
+                if (len(oldΔ1) == 0){
+                    var (_, length) = utf8.DecodeRuneInString(inΔ1.slice(i));
+                    Ꮡout.WriteString(inΔ1.slice(i, i + length));
+                    i += length;
+                } else {
+                    Ꮡout.WriteByte(inΔ1[i]);
+                    i++;
+                }
+            }
+            if (len(oldΔ1) == 0 && nΔ1 != 0) {
+                Ꮡout.WriteString(newΔ1);
+            }
+            return @out.String();
+        }
+        {
+            @string simple = differentImpl(@in, old, @new, n);
+            @string replace = Replace(@in, old, @new, n); if (simple != replace) {
+                t.Errorf("The two implementations do not match %q != %q for Replace(%q, %q, %q, %d)"u8, simple, replace, @in, old, @new, n);
+            }
+        }
+    });
+}
+
+public static void BenchmarkReplace(ж<testing.B> Ꮡb) {
+    foreach (var (_, vᴛ1) in ReplaceTests) {
+        ref var tt = ref heap(new ReplaceTestsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        @string desc = fmt.Sprintf("%q %q %q %d"u8, tt.@in, tt.old, tt.@new, tt.n);
+        var ttʗ1 = tt;
+        Ꮡb.Run(desc, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            while (bΔ1.Loop()) {
+                Replace(ttʗ1.@in, ttʗ1.old, ttʗ1.@new, ttʗ1.n);
+            }
+        });
     }
 }
 
@@ -2026,15 +2107,16 @@ internal static @string makeBenchInputHard() {
         "</a>"u8, "</p>"u8, "</b>"u8, "</strong>"u8,
         "hello"u8, "world"u8
     }.array();
-    var x = new slice<byte>(0, (1 << (int)(20)));
+    var x = new slice<byte>(0, (1 << 20));
+    var r = rand.New(rand.NewSource(99));
     while (ᐧ) {
-        nint i = rand.Intn(len(tokens));
-        if (len(x) + len(tokens[i]) >= (1 << (int)(20))) {
+        nint i = r.Intn(len(tokens));
+        if (len(x) + len(tokens[i]) >= 1 << 20) {
             break;
         }
         x = append(x, tokens[i].ꓸꓸꓸ);
     }
-    return ((@string)x);
+    return (@string)x;
 }
 
 internal static @string benchInputHard = makeBenchInputHard();
@@ -2112,9 +2194,9 @@ public static void BenchmarkCountHard3(ж<testing.B> Ꮡb) {
     benchmarkCountHard(Ꮡb, bHelloWorldBˢ);
 }
 
-internal static @string benchInputTorture = Repeat("ABC"u8, (1 << (int)(10))) + "123"u8 + Repeat("ABC"u8, (1 << (int)(10)));
+internal static @string benchInputTorture = Repeat("ABC"u8, 1 << 10) + "123"u8 + Repeat("ABC"u8, 1 << 10);
 
-internal static @string benchNeedleTorture = Repeat("ABC"u8, (1 << (int)(10)) + 1);
+internal static @string benchNeedleTorture = Repeat("ABC"u8, (1 << 10) + 1);
 
 public static void BenchmarkIndexTorture(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -2138,15 +2220,15 @@ internal static readonly @string abcˢ2 = "ABC"u8;
 public static void BenchmarkCountTortureOverlapping(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string A = Repeat(abcˢ2, (1 << (int)(20)));
-    @string B = Repeat(abcˢ2, (1 << (int)(10)));
+    @string A = Repeat(abcˢ2, 1 << 20);
+    @string B = Repeat(abcˢ2, 1 << 10);
     for (nint i = 0; i < b.N; i++) {
         Count(A, B);
     }
 }
 
 public static void BenchmarkCountByte(ж<testing.B> Ꮡb) {
-    var indexSizes = new nint[]{10, 32, (4 << (int)(10)), (4 << (int)(20)), (64 << (int)(20))}.slice();
+    var indexSizes = new nint[]{10, 32, 4 << 10, 4 << 20, 64 << 20}.slice();
     @string benchStr = Repeat(benchmarkString,
         (indexSizes[len(indexSizes) - 1] + len(benchmarkString) - 1) / len(benchmarkString));
     void benchFunc(ж<testing.B> bΔ1, @string benchStrΔ1) {
@@ -2164,10 +2246,11 @@ public static void BenchmarkCountByte(ж<testing.B> Ꮡb) {
 }
 
 internal static Func<@string> makeFieldsInput = () => {
-    var x = new slice<byte>((1 << (int)(20)));
+    var x = new slice<byte>((1 << 20));
     // Input is ~10% space, ~10% 2-byte UTF-8, rest ASCII non-space.
-    foreach (var (i, _) in x) {
-        var exprᴛ1 = rand.Intn(10);
+    var r = rand.New(rand.NewSource(99));
+    foreach (var i in range(x)) {
+        var exprᴛ1 = r.Intn(10);
         var matchᴛ1 = false;
         if (exprᴛ1 is 0) { matchᴛ1 = true;
             x[i] = (rune)' ';
@@ -2185,20 +2268,21 @@ internal static Func<@string> makeFieldsInput = () => {
             x[i] = (rune)'x';
         }
     }
-    return ((@string)x);
+    return (@string)x;
 };
 
 internal static Func<@string> makeFieldsInputASCII = () => {
-    var x = new slice<byte>((1 << (int)(20)));
+    var x = new slice<byte>((1 << 20));
     // Input is ~10% space, rest ASCII non-space.
-    foreach (var (i, _) in x) {
-        if (rand.Intn(10) == 0){
+    var r = rand.New(rand.NewSource(99));
+    foreach (var i in range(x)) {
+        if (r.Intn(10) == 0){
             x[i] = (rune)' ';
         } else {
             x[i] = (rune)'x';
         }
     }
-    return ((@string)x);
+    return (@string)x;
 };
 
 internal static slice<mapdataᴛ1> stringdata = new mapdataᴛ1[]{
@@ -2213,7 +2297,7 @@ public static void BenchmarkFields(ж<testing.B> Ꮡb) {
 
         var sdʗ1 = sd;
         Ꮡb.Run(sd.name, (ж<testing.B> bΔ1) => {
-            for (nint jᴛ1 = (1 << (int)(4)); jᴛ1 <= (1 << (int)(20)); jᴛ1 <<= (int)(4)) {
+            for (nint jᴛ1 = 1 << 4; jᴛ1 <= 1 << 20; jᴛ1 <<= (int)(4)) {
                 var j = jᴛ1;
                 var sdʗ2 = sdʗ1;
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
@@ -2236,7 +2320,7 @@ public static void BenchmarkFieldsFunc(ж<testing.B> Ꮡb) {
 
         var sdʗ1 = sd;
         Ꮡb.Run(sd.name, (ж<testing.B> bΔ1) => {
-            for (nint jᴛ1 = (1 << (int)(4)); jᴛ1 <= (1 << (int)(20)); jᴛ1 <<= (int)(4)) {
+            for (nint jᴛ1 = 1 << 4; jᴛ1 <= 1 << 20; jᴛ1 <<= (int)(4)) {
                 var j = jᴛ1;
                 var sdʗ2 = sdʗ1;
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
@@ -2432,7 +2516,7 @@ public static void BenchmarkIndexPeriodic(ж<testing.B> Ꮡb) {
     @string key = "aa"u8;
     foreach (var (_, skip) in new nint[]{2, 4, 8, 16, 32, 64}.array()) {
         Ꮡb.Run(fmt.Sprintf("IndexPeriodic%d"u8, skip), (ж<testing.B> bΔ1) => {
-            @string s = Repeat("a"u8 + Repeat(" "u8, skip - 1), (1 << (int)(16)) / skip);
+            @string s = Repeat("a"u8 + Repeat(" "u8, skip - 1), (1 << 16) / skip);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Index(s, key);
             }

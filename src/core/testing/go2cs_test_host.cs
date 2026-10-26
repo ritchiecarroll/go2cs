@@ -36,6 +36,7 @@ internal static class Go2CsTestHost
             "testing_windows_test.go",
         }, new string[]
         {
+            "cryptotest",
             "fstest",
             "internal",
             "iotest",
@@ -44,31 +45,45 @@ internal static class Go2CsTestHost
             "synctest",
         });
         registry.Add("TestAllocsPerRun", testing_test_package.TestAllocsPerRun, "allocs_test.go", 23);
-        registry.Add("TestBenchmarkRaceBLoop", testing_test_package.TestBenchmarkRaceBLoop, "testing_test.go", 703);
-        registry.Add("TestCallRunInCleanupHelper", testing_test_package.TestCallRunInCleanupHelper, "panic_test.go", 247);
-        registry.Add("TestChdir", testing_test_package.TestChdir, "testing_test.go", 289);
-        registry.Add("TestChdirWithParallelAfter", testing_test_package.TestChdirWithParallelAfter, "testing_test.go", 273);
-        registry.Add("TestChdirWithParallelBefore", testing_test_package.TestChdirWithParallelBefore, "testing_test.go", 277);
-        registry.Add("TestChdirWithParallelGrandParentBefore", testing_test_package.TestChdirWithParallelGrandParentBefore, "testing_test.go", 285);
-        registry.Add("TestChdirWithParallelParentBefore", testing_test_package.TestChdirWithParallelParentBefore, "testing_test.go", 281);
-        registry.Add("TestConcurrentRun", testing_test_package.TestConcurrentRun, "testing_test.go", 919);
-        registry.Add("TestContext", testing_test_package.TestContext, "testing_test.go", 951);
+        registry.Add("TestArtifactDir", testing_test_package.TestArtifactDir, "testing_test.go", 1214);
+        registry.Add("TestArtifactDirConsistent", testing_test_package.TestArtifactDirConsistent, "testing_test.go", 1118);
+        registry.Add("TestArtifactDirDefault", testing_test_package.TestArtifactDirDefault, "testing_test.go", 1065);
+        registry.Add("TestArtifactDirExample", testing_test_package.TestArtifactDirExample, "testing_test.go", 1061);
+        registry.Add("TestArtifactDirInSubtest", testing_test_package.TestArtifactDirInSubtest, "testing_test.go", 1099);
+        registry.Add("TestArtifactDirLongTestNameExample", testing_test_package.TestArtifactDirLongTestNameExample, "testing_test.go", 1105);
+        registry.Add("TestArtifactDirNoArtifacts", testing_test_package.TestArtifactDirNoArtifacts, "testing_test.go", 1078);
+        registry.Add("TestArtifactDirSpecified", testing_test_package.TestArtifactDirSpecified, "testing_test.go", 1072);
+        registry.Add("TestArtifactDirSubtestExample", testing_test_package.TestArtifactDirSubtestExample, "testing_test.go", 1093);
+        registry.Add("TestArtifactDirWithLongTestName", testing_test_package.TestArtifactDirWithLongTestName, "testing_test.go", 1112);
+        registry.Add("TestAttrExample", testing_test_package.TestAttrExample, "testing_test.go", 1014);
+        registry.Add("TestAttrInvalid", testing_test_package.TestAttrInvalid, "testing_test.go", 1027);
+        registry.Add("TestAttrSet", testing_test_package.TestAttrSet, "testing_test.go", 1018);
+        registry.Add("TestBenchmarkRaceBLoop", testing_test_package.TestBenchmarkRaceBLoop, "testing_test.go", 738);
+        registry.Add("TestCallRunInCleanupHelper", testing_test_package.TestCallRunInCleanupHelper, "panic_test.go", 265);
+        registry.Add("TestChdir", testing_test_package.TestChdir, "testing_test.go", 323);
+        registry.Add("TestChdirWithParallelAfter", testing_test_package.TestChdirWithParallelAfter, "testing_test.go", 307);
+        registry.Add("TestChdirWithParallelBefore", testing_test_package.TestChdirWithParallelBefore, "testing_test.go", 311);
+        registry.Add("TestChdirWithParallelGrandParentBefore", testing_test_package.TestChdirWithParallelGrandParentBefore, "testing_test.go", 319);
+        registry.Add("TestChdirWithParallelParentBefore", testing_test_package.TestChdirWithParallelParentBefore, "testing_test.go", 315);
+        registry.Add("TestConcurrentRun", testing_test_package.TestConcurrentRun, "testing_test.go", 954);
+        registry.Add("TestContext", testing_test_package.TestContext, "testing_test.go", 986);
         registry.Add("TestFlag", testing_test_package.TestFlag, "flag_test.go", 19);
-        registry.Add("TestGoexitInCleanupAfterPanicHelper", testing_test_package.TestGoexitInCleanupAfterPanicHelper, "panic_test.go", 259);
-        registry.Add("TestMorePanic", testing_test_package.TestMorePanic, "panic_test.go", 213);
+        registry.Add("TestGoexitInCleanupAfterPanicHelper", testing_test_package.TestGoexitInCleanupAfterPanicHelper, "panic_test.go", 277);
+        registry.Add("TestMorePanic", testing_test_package.TestMorePanic, "panic_test.go", 231);
         registry.Add("TestPanic", testing_test_package.TestPanic, "panic_test.go", 24);
-        registry.Add("TestPanicHelper", testing_test_package.TestPanicHelper, "panic_test.go", 163);
-        registry.Add("TestParentRun", testing_test_package.TestParentRun, "testing_test.go", 939);
-        registry.Add("TestSetenv", testing_test_package.TestSetenv, "testing_test.go", 149);
-        registry.Add("TestSetenvWithParallelAfter", testing_test_package.TestSetenvWithParallelAfter, "testing_test.go", 253);
-        registry.Add("TestSetenvWithParallelBefore", testing_test_package.TestSetenvWithParallelBefore, "testing_test.go", 257);
-        registry.Add("TestSetenvWithParallelGrandParentBefore", testing_test_package.TestSetenvWithParallelGrandParentBefore, "testing_test.go", 265);
-        registry.Add("TestSetenvWithParallelParentBefore", testing_test_package.TestSetenvWithParallelParentBefore, "testing_test.go", 261);
+        registry.Add("TestPanicHelper", testing_test_package.TestPanicHelper, "panic_test.go", 180);
+        registry.Add("TestParentRun", testing_test_package.TestParentRun, "testing_test.go", 974);
+        registry.Add("TestSetenv", testing_test_package.TestSetenv, "testing_test.go", 183);
+        registry.Add("TestSetenvWithParallelAfter", testing_test_package.TestSetenvWithParallelAfter, "testing_test.go", 287);
+        registry.Add("TestSetenvWithParallelBefore", testing_test_package.TestSetenvWithParallelBefore, "testing_test.go", 291);
+        registry.Add("TestSetenvWithParallelGrandParentBefore", testing_test_package.TestSetenvWithParallelGrandParentBefore, "testing_test.go", 299);
+        registry.Add("TestSetenvWithParallelParentBefore", testing_test_package.TestSetenvWithParallelParentBefore, "testing_test.go", 295);
         registry.Add("TestTBHelper", testing_test_package.TestTBHelper, "helper_test.go", 15);
         registry.Add("TestTBHelperParallel", testing_test_package.TestTBHelperParallel, "helper_test.go", 57);
         registry.Add("TestTempDir", testing_test_package.TestTempDir, "testing_test.go", 81);
+        registry.Add("TestTempDirGOTMPDIR", testing_test_package.TestTempDirGOTMPDIR, "testing_test.go", 150);
         registry.Add("TestTempDirInCleanup", testing_test_package.TestTempDirInCleanup, "testing_test.go", 49);
-        registry.Add("TestTesting", testing_test_package.TestTesting, "testing_test.go", 403);
+        registry.Add("TestTesting", testing_test_package.TestTesting, "testing_test.go", 437);
         registry.SetTestMain(testing_test_package.TestMain);
         return TestHost.Run(registry, args);
     }

@@ -1,0 +1,12 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s
+time	PASS	178	194	1	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	194	0
+crypto/internal/fips140/mlkem	PASS	11	42	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	42	0
+crypto/mlkem	PASS	8	30	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	30	0
+hash/maphash	PASS	66	155	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	155	0
+archive/zip	PASS	101	45	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	45	0
+crypto/dsa	PASS	4	40	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	40	0
+sync/atomic	PASS	108	83	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	83	0
+index/suffixarray	PASS	12	122	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	122	0
+go/parser	PASS	183	144	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	144	0
+runtime	PASS	11080	1320	0	0	0	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	1320	1
+net	DIVERGED	505	1513	0	1	1	windows/amd64	f8fe15c97e8c8d10ad18328ccd48a56ab47b9e38	1513	0

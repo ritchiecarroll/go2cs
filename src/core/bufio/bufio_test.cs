@@ -607,7 +607,7 @@ public static void TestUnreadRuneError(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Error(unexpectedErrorOnˢ7, err);
     }
-    foreach ((_, _) in buf) {
+    foreach (var _ᴛ1 in range(buf)) {
         (_, err) = r.ReadByte();
         if (err != default!) {
             Ꮡt.Error(unexpectedErrorOnˢ8, err);
@@ -1317,7 +1317,7 @@ internal static void testReadLineNewlines(ж<Δtesting.T> Ꮡt, @string input, s
 
 internal static slice<byte> createTestInput(nint n) {
     var input = new slice<byte>(n);
-    foreach (var (i, _) in input) {
+    foreach (var i in range(input)) {
         // 101 and 251 are arbitrary prime numbers.
         // The idea is to create an input sequence
         // which doesn't repeat too frequently.
@@ -1363,7 +1363,7 @@ internal static (nint, error) Write(this errorWriterToTest w, slice<byte> p) {
 internal static slice<errorWriterToTest> errorWriterToTests = new errorWriterToTest[]{
     new(1, 0, default!, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
     new(0, 1, Δio.ErrClosedPipe, default!, Δio.ErrClosedPipe),
-    new(0, 0, Δio.ErrUnexpectedEOF, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
+    new(0, 0, Δio.ErrUnexpectedEOF, Δio.ErrClosedPipe, Δio.ErrUnexpectedEOF),
     new(0, 1, Δio.EOF, default!, default!)
 }.slice();
 
@@ -1760,7 +1760,7 @@ internal static readonly @string barBarˢ = "bar bar"u8;
 internal static readonly @string recurˢ = "recur"u8;
 internal static readonly @string recur2ˢ = "recur2"u8;
 
-public static void TestReaderReset(ж<Δtesting.T> Ꮡt) {
+public static partial void TestReaderReset(ж<Δtesting.T> Ꮡt) {
     void checkAll(ж<bufio.Reader> rΔ1, @string want) {
         Ꮡt.Helper();
         var (all, err) = Δio.ReadAll(new bufio_test_package.bufio_ReaderжReader(rΔ1));

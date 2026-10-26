@@ -9,96 +9,58 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("strconv", new string[]
         {
-            "atob.go",
-            "atob_test.go",
-            "atoc.go",
-            "atoc_test.go",
-            "atof.go",
-            "atof_test.go",
-            "atoi.go",
-            "atoi_test.go",
             "bytealg.go",
             "bytealg_bootstrap.go",
-            "ctoa.go",
-            "ctoa_test.go",
-            "decimal.go",
-            "decimal_test.go",
             "doc.go",
-            "eisel_lemire.go",
             "example_test.go",
             "export_test.go",
-            "fp_test.go",
-            "ftoa.go",
-            "ftoa_test.go",
-            "ftoaryu.go",
-            "ftoaryu_test.go",
-            "internal_test.go",
+            "import_test.go",
             "isprint.go",
-            "itoa.go",
-            "itoa_test.go",
             "makeisprint.go",
+            "number.go",
+            "number_test.go",
             "quote.go",
             "quote_test.go",
             "strconv_test.go",
-            "testdata/testfp.txt",
-        }, new string[]
-        {
-            "testdata",
         });
         registry.Add("TestAllocationsFromBytes", strconv_test_package.TestAllocationsFromBytes, "strconv_test.go", 81);
-        registry.Add("TestAppendBool", strconv_test_package.TestAppendBool, "atob_test.go", 84);
-        registry.Add("TestAtof", strconv_test_package.TestAtof, "atof_test.go", 553);
-        registry.Add("TestAtofRandom", strconv_test_package.TestAtofRandom, "atof_test.go", 557);
-        registry.Add("TestAtofSlow", strconv_test_package.TestAtofSlow, "atof_test.go", 555);
-        registry.Add("TestAtoi", strconv_test_package.TestAtoi, "atoi_test.go", 472);
+        registry.Add("TestAppendBool", strconv_test_package.TestAppendBool, "number_test.go", 83);
+        registry.Add("TestAtof", strconv_test_package.TestAtof, "number_test.go", 348);
+        registry.Add("TestAtoi", strconv_test_package.TestAtoi, "number_test.go", 646);
         registry.Add("TestCanBackquote", strconv_test_package.TestCanBackquote, "quote_test.go", 230);
         registry.Add("TestCountMallocs", strconv_test_package.TestCountMallocs, "strconv_test.go", 49);
-        registry.Add("TestDecimalRound", strconv_test_package.TestDecimalRound, "decimal_test.go", 70);
-        registry.Add("TestDecimalRoundedInteger", strconv_test_package.TestDecimalRoundedInteger, "decimal_test.go", 116);
-        registry.Add("TestDecimalShift", strconv_test_package.TestDecimalShift, "decimal_test.go", 32);
         registry.Add("TestErrorPrefixes", strconv_test_package.TestErrorPrefixes, "strconv_test.go", 131);
-        registry.Add("TestFormatBool", strconv_test_package.TestFormatBool, "atob_test.go", 65);
-        registry.Add("TestFormatComplex", strconv_test_package.TestFormatComplex, "ctoa_test.go", 12);
-        registry.Add("TestFormatComplexInvalidBitSize", strconv_test_package.TestFormatComplexInvalidBitSize, "ctoa_test.go", 46);
-        registry.Add("TestFormatFloatInvalidBitSize", strconv_test_package.TestFormatFloatInvalidBitSize, "ftoa_test.go", 249);
-        registry.Add("TestFormatUintVarlen", strconv_test_package.TestFormatUintVarlen, "itoa_test.go", 163);
-        registry.Add("TestFp", strconv_test_package.TestFp, "fp_test.go", 95);
-        registry.Add("TestFtoa", strconv_test_package.TestFtoa, "ftoa_test.go", 177);
-        registry.Add("TestFtoaPowersOfTwo", strconv_test_package.TestFtoaPowersOfTwo, "ftoa_test.go", 201);
-        registry.Add("TestFtoaRandom", strconv_test_package.TestFtoaRandom, "ftoa_test.go", 220);
+        registry.Add("TestFormatBool", strconv_test_package.TestFormatBool, "number_test.go", 64);
+        registry.Add("TestFormatComplex", strconv_test_package.TestFormatComplex, "number_test.go", 788);
+        registry.Add("TestFormatComplexInvalidBitSize", strconv_test_package.TestFormatComplexInvalidBitSize, "number_test.go", 822);
+        registry.Add("TestFormatUintVarlen", strconv_test_package.TestFormatUintVarlen, "number_test.go", 949);
         registry.Add("TestIsGraphic", strconv_test_package.TestIsGraphic, "quote_test.go", 29);
         registry.Add("TestIsPrint", strconv_test_package.TestIsPrint, "quote_test.go", 15);
-        registry.Add("TestItoa", strconv_test_package.TestItoa, "itoa_test.go", 62);
-        registry.Add("TestMulByLog10Log2", strconv_test_package.TestMulByLog10Log2, "ftoaryu_test.go", 23);
-        registry.Add("TestMulByLog2Log10", strconv_test_package.TestMulByLog2Log10, "ftoaryu_test.go", 13);
-        registry.Add("TestNumError", strconv_test_package.TestNumError, "atoi_test.go", 594);
-        registry.Add("TestNumErrorUnwrap", strconv_test_package.TestNumErrorUnwrap, "atoi_test.go", 607);
-        registry.Add("TestParseBool", strconv_test_package.TestParseBool, "atob_test.go", 36);
-        registry.Add("TestParseComplex", strconv_test_package.TestParseComplex, "atoc_test.go", 33);
-        registry.Add("TestParseComplexIncorrectBitSize", strconv_test_package.TestParseComplexIncorrectBitSize, "atoc_test.go", 216);
-        registry.Add("TestParseFloatIncorrectBitSize", strconv_test_package.TestParseFloatIncorrectBitSize, "atof_test.go", 640);
-        registry.Add("TestParseFloatPrefix", strconv_test_package.TestParseFloatPrefix, "atof_test.go", 489);
-        registry.Add("TestParseInt", strconv_test_package.TestParseInt, "atoi_test.go", 449);
-        registry.Add("TestParseInt32", strconv_test_package.TestParseInt32, "atoi_test.go", 393);
-        registry.Add("TestParseInt64", strconv_test_package.TestParseInt64, "atoi_test.go", 404);
-        registry.Add("TestParseInt64Base", strconv_test_package.TestParseInt64Base, "atoi_test.go", 415);
-        registry.Add("TestParseIntBase", strconv_test_package.TestParseIntBase, "atoi_test.go", 570);
-        registry.Add("TestParseIntBitSize", strconv_test_package.TestParseIntBitSize, "atoi_test.go", 546);
-        registry.Add("TestParseUint", strconv_test_package.TestParseUint, "atoi_test.go", 426);
-        registry.Add("TestParseUint32", strconv_test_package.TestParseUint32, "atoi_test.go", 360);
-        registry.Add("TestParseUint64", strconv_test_package.TestParseUint64, "atoi_test.go", 371);
-        registry.Add("TestParseUint64Base", strconv_test_package.TestParseUint64Base, "atoi_test.go", 382);
-        registry.Add("TestParseUintBase", strconv_test_package.TestParseUintBase, "atoi_test.go", 582);
-        registry.Add("TestParseUintBitSize", strconv_test_package.TestParseUintBitSize, "atoi_test.go", 558);
+        registry.Add("TestItoa", strconv_test_package.TestItoa, "number_test.go", 848);
+        registry.Add("TestNumError", strconv_test_package.TestNumError, "number_test.go", 768);
+        registry.Add("TestNumErrorUnwrap", strconv_test_package.TestNumErrorUnwrap, "number_test.go", 781);
+        registry.Add("TestParseBool", strconv_test_package.TestParseBool, "number_test.go", 35);
+        registry.Add("TestParseComplex", strconv_test_package.TestParseComplex, "number_test.go", 110);
+        registry.Add("TestParseComplexIncorrectBitSize", strconv_test_package.TestParseComplexIncorrectBitSize, "number_test.go", 293);
+        registry.Add("TestParseInt", strconv_test_package.TestParseInt, "number_test.go", 623);
+        registry.Add("TestParseInt32", strconv_test_package.TestParseInt32, "number_test.go", 567);
+        registry.Add("TestParseInt64", strconv_test_package.TestParseInt64, "number_test.go", 578);
+        registry.Add("TestParseInt64Base", strconv_test_package.TestParseInt64Base, "number_test.go", 589);
+        registry.Add("TestParseIntBase", strconv_test_package.TestParseIntBase, "number_test.go", 744);
+        registry.Add("TestParseIntBitSize", strconv_test_package.TestParseIntBitSize, "number_test.go", 720);
+        registry.Add("TestParseUint", strconv_test_package.TestParseUint, "number_test.go", 600);
+        registry.Add("TestParseUint32", strconv_test_package.TestParseUint32, "number_test.go", 534);
+        registry.Add("TestParseUint64", strconv_test_package.TestParseUint64, "number_test.go", 545);
+        registry.Add("TestParseUint64Base", strconv_test_package.TestParseUint64Base, "number_test.go", 556);
+        registry.Add("TestParseUintBase", strconv_test_package.TestParseUintBase, "number_test.go", 756);
+        registry.Add("TestParseUintBitSize", strconv_test_package.TestParseUintBitSize, "number_test.go", 732);
         registry.Add("TestQuote", strconv_test_package.TestQuote, "quote_test.go", 61);
         registry.Add("TestQuoteRune", strconv_test_package.TestQuoteRune, "quote_test.go", 146);
         registry.Add("TestQuoteRuneToASCII", strconv_test_package.TestQuoteRuneToASCII, "quote_test.go", 157);
         registry.Add("TestQuoteRuneToGraphic", strconv_test_package.TestQuoteRuneToGraphic, "quote_test.go", 168);
         registry.Add("TestQuoteToASCII", strconv_test_package.TestQuoteToASCII, "quote_test.go", 72);
         registry.Add("TestQuoteToGraphic", strconv_test_package.TestQuoteToGraphic, "quote_test.go", 83);
-        registry.Add("TestRoundTrip", strconv_test_package.TestRoundTrip, "atof_test.go", 585);
-        registry.Add("TestRoundTrip32", strconv_test_package.TestRoundTrip32, "atof_test.go", 610);
-        registry.Add("TestUitoa", strconv_test_package.TestUitoa, "itoa_test.go", 121);
+        registry.Add("TestUitoa", strconv_test_package.TestUitoa, "number_test.go", 907);
         registry.Add("TestUnquote", strconv_test_package.TestUnquote, "quote_test.go", 314);
         registry.Add("TestUnquoteInvalidUTF8", strconv_test_package.TestUnquoteInvalidUTF8, "quote_test.go", 327);
         return TestHost.Run(registry, args);

@@ -59,6 +59,7 @@ public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
         goǃ((nint iΔ1) => {
             GoFrame ᒐ = default;
             try {
+                var idsᴷ = new stackAppend<uint64>();
                 defer(Ꮡwg.Done, ref ᒐ);
 
                 @string si = strconv.Itoa(iΔ1);
@@ -78,7 +79,7 @@ public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
                     if (!inserted) {
                         Ꮡt.Errorf("expected to have inserted string %q, but did not"u8, s);
                     }
-                    ids = append(ids, id);
+                    ids = append(idsᴷ, ids, id);
                 }
                 foreach (var (iΔ2, s) in d.ΔRangeSnapshot()) {
                     var (id, inserted) = Ꮡm.PutString(s);

@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAYUgoK4goKC")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAYcgoK6ooKUqKKCgpSmgMiigpSmgoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,6 +65,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct words {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

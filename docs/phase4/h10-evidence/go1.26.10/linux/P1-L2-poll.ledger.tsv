@@ -1,0 +1,3 @@
+event	seq	row	corpus	converter	bin_mtime	boot	utc	timeout	testdeadline	word	verdicts	rc	wall_s
+START	1	internal/poll	233420f42258cde2fe2d2d363e5f5aa188501062	233420f42258cde2fe2d2d363e5f5aa188501062	1792958142	acc26bf5	2026-10-25T20:22:46Z	30m	30m				
+END	1	internal/poll	233420f42258cde2fe2d2d363e5f5aa188501062	233420f42258cde2fe2d2d363e5f5aa188501062	1792958142	acc26bf5	2026-10-25T20:55:19Z	30m	30m	PASS	12	0	1951

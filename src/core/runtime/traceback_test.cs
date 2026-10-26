@@ -82,28 +82,28 @@ public static void TestTracebackInlined(ж<testing.T> Ꮡt) {
     }
 
     var checkʗ1 = check;
-    Ꮡt.Run(simpleˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(simpleˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         // Check a simple case of inlining
         var r = ttiSimple1();
         checkʗ1(tΔ2, r, runtimeTestTtiSimple3ˢ, runtimeTestTtiSimple2ˢ, runtimeTestTtiSimple1ˢ);
     });
 
     var checkʗ2 = check;
-    Ꮡt.Run(sigpanicˢ, (ж<testing.T> tΔ3) => {
+    Ꮡt.Run(sigpanicˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         // Check that sigpanic from an inlined function prints correctly
         var r = ttiSigpanic1();
         checkʗ2(tΔ3, r, runtimeTestTtiSigpanic1ˢ, panicˢ2, runtimeTestTtiSigpanic3ˢ, runtimeTestTtiSigpanic2ˢ, runtimeTestTtiSigpanic1ˢ2);
     });
 
     var checkʗ3 = check;
-    Ꮡt.Run(wrapperˢ, (ж<testing.T> tΔ4) => {
+    Ꮡt.Run(wrapperˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4) => {
         // Check that a method inlined into a wrapper prints correctly
         var r = ttiWrapper1();
         checkʗ3(tΔ4, r, runtimeTestTtiWrapperM1ˢ, runtimeTestTtiWrapper1ˢ);
     });
 
     var checkʗ4 = check;
-    Ꮡt.Run(excludedˢ, (ж<testing.T> tΔ5) => {
+    Ꮡt.Run(excludedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ5) => {
         // Check that when F -> G is inlined and F is excluded from stack
         // traces, G still appears.
         var r = ttiExcluded1();
@@ -854,6 +854,7 @@ internal static readonly @string missingˢ = "missing ("u8;
 // check the result.
 internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string tb) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var tbsᴷ = new stackAppend<ж<traceback>>(moves: true);
 
     //lines := strings.Split(tb, "\n")
     //nLines := len(lines)
@@ -889,7 +890,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, goroutineˢ2): {
             cur = Ꮡ(new traceback(nil));
-            tbs = append(tbs, cur);
+            tbs = append(tbsᴷ, tbs, cur);
             break;
         }
         case {} when line == ""u8: {
@@ -926,6 +927,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             break;
         }}
     }
+    tbs = move2heap(tbsᴷ, tbs);
     return tbs;
 }
 

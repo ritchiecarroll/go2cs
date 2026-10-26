@@ -25,8 +25,10 @@ internal static void initᴛparseIPTests() { parseIPTests = new parseIPTestsᴛ1
     new("::ffff:7f01:0203"u8, IPv4(127, 1, 2, 3)),
     new("0:0:0:0:0000:ffff:127.1.2.3"u8, IPv4(127, 1, 2, 3)),
     new("0:0:0:0::ffff:127.1.2.3"u8, IPv4(127, 1, 2, 3)),
+
     new("2001:4860:0:2001::68"u8, new IP(new byte[]{0x20, 0x01, 0x48, 0x60, 0, 0, 0x20, 0x01, 0, 0, 0, 0, 0, 0, 0x00, 0x68}.slice())),
     new("2001:4860:0000:2001:0000:0000:0000:0068"u8, new IP(new byte[]{0x20, 0x01, 0x48, 0x60, 0, 0, 0x20, 0x01, 0, 0, 0, 0, 0, 0, 0x00, 0x68}.slice())),
+
     new("-0.0.0.0"u8, default!),
     new("0.-1.0.0"u8, default!),
     new("0.0.-2.0"u8, default!),
@@ -661,17 +663,22 @@ public static void TestSplitHostPort(ж<testing.T> Ꮡt) {
         new("[fe80::1%lo0]"u8, "missing port in address"u8),
         new("[localhost%lo0]"u8, "missing port in address"u8),
         new("localhost%lo0"u8, "missing port in address"u8),
+
         new("::1"u8, "too many colons in address"u8),
         new("fe80::1%lo0"u8, "too many colons in address"u8),
         new("fe80::1%lo0:80"u8, "too many colons in address"u8),
 
         // Test cases that didn't fail in Go 1
+
         new("[foo:bar]"u8, "missing port in address"u8),
         new("[foo:bar]baz"u8, "missing port in address"u8),
         new("[foo]bar:baz"u8, "missing port in address"u8),
+
         new("[foo]:[bar]:baz"u8, "too many colons in address"u8),
+
         new("[foo]:[bar]baz"u8, "unexpected '[' in address"u8),
         new("foo[bar]:baz"u8, "unexpected '[' in address"u8),
+
         new("foo]bar:baz"u8, "unexpected ']' in address"u8)
     }.slice()) {
         {
@@ -884,7 +891,7 @@ internal static void benchmarkIPEqual(ж<testing.B> Ꮡb, nint size) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var ips = new slice<global::go.net_package.IP>(1000);
-    foreach (var (i, _) in ips) {
+    foreach (var i in range(ips)) {
         ips[i] = new global::go.net_package.IP(size);
         rand.Read(ips[i]);
     }

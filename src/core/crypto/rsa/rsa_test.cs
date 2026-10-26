@@ -8,23 +8,29 @@ using bytes = bytes_package;
 using crypto = crypto_package;
 using boring = go.crypto.@internal.boring_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
+using fips140 = go.crypto.@internal.fips140_package;
 using rand = go.crypto.rand_package;
 using static go.crypto.rsa_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using sha512 = go.crypto.sha512_package;
 using Δx509 = go.crypto.x509_package;
+using hex = encoding.hex_package;
 using pem = encoding.pem_package;
 using flag = flag_package;
 using fmt = fmt_package;
+using io = io_package;
 using big = math.big_package;
+using os = os_package;
+using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.crypto;
 using go.crypto.@internal;
 using hash = hash_package;
-using io = io_package;
 using math;
 using rsa = go.crypto.rsa_package;
 using static go.crypto.rsa_internal_test_package;
@@ -159,32 +165,43 @@ public static void TestGnuTLSKey(ж<testing.T> Ꮡt) {
 }
 
 internal static void testKeyBasics(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpriv) {
-    ref var priv = ref Ꮡpriv.DerefOrNull();
+    GoFrame ᒐ = default;
+    try {
+        ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    {
-        var errΔ1 = priv.Validate(); if (errΔ1 != default!) {
-            Ꮡt.Errorf("Validate() failed: %s"u8, errΔ1);
+        defer(() => {
+            if (Ꮡt.Failed()) {
+                Ꮡt.Logf("failed key: %#v"u8, Ꮡpriv.OrTypedNil());
+            }
+        }, ref ᒐ);
+
+        {
+            var errΔ1 = priv.Validate(); if (errΔ1 != default!) {
+                Ꮡt.Errorf("Validate() failed: %s"u8, errΔ1);
+            }
+        }
+        if (priv.D.Cmp(priv.N) > 0) {
+            Ꮡt.Errorf("private exponent too large"u8);
+        }
+
+        var msg = slice<byte>("hi!"u8);
+        var (enc, err) = EncryptPKCS1v15(rand.Reader, Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), msg);
+        if (err != default!) {
+            Ꮡt.Errorf("EncryptPKCS1v15: %v"u8, err);
+            return;
+        }
+
+        (var dec, err) = DecryptPKCS1v15(default!, Ꮡpriv, enc);
+        if (err != default!) {
+            Ꮡt.Errorf("DecryptPKCS1v15: %v"u8, err);
+            return;
+        }
+        if (!bytes.Equal(dec, msg)) {
+            Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
         }
     }
-    if (priv.D.Cmp(priv.N) > 0) {
-        Ꮡt.Errorf("private exponent too large"u8);
-    }
-
-    var msg = slice<byte>("hi!"u8);
-    var (enc, err) = EncryptPKCS1v15(rand.Reader, Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), msg);
-    if (err != default!) {
-        Ꮡt.Errorf("EncryptPKCS1v15: %v"u8, err);
-        return;
-    }
-
-    (var dec, err) = DecryptPKCS1v15(default!, Ꮡpriv, enc);
-    if (err != default!) {
-        Ꮡt.Errorf("DecryptPKCS1v15: %v"u8, err);
-        return;
-    }
-    if (!bytes.Equal(dec, msg)) {
-        Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
-    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 public static void TestAllocations(ж<testing.T> Ꮡt) {
@@ -234,17 +251,17 @@ public static void TestEverything(ж<testing.T> Ꮡt) {
     if (allFlag.Value) {
         max = 2048;
     }
-    for (nint size = min; size <= max; size++) {
-        nint sizeΔ1 = size;
-        Ꮡt.Run(fmt.Sprintf("%d"u8, sizeΔ1), (ж<testing.T> tΔ2) => {
+    for (nint sizeᴛ1 = min; sizeᴛ1 <= max; sizeᴛ1++) {
+        var size = sizeᴛ1;
+        Ꮡt.Run(fmt.Sprintf("%d"u8, size), (ж<testing.T> tΔ2) => {
             tΔ2.Parallel();
-            var (priv, err) = GenerateKey(rand.Reader, sizeΔ1);
+            var (priv, err) = GenerateKey(rand.Reader, size);
             if (err != default!) {
-                tΔ2.Fatalf("GenerateKey(%d): %v"u8, sizeΔ1, err);
+                tΔ2.Fatalf("GenerateKey(%d): %v"u8, size, err);
             }
             {
-                nint bits = (~priv).N.BitLen(); if (bits != sizeΔ1) {
-                    tΔ2.Errorf("key too short (%d vs %d)"u8, bits, sizeΔ1);
+                nint bits = (~priv).N.BitLen(); if (bits != size) {
+                    tΔ2.Errorf("key too short (%d vs %d)"u8, bits, size);
                 }
             }
             testEverything(tΔ2, priv);
@@ -264,11 +281,11 @@ internal static readonly @string hashMsgᶜ = "crypto/rsa: input must be hashed 
 
 internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
+    var cᴷ = new stackAppend<byte>();
 
-    {
-        var errΔ1 = priv.Validate(); if (errΔ1 != default!) {
-            Ꮡt.Errorf("Validate() failed: %s"u8, errΔ1);
-        }
+    var validateErr = priv.Validate();
+    if (validateErr != default! && len(priv.Primes) >= 2) {
+        Ꮡt.Errorf("Validate() failed: %s"u8, validateErr);
     }
 
     var msg = slice<byte>("test"u8);
@@ -280,13 +297,13 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         Ꮡt.Errorf("EncryptPKCS1v15: %v"u8, err);
     }
     if (err == default!) {
-        var (dec, errΔ2) = DecryptPKCS1v15(default!, Ꮡpriv, enc);
-        if (errΔ2 != default!) {
-            Ꮡt.Errorf("DecryptPKCS1v15: %v"u8, errΔ2);
+        var (dec, errΔ1) = DecryptPKCS1v15(default!, Ꮡpriv, enc);
+        if (errΔ1 != default!) {
+            Ꮡt.Errorf("DecryptPKCS1v15: %v"u8, errΔ1);
         }
-        errΔ2 = DecryptPKCS1v15SessionKey(default!, Ꮡpriv, enc, new slice<byte>(4));
-        if (errΔ2 != default!) {
-            Ꮡt.Errorf("DecryptPKCS1v15SessionKey: %v"u8, errΔ2);
+        errΔ1 = DecryptPKCS1v15SessionKey(default!, Ꮡpriv, enc, new slice<byte>(4));
+        if (errΔ1 != default!) {
+            Ꮡt.Errorf("DecryptPKCS1v15SessionKey: %v"u8, errΔ1);
         }
         if (!bytes.Equal(dec, msg)) {
             Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
@@ -302,9 +319,9 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         Ꮡt.Errorf("EncryptOAEP: %v"u8, err);
     }
     if (err == default!) {
-        var (dec, errΔ3) = DecryptOAEP(sha256.New(), default!, Ꮡpriv, enc, label);
-        if (errΔ3 != default!) {
-            Ꮡt.Errorf("DecryptOAEP: %v"u8, errΔ3);
+        var (dec, errΔ2) = DecryptOAEP(sha256.New(), default!, Ꮡpriv, enc, label);
+        if (errΔ2 != default!) {
+            Ꮡt.Errorf("DecryptOAEP: %v"u8, errΔ2);
         }
         if (!bytes.Equal(dec, msg)) {
             Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
@@ -409,7 +426,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
     if (err == default!) {
         Ꮡt.Errorf("DecryptPKCS1v15 accepted a large ciphertext"u8);
     }
-    c = append(c, (byte)0xff);
+    c = append(cᴷ, c, (byte)0xff);
     err = VerifyPSS(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA256, hash[..], c, opts);
     if (err == default!) {
         Ꮡt.Errorf("VerifyPSS accepted a long signature"u8);
@@ -419,19 +436,21 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         Ꮡt.Errorf("DecryptPKCS1v15 accepted a long ciphertext"u8);
     }
 
-    (var der, err) = Δx509.MarshalPKCS8PrivateKey(Ꮡpriv.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Errorf("MarshalPKCS8PrivateKey: %v"u8, err);
-    }
-    (var key, err) = Δx509.ParsePKCS8PrivateKey(der);
-    if (err != default!) {
-        Ꮡt.Errorf("ParsePKCS8PrivateKey: %v"u8, err);
-    }
-    if (!key._<ж<rsa.PrivateKey>>().Equal(Ꮡpriv.OrTypedNil())) {
-        Ꮡt.Errorf("private key mismatch"u8);
+    if (validateErr == default!) {
+        var (derΔ1, errΔ3) = Δx509.MarshalPKCS8PrivateKey(Ꮡpriv.OrTypedNil());
+        if (errΔ3 != default!) {
+            Ꮡt.Errorf("MarshalPKCS8PrivateKey: %v"u8, errΔ3);
+        }
+        (var key, errΔ3) = Δx509.ParsePKCS8PrivateKey(derΔ1);
+        if (errΔ3 != default!) {
+            Ꮡt.Errorf("ParsePKCS8PrivateKey: %v"u8, errΔ3);
+        }
+        if (!key._<ж<rsa.PrivateKey>>().Equal(Ꮡpriv.OrTypedNil())) {
+            Ꮡt.Errorf("private key mismatch"u8);
+        }
     }
 
-    (der, err) = Δx509.MarshalPKIXPublicKey(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey));
+    (var der, err) = Δx509.MarshalPKIXPublicKey(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey));
     if (err != default!) {
         Ꮡt.Errorf("MarshalPKIXPublicKey: %v"u8, err);
     }
@@ -448,7 +467,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 internal static readonly @string insecureˢ = "insecure"u8;
 
-public static void TestKeyTooSmall(ж<testing.T> Ꮡt) {
+public static partial void TestKeyTooSmall(ж<testing.T> Ꮡt) {
     void checkErr(error err) {
         Ꮡt.Helper();
         if (err == default!) {
@@ -459,7 +478,7 @@ public static void TestKeyTooSmall(ж<testing.T> Ꮡt) {
         }
     }
     var checkErrʗ1 = checkErr;
-    void checkErr2(slice<byte> _, error err) {
+    [MethodImpl(MethodImplOptions.NoInlining)] void checkErr2(slice<byte> _, error err) {
         Ꮡt.Helper();
         checkErrʗ1(err);
     }
@@ -591,6 +610,30 @@ fLVGuFoTVIu2bF0cWAjNNMg=
 
 internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StandardBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
 internal static ref ж<rsa.PrivateKey> test2048Key => ref Ꮡtest2048Key.ValueSlot;
+
+internal static ж<rsa.PrivateKey> test2048KeyOnlyD = Ꮡ(new PrivateKey(
+    PublicKey: (~test2048Key).PublicKey,
+    D: (~test2048Key).D
+));
+
+internal static ж<rsa.PrivateKey> test2048KeyWithoutPrecomputed = Ꮡ(new PrivateKey(
+    PublicKey: (~test2048Key).PublicKey,
+    D: (~test2048Key).D,
+    Primes: (~test2048Key).Primes
+));
+
+// test2048KeyWithPrecomputed is different from test2048Key because it includes
+// only the public precomputed values, and not the fips140/rsa.PrivateKey.
+internal static ж<rsa.PrivateKey> test2048KeyWithPrecomputed = Ꮡ(new PrivateKey(
+    PublicKey: (~test2048Key).PublicKey,
+    D: (~test2048Key).D,
+    Primes: (~test2048Key).Primes,
+    Precomputed: new PrecomputedValues(
+        Dp: (~test2048Key).Precomputed.Dp,
+        Dq: (~test2048Key).Precomputed.Dq,
+        Qinv: (~test2048Key).Precomputed.Qinv
+    )
+));
 
 internal static ж<rsa.PrivateKey> test3072Key = parseKey(testingKey("""
 -----BEGIN TESTING KEY-----
@@ -784,20 +827,42 @@ public static void BenchmarkEncryptOAEP(ж<testing.B> Ꮡb) {
     });
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string noprecompOnlyDˢ = "2048/noprecomp/OnlyD"u8;
+internal static readonly @string noprecompPrimesˢ = "2048/noprecomp/Primes"u8;
+internal static readonly @string noprecompAllValuesˢ = "2048/noprecomp/AllValues"u8;
+
 public static void BenchmarkSignPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var hashed = sha256.Sum256(slice<byte>("testing"u8));
-
-        byte sink = default!;
-        bΔ1.ResetTimer();
-        for (nint i = 0; i < (~bΔ1).N; i++) {
-            var (s, err) = SignPKCS1v15(rand.Reader, test2048Key, crypto.SHA256, hashed[..]);
-            if (err != default!) {
-                bΔ1.Fatal(err);
-            }
-            sink ^= (byte)(s[0]);
-        }
+        benchmarkSignPKCS1v15(bΔ1, test2048Key);
     });
+    Ꮡb.Run(noprecompOnlyDˢ, (ж<testing.B> bΔ2) => {
+        benchmarkSignPKCS1v15(bΔ2, test2048KeyOnlyD);
+    });
+    Ꮡb.Run(noprecompPrimesˢ, (ж<testing.B> bΔ3) => {
+        benchmarkSignPKCS1v15(bΔ3, test2048KeyWithoutPrecomputed);
+    });
+    // This is different from "2048" because it's only the public precomputed
+    // values, and not the crypto/internal/fips140/rsa.PrivateKey.
+    Ꮡb.Run(noprecompAllValuesˢ, (ж<testing.B> bΔ4) => {
+        benchmarkSignPKCS1v15(bΔ4, test2048KeyWithPrecomputed);
+    });
+}
+
+internal static void benchmarkSignPKCS1v15(ж<testing.B> Ꮡb, ж<rsa.PrivateKey> Ꮡk) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var hashed = sha256.Sum256(slice<byte>("testing"u8));
+
+    byte sink = default!;
+    b.ResetTimer();
+    for (nint i = 0; i < b.N; i++) {
+        var (s, err) = SignPKCS1v15(rand.Reader, Ꮡk, crypto.SHA256, hashed[..]);
+        if (err != default!) {
+            Ꮡb.Fatal(err);
+        }
+        sink ^= (byte)(s[0]);
+    }
 }
 
 public static void BenchmarkVerifyPKCS1v15(ж<testing.B> Ꮡb) {
@@ -852,18 +917,6 @@ public static void BenchmarkVerifyPSS(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkGenerateKey(ж<testing.B> Ꮡb) {
-    Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        for (nint i = 0; i < (~bΔ1).N; i++) {
-            {
-                var (_, err) = GenerateKey(rand.Reader, 2048); if (err != default!) {
-                    bΔ1.Fatal(err);
-                }
-            }
-        }
-    });
-}
-
 public static void BenchmarkParsePKCS8PrivateKey(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
         var (p, _) = pem.Decode(slice<byte>(test2048KeyPEM));
@@ -876,6 +929,65 @@ public static void BenchmarkParsePKCS8PrivateKey(ж<testing.B> Ꮡb) {
             }
         }
     });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string testdataKeygen2048Txtˢ = "testdata/keygen2048.txt"u8;
+
+public static void BenchmarkGenerateKey(ж<testing.B> Ꮡb) {
+    Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
+        var (primes, err) = os.ReadFile(testdataKeygen2048Txtˢ);
+        if (err != default!) {
+            bΔ1.Fatal(err);
+        }
+        while (bΔ1.Loop()) {
+            var r = Ꮡ(new testPrimeReader(primes: ((@string)primes)));
+            {
+                var (_, errΔ1) = GenerateKey(new rsa_test_package.testPrimeReaderжReader(r), 2048); if (errΔ1 != default!) {
+                    bΔ1.Fatal(errΔ1);
+                }
+            }
+        }
+    });
+}
+
+// testPrimeReader feeds prime candidates from a text file,
+// one per line in hex, to GenerateKey.
+partial struct testPrimeReader {
+    internal @string primes;
+}
+
+internal static (nint n, error err) Read(this ref testPrimeReader r, slice<byte> p) {
+    error err = default!;
+
+    // Neutralize randutil.MaybeReadByte.
+    //
+    // DO NOT COPY this. We *will* break you. We can do this because we're
+    // in the standard library, and can update this along with the
+    // GenerateKey implementation if necessary.
+    //
+    // You have been warned.
+    if (len(p) == 1) {
+        return (1, default!);
+    }
+
+    @string line = default!;
+    while (line == ""u8 || line[0] == (rune)'#') {
+        bool ok = default!;
+        (line, r.primes, ok) = strings.Cut(r.primes, "\n"u8);
+        if (!ok) {
+            return (0, io.EOF);
+        }
+    }
+    (var b, err) = hex.DecodeString(line);
+    if (err != default!) {
+        return (0, err);
+    }
+    if (len(p) != len(b)) {
+        return (0, fmt.Errorf("unexpected read length: %d"u8, len(p)));
+    }
+    copy(p, b);
+    return (len(p), default!);
 }
 
 partial struct testEncryptOAEPMessage {
@@ -1002,6 +1114,36 @@ public static void TestEncryptDecryptOAEP(ж<testing.T> Ꮡt) {
             }
             if (!bytes.Equal(dec, message.@in)) {
                 Ꮡt.Errorf("#%d,%d: round trip %q -> %q"u8, i, j, message.@in, dec);
+            }
+
+            // Using different hash for MGF.
+            (enc, err) = EncryptOAEPWithOptions(rand.Reader, priv.of(rsa.PrivateKey.ᏑPublicKey), message.@in, Ꮡ(new OAEPOptions(Hash: crypto.SHA256, MGFHash: crypto.SHA1, Label: label)));
+            if (err != default!) {
+                Ꮡt.Errorf("#%d,%d: EncryptOAEP with different MGFHash: %v"u8, i, j, err);
+                continue;
+            }
+            (dec, err) = priv.Decrypt(rand.Reader, enc, Ꮡ(new OAEPOptions(Hash: crypto.SHA256, MGFHash: crypto.SHA1, Label: label)));
+            if (err != default!) {
+                Ꮡt.Errorf("#%d,%d: DecryptOAEP with different MGFHash: %v"u8, i, j, err);
+                continue;
+            }
+            if (!bytes.Equal(dec, message.@in)) {
+                Ꮡt.Errorf("#%d,%d: round trip with different MGFHash %q -> %q"u8, i, j, message.@in, dec);
+            }
+
+            // Using a zero MGFHash.
+            (enc, err) = EncryptOAEPWithOptions(rand.Reader, priv.of(rsa.PrivateKey.ᏑPublicKey), message.@in, Ꮡ(new OAEPOptions(Hash: crypto.SHA256, Label: label)));
+            if (err != default!) {
+                Ꮡt.Errorf("#%d,%d: EncryptOAEP with zero MGFHash: %v"u8, i, j, err);
+                continue;
+            }
+            (dec, err) = DecryptOAEP(sha256Δ1, rand.Reader, priv, enc, label);
+            if (err != default!) {
+                Ꮡt.Errorf("#%d,%d: DecryptOAEP with zero MGFHash: %v"u8, i, j, err);
+                continue;
+            }
+            if (!bytes.Equal(dec, message.@in)) {
+                Ꮡt.Errorf("#%d,%d: round trip with zero MGFHash %q -> %q"u8, i, j, message.@in, dec);
             }
         }
     }
@@ -1176,6 +1318,220 @@ public static void TestPSmallerThanQ(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(boringCryptoModeReturnsˢ);
     }
     testEverything(Ꮡt, k);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string beginTestingKeyˢ = """
+-----BEGIN TESTING KEY-----
+MIICmAIBADANBgkqhkiG9w0BAQEFAASCAoIwggJ+AgEAAoGBAOB/V7qbbMLHZSHS
+rU3FLNQJe88wQr5asy813wqlWsCeYUn7Imxv23vDXthpkH/54+CplWDvVri24zhU
+4tHfONSEBWWKTRfQKCW+vrzf+d02rB95lVBrBDSKAUR6w1Xcx9/6ib+kQRDnMl2l
+WZzDgv8jrNPrLGipYBOLcI9/Oh3HAgMBAAECgYBr85AiAX8JIoy0+POxA/GMfIr2
+lERj+IVVXFhGbED5gjUBUn8kz/gOrClZAqgxJKVbdTcxn4KGOM64z427Y24H52zQ
+sCq7RFJ9KDd4s1hAPQImBRUYu2blqDoqxNBQBxLHVUN7vwFp2MGsHzTz7mcx7QNG
+teRbyLhCanUd3UOb4QJhAP5dyjIK1WzKBZ/jSAmjJL64bks4wEEl5eG6e2cTscCH
+RE/OSpHi57dyrxgnBkczt56hOksJFzwmgk4wEM8n/JDOXwIzvAH4w4JWhu169gCW
+8LgxCzJ71xv8+wUUouUTLwIhAOHwcdEAKyLo3K7X1nlYcUOX61yQ1GXRgIROGrsh
+NNjpAmEAuW1nu4k4QmEXLpJB7nyWic3q4T0SsatN5HrMAL1To/U3sDHDHIxbvNiG
+mcXBBuDFp4cC9rY+0OOFtDfH2SveKzW1/uX11T4iT/6Bx9cORCnEe5GNBxVOH6IQ
+34hGo1WTAiEAyCYALW1AyUQPerOpQwWeEIrb7Lw/65KTjqDB/VOFRUECYQCPcc07
+D19OB593kGklAtk1XwGt1W8OmfGIKhGMKzlYhb9MezjaX/3zpO19msSUmSNKszMX
+RpZX4LYz9Ity0nxQ3qZYN6XYNwvr7dCV0E5eS+mgbGWRrf3utdbUkZUNwYE=
+-----END TESTING KEY-----
+"""u8.Raw();
+internal static readonly @string beginTestingKeyˢ2 = """
+-----BEGIN TESTING KEY-----
+MIICVwIBADANBgkqhkiG9w0BAQEFAASCAkEwggI9AgEAAoGBAObSD1Q4cfUURAuY
+RCCTDxv3TxK/VPJH/ees4eVkJHBkgErTXJsVb7df3Pyz8J5yVU7Y68osp1uRgJu1
+E/v61L388oUQbpDlhpCzkpx2ZBfwx891JJBNgrRu/ZEDaWfXA4fx3iUDcA83NfY+
+WWBlwwjhZG2jTQAgB0kz6fIhxODRAgMBAAECgYAJcO3i1WC25C5w1Xhy5yT68TuN
+IiGWu+JbLa97NySE6tOHRvQk0QSTUGw8thsEoo3BAthlQtKHWLmvwPl1YNtEGE14
+9gMlzoveiB10tMAJqmIaPoUWgQ2Wmzz+akYgr3zEloN+2ptVRYmboOWXGOHK4LJd
+n5h7UvQNSqZyUvqogQIhAPOfMCgE3hvt4wA9cNUg3uQgUNnjr0ITiptNmgmoaaFB
+AmEA8oxdQm/Uo1B5J2ebPj/e6mCi/wv3Ewq0CNE4Q1SiLmK1EKwyYj1pNBfrT2Vs
+O5XsuFPC5V07iSjjfbaE8Q4zuKSmhVFe9aoAn8lwuuVBufGLFW7FD8PnhDZcqWsE
+ksuRAiEA7sRa5y32Hbtlmquc9VV0/nJpq1NKRmFunE1PJh4IAMECYH0Q1ZHJWkqv
+1xjzeoA5rPcLx2BdyhP+g+C8CRfmzw2+BgFH2V8ArXuYDdTNxmZfI0XUov1j+qv5
+8nvDHn+xxAekltzNnXptI49A7qjgR+jaXM47ZM+BQ6LP6S3OqfgLkQIhAKbHdb9l
+cHPGX1uUDRAU1xxtpVQ0OqXyEgqwz6y6hYRw
+-----END TESTING KEY-----
+"""u8.Raw();
+
+public static void TestLargeSizeDifference(ж<testing.T> Ꮡt) {
+    // This key has a 768-bit P and a 256-bit Q.
+    var k1 = parseKey(testingKey(beginTestingKeyˢ));
+
+    // This key has a 256-bit P and a 768-bit Q.
+    var k2 = parseKey(testingKey(beginTestingKeyˢ2));
+
+    if (boring.Enabled) {
+        Ꮡt.Skip(boringCryptoModeReturnsˢ);
+    }
+    testEverything(Ꮡt, k1);
+    testEverything(Ꮡt, k2);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string onlyDˢ = "OnlyD"u8;
+internal static readonly @string primesˢ = "Primes"u8;
+internal static readonly object precomputedValuesShouldˢ = (@string)"Precomputed values should not be nil after Precompute()"u8;
+internal static readonly @string allValuesˢ = "AllValues"u8;
+
+public static void TestNotPrecomputed(ж<testing.T> Ꮡt) {
+    Ꮡt.Run(onlyDˢ, (ж<testing.T> tΔ1) => {
+        testEverything(tΔ1, test2048KeyOnlyD);
+        ref var k = ref heap<rsa.PrivateKey>(out var Ꮡk);
+        k = test2048KeyOnlyD.Value;
+        k.Precompute();
+        testEverything(tΔ1, Ꮡk);
+    });
+    Ꮡt.Run(primesˢ, (ж<testing.T> tΔ2) => {
+        testEverything(tΔ2, test2048KeyWithoutPrecomputed);
+        ref var k = ref heap<rsa.PrivateKey>(out var Ꮡk);
+        k = test2048KeyWithoutPrecomputed.Value;
+        k.Precompute();
+        if (k.Precomputed.Dp == nil || k.Precomputed.Dq == nil || k.Precomputed.Qinv == nil) {
+            tΔ2.Error(precomputedValuesShouldˢ);
+        }
+        testEverything(tΔ2, Ꮡk);
+    });
+    Ꮡt.Run(allValuesˢ, (ж<testing.T> tΔ3) => {
+        testEverything(tΔ3, test2048KeyWithPrecomputed);
+        ref var k = ref heap<rsa.PrivateKey>(out var Ꮡk);
+        k = test2048KeyWithoutPrecomputed.Value;
+        k.Precompute();
+        if (k.Precomputed.Dp == nil || k.Precomputed.Dq == nil || k.Precomputed.Qinv == nil) {
+            tΔ3.Error(precomputedValuesShouldˢ);
+        }
+        testEverything(tΔ3, Ꮡk);
+    });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object test512KeyShouldBeValidˢ = (@string)"test512Key should be valid"u8;
+internal static readonly @string publicKeyMismatchˢ = "PublicKey mismatch"u8;
+internal static readonly @string precomputedMismatchˢ = "Precomputed mismatch"u8;
+internal static readonly object thisWasFixedAfterV100ˢ = (@string)"This was fixed after v1.0.0"u8;
+internal static readonly @string dIsNilˢ = "D is nil"u8;
+internal static readonly @string nIsNilˢ = "N is nil"u8;
+internal static readonly @string pIsNilˢ = "P is nil"u8;
+internal static readonly @string qIsNilˢ = "Q is nil"u8;
+
+public static void TestModifiedPrivateKey(ж<testing.T> Ꮡt) {
+    if (test512Key.Validate() != default!) {
+        Ꮡt.Fatal(test512KeyShouldBeValidˢ);
+    }
+
+    Ꮡt.Run(publicKeyMismatchˢ, (ж<testing.T> tΔ1) => {
+        testModifiedPrivateKey(tΔ1, (ж<rsa.PrivateKey> k) => {
+            k.Value.PublicKey = test512KeyTwo.Value.PublicKey;
+        });
+    });
+    Ꮡt.Run(precomputedMismatchˢ, (ж<testing.T> tΔ2) => {
+        testModifiedPrivateKey(tΔ2, (ж<rsa.PrivateKey> k) => {
+            k.Value.Precomputed = test512KeyTwo.Value.Precomputed;
+        });
+    });
+
+    Ꮡt.Run("D+2"u8, (ж<testing.T> tΔ3) => {
+        if (fips140.Version() == "v1.0.0"u8) {
+            tΔ3.Skip(thisWasFixedAfterV100ˢ);
+        }
+        testModifiedPrivateKey(tΔ3, (ж<rsa.PrivateKey> k) => {
+            k.Value.D = @new<bigꓸInt>().Add((~k).D, big.NewInt(2));
+        });
+    });
+    Ꮡt.Run("D=0"u8, (ж<testing.T> tΔ4) => {
+        testModifiedPrivateKey(tΔ4, (ж<rsa.PrivateKey> k) => {
+            k.Value.D = @new<bigꓸInt>();
+        });
+    });
+    Ꮡt.Run(dIsNilˢ, (ж<testing.T> tΔ5) => {
+        testModifiedPrivateKey(tΔ5, (ж<rsa.PrivateKey> k) => {
+            k.Value.D = default!;
+        });
+    });
+
+    Ꮡt.Run("N+2"u8, (ж<testing.T> tΔ6) => {
+        testModifiedPrivateKey(tΔ6, (ж<rsa.PrivateKey> k) => {
+            k.Value.N = @new<bigꓸInt>().Add((~k).N, big.NewInt(2));
+        });
+    });
+    Ꮡt.Run("N=0"u8, (ж<testing.T> tΔ7) => {
+        testModifiedPrivateKey(tΔ7, (ж<rsa.PrivateKey> k) => {
+            k.Value.N = @new<bigꓸInt>();
+        });
+    });
+    Ꮡt.Run(nIsNilˢ, (ж<testing.T> tΔ8) => {
+        testModifiedPrivateKey(tΔ8, (ж<rsa.PrivateKey> k) => {
+            k.Value.N = default!;
+        });
+    });
+
+    Ꮡt.Run("P+2"u8, (ж<testing.T> tΔ9) => {
+        testModifiedPrivateKey(tΔ9, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[0] = @new<bigꓸInt>().Add((~k).Primes[0], big.NewInt(2));
+        });
+    });
+    Ꮡt.Run("P=0"u8, (ж<testing.T> tΔ10) => {
+        testModifiedPrivateKey(tΔ10, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[0] = @new<bigꓸInt>();
+        });
+    });
+    Ꮡt.Run(pIsNilˢ, (ж<testing.T> tΔ11) => {
+        testModifiedPrivateKey(tΔ11, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[0] = default!;
+        });
+    });
+
+    Ꮡt.Run("Q+2"u8, (ж<testing.T> tΔ12) => {
+        testModifiedPrivateKey(tΔ12, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[1] = @new<bigꓸInt>().Add((~k).Primes[1], big.NewInt(2));
+        });
+    });
+    Ꮡt.Run("Q=0"u8, (ж<testing.T> tΔ13) => {
+        testModifiedPrivateKey(tΔ13, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[1] = @new<bigꓸInt>();
+        });
+    });
+    Ꮡt.Run(qIsNilˢ, (ж<testing.T> tΔ14) => {
+        testModifiedPrivateKey(tΔ14, (ж<rsa.PrivateKey> k) => {
+            k.Value.Primes[1] = default!;
+        });
+    });
+
+    Ꮡt.Run("E+2"u8, (ж<testing.T> tΔ15) => {
+        testModifiedPrivateKey(tΔ15, (ж<rsa.PrivateKey> k) => {
+            k.Value.E += 2;
+        });
+    });
+    Ꮡt.Run("E=0"u8, (ж<testing.T> tΔ16) => {
+        testModifiedPrivateKey(tΔ16, (ж<rsa.PrivateKey> k) => {
+            k.Value.E = 0;
+        });
+    });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object validateShouldHaveFailedˢ = (@string)"Validate should have failed"u8;
+internal static readonly object validateShouldHaveFailedˢ2 = (@string)"Validate should have failed after Precompute()"u8;
+
+internal static void testModifiedPrivateKey(ж<testing.T> Ꮡt, Action<ж<rsa.PrivateKey>> f) {
+    var k = @new<rsa.PrivateKey>();
+    k.Value = test512Key.Value;
+    k.Value.Primes = slices.Clone<slice<ж<bigꓸInt>>, ж<bigꓸInt>>((~k).Primes);
+    f(k);
+    {
+        var err = k.Validate(); if (err == default!) {
+            Ꮡt.Error(validateShouldHaveFailedˢ);
+        }
+    }
+    k.Precompute();
+    {
+        var err = k.Validate(); if (err == default!) {
+            Ꮡt.Error(validateShouldHaveFailedˢ2);
+        }
+    }
 }
 
 } // end rsa_test_package

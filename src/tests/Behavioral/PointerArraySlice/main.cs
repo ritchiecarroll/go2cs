@@ -77,7 +77,7 @@ internal static void rangeIndexOnly() {
 }
 
 internal static void fill(this ref grid b) {
-    foreach (var i in range(b)) {
+    foreach (var i in range(4)) {
         b.Value[i] = i * 10;
     }
 }

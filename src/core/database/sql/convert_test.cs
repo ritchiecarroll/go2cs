@@ -651,6 +651,7 @@ public static void TestDecimal(ж<testing.T> Ꮡt) {
 
         // Ensure reflection is not used to assign the value by using different types.
         new(name: "diff"u8, @in: new decFinite(exponent: -6), @out: new dec(exponent: -6)),
+
         new(name: "bad-form"u8, @in: new dec(form: 200), err: true)
     }.slice();
     foreach (var (_, vᴛ1) in list) {

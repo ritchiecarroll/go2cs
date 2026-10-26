@@ -347,7 +347,7 @@ internal static readonly @string newTickerˢ = "NewTicker"u8;
 internal static readonly @string newTimerStopˢ = "NewTimerStop"u8;
 internal static readonly @string newTickerStopˢ = "NewTickerStop"u8;
 
-public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
+public static partial void TestTimerGC(ж<Δtesting.T> Ꮡt) {
     if (time_internal_test_package.AsynctimerChan.Value() == "1"u8) {
         Ꮡt.Skip(skippingTestTimerGCWithˢ);
     }
