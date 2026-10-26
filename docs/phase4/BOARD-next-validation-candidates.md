@@ -28837,4 +28837,51 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — G (COORD's wave, the .2 headline's design): windows `syscall.ForkLock`'s hand-own has no box while its converter twin and every importer's predicate say it does — LATENT, fixed in the headline seat
+
+**What happens.** The owner arm `markExportedBoxOnlyGlobals` boxes `syscall.ForkLock` on every target, and
+`importedGlobalIsBoxed` re-runs that predicate for an importer. On windows the compiled file is the hand-own
+`src/core/syscall/windows/exec_windows.cs`, which declares `public static Δsync.RWMutex ForkLock;`, a plain field.
+Its re-emitted twin `exec_windows.cs.auto` declares the box. So an importer's `syscall.ForkLock.RLock()` on windows
+would emit `syscall.ᏑForkLock` against a member the compiled `syscall` does not have: CS0117.
+
+**Why nothing fails.** No windows emission names `syscall.ᏑForkLock`. Its importers are all unix flavours
+(`internal/poll` on linux and darwin, `os` and `net` on darwin), and the linux and darwin `syscall` both declare the
+box (linux's hand-own, darwin's converted file). Found by the census of
+[`DESIGN-crosspkg-exported-box.md`](DESIGN-crosspkg-exported-box.md), which reads the compiled emission rather than
+the converter's twin.
+
+**Owed (the headline seat, OQ-3 of that note):**
+- Box `ForkLock` in the windows hand-own.
+- Add a guard: every whole-file hand-own declares exactly the package-level boxes its `.cs.auto` twin declares. It is
+  red on master for this row.
+
+— G (2026-10-26)
+
+## 2026-10-26 — G (COORD's wave, the .2 headline's design): an importer's FIELD or ELEMENT path into another package's exported var roots on a copy, and `&lib.Arr[i]` spells a name nothing declares — LATENT in std, fixed by the headline seat's importer arm
+
+**What happens.** Converted at master `62ae00e43e` (the probe is committed in
+`probes/g-crosspkg-box-census/emitprobe`; Go prints `5 2 3 7 4 true`):
+- `q := &lib.S.N` emits `Ꮡ(lib.S).of(lib.Holder.ᏑN)`, a field of a fresh copy of `lib.S`, so `*q = 3` never reaches it.
+- `lib.S.WG.Add(1); lib.S.WG.Done()` (a box-only field type) emits `Ꮡ(lib.S).of(lib.Holder.ᏑWG).Add(1)`: each call
+  takes a NEW copy, so `Done` reaches a WaitGroup that `Add` never touched. Predicted, not run: Go's negative-counter
+  panic, for a program Go runs cleanly.
+- `e := &lib.Arr[1]` emits `Ꮡlib.Arr.at<nint>(1)`. It names `Ꮡlib`, which nothing declares, so it should fail to
+  compile (CS0103; the probe was converted, not built).
+
+Boxing the owner alone does not fix the first two: with the owner arm widened, both still root on `Ꮡ(lib.S)`, because
+the `&m.field` arm of `convUnaryExpr` and `exprFieldRootsAtAddressedGlobal` both need a bare same-package identifier
+root.
+
+**Scope.** None of the three shapes occurs in std or its tests: the importer census of
+[`DESIGN-crosspkg-exported-box.md`](DESIGN-crosspkg-exported-box.md) finds no cross-package field or element address,
+and no field-path pointer-receiver call, on an unboxed var. The `Ꮡ<alias>.<Var>.at<` spelling reads 0 in `src/core`,
+with its positive control 1. User code reaches all three.
+
+**Owed (the headline seat, its section 2):** an importer arm that roots a field or element path at the owner's box
+when `importedGlobalIsBoxed` answers yes: `lib.ᏑS.of(lib.Holder.ᏑN)` and `lib.ᏑArr.at<nint>(1)`. Red first, by the
+three lines above in the new behavioral golden.
+
+— G (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

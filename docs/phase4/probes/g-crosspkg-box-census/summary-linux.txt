@@ -1,0 +1,75 @@
+linux tests=false all                                      601
+linux tests=false boxed-today kind=pointer                 1
+linux tests=false boxed-today kind=value:array             1
+linux tests=false boxed-today kind=value:basic:int         1
+linux tests=false boxed-today kind=value:slice             1
+linux tests=false boxed-today kind=value:struct            4
+linux tests=false kind=interface                           144
+linux tests=false kind=pointer                             294
+linux tests=false kind=value:array                         9
+linux tests=false kind=value:basic:bool                    32
+linux tests=false kind=value:basic:int                     11
+linux tests=false kind=value:basic:int32                   1
+linux tests=false kind=value:basic:string                  15
+linux tests=false kind=value:basic:uintptr                 1
+linux tests=false kind=value:func                          16
+linux tests=false kind=value:map                           10
+linux tests=false kind=value:slice                         30
+linux tests=false kind=value:struct                        38
+linux tests=false to-box kind=interface                    144
+linux tests=false to-box kind=pointer                      293
+linux tests=false to-box kind=value:array                  8
+linux tests=false to-box kind=value:basic:bool             32
+linux tests=false to-box kind=value:basic:int              10
+linux tests=false to-box kind=value:basic:int32            1
+linux tests=false to-box kind=value:basic:string           15
+linux tests=false to-box kind=value:basic:uintptr          1
+linux tests=false to-box kind=value:func                   16
+linux tests=false to-box kind=value:map                    10
+linux tests=false to-box kind=value:slice                  29
+linux tests=false to-box kind=value:struct                 34
+linux tests=false to-box linkname kind=value:basic:int32   1
+linux tests=false to-box linkname kind=value:struct        8
+linux tests=true all                                      263
+linux tests=true boxed-today kind=value:basic:uint32      1
+linux tests=true boxed-today kind=value:basic:uint64      1
+linux tests=true emitted=no                               24
+linux tests=true kind=interface                           22
+linux tests=true kind=pointer                             20
+linux tests=true kind=value:array                         3
+linux tests=true kind=value:basic:Pointer                 1
+linux tests=true kind=value:basic:bool                    4
+linux tests=true kind=value:basic:float64                 2
+linux tests=true kind=value:basic:int                     8
+linux tests=true kind=value:basic:string                  2
+linux tests=true kind=value:basic:uint                    1
+linux tests=true kind=value:basic:uint32                  1
+linux tests=true kind=value:basic:uint64                  2
+linux tests=true kind=value:basic:uintptr                 4
+linux tests=true kind=value:func                          150
+linux tests=true kind=value:map                           2
+linux tests=true kind=value:slice                         34
+linux tests=true kind=value:struct                        7
+linux tests=true to-box kind=interface                    22
+linux tests=true to-box kind=pointer                      17
+linux tests=true to-box kind=value:array                  1
+linux tests=true to-box kind=value:basic:Pointer          1
+linux tests=true to-box kind=value:basic:bool             4
+linux tests=true to-box kind=value:basic:float64          2
+linux tests=true to-box kind=value:basic:int              8
+linux tests=true to-box kind=value:basic:string           2
+linux tests=true to-box kind=value:basic:uint             1
+linux tests=true to-box kind=value:basic:uint64           1
+linux tests=true to-box kind=value:basic:uintptr          4
+linux tests=true to-box kind=value:func                   131
+linux tests=true to-box kind=value:map                    2
+linux tests=true to-box kind=value:slice                  34
+linux tests=true to-box kind=value:struct                 7
+linux importers use=addr         kind=value     test=false 1
+linux importers use=addr         kind=value     test=true 12
+linux importers use=ptrcall      kind=value     test=false 2
+linux importers use=ptrcall      kind=value     test=true 2
+linux importers use=read         kind=interface test=false 575
+linux importers use=read         kind=interface test=true 1388
+linux importers use=read         kind=value     test=false 471
+linux importers use=read         kind=value     test=true 517
