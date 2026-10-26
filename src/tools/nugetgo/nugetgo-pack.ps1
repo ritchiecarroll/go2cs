@@ -540,6 +540,9 @@ $csproj = @"
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <TargetsForTfmSpecificContentInPackage>`$(TargetsForTfmSpecificContentInPackage);NugetgoModuleAssemblies</TargetsForTfmSpecificContentInPackage>
+    <!-- lib/ is the module's own assemblies, each referenced directly below. A library's pkg/ reference (a third-party
+         module, a NuGet dependency of this package) must not resolve through it transitively into lib/. -->
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <PackageId>$(& $esc $id.Id)</PackageId>
     <Version>$(& $esc $packageVersion)</Version>
     <Authors>$(ConvertTo-NugetgoMSBuildLiteral $Authors)</Authors>
