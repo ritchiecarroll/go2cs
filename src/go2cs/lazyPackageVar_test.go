@@ -433,7 +433,7 @@ func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 		"return Ꮡtable;",
 		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StaticBox<array<P>>(",
 		"internal static ref array<P> counters => ref Ꮡcounters.Value;",
-		"[GoLazy] partial class lazyᴛbumpers { internal static ж<array<P>> Ꮡbumpers = new StandardBox<array<P>>(",
+		"[GoLazy] partial class lazyᴛbumpers { internal static ж<array<P>> Ꮡbumpers = new StaticBox<array<P>>(",
 		"internal static ref array<P> bumpers => ref Ꮡbumpers.Value;",
 		"return Ꮡbumpers.at<P>(0).Bump;",
 	} {
