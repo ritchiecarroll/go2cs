@@ -15,7 +15,7 @@ partial class runtime_package {
 //go:generate go run mkduff.go
 //go:generate go run mkfastlog2table.go
 //go:generate go run mklockrank.go -o lockrank.go
-internal static ж<ticksType> Ꮡticks = new StandardBox<ticksType>(new ticksType());
+internal static ж<ticksType> Ꮡticks = new StaticBox<ticksType>(new ticksType());
 internal static ref ticksType ticks => ref Ꮡticks.Value;
 
 partial struct ticksType {
@@ -143,13 +143,13 @@ internal static void syscall_Exit(nint code) {
 
 internal static @string godebugDefault;
 
-internal static ж<atomic.Pointer<Action<@string, @string>>> ᏑgodebugUpdate = new StandardBox<atomic.Pointer<Action<@string, @string>>>(default(atomic.Pointer<Action<@string, @string>>));
+internal static ж<atomic.Pointer<Action<@string, @string>>> ᏑgodebugUpdate = new StaticBox<atomic.Pointer<Action<@string, @string>>>(default(atomic.Pointer<Action<@string, @string>>));
 internal static ref atomic.Pointer<Action<@string, @string>> godebugUpdate => ref ᏑgodebugUpdate.Value;
 
-internal static ж<atomic.Pointer<@string>> ᏑgodebugEnv = new StandardBox<atomic.Pointer<@string>>(default(atomic.Pointer<@string>));
+internal static ж<atomic.Pointer<@string>> ᏑgodebugEnv = new StaticBox<atomic.Pointer<@string>>(default(atomic.Pointer<@string>));
 internal static ref atomic.Pointer<@string> godebugEnv => ref ᏑgodebugEnv.Value;                      // set by parsedebugvars
 
-internal static ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new StandardBox<atomic.Pointer<Func<@string, Action>>>(default(atomic.Pointer<Func<@string, Action>>));
+internal static ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new StaticBox<atomic.Pointer<Func<@string, Action>>>(default(atomic.Pointer<Func<@string, Action>>));
 internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault => ref ᏑgodebugNewIncNonDefault.Value;
 
 //go:linkname godebug_setUpdate internal/godebug.setUpdate
@@ -252,7 +252,7 @@ internal static void writeErrStr(@string s) {
 // to standard error.
 //
 // Initialized to -1 in schedinit.
-internal static ж<atomic.Uintptr> ᏑcrashFD = new StandardBox<atomic.Uintptr>(default(atomic.Uintptr));
+internal static ж<atomic.Uintptr> ᏑcrashFD = new StaticBox<atomic.Uintptr>(default(atomic.Uintptr));
 internal static ref atomic.Uintptr crashFD => ref ᏑcrashFD.Value;
 
 //go:linkname setCrashFD
@@ -322,7 +322,7 @@ internal static slice<uintptr> getAuxv() {
 // See go.dev/issue/67401.
 //
 //go:linkname zeroVal
-public static ж<array<byte>> ᏑzeroVal = new StandardBox<array<byte>>(new array<byte>(1024));
+public static ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(new array<byte>(1024));
 public static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
 
 } // end runtime_package

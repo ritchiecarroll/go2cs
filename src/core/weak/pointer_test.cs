@@ -356,7 +356,7 @@ public static void TestIssue70739(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<T> Ꮡimmortal = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡimmortal = new StaticBox<T>(default(T));
 internal static ref T immortal => ref Ꮡimmortal.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

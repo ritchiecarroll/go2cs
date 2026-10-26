@@ -55,7 +55,7 @@ public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> Ꮡf
 
 // Importing is a sentinel taking the place in Importer.packages
 // for a package that is in the process of being imported.
-internal static ж<types.Package> Ꮡimporting = new StandardBox<types.Package>(default(types.Package));
+internal static ж<types.Package> Ꮡimporting = new StaticBox<types.Package>(default(types.Package));
 internal static ref types.Package importing => ref Ꮡimporting.Value;
 
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).

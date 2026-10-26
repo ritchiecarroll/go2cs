@@ -16,7 +16,7 @@ internal static bool ratTok(rune ch) {
     return strings.ContainsRune("+-/0123456789.eE"u8, ch);
 }
 
-internal static ж<ΔRat> ᏑratZero = new StandardBox<ΔRat>(default(ΔRat));
+internal static ж<ΔRat> ᏑratZero = new StaticBox<ΔRat>(default(ΔRat));
 internal static ref ΔRat ratZero => ref ᏑratZero.Value;
 
 internal static fmt.Scanner _ᴛ6ʗ = new ΔRatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner

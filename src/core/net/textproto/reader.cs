@@ -845,7 +845,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
 // commonHeader interns common header strings.
 internal static map<@string, @string> commonHeader;
 
-internal static ж<sync.Once> ᏑcommonHeaderOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑcommonHeaderOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once commonHeaderOnce => ref ᏑcommonHeaderOnce.Value;
 
 internal static void initCommonHeader() {

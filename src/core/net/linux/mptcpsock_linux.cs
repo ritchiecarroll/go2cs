@@ -14,7 +14,7 @@ using @internal.syscall;
 
 partial class net_package {
 
-internal static ж<Δsync.Once> ᏑmptcpOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ж<Δsync.Once> ᏑmptcpOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once mptcpOnce => ref ᏑmptcpOnce.Value;
 internal static bool mptcpAvailable;
 internal static bool hasSOLMPTCP; // only valid if mptcpAvailable is true

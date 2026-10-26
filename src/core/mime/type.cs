@@ -12,16 +12,16 @@ using Δsync = sync_package;
 
 partial class mime_package {
 
-internal static ж<Δsync.Map> ᏑmimeTypes = new StandardBox<Δsync.Map>(default(Δsync.Map));
+internal static ж<Δsync.Map> ᏑmimeTypes = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map mimeTypes => ref ᏑmimeTypes.Value;  // map[string]string; ".Z" => "application/x-compress"
-internal static ж<Δsync.Map> ᏑmimeTypesLower = new StandardBox<Δsync.Map>(default(Δsync.Map));
+internal static ж<Δsync.Map> ᏑmimeTypesLower = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map mimeTypesLower => ref ᏑmimeTypesLower.Value; // map[string]string; ".z" => "application/x-compress"
 
 // extensions maps from MIME type to list of lowercase file
 // extensions: "image/jpeg" => [".jfif", ".jpg", ".jpeg", ".pjp", ".pjpeg"]
-internal static ж<Δsync.Mutex> ᏑextensionsMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
+internal static ж<Δsync.Mutex> ᏑextensionsMu = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex extensionsMu => ref ᏑextensionsMu.Value; // Guards stores (but not loads) on extensions.
-internal static ж<Δsync.Map> Ꮡextensions = new StandardBox<Δsync.Map>(default(Δsync.Map));
+internal static ж<Δsync.Map> Ꮡextensions = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map extensions => ref Ꮡextensions.Value; // map[string][]string; slice values are append-only.
 
 // setMimeTypes is used by initMime's non-test path, and by tests.
@@ -137,7 +137,7 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
     [".zip"u8] = "application/zip"u8
 }; }
 
-internal static ж<Δsync.Once> Ꮡonce = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ж<Δsync.Once> Ꮡonce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once once => ref Ꮡonce.Value;    // guards initMime
 
 internal static Action testInitMime;

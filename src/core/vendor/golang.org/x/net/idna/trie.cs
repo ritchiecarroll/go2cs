@@ -17,7 +17,7 @@ partial struct sparseBlocks {
     internal slice<uint16> offset;
 }
 
-[GoLazy] partial class lazyᴛidnaSparse { internal static ж<sparseBlocks> ᏑidnaSparse = new StandardBox<sparseBlocks>(new sparseBlocks(
+[GoLazy] partial class lazyᴛidnaSparse { internal static ж<sparseBlocks> ᏑidnaSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
     values: idnaSparseValues[..],
     offset: idnaSparseOffset[..]
 )); }

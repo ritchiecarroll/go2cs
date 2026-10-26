@@ -122,7 +122,7 @@ public static (ж<P384Point>, error) SetBytes(this ж<P384Point> Ꮡp, slice<byt
 
 internal static ж<fiat.P384Element> _p384B;
 
-internal static ж<sync.Once> Ꮡ_p384BOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> Ꮡ_p384BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p384BOnce => ref Ꮡ_p384BOnce.Value;
 
 internal static ж<fiat.P384Element> p384B() {
@@ -423,7 +423,7 @@ public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384
 
 internal static ж<array<p384Table>> p384GeneratorTable;
 
-internal static ж<sync.Once> Ꮡp384GeneratorTableOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> Ꮡp384GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p384GeneratorTableOnce => ref Ꮡp384GeneratorTableOnce.Value;
 
 // generatorTable returns a sequence of p384Tables. The first table contains

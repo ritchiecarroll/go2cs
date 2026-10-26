@@ -20,7 +20,7 @@ partial class runtime_package {
 //
 // These fields are protected by metricsSema which should be
 // locked/unlocked with metricsLock() / metricsUnlock().
-internal static ж<uint32> ᏑmetricsSema = new StandardBox<uint32>(1);
+internal static ж<uint32> ᏑmetricsSema = new StaticBox<uint32>(1);
 internal static ref uint32 metricsSema => ref ᏑmetricsSema.Value;
 internal static bool metricsInit;
 internal static map<@string, metricData> metrics;
@@ -905,7 +905,7 @@ partial struct metricFloat64Histogram {
 // Managed as a global variable because its pointer will be
 // an argument to a dynamically-defined function, and we'd
 // like to avoid it escaping to the heap.
-internal static ж<statAggregate> Ꮡagg = new StandardBox<statAggregate>(new statAggregate());
+internal static ж<statAggregate> Ꮡagg = new StaticBox<statAggregate>(new statAggregate());
 internal static ref statAggregate agg => ref Ꮡagg.Value;
 
 partial struct metricName {

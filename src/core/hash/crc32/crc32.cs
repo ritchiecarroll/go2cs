@@ -81,7 +81,7 @@ internal static ж<slicing8Table> castagnoliTable8;
 
 internal static Func<uint32, slice<byte>, uint32> updateCastagnoli;
 
-internal static ж<atomic.Bool> ᏑhaveCastagnoli = new StandardBox<atomic.Bool>(default(atomic.Bool));
+internal static ж<atomic.Bool> ᏑhaveCastagnoli = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool haveCastagnoli => ref ᏑhaveCastagnoli.Value;
 
 internal static Action castagnoliInitOnce;

@@ -35,7 +35,7 @@ partial struct cacheᴛ1 /*dyn*/ {
     internal ж<User> u;
     internal error err;
 }
-internal static ж<cacheᴛ1> Ꮡcache = new StandardBox<cacheᴛ1>(new cacheᴛ1(nil));
+internal static ж<cacheᴛ1> Ꮡcache = new StaticBox<cacheᴛ1>(new cacheᴛ1(nil));
 internal static ref cacheᴛ1 cache => ref Ꮡcache.Value;
 
 // Lookup looks up a user by username. If the user cannot be found, the

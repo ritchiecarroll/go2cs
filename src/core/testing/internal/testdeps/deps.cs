@@ -140,7 +140,7 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<testLog> Ꮡlog = new StandardBox<testLog>(default(testLog));
+internal static ж<testLog> Ꮡlog = new StaticBox<testLog>(default(testLog));
 internal static ref testLog log => ref Ꮡlog.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -115,7 +115,7 @@ internal static @string modinfo;
 //   background GC work (note: currently disabled per golang.org/issue/19112).
 //   Also see golang.org/issue/44313, as this should be extended to all GC
 //   workers.
-internal static ж<m> Ꮡm0 = new StandardBox<m>(new m(nil));
+internal static ж<m> Ꮡm0 = new StaticBox<m>(new m(nil));
 internal static ref m m0 => ref Ꮡm0.Value;
 internal static g g0 = new();
 internal static ж<mcache> mcache0;
@@ -618,7 +618,7 @@ internal static void badctxt() {
 // stack conditions.
 internal static g gcrash = new();
 
-internal static ж<atomic.Pointer<g>> ᏑcrashingG = new StandardBox<atomic.Pointer<g>>(default(atomic.Pointer<g>));
+internal static ж<atomic.Pointer<g>> ᏑcrashingG = new StaticBox<atomic.Pointer<g>>(default(atomic.Pointer<g>));
 internal static ref atomic.Pointer<g> crashingG => ref ᏑcrashingG.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -670,9 +670,9 @@ internal static bool lockedOSThread() {
 // Access via the slice is protected by allglock or stop-the-world.
 // Readers that cannot take the lock may (carefully!) use the atomic
 // variables below.
-internal static ж<mutex> Ꮡallglock = new StandardBox<mutex>(new mutex(nil));
+internal static ж<mutex> Ꮡallglock = new StaticBox<mutex>(new mutex(nil));
 internal static ref mutex allglock => ref Ꮡallglock.Value;
-internal static ж<slice<ж<g>>> Ꮡallgs = new StandardBox<slice<ж<g>>>(default(slice<ж<g>>));
+internal static ж<slice<ж<g>>> Ꮡallgs = new StaticBox<slice<ж<g>>>(default(slice<ж<g>>));
 internal static ref slice<ж<g>> allgs => ref Ꮡallgs.ValueSlot;
 
 // allglen and allgptr are atomic variables that contain len(allgs) and
@@ -687,9 +687,9 @@ internal static ref slice<ж<g>> allgs => ref Ꮡallgs.ValueSlot;
 // allgptr copies should always be stored as a concrete type or
 // unsafe.Pointer, not uintptr, to ensure that GC can still reach it
 // even if it points to a stale array.
-internal static ж<uintptr> Ꮡallglen = new StandardBox<uintptr>(default(uintptr));
+internal static ж<uintptr> Ꮡallglen = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr allglen => ref Ꮡallglen.Value;
-internal static ж<ж<ж<g>>> Ꮡallgptr = new StandardBox<ж<ж<g>>>(default(ж<ж<g>>));
+internal static ж<ж<ж<g>>> Ꮡallgptr = new StaticBox<ж<ж<g>>>(default(ж<ж<g>>));
 internal static ref ж<ж<g>> allgptr => ref Ꮡallgptr.ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1156,7 +1156,7 @@ internal static UntypedInt freezeStopWait => 0x7fffffff;
 
 // freezing is set to non-zero if the runtime is trying to freeze the
 // world.
-internal static ж<atomic.Bool> Ꮡfreezing = new StandardBox<atomic.Bool>(default(atomic.Bool));
+internal static ж<atomic.Bool> Ꮡfreezing = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool freezing => ref Ꮡfreezing.Value;
 
 // Similar to stopTheWorld but best-effort and can be called several times.
@@ -1276,7 +1276,7 @@ internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval)
 
 // casgstatusAlwaysTrack is a debug flag that causes casgstatus to always track
 // various latencies on every transition instead of sampling them.
-internal static ж<bool> ᏑcasgstatusAlwaysTrack = new StandardBox<bool>(false);
+internal static ж<bool> ᏑcasgstatusAlwaysTrack = new StaticBox<bool>(false);
 internal static ref bool casgstatusAlwaysTrack => ref ᏑcasgstatusAlwaysTrack.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1567,7 +1567,7 @@ internal static void startTheWorldGC(worldStop w) {
 }
 
 // Holding worldsema grants an M the right to try to stop the world.
-internal static ж<uint32> Ꮡworldsema = new StandardBox<uint32>(1);
+internal static ж<uint32> Ꮡworldsema = new StaticBox<uint32>(1);
 internal static ref uint32 worldsema => ref Ꮡworldsema.Value;
 
 // Holding gcsema grants the M the right to block a GC, and blocks
@@ -1576,7 +1576,7 @@ internal static ref uint32 worldsema => ref Ꮡworldsema.Value;
 //
 // TODO(mknyszek): Once gomaxprocs and the execution tracer can handle
 // being changed/enabled during a GC, remove this.
-internal static ж<uint32> Ꮡgcsema = new StandardBox<uint32>(1);
+internal static ж<uint32> Ꮡgcsema = new StaticBox<uint32>(1);
 internal static ref uint32 gcsema => ref Ꮡgcsema.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2748,17 +2748,17 @@ internal static uintptr getm() {
 // Can't be atomic.Pointer[m] because we use an invalid pointer as a
 // "locked" sentinel value. M's on this list remain visible to the GC
 // because their mp.curg is on allgs.
-internal static ж<atomic.Uintptr> ᏑextraM = new StandardBox<atomic.Uintptr>(default(atomic.Uintptr));
+internal static ж<atomic.Uintptr> ᏑextraM = new StaticBox<atomic.Uintptr>(default(atomic.Uintptr));
 internal static ref atomic.Uintptr extraM => ref ᏑextraM.Value;
 // Number of M's in the extraM list.
-internal static ж<atomic.Uint32> ᏑextraMLength = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ж<atomic.Uint32> ᏑextraMLength = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMLength => ref ᏑextraMLength.Value;
 // Number of waiters in lockextra.
-internal static ж<atomic.Uint32> ᏑextraMWaiters = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ж<atomic.Uint32> ᏑextraMWaiters = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMWaiters => ref ᏑextraMWaiters.Value;
 
 // Number of extra M's in use by threads.
-public static ж<atomic.Uint32> ᏑextraMInUse = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+public static ж<atomic.Uint32> ᏑextraMInUse = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 public static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
 
 // lockextra locks the extra list and returns the list head.
@@ -2842,13 +2842,13 @@ internal static void addExtraM(ж<m> Ꮡmp) {
 // allocmLock is locked for read when creating new Ms in allocm and their
 // addition to allm. Thus acquiring this lock for write blocks the
 // creation of new Ms.
-internal static ж<rwmutex> ᏑallocmLock = new StandardBox<rwmutex>(new rwmutex());
+internal static ж<rwmutex> ᏑallocmLock = new StaticBox<rwmutex>(new rwmutex());
 internal static ref rwmutex allocmLock => ref ᏑallocmLock.Value;
 
 // execLock serializes exec and clone to avoid bugs or unspecified
 // behaviour around exec'ing while creating/destroying threads. See
 // issue #19546.
-internal static ж<rwmutex> ᏑexecLock = new StandardBox<rwmutex>(new rwmutex());
+internal static ж<rwmutex> ᏑexecLock = new StaticBox<rwmutex>(new rwmutex());
 internal static ref rwmutex execLock => ref ᏑexecLock.Value;
 
 // These errors are reported (via writeErrStr) by some OS-specific
@@ -2873,7 +2873,7 @@ partial struct newmHandoffᴛ1 /*dyn*/ {
     // to 1.
     internal uint32 haveTemplateThread;
 }
-internal static ж<newmHandoffᴛ1> ᏑnewmHandoff = new StandardBox<newmHandoffᴛ1>(new newmHandoffᴛ1());
+internal static ж<newmHandoffᴛ1> ᏑnewmHandoff = new StaticBox<newmHandoffᴛ1>(new newmHandoffᴛ1());
 internal static ref newmHandoffᴛ1 newmHandoff => ref ᏑnewmHandoff.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -4924,7 +4924,7 @@ internal static void syscall_runtime_AfterForkInChild() {
 // pendingPreemptSignals is the number of preemption signals
 // that have been sent but not received. This is only used on Darwin.
 // For #41702.
-internal static ж<atomic.Int32> ᏑpendingPreemptSignals = new StandardBox<atomic.Int32>(default(atomic.Int32));
+internal static ж<atomic.Int32> ᏑpendingPreemptSignals = new StaticBox<atomic.Int32>(default(atomic.Int32));
 internal static ref atomic.Int32 pendingPreemptSignals => ref ᏑpendingPreemptSignals.Value;
 
 // Called from syscall package before Exec.
@@ -5357,7 +5357,7 @@ partial struct profᴛ1 /*dyn*/ {
     // signalLock should be taken to synchronize with changes.
     internal atomic.Int32 hz;
 }
-internal static ж<profᴛ1> Ꮡprof = new StandardBox<profᴛ1>(default(profᴛ1));
+internal static ж<profᴛ1> Ꮡprof = new StaticBox<profᴛ1>(default(profᴛ1));
 internal static ref profᴛ1 prof => ref Ꮡprof.Value;
 
 internal static void _System() {
@@ -6168,7 +6168,7 @@ internal static void checkdead() {
 // is forced to run.
 //
 // This is a variable for testing purposes. It normally doesn't change.
-internal static ж<int64> Ꮡforcegcperiod = new StandardBox<int64>(120000000000L);
+internal static ж<int64> Ꮡforcegcperiod = new StaticBox<int64>(120000000000L);
 internal static ref int64 forcegcperiod => ref Ꮡforcegcperiod.Value;
 
 // haveSysmon indicates whether there is sysmon thread support.
@@ -6718,7 +6718,7 @@ internal static ж<godebugInc> updatemaxprocs = Ꮡ(new godebugInc(name: "update
 
 // Synchronization and state between updateMaxProcsGoroutine and
 // sysmon.
-internal static ж<updateMaxProcsGState> ᏑupdateMaxProcsG = new StandardBox<updateMaxProcsGState>(new updateMaxProcsGState());
+internal static ж<updateMaxProcsGState> ᏑupdateMaxProcsG = new StaticBox<updateMaxProcsGState>(new updateMaxProcsGState());
 internal static ref updateMaxProcsGState updateMaxProcsG => ref ᏑupdateMaxProcsG.Value;
 
 // Synchronization between GOMAXPROCS and sysmon.
@@ -6768,7 +6768,7 @@ internal static ref updateMaxProcsGState updateMaxProcsG => ref ᏑupdateMaxProc
 // N.B. computeMaxProcsLock could simply be sched.lock, but we want to
 // avoid holding that lock during the potentially slow
 // defaultGOMAXPROCS.
-internal static ж<mutex> ᏑcomputeMaxProcsLock = new StandardBox<mutex>(new mutex(nil));
+internal static ж<mutex> ᏑcomputeMaxProcsLock = new StaticBox<mutex>(new mutex(nil));
 internal static ref mutex computeMaxProcsLock => ref ᏑcomputeMaxProcsLock.Value;
 
 // Start GOMAXPROCS update helper goroutine.
@@ -7738,7 +7738,7 @@ internal static void sync_runtime_doSpin() {
     internal_sync_runtime_doSpin();
 }
 
-internal static ж<randomOrder> ᏑstealOrder = new StandardBox<randomOrder>(default(randomOrder));
+internal static ж<randomOrder> ᏑstealOrder = new StaticBox<randomOrder>(default(randomOrder));
 internal static ref randomOrder stealOrder => ref ᏑstealOrder.Value;
 
 // randomOrder/randomEnum are helper types for randomized work stealing.

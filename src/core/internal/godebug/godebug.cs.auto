@@ -161,10 +161,10 @@ internal static void register(this ж<Setting> Ꮡs) {
 // at least once, or if the name has ever appeared in
 // a name=value pair in the $GODEBUG environment variable.
 // Once entered into the map, the name is never removed.
-internal static ж<sync.Map> Ꮡcache = new StandardBox<sync.Map>(default(sync.Map));
+internal static ж<sync.Map> Ꮡcache = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map cache => ref Ꮡcache.Value; // name string -> value *atomic.Pointer[string]
 
-internal static ж<value> Ꮡempty = new StandardBox<value>(default(value));
+internal static ж<value> Ꮡempty = new StaticBox<value>(default(value));
 internal static ref value empty => ref Ꮡempty.Value;
 
 // Value returns the current value for the GODEBUG setting s.
@@ -249,7 +249,7 @@ internal static Action newIncNonDefault(@string name) {
     return s.IncNonDefault;
 }
 
-internal static ж<sync.Mutex> ᏑupdateMu = new StandardBox<sync.Mutex>(default(sync.Mutex));
+internal static ж<sync.Mutex> ᏑupdateMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex updateMu => ref ᏑupdateMu.Value;
 
 // update records an updated GODEBUG setting.
@@ -338,7 +338,7 @@ internal static void parse(map<@string, bool> did, @string s) {
 partial struct runtimeStderr {
 }
 
-internal static ж<runtimeStderr> Ꮡstderr = new StandardBox<runtimeStderr>(default(runtimeStderr));
+internal static ж<runtimeStderr> Ꮡstderr = new StaticBox<runtimeStderr>(default(runtimeStderr));
 internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
 
 internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {

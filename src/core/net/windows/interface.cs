@@ -186,7 +186,7 @@ partial struct ipv6ZoneCache {
     internal map<nint, @string> toName; // interface index to its name
 }
 
-internal static ж<ipv6ZoneCache> ᏑzoneCache = new StandardBox<ipv6ZoneCache>(new ipv6ZoneCache(
+internal static ж<ipv6ZoneCache> ᏑzoneCache = new StaticBox<ipv6ZoneCache>(new ipv6ZoneCache(
     toIndex: new map<@string, nint>(),
     toName: new map<nint, @string>()
 ));

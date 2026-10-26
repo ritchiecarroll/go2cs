@@ -111,7 +111,7 @@ public static void TestReset(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<sync.Once> ᏑbigDataOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑbigDataOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once bigDataOnce => ref ᏑbigDataOnce.Value;
 internal static slice<byte> bigDataBytes;
 internal static error bigDataErr;
@@ -142,7 +142,7 @@ internal static @string findZstd(testing.TB t) {
     return zstd;
 }
 
-internal static ж<sync.Once> ᏑzstdBigOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑzstdBigOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once zstdBigOnce => ref ᏑzstdBigOnce.Value;
 internal static slice<byte> zstdBigBytes;
 internal static error zstdBigErr;

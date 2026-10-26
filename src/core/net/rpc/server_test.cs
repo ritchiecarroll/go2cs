@@ -29,11 +29,11 @@ internal static ж<global::go.net.rpc_package.Server> newServer;
 internal static @string serverAddr;
 internal static @string newServerAddr;
 internal static @string httpServerAddr;
-internal static ж<sync.Once> Ꮡonce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> Ꮡonce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once once => ref Ꮡonce.Value;
-internal static ж<sync.Once> ᏑnewOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑnewOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once newOnce => ref ᏑnewOnce.Value;
-internal static ж<sync.Once> ᏑhttpOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑhttpOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once httpOnce => ref ᏑhttpOnce.Value;
 
 internal static readonly @string newHttpPath = "/foo"u8;

@@ -53,7 +53,7 @@ partial struct cpuProfile {
     internal uint64 lostAtomic; // count of frames lost because of being in atomic64 on mips/arm; updated racily
 }
 
-internal static ж<cpuProfile> Ꮡcpuprof = new StandardBox<cpuProfile>(new cpuProfile());
+internal static ж<cpuProfile> Ꮡcpuprof = new StaticBox<cpuProfile>(new cpuProfile());
 internal static ref cpuProfile cpuprof => ref Ꮡcpuprof.Value;
 
 // SetCPUProfileRate sets the CPU profiling rate to hz samples per second.

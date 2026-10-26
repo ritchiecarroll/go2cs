@@ -526,7 +526,7 @@ public static Value MakeString(@string s) {
     return new stringValжValue(Ꮡ(new stringVal(s: s)));
 }
 
-internal static ж<stringVal> ᏑemptyString = new StandardBox<stringVal>(default(stringVal));
+internal static ж<stringVal> ᏑemptyString = new StaticBox<stringVal>(default(stringVal));
 internal static ref stringVal emptyString => ref ᏑemptyString.Value;
 
 // MakeInt64 returns the [Int] value for x.

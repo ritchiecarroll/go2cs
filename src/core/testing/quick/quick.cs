@@ -230,7 +230,7 @@ partial struct Config {
     public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 }
 
-internal static ж<Config> ᏑdefaultConfig = new StandardBox<Config>(default(Config));
+internal static ж<Config> ᏑdefaultConfig = new StaticBox<Config>(default(Config));
 internal static ref Config defaultConfig => ref ᏑdefaultConfig.Value;
 
 // getRand returns the *rand.Rand to use for a given Config.

@@ -327,7 +327,7 @@ internal static (nint n, error err) read(slice<byte> p, Source src, ref int64 re
 // convenience functions. When possible it uses the runtime fastrand64
 // function to avoid locking. This is not possible if the user called Seed,
 // either explicitly or implicitly via GODEBUG=randautoseed=0.
-internal static ж<atomic.Pointer<Rand>> ᏑglobalRandGenerator = new StandardBox<atomic.Pointer<Rand>>(default(atomic.Pointer<Rand>));
+internal static ж<atomic.Pointer<Rand>> ᏑglobalRandGenerator = new StaticBox<atomic.Pointer<Rand>>(default(atomic.Pointer<Rand>));
 internal static ref atomic.Pointer<Rand> globalRandGenerator => ref ᏑglobalRandGenerator.Value;
 
 internal static ж<godebug.Setting> randautoseed = godebug.New("randautoseed"u8);

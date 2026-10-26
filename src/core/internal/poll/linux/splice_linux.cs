@@ -219,7 +219,7 @@ partial struct splicePipe {
 // splicePipePool caches pipes to avoid high-frequency construction and destruction of pipe buffers.
 // The garbage collector will free all pipes in the sync.Pool periodically, thus we need to set up
 // a finalizer for each pipe to close its file descriptors before the actual GC.
-internal static ж<sync.Pool> ᏑsplicePipePool = new StandardBox<sync.Pool>(default(sync.Pool));
+internal static ж<sync.Pool> ᏑsplicePipePool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool splicePipePool => ref ᏑsplicePipePool.Value;
 internal static void initᴛsplicePipePool() { splicePipePool = new sync.Pool(New: newPoolPipe); }
 

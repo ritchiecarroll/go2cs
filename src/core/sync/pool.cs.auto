@@ -85,7 +85,7 @@ partial struct poolLocalInternal {
 //go:linkname runtime_randn runtime.randn
 internal static partial uint32 runtime_randn(uint32 n);
 
-internal static ж<array<uint64>> ᏑpoolRaceHash = new StandardBox<array<uint64>>(new array<uint64>(128));
+internal static ж<array<uint64>> ᏑpoolRaceHash = new StaticBox<array<uint64>>(new array<uint64>(128));
 internal static ref array<uint64> poolRaceHash => ref ᏑpoolRaceHash.Value;
 
 // poolRaceAddr returns an address to use as the synchronization point
@@ -305,7 +305,7 @@ internal static void poolCleanup() {
     (oldPools, allPools) = (allPools, default!);
 }
 
-internal static ж<Mutex> ᏑallPoolsMu = new StandardBox<Mutex>(default(Mutex));
+internal static ж<Mutex> ᏑallPoolsMu = new StaticBox<Mutex>(default(Mutex));
 internal static ref Mutex allPoolsMu => ref ᏑallPoolsMu.Value;
 
 // allPools is the set of pools that have non-empty primary

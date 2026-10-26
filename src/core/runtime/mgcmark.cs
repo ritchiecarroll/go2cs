@@ -210,7 +210,7 @@ internal static void gcMarkRootCheck() {
 }
 
 // oneptrmask for an allocation containing a single pointer.
-internal static ж<array<uint8>> Ꮡoneptrmask = new StandardBox<array<uint8>>(new uint8[]{1}.array());
+internal static ж<array<uint8>> Ꮡoneptrmask = new StaticBox<array<uint8>>(new uint8[]{1}.array());
 internal static ref array<uint8> oneptrmask => ref Ꮡoneptrmask.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

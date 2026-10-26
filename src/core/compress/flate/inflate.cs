@@ -25,10 +25,10 @@ internal static UntypedInt maxNumDist => 30;
 internal static UntypedInt numCodes => 19; // number of codes in Huffman meta-code
 
 // Initialize the fixedHuffmanDecoder only once upon first use.
-internal static ж<sync.Once> ᏑfixedOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑfixedOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once fixedOnce => ref ᏑfixedOnce.Value;
 
-internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StandardBox<huffmanDecoder>(new huffmanDecoder());
+internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StaticBox<huffmanDecoder>(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ᏑfixedHuffmanDecoder.Value;
 
 // A CorruptInputError reports the presence of corrupt input at a given offset.

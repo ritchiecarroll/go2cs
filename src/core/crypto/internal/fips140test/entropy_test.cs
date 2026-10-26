@@ -171,7 +171,7 @@ RUN cp ea_non_iid ea_restart /usr/local/bin/
 
 """u8.Raw();
 
-internal static ж<entropy.ScratchBuffer> Ꮡmemory = new StandardBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
+internal static ж<entropy.ScratchBuffer> Ꮡmemory = new StaticBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
 internal static ref entropy.ScratchBuffer memory => ref Ꮡmemory.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

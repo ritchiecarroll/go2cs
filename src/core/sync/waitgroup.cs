@@ -25,7 +25,7 @@ using WaitReason = go.golib.WaitReason;
 // hand-owned file. One table entry per statement, each followed by a zero entry, so every other
 // line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
 // checks it.
-[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AOwB3AMAANsD")]
+[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]
 
 namespace go;
 

@@ -137,7 +137,7 @@ public static @string Error(this ж<W> Ꮡw) {
     return fmt.Sprintf("[%d]"u8, w.k);
 }
 
-internal static ж<I> ᏑsiVal = new StandardBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
+internal static ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
 internal static ref I siVal => ref ᏑsiVal.ValueSlot;
 
 internal static (ж<global::go.html.template_package.Template>, error) tupleᴛ1ʗ = New("x"u8).Parse("test template"u8);
@@ -206,7 +206,7 @@ public partial interface I {
     @string Method0();
 }
 
-internal static ж<I> ᏑiVal = new StandardBox<I>(new template_internal_test_package.TжI(tVal));
+internal static ж<I> ᏑiVal = new StaticBox<I>(new template_internal_test_package.TжI(tVal));
 internal static ref I iVal => ref ᏑiVal.ValueSlot;
 
 // Helpers for creation.
