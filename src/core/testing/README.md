@@ -7,7 +7,7 @@
 
 From C#, call this package through the static class go.testing_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package testing provides support for automated testing of Go packages. This is the go2cs Phase-4 test host: a hand-maintained implementation of the `testing` API — `T`, `B`, `F`, `TB`, subtests, parallelism, `TempDir` with Go-faithful `os.RemoveAll` cleanup semantics, `Setenv`, package deadlines — that runs converted `_test.go` suites and compares their verdicts one-for-one against a clean `go test -json` baseline. Every validated package's proof page on [go2cs.net/validation](https://go2cs.net/validation/index.html) was produced under this host.
+Package testing provides support for automated testing of Go packages. This is the go2cs test host: a hand-maintained implementation of the `testing` API — `T`, `B`, `F`, `TB`, subtests, parallelism, `TempDir` with Go-faithful `os.RemoveAll` cleanup semantics, `Setenv`, package deadlines — that runs converted `_test.go` suites and compares their verdicts one-for-one against a clean `go test -json` baseline. Every validated package's proof page on [go2cs.net/validation](https://go2cs.net/validation/index.html) was produced under this host.
 
 ---
 

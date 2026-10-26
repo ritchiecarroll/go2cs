@@ -1,9 +1,11 @@
 # Baseline vs. Full Conversion — the separation contract *(SUPERSEDED 2026-08-01)*
 
+**Archived.** This page is a historical record and is not kept current.
+
 > **⚠ The separation this document names is OVER.** On **2026-08-01** the stub baseline retired and the
 > converted standard library moved home to **`src/core`** (commit `2e8066da6`). There is now ONE tree and
 > ONE path scheme — `$(go2csPath)core\<pkg>`, the reference the converter always emitted — and none of the
-> rewrite / overlay / remap machinery described below survives. See [`/CLAUDE.md`](../CLAUDE.md) *One tree*.
+> rewrite / overlay / remap machinery described below survives. See [`/CLAUDE.md`](../../CLAUDE.md#one-tree-read-before-touching-srccore) *One tree*.
 >
 > This file is kept because parts of it are still **live doctrine**, not history: *Hand-owning a package to
 > make it OPERATIONAL* (the `[module: GoManualConversion]` marker, the `*_impl.cs` companion, the
@@ -179,7 +181,7 @@ hand-owned (its `[P]poolLocal` block is reached by pointer arithmetic through an
 is now a faithful port of Go's algorithm rather than a `ConcurrentBag`: private slot → shared chain →
 steal → victim cache, with `poolCleanup` registered exactly as Go registers it. Two divergences are
 stated in the file and in
-[`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md#syncpool--a-managed-reference-ring-slot-and-a-thread-affine-stand-in-for-the-p-pin):
+[`ConversionStrategies-Reference/manual-conversions.md`](../../docs/ConversionStrategies-Reference/manual-conversions.md#syncpool--a-managed-reference-ring-slot-and-a-thread-affine-stand-in-for-the-p-pin):
 `procPin` becomes a **thread-affine** shard index (so two threads can share a shard, which Pool closes
 with interlocked private slots and a per-shard producer gate), and the cleanup is triggered by
 *requested* collections rather than every GC cycle. `sync` goes 21 → 35 of 50 on this arc.
@@ -206,7 +208,7 @@ struct carries a generated field-wise `Equals` plus a `HashCode.Combine` of the 
 compares and hashes by content. Detail, and the two walls it uncovered behind it (a cross-assembly
 `//go:linkname` **PUSH** that never links, and `abi.TypeFor<T>()` returning the wrong object for an
 INTERFACE `T`):
-[`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md#internalconcurrenthashtriemap--a-managed-map-where-go-seeds-itself-from-maptypehasher).
+[`ConversionStrategies-Reference/manual-conversions.md`](../../docs/ConversionStrategies-Reference/manual-conversions.md#internalsynchashtriemap--a-managed-map-where-go-seeds-itself-from-maptypehasher).
 
 ⚠ **A single-Go-file package that hand-owns that file becomes FULLY hand-owned.** `unmarkedFileCount == 0`
 makes the driver `continue` before `writeProjectFile`, so the package's `.csproj`, `package_info.cs` and
@@ -271,7 +273,7 @@ There are **two** ways a package carries hand-owned C#, and they are NOT interch
    `goenvs_impl.cs` (2026-08-01 — a `[ModuleInitializer]` snapshot of the process environment into
    `runtime.envs`, standing in for the `goenvs()` call in the `schedinit` go2cs never runs, without
    which `gogetenv` — and therefore `runtime.GOROOT()` — threw *"getenv before env init"*). Rule and
-   measured reach for the last two: [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md),
+   measured reach for the last two: [`ConversionStrategies-Reference/manual-conversions.md`](../../docs/ConversionStrategies-Reference/manual-conversions.md#the-process-roots-a-converted-program-never-gets-from-a-go-bootstrap-runtimeenvs-osruntime_rand),
    *The process ROOTS a converted program never gets from a Go bootstrap*.
 
 Marker mechanics: `[AttributeTargets.Module, AllowMultiple = true]` (golib `GoManualConversionAttribute`), so
