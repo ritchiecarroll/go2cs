@@ -50,14 +50,16 @@ lists them all.
   is the usual answer.
 - **Code that needs a newer Go than go2cs tracks.** The converter refuses it and names both releases.
 - **One form of generic type alias**, an alias of an anonymous struct or interface.
+- **A generic call over a pointer element whose constraint shares the element's storage.** `Walk[*Node]`
+  under `Walk[N Tree[N]]`, where `Children()` returns `[]N`, is refused with `GO2CS2002`, naming the site
+  and the method. The same code over a value element converts.
 
 [What won't make the trip](Limitations.md#what-wont-make-the-trip) has the detail and the workarounds.
 
 ## Which Go and .NET versions does it use?
 
 Exactly one Go release and one .NET release at a time, both named in the README's
-[Requirements](README.md#requirements). The Go release it tracks today is out of upstream support, so
-the converted standard library carries none of the Go security fixes issued since. The
+[Requirements](README.md#requirements). The Go release it tracks today is still supported upstream. The
 [Roadmap](Roadmap.md#go-releases) says which Go releases come next and in what order.
 
 ## Which platforms are supported?
@@ -105,7 +107,8 @@ It is slower than native Go, and that is the trade.
 ## Can it convert a module with third-party dependencies?
 
 Yes. `go2cs -recurse=nuget` converts a module and every third-party package it imports, in dependency
-order, and writes a solution that restores and builds
+order, and writes a solution that restores and builds. A dependency already published as a converted NuGet
+package is referenced instead of converted
 ([Converting a real-world Go module](ConvertingAModule.md)). Not every module converts cleanly yet. A
 dependency that uses assembly or `unsafe` shortcuts may need its pure-Go build tag, and real code still
 turns up converter bugs. When one dependency blocks you, `-recurse=module,nuget` converts your own packages

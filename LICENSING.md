@@ -66,8 +66,8 @@ existing notices. It overrides generated or custom-template license metadata.
 Without an override, a local `LICENSE` is selected as `PackageLicenseFile` when it
 exists. Known standard-library projects otherwise select the shared upstream file.
 The third-party dependency modules of a `-recurse` conversion select their own
-module's license file (`LICENSE`, `LICENSE.md`, `LICENSE.txt`, `LICENCE*` or
-`COPYING*`, matched case-insensitively), which conversion copies verbatim to the
+module's license file (`LICENSE`, `LICENCE` or `COPYING`, bare or with a `.md` or
+`.txt` extension, matched case-insensitively), which conversion copies verbatim to the
 converted module's root once per module and every package of the module packs by
 relative path, exactly as standard-library packages pack `src/core/LICENSE`. The
 application's own module and a dependency that ships no such file are left
