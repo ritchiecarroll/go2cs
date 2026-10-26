@@ -8,6 +8,7 @@
 #>
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
 $failed = 0
 $ran = 0
 function Check([string]$name, [bool]$ok, [string]$detail) {
@@ -104,8 +105,39 @@ try {
 }
 finally { if (Test-Path $mod) { Remove-Item -Recurse -Force $mod } }
 
+# An -ExcludePackage'd package that has a proof row (COORD ruling 2026-10-26: cobra/doc, 19 + 0, left out because its
+# imports go-md2man and yaml.v3 are not nugetgo packages). Its row binds nothing the package carries, so the binding
+# accepts it, and VALIDATION.md counts the packed packages only, with one line naming the validated, unpacked package.
+Write-Host 'a proven package left out by -ExcludePackage'
+$cobraSummary = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'testdata/binding/cobra-v1.10.2.MODULE.md'))
+$cobraProof = Get-NugetgoProofInputDigests -ModuleSummary $cobraSummary
+$cobraPacked = @{ 'github.com/spf13/cobra' = $cobraProof['github.com/spf13/cobra'] }
+$reasons = @(Test-NugetgoValidationBinding -Proof $cobraProof -Packed $cobraPacked)
+Check 'without -Excluded, the unpacked row is refused (the control)' (($reasons -join '; ') -like '*github.com/spf13/cobra/doc has a proof row and is not packed*') "got [$($reasons -join '; ')]"
+$reasons = @(Test-NugetgoValidationBinding -Proof $cobraProof -Packed $cobraPacked -Excluded @('github.com/spf13/cobra/doc'))
+Check 'with -Excluded naming it, the binding holds' ($reasons.Count -eq 0) "got [$($reasons -join '; ')]"
+$reasons = @(Test-NugetgoValidationBinding -Proof $cobraProof -Packed @{} -Excluded @('github.com/spf13/cobra/doc'))
+Check '-Excluded never excuses a packed package''s own missing binding' (($reasons -join '; ') -like '*github.com/spf13/cobra has a proof row and is not packed*') "got [$($reasons -join '; ')]"
+$sel = Select-NugetgoPackedProof -ModuleSummary $cobraSummary -Excluded @('github.com/spf13/cobra/doc')
+$selLines = @($sel.Text -split "`r?`n")
+Check 'the excluded row is gone and the packed one stays' (-not $sel.Text.Contains('| `github.com/spf13/cobra/doc` |') -and $sel.Text.Contains('| `github.com/spf13/cobra` | 405 | 0 |')) $sel.Text
+$dot = [char]0x00B7
+Check 'the total counts the packed packages only' ($selLines -ccontains "**Total: 405 matched $dot 0 disclosed** across 1 package(s).") $sel.Text
+Check 'one line names the validated, unpacked package with its counts' (@($selLines | Where-Object { $_.StartsWith("``github.com/spf13/cobra/doc`` was validated (19 matched $dot 0 disclosed) and is not packed", [StringComparison]::Ordinal) }).Count -eq 1) $sel.Text
+Check 'its excluded declarations go with it, the section too when none remain' (-not $sel.Text.Contains('## Excluded declarations') -and -not $sel.Text.Contains('BenchmarkGenManToFile')) $sel.Text
+Check 'its proof page is named for the pack to leave out' (($sel.DroppedPages -join ',') -ceq 'doc.md') "got [$($sel.DroppedPages -join ', ')]"
+$totals = Get-NugetgoProofTotals -ModuleSummary $sel.Text
+Check 'the README''s totals read from it are the packed ones' ($totals.Matched -eq 405 -and $totals.Disclosed -eq 0 -and $totals.Packages -eq 1) "got $($totals.Matched) / $($totals.Disclosed) / $($totals.Packages)"
+$same = Select-NugetgoPackedProof -ModuleSummary $cobraSummary -Excluded @()
+Check 'with nothing excluded, the summary is unchanged byte for byte' ($same.Text -ceq $cobraSummary -and $same.DroppedPages.Count -eq 0) 'changed'
+$jwtLike = Select-NugetgoPackedProof -ModuleSummary $cobraSummary -Excluded @('github.com/spf13/cobra/nosuch')
+Check 'an excluded package with no proof row (jwt/v5''s test) changes nothing' ($jwtLike.Text -ceq $cobraSummary) 'changed'
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+Check 'nugetgo-pack.ps1 passes -Excluded to the binding and packs the selected summary' (
+    $pack -match 'Test-NugetgoValidationBinding [^\r\n]*-Excluded \$ExcludePackage' -and $pack.Contains('Select-NugetgoPackedProof -ModuleSummary') -and
+    $pack.Contains('$proofSummary') -and -not $pack.Contains('[System.IO.File]::ReadAllText($validationPage) +')) 'the pack still binds or packs MODULE.md unselected'
 Check 'nugetgo-pack.ps1 reads each packed project''s digest and the proof''s' (
     $pack.Contains('Get-NugetgoProjectInputDigest') -and $pack.Contains('Get-NugetgoProofInputDigests')) 'the pack does not read both digests'
 Check 'nugetgo-pack.ps1 tells the binding which packed packages have Go tests' ($pack -match 'Get-NugetgoTestedImportPaths' -and $pack -match 'Test-NugetgoValidationBinding [^\r\n]*-Tested') 'the pack does not pass -Tested'

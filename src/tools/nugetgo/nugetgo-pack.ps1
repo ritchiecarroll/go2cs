@@ -113,6 +113,9 @@ param(
     # The upstream license as an SPDX expression, for the README's license line. It is stated, never inferred from the
     # license file (NugetgoLicense.psm1).
     [string]$LicenseSpdx,
+    # The holder line for a license that carries no Copyright line (cobra's Apache LICENSE.txt): one of the module's own
+    # source-header lines, refused when the license carries one (Resolve-NugetgoCopyright).
+    [string]$Copyright,
     # The package icon, PNG or JPEG up to 1 MB; the go2cs icon the conversion carries when not given. A module author
     # publishing their own module sets their own.
     [string]$Icon,
@@ -225,14 +228,16 @@ if (-not (Test-Path -LiteralPath $LicenseFile -PathType Leaf)) { Refuse "no upst
 $licenseName = Split-Path -Leaf $LicenseFile
 if (-not $LicenseSpdx) { Refuse '-LicenseSpdx is required: the README names the upstream license as an SPDX expression (for example MIT or BSD-3-Clause), stated by the caller, never inferred' }
 if (-not (Test-NugetgoSpdx $LicenseSpdx)) { Refuse "-LicenseSpdx '$LicenseSpdx' is not an SPDX expression (identifiers joined by AND, OR or WITH)" }
-$copyright = (@(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) -join '; ')
-if (-not $copyright) { Refuse "the upstream license file carries no Copyright line: $LicenseFile" }
+$resolvedCopyright = Resolve-NugetgoCopyright -LicenseFile $LicenseFile -Stated $Copyright -ModuleDir $moduleCacheDir
+if ($resolvedCopyright.Reason) { Refuse $resolvedCopyright.Reason }
+if ($resolvedCopyright.Source -ceq 'stated') { Write-Host "  copyright: stated with -Copyright (the license carries none); evidence: $($resolvedCopyright.Evidence)" }
+$copyright = ($resolvedCopyright.Lines -join '; ')
 # Each packed assembly's own copyright attribute names the UPSTREAM holder too (owner ruling 2026-10-04): the same
 # Copyright lines, then the go2cs scaffolding line. It is set by a Directory.Build.targets in the converted module's
 # own directory, so the conversion repository pushed from <RecurseRoot> rebuilds the same attribute. Escaped -p:
 # globals would not: they reach every project the build touches (a third-party pkg/ project reference included),
 # split at ',' and ';', and live in no file a rebuild from the pushed sources reads.
-$assemblyCopyright = Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile
+$assemblyCopyright = Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile -Lines $resolvedCopyright.Lines
 $moduleTargets = Join-Path $moduleSrc 'Directory.Build.targets'
 $ownTargets = (Test-Path -LiteralPath $moduleTargets) -and ([System.IO.File]::ReadAllText($moduleTargets)).Contains((Get-NugetgoTargetsMarker))
 if ((Test-Path -LiteralPath $moduleTargets) -and -not $ownTargets) { Refuse "$moduleTargets exists and was not written by nugetgo-pack.ps1: the packed assemblies' copyright cannot be set beside it" }
@@ -267,6 +272,7 @@ if ($ConversionReadme) {
 # tests ships its behavioral proof instead (COORD ruling 2026-10-12). A module that cannot validate yet packs ONLY as a
 # rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a package is never a release.
 $pages = @()
+$proofSummary = $null
 $behaviorRows = @{}
 if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir, where the pack reads whether the module has Go tests (go mod download $ModulePath@$GoVersion)" }
 $proofMode = Get-NugetgoProofMode -ValidationDir $ValidationDir -UnvalidatedReason $UnvalidatedReason -BehaviorProofDir $BehaviorProofDir -Release:$Release `
@@ -296,8 +302,15 @@ elseif ($proofMode.Mode -ceq 'behavioral') {
 else {
     $validationPage = Join-Path $ValidationDir 'MODULE.md'
     if (-not (Test-Path -LiteralPath $validationPage)) { Refuse "no MODULE.md in $ValidationDir (a validated module is required; D7)" }
-    $pages = @(Get-ChildItem -LiteralPath $ValidationDir -Filter '*.md' -Recurse | Where-Object { $_.Name -ne 'MODULE.md' })
-    $totals = Get-NugetgoProofTotals -ModuleSummary ([System.IO.File]::ReadAllText($validationPage))
+    # VALIDATION.md counts the packed packages only (COORD ruling 2026-10-26): a proven package -ExcludePackage leaves
+    # out (cobra/doc) is named in one line, and its row and proof page are not shipped.
+    $proofSelection = Select-NugetgoPackedProof -ModuleSummary ([System.IO.File]::ReadAllText($validationPage)) -Excluded $ExcludePackage
+    $proofSummary = $proofSelection.Text
+    $validationRoot = $ValidationDir.TrimEnd('\', '/')
+    $pages = @(Get-ChildItem -LiteralPath $ValidationDir -Filter '*.md' -Recurse | Where-Object {
+        $_.Name -ne 'MODULE.md' -and @($proofSelection.DroppedPages) -notcontains ($_.FullName.Substring($validationRoot.Length + 1) -replace '\\', '/') })
+    foreach ($page in @($proofSelection.DroppedPages)) { Write-Host "  proof: $page left out with its -ExcludePackage'd package (VALIDATION.md names it)" }
+    $totals = Get-NugetgoProofTotals -ModuleSummary $proofSummary
     if ($totals.Packages -eq 0) { Refuse "$validationPage has no package row: the README's Tests badge has no totals to state" }
     # The proof must be OF the packed bytes (the nugetgo rehearsal, 2026-10-09, gap 4): every MODULE.md row's input
     # digest is the GoInputDigest its packed project records. $packed lists the libraries in $libraries' order.
@@ -306,12 +319,15 @@ else {
     $proofDigests = Get-NugetgoProofInputDigests -ModuleSummary ([System.IO.File]::ReadAllText($validationPage))
     # A packed package with Go tests must have a row: one without is a package the -tests run did not validate.
     $testedPaths = @(Get-NugetgoTestedImportPaths -ModuleDir $moduleCacheDir -ModulePath $ModulePath -ImportPaths @($packedDigests.Keys))
-    $unbound = @(Test-NugetgoValidationBinding -Proof $proofDigests -Packed $packedDigests -Tested $testedPaths)
+    $unbound = @(Test-NugetgoValidationBinding -Proof $proofDigests -Packed $packedDigests -Tested $testedPaths -Excluded $ExcludePackage)
     if ($unbound.Count) { Refuse "the validation proof is not a proof of the packed tree -- $($unbound -join '; ')" }
     foreach ($path in @($packedDigests.Keys | Sort-Object)) {
         Write-Host "  proof: $path $(if ($proofDigests.ContainsKey($path)) { "bound at $($packedDigests[$path])" } else { 'has no proof row (no Go tests)' })"
     }
 }
+
+# The unvalidated and behavioral pages are packed as written; a test proof is the selection above.
+if ($null -eq $proofSummary) { $proofSummary = [System.IO.File]::ReadAllText($validationPage) }
 
 # ---- the package README and icon ---------------------------------------------------------------------------------------
 # The author's package page (COORD ruling 2026-10-10) lives in the converted module's own directory, the one tree the
@@ -503,7 +519,7 @@ Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
 # A RID-specific package's page discloses, in one line, the flavors its self-description does not describe.
 $flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofGoos $proofGoos -RidSpecific:$flavorDecision.RidSpecific
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
-    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + [System.IO.File]::ReadAllText($validationPage) +
+    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + $proofSummary +
         $(if ($proofMode.SampleRows) { "`n" + (New-NugetgoSampleBehaviorSection -ModulePath $ModulePath -GoVersion $GoVersion -Rows $behaviorRows) } else { '' })), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
 
