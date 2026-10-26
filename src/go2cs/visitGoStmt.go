@@ -316,6 +316,12 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		result.WriteString(strings.Join(lambdaContext.callArgs, ", "))
 	}
 
+	// A goroutine proved unable to recurse starts on golib's small stack reservation rather than the Go-scale default
+	// (goroutineStackAnalysis.go); everything else keeps the default, unmarked.
+	if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {
+		result.WriteString(", GoStack.Bounded")
+	}
+
 	result.WriteString(");")
 
 	v.outputBuilder.WriteString(result.String())

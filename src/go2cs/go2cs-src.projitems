@@ -214,6 +214,8 @@
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis.go" />
+    <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goStmtReceiverBoxMethodGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
