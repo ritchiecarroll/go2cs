@@ -5095,7 +5095,7 @@ internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Con
 
         sc.serveG.check();
         defer(Ꮡsc.notePanic, ref ᒐ, recovers: true);
-        defer(() => Ꮡsc.Value.conn.Close(), ref ᒐ);
+        defer(ᴛ0 => ᴛ0.Close(), Ꮡsc.Value.conn, ref ᒐ);
         defer(Ꮡsc.closeAllStreamsOnConnClose, ref ᒐ);
         defer(Ꮡsc.stopShutdownTimer, ref ᒐ);
         defer(ᴛ1 => builtin.close(ᴛ1), Ꮡsc.Value.doneServing, ref ᒐ); // unblocks handlers trying to send
@@ -5142,13 +5142,13 @@ internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Con
 
         if ((~sc.srv).IdleTimeout > 0) {
             sc.idleTimer = time.AfterFunc((~sc.srv).IdleTimeout, Ꮡsc.onIdleTimer);
-            defer(() => Ꮡsc.Value.idleTimer.Stop(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.Stop(), Ꮡsc.Value.idleTimer, ref ᒐ);
         }
 
         if (conf.SendPingTimeout > 0) {
             sc.readIdleTimeout = conf.SendPingTimeout;
             sc.readIdleTimer = time.AfterFunc(conf.SendPingTimeout, Ꮡsc.onReadIdleTimer);
-            defer(() => Ꮡsc.Value.readIdleTimer.Stop(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.Stop(), Ꮡsc.Value.readIdleTimer, ref ᒐ);
         }
 
         goǃ(Ꮡsc.readFrames); // closed by defer sc.conn.Close above

@@ -503,7 +503,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             // any Read in flight after the handle returns, in practice it's safe to
             // read after closing it.
             var outreqʗ1 = outreq;
-            defer(() => (~outreqʗ1).Body.Close(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.Close(), (~outreqʗ1).Body, ref ᒐ);
         }
         if ((~outreq).Header == default!) {
             outreq.Value.Header = new httpꓸHeader(0); // Issue 33142: historical behavior was to always allocate
@@ -673,7 +673,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
         err = Ꮡp.copyResponse(rw, (~res).Body, p.flushInterval(res));
         if (err != default!) {
             var resʗ1 = res;
-            defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.Close(), (~resʗ1).Body, ref ᒐ);
             // Since we're streaming the response, if we run into an error all we can do
             // is abort the request. Issue 23643: ReverseProxy should use ErrAbortHandler
             // on read error while copying body.

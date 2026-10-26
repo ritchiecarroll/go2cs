@@ -2047,7 +2047,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                     }
                     {
                         var errΔ3 = tc.HandshakeContext(ctx); if (errΔ3 != default!) {
-                            goǃ(() => (~pconn).conn.Close());
+                            goǃ(ᴛ0 => ᴛ0.Close(), (~pconn).conn);
                             if (trace != nil && (~trace).TLSHandshakeDone != default!) {
                                 (~trace).TLSHandshakeDone(new tlsꓸConnectionState(nil), errΔ3);
                             }

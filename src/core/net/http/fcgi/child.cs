@@ -180,7 +180,7 @@ internal static void serve(this ж<child> Ꮡc) {
     try {
         ref var c = ref Ꮡc.DerefOrNull();
 
-        defer(() => Ꮡc.Value.conn.Close(), ref ᒐ);
+        defer(ᴛ0 => ᴛ0.Close(), Ꮡc.Value.conn, ref ᒐ);
         defer(Ꮡc.cleanUp, ref ᒐ);
         ref var rec = ref heap(new record(), out var Ꮡrec);
         while (ᐧ) {
