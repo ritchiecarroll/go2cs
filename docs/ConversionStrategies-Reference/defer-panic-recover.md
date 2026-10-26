@@ -200,18 +200,19 @@ A fourth gate has no counterpart in the emission and exists purely because the m
 evaluates `c.mu` AT the defer, so a nil `c` panics there and registers nothing; a lowered `finally`
 evaluates it at exit, so the body would run to completion first and the panic would surface late with
 the body's effects already committed. The dominant `c.mu.Lock(); defer c.mu.Unlock()` idiom satisfies
-it trivially — but a few sites in Go 1.23.12's standard library have no earlier dereference at all,
+it trivially — but a few sites in the standard library have no earlier dereference at all,
 and a few more have one only inside an `if`, a loop or a func literal, which witnesses nothing
 because that branch may not have run. Both are refused. The conditional half is the sharper of the two:
 the first form of this gate scanned preceding statements without asking whether they execute, and
 accepted every one of them.
-<!-- census at the time: three sites with no earlier dereference, four with one only inside a branch. -->
+<!-- census at the time, over Go 1.23.12's standard library: three sites with no earlier dereference, four with one
+     only inside a branch. -->
 
 Everything else keeps the registration form, including any function that mixes a qualifying defer with
 a non-qualifying one: the lowering is all-or-nothing per function, because interleaving a lowered LIFO
 order with a registered one is not expressible.
 
-**Two widenings (B2), each a gate that was stricter than correctness required.** The first cut admitted
+**Two widenings, each a gate that was stricter than correctness required.** The first cut admitted
 only defers that were direct children of the body, and only calls on a receiver *field*. Both were
 sizing proxies carried into the emission unexamined, and together they refused the very function the
 capability exists to reach — `internal/poll`'s `FD.Write`, whose `defer fd.writeUnlock()` is a method on
@@ -234,15 +235,17 @@ different gate so that all-or-nothing rejected the pair.
   embedded field (`onceError` embedding `sync.Mutex`, `defer a.Unlock()`) is reached through
   `Ꮡa.of(onceError.ᏑMutex)`, so lowering moves that box into the `finally` rather than removing it and
   saves only the delegate. Correct, and measured as a minority of the lowered calls on the windows
-  corpus; removing the box there is Phase C's aliasing field pointer, a different capability.
+  corpus; removing the box there needs an aliasing field pointer, a different capability.
 
-Most such sites in Go 1.23.12's standard library qualify, including conditional and receiver-method ones.
+Most such sites in the standard library qualify, including conditional and receiver-method ones.
 The census runs the converter's own `provablyBefore` verbatim, so the two predicates cannot drift.
 Guarded by `tests/Behavioral/DeferFinallyLowering`, whose refusal rows are asserted by the golden (a
 refusal is invisible in stdout), whose `rebound` row fails loudly if the receiver-stability gate is
 removed, and whose `writeShape` row — `FD.Write`'s exact shape — prints a spurious `done b` for the
 untaken branch if the reached-flag is removed.
-<!-- census at the time: 332 sites, 225 qualifying (10 conditional, 60 receiver-method); promoted-method lowerings were ten of sixty-five lowered calls on the windows corpus. -->
+<!-- census at the time, over Go 1.23.12's standard library:
+     332 sites, 225 qualifying (10 conditional, 60 receiver-method); promoted-method lowerings were ten of sixty-five
+     lowered calls on the windows corpus. -->
 
 ## A VARIADIC deferred/spawned func literal is cast to its golib family delegate
 
@@ -279,34 +282,39 @@ back to the cast delegate hands the `Action` rung a family delegate (**CS1503**)
 kept and wrapped — `defer(() => ((Actionꓸꓸꓸ<nint>)(<literal>))(), ref ᒐ)`. `go` takes all of the same
 arms for the same reasons.
 
-**Reach.** In the Go 1.23 tree the shape is `html/template`'s `examplefiles_test.go:90`, and it
-was that package's SOLE remaining build wall, standing in front of **243** verdicts. The same cast
+**Reach.** The shape is `html/template`'s `examplefiles_test.go:90`, which was that package's last
+build wall. The same cast
 also closes the immediately-invoked variadic literal (`func(parts ...int) int { … }(1, 2, 3)`), which
 `convCallExpr`'s IIFE interception had explicitly excluded on the stale reasoning that "delegate type
 would need a params array" — `iifeDelegateType` has rendered the family form for a variadic signature
-all along. (Guarded by `DeferLambdaParam`, extended from its one non-variadic row to cover the
+all along. <!-- measured on the Go 1.23 tree: that build wall stood in front of 243 verdicts;
+     GOROOT/src/html/template/examplefiles_test.go:90 holds the shape at go1.26.10 too. -->
+(Guarded by `DeferLambdaParam`, extended from its one non-variadic row to cover the
 variadic literal at every arity around the shape: no fixed parameter with one argument, a fixed
 parameter ahead of the tail, none at all, a result-returning literal, and the immediately-invoked
 form — plus the defer-time snapshot itself, whose arguments are reassigned after the `defer` and must
 not change what the thunk prints. Counter-proven failing-first by neutering each half separately: the
 temp-parameter force alone gives CS0411 ×4, the delegate cast alone gives CS0149/CS1503 ×6.)
 
-**Two adjacent walls this deliberately does NOT close, both measured here and neither caused by it:**
+**An adjacent wall this deliberately does NOT close, measured here and not caused by it:**
 
-1. **A SPREAD argument to any deferred variadic call.** `defer f(nums...)` emits `nums.ꓸꓸꓸ`, a
-   `Span<T>`, as the type argument of `defer<T>` — and C# forbids a ref struct there (**CS9244**).
-   Proven independent: a NAMED variadic callee with no func literal anywhere emits the identical
-   `defer(ᴛ1 => f(ᴛ1), nums.ꓸꓸꓸ, ref ᒐ)` and fails the same way. Closing it means passing the SLICE
-   and spreading inside the thunk, at every variadic deferred call in the corpus.
-2. **An empty variadic call passes an empty slice where Go passes NIL.** `f()` on `func f(parts
-   ...int)` answers `parts == nil` as `true` in Go and `false` here. Visible from a plain direct call
-   — no defer, no literal — so it is an argument-CONSTRUCTION difference with corpus-wide reach.
+**A SPREAD argument to any deferred variadic call.** `defer f(nums...)` emits `nums.ꓸꓸꓸ`, a
+`Span<T>`, as the type argument of `defer<T>` — and C# forbids a ref struct there (**CS9244**).
+Proven independent: a NAMED variadic callee with no func literal anywhere emits the identical
+`defer(ᴛ1 => f(ᴛ1), nums.ꓸꓸꓸ, ref ᒐ)` and fails the same way. Closing it means passing the SLICE
+and spreading inside the thunk, at every variadic deferred call in the corpus.
+
+An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
+Go, because the variadic pack's `Span<T>.slice()` keeps a null span nil.
+<!-- src/core/golib/slice.cs:1878 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+     empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
+     slice.cs:1848 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 
-The named-callee sibling of the literal cast above, found blocking os/signal's test-host compile
-(`defer Reset()` on `func Reset(sig ...os.Signal)`, 2026-08-27 — the same variadic-binding family as
-the C#14 params-flip fix). The zero-argument arm of `visitDeferStmt`/`visitGoStmt` trims `f()` back
+The named-callee sibling of the literal cast above (`defer Reset()` on `func Reset(sig ...os.Signal)`, from
+os/signal's tests). <!-- found blocking os/signal's test-host compile, 2026-08-27: the same variadic-binding family as
+the C#14 params-flip fix. --> The zero-argument arm of `visitDeferStmt`/`visitGoStmt` trims `f()` back
 to the method group `f` so golib's arity-0 `defer`/`goǃ` take it as an `Action` — valid only when the
 callee's C# arity is genuinely zero. A variadic callee's C# form **always** carries the `params`
 parameter, so its method group converts to no `Action` (defer) and no `WaitCallback` (go) —
@@ -365,7 +373,7 @@ matters only for a FUNC-LITERAL callee — an ordinary callee already takes that
 existing arity test (one argument against N>1 declared parameters), but a literal reaches neither
 that test nor the variadic one (CS0411 without it). And a non-variadic **func-literal callee** is
 the one defer/go shape rendered as an INVOCATION rather than handed to the rung as a delegate, so
-it additionally needs the immediately-invoked-literal delegate cast that phase 1a declines for
+it additionally needs the immediately-invoked-literal delegate cast that `convCallExpr`'s intercept declines for
 every other defer/go callee (CS0149 without it):
 
 ```csharp
@@ -375,9 +383,10 @@ defer(ᴛ1 => ((Action<nint, @string>)((nint n, @string s) => { … }))(ᴛ1.Ite
 **Reach.** No production source used it when this was measured — the idiom is a TEST one, which is where it was
 found: Go's own save-and-restore hook `defer reflect.SetArgRegs(reflect.SetArgRegs(a, b, c))`
 (three results into three parameters, the callee returning values so the thunk binds the
-result-discarding `Func` rung) accounts for **four** of the reflect test host's errors, at
-`abi_test.cs` ×3 and `all_test.cs` ×1. A converted-test emission diff over that host moves exactly
-those four lines and nothing else. (Guarded by `DeferMultiValueSpread`: arity 2 and 3, the
+result-discarding `Func` rung) appears four times in reflect's tests, `abi_test.go` ×3 and `all_test.go` ×1.
+<!-- At the fix those four sites were four of the reflect test host's errors, and a converted-test emission diff over
+     that host moved exactly those four lines and nothing else. -->
+(Guarded by `DeferMultiValueSpread`: arity 2 and 3, the
 capture-not-re-read case, LIFO ordering, a pointer-receiver method callee, a per-iteration loop, a
 func-literal callee, a variadic callee, and the result-returning save/restore shape — plus two
 CONTROLS that must keep their existing emission, plain matching-arity arguments and a
@@ -474,9 +483,9 @@ Measured on `database/sql`'s `TestConnRaw`. `Conn.Raw`'s deferred cleanup calls 
 one `defer` and panicking nothing, whose `Run` threw the callback's panic on the way out. The
 connection was left open, and the test's five-second `waitCondition` poll (which sizes itself from
 `t.Deadline()`) burned the package's ENTIRE deadline, which read as a
-hang rather than as the assertion failure it was. The package validates at 137 of 139 with the rule
-in place, and its suite finishes in seconds.
-<!-- measured at the fix (platform not recorded): 3,418 s against Go's 0.005 s before, about three seconds after. -->
+hang rather than as the assertion failure it was. With the rule in place its suite finishes in seconds.
+<!-- measured at the fix (platform not recorded): 3,418 s against Go's 0.005 s before, about three seconds after;
+     the package validated at 137 of 139. -->
 
 Guarded twice, both neuter-verified. `PanicDeferCalleeFrame` output-compares the shape against
 `go run` — the reduced acquire/cleanup/release chain, three deferring callees stacked below one
@@ -536,7 +545,7 @@ internal static void catchError(ж<error> Ꮡerr) {
   `recover(calledByDefer: false)` and the panic continues, as in Go.
 
 **Stated limits.**
-- **Exported functions keep `recover()`.** An EXPORTED function that calls `recover()` emits it as before. Another
+- **Exported functions keep `recover()`.** An EXPORTED function that calls `recover()` emits plain `recover()`. Another
   package may defer it, and that defer site cannot know to set the mark, so the function cannot tell a deferred
   call from a helper call. It recovers in both, a false true where Go would read nil. Package `main` exports
   nothing and is exempt.
@@ -571,15 +580,29 @@ the inner registration lands there rather than in the enclosing function's. Guar
 
 ## An unrecovered panic crashes the process Go-style: report on stderr, exit code 2
 `throw panic(x)` unwinds until some enclosing frame's deferred sequence recovers it. When nothing
-does — including in a **goroutine**, since `goǃ` runs the body at the root of its own dedicated thread
-with no frame around it and a frame's exception filter only adopts panic-convertible exceptions — the exception reaches
-golib's `AppDomain.UnhandledException` backstop (registered in `builtin.InitializeGoLib`). The backstop
-matches Go: it writes the report to **stderr** (`panic: <message>`, first mapping runtime-error
-exceptions through `RuntimeErrorPanic.TryAsPanic` so e.g. an integer divide by zero reports Go's
-`panic: runtime error: …` form) and terminates with **exit code 2** — exactly like an unrecovered Go
-panic, minus the goroutine stack-trace lines. It previously printed to *stdout* and called
-`Environment.Exit(0)`, which polluted compared output and signaled false success to every caller
-(shells, CI, the Phase-4 differential oracle). The behavioral output-comparison harness validates this
+does — including in a **goroutine**, since `goǃ` runs the body at the root of a goroutine thread (golib
+reuses idle ones) with no frame around it, and a frame's exception filter only adopts panic-convertible
+exceptions — the exception reaches golib's `AppDomain.UnhandledException` backstop (registered in
+`builtin.InitializeGoLib`). The backstop matches Go: it writes the report to **stderr** and terminates
+with **exit code 2**. The report is the one Go prints (golib's `CrashReport`):
+- the panic chain, as Go's `printpanics` writes it: every panic still linked beneath the one that escaped, oldest
+  first, each later one on a tab-indented line, with ` [recovered]` on a panic a `recover()` stopped and
+  ` [recovered, repanicked]` where a recovered value was panicked again. Each line reads `panic: <value>`; a
+  runtime-error exception is first mapped through `RuntimeErrorPanic.TryAsPanic`, so an integer divide by zero
+  reports Go's `panic: runtime error: …` form;
+- a blank line, the `goroutine N [running]:` header, and the traceback with Go's frame names and Go source
+  positions. A frame the JIT inlined away is put back for an explicit `panic`
+  ([how](../ConversionStrategies.md#a-partial-method-with-a-body-keeps-its-own-frame)). In a few shapes the
+  traceback is shorter than Go's
+  ([Limitations](../Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
+<!-- src/core/golib/runtime/CrashReport.cs:192 `oldest first, each after the first on a TAB, with <c> [recovered]</c>`;
+     :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The traceback renderer is the
+     converted runtime's (src/core/runtime/managed_impl.cs:171 `CrashReport.TracebackRenderer = crashTraceback;`).
+     Guards: GolibTests CrashReportTests and CrashReportChainTests. Design record: docs/phase4/DESIGN-crash-report.md.
+     history: the backstop once printed to stdout and called Environment.Exit(0), which polluted compared output and
+     signaled false success to every caller; later it printed the first line alone, without the traceback. -->
+
+The behavioral output-comparison harness validates this
 differentially: the Go binary is the oracle, so exit codes must **match** (not be zero), stdout must
 match, and the **first stderr line** must match — the remainder of Go's panic stderr is a
 machine-specific goroutine stack trace, so only the first line is compared. (Guarded by the
@@ -593,14 +616,17 @@ goroutine has not reported yet. Go's `runtime.main` does not exit then. It waits
 panic's deferred calls (`runningPanicDefers`), and once a report has begun (`panicking`) it waits for the
 report, so the program exits 2 with it (runtime/proc.go, issues 3934 and 20018).
 
-A converted `main` is the CLR entry point and goroutines run on background threads, so the runtime used to shut
-down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainExit` runs Go's tail from
+A converted `main` is the CLR entry point and goroutines run on background threads, so left alone the runtime would
+shut down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainExit` runs Go's tail from
 `AppDomain.ProcessExit`, which the CLR raises when `Main` returns:
 - **The count.** A goroutine counts from the moment a panic starts running its deferred calls
   (`GoFrame.Capture`). It stops counting when its frame returns with no panic in flight (a recovery), when
   the goroutine ends, or when its fatal report begins.
 - **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. That is as short as Go's
-  1000 yields in spirit: it covers the goroutine's rethrow to its root (1.2 to 1.8 ms measured) and no more.
+  1000 yields in spirit: it covers the goroutine's rethrow to its root and no more.
+  <!-- src/core/golib/runtime/MainExit.cs:44 `which takes 1.2 to 1.8 ms from <c>GoFrame.Capture</c> (Release, 30 runs`
+       (the platform measured is not recorded); the bound
+       :72 `internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);` -->
   A goroutine that is still running a slow recovering call, or blocks in a deferred call, is not waited for, and
   neither does Go wait for one. If a report has begun, `main` waits for the report and exits with its status.
 - **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
@@ -610,7 +636,7 @@ down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainEx
 - **An exit taken on purpose** (`os.Exit`, a fatal error, the backstop) goes through `MainExit.Exit` and owns its
   status, as Go's `exit` never consults the count.
 
-(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which exits 2 against exit 0 before, and by
+(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which must exit 2 with Go's report, and by
 `GoroutineRecoveringWhenMainReturns`, which prints nothing after `main` returns. GolibTests `MainExitPanicDefersTests`
 pins the count and the bounded wait.)
 
@@ -628,11 +654,10 @@ panic: open final.txt: code 13 // Go, and now
 ```
 
 That is not a cosmetic divergence: a traceback exists to carry exactly the information the address
-destroys, and it cost the row-harvest-2 lane a diagnostic round-trip on the only defect it was
-chasing (`text/template`'s `goodFunc` rejection, whose message had to be recovered by instrumenting
-the callee). The rule now lives in `PanicException.PanicText` and both readers of a panic value go
-through it — the unhandled-exception backstop above, and `debug.Stack`'s panic line in
-`runtime/managed_impl.cs`, which had its own copy of the old rendering.
+destroys. <!-- it cost a diagnostic round-trip on text/template's goodFunc rejection, whose message had to be
+recovered by instrumenting the callee. --> The rule lives in `PanicException.PanicText` and both readers of a panic
+value go through it (as `PanicException.Message`) — the unhandled-exception backstop above, and `debug.Stack`'s panic
+line in `runtime/managed_impl.cs`.
 
 **The `Stringer` arm is not redundant with `ToString()`.** A Go named type's generated `ToString()`
 forwards to its UNDERLYING value (go2cs-gen's `InheritedTypeTemplate`), so `panic(2 * time.Second)`
@@ -680,10 +705,12 @@ value an explicit `panicdivide()` would — which is precisely Go's own invarian
 program that never links `runtime` keeps the plain-message fallback, which reads and prints
 identically and loses only the assertion.
 
-(The fallback path is guarded by the `DivideByZeroPanic` behavioral test, which prints the recovered
-value; the `runtime.Error`-typed path is guarded by the committed math/bits Go test suite itself —
-behavioral tests build against the baseline `src/core`, which has no `runtime` package, so the typed
-form cannot be exercised there.)
+(The `DivideByZeroPanic` behavioral test prints the recovered value, which reads the same on either
+path; the `runtime.Error`-typed path is guarded by math/bits' own Go test suite, `TestDiv32PanicZero`,
+run through the converted test pipeline.)
+<!-- history: the typed path was untestable in a behavioral test while those built against a src/core without a
+     runtime package; src/core/runtime/panicvalues_impl.cs is in the one tree now, but no behavioral test asserts
+     err.(runtime.Error). -->
 
 ## `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
 
@@ -693,12 +720,12 @@ recovered value's text is `runtime error: makeslice: len out of range` (or `cap`
 `slice<T>(nint length, nint capacity, nint low)` constructor) raised
 `ArgumentOutOfRangeException`/`OverflowException` for the same inputs — .NET exceptions
 `recover()` cannot catch, so a deferred recover never ran and the process died. The constructor
-now validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
+validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
 `MakeSliceCapOutOfRange()` (recoverable `PanicException`s carrying Go's message text), using
 `Array.MaxLength` as .NET's `maxAlloc` equivalent. The same validation class applies to the
 hand-owned `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) — Go's runtime implementation of it
 panics `len out of range` before allocating, and strings/bytes `TestRepeatCatchesOverflow`
-recovers that panic and matches on `"out of range"` (Phase-4 row R6; `strings.Repeat` of a
+recovers that panic and matches on `"out of range"` (`strings.Repeat` of a
 near-`maxInt` product reaches `MakeNoZero` after passing Repeat's own overflow pre-checks).
 Like the established golib runtime-panic convention, the panic STATE is the message string, not
 an `error` value — a recovering type switch takes Go's `case error:` arm only in Go; both sides
@@ -711,11 +738,13 @@ Go's `panic` takes an `any`, so the panicked value's **dynamic type** is observa
 side — `if p != "x"`, `err.(string)`, and `case string:` all test it. Two converted spellings hand
 golib a bare C# `System.String` rather than a Go `@string`: a **string literal** (`panic("x")` — the
 emission deliberately suppresses the `u8` suffix there, so the argument stays a C# literal) and a
-**computed** value from a stub that returns C# `string` (the baseline `fmt.Sprintf` does). Boxed as
-`System.String`, such a value matched nothing on the recover side, which compares against `@string`:
-sync's `testOncePanicX` reported the self-contradictory `want panic x, got x` (3 tests).
+**computed** C# `string` from hand-written C# code. Boxed as
+`System.String`, such a value would match nothing on the recover side, which compares against `@string`:
+sync's `testOncePanicX` reported the self-contradictory `want panic x, got x`.
+<!-- history: the computed case was first met from a stub fmt.Sprintf returning C# string, since replaced by the
+     converted fmt; three sync tests failed on it. -->
 
-`builtin.panic(object)` — the single boxing boundary for the builtin — now normalizes `string` to
+`builtin.panic(object)` — the single boxing boundary for the builtin — normalizes `string` to
 `@string`. Choosing that layer over an emission-site `(@string)` cast is deliberate: the cast would
 fix only the literal spelling, while the boundary covers literal, computed, and hand-owned callers
 alike. It is a narrow normalization, not a coercion — a NAMED string type keeps its own identity
@@ -733,7 +762,7 @@ dereference is recoverable and real code depends on it — sync's `TestNilPool` 
 `NullReferenceException`, which `recover()` could not see: the panic escaped past every deferred
 recover and surfaced as an unrecoverable host error. `RuntimeErrorPanic.TryAsPanic` — the single
 predicate every emitted frame's exception filter (`GoFrame.IsPanic`) and the process-level unhandled
-handler share — now maps it to `RuntimeErrorPanic.NilPointerDereference()`, whose text is Go's
+handler share — maps it to `RuntimeErrorPanic.NilPointerDereference()`, whose text is Go's
 verbatim `runtime error: invalid memory address or nil pointer dereference`.
 
 This is faithful rather than lenient: Go recovers a genuine nil-deref bug exactly the same way, and
@@ -807,7 +836,7 @@ call. But when the deferred callee is an ordinary call whose **argument** is a c
 x/net/nettest `conntest.go`'s `defer once.Do(func() { stop() })` — the argument literal's snapshot
 declarations were dumped inline into the deferred call's argument list, an invalid statement
 mid-expression (`defer(Ꮡonce.Do,` `var stopʗ1 = stop;` `() => …)` → CS1001/CS1002/CS1003/CS1026).
-The hoist sink (`lambdaContext.deferredDecls`) is now provided **unconditionally** in `visitDeferStmt`,
+The hoist sink (`lambdaContext.deferredDecls`) is provided **unconditionally** in `visitDeferStmt`,
 not only for the func-literal-callee case, so `convFuncLit` (reached via convCallExpr → convExprList →
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
@@ -833,7 +862,7 @@ literal without looking through the parentheses: `visitGoStmt`/`visitDeferStmt` 
 captures as for an ordinary callee, the capture analysis did not treat the literal's body as a closure
 body, and `convCallExpr` rendered the callee through `convParenExpr`, which drops the hoist sink. The
 literal's capture copies were then written inside the call (`goǃ((` `var doneʗ2 = doneʗ1;` `() => …`,
-CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three now unwrap the parentheses, so
+CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three unwrap the parentheses, so
 the copy is a statement before the call and the deferred literal reads its variables by reference:
 
 <!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:16-28 -->
@@ -866,7 +895,7 @@ while the eager arguments rendered: inside an IIFE that snapshot-captured a heap
 `@base` — uncapturable in the IIFE's C# lambda (CS8175) — with the snapshot left declared but unused;
 where the raw name IS capturable (a reference-typed local — net/http `transport.go`'s
 `defer close(didReadResponse)` inside a `go func() { … }` lambda), it silently bypassed the snapshot
-every other read in that body uses. `visitDeferStmt`/`visitGoStmt` now enter through a **seeded**
+every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through a **seeded**
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
@@ -886,9 +915,9 @@ var baseʗ1 = @base;
 
 `prepareStmtCaptures` still OVERRIDES the statement's own captured-callee entries afterward (their
 defer-time snapshots), and a function-level defer/go — no enclosing lambda — is untouched (the seed
-set is empty). Whole-stdlib footprint at landing: net/http `transport.cs` alone, where the deferred
-`close` argument becomes the goroutine lambda's `didReadResponseʗ1` (semantically neutral there — both
-names alias one channel object; the fix matters for ref-local-boxed value locals). (Guarded by the
+set is empty). <!-- Whole-stdlib footprint at landing: net/http transport.cs alone, where the deferred
+close argument became the goroutine lambda's didReadResponseʗ1 (semantically neutral there: both
+names alias one channel object; the fix matters for ref-local-boxed value locals). --> (Guarded by the
 `DeferArgEnclosingCapture` behavioral test — a heap-boxed struct local passed eagerly to a deferred
 func literal, a deferred NAMED callee, and a go-statement literal, each inside an IIFE, with the
 mutations landing on the deferred copies and the source read back untouched, output-compared vs Go.)
@@ -901,7 +930,7 @@ are statements, invalid inside the condition expression. `visitExprStmt` / `visi
 route such decls to a pre-statement hoist buffer (`v.hoistedDecls`), but `visitIfStmt` and
 `visitForStmt` converted the condition with `convExpr(cond, nil)` and no hoist target, so the decls
 were dumped inline into the condition (`if (tpar.underIs(` `var suʗ1 = su;` `(ΔType u) => { … }))` →
-CS1003/CS1026/CS1002/CS1022/CS1513, ~63 errors across `go/types` alone). Both statement emitters now
+CS1003/CS1026/CS1002/CS1022/CS1513). Both statement emitters
 convert the condition into a hoist buffer and write any collected decls on their own lines **before**
 the `if`/`for`, mirroring `visitExprStmt`:
 
@@ -917,14 +946,12 @@ The condition is converted **after** an `if`/`for` init clause (preserving captu
 and the `if`-with-init sub-block hoists between the init and the `if`. The traditional `for` reuses the
 existing `ForVarInitMarker` slot — the hoisted condition decls are emitted at the same pre-`for` position
 as the for-init heap allocations. The hoist buffer is empty for a condition with no capturing func-literal
-argument, so the behavioral corpus is byte-identical; the stdlib deltas at landing were `go/types` files
-(`under.cs`, `builtins.cs`, `expr.cs`, `index.cs`, `instantiate.cs`) and a `crypto/tls`
-`slices.ContainsFunc` call. This clears the **syntax-error layer** in those files (`go/types` had ~63
-`CS100x`/`CS1026` from this one construct); it does not by itself green `go/types`, which compiles far
-enough afterward to surface a deeper layer of latent semantic defects (a `map[token.Token]func()`
-mis-lowered to a malformed explicit-interface `IDictionary`/`ICollection` implementation, named-slice
-wrappers not satisfying `IArray.Source`, `token` resolution) — the frontier moves from syntax to
-semantics, "progress, not regression." (Guarded by `FuncLitCaptureInCondition` — a func literal
+argument, so the behavioral corpus is byte-identical.
+<!-- At landing: the stdlib deltas were go/types files (under.cs, builtins.cs, expr.cs, index.cs, instantiate.cs) and
+     a crypto/tls slices.ContainsFunc call; go/types had ~63 CS100x/CS1026 from this one construct. Clearing that
+     syntax-error layer surfaced deeper semantic defects in go/types then (a map[token.Token]func() mis-lowered to a
+     malformed explicit-interface IDictionary/ICollection implementation, named-slice wrappers not satisfying
+     IArray.Source, token resolution). --> (Guarded by `FuncLitCaptureInCondition` — a func literal
 capturing an enclosing map, passed as an argument inside a plain `if` condition, an `if` condition with
 an init clause, a traditional `for` condition, and a while-style `for` condition, all output-compared vs
 Go.)
@@ -938,7 +965,7 @@ The third statement position with the same hazard: a capturing func literal pass
 `lambdaContext.deferredDecls` (the go/defer/return channel in `convFuncLit`), but a literal nested as a
 call **argument** falls back to the pre-statement hoist sink, which `visitReturnStmt` never provided —
 the snapshot declaration was dumped inline inside the return expression (10 syntax errors in `server.cs`,
-a 4-error cascade in traceviewer). `visitReturnStmt` now provides the same hoist buffer as
+a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buffer as
 `visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
 `DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
 
@@ -975,7 +1002,7 @@ range expression with `convExpr(rangeStmt.X, nil)` — no hoist target — so th
 after the `f:` argument name, and the whole file died in a syntax cascade (`context`'s `x_test.cs`:
 CS1003/CS1026/CS1002/CS1513/CS0106 ×195, from `TestAllocs` and `TestCause` alone).
 
-`visitRangeStmt` now converts the range expression into a hoist buffer and **splices** the collected
+`visitRangeStmt` converts the range expression into a hoist buffer and **splices** the collected
 decls in at the statement's own start — it records that offset before conversion and inserts there
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
@@ -1037,7 +1064,7 @@ for (nint tickersPerP = 1; …; tickersPerP++) {
         var stats = new slice<…>(tickerCount);
 ```
 
-`convFuncLit` now detaches `v.hoistedDecls` for the duration of the body walk and restores it after, so
+`convFuncLit` detaches `v.hoistedDecls` for the duration of the body walk and restores it after, so
 a nested hoist can only reach a position inside the body. The literal's own captures are unaffected —
 they are flushed before the body is converted, while the enclosing buffer is still installed. (Guarded
 by `FuncLitArgCapture` case 15.)
@@ -1046,7 +1073,7 @@ Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the bo
 
 * **Named results + defer.** See *The named-result form* above: the results are declared before the `try` and read back after the `finally`, and every exit inside leaves through a `goto`.
 * **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the thread's panic state rather than any handle on a frame.
-* **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go; cleared runtime's 4 CS8030.)
+* **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go.) <!-- the fix cleared runtime's 4 CS8030. -->
 * **Return-type INFERENCE is not a concern.** An inline body returns against the METHOD's own declared result type, so no inference runs over the return statements and the two shapes that would defeat one cannot arise: every return carrying an untyped `default!` (Go `nil` -- syscall's `getProcessEntry`), and returns of two unrelated concrete types sharing only the declared interface (go/parser's `parseTypeName` returning `&ast.SelectorExpr{...}` beside a plain `*ast.Ident`). Both are pinned as guards: `DeferTypelessReturns` (unnamed results, a defer, and every return carrying nil) and `DeferInterfaceReturn` (a defer/recover func returning `Shape` via `Circle` vs `Square`, plus a heterogeneous `(Shape, bool)` tuple return).
 
 ## A BLANK result mixed with a named one still needs the named-return-defer handling
@@ -1075,7 +1102,7 @@ A result list that is entirely **unnamed** (`func f() (int, error)`) or entirely
 
 ## Function-literal named results
 
-A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple referenced undeclared names (CS0103 — the `iter` package's last wave-1 errors). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *before* the `try`, returned after the `finally`. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
+A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple would reference undeclared names (CS0103, met in the `iter` package). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *before* the `try`, returned after the `finally`. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
 
 Because a named result lives in the literal's OWN scope, a reference to it in the body is the result, never an outer-scope capture — so named results are excluded from the lambda-capture set (`convFuncLit`) exactly as parameters are. text/template's `readFileFS` returns `func(file string) (name string, b []byte, err error)`, whose closure captures the enclosing `fsys` AND writes `b` via the captured tuple call `b, err = fs.ReadFile(fsys, file)`. Because the closure genuinely captures `fsys`, the capture analysis ran and mis-flagged `b` too — hoisting `var bʗ1 = b;` into the enclosing function, where `b` does not exist (CS0103), and renaming the body's `b` to the captured `bʗ1`. Filtering the named-result names out of the capture set (alongside the parameter names) leaves `b` a plain in-block declaration. (Guarded by `CrossPkgUser`'s `makeScanner` — a captured closure returning named results, one written via a tuple call whose RHS uses the capture, output-compared vs Go; crypto/x509 and html/template shared the same latent shape.)
 
@@ -1091,9 +1118,9 @@ Guarded by `DeferTypelessReturns`.
 ```csharp
 defer(Ꮡs.release, ref ᒐ);                 // DeferCallOrder's acquireAndWork: defer s.release()
 ```
-(net's own `defer conf.releaseSema()` sites now take the receiver-call lowering into the `finally`, described above, when its gates pass.) The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
+(net's own `defer conf.releaseSema()` sites take the receiver-call lowering into the `finally`, described above, when its gates pass.) The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
 
-The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(profileBuilder.Ꮡdeck).reset, ref ᒐ)`, the ж<pcDeck> overload captured at defer time and mutating the real field. Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
+The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ)` for `defer b.c.reset()`, the `ж<T>` overload captured at defer time and mutating the real field. (pprof's own `defer b.deck.reset()` passes the gates of the [receiver-call lowering](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally) and is emitted into the frame's `finally` instead.) <!-- src/tests/Behavioral/DeferValueFieldPtrReceiver/main.cs.target:28 `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ);`; src/core/runtime/pprof/proto.cs:694 `finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }` --> Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
 
 ## A deferred VALUE-receiver method passes its receiver as the thunk's first eager argument
 
@@ -1135,7 +1162,7 @@ state = h.ch.newHandleState(buf, true, " "u8);
 var stateʗ1 = state;         // snapshot copy — WRONG
 defer(Ꮡstateʗ1.free, ref ᒐ);        // Ꮡstateʗ1 never declared → CS0103
 ```
-The capture analysis now recognizes this implicit address-of (a value receiver of a pointer-receiver method, matching the pointee exactly and NAMED — the same guard the emission uses) as a reason to treat the local as a **box-ref var**, exactly like an explicit `&state`: it skips the snapshot, and the emission binds the original heap box:
+The capture analysis recognizes this implicit address-of (a value receiver of a pointer-receiver method, matching the pointee exactly and NAMED — the same guard the emission uses) as a reason to treat the local as a **box-ref var**, exactly like an explicit `&state`: it skips the snapshot, and the emission binds the original heap box:
 ```csharp
 ref var state = ref heap<handleState>(out var Ꮡstate);
 state = h.ch.newHandleState(buf, true, " "u8);
@@ -1158,7 +1185,7 @@ The same box-ref treatment covers a pointer-receiver method on a **value-struct 
 var prʗ1 = pr;                                 // snapshot copy — WRONG
 defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
-The capture analysis now matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
+The capture analysis matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
 ```csharp
 defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
 ```

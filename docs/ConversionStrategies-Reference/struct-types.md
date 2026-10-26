@@ -19,13 +19,13 @@ A combined Go field declaration — `x, y int` — emits a single combined C# li
 
 C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `partial struct settingsᴛ1 /*dyn*/`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
 
-**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `/*dyn*/` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Before it, `go/ast`'s `TestPrint` reported `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`, and `internal/platform`'s decode error named `[]platform_test.listEntry` rather than Go's structural spelling. (Landed 2026-08-09 with `go/ast`'s 9/9 bank; see [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).)
+**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `/*dyn*/` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Without it, `go/ast`'s `TestPrint` would report `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`. (Design: [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).) <!-- landed 2026-08-09 with go/ast's 9/9 bank; internal/platform's decode error had named []platform_test.listEntry rather than Go's structural spelling. -->
 
-A **map whose VALUE type is an anonymous struct** is lifted the same way. A package-level `var m = map[K]struct{…}{…}` — Go 1.24's crypto/internal/hpke `SupportedKEMs` (`map[uint16]struct{ curve ecdh.Curve; hash crypto.Hash; nSecret uint16 }`) and `SupportedAEADs` were the corpus instances — names its value struct through the lift so the map type reads `map<uint16, SupportedKEMsᴛ1>`; without it, `getAliasQualifiedTypeName`'s map arm stringified the value as raw Go `struct{…}` syntax straight into the C# map signature (`map<uint16, struct{ curve ecdh.Curve; … }>`) — which C# cannot parse (a CS1519/CS1003 syntax cascade). `extractStructType`'s recursive descent (see [An anonymous struct lifts from ANY depth of its declared type](#an-anonymous-struct-lifts-from-any-depth-of-its-declared-type)) reaches the map **VALUE** struct at the package-level value-spec composite-literal site; the one-off `extractMapValueStructType` that first did this was folded into it. The keyed element literals stay the target-typed `new(…)` constructor form — `[0x0001] = new(name: "alpha", size: 16, scale: (nint n) => n * 2)` in the guard's golden — which binds to the lifted struct's generated constructor; a func-typed value field (SupportedAEADs' `aead func([]byte) (cipher.AEAD, error)`) lifts to a `Func<…>` field that a method-group or func-value element still fills. Both the declaration type (`getCSharpTypeName` → the map arm) and the literal's own type render (`convMapType` → `getExpressionTypeName`) resolve the value through the shared `liftedTypeMap` (the lift runs before the initializer is converted). (Guarded by the `MapAnonStructValue` behavioral test — a package-level map with an anonymous-struct value type, including a func-typed field, constructed and read back by key, output-compared vs Go.)
+A **map whose VALUE type is an anonymous struct** is lifted the same way. A package-level `var m = map[K]struct{…}{…}` names its value struct through the lift, so the map type reads `map<uint16, kindsᴛ1>` in the guard's golden; without it, `getAliasQualifiedTypeName`'s map arm would stringify the value as raw Go `struct{…}` syntax straight into the C# map signature (`map<uint16, struct{ name string; … }>`) — which C# cannot parse (a CS1519/CS1003 syntax cascade). <!-- the corpus instances were Go 1.24's crypto/internal/hpke SupportedKEMs (map[uint16]struct{ curve ecdh.Curve; hash crypto.Hash; nSecret uint16 }) and SupportedAEADs, with a func-typed field aead func([]byte) (cipher.AEAD, error); Go 1.26's crypto/hpke declares no such map. --> `extractStructType`'s recursive descent (see [An anonymous struct lifts from ANY depth of its declared type](#an-anonymous-struct-lifts-from-any-depth-of-its-declared-type)) reaches the map **VALUE** struct at the package-level value-spec composite-literal site; the one-off `extractMapValueStructType` that first did this was folded into it. The keyed element literals stay the target-typed `new(…)` constructor form — `[0x0001] = new(name: "alpha", size: 16, scale: (nint n) => n * 2)` in the guard's golden — which binds to the lifted struct's generated constructor; a func-typed value field (the guard's `scale func(int) int`) lifts to a `Func<…>` field that a method-group or func-value element still fills. Both the declaration type (`getCSharpTypeName` → the map arm) and the literal's own type render (`convMapType` → `getExpressionTypeName`) resolve the value through the shared `liftedTypeMap` (the lift runs before the initializer is converted). (Guarded by the `MapAnonStructValue` behavioral test — a package-level map with an anonymous-struct value type, including a func-typed field, constructed and read back by key, output-compared vs Go.)
 
-The **empty struct `struct{}` is never lifted** — it maps to the shared golib `EmptyStruct`, so a `struct{}{}` composite literal emits `new EmptyStruct()` and a `map[K]struct{}` ("set") emits `map<K, EmptyStruct>`. Lifting an empty struct would be doubly wrong: it has no fields to model, and the lift mis-attributes its name and identity. When the `struct{}{}` is the value assigned to a map element (`seen[k] = struct{}{}`), the enclosing assignment passes the **LHS ident** (`seen`) into the struct-conversion context to name the lift — so the empty struct was being lifted to `<func>_seen` *and registered under `seen`'s own type, the map* `map[K]struct{}`, in the lifted-type registry. That poisoned every later reference to that map type: the function parameter `seen map[K]struct{}` rendered as the phantom struct instead of `map<K, EmptyStruct>`, and its comma-ok deconstruction (`(_, ok) = seen[k]`) and two-arg indexer vanished (CS8130/CS0021), while real-map call sites mismatched (CS1503). `convStructType` now short-circuits an empty struct to `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard that `extractStructType` already applies everywhere else. (Guarded by the `EmptyStructMapSet` behavioral test; runtime hit this on `typesEqual`'s `seen map[_typePair]struct{}` parameter.)
+The **empty struct `struct{}` is never lifted** — it maps to the shared golib `EmptyStruct`, so a `struct{}{}` composite literal emits `new EmptyStruct()` and a `map[K]struct{}` ("set") emits `map<K, EmptyStruct>`. Lifting an empty struct would be doubly wrong: it has no fields to model, and the lift mis-attributes its name and identity. When the `struct{}{}` is the value assigned to a map element (`seen[k] = struct{}{}`), the enclosing assignment passes the **LHS ident** (`seen`) into the struct-conversion context to name the lift — so the empty struct was being lifted to `<func>_seen` *and registered under `seen`'s own type, the map* `map[K]struct{}`, in the lifted-type registry. That poisoned every later reference to that map type: the function parameter `seen map[K]struct{}` rendered as the phantom struct instead of `map<K, EmptyStruct>`, and its comma-ok deconstruction (`(_, ok) = seen[k]`) and two-arg indexer vanished (CS8130/CS0021), while real-map call sites mismatched (CS1503). `convStructType` short-circuits an empty struct to `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard that `extractStructType` already applies everywhere else. (Guarded by the `EmptyStructMapSet` behavioral test; runtime hit this on `typesEqual`'s `seen map[_typePair]struct{}` parameter.)
 
-An **empty `interface{}` field is never lifted** either — it maps to `any`, exactly as a bare `interface{}` type does. When `visitStructType` lifts an anonymous struct it walks its fields and lifts any *anonymous interface* field to its own named `/*dyn*/` interface. Those three inline lift sites (a plain `interface{}` field, a `*interface{}` field, and a `[]interface{}`/`[N]interface{}` element) type-asserted `*ast.InterfaceType` directly, diverging from `extractInterfaceType` — the canonical lift gate, which already excludes empty interfaces. So encoding/json's slice-encoder cycle memo — `ptr := struct{ ptr interface{}; len int }{v.UnsafePointer(), v.Len()}` — lifted its `ptr interface{}` field to a named empty **marker** interface `encode_ptr_ptr`. A named empty interface is implemented by nothing, so constructing the struct from the boxed `uintptr` failed (`cannot convert from 'uintptr' to '…encode_ptr_ptr'`, CS1503). The three sites now carry the same `!isEmptyInterface` guard, so an empty-interface field falls through to the normal field-type conversion and renders `any` (`*interface{}` → `ж<any>`, `[]interface{}` → `slice<any>`). (Guarded by the `AnonymousStructs` extension `cycleMemo` — an in-function anonymous struct with an `interface{}` field constructed from a pointer, read back through the field, and used as a map key, output-compared vs Go; fails CS1503 without the guard. Part of greening encoding/json.)
+An **empty `interface{}` field is never lifted** either — it maps to `any`, exactly as a bare `interface{}` type does. When `visitStructType` lifts an anonymous struct it walks its fields and lifts any *anonymous interface* field to its own named `/*dyn*/` interface. Those three inline lift sites (a plain `interface{}` field, a `*interface{}` field, and a `[]interface{}`/`[N]interface{}` element) type-asserted `*ast.InterfaceType` directly, diverging from `extractInterfaceType` — the canonical lift gate, which already excludes empty interfaces. So encoding/json's slice-encoder cycle memo — `ptr := struct{ ptr interface{}; len int }{v.UnsafePointer(), v.Len()}` — lifted its `ptr interface{}` field to a named empty **marker** interface `encode_ptr_ptr`. A named empty interface is implemented by nothing, so constructing the struct from the boxed `uintptr` failed (`cannot convert from 'uintptr' to '…encode_ptr_ptr'`, CS1503). The three sites carry the same `!isEmptyInterface` guard, so an empty-interface field falls through to the normal field-type conversion and renders `any` (`*interface{}` → `ж<any>`, `[]interface{}` → `slice<any>`). (Guarded by the `AnonymousStructs` extension `cycleMemo` — an in-function anonymous struct with an `interface{}` field constructed from a pointer, read back through the field, and used as a map key, output-compared vs Go; fails CS1503 without the guard. Part of greening encoding/json.)
 
 **A returned anonymous-struct composite literal records its implicit conversion AFTER it is lifted.** Two structurally-identical anonymous structs are the *same* Go type but the converter lifts each occurrence to a *distinct* C# name, so a conversion between them must be bridged by a recorded `[assembly: GoImplicitConv<…>]` (the `ImplicitConvGenerator` emits the operators). A closure whose **result type** is an anonymous struct that `return`s a **composite literal** of the identical anonymous struct — `mk := func(…) struct{ptr any; len int} { return struct{ptr any; len int}{p, n} }` — lifts the closure-result type (`…_func_R0`) and the composite-literal type (`…_type`) separately, and `visitReturnStmt`'s `checkForDynamicStructs` records the conversion between them. Each side's C# name is resolved through the per-file lifted-type registry (`liftedTypeMap`), but a function-local composite literal is only *added* to that registry **during its own `convExpr`**. The recording therefore had to move to run **after** the result expression is converted: reading the arg's type earlier found it unlifted and stringified it as raw Go `struct{…}` text — an invalid C# generic argument in the emitted attribute (`[assembly: GoImplicitConv<struct{ptr interface{}; len int}, …_func_R0>]`, CS1031 "Type expected"). Recording after the lift resolves both sides to their lifted names (`[assembly: GoImplicitConv<…_type, …_func_R0>]`). The `dynamicCast` template `checkForDynamicStructs` may return is applied to the already-converted result expression identically either way, so the reorder is otherwise output-neutral (the full-stdlib A/B reconvert is byte-identical). This is latent for the current stdlib (encoding/json builds its identical memo struct once into a variable, avoiding a second same-shape lift). (Guarded by the `ClosureReturnAnonStruct` behavioral test.)
 
@@ -50,7 +50,7 @@ struct (or the field is embedded), so a named scalar with a method set — hpack
 `DecodingError{InvalidIndexError(idx)}`, where `type InvalidIndexError int` has an `Error()` method
 satisfying the `error` field — recorded no `GoImplement<InvalidIndexError, error>` and passed the
 value bare to the interface-typed constructor parameter (which surfaces as `NilType`, CS1503). The
-gate now also fires when a named, non-struct, **non-interface** element type `types.Implements` the
+gate also fires when a named, non-struct, **non-interface** element type `types.Implements` the
 field's interface — mirroring the call-argument path, which routes any argument into an interface
 parameter with no struct-only restriction. Recording the `GoImplement` is what clears the error (the
 generated implementation makes the scalar implement the interface, so the bare pass then converts
@@ -121,11 +121,15 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     internal @string str;
     /*embed*/ internal error error;
 }
-internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
+[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
     Ꮡ(new ptrElemsᴛ1(2, "two"u8, default!))
-}.slice();
+}.slice(); }
 ```
+
+(The `[GoLazy]` holder class around the var is unrelated to the lift: a package var whose value is pure data is
+built on its first read, see
+[Package-Level Variable Initialization Order](../ConversionStrategies.md#a-pure-data-var-is-built-on-its-first-read).)
 
 This strictly widens what lifts: anything that lifted before still lifts, under the same name. The
 walk is deliberately **first-match**, because each lifting caller can name only one anonymous type
@@ -139,10 +143,10 @@ commit — **not** by a source scan, which got this wrong. A grep for the shape 
 `_test.go` files and would have concluded the production corpus was untouched; the A/B found
 `encoding/gob/type.cs`, because `bootstrapType("_reserved1", (*struct{ r7 int })(nil))` reaches its
 anonymous struct through a *parenthesized pointer conversion* — `(…)` then `*` then the literal — a
-composition the scan's pattern never looked for. (Charter §9's false-alarm rule, from the other
+composition the scan's pattern never looked for. <!-- Charter §9's false-alarm rule, from the other
 direction: a zero-hit scan is only as good as its positive controls, and this one had a control for
-`[]*struct{…}` and none for `(*struct{…})`.) The corpus footprint is exactly gob's `tReservedN`
-declarations, and the change there is a **naming improvement, not a behavior change**: the lift now
+[]*struct{…} and none for (*struct{…}). --> The corpus footprint is exactly gob's `tReservedN`
+declarations, and the change there is a **naming improvement, not a behavior change**: the lift
 happens at the call argument, where it takes the parameter's name (`eᴛ1`…`eᴛ7`), instead of arriving
 late from `convStarExpr`'s fallback as the generic `Δtype`/`Δtypeᴛ1`…. Declarations, uses and the
 `package_info.cs` accessibility block all move together. (Guarded by the
@@ -156,7 +160,7 @@ kept its *own* hand-written peel — a chain of `field.Type.(*ast.StarExpr)` / `
 field declared `[N]struct{…}` lifted while `[N]*struct{…}`, `[]*struct{…}`, `map[K]struct{…}` and
 `chan struct{…}` fell through to the same raw-Go-text emission. That the map case had already been
 patched in as its own arm rather than as a rule is the shape a point-repair leaves behind, and it is
-what marked this as the next site. The arm now calls `extractStructType` / `extractInterfaceType`,
+what marked this as the next site. The arm calls `extractStructType` / `extractInterfaceType`,
 the identical helpers every other lift site uses:
 
 ```go
@@ -219,7 +223,7 @@ directly: against the previous binary the three struct fields emit raw `struct{�
 fields are read at their ZERO values on purpose — *constructing* a value of an anonymous struct type
 lifts a second, function-scoped name for the same Go type, and a container of it has no implicit
 conversion to bridge the two. That is the recorded cross-context anonymous-lift identity split, which
-applies equally to the one-level shape and is a separate increment.)
+applies equally to the one-level shape and is not closed here.)
 
 ## A global addressed only by the package's own `_test.go` is still heap-boxed
 A Go pointer to a package-level var aliases that var's real storage, which in C# means the global
@@ -231,7 +235,7 @@ path/filepath is the canonical case — `path.go` declares `var lstat = os.Lstat
 implementation the production `Walk` calls. The production emission left `lstat` a plain field, and
 the test variant's `Ꮡlstat` named a box nothing declared: **CS0103**.
 
-The converter now scans the build-selected in-package `_test.go` files for the identifiers they take
+The converter scans the build-selected in-package `_test.go` files for the identifiers they take
 the address of and folds them into the addressed-global set, so the production declaration carries
 the box:
 
@@ -245,7 +249,7 @@ Three properties make this the right shape rather than a `-tests`-only patch:
 
 - **It runs in ordinary conversion too**, exactly as `siblingTestFuncMethodNames` does for reference
   spelling, so a package's production storage shape is **mode-stable** — an `-stdlib` reconvert and a
-  `-tests` run emit the same bytes. Conditioning it on `-tests` would make the banked corpus flip
+  `-tests` run emit the same bytes. Conditioning it on `-tests` would make the committed corpus flip
   between the two.
 - **The scan is a cheap direct directory read, not a second type-check** — no test dependency graph is
   loaded. It is therefore name-based, and the production pass resolves each candidate against the real
@@ -300,7 +304,7 @@ re-binds above textually re-emit the tag expression, so a tag containing a **cal
 receive** evaluated once at dispatch and again at each matched re-bind arm —
 `switch p := recover().(type)` re-called `recover()` (which returns nil the second time,
 silently losing the recovered value in a `case nil, *bailout:`-style arm that reads `p`;
-go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is now
+go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is
 HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
 
 ```csharp
@@ -331,8 +335,8 @@ Inside a package whose namespace nests a same-named segment (go/build/constraint
 `namespace go.go.build`), C# binds a generated reference's leading `go` RELATIVELY to `go.go`
 (CS0234). The generators qualify every type-reference position via `GlobalQualify`
 (Common.cs); generated signatures also carry parameter REF KINDS (`in slice<byte>`) and a
-canned `System.IFormattable` impl where the interface inherits it (the hand-finished io
-stub's dyn machinery).
+canned `System.IFormattable` impl where the interface inherits it (only a hand-written
+interface can).
 
 The **converter** faces the same `go.go` shadowing in the import `using` directives it emits for a
 `go/*` package (go/token lands in `namespace go.go`, imports `sync`/`unicode` sub-namespaces): a
@@ -385,7 +389,7 @@ compile errors:
    host's `using go.testing_runtime;` were bare, which is why one emitted file could show a
    correctly-qualified `using iotest = global::go.testing.iotest_package;` beside a broken
    `using static go.math.rand.rand_package;`. `globalQualifyRooted` applies the same gate to an
-   ALREADY-rooted path and both sites now route through it. It is idempotent and a no-op with no
+   ALREADY-rooted path and both sites route through it. It is idempotent and a no-op with no
    shadow, so unshadowed packages emit byte-identically.
 
 Both holes fire for ANY package whose test closure reaches a `go/*` package, and a `regress_test.go`
@@ -421,7 +425,7 @@ the package's fully-qualified class back to the bare local form the attribute fi
 `using static <ns>.<pkg>_package;` resolves, so the two spellings collapse in the emitting
 `HashSet`. Guarded by `TestStripLocalTypeQualifier`.
 
-*(Superseded in the details, 2026-08-02: `canonicalRecordIfaceName` is retired. Both record sets now
+*(Superseded in the details: `canonicalRecordIfaceName` is retired.<!-- history: superseded 2026-08-02 --> Both record sets now
 compose one key through `implementRecordKey` / `canonicalImplementRecordIfaceName` — same collapse
 rule, now shared rather than duplicated. See* A foreign implement record is keyed in ONE spelling,
 and a VALUE one is trusted only for a partial struct.*)*
@@ -431,7 +435,7 @@ slips past it, because `package_info_external_test.cs` / `package_test_info.cs` 
 the anchor-routing note above). The merge reads each existing attribute line VERBATIM into the
 emitting `HashSet`, so a record persisted by an OLDER converter — before `stripLocalTypeQualifier`
 reduced it — arrives under the pre-collapse spelling and never meets the fresh, already-collapsed
-one. `container/heap` (banked at package #8, before the collapse landed) committed
+one. `container/heap` (validated before the collapse landed) committed
 `[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]`; a fresh
 `-tests` run of a NESTED package-under-test now renders that same pair as the bare
 `[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]` (the qualified `go.container.heap_package.`
@@ -465,7 +469,7 @@ targets, so the composed name happened to be right. `go/types`' `rangeStmt` decl
 `type Expr = ast.Expr` **function-locally**, and once function-local type declarations began taking
 the enclosing-function lift (`rangeStmt_Expr`, so two functions never claim one compilation-scoped
 `global using`), `check.errorf(lhs[i], …)` started composing `ast_rangeStmt_Exprᴠpositioner` against
-the generator's `ast_Exprᴠpositioner` — 557 verdicts behind two lines. With the resolution in place
+the generator's `ast_Exprᴠpositioner`. <!-- 557 verdicts stood behind those two lines. --> With the resolution in place
 the aliased and unaliased cast sites in that same function land on one adapter and one record.
 (Guarded by the `LocalTypeAliasScope` extension: a function-local `type S = fmt.Stringer` converted
 to a local `namer` beside the same conversion written through `fmt.Stringer` directly, so a
@@ -530,7 +534,7 @@ dependency list stays import-derived. This is what lets **os/signal** validate (
 `TestAliasReferenceImportsMatchesConversionRecordQualifierShapes` and
 `TestAliasReferenceImportsIgnoresConversionRecordAttributePayload`.
 
-**Referencing a `go/*`-package TYPE loses a root segment because the path's own `go` collides with the root namespace.** A `go/ast` type reference renders correctly as `go.go.ast_package.X` (root `go` + the path's `go.ast` → namespace `go.go`, class `ast_package`), but `convertToCSTypeName` then strips the *leading* `go.` as a redundant root (bodies live inside `namespace go`), leaving `go.ast_package.X` — namespace `go`, which has no `ast_package` (CS0234/CS0426 in the go/* consumers go/doc, go/printer, go/internal/typeparams, whose GoImplement attributes and `using` aliases both carry the stripped form). The two rooting helpers now recognise this: `isStrippedGoPathPackageRef` splits the ref at its first `_package` class segment and tests the *namespace* portion against `packageChildNamespaces` (the current package's rooted import-closure namespaces): the ref is stripped iff that namespace is NOT already a real rooted namespace but *becomes* one when the root `go.` is prepended. This is a **membership** test, not a string-shape test, so it recognises a stripped go/*-package ref at any depth — `go.ast_package` (ns `go`✗ → `go.go`✓), `go.build.constraint_package` (ns `go.build`✗ → `go.go.build`✓, three-segment `go/build/constraint`), `go.doc.comment_package` (ns `go.doc`✗ → `go.go.doc`✓) — while leaving a genuinely-rooted ref alone (`go.io.fs_package` — ns `go.io` is already real). (The earlier two-segment string heuristic — "the class segment sits immediately after `go.`" — recognised only the depth-one `go.ast_package` shape and silently missed the three-segment `go/build/constraint` and `go/doc/comment` sub-package refs, which are string-indistinguishable from a correctly-rooted `go.io.fs_package`; the membership test is what disambiguates them.) `rootQualifySubNamespaceTypeRefs` (the assembly-scope GoImplement/GoImplicitConv attributes) re-roots the stripped form to a bare `go.go.ast_package`; `rootQualifyIfAmbiguous` (the in-namespace `using` aliases) re-roots to `global::go.go.ast_package` — always `global::`, because a bare `go.go.<pkg>_package` re-binds its leading `go` to the nearest enclosing `go` from *any* importer (a go/*-package's own `go.go.*` namespace, and equally `internal/pkgbits` at `go.internal.pkgbits` resolving the second `go` inside `go.go`, CS0234). This un-blocks the whole go/* chain at the rooting level (go/doc's own-errors 17 → 1); each go/* package still needs its remaining per-package residuals (e.g. a methodless-func-type's `[GoTypeAlias]` still names an inline-rendered `ΔFilter`) to fully compile. The depth-one shape is now guarded by `GoNamespaceShadow` (its `go/nsshadow` nested module's import renders through `isStrippedGoPathPackageRef` → `using nsshadow = global::go.go.nsshadow_package;`); the multi-segment sub-package depth (`go/build/constraint`) remains census-verified only — the A/B reconvert-diff showed only the four `go/build/constraint`- and `go/doc/comment`-importing packages, go/build, go/doc, go/parser, go/printer, gaining the corrected double-`go` rooting, with the depth-one `go.go.ast_package` refs unchanged and zero collateral.
+**Referencing a `go/*`-package TYPE loses a root segment because the path's own `go` collides with the root namespace.** A `go/ast` type reference renders correctly as `go.go.ast_package.X` (root `go` + the path's `go.ast` → namespace `go.go`, class `ast_package`), but `convertToCSTypeName` then strips the *leading* `go.` as a redundant root (bodies live inside `namespace go`), leaving `go.ast_package.X` — namespace `go`, which has no `ast_package` (CS0234/CS0426 in the go/* consumers go/doc, go/printer, go/internal/typeparams, whose GoImplement attributes and `using` aliases both carry the stripped form). The two rooting helpers now recognise this: `isStrippedGoPathPackageRef` splits the ref at its first `_package` class segment and tests the *namespace* portion against `packageChildNamespaces` (the current package's rooted import-closure namespaces): the ref is stripped iff that namespace is NOT already a real rooted namespace but *becomes* one when the root `go.` is prepended. This is a **membership** test, not a string-shape test, so it recognises a stripped go/*-package ref at any depth — `go.ast_package` (ns `go`✗ → `go.go`✓), `go.build.constraint_package` (ns `go.build`✗ → `go.go.build`✓, three-segment `go/build/constraint`), `go.doc.comment_package` (ns `go.doc`✗ → `go.go.doc`✓) — while leaving a genuinely-rooted ref alone (`go.io.fs_package` — ns `go.io` is already real). (The earlier two-segment string heuristic — "the class segment sits immediately after `go.`" — recognised only the depth-one `go.ast_package` shape and silently missed the three-segment `go/build/constraint` and `go/doc/comment` sub-package refs, which are string-indistinguishable from a correctly-rooted `go.io.fs_package`; the membership test is what disambiguates them.) `rootQualifySubNamespaceTypeRefs` (the assembly-scope GoImplement/GoImplicitConv attributes) re-roots the stripped form to a bare `go.go.ast_package`; `rootQualifyIfAmbiguous` (the in-namespace `using` aliases) re-roots to `global::go.go.ast_package` — always `global::`, because a bare `go.go.<pkg>_package` re-binds its leading `go` to the nearest enclosing `go` from *any* importer (a go/*-package's own `go.go.*` namespace, and equally `internal/pkgbits` at `go.internal.pkgbits` resolving the second `go` inside `go.go`, CS0234). This is what lets the go/* packages resolve each other's types. <!-- at the fix: go/doc's own errors 17 → 1; the remaining per-package residuals (e.g. a methodless func type's [GoTypeAlias] naming an inline-rendered ΔFilter) were closed separately, see "A collapsed methodless func type must NOT export a [GoTypeAlias]" below. --> The depth-one shape is now guarded by `GoNamespaceShadow` (its `go/nsshadow` nested module's import renders through `isStrippedGoPathPackageRef` → `using nsshadow = global::go.go.nsshadow_package;`); the multi-segment sub-package depth (`go/build/constraint`) remains census-verified only — the A/B reconvert-diff showed only the four `go/build/constraint`- and `go/doc/comment`-importing packages, go/build, go/doc, go/parser, go/printer, gaining the corrected double-`go` rooting, with the depth-one `go.go.ast_package` refs unchanged and zero collateral.
 
 **BCL names in generator templates are global::-qualified too — a Go type can shadow any bare BCL
 name.** The generated partials sit inside the package class, where every Go type in the package is
@@ -551,16 +555,17 @@ a package declaring `type Range struct` alongside a named string type and a name
 sub-sliced with the Go `Range`'s fields as bounds, output vs Go.)
 
 ## Generic embedded fields
-A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, Go 1.23's internal/concurrent) arrives in the AST as
+A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/sync's `HashTrieMap`) arrives in the AST as
 an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,
 pointer, and selector forms) and the member emits under the **base name** with type arguments
 stripped **before** the selector dot-strip — the arguments may contain qualified types whose
-dots otherwise win the LastIndex (`*concurrent.HashTrieMap[T, weak.Pointer[T]]` misnamed its
-member `Pointer` instead of `HashTrieMap`). The TypeGenerator's promoted accessors carry the
+dots otherwise win the LastIndex (Go 1.23's unique embedded `*concurrent.HashTrieMap[T, weak.Pointer[T]]`,
+which would otherwise name its member `Pointer` instead of `HashTrieMap`). The TypeGenerator's promoted accessors
+carry the
 type parameters on the instance param (`ref Δentry<K, V> instance`) and strip them from the
 member access (`instance.node.isEntry`). A promoted method call through a raw ж **box local**
 hops `X.Value` ahead of the cross-package pointer-embed hop
-(`m.Value.HashTrieMap.Value.Load(value)`, unique). BANKED: unqualified promoted METHOD calls
+(`m.Value.HashTrieMap.Value.Load(value)`, Go 1.23's unique). Known gap: unqualified promoted METHOD calls
 through a generic embed (`w.show()`) — receiver wrappers resolve the embedded type by exact
 name; qualified calls work. Guarded by `GenericStructFields` (`wrapped[T]`/`tag[T]`) and
 `CrossPkgUser` (`holder[T]` embedding `*CrossPkgLib.Cache[T]`).
@@ -585,7 +590,7 @@ target-typed positions are untouched — their delegate supplies the type, and a
 type there could only add identity-match constraints against hand-written stub delegate types.
 Multi-result `any`-slot literals kept natural tuple typing until html/template supplied the
 consumer that caveat was waiting for (see below). Guarded
-by the `LiftedLocalTypes` behavioral test; operationally by testing/quick's banked suite.
+by the `LiftedLocalTypes` behavioral test; operationally by testing/quick's validated test suite.
 
 **The same slot is reached through a KEYED COMPOSITE, and there the loss is total rather than
 merely imprecise.** The argument position above was the first consumer; a `map[K]any` value, an
@@ -604,7 +609,7 @@ FuncMap{"die": func() bool { panic("die") }}   // text/template exec_test
 The reflection bridge then reports `NumOut() == 0` — truthfully, because the datum is missing
 from the emission, not from the bridge — and `text/template`'s own `goodFunc` rejects a function
 Go accepts ("function die has 0 return values; should be 1 or 2"), panicking as the FuncMap is
-registered and taking **16 of that package's 52 verdicts** with it. The mark is applied where the
+registered. <!-- that took 16 of text/template's 52 verdicts. --> The mark is applied where the
 value's declared slot is already resolved, so all three keyed forms are covered by one predicate;
 a slot with a CONCRETE func type (`map[string]func() bool`) has a delegate target and is
 deliberately left exactly as it was. Guarded by `untypedInterfaceFuncLit_test.go`
@@ -655,7 +660,7 @@ The forwarded-call test is the predicate `visitReturnStmt` uses to decide the el
 conversion (`forwardedReturnNeedsConversion`), so the type is stated exactly when the return emits
 adapter wrapping. A SINGLE-result literal returning one concrete adapter (`return
 new slog.JSONHandlerжΔHandler(…)` against `slog.Handler`) is left unprefixed: delegate covariance
-converts `Func<…, Adapter>` to `Func<…, Handler>`, and testing/slogtest's banked suite compiles that
+converts `Func<…, Adapter>` to `Func<…, Handler>`, and testing/slogtest's validated test suite compiles that
 shape. Guarded by the `PanicOnlyFuncLiteralVar` and `FuncLiteralDeclaredResultIface` behavioral
 tests.
 
@@ -667,8 +672,8 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
   occurrences (`new(struct{ A Struct })` four times in encoding/binary's TestSizeStructCache)
   must lift to a SINGLE C# type — per-occurrence lifts split `reflect.Type` identity per
   occurrence, so binary's `structSize` cache gained four entries where Go adds one. Lifted
-  anonymous structs dedupe by structural signature within a scope — a function, and, since
-  2026-08-18, PACKAGE level within a file: two package vars over one written anonymous struct
+  anonymous structs dedupe by structural signature within a scope — a function, and
+  PACKAGE level within a file: two package vars over one written anonymous struct
   (internal/reflectlite's `assignableTests`/`implementsTests`, reflect's own
   `funcLookupCache`/`structLookupCache`) are one Go type, and splitting them made the C# types
   un-unifiable where Go unifies freely — `append(assignableTests, implementsTests...)` could not
@@ -678,8 +683,8 @@ package scope under a function-prefixed name. Two Go type-identity rules ride th
   instead the ADOPTION path's job: a lift **adopts a PACKAGE-LEVEL lift of the same anonymous
   type** rather than minting a second one (so a function-local literal of a package-lifted
   anonymous struct reuses the package's type — Go's anonymous-struct identity is scopeless, and
-  assigning the local to a package var is legal Go needing one C# type — the coordinator ruling
-  at the local-iface-cast × escape-box-copy merge): `encoding/xml`'s
+  assigning the local to a package var is legal Go needing one C# type
+  <!-- the coordinator ruling at the local-iface-cast × escape-box-copy merge -->): `encoding/xml`'s
   `read_test.go` declares `type Child struct{ G struct{ I int } }` — lifted `Child_G` — and then
   writes the same anonymous type as a composite literal inside a function, and Go assigns one to the
   other (CS1503 ×6 while they were two C# structs). The package-level registry decides it, keyed by
@@ -713,17 +718,18 @@ partial struct TestNoFixedSize_Person /*dyn*/ {
 ```
 Guarded by the `LiftedLocalTypes` behavioral test (single lifted declaration for repeated
 anonymous occurrences + `[GoLocalName]` pinned in the golden); operationally by
-encoding/binary's banked suite.
+encoding/binary's validated test suite.
 
 In the INTERNAL white-box test bridge (the `_test.go` files of the package under test) the declaration keeps its
 accessibility inline, and the attribute records ride attribute-only partials in the bridge's own metadata unit
 (`packageBridgeTypeAccess`: `package_info_internal_test.cs`, or `package_test_info.cs` for an internal-only suite).
-The interface lift once discarded its attributes, so a function-local interface in an internal test file had no
-`[GoLocalName]` at all, and go2cs-gen, which finds the struct field embedding an interface by that stamp,
-forwarded a promoted method to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, BurntSushi/toml's
-`TestEncodeAnonymousNoStructField`). The interface lift now records its stamp exactly as the struct lift does:
+go2cs-gen finds the struct field embedding an interface by the `[GoLocalName]` stamp, so without it a promoted
+method would forward to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, met in BurntSushi/toml's
+`TestEncodeAnonymousNoStructField`). The interface lift therefore records its stamp exactly as the struct lift does:
 
-<!-- source: the two lines src/go2cs/internalTestLocalInterfaceStamp_test.go:87 and :101 assert, the declaration and its record -->
+<!-- illustration: the two strings the guard asserts, the declaration and its record:
+     src/go2cs/internalTestLocalInterfaceStamp_test.go:88 `internal partial interface TestLocalEmbeddedInterface_Inner`
+     and :102 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
 ```csharp
 internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
 …
@@ -828,8 +834,8 @@ Because the collapse applies at both the declaration and every reference, and to
 consistency holds across packages. One position needed a companion fix: a variadic `...Option`
 element is package-class-qualified (`main_package.Option`) for a package-local named type, which
 would mangle a collapsed delegate to `main_package.Action` (CS0426) — `variadicElementType` now
-skips the qualifier when the element collapsed. Cleared 13 of database/sql's 17 errors (the whole
-named-func family + the CS1929 it masked). Guarded by `MethodlessFuncType` (a function returning
+skips the qualifier when the element collapsed. <!-- cleared 13 of database/sql's 17 errors (the whole
+named-func family + the CS1929 it masked). --> Guarded by `MethodlessFuncType` (a function returning
 the named type, one taking the anonymous underlying, a struct field, and a tuple-deconstruction
 seam across the two); regression-checked against the self-referential (`NamedFuncTypeStateMachine`,
 unchanged), nested-reference (`FirstClassFunctions`), and variadic-param (`PublicizedFuncTypeParam`)
@@ -910,9 +916,7 @@ extension — a package-level `simpleResolve` passed as a METHOD GROUP to `Cross
 `Resolver` is a methodless func type naming the cross-package `*CrossPkgLib.Node`, so the wrapped delegate
 renders `ж<CrossPkgLib.Node>` via the alias, output-compared vs Go. The single-segment producer compiles
 either way, so the byte-golden — unnamed vs Go-named result tuple — is what guards the routing; the exact
-slash-bearing CS0234/CS0123 needs a multi-segment producer like go/ast, verified by the go/doc source A/B.
-go/doc's own remaining block is the SHARED generated-adapter forwarding of go/ast's unexported interface
-marker methods — a separate root.)
+slash-bearing CS0234/CS0123 needs a multi-segment producer like go/ast, verified by the go/doc source A/B.)
 
 A companion root cleared path/filepath fully: a **cross-package type ALIAS whose target lives in yet
 another package** — `os.FileInfo = fs.FileInfo` (os/types.go, target in `io/fs`) — is emitted as an
@@ -925,9 +929,10 @@ already resolves through the existing `ꓸ` global-using alias (`CrossPkgLibꓸT
 untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. CNR byte-identical;
 an A/B of os+io/ioutil (same package set) shows only that one intended resolution (io/ioutil's `ReadDir`
 sort lambda moved `osꓸFileInfo` → `fs.FileInfo`, matching the file's other `fs.FileInfo` refs — still
-compiles). **GUARD OWED** — the shape needs three packages (B declares `Y`, A aliases `type X = B.Y`, C
-references `A.X`), which neither the single-package baseline nor the 2-package `CrossPkg` harness
-expresses; validated by the `core/path/filepath` build (1→0) + io/ioutil build.)
+compiles). No behavioral test covers it: the shape needs three packages (B declares `Y`, A aliases
+`type X = B.Y`, C references `A.X`), which neither a single-package behavioral test nor the 2-package `CrossPkg`
+harness expresses; the `core/path/filepath` and io/ioutil builds exercise it.)
+<!-- GUARD OWED; path/filepath went 1→0 errors. -->
 
 **A func type renders structurally in EVERY type-name path — the signature never stringifies.**
 `getAliasQualifiedTypeName` now carries a `*types.Signature` arm (`signatureTypeName`, beside `iifeDelegateType`)
@@ -960,8 +965,8 @@ go/importer field fixed, `ж<tls.Conn>` in net/http server/transport/h2_bundle (
 literals), traceviewer's `Func<trace.UtilFlags, (slice<slice<trace.MutatorUtil>>, error)>`,
 go/scanner's `err` field moving to the canonical `tokenꓸPosition` alias (the old
 `go.token_package.ΔPosition` resolved only by go.go-namespace luck), the variadic type-assert
-target below, one comment-alignment shift, and the benign using-line additions. Cleared the
-IMP-2/HTTP-3 CS0234 cluster (net/http ×8 + go/importer ×6 + traceviewer). (Guarded by the
+target below, one comment-alignment shift, and the benign using-line additions. <!-- cleared the
+IMP-2/HTTP-3 CS0234 cluster (net/http ×8 + go/importer ×6 + traceviewer). --> (Guarded by the
 `SynthesizedDelegateChildPkg` behavioral test — a nested CHILD subpackage (slash-bearing import
 path) whose `*inner.Record` rides a named methodless func-type field with a nested-tuple lookup
 param AND a `map[string]func(*inner.Record, string)` field, both invoked at runtime vs Go.)
@@ -972,7 +977,7 @@ lowers to the `ꓸꓸꓸ` delegate family.** `extractTypes` split the parameter 
 (io.ReadCloser, error)` (go/internal/gccgoimporter's `Importer`, surfacing as go/importer's
 `gccgoimports.importer` field) — shredded at the tuple's interior comma, unbalancing the assembled
 delegate: `Func<@string, (io.ReadCloser>, error)` (the inner `>` closes before the tuple's second
-element — a 6-error syntax cascade, IMP-1). `splitTopLevelParams` tracks `<>`/`()`/`[]`/`{}` depth
+element — a 6-error syntax cascade). `splitTopLevelParams` tracks `<>`/`()`/`[]`/`{}` depth
 (with the channel-arrow `<-` guard `splitMapKeyValue` already carries) and splits only at depth 0.
 On top of that, a variadic tail (`...elem`, from the structural render above) converts its ELEMENT
 type in `extractTypes` and carries an ellipsis-family marker that the `func(` assembler hoists into
@@ -1013,8 +1018,8 @@ signature OR methodless named func, via `methodlessNamedFuncSignature`) through 
 `Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f = default!;`. This precedence matches
 `getCSharpTypeName`'s own — the func render wins over the foreign-alias route (which for a methodless named
 func would point at the SKIPPED delegate declaration); a non-func foreign-renamed local keeps its alias
-unchanged. An A/B full-stdlib reconvert moves exactly one file (go/parser/parser.cs), greening go.parser
-outright. (Guarded by the `MethodlessFuncType` extension — an uninitialized `var find lookup` where
+unchanged. An A/B full-stdlib reconvert moves exactly one file (go/parser/parser.cs).
+(Guarded by the `MethodlessFuncType` extension — an uninitialized `var find lookup` where
 `type lookup func(string) (path string, ok bool)`; the byte-golden captures the structural render
 `Func<@string, (@string, bool)>` — dropping the Go result NAMES the string path keeps — output-compared vs
 Go. As with the delegate-routing sibling above, a single-segment/same-package producer compiles either way,
@@ -1023,7 +1028,7 @@ multi-segment producer like go/ast, verified by the go/parser source A/B.)
 
 ## Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
-C# conversion: Go 1.23's internal/concurrent `keyHash: mapType.Hasher` feeds a `hashFunc` field from a
+C# conversion: Go 1.23's internal/concurrent `keyHash: mapType.Hasher` fed a `hashFunc` field from a
 `Func<…>` field. The composite-literal walk resolves each element's field BY NAME (keyed-aware)
 and wraps mismatched delegate values in the target delegate's constructor —
 `keyHash: new hashFunc((~mapType).Hasher)` (the wrap splits a C# named-argument label first).
@@ -1058,12 +1063,12 @@ params) also stays native. (Guarded by the `NamedDelegateStructuralParam` behavi
 named-with-method and method-group-declared locals wrapped, methodless/method-group/func-literal
 controls bare, values vs Go.)
 
-The same mirror applies to a **composite-literal FIELD** (2026-07-17; sort's test-suite
+The same mirror applies to a **composite-literal FIELD** (met in sort's test-suite
 conversion): the composite walk previously wrapped only the named-field ← different-delegate
 direction, so GOROOT sort example_keys_test's `planetSorter{planets: planets, by: by}` — a `By`
 value (named, with a `Sort` method) initializing the written structural field `by func(p1, p2
 *Planet) bool` — emitted the bare `by: by` against the `Func<ж<Planet>, ж<Planet>, bool>`
-constructor parameter (CS1503; the Phase-4 blocker-map row B10b). The structural-field arm now
+constructor parameter (CS1503). <!-- 2026-07-17; the Phase-4 blocker-map row B10b. --> The structural-field arm
 applies the identical named-rendering test and wrap: `by: new Func<ж<Planet>, ж<Planet>,
 bool>(by)`. Method groups, func literals, and nil stay bare, and generic fields stay native, as
 at call sites. (Guarded by the `NamedFuncTypeStructuralField` behavioral test — the By-with-method
@@ -1110,7 +1115,7 @@ the named-function convention `(@string format, params ꓸꓸꓸany argsʗp) => 
 against that `Action`), and calls through the value passed loose Go-style args as if `params`
 existed (`reportf("…"u8, (~f).typ)` — CS1503; `reportf("empty type set"u8)` — CS7036).
 
-The lowering now targets a golib delegate family carrying a real C# 13 `params Span<T>` tail
+The lowering targets a golib delegate family carrying a real C# 13 `params Span<T>` tail
 (`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
 and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
@@ -1138,16 +1143,14 @@ passes the variadic **element** type as the last type argument. Everything else 
 A `:=`-declared variadic func literal is untouched: it keeps C#'s natural (params-capable) lambda
 type under `var` (the `VariadicClosureSpread` shape). One deliberate residue: `defer`/`goǃ` of a
 call **through a variadic func value** would need to capture the `Span` tail, which a ref struct
-cannot be — pack into a slice at such a site. ⚠ **That residue now has its one demonstrated
-consumer, and it is a TEST file** (found 2026-08-19, lane `claude/variadic-call`): the census of
-the whole Go 1.23 tree found the `defer`/`go` of a variadic func literal in one place only —
-`html/template/examplefiles_test.go:90`, `defer func(dirs ...string){…}(dir1, dir2)` — which emits
-`defer((params ꓸꓸꓸstring dirsʗp) => {…}, dir1, dir2, ref ᒐ)` and fails inference against
-`builtin.defer<T1,T2>(Action<T1,T2>, T1, T2, ref GoFrame)`: **CS0411**. That is why the claim used
-to read "no stdlib occurrence" — the original A/B was over PRODUCTION sources, and the shape lives
-only in a `_test.go`, so nothing before the Phase-4 `-tests` pipeline could see it. It is one of the
-two roots now blocking `html/template`'s 243 verdicts. Full-stdlib
-A/B footprint: go/types predicates.cs/expr.cs plus every file that renders a variadic func type
+cannot be — pack into a slice at such a site. The `defer`/`go` of a variadic func LITERAL with loose
+arguments (`html/template/examplefiles_test.go:90`, `defer func(dirs ...string){…}(dir1, dir2)`) is not that
+residue: each argument is captured on its own and the literal is cast to its family delegate
+([Defer/Panic/Recover](defer-panic-recover.md#a-variadic-deferredspawned-func-literal-is-cast-to-its-golib-family-delegate)).
+<!-- history: found 2026-08-19 (lane claude/variadic-call) by a census of the Go 1.23 tree, when that literal emitted
+     defer((params ꓸꓸꓸstring dirsʗp) => {…}, dir1, dir2, ref ᒐ) and failed inference (CS0411), one of two
+     roots blocking html/template's 243 verdicts; the family-delegate cast closed it. -->
+Full-stdlib A/B footprint: go/types predicates.cs/expr.cs plus every file that renders a variadic func type
 structurally (inspected file-by-file at introduction). (Guarded by `VariadicFuncValues` — a named
 func AND a func literal satisfying a variadic func-typed param, loose/empty/spread calls through
 it, and a nil-compared variadic func-typed var — output-compared vs Go.)
@@ -1156,14 +1159,14 @@ it, and a nil-compared variadic func-typed var — output-compared vs Go.)
 the asserted type by converting the TYPE EXPRESSION through the string-based type-name path, which
 skips the variadic lowering above — net/http transport.go's
 `cw.(func(string, ...any))` emitted `._<Action<@string, .any>>(ᐧ)` with a literal `.any` (CS1001, the
-`...` mangled instead of lowered). An anonymous-signature assert target now renders through
+`...` mangled instead of lowered). An anonymous-signature assert target renders through
 `getCSharpTypeName` → `iifeDelegateType`, exactly like the collapsed methodless NAMED func target already
 did: `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`. Non-variadic signatures render identically on both paths, so the
 only full-stdlib delta is the transport.cs site. (Guarded by `VariadicFuncTypeAssert` — a positive
 variadic assert invoked through the asserted value, a negative assert on a non-func value, and a
 non-variadic anonymous func assert, output-compared vs Go.)
 
-**…and the BOXING side needs the matching cast, or the two can never meet (2026-08-20).** Rendering
+**…and the BOXING side needs the matching cast, or the two can never meet.** <!-- 2026-08-20 --> Rendering
 the assert target through `iifeDelegateType` fixes the *reading* half; the *writing* half is where the
 value acquires a dynamic type, and for a variadic func that type is C#'s, not Go's. C# gives a method
 group or lambda at an untyped destination a **natural function type**: for a non-variadic signature
@@ -1178,7 +1181,7 @@ the same converter.
 So a variadic func entering EMPTY-INTERFACE space is cast to its Go func type at the boundary —
 `((Funcꓸꓸꓸ<any, @string>)(attrEscaper))` — which is the same carry-your-Go-type rule the pointer box
 and the untyped-constant box already apply at that same finite set of slots, and it lives with them in
-`typedNilInterfaceBoxing.go`. Both sides now name the type through `getCSharpTypeName` →
+`typedNilInterfaceBoxing.go`. Both sides name the type through `getCSharpTypeName` →
 `iifeDelegateType`, one renderer, so they cannot drift. The cast is a no-op wherever the value already
 has that type (a typed var, a call result), so it widens nothing; a NON-empty interface target needs
 nothing either, since a bare func type has no methods and satisfies no other Go interface. (Guarded by
@@ -1187,7 +1190,8 @@ group as a `map[string]any` element, through a plain assignment, and as an `[]an
 asserted back; plus a NON-variadic literal direct to `any` as the control that must keep matching
 without a cast. Neutering the cast prints `no match` on all four and leaves the control passing.)
 
-**A variadic METHOD VALUE was the one shape in the family still frozen at fixed arity (2026-08-26).**
+**A variadic METHOD VALUE keeps its variadic tail too.**
+<!-- 2026-08-26: it was the one shape in the family still frozen at fixed arity. -->
 `errorf := t.Errorf` — go/types' and `slices`' own idiom, `errorf = t.Logf` one statement later, then
 loose Go-style calls — has TWO emissions, and both dropped the variadic tail. A bound method value
 forwards through a lambda carrying the method's own parameters, and that lambda rendered the tail as
@@ -1195,7 +1199,7 @@ the plain `slice<T>` the signature *stores* rather than the `params ꓸꓸꓸT` 
 variadic function uses: `(@string p1, slice<any> p2) => Ꮡt.Errorf(p1, p2)`. Every call through the
 value was then an arity error — `errorf("…", n)` CS1503 on a bare `n` against `slice<any>`,
 `errorf("…", a, b)` CS1593 "does not take 3 arguments", `errorf("…")` CS7036 — which is the same
-family the lambda's explicit parameters were introduced to fix, one level in. The tail now renders
+family the lambda's explicit parameters were introduced to fix, one level in. The tail renders
 through `variadicParamType`, the same routine the named-function convention uses (a file-local
 `using ꓸꓸꓸT = Span<…>;` alias where one is mintable, inline `Span<T>` otherwise), so the forwarded
 argument binds the receiving `params ꓸꓸꓸany` parameter directly and the call inside the lambda is
@@ -1231,8 +1235,8 @@ AND from C#. It also puts the value permanently out of reach of every reflective
 their arguments through an `object?[]` a ref struct cannot enter. `System.Linq.Expressions`
 refuses one outright as well, so the method-value binder's `Expression.Lambda` approach
 (GoReflect.MethodSets.cs) does not generalize either. `reflect.Value.Call` therefore threw
-`NotImplementedException` for every variadic func value — which is 13 of `text/template`'s 52
-verdicts, since its whole `FuncMap` feature calls user functions exactly that way.
+`NotImplementedException` for every variadic func value, and `text/template`'s whole `FuncMap` feature calls
+user functions exactly that way. <!-- 13 of text/template's 52 verdicts. -->
 
 The call is made in **typed code** instead (`GoReflect.InvokeVariadic`, GoReflect.TypeLayout.cs).
 One small generic trampoline per family arity — eighteen, the closed set golib's variadic.cs
@@ -1273,7 +1277,8 @@ Go program can construct. The arity row matters because only 0, 1 and 2 fixed pa
 consumer in the corpus today: 3 through 8 would otherwise be discovered by whichever package
 reached them first.)
 
-## `reflect.MakeFunc` is `Value.Call`'s exact inverse — a compiled delegate over the descriptor's carried System.Type (2026-08-29)
+<a id="reflectmakefunc-is-valuecalls-exact-inverse--a-compiled-delegate-over-the-descriptors-carried-systemtype-2026-08-29"></a>
+## `reflect.MakeFunc` is `Value.Call`'s exact inverse — a compiled delegate over the descriptor's carried System.Type
 
 Go's `MakeFunc` is runtime machinery end to end: it reinterprets the descriptor into a `funcType`
 sub-record, asks `funcLayout` for a stack map, and pairs an assembly stub (`makeFuncStub`) with a
@@ -1301,17 +1306,19 @@ a typed Go func (`t.DNSStart(info)`), through `Value.Call`, and through composit
 
 The returned Value rides `typ`'s **own** descriptor box rather than a fresh `synthType`, so the
 dims cargo survives and `Type()` interns back to the caller's wrapper: `MakeFunc(t, fn).Type() == t`
-by identity. A VARIADIC func type is a loud `NotImplementedException`, not a wrong delegate: its
-tail is `params Span<T>`, a byref-like type no expression tree can carry — the route that exists is
-the reverse of `InvokeVariadic`'s typed family trampolines above, unbuilt for want of a
-demonstrated consumer, exactly as `Value.CallSlice` records. `makeMethodValue`'s identical
+by identity. A VARIADIC func type's tail is `params Span<T>`, a byref-like type no expression tree can
+carry, so `MakeGoFuncDelegate` builds it through a typed family (`makeVariadicFunc{N}`/`makeVariadicAction{N}`,
+golib's `GoReflect.MakeVariadicDelegate.cs`), the reverse of `InvokeVariadic`'s call trampolines above; the
+invoker receives the variadic parameter as its packed slice.
+<!-- src/core/reflect/makefunc_impl.cs:67 `A VARIADIC func (isVariadic) is no longer refused here`. history: MakeFunc
+     threw NotImplementedException for a variadic func type before that family existed. --> `makeMethodValue`'s identical
 `funcLayout` read deliberately stays auto: it is reachable only through `flagMethod`, which the
 bridge never sets (`Value.Method` binds the receiver into an ordinary delegate instead). With
 MakeFunc live, `reflect/iter.cs`'s rangefunc `Seq`/`Seq2` funcs gain their real implementation
 path too. (Guarded by behavioral `ReflectMakeFunc`: the docs swap example invoked directly, the
 httptrace compose shape, multi-return, canonical `Type()` identity, `Call` over a made func, an
 interface-typed parameter, a typed-nil pointer argument, and a `[4]byte` parameter whose `Len()`
-proves the dims cargo threads through. Banked consumer: `net/http/httptrace` 2|0.)
+proves the dims cargo threads through.) <!-- banked consumer: net/http/httptrace 2|0. -->
 
 ## Major-version import directories
 A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, so the
@@ -1329,14 +1336,14 @@ different renderers, and each needed the convention applied at its own site:
    foreign type's name from the type graph's path-qualified string, whose last segment slash-strip
    assumes the path tail IS the package qualifier. For a `/vN` tail it left the version behind
    (`math/rand/v2.Rand` → `v2.Rand`), which the alias-prepend then doubled into `rand.v2.Rand`
-   (`v2` read as a member of class `rand_package` — CS0426). Both renderers now reduce the foreign
+   (`v2` read as a member of class `rand_package` — CS0426). Both renderers reduce the foreign
    import-PATH qualifier to the package NAME before the slash-strip. `getFullyQualifiedTypeName` also composes
    `pkg.Path()+"_package"` directly for the qualified base name — routed through `packageClassPath`,
    which swaps a `/vN` tail for the Go package name.
 3. **Cross-package reference metadata** — `PackageInfo.RootPackageName` (`importOperations.go`) is the
    code-facing qualifier that keys imported-alias loading and the foreign-implement records that cast
    sites reference (`GoImplement<…rand_package.PCG, …rand_package.Source>(Pointer = true)`). It was the
-   path's last segment (`v2`); `rootPackageNameFromPathParts` now returns the parent segment for a
+   path's last segment (`v2`); `rootPackageNameFromPathParts` returns the parent segment for a
    `/vN` tail. `PackageName` stays path-formed — it also names the referenced `.csproj`, which IS
    `math.rand.v2.csproj`.
 4. **Imported type-alias TARGET class** — `loadImportedTypeAliases` (`importOperations.go`) qualifies
@@ -1349,7 +1356,7 @@ stdlib has none, so the regex/parent-segment rule holds corpus-wide. Guarded by 
 behavioral test — a `main` importing a sibling `vlib/v2` module (`package vlib`) that mirrors
 math/rand/v2's shape: a struct field `ж<vlib.Rand>` (renderer #2), a `*PCG → Source` pointer cast
 recorded as `go.vlib.vlib_package.PCG` (#3/#4), output-compared vs `go run` across all four phases.
-This is what unblocks sort as Phase 4's second validated package (its test suite imports math/rand/v2).
+(sort's test suite imports math/rand/v2, so it needs this to validate.)
 
 ## A C# keyword inside a dotted import-path element
 A Go import-path element may itself contain **dots** — a module host (`gopkg.in`, `example.com`,
@@ -1357,7 +1364,7 @@ A Go import-path element may itself contain **dots** — a module host (`gopkg.i
 separator** in the emitted C#. So `gopkg.in/yaml.v3` does not render two namespace levels, it renders
 four, and each is a separate C# identifier that has to be keyword-escaped on its own.
 
-Two sanitizers render namespace text, and until 2026-08-07 only one of them knew that. The
+Two sanitizers render namespace text, and both have to know that. <!-- until 2026-08-07 only one did. --> The
 **declaration** side (`getProjectName` → `getCoreSanitizedIdentifier`) has always split an element on
 its dots, so the dependency's own file correctly opens `namespace go.gopkg.@in;`. Every **consumer**
 emission — the import's `using yaml = …;` alias, the enclosing-namespace `using gopkg.…;` an unaliased
@@ -1403,8 +1410,8 @@ whole-string measurement reproduces the reporter's emitted text verbatim.
 The string-path type renderer (`convertToCSFullTypeName`) peels a Go type expression one constructor
 at a time — `<-chan `, `chan `, `chan<- `, `*`, `[]`, `[N]`, `map[K]`, `func(…)` — recursing on what
 is left. Its **import-path rewrite runs first**, before any of those branches, because a
-package-qualified element has to become a C# namespace before the name means anything. Until
-2026-08-08 that rewrite measured the path from index 0 of the whole string, constructor included.
+package-qualified element has to become a C# namespace before the name means anything. Measured from
+index 0 of the whole string, constructor included, that rewrite goes wrong: <!-- it did, until 2026-08-08 -->
 
 `convertImportPathToNamespace` maps a **hyphen to an underscore**, because a Go path element may
 legally contain one (`mongo-driver`, `go-isatty`). Handed the constructor as well, it rewrote the
@@ -1496,10 +1503,10 @@ wrong qualifier into its `.g.cs`. A `types.Type` carries no source alias, so a p
 **explicitly-aliased** imports populate the map — unaliased / blank / dot / Δ-collision-renamed
 imports are absent and keep the `importQualifier(pkg.Name())` fallback, so nothing else changes
 (value references were already correct — they come from the AST import name via `convIdent`; only
-type references, sourced from `types.Type`, lost the alias). Cleared cryptobyte's CS0426 (which had
-masked deeper `Builder.add`/`slice.Value` roots, now banked). GUARD OWED — the shape needs two
-packages whose names collide so one import is forced non-canonical, not expressible in the
-single-library behavioral corpus.
+type references, sourced from `types.Type`, lost the alias). No behavioral test covers it: the shape needs
+two packages whose names collide so one import is forced non-canonical, not expressible in the
+single-library behavioral corpus. <!-- GUARD OWED. Cleared cryptobyte's CS0426, which had masked deeper
+Builder.add/slice.Value roots, since banked. -->
 
 ## A ONE-FIELD struct's positional `nil` literal names its field constructor
 The universe `nil` renders in a value context as the typeless `default!`, which takes its type from
@@ -1512,15 +1519,15 @@ ambiguous`:
 new TestWriter_testClose(default!)          // ambiguous: T(NilType) vs T(error)
 new TestWriter_testClose((error)(default!))   // names the field constructor, and only it
 ```
-The argument now carries the field's type, via the same per-element `castArgToType` plumbing the
+The argument carries the field's type, via the same per-element `castArgToType` plumbing the
 narrow-integer and `any`-field element casts use. **Only** a one-field struct can reach this: Go
 requires a positional composite literal to list every field in order, so at any other arity the call
 already differs from `T(NilType)` in argument count — and only `nil` can, because every other element
 renders with a type of its own. A POINTER field is excluded and deliberately unchanged: there the
 literal renders golib's `nil`, whose type `NilType` is an *exact* match for `T(NilType)` and so beats
 the field constructor's user-defined conversion without ambiguity, producing the zero struct, which
-is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape (×9, and the last wall
-in front of that package's 97 verdicts); `database/sql`'s `stubDriverStmt{nil}` is the same root.
+is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `database/sql`'s
+`stubDriverStmt{nil}` is the same root. <!-- ×9 in archive/tar, the last wall in front of that package's 97 verdicts. -->
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import pl "PALib"` with `pl.B2{V: 1}`, where `B2` is an exported alias, cannot render `new pl.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new PALibꓸB2(…)` as the canonical import does. Every other member keeps the file's alias (`new pl.Box(…)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
