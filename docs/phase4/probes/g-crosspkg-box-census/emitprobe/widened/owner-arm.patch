@@ -1,0 +1,13 @@
+diff --git a/src/go2cs/globalAddressOperations.go b/src/go2cs/globalAddressOperations.go
+index 7a57f8fab6..9134ac717e 100644
+--- a/src/go2cs/globalAddressOperations.go
++++ b/src/go2cs/globalAddressOperations.go
+@@ -338,7 +338,7 @@ func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool)
+ 			continue
+ 		}
+ 
+-		if typeHasBoxOnlyPointerMethod(varObj.Type()) {
++		if pkg.Name() != "main" { // EXPERIMENT: option (b)
+ 			into[varObj] = true
+ 		}
+ 	}
