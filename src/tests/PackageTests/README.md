@@ -187,3 +187,15 @@ packages' own symbol files, MEASURED and never gating on the same terms, its fra
 `-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
 release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`
 input does this on every leg, with no pack.
+
+# `GolibAotProbe`: a golib change that must not move behavior
+
+`GolibAotProbe` is a golib-only program that reaches the frame, panic, goroutine and `GoArrayZero` sites in the
+shapes the converter emits, and prints to stdout only. Publish it once per golib (`-p:GolibProj=<that tree>\src\core\golib\golib.csproj`;
+the default is this tree) and compare the two stdouts byte for byte. It was written for the quiet-build seat
+(BOARD, 2026-10-26), whose A/B ran it on the JIT, as a `TrimMode=full` ILLink publish, and as a Native AOT publish:
+
+```text
+dotnet publish src/tests/PackageTests/GolibAotProbe -c Release -r win-x64 -o <out dir outside the tree>
+<out dir>\GolibAotProbe.exe > probe.out
+```

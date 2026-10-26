@@ -28837,4 +28837,49 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — H (COORD seat #7, .2): golib's quiet build — 14 IL warnings and go2cs-gen's CS8602 answered at their sites; a converted generic's type parameter carries no `[DynamicallyAccessedMembers]` (RESIDUAL, converter side)
+
+**What landed.** golib's Release build reads **0** warnings, down from 14, with the trim analyzer on through
+`PublishTrimmed`. go2cs-gen's Release build reads **0**, down from 1. Each warning was answered at its own site:
+
+| Site | Warning | Answer |
+|---|---|---|
+| `runtime/RuntimePanicCheck.cs:81` | IL2026 `StackFrame.GetMethod()` | Reads frames through `DiagnosticMethodInfo`, by name: it needed only the declaring type's name and assembly. `IsRuntimePackageType` now takes the type's full name and reads its outermost class. |
+| `GoFrame.cs:477`, `runtime/Goroutine.cs:1194` | IL2026 `StackFrame.GetMethod()` | The method is compared by identity, and in Goroutine resolved through its IL offset, which only a `MethodBase` answers. A site suppression whose justification states what is read and how the answer degrades without metadata, as `builtin.recoverChecked` (`builtin.cs:383`) already did. A `RequiresUnreferencedCode` would cascade into `GoFrame.Run` and `goǃ`, which every converted program calls. |
+| `GoDelegateSynthesis.cs:155` | IL2026 ×5, IL2111 ×5 | `DefineType`'s parent parameter is `DynamicallyAccessedMembers(All)`, so naming `MulticastDelegate` keeps all its members; the minted type only derives from it. Suppressed at `mint` with that proof. The path's real limit is Native AOT's missing `Reflection.Emit`, IL3050 at `GoStructSynthesis`'s `DefineDynamicAssembly`, which stage 3d owns. |
+| `GoArrayDims.cs:60` | IL2091 | `GoArrayZero.New<T, TDims>` carries `[DynamicallyAccessedMembers(PublicConstructors)]` on `T`, as `builtin.new<T>` does. |
+| go2cs-gen `MethodSet.cs:212` | CS8602 | `IsSpan`'s nullable out parameter becomes `SpanElement`'s return value, since netstandard2.0 has no `NotNullWhen`. |
+
+**Not turned on: the AOT analyzer.** With `-p:IsAotCompatible=true` the same build reads 26 IL3050, and stage 3d of
+[`PLAN-golib-full-trim.md`](../PLAN-golib-full-trim.md) (`RequiresDynamicCode` on what remains, the OQ-3 panic,
+`GoAotFailOnDynamicCode`) is not on master. COORD ruled it a later seat, with this census as its starting
+measurement: `AdapterBinder.cs:317`; `GoReflect.FieldAccess.cs:572, 656, 676, 690`;
+`GoReflect.PointerConversions.cs:125, 131`; `GoReflect.TypeLayout.cs:1516, 1568, 1586-1591, 1595`;
+`GoReflect.VariadicRegistry.cs:65, 85`; `GoStructSynthesis.cs:192`; `GoTypeOps.cs:259`; `builtin.cs:3620`;
+`runtime/TypeExtensions.ExtensionMethodRegistry.cs:331, 446, 450`; `runtime/TypeExtensions.GoMethodSets.cs:380`;
+`runtime/TypeExtensions.cs:143`. Line numbers are read at master `d269ef477b`.
+
+**RESIDUAL (converter side): a converted generic's type parameter carries no `[DynamicallyAccessedMembers]`.**
+The IL2091 annotation moves the requirement to `GoArrayZero.New`'s callers. An Exe build, where the converter's
+template turns on `PublishTrimmed` and so the trim analyzer, now warns at a generic call site. Libraries do not run
+the analyzer, and neither do `-tests` hosts (`runtime.tests.csproj` reads `EnableTrimAnalyzer` and `PublishTrimmed`
+both empty). This is the class a generic `new(T)` already raises against `builtin.new<T>`: at master,
+`Behavioral/ZeroValueNeedyStructPaths/main.cs:26` reads IL2091 for `@new<T>()`. The footprint was measured over the
+committed tree, building each Exe that calls `GoArrayZero.New` from generic code against both golibs. Two projects
+read one new project-own IL2091 each, 0 → 1: `Behavioral/GenericArrayTypeArgZero/main.cs:16` and
+`Behavioral/ReflectBridgeClosure/main.cs:91`. Each build also stops printing golib's 14. The remedy is the converter
+writing `[DynamicallyAccessedMembers(PublicConstructors)]` on a type parameter that reaches `new(T)` or a sized zero,
+which would answer both at once. Owed: a census of the corpus's generic `new(T)` sites before it is sized.
+
+**Proof that behavior did not move.** The probe `src/tests/PackageTests/GolibAotProbe` (golib only, 8 scenarios:
+recover, a recovered bounds panic, a re-panic in a defer, a `recovers: true` handler, a goroutine send, a goroutine
+recover, and `GoArrayZero.New` twice) prints identical stdout on golib at `d269ef477b` and at the seat. That holds
+on the JIT and as a self-contained `TrimMode=full` ILLink publish (sha256 `4e96584f…cbbe5` both arms). On that
+publish the probe's trim warnings go 22 → 19: golib's four frame and IL2091 warnings are gone, and the probe's own
+generic call gains one. The Native AOT arm runs on the i7, since H has no platform linker. Also recorded: a full
+ILLink trim of the probe still reports 18 golib warnings that golib's own build does not, all in the method-set and
+type-registry code that stage 5 owns.
+
+— H (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

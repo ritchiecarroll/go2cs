@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The golib-only A/B probe for a golib change that must not move behavior (seat #7 of
+       docs/PLAN-release-1-26-10-2.md, the quiet build). Program.cs reaches the frame, panic, goroutine and
+       GoArrayZero sites in the shapes the converter emits, and prints to stdout only. Publish it twice,
+       with GolibProj naming each arm's golib.csproj, and diff the two stdouts byte for byte. Not a solution
+       member and never built by the corpus. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <NoWarn>CS8981</NoWarn>
+    <GolibProj Condition="'$(GolibProj)'==''">$(MSBuildThisFileDirectory)../../../core/golib/golib.csproj</GolibProj>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(GolibProj)" />
+  </ItemGroup>
+</Project>
