@@ -38,7 +38,7 @@ was the most satisfying compile I have ever been part of. The final layers were 
 defects were all one family, three declaration sites catching up to a semantics fix that was itself
 correct — which is exactly what finishing looks like.*
 
-Compiling is the milestone — **operational is the mission.** Phase 4 now begins: running the Go
+Compiling is the milestone — **operational is the mission.** Phase 4 came next: running the Go
 standard library's own test suites against the transpiled output, and hardening the runtime semantics
 this campaign already banked. If you have ever wanted to consume real Go code from .NET — or extend a
 Go application in C# — this is the moment the foundation went from theory to artifact.

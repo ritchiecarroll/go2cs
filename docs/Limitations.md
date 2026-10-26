@@ -114,11 +114,13 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
-* **The address of another package's variable is the address of a copy.** When code takes the address of a
-  variable that a different package exports and that is not itself a pointer, the pointer it gets refers to a
-  copy, so writes through it never reach the variable. That covers `&otherpkg.V`, a pointer-receiver method
-  value used as a value (`f := otherpkg.V.Reset`), and the common `flag.BoolVar(&otherpkg.Debug, "debug", false,
-  "...")`, where parsing the flag leaves `otherpkg.Debug` unchanged. Calling the method directly
+* **In 1.26.10.1, the address of another package's variable can be the address of a copy.** When code takes
+  the address of a variable that a different package exports and that is not itself a pointer, the pointer it
+  gets refers to a copy, so writes through it never reach the variable, unless the package that declares the
+  variable takes its address itself (with `&V`, or by calling a pointer method on it or taking one as a
+  value). That covers `&otherpkg.V`, a pointer-receiver method value used as a value
+  (`f := otherpkg.V.Reset`), and the common `flag.BoolVar(&otherpkg.Debug, "debug", false, "...")`, where
+  parsing the flag leaves `otherpkg.Debug` unchanged. Calling the method directly
   (`otherpkg.V.Reset()`) and reading the variable both work, and inside one package all of these work. To avoid it,
   keep the variable and the code that takes its address in the same package, or have the package export a pointer
   (`var V = &T{}`) or an accessor function instead of the value.
@@ -129,7 +131,12 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
        with exported variables boxed only for a box-only pointer method at
        :329 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
        value is fixed for the 1.26 publication (R's seat F1); the cross-package case is ruled a documented limitation
-       (owner, 2026-10-25), with the fix in the BOARD row of that date. -->
+       (owner, 2026-10-25), with the fix in the BOARD row of that date.
+       2026-10-26: re-read at a6214f0c5d: the owner's predicate, run by an importer over the owner's syntax, is
+       src/go2cs/globalAddressOperations.go:79 (`func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, into map[types.Object]bool) {`):
+       it boxes a package-level value var the owner itself writes `&V` (or `&V.f`, `&V[i]`) for, calls a
+       pointer-receiver method on, or takes a pointer-receiver method value of; so the copy happens only when the
+       owner does none of these (and markExportedBoxOnlyGlobals, cited above, does not fire). -->
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
@@ -198,7 +205,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   correct, validated, and slower than Go's assembly. A TLS handshake is where you will notice.
 * **Native AOT** starts much faster and holds less memory, but once running it is slower than the JIT
   on most rows of the comparison, and a publish compiles every converted package your program
-  references, which takes hours and a lot of memory
+  references in full
   ([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
   has the measurements).
 

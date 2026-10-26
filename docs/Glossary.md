@@ -283,7 +283,7 @@ does — pointer identity, write-through, and type-assert-back all survive — a
 must therefore construct it (`new errorStringжerror(Ꮡ(…))`). A **value** implementation whose
 concrete cannot carry a base list — a foreign struct, or a named func type (a C# delegate cannot be
 a partial struct) — emits a `TᴠI` class. Converter (`adapterTypeRef` / `valueAdapterTypeRef` in
-`src/go2cs/main.go`) and generator (`ImplementGenerator`) compose the name independently and must
+`src/go2cs/interfaceConversion.go`) and generator (`ImplementGenerator`) compose the name independently and must
 stay in sync; a foreign concrete is package-qualified first (`os_FileжReader`).
 
 Three properties of the scheme are load-bearing, and answer the recurring "why not `жT_I`?": the
@@ -316,7 +316,7 @@ migration runbooks, [`GoCorpusMigration.md`](GoCorpusMigration.md) and
 [`DotNetMigration.md`](DotNetMigration.md). A runbook **leads**: it is executed as written, and a
 deviation found mid-run fixes the runbook in the same stage that found it. It names instruments,
 gates and traps, never a particular release, and carries **no frozen figures** — budgets live in
-CLAUDE.md's measured table, counts with the instrument that re-measures them. A runbook edit never
+the measured table in `.claude/rules/harness-gates.md`, counts with the instrument that re-measures them. A runbook edit never
 reopens a ruling.
 
 <a id="plan"></a>**Plan (strategy plan / instance plan).**
@@ -369,7 +369,7 @@ board rather than carried elsewhere.
 The mailbox ([`phase4/MAILBOX.md`](phase4/MAILBOX.md), branch `claude/mailbox`) is the fleet's async
 **transport, not record**: questions, ready-signals, warnings — polled at session start and before
 final gates. Durable content routes by kind: procedure → the runbook in-stage, harness/gate doctrine
-→ CLAUDE.md, findings → the board. A **lane** is one worktree-plus-session executing an assigned
+→ `.claude/rules/harness-gates.md`, findings → the board. A **lane** is one worktree-plus-session executing an assigned
 slice of a campaign under the worker contract ([`GoCorpusMigration.md`](GoCorpusMigration.md) §3.6).
 
 ## .NET and tooling terms
@@ -390,7 +390,7 @@ that generic constraints lift to.
 .NET's ahead-of-time compiler: it consumes IL at **publish** time and emits native machine code, so the
 program starts without a JIT. go2cs measures it as the third column of the performance suite (Go binary /
 C# JIT / C# **Native AOT**), and it is expensive here — each AOT publish compiles the full converted-stdlib
-closure, ~25 min per benchmark on the current coordinator class, which is why a full perf run is hours and
+closure, ~25 min per benchmark on an older six-core desktop, which is why a full perf run is hours and
 must run solo. **ILC arrives as a runtime pack selected by the [TFM](#tfm), not by the SDK performing the
 publish** — so a new SDK publishing an old TFM silently resolves the OLD ILC and produces the previous
 generation's codegen, presenting as a plausible "the new runtime changed nothing" rather than as an error

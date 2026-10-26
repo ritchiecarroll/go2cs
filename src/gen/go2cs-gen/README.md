@@ -8,7 +8,14 @@ converted Go code behave like Go:
 - pointer-receiver method overloads,
 - implicit type-alias conversions,
 - struct embedding / promotion,
-- package init ordering.
+- lazily built package variables,
+- field access through pointers reinterpreted from `unsafe.Pointer`,
+- throwing stubs for Go functions with no Go body (assembly or cgo),
+- Go-string boxing for string literals passed to `any` parameters,
+- the records Go reflection reads (channel directions, struct member facts, container operations).
+
+Two analyzers ship with the generator and fail the build when a C# string literal binds a C# type
+where Go has a `string`, or when a stack-append buffer is passed as anything but a plain local.
 
 Install go.gen when you convert your **own** Go code to C# with go2cs — the generator must run at
 compile time so the generated members are available. The pre-converted Go standard-library packages

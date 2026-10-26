@@ -48,7 +48,6 @@ For a package such as `unicode/utf8`, conversion shall produce a layout equivale
 unicode/utf8/
   utf8.cs
   utf8_test.cs
-  example_test.cs
   package_info.cs
   package_test_info.cs
   go2cs_test_host.cs
@@ -167,9 +166,11 @@ arguments `go test -json` gives a Go test binary, and nothing else:
 `-test.v=test2json` is the host's JSON mode (`--json` remains an accepted spelling). A package that
 reads its own arguments then sees what Go's binary sees: cobra's `Execute` with no `SetArgs` parses
 `os.Args[1:]`, and pflag skips every `-test.` flag. The pipeline's result and JUnit paths have no Go
-flag, so they arrive in the environment as `GO2CS_TEST_RESULT` and `GO2CS_TEST_JUNIT`. The host reads
-them once and removes them, so a test that re-executes the host does not write into the parent's
-files. An explicit `--result` or `--junit` argument still wins, which is how the in-process test tier
+flag, so they arrive in the environment as `GO2CS_TEST_RESULT` and `GO2CS_TEST_JUNIT`. The per-test
+deadline (`-test-deadline`) has no Go flag either, since Go's test binary has no such bound; it arrives
+as `GO2CS_TEST_DEADLINE`, a Go duration, with `0` for none. The host reads all three once and removes
+them, so a test that re-executes the host does not write into the parent's files or inherit its
+deadline. An explicit `--result` or `--junit` argument still wins, which is how the in-process test tier
 passes them. `os.Args[0]` stays the real executable path, because tests re-execute themselves through it.
 
 ### 5.2 Isolation and fixtures
@@ -180,10 +181,11 @@ that the test intentionally reads. The original GOROOT or repository shall not b
 test directory.
 
 **Shared (ancestor) fixtures.** "Relative layout" is not limited to the package's own `testdata/`. Go
-shares large fixtures between sibling packages rather than duplicating them: `compress/{flate,zlib,lzw}`
-all read `../testdata/{e,pi,gettysburg}.txt`, and `flate` also reads
+shares large fixtures between sibling packages rather than duplicating them: `compress/{zlib,lzw}`
+read `../testdata/{e,pi,gettysburg}.txt`, and `compress/flate` reads `../testdata/e.txt` and
 `../../testdata/Isaac.Newton-Opticks.txt`. Eleven converted packages depend on such a path —
-`compress/{flate,lzw,zlib}`, `image/{draw,gif,jpeg,png}`, `index/suffixarray`, `internal/zstd`, `net`.
+`compress/{flate,lzw,zlib}`, `go/types`, `image/{draw,gif,jpeg,png}`, `index/suffixarray`,
+`internal/zstd`, `net`.
 Three parts make it work, and all three are required:
 
 1. **Discovery** — the converter scans each package's `_test.go` sources for `"../"`-prefixed literals
@@ -217,8 +219,17 @@ whole**, keeping its relative shape, with no reference analysis — the same rul
 `testdata/` already gets, applied to the rest of the tree the package occupies on disk. Only `testdata` is
 staged, never a nested package's sources: a sibling package is compiled and referenced as its own
 assembly, and its own conversion run stages its files. Go's convention of keeping fixtures under
-`testdata` is what bounds the cost — measured over all of `$GOROOT/src`, sixteen packages gain anything at
-all, a few hundred files in total.
+`testdata` is what bounds the cost — measured over all of `$GOROOT/src` at Go 1.26.10, eighteen packages
+gain anything at all, about a thousand files and 6 MB in total.
+<!-- 2026-10-26: re-measured at a6214f0c5d over Go 1.26.10's src with nestedFixturePaths' rule (every testdata
+     directory below a package directory holding a _test.go, the package's own testdata/ excluded, no descent into
+     a "." or "_" directory): 18 packages, 1,017 files, 6.15 MB, the largest crypto (566 files, 2.04 MB), then
+     cmd/compile and internal/trace. The same walk over Go 1.23.12 reads 16 packages, 401 files, 3.61 MB, the
+     figures nestedFixturePaths' own comment in src/go2cs/testConversion.go records for 2026-08-28.
+     The eleven shared-fixture (ancestor) packages above, re-read the same day: exactly the *.tests.csproj files under
+     src/core that link a fixture under go2cs_shared_fixtures; go/types reads ../../internal/types/testdata/{check,
+     spec,examples,fixedbugs}. compress/flate reads ../testdata/e.txt and ../../testdata/Isaac.Newton-Opticks.txt
+     only; compress/zlib and compress/lzw read e, pi and gettysburg. -->
 
 The orchestrator shall pass a controlled environment and record relevant values in the result manifest:
 GOOS, GOARCH, Go version, .NET runtime, culture, timezone, test seed, package source revision, and
@@ -231,9 +242,10 @@ full run.
 ## 6. `testing` compatibility requirements
 
 Phase 4 shall add a hand-owned compatibility implementation for imports of `testing` from converted test
-projects. Test projects shall reference this implementation instead of the full auto-converted
-`core/testing` project. Production projects are unaffected. Testing the Go `testing` package
-itself is deferred until the bootstrap dependency is resolved.
+projects. Test projects shall reference this implementation, not an auto-conversion of Go's `testing`.
+Production projects are unaffected. `src/core/testing` is that implementation: the package is
+hand-owned, and it is the test host. Go's own `testing` suite runs against it and validates on a ruled
+subset of its tests ([Validated Test Packages](ValidatedTestPackages.md)).
 
 ### 6.1 Required first-tier API
 

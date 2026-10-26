@@ -80,7 +80,7 @@ EOF
 
 Next, pin the app's dependencies to releases that go2cs's Go version can read, and confirm it builds as Go.
 
-> **NOTE:** _go2cs's type-checker reads only modules whose `go` directive (and their dependencies') is no newer than the Go release go2cs is built with (see [Requirements](README.md#requirements)). Newer `fatih/color` and `golang.org/x/sys` releases need a newer Go, which would fail step 2 with_ `package requires newer Go version`_; pin as shown._
+> **NOTE:** _go2cs's type-checker reads only modules whose `go` directive (and their dependencies') is no newer than the Go release go2cs is built with (see [Requirements](README.md#requirements)). A dependency release that needs a newer Go fails step 2 with_ `package requires newer Go version`_. Pinning `fatih/color` as shown keeps the walkthrough on the dependency releases it was measured with._
 >
 > _The `GOTOOLCHAIN=local` below is what makes that error appear at all. Left unset, Go **silently downloads and re-execs** whichever newer toolchain a `go`/`toolchain` directive asks for, so the build succeeds against a standard library go2cs has no published packages for. go2cs detects the switch and says so, but pinning the toolchain keeps the whole round-trip on one Go release, which is what you want._
 
@@ -113,7 +113,7 @@ go2cs -recurse=nuget . csharp
 ```
 
 `go2cs` discovers the imports and converts each package, least-dependencies-first
-(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app), into a parallel tree under `csharp/`,
+(`x/sys` → `go-isatty` → `go-colorable` → `color` → the app), into a parallel tree under `csharp/`,
 leaving your original Go source untouched. The converted app lands under `csharp/src/<import-path>`, and
 every third-party library under `csharp/pkg/<import-path>`. The standard library is referenced as
 `go.<pkg>` packages, and the generated `csharp/Directory.Build.props` supplies the version they resolve —
@@ -135,11 +135,8 @@ using github.com.fatih;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object helloFromFatihColorˢ = (@string)"hello from fatih/color"u8;
-
 internal static void Main() {
-    color.New(color.FgGreen, color.Bold).Println(helloFromFatihColorˢ);
+    color.New(color.FgGreen, color.Bold).Println("hello from fatih/color");
 }
 
 } // end main_package
@@ -199,10 +196,12 @@ The walkthrough above shows that a converted program runs. To check that a modul
 convert its own `_test.go` suites as well, run them in C#, and compare every verdict with `go test`:
 
 ```shell
-go2cs -tests -recurse -test-action all path/to/module out_root
+go2cs -tests -recurse -test-action all -go2cspath path/to/go2cs/src path/to/module out_root
 ```
 
 - **Plain `-recurse` only.** `-tests` refuses `-recurse=nuget` and `-recurse=module`.
+- **It needs a go2cs clone.** The generated projects reference the converted standard library on disk, so
+  `-go2cspath` names the `src` folder of a go2cs clone, as an absolute path (or set `GO2CSPATH`).
 - **The output root sits outside the module's own source tree.**
 - **The Go release must match.** A module that needs a newer Go than the converted standard library is refused,
   as it is for a conversion.
@@ -229,17 +228,20 @@ go2cs -recurse=module,nuget . csharp
 Every package under the module's own `go.mod` converts, in dependency order, exactly as it would under
 `-recurse=nuget`; every third-party package is *referenced* — into `csharp/pkg/<import-path>`, the same place
 the full run would have converted it — but never converted, so nothing about it can fail the run. The
-converter prints the referenced-but-unconverted list when it finishes:
+converter prints the closure it found when it starts, and the referenced-but-unconverted list when it finishes:
 
 ```text
-Closure: 73 packages discovered — converting 1 app, referencing 4 third-party + 67 stdlib (1 skipped)
+Closure: <n> packages discovered — converting <a> app, referencing <t> third-party + <s> stdlib (<k> skipped)
 ...
-Third-party packages referenced but NOT converted (-recurse=module): 4
+Third-party packages referenced but NOT converted (-recurse=module): <t>
   github.com/fatih/color
   github.com/mattn/go-colorable
   github.com/mattn/go-isatty
-  golang.org/x/sys/windows
+  golang.org/x/sys/...
 ```
+
+The counts depend on the module and on the platform you convert for. The `x/sys` package listed is the one for
+your operating system (`golang.org/x/sys/windows` on Windows, `golang.org/x/sys/unix` elsewhere).
 
 Those references are unresolved until something is written at those paths, so the generated solution does
 **not** build yet — the mode's deliberate trade. Re-running the conversion **without** `module`, as
@@ -270,7 +272,9 @@ go2cs -recurse . -go2cspath <gopath>/src/go2cs
 
 The converted app lands under `<gopath>/src/go2cs/src/<import-path>` and its converted third-party
 dependencies under `<gopath>/src/go2cs/pkg/<import-path>`, with the standard library referenced at
-`<gopath>/src/go2cs/core/`; build and run it exactly as in steps 3 and 4 from there. The converted C# is
+`<gopath>/src/go2cs/core/`; build and run it as in steps 3 and 4 from there. On Linux and macOS, add
+`-p:GoTargetOS=linux` (or `darwin`) to `dotnet build` and `dotnet run`: a local standard library builds its
+Windows flavor unless told otherwise, and that program stops at start-up with a warning that says so. The converted C# is
 the same either way — only the reference style in the generated projects differs.
 
 The output root does not have to be the deploy root: `go2cs -recurse -go2cspath <gopath>/src/go2cs . csharp`

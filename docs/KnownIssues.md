@@ -5,8 +5,9 @@ the rough spots real code hits today, see [Limitations](Limitations.md).
 
 ## Writes through the address of another package's variable are lost
 
-Taking the address of a variable that another package exports, including `flag.BoolVar(&otherpkg.Debug, ...)`,
-gives a pointer to a copy. [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes
+In 1.26.10.1, taking the address of a variable that another package exports, including
+`flag.BoolVar(&otherpkg.Debug, ...)`, gives a pointer to a copy, unless the package that declares the variable
+takes its address itself. [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes
 the cases and the workarounds.
 
 ## Ubuntu's packaged .NET 10 can end a converted program early
@@ -76,24 +77,35 @@ ever reproduces the fault.
      on every publish), in master through the merge 4d9046eb70. -->
 
 A program that references the `go.*` packages and publishes with Native AOT (`PublishAot`) runs. The check
-that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64` and
-`osx-x64`. A project that sets no trim mode of its own gets the packages' default, `partial`, which is the
-setting a converted project carries in its generated project file. On a Mac with Apple silicon the publish has
-not been measured: it does not finish within the six hours a hosted CI job is allowed.
+that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64`,
+`osx-arm64` and `osx-x64`. A project that sets no trim mode of its own gets the packages' default, `partial`,
+which is the setting a converted project carries in its generated project file.
 
 A full trim (`TrimMode` set to `full`) produces a program that runs as well. That is measured on `win-x64`, on
 one development machine; the hosted check measures the default.
 
 **What it costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
 full, not only the parts the program uses. For a small program that references about thirty of them, the
-publish took a little over an hour on a CI runner for Linux and for Windows, several hours for an Intel Mac,
-and more than two hours on a four-core machine, and the
-executable was about 250 MB. A program that uses `fmt` and `reflect` references about twice as many: on a
-six-core Windows machine (`win-x64`, 31 GB of memory) its publish took about five and a half hours, the
-Native AOT compiler held about 9.5 GB of memory throughout, and the executable was about 370 MB. It ran
-correctly. The performance suite's programs, which compile the whole converted standard library, peak at
-15 to 18 GB while they publish ([Performance](Performance.md)). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run`
-and a publish without Native AOT are not affected.
+publish took under four minutes on a hosted CI runner for Linux and for Windows, about six minutes on a Mac
+with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14). Before golib's generic-cycle fix
+of that day, the same publish took about an hour on Linux and Windows and nearly five hours on an Intel Mac,
+did not finish within six hours on Apple silicon, and produced an executable of about 250 MB. A converted
+project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
+Native AOT are not affected.
+
+<!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
+     fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
+     docs/CIMatrix.md's aot-smoke budget row: 0 ILC cycle cut-offs on every RID; linux 224 s, windows 230 s, osx-x64 654 s
+     on the e2move tip (run 38575258530); linux 212 s, windows 167 s, osx-arm64 354 s from master (run 38587876788).
+     Before it: linux 56 min, windows 71 min, osx-x64 293 min, osx-arm64 cancelled at the 6 h job limit (37523439849),
+     and about 70 min on hosted linux (37495989079). The executable size (243,136,000 bytes on one machine, below) has
+     not been re-measured since the fix. These readings were taken at a Go 1.24.13 tree; whether to re-measure at
+     1.26.10.1 is an owner question.
+     MOVED HERE from the visible text, all measured BEFORE the fix and not re-measured since: "more than two hours on a
+     four-core machine" for the same consumer (the 2 h 24 min reading in the comment above); a program that uses fmt and
+     reflect ("genprobe", the comment below) published in about five and a half hours, with ILC at about 9.5 GB, to an
+     executable of about 370 MB; and the performance suite's programs peaked at 15 to 18 GB while they published
+     (docs/Performance.md), re-measured at 22.2 GB working set on 2026-10-13 (docs/phase4/DATA-hopN-perf.md). -->
 
 <!-- Measured 2026-10-10 by G (ledger: COORD's stage-3 table, row A): "genprobe", a short fmt + reflect program
      (generic struct printing, reflect.TypeOf / Field / DeepEqual), converted, 58 Go packages in its closure,
@@ -111,9 +123,9 @@ A converted program's project turns ReadyToRun on for `dotnet publish`. Adding `
 to that publish ran the ReadyToRun compiler, crossgen2, to about 10 GB of memory on a linux-x64 machine,
 where it failed with `Insufficient memory` and left the build hanging. The publish profiles go2cs writes
 beside a converted program (`-p:PublishProfile=linux-x64` and the others) turn ReadyToRun off, so a profile
-publish is not affected. A program converted before that change keeps the profiles it already has, since
-go2cs never overwrites one; add `<PublishReadyToRun>false</PublishReadyToRun>` to them. On the command line,
-turn ReadyToRun off yourself:
+publish is not affected. A program converted by a go2cs earlier than 1.26.10.1 keeps the profiles it already
+has, since go2cs never overwrites one; add `<PublishReadyToRun>false</PublishReadyToRun>` to them. On the
+command line, turn ReadyToRun off yourself:
 
 ```
 dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=false

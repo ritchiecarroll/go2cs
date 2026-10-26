@@ -50,7 +50,9 @@ reference `go test` run), and `go2cs` on your `PATH` (see [Build the converter](
 
 Run it from the root of your clone. The first argument is the package's Go source, and the second is
 the package's home in the converted tree; the converter locates the runtime and the package's
-standard-library dependencies from there, so no other flags or environment setup are needed. The ten
+standard-library dependencies from there, so no other flags or environment setup are needed. (A go2cs
+root staged where `GO2CSPATH` points, or at `~/go2cs`, takes precedence; to validate against the clone
+instead, add `-go2cspath` with the absolute path of the clone's `src` folder.) The ten
 minutes are the deadline for running the tests and comparing them with `go test`; building the test host
 has its own, longer allowance, because the first build compiles the converted runtime and the package's
 standard-library dependencies.
@@ -80,7 +82,8 @@ The command converts the `_test.go` files to C#, generates a test host, builds i
 standard library, runs it in an isolated process, captures a clean `go test -json -count=1` baseline, and
 compares terminal results by full Go test name — reporting `validated` only when every test agrees on both
 sides and every unsupported declaration (benchmarks, examples) is accounted for. It regenerates the local
-converted `.cs` in place; the Go source copies and run manifests it stages are git-ignored. The same
+converted `.cs` in place and rewrites the package's proof page under `docs/validation/current/`; the Go
+source copies and run manifests it stages are git-ignored. The same
 command validates every other package on the table — substitute its GOROOT source path and its
 `src/core/<pkg>` path in the two arguments.
 

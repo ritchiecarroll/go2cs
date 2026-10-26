@@ -34,8 +34,11 @@ by. For where it falls short, see [Limitations](Limitations.md).
 
 ## Go language coverage
 
-go2cs converts the full Go language surface except a generic type alias whose target is an anonymous
-struct or interface type (`type A[T any] = struct{…}`), which it reports and does not yet convert.
+go2cs converts the full Go language surface except two generic forms, which it reports and does not yet
+convert: a generic type alias whose target is an anonymous struct or interface type
+(`type A[T any] = struct{…}`), and a generic call over a pointer element whose constraint shares the
+element's storage (`Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N`, refused with `GO2CS2002`;
+see [Limitations](Limitations.md#what-wont-make-the-trip)).
 
 **Types & values**
 

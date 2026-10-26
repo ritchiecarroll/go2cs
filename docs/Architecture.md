@@ -37,7 +37,8 @@ selection, implicit conversions, constant folding, unsigned detection) are seman
   runnable test host, and compares its verdicts with `go test -json`. `moduleTestsDriver.go` runs it
   for every package of a module (`-tests -recurse`), and `validationProofPages.go` writes the proof
   pages.
-- **Output:** `writeOperations.go` emits `.cs` files and generates each package's `.csproj` from a template,
+- **Output:** `writeOperations.go` holds the emit helpers (indentation, comments, CRLF line endings).
+  `projectFileWriter.go` generates each package's `.csproj` from the embedded `csproj-template.xml`,
   substituting markers (project references derived from detected imports, `unsafe` usage flag, etc.).
 
 ## `visit*.go` — AST node → C# declaration/statement
@@ -56,7 +57,7 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | `visitIfStmt.go` / `visitForStmt.go` / `visitRangeStmt.go` | Conditionals & loops (range handles ptr deref). |
 | `visitSwitchStmt.go` / `visitTypeSwitchStmt.go` / `visitSelectStmt.go` / `visitCommClause.go` | switch / type-switch / select + comm clauses. |
 | `visitReturnStmt.go` / `visitBranchStmt.go` / `visitLabeledStmt.go` | return, break/continue/goto, labels. |
-| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (goroutine → thread pool/Task). |
+| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (goroutine → its own OS thread, reused through `GoroutineThreadPool`). |
 | `visitIdent.go` | Identifier emission / name sanitization. |
 
 ## `conv*.go` — expression & type converters
@@ -72,8 +73,8 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | `convArrayType.go` / `convMapType.go` / `convChanType.go` / `convFuncType.go` | Type expressions. |
 | `convStructType.go` / `convInterfaceType.go` | Struct/interface type expressions. |
 
-Supporting: `Stack.go`, `HashSet.go` (generic data structures), `directiveOperations.go` (build tags /
-`+build ignore` / cgo directives).
+Supporting: `Stack.go` (a generic stack), the `github.com/ritchiecarroll/hashset` module (a generic set),
+`directiveOperations.go` (build tags / `+build ignore` / cgo directives).
 
 ## Analysis passes
 
@@ -94,11 +95,25 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | Generator | Trigger | Produces |
 |---|---|---|
 | `ImplementGenerator` | `[assembly: GoImplement<TStruct, TInterface>]` | Explicit interface implementations / promoted methods (Go duck-typing). |
-| `RecvGenerator` | methods whose receiver is `this ref T` | Value/pointer receiver overloads handling `ptr<T>`/`ж<T>` deref. |
+| `RecvGenerator` | methods whose receiver is `this ref T` | Value/pointer receiver overloads handling `ж<T>` deref. |
 | `ImplicitConvGenerator` | `[GoImplicitConv]` | Implicit conversion operators between Go type aliases. |
 | `TypeGenerator` | a `partial` type declared in the package class | Wrapper types + field promotion for struct embedding. |
 | `PartialStubGenerator` | a bodyless `partial` method with no implementing part | A throwing stub, so a Go function with no Go body (assembly or cgo) compiles until a hand-owned companion supplies it. |
 | `StrGenerator` | a method with an `sstring` parameter | The `@string` forwarder (and, for a package-level function, its value delegate) for an `sstring` twin. |
+| `ConstraintProxyGenerator` | a self-referential constraint interface (`where T : Lesser<T>`) | The generic constraint proxy (`жLesser<E>`) other packages bind. |
+| `FieldAccessGenerator` | `[GoFieldAccess(...)]` records | Field properties on `ж<T>`, so a field reached through a pointer reinterpreted from `unsafe.Pointer` reads as Go spells it. |
+| `LazyHolderGenerator` | `[GoLazy]` holder classes | The `ref` accessor of a package var built on its first read. |
+| `LiteralInterceptorGenerator` | a bare string literal passed to an `any` slot | An interceptor that passes a cached Go `@string` in place of the C# string. |
+| `NoInliningPartialGenerator` | a no-inline carrier method (an implementing `partial` part with no declaring part) | Its declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]` or `[StackTraceHidden]`. |
+| `ChanDirSigGenerator` | a method whose signature carries a directional channel | A `[GoSigChanDir]` record, so reflection can recover the channel direction C# drops. |
+| `MemberRecordGenerator` | a member converted code marks with a fact comment | A `[GoMemberRecord]` that reflection reads back (embedding, tag, array dimensions). |
+| `EscapeRegistryGenerator` | a closed golib container converted to an interface | A per-package registration of that container's operations, so reflect can reach them. |
+| `NativeArrayOpenerGenerator` | a native array spelled with a pointer element (`*[N]*E` and native struct array fields) | A per-package registration of an opener for each such element. |
+| `RuntimeInitHookGenerator` | an executable that references the converted `runtime` package | A module initializer that lets golib initialize `runtime` lazily, so an unrecovered panic prints Go's traceback. |
+
+Two analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
+converted code binds a C# type where Go has a `string`, and `StackAppendBufferAnalyzer` fails it when a
+stack-append buffer is passed as anything but a plain local.
 
 ## Runtime type map (`src/core/golib/`)
 
@@ -106,7 +121,7 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 |---|---|
 | slice | `slice<T>` (array + low/high/cap) — `slice.cs` |
 | array | `array<T>` — `array.cs` |
-| map | `map<K,V>` (Dictionary + lock) — `map.cs` |
+| map | `map<K,V>` (a `Dictionary`, no lock, as Go's map takes none) — `map.cs` |
 | channel | `channel<T>` (queue + wait handles) — `channel.cs` |
 | string | `@string` (UTF-8 backed) — `string.cs`; `sstring`, a zero-copy stack view for a non-escaping `string([]byte)` — `sstring.cs` |
 | `interface{}` / `any` | `object` |
@@ -114,7 +129,8 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `nil` | `NilType` + `null` for heap refs |
 | pointer-to-value boxing | `ж<T>` heap box |
 | `int`/`uint` (platform-sized) | `nint`/`nuint` |
-| `uint8`/`rune`/`uintptr`/`complex128`/… | aliases (`byte`/`int32`/`UIntPtr`/`Complex`) via global usings |
+| `uint8`/`rune`/`complex128`/… | aliases (`byte`/`int32`/`Complex`) via global usings |
+| `uintptr` | the `uintptr` struct — `uintptr.cs` |
 | panic / runtime error | `PanicException` / `RuntimeErrorPanic` |
 | per-call `defer` list | `GoFrame` (`ref struct`, LIFO drain) — `GoFrame.cs` |
 
