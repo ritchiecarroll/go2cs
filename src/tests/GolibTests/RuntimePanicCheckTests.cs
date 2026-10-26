@@ -21,7 +21,7 @@ namespace GolibTests;
 // really thrown from each marker class: a HIT, the nested HIT, and the excluded package runtime_test.
 //
 // The marker classes are declared in RuntimePanicCheckFixtures.cs, in THIS assembly: the predicate is
-// structural (a type's full name, walked outward through DeclaringType), so a fixture named exactly
+// structural (the outermost class in a frame's declaring-type name), so a fixture named exactly
 // like the converter's class exercises the same test without loading a -tests build.
 //
 // A8b rides here too: a nil *Func's Entry and FileLine fault as Go's do, and Name() still answers "".
@@ -34,7 +34,7 @@ public class RuntimePanicCheckTests
         typeof(PanicException).GetProperty("RuntimeThrowText", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     private static bool IsRuntimePackageType(Type type) =>
-        (bool)s_check.GetMethod("IsRuntimePackageType", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, [type])!;
+        (bool)s_check.GetMethod("IsRuntimePackageType", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, [type.FullName])!;
 
     // The predicate over a thrown panic's trace. The trace is the exception's own, so reflection adds no
     // frame to it: what the walk reads is exactly the frames from the throw site to the catch.

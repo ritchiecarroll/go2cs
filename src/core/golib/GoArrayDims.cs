@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace go;
@@ -56,7 +57,7 @@ public static class GoArrayZero
     /// <typeparam name="TDims">Its array-dims companion.</typeparam>
     /// <returns>The box <see cref="builtin.@new{T}()"/> returns, holding a sized zero array when <typeparamref name="TDims"/> names dims.</returns>
     /// <remarks><see cref="builtin.Ꮡ{T}(in T)"/> charges the allocation to GoMemProfile, as <see cref="builtin.@new{T}()"/> does.</remarks>
-    public static ж<T> New<T, TDims>() where TDims : IGoArrayDims =>
+    public static ж<T> New<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T, TDims>() where TDims : IGoArrayDims =>
         TDims.Dims.Length == 0 ? builtin.@new<T>() : builtin.Ꮡ(Of<T, TDims>());
 
     /// <summary>
