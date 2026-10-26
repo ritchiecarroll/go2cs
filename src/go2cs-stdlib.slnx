@@ -959,7 +959,6 @@
   <Folder Name="/runtime/debug/" Id="a3a25c33-5f50-5260-b527-870d2cae4584">
     <Project Path="core/runtime/debug/runtime.debug.csproj" />
   </Folder>
-  <Folder Name="/runtime/internal/" />
   <Folder Name="/runtime/metrics/" Id="d1f778c5-8e72-5d63-ae70-b7dc62440ca3">
     <Project Path="core/runtime/metrics/runtime.metrics.csproj" />
   </Folder>
