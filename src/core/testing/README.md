@@ -2,8 +2,8 @@
 
 > Hand-implemented C# counterpart of the Go standard library's `testing` package, by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-83_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/testing.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/testing@go1.26.10)\
-[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/testing) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/testing)
+[![Tests](https://img.shields.io/badge/Tests-83_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.1/testing.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/testing@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/testing) [![Source](https://img.shields.io/badge/Source-@1.26.10.1-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.1/src/core/testing)
 
 From C#, call this package through the static class go.testing_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 

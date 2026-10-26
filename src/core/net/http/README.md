@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-1526_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/net.http.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/net/http@go1.26.10)\
-[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/net/http) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/net/http)
+[![Tests](https://img.shields.io/badge/Tests-1526_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.26.10.1/net.http.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/net/http@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/net/http) [![Source](https://img.shields.io/badge/Source-@1.26.10.1-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.1/src/core/net/http)
 
 From C#, call this package through the static class go.net.http_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
