@@ -86,6 +86,12 @@
 // and back (NativeStructMarshal). They are reached from runtime/pprof's machVMInfo, which every proto
 // profile write calls on darwin (readMapping).
 //
+// KEVENT'S RESULT PROTOCOL (2026-10-26). kevent_trampoline hands back -errno when libc returns -1, and
+// the runtime's callers retry on -_EINTR. Its args struct has no result field, so the default dispatch
+// returned libc's raw -1: wakeNetpoll printed "netpollBreak write failed with 1" whatever the errno was,
+// and a signal during a poll became a fatal error instead of a retry. The form table names the rule
+// (GoLibcErrnoRule.NegatedErrno); pipe, read and write, whose trampolines share it, are hand-owned.
+//
 // Hand-owned (no libccall_impl.go exists, so a reconvert never regenerates this file). Declared
 // NON-partial: the registry displacement leaves a comment placeholder in sys_libc.cs, not a bodyless
 // partial, so this file owns the whole declaration — the nanotime_impl.cs shape beside it.
@@ -148,6 +154,11 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
         return machVMRegion(entryPoint, argsBox, symbol);
     case "proc_regionfilename":
         return procRegionFilename(entryPoint, argsBox, symbol);
+    case "kevent":
+        // kevent_trampoline: CALL libc_kevent; CMPL AX, $-1; JNE ok; CALL libc_error; MOVLQSX (AX), AX;
+        // NEGQ AX -- a failure comes back as -errno, which netpoll, addWakeupEvent and wakeNetpoll compare
+        // against -_EINTR. kevent_args has no result field to carry that rule, so it is named here.
+        return unchecked((int32)(uint32)GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol, GoLibcErrnoRule.NegatedErrno));
     }
 
     nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);

@@ -963,8 +963,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// asmcgocall's stub: an infrastructure error rather than a Go panic, which no disclosure can
 		// absorb. The windows hand-own refuses by name with the same cause and the same leading words
 		// (runtime/windows/netpoll_windows_impl.cs); no break is sent to a completion port that
-		// netpollGenericInit never created. darwin (wakeNetpoll over kq) is unmeasured and stays auto.
-		"netpollBreak": goosScope{"linux", "windows"},
+		// netpollGenericInit never created.
+		//
+		// AND on darwin, measured once kevent's errno protocol was restored (2026-10-26): the auto body's
+		// wakeNetpoll(kq) runs kevent on the kq netpollGenericInit never created, answers -EBADF and takes
+		// Go's throw, the fatal linux met. The darwin hand-own refuses by name before the kevent
+		// (runtime/darwin/netpoll_kqueue_impl.cs).
+		"netpollBreak": goosScope{"linux", "windows", "darwin"},
 		// runtime.throw and runtime.fatal -- the FATAL path (runtime/panic_impl.cs;
 		// docs/phase4/DESIGN-fatal-path.md). Both converted bodies print Go's `fatal error: <text>`
 		// line through golib's print and then call fatalthrow, whose FIRST statement is

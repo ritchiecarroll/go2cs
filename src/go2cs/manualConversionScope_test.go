@@ -564,3 +564,31 @@ func TestDarwinPointerArgumentMirrorsAreScopedToDarwin(t *testing.T) {
 		}
 	}
 }
+
+// netpollBreak is a refusal by name on every flavour: netpollGenericInit creates no runtime poller
+// under go2cs, so each generated body reaches Go's throw (linux, darwin) or an asmcgocall stub
+// (windows) instead of a break. Each flavour's hand-own must exist wherever the converter displaces it.
+func TestNetpollBreakIsRefusedByNameOnEveryFlavor(t *testing.T) {
+	scope, listed := manualConversionFuncs["runtime"]["netpollBreak"]
+
+	if !listed {
+		t.Fatal("runtime.netpollBreak is no longer registered")
+	}
+
+	handOwns := handOwnSourcesByFlavor(t, "runtime")
+
+	for _, goos := range []string{"windows", "linux", "darwin"} {
+		if !scope.includes(goos) {
+			t.Errorf("runtime.netpollBreak is not displaced on %s: the generated body reaches a fatal the host does not survive", goos)
+			continue
+		}
+
+		if !strings.Contains(handOwns[goos], " netpollBreak()") {
+			t.Errorf("runtime.netpollBreak is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares it: the placeholder would leave it unimplemented", goos, goos)
+		}
+
+		if !strings.Contains(handOwns[goos], `"runtime: netpollBreak: the managed host has no runtime poller to break (`) {
+			t.Errorf("runtime.netpollBreak on %s does not refuse with the shared leading words", goos)
+		}
+	}
+}

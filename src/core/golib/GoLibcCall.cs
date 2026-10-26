@@ -34,6 +34,15 @@ public enum GoLibcErrnoRule
     /// call, success or not, and the caller decides whether it means anything.
     /// </summary>
     AlwaysRead,
+    /// <summary>
+    /// <c>CMPL AX, $-1; JNE ok; CALL libc_error; MOVLQSX (AX), AX; NEGQ AX</c>: failure as for
+    /// <see cref="Int32MinusOne"/>, and the trampoline then returns errno NEGATED in place of the -1
+    /// ("caller wants it as a negative error code"). runtime/sys_darwin_amd64.s and sys_darwin_arm64.s give
+    /// this protocol to kevent, pipe, read and write; only kevent's trampoline still reaches the
+    /// dispatcher (the other three are hand-owned in runtime/darwin). It stores nothing at <c>[sp]</c> on
+    /// arm64: <see cref="VariadicStackSlot"/> keys only on the two variadic-capable entries.
+    /// </summary>
+    NegatedErrno,
 }
 
 /// <summary>
@@ -122,7 +131,7 @@ public static unsafe class GoLibcCall
 
         bool failed = rule switch
         {
-            GoLibcErrnoRule.Int32MinusOne => unchecked((int)(uint)r) == -1,
+            GoLibcErrnoRule.Int32MinusOne or GoLibcErrnoRule.NegatedErrno => unchecked((int)(uint)r) == -1,
             GoLibcErrnoRule.Int64MinusOne => unchecked((long)(ulong)r) == -1L,
             GoLibcErrnoRule.NullPointer => r == 0,
             GoLibcErrnoRule.AlwaysRead => true,
@@ -130,6 +139,11 @@ public static unsafe class GoLibcCall
         };
 
         errno = failed ? ReadErrno(errnoReader) : 0;
+
+        // MOVLQSX (AX), AX; NEGQ AX: the trampoline returns errno, negated, in place of the -1.
+        if (failed && rule == GoLibcErrnoRule.NegatedErrno)
+            return unchecked((nuint)(-(nint)errno));
+
         return r;
     }
 
@@ -275,6 +289,13 @@ public static unsafe class GoLibcCall
     /// <param name="argsBox">The <c>ж&lt;T&gt;</c> box <c>ManagedPointerTokens.Resolve</c> recovered for the call's argument pointer.</param>
     /// <param name="errnoReader">The resolved <c>__error</c>.</param>
     /// <param name="symbol">The symbol's name, for the refusal messages only.</param>
+    /// <param name="trampolineRule">
+    /// The failure protocol of a trampoline whose args struct has NO result field, so nothing in its
+    /// layout names one: <see cref="GoLibcErrnoRule.NegatedErrno"/> for <c>kevent_trampoline</c>, whose
+    /// caller compares the returned count against <c>-_EINTR</c>. <see cref="GoLibcErrnoRule.None"/> (the
+    /// default) returns the register as it came back. A struct WITH a result field takes its rule from that
+    /// field's width and refuses any other.
+    /// </param>
     /// <returns>
     /// The result register <see cref="Call"/> handed back — what Go's <c>asmcgocall</c> returns as
     /// <c>libcCall</c>'s <c>int32</c> (its low 32 bits), which twenty <c>sys_darwin.cs</c> callers read
@@ -287,7 +308,7 @@ public static unsafe class GoLibcCall
     /// register (a managed reference, a floating-point value, an unknown width) or a result field of
     /// an unsupported kind. Every refusal names the symbol; none returns a value.
     /// </exception>
-    public static nuint DispatchArgsStruct(nint fn, object? argsBox, nint errnoReader, string symbol)
+    public static nuint DispatchArgsStruct(nint fn, object? argsBox, nint errnoReader, string symbol, GoLibcErrnoRule trampolineRule = GoLibcErrnoRule.None)
     {
         // A null box is Go's ZERO-ARGUMENT trampoline — `libcCall(fn, nil)`: kqueue, issetugid —
         // nothing to place, nothing to write back; the register is the whole outcome.
@@ -341,7 +362,10 @@ public static unsafe class GoLibcCall
             args[argCount++] = ToRegister(field.GetValue(value), field, argsType, symbol);
         }
 
-        GoLibcErrnoRule rule = result is null ? GoLibcErrnoRule.None : RuleFor(result.FieldType, argsType, symbol);
+        if (result is not null && trampolineRule != GoLibcErrnoRule.None)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): {argsType.Name} has a result field, which decides its own errno rule; a trampoline rule ({trampolineRule}) cannot also apply");
+
+        GoLibcErrnoRule rule = result is null ? trampolineRule : RuleFor(result.FieldType, argsType, symbol);
 
         nuint r = Call(fn, args[..argCount], rule, errnoReader, out nuint errno);
 
