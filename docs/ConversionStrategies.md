@@ -7954,10 +7954,10 @@ function that calls recover() or has named results), runtime.Goexit, the crash r
 the NoInlining pin on runtime.Caller callers. src/core/golib/GoFrame.cs: m_d0..m_d3 are the inline slots; a
 fifth registration allocates the List<Action> overflow. PanicException: src/core/golib/PanicException.cs:20#6fd451.
 Run() re-throws a panic no deferred call recovered: GoFrame.cs:120-149#1286a5. Capture parks it for recover():
-GoFrame.cs:684-707#b2f6a2; builtin.recover reads and clears that slot: builtin.cs:341#9159ef. defer/panic/recover live on
+GoFrame.cs:690-713#b2f6a2; builtin.recover reads and clears that slot: builtin.cs:341#9159ef. defer/panic/recover live on
 the partial class builtin (builtin.DeferRegistrations.cs:55#ffe49b, builtin.cs:291#09e845, :341#9159ef); the project-wide
 `using static go.builtin` is described at builtin.cs:35#bbc027. A non-panic exception fails IsPanic and propagates
-unchanged while the finally still runs the defers: GoFrame.cs:617-679#3ad245. -->
+unchanged while the finally still runs the defers: GoFrame.cs:623-685#3ad245. -->
 **A function that defers wraps its body in `try`/`catch`/`finally`.** This is the smallest `defer`:
 
 <!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.go:5-9 -->
@@ -8151,7 +8151,7 @@ Package `main` exports nothing, so a program's own functions follow Go. A `defer
 func-typed field or an interface method is marked when its signature matches a recovering function of the
 package. An unexported recovering function that another package receives as a func value and defers is not
 marked there, so its `recover` returns `nil`.
-<!-- the mark: src/core/golib/GoFrame.cs:501 `public static bool TakeDeferredCall()`; the read:
+<!-- the mark: src/core/golib/GoFrame.cs:507 `public static bool TakeDeferredCall()`; the read:
      src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`;
      a literal reached through a func value: :386 `public static object? recoverChecked()`; the converter's forms:
      src/go2cs/recoverForms.go. Guard: src/tests/Behavioral/RecoverInHelper, compared with Go's output (the
