@@ -26,11 +26,11 @@ partial struct engine {
 }
 
 internal static partial void start(this ж<engine> Ꮡe, nint delta) {
-    goǃ(ᴛ1 => Ꮡe.Value.tally.bump(ᴛ1), delta);
+    goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1), Ꮡe.Value.tally, delta);
 }
 
 internal static partial void ping(this ж<engine> Ꮡe) {
-    goǃ(() => Ꮡe.Value.tally.report());
+    goǃ(ᴛ0 => ᴛ0.report(), Ꮡe.Value.tally);
 }
 
 partial struct valueSender {
