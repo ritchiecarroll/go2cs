@@ -900,3 +900,95 @@ EVIDENCE: the i9 reads the artifacts, one TSV per dispatch under docs/phase4/h10
 POST: one per dispatch: the run id and tip; rows agreeing on both RIDs with their counts; rows disagreeing, by
   name and with both counts; rows the sweep could not reach.
 ```
+
+## 14. The release: H11, H12 and release day (COORD's ask of 2026-10-26)
+
+The runbook's H11 (`GoCorpusMigration.md` :3898), H12 (:3938) and *Release day* (:4010) as one step list for this
+hop. Every figure below was measured at the batch-44 spine (`claude/g-darwin-annotation-dw2` @ 4edd2143d9) and is
+re-read by its owner at the release tree. **`<REL>` is the release tree** (batch 44 landed, the master merge done).
+Lanes are as COORD proposed:
+- H (windows, idle): the rehearsal;
+- C2: the prose scan and the NEWS/announcement text;
+- C1: release-smoke;
+- P1: the mechanical controls;
+- the OWNER: the walkthrough, the publish, the PIN and the deprecations.
+
+### 14.1 H11 — publication and compatibility guards
+
+| # | Step | Owner | Expected output |
+|---|---|---|---|
+| H11.1 | **Existence plus monotonicity.** <code>go test -count=1 -run 'TestPublishedCounterMatchesTheRecordedReleases&#124;TestCorpusReleaseMatchesThePublishedStamp' ./internal/repoguard/</code> at `<REL>`, then push-nuget's pre-bump gate in its dry run | P1 | Both tests PASS. The dry run computes **1.26.10.1** and compares it NUMERICALLY with the origin's `nuget-*` tags (an unreadable origin degrades to local tags only by the Readiness ruling, Q15, and says so) |
+| H11.2 | **The composed version.** `version.props` reads `<GoStdLibVersion>1.26.10</GoStdLibVersion>`, `<GoBuildNumber>0</GoBuildNumber>` (nothing published at this base), so the first publish bumps to **1.26.10.1** | P1 | The dry run's version line reads 1.26.10.1, and no 1.26.10.x tag exists on origin |
+| H11.3 | **NEW package IDs: 28.** Every non-test library in `src/go2cs-stdlib.slnx` packs as `go.<AssemblyName>`. Measured `nuget-1.24.13.7` -> the spine: 344 -> 362 IDs (list below). Each is a fresh ID, and a feed query for any of them is advisory only | P1 | The dry run packs the 362 library projects less go2cs.CpuProfiler (IsPackable false in both releases), and the 28 below are the only IDs absent from 1.24.13.7 |
+| H11.4 | **REMOVED package IDs: 10.** Each gets the ruled disposition: DEPRECATE with a pointer to **1.24.13.7** (the last release that carried it), never unlist; the alternate where Go 1.26 has a successor. An owner step AFTER the publish, because each alternate must already be on the feed | OWNER (G drafts the list) | 10 deprecations, each naming 1.24.13.7 and its alternate (table below, the alternates proposed from Go 1.26's tree for the owner to confirm) |
+| H11.5 | **`corpus-release.txt`** reads `1.24.13.7` now, and must until the publish (MUST-NOT-CHANGE at the pin). release-nuget.ps1 Phase 4 regenerates it to `1.26.10.1` in the record commit | P1 (before), the publish (after) | `TestCorpusReleaseMatchesThePublishedStamp` green at `<REL>` and again at the record |
+
+**The 28 new IDs:** go.crypto.hpke, go.crypto.internal.constanttime, go.crypto.internal.entropy.v1.0.0,
+go.crypto.internal.fips140.mldsa, go.crypto.internal.fips140cache, go.crypto.internal.fips140deps.time,
+go.crypto.internal.rand, go.crypto.mlkem.mlkemtest, go.go.internal.scannerhooks, go.internal.cgrouptest,
+go.internal.routebsd, go.internal.runtime.cgroup, go.internal.runtime.gc, go.internal.runtime.gc.internal.gen,
+go.internal.runtime.gc.scan, go.internal.runtime.pprof.label, go.internal.runtime.startlinetest,
+go.internal.runtime.syscall.linux, go.internal.runtime.syscall.windows, go.internal.strconv, go.internal.testhash,
+go.internal.trace.internal.testgen, go.internal.trace.internal.tracev1, go.internal.trace.tracev2,
+go.math.big.internal.asmgen, go.net.http.internal.httpcommon, go.testing.cryptotest, go.testing.synctest.
+
+**The 10 removed IDs, with the proposed alternate (the owner rules each):**
+
+| Removed ID (last carried by 1.24.13.7) | Proposed alternate at 1.26.10 |
+|---|---|
+| go.crypto.internal.hpke | go.crypto.hpke (Go promoted the package; this hop's relocation map) |
+| go.internal.itoa | go.internal.strconv (Go 1.26 removed internal/itoa) |
+| go.internal.runtime.syscall | go.internal.runtime.syscall.linux and go.internal.runtime.syscall.windows (split per OS) |
+| go.internal.trace.event | go.internal.trace.tracev2 |
+| go.internal.trace.event.go122 | go.internal.trace.tracev2 |
+| go.internal.trace.internal.oldtrace | go.internal.trace.internal.tracev1 |
+| go.internal.trace.internal.testgen.go122 | go.internal.trace.internal.testgen |
+| go.log.slog.internal.slogtest | none (removed upstream): deprecate without an alternate |
+| go.runtime.internal.startlinetest | go.internal.runtime.startlinetest |
+| go.vendor.golang.org.x.net.route | go.internal.routebsd |
+
+### 14.2 H12 — docs, badges, READMEs
+
+| # | Step | Owner | Expected output |
+|---|---|---|---|
+| H12.1 | **The badge diff size, stated before the overlay.** The two H1-following badges (Docs, Go Source) already read `@1.26.10` in 358 of 362 READMEs. The two publish-following badges (the Tests proof link and the C# Source tag) stay at **1.24.13.7** until the publish (the UNPUBLISHED line). | P1 | A regen at `<REL>` changes **0** generated READMEs. Anything else is drift, not the overlay |
+| H12.2 | **The hand-owned README derivation, as a control.** Two of the four READMEs without 1.26.10 are hand-owned and STALE: `src/core/unsafe` and `src/core/testing` still read `@1.24.13` on both Go badges, and testing's Tests badge reads 53 / 15 against its bank of 83 + 2. Re-derive both against the converter's own output, never typed. golib's and core's READMEs carry no version badges. | P1 | Both READMEs' Go badges at `@1.26.10`, and testing's Tests badge at 83 / 2, each with its derivation recorded |
+| H12.3 | **The GOROOT-vendored `golang.org/x/*` re-pin**, as a control. go1.26.10's `src/vendor/modules.txt` pins x/crypto `v0.46.1-0.20251210140736-7dacc380ba00`, x/net `v0.47.1-0.20261008201845-026a91c07857`, x/sys `v0.39.0` and x/text `v0.32.0`, and the vendored READMEs already carry exactly those (17 READMEs) | P1 | 0 differences against modules.txt, re-read at the release GOROOT |
+| H12.4 | **The prose scan.** `migrate-gorelease.ps1 -From 1.24.13 -To 1.26.10` (census only) reports every editable site migrated and **72 unanchored lines** to rule: 59 in the roster (dated provenance comments, expected KEEP-HISTORICAL), 10 in Roadmap, and 1 each in docs/README, ConversionStrategies and **CLAUDE.md:69** ("the corpus is on Go 1.24.13", a present-tense fact: MIGRATE). Each line gets a class: KEEP-HISTORICAL, MIGRATE, RERUN-THEN-MIGRATE, GENERATED-CHECK or OWNER-ASK. The Try-it command is timed cold | C2 | A ruled list, the MIGRATE edits as one docs commit, and the cold Try-it timing |
+| H12.5 | **The NEWS and announcement text**, landing on the branch BEFORE the tag mints (the ritual's element 1), naming 1.26.10.1 | C2 | A docs commit merged before release day |
+| H12.6 | **The release-ritual REHEARSAL** at `<REL>`. In an isolated clone with NO remote, mint the pre-pack signed tag `nuget-1.26.10.1` (discarded after). Then, in a throwaway worktree, push-nuget's pack dry run (it writes package READMEs even dry). Check all five elements: the announcement text present, the tag, the write-once snapshot `docs/validation/1.26.10.1/`, BOTH badge retargets (Tests -> `validation/1.26.10.1`, C# Source -> `nuget-1.26.10.1`), and the recomputed re-verification pass | H | The five elements, each named with its output, and the clone and worktree discarded with an empty tracked-count assert. Signing proves the ritual, not the credential |
+
+**The badges that DANGLE until the publish** (stated so that the rehearsal and the walkthrough do not read them as
+defects). They all resolve once the publish's retargets land:
+- **17 Tests badges** link a page the 1.24.13.7 snapshot does not have: crypto.fips140, crypto.hpke,
+  crypto.internal.fips140.mldsa, crypto.internal.fips140.subtle, crypto.internal.fips140cache,
+  crypto.internal.fips140only, internal.runtime.cgroup, internal.runtime.gc.scan, internal.strconv,
+  internal.syscall.unix, internal.trace.internal.tracev1, internal.trace.testtrace, internal.trace.tracev2,
+  internal.unsafeheader, math.big.internal.asmgen, testing.cryptotest, testing.synctest.
+- **26 C# Source badges** link a directory the `nuget-1.24.13.7` tree does not have: the 28 new IDs' directories
+  less `internal/runtime/syscall/linux` and `internal/trace/internal/testgen`, whose directories existed at the tag.
+
+### 14.3 Release day
+
+| # | Step | Owner | Expected output |
+|---|---|---|---|
+| RD1 | **Order.** Batch 44 lands, then §6's full sweep, then `claude/hop-go126` merges to master, and the release is cut from master. Nothing that moves golib or runtime lands between the sweep and the release | COORD | master at `<REL>`, and the sweep's result recorded |
+| RD2 | **release-smoke at the shipping tree:** one windows pack feeding all four shipped RIDs, arms A-D on every leg, darwin's D (the README walkthrough on a Mac) gating. On this release, which ships macOS assets, the darwin `census` must also be green AT `<REL>`, so dispatch one when the tip landed after the daily | C1 | All four RIDs pass A-D, and the darwin census is green at `<REL>`, with their run ids |
+| RD3 | **The owner's gate:** the README walkthrough on linux AND windows from packages repacked at `<REL>`, and GolibTests at Debug AND Release | OWNER | Both walkthroughs and both GolibTests configurations green |
+| RD4 | **The publish**, at the release machine's console, from a checkout with empty porcelain. First the environment read-back: .NET 10 SDK and the pinned Go first on PATH, `dotnet --version` admitted by global.json, and `go version` under `GOTOOLCHAIN=local` reading go1.26.10. No GPG signing during NuGet Phase 2 (or `disable-scdaemon`). Then `release-nuget.ps1`. **The PIN** is entered once, at the signer | OWNER | Phases 0-4 green: the bump to 1.26.10.1, the tag, the snapshot, the retargets, the signed push |
+| RD5 | **Resume rule:** a failed Phase 2 NEVER re-runs release-nuget (it re-bumps). Run the signer's census, then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push | OWNER | Nothing re-packed |
+| RD6 | **Indexed**, meaning every ID in the walkthrough's restore closure is listed (a partial index fails restore loudly, NU1102), then the **post-publish smoke**: release-smoke with `published_version=1.26.10.1`, no pack, all four RIDs restoring from nuget.org, D gating | C1 | Every closure ID listed, and A-D green on four RIDs from the feed |
+| RD7 | **The deprecations**: the 10 removed IDs of H11.4, each pointing at 1.24.13.7 and its alternate | OWNER | 10 deprecated, 0 unlisted |
+| RD8 | **The release record** (Phase 4's commit: counter 1, snapshot, `corpus-release.txt` = 1.26.10.1) lands on master | OWNER / COORD | `TestCorpusReleaseMatchesThePublishedStamp` and `TestPublishedCounterMatchesTheRecordedReleases` green at the record |
+| RD9 | **`release/go1.24`** mints at **b0ef977fda**, the 1.24.13.7 RECORD: one commit after the `nuget-1.24.13.7` tag (57ca7c1616), writing counter 7, the snapshot and `corpus-release.txt` = 1.24.13.7. It mints only after RD8's record lands, as `release/go1.23` did. Read it back with `git ls-remote` | COORD (or G) | `refs/heads/release/go1.24` = b0ef977fda on origin (PLAN-version-lines.md §1, §2) |
+
+<!-- Provenance (G, 2026-10-26, COORD's ask as plan owner). Read at the batch-44 spine 4edd2143d9: GoCorpusMigration.md
+     H11/H12/Release day; src/version.props; src/go2cs/corpus-release.txt; src/push-nuget.ps1 (the pack set: every
+     non-test library project in src/go2cs-stdlib.slnx, `go.<AssemblyName>`; go2cs.CpuProfiler is the only
+     IsPackable false and sits in both lists); the ID diff by a script reading each ref's slnx and csproj
+     AssemblyNames at nuget-1.24.13.7 (57ca7c1616) and the spine (344 -> 362: 28 new, 10 removed); every
+     src/core/**/README.md for the badge spellings, the 17 Tests links into docs/validation/1.24.13.7/ with no page,
+     and the 26 C# Source links into directories the tag's tree lacks; go1.26.10's src/vendor/modules.txt;
+     migrate-gorelease.ps1 -From 1.24.13 -To 1.26.10 run read-only (porcelain empty after); b0ef977fda's own stat (its
+     corpus-release.txt and GoBuildNumber). The removed IDs' alternates are proposals from Go 1.26's tree, for the
+     owner to rule, not measurements. -->
