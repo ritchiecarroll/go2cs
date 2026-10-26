@@ -192,6 +192,18 @@ public static class TestHost
             return 2;
         }
 
+        // The pipeline's three settings are this run's ALONE, and Parse cleared them from the CLR
+        // environment only. On unix a converted child inherits syscall.envs instead (windows' converted
+        // syscall reads the process environment itself, so it was never stale there), the snapshot syscall's static
+        // initializer took -- before Parse whenever that ran first (a module initializer, or syscall being
+        // the package under test) -- so a test re-executing this host handed its child the parent's absolute
+        // GO2CS_TEST_RESULT, and each child's exit flush truncated the parent's results file: 4 helpers of
+        // the linux syscall row wrote it before the parent's final write, and on darwin a child's 3-event
+        // record survived (go1.26.10, 2026-10-25). Cleared from the converted environment too
+        // (PublishSandboxMarker's two-environment argument). Guarded by GolibTests' HostGoTestArgvTests.
+        foreach (string taken in TestOptions.PipelineEnvironmentVariables)
+            PublishEnvironmentVariable(taken, null);
+
         ShortMode = options.Short;
         VerboseMode = options.Verbose;
 
