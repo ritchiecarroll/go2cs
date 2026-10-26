@@ -43,6 +43,7 @@
        disagree; nothing is wrong with the code under test. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
+    <Compile Remove="LinuxPipelineEnvironmentTests.cs" />
     <Compile Remove="LinuxSignalMaskTests.cs" />
     <Compile Remove="LinuxSigpipeTests.cs" />
     <Compile Remove="LinuxSyscallClockTests.cs" />

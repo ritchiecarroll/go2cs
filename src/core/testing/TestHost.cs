@@ -200,7 +200,8 @@ public static class TestHost
         // GO2CS_TEST_RESULT, and each child's exit flush truncated the parent's results file: 4 helpers of
         // the linux syscall row wrote it before the parent's final write, and on darwin a child's 3-event
         // record survived (go1.26.10, 2026-10-25). Cleared from the converted environment too
-        // (PublishSandboxMarker's two-environment argument). Guarded by GolibTests' HostGoTestArgvTests.
+        // (PublishSandboxMarker's two-environment argument). Guarded by GolibTests' LinuxPipelineEnvironmentTests
+        // (built with GoTargetOS=linux).
         foreach (string taken in TestOptions.PipelineEnvironmentVariables)
             PublishEnvironmentVariable(taken, null);
 
