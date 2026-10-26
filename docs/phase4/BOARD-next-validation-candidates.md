@@ -28759,5 +28759,25 @@ It moves EVERY darwin row's sandbox spelling, so it is owed a darwin re-read of 
 land. Linux is unaffected (its temp paths are physical), and windows does not take the arm.
 
 — G (2026-10-26)
+## 2026-10-26 — P2 (COORD ruling): darwin TestNetpollBreak — the root, after the kevent errno seat — POST-PUBLISH
+
+**Measured (COORD, mac run 40259307336, read by the i9).** With the kevent errno seat (claude/p2-darwin-kevent-errno
+@ 9fd86bcc1b, landing in batch 44) the fatal line reads "netpollBreak write failed with 9": EBADF, a real errno where
+the raw -1 printed "1" before. Nothing else moved (0 runtime keys against the vm-region proof).
+
+**Root (read from the tree).** runtime's `netpollGenericInit` is a deliberate no-op under go2cs
+(runtime/netpoll_impl.cs: the managed host has no runtime-side poller, internal/poll's netpoller is .NET-native), so
+darwin's `kq` stays -1. `runtime.NetpollGenericInit()` in TestNetpollBreak therefore creates nothing, and
+`NetpollBreak` reaches the generated `netpollBreak` -> `wakeNetpoll(kq)` -> `kevent(-1, ...)` = EBADF -> Go's
+`throw`, a fatal error that ends the host and takes 34 in-flight tests with it. linux and windows met the same
+premise earlier and hand-own `netpollBreak` as a refusal by name (`manualConversionFuncs["runtime"]`
+`"netpollBreak": goosScope{"linux", "windows"}`; linux/netpoll_epoll_impl.cs, whose header records the linux twin of
+this death, COORD ruling, ledger 80fc879c1c). darwin is the one flavour left on the generated body.
+
+Owed (candidate, not started): the darwin twin, `"darwin"` added to that scope and a darwin netpoll_kqueue_impl.cs
+refusing by name before the kevent, so TestNetpollBreak fails as one loud row and the host lives. runtime stays
+darwin-unbanked at 1.26 either way.
+
+— P2 (2026-10-26)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
