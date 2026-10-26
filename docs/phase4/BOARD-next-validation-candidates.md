@@ -28534,5 +28534,40 @@ count is unbounded, `(FileMode)(((uint32)1).Lsh(count))`, the guard taking the c
 does. Pair it with the literal-count `(int)` cleanup, since both edit the same shift arm.
 
 — H (2026-10-25)
+## 2026-10-25 — G (COORD's ruling, the i9's darwin syscall read): a re-executed helper wrote the PARENT's results file on unix — FIXED IN-HOP (claude/g-results-env-clear); no banked verdict moved
+
+**What happened.** The pipeline hands the converted test host its result, JUnit and per-test-deadline settings in the
+environment (`GO2CS_TEST_RESULT`, `GO2CS_TEST_JUNIT`, `GO2CS_TEST_DEADLINE`, as absolute paths;
+`testConversion.go` `convertedHostResultEnv`). `TestOptions.Parse` took them and cleared them from the CLR
+environment only. On unix a converted child inherits `syscall.envs`, the snapshot syscall's static initializer took,
+and whenever that ran before the parse the snapshot still held the parent's paths. So a test that re-executes the
+host (`exec.Command(os.Args[0], ...)`) started a child whose exit flush truncated the parent's
+`go2cs_test_results.json`.
+
+Measured with a local writer probe on the linux syscall row: five writers to one file, four helpers and then the
+parent, whose final write masked them. On darwin the syscall parent never completed its own write, so a helper's
+three-event `TestRlimitRestored` record was what survived (run 40252700084). Windows was never affected: its
+converted syscall reads the process environment itself, and the os/exec row's file had one writer.
+
+**What it could and could not reach.** Banked comparisons could not move: `testConversion.go` never reads
+`go2cs_test_results.json`. Verdicts come from the host's stdout stream, which a helper never writes, because its
+output is the parent test's own pipe. The file's side readers could, but only when a parent did not complete its
+own write (killed, crashed, deadline):
+- the sweep's oracle-only re-run rule (`Get-ResultsTailText`), which would read a helper's clean `os.Exit 0` tail as
+  the run's;
+- `src/tools/alloc-units`, which would keep a helper's reading of a test it shared with the parent;
+- `src/tools/comparison-classifier`, a diagnostic.
+
+This hop's alloc-units readings were all taken from runs whose parents completed, so they stand.
+
+**The fix.** `TestHost.Run` clears the three names from the converted environment too, right after the parse
+(`PublishEnvironmentVariable(name, null)`, the host's existing two-environment helper). The guard is
+GolibTests' `LinuxPipelineEnvironmentTests`, compiled only under `GoTargetOS=linux` like `LinuxSpawnSeamTests`. It
+plants all three settings on both sides and reads what a child spawned from a test body would inherit. It is
+red-first on linux. On windows it would be vacuous by the mechanism above, and on a linux host the default build
+binds the windows syscall flavor, whose static initializer cannot run. Proof: the linux syscall row's results file
+now has one writer, the parent (121 events).
+
+— G (2026-10-25)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

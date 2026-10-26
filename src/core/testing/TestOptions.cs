@@ -94,8 +94,15 @@ internal sealed class TestOptions
     /// <summary>Environment variable the pipeline passes the per-test deadline in, as a Go duration ("15m0s"); "0" is none.</summary>
     public const string TestDeadlineEnvironmentVariable = "GO2CS_TEST_DEADLINE";
 
-    // Reads an environment variable and removes it from this process, so nothing this process
-    // starts inherits it.
+    /// <summary>
+    /// The three settings <see cref="Parse"/> takes from the environment, which no child this run starts
+    /// may inherit. TestHost.Run clears them from the converted environment as well.
+    /// </summary>
+    public static readonly string[] PipelineEnvironmentVariables =
+        [ResultFileEnvironmentVariable, JUnitFileEnvironmentVariable, TestDeadlineEnvironmentVariable];
+
+    // Reads an environment variable and removes it from the CLR environment, which is what this host and a
+    // CLR child read. A CONVERTED child reads syscall.envs, cleared by TestHost.Run after the parse.
     private static string? TakeEnvironmentVariable(string name)
     {
         string? value = Environment.GetEnvironmentVariable(name);
