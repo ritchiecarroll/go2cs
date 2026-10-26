@@ -28856,7 +28856,7 @@ is the .go file itself. It also wrote EVERY file of the package to that one name
 last file won. Now main.go settles the one output file first (`singleFileOutputPath`: the named `.cs`, else
 `<name>.cs` in the named directory, else beside the input), and the driver writes only the named file there. The
 package's other files are still visited, for the package-wide state the named file's emission reads, and are not
-written. For a one-file package, single-file and package mode now emit byte-identical `example.cs` and `.csproj`.
+written; their imports still reach the project file. For a one-file package, single-file and package mode now emit byte-identical `example.cs` and `.csproj`.
 
 **(b) A relative `-go2cspath`** (or `GO2CSPATH`) was carried as written into the `-tests` flow's
 `dotnet publish -p:go2csPath=...` and the child environment, and dotnet runs from the project directory, so the

@@ -586,8 +586,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				if !isDir {
 					// A single-file conversion writes the ONE file the user named. The package's other files were
-					// visited above for the package-wide state the named file's emission reads, and are not written.
+					// visited above for the package-wide state the named file's emission reads, and are not written;
+					// their imports still reach the project file, as every file's did before.
 					if !isSingleFileInput(fileEntry.filePath, options) {
+						packageLock.Lock()
+						projectImports.UnionWithSet(visitor.importQueue)
+						packageLock.Unlock()
 						return
 					}
 
