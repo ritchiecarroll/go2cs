@@ -28837,4 +28837,41 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — P1 (.2 seat #12, owner ruling): signed release binaries — BUILT on `claude/p1-signed-binaries`
+
+**The gap.** `release-binaries.yml` builds the six go2cs archives in CI, attests them and drafts the GitHub Release.
+The Windows executables were not code-signed: the release certificate is on a smart card in the release machine.
+
+**The step.** `src/sign-release-binaries.ps1 -Tag nuget-N.N.N.N [-Apply]`, run on the release machine:
+- It finds the key that signed the release tag, from the tag's own GPG signature, and verifies the tag.
+- It refuses a Release that is not a draft, or one that already carries `SHA256SUMS.asc`.
+- It downloads the draft and checks each archive against `SHA256SUMS` and `gh attestation verify`.
+- It Authenticode-signs both `go2cs.exe` files in ONE signtool call, so one PIN prompt. `src/_authenticode.ps1`
+  (`Invoke-GoAuthenticodeSign -Files ...`) is the signing call the tool packages' executables (seat #11) use too.
+  It finds the certificate by the same SHA-256 fingerprint as `$env:NuGetCertFingerprint`, and timestamps with
+  RFC 3161. `dotnet nuget sign` is a separate process, so the packages' signing asks for the PIN again.
+- It re-packs the two Windows zips: every record is byte-identical except `go2cs.exe`'s CRC-32, sizes and body,
+  and the offsets after it. The tarballs are not touched.
+- It regenerates `SHA256SUMS` (same lines and order) and signs it with the tag's key: `SHA256SUMS.asc`.
+- With `-Apply` it uploads to the draft, deletes the build's attestation bundle, and verifies by re-download.
+  Without `-Apply` nothing on GitHub changes.
+
+**Attestation: choice (a).** `.github/workflows/attest-release.yml`, started by hand with the tag, refuses a published
+Release and checks `SHA256SUMS`. It verifies the four unchanged tarballs against their build attestation, attests
+all six archives as the draft holds them, and uploads the bundle. Its predicate names that workflow run, so it says
+"these bytes were on the draft when this run attested them", not "this run built them". The build's attestation of
+the unsigned bytes stays in the repository's store. (b) would leave the Release carrying a bundle that does not match
+the Windows archives. Signing in CI is impossible because the key is on a card. The draft is published only after
+this workflow, so a published Release never carries a mismatched attestation. macOS and Linux are covered by the
+signed `SHA256SUMS` only; notarization needs an Apple Developer ID and remains the owner's open question.
+
+**Guard:** `src/tests/sign-release-binaries-selftest.ps1`, against a mock `gh` serving a draft Release from a folder.
+It uses real Windows executables cross-compiled with Go, `zip -9` archives as CI makes them, a self-signed test
+certificate (osslsigncode) and a throwaway GPG key that signs a scratch tag and is not the keyring's default. Red
+first, 17 failures, then green. Three sites were each broken once and named, then restored byte-identical: the
+signing key, the attestation check and the zip header. Linux only: the signtool path, Windows PowerShell 5.1 and
+the workflow itself were not run.
+
+— P1 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
