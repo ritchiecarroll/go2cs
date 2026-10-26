@@ -28856,8 +28856,13 @@ per API key. `push-nuget.ps1 -Push` has the same loop. Neither could resume exce
 or tag, it skips the clean-tree and certificate gates, and it refuses a folder holding a package of another version.
 `push-nuget.ps1 -Push -BumpBuild:$false` is that script's resume, as before.
 
+**Reusable (COORD scope add, for C2's nugetgo sheet).** Dot-source `src/_nugetpush.ps1`, then call
+`Invoke-GoNuGetPush -Packages <FileInfo[]> -Source <v3 index URL> -ApiKey <key> [-StopOnRateLimit]`. It returns the
+pushed, already-published and wait counts. The resume entry point is the same call again. With `-StopOnRateLimit`, a
+refusal with a Retry-After stops at once and prints the UTC time to re-run, instead of waiting.
+
 **Guard:** `src/tests/nuget-push-selftest.ps1`, against a mock feed on the loopback. Nothing reaches a real feed.
-Red first at the extracted shipped loop: rc 1, 11 failures. Green: rc 0 on all seven cases, including
+Red first at the extracted shipped loop: rc 1, 11 failures. Green: rc 0 on all nine cases (201, 409, 403 with and without Retry-After, 503 then 500, `-StopOnRateLimit`), including
 `release-nuget.ps1 -ResumePush` end to end. Run with PowerShell 7 on linux only. The Windows PowerShell 5.1 path and a
 real nuget.org push were not run.
 

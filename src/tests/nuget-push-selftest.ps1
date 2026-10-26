@@ -14,6 +14,9 @@
       normalized a package versioned x.y.z.0 that the flat container keys as x.y.z -> found published, not PUT
       conflict   the feed answers 409 for a version its flat container does not list yet -> counted as published
       refused    403 with NO Retry-After (a bad API key) -> throws, naming the package and the count pushed before it
+      stop       -StopOnRateLimit: 403 with Retry-After 2489 -> throws at once with the UTC resume time, no wait; the
+                 same call again (the resume) PUTs only the refused package
+      server     503 with Retry-After 3 -> waited out and pushed; then 500 with none -> throws, naming the package
       resume-foreign  release-nuget.ps1 -ResumePush over a folder holding a package of another version -> refused by
                  name, nothing PUT, version.props untouched
       resume-release  release-nuget.ps1 -ResumePush, end to end, over three packages of the release (one published, a
@@ -151,9 +154,9 @@ $source = "${prefix}v3/index.json"
 $recordedWaits = New-Object System.Collections.Generic.List[int]
 $recordWait = { param([int]$Seconds) $recordedWaits.Add($Seconds) }.GetNewClosure()
 
-function Invoke-Case([System.IO.FileInfo[]] $Packages) {
+function Invoke-Case([System.IO.FileInfo[]] $Packages, [switch] $Stop) {
     # Write-Host is the information stream (6): its records are the console text, and the one other object is the summary.
-    $records = @(& { Invoke-GoNuGetPush -Packages $Packages -Source $source -ApiKey 'selftest-key' -Sleep $recordWait } 6>&1)
+    $records = @(& { Invoke-GoNuGetPush -Packages $Packages -Source $source -ApiKey 'selftest-key' -Sleep $recordWait -StopOnRateLimit:$Stop } 6>&1)
     $info = [System.Management.Automation.InformationRecord]
     $summary = @($records | Where-Object { $_ -isnot $info }) | Select-Object -Last 1
     [pscustomobject]@{ Summary = $summary; Text = (@($records | Where-Object { $_ -is $info } | ForEach-Object { "$($_.MessageData)" }) -join "`n") }
@@ -219,6 +222,36 @@ try {
     Check ($null -ne $thrown) 'refused: a 403 without Retry-After did not throw'
     if ($thrown) { Check ($thrown -match 'go\.refused\.b' -and $thrown -match 'after 1 pushed') "refused: the error does not name go.refused.b and the 1 pushed before it: $thrown" }
     Check ($recordedWaits.Count -eq 0) "refused: a 403 without Retry-After waited [$($recordedWaits -join ',')]"
+
+    # ---- stop -----------------------------------------------------------------------------------------------------
+    $state.Puts.Clear(); $recordedWaits.Clear()
+    $stopPackages = @('go.stop.a', 'go.stop.b' | ForEach-Object { New-FakePackage $_ $version })
+    [void]$state.Script.Add(@{ Status = 201 })
+    [void]$state.Script.Add(@{ Status = 403; Body = 'Quota Exceeded'; Headers = @{ 'Retry-After' = '2489' } })
+    $thrown = $null
+    try { [void](Invoke-Case $stopPackages -Stop) } catch { $thrown = "$_" }
+    Check ($null -ne $thrown) 'stop: a 403 with Retry-After under -StopOnRateLimit did not stop'
+    if ($thrown) { Check ($thrown -match 'go\.stop\.b' -and $thrown -match 'after 1 pushed' -and $thrown -match 'Resume at \d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC') "stop: the error does not name go.stop.b, the 1 pushed and the resume time: $thrown" }
+    Check ($recordedWaits.Count -eq 0) "stop: -StopOnRateLimit waited [$($recordedWaits -join ',')]"
+    $state.Puts.Clear()
+    $case = $null
+    try { $case = Invoke-Case $stopPackages -Stop } catch { $failures.Add("stop: the resume threw: $_") }
+    Check ((@($state.Puts) -join ',') -eq "go.stop.b $version") "stop: the resume PUT $(@($state.Puts) -join ', '); want go.stop.b only"
+    if ($case) { Check ($case.Summary.Pushed -eq 1 -and $case.Summary.AlreadyPublished -eq 1) "stop: resume summary $($case.Summary | Out-String) want 1 pushed, 1 already published" }
+
+    # ---- server ---------------------------------------------------------------------------------------------------
+    $state.Puts.Clear(); $recordedWaits.Clear()
+    $serverA = New-FakePackage 'go.server.a' $version
+    $serverB = New-FakePackage 'go.server.b' $version
+    [void]$state.Script.Add(@{ Status = 503; Body = 'Service Unavailable'; Headers = @{ 'Retry-After' = '3' } })
+    [void]$state.Script.Add(@{ Status = 201 })
+    [void]$state.Script.Add(@{ Status = 500; Body = 'Internal Server Error' })
+    $thrown = $null
+    try { [void](Invoke-Case @($serverA, $serverB)) } catch { $thrown = "$_" }
+    Check (($recordedWaits -join ',') -eq '3') "server: waits were [$($recordedWaits -join ',')]; want one wait of 3 s for the 503"
+    Check ($state.Published.ContainsKey("go.server.a/$version")) 'server: go.server.a is not on the feed after its 503 was waited out'
+    Check ($null -ne $thrown) 'server: a 500 without Retry-After did not throw'
+    if ($thrown) { Check ($thrown -match 'go\.server\.b' -and $thrown -match '500' -and $thrown -match 'after 1 pushed') "server: the error does not name go.server.b, the 500 and the 1 pushed: $thrown" }
 
     # ---- release-nuget.ps1 -ResumePush ----------------------------------------------------------------------------
     $repoSrc = Split-Path $PSScriptRoot -Parent
@@ -289,5 +322,5 @@ finally {
 }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host 'nuget-push selftest: PASS (quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
+Write-Host 'nuget-push selftest: PASS (quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
 exit 0

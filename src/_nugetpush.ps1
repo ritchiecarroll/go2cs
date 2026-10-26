@@ -148,8 +148,18 @@ function Send-GoNuGetPackage([System.Net.Http.HttpClient]$Client, [string]$Publi
     }
 }
 
-# Pushes $Packages, in order, to $Source. Returns the counts; throws on the first refusal that is not a wait, naming
-# the package and how many were pushed before it, so the operator's next step is a re-run (which skips them).
+# THE CALL, for any script that publishes go.* packages (release-nuget.ps1 Phase 3, push-nuget.ps1 -Push, an owner's
+# sheet). Dot-source this file, then:
+#
+#   $result = Invoke-GoNuGetPush -Packages <FileInfo[]> -Source <v3 index URL or folder> -ApiKey <key> [-StopOnRateLimit]
+#
+# It pushes $Packages in the order given (Get-GoNuGetPushOrder puts go.lib and go.gen first) and returns
+# [pscustomobject]@{ Pushed; AlreadyPublished; Waits }. THE RESUME ENTRY POINT IS THE SAME CALL: a re-run skips every
+# package the feed already has, so it carries on where the last run stopped.
+#
+# A refusal with a Retry-After is waited out by default. With -StopOnRateLimit it is not: the call throws at once,
+# naming the package, the counts so far and the UTC time to re-run, for a caller that would rather stop than block.
+# Every other refusal throws the same way, naming the package and how many were pushed before it.
 # $Sleep is how a wait is spent; the selftest passes one that records instead of sleeping.
 function Invoke-GoNuGetPush {
     param(
@@ -157,7 +167,8 @@ function Invoke-GoNuGetPush {
         [Parameter(Mandatory)] [string] $Source,
         [Parameter(Mandatory)] [string] $ApiKey,
         [scriptblock] $Sleep = { param([int]$Seconds) Start-Sleep -Seconds $Seconds },
-        [int] $MaxWaitsPerPackage = 6
+        [int] $MaxWaitsPerPackage = 6,
+        [switch] $StopOnRateLimit
     )
 
     $pushed = 0
@@ -213,6 +224,13 @@ function Invoke-GoNuGetPush {
                 if (($result.Status -in @(403, 429, 503)) -and ($null -ne $result.RetryAfterSeconds) -and ($waited -lt $MaxWaitsPerPackage)) {
                     $seconds = [int][math]::Max(1, $result.RetryAfterSeconds)
                     $resume = [DateTime]::UtcNow.AddSeconds($seconds).ToString('yyyy-MM-dd HH:mm:ss')
+
+                    if ($StopOnRateLimit) {
+                        throw ("push of $($identity.Id) $($identity.Version) rate-limited ($($result.Status) $($result.Reason), Retry-After $seconds s) " +
+                            "after $pushed pushed and $published already published of $total; stopped. Resume at $resume UTC by re-running " +
+                            "the same push (published packages are skipped)")
+                    }
+
                     Write-Host ("  $label  refused: $($result.Status) $($result.Reason), Retry-After $seconds s, after $pushed pushed this run. " +
                         "Waiting; the push resumes at $resume UTC. (Stopping now is safe: a re-run skips what is published.)") -ForegroundColor Yellow
                     & $Sleep $seconds
