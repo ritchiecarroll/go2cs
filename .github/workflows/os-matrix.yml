@@ -93,7 +93,12 @@ on:
         required: false
         default: ''
       nugetgo_feed:
-        description: 'nugetgo-behavior only: the NuGet v3 feed that serves the package. Blank takes int.nugettest.org (https://apiint.nugettest.org/v3/index.json), where the runbook rehearses.'
+        description: 'nugetgo-behavior only: the feed that serves the package. A NuGet v3 feed URL ending in /index.json, or git:REF:FOLDER, a folder of nupkgs in this repository at a branch or commit (e.g. git:claude/kit:nupkg/int.1), which every leg uses as a local folder feed at the ONE commit the plan resolves. Blank takes int.nugettest.org (https://apiint.nugettest.org/v3/index.json), where the runbook rehearses.'
+        type: string
+        required: false
+        default: ''
+      nugetgo_feed_sha256:
+        description: 'nugetgo-behavior with a git: feed only, and required there: the SHA-256 of the package''s nupkg in that folder. Each leg refuses a nupkg whose hash differs before anything reads it.'
         type: string
         required: false
         default: ''
@@ -149,6 +154,7 @@ jobs:
       nugetgo-version: ${{ steps.derive.outputs.nugetgo-version }}
       nugetgo-package: ${{ steps.derive.outputs.nugetgo-package }}
       nugetgo-feed: ${{ steps.derive.outputs.nugetgo-feed }}
+      nugetgo-feed-sha256: ${{ steps.derive.outputs.nugetgo-feed-sha256 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -167,6 +173,7 @@ jobs:
           INPUT_NUGETGO_MODULE: ${{ inputs.nugetgo_module }}
           INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
+          INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -225,8 +232,8 @@ jobs:
           # nugetgo-behavior: the module, the package version and the feed. Only that stage reads them, each is refused on
           # any other stage, and a malformed value FAILS the plan by name rather than reaching a leg. The sample program
           # must exist at the dispatched ref: a leg would otherwise discover its absence four times over.
-          $nugetgoModule = ''; $nugetgoVersion = ''; $nugetgoPackage = ''; $nugetgoFeed = ''
-          $nugetgoGiven = if ($env:EVENT_NAME -eq 'schedule') { @() } else { @($env:INPUT_NUGETGO_MODULE, $env:INPUT_NUGETGO_PACKAGE, $env:INPUT_NUGETGO_FEED) | Where-Object { "$_".Trim() } }
+          $nugetgoModule = ''; $nugetgoVersion = ''; $nugetgoPackage = ''; $nugetgoFeed = ''; $nugetgoFeedSha256 = ''
+          $nugetgoGiven = if ($env:EVENT_NAME -eq 'schedule') { @() } else { @($env:INPUT_NUGETGO_MODULE, $env:INPUT_NUGETGO_PACKAGE, $env:INPUT_NUGETGO_FEED, $env:INPUT_NUGETGO_FEED_SHA256) | Where-Object { "$_".Trim() } }
           if ($stage -eq 'nugetgo-behavior') {
               $spec = "$env:INPUT_NUGETGO_MODULE".Trim()
               if ($spec -notmatch '^(?<module>[a-z0-9.-]+(/[A-Za-z0-9._~-]+)+)@(?<version>v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$') { throw "nugetgo_module must be MODULE@VERSION, such as github.com/inconshreveable/mousetrap@v1.1.0; got '$spec'." }
@@ -236,10 +243,26 @@ jobs:
               if ($nugetgoPackage -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z.-]+)?$') { throw "nugetgo_package must be a NuGet package version such as 1.1.0-int.1; got '$nugetgoPackage'." }
               $nugetgoFeed = "$env:INPUT_NUGETGO_FEED".Trim()
               if (-not $nugetgoFeed) { $nugetgoFeed = 'https://apiint.nugettest.org/v3/index.json' }
-              if ($nugetgoFeed -notmatch '^https://[^\s]+/index\.json$') { throw "nugetgo_feed must be a NuGet v3 feed URL ending in /index.json; got '$nugetgoFeed'." }
+              $nugetgoFeedSha256 = "$env:INPUT_NUGETGO_FEED_SHA256".Trim().ToLowerInvariant()
+              # A git: feed is a folder of nupkgs in this repository (a kit ref), for a package no gallery serves. The
+              # plan resolves the ref to ONE commit, so every leg reads the same bytes, and the nupkg's hash is pinned.
+              if ($nugetgoFeed -match '^git:(?<ref>[^:\s]+):(?<folder>[^:\s]+)$') {
+                  $feedRef = $Matches['ref']; $feedFolder = $Matches['folder'].Trim('/')
+                  if ($feedFolder -match '(^|/)\.\.?(/|$)' -or $feedFolder.StartsWith('/')) { throw "nugetgo_feed: the folder must be a plain relative path in the repository; got '$feedFolder'." }
+                  if ($nugetgoFeedSha256 -notmatch '^[0-9a-f]{64}$') { throw "nugetgo_feed_sha256 must be the 64-hex SHA-256 of the package's nupkg when nugetgo_feed is a git: folder; got '$nugetgoFeedSha256'." }
+                  $feedCommit = if ($feedRef -match '^[0-9a-f]{40}$') { $feedRef } else {
+                      $line = @(& git ls-remote origin "refs/heads/$feedRef") | Select-Object -First 1
+                      if ($LASTEXITCODE -ne 0 -or -not $line) { throw "nugetgo_feed: no branch '$feedRef' on origin." }
+                      ($line -split '\s+')[0]
+                  }
+                  $nugetgoFeed = "git:${feedCommit}:$feedFolder"
+                  Write-Host "nugetgo_feed: git:${feedRef}:$feedFolder resolves to commit $feedCommit; the nupkg must hash $nugetgoFeedSha256"
+              }
+              elseif ($nugetgoFeed -notmatch '^https://[^\s]+/index\.json$') { throw "nugetgo_feed must be a NuGet v3 feed URL ending in /index.json, or git:REF:FOLDER; got '$nugetgoFeed'." }
+              elseif ($nugetgoFeedSha256) { throw "nugetgo_feed_sha256 applies to a git: feed only; a gallery feed is not pinned here (got feed '$nugetgoFeed')." }
               Write-Host "nugetgo-behavior: $nugetgoModule $nugetgoVersion, package $nugetgoPackage from $nugetgoFeed"
           }
-          elseif (@($nugetgoGiven).Count) { throw "nugetgo_module, nugetgo_package and nugetgo_feed apply to stage nugetgo-behavior only; got stage '$stage'." }
+          elseif (@($nugetgoGiven).Count) { throw "nugetgo_module, nugetgo_package, nugetgo_feed and nugetgo_feed_sha256 apply to stage nugetgo-behavior only; got stage '$stage'." }
 
           # The Go release is READ FROM version.props, never written here. run-validated-sweep.ps1
           # and the converter both refuse a toolchain whose release differs from <GoStdLibVersion>
@@ -373,6 +396,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-version=$nugetgoVersion" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-package=$nugetgoPackage" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed=$nugetgoFeed" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed-sha256=$nugetgoFeedSha256" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1568,6 +1592,7 @@ jobs:
           NUGETGO_VERSION: ${{ needs.plan.outputs.nugetgo-version }}
           NUGETGO_PACKAGE: ${{ needs.plan.outputs.nugetgo-package }}
           NUGETGO_FEED: ${{ needs.plan.outputs.nugetgo-feed }}
+          NUGETGO_FEED_SHA256: ${{ needs.plan.outputs.nugetgo-feed-sha256 }}
           # The matrix label, which the row names beside the image (ImageOS, ImageVersion) the runner reports.
           NUGETGO_RUNNER: ${{ matrix.runner }}
         run: |
@@ -1587,12 +1612,32 @@ jobs:
           try { & go build -o "bin/$exeName" . ; $goExit = $LASTEXITCODE } finally { Pop-Location }
           if ($goExit -ne 0) { Write-Host "::error::converter go build failed with exit $goExit"; exit $goExit }
 
+          # A git: feed (git:COMMIT:FOLDER, resolved by the plan) is that folder of the commit, extracted outside the
+          # artifacts and handed to the row as a local folder feed once its nupkg hashes as pinned.
+          $feed = $env:NUGETGO_FEED
+          if ($feed -match '^git:(?<commit>[0-9a-f]{40}):(?<folder>.+)$') {
+              $feedCommit = $Matches['commit']; $feedFolder = $Matches['folder']
+              & git fetch --no-tags --depth=1 origin $feedCommit
+              if ($LASTEXITCODE -ne 0) { Write-Host "::error::nugetgo feed: git fetch of $feedCommit failed with exit $LASTEXITCODE"; exit 1 }
+              $feedRoot = Join-Path $env:RUNNER_TEMP 'nugetgo-feed'
+              $feedZip = Join-Path $env:RUNNER_TEMP 'nugetgo-feed.zip'
+              & git archive --format=zip -o $feedZip $feedCommit -- $feedFolder
+              if ($LASTEXITCODE -ne 0) { Write-Host "::error::nugetgo feed: no folder $feedFolder at $feedCommit (git archive exit $LASTEXITCODE)"; exit 1 }
+              Expand-Archive -LiteralPath $feedZip -DestinationPath $feedRoot -Force
+              $feed = Join-Path $feedRoot $feedFolder
+              $nupkg = @(Get-ChildItem -LiteralPath $feed -File -Filter '*.nupkg' | Where-Object { $_.Name.ToLowerInvariant().EndsWith(".$($env:NUGETGO_PACKAGE.ToLowerInvariant()).nupkg") })
+              if ($nupkg.Count -ne 1) { Write-Host "::error::nugetgo feed: $($nupkg.Count) nupkg(s) of version $($env:NUGETGO_PACKAGE) in $feedFolder at $feedCommit, not one"; exit 1 }
+              $hash = (Get-FileHash -LiteralPath $nupkg[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $env:NUGETGO_FEED_SHA256) { Write-Host "::error::nugetgo feed: $($nupkg[0].Name) hashes $hash, not the pinned $($env:NUGETGO_FEED_SHA256)"; exit 1 }
+              Write-Host "nugetgo feed: $($nupkg[0].Name) at $feedCommit hashes $hash as pinned; folder feed $feed"
+          }
+
           $rows = Join-Path $art 'nugetgo-behavior'
           $work = Join-Path $art "nugetgo-behavior-work-$rid"
           $log = Join-Path $art "nugetgo-behavior-$goos-$rid.log"
           # A child pwsh, so a refusal is an exit code and a log line rather than the end of this step.
           & pwsh -NoProfile -File ./src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1 -ModulePath $env:NUGETGO_MODULE -GoVersion $env:NUGETGO_VERSION `
-              -PackageVersion $env:NUGETGO_PACKAGE -Feed $env:NUGETGO_FEED -Rid $rid -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") `
+              -PackageVersion $env:NUGETGO_PACKAGE -Feed $feed -Rid $rid -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") `
               -OutDir $rows -Work $work *>&1 | Tee-Object -FilePath $log
           $rowExit = $LASTEXITCODE
 
@@ -1600,7 +1645,7 @@ jobs:
           $summary = @(
               "## nugetgo behavior -- $($env:NUGETGO_MODULE) $($env:NUGETGO_VERSION) on $rid"
               ''
-              "exit ``$rowExit`` -- package $($env:NUGETGO_PACKAGE) from $($env:NUGETGO_FEED)"
+              "exit ``$rowExit`` -- package $($env:NUGETGO_PACKAGE) from $($env:NUGETGO_FEED)$(if ($env:NUGETGO_FEED_SHA256) { " (nupkg SHA-256 $($env:NUGETGO_FEED_SHA256))" })"
               ''
               '```'
           ) + @(if (Test-Path -LiteralPath $row) { Get-Content -LiteralPath $row } else { Get-Content -LiteralPath $log | Select-Object -Last 15 }) + @('```')

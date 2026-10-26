@@ -88,7 +88,8 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | `published_version` | a four-part go.* version, optional | `release-smoke` only. Blank packs this tree and consumes that pack (the pre-publish gate). Set, the pack is skipped and every leg restores that version from nuget.org (the post-publish smoke). |
 | `nugetgo_module` | `MODULE@VERSION` | `nugetgo-behavior` only, and required there. Its sample program and mappings row must exist at `src/tests/ModuleBehavior/MODULE@VERSION/` on the dispatched ref. |
 | `nugetgo_package` | a NuGet package version | `nugetgo-behavior` only, and required there: the rehearsal package every row runs (e.g. `1.1.0-int.1`). |
-| `nugetgo_feed` | a NuGet v3 feed URL, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where module releases are rehearsed. |
+| `nugetgo_feed` | a NuGet v3 feed URL, or `git:REF:FOLDER`, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where module releases are rehearsed. `git:REF:FOLDER` is a folder of nupkgs in this repository at a branch or commit, for a package no gallery serves: the plan resolves REF to one commit, and each leg extracts the folder and passes it to the row as a local folder feed. The go.* closure still restores from nuget.org. |
+| `nugetgo_feed_sha256` | 64 hex digits | `nugetgo-behavior` with a `git:` feed only, and required there: the SHA-256 of the package's nupkg in that folder. Each leg refuses a nupkg that hashes otherwise. Refused with a gallery feed. |
 | `aot_bound_minutes` | 1-340, optional | `aot-smoke` only: the AOT step's own limit. Blank takes 330 (5 h 30 m). An expired bound reads NOT MEASURED (timeout) on osx-x64 and fails the leg on linux-x64 and win-x64. A small value makes the bound fire on purpose. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
