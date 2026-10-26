@@ -142,6 +142,9 @@ Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoBehaviorProof.psm1') -Force
+# The list parameters arrive comma-joined from the rebuild driver (Split-NugetgoListArgument).
+$ThirdPartyPackage = @(Split-NugetgoListArgument $ThirdPartyPackage)
+$ExcludePackage = @(Split-NugetgoListArgument $ExcludePackage)
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }

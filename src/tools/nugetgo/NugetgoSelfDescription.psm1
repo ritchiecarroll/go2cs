@@ -42,6 +42,12 @@ function Get-NugetgoPackedPackages {
     }
 }
 
+# A list parameter of a script run as `pwsh -File`: a repeated parameter does not bind there, and a comma list arrives
+# as ONE string, so a list is passed once, comma-joined, and split here. Entries are trimmed and empties dropped.
+function Split-NugetgoListArgument([string[]]$Values) {
+    @($Values | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+}
+
 function Get-NugetgoThirdPartyRequires {
     [CmdletBinding()]
     # -AllowUnreferenced: one flavor of a module whose requires differ by GOOS (nugetgo-pack.ps1 checks the union instead).
@@ -224,4 +230,4 @@ function Get-NugetgoTestOnlyPackages {
     }
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages
+Export-ModuleMember -Function Split-NugetgoListArgument, Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages

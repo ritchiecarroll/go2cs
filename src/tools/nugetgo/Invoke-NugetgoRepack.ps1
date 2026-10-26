@@ -50,7 +50,8 @@
     which the pack fills, and the author's text outside it. Without it, the pack seeds one.
 .PARAMETER ThirdPartyPackage
     For a module that requires other nugetgo modules (cobra): '<module>=<nuget-id>@<package-version>', one per
-    module, passed to the pack, which makes each a NuGet dependency.
+    module, passed to the pack, which makes each a NuGet dependency. Under pwsh -File, pass them comma-joined in one
+    argument; the driver splits them.
 .PARAMETER Feed
     The pack's single restore source. nuget.org by default; a local folder when it must hold release candidates that
     are not published yet, beside the go.* release they were packed against.
@@ -79,6 +80,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 function Refuse([string]$why) { throw "REFUSED: $why" }
+# Under pwsh -File a list arrives as one comma-joined string (Split-NugetgoListArgument in the pack does the same).
+$ThirdPartyPackage = @($ThirdPartyPackage | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 function Say([string]$line) { Write-Host $line }
 
 if ($PSVersionTable.PSVersion.Major -lt 7) { Refuse "PowerShell $($PSVersionTable.PSVersion) is not 7.x: start pwsh 7 and run again" }
@@ -264,8 +267,9 @@ try {
             '-LicenseSpdx', $row.LicenseSpdx, '-Converter', $G)
         if ($row.UpstreamPublishes) { $packArgs += '-UpstreamPublishes' }
         if ($readme) { $packArgs += @('-ConversionReadme', $readme) }
-        foreach ($x in $excluded) { $packArgs += @('-ExcludePackage', $x) }
-        foreach ($x in $ThirdPartyPackage) { $packArgs += @('-ThirdPartyPackage', $x) }
+        # pwsh -File binds a repeated parameter as an error: each list goes once, comma-joined, and the pack splits it.
+        if ($excluded) { $packArgs += @('-ExcludePackage', ($excluded -join ',')) }
+        if ($ThirdPartyPackage) { $packArgs += @('-ThirdPartyPackage', ($ThirdPartyPackage -join ',')) }
         $packArgs += if ($pack -eq 'int1') { @('-RehearsalSuffix', 'int.1') } else { @('-Release') }
         $start = Get-Date
         $p = Start-Process -FilePath $pwsh -ArgumentList (Join-Argv $packArgs) -NoNewWindow -PassThru -Wait `

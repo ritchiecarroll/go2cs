@@ -108,8 +108,26 @@ finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+Write-Host 'list arguments across pwsh -File'
+# pwsh -File binds a repeated parameter as an error and a comma list as ONE string, so the driver passes a list once,
+# comma-joined, and the pack splits it (C2, 2026-10-26: the cobra run's two -ThirdPartyPackage entries).
+$one = @(Split-NugetgoListArgument @('example.com/a=nugetgo.example.com.a@1.0.0'))
+Check 'one entry stays one' ($one.Count -eq 1 -and $one[0] -ceq 'example.com/a=nugetgo.example.com.a@1.0.0') "got [$($one -join ' | ')]"
+$joined = @(Split-NugetgoListArgument @('example.com/a=nugetgo.example.com.a@1.0.0,example.com/b=nugetgo.example.com.b@2.0.0'))
+Check 'a comma-joined argument is two entries' ($joined.Count -eq 2 -and $joined[1] -ceq 'example.com/b=nugetgo.example.com.b@2.0.0') "got [$($joined -join ' | ')]"
+$mixed = @(Split-NugetgoListArgument @('x', 'y, z', ''))
+Check 'an array of joined arguments flattens, trimmed, empties dropped' (($mixed -join '|') -ceq 'x|y|z') "got [$($mixed -join ' | ')]"
+Check 'nothing is nothing' (@(Split-NugetgoListArgument @()).Count -eq 0) 'not empty'
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+$driver = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Invoke-NugetgoRepack.ps1'))
+Check 'nugetgo-pack.ps1 splits -ThirdPartyPackage and -ExcludePackage before using them' (
+    $pack.Contains('$ThirdPartyPackage = @(Split-NugetgoListArgument $ThirdPartyPackage)') -and
+    $pack.Contains('$ExcludePackage = @(Split-NugetgoListArgument $ExcludePackage)')) 'the pack does not split its list arguments'
+Check 'the driver passes each list once, comma-joined' (
+    $driver.Contains("'-ThirdPartyPackage', (`$ThirdPartyPackage -join ',')") -and $driver.Contains("'-ExcludePackage', (`$excluded -join ',')") -and
+    -not $driver.Contains('foreach ($x in $ThirdPartyPackage)') -and -not $driver.Contains('foreach ($x in $excluded)')) 'the driver repeats a list parameter'
 Check 'nugetgo-pack.ps1 takes -ExcludePackage and selects its libraries through Select-NugetgoPackedLibraries' (
     $pack.Contains('[string[]]$ExcludePackage') -and $pack.Contains('Select-NugetgoPackedLibraries')) 'the pack does not select its libraries'
 
