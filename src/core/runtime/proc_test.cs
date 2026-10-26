@@ -732,11 +732,11 @@ internal static nint bigframe(channel<nint> stop) {
 internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    foreach (var i in range(x)) {
+    foreach (var i in range(8192)) {
         x[i] = (byte)i;
     }
     nint sum = 0;
-    foreach (var i in range(x)) {
+    foreach (var i in range(8192)) {
         sum += (nint)x[i];
     }
 

@@ -254,15 +254,19 @@ func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {
 	refuse("blankValue", "(i, _)")
 	expect("noVars", "foreach (var _"+marker+"1 in range(s))")
 	// A *[N]T ranges its type's length beside the pointer, so a nil one ranges N times, as Go's does; a pointer
-	// PARAMETER is already the dereferenced value local and ranges as an array.
+	// PARAMETER is the dereferenced value and ranges its count (overPointerParam, below).
 	expect("overArray", "foreach (var i in range(a))", "foreach (var i in range(p, 3))")
 	refuse("overArray", ".Value", "(i, _)")
 	expect("overNilPointer", "foreach (var i in range(nilp, 4))")
 	refuse("overNilPointer", ".Value", "(i, _)")
-	expect("overPointerParam", "foreach (var i in range(p))")
-	// A pointer RECEIVER is the value it addresses too (`this ref bits b`), so it ranges as an array: the box overload
-	// range(ж<TArray>, nint) cannot bind a ref (CS0411 at runtime's pageBits.setAll).
-	expect("setAll", "foreach (var i in range(b))")
+	// A pointer PARAMETER is the dereferenced value, and a pointer RECEIVER is the value it addresses too
+	// (`this ref bits b`): each ranges its count, `range(N)`, since Go does not evaluate the operand of an index-only
+	// range over a constant-length array, and a ref is null for a nil pointer. The box overload range(ж<TArray>, nint)
+	// cannot bind a ref either (CS0411 at runtime's pageBits.setAll).
+	expect("overPointerParam", "foreach (var i in range(2))")
+	refuse("overPointerParam", "range(p)")
+	expect("setAll", "foreach (var i in range(4))")
+	refuse("setAll", "range(b)")
 	refuse("setAll", "range(b, 4)")
 	expect("assigned", "foreach (var i"+marker+"1 in range(s))", "i = i"+marker+"1;")
 	expect("written", "foreach (var i"+marker+"1 in range(s))", "var i = i"+marker+"1;")
