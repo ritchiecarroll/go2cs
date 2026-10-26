@@ -906,7 +906,9 @@ survive two hops the func-value route does not have:
    `In(i)` by construction — which is Go's own shape for a method type, receiver first.
 2. **The array sits behind a POINTER.** A callee that writes its result through a parameter takes a
    `*T`, so the type-only position whose length must survive is the *pointee's*. The converter now
-   stamps a parameter's pointee dims (one hop; that is all a Go signature spells here), and a
+   stamps a BOXED pointer-to-array parameter's pointee dims (one hop; that is all a Go signature spells
+   here), as `/*[N]*/ ж<array<T>>` (`/*[1]*/ ж<array<nint>> Ꮡreply`); a `*[N]T` parameter the converter
+   lowers to a `ref` is `ref array<T>` and carries no stamp. A
    pointer descriptor's dims pass through `Elem()` **unshifted** — there is nothing else they could
    describe, a pointer having no length of its own — while an array's dims still shift, its element
    consuming the outer one. The stamp had to be added to `visitFuncDecl`'s REBUILT signature path as

@@ -198,8 +198,8 @@ records only the two shapes it ever recorded — the field *is* the anonymous st
 straight to it — because that map describes the field's own declared type; a struct reached through a
 slice/array/map/channel element is not the field's type and never was tracked.
 
-Measured by the same whole-standard-library A/B, the widening has **no corpus consumer today**: no
-converted package declares a composed anonymous-struct field. What the A/B *did* change is a handful of
+Measured by the same whole-standard-library A/B, the widening currently has **no consumer in the converted
+standard library**: no package there declares a composed anonymous-struct field. What the A/B *did* change is a handful of
 files in two packages, all one incidental canonicalization — the shared helpers exclude the **empty**
 `struct{}`/`interface{}`, and the old field arm did not:
 
@@ -1273,9 +1273,9 @@ against `go run` — declared func, empty tail, no fixed params, `...any`, multi
 two fixed params, a variadic METHOD value, and three `map[string]any` literals — while
 `GoReflectBridgeClosureTests` pins the three delegate identities, the tail's aliasing, the refusal
 of a non-variadic delegate, and every family arity of both families, which are golib-only shapes no
-Go program can construct. The arity row matters because only 0, 1 and 2 fixed parameters have a
-consumer in the corpus today: 3 through 8 would otherwise be discovered by whichever package
-reached them first.)
+Go program can construct. The arity row matters because only a few low fixed-parameter arities currently have a
+consumer in the converted standard library: the higher ones would otherwise be discovered by whichever
+package reached them first.)
 
 <a id="reflectmakefunc-is-valuecalls-exact-inverse--a-compiled-delegate-over-the-descriptors-carried-systemtype-2026-08-29"></a>
 ## `reflect.MakeFunc` is `Value.Call`'s exact inverse — a compiled delegate over the descriptor's carried System.Type

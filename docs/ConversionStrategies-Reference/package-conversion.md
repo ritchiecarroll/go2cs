@@ -1761,9 +1761,9 @@ the record order is deterministic across runs.
   `CrossPkgLib_package.Label(this.Device)` is CS1503 for want of `this.Device.Sensor`. Promotion
   through an embedded INTERFACE is the common shape this still admits (`sort`'s `reverse` embeds
   `Interface`; `debug/macho`'s segment types embed `LoadBytes`). The bound is deliberately
-  CONSERVATIVE rather than a model of the generator's exact reach — it costs exactly two stdlib
-  records (`net`'s `tcpConnWithoutReadFrom`/`tcpConnWithoutWriteTo`→`Conn`, whose `*TCPConn` hop the
-  generator's `embedHopDeepPaths` arm can in fact follow), neither of which has a consumer, and
+  CONSERVATIVE rather than a model of the generator's exact reach — it withholds a few stdlib
+  records (such as `net`'s `tcpConnWithoutReadFrom`/`tcpConnWithoutWriteTo`→`Conn`, whose `*TCPConn` hop the
+  generator's `embedHopDeepPaths` arm can in fact follow), none of which has a consumer, and
   withholding a speculative record is always safe: the consumer keeps its local adapter.
 
 The gates bind only the SPECULATIVE recorder. A pair the source actually casts is DEMANDED and still

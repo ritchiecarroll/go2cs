@@ -180,9 +180,10 @@ constant**, so for a value-type key — `map[string]V`, `map[int]V`, the overwhe
 the test and every branch it guards fold away and those instantiations compile to exactly the code
 they had before nil keys existed. Only a reference-typed key pays a null check, and the slot
 operations themselves sit behind `[MethodImpl(MethodImplOptions.NoInlining)]` so the hot members stay
-small. Measured: `PerfMap` (`map[int]int`) is flat — the difference with the slot sat inside the
-run-to-run band of the *unchanged* build.<!-- Measured at the time (machine and platform not recorded): 276.4 ms with
-the slot vs 271.8 ms without, median of three 9-run sessions each, inside a 260–310 ms run-to-run band. -->
+small.<!-- Measured at the time (machine and platform not recorded): 276.4 ms with
+the slot vs 271.8 ms without, median of three 9-run sessions each, inside a 260–310 ms run-to-run band.
+The prose sentence "PerfMap is flat" was removed at the 2026-10-26 docs review: a performance result is
+stated only with a recorded platform. -->
 
 One consumer cannot see the slot and had to be threaded explicitly: `reflect.DeepEqual` walks the
 backing `IDictionary` through a reflected field probe, which never yields a nil key, and a lone nil
