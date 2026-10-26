@@ -438,7 +438,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         var d = (Δtime.Duration)1;
         nuint a = (nuint)(logdi % 9);
         var b = (logdi >> 16) % 9;
-        d <<= (int)(a);
+        d <<= a;
         for (nint i = 0; i < (nint)b; i++) {
             d *= 5;
         }
