@@ -753,7 +753,7 @@ see the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and
 The initial conversion of the **full Go source library** completed without failing — the converter's first end-to-end pass over the entire standard library, committed to `src/go-src-converted`.
 The warnings in that conversion's build log laid out the road map of the parsing and conversion work
 remaining. Converted code at the time targeted .NET Core 3.1 / C# 8.0, and simple conversions depended
-on `src/gocore` — the small, manually-converted subset of the Go library that survives today as the
-curated baseline in `src/core`.
+on `src/gocore` — the small, manually-converted subset of the Go library that later became the
+curated baseline in `src/core`, since retired in favor of the converted standard library.
 
 *Commit: `8e2d6e8e6`*

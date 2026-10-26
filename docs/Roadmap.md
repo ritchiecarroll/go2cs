@@ -56,7 +56,17 @@
      Amended the same day at master ea47fdd770: the placeholder becomes the link to
      docs/phase4/CENSUS-phase5-exported-reach.md with its findings in words, and the Phase 5 detail and
      the Timeline's Unscheduled row follow the owner's priority ruling (ledger 2026-10-10 10:15 and
-     11:33): easily reached stubs first, the unreached ones when a real use needs one. -->
+     11:33): easily reached stubs first, the unreached ones when a real use needs one.
+     2026-10-26: re-read at a6214f0c5d for the 1.26.10.1 release: the four exported calls the reach census
+     confirmed now have bodies (internal/coverage/cfile/emit_impl.cs, runtime/stubs_impl.cs breakpoint,
+     crypto/x509/internal/macos/darwin/corefoundation_impl.cs, and runtime/pprof's mach_vm_region forwarded
+     through runtime/darwin/libccall_impl.cs in 7266441cf5); both Phase 5 censuses and ValidatedModules.md
+     are go1.24.13 readings, so the page says so; the TestBogoSuite entry is bound by per-process start-up
+     (about 10 s a launch against Go's 85 ms, the crypto/tls roster row), not throughput, and that start-up
+     work is now a Performance item; the re-baseline runs on the published 1.26.10.1 packages against
+     1.24.13.7 (PLAN-perf-rebaseline.md section 1); the release AOT check publishes and runs osx-arm64
+     (os-matrix.yml aot-smoke, osx-x64 read NOT MEASURED on its bound); the macOS gaps named under Phase 5
+     shipped in 1.24.13.6 (NEWS.md, October 12). -->
 
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
@@ -67,7 +77,7 @@ Dates are month or quarter targets.
 **Where things stand.** Every implementable package of the converted standard library validates
 against Go's own tests on Windows and Linux, and the same validation is under way on macOS, package
 by package. `go2cs -tests -recurse` validates real third-party modules against their own tests the
-same way, and the first converted module is published as a NuGet package.
+same way, and converted modules are published as NuGet packages, listed on [nugetgo.net](https://nugetgo.net).
 [Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries the current state
 of the standard library, and [Validated Modules](ValidatedModules.md) that of third-party modules.
 
@@ -112,12 +122,10 @@ again. For a user that means each go2cs release names exactly one Go release and
 The project advances by release migrations, called [hops](Glossary.md#hop): moving the converted
 standard library (the *corpus*) to a new Go release or to a new .NET runtime, one variable at a time
 and never both in one hop. Each Go hop re-validates every package against that release's own tests.
-This page states which releases come next. Three documents carry the work itself, and this roadmap
-links to them rather than restating them: [`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md), which
-frames how hops are run, and the two standing runbooks that lead on procedure,
-[`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go release migration and
-[`DotNetMigration.md`](DotNetMigration.md) for a .NET one. What each document type is for, and which
-one wins when two disagree, is in [`Glossary.md`](Glossary.md#document-types).
+This page states which releases come next. How a hop is run is in
+[`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md), and the step-by-step procedure is in
+[`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go release and
+[`DotNetMigration.md`](DotNetMigration.md) for a .NET one.
 
 ## Go releases
 
@@ -168,15 +176,16 @@ and relaunch their own binary pass.
 
 Entries remain in `crypto/tls`, `os`, `os/exec` and `syscall`, and not every one retires through the
 deployment shape; the roster's class text names what each one needs. In `crypto/tls`'s
-`TestBogoSuite`, BoringSSL's test runner starts the host once per case inside Go's own 10-minute test
-deadline. The interop itself passes, and the run is bound by throughput rather than start-up time, so
-no start-up work alone retires it. The entry retires when managed steady-state TLS throughput brings
-the run inside the runner's deadline, which is what the TLS work under [Performance](#performance) targets.
+`TestBogoSuite`, BoringSSL's test runner starts a converted helper process once per case inside Go's
+own 10-minute test deadline. Each launch costs about 10 s where Go's costs about 85 ms: .NET's process
+start and package initialization, then compiling the handshake path in each new process. That
+per-process start-up cost is what keeps the run outside the deadline, and the entry retires when the
+start-up work under [Performance](#performance) brings it inside.
 
 ## Native AOT and trimming
 
 **In short.** You can publish converted Go as a native executable today, and it runs, but the publish
-can take hours and the file is large. This work makes that publish smaller, quicker and free of
+compiles every converted package it references in full. This work makes that publish smaller, quicker and free of
 warnings, in stages.
 
 A converted program, and a C# program that references the `go.*` packages, can be published with Native
@@ -195,8 +204,12 @@ library and the source generators:
   check uses, so 1.24.13.7 was measured on `linux-x64` and `win-x64` only.
 - **Later stages** cover method sets and stack frames.
 
+The check that gates each release publishes a program with Native AOT and runs it on `linux-x64`,
+`win-x64` and `osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted
+runner's time limit, and reported as not measured when it does not.
+
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program
-references in full, so a publish takes hours and the executable is large.
+references in full, which costs publish time and executable size.
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measurements. A build, `dotnet run` and a publish without Native AOT are not affected.
 
@@ -227,14 +240,16 @@ zones, sockets, the `syscall` surface) follows Windows semantics or fails.
 ## Real-world Go modules
 
 **In short.** Beyond the standard library, go2cs converts third-party Go modules and holds each to the
-same bar: its own tests must match Go's. Five modules pass today, and a larger one is next.
+same bar: its own tests must match Go's. Five modules pass, measured with Go 1.24.13, and a larger one
+is next.
 
 Third-party modules are the proving ground after the standard library. Each module is converted,
 validated against its own Go test suite exactly as a standard-library package is, and given a proof
 page beside the conversion rather than on the standard-library roster. `go2cs -tests -recurse` runs a
 module's tests across all of its packages, and a validated module packs as one NuGet package.
 
-Five modules validate today, each on the platforms [Validated Modules](ValidatedModules.md) names:
+Five modules validate, each with the Go release and on the platforms
+[Validated Modules](ValidatedModules.md) names:
 `golang.org/x/sync`, [`google/uuid`](https://github.com/google/uuid),
 [`golang-jwt/jwt`](https://github.com/golang-jwt/jwt) v5, [`ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset)
 and [`spf13/pflag`](https://github.com/spf13/pflag). `uuid` is one package with no dependencies; it
@@ -320,12 +335,11 @@ run faster is a different subject, under [Performance](#performance).
 
 **What it means for you.** No validated package's tests reach a stub, and a call that does reach one
 fails loudly and by name, never silently. Which exported functions can reach one is measured, in the
-[exported-reach record](phase4/CENSUS-phase5-exported-reach.md). On Windows and Linux the only exported
-calls that do are ones Go itself refuses to carry out in an ordinary program: clearing coverage
-counters in a program built without coverage, and `runtime.Breakpoint`. They are being changed to
-answer exactly as Go does. On macOS, verifying a certificate against the system's root certificates
-and CPU profiling also reach a stub. Those are part of the macOS work
-([Platforms](#platforms)).
+[exported-reach record](phase4/CENSUS-phase5-exported-reach.md), taken on the Go 1.24 standard
+library. Every call it confirmed reaching one now reaches a real body instead. Clearing coverage
+counters in a program built without coverage, and `runtime.Breakpoint`, answer exactly as Go does. On
+macOS, verifying a certificate against the system's root certificates and CPU profiling no longer
+reach a stub.
 
 The converted library reproduces Go built with `-tags purego`, so most assembly-backed code takes its
 portable Go path and needs nothing from Phase 5. The declarations it is about are the ones with no Go
@@ -334,16 +348,16 @@ The `PartialStubGenerator` writes the throwing stub for each until a C# implemen
 
 **It proceeds package by package, as validation demands, not as one campaign.** When a package's own
 tests need a declaration, it gets a hand-written C# body and the package validates with it. That is how
-most of the surface that matters has been implemented so far, and it is how the macOS validation is
-closing the gaps it finds now: `os.Executable`, the system page size, and an arm64 path for
-`hash/crc32`. A declaration no validated test reaches can still be a throwing stub, and a program that
-calls one stops with a `NotImplementedException` that names it.
+most of the surface that matters has been implemented so far, including the gaps the macOS validation
+found: `os.Executable`, the system page size, and an arm64 path for `hash/crc32`. A declaration no
+validated test reaches can still be a throwing stub, and a program that calls one stops with a
+`NotImplementedException` that names it.
 
 **The remaining stubs are measured.** The
 [Phase 5 stub inventory](phase4/CENSUS-phase5-stub-inventory.md) is a measured inventory of the
-declarations that still compile against throwing stubs, per package and per operating system. None of
-them is reached by a validated package's tests. The record carries the counts, so this page quotes
-none.
+declarations that still compile against throwing stubs, per package and per operating system, taken
+on the Go 1.24 standard library. None of them was reached by a validated package's tests. The record
+carries the counts, so this page quotes none.
 
 **How a declaration gets its implementation.**
 
@@ -383,18 +397,23 @@ up anything else on this page.
 The published [performance comparison](Performance.md) measures converted C# against Go on the JIT
 and under Native AOT. The follow-ups run off the critical path:
 
-- **A re-baseline at the last Go 1.24 package release**, which is also the before
-  picture for the Go 1.26 hop and the .NET 11 measurement stage. It brings the TLS-handshake
-  benchmark, already in the suite, into the published table, and profiles the crypto paths behind the
-  handshake gap; TLS throughput is also what retires the
-  `crypto/tls` [host-limit entry](#declared-host-limits-and-their-retirement-path).
+- **A re-baseline on the published 1.26.10.1 packages**, measured against 1.24.13.7 in the same
+  session, which is also the before picture for the .NET 11 measurement stage. It brings the
+  TLS-handshake benchmark, already in the suite, into the published table, and profiles the crypto
+  paths behind the handshake gap.
+- **Start-up cost of a converted process** (planned). A converted process pays .NET's process start,
+  package initialization and compiling its code paths each time it starts: a converted `crypto/tls`
+  helper takes about 10 s to start and run its handshake, where Go's takes about 85 ms. The planned
+  levers are ReadyToRun-compiled test hosts and tiered compilation in spawned child processes. This
+  cost is also what keeps the `crypto/tls`
+  [host-limit entry](#declared-host-limits-and-their-retirement-path) open.
 - **Allocations** (committed; design kickoff planned for Q1 2027): the retirement plan named by each
   deferred allocation-count disclosure on the roster. Go meets those assertions through compiler
   optimizations, chiefly escape analysis keeping values off the heap, that the converted code does
   not yet reproduce. The work closes the gap by construction (storage for Go array values,
   frame-local allocations kept off the heap, and ref-receiver method emission), and each disclosure
   retires when its assertion matches.
-- **Interface conversions** (unscheduled, after the last Go 1.24 package release): the remaining
+- **Interface conversions** (unscheduled): the remaining
   items from the [interface-shell caching design](phase4/DESIGN-iface-shell-caching.md), a per-value
   shell-cache experiment and a base-class marker. A converter-emitted per-call-site inline cache
   stays deferred.
@@ -445,8 +464,13 @@ Smaller converter items, unscheduled. The first is recorded in the
 [struct-types reference](ConversionStrategies-Reference/struct-types.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed);
 the rest are tracked in `src/go2cs/ToDo.md`:
 
-- **Cross-package address of a global.** `&otherpkg.Var` does not box the global, because the
-  addressed-global scan covers only the package under conversion.
+- **The address of another package's variable.** Taking the address of a variable that another
+  package exports, and that is not itself a pointer, gives a pointer to a copy, so writes through it
+  are lost. That covers `&otherpkg.V`, a pointer-receiver method value such as `f := otherpkg.V.Reset`,
+  and `flag.BoolVar(&otherpkg.Debug, ...)`. It is a current limitation;
+  [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) and
+  [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-variable-are-lost)
+  give the workarounds.
 - **The remaining dynamic-struct implicit-cast checks** in the `AssignStmt`, `CompositeLit`,
   `IndexExpr`, `BinaryExpr`, `UnaryExpr`, `SelectorExpr`, `TypeSwitchStmt` and `ValueSpec` visitors.
 - **Complete comment conversion**, free-floating comments included, which depends on
@@ -463,7 +487,7 @@ something else finishing first.
 | When | Planned |
 |:--|:--|
 | Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
-| Next | The performance re-baseline at 1.24.13.7. The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Next | The performance re-baseline on the 1.26.10.1 packages. The start-up cost of a converted process. The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
 | Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
