@@ -1189,10 +1189,10 @@ public sealed class Goroutine
     // file and line through its IL offset.
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
-        Justification = "Reads the frame method's identity and declaring type, which a running method keeps under any " +
-                        "trim. A frame whose method cannot be read (Native AOT metadata) is skipped, and a launch with " +
-                        "no readable creator reads as a host thread's does: no creator, a user goroutine (trim class F, " +
-                        "docs/PLAN-golib-full-trim.md).")]
+        Justification = "Reads the frame method's identity and declaring type, which a running method keeps under any trim. A frame " +
+                        "without its metadata (Native AOT) is skipped. Only Creator and CreatorILOffset degrade, the traceback's 'created by' " +
+                        "line and gopc; IsSystem reads systemBasis ?? entry ?? creator, and Entry is the launching delegate's method. Proof: " +
+                        "GolibAotProbe's recover, re-panic, recovers:true and goroutine scenarios, same stdout on JIT and TrimMode=full.")]
     private static (System.Reflection.MethodBase? method, int ilOffset) CreatorFrame()
     {
         foreach (System.Diagnostics.StackFrame frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())

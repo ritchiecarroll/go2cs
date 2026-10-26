@@ -472,9 +472,9 @@ public ref struct GoFrame
     // The catcher is compared by METHOD IDENTITY, which only a MethodBase answers: a name cannot tell apart the
     // ref and ж<T> receiver overloads go2cs-gen writes under one name.
     [UnconditionalSuppressMessage("Trimming", "IL2026",
-        Justification = "Reads only the frame method's identity, which a running method keeps under any trim. A frame " +
-                        "whose method cannot be read (Native AOT metadata) answers 'not re-raised', as for a panic that " +
-                        "did not come back through its catcher's own Run (trim class F, docs/PLAN-golib-full-trim.md).")]
+        Justification = "Reads only the frame method's identity, which a running method keeps under any trim. Without its metadata " +
+                        "(Native AOT) it answers 'not re-raised': the site stays unowned, so a trace on that path omits its frames; recover " +
+                        "is unaffected. Proof: GolibAotProbe's recover, re-panic, recovers:true and goroutine scenarios, same stdout on JIT and TrimMode=full.")]
     private static bool ReRaisedByTheDeferredDelegate(Action? deferred, PanicException raised)
     {
         if (deferred is null || raised.Catches != 2 || raised.SiteEndsAtRun || raised.SiteTrace?.GetFrames() is not { Length: > 0 } site)
