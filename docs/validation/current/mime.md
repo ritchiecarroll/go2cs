@@ -49,7 +49,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestLookupMallocs` | `deferred` | want-zero AllocsPerRun assert: TypeByExtension's converted lookup allocates in the managed runtime (sync.Map probe boxing and @string materialization) where Go's compiled lookup runs allocation-free; a malloc-counting shim would fail identically. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. The census's floor (the sync.Map probe's any-boxing) is withdrawn: boxing is uncounted. |
+| `TestLookupMallocs` | `deferred` | want-zero AllocsPerRun assert: Go's TypeByExtension lookup runs allocation-free, while the converted lookup counts 3 golib-site objects per run on windows and linux, on the case-insensitive miss: the 10-byte working buffer `array<byte> buf = new(10)` (mime/type.cs:123), the `(@string)lower` probe's string conversion (:140), and a third object not yet attributed (the sync.Map Load path is the candidate). Boxing is not counted, so the sync.Map probe's boxing is not part of the figure. Deferred, with no floor: both attributed objects are non-escaping storage that planned work removes; the entry retires only at zero bytes. |
 
 ## Excluded declarations
 

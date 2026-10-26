@@ -92,7 +92,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestPipeAllocations` | `deferred` | count-bound AllocsPerRun assert (want <= 4): the byte-derived shim reports allocated bytes, so Pipe() - measured 1184 bytes per call, for the two heap-boxed ends plus the pipe struct's three channels and its Mutex/Once/onceError members - can never satisfy a four-MALLOC bound whatever its allocation behavior. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> deferred. The byte-derived-shim premise is retired: the reading is COUNT. Its plan is REC-G, not zh-box. |
+| `TestPipeAllocations` | `deferred` | Count-bound AllocsPerRun assert (want <= 4): Go's io.Pipe() makes four allocations, the PipeWriter and the pipe's three channels (io/pipe.go). The converted Pipe() reads a count of golib-runtime objects, Go's own unit, of 14 per run at go1.26.10 on windows and linux. A single-object channel core in golib is predicted (unmeasured) to take it to 5: Go's four plus the PipeWriter's field-reference view (`pw.of(PipeWriter.Ꮡr)`, io/pipe.cs:253). |
 
 ## Excluded declarations
 

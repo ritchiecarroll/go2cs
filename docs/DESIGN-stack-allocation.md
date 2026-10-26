@@ -58,7 +58,7 @@ These are the go1.26.10 deferred entries that cite this record as their retireme
 :106 (`4,081 to 4,432 per run at batch 19`…`4,071 to 4,642 at batch 24`). The OWN/INLINED attribution of the sha256,
 NewInt and mldsa rows is C2's sizing census (mailbox, COORD inbox, 2026-10-21T13:07:46Z, go1.26.10, three amd64
 targets); the karatsuba rows are R's (COORD inbox, 2026-10-21T07:59:24Z, windows) and G's (math/big's disclosure
-plan, src/core/math/big/go2cs_test_disclosures.json:11 (`INCREMENT 1 (queued post-publish, COORD 2026-10-25)`)). The
+plan, src/core/math/big/go2cs_test_disclosures.json:12 (`INCREMENT 1 (queued post-publish, COORD 2026-10-25)`)). The
 TestReplace attribution is read at the emission, src/core/strings/strings.cs:1195
 (`ref var b = ref heap(new Builder(), out var Ꮡb);`). -->
 
@@ -181,7 +181,7 @@ its buffer comes from S2. <!-- src/core/golib/stackAppend.cs:35-36
 
 **S4 — inline the callee in the converter.** **Rejected**, because it breaks the one-for-one function boundaries the
 emitted code keeps so it reads like the Go source. reflect's TestMapIterSet disclosure argues from the same premise.
-<!-- src/core/reflect/go2cs_test_disclosures.json:88 (`The only route is inlining MapRange into its callers`). -->
+<!-- src/core/reflect/go2cs_test_disclosures.json:97 (`The only route is inlining MapRange into its callers`). -->
 
 ### The INLINED seam
 
@@ -344,7 +344,7 @@ before it can read zero.
 <!-- Provenance. Lane C2, 2026-10-25, worktree at b5fc1294db (origin/claude/hop-go126). Sources: C2's sizing census
 (COORD inbox 2026-10-21T13:07:46Z: go1.26.10, three amd64 targets, method -gcflags='-m -d=variablemakehash=vy' with
 go/types classification, controlled by a one-site-per-class probe); R's karatsuba finding (COORD inbox
-2026-10-21T07:59:24Z, windows); G's TestMulUnbalanced rooting (src/core/math/big/go2cs_test_disclosures.json:10
+2026-10-21T07:59:24Z, windows); G's TestMulUnbalanced rooting (src/core/math/big/go2cs_test_disclosures.json:11
 (`5,723,096 B for a 400,320 B input, a ratio of 14`)); lane H's readings (docs/phase4/DATA-hop126-deferred-allocs.md).
 The harvest the oracle reuses: src/go2cs/stackAppendHints.go:695 (`"-gcflags=-m -d=variablemakehash=vy"`). Go
 sources read at the pinned toolchain: GOROOT/src/math/big/natmul.go:164 and GOROOT/src/math/big/natmul.go:257 (karatsuba, karatsubaSqr),

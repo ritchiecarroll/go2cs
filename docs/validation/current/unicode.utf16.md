@@ -40,7 +40,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAllocationsDecode` | `deferred` | want-zero AllocsPerRun assert: Decode returns a []rune that the managed runtime heap-allocates where Go's escape analysis stack-allocates the non-escaping result (the test is guarded by testenv.SkipIfOptimizationOff precisely because the zero-alloc outcome depends on the optimizer); a malloc-counting shim would fail identically. TestDecode proves the decoded output is correct — only the allocation profile diverges. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -> deferred. Legs 2-4's unit is unrecorded because the host notes only a test's first nonzero call; each mints Decode's counted make on every run, so they are COUNT by construction. |
+| `TestAllocationsDecode` | `deferred` | Want-zero AllocsPerRun assert: Decode returns a []rune that the managed runtime heap-allocates where Go's escape analysis stack-allocates the non-escaping result (the test is guarded by testenv.SkipIfOptimizationOff precisely because the zero-alloc outcome depends on the optimizer); a malloc-counting shim would fail identically. TestDecode proves the decoded output is correct; only the allocation profile diverges. Each of the four legs counts Decode's `make([]rune, 0, 64)` on every run, which Go keeps on the stack only because Decode inlines (the host records the unit only for a test's first nonzero call, so legs 2-4 are counts by construction). |
 
 ## Excluded declarations
 

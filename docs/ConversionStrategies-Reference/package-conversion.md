@@ -1526,8 +1526,8 @@ standard library at `src/core`; substituting it is only correct when that is wha
 references. Under `-recurse=nuget` that is guaranteed. A `$(go2csPath)` deploy root may hold an older or
 partial staging whose exported surface differs, and the stdlib
 self-conversion is *building* the assemblies being published. Both keep the derive-from-declarations
-fallback. Because `-recurse=nuget` is off by default, no other conversion path changes — CNR is
-byte-identical across the behavioral corpus.
+fallback. Because `-recurse=nuget` is off by default, no other conversion path changes — every behavioral test
+re-converts to its committed output byte for byte.
 
 The result is exact rather than approximate: converting the README's `colordemo` with `-recurse=nuget`
 against an empty `$(go2csPath)` emits **byte-identical** C# to the same app converted with
