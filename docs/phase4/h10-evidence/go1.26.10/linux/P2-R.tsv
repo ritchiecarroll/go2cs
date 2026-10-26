@@ -1,0 +1,6 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	matched	disclosed
+runtime/debug	PASS	8	309	1	0	0	linux/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	309	0	8	2
+log	PASS	23	318	0	0	0	linux/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	318	0	23	1
+crypto/cipher	PASS	27289	377	0	0	0	linux/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	377	0	27289	0
+os	PASS	3831	420	0	0	0	linux/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	420	0	3831	2
+time	PASS	176	486	0	0	0	linux/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	486	0	176	0
