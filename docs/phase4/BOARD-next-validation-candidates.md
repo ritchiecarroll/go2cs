@@ -28913,6 +28913,34 @@ real working directory. Red first at d269ef477b, green with the fix. Run on linu
 
 **Emission:** package (directory) conversions take the `isDir` branches, which are unchanged, so the corpus and the
 behavioral goldens do not move.
+## 2026-10-26 — P1 (.2 seat #6): the release push stops at nuget.org's per-key quota — FIXED on `claude/p1-resumable-push`
+
+**Found in the 1.26.10.1 publish.** Phase 3 of `release-nuget.ps1` (`dotnet nuget push *.nupkg --skip-duplicate`)
+died on push 351 of 362 with 403 Quota Exceeded and a Retry-After of 2489 s: nuget.org caps pushes at 350 per window
+per API key. `push-nuget.ps1 -Push` has the same loop. Neither could resume except by re-pushing everything.
+
+**Fix.** `src/_nugetpush.ps1`, used by both scripts, pushes one package at a time, `go.lib` and `go.gen` first:
+- It skips a version the feed already has. The check is the flat container's
+  `<id>/<normalized version>/<id>.nuspec`, which answers 200 or 404. The v2 download URL answers 302 for any version
+  and a gallery page answers 200 for a fake one, so neither is used. A 409 on the push also counts as published.
+- It pushes with a direct PUT to the service index's PackagePublish endpoint, as the NuGet client does, so the
+  Retry-After header can be read. `dotnet nuget push` reports only the status line.
+- On 403, 429 or 503 with a Retry-After, it prints the time the push resumes, waits, and pushes the same package
+  again. Any other refusal stops the run, naming the package and how many were pushed before it.
+
+`release-nuget.ps1 -ResumePush` re-enters Phase 3 at the version `version.props` names. It does not bump, pack, sign
+or tag, it skips the clean-tree and certificate gates, and it refuses a folder holding a package of another version.
+`push-nuget.ps1 -Push -BumpBuild:$false` is that script's resume, as before.
+
+**Reusable (COORD scope add, for C2's nugetgo sheet).** Dot-source `src/_nugetpush.ps1`, then call
+`Invoke-GoNuGetPush -Packages <FileInfo[]> -Source <v3 index URL> -ApiKey <key> [-StopOnRateLimit]`. It returns the
+pushed, already-published and wait counts. The resume entry point is the same call again. With `-StopOnRateLimit`, a
+refusal with a Retry-After stops at once and prints the UTC time to re-run, instead of waiting.
+
+**Guard:** `src/tests/nuget-push-selftest.ps1`, against a mock feed on the loopback. Nothing reaches a real feed.
+Red first at the extracted shipped loop: rc 1, 11 failures. Green: rc 0 on all nine cases (201, 409, 403 with and without Retry-After, 503 then 500, `-StopOnRateLimit`), including
+`release-nuget.ps1 -ResumePush` end to end. Run with PowerShell 7 on linux only. The Windows PowerShell 5.1 path and a
+real nuget.org push were not run.
 
 — P1 (2026-10-26)
 

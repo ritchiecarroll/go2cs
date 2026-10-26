@@ -27,6 +27,24 @@
     packages in the artifacts folder. The push is therefore gated on an explicit confirmation
     unless -Yes is passed, and the gate prints exactly what is about to become permanent.
 
+    PHASE 3 IS RESUMABLE (2026-10-26). nuget.org caps pushes per API key per window: the 1.26.10.1
+    Phase 3 died with 403 Quota Exceeded (Retry-After 2489 s) on push 351 of 362. The push now goes
+    one package at a time (src\_nugetpush.ps1), skips every version the feed's flat container already
+    has, and waits out a refusal that carries a Retry-After, printing when it resumes. A push that
+    stops anyway is finished with -ResumePush, which re-enters Phase 3 without bumping, packing or
+    signing again.
+
+.PARAMETER ResumePush
+    Finish a Phase 3 that stopped: push the signed packages already in the artifacts folder at the
+    version src\version.props names, skipping every one the feed already has. Nothing is bumped,
+    packed, signed or tagged, so the working tree is EXPECTED to carry the release's uncommitted
+    record and the signing certificate is not needed. Every package in the folder must carry that
+    version, or nothing is pushed. Refused with -OfflineSigning.
+
+.PARAMETER Source
+    The feed Phase 3 pushes to: nuget.org's v3 service index unless a rehearsal names another
+    (src\tests\nuget-push-selftest.ps1 runs -ResumePush against a mock feed on the loopback).
+
 .PARAMETER OfflineSigning
     Stop after packing and print the copy-to-signing-machine instructions, then wait -- the
     pre-2026-08-24 flow, for a machine without the signing certificate.
@@ -65,12 +83,19 @@
     .\release-nuget.ps1
     The full ritual: pack, sign (one PIN), confirm, push, then print the record-the-release
     commands.
+
+.EXAMPLE
+    .\release-nuget.ps1 -ResumePush
+    Finish a publish whose Phase 3 stopped: push what the feed does not have yet, then print the
+    record-the-release commands.
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [switch] $OfflineSigning,
     [switch] $Yes,
     [switch] $VerifyOnly,
+    [switch] $ResumePush,
+    [string] $Source = 'https://api.nuget.org/v3/index.json',
     [string] $OutDir
 )
 
@@ -142,13 +167,22 @@ if ($VerifyOnly) {
 
 Write-Phase 'Phase 0: preflight'
 
+if ($ResumePush -and $OfflineSigning) { Die '-ResumePush pushes packages that are already signed; it takes no -OfflineSigning.' }
+
+# A resumed push follows a Phase 1 whose record (version.props, the frozen proof, the retargeted badges) is
+# committed only in Phase 4, so its tree is dirty by construction.
 $dirty = @(git -C $RepoRoot status --porcelain 2>$null)
-if ($dirty.Count -gt 0) {
+if ($ResumePush) {
+    Write-Host "  working tree     : not checked (-ResumePush; $($dirty.Count) uncommitted path(s), the release's own record)"
+}
+elseif ($dirty.Count -gt 0) {
     Write-Host 'Working tree is not clean:' -ForegroundColor Red
     $dirty | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
     Die 'A release commits version.props, a proof snapshot and retargeted badges together; unrelated changes must not ride along.'
 }
-Write-Host '  working tree     : clean'
+else {
+    Write-Host '  working tree     : clean'
+}
 
 $branch = (git -C $RepoRoot branch --show-current 2>$null)
 Write-Host "  branch           : $branch"
@@ -185,7 +219,7 @@ if ($sdk.ExitCode -ne 0) {
 $dotnetPath = (Get-Command dotnet).Source
 Write-Host "  .NET SDK         : $($sdk.Output[-1]) ($dotnetPath; global.json $($sdkWanted.version), rollForward $($sdkWanted.rollForward))"
 
-if (-not $env:NuGetCertFingerprint -and -not $OfflineSigning) {
+if (-not $env:NuGetCertFingerprint -and -not $OfflineSigning -and -not $ResumePush) {
     Die 'NuGetCertFingerprint is not set. Set it, or pass -OfflineSigning to sign elsewhere.'
 }
 
@@ -196,8 +230,8 @@ Write-Host '  NUGET_API_KEY    : set'
 
 # The certificate is proven reachable NOW rather than after a multi-minute pack, by running the
 # signer's own census against whatever is currently in the artifacts folder (or an empty one --
-# the certificate half of its checks runs regardless).
-if (-not $OfflineSigning) {
+# the certificate half of its checks runs regardless). A resumed push signs nothing.
+if (-not $OfflineSigning -and -not $ResumePush) {
     $probe = Invoke-Sibling -Script $sign -Arguments @('-PackageDir', $OutDir)
     $certLine = $probe.Output | Where-Object { $_ -match 'Certificate:' } | Select-Object -First 1
     if (-not $certLine) {
@@ -215,13 +249,18 @@ if ($WhatIfPreference) {
 
 # ---- Phase 1: bump, pack, freeze the proof, mint the tag -------------------------------------
 
-Write-Phase 'Phase 1: bump version and pack Release packages'
-Write-Host '  (the build number bumps UP FRONT so packed, signed and pushed packages carry ONE version)'
+if ($ResumePush) {
+    Write-Phase 'Phases 1 and 2: skipped (-ResumePush: the packages are already packed and signed)'
+}
+else {
+    Write-Phase 'Phase 1: bump version and pack Release packages'
+    Write-Host '  (the build number bumps UP FRONT so packed, signed and pushed packages carry ONE version)'
 
-$pack = Invoke-Sibling -Script $push -Arguments @('-BumpBuild', '-OutDir', $OutDir) -Passthru
-if ($pack.ExitCode -ne 0) {
-    Write-Host ''
-    Die "Phase 1 (pack) FAILED. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props, and delete the tag if one was minted."
+    $pack = Invoke-Sibling -Script $push -Arguments @('-BumpBuild', '-OutDir', $OutDir) -Passthru
+    if ($pack.ExitCode -ne 0) {
+        Write-Host ''
+        Die "Phase 1 (pack) FAILED. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props, and delete the tag if one was minted."
+    }
 }
 
 $x = [xml](Get-Content -Raw (Join-Path $SrcRoot 'version.props'))
@@ -231,7 +270,10 @@ Write-Host "  version          : $ver"
 
 # ---- Phase 2: sign ---------------------------------------------------------------------------
 
-if ($OfflineSigning) {
+if ($ResumePush) {
+    # Nothing to sign. What is checked instead is that the folder holds THIS release and nothing else.
+}
+elseif ($OfflineSigning) {
     Write-Phase 'Phase 2: OFFLINE signing (this machine does not sign)'
     Write-Host "  Packages are in: $OutDir"
     Write-Host ''
@@ -252,12 +294,24 @@ else {
 
 # ---- Phase 3: push -- THE IRREVERSIBLE ONE ---------------------------------------------------
 
-$packages = @(Get-ChildItem (Join-Path $OutDir '*.nupkg') -File)
+. (Join-Path $PSScriptRoot '_nugetpush.ps1')
 
-Write-Phase 'Phase 3: publish to nuget.org'
+$packages = @(Get-GoNuGetPushOrder @(Get-ChildItem (Join-Path $OutDir '*.nupkg') -File))
+if ($packages.Count -eq 0) { Die "Phase 3: no .nupkg in $OutDir. Nothing was published." }
+
+if ($ResumePush) {
+    $wanted = ConvertTo-GoNuGetNormalizedVersion $ver
+    $foreign = @($packages | Where-Object { (ConvertTo-GoNuGetNormalizedVersion (Get-GoNuGetPackageIdentity $_.FullName).Version) -ne $wanted })
+    if ($foreign.Count -gt 0) {
+        $foreign | Select-Object -First 8 | ForEach-Object { Write-Host "    $($_.Name)" -ForegroundColor Red }
+        Die "Phase 3: $($foreign.Count) package(s) in $OutDir are not version $ver (src/version.props). -ResumePush pushes one release; nothing was published."
+    }
+}
+
+Write-Phase "Phase 3: publish to $(([uri]$Source).Host)"
 Write-Host "  version          : $ver"
 Write-Host "  packages         : $($packages.Count)"
-Write-Host "  source           : https://api.nuget.org/v3/index.json"
+Write-Host "  source           : $Source"
 Write-Host ''
 Write-Host '  A published version can be UNLISTED but never DELETED.' -ForegroundColor Yellow
 
@@ -266,11 +320,15 @@ if (-not $Yes) {
     if ($answer -ne 'publish') { Die '  Not published. Nothing was sent; the signed packages remain in the artifacts folder.' }
 }
 
-dotnet nuget push (Join-Path $OutDir '*.nupkg') --source https://api.nuget.org/v3/index.json --api-key $env:NUGET_API_KEY --skip-duplicate
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ''
-    Die "Phase 3 (push) FAILED. The signed packages are still in $OutDir; re-run the push once resolved -- do NOT re-pack, the version is already minted and signed."
+try {
+    $result = Invoke-GoNuGetPush -Packages $packages -Source $Source -ApiKey $env:NUGET_API_KEY
 }
+catch {
+    Write-Host ''
+    Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
+    Die "Phase 3 (push) STOPPED. The signed packages are still in $OutDir; once resolved, finish with .\release-nuget.ps1 -ResumePush -- do NOT re-pack, the version is already minted and signed."
+}
+Write-Host "  pushed           : $($result.Pushed); already published: $($result.AlreadyPublished); rate-limit waits: $($result.Waits)"
 
 # ---- Phase 4: record --------------------------------------------------------------------------
 # The published version, its frozen proof snapshot and the badge links pointing at it are ONE
