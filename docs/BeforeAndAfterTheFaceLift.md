@@ -1,6 +1,6 @@
 # Converted code, before and after the face lift
 
-go2cs converts Go into C# that a Go developer can read. Until this release the converted code carried a
+go2cs converts Go into C# that a Go developer can read. Until release 1.24.13.5 the converted code carried a
 set of attributes that told the build what Go's own syntax already says: that a method has a pointer
 receiver, that a type came from Go, that a field is embedded. They were accurate, and they were noise.
 The face lift removes them from converted code.
@@ -11,7 +11,7 @@ build time and write the attribute into generated code, where the runtime finds 
 left with the code.
 
 Every example on this page is a real line of the converted Go standard library. "Before" is the file as
-it stood before the face lift, "after" is the same file in this release, and the Go line is the one both
+it stood before the face lift, "after" is the same file today, and the Go line is the one both
 were converted from. The marks that remain, and why, are listed in
 [Marker comments: what converted code carries instead of an attribute](ConversionStrategies-Reference/source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute).
 
@@ -21,7 +21,7 @@ were converted from. The marks that remain, and why, are listed in
 
 Go, `strings/builder.go`:
 
-<!-- source: Go toolchain src/strings/builder.go:45 (Go 1.24.13; the Go source of src/core/strings/builder.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/strings/builder.go:51 (Go 1.26.10; the Go source of src/core/strings/builder.cs, which the repository does not hold) -->
 ```go
 func (b *Builder) Len() int { return len(b.buf) }
 ```
@@ -49,7 +49,7 @@ From the `this ref` receiver a source generator writes the overload that takes a
 
 Go, `container/list/list.go`:
 
-<!-- source: Go toolchain src/container/list/list.go:48-51 (Go 1.24.13; the Go source of src/core/container/list/list.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/container/list/list.go:48-51 (Go 1.26.10; the Go source of src/core/container/list/list.cs, which the repository does not hold) -->
 ```go
 type List struct {
 	root Element // sentinel list element, only &root, root.prev, and root.next are used
@@ -86,7 +86,7 @@ The generator completes the `partial struct` (its constructors, equality and `To
 
 Go, `time/time.go`:
 
-<!-- source: Go toolchain src/time/time.go:911 (Go 1.24.13; the Go source of src/core/time/time.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/time/time.go:915 (Go 1.26.10; the Go source of src/core/time/time.cs, which the repository does not hold) -->
 ```go
 type Duration int64
 ```
@@ -114,7 +114,7 @@ The generator builds the struct's value, operators and conversions from that com
 
 Go, `sort/sort.go`:
 
-<!-- source: Go toolchain src/sort/sort.go:121 (Go 1.24.13; the Go source of src/core/sort/sort.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/sort/sort.go:123 (Go 1.26.10; the Go source of src/core/sort/sort.cs, which the repository does not hold) -->
 ```go
 type IntSlice []int
 ```
@@ -142,7 +142,7 @@ partial struct IntSlice /*[]nint*/;
 
 Go, `sort/sort.go`:
 
-<!-- source: Go toolchain src/sort/sort.go:88-92 (Go 1.24.13; the Go source of src/core/sort/sort.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/sort/sort.go:90-94 (Go 1.26.10; the Go source of src/core/sort/sort.cs, which the repository does not hold) -->
 ```go
 type reverse struct {
 	// This embedded Interface permits Reverse to use the methods of
@@ -182,7 +182,7 @@ Method promotion, and `reflect`'s `Anonymous`, follow from the comment.
 
 Go, `net/rpc/jsonrpc/client.go`:
 
-<!-- source: Go toolchain src/net/rpc/jsonrpc/client.go:46-50 (Go 1.24.13; the Go source of src/core/net/rpc/jsonrpc/client.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/net/rpc/jsonrpc/client.go:46-50 (Go 1.26.10; the Go source of src/core/net/rpc/jsonrpc/client.cs, which the repository does not hold) -->
 ```go
 type clientRequest struct {
 	Method string `json:"method"`
@@ -225,7 +225,7 @@ The struct is three lines shorter and reads line for line as the Go does. `encod
 
 Go, `time/time.go`:
 
-<!-- source: Go toolchain src/time/time.go:953 (Go 1.24.13; the Go source of src/core/time/time.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/time/time.go:957 (Go 1.26.10; the Go source of src/core/time/time.cs, which the repository does not hold) -->
 ```go
 func (d Duration) format(buf *[32]byte) int {
 ```
@@ -253,7 +253,7 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 
 Go, `unicode/utf8/utf8.go`:
 
-<!-- source: Go toolchain src/unicode/utf8/utf8.go:205 (Go 1.24.13; the Go source of src/core/unicode/utf8/utf8.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/unicode/utf8/utf8.go:219 (Go 1.26.10; the Go source of src/core/unicode/utf8/utf8.cs, which the repository does not hold) -->
 ```go
 func DecodeRuneInString(s string) (r rune, size int) {
 ```
@@ -281,7 +281,7 @@ A generator writes the `@string` overload from it.
 
 Go, `time/tzdata/tzdata.go`:
 
-<!-- source: Go toolchain src/time/tzdata/tzdata.go:31-32 (Go 1.24.13; the Go source of src/core/time/tzdata/tzdata.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/time/tzdata/tzdata.go:31-32 (Go 1.26.10; the Go source of src/core/time/tzdata/tzdata.cs, which the repository does not hold) -->
 ```go
 //go:linkname registerLoadFromEmbeddedTZData time.registerLoadFromEmbeddedTZData
 func registerLoadFromEmbeddedTZData(func(string) (string, error))
