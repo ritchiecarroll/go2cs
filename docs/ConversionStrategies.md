@@ -8566,12 +8566,44 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1100 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));`;
+<!-- src/core/golib/runtime/Goroutine.cs:1134 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
-     `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :151
+     `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
      Guards: GolibTests GoroutinePoolTests (reuse, the locked exit, the goroutine stack on a reused thread, no
      thread state carried over, the creator's ExecutionContext, the idle count) and ThreadStateCensusTests. -->
+
+**A goroutine that cannot recurse starts on a smaller stack.** A Go goroutine's stack grows as it needs, while a
+.NET thread's stack is a fixed reservation that ends the process when it overflows. So golib reserves a Go-scale
+256 MiB stack for each goroutine by default (`GO2CS_GOROUTINE_STACK` changes it). That reservation is address
+space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start. The
+converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
+to a function the converter can see, and no chain of calls may return to a function already on it. A goroutine it
+proves cannot recurse is started with a mark, and golib runs it on a 16 MiB stack
+(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it):
+
+```go
+go produce(i, out) // produce only computes and sends
+```
+
+```csharp
+goǃ(produce, i, @out.WithDirection(GoChanDir.Send), GoStack.Bounded);
+```
+
+Anything the proof cannot follow keeps the full stack, unmarked. That includes a call through an interface or a
+func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
+goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
+crash where Go grows the stack, so the proof gives up rather than guess.
+<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:263
+     `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
+     src/core/golib/runtime/Goroutine.cs:94 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
+     worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
+     `private static readonly Pool s_bounded = new(Goroutine.BoundedStackReserve);`. Sample: the behavioral test
+     GoroutineStackReserve. Measured on Windows x64 (R-LAPTOP, 16 hardware threads, ParkStorm, 100,000 goroutines
+     parked at once, 2026-10-26): 361 s to park at 256 MiB, 70 s at 16 MiB. Over the standard library, 1 of 129
+     production go statements proves bounded (2026-10-26 census): the rest reach an interface method, a func value
+     or a runtime callback. Guards: the converter's goroutineStackAnalysis_test.go, GolibTests GoroutinePoolTests
+     (a bounded goroutine's measured stack; a default goroutine never on a bounded worker). -->
 
 **Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
