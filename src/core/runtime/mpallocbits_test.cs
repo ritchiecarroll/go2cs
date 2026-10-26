@@ -122,7 +122,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
 internal static void invertPallocBits(ж<global::go.runtime_internal_test_package.ΔPallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    foreach (var i in range(b)) {
+    foreach (var i in range(8)) {
         b[i] = ~b[i];
     }
 }
