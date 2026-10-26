@@ -202,6 +202,12 @@ func main() {
 	// stalls during option resolution or package loading is still reachable by a profiler.
 	startDiagnosticProfiling()
 
+	// A release build brings its own Go when the host has none of its release (toolchainProvision.go).
+	// Before GOROOT is resolved below, which is the first thing that needs one.
+	if err := ensureGoToolchain(os.Args[1:]); err != nil {
+		log.Fatalln(err)
+	}
+
 	var goRoot, goPath, go2csPath string
 	var err error
 
@@ -218,11 +224,10 @@ func main() {
 			goRoot = runtime.GOROOT()
 		}
 
-		if len(goRoot) == 0 {
-			log.Fatalln("Failed to resolve GOROOT path")
+		// An unresolved GOROOT is fatal after -version has had its chance to answer: that needs no Go.
+		if len(goRoot) != 0 {
+			os.Setenv("GOROOT", goRoot)
 		}
-
-		os.Setenv("GOROOT", goRoot)
 	} else {
 		goRootPinned = true
 	}
@@ -301,6 +306,10 @@ func main() {
 	if err == nil && *versionCmd {
 		fmt.Print(versionReport())
 		os.Exit(0)
+	}
+
+	if len(goRoot) == 0 {
+		log.Fatalln("Failed to resolve GOROOT path")
 	}
 
 	// Pin go/build's resolver to the converter's robustly-resolved GOROOT/GOPATH. build.Default is

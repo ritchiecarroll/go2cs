@@ -566,6 +566,9 @@
     <None Include="$(MSBuildThisFileDirectory)testManifestEmbedDigest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainPins.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainProvision.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainProvision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingComments_test.go" />
