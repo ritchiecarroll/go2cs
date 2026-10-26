@@ -1,0 +1,3 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s
+time	PASS	178	340	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	340	0
+runtime	PASS	11080	1332	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	1332	1
