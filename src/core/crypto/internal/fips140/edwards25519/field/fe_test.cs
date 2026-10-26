@@ -305,7 +305,7 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
             if (len(buf) == 0) {
                 break;
             }
-            words[n] |= (big.Word)((((big.Word)(nuint)buf[0]) << (int)(nuint)(((big.Word)(nuint)i))));
+            words[n] |= (big.Word)((((big.Word)(nuint)buf[0]) << ((big.Word)(nuint)i)));
             buf = buf[1..];
         }
     }

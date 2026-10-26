@@ -50,7 +50,7 @@ internal static Tag mask(Tag t) {
 }
 
 internal static word maskFor(nuint s) {
-    var m = (((word)1) << (int)(s)) - 1;
+    var m = (((word)1) << s) - 1;
     return m;
 }
 

@@ -40,11 +40,29 @@ guard.
 R3 no longer keeps a signed `y % M` native. Go's `%` keeps the dividend's sign (`-3 % 8` is -3), so the
 count can still be negative; an unsigned `y % M` and any `y & M` with `M >= 0` stay native as before.
 
-Two shapes keep the unsigned widening, and neither occurs in the standard library's production code:
-- A type-parameter count: its sign is not known when converting.
-- A count on a NAMED receiver: its generated `operator <<` takes an `int` count. C# 11 allows a wider
-  one, so carrying the check there means an `int64`/`uint64` operator pair in `NumericTypeTemplate` and
-  the converter spelling the count to match.
+One shape keeps the unsigned widening, and it does not occur in the standard library's production code: a
+type-parameter count, whose sign is not known when converting.
+
+**A NAMED integer receiver takes its count widened too (2026-10-25).** Its generated operator already guards
+the width, but the converter narrowed an unbounded count to `int` on the way in. So `w << (1 << 32)` read as
+`w << 0` and gave `w`, and `w << -1` read as a huge count and gave 0 without Go's panic (C2's H12 finding,
+present at 1.24.13.7 too). `NumericTypeTemplate` now gives every integer wrapper `uint64` and `int64` count
+overloads of `<<` and `>>` beside the `int` one, routed to `Lsh` and `Rsh`; C# 11 allows a non-`int` shift
+count. The converter passes an unbounded count with the guard's own widening, binary and compound alike:
+`w << s`, `w << (int64)(n)`, `w <<= s`. A literal or provably in-range count keeps the `int` form, and so does an
+untyped constant LEFT operand with a named result (`m & (1 << uint(32-1-i))` on io/fs's `FileMode`): the shift arm
+re-types it through the underlying, `(FileMode)((uint32)1 << (int)(…))`, so its `<<` is C#'s native operator, whose
+count must be `int`. That shape still masks its count; the BOARD row of 2026-10-25 carries it to after the publish.
+<!-- src/go2cs/convBinaryExpr.go namedShiftWidth / compoundShiftWide, the binary site `if _, width, named :=
+v.namedShiftWidth(binaryExpr); named && v.shiftCountGuarded(binaryExpr.Y, width) {`; src/go2cs/visitAssignStmt.go
+shiftAssignWide at both compound sites; src/gen/go2cs-gen/Templates/InheritedType/NumericTypeTemplate.cs
+`operator <<({targetTypeName} value, uint64 shift)` and its int64 and `>>` twins. Census (std+tests, purego,
+CGO_ENABLED=0) of the non-constant-count shifts on a named integer left operand, constant left operands excluded,
+that shiftCountGuarded cannot bound: windows and darwin 33 (30 production, math/big's Word 27 of them; 3 test). The
+first cut also widened the constant-left shape, and io/fs's emission failed CS0019; that is the exclusion. -->
+(Guarded by the converter's `TestNamedShiftCountIsWidened`, GenTests' `NamedShiftCountOverloadTests`, and
+`GoShiftSemantics`, extended with `1 << 32`, `1<<32 + 1`, a compound form and a negative count under
+`recover`.)
 
 In the standard library's production code no signed non-constant count is on a named receiver. (Guarded by
 the `NegativeShiftCount` behavioral test, which runs each negative-count shape under `recover` against Go,

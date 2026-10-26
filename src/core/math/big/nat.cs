@@ -529,7 +529,7 @@ internal static nuint sticky(this Δnat x, nuint i) {
             return 1;
         }
     }
-    if (x[j] << (int)((nuint)_W - i % (nuint)_W) != 0) {
+    if (x[j] << ((nuint)_W - i % (nuint)_W) != 0) {
         return 1;
     }
     return 0;
@@ -736,7 +736,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
         z = z.set(x);
         Word v = y[len(y) - 1]; // v > 0 because y is normalized and y > 0
         nuint shift = nlz(v) + 1;
-        v <<= (int)(shift);
+        v <<= shift;
         Δnat q = default!;
 
         UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
@@ -1095,7 +1095,7 @@ internal static Δnat setBytes(this Δnat z, slice<byte> buf) {
     if (i > 0) {
         Word d = default!;
         for (nuint s = (nuint)0; i > 0; s += 8) {
-            d |= (Word)((((Word)(nuint)buf[i - 1]) << (int)(s)));
+            d |= (Word)((((Word)(nuint)buf[i - 1]) << s));
             i--;
         }
         z[len(z) - 1] = d;

@@ -957,7 +957,7 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     big.Word w = default!;
     nuint s = default!;
     foreach (var (_, b) in bytes) {
-        w |= (big.Word)((((big.Word)(nuint)b) << (int)(s)));
+        w |= (big.Word)((((big.Word)(nuint)b) << s));
         {
             s += 8; if (s == (nuint)(wordSize * 8)) {
                 words[i] = w;
@@ -1682,7 +1682,7 @@ public static Value Shift(Value x, token.Token op, nuint s) {
             return makeInt(z.Lsh(z, s));
         }
         if (exprᴛ1 == token.SHR) {
-            return (xΔ1 >> (int)(s));
+            return (xΔ1 >> s);
         }
         break;
     }

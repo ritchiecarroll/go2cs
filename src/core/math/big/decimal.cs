@@ -108,7 +108,7 @@ internal static void rsh(ref @decimal x, nuint s) {
     // pick up enough leading digits to cover first shift
     nint r = 0; // read index
     Word n = default!;
-    while (n >> (int)(s) == 0 && r < len(x.mant)) {
+    while (n >> s == 0 && r < len(x.mant)) {
         Word ch = (Word)(nuint)x.mant[r];
         r++;
         n = n * 10 + ch - (rune)'0';
@@ -118,7 +118,7 @@ internal static void rsh(ref @decimal x, nuint s) {
         x.mant = x.mant[..0];
         return;
     }
-    while (n >> (int)(s) == 0) {
+    while (n >> s == 0) {
         r++;
         n *= 10;
     }
@@ -126,11 +126,11 @@ internal static void rsh(ref @decimal x, nuint s) {
 
     // read a digit, write a digit
     nint w = 0; // write index
-    Word mask = (((Word)1) << (int)(s)) - 1;
+    Word mask = (((Word)1) << s) - 1;
     while (r < len(x.mant)) {
         Word ch = (Word)(nuint)x.mant[r];
         r++;
-        Word d = n >> (int)(s);
+        Word d = n >> s;
         n &= (Word)(mask); // n -= d << s
         x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
@@ -139,7 +139,7 @@ internal static void rsh(ref @decimal x, nuint s) {
 
     // write extra digits that still fit
     while (n > 0 && w < len(x.mant)) {
-        Word d = n >> (int)(s);
+        Word d = n >> s;
         n &= (Word)(mask);
         x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
@@ -149,7 +149,7 @@ internal static void rsh(ref @decimal x, nuint s) {
 
     // append additional digits that didn't fit
     while (n > 0) {
-        Word d = n >> (int)(s);
+        Word d = n >> s;
         n &= (Word)(mask);
         x.mant = append(x.mant, (byte)(nuint)(d + (rune)'0'));
         n = n * 10;

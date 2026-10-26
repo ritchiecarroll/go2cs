@@ -534,7 +534,7 @@ internal static nint bits(this ref IfaceKey k) {
 }
 
 internal static void flipBit(this ref IfaceKey k, nint i) {
-    k.i = (fInter)(k.i._<fInter>() ^ ((fInter)1) << (int)((nuint)i));
+    k.i = (fInter)(k.i._<fInter>() ^ ((fInter)1) << (nuint)i);
 }
 
 internal static partial uintptr hash(this ref IfaceKey k) {
