@@ -63,6 +63,15 @@ foreach ($bad in @('', 'BSD 3-Clause', 'see LICENSE', 'MIT;rm')) {
     Check "'$bad' is refused" (-not (Test-NugetgoSpdx $bad)) 'accepted'
 }
 
+Write-Host 'the conversion repository a README names'
+foreach ($case in @(
+        @('https://github.com/ritchiecarroll/sync-cs', 'ritchiecarroll/sync-cs'),
+        @('https://github.com/ritchiecarroll/hashset-cs/', 'ritchiecarroll/hashset-cs'),
+        @('https://gitlab.com/o/r-cs', 'gitlab.com/o/r-cs'))) {
+    $got = Get-NugetgoRepositoryName -RepositoryUrl $case[0]
+    Check "$($case[0])" ($got -ceq $case[1]) "got '$got', want '$($case[1])'"
+}
+
 Write-Host 'the Go module source a README links'
 foreach ($case in @(
         @('github.com/ritchiecarroll/hashset', 'v1.0.0', 'https://github.com/ritchiecarroll/hashset/tree/v1.0.0'),
@@ -102,7 +111,7 @@ Check 'the Go module badge links pkg.go.dev at the module version' (
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
 Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
-Check 'the license line links the module source too' ($lines -ccontains "Converted from [example.com/mod]($modSource) source; licensed under MIT $([char]0x2014) see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
+Check 'the license line links the module source and the C# conversion at its tag (owner 2026-10-15)' ($lines -ccontains "Converted from [example.com/mod]($modSource) source to C# in [example/mod-cs]($repo/tree/nuget-1.2.3); licensed under MIT $([char]0x2014) see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
 Check 'the go2cs icon brings its artwork line' ($readme.Contains('Artwork licensed under Creative Commons Attribution 3.0')) 'no artwork line'
 Check 'no inline code anywhere' (-not $readme.Contains('`')) 'a backtick'
 Check 'no link names HEAD (COORD ruling 2026-10-10: links name the conversion tag)' ($readme -notmatch '/(blob|tree)/HEAD\b') 'a HEAD link'
