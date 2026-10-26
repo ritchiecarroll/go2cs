@@ -1,0 +1,10 @@
+w	worker	slice	seq	row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	banked	manifest_pins	cost_i9_s	reserved
+4	G	1	1	runtime/debug	PASS	8	192	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	194	0	yes	2	45	0
+4	G	1	2	bufio	PASS	80	36	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	36	0	yes	1	47	0
+4	G	1	3	encoding/asn1	PASS	55	37	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	38	0	yes	0	56	0
+4	G	1	4	image/jpeg	PASS	19	43	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	43	0	yes	0	61	0
+4	G	1	5	log	PASS	23	46	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	47	0	yes	1	68	0
+4	G	1	6	crypto/internal/fips140/edwards25519/field	PASS	15	60	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	60	0	yes	0	82	0
+4	G	1	7	crypto/cipher	PASS	27289	72	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	75	3	yes	0	94	0
+4	G	1	8	log/slog	PASS	228	178	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	179	0	yes	19	117	0
+4	G	1	9	os	PASS	6826	260	1	0	0	windows/amd64	e4c8e0bf54486aba99f26c4559c5552acdacf372	261	1	yes	3	656	0
