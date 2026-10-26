@@ -70,8 +70,11 @@ go2cs -tests -test-action all -test-timeout 10m "$(go env GOROOT)/src/unicode/ut
 Expected final line:
 
 ```text
-Validated 14 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (deferred), 47 disclosed-unsupported declarations excluded).
+Validated 14 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (deferred), 49 disclosed-unsupported declarations excluded).
 ```
+<!-- Run cold on linux/amd64 (4 vCPU, .NET SDK 10.0.112, empty NuGet and Go build caches) at ac1454281f by C2,
+     2026-10-26, the bash form above: this line, rc 0, in 347 s. The 49 are go1.26.10's unicode/utf8 Benchmark,
+     Example and Fuzz declarations: 16 in example_test.go and 33 in utf8_test.go. -->
 
 The command converts the `_test.go` files to C#, generates a test host, builds it against the converted
 standard library, runs it in an isolated process, captures a clean `go test -json -count=1` baseline, and

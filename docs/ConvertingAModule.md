@@ -98,7 +98,7 @@ export GOTOOLCHAIN=local     # bash / zsh
 Then, in either shell:
 
 ```shell
-go get github.com/fatih/color@v1.18.0   # a Go 1.24-compatible release (v1.19+ requires Go 1.25)
+go get github.com/fatih/color@v1.18.0   # the release this walkthrough is measured with
 go mod tidy                             # download color + its dependencies
 go build ./...                          # baseline: confirm it compiles as Go first
 ```
