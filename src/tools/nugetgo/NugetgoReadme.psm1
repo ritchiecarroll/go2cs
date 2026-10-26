@@ -150,6 +150,10 @@ function New-NugetgoGeneratedBlock {
     # The license line names both sides of the conversion (owner, 2026-10-15): the Go module's source, and the C# it
     # became, in the conversion repository at the tag this package names.
     $blocks.Add("Converted from $moduleLink source to C# in [$(Get-NugetgoRepositoryName $repo)]($repo/tree/$RepositoryTag); licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
+    # The release line (owner ruling 2026-10-26): the package is compiled against one go.* release, and a later release
+    # can change a package's public shape (1.26.10.2 turns exported package-level value variables into ref
+    # properties), so it says which release, and that such a release takes this package's rebuild.
+    $blocks.Add("This package is compiled against the go2cs standard-library packages at release ${ClosureVersion}: use it with that release of them. A later release that changes a package's public shape needs this package's rebuild for that release.")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     $blocks -join "`n`n"
 }

@@ -112,6 +112,9 @@ Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
 Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
 Check 'the license line links the module source and the C# conversion at its tag (owner 2026-10-15)' ($lines -ccontains "Converted from [example.com/mod]($modSource) source to C# in [example/mod-cs]($repo/tree/nuget-1.2.3); licensed under MIT $([char]0x2014) see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
+Check 'the release line names the go.* release the package is compiled against, after the license line (owner 2026-10-26)' (
+    [Array]::IndexOf([string[]]$lines, 'This package is compiled against the go2cs standard-library packages at release 1.24.13.5: use it with that release of them. A later release that changes a package''s public shape needs this package''s rebuild for that release.') -gt
+    [Array]::IndexOf([string[]]@($lines | ForEach-Object { if ($_ -clike 'Converted from *') { 'LICENSE-LINE' } else { $_ } }), 'LICENSE-LINE')) 'no release line after the license line'
 Check 'the go2cs icon brings its artwork line' ($readme.Contains('Artwork licensed under Creative Commons Attribution 3.0')) 'no artwork line'
 Check 'no inline code anywhere' (-not $readme.Contains('`')) 'a backtick'
 Check 'no link names HEAD (COORD ruling 2026-10-10: links name the conversion tag)' ($readme -notmatch '/(blob|tree)/HEAD\b') 'a HEAD link'
@@ -162,7 +165,8 @@ $inside = @($sl[($bi + 1)..($ei - 1)])
 Check 'the callout is the first line inside the fence' (@($inside | Where-Object { $_ })[0] -clike '> unofficial go2cs C# conversion of *') 'no callout first'
 Check 'the badges, the license line and the artwork line are inside the fence' (
     ($inside -join "`n").Contains('[![Tests]') -and ($inside -join "`n").Contains('[![go2cs]') -and
-    @($inside | Where-Object { $_ -clike 'Converted from *' }).Count -eq 1 -and @($inside | Where-Object { $_ -clike 'Artwork licensed *' }).Count -eq 1) 'a generated line outside the fence'
+    @($inside | Where-Object { $_ -clike 'Converted from *' }).Count -eq 1 -and @($inside | Where-Object { $_ -clike 'This package is compiled against *' }).Count -eq 1 -and
+    @($inside | Where-Object { $_ -clike 'Artwork licensed *' }).Count -eq 1) 'a generated line outside the fence'
 Check 'the synopsis is after the fence, the author''s' ([Array]::IndexOf([string[]]$sl, 'Package mod does \*one\* thing.') -gt $ei) 'no synopsis after the fence'
 Check 'the seed passes the fence guard and the README guard' (@(Test-NugetgoReadmeFence $seed).Count -eq 0 -and @(Test-NugetgoReadme $seed $modSource).Count -eq 0) "refused: $(@(Test-NugetgoReadmeFence $seed) + @(Test-NugetgoReadme $seed $modSource) -join '; ')"
 $blockArgs = @{} + $seedArgs; $blockArgs.Remove('Id'); $blockArgs.Remove('Synopsis')

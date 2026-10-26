@@ -143,7 +143,9 @@ The package page belongs to the module's author; the pack keeps its facts true (
 - **The generated block** lies between `[//]: # (nugetgo:generated:begin)` and `[//]: # (nugetgo:generated:end)`.
   Every pack rewrites it from what it measured: the callout with the Go-source link and the security caveat, the
   Tests, C# Source, Go module and go2cs badges, the license line (which links the Go source and the conversion
-  repository at `nuget-<PV>`), and the artwork line when the icon is go2cs's.
+  repository at `nuget-<PV>`), the release line (the package is compiled against the go.* release `-ClosureVersion`
+  names, and a release that changes a package's public shape takes the package's rebuild), and the artwork line when
+  the icon is go2cs's.
   When the file's block is stale, the pack rewrites it in the file and in the packed copy, and prints `REWRITTEN
   with package version <PV>, tag nuget-<PV>`. A rehearsal pack writes its rehearsal version there, so commit the
   file after the RELEASE pack. Nothing outside the block is ever touched.

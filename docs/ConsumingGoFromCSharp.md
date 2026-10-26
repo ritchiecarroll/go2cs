@@ -57,6 +57,11 @@ There are two ways to get one:
 - **Reference a published package.** The Go standard library is published as the `go.*` packages, and the
   [nugetgo.net](https://nugetgo.net) registry lists Go modules converted and published to NuGet, such as
   `nugetgo.github.com.ritchiecarroll.hashset`. Add them as a `PackageReference`, like any other package.
+  A `nugetgo.*` package is compiled against one `go.*` release, which its README names: use it with that release
+  of the `go.*` packages. A later release can change a package's public shape, and then the package needs its
+  rebuild for that release. `go.*` 1.26.10.2 is such a release: it turns exported package-level value variables,
+  such as `os.Args`, into ref properties, so an assembly compiled against 1.26.10.1 that reads one directly fails
+  with `MissingFieldException` against 1.26.10.2.
 - **Convert it yourself.** `go2cs -recurse=nuget <module_dir> <output_root>` converts a module and its dependencies
   (see [Converting a real-world module](README.md#converting-a-real-world-module)). Each Go package becomes one C#
   project; add the ones you call as `ProjectReference` items.
