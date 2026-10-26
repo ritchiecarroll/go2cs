@@ -78,6 +78,16 @@ function Get-NugetgoThirdPartyRequires {
 
     foreach ($library in $Libraries) {
         [xml]$project = Get-Content -Raw -LiteralPath $library.FullName
+        # A MAPPED third-party module (COORD, 2026-10-26): where the converter reaches the nugetgo.net registry, it
+        # references a published module as an exact-pinned PackageReference instead of converting it into pkg/. Only
+        # pkg/ modules become NuGet dependencies here, so the mapped one would be missing from the nuspec, silently.
+        foreach ($reference in @($project.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
+            if (([string]$reference.Include).ToLowerInvariant().StartsWith('go.', [StringComparison]::Ordinal)) { continue }
+            throw ("REFUSED: $($library.Name) references the third-party package $($reference.Include) $($reference.Version) as a " +
+                "PackageReference: the converter mapped it to its published package rather than converting it into pkg/, and the " +
+                "pack makes a NuGet dependency only of a module converted into pkg/, so this package's nuspec would lack it. " +
+                "Convert where the mapping does not apply (no registry row for that module at this go2cs release), so it converts locally")
+        }
         foreach ($reference in @($project.Project.ItemGroup | ForEach-Object { $_.ProjectReference } | Where-Object { $_ })) {
             $include = ([string]$reference.Include).Replace('\', [System.IO.Path]::DirectorySeparatorChar).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
             $target = [System.IO.Path]::GetFullPath((Join-Path $library.DirectoryName $include))

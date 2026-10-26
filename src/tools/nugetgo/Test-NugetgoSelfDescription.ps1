@@ -89,6 +89,20 @@ try {
     $orphan = Write-Fixture 'src/example.com/mod/orphan/example.com.mod.orphan.csproj' (Project 'example.com.mod.orphan' @('../../../../pkg/example.com/stranger/example.com.stranger.csproj'))
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($orphan) -ThirdPartyPackage @() }
     Check 'a pkg/ reference no lock entry covers is refused' ($why -like '*example.com/stranger*go2cs.modules.lock*') "got '$why'"
+
+    # A MAPPED third-party module (COORD, 2026-10-26): on a host that reaches nugetgo.net, the converter references a
+    # published module as an exact-pinned PackageReference instead of converting it into pkg/. The pack carries only
+    # pkg/ modules into the nuspec, so the mapped one would be silently missing there: refused by name, with or
+    # without -ThirdPartyPackage naming it. go.* PackageReferences are the standard library and pass.
+    $goRefs = "<Project Sdk=`"Microsoft.NET.Sdk`">`n  <ItemGroup>`n    <PackageReference Include=`"go.gen`" Version=`"`$(GoStdLibVersion)`" PrivateAssets=`"all`" />`n    <PackageReference Include=`"go.lib`" Version=`"`$(GoStdLibVersion)`" />`n  </ItemGroup>`n</Project>`n"
+    $stdLib = Write-Fixture 'src/example.com/mod/std/example.com.mod.std.csproj' $goRefs
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($stdLib) -ThirdPartyPackage @() }
+    Check 'go.* PackageReferences are the standard library, not a third-party edge' ($null -eq $why) "got '$why'"
+    $mapped = Write-Fixture 'src/example.com/mod/mapped/example.com.mod.mapped.csproj' ($goRefs.Replace('</ItemGroup>', "  <PackageReference Include=`"nugetgo.example.com.dep`" Version=`"[0.2.0]`" />`n  </ItemGroup>"))
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($mapped) -ThirdPartyPackage @() }
+    Check 'a mapped third-party PackageReference is refused, naming the package and its version' ($why -like '*example.com.mod.mapped.csproj*nugetgo.example.com.dep `[0.2.0`]*PackageReference*') "got '$why'"
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($mapped) -ThirdPartyPackage @($depPackage) -AllowUnreferenced }
+    Check 'it is refused the same way when -ThirdPartyPackage names the module' ($why -like '*nugetgo.example.com.dep `[0.2.0`]*PackageReference*') "got '$why'"
 }
 finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

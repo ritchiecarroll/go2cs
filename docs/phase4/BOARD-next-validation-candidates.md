@@ -28837,4 +28837,30 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — C2 (COORD ruling): a MAPPED third-party module could be missing from a nugetgo package's nuspec, silently — REFUSED by the pack (claude/c2-nugetgo-wave3-tools)
+
+**Shape.** `nugetgo-pack.ps1` makes a NuGet dependency only of a third-party module converted into the recurse
+root's `pkg/` tree (a `ProjectReference`, read by `Get-NugetgoThirdPartyRequires`); of a library's
+`PackageReference` items it keeps only `go.*` (`nugetgo-pack.ps1:202`). Under `-recurse=nuget` the converter maps a
+module the nugetgo.net registry lists, for this go2cs release, to `<PackageReference Include="nugetgo.<module>"
+Version="[<version>]" />` in the importing project (`projectFileWriter.go:528`) and converts nothing into `pkg/`. The
+pack references each packed library with `PrivateAssets="all"`, so that PackageReference does not reach the nuspec.
+
+**When it bites.** cobra imports pflag and mousetrap. On a host that reaches nugetgo.net, once pflag's 1.26.10.1
+rebuild has a registry row, cobra's PR and the pack's own flavor conversions (`nugetgo-pack.ps1:415`, default
+mapping) both map pflag. With `-ThirdPartyPackage` naming pflag, the flavor union refuses it
+(`NugetgoFlavors.psm1:182`). Without it, cobra's package would pack with no pflag dependency and every gate green.
+This wave packs on a host that cannot reach the registry, so both convert locally; the wave was not affected.
+
+**Now.** `Get-NugetgoThirdPartyRequires` refuses any non-`go.*` `PackageReference` in a packed library, naming the
+project, the package and its version, with or without `-ThirdPartyPackage`. The pack calls it for `-RecurseRoot` and
+for every flavor, before any build. `Test-NugetgoSelfDescription.ps1` carries the case, red before the refusal and
+green after.
+
+**Owed (unowned):** packing such a module on a registry-reachable host. Either the pack's flavor conversions and PR
+run with `-nuget-map off` (the digest binding to VR's MODULE.md must still hold), or the pack carries a mapped
+`PackageReference` into the nuspec as the dependency it is.
+
+— C2 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
