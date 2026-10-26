@@ -39,6 +39,15 @@ file, though the next conversion rewrites that file:
 Converted executable projects carry this line, commented out. It costs about 90 ms (16%) more startup time,
 and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
 ever reproduces the fault.
+<!-- Source of the 90 ms (16%) figure, found 2026-10-26: the fleet mailbox post C2 -> COORD of 2026-09-30T10:57Z
+     (commit 80f928db5a on origin/claude/mailbox, file docs/phase4/inbox/COORD/20260930T105729Z-C2.md, not on master).
+     Measured on a 4-core Linux machine on Canonical's .NET 10.0.12, PerfStartup and PerfSieve built Release from master
+     f819887fa3, default vs runtimeconfig System.Runtime.TieredCompilation.QuickJitForLoops=false (the arms differ ONLY
+     in runtimeconfig.json), interleaved, one discarded warm-up, every run rc 0. PerfStartup wall, n=40 each: default
+     median 561 ms (p10 524, p90 617), opt-in median 653 ms (p10 592, p90 686): +92 ms median, about +16%. PerfSieve
+     in-program workload, n=20 each: 238 ms vs 249 ms median, +11 ms (+4.7%), inside the spread (one benchmark, one
+     machine). The same post measured the opt-in at 0/96 BAD against 64/96 BAD for the default on the OSR repro
+     (claude/c2-osr-repro); the owner ruled it opt-in, not default, on 2026-09-30. -->
 
 ## A Native AOT publish of a program that references the packages is slow and large
 
@@ -149,3 +158,17 @@ The program then starts without ReadyToRun's head start, as it does under `dotne
      PublishReadyToRun=false, publish rc 0 in 438 s from a purged tree, cgroup peak 3,422 MiB, one 20,677,627-byte
      executable whose output equals `go run`. The template's own line is deferred: it would move one line in 1,312
      committed csproj. -->
+
+## On Linux, a converted test suite can skip its unix-socket tests under a long TMPDIR
+
+The converted test host keeps each run's temporary files under `go2cs-tests/<package>/<run id>/.tmp` inside
+`TMPDIR`, about 60 bytes deeper than Go's own `t.TempDir`. Linux limits a unix socket's path to 108 bytes, so a
+test that binds a socket there can fail to bind under a long `TMPDIR` and is reported as skipped where Go passes
+it (`bufio`'s `TestCopyUnixpacket`, for example). Run converted test suites with a short `TMPDIR`, such as
+`/tmp`; 10 bytes or fewer leaves every socket path in range.
+<!-- BOARD-next-validation-candidates.md, the 2026-10-25 row "the converted test host's temp root is long enough to
+     break unix-socket tests under an ordinary TMPDIR" (G, from P2's linux-leg finding): under
+     TMPDIR=/dev/shm/p2-h10-tmp, TestCopyUnixpacket's socket path reached 116 bytes, bind returned EINVAL and the
+     converted side skipped a test Go passed. The re-bank worked around it by host checklist (the Go hop runbook's
+     lesson 88: TMPDIR of 10 bytes or less). Listed here on 2026-10-26 (R's docs follow-up) until the host's temp
+     root is shortened. -->

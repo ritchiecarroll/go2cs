@@ -11,8 +11,12 @@ their full text.
 ## October 26, 2026 — The converted standard library moves to Go 1.26.10
 
 **NuGet 1.26.10.1.** The converted standard library is now built from Go 1.26.10, a release Go still
-supports, so it carries the Go security fixes issued through Go 1.26.10. Converting needs Go 1.26.10, exactly
-that release, and the .NET 10 SDK as before. 1.24.13.7 stays the last release built from Go 1.24.
+supports, so it carries the Go security fixes issued through Go 1.26.10. Converting a module needs a Go 1.26
+toolchain (any 1.26.x release) and the .NET 10 SDK as before; the standard library packages are converted from, and
+validated on, Go 1.26.10. 1.24.13.7 stays the last release built from Go 1.24.
+<!-- Corrected 2026-10-26 (settled ruling): the entry first said "Converting needs Go 1.26.10, exactly that release,
+     and the .NET 10 SDK as before." That was wrong for module conversion, which needs only a Go 1.26 toolchain;
+     the exact-release pin applies to converting and validating the standard library itself. -->
 
 **Every package that can be validated passes Go's own tests at Go 1.26.10**, on Windows x64 and on
 Linux x64. Each package was re-converted from Go 1.26.10's sources and re-validated from Go 1.26.10's
@@ -188,8 +192,10 @@ proof page. Below it, one line names the C# class that holds the package's funct
 who lands on `go.strings` knows to call `go.strings_package`.
 
 **Two calls that reached a stub now answer as Go does.** A measurement of which exported functions can
-reach an unimplemented stub found two on Windows and Linux
-([the record](phase4/CENSUS-phase5-exported-reach.md)). `runtime/coverage.ClearCounters` now returns Go's
+reach an unimplemented stub found two on Windows and Linux.
+<!-- The measurement: [the record](phase4/CENSUS-phase5-exported-reach.md) (an internal record; its visible link was
+     removed 2026-10-26 under owner ruling OQ-1 on fleet language in visitor pages). -->
+`runtime/coverage.ClearCounters` now returns Go's
 own error for a program built without coverage, and `runtime.Breakpoint` breaks into an attached
 debugger, or without one stops the program with Go's report line.
 
@@ -409,8 +415,10 @@ re-validate against Go 1.24 on exactly the footing of the 204 that banked. What 
 differs: `reflect` is measured and under active converter and runtime work; `runtime` is measured
 only as far as a host-killing crash — `TestCrashWhileTracing`, at index 104 of its 883 verdicts —
 which leaves everything after it unread; `unique` is measured at 19 of its 20 verdicts under the
-configuration of record and waits on a ruled runtime-model arc; and `runtime/pprof` and
-`net/http/pprof` are each measured on two hosts and held by a capability or classification ruling.
+configuration of record and waits on planned runtime-model work; and `runtime/pprof` and
+`net/http/pprof` are each measured on two hosts and held by a capability or classification decision.
+<!-- Pre-2026-10-26 wording: "waits on a ruled runtime-model arc" / "held by a capability or classification
+     ruling". -->
 
 The reordering is deliberate, and it is worth saying why, because the percentage means something
 narrower than it looks. **The metric is package-based, not content-based**: a row is all-or-nothing,
@@ -500,14 +508,15 @@ value**, not a managed reference, closing a round-trip that had also hidden a GC
 dangling-reference hazard. And **an always-on GC recorder** supplies real pause and release facts
 to `runtime/debug`'s statistics surface at zero cost per read.
 
-What the campaign declined is part of the record. A disclosure names something the managed runtime
+What the work declined is part of the record. A disclosure names something the managed runtime
 provably cannot satisfy — never something merely unimplemented — so packages that reach 105 of 106
 or 210 of 267 stay off the roster with their remaining root named and priced. Four disclosure
-classes carry the campaign's divergences today; a fifth retired itself the day its remedy landed,
+classes carry the roster's divergences today; a fifth retired itself the day its remedy landed,
 exactly as it was written to.
+<!-- Pre-2026-10-26 wording: "What the campaign declined ..." / "carry the campaign's divergences today". -->
 
 This is Go 1.23.1's terminal validation marker. Every roster row re-derives from a release's own
-test sources at a version hop, so the campaign continues on Go 1.23.12 — the release users would
+test sources at a version hop, so validation continues on Go 1.23.12 — the release users would
 actually choose — with the 1.23 story living on its own branch.
 
 ## August 8, 2026 — Go programs run on Linux
@@ -516,7 +525,7 @@ Converted Go programs now **run on Linux, byte-identical to `go run`**: `fmt.Pri
 a program crossing `os.Args`, `os.Getenv` and `time.Now()`, and the README's own
 [real-world walkthrough](README.md#converting-a-real-world-module) — `fatih/color` printing true ANSI
 colour under a real PTY, with the `isatty` branch agreeing with Go in both directions (plain when piped,
-coloured on a terminal). The whole campaign landed in one continuous arc: the repository checks out
+coloured on a terminal). The whole effort landed in one continuous arc: the repository checks out
 deterministically on any filesystem, the converter and every harness instrument run natively on Linux,
 the standard library compiles for **windows, linux and darwin from one tree** (per-GOOS source folders
 selected by `$(GoTargetOS)`, windows the default, with 141 of 141 shared-source packages measured
@@ -536,9 +545,11 @@ marshalling hazards surfaced during the migration, each converted explicitly.
 Stated plainly: the published `1.23.1.4` packages still carry Windows-only assemblies — the Linux
 experience ships with the next release; a Linux consumer of the few platform-divergent packages also
 needs the compile-surface answer scheduled next; and darwin binaries are compile-proven and
-IL-identity-backed but have never been executed here. The Windows lane did not move a byte through any
-of it: every merge held CNR byte-identical, the behavioral suite green, and the 110-package validated
-sweep at 13,628 verdicts with zero failures.
+IL-identity-backed but have never been executed here. Windows did not move a byte through any of it:
+every merge kept the converter's behavioral-test output byte-identical, the behavioral suite green, and the 110-package validated sweep at
+13,628 verdicts with zero failures.
+<!-- Pre-2026-10-26 wording: "The Windows lane did not move a byte through any of it" (the lane that held the
+     Windows gates while Linux work merged); "the campaign continues on Go 1.23.12"; "The whole campaign landed". -->
 
 ## August 8, 2026 — Over half the standard library validates; defers reach zero allocation
 
@@ -663,7 +674,7 @@ above)! However, simple apps will run, try
 [current status](README.md#status) in the README.
 
 *Tag: [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10)
-· commit `51ba5d9cf`*
+· commit `5cc07f8f33`*
 
 ---
 
@@ -687,7 +698,7 @@ namespace-collision qualification, composite self-qualification, and relational-
 The rewritten Go-based converter completed its **first full standard-library auto-conversion**: the
 whole Go standard library (~301 projects) converted end to end. "Converted" here meant the transpiler
 did not crash and every Go source file received a corresponding C# file — not yet that the emitted C#
-compiles. Driving this full conversion to a clean compile became the Phase 3 campaign, finished on
+compiles. Driving this full conversion to a clean compile became Phase 3, finished on
 July 10, 2026 (above).
 
 *Tag: [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05)

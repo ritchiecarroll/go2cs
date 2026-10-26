@@ -12,6 +12,10 @@
 <!-- Amended 2026-10-10 (the Roadmap refresh at master 4c42cc7d3a): the intro says which parts of Phase 4
      this page records. No moved section is changed. -->
 
+<!-- Amended 2026-10-26 (owner ruling OQ-1: visitor pages carry no fleet language and no links to internal
+     records): a few passages below were reworded in place, and each changed passage keeps its original text in a
+     comment beside it. Dates, figures and verdicts are unchanged. -->
+
 This page holds the completed phases of the go2cs roadmap and the git commits and tags that anchor
 them. Each section keeps the heading and text it was recorded with while the work happened, so its
 dates, figures and "next" items describe that moment. Of Phase 4, the sub-phases recorded here, 4A to
@@ -21,7 +25,7 @@ on the [roster](ValidatedTestPackages.md), which carries its current state. What
 the [Roadmap](Roadmap.md).
 
 > **Status (2026-07-10): Phases 0–3 done — the full standard library compiles.** All **302** packages of
-> the auto-conversion (Go 1.23.1) build clean as .NET assemblies (commit `51ba5d9cf`,
+> the auto-conversion (Go 1.23.1) build clean as .NET assemblies (commit `5cc07f8f33`,
 > tag `stdlib-green-2026-07-10`) — the Phase-3 milestone. **Compiling, not yet operational:** Phase 4 will
 > convert and run Go's own package tests; Phase 5 will use those tests to prove the C# implementations that
 > replace assembly/cgo stubs.
@@ -32,21 +36,29 @@ the [Roadmap](Roadmap.md).
 > that spells `src/go-src-converted` is a period-accurate record of where the tree stood at the time —
 > read it as history, not as instructions. See [`/CLAUDE.md`](../CLAUDE.md) *One tree*.
 >
-> **⚠ Where the road goes after Phase 4 — the hop era.** Beyond the phases below, the project moves
-> by **release migrations**: the Go release the corpus converts from, and the .NET runtime it runs
-> on, one variable at a time and never both in one hop. Three documents carry that work, and this
-> roadmap routes to them rather than restating them — the ruled frame in
-> [`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md) (which releases, in which order, and its ruled
-> open questions), and the two standing **runbooks** that lead on procedure:
-> [`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go corpus migration and
-> [`DotNetMigration.md`](DotNetMigration.md) for a .NET one. What each document type may be used for,
-> and which one wins when two disagree: [`Glossary.md`](Glossary.md), *Document types*.
+> **⚠ Where the road goes after Phase 4 — release migrations.** Beyond the phases below, the project
+> moves by **release migrations**: the Go release the corpus converts from, and the .NET runtime it
+> runs on, one variable at a time and never both in one move. The [Roadmap](Roadmap.md) carries that
+> work.
 >
-> **⚠ AMENDED 2026-09-07 — the hop era does not wait for Phase 4 to reach 100%.** By owner ruling the
-> corpus moves to **Go 1.24.13** with Phase 4's Go 1.23.12 record **closed at its anchor** rather than
-> driven to completion, and the rows still unbanked there re-validate under the new release — a hop
-> re-derives every roster row from scratch regardless (`GoCorpusMigration.md` H10). Read "after
-> Phase 4" above as the order these phases were written in, not as a gate on the hop.
+> **⚠ AMENDED 2026-09-07 — release migrations do not wait for Phase 4 to reach 100%.** The corpus
+> moves to **Go 1.24.13** with Phase 4's Go 1.23.12 record **closed at its anchor** rather than
+> driven to completion, and the rows not yet validated there re-validate under the new release — a
+> release move re-derives every roster row from scratch regardless. Read "after Phase 4" above as the
+> order these phases were written in, not as a gate on the move.
+<!-- Pre-2026-10-26 text of these two notes: "**⚠ Where the road goes after Phase 4 — the hop era.** Beyond the
+     phases below, the project moves by **release migrations**: the Go release the corpus converts from, and the
+     .NET runtime it runs on, one variable at a time and never both in one hop. Three documents carry that work, and
+     this roadmap routes to them rather than restating them — the ruled frame in
+     [`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md) (which releases, in which order, and its ruled open
+     questions), and the two standing **runbooks** that lead on procedure:
+     [`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go corpus migration and
+     [`DotNetMigration.md`](DotNetMigration.md) for a .NET one. What each document type may be used for, and which
+     one wins when two disagree: [`Glossary.md`](Glossary.md), *Document types*." and "**⚠ AMENDED 2026-09-07 —
+     the hop era does not wait for Phase 4 to reach 100%.** By owner ruling the corpus moves to **Go 1.24.13** ...
+     and the rows still unbanked there re-validate under the new release — a hop re-derives every roster row from
+     scratch regardless (`GoCorpusMigration.md` H10). Read "after Phase 4" above as the order these phases were
+     written in, not as a gate on the hop." The three linked documents are internal records. -->
 
 *Phase 2's 57-package `fmt` closure, considered and rejected as a bootstrap in 2026-06, is now simply
 what the behavioral suite builds: cold ~48 s, warm ~4 s.*
@@ -61,7 +73,7 @@ High level timeline of the project's major turning points; the tags carry the de
 | 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) | The mature ANTLR4-era converter, tagged. |
 | 2025-01-12 | [The converter is rewritten in Go](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs-version-2) | `87465f5f5` | Rebuilt on `go/ast` + `go/types`, with the `golib` runtime library and Roslyn source generators supplying Go's semantics. |
 | 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`) | Every Go file gets a C# file; compiling comes later. |
-| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | Every package compiles with zero errors, `runtime`, `reflect` and `net/http` included ([details](StdLibCompileMilestone.md)). |
+| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `5cc07f8f33` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | Every package compiles with zero errors, `runtime`, `reflect` and `net/http` included ([details](StdLibCompileMilestone.md)). |
 | 2026-07-14 | [Standard library on NuGet](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14) | A converted app references the standard library from nuget.org, with no local go2cs checkout. |
 | 2026-07-17 | [**First Go test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17) | `unicode/utf8` matches `go test`, test for test. |
 | 2026-08-08 | [**Go programs run on Linux**](NEWS.md#august-8-2026--go-programs-run-on-linux) | [`linux-first-run-2026-08-08`](https://github.com/ritchiecarroll/go2cs/releases/tag/linux-first-run-2026-08-08) | Converted programs, the `fatih/color` walkthrough included, match `go run` on Linux. |
@@ -159,11 +171,11 @@ Each verified by rebuild + reconvert + compile:
 
 **Outcome:** all **302** packages of `src/go-src-converted` (the full Go 1.23.1 standard-library
 auto-conversion) compile clean as .NET assemblies — zero errors, zero exclusions — reached 2026-07-10
-(commit `51ba5d9cf`, tag `stdlib-green-2026-07-10`). `runtime`, `reflect`, `net/http`, `go/types`,
+(commit `5cc07f8f33`, tag `stdlib-green-2026-07-10`). `runtime`, `reflect`, `net/http`, `go/types`,
 `crypto/tls`, `database/sql` and every other package are included. Every fix was root-caused against real
 emitted C#, locked in by a Go-vs-C# behavioral regression test (371 and counting), and verified byte-for-byte
 against the full corpus before landing. **Compiling is the milestone, not operational** — running each
-package's own tests is Phase 4. The narrative of the two-week finishing campaign is in
+package's own tests is Phase 4. The narrative of the two-week finishing push is in
 [About Standard Library Compile Milestone](StdLibCompileMilestone.md)
 (the announcement itself is archived in [`NEWS.md`](NEWS.md)); the strategy that got there is below, followed by the early iteration
 log (retained as historical record — its dated "Next:" items are long since done).
@@ -569,9 +581,11 @@ CS0029/CS1929 cluster), blocking both container packages.
 ## Phase 4 — Convert and run Go package tests
 
 **Goal:** validate each compiling converted package against the same `_test.go` suite used by Go before
-assembly-backed implementations are attempted at scale. The detailed and authoritative design is
-[`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md); this section tracks the
-delivery sequence and exit gates.
+assembly-backed implementations are attempted at scale. This section tracks the delivery sequence and
+exit gates.
+<!-- Pre-2026-10-26 wording: "The detailed and authoritative design is
+     [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md); this section tracks the delivery
+     sequence and exit gates." (an internal record). -->
 
 ### 🎉 First operational milestone (2026-07-12): a converted `fmt.Println("hi")` RUNS and prints
 
@@ -581,8 +595,9 @@ chain** — every layer a fix committed and validated (full behavioral suite + d
 at each step). This is the minimum Phase-4 operational bar. In order:
 
 1. **Native `sync` primitives** (`e36dea3aa`) — Go's runtime sleeping semaphore cannot be emulated;
-   `Mutex`/`RWMutex`/`WaitGroup` are hand-owned native rewrites on .NET primitives (see
-   [DESIGN → Operational stdlib](phase3/DESIGN-recursive-enduser-conversion.md#operational-stdlib--native-sync-primitives-2026-07-11-phase-4-start)).
+   `Mutex`/`RWMutex`/`WaitGroup` are hand-owned native rewrites on .NET primitives.
+   <!-- Design: [DESIGN → Operational stdlib](phase3/DESIGN-recursive-enduser-conversion.md#operational-stdlib--native-sync-primitives-2026-07-11-phase-4-start)
+        (an internal record; visible link removed 2026-10-26, OQ-1). -->
 2. **Package-level var initialization order** (`e39855770`) — relocate initializers whose Go dependency
    order (`types.Info.InitOrder`, resolved transitively through package function bodies) C#'s static-field
    order cannot reproduce, into a generated `package_init.cs` static ctor. First crash of any `os` import.
@@ -801,7 +816,9 @@ more than Windows.
   platform-shared files sit flat, platform-varying emissions live in per-GOOS folders
   (`<pkg>/{windows,linux,darwin}/`, 37 packages vary), and each affected `.csproj` compiles exactly
   one set via `$(GoTargetOS)` — defaulting to `windows`, so a plain build still means the Windows
-  corpus. Design: [`phase4/DESIGN-multiplatform-corpus.md`](phase4/DESIGN-multiplatform-corpus.md).
+  corpus.
+  <!-- Design: [`phase4/DESIGN-multiplatform-corpus.md`](phase4/DESIGN-multiplatform-corpus.md) (an internal record;
+       visible link removed 2026-10-26, OQ-1). -->
 - **Running on Linux works today for programs whose import closure stays within the
   `fmt`/`os`/`time` class** — the first native Linux run of a converted program landed 2026-08-08
   (tag `linux-first-run-2026-08-08`).
@@ -810,11 +827,12 @@ more than Windows.
   Compiling is the milestone, not operational — the same distinction the Windows corpus walked
   between its Phase 3 and Phase 4: the platform-divergent `syscall` surface still needs its
   *operational* Linux counterparts (the struct-passing seam solved on Windows with blittable
-  mirrors, the netpoll contracts), and a Linux validation campaign then follows with its own
-  per-platform roster. The operational plan and remaining F-items live in
-  [`PLAN-linux-operation.md`](PLAN-linux-operation.md);
-  [`phase4/CENSUS-linux-compile-wall.md`](phase4/CENSUS-linux-compile-wall.md) records how the
-  compile wall fell.
+  mirrors, the netpoll contracts), and Linux validation then follows with its own per-platform
+  roster.
+  <!-- Pre-2026-10-26 wording: "and a Linux validation campaign then follows with its own per-platform roster. The
+       operational plan and remaining F-items live in [`PLAN-linux-operation.md`](PLAN-linux-operation.md);
+       [`phase4/CENSUS-linux-compile-wall.md`](phase4/CENSUS-linux-compile-wall.md) records how the compile wall
+       fell." (both internal records). -->
 
 **What a published package is, platform-wise.** Three layers with different platform models ship in
 every NuGet package, and knowing which is which explains what works where:
@@ -835,8 +853,8 @@ every NuGet package, and knowing which is which explains what works where:
    below it.
 
 **Validation is per-target.** Every row in
-[`ValidatedTestPackages.md`](ValidatedTestPackages.md) is a `windows/amd64` verdict; a Linux
-validation campaign begins when the `GoTargetOS=linux` corpus builds, and its roster will differ
+[`ValidatedTestPackages.md`](ValidatedTestPackages.md) is a `windows/amd64` verdict; Linux
+validation begins when the `GoTargetOS=linux` corpus builds, and its roster will differ
 (build tags select different test files per platform). **The packaging direction once it does:**
 RID-specific assets in a single package — one `go.<pkg>` ID carrying each target's correct
 emission under `runtimes/<rid>/`, selected automatically by the consumer's runtime identifier —
@@ -851,7 +869,7 @@ so Go-faithful per-platform semantics never fork the package graph.
 | Full packages compiling | `src/go2cs-stdlib.slnx` (344 projects at Go 1.24.13) | ✅ **342 / 342** packages (2026-09-23, `fa18863b9`) |
 | Full-conversion error count | build-error buckets | ✅ **0** |
 | Converted package tests | [`ValidatedTestPackages.md`](ValidatedTestPackages.md) — the authoritative roster | ◻ Phase 4 **in flight**. The roster's own header carries the current count, verdict total and disclosure total, recomputed from its table — read it there rather than here, so this row cannot go stale against it |
-| Assembly-backed implementations | Phase 5 external-declaration ledger | ◻ Phase 5 planned — gated by Phase 4 validation |
+| Assembly-backed implementations | Phase 5 external-declaration inventory | ◻ Phase 5 planned — gated by Phase 4 validation |
 | Linux / multi-target | Platforms section above | ◻ converts on Windows and Linux; a module reaching `golang.org/x/sys/unix` (the README walkthrough) builds and runs on `linux/amd64` with go2cs packages ≥ 1.24.13.2 and a converter from a checkout that includes them; the wider operational `syscall` surface and a Linux validation roster are in progress |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)

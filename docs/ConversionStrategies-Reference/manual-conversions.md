@@ -39,7 +39,7 @@ Go actually has **two** flavors of that protocol and picks one per GOOS: `lock_s
 - **The load-bearing separation is wake-vs-readiness.** A completion sets `ready` and pulses; a deadline firing and `pollUnblock` pulse **without** setting it. Go encodes this as `pdReady`-vs-`pdNil`-wake, and it is what makes `waitCanceled`'s ignore-errors loop correct — that loop waits for a COMPLETION specifically, ignoring the very timeout that woke its caller. Readiness is also consumed *before* either error check, so a completion that raced the deadline is still delivered.
 - **Deadlines are `GoTimer` + sticky flags + generations, not `CancellationToken`.** A CTS models a one-shot cancellation of a linked operation; a Go deadline is per-MODE, STICKY across future operations until re-set, REPLACEABLE while an op is in flight, and NON-ABANDONING (the timed-out op must still be cancelled *and harvested* by the same caller). Modeling all four with tokens reconstructs the flags+timer state machine anyway. The generation check is **not** optional hardening: `GoTimer.Stop` does not wait for a callback the timer service has already taken (Go's `t.stop()` does not either), so without it a cleared deadline can be expired by the callback of the deadline it replaced.
 
-**The listener lifecycle is guarded on its own** — contracts 1 (`pollServerInit`), 2 (`pollOpen`), 8 (`pollUnblock`), 3 (`pollClose`), plus a `pollSetDeadline` smoke — with **zero data flow**, by the `NetListenSmoke` behavioral **output** test, which prints kernel-derived values rather than checking for absence of a fault (an ephemeral port was assigned, two live listeners differ, and, the strongest line, the port a closed listener released can be re-bound — only true if `pollClose` released the registration before `internal/poll` closed the socket; port numbers themselves are never printed, so the output is host-independent). The data path is the overlapped SUBMIT seam, below. Full design, and the eight resolved open questions: [`docs/phase4/DESIGN-netpoll-managed-poller.md`](../phase4/DESIGN-netpoll-managed-poller.md).
+**The listener lifecycle is guarded on its own** — contracts 1 (`pollServerInit`), 2 (`pollOpen`), 8 (`pollUnblock`), 3 (`pollClose`), plus a `pollSetDeadline` smoke — with **zero data flow**, by the `NetListenSmoke` behavioral **output** test, which prints kernel-derived values rather than checking for absence of a fault (an ephemeral port was assigned, two live listeners differ, and, the strongest line, the port a closed listener released can be re-bound — only true if `pollClose` released the registration before `internal/poll` closed the socket; port numbers themselves are never printed, so the output is host-independent). The data path is the overlapped SUBMIT seam, below.<!-- Full design, and the eight resolved open questions: [`docs/phase4/DESIGN-netpoll-managed-poller.md`](../phase4/DESIGN-netpoll-managed-poller.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 <!-- history: landed in stages, S1 the listener lifecycle and S2 the overlapped SUBMIT seam; the design record holds
      the staging. -->
 
@@ -361,8 +361,8 @@ fractional-second scan (~1728 B in the same shapes) and `Date` (~240 B) accounte
 it was CLR-necessary: Go monomorphizes the union-constrained generic and stack-allocates all of it, and
 nothing here was boxing that a managed model *must* do — it was boxing that the `IByteSeq`
 modeling and range lowering happened to do. **So this row was performance work, not a disclosure
-candidate** (a disclosure is only for asserts the CLR provably cannot satisfy — see the campaign
-charter §5), and it was resolved as such: the range enumerator became a struct (every converted
+candidate** (a disclosure is only for asserts the CLR provably cannot satisfy<!-- see the campaign
+charter §5 -->), and it was resolved as such: the range enumerator became a struct (every converted
 `for i, v := range s` in the corpus had been paying it), and the union-constraint boxing was removed
 wholesale by the self-referential redesign described under
 [Allocation-free union-constrained bodies](generic-constraints.md#allocation-free-union-constrained-bodies) — a
@@ -773,8 +773,8 @@ Names agreeing over the whole packed prefix tie and fall through to fmtsort's co
 Go's layout order for three or more key types is not on offer and would not be a property Go
 promises. Guarded by the fmtsort test suite (TestInterface's grouping) and the
 `InterfaceInheritance` behavioral test's output comparison, which is what caught the PRNG model
-landing tails. Full derivation:
-[`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).
+landing tails.
+<!-- Full derivation: [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 **EXPORTEDNESS is a descriptor read too, and the value side had been right about it all along —
 `StructField.PkgPath`.**<!-- history: 2026-08-11 --> `reflect.StructField.IsExported()` is nothing but
@@ -1769,7 +1769,7 @@ private static partial nint libc_syscall(nint number, nint a1, nint a2, nint a3,
 Three details separate a faithful binding from a plausible one. Each was **measured on linux/amd64** (glibc 2.35, .NET 9) rather than argued from the ABI documents, because each is exactly the kind of claim that reads as obviously true and is expensive when it is not:
 
 * **The variadic.** C declares `long syscall(long number, ...)`; this declares seven fixed native ints. That is correct under SysV AMD64 — integer-class variadic arguments ride the same registers as fixed ones, with the seventh spilling to the stack, which is precisely where glibc's hand-written `syscall.S` reads `a6`. Proven with a real six-argument call: `mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)` returned a live mapping that `munmap` then released. (`AL`, which a true variadic call sets to the vector-register count, is unused by `syscall.S`.)
-* **`r2`.** Go's contract returns `RDX`, which libc's wrapper cannot hand back — the reason the [run-layer finding](../phase4/FINDING-linux-run-layer.md) listed it as an open question. It does not need to: the Linux x86-64 convention clobbers only `RCX` and `R11`, so `RDX` still holds what entered the kernel, and the asm's `MOVQ DX, BX` observes `a3` unchanged. Returning `a3` is therefore not a stand-in for `r2` on this architecture — it *is* `r2`. Probed under the real Go runtime: `syscall.Syscall6(SYS_GETPID, …, a3=0xDEADBEEF, …)` returns `r2=0xdeadbeef`. The failure path zeroes `r2`, which the shim mirrors.
+* **`r2`.** Go's contract returns `RDX`, which libc's wrapper cannot hand back — the reason it was once listed as an open question.<!-- the [run-layer finding](../phase4/FINDING-linux-run-layer.md) listed it (internal record, unlinked 2026-10-26, OQ-1) --> It does not need to: the Linux x86-64 convention clobbers only `RCX` and `R11`, so `RDX` still holds what entered the kernel, and the asm's `MOVQ DX, BX` observes `a3` unchanged. Returning `a3` is therefore not a stand-in for `r2` on this architecture — it *is* `r2`. Probed under the real Go runtime: `syscall.Syscall6(SYS_GETPID, …, a3=0xDEADBEEF, …)` returns `r2=0xdeadbeef`. The failure path zeroes `r2`, which the shim mirrors.
 * **`errno`.** libc collapses the kernel's whole `[-4095, -1]` error band to a `-1` return and reports the positive errno out of band — the same number Go's asm produces by negating the raw return — and `SetLastError` lets the CLR capture it before managed code can perturb it. Probed: `openat(AT_FDCWD, NULL)` returns `-1` with `Marshal.GetLastPInvokeError() == 14` (EFAULT).
 
 **One divergence is disclosed rather than papered over:** a syscall that legitimately returns `-1` as a *success* value is indistinguishable from a failure through libc, and would report a stale errno. Go's asm has no such ambiguity because it tests the raw return against the whole band. Nothing the converted corpus reaches behaves that way, and the only true fix is an instruction-level bottom the managed model cannot express.
@@ -2259,8 +2259,8 @@ box that is default behind a synthesized descriptor — it **throws** for any no
 now answers from the same `GoReflect.GoImplements` probe the emitted `_<T>` asserts use, so a method
 set cannot be answered one way by a type assertion and another by reflection.
 
-**(3) `haveIdenticalUnderlyingType`'s downcast arms had to be fixed WITH it.** This is THE seat of
-Go's type-identity relation — `ConvertibleTo` reaches it through `convertOp`, `AssignableTo` through
+**(3) `haveIdenticalUnderlyingType`'s downcast arms had to be fixed WITH it.** This is where
+Go's type-identity relation lives — `ConvertibleTo` reaches it through `convertOp`, `AssignableTo` through
 `directlyAssignable`. Five of its eight arms already worked: the scalar arm needs nothing, and
 Array/Map/Pointer/Slice recurse through the `Elem()`/`Key()`/`Len()` that `internal/abi` synthesizes
 (previous section). The **struct**, **func** and **interface** arms reached their operands by the
@@ -3359,8 +3359,9 @@ registers the release of both locks there, keyed on the recorded holder. `startT
 
 ## The GC measurement surface — one recorder, one ring, one snapshot
 
-The recorder is `golib/runtime/GcPauseRecorder.cs`<!-- landed 2026-08-21 -->; the design and measurements are in
-[`docs/phase4/DESIGN-readmemstats-surface.md`](../phase4/DESIGN-readmemstats-surface.md). `ReadMemStats`
+The recorder is `golib/runtime/GcPauseRecorder.cs`<!-- landed 2026-08-21 -->.
+<!-- the design and measurements are in [`docs/phase4/DESIGN-readmemstats-surface.md`](../phase4/DESIGN-readmemstats-surface.md) (internal record, unlinked 2026-10-26, OQ-1) -->
+`ReadMemStats`
 and `readGCStats` used to answer independently, and both left the per-cycle facts zero — which made
 `runtime/debug`'s `TestReadGCStats` fail on two *length* assertions comparing the two surfaces to each
 other. The cheap way to make those pass is to report `NumGC = 0` on both; that is refused, because it
@@ -3777,7 +3778,7 @@ fact about the Go build that must survive. The tempting generalization — strip
 — is wrong in a way a validated test already measures: `runtime/debug`'s own `TestStack` greps a
 rendered traceback for `runtime/debug_test.(*T).ptrmethod`.
 
-[`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md) §8 records that these two suffix rules
+The position-map design (§8) records that these two suffix rules<!-- [`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md) (internal record, unlinked 2026-10-26, OQ-1) -->
 retire from the FILE half (which is RECORDED, so nothing is derived from a namespace any more) but
 "remain necessary and unchanged for the FUNCTION half"; the internal-test half of that rule was
 never implemented there, and the leak was **systemic to the `-tests` pipeline rather than
@@ -3821,11 +3822,11 @@ the CLR from tail-calling it), while a function literal on such a path carries
 Same family as reflect's `valueMethodName`, whose faithfully transcribed stack climb was
 correct in Debug and could not work in Release, and which was replaced by a `[CallerMemberName]`
 thread precisely because a compile-time constant is the one answer no tiering or inlining decision
-can move ([`DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md)); and the sibling of
+can move<!-- [`DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md) (internal record, unlinked 2026-10-26, OQ-1) -->; and the sibling of
 the tier-0 liveness rule recorded further down this section, where the same "test methods run once,
 so they are jitted at tier 0" fact makes a GC-lifetime local look permanently live. (The literal's
-COUNTER is recorded rather than derived —
-[`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md) §8 — which is orthogonal to whether the
+COUNTER is recorded rather than derived — the position-map design, §8 — which is orthogonal to whether the
+<!-- [`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md) (internal record, unlinked 2026-10-26, OQ-1) -->
 frame exists to be named at all.)
 
 **`runtime.Caller` works by severing the FUNNEL, not by hand-owning another public API.**
@@ -3868,7 +3869,7 @@ name through `goFrameName`, so the program's own top frame reads `main.Main`, no
 the same "a candidate's EMITTED name is not always its GO name" class recorded elsewhere.
 `file`/`line` name the **Go** position, consistent with `Frame.File`/`Line` above: the converter
 emits one `[assembly: GoPositionMap]` record per converted file into its package's `package_info.cs`
-(`GoPositionMapAttribute.cs`; [`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md)), and the
+(`GoPositionMapAttribute.cs`)<!-- [`DESIGN-position-map.md`](../phase4/DESIGN-position-map.md) (internal record, unlinked 2026-10-26, OQ-1) -->, and the
 runtime maps a frame's C# position through it. File and line come from that one record, so a frame
 either reports a Go position that exists or, with no record, its honest converted `.cs` position —
 never a pair composed from two sources. That serves a test that asserts the *Go* file's own
@@ -3998,10 +3999,12 @@ The class's bar and its standing measurements live with the roster's disclosure 
 provenance comments beside them. A tier-0 A/B shows the first point above disappears under<!-- 2026-08-30 -->
 a Release publish with `DOTNET_TieredCompilation=0`, the default configuration, so no row carries<!-- 2026-09-02 -->
 `execution: release-tc0` (`internal/weak` was the first to need it). `sync`'s
-three `TestOnceXGC` subtest pins, and how they count toward its Disclosed column, are recorded in
-[DATA-alloc-pins-rand-sync](../phase4/DATA-alloc-pins-rand-sync.md);
-[CENSUS-type-name-erasure](../phase4/CENSUS-type-name-erasure.md) §8 derives how `unique`'s GC rows move
-between matched and `codegen-liveness` once its subtest names match Go's.
+three `TestOnceXGC` subtest pins, and how they count toward its Disclosed column, are recorded with the
+project's measurement data, and a census derives how `unique`'s GC rows move between matched and
+`codegen-liveness` once its subtest names match Go's.
+<!-- recorded in [DATA-alloc-pins-rand-sync](../phase4/DATA-alloc-pins-rand-sync.md);
+     [CENSUS-type-name-erasure](../phase4/CENSUS-type-name-erasure.md) §8 derives the `unique` move
+     (internal records, unlinked 2026-10-26, OQ-1) -->
 
 ## `host-limit` — the third disclosed-divergence class: what the test HOST cannot BE
 
@@ -4083,8 +4086,8 @@ met by family rather than by a bespoke design per entry.
 opening the test. `reading` is the measured current value **with the configuration named**, because a
 reading taken at another configuration is not comparable (Release with tiering off is the measurement
 of record) and one with no tree named cannot be re-checked. **Nothing compares it with the run yet**<!-- stated 2026-09-23, ledger 03:37 X(5) -->: the loader and check-roster-format's 2c arm only
-check that the field is present, so until the sweep-side comparator of
-[`DESIGN-allocation-counting.md`](../phase4/DESIGN-allocation-counting.md) §9 (v) lands, each deferred
+check that the field is present, so until a sweep-side comparator lands, each deferred
+<!-- the comparator of [`DESIGN-allocation-counting.md`](../phase4/DESIGN-allocation-counting.md) §9 (v) (internal record, unlinked 2026-10-26, OQ-1) -->
 entry's unit note is compared against its `reading` by hand at every sweep read, and a reading moving
 **away** from the want is a finding. Every `reading` therefore LEADS with its per-run figure.
 `plan` is the design record and increment that closes it.

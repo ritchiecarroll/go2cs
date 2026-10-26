@@ -1,7 +1,7 @@
 # PLAN — go.* 1.26.10.2: the first fix release on the Go 1.26 line
 
 > **STATUS: DRAFT (COORD, 2026-10-26).** The owner asked for the post-publish wave and this plan on 2026-10-26, right
-> after 1.26.10.1 published. Document type: an [instance plan](Glossary.md#plan). It names the scope of the next
+> after 1.26.10.1 published. Document type: an [instance plan](doctrine/ProcessGlossary.md#plan). It names the scope of the next
 > release on master's Go 1.26.10 line, the seats and their lanes, how they land, and what gates the release.
 > Procedure is not restated: seats land by the train discipline in the `train-assembly` skill, a re-bank follows
 > [`GoCorpusMigration.md`](GoCorpusMigration.md), and the release follows its *Release day* section. If Go publishes
