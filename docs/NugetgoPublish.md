@@ -2,7 +2,7 @@
 
 > **STATUS: DRAFT (C2, 2026-10-09). Its four open questions were RULED by COORD on 2026-10-09 and are folded in
 > below; the document as a whole is not yet ruled, and nothing is executed from it until it is.**
-> Document type: a [runbook](Glossary.md#runbook). It is the procedure for any one module, on any go2cs release, and
+> Document type: a [runbook](doctrine/ProcessGlossary.md#runbook). It is the procedure for any one module, on any go2cs release, and
 > names no release or module. The first wave's values (hashset, uuid, jwt/v5) and its open questions are the instance
 > plan [`PLAN-nugetgo-first-wave.md`](PLAN-nugetgo-first-wave.md). The rulings it follows (B1-B8: publisher, IDs,
 > versions, ranges, metadata, rehearsal, first wave) are in [`PLAN-nugetgo.md`](PLAN-nugetgo.md), section 8.
