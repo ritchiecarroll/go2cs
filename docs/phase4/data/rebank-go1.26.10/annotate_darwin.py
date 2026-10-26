@@ -20,6 +20,11 @@ pin = re.search(r'<GoStdLibVersion>([^<]+)</GoStdLibVersion>', props).group(1)
 guard = open(os.path.join(tree, 'src/check-roster-format.ps1'), encoding='utf-8').read()
 waves = re.findall(r"'([^']*)'", re.search(r'^\$DarwinEvidenceWaves = @\(([^)]*)\)', guard, re.M).group(1))
 assert waves and waves[0] == '', waves
+# The guard's $DarwinAgreementRulings keys (COORD 2026-10-26): rows whose RIDs agree RELATIVE TO GO though the TSV's
+# raw-verdict agree column reads NO. Read from the guard so the two cannot drift.
+rulings_block = re.search(r'^\$DarwinAgreementRulings = @\{(.*?)^\}', guard, re.M | re.S).group(1)
+rulings = set(re.findall(r"^\s*'([^']+)'\s*=", rulings_block, re.M))
+assert rulings, 'no agreement rulings parsed'
 
 evdir = os.path.join(tree, f'docs/phase4/h10-evidence/go{pin}/darwin')
 by_row = {}
@@ -31,17 +36,24 @@ for d, _, files in os.walk(evdir):
     for f in sorted(files):
         if f.endswith('.tsv'):
             for r in csv.DictReader(open(os.path.join(d, f), encoding='utf-8'), delimiter='\t'):
-                by_row.setdefault(r['row'], []).append((waves.index(rel), r))
+                by_row.setdefault(r['row'], []).append((waves.index(rel), f[:-4], r))
 
 def reading(records):
-    latest = max(w for w, _ in records)
-    rs = [r for w, r in records if w == latest]
+    latest = max(w for w, _, _ in records)
+    in_wave = [(s, r) for w, s, r in records if w == latest]
+    stems = sorted({s for s, _ in in_wave})
+    # A re-dispatch (its stem extends the original's, r3 -> r3b) supersedes the original within the wave; anything else
+    # keeps every line, and the one-line-per-RID check below refuses it. The guard's Select-LatestDarwinWave rule.
+    if len(stems) > 1 and all(stems[k].startswith(stems[k - 1]) for k in range(1, len(stems))):
+        in_wave = [(s, r) for s, r in in_wave if s == stems[-1]]
+    rs = [r for _, r in in_wave]
     arm = [r for r in rs if r['RID'] == 'osx-arm64']
     x64 = [r for r in rs if r['RID'] == 'osx-x64']
     if len(arm) != 1 or len(x64) != 1:
         sys.exit(f"{rs[0]['row']}: {len(arm)} osx-arm64 and {len(x64)} osx-x64 lines in its latest wave")
     a, x = arm[0], x64[0]
-    banked = a['status'] == x['status'] == 'validated' and a['agree'] == x['agree'] == 'yes' \
+    agreed = a['agree'] == x['agree'] == 'yes' or a['row'] in rulings
+    banked = a['status'] == x['status'] == 'validated' and agreed \
         and a['matched'] == x['matched'] and a['disclosed'] == x['disclosed']
     if not banked:
         return None

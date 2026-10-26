@@ -2180,17 +2180,28 @@ Assert-Equal 'legacy-label arm: it read at least one manifest entry (a zero mean
 # Red at birth on 4ad0b70077 by design: sync/atomic (arm64 failing, x64 validated) and internal/synctest
 # (both failing) still carry their go1.24.13 `darwin: 108` / `darwin: 28`. It goes green when each is
 # re-read at the pin or loses its segment (PLAN-rebank-go126.md 8, the close).
-function Get-DarwinSegmentRefusal {
-    param($Records, $Segment)
+# AGREEMENT RULINGS (COORD, 2026-10-26, C1-R r3b). The leg's "arm64 and x64 agree verdict for verdict" is about
+# the CONVERTED code behaving the same RELATIVE TO GO on both arches. An ORACLE-side environment difference that the
+# converted code mirrors on each RID meets it, though the TSV's agree column (raw verdicts compared across the RIDs)
+# reads NO. The TSV carries no per-key outcome, so each such row is named here with its ruling, and it applies ONLY
+# where both RIDs read `validated` with equal matched and disclosed counts. annotate_darwin.py reads this table.
+$DarwinAgreementRulings = @{
+    'net' = 'COORD 2026-10-26 (r3b, run 40279373649): 10 TestLookupNoSuchHost NXDOMAIN keys differ across the RIDs (the runners'' resolvers: arm64 pass/pass, x64 fail/fail), Go == C# on every key within each RID'
+}
 
-    # $Records: the evidence lines for ONE row; $Segment: the row's OS['darwin'] entry or $null.
+function Get-DarwinSegmentRefusal {
+    param($Records, $Segment, [string] $AgreementRuling)
+
+    # $Records: the evidence lines for ONE row; $Segment: the row's OS['darwin'] entry or $null; $AgreementRuling:
+    # the row's $DarwinAgreementRulings entry, or empty.
     $arm = @($Records | Where-Object { $_.RID -ceq 'osx-arm64' })
     $x64 = @($Records | Where-Object { $_.RID -ceq 'osx-x64' })
     if (($arm.Count -ne 1) -or ($x64.Count -ne 1)) {
         return "the darwin evidence holds $($arm.Count) osx-arm64 and $($x64.Count) osx-x64 line(s) for it, not one of each"
     }
     $a = $arm[0]; $x = $x64[0]
-    $banked = ($a.status -ceq 'validated') -and ($x.status -ceq 'validated') -and ($a.agree -ceq 'yes') -and ($x.agree -ceq 'yes') -and
+    $agreed = (($a.agree -ceq 'yes') -and ($x.agree -ceq 'yes')) -or ([bool]$AgreementRuling)
+    $banked = ($a.status -ceq 'validated') -and ($x.status -ceq 'validated') -and $agreed -and
         ($a.matched -eq $x.matched) -and ($a.disclosed -eq $x.disclosed)
 
     if (-not $banked) {
@@ -2232,6 +2243,7 @@ function Read-DarwinEvidence {
         }
         foreach ($record in @([System.IO.File]::ReadAllText($file.FullName) | ConvertFrom-Csv -Delimiter "`t")) {
             $record | Add-Member -NotePropertyName Wave -NotePropertyValue $wave -Force
+            $record | Add-Member -NotePropertyName Stem -NotePropertyValue $file.BaseName -Force
             if (-not $byRow.ContainsKey($record.row)) { $byRow[$record.row] = New-Object System.Collections.Generic.List[object] }
             $byRow[$record.row].Add($record)
         }
@@ -2239,12 +2251,23 @@ function Read-DarwinEvidence {
     return [PSCustomObject]@{ ByRow = $byRow; Undeclared = $undeclared.ToArray() }
 }
 
-# The row's reading of record: the records of its latest declared wave.
+# The row's reading of record: the records of its latest declared wave. Within that wave a RE-DISPATCH supersedes its
+# original only when its file names it as one: the later stem EXTENDS the earlier (C1-R's r3 -> r3b, COORD's net
+# re-dispatch, 2026-10-26). Any other row read in two files of one wave keeps both, and the one-line-per-RID refusal
+# names it.
 function Select-LatestDarwinWave {
     param($Records)
 
     $latest = ($Records | Measure-Object -Property Wave -Maximum).Maximum
-    return @($Records | Where-Object { $_.Wave -eq $latest })
+    $inWave = @($Records | Where-Object { $_.Wave -eq $latest })
+    $stems = @($inWave | ForEach-Object { $_.Stem } | Sort-Object -Unique -CaseSensitive)
+    if ($stems.Count -le 1) { return $inWave }
+    $chain = $true
+    for ($k = 1; $k -lt $stems.Count; $k++) {
+        if (-not $stems[$k].StartsWith($stems[$k - 1], [System.StringComparison]::Ordinal)) { $chain = $false }
+    }
+    if (-not $chain) { return $inWave }
+    return @($inWave | Where-Object { $_.Stem -ceq $stems[-1] })
 }
 
 # The refusal's contract, against fixtures, every way: on a roster the evidence agrees with, the loop
@@ -2281,10 +2304,27 @@ try {
     Assert-Equal 'darwin waves: a row read only in D-W1 keeps D-W1' $null (Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $waveRead.ByRow['w/only']) -Segment (& $darwinSeg 5 0))
     Assert-Equal 'darwin waves: an undeclared subdirectory is named' 'stray' ($waveRead.Undeclared -join ',')
     Assert-Equal 'darwin waves: an undeclared subdirectory is never read' $false $waveRead.ByRow.ContainsKey('w/stray')
+
+    # A re-dispatch within one wave (its stem extends the original's) supersedes it; an unrelated second file does not.
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'reread/r3.tsv'), ($header, "r3`tw/redo`tosx-arm64`t9`t7`t0`t2`t2`tfailing`tNO", "r3`tw/redo`tosx-x64`t9`t7`t0`t2`t2`tfailing`tNO",
+        "r3`tw/twice`tosx-arm64`t4`t4`t0`t0`t0`tvalidated`tyes", "r3`tw/twice`tosx-x64`t4`t4`t0`t0`t0`tvalidated`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'reread/r3b.tsv'), ($header, "r3b`tw/redo`tosx-arm64`t9`t9`t0`t0`t0`tvalidated`tyes", "r3b`tw/redo`tosx-x64`t9`t9`t0`t0`t0`tvalidated`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'reread/q.tsv'), ($header, "q`tw/twice`tosx-arm64`t4`t4`t0`t0`t0`tvalidated`tyes", "q`tw/twice`tosx-x64`t4`t4`t0`t0`t0`tvalidated`tyes") -join "`n")
+    $redoRead = Read-DarwinEvidence -Directory $waveFixture
+    Assert-Equal 'darwin waves: a re-dispatch (r3 -> r3b) supersedes its original within the wave' $null (Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $redoRead.ByRow['w/redo']) -Segment (& $darwinSeg 9 0))
+    Assert-Equal 'darwin waves: two unrelated files reading one row in one wave are still refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $redoRead.ByRow['w/twice']) -Segment (& $darwinSeg 4 0)))
 }
 finally {
     Remove-Item -LiteralPath $waveFixture -Recurse -Force -ErrorAction SilentlyContinue
 }
+
+# The agreement ruling's contract: it banks a row whose RIDs both validate with equal counts though agree reads NO,
+# and NOTHING else -- not a failing RID, not unequal counts, and not a row without a ruling.
+$ruledSplit = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'NO' 552 3), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'NO' 552 3))
+$ruledFailing = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'NO' 552 3), (New-DarwinFixtureRecord 'osx-x64' 'failing' 'NO' 550 3))
+Assert-Equal 'darwin agreement ruling: a named row validated on both RIDs with equal counts banks' $null (Get-DarwinSegmentRefusal -Records $ruledSplit -Segment (& $darwinSeg 552 3) -AgreementRuling 'fixture')
+Assert-Equal 'darwin agreement ruling: without a ruling the same row does not bank' $true ($null -ne (Get-DarwinSegmentRefusal -Records $ruledSplit -Segment (& $darwinSeg 552 3)))
+Assert-Equal 'darwin agreement ruling: a ruling never banks a failing RID' $true ($null -ne (Get-DarwinSegmentRefusal -Records $ruledFailing -Segment (& $darwinSeg 552 3) -AgreementRuling 'fixture'))
 
 $darwinEvidenceDir = Join-Path $repo "docs/phase4/h10-evidence/go$goPin/darwin"
 $darwinRowsGated = 0
@@ -2300,7 +2340,8 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
         if (-not $darwinEvidence.ContainsKey($row.Package)) { $darwinRowsUnread++; continue }
         $darwinRowsGated++
         $segment = if ($row.OS.ContainsKey('darwin')) { $row.OS['darwin'] } else { $null }
-        $refusal = Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $darwinEvidence[$row.Package]) -Segment $segment
+        $refusal = Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $darwinEvidence[$row.Package]) -Segment $segment `
+            -AgreementRuling $(if ($DarwinAgreementRulings.ContainsKey($row.Package)) { $DarwinAgreementRulings[$row.Package] } else { '' })
         if ($null -ne $refusal) {
             $darwinRefused++
             Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence docs/phase4/h10-evidence/go$goPin/darwin)" $true $false
