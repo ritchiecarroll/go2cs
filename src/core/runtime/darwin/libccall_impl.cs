@@ -73,10 +73,18 @@
 // discriminates by construction.
 //
 // WHAT IS REFUSED, LOUDLY AND BY NAME, NEVER WITH A DEFAULT. An argument whose number resolves to
-// no box (a reference-bearing args struct — mmap_args, mach_vm_region_args, proc_regionfilename_args
-// carry managed pointers and have no pinnable storage, so they never register), a field the
-// dispatcher cannot place in a register, or a null function pointer. A wrong layout would hand libc
-// garbage in registers; a throw that names the symbol is the honest answer.
+// no box, a field the dispatcher cannot place in a register (mmap_args carries managed pointers), or a
+// null function pointer. A wrong layout would hand libc garbage in registers; a throw that names the
+// symbol is the honest answer.
+//
+// THE TWO PPROF MEMBERS (2026-10-25). mach_vm_region_args and proc_regionfilename_args also carry
+// managed pointers, so the default dispatch refuses them ("cannot place in an integer register"). Since
+// the order-token cut their args box RESOLVES (FromPinnedBox mints a token that retains it), so the form
+// table below reads each one's fields by type: every pointer becomes its number (a reference-free box
+// pins and answers its address; machVMRegionBasicInfoData, which holds two fixed arrays, answers its
+// order token) and GoLibcCall.Call places them, marshalling a token's box into a Go-layout native copy
+// and back (NativeStructMarshal). They are reached from runtime/pprof's machVMInfo, which every proto
+// profile write calls on darwin (readMapping).
 //
 // Hand-owned (no libccall_impl.go exists, so a reconvert never regenerates this file). Declared
 // NON-partial: the registry displacement leaves a comment placeholder in sys_libc.cs, not a bodyless
@@ -95,6 +103,8 @@ partial class runtime_package {
 private const string libSystemPath = "/usr/lib/libSystem.B.dylib";
 
 private static nint s_libcCallErrnoReader;
+
+private static nint s_machTaskSelf;
 
 internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     nint entryPoint = unchecked((nint)(nuint)(uintptr)fn);
@@ -134,6 +144,10 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
         // pthread_self_trampoline: CALL libc_pthread_self; MOVQ AX, 0(BX) -- the result lands in the
         // block's first word (the pthread wrapper's value).
         return unchecked((int32)(uint32)GoLibcCall.CallStoringResultIntoBlock(entryPoint, argsBox, s_libcCallErrnoReader, symbol));
+    case "mach_vm_region":
+        return machVMRegion(entryPoint, argsBox, symbol);
+    case "proc_regionfilename":
+        return procRegionFilename(entryPoint, argsBox, symbol);
     }
 
     nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);
@@ -142,6 +156,57 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     // rule -- and twenty callers in sys_darwin.cs read it (the header's shape (d)); the lifted
     // family reads args.ret as well, which the dispatcher has already filled. Until increment 7 this
     // returned 0 on the belief that no caller read it.
+    return unchecked((int32)(uint32)r);
+}
+
+// mach_vm_region_trampoline: the task port, read from libSystem's mach_task_self_ global as Go's
+// `MOVQ $libc_mach_task_self_(SB), DI; MOVL 0(DI), DI` reads it, then the args struct's six fields in
+// order. The seventh C argument goes on the stack on amd64; the native call's own ABI places it.
+// kern_return_t needs no errno: the result is the whole outcome, and machVMInfo reads it.
+private static unsafe int32 machVMRegion(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<mach_vm_region_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is not mach_vm_region_args (got {argsBox?.GetType().FullName ?? "null"})");
+    }
+
+    if (s_machTaskSelf == 0) {
+        s_machTaskSelf = GoCgoDynamicImports.Resolve("mach_task_self_", libSystemPath);
+    }
+
+    ref var args = ref box.Value;
+    nuint task = *(uint*)s_machTaskSelf;
+
+    nuint r = GoLibcCall.Call(entryPoint, [
+        task,
+        (uintptr)args.address,
+        (uintptr)args.size,
+        unchecked((nuint)(uint)(int32)args.flavor),
+        (uintptr)args.info,
+        (uintptr)args.count,
+        (uintptr)args.object_name
+    ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+    System.GC.KeepAlive(box);
+    return unchecked((int32)(uint32)r);
+}
+
+// proc_regionfilename_trampoline: pid, address, buffer, buffer_size, in the args struct's order. buf is
+// unsafe.SliceData of pprof's []byte, a reference-free element, so its number is the pinned address of
+// the slice's backing store and libc writes the file name straight into it. The result is the length.
+private static int32 procRegionFilename(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<proc_regionfilename_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument box is not proc_regionfilename_args (got {argsBox?.GetType().FullName ?? "null"})");
+    }
+
+    ref var args = ref box.Value;
+
+    nuint r = GoLibcCall.Call(entryPoint, [
+        unchecked((nuint)args.pid),
+        (nuint)args.address,
+        (uintptr)args.buf,
+        unchecked((nuint)args.bufSize)
+    ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+    System.GC.KeepAlive(box);
     return unchecked((int32)(uint32)r);
 }
 

@@ -79,10 +79,11 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// must be IN the population. Arm 3 below also requires every control to be a PUSHED member (its
 	// //go:linkname push exists in this corpus), so an assembly stub cannot serve here, however many
 	// hosts it has killed. Today the controls are two pushes that do not arrive and have callers in
-	// their own package: os.ignoreSIGSYS (pushed from runtime's signal_unix.cs; pidfd_linux.cs calls
-	// it once) and runtime/pprof.mach_vm_region (pushed from runtime/darwin/sys_darwin.cs), which the Phase 5
-	// exported-reach census confirmed a user API reaches (pprof.StartCPUProfile on darwin, arm64 and
-	// x64; docs/phase4/CENSUS-phase5-exported-reach.md). It replaced
+	// their own package: os.ignoreSIGSYS and os.restoreSIGSYS (both pushed from runtime's
+	// signal_unix.cs; pidfd_linux.cs calls each once). restoreSIGSYS replaced
+	// runtime/pprof.mach_vm_region on 2026-10-25, when linknamePushTargets gave that one and
+	// proc_regionfilename forwarding bodies (the darwin mach_vm_region seat); both rows left
+	// declaredPushStubs in the same commit. mach_vm_region had replaced
 	// internal/coverage/cfile.getCovCounterList in the commit that bodied that one (emit_impl.cs,
 	// 2026-10-10), which moved to the negative controls below. os.ignoreSIGSYS replaced
 	// internal/runtime/maps.mapKeyError at the Go 1.26 hop (H5): 1.26 defines mapKeyError in maps
@@ -98,7 +99,7 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// body, a member that is still stubbed replaces it in the same commit.
 	controls := []string{
 		"os/linux/pidfd_linux.cs:ignoreSIGSYS",
-		"runtime/pprof/darwin/vminfo_darwin.cs:mach_vm_region",
+		"os/linux/pidfd_linux.cs:restoreSIGSYS",
 	}
 
 	if len(controls) == 0 {
@@ -467,8 +468,6 @@ var declaredPushStubs = map[string]string{
 	"runtime.mapdelete_fast32":          dispositionSuppliedElsewhere,
 	"runtime.mapdelete_fast64":          dispositionSuppliedElsewhere,
 	"runtime.mapdelete_faststr":         dispositionSuppliedElsewhere,
-	"runtime/pprof.mach_vm_region":      dispositionLatent,
-	"runtime/pprof.proc_regionfilename": dispositionLatent,
 	"syscall.runtime_AfterFork":         dispositionLatent,
 	"syscall.runtime_AfterForkInChild":  dispositionLatent,
 	"syscall.runtime_BeforeFork":        dispositionLatent,
