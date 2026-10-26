@@ -28585,4 +28585,25 @@ to read the real errno, then root the failure itself. Not P2's seat until ruled.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — P2 (COORD ruling): darwin syscall after the iovec/dirent seat — two residual reds — POST-PUBLISH
+
+**Measured (COORD, mac run 40252700084, read by the i9).** With the iovec/dirent seat (claude/p2-darwin-iovec-dirent
+@ 002bfdaa71) TestDirent passes (no SIGBUS) and 21 C# keys move to real verdicts, but syscall stays darwin-unbanked at
+1.26 on two reds:
+- **(a) TestGetdirentries/n=10 and /n=1000** panic "dereference of a managed pointer with no address (*array`1 over
+  <token> ... arm 2a)" at getdirentries_test.cs:96. The Getdirentries mirror has already returned its records; the panic
+  is the TEST's own parse, `copy((*[unsafe.Sizeof(dirent)]byte)(unsafe.Pointer(&dirent))[:], data)`
+  (getdirentries_test.go:67): a `*[1048]byte` view over a local `syscall.Dirent`, whose `Name [1024]int8` makes it
+  reference-bearing, so `&dirent` is an order token and the reinterpreting dereference has no address to read. Same
+  class as the parse the iovec/dirent diagnosis named, now in test code: a byte-array view over a reference-bearing
+  pointee. Owed: the reinterpret seam (a Go-layout byte view over such a box), not a funnel mirror.
+- **(b) TestGetfsstat** kills the host (arm64 SIGSEGV, x64 abort trap). Read from the tree (not run): generated
+  `Getfsstat` passes `unsafe.Pointer(&buf[0])` with `bufsize = 2168 * len(buf)`; `Statfs_t` holds four fixed arrays,
+  so `&buf[0]` is an order token and the funnel marshals ONE 2168-byte copy, while libc writes `len(buf)` records into
+  it, overrunning the native copy. The Kevent-past-[0] class from the 2026-10-25 row, now reached by std. Not a
+  one-line twin of the kevent fix: it needs a native mirror like writev's (one native block of bufsize, the call, then
+  each record decoded back into `buf[i]`). Candidate for the funnel-mirror treatment.
+
+— P2 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
