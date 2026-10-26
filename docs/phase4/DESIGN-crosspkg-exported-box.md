@@ -1,6 +1,8 @@
 # DESIGN — the cross-package exported-variable box (go.* 1.26.10.2's headline)
 
-**Status:** PROPOSED (G, 2026-10-26), for COORD to rule before the seat is cut. There is no code change in this file.
+**Status:** ACCEPTED (COORD, 2026-10-26, on `6f88cc796a`): the owner predicate plus the importer field/element arm,
+through `addressedGlobalDecl`, sharing item 2's `StaticBox`, with no fifth box kind. The rulings on the open questions
+are in section 9. The seat is G's, after item 2. There is no code change in this file.
 **Ruling it implements:** the owner's option (b) of 2026-10-25 (BOARD, *C2 (owner's ruling, R's diagnosis): the address
 of ANOTHER package's exported value variable binds a copy*): box every exported package-level value variable, with a
 full re-bank. Item 1 of [`PLAN-release-1-26-10-2.md`](../PLAN-release-1-26-10-2.md).
@@ -272,6 +274,22 @@ All of these are red on master and green on the seat. Each is planted back and r
 - **OQ-3 — `ForkLock` on windows.** It is a live hand-own/twin mismatch today, with no failing site. Fix it in this
   seat (recommended, since the guard of section 8 needs it), or earlier as a one-line hand edit?
 
+**Rulings (COORD, 2026-10-26):**
+- **OQ-1: value kind only**, as the owner priced it. Interface-kind vars (the `io.EOF` class) keep a NAMED
+  limitation. The seat amends `docs/Limitations.md` and `docs/KnownIssues.md` so the remaining case is stated exactly:
+  taking the address of another package's exported INTERFACE-typed variable binds a copy.
+- **OQ-2: exact go.* inter-package version ranges at pack.** A mixed 1.26.10.1/1.26.10.2 go.* graph then fails at
+  restore instead of throwing `MissingFieldException` at run time. The change is a known breaking change, acceptable
+  before the loud announcement (the owner's standing ruling). The 1.26.10.2 NEWS and release notes state it. The
+  nugetgo half is COORD's to sequence: C2 censuses which modules touch a std exported value var directly. If any
+  does, that wave's pin joins 1.26.10.2's session, one pin for both.
+- **OQ-3: in the seat**, with its BOARD row.
+
+**The seat's order:** the `binary.LittleEndian` read A/B first, since its answer picks between the `static readonly`
+sealed box and `ValueSlot`. Then the red-first goldens of section 8, among them `&lib.Arr[1]`, which must no longer
+emit the undeclared `Ꮡlib.Arr.at<nint>`. Then the two-seeded footprint on all three targets, predicted from this
+census first, and both BOARD rows.
+
 ## 10. The seat
 
 Off the master that has item 2. It carries:
@@ -282,7 +300,9 @@ Off the master that has item 2. It carries:
 - its own `src/core` footprint: two-seeded, three targets, plus the `-tests` leg over the packages whose committed
   `_test.cs` declare a var in scope;
 - the read-path A/B;
-- a BOARD row closing C2's row of 2026-10-25.
+- the exact go.* inter-package version ranges at pack (OQ-2), and the breaking change stated in the 1.26.10.2 NEWS;
+- `docs/Limitations.md` and `docs/KnownIssues.md` narrowed to the interface-kind case (OQ-1);
+- a BOARD row closing C2's row of 2026-10-25, and the closes of both G rows of 2026-10-26.
 
 Gates: go test, GenTests, GolibTests, the solution build, CNR, and a `-p:GoTargetOS=linux` build for the L3 flavours.
 Then the re-bank by the runbook.
