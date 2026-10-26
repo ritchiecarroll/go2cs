@@ -62,6 +62,14 @@ public class DarwinArm64VariadicSlotTests
     }
 
     [TestMethod]
+    public void TheKeventTrampolineStoresNothing()
+    {
+        // kevent_trampoline (six arguments, -1 becomes -errno) loads its registers from the args block and
+        // calls libc_kevent directly: no [sp] store, unlike runtime·syscall6 at the same arity.
+        Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(6, GoLibcErrnoRule.NegatedErrno, darwinArm64: true));
+    }
+
+    [TestMethod]
     public void NoOtherArityStoresAnything()
     {
         foreach (int arity in new[] { 0, 1, 2, 4, 5, 7, 8 })
