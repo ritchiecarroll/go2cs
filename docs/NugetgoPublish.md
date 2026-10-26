@@ -63,7 +63,8 @@ Stop at the first one that fails.
 
 ## 1. Convert and validate (lane, at `T`)
 
-1. Build `G` once: `go build -o <bin>/go2cs .` in `T`'s `src/go2cs`. Every conversion of this module uses this one
+1. Build `G` once: `go build -o <bin>/go2cs .` in `T`'s `src/go2cs` (`-o <bin>/go2cs.exe` on Windows: an explicit
+   `-o` name gets no `.exe` added). Every conversion of this module uses this one
    binary, because the input digest records the converter (trap 3).
 2. Convert with the module's tests, into a fresh output root `VR` (the output directory is the SECOND positional):
    `G -recurse -tests -test-action all -platforms P -go2cspath <T>/src -module-disclosures <T>/src/tests/ModuleDisclosures <SRC> <VR>`.
@@ -71,15 +72,15 @@ Stop at the first one that fails.
    whose divergences are disclosed there cannot validate. A slow module may need `-test-timeout` above its 2m default:
    state the value used beside the proof.
 3. **Gate: the proof.** Step 2 exits 0. A tested package that did not validate makes it exit non-zero, and MODULE.md
-   names it under *Packages that did not validate* instead of giving it a row; the pack refuses to ship it (tools at
-   `claude/c2-nugetgo-binding-tested` or later). Then `VR/validation/M/MODULE.md` exists, every package row carries an
+   names it under *Packages that did not validate* instead of giving it a row; the pack refuses to ship it.
+   Then `VR/validation/M/MODULE.md` exists, every package row carries an
    `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
    package ships as VALIDATION.md.
 4. Convert the pack's input into another fresh root `PR`: `G -recurse=nuget -platforms P -go2cspath <T>/src <SRC> <PR>`.
 5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
    The pack checks this again; reading it here catches a wrong binary before a pack runs.
 
-**A module with no Go tests** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-cobra-increment` or later). Step 2
+**A module with no Go tests** (COORD ruling 2026-10-12). Step 2
 refuses it ("has no package with Go test files"), so there is no `VR` and no MODULE.md: skip steps 2, 3 and 5. Its
 proof is behavioral, one row per shipped RID, each run on a host of that RID (section 3, *A module with no Go tests*).
 Its sample program is committed at `T` under `src/tests/ModuleBehavior/M@V/`: `main.go`, `go.mod`, `go.sum`, and
@@ -107,11 +108,11 @@ for any other org. `-ExcludePackage` names, by import path, a library package of
 own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
 exclusion that names no library of the module, and one that a packed package references. An INTERNAL package that
 no production code reaches (imported only from `_test.go` files, or by nothing) is left out without being named, and
-the pack log lists each one; one with Go tests of its own is packed and logged `kept: validated` (tools at
-`claude/c2-nugetgo-testonly-exclude` or later). `-ExcludePackage` stays the tool for a public helper. The rehearsal label
+the pack log lists each one; one with Go tests of its own is packed and logged `kept: validated`.
+`-ExcludePackage` stays the tool for a public helper. The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
 
-**Flavors** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-rid-packs` or later). The pack adopts the `go.*`
+**Flavors** (COORD ruling 2026-10-12). The pack adopts the `go.*`
 release's per-OS promotion. A `-recurse` conversion emits one GOOS, so the pack converts `M`'s own source once per GOOS
 of the release's RID map (windows, linux, darwin) with `-Converter`, which is `G` from section 1. It refuses unless its
 conversion of `P`'s GOOS reproduces every packed project's `GoInputDigest`, because the digest records the converter
@@ -213,8 +214,8 @@ assembly is not the bytes the package carries for its RID.
 
 ### The hosted rows
 
-For a module with no Go tests these rows are its proof. For a module WITH Go tests (COORD ruling 2026-10-12; tools
-at `claude/c2-nugetgo-sample-rows` or later) they are an additional row set beside the test proof, never in its
+For a module with no Go tests these rows are its proof. For a module WITH Go tests (COORD ruling 2026-10-12)
+they are an additional row set beside the test proof, never in its
 place: they replace steps 3 to 5 above, which then need no owner's machine, and the release candidate takes
 `-BehaviorProofDir <rows>` beside `-ValidationDir`. Its VALIDATION.md gains a "Sample behavior" section under the test
 comparison, and its README a Sample behavior badge after the Tests badge. A tested module packed without rows is
@@ -331,9 +332,9 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
    `corpus-release.txt` and refuses the package's self-description as another corpus release. Build `T` at or after
    the record commit.
 2. **A tree whose golib moved past `R` cannot pack against `R`.** Its emission calls golib API the published
-   `go.lib` lacks, so the compile against the published `go.gen` fails (the 2026-10-09 hashset rehearsal, arm 2A,
-   recorded on `claude/c2-nugetgo-rehearsal`). The published-closure guard refuses an unpublished `go.lib` or `go.gen`
+   `go.lib` lacks, so the compile against the published `go.gen` fails (the 2026-10-09 hashset rehearsal, arm 2A). The published-closure guard refuses an unpublished `go.lib` or `go.gen`
    by name before compiling; the diff gate in 0.3 catches the move before any conversion.
+   <!-- 2026-10-26: re-read at a6214f0c5d: the branch this record was on no longer exists; the rehearsal record is commit 68d03fc541, which no branch at origin holds. -->
 3. **One binary per module.** `GoInputDigest` includes the converter revision, so a rebuild of `G` between 1.2 and
    1.4 makes the pack refuse the proof. Rebuild, then redo both conversions.
 4. **Comments do not enter the digest** (COORD ruling, 2026-10-09). `-tests` always converts with comments and the

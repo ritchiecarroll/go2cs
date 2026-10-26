@@ -19,7 +19,8 @@ module's summary is the `VALIDATION.md` its NuGet package carries, below the pac
 | `github.com/ritchiecarroll/hashset` | v1.0.0 | 1 | 37 | 0 | `linux/amd64` | [summary](validation/modules/github.com/ritchiecarroll/hashset@v1.0.0/MODULE.md) |
 | `github.com/spf13/pflag` | v1.0.9 | 1 | 177 | 0 | `linux/amd64` | [summary](validation/modules/github.com/spf13/pflag@v1.0.9/MODULE.md) |
 
-Measured with Go 1.24.13 at `Release` with the tiered JIT off, the test host's default.
+Measured with Go 1.24.13 at `Release` with the tiered JIT off, the test host's default. These five modules
+have not been re-measured with Go 1.26.10.
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
