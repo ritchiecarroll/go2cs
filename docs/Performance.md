@@ -39,7 +39,10 @@ outlier at the other end.
 | **IfaceCall** | 50M iterations of pure interface method dispatch — interface values of statically-known types built once, called in a megamorphic hot loop; no asserts, no switches. The row that answers "what does calling an interface method cost?" |
 | **Iface** | 20M iterations of the **common** interface cases: method dispatch, concrete comma-ok assertions, and a type switch over a closed set — all resolved by the compile-time (nominal) machinery: generated adapters and cast-shaped asserts. What ordinary Go interface code costs. |
 | **IfaceShell** | 5M iterations × 2 duck-typed interface asserts + forwarded calls — one on a value-typed dynamic value (the reflective **object shell**), one on a pointer-sourced one (the delegate-bound **generic shell**). The one path with no compile-time answer, and the only shared mechanism whose Native AOT behavior is otherwise unexercised. |
+| **IfaceShellChurn** | 1M iterations of the same duck-typed asserts as IfaceShell, but every assert sees a NEW dynamic value (a fresh struct, a fresh pointer, and `errors.Is` over a fresh `*fs.PathError`). IfaceShell is the case a shell cache wins on; this is the case it can only lose on, so the pair bounds what a cache costs. `run-shell-churn-bound.ps1` holds that cost to 1.15x time and 1.25x peak working set against the same row built with the cache compiled out. |
 | **RefLower** | A pointer-heavy hot loop: pointer parameters passed on to pointer parameters, address-taken locals and field addresses — the shapes the converter's ref-lowering turns from heap boxes into native C# `ref`s. |
+| **FieldView** | Field addresses that stay boxed: methods on `*element` taking `*element` operands and returning the receiver (crypto/internal/fiat's P-256 shape), every operand an `&p.f` and its own call site, over a pointer and over `&pts[i]`. Measures the field-view cache (golib `ж.Views.cs`) matching each site to its field's one view, on a pointer's box and on fresh element boxes. |
+| **TlsHandshake** | 64 full TLS 1.3 handshakes over loopback, one fresh connection each, after one warm-up handshake; the certificate is parsed before the clock starts. Isolates the handshake latency that `net/http`'s h2 write-deadline tests bound only indirectly. |
 
 Every benchmark prints a deterministic **checksum** (verified byte-identical across Go, C# JIT, and
 C# AOT before anything is measured) plus its own workload time measured in-program via
@@ -62,10 +65,14 @@ separately by the Startup row.
   part — so the History section's cross-toolchain comparisons (e.g., .NET 9 → 10) are always
   same-machine. Ratios from different hardware are not comparable and are never mixed.
 - **The AOT column's numbers are runtime numbers; producing them is expensive, and we say so.**
-  Each Native AOT publish compiles the entire converted-stdlib closure whole-program — hours per
-  publish, largely single-threaded, at a **15–18 GB** build-time working-set peak (re-measured at
-  each Go or .NET release move; a smaller program that uses only `fmt` and `reflect` held about 9.5 GB,
-  [Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)) — which is also exactly what buys the column's lean images and runtime memory wins. The
+  Each Native AOT publish compiles the entire converted-stdlib closure whole-program, which is also
+  exactly what buys the column's lean images and runtime memory wins. When this table was produced
+  that took hours per publish, largely single-threaded, at a **15–18 GB** build-time working-set
+  peak (22.2 GB when re-measured on 2026-10-13). Those figures were measured before golib's
+  generic-cycle fix of 2026-10-14, which cut a small package consumer's publish from about an hour
+  to minutes
+  ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large));
+  this suite's publishes have not been re-measured since. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
   section.
@@ -80,9 +87,9 @@ cd src/tests/Performance
 ./run-performance.ps1 --runs 10 --update-readme   # refresh the results block below
 ```
 
-Requirements: Go toolchain, a .NET SDK matching the corpus target framework (`net10.0`, named by
-`src/Directory.Build.props`), and — for the AOT column — a native linker and toolchain, which differs
-by host:
+Requirements: Go 1.26.10 (the release go2cs converts), a .NET SDK matching the corpus target
+framework (`net10.0`, named by `src/Directory.Build.props`), and — for the AOT column — a native
+linker and toolchain, which differs by host:
 
 | Host | Native AOT prerequisite |
 |:--|:--|
@@ -92,8 +99,8 @@ by host:
 
 Deliberately **not** scripted: `run-performance.ps1` does not install any of these. A benchmark
 harness that silently mutates the machine's toolchain is not a harness anyone should trust with a
-performance claim. `--no-aot` drops the whole column and needs none of them (F13,
-[PLAN-linux-operation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-linux-operation.md)).
+performance claim. `--no-aot` drops the whole column and needs none of them
+([PLAN-linux-operation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-linux-operation.md)).
 
 The environment line of the results block reads the CPU name from the registry on Windows and from
 `/proc/cpuinfo` on Linux, so a published table always names the part that produced it.
@@ -104,6 +111,9 @@ to produce identical (timing-filtered) stdout before anything is timed, so the t
 silently report a benchmark that computes something different in C#.
 
 ## Results
+
+The table below has 14 of the suite's 17 programs: TlsHandshake, IfaceShellChurn and FieldView
+joined the suite after it was measured, and the planned re-baseline measures all 17.
 
 <!-- PERF-RESULTS:BEGIN -->
 
@@ -229,13 +239,20 @@ binary costs to **build**, and the cost is large enough that omitting it would m
   converted-stdlib closure** (~three hundred packages) into it, largely single-threaded (~1.1–1.3
   effective cores regardless of machine). Measured at the move to .NET 10: **hours per publish** on
   laptop-class hardware — roughly an order of magnitude over the .NET 9 era on identical input —
-  so a full 14-row AOT re-baseline is days serial, overnight when publishes run concurrently on a
+  so a full AOT re-baseline was days serial, overnight when publishes ran concurrently on a
   high-memory box (measured figures and the run series:
   [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)).
-- **Build memory.** A publish peaks at roughly **15–18 GB working set** (re-measure at each hop —
-  the floor moves with the corpus). A 16 GB machine swaps; concurrent publishes need that much
-  *per lane*. The produced images are ~300 MB self-contained, sized by the closure rather than the
-  benchmark — while the same binaries **run** in tens of megabytes.
+- **Build memory.** A publish peaked at roughly **15–18 GB working set**, and at 22.2 GB when
+  re-measured on 2026-10-13 (re-measure at each Go or .NET release move — the floor moves with the
+  corpus). A 16 GB machine swaps; concurrent publishes need that much *each*. The produced images
+  are ~300 MB self-contained, sized by the closure rather than the benchmark — while the same
+  binaries **run** in tens of megabytes.
+- **Since 2026-10-14.** The build time and memory above were measured before golib's generic-cycle
+  fix of that day. The fix cut a 31-package consumer's publish from about an hour to under four
+  minutes on a hosted Linux runner
+  ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+  This suite's publishes, which compile the whole converted standard library, have not been
+  re-measured since; the planned re-baseline will.
 - **Why it is this way.** ILC is a **whole-program** compiler: reachability, the generic
   instantiation closure, cross-assembly inlining and tree-shaking are all computed per-application
   from that application's roots. Nothing is reusable between applications and there is no
