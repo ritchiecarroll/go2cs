@@ -661,3 +661,135 @@ POST: one per wave:
      Measured here: the per-GOOS eligibility (eligible.sh, go1.26.10, the corpus tags, a fabricated control on each OS)
      and the shard deal (shards.py), both reproducing their committed outputs byte-identically. A docs act: no H9 or
      H10 instrument was run to write this plan. -->
+
+## 13. The final re-read pass (COORD's ask of 2026-10-25, at the batch-43 tip)
+
+Batch 43 lands seats that move emission in rows already banked at go1.26.10. Each such row is read once more, at the
+batch-43 tip `<TIP43>`, before the annotation legs and the close. The data file is
+[`data/rebank-go1.26.10/reread.tsv`](phase4/data/rebank-go1.26.10/reread.tsv), in `shards.tsv`'s columns (os, lane,
+shard, seq, row, projected_s). It is cut by [`reread.py`](phase4/data/rebank-go1.26.10/reread.py), deterministically,
+from the population, the eligibility lists, `$longTimeouts` and this hop's own pass-1 walls.
+
+### 13.1 Windows + linux: 26 rows, each read on both OSes
+
+The set is every row whose test or production `src/core` emission moved in batches 42-43, read from each seat's
+committed diff against its merge base with `996a609534`:
+- **the tail-call seat** (`fad9217ba0`): 20 packages. `context` was converted with them and did not change, so it is
+  not read. (My FINAL post said 21; the footprint is 20.)
+- **H's two seats** (`h-named-shift-count`, `h-range-nil-ptrarray`):
+  - production: `math/big`, `go/constant`, `encoding/asn1`, `runtime`;
+  - test only: `crypto/internal/fips140/edwards25519/field`, `time`, `image/jpeg`, `runtime`.
+- **`log`**, added by me. The tail-call seat's lever A changes every NoInlining overload go2cs-gen writes, and `log`'s
+  Lshortfile is runtime.Caller's. The seat read it on windows only.
+- **L3's `log/slog` and `testing`** are already in the set.
+
+Rows that are NOT read on windows or linux, and why:
+- **R's F1+G** (`r-methodvalue-box`) commits no `src/core` file.
+- **P2's mach_vm_region and iovec/dirent, and C2's sigpipe** touch only `darwin/` hand-owned files. **C2's atomic
+  floor** is a sweep floor.
+- **The `/var`-symlink and results-env seats** change no windows or linux verdict, by COORD's acceptance. The
+  segment-age seat is docs and the format guard.
+- **H's go2cs-gen change** adds `uint64`/`int64` shift-count overloads to every integer wrapper. A call site binds
+  them only where the converter now passes such a count, and those sites are in the committed rows above. No
+  existing call could compile against them before the change.
+
+| OS | lane | rows | projected | note |
+|---|---|---|---|---|
+| windows | i9 | 2 | 25 min | `time`, `runtime`: reserved, not off-i9 |
+| windows | RLAP | 2 | 27 min | `net/http`, `crypto/tls`: reserved and off-i9 (Q5) |
+| windows | H | 13 | 21 min | dealt longest-first onto the lane that finishes first |
+| windows | G | 9 | 20 min | costed as H (measured 2026-10-25: G is H's speed or better) |
+| linux | RWSL | 3 | 82 min | `runtime`, `crypto/tls`, `net/http`: Q2's proven box. AFTER RLAP-R (Q2: serial) |
+| linux | P1 | 18 | 38 min | |
+| linux | P2 | 5 | 37 min | P2 pays a ~260 s floor per row (pass 1: min 260-269 s on all three shards) |
+
+Costs are pass-1 `wall_s` at go1.26.10. An L2 re-read pays a fresh build, so the minimum per row is taken. A
+projection, not a promise.
+
+**Critical path: R, at about 1 h 50 min** (RLAP-R 27 min, then RWSL-R 82 min). Every other windows and linux lane
+finishes inside 40 min. No row in the set is linux `net`, so the NXDOMAIN rule has nothing to place. `crypto/tls` and
+`net/http` stay off the i9 by construction.
+
+### 13.2 Darwin: 12 rows, on C1
+
+| row | why it is read again | at D-W1/D-W2 |
+|---|---|---|
+| `net` | P2's iovec: native `writev` (TestBuffers_WriteTo read "bad address") | failing, RIDs disagree (3db157aaa9) |
+| `net/http/pprof` | P2's mach_vm_region | failing |
+| `runtime/pprof` | P2's mach_vm_region | failing |
+| `syscall` | P2's Getdirentries (TestDirent's SIGBUS) | conversion-blocked |
+| `net/http/cgi` | the `/var`-symlink seat (proven at its seat tip, run 40246104125, not at `<TIP43>`) | failing |
+| `math/big` | the same seat (TestEscape), plus H's shift-count production change | failing |
+| `os` | C2's sigpipe (TestStdPipe), plus tail-call marks | failing |
+| `os/exec` | C2's sigpipe: os/exec's SIGPIPE tests run under the new disposition | validated (9b0269c2e8) |
+| `sync/atomic` | C2's 150m floor (E1 timed it at 6217c00c85) | arm64 failing, x64 validated |
+| `log/slog` | the tail-call seat's frame-SENSITIVE marks (TestCallDepthConnection) | L3-equivalent |
+| `testing` | the same (TestTBHelper) | L3-equivalent |
+| `runtime` | frame-sensitive marks (ExampleFrames' Callers chain), H's mpallocbits, mach_vm_region, sigpipe | failing, RIDs disagree |
+
+A row banks a darwin annotation only when both RIDs validate and agree, as before. `runtime` is read for the record.
+
+**Proposed filters**, one dispatch each so a long row cannot hold the others: `runtime` alone, `sync/atomic` alone,
+`net` alone, and the other nine together. Darwin walls are not measured on this side. The windows walls of the same
+rows are about 22 min (`runtime`), 1.5 min (`sync/atomic`), 25 min (`net`) and 35 min (the nine). C1 scales them by
+D-W2's run durations. `sync/atomic`'s wall is E1's measurement, up to its 150m floor on arm64. **That row, not R, is
+the critical path if E1 read it near the floor.**
+
+**NO darwin re-read, with the reason:**
+- **The tail-call seat's Helper-only rows**: `bufio`, `crypto/cipher`, `crypto/internal/fips140/edwards25519`,
+  `crypto/rsa`, `crypto/tls`, `database/sql`, `go/build`, `go/token`, `internal/coverage/slicewriter`, `io/fs`,
+  `iter`, `net/http`, `path/filepath`, `runtime/debug`.
+  - A Helper mark moves only the file:line a FAILING check prints. No passing verdict can move, and none of these
+    rows has a disclosure signature pinning a test line.
+  - This is the judgment COORD accepted for the six D-W1 rows. It holds for the D-W1 rows read later and for D-W2's
+    `crypto/rsa`, `bufio` and `database/sql`. D-W2 was also read before the seat, at 3db157aaa9.
+- **H's OS-independent rows**: `go/constant`, `encoding/asn1`, `crypto/internal/fips140/edwards25519/field`,
+  `image/jpeg`, `time`.
+  - The changes are a shift-count width and an index-only range's lowering, with no OS path. A darwin verdict can
+    move only where the windows and linux ones do.
+  - **CONDITION:** if 13.1 reads any of these at a count other than its bank, that row joins C1's set.
+- **`log`**: the same condition.
+- **`internal/synctest`**: ruled darwin-UNBANKED at 1.26. Its segment is removed at the close.
+- **`internal/trace`**: a Go-side host skip on x64. The RIDs disagree, so there is no darwin annotation at 1.26 (BOARD).
+- **`context`**: its emission did not move.
+
+### 13.3 After the pass: the annotation legs and the close
+
+1. **Windows: the re-read rows' bank.** Each lane's shard ref carries artifacts only, as §4.4 lists. A row whose
+   matched count moved updates its Tests cell and proof page in ONE roster seat, and `docs/validation/index.md`
+   follows. The full `go test ./...` in `src/go2cs` gates it.
+2. **The linux annotation leg** (§5.1) at `<TIP43>`:
+   - the 26 rows, from P1-R/P2-R/RWSL-R;
+   - the L2 rows not among them, from their L2 evidence (P1-L2, P2-L2, RWSL-L2, P1-L2-poll at 36306723ae);
+   - L3's `log/slog` and `testing`, which are in the 26.
+3. **The darwin annotation leg:** D-W2's rows, refreshing the stale `math/big` 231, `reflect` 396 + 22, `slices` 121
+   and `internal/strconv` 3, plus the 12 C1-R rows. Both RIDs must agree.
+4. **The roster close (§8):**
+   - `sync/atomic` banks from C1-R if both RIDs validate under the floor, or its `darwin: 108` is removed;
+   - `internal/synctest`'s `darwin: 28` is removed;
+   - `internal/coverage/cfile`'s darwin segment is removed (the staged-std go.mod identity class);
+   - §2h reads **0 refused**.
+5. **A §2h fix is owed before step 4 can read 0** (sized here, cut after batch 43 lands, since §2h rides it).
+   - §2h reads only `docs/phase4/h10-evidence/go<pin>/darwin/*.tsv`. D-W2's evidence sits in `dw2/` and C1-R's would
+     sit beside it, and a row read in two waves gives two lines per RID, which §2h refuses.
+   - The fix: recurse, and let the LATEST wave's reading per row win (D-W1 < D-W2 < C1-R, by a declared wave order,
+     never by file time). About 15 lines and a fixture arm for each rule.
+
+**Publish arithmetic, as a projection:**
+- R, about 1 h 50 min (or `sync/atomic`'s darwin dispatch, if E1 read it near its floor);
+- then the posts and the merge of the shard refs;
+- then the three legs and the close in parallel: about 1 h, the roster seat and full `go test` included.
+
+That is **about 3 h from `<TIP43>` landing**, if the critical path is R. The darwin legs run on C1's runners while the
+windows and linux lanes run.
+
+<!-- Provenance (G, 2026-10-25, COORD's ask as plan owner). Read at 996a609534 and the seat refs on origin:
+     h-named-shift-count 5d611fb447, h-range-nil-ptrarray 2497787ecd, r-methodvalue-box 82711e7687,
+     p2-darwin-machvm 6a8451376a, p2-darwin-iovec-dirent 002bfdaa71, c2-darwin-sigpipe 163a5d1a1b,
+     c2-atomic-floor 6217c00c85 -- each one's `git diff --name-only <merge-base> <ref> -- src/core`, and each founding
+     commit's message. The tail-call footprint is `git show --name-only fad9217ba0` (20 packages). Darwin states: the
+     D-W1 TSVs at 996a609534 and the D-W2 TSVs at claude/c1-darwin-dw2 802e241278 (read at 3db157aaa9). Walls: the
+     pass-1 and L2 evidence TSVs under h10-evidence/go1.26.10/{windows,linux}. G's speed: this lane's own rows on
+     2026-10-25 (log 47 s, testing 62 s, math/big 80 s, net/http/cgi 190 s, log/slog 335 s first-row). SIGPIPE's
+     test packages: a grep of go1.26.10's _test.go files (os, os/exec). reread.py reproduces reread.tsv byte-identically
+     (sha1 4c42627db9). Batch 43's tip af4b007d14 is COORD's local assembly and was not read here. -->
