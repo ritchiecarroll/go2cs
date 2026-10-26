@@ -552,7 +552,7 @@ Examples:
 	options := Options{
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
-		go2csPath:           *go2csPathCmd,
+		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),
 		convertStdLib:       convertStdLib,
 		convertTimeout:      *convertTimeoutCmd,
 		convertTests:        *convertTestsCmd,
@@ -757,16 +757,26 @@ Examples:
 
 		isDir := fileInfo.IsDir()
 
-		if !isDir {
-			inputFilePath = filepath.Dir(inputFilePath)
-		}
-
 		var outputFilePath string
 
 		// If the user has provided a second argument, we will use it as the output directory or file
 		if len(positionals) > 1 {
 			outputFilePath = strings.TrimSpace(positionals[1])
-		} else {
+		}
+
+		if !isDir {
+			// A single .go file converts to ONE .cs file, settled here while the input still names the file: the
+			// conversion loads the file's whole package, and the project and package metadata go in the directory
+			// that holds the output file.
+			options.singleFileOutput = singleFileOutputPath(inputFilePath, outputFilePath)
+
+			if options.singleFileInput, err = filepath.Abs(inputFilePath); err != nil {
+				log.Fatalf("Failed to get absolute file path \"%s\": %s\n", inputFilePath, err)
+			}
+
+			inputFilePath = filepath.Dir(inputFilePath)
+			outputFilePath = filepath.Dir(options.singleFileOutput)
+		} else if len(outputFilePath) == 0 {
 			outputFilePath = inputFilePath
 		}
 
