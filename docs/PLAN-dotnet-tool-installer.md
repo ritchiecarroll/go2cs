@@ -251,5 +251,16 @@ network at all after `dotnet tool install`, which `-recurse=nuget` cannot use an
 - **OQ-4: it lands with 1.26.10.2.**
 - **OQ-5: yes to both.** The release archives gain provisioning too. The README and the home page lead with
   `dotnet tool install -g go2cs` for a first-time user, and keep the build-from-source route below it.
+- **Signing reaches the binaries too (the owner, 2026-10-26).** Every Windows `go2cs` executable the project ships
+  is Authenticode-signed with the release certificate: the ones inside the tool packages, and the ones in the
+  GitHub release archives. The release machine downloads the CI-built archives, signs the Windows executables in
+  the release's PIN session, re-packs them and pushes them back to the draft Release. The certificate is an
+  Authenticode certificate, so it signs Windows binaries only. The archives for every platform are covered by a
+  detached GPG signature over `SHA256SUMS`, made with the key that signs the release tag. macOS signing and
+  notarization need an Apple Developer ID, and remain an open question for the owner.
+  1.26.10.2's seat #12 builds this; the attestation story for re-signed bytes is part of that seat.
+<!-- The owner, in the COORD chat, 2026-10-26: "per questions: download, go2cs ID, same API key, signing would be
+     good (also for release binaries, even if downloaded by i7, signed and pushed back), yes on README tool install." -->
+
 
 <!-- {% endraw %} -->
