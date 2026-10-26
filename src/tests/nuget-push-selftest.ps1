@@ -14,6 +14,15 @@
       normalized a package versioned x.y.z.0 that the flat container keys as x.y.z -> found published, not PUT
       conflict   the feed answers 409 for a version its flat container does not list yet -> counted as published
       refused    403 with NO Retry-After (a bad API key) -> throws, naming the package and the count pushed before it
+      resume-foreign  release-nuget.ps1 -ResumePush over a folder holding a package of another version -> refused by
+                 name, nothing PUT, version.props untouched
+      resume-release  release-nuget.ps1 -ResumePush, end to end, over three packages of the release (one published, a
+                 403 with Retry-After 1 on the first PUT) -> exit 0, 2 pushed + 1 skipped + 1 wait, version.props
+                 byte-identical (no re-bump), the published one never PUT
+
+    The two release-nuget cases run a scratch copy of release-nuget.ps1 and the files it reads (global.json,
+    _paths.ps1, Directory.Build.props, _nugetpush.ps1, version.props, and a no-op gencorpusrelease for Phase 4) in a
+    child of this PowerShell, so they need dotnet and go on PATH, as a release does.
 
     Exit 0 clean, 1 on any violation. Writes only under the host's temp directory.
 #>
@@ -30,8 +39,8 @@ New-Item -ItemType Directory -Path $work | Out-Null
 
 function Check([bool] $Condition, [string] $Message) { if (-not $Condition) { $failures.Add($Message) } }
 
-function New-FakePackage([string] $Id, [string] $Version) {
-    $path = Join-Path $work "$Id.$Version.nupkg"
+function New-FakePackage([string] $Id, [string] $Version, [string] $Dir = $work) {
+    $path = Join-Path $Dir "$Id.$Version.nupkg"
     $zip = [System.IO.Compression.ZipFile]::Open($path, 'Create')
     try {
         $writer = New-Object System.IO.StreamWriter($zip.CreateEntry("$Id.nuspec").Open())
@@ -95,7 +104,7 @@ $feed = [powershell]::Create()
                 if ($State.Published.ContainsKey("$($Matches[1])/$($Matches[2])")) { Respond $context 200 '<package/>' $null }
                 else { Respond $context 404 '' $null }
             }
-            elseif ($request.HttpMethod -eq 'PUT' -and $path -match '^/api/v2/package/?$') {
+            elseif ($request.HttpMethod -eq 'PUT' -and $path -eq '/api/v2/package/') {
                 # The package is the multipart body's one part: between the end of its headers and the closing boundary.
                 $buffer = New-Object System.IO.MemoryStream
                 $request.InputStream.CopyTo($buffer)
@@ -211,6 +220,64 @@ try {
     if ($thrown) { Check ($thrown -match 'go\.refused\.b' -and $thrown -match 'after 1 pushed') "refused: the error does not name go.refused.b and the 1 pushed before it: $thrown" }
     Check ($recordedWaits.Count -eq 0) "refused: a 403 without Retry-After waited [$($recordedWaits -join ',')]"
 
+    # ---- release-nuget.ps1 -ResumePush ----------------------------------------------------------------------------
+    $repoSrc = Split-Path $PSScriptRoot -Parent
+    $root = Join-Path $work 'release'
+    $src = Join-Path $root 'src'
+    New-Item -ItemType Directory -Path (Join-Path $src 'go2cs/internal/gencorpusrelease') -Force | Out-Null
+    Copy-Item (Join-Path (Split-Path $repoSrc -Parent) 'global.json') $root
+    foreach ($f in 'release-nuget.ps1', '_paths.ps1', '_nugetpush.ps1', 'version.props', 'Directory.Build.props') { Copy-Item (Join-Path $repoSrc $f) $src }
+    Set-Content -Path (Join-Path $src 'go2cs/go.mod') -Value "module stub`n`ngo 1.21`n"
+    Set-Content -Path (Join-Path $src 'go2cs/internal/gencorpusrelease/main.go') -Value "package main`n`nfunc main() {}`n"
+
+    $propsPath = Join-Path $src 'version.props'
+    $propsBefore = [System.IO.File]::ReadAllBytes($propsPath)
+    $group = ([xml](Get-Content -Raw $propsPath)).Project.PropertyGroup
+    $release = "$($group.GoStdLibVersion).$($group.GoBuildNumber)".Trim()
+    $flat = ConvertTo-GoNuGetNormalizedVersion $release
+
+    function Invoke-Release([string] $OutDir) {
+        $ErrorActionPreference = 'Continue'
+        $savedKey = $env:NUGET_API_KEY
+        $env:NUGET_API_KEY = 'selftest-key'
+        try {
+            $out = @(& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File (Join-Path $src 'release-nuget.ps1') `
+                -ResumePush -Yes -Source $source -OutDir $OutDir 2>&1 | ForEach-Object { "$_" })
+            $code = $LASTEXITCODE
+        }
+        finally { $env:NUGET_API_KEY = $savedKey }
+        [pscustomobject]@{ Code = $code; Text = ($out -join "`n") }
+    }
+
+    function Test-PropsUntouched([string] $Case) {
+        $after = [System.IO.File]::ReadAllBytes($propsPath)
+        Check ([System.Convert]::ToBase64String($after) -eq [System.Convert]::ToBase64String($propsBefore)) "${Case}: version.props changed (re-bumped)"
+    }
+
+    $foreignDir = Join-Path $work 'out-foreign'
+    New-Item -ItemType Directory -Path $foreignDir | Out-Null
+    [void](New-FakePackage 'go.lib' $release $foreignDir)
+    [void](New-FakePackage 'go.stale' '1.0.0.9' $foreignDir)
+    $state.Puts.Clear(); $state.Script.Clear()
+    $run = Invoke-Release $foreignDir
+    Check ($run.Code -eq 1) "resume-foreign: exit $($run.Code); want 1:`n$($run.Text)"
+    Check ($run.Text -match 'go\.stale\.1\.0\.0\.9\.nupkg' -and $run.Text -match "not version $([regex]::Escape($release))") "resume-foreign: the refusal does not name go.stale and the release:`n$($run.Text)"
+    Check ($state.Puts.Count -eq 0) "resume-foreign: PUT $(@($state.Puts) -join ', ')"
+    Test-PropsUntouched 'resume-foreign'
+
+    $releaseDir = Join-Path $work 'out-release'
+    New-Item -ItemType Directory -Path $releaseDir | Out-Null
+    foreach ($id in 'go.x', 'go.gen', 'go.lib') { [void](New-FakePackage $id $release $releaseDir) }
+    $state.Published["go.gen/$flat"] = $true
+    $state.Puts.Clear()
+    [void]$state.Script.Add(@{ Status = 403; Body = 'Quota Exceeded'; Headers = @{ 'Retry-After' = '1' } })
+    $run = Invoke-Release $releaseDir
+    Check ($run.Code -eq 0) "resume-release: exit $($run.Code); want 0:`n$($run.Text)"
+    Check ($run.Text -match 'pushed\s+: 2; already published: 1; rate-limit waits: 1') "resume-release: no '2 pushed, 1 already published, 1 wait' line:`n$($run.Text)"
+    Check ((@($state.Puts) -join ',') -eq "go.lib $release,go.lib $release,go.x $release") "resume-release: PUTs were $(@($state.Puts) -join ', '); want go.lib (refused), go.lib, go.x"
+    Check ($run.Text -notmatch 'Phase 1: bump') "resume-release: Phase 1 ran:`n$($run.Text)"
+    Test-PropsUntouched 'resume-release'
+
     foreach ($e in $state.Errors) { $failures.Add("mock feed: $e") }
 }
 finally {
@@ -222,5 +289,5 @@ finally {
 }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host 'nuget-push selftest: PASS (quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name)'
+Write-Host 'nuget-push selftest: PASS (quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
 exit 0
