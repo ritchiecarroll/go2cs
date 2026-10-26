@@ -305,6 +305,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interceptorBuildGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
