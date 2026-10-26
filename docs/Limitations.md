@@ -28,7 +28,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 * **cgo.** A package whose build selects a file with `import "C"` stops the whole run:
   `error GO2CS2001: ... cgo has no C# conversion yet`. With no pure-Go path it is out of reach today
-  ([plan](PLAN-cgo-interop.md), [Roadmap](Roadmap.md#cgo)).
+  ([Roadmap](Roadmap.md#cgo)). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1) -->
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**
   `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
   naming the site and the method. A pointer element reaches the generic code through a proxy object, and
@@ -61,8 +61,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   four seconds to start, where Go took 100 MB and under a tenth of a second. 100,000 took minutes and about
   6 GB, and a million had not finished starting after ten minutes. `runtime.GOMAXPROCS(1)` does not make anything run one at a time.
   Bound your fan-out with a worker pool, and remember that a `net/http` server spends one on every open
-  connection. [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
-  the limit would take.
+  connection.
+  <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
+       the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
   <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1100 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
@@ -166,6 +167,14 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
   * A type switch's `case int:` also catches an `int32` or `rune` when the switch has no `int32` case of
     its own (`case uint:` likewise for `uint32`).
+  * A left shift of an untyped constant that takes a named integer type from its context, such as
+    `m & (1 << uint(32-1-i))` with `m` an `fs.FileMode`, wraps its count at the type's width: a count of the
+    width or more gives the wrapped result where Go gives 0, and a negative count does not panic.
+  <!-- BOARD-next-validation-candidates.md, the 2026-10-25 row "an untyped-constant LEFT shift with a NAMED result
+       still masks its count" (H): the converter re-types the constant through the named type's underlying basic, so
+       `(FileMode)((uint32)1 << (int)((nuint)(32 - 1 - i)))` uses C#'s native shift, which masks the count (n & 31).
+       Every corpus count is below the width by construction, so no banked suite reads a wrong value; listed here on
+       2026-10-26 (R's docs follow-up) until the fix lands. -->
 
 ## What works, but costs you something
 
