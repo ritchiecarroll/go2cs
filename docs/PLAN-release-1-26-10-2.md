@@ -34,6 +34,7 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 | 8 | Darwin harness items: the amd64-only test skip on the arm64 RID, cfile's host identity, `testing`'s working directory (fix B) | harness + hand-owned `testing` | C1 |
 | 9 | Spawned test processes start faster (ReadyToRun or tiered JIT), so the BoGo suite fits its wall on desktop hosts | harness | G sizes; P1 measures |
 | 10 | Alloc-free element-address compare (`&a[i] == &b[j]`) | converter + golib | after #1 lands; lane by ruling |
+| 11 | The `go2cs` dotnet tool: install with `dotnet tool install -g go2cs` and convert with no Go installed (Go fetched on first use, verified), per [`PLAN-dotnet-tool-installer.md`](PLAN-dotnet-tool-installer.md) | converter + packaging + release ritual | P2 |
 
 **Not in this release, already scheduled:** the performance re-baseline against the published 1.26.10.1 packages
 ([`PLAN-perf-rebaseline.md`](PLAN-perf-rebaseline.md), G with the i9's AOT builds), the nugetgo rebuild wave against
@@ -41,8 +42,10 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 
 **Later, sized but not scheduled:** stack-allocation parity
 ([`DESIGN-stack-allocation.md`](DESIGN-stack-allocation.md)), the deferred-closure frame marker, `runtime.Goexit` on the
-main goroutine, real `debug.ReadBuildInfo` data, the goroutine-leak profile, the crash block's `created by` line, and
-the remaining darwin list items that need a design.
+main goroutine, real `debug.ReadBuildInfo` data, the goroutine-leak profile, the crash block's `created by` line, the
+remaining darwin list items that need a design, and stage 3d of
+[`PLAN-golib-full-trim.md`](PLAN-golib-full-trim.md) (the dynamic-code class under the AOT analyzer, which reads 26
+IL3050 sites at the plan's base).
 
 ## 2. Order and landing
 

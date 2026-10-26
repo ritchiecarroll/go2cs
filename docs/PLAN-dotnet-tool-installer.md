@@ -1,7 +1,8 @@
 # PLAN — a `dotnet tool` installer for go2cs that needs no Go installation
 <!-- {% raw %} -->
 
-> **STATUS: PROPOSED (COORD research, 2026-10-26). Exploratory; nothing is built or ruled.** An instance plan
+> **STATUS: ACCEPTED (the owner, 2026-10-26): build the `go2cs` dotnet tool for 1.26.10.2, with the
+> download design. The rulings on §10 are in §11.** Originally PROPOSED (COORD research, 2026-10-26). An instance plan
 > answering the owner's ask of 2026-10-26: what it takes to ship go2cs as a .NET tool that brings its own Go,
 > where it lives, what it costs to build and to keep, and what to recommend. Measurements are from the i7
 > (win-x64) against Go 1.26.10 and a converter built at master `d269ef477b`; a linux-amd64 archive was measured
@@ -231,5 +232,24 @@ network at all after `dotnet tool install`, which `-recurse=nuget` cannot use an
 - **OQ-4.** When should it land: with `1.26.10.2`, or as its own release after it?
 - **OQ-5.** Should the GitHub release archives also gain provisioning (it comes with D/T1 at no extra cost), and
   should the README lead with `dotnet tool install -g go2cs` over clone-and-`go install`?
+
+## 11. Rulings (2026-10-26)
+
+<!-- The owner, in the COORD chat: "Sure, let's go with `go2cs` dotnet tool for 1.26.10.2 -- sounds like it would
+     install from dotnet as a tool and 'just work'. Very cool for .NET first timers experimenting with Go
+     conversions." OQ-1, OQ-2's ID, OQ-4 and OQ-5's README half are his; the rest are COORD's, within that frame. -->
+
+- **OQ-1: download on first use (D).** The tool installs and "just works": the first conversion fetches the pinned
+  Go, verifies it and runs it, with no separate Go install.
+- **OQ-2: the ID and command are `go2cs`, under the same API key as the `go.*` packages.** The tool's seven packages
+  take the release past nuget.org's 350-push window, which the resumable, rate-aware push (1.26.10.2 seat #6) handles.
+- **OQ-3: the tool packages are signed, like every package.** The owner's account has the signing certificate
+  registered, so nuget.org refuses an unsigned push. The tool packages are therefore packed on the release machine
+  by the release ritual, from six `go2cs` binaries cross-compiled there from the release record commit (the converter
+  is pure Go, so cross-compiling needs no other toolchain), and signed in the same PIN session as the `go.*` packages.
+  `release-binaries.yml` keeps building the attested GitHub release archives from the same commit.
+- **OQ-4: it lands with 1.26.10.2.**
+- **OQ-5: yes to both.** The release archives gain provisioning too. The README and the home page lead with
+  `dotnet tool install -g go2cs` for a first-time user, and keep the build-from-source route below it.
 
 <!-- {% endraw %} -->
