@@ -8437,15 +8437,26 @@ type testDisclosure struct {
 	// test. A half's own platforms scope that half at load (scopeDisclosures); an entry none of whose
 	// halves apply is out of scope as a whole. The proof page reports each half on its own row.
 	Halves []disclosureHalf `json:"halves,omitempty"`
+
+	// History and HostConditionalHistory are the entry's own record, and NOTHING renders them. Reason and
+	// HostConditional are printed on the package's public proof page (validationProofPages.go), so they say only what
+	// a visitor needs: what the test asserts, why the converted side differs, what was measured. Who decided an entry,
+	// when, and what an earlier reason said (a relabel, a corrected claim, the post that ruled it) is provenance, and
+	// it lives here, verbatim, the way it read before its reason was reworded for visitors (owner ruling OQ-1,
+	// 2026-10-26; seat #13 of the 1.26.10.2 plan). repoguard's TestStdlibDisclosureTextHasNoFleetWords holds the
+	// rendered fields to that.
+	History                string `json:"history,omitempty"`
+	HostConditionalHistory string `json:"hostConditionalHistory,omitempty"`
 }
 
 // disclosureHalf is one reason of a two-half entry (testDisclosure.Halves): the class, signature,
 // reason and retirement fields an entry carries, held to the same rules, plus a platform scope of its
-// own.
+// own, and the same never-rendered History beside its reason (testDisclosure.History).
 type disclosureHalf struct {
 	Class     string    `json:"class"`
 	Signature string    `json:"signature"`
 	Reason    string    `json:"reason"`
+	History   string    `json:"history,omitempty"`
 	Want      string    `json:"want,omitempty"`
 	Reading   string    `json:"reading,omitempty"`
 	Plan      string    `json:"plan,omitempty"`
@@ -8462,7 +8473,7 @@ func (d testDisclosure) parts() []disclosureHalf {
 		return d.Halves
 	}
 
-	return []disclosureHalf{{Class: d.Class, Signature: d.Signature, Reason: d.Reason, Want: d.Want, Reading: d.Reading,
+	return []disclosureHalf{{Class: d.Class, Signature: d.Signature, Reason: d.Reason, History: d.History, Want: d.Want, Reading: d.Reading,
 		Plan: d.Plan, Floor: d.Floor, Proof: d.Proof}}
 }
 
@@ -8652,6 +8663,10 @@ type testDisclosureManifest struct {
 	// here rather than hand-edited into the page, because the page is regenerated on every
 	// re-validation and a hand edit would not survive one.
 	Notes []string `json:"notes,omitempty"`
+
+	// NotesHistory is the notes as they read before they were reworded for visitors, kept verbatim and never
+	// rendered (testDisclosure.History).
+	NotesHistory []string `json:"notesHistory,omitempty"`
 }
 
 // readTestDisclosureManifest reads and VALIDATES the package's hand-owned disclosure manifest,

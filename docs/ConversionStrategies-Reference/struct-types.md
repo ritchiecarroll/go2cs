@@ -886,7 +886,7 @@ named branch), and the caller trusts that output directly instead of a second pa
 everywhere except named-parameter func types — bare-type func types (`func(int, string)`) were already
 converted once and stay so, just at the `extractTypes` site rather than the caller. (Guarded by the
 `NamedFuncTypeMapParam` behavioral test — `type Importer func(imports map[string]*Node, path string) (pkg
-*Node, err error)` used as a function parameter, output-compared vs Go; CNR byte-identical across the corpus,
+*Node, err error)` used as a function parameter, output-compared vs Go; every behavioral test re-converts unchanged,
 and an A/B reconvert of go/ast shows only that one collapsed-delegate parameter shape moving.)
 
 **A collapsed methodless named func type's DELEGATE TYPE renders through `iifeDelegateType`, not the string
@@ -910,7 +910,7 @@ equal-or-better**: the go/doc mangle fixed, plus `go/parser`/`go/scanner` (`go.t
 `tokenꓸPosition`), `go/internal/gccgoimporter` (a malformed `(io.ReadCloser>, error)` → valid),
 `internal/trace/traceviewer` (`net.http_package.Request` → `http.Request`), and `path/filepath`
 (`io.fs_package.DirEntry` → `fs.DirEntry`) all cleaned up, with `bufio`/`go/ast`/`nettest` only dropping
-cosmetic tuple names; CNR touches only three existing goldens (`NamedFuncTypeMapParam`,
+cosmetic tuple names; re-converting the behavioral tests changes only three existing goldens (`NamedFuncTypeMapParam`,
 `SubpackageFuncTypeParam`, `FirstClassFunctions`), all the same pattern. (Guarded by the `CrossPkgUser`
 extension — a package-level `simpleResolve` passed as a METHOD GROUP to `CrossPkgLib.Resolve`, whose
 `Resolver` is a methodless func type naming the cross-package `*CrossPkgLib.Node`, so the wrapped delegate
@@ -926,7 +926,7 @@ a member of the os package's C# class, so a cross-package reference `os_package.
 **target** — `os.FileInfo` → `fs.FileInfo` (→ `io.fs_package.FileInfo` via the file's `fs` using). Gated
 to a **different-package target**: an alias to a SAME-package type (`CrossPkgLib.Temperature = Celsius`)
 already resolves through the existing `ꓸ` global-using alias (`CrossPkgLibꓸTemperature`) and is left
-untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. CNR byte-identical;
+untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. Every behavioral test re-converts unchanged;
 an A/B of os+io/ioutil (same package set) shows only that one intended resolution (io/ioutil's `ReadDir`
 sort lambda moved `osꓸFileInfo` → `fs.FileInfo`, matching the file's other `fs.FileInfo` refs — still
 compiles). No behavioral test covers it: the shape needs three packages (B declares `Y`, A aliases
@@ -954,7 +954,7 @@ reaching the parser is slash-free (`func(*Server, *tls.Conn, Handler)`) and each
 through the normal alias route. Result NAMES are preserved, so a named multi-result field keeps its
 named C# tuple (the display-path advantage the old struct-field routing existed to protect); a
 same-package/builtin signature renders byte-identically to the old `t.String()` path (zero churn —
-CNR confirmed across the whole behavioral corpus). A variadic tail renders `...elem` (which the old
+every behavioral test re-converts unchanged). A variadic tail renders `...elem` (which the old
 path's `..`-strip reduced to the unparseable `.elem`) and lowers through the parser to the golib
 `ꓸꓸꓸ` delegate family (next paragraph). One side effect: element recursion passes through
 `getAliasQualifiedTypeName`'s foreign-ALIAS arm, so a signature naming a cross-package alias (`os.FileInfo` →
@@ -998,7 +998,7 @@ target is a methodless named func type, the assertion now renders its `getCSharp
 `Func<…>`): `ci._<Func<io.Writer, (io.WriteCloser, error)>>()` — matching how the stored value was
 emitted (a collapsed delegate). Other assertion targets are unchanged. (Guarded by the
 `MethodlessFuncTypeAssert` behavioral test — `i.(Compressor)` on a matching and a non-matching dynamic
-type, output-compared vs Go; CNR byte-identical and an A/B of archive/zip shows only the two intended
+type, output-compared vs Go; every behavioral test re-converts unchanged, and re-converting archive/zip before and after shows only the two intended
 `_<Compressor>`/`_<Decompressor>` → `_<Func<…>>` lines.)
 
 An **UNINITIALIZED local `var` of a methodless named func type** renders its declared type through the
@@ -1218,7 +1218,7 @@ args, an empty tail and a spread; it fails on the pre-change converter with CS15
 which is exactly the `slices` `TestGrow`/`TestConcat` error set.)
 
 A/B footprint: this is the half of the arc that moves anything outside its own guard, and it moves
-two lines. CNR across the behavioral corpus reports `DeferCallOrder` and `GoCallVariations`, both
+two lines. Re-converting the behavioral tests changes `DeferCallOrder` and `GoCallVariations`, both
 `f1 := fmt.Println` — a variadic PACKAGE function bound as a method value, which was the same
 `var`-inferred synthesized delegate and is now `Funcꓸꓸꓸ<any, (nint, error)>`. Both still compile and
 still match `go run`. The whole converted standard library re-emitted byte-identically, because <!-- measured at the

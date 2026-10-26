@@ -79,7 +79,7 @@ and every any position paid the transcode. -->
 Concatenation needs its own signal: `convBinaryExpr` suppresses `u8` inside a string
 **concatenation** whose slot cannot hold a span, because two u8 operands fold (C# folds UTF-8
 literal constants) into a single `ReadOnlySpan<byte>` that then has no boxing conversion — `print("\n" +
-"\t")` in runtime's `newstack` diagnostics would be CS1503, a **compile break that CNR cannot surface**
+"\t")` in runtime's `newstack` diagnostics would be CS1503, a **compile break that re-converting the behavioral tests and comparing their output cannot surface**
 (the emitted text is legal-looking; only the corpus build fails). Concat suppression therefore has its own signal,
 `BasicLitContext.spanTargetUnsupported`,
 which says "this slot cannot hold a bare span" and is set by every span-hostile site — `any` positions,
