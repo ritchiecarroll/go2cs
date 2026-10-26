@@ -1185,8 +1185,14 @@ public sealed class Goroutine
     // and this walk on Goroutine -- located by IDENTITY rather than by a skip count, so a rung the
     // JIT inlines (they are one-line bodies, exactly the shape it inlines eagerly) cannot shift the
     // answer onto the wrong function. No file info: see Creator. The frame's IL offset rides along
-    // (see CreatorILOffset).
+    // (see CreatorILOffset). A MethodBase, not a name: Creator is matched by identity and resolved to Go's
+    // file and line through its IL offset.
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Reads the frame method's identity and declaring type, which a running method keeps under any trim. A frame " +
+                        "without its metadata (Native AOT) is skipped. Only Creator and CreatorILOffset degrade, the traceback's 'created by' " +
+                        "line and gopc; IsSystem reads systemBasis ?? entry ?? creator, and Entry is the launching delegate's method. Proof: " +
+                        "GolibAotProbe's recover, re-panic, recovers:true and goroutine scenarios, same stdout on JIT and TrimMode=full.")]
     private static (System.Reflection.MethodBase? method, int ilOffset) CreatorFrame()
     {
         foreach (System.Diagnostics.StackFrame frame in new System.Diagnostics.StackTrace(fNeedFileInfo: false).GetFrames())

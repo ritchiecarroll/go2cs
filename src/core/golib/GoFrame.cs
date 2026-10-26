@@ -469,6 +469,12 @@ public ref struct GoFrame
     // delegate's own method: a trace cannot be read for "no frame between", because the JIT's implicit
     // tail calls remove exactly those frames (COORD's verification of the re-cut, B1). A catcher whose Run
     // registered no defer (an unreached conditional defer) left the site unstamped, and passes too.
+    // The catcher is compared by METHOD IDENTITY, which only a MethodBase answers: a name cannot tell apart the
+    // ref and ж<T> receiver overloads go2cs-gen writes under one name.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Reads only the frame method's identity, which a running method keeps under any trim. Without its metadata " +
+                        "(Native AOT) it answers 'not re-raised': the site stays unowned, so a trace on that path omits its frames; recover " +
+                        "is unaffected. Proof: GolibAotProbe's recover, re-panic, recovers:true and goroutine scenarios, same stdout on JIT and TrimMode=full.")]
     private static bool ReRaisedByTheDeferredDelegate(Action? deferred, PanicException raised)
     {
         if (deferred is null || raised.Catches != 2 || raised.SiteEndsAtRun || raised.SiteTrace?.GetFrames() is not { Length: > 0 } site)

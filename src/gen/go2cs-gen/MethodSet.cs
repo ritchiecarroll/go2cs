@@ -204,7 +204,7 @@ internal static class MethodSet
             if (parameter.RefKind != RefKind.None || parameter.HasExplicitDefaultValue)
                 return null;
 
-            if (IsSpan(parameter.Type, out ITypeSymbol? tail))
+            if (SpanElement(parameter.Type) is { } tail)
             {
                 if (i != closed.Parameters.Length - 1)
                     return null;
@@ -524,17 +524,12 @@ internal static class MethodSet
         _ => null
     };
 
-    private static bool IsSpan(ITypeSymbol type, out ITypeSymbol? element)
-    {
-        if (type is INamedTypeSymbol { Name: "Span", TypeArguments: [var argument], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
-        {
-            element = argument;
-            return true;
-        }
-
-        element = null;
-        return false;
-    }
+    // The element of a System.Span<T>, or null for any other type. Returned rather than an out parameter: netstandard2.0
+    // has no NotNullWhen to tell the caller a true answer carries one (CS8602).
+    private static ITypeSymbol? SpanElement(ITypeSymbol type) =>
+        type is INamedTypeSymbol { Name: "Span", TypeArguments: [var argument], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } }
+            ? argument
+            : null;
 
     private static bool IsBox(ITypeSymbol type, out ITypeSymbol element)
     {
