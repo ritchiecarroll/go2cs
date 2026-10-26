@@ -223,7 +223,7 @@ The [validated modules](ValidatedModules.md) page is still short.
   every later result says it ran after the abandoned test.
   <!-- docs/CommandLine.md, the -test-deadline row (default 15m; 0 turns it off). A converted test's argv has the
        shape go test gives a test binary:
-       src/core/testing/TestOptions.cs:236-238 `keeps argv exactly the shape…gives a…test binary`. pflag's suite
+       src/core/testing/TestOptions.cs:243-245 `keeps argv exactly the shape…gives a…test binary`. pflag's suite
        reads identical to its published proof at 9dcf0bafe1 (docs/phase4/DATA-p2-nugetgo-trial-2026-10-24.md §3). -->
 * **Converter bugs that surface as C# compile errors**, usually in corners of the type system. In your
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
