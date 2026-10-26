@@ -2164,7 +2164,8 @@ Assert-Equal 'legacy-label arm: it read at least one manifest entry (a zero mean
 
 # ---- 2h. a darwin segment never predates the hop for a row the hop's darwin leg READ (COORD, 2026-10-25)
 # The darwin annotation leg writes a row's `darwin:` segment from the hop's per-shard evidence TSVs
-# (docs/phase4/h10-evidence/go<pin>/darwin/*.tsv, one line per row per RID): a row banks a segment only
+# (docs/phase4/h10-evidence/go<pin>/darwin/, its top and its DECLARED wave subdirectories, one line per row per
+# RID per wave; a row's reading of record is its latest wave, below): a row banks a segment only
 # when osx-arm64 and osx-x64 both read `validated` and agree, and the value is the agreed matched count
 # plus " + <disclosed>". A row the leg READ but did not bank keeps whatever segment it carried, and
 # that segment is the previous hop's -- a claim at an older Go release surviving under this bank. COORD's
@@ -2205,18 +2206,44 @@ function Get-DarwinSegmentRefusal {
     return $null
 }
 
+# THE WAVES (COORD's ruling, 2026-10-25, PLAN-rebank-go126.md 13.3). A hop's darwin leg reads in waves, and a row
+# can be read in more than one: D-W1's shard TSVs sit at the evidence directory's top, D-W2's under dw2/, the
+# final re-read's under reread/. The reading of record is the row's LATEST wave, by this DECLARED order and never
+# by file time; within that wave it must still be one line per RID. A subdirectory not declared here is refused
+# by name, so a new wave cannot be read in an undeclared order.
+$DarwinEvidenceWaves = @('', 'dw2', 'reread')
+
 function Read-DarwinEvidence {
     param([string] $Directory)
 
-    # row -> list of records. Every TSV's header names its columns, so a column added later never shifts one.
+    # row -> list of records, each tagged with its wave's index. Every TSV's header names its columns, so a column
+    # added later never shifts one.
     $byRow = @{}
-    foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.tsv' | Sort-Object Name)) {
+    $undeclared = New-Object System.Collections.Generic.List[string]
+    $root = (Resolve-Path -LiteralPath $Directory).Path
+    foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.tsv' -Recurse -File | Sort-Object FullName)) {
+        $relative = [System.IO.Path]::GetRelativePath($root, $file.DirectoryName).Replace('\', '/')
+        if ($relative -eq '.') { $relative = '' }
+        $wave = [array]::IndexOf($DarwinEvidenceWaves, $relative)
+        if ($wave -lt 0) {
+            if (-not $undeclared.Contains($relative)) { [void]$undeclared.Add($relative) }
+            continue
+        }
         foreach ($record in @([System.IO.File]::ReadAllText($file.FullName) | ConvertFrom-Csv -Delimiter "`t")) {
+            $record | Add-Member -NotePropertyName Wave -NotePropertyValue $wave -Force
             if (-not $byRow.ContainsKey($record.row)) { $byRow[$record.row] = New-Object System.Collections.Generic.List[object] }
             $byRow[$record.row].Add($record)
         }
     }
-    return $byRow
+    return [PSCustomObject]@{ ByRow = $byRow; Undeclared = $undeclared.ToArray() }
+}
+
+# The row's reading of record: the records of its latest declared wave.
+function Select-LatestDarwinWave {
+    param($Records)
+
+    $latest = ($Records | Measure-Object -Property Wave -Maximum).Maximum
+    return @($Records | Where-Object { $_.Wave -eq $latest })
 }
 
 # The refusal's contract, against fixtures, every way: on a roster the evidence agrees with, the loop
@@ -2234,17 +2261,45 @@ Assert-Equal 'darwin segment age: a row read and NOT banked that still carries a
 Assert-Equal 'darwin segment age: a row read and not banked with no segment is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinSplit -Segment $null)
 Assert-Equal 'darwin segment age: one RID alone is refused, never read as banked' $true ($null -ne (Get-DarwinSegmentRefusal -Records @($darwinBanked[0]) -Segment (& $darwinSeg 98 2)))
 
+# The waves' contract, against a fixture TREE (the reader is part of the contract): a row failing in D-W1 and
+# validated in a later wave reads as the later wave, in either file order; a row read only in D-W1 keeps it; and
+# an undeclared subdirectory is named, never read.
+$waveFixture = Join-Path ([System.IO.Path]::GetTempPath()) ('g2cs-darwin-waves-' + [Guid]::NewGuid().ToString('N'))
+try {
+    $header = "shard`trow`tRID`tverdicts`tmatched`tdisclosed`tdivergent`tnew`tstatus`tagree"
+    [void](New-Item -ItemType Directory -Force -Path (Join-Path $waveFixture 'dw2'), (Join-Path $waveFixture 'reread'), (Join-Path $waveFixture 'stray'))
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'C1-1.tsv'), ($header, "C1-1`tw/late`tosx-arm64`t9`t8`t0`t1`t1`tfailing`tNO", "C1-1`tw/late`tosx-x64`t9`t9`t0`t0`t0`tvalidated`tNO",
+        "C1-1`tw/only`tosx-arm64`t5`t5`t0`t0`t0`tvalidated`tyes", "C1-1`tw/only`tosx-x64`t5`t5`t0`t0`t0`tvalidated`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'reread/a.tsv'), ($header, "R`tw/late`tosx-arm64`t9`t9`t0`t0`t0`tvalidated`tyes", "R`tw/late`tosx-x64`t9`t9`t0`t0`t0`tvalidated`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'dw2/z.tsv'), ($header, "f`tw/late`tosx-arm64`t9`t7`t0`t2`t2`tfailing`tyes", "f`tw/late`tosx-x64`t9`t7`t0`t2`t2`tfailing`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $waveFixture 'stray/s.tsv'), ($header, "s`tw/stray`tosx-arm64`t1`t1`t0`t0`t0`tvalidated`tyes") -join "`n")
+    $waveRead = Read-DarwinEvidence -Directory $waveFixture
+    $late = Select-LatestDarwinWave $waveRead.ByRow['w/late']
+    Assert-Equal 'darwin waves: a row read in three waves reads as its LATEST declared wave (reread over dw2 over D-W1)' 'reread' $DarwinEvidenceWaves[$late[0].Wave]
+    Assert-Equal 'darwin waves: the latest wave is one line per RID, so the earlier waves never trip the duplicate refusal' $null (Get-DarwinSegmentRefusal -Records $late -Segment (& $darwinSeg 9 0))
+    Assert-Equal 'darwin waves: a row read only in D-W1 keeps D-W1' $null (Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $waveRead.ByRow['w/only']) -Segment (& $darwinSeg 5 0))
+    Assert-Equal 'darwin waves: an undeclared subdirectory is named' 'stray' ($waveRead.Undeclared -join ',')
+    Assert-Equal 'darwin waves: an undeclared subdirectory is never read' $false $waveRead.ByRow.ContainsKey('w/stray')
+}
+finally {
+    Remove-Item -LiteralPath $waveFixture -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 $darwinEvidenceDir = Join-Path $repo "docs/phase4/h10-evidence/go$goPin/darwin"
 $darwinRowsGated = 0
 $darwinRowsUnread = 0
 $darwinRefused = 0
 if (Test-Path -LiteralPath $darwinEvidenceDir) {
-    $darwinEvidence = Read-DarwinEvidence -Directory $darwinEvidenceDir
+    $darwinRead = Read-DarwinEvidence -Directory $darwinEvidenceDir
+    foreach ($stray in $darwinRead.Undeclared) {
+        Assert-Equal "darwin segment age: evidence subdirectory '$stray' is not a declared wave (`$DarwinEvidenceWaves: declare it in its order, or move it)" $true $false
+    }
+    $darwinEvidence = $darwinRead.ByRow
     foreach ($row in $rows) {
         if (-not $darwinEvidence.ContainsKey($row.Package)) { $darwinRowsUnread++; continue }
         $darwinRowsGated++
         $segment = if ($row.OS.ContainsKey('darwin')) { $row.OS['darwin'] } else { $null }
-        $refusal = Get-DarwinSegmentRefusal -Records $darwinEvidence[$row.Package] -Segment $segment
+        $refusal = Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $darwinEvidence[$row.Package]) -Segment $segment
         if ($null -ne $refusal) {
             $darwinRefused++
             Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence docs/phase4/h10-evidence/go$goPin/darwin)" $true $false
