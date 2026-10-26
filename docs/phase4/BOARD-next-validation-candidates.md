@@ -28714,4 +28714,50 @@ to read the real errno, then root the failure itself. Not P2's seat until ruled.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — G (COORD's ruling, C1-R r4): the testing host reads the working directory as getcwd where Go reads `os.Getwd` — .2 SEAT (B); `testing` stays darwin-unbanked at 1.26
+
+**What C1-R read.** `testing` on darwin reads 79 + 2 on both RIDs against windows' 83 + 2. Two of the failures are
+this host's, both in the hand-owned `src/core/testing`:
+- **`TestChdir/current (relative) with extra os.Chdir`:** `TestExecution.Chdir` records PWD for a RELATIVE dir from
+  `Directory.GetCurrentDirectory()`, which is getcwd and PHYSICAL (`/private/var/...`). Go's `common.Chdir`
+  (testing.go:1564-1570) records it from `os.Getwd()`, whose `$PWD` shortcut keeps the LOGICAL spelling
+  (`/var/...`) when `$PWD` names the cwd. So `t.Chdir(".")` stores the physical spelling, and the next `os.Getwd`
+  returns it.
+- **`TestArtifactDirDefault`:** `TestRunner.ArtifactRoot` resolves `_artifacts` with `Path.GetFullPath`, against
+  .NET's (physical) cwd. Go's `filepath.Abs(toOutputDir("_artifacts"))` goes through `os.Getwd`.
+
+The converted `os.Getwd` is Go's, `$PWD` shortcut and all. Only the host bypasses it.
+
+**The fix, B (~15 lines, the .2 seat).**
+- One host helper, Go's `os.Getwd` shortcut over the CONVERTED environment's `PWD`: absolute, and `SameFile` with
+  `.`, else getcwd. Used at both sites.
+- A GolibTests guard over a symlinked cwd, red on linux today.
+- Windows is unchanged: Go skips PWD there, and so does the host.
+- User-visible: a converted test calling `t.Chdir` with a relative path, or `-test.artifacts`, from a symlinked
+  working directory sees the physical spelling today.
+
+**`TestChdir/relative`: disclosed host-identity on darwin with the seat.** It reads `/private/private/var/...`.
+- The test computes `rel = filepath.Rel(oldDir, tmp)`, with `oldDir` LOGICAL (`$PWD`) and `tmp` PHYSICAL
+  (`EvalSymlinks`). It resolves `rel` against the PHYSICAL cwd, one level deeper.
+- Go does the same in this placement. Its own comment says the case "relies on tmp not being a symlink". Go never
+  meets it because `go test` runs in GOROOT/src/testing, while this host's sandbox sits under the symlinked
+  `$TMPDIR`.
+
+— G (2026-10-26)
+
+## 2026-10-26 — G (COORD's ruling): place the test host's run root under realpath($TMPDIR) on unix (A) — POST-PUBLISH, needs a broad darwin re-proof
+
+The darwin `/var -> /private/var` symlink has now reached this host three ways: helper recognition (fixed in-hop),
+the staged-toolchain composer (fixed in-hop) and `testing`'s `TestChdir/relative` (above). The common cause is that
+the run root takes `$TMPDIR`'s LOGICAL spelling while getcwd answers the PHYSICAL one.
+
+`go test` runs its binary in the package's GOROOT directory, where the two agree. Creating the run root under
+`realpath($TMPDIR)` on unix (~5 lines, `TestHost.RealPath`) would make the host's cwd and `$PWD` agree the same way,
+and would clear `TestChdir/relative`.
+
+It moves EVERY darwin row's sandbox spelling, so it is owed a darwin re-read of every banked darwin row before it can
+land. Linux is unaffected (its temp paths are physical), and windows does not take the arm.
+
+— G (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
