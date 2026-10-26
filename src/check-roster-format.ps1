@@ -2207,11 +2207,12 @@ function Get-DarwinSegmentRefusal {
 }
 
 # THE WAVES (COORD's ruling, 2026-10-25, PLAN-rebank-go126.md 13.3). A hop's darwin leg reads in waves, and a row
-# can be read in more than one: D-W1's shard TSVs sit at the evidence directory's top, D-W2's under dw2/, the
-# final re-read's under reread/. The reading of record is the row's LATEST wave, by this DECLARED order and never
-# by file time; within that wave it must still be one line per RID. A subdirectory not declared here is refused
-# by name, so a new wave cannot be read in an undeclared order.
-$DarwinEvidenceWaves = @('', 'dw2', 'reread')
+# can be read in more than one: D-W1's shard TSVs sit at the evidence directory's top, D-W2's under dw2/, E1's
+# sync/atomic reading of record under e1/ (run 40237155540 at 6217c00c85, after D-W2), the final re-read's under
+# reread/. The reading of record is the row's LATEST wave, by this DECLARED order and never by file time; within
+# that wave it must still be one line per RID. A subdirectory not declared here is refused by name, so a new wave
+# cannot be read in an undeclared order.
+$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread')
 
 function Read-DarwinEvidence {
     param([string] $Directory)
