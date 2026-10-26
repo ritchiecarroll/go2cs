@@ -25,6 +25,23 @@ internal static class runtime_internal_test_package
         }
     }
 
+    // Thrown INSIDE golib (the slice indexer's bounds check) on behalf of this frame, as converted runtime code's
+    // `s[i]` is: the trace's first frame is golib's, which the walk must skip to reach this one.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception RaiseInGolib()
+    {
+        try
+        {
+            slice<nint> s = new nint[1].slice();
+            nint i = 1;
+            return new InvalidOperationException($"no panic: {s[i]}");
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+
     // Built here and handed back unthrown: whoever THROWS it owns the trace.
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static PanicException Build() => RuntimeErrorPanic.IndexOutOfRange(1L, 0L);

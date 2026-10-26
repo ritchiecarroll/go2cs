@@ -69,6 +69,10 @@ public class RuntimePanicCheckTests
         Assert.IsTrue(RaisedInRuntimePackage(runtime_internal_test_package.Nested.Raise(), out frame), "a panic raised on a nested type must HIT");
         Assert.AreEqual("go.runtime_internal_test_package+Nested.Raise", frame);
 
+        Assert.IsTrue(RaisedInRuntimePackage(runtime_internal_test_package.RaiseInGolib(), out frame),
+            "a panic golib's bounds check raises for package runtime must HIT: golib's own frames are skipped");
+        Assert.AreEqual("go.runtime_internal_test_package.RaiseInGolib", frame);
+
         Assert.IsFalse(RaisedInRuntimePackage(runtime_test_package.Raise(), out frame), "a panic raised in package runtime_test must MISS");
         Assert.AreEqual("go.runtime_test_package.Raise", frame);
 
