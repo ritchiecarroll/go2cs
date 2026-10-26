@@ -199,7 +199,10 @@ method-group form cannot express -- a **result-returning** method, a named func 
 run. Left SHARED, the clause variable would be read by the synthesized lambda at its post-loop value:
 the capture snapshot (`cʗ1`) hoists the ARRAY, but the SUBSCRIPT is read when the defer fires, `c[3]`.
 `deferOrGoCalleeReferences` therefore joins the trigger, and the emission takes the ordinary
-per-iteration shape above:
+per-iteration shape above. The receiver itself is evaluated at the defer statement, as Go evaluates it:
+the element `cʗ1[i]` is the thunk's first eager argument (`ᴛ0`), so a later `c[i] = other` does not change
+what is closed. An array copy shares its elements, so reading `cʗ1[i]` inside the thunk would see that
+write.
 
 ```go
 var c [3]closer                     // Conn-shaped: Close() returns error
@@ -214,11 +217,11 @@ for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;                    // this iteration's own i
     c[i] = dial(i);
     var cʗ1 = c;                    // the capture snapshot of the array
-    defer(() => cʗ1[i].Close(), ref ᒐ);  // the subscript reads this iteration's i
+    defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);  // the element is read at the defer statement
 }
 ```
-<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:56 `defer(() => cʗ1[i].Close(), ref ᒐ);`
-(deferIndexedReceiverInLoop, :52 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
+<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:70 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
+(deferIndexedReceiverInLoop, :66 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
 as dial(i). -->
 
 net's `TestConcurrentSetDeadline` is the witness: with the variable shared, `defer c[i].Close()` over a
@@ -231,9 +234,11 @@ no behavioral gain. That restriction keeps the converted standard library's prod
 unchanged: its only sites with the shape (`net/http/h2_bundle.go`'s two
 `defer http2bufPools[index].Put(…)` calls) index a plain local outside any loop. The shape occurs in
 `net/dial_test.go` and `net/timeout_test.go`, so the rule reaches TEST conversions. (Guarded by the
-`DeferLoopCapture` behavioral test: the defer witness and the `go` equivalent, plus four controls -- a
-receiver reassigned after the defer, 3-clause and range closure capture, and deferred plain arguments --
-whose emission the trigger must not move.)
+`DeferLoopCapture` behavioral test: the defer witness and the `go` equivalent, an element reassigned after
+a `defer` or `go` on it (interface, pointer and value elements, and a pointer method on a value element,
+which Go binds by address and so does see the write), plus four controls -- a receiver reassigned after
+the defer, 3-clause and range closure capture, and deferred plain arguments -- whose emission the trigger
+must not move.)
 <!-- census at landing: zero moved files across 307 projects; not re-measured by a guard. -->
 
 ## A range-over-int index is `nint` (golib's `range` helper yields Go's `int`)

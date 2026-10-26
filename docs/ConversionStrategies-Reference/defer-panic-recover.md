@@ -793,7 +793,7 @@ form the variadic path, e.g. `go fmt.Println(…)`, already emits):
 
 ```csharp
 go chunkedCopy(c2, c2)          -> goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), c2, c2);   // param callee
-go q.conn.HandshakeContext(ctx) -> goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx);      // selector method
+go q.conn.HandshakeContext(ctx) -> goǃ((ᴛ0, ᴛ1) => ᴛ0.HandshakeContext(ᴛ1), Ꮡq.Value.conn, ctx); // selector method
 go c.Close()                    -> goǃ(() => c.Close());                             // nullary callee
 ```
 
@@ -824,7 +824,9 @@ forbids constructing a delegate from an extension method over a **value-type rec
 net/http/httputil's `go spc.copyToBackend(errc)`, `switchProtocolCopier`). So
 `goǃ(spcʗ1.copyToBackend, errc)` becomes `goǃ(ᴛ1 => spcʗ1.copyToBackend(ᴛ1), errc)` and a nullary
 `go vs.ping()` keeps its invocation (`goǃ(() => vsʗ1.ping())`). The receiver snapshot (`spcʗ1`)
-still evaluates at go-statement time. An INTERFACE-receiver method group is excluded (a genuine C#
+still evaluates at go-statement time. A value receiver that is not a plain identifier (`go v[i].ping()`)
+is passed as the thunk's `ᴛ0` instead (see
+[the element and field receiver section](#a-deferred-or-spawned-call-evaluates-an-element-or-field-receiver-at-the-statement)). An INTERFACE-receiver method group is excluded (a genuine C#
 instance method binds delegates fine), and pointer receivers keep the box-group machinery
 (`pointerReceiverBoxMethodGroup` — `ж<T>` is a class, so its group is delegate-legal). (Guarded by
 `GoStmtReceiverLambda`'s `valueSender` arms — value-receiver argument and nullary go-statements
@@ -1145,7 +1147,9 @@ where the LAMBDA was already the form — a RESULT-returning nullary callee (`de
 replaced` where Go prints `close orig`); they now take `defer(ᴛ0 => ᴛ0.Close(), Ꮡs.Value.cur, ref ᒐ)`. An
 IDENTIFIER receiver keeps the capture hoist that already copies it at the defer (`var kʗ1 = k; defer(() =>
 kʗ1.Close(), ref ᒐ)`), which covered every lambda-form site measured in the standard library and the behavioral
-corpus. An interface receiver keeps its method group, and a pointer receiver keeps the box group above.
+corpus. An interface receiver keeps its method group, and a pointer receiver keeps the box group above;
+under the lambda form, an interface or pointer receiver that is not a plain identifier takes `ᴛ0` too (next
+section).
 The census before the change found no site in the converted standard library (production on three targets, tests on two)
 or in the behavioral modules, because every site failed to compile. (Guarded by
 `deferValueReceiverSnapshot_test.go` and the `DeferValueReceiverSnapshot` behavioral test: a field of a pointer, a
@@ -1154,6 +1158,38 @@ vs Go; CS1113 on the pre-change converter. The lambda-form half is guarded by `d
 the `DeferLambdaReceiverCopy` behavioral test, which COMPILES on the pre-change converter and fails its output
 comparison: `log replaced`, `close replaced` and `close replaced` against Go's `orig`, `orig` and `pointee`.)
 <!-- census at the change: 24 lambda-form sites with an identifier receiver; 757 behavioral modules. -->
+
+## A deferred or spawned call evaluates an element or field receiver at the statement
+
+Go evaluates the receiver of `defer c[i].Close()` and `go c[i].Close()` when the statement runs. The method-group
+form binds it there. The LAMBDA form, which a result-returning or variadic callee takes, read a receiver that is
+not a plain identifier when the thunk ran: `defer(() => cʗ1[i].Close(), ref ᒐ)` indexed the array copy at unwind,
+and an array copy shares its elements (`array<T>` is a struct over a shared backing array), so a `c[i] = other`
+after the defer closed the new element. The same held for a slice or map element, a field (`res.Body`), a
+dereference and a call result. Such a receiver is the thunk's first eager argument, `ᴛ0`, in `defer` and `goǃ`
+alike:
+
+```csharp
+defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);                // defer c[i].Close(), c a [N]closer
+defer(ᴛ0 => ᴛ0.Close(), (~resʗ1).Body, ref ᒐ);         // defer res.Body.Close()
+goǃ(ᴛ0 => ᴛ0.Close(), cʗ1[0]);                         // go c[0].Close()
+defer(ᴛ0 => ᴛ0.Close(), Ꮡv.at<conn>(0), ref ᒐ);        // defer v[0].Close(), v a [N]conn, Close on *conn
+defer(Ꮡv.at<conn>(0).Reset, ref ᒐ);                    // defer v[0].Reset(), Reset on *conn, no result
+```
+
+A pointer method on an addressable VALUE (`v[0].Close()` with `v` a `[N]conn`) is bound by ADDRESS in Go, so the
+deferred call does see a later write to `v[0]`; the snapshot is that address, `Ꮡv.at<conn>(0)`, not the element's
+value. Every form of such a call evaluates the address at the statement, so a heap-boxed variable at the root of
+the receiver takes no capture copy: with one, the box method group named the copy's box, which does not exist
+(`Ꮡvʗ2.at<conn>(0).Reset`, CS0103). Any other root keeps its copy, through which the address reaches the same
+storage.
+A pointer method PROMOTED to a value through an embedded field, and another package's variable (whose address
+binds a copy, a documented limitation), keep their earlier emission.
+
+Not covered: a nil interface receiver panics in Go at the statement, and the snapshot passes it to the thunk, which
+panics when it runs. An IDENTIFIER receiver keeps the capture copy above. (Guarded by the `DeferLoopCapture` behavioral test's red 3, 4 and 5: an
+interface, pointer and value element reassigned after a `defer` or `go` on it, and a pointer method on a value
+element, output-compared vs Go; before the change red 3 and red 5 printed the new element and red 4 did not compile.)
 
 ## A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy
 The emission above binds the box (`Ꮡstate.free`) for a `defer state.free()` on a value local — but the CAPTURE analysis must cooperate. `defer`/`go`/closure bodies are lambda-conversion scopes: a variable used inside them that escapes to the heap is normally snapshot-copied into a `var stateʗ1 = state;` declaration so the C# closure captures a value, not an uncapturable ref-local. For an escaping value local used **only** as the receiver of a pointer-receiver method call (`state` a `handleState` value, `free` a `*handleState` method — log/slog handler.go's `defer state.free()`), that snapshot is doubly wrong: the address-taking is *implicit* (Go auto-takes `&state`), so the emission still binds the box — but of the *snapshot name* `Ꮡstateʗ1`, which is a plain value with no `Ꮡ` companion:
