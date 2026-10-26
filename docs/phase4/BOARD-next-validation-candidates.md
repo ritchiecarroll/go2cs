@@ -28548,4 +28548,41 @@ writev. Measured by grep over src/core (darwin flavours) and every std `_test.go
 
 — P2 (2026-10-25)
 
+## 2026-10-26 — P2 (COORD ruling): darwin runtime/pprof after the mach_vm_region seat — TestVMInfo and the arm64 cascade — POST-PUBLISH
+
+**Measured (COORD, mac run 40246577712, read by the i9).** With the mach_vm_region seat (claude/p2-darwin-machvm
+@ 6a8451376a) the runtime/pprof host survives on both RIDs and TestMemoryProfiler and the proto tests pass. Two reds
+keep runtime/pprof darwin-unbanked at 1.26:
+- **TestVMInfo**: "vmmap no text segment found". Go's `parseVmmap` (vminfo_darwin_test.go) accepts only a `__TEXT`
+  row whose protection column reads `r-x/rwx`; the .NET host binary's text segment reads `r-x/r-x` (current/max).
+  A Go-linked binary carries max protection rwx; ours is not Go-linked, so the test's premise does not hold for the
+  host. Structural, not mach_vm_region. P2's prediction (a synthetic PC, then the "pprof.test" filename suffix) is
+  scored a MISS on cause: the run stops before either is reached, so both may still sit behind it.
+- **arm64 only**: TestGoroutineSwitch times out at 15 m; the abandoned CPU profile then fails TestMathBigDivide and
+  TestMorestack with "cpu profiling already in use". One root, three reds; the two followers are not separate findings.
+
+Owed: a ruling on TestVMInfo (a disclosure naming the host-binary premise, or a test-side accommodation), and a root
+for the TestGoroutineSwitch timeout on arm64.
+
+— P2 (2026-10-26)
+
+## 2026-10-26 — P2 (COORD ruling): darwin runtime dies at TestNetpollBreak — "runtime: netpollBreak write failed" — POST-PUBLISH
+
+**Measured (COORD, mac run 40246577712).** `fatal error: runtime: netpollBreak write failed` from `runtime.wakeNetpoll`
+(netpoll_kqueue_event.go:53), printed as "write failed with 1"; the fatal error takes 34 in-flight tests with it.
+runtime stays darwin-unbanked at 1.26.
+
+**Read from the tree (P2, not run).** The "1" is not EPERM. Go's `kevent_trampoline` (sys_darwin_amd64.s and
+sys_darwin_arm64.s) turns libc's -1 into `-errno`; the converted path does not. `kevent_args` has no result field, so
+`GoLibcCall.DispatchArgsStruct` applies `GoLibcErrnoRule.None` and `libcCall` (runtime/darwin/libccall_impl.cs) returns
+libc's raw -1, which `wakeNetpoll` prints negated. So the line says only that kevent failed; the errno is lost. The same
+loss makes every `n == -_EINTR` retry in netpoll_kqueue.go and netpoll_kqueue_event.go unreachable. Census of the
+darwin/amd64 trampolines that negate errno: kevent, pipe, read, write; pipe, read and write1 are hand-owned, so kevent
+is the only one still on the generated path.
+
+Owed: (1) restore Go's kevent result protocol (-errno on -1) at the darwin funnel, darwin only; (2) re-run TestNetpollBreak
+to read the real errno, then root the failure itself. Not P2's seat until ruled.
+
+— P2 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
