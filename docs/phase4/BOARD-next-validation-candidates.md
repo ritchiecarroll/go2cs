@@ -28639,6 +28639,35 @@ on Apple silicon. This row is the first measured consequence, not the whole of i
 
 — P2 (2026-10-25)
 
+**Amended 2026-10-26 (C1, seat #8 (a), COORD ruled OPTION 2, per OS) — FIXED on claude/c1-darwin-harness-2 @ 4f245d9f4b.**
+A test declared in a `_test.go` file that some architecture its target GOOS ships does not build now leaves the run
+on EVERY RID of that GOOS. Its name joins the -skip string handed to both sides, as a host-fatal test's does
+(src/go2cs/testTargetArch.go; `shippedGOARCHs`: darwin amd64 + arm64, windows and linux amd64 alone). It is read
+from the source and the shipped set, so both mac RIDs answer the same, and nothing leaves on windows or linux. It
+is not a disclosure. The comparison record names each one in `targetArchExcluded` (omitempty). The row's proof
+page lists them under "Withdrawn where a shipped architecture does not build the test", with the reason ("… is not
+built for darwin/arm64 (//go:build …); one darwin build serves both RIDs"), whatever platform writes the page.
+Option 1 (per host) was set aside: arm64 alone would withdraw, the two RIDs' counts would part, and three rows
+banked today would unbank.
+
+The split this row owed, at darwin/amd64 + purego over std: 14 tests, 9 files, 5 rows. P2 counted 33 files that
+name amd64; the other 24 also admit arm64, or fall outside the pure-Go conversion.
+
+| Row | Withdrawn on darwin | Roster darwin today | Re-bank reads (predicted) |
+|:--|:--|:--|:--|
+| crypto/sha1 | TestOutOfBoundsRead | none (the RIDs disagreed) | **13** on both RIDs |
+| internal/cpu | 7: TestX86ifAVX2hasAVX, TestX86ifAVX512FhasAVX2, TestX86ifAVX512BWhasAVX512F, TestX86ifAVX512VLhasAVX512F, TestDisableSSE3, TestSSE3DebugOption, TestDataCacheSizes | 9 | **2** |
+| internal/runtime/gc/scan | 3: TestExpandAVX512, TestFilterNilAVX512, TestScanSpanPackedAVX512 | 3095 | **3092** |
+| math/big | TestAddMulVVWWNoADX | 248 + 3 | **247 + 3** |
+| runtime | TestHasAVX, TestStartLineAsm | none | (unbanked; two fewer verdicts) |
+
+**Measured,** filter `crypto/sha1,internal/coverage/cfile,testing`, dotnet 10.0.402:
+- **crypto/sha1, base d269ef477b (run 40396727836):** osx-x64 reads count 14 against the windows column 13; osx-arm64 FAILs TestOutOfBoundsRead.
+- **crypto/sha1, seat (runs 40396761653 and 40400361240):** PASS 13 on BOTH RIDs.
+- **Windows (run 40396858971) and linux (run 40400396727):** crypto/sha1 is unchanged, at 13 and 14.
+
+The seat moves no roster count. The 1.26.10.2 re-bank reads the counts above.
+
 ## 2026-10-25 — P2: darwin libc arguments that still cross as order tokens — the same class as writev/readdir_r, unreached in std
 
 **What happens.** darwin's libc funnel leaves an order token for any pointee that holds a non-nil Go pointer (the
@@ -28744,6 +28773,21 @@ The converted `os.Getwd` is Go's, `$PWD` shortcut and all. Only the host bypasse
   `$TMPDIR`.
 
 — G (2026-10-26)
+
+**Amended 2026-10-26 (C1, seat #8 (c), fix B) — FIXED on claude/c1-darwin-harness-2 @ dfc7539c27.**
+`TestExecution.GoWorkingDirectory` calls the converted `os.Getwd`, which keeps PWD's logical spelling when it names
+".". Both of this row's sites use it: `TestExecution.Chdir`'s relative PWD and `TestRunner.ArtifactRoot`'s
+`filepath.Abs`. Windows keeps getcwd, as Go skips PWD there.
+
+Guard: GolibTests `TestChdirLifecycleTests.TheWorkingDirectoryKeepsPwdsLogicalSpellingUnderASymlink`. It makes a
+symlinked cwd, so linux runs the darwin shape. It went red first under GoTargetOS=linux at each site in turn:
+`t.Chdir(".")` read `<root>/real`, then, with the Chdir hunk alone, the artifact root read `<root>/real/_artifacts`.
+
+**Measured** (darwin, filter `crypto/sha1,internal/coverage/cfile,testing`):
+- At base d269ef477b (run 40396727836), testing FAILs on both RIDs. The oracle names `TestChdir/current_(relative)_with_extra_os.Chdir`.
+- At the seat (runs 40396761653 and 40400361240), testing FAILs on both RIDs with `TestChdir/relative` named instead. That is the disclosed-in-waiting host-identity case, fix A's, not this seat's.
+- The tail names one divergence. The full set, including TestArtifactDirDefault, is the i9's read of the row output.
+- Linux and windows: testing 83 at base and seat.
 
 ## 2026-10-26 — G (COORD's ruling): place the test host's run root under realpath($TMPDIR) on unix (A) — POST-PUBLISH, needs a broad darwin re-proof
 
@@ -28977,5 +29021,43 @@ signing key, the attestation check and the zip header. Linux only: the signtool 
 the workflow itself were not run.
 
 — P1 (2026-10-26)
+## 2026-10-26 — C1 (seat #8 (b), COORD's .2 plan): internal/coverage/cfile `TestIssue59563TruncatedCoverPkgAll` — the go child's PWD named the sandbox — FIXED (claude/c1-darwin-harness-2)
+
+**The record.** The row's manifest (src/core/internal/coverage/cfile/go2cs_test_disclosures.json, re-signed at
+e147cdc09f) discloses the test host-identity on linux, signature "go tool cover -func failed: exit status 2". Its
+retire plan reads "keep PWD from naming the sandbox". darwin failed it too, at D-W2 run 40233636682, on both RIDs.
+
+**Root.** The test runs `go test -coverpkg=all` with `cmd.Dir = testdata/issue59563`, so os/exec sets
+`PWD=<abs cmd.Dir>` in the sandbox spelling. The host's staged-toolchain composer moves a go child that starts in
+the staged ancestry to the real GOROOT directory it stands for, but:
+- **linux:** the composer moved the child, but the staged `testdata` is a LINK to the real tree, so the old PWD
+  still named the child's cwd (the same file). The child's os.Getwd answered the sandbox spelling, cmd/go walked up
+  to the staged `src/go.mod`, read it as a module named std, and `go tool cover -func` refused `std/internal/...`.
+- **darwin:** the composer never moved it. The relative cmd.Dir resolves against getcwd's `/private/var` spelling,
+  against the run root's `/var` spelling. And realpath of the whole directory follows that testdata link out of
+  the staged root.
+
+**Fix, two commits:**
+- **b5380a145d:** syscall's linux and darwin spawns compose the child's directory BEFORE marshalling its
+  environment. When the composer moved the child, a realpath-equal PWD is respelled as the new directory. Any other
+  PWD is kept. Guard: `LinuxSpawnSeamTests.AMovedChildsPwdNamesTheDirectoryItStartsIn` (a printenv child; red
+  first, PWD=<root>/link).
+- **cd2870da10:** the composer's realpath arm asks the directory's physical spelling against the canonical root
+  before resolving the directory's own links. Guard:
+  `HelperSandboxContainmentTests.AToolchainChildUnderAStagedFixtureLinkStartsInRealGorootOnUnix` (red first, null).
+
+**Measured,** filter `crypto/sha1,internal/coverage/cfile,testing`, dotnet 10.0.402:
+
+| Leg | Base d269ef477b | Seat |
+|:--|:--|:--|
+| linux | run 40396793909: PASS 15 (linux), the disclosed test failing as banked | runs 40396826412 and 40400396727: **16, disclosed 0** vs the linux expectation 1 (the test passes) |
+| darwin | run 40396727836: FAIL TestIssue59563 on both RIDs | 4f245d9f4b, run 40396761653: still FAIL (the composer half missing); cd2870da10, run 40400361240: **PASS 16** on BOTH RIDs (osx-arm64 and osx-x64) |
+| windows | | run 40396858971: PASS 16, unchanged |
+
+**Owed to the re-bank.** The linux-scoped manifest entry now reports itself an ORPHAN (report-only). Its
+retirement, and linux 15 + 1 -> 16 + 0 and darwin's first reading at 16, are the 1.26.10.2 re-bank's. The seat
+changes no manifest or roster count.
+
+— C1 (2026-10-26)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
