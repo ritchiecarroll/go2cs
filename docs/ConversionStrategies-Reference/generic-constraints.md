@@ -589,7 +589,7 @@ forwarder throw the same refusal. The interface's own package still compiles: wi
 refusal is fatal to a conversion, so the converted standard library, which converts, reaches no refused
 shape, and no behavioral fixture does either.
 <!-- census of 2026-10-19 (Go 1.24 corpus): 6 self-referential interfaces in std, 12 in the behavioral tree, 0 sharing
-shapes. src/go2cs/conversionDriver.go:308 `log.Fatalf("Refusing to convert: %s\n", refusal)`. -->
+shapes. src/go2cs/conversionDriver.go:309 `log.Fatalf("Refusing to convert: %s\n", refusal)`. -->
 
 Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
 in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.

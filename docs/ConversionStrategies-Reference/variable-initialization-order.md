@@ -164,7 +164,7 @@ anyone could see. `lazyInitializerRefusal` accepts:
 * conversions and operators over eligible operands (a conversion applies a type, so it is not a call);
 * reads of same-package vars that are themselves eligible and never assigned or addressed, and slices of such a
   var with constant bounds (slicing aliases, so the slice is the same whenever it is taken).
-  <!-- src/go2cs/lazyPackageVarOperations.go:187 (`if mutated[dep] || packageAddressedGlobals[dep] {`) -->
+  <!-- src/go2cs/lazyPackageVarOperations.go:189 (`if mutated[dep] || packageAddressedGlobals[dep] {`) -->
 
 Everything else keeps the var eager: a call, a read of an imported var (its package may change it first) or of a
 field, an index or a dereference (each copies a value as it is at that moment), a method value (it binds its
@@ -175,7 +175,7 @@ receiver when it runs), `&` of storage, a channel receive and a type assertion.
 * a var declared with other names from one value;
 * a var whose address only a pointer-receiver method value takes (`f := X.M`): the converter keeps no heap box
   for it, so the holder would carry no box for the pointer to name;
-  <!-- src/go2cs/lazyPackageVarOperations.go:162 (`candidate.reason = "its address is taken where the converter keeps no box for it"`) -->
+  <!-- src/go2cs/lazyPackageVarOperations.go:164 (`candidate.reason = "its address is taken where the converter keeps no box for it"`) -->
 * a var whose declaration is hand-owned, and every var that reads it: the converter does not shape a declaration it
   does not emit;
 * a var that reads a var the package or its internal tests assign or take the address of;

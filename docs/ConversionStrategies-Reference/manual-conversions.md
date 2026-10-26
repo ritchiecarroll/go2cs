@@ -1126,7 +1126,7 @@ borrow expressions; each word-size function is a single expression with no `Uint
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
 <!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
      :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2764 (`"math/bits": {`);
+     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2773 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub

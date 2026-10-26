@@ -1360,10 +1360,10 @@ a rule, the conversion would stop and name it.
 <!-- the predicate: src/go2cs/lazyPackageVarOperations.go:97 `func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`,
      the initializer rules :297 `func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`,
      the floor :48 `const lazyPackageVarNodeFloor = 20`, the listed tables :38 `var lazyPackageVars = map[string]map[string]bool{`;
-     a dep never assigned or addressed: :187 `if mutated[dep] || packageAddressedGlobals[dep] {`; a test file's vars:
+     a dep never assigned or addressed: :189 `if mutated[dep] || packageAddressedGlobals[dep] {`; a test file's vars:
      :120 `// A test file's own vars stay eager`; the unboxed address (probe at 3e3f18925a: a 21-field struct var whose
      method value `mv.sum` is taken stays `internal static six mv = new six(…);`, read as `Ꮡ(mv).sum`):
-     :162 `candidate.reason = "its address is taken where the converter keeps no box for it"`;
+     :164 `candidate.reason = "its address is taken where the converter keeps no box for it"`;
      the refusal of a listed var: src/go2cs/visitValueSpec.go:727 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
      A malloc table's holder: src/core/runtime/malloc_tables_generated.cs:9 `[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{`.
      Why those two are listed: their one reader, mallocgc's size-specialized branch, is gated by a const false
@@ -12251,7 +12251,7 @@ converter's list can likewise name the operating systems it covers.
      bits_impl.cs:74 (`public static (nuint hi, nuint lo) Mul(nuint x, nuint y)`),
      :94 (`public static (nuint sum, nuint carryOut) Add(nuint x, nuint y, nuint carry)`), :105
      (`public static (nuint diff, nuint borrowOut) Sub(nuint x, nuint y, nuint borrow)`); the six list entries:
-     src/go2cs/manualTypeOperations.go:2764-2771#46e257. -->
+     src/go2cs/manualTypeOperations.go:2773-2780#46e257. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference/manual-conversions.md#manually-converted-declarations) — every hand-owned surface and why, `//go:linkname` forwarders in both directions, the poller and system call internals on each OS, native bindings, how hand-owned files and list entries are scoped per platform, and the reflection bridge.
 
