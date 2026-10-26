@@ -7,10 +7,15 @@
 #     WAVES by shard name: pass 1 (`P1-3`), L1 (`P2-L1`), L2 (`P1-L2`, `P1-L2-poll`), the final re-read (`P1-R`).
 #     A row's reading of record is its LATEST wave, and within it its LAST line (crypto/x509's SSL_CERT_FILE-unset
 #     re-run is the precedent);
-#   - that reading banks only on `PASS`, and the segment is "<matched>[ + <disclosed>]", matched being the count column
-#     where the TSV has one and `verdicts` where `matched` is pass 1's boolean;
+#   - that reading banks only on `PASS`, and the segment is "<matched>[ + <disclosed-divergent>]", matched being the count
+#     column where the TSV has one and `verdicts` where `matched` is pass 1's boolean;
+#   - the TSVs' `disclosed` column is len(comparison.disclosed), the disclosure LIST, which the converter builds as the
+#     disclosed-divergent set PLUS every host-fatal name in scope (src/go2cs/testConversion.go, hostFatalNames, appended
+#     after the comparison: those tests ran on neither side and have no verdict). The roster's disclosed count is the
+#     summary's "K disclosed-divergent" (Get-DisclosedCount), so the row's host-fatal entries in scope on linux are
+#     subtracted (COORD 2026-10-26, R's finding: runtime 11091 + 76 is 11091 + 70);
 #   - a row whose reading of record is NOT PASS keeps its segment and is listed, for its re-read or a ruling.
-import csv, os, re, sys
+import csv, json, os, re, sys
 
 tree = sys.argv[1]
 write = '--write' in sys.argv[2:]
@@ -32,12 +37,21 @@ for f in sorted(os.listdir(evdir)):
     for n, r in enumerate(csv.DictReader(open(os.path.join(evdir, f), encoding='utf-8'), delimiter='\t')):
         by_row.setdefault(r['row'], []).append(((wave[0], f, n), r))
 
+def host_fatal_in_scope(pkg, goos='linux'):
+    path = os.path.join(tree, 'src/core', pkg, 'go2cs_test_disclosures.json')
+    if not os.path.exists(path):
+        return 0
+    entries = json.load(open(path, encoding='utf-8')).get('disclosures', [])
+    return sum(1 for e in entries if e.get('class') == 'host-fatal' and (not e.get('platforms') or goos in e['platforms']))
+
 def reading(records):
     (_, f, _), r = max(records, key=lambda t: t[0])
     if r['word'] != 'PASS':
         return None, f'{r["word"]} in {f}'
     matched = r['matched'] if r['matched'].isdigit() else r['verdicts']
-    return matched + (f" + {r['disclosed']}" if int(r['disclosed']) else ''), f
+    divergent = int(r['disclosed']) - host_fatal_in_scope(r['row'])
+    assert divergent >= 0, f"{r['row']}: disclosed {r['disclosed']} is less than its host-fatal entries in scope"
+    return matched + (f' + {divergent}' if divergent else ''), f
 
 table = os.path.join(tree, 'docs/ValidatedTestPackages.md')
 lines = open(table, encoding='utf-8', newline='').read().split('\n')

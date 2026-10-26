@@ -2189,6 +2189,22 @@ $DarwinAgreementRulings = @{
     'net' = 'COORD 2026-10-26 (r3b, run 40279373649): 10 TestLookupNoSuchHost NXDOMAIN keys differ across the RIDs (the runners'' resolvers: arm64 pass/pass, x64 fail/fail), Go == C# on every key within each RID'
 }
 
+# The DISCLOSED-DIVERGENT count of one evidence line (COORD 2026-10-26, R's finding). The TSV's `disclosed` column is
+# len(comparison.disclosed), the disclosure LIST, which the converter builds as the divergent set PLUS every host-fatal
+# name in scope (testConversion.go, hostFatalNames: tests run on neither side, with no verdict). The roster banks the
+# summary's "K disclosed-divergent", which is `divergent - new`, the disclosed share of the non-matching verdicts.
+# A line without those columns (a fixture) answers its `disclosed`.
+function Get-DarwinDisclosedDivergent {
+    param($Record)
+
+    $d = 0; $n = 0
+    if ($Record.PSObject.Properties['divergent'] -and [int]::TryParse([string]$Record.divergent, [ref]$d) -and
+        $Record.PSObject.Properties['new'] -and [int]::TryParse([string]$Record.new, [ref]$n)) {
+        return $d - $n
+    }
+    return [int]$Record.disclosed
+}
+
 function Get-DarwinSegmentRefusal {
     param($Records, $Segment, [string] $AgreementRuling)
 
@@ -2202,14 +2218,15 @@ function Get-DarwinSegmentRefusal {
     $a = $arm[0]; $x = $x64[0]
     $agreed = (($a.agree -ceq 'yes') -and ($x.agree -ceq 'yes')) -or ([bool]$AgreementRuling)
     $banked = ($a.status -ceq 'validated') -and ($x.status -ceq 'validated') -and $agreed -and
-        ($a.matched -eq $x.matched) -and ($a.disclosed -eq $x.disclosed)
+        ($a.matched -eq $x.matched) -and ((Get-DarwinDisclosedDivergent $a) -eq (Get-DarwinDisclosedDivergent $x))
 
     if (-not $banked) {
         if ($null -eq $Segment) { return $null }
         return "it was read at the pin and did not bank (osx-arm64 $($a.status), osx-x64 $($x.status), agree $($a.agree)/$($x.agree)), but still carries a darwin: segment from an earlier hop -- re-read it at the pin or remove the segment"
     }
 
-    $want = "$($a.matched)" + $(if ([int]$a.disclosed -ne 0) { " + $($a.disclosed)" } else { '' })
+    $divergent = Get-DarwinDisclosedDivergent $a
+    $want = "$($a.matched)" + $(if ($divergent -ne 0) { " + $divergent" } else { '' })
     if ($null -eq $Segment) { return "it banked at the pin on both RIDs (darwin: $want) and carries no darwin: segment" }
     if (-not $Segment.Applicable) { return "it banked at the pin on both RIDs (darwin: $want) and carries darwin: n/a" }
     $have = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
@@ -2325,6 +2342,13 @@ $ruledFailing = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'NO' 552 3), 
 Assert-Equal 'darwin agreement ruling: a named row validated on both RIDs with equal counts banks' $null (Get-DarwinSegmentRefusal -Records $ruledSplit -Segment (& $darwinSeg 552 3) -AgreementRuling 'fixture')
 Assert-Equal 'darwin agreement ruling: without a ruling the same row does not bank' $true ($null -ne (Get-DarwinSegmentRefusal -Records $ruledSplit -Segment (& $darwinSeg 552 3)))
 Assert-Equal 'darwin agreement ruling: a ruling never banks a failing RID' $true ($null -ne (Get-DarwinSegmentRefusal -Records $ruledFailing -Segment (& $darwinSeg 552 3) -AgreementRuling 'fixture'))
+
+# The disclosed-divergent count, not the list (runtime/debug's shape: one host-fatal name in the list, no verdict).
+$hostFatalShape = @('osx-arm64', 'osx-x64') | ForEach-Object {
+    [PSCustomObject]@{ RID = $_; status = 'validated'; agree = 'yes'; matched = '8'; disclosed = '2'; divergent = '1'; new = '0' }
+}
+Assert-Equal 'darwin disclosed: a host-fatal name in the list does not count -- the row banks at its divergent 8 + 1' $null (Get-DarwinSegmentRefusal -Records $hostFatalShape -Segment (& $darwinSeg 8 1))
+Assert-Equal 'darwin disclosed: the list length (8 + 2) is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $hostFatalShape -Segment (& $darwinSeg 8 2)))
 
 $darwinEvidenceDir = Join-Path $repo "docs/phase4/h10-evidence/go$goPin/darwin"
 $darwinRowsGated = 0

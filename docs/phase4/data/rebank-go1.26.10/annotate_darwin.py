@@ -5,8 +5,11 @@
 # The rule, §2h's:
 #   - the evidence is docs/phase4/h10-evidence/go<pin>/darwin/, read in DECLARED WAVES ('' = D-W1 at the top, dw2,
 #     e1, reread), and a row's reading of record is its LATEST wave;
-#   - banked = both RIDs `validated`, `agree` yes on both, and equal matched and disclosed. The segment is then
-#     "matched[ + disclosed]";
+#   - banked = both RIDs `validated`, `agree` yes on both, and equal matched and disclosed-divergent. The segment is
+#     then "matched[ + disclosed-divergent]". Disclosed-divergent is `divergent - new` (the disclosed share of the
+#     non-matching verdicts), NOT the `disclosed` column: that is len(comparison.disclosed), the disclosure LIST, which
+#     the converter builds as the divergent set PLUS every host-fatal name in scope, tests with no verdict on either side
+#     (COORD 2026-10-26, R's finding; runtime/debug read 8 + 2 by the list and is 8 + 1, as windows banks it);
 #   - read and not banked: the row carries NO darwin: segment;
 #   - a row the evidence does not name is left as it is.
 # The waves are the guard's own list, read from the script so the two cannot drift.
@@ -53,11 +56,14 @@ def reading(records):
         sys.exit(f"{rs[0]['row']}: {len(arm)} osx-arm64 and {len(x64)} osx-x64 lines in its latest wave")
     a, x = arm[0], x64[0]
     agreed = a['agree'] == x['agree'] == 'yes' or a['row'] in rulings
-    banked = a['status'] == x['status'] == 'validated' and agreed \
-        and a['matched'] == x['matched'] and a['disclosed'] == x['disclosed']
+    if not (a['status'] == x['status'] == 'validated' and agreed):
+        return None
+    div_a = int(a['divergent']) - int(a['new'])
+    div_x = int(x['divergent']) - int(x['new'])
+    banked = a['matched'] == x['matched'] and div_a == div_x
     if not banked:
         return None
-    return a['matched'] + (f" + {a['disclosed']}" if int(a['disclosed']) else '')
+    return a['matched'] + (f' + {div_a}' if div_a else '')
 
 table = os.path.join(tree, 'docs/ValidatedTestPackages.md')
 lines = open(table, encoding='utf-8', newline='').read().split('\n')
