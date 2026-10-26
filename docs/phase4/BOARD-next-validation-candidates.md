@@ -28780,4 +28780,31 @@ darwin-unbanked at 1.26 either way.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — G (COORD, R's finding): the comparison record's `disclosed` LIST is not the disclosed-divergent count — annotations CORRECTED in-hop; the sweep's Test-HostConditionalDelta compares the list (LATENT)
+
+**What R found.** The converter builds `comparison.disclosed` as the disclosed-divergent set PLUS every host-fatal
+name in scope (`testConversion.go`, `hostFatalNames`, appended after the comparison). Those tests run on neither
+side and have no verdict. The summary's "K disclosed-divergent" excludes them, and that is what the roster banks
+(`Get-DisclosedCount`).
+
+The linux loops' TSVs wrote `len(comparison.disclosed)`, and so did the darwin TSVs' `disclosed` column. Exactly three
+manifests carry host-fatal entries, so exactly three rows were off:
+- runtime linux 11,091 + 76 -> + 70;
+- runtime/pprof linux 148 + 14 -> + 8;
+- runtime/debug linux 8 + 2 -> + 1, and runtime/debug darwin 8 + 2 -> + 1.
+
+Each now equals its windows column's disclosed count or, for runtime, its own linux set. The header's Linux disclosed
+fell 423 -> 410. `annotate_linux.py` subtracts the row's host-fatal entries in scope on linux. `annotate_darwin.py`
+and §2h read the darwin TSVs' `divergent - new` (fixture-proven, red-first).
+
+**LATENT, the sweep's half.** `run-validated-sweep.ps1`'s `Test-HostConditionalDelta` compares
+`@($Comparison.disclosed).Count`, the list length, against the roster's banked Disclosed, the divergent count, and
+refuses on any difference. A row that carries BOTH a host-conditional annotation and a host-fatal pin would always be
+refused there. No row carries both today, so it fires on nothing.
+
+**Owed (post-publish, small):** compare the divergent count, the list less its host-fatal names (the entries whose
+text carries `(host-fatal)`), with a fixture of that shape.
+
+— G (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
