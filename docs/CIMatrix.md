@@ -4,8 +4,10 @@
 > demand only. It reaches platforms the fleet does not own — **both macOS legs above all** — and
 > gives the Linux lane a second, independent host. It is **never a merge gate**: the fleet's
 > machines and their measured budgets stay authoritative, and nothing this workflow produces
-> lands in the repository. See [`../CLAUDE.md`](../CLAUDE.md) for corpus mechanics, `GoTargetOS`
-> flavors and the budget table the timeouts are scaled from, and
+> lands in the repository. See [`.claude/rules/corpus.md`](../.claude/rules/corpus.md) for corpus
+> mechanics and `GoTargetOS` flavors,
+> [`.claude/rules/harness-gates.md`](../.claude/rules/harness-gates.md) for the budget table the
+> timeouts are scaled from, and
 > [`PLAN-linux-operation.md`](PLAN-linux-operation.md) for the F-series census-first pattern the
 > darwin leg replays.
 
@@ -13,15 +15,16 @@
 
 **1. The darwin census — the one thing nothing else can do.** Layout L3 emits a `darwin/` folder
 for every platform-varying package, and `-p:GoTargetOS=darwin` selects it, so the flavor *exists*
-in the corpus. It has only ever been compiled **cross-target from Windows**, where it stops at a
-known wall in `os`'s directory walk (CLAUDE.md's L3 gate lessons; census it, don't re-diagnose).
-What has never happened anywhere is that build **on Apple hardware** — and there are two of those,
-arm64 and x64, which are different compilations of the same flavor. A darwin dispatch fans out to
-both. This is the Phase-3 doctrine applied to a platform: **compile is the milestone, operational
-is later**, and the census is the deliverable whether or not it is green.
+in the corpus. Compiled **cross-target from Windows**, it stopped at a known wall in `os`'s
+directory walk (the L3 gate lessons in [`.claude/rules/corpus.md`](../.claude/rules/corpus.md)).
+Nothing else builds it **on Apple hardware** — and there are two of those, arm64 and x64, which are
+different compilations of the same flavor. A darwin dispatch fans out to both, and both have
+compiled clean since 2026-08-23 (below). This is the Phase-3 doctrine applied to a platform:
+**compile is the milestone, operational is later**, and the census is the deliverable whether or
+not it is green.
 
-**2. The native-Linux control.** Every Linux reading the campaign holds comes from one WSL distro
-on one machine. A hosted `ubuntu-latest` is a second Linux with a different kernel, a different
+**2. The native-Linux control.** A Linux reading taken under WSL shares its machine with a Windows
+host. A hosted `ubuntu-latest` is a second Linux with a different kernel, a different
 filesystem and no Windows host underneath it. A finding that reproduces on both is a property of
 the platform; a finding that reproduces on only one is a property of the topology. That
 distinction is worth a dispatch before a Linux arc is planned around it.
@@ -63,14 +66,16 @@ Actions → **OS matrix (on demand)** → *Run workflow*. Or from the CLI:
 
 ```
 gh workflow run os-matrix.yml -f goos=darwin -f stage=census
-gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=compress
+gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=compress/flate
 ```
 
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` | What to run. One stage per dispatch. |
-| `filter` | free text, optional | The shard. A package substring for `sweep-shard`, a project-name substring for `behavioral-smoke`. Blank takes the stage's documented default. |
+| `stage` | `census` · `behavioral-smoke` · `behavioral-full` · `behavioral-stderr` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` | What to run. One stage per dispatch. `behavioral-full` runs the whole behavioral enumeration in slices; `behavioral-stderr` runs named projects directly and keeps their whole stderr. |
+| `filter` | free text, optional | The shard. Comma-separated **exact** roster package names for `sweep-shard` (each swept with `-Exact`, and a name not on the roster refuses the run), a project-name substring for `behavioral-smoke`, comma-separated project names for `behavioral-stderr`. `behavioral-full` ignores it. Blank takes the stage's documented default. |
+| `dotnet` | `10.0.x` · `10.0.402` | The SDK channel for `setup-dotnet`. Blank takes `10.0.x`. |
+| `run_timeout` | 1-1800, optional | The behavioral stages' per-program run budget in seconds (`GO2CS_RUN_TIMEOUT`). Blank takes 120. |
 | `published_version` | a four-part go.* version, optional | `release-smoke` only. Blank packs this tree and consumes that pack (the pre-publish gate). Set, the pack is skipped and every leg restores that version from nuget.org (the post-publish smoke). |
 | `nugetgo_module` | `MODULE@VERSION` | `nugetgo-behavior` only, and required there. Its sample program and mappings row must exist at `src/tests/ModuleBehavior/MODULE@VERSION/` on the dispatched ref. |
 | `nugetgo_package` | a NuGet package version | `nugetgo-behavior` only, and required there: the rehearsal package every row runs (e.g. `1.1.0-int.1`). |
@@ -126,7 +131,8 @@ from a harness failure in the log.
 
 ### `sweep-shard` — a filtered validated sweep against `go test`
 
-Runs `run-validated-sweep.ps1 -Filter <filter>` under `pwsh`, with `setup-go` supplying the
+Runs `run-validated-sweep.ps1 -Filter <name> -Exact` under `pwsh` once for each roster package
+named in the filter, with `setup-go` supplying the
 `go test -json` baseline toolchain the comparison needs. `container/heap` is the default filter —
 the fleet's provisioning calibration row, and the right answer to "does a sweep run here at all".
 Per-row evidence (each swept package's comparison record and results files) is collected into the
@@ -175,7 +181,7 @@ converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The
 (240 min; measured 38-53 min).
 
 **After the publish**, the same stage with `published_version` set to the version just pushed (say
-`-f published_version=1.24.13.4`) skips the pack and runs the same arms on the same four RIDs against
+`-f published_version=1.26.10.1`) skips the pack and runs the same arms on the same four RIDs against
 nuget.org itself, `go.*` and everything else restored from there: the release as a user receives it. It is
 dispatchable once every id in the walkthrough's restore closure is listed (a partial index fails restore loudly,
 NU1102). The input is refused on any other stage and must be four numeric parts.
@@ -190,9 +196,11 @@ self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's p
 deterministic; IlcCompile is not (2026-10-14: one tree read 7,001 s and 5,444 s on hosted linux, a 22% spread, and
 6,340 s and 9,897 s on hosted windows, a 56% spread; runs 38555847362 and 38576996407), so a single-run IlcCompile
 comparison is read against its RID's band. A consumer takes
-go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
-min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm
-(4 min since e2move broke ILC's generic cycle in golib: run 38575258530, 0 cycle cutoffs on every RID).
+go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole. For this
+fixture's 31 assemblies that takes about 4 min on hosted linux and windows, 6 on osx-arm64 and 11 on osx-x64, with 0
+cycle cut-offs on every RID, since e2move broke ILC's generic cycle in golib on 2026-10-14 (runs 38575258530 and
+38587876788). Before that it took about 70 min on hosted linux, which is why it became its own stage and not a
+release-smoke arm.
 Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
 metadata golib reads). **Non-gating on its first train (Q)**; from the release after, read before every release like
 the census, and a red holds the release. It reads this tree's pack only: `published_version` is refused for it.
@@ -275,12 +283,14 @@ disclosure count is half of what makes a row honest.
   each leg's environment report *before* anything runs, so a genuine mid-run exhaustion — which
   surfaces as corpus failures, not as a disk message — can still be recognized rather than guessed.
 - **The environment report is calibration data.** Cores, RAM-class, toolchain versions and free
-  space per runner: the first dispatches are what anchor these runners the way the fleet roster
-  anchors its machines. Until then every budget here is an estimate.
+  space per runner: the dispatches are what anchor these runners the way the fleet roster
+  anchors its machines. Some stages are now measured (the census, the `pack` job, `aot-smoke`); the
+  other budgets here are still estimates.
 
 ## What this is NOT
 
-- **Not a merge gate, ever.** No `push` trigger, no `pull_request` trigger, no schedule. A banking
+- **Not a merge gate, ever.** No `push` trigger, no `pull_request` trigger, and only the one
+  daily darwin census on a schedule ([above](#the-one-schedule--the-darwin-regression-guard)). A banking
   merge's proof still comes from the fleet's instruments on the fleet's machines.
 - **Not a substitute for the sweep, CNR or the behavioral suite.** It runs the same scripts, but a
   hosted runner is an unanchored machine; a number measured here is provisional until a fleet
@@ -288,8 +298,9 @@ disclosure count is half of what makes a row honest.
 - **Not a place that writes to the repository.** It has read-only permissions, banks nothing,
   updates no roster row and pushes no branch. A validated count seen here is a *candidate* for
   banking through the normal policy, on a pinned machine.
-- **Not a budget baseline.** The timeouts below are scaled estimates, not measurements. Replace
-  them with measured figures once real dispatches exist.
+- **Not a budget baseline.** The timeouts below are scaled estimates, not measurements. Some
+  stages have since been measured (the census, the `pack` job, `aot-smoke`); those readings are in
+  the stage sections above and in the `aot-smoke` row.
 
 ## Budgets
 
@@ -297,6 +308,8 @@ disclosure count is half of what makes a row honest.
 |:--|--:|--:|:--|
 | `census` | 150 min | 225 min | The full stdlib solution build `--no-incremental` on the fleet's slowest anchored box, plus a **cold** NuGet restore of every project. |
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
+| `behavioral-full` | 150 min | 225 min | The whole behavioral enumeration in slices, with a purge between. Provisional. |
+| `behavioral-stderr` | 60 min | 90 min | Converter `go build`, a transpile and compile of a handful of named projects, and one direct run of each. Provisional. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus five small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
@@ -314,23 +327,26 @@ rewrites every `.cs` immediately before Compile and warm state can never make th
 
 ## darwin known-unknowns
 
-Everything below is untested by construction — the first dispatch is the experiment. Named here so
-a failure is recognized rather than re-diagnosed:
+Everything below was untested by construction when it was written — the first dispatch was the
+experiment. Named here so a failure is recognized rather than re-diagnosed; the settled entries
+record the answer:
 
-- **Whether the darwin corpus's wall is the same one.** The cross-target census from Windows names
-  a specific stop in `os`'s directory walk. Compiling on macOS may hit it identically, hit it plus
-  more, or reach further before stopping. Expect a wall; the shape of it is the finding.
-- **Whether the two architectures wall identically.** `osx-arm64` and `osx-x64` compile the same
-  sources, so a divergence between them is a finding about the corpus, not about macOS.
-- ~~**Whether anything past the census can run at all.**~~ **SETTLED 2026-08-25 — it cannot, yet.**
-  The first darwin `behavioral-smoke` compiled and golden-matched 20/20, then failed all twenty at
-  Output with `exit code mismatch: C# 2 vs Go 0`. Darwin's syscall entry points are libc **assembly**
-  trampolines in Go, emitted as bodyless partials and filled with throwing stubs, so a converted
-  program dies in a module initializer — before `Main`, whether or not it prints. Evidence and
-  remedy shapes:
-  [`phase4/FINDING-darwin-run-layer.md`](phase4/FINDING-darwin-run-layer.md). Until that run layer
-  exists a darwin `behavioral-smoke` or `sweep-shard` reports this uniformly — a known state, not a
-  new finding, and not worth a runner hour to re-observe.
+- ~~**Whether the darwin corpus's wall is the same one.**~~ **SETTLED 2026-08-23 — there is no
+  wall.** The cross-target census from Windows named a specific stop in `os`'s directory walk.
+  Compiled on macOS, the darwin corpus builds with zero errors (census run 32649840220).
+- ~~**Whether the two architectures wall identically.**~~ **SETTLED 2026-08-23 — neither walls.**
+  `osx-arm64` and `osx-x64` compile the same sources, and both read zero errors in the same run, so
+  a divergence between them would be a finding about the corpus, not about macOS.
+- ~~**Whether anything past the census can run at all.**~~ **SETTLED 2026-08-25 — it could not,
+  then; it can now.** The first darwin `behavioral-smoke` compiled and golden-matched 20/20, then
+  failed all twenty at Output with `exit code mismatch: C# 2 vs Go 0`. Darwin's syscall entry points
+  are libc **assembly** trampolines in Go, emitted as bodyless partials and filled with throwing
+  stubs, so a converted program died in a module initializer — before `Main`, whether or not it
+  printed. Evidence and remedy shapes:
+  [`phase4/FINDING-darwin-run-layer.md`](phase4/FINDING-darwin-run-layer.md). The run layer has
+  since been written: by 2026-09-04 a darwin `behavioral-full` ran on both legs (run 33898025427),
+  and the [roster](ValidatedTestPackages.md) shows a macOS count for each package that validates on
+  both chips.
 - ~~**What an explicit `darwin` binding does.**~~ **SETTLED 2026-08-25 — it works.** `GoTargetOS` in
   this workflow's `env:` block does reach MSBuild, and a macOS leg builds and runs the darwin flavor.
   Proved by the contrapositive: the identical env-only mechanism on Linux passed 20/20, and `fmt`'s
@@ -345,8 +361,9 @@ a failure is recognized rather than re-diagnosed:
   amd64 target.
 - **Case sensitivity.** Default APFS is case-**insensitive** like Windows, so the mac legs prove
   nothing about path casing. Linux remains the only filesystem that does.
-- **Runner labels and images.** `macos-15-intel` is a comparatively new label; whether its image
-  carries the expected `pwsh` and SDK story is something only a dispatch settles.
+- ~~**Runner labels and images.**~~ **SETTLED — the image works.** `macos-15-intel` was a
+  comparatively new label when this was written; its `osx-x64` legs have since run the census,
+  `behavioral-full` and `aot-smoke` (run 38575258530).
 - **`pwsh` version drift.** The Linux campaign's readings come from one specific pwsh; hosted images
   ship whatever they ship. A PowerShell-level failure on a runner is a portability finding about the
   instrument, not about the corpus.
