@@ -17,13 +17,14 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
+## 📰 NEWS — The converted standard library moves to Go 1.26.10
 
-**October 14, 2026, NuGet 1.24.13.7.** With `-comments`, converted C# now carries Go's doc
-comments and in-function comments where Go put them, and blank lines follow Go's in every conversion. An `https` request from a converted program works on macOS.
-Two defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
-types raw. This is the last release built from Go 1.24; the next moves to Go 1.26.
-[Full announcement](NEWS.md#october-14-2026--converted-code-keeps-gos-comments-and-spacing-and-https-works-on-macos).
+**October 26, 2026, NuGet 1.26.10.1.** The converted standard library is built from Go 1.26.10, a release
+Go still supports, and every package that can be validated passes Go's own tests at Go 1.26.10 on
+Windows x64 and Linux x64. Converting needs Go 1.26.10. Go 1.26's new packages are new `go.*` package
+IDs, and the ten IDs Go 1.26 no longer has are deprecated, pointing at 1.24.13.7. A limitation is newly
+documented: the address of another package's variable is the address of a copy.
+[Full announcement](NEWS.md#october-26-2026--the-converted-standard-library-moves-to-go-12610).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
