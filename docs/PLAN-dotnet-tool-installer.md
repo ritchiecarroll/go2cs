@@ -259,6 +259,12 @@ network at all after `dotnet tool install`, which `-recurse=nuget` cannot use an
   detached GPG signature over `SHA256SUMS`, made with the key that signs the release tag. macOS signing and
   notarization need an Apple Developer ID, and remain an open question for the owner.
   1.26.10.2's seat #12 builds this; the attestation story for re-signed bytes is part of that seat.
+- **Considered, not required (the owner, 2026-10-26): the tour can use the tool's Go.** The
+  [Tour of go2cs](../src/tour/README.md) runs the Go side of each example as well as the converted C#, so today it
+  needs Go installed. If the tool can report where its provisioned Go lives (for example `go2cs toolchain env`,
+  printing `GOROOT` and the `go` path), the tour can use that Go when no other is on `PATH`, optionally, so that a
+  first-time user who installed only the tool can also take the tour. Seat #11 sizes this, and builds it if it is
+  small.
 <!-- The owner, in the COORD chat, 2026-10-26: "per questions: download, go2cs ID, same API key, signing would be
      good (also for release binaries, even if downloaded by i7, signed and pushed back), yes on README tool install." -->
 
