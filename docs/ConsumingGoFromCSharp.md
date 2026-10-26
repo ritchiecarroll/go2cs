@@ -34,9 +34,7 @@ fmt.Println(shout, len(shout));     // HELLO, GOPHER 13
 
 `dotnet run` prints `HELLO, GOPHER 13`. That is the whole pattern: one `using` alias per Go package, and the calls
 read like Go. `@string` is Go's string type ([Strings](#strings)), and the packages bring `@string` and Go's
-built-ins such as `len` into scope for you ([Imports](#imports)). Packages newer than 1.24.13.7 also switch off the
-compiler's warning about lowercase alias names (CS8981); with 1.24.13.7 or earlier, or a project that references a
-conversion as projects, add `<NoWarn>$(NoWarn);CS8981</NoWarn>` yourself ([Imports](#imports)).
+built-ins such as `len` into scope for you ([Imports](#imports)).
 
 A published Go module works the same way. `github.com/google/uuid` is `nugetgo.github.com.google.uuid`:
 
@@ -129,10 +127,9 @@ fails with CS1537. A conversion you reference as projects adds none of these, so
 `Program.cs` does.
 
 **Lowercase aliases raise warning CS8981**, which notes that an all-lowercase name may become a C# keyword one day.
-The aliases are deliberate. Packages newer than 1.24.13.7 add CS8981 to your `NoWarn` along with the usings above,
-under the same switch, so `GoConsumerUsings=false` brings the warning back along with the usings. With 1.24.13.7 or
-earlier, with a conversion you reference as projects, or in a project that sets `GoConsumerUsings` to `false`, turn
-the warning off in the project file:
+The aliases are deliberate. The packages add CS8981 to your `NoWarn` along with the usings above, under the same
+switch, so `GoConsumerUsings=false` brings the warning back along with the usings. With a conversion you reference as
+projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warning off in the project file:
 
 ```xml
 <NoWarn>$(NoWarn);CS8981</NoWarn>
@@ -598,9 +595,8 @@ Each item is a first surprise, and what to write instead.
 - **A Go method does not compile.** Import the package's namespace as well as its alias: `using go;` for a
   standard-library package without a slash, `using go.encoding;` for `encoding/hex`, `using go.github.com.google;`
   for uuid ([Imports](#imports)).
-- **Warning CS8981 on each alias.** NuGet packages newer than 1.24.13.7 switch it off for you. With 1.24.13.7 or
-  earlier, with a conversion you reference as projects, or with `GoConsumerUsings` set to `false`, add
-  `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
+- **Warning CS8981 on each alias.** The NuGet packages switch it off for you. With a conversion you reference as
+  projects, or with `GoConsumerUsings` set to `false`, add `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
 - **`foreach (var v in s)` gives a tuple, not a value.** `foreach` over a slice gives `(index, value)` pairs: write
