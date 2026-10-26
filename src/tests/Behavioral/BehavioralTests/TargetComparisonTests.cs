@@ -1606,6 +1606,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
 
     [TestMethod]
+    public void CheckPackageVarMethodValue() => CheckTarget("PackageVarMethodValue");
+
+    [TestMethod]
     public void CheckPackageVarTupleInitOrder() => CheckTarget("PackageVarTupleInitOrder");
 
     [TestMethod]

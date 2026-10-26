@@ -721,9 +721,10 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	siblingTestFuncMethodNames = nil
 
 	// Likewise for the addressed-global seed: each variant's universe already CONTAINS the
-	// `_test.go` files, so its own collectAddressedGlobals sees `&g` directly. The seed exists only
-	// for the production pass, which cannot.
+	// `_test.go` files, so its own collectAddressedGlobals sees `&g` (and `g.inc` as a value)
+	// directly. The seed exists only for the production pass, which cannot.
 	siblingTestAddressedGlobalNames = nil
+	siblingTestMethodValues = nil
 
 	// And likewise for the publicization seed: the in-package variant's own scope holds the
 	// production declaration AND the test file's exported consumer together, so its

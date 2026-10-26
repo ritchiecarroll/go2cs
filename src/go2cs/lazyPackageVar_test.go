@@ -397,13 +397,18 @@ var table = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
 
 var counters = [...]P{{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}, {13, 14}, {15, 16}}
 
+var bumpers = [...]P{{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}, {13, 14}, {15, 16}}
+
 func addr() *[20]int { return &table }
 
 func bump() { counters[0].Bump() }
+
+func bumper() func() { return bumpers[0].Bump }
 `
 
 // TestLazyPackageVarCarriesItsBox pins the address-of increment's shape: a lazy var the converter boxes is written as its
-// box inside the holder and its unchanged ref property beside it, and `&X` keeps reading the box.
+// box inside the holder and its unchanged ref property beside it, and `&X` keeps reading the box. A pointer-receiver
+// method VALUE (bumpers) addresses its var exactly as `&X` and a pointer-receiver call do, so it is boxed and lazy alike.
 func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -412,7 +417,7 @@ func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 	}
 
 	files, err := convertLazyVarModule(t, map[string]string{
-		"main.go":  "package main\n\nfunc main() { bump(); println(addr()[0], table[1], counters[0].n) }\n",
+		"main.go":  "package main\n\nfunc main() { bump(); bumper()(); println(addr()[0], table[1], counters[0].n, bumpers[0].n) }\n",
 		"table.go": lazyVarAddressedSource,
 	})
 
@@ -428,6 +433,9 @@ func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 		"return Ꮡtable;",
 		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StandardBox<array<P>>(",
 		"internal static ref array<P> counters => ref Ꮡcounters.Value;",
+		"[GoLazy] partial class lazyᴛbumpers { internal static ж<array<P>> Ꮡbumpers = new StandardBox<array<P>>(",
+		"internal static ref array<P> bumpers => ref Ꮡbumpers.Value;",
+		"return Ꮡbumpers.at<P>(0).Bump;",
 	} {
 		if !strings.Contains(table, want) {
 			t.Errorf("table.cs lacks %q:\n%s", want, table)
@@ -524,9 +532,11 @@ func TestLazyPackageVarRefusesByName(t *testing.T) {
 			"it reads the var base, which the package or its tests assign or take the address of"},
 		{"exported constant dep", map[string]string{"table.go": "package main\n\nvar Max = 10\n\nvar table = [1]int{Max}\n"},
 			"it reads the exported var Max, which an importer can assign"},
-		// A pointer-receiver method VALUE binds the var's address where the converter keeps no box for it, so there is no
-		// box for the holder to carry (`&table` and a pointer-receiver CALL are boxed: TestLazyPackageVarCarriesItsBox).
-		{"pointer method value", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() func() { return table.Bump }\n"},
+		// The lazy pass's address is the wider one: a pointer-receiver method value on a SLICE element addresses the
+		// element's backing array, which needs no box of the var, so the converter keeps none and there is no box for the
+		// holder to carry (`&table`, a pointer-receiver call and a method value on the var's own storage are boxed:
+		// TestLazyPackageVarCarriesItsBox).
+		{"slice element method value", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = []P{{1}}\n\nfunc g() func() { return table[0].Bump }\n"},
 			"its address is taken where the converter keeps no box for it"},
 		// Slicing an array var aliases its storage, so a write through the slice changes what a reader copies.
 		{"dep sliced", map[string]string{"table.go": "package main\n\nvar base = [2]int{1, 2}\n\nfunc g() []int { return base[:] }\n\nvar table = [1][2]int{base}\n"},

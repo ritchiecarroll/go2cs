@@ -46,6 +46,14 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 		}
 	}
 
+	// Likewise the pointer-receiver method values that test half takes on a production var
+	// (siblingTestMethodValues), resolved against the real types by the scan's own rule.
+	for _, candidate := range siblingTestMethodValues {
+		if varObj := siblingMethodValueRoot(pkg, candidate); varObj != nil {
+			packageAddressedGlobals[varObj] = true
+		}
+	}
+
 	for _, fileEntry := range files {
 		scanAddressedGlobals(fileEntry.file, pkg, info, packageAddressedGlobals)
 	}
@@ -63,7 +71,8 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 }
 
 // scanAddressedGlobals records into `into` every package-level value var of `pkg` that `file` takes
-// the address of (via &g, &g.field, &g[i]) or calls a capture-mode / pointer-receiver method on. It is
+// the address of (via &g, &g.field, &g[i]), calls a capture-mode / pointer-receiver method on, or
+// takes a pointer-receiver method VALUE of (`f := g.inc`, which is `(&g).inc`). It is
 // the per-file half of collectAddressedGlobals, split out so the SAME predicate can be run over an
 // IMPORTED package's syntax (importedGlobalIsBoxed) — an importer must bind the owner's box exactly
 // when the owner's own emission declares one.
@@ -178,10 +187,142 @@ func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, 
 			if shouldBox {
 				into[varObj] = true
 			}
+
+		case *ast.SelectorExpr:
+			// A pointer-receiver METHOD VALUE on a package-level value var (`f := g.inc`,
+			// `apply(gh.t.inc)`, `ga[1].inc`) binds `&g` at evaluation, so g needs its box exactly as
+			// for `&g`: otherwise the emission falls back to `Ꮡ(g).inc`, a box of a COPY, and every
+			// write through the method value is lost. (A CALL of the same selector is the CallExpr
+			// arm's; this arm marks nothing for it that the call arm does not.)
+			if varObj := methodValueStorageRoot(node, info); varObj != nil && varObj.Parent() == pkg.Scope() {
+				into[varObj] = true
+			}
 		}
 
 		return true
 	})
+}
+
+// methodValueStorageRoot returns the variable whose storage the method value `selectorExpr` takes
+// the address of — the root of `g.m`, `g.f.m` or `g[i].m` through value fields and ARRAY indexes —
+// when the selection is a pointer-receiver method on addressable value storage. Nil otherwise: a
+// value receiver copies; a pointer operand, a field reached through a pointer, an embedded pointer
+// on the path (selection.Indirect) and a slice element all already address the real storage.
+func methodValueStorageRoot(selectorExpr *ast.SelectorExpr, info *types.Info) *types.Var {
+	selection := info.Selections[selectorExpr]
+
+	if selection == nil || selection.Kind() != types.MethodVal || selection.Indirect() {
+		return nil
+	}
+
+	if signature, ok := selection.Obj().Type().(*types.Signature); !ok || signature.Recv() == nil {
+		return nil
+	} else if _, pointerMethod := signature.Recv().Type().(*types.Pointer); !pointerMethod {
+		return nil
+	}
+
+	operand := ast.Unparen(selectorExpr.X)
+
+	for {
+		operandType := info.TypeOf(operand)
+
+		if operandType == nil {
+			return nil
+		}
+
+		if _, isPtr := operandType.Underlying().(*types.Pointer); isPtr {
+			return nil
+		}
+
+		switch expr := operand.(type) {
+		case *ast.Ident:
+			varObj, _ := info.Uses[expr].(*types.Var)
+			return varObj
+		case *ast.SelectorExpr:
+			field := info.Selections[expr]
+
+			if field == nil {
+				// A qualified identifier, `pkg.V`.
+				varObj, _ := info.Uses[expr.Sel].(*types.Var)
+				return varObj
+			}
+
+			if field.Kind() != types.FieldVal || field.Indirect() {
+				return nil
+			}
+
+			operand = ast.Unparen(expr.X)
+		case *ast.IndexExpr:
+			if baseType := info.TypeOf(expr.X); baseType == nil {
+				return nil
+			} else if _, isArray := baseType.Underlying().(*types.Array); !isArray {
+				return nil
+			}
+
+			operand = ast.Unparen(expr.X)
+		default:
+			return nil
+		}
+	}
+}
+
+// siblingMethodValueRoot resolves one siblingTestMethodValues candidate against the production types
+// by methodValueStorageRoot's rule: the package-level var it names when each step is a value field or
+// an array index and the method is a pointer-receiver method of the operand's addressable value; nil
+// for any other shape (a local, a func, a value receiver, a pointer on the path, an interface method).
+func siblingMethodValueRoot(pkg *types.Package, candidate siblingMethodValue) *types.Var {
+	varObj, ok := pkg.Scope().Lookup(candidate.root).(*types.Var)
+
+	if !ok {
+		return nil
+	}
+
+	operandType := varObj.Type()
+
+	for _, step := range candidate.path {
+		if _, isPtr := operandType.Underlying().(*types.Pointer); isPtr {
+			return nil
+		}
+
+		if step == siblingIndexStep {
+			array, isArray := operandType.Underlying().(*types.Array)
+
+			if !isArray {
+				return nil
+			}
+
+			operandType = array.Elem()
+			continue
+		}
+
+		obj, _, indirect := types.LookupFieldOrMethod(operandType, true, pkg, step)
+		field, isField := obj.(*types.Var)
+
+		if !isField || indirect {
+			return nil
+		}
+
+		operandType = field.Type()
+	}
+
+	if _, isPtr := operandType.Underlying().(*types.Pointer); isPtr {
+		return nil
+	}
+
+	obj, _, indirect := types.LookupFieldOrMethod(operandType, true, pkg, candidate.method)
+	method, isMethod := obj.(*types.Func)
+
+	if !isMethod || indirect {
+		return nil
+	}
+
+	if signature, ok := method.Type().(*types.Signature); !ok || signature.Recv() == nil {
+		return nil
+	} else if _, pointerMethod := signature.Recv().Type().(*types.Pointer); !pointerMethod {
+		return nil
+	}
+
+	return varObj
 }
 
 // markExportedBoxOnlyGlobals is the owner arm described in collectAddressedGlobals.

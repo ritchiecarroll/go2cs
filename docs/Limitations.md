@@ -125,9 +125,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   <!-- Diagnosed by lane R on windows/amd64 and linux/amd64 at 9b0269c2e8 (COORD inbox, 2026-10-25T19:24:56Z):
        `f := lib.G.Inc` emits `Ꮡ(lib.G).Inc`, a box of a copy (Go prints 1, converted 0); `&lib.G2` and
        `bump(&lib.Count)` likewise. An importer binds the owner's own box only when the owner boxes the variable, which
-       it decides from its own syntax: src/go2cs/globalAddressOperations.go:237 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`),
+       it decides from its own syntax: src/go2cs/globalAddressOperations.go:378 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`),
        with exported variables boxed only for a box-only pointer method at
-       :188 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
+       :329 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
        value is fixed for the 1.26 publication (R's seat F1); the cross-package case is ruled a documented limitation
        (owner, 2026-10-25), with the fix in the BOARD row of that date. -->
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
@@ -241,8 +241,8 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:3926 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
-       Example- and Benchmark-only test files are left out of the compile set, :792
+  <!-- src/go2cs/testConversion.go:3927 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+       Example- and Benchmark-only test files are left out of the compile set, :793
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime
