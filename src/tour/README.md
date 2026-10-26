@@ -106,7 +106,9 @@ Useful options:
 
 `start.ps1` and `start.sh` pass any option they do not recognize straight
 through, so `.\src\tour\scripts\start.ps1 -Runtime nuget -solutions-url=` starts
-the app with the header link removed.
+the app with the header link removed. Through `start.ps1`, give a value after a
+space (`-nuget-version 1.26.10.1`, `-solutions-url https://...`): PowerShell
+splits a `-name=value` argument at a `.` or a `:`.
 
 `GO_TOUR_BIN` can point to the upstream `tour` executable. `GO2CS_BIN` can point
 to an explicitly managed prebuilt go2cs executable, which skips the build entirely.
@@ -196,8 +198,8 @@ Building go2cs and the first restore of the `go.*` packages are paid by the warm
 Go module; the server runs `go mod tidy`, recursively converts imported third-party packages, and keeps
 the generated app/dependency graph isolated from the selected runtime tree. The Code and Project tabs
 still show only the submitted app. Converted workspaces expire after 30 minutes. The request body is
-limited to 256 KiB; normal tool stages have a 20-second timeout, dependency resolution has two minutes
-for an initial download, and the one-time converter build has ten.
+limited to 256 KiB; the transpile and run stages have a 20-second timeout, the .NET build five minutes,
+dependency resolution two minutes for an initial download, and the one-time converter build ten.
 
 The `dotnet build` of a submission starts as soon as its conversion succeeds, in the background, and
 the Build stage reports that build. The page asks for it straight after the conversion, so the Build tab
@@ -217,9 +219,10 @@ next Run finds it finished.
 ## Integration design
 
 The official Tour runs unchanged on a private loopback port. This server
-reverse-proxies `/tour/`, `/images/`, and the websocket endpoint, injects only
-the source bridge and a small thematic stylesheet, and hosts the outer
-interface on port 4000.
+reverse-proxies `/tour/`, `/images/`, `/_/` and the websocket endpoint. It
+injects the source bridge and a small thematic stylesheet, starts the Tour in
+its dark theme with syntax highlighting on, adds a `go` line to the module the
+Tour writes for each lesson, and hosts the outer interface on port 4000.
 
 The websocket proxy translates the browser-facing origin to the private Tour
 origin so the upstream same-origin check remains effective. The server owns
