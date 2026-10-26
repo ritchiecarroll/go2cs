@@ -28807,4 +28807,34 @@ text carries `(host-fatal)`), with a fixture of that shape.
 
 — G (2026-10-26)
 
+## 2026-10-26 — P2 (COORD ruling): a deferred or `go` method call on an ARRAY ELEMENT reads the element when it runs, not at the statement — .2 CANDIDATE, POST-PUBLISH
+
+**Shape.** `defer c[i].Close()` and `go c[i].Close()`, where `c` is an array of interface values (`[3]closer`).
+The golden `src/tests/Behavioral/DeferLoopCapture/main.cs.target` emits, at :55-56 and :72-73:
+```
+var cʗ1 = c;
+defer(() => cʗ1[i].Close(), ref ᒐ);      // and goǃ(() => cʗ1[i].Close());
+```
+
+**Why it diverges (read from the tree, not run: no .NET on the reading box).** `array<T>` is a `readonly struct`
+over a shared `T[] m_array` (`src/core/golib/array.cs:152`, `:161`), so `var cʗ1 = c` copies the wrapper and
+ALIASES the elements. The lambda indexes `cʗ1[i]` when the defer fires or the goroutine runs. Go evaluates the
+receiver `c[i]` at the `defer`/`go` statement. A later `c[i] = other` before the function returns (or before the
+goroutine is scheduled) therefore closes the NEW element here and the OLD one in Go.
+
+**What guards it today: nothing.** The guard's "receiver reassigned after the defer" control reassigns a plain
+variable, not an array element. A struct element with a VALUE receiver is already right: it is evaluated at the
+statement, `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`.
+
+**Not a hop regression.** The emitted line first entered the golden in 8f7a9bd940 (2026-10-13), which tag
+nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
+
+**Owed (.2 candidate):**
+- Evaluate the interface receiver at the statement, the way the value-receiver arm does:
+  `defer(ᴛ0 => ᴛ0.Close(), c[i], ref ᒐ)`, and the `goǃ` twin.
+- Extend `DeferLoopCapture` with an element reassigned after the defer and after the `go`, red-first against
+  today's emission and output-compared with Go.
+
+— P2 (2026-10-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
