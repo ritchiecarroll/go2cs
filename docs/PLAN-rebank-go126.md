@@ -992,3 +992,88 @@ defects). They all resolve once the publish's retargets land:
      migrate-gorelease.ps1 -From 1.24.13 -To 1.26.10 run read-only (porcelain empty after); b0ef977fda's own stat (its
      corpus-release.txt and GoBuildNumber). The removed IDs' alternates are proposals from Go 1.26's tree, for the
      owner to rule, not measurements. -->
+
+## 15. The §6 full validated-roster sweep, sharded (COORD's ruling of 2026-10-26)
+
+Runbook §6 owes one full validated-roster sweep at the parity gate, AFTER the last golib or runtime change
+(Release day step 1). That is the batch-44 tree, `<TIP44>` = `ac1454281f` (the deal below re-cut there, unchanged). COORD ruled it SHARDED: one complete pass at ONE tree
+across boxes, so "once" holds and the wall shrinks. The data file is
+[`data/rebank-go1.26.10/sweep-shards.tsv`](phase4/data/rebank-go1.26.10/sweep-shards.tsv), in `shards.tsv`'s columns.
+It is cut deterministically by [`sweep_shards.py`](phase4/data/rebank-go1.26.10/sweep_shards.py) from the roster's
+238 banked rows, `$longTimeouts` and this hop's pass-1 windows walls.
+
+| Box | Rows | Projected | What it holds |
+|---|---|---|---|
+| i9 | 79 | 1.66 h | the reserved rows (net and the off-i9 rows aside), then its share of the rest |
+| H | 77 | 1.67 h | its share |
+| G | 74 | 1.66 h | `net` (windows net banks only on an NXDOMAIN resolver, PLAN §4 step 4; the i9's network is SERVFAIL, and G banked net at pass 2), then its share |
+| R | 8 | 0.71 h | the owner's off-i9 list: crypto/tls, net/http, net/http/httptest, net/smtp, crypto/x509, net/http/cgi, net/http/httptrace, os/exec |
+
+The projection uses pass-1 walls, mostly H-class, so the i9's share should beat it. **Critical path: about 1.7 h**
+with all four boxes started together.
+
+**What the sweep proves:** the exact banked count and a drift-clean corpus.
+- **Every row PASS.** The sweep's PASS lines include its narrow, named exceptions: host-conditional,
+  capability-absent, host-limit and the oracle-only re-run.
+- **Zero REAL drift.** The sweep prints the known `-tests` closure class apart from real drift.
+- A FAIL, an oracle-unstable row or a real-drift file stops the shard's post. It is a finding, not a reading.
+
+### 15.1 The shard brief (one block, every box; `<LANE>` is i9, H, G or R)
+
+```
+LANE <LANE> -- the §6 FULL SWEEP, go1.26.10, at <TIP44>. Plan: docs/PLAN-rebank-go126.md §15 at <TIP44>.
+ROWS: docs/phase4/data/rebank-go1.26.10/sweep-shards.tsv, rows with lane <LANE>, in seq order. Write the list from
+  the file. Never retype it.
+H only: the H12.6 rehearsal and this shard never overlap on the box -- one battery per box.
+BEFORE ROW 1:
+  - a throwaway linked worktree DETACHED at <TIP44> (the sweep reads the roster; nothing here banks);
+  - free disk >= 30 GB (the sweep's own preflight floors at 25 GB, and re-checks at every invocation);
+  - src\clean-bin.ps1 -Root <TREE>, the root EXPLICIT; then purge src\gen\go2cs-gen\bin and \obj SEPARATELY
+    (clean-bin does not reach them; §7 lesson 37);
+  - the toolchain triple (go1.26.10) and the residue census, as §12's i9 block;
+  - G only: `nslookup invalid.invalid` answers NXDOMAIN, recorded in the ledger before net.
+THE SURVIVAL CANARY (§7 lesson 37), before the shard proper:
+  - launch the shard's runner exactly as the shard will be launched (detached, from the box's own session),
+    with ONE row, the box's seq-1 row;
+  - END THE TURN, then confirm from a SEPARATE call: its PASS line, its rc, and its timing TSV. A runner reaped at
+    the turn boundary has lost sweeps before, and this is the check;
+  - only then launch the shard.
+ENV: GOROOT=<GOROOT> GOTOOLCHAIN=local CGO_ENABLED=0, <GOROOT>\bin first on PATH, .NET 10 (DOTNET_ROOT set in the
+  pwsh child only). Default config (Release, untiered, per-row execution annotations RESPECTED). Pass no
+  -TestConfig: an explicit one makes the run non-bank-eligible. i9: -TestBuildMaxCpu 4 (the hardware order).
+THE ACT, per row, one invocation each:
+  pwsh -NoProfile -File <TREE>\src\run-validated-sweep.ps1 -Filter <row> -Exact [-SkipBuild after the first row]
+  - capture rc on the next line;
+  - capture the row's PASS/FAIL/CVAC line, the summary line, the "real drift" block (expected empty) and the
+    printed timing-TSV path;
+  - then RESTORE the row's dirt BY STATUS (git status --porcelain: check out tracked paths, remove untracked
+    ones), so the next row's drift check reads that row alone;
+  - check the free space at the row boundary.
+OUTPUT, per shard: docs/phase4/h10-evidence/go1.26.10/sweep/<LANE>-S.tsv on lane ref claude/<lane>-sweep-final,
+  columns: row, word, count, banked, rc, wall_s, real_drift (the count of real-drift files), oracle_rerun (yes/no).
+  Its ledger beside it. ls-remote after the push.
+POST (one, <=40 lines):
+  - WHAT: lane, <TIP44>, ref@SHA;
+  - EVIDENCE: rows run against listed; the word tally; every non-PASS row by name with its line; every row with
+    real drift, with its files; the canary's evidence; the toolchain triple; residue before and after;
+  - NEXT.
+```
+
+### 15.2 The close of the sweep
+
+COORD sums the four TSVs into one verdict:
+- 238 rows, each exactly once;
+- every word PASS;
+- zero real drift.
+
+That is §6's gate at `<TIP44>`, and only then does the master merge (§14.3 RD1) proceed. A red shard re-runs only its
+red rows, at the same tree, after its finding is ruled. It never re-runs the whole pass.
+
+<!-- Provenance (G, 2026-10-26, COORD's ruling as plan owner). Read at the spine: src/run-validated-sweep.ps1 (the
+     -Filter/-Exact single-row selection; -SkipBuild; the default Release/untiered config with per-row execution
+     annotations, and that an EXPLICIT -TestConfig makes every row non-bank-eligible; the disk preflight at each
+     invocation; the summary line and the per-row timing TSV under scratchpad/sweep-row-walltimes; the end-of-run
+     drift check with the known -tests-closure class split from REAL drift, which is printed, not an exit code);
+     GoCorpusMigration.md §6 and §7 lesson 37; PLAN §4 step 4 (net's NXDOMAIN rule); the owner's off-i9 list (COORD
+     2026-10-24). sweep_shards.py reproduces sweep-shards.tsv byte-identically. The walls are pass-1's, a
+     projection. -->
