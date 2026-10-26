@@ -472,6 +472,13 @@ H10's close checklist runs as the runbook writes it (the 2026-09-23 close amendm
   carries; COORD rules on that at the checkpoint.
 - **The closing checks name both numbers against go1.24.13's 225 / 230**, with the linux and darwin lines beside
   them.
+- **No darwin segment predates the bank** (COORD, 2026-10-25, pre-ruled). Every roster row the go1.26.10 darwin leg
+  READ either carries the segment that leg banked (both RIDs `validated` and agreeing) or carries NO `darwin:`
+  segment. A row read and not banked gets a reading of record at the pin or its segment is REMOVED before the
+  publish, so no go1.24.13 claim survives under the 1.26 bank. Two rows owe this at D-W1: `sync/atomic` (`darwin:
+  108`; arm64 abandons at 15m, x64 validates; E1 is testing the 150m floor) and `internal/synctest` (`darwin: 28`;
+  an OOM host death at 1.26, ruled darwin-UNBANKED at 1.26). `src/check-roster-format.ps1` §2h gates it against
+  `docs/phase4/h10-evidence/go<pin>/darwin/*.tsv`, and it must read **0 refused** with D-W2's evidence merged.
 
 ## 9. Timing, as a projection
 

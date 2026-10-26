@@ -2162,6 +2162,100 @@ Write-Host ('legacy alloc-profile in rows banked at go{0}: {1} rows read ({2} en
 Assert-Equal 'legacy-label arm: it read at least one row banked at the pin (a zero means it checked nothing)' $true ($legacyRowsRead -gt 0)
 Assert-Equal 'legacy-label arm: it read at least one manifest entry (a zero means the manifests were never opened)' $true ($legacyEntriesRead -gt 0)
 
+# ---- 2h. a darwin segment never predates the hop for a row the hop's darwin leg READ (COORD, 2026-10-25)
+# The darwin annotation leg writes a row's `darwin:` segment from the hop's per-shard evidence TSVs
+# (docs/phase4/h10-evidence/go<pin>/darwin/*.tsv, one line per row per RID): a row banks a segment only
+# when osx-arm64 and osx-x64 both read `validated` and agree, and the value is the agreed matched count
+# plus " + <disclosed>". A row the leg READ but did not bank keeps whatever segment it carried, and
+# that segment is the previous hop's -- a claim at an older Go release surviving under this bank. COORD's
+# honesty ruling: each such row gets a reading of record at the pin or its segment is REMOVED before
+# the publish.
+#
+# So, for every roster row the pin's darwin evidence names: banked on both RIDs => the segment exists
+# and equals the evidence; otherwise => NO segment. A row the evidence does not name is not gated (its
+# wave has not run, or it is not in the darwin population) and is counted. The evidence directory moves
+# with the pin, so this arm names no hop; before a hop's darwin leg has run it reads nothing and says so.
+#
+# Red at birth on 4ad0b70077 by design: sync/atomic (arm64 failing, x64 validated) and internal/synctest
+# (both failing) still carry their go1.24.13 `darwin: 108` / `darwin: 28`. It goes green when each is
+# re-read at the pin or loses its segment (PLAN-rebank-go126.md 8, the close).
+function Get-DarwinSegmentRefusal {
+    param($Records, $Segment)
+
+    # $Records: the evidence lines for ONE row; $Segment: the row's OS['darwin'] entry or $null.
+    $arm = @($Records | Where-Object { $_.RID -ceq 'osx-arm64' })
+    $x64 = @($Records | Where-Object { $_.RID -ceq 'osx-x64' })
+    if (($arm.Count -ne 1) -or ($x64.Count -ne 1)) {
+        return "the darwin evidence holds $($arm.Count) osx-arm64 and $($x64.Count) osx-x64 line(s) for it, not one of each"
+    }
+    $a = $arm[0]; $x = $x64[0]
+    $banked = ($a.status -ceq 'validated') -and ($x.status -ceq 'validated') -and ($a.agree -ceq 'yes') -and ($x.agree -ceq 'yes') -and
+        ($a.matched -eq $x.matched) -and ($a.disclosed -eq $x.disclosed)
+
+    if (-not $banked) {
+        if ($null -eq $Segment) { return $null }
+        return "it was read at the pin and did not bank (osx-arm64 $($a.status), osx-x64 $($x.status), agree $($a.agree)/$($x.agree)), but still carries a darwin: segment from an earlier hop -- re-read it at the pin or remove the segment"
+    }
+
+    $want = "$($a.matched)" + $(if ([int]$a.disclosed -ne 0) { " + $($a.disclosed)" } else { '' })
+    if ($null -eq $Segment) { return "it banked at the pin on both RIDs (darwin: $want) and carries no darwin: segment" }
+    if (-not $Segment.Applicable) { return "it banked at the pin on both RIDs (darwin: $want) and carries darwin: n/a" }
+    $have = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
+    if ($have -cne $want) { return "its darwin: $have is not the pin's reading, darwin: $want" }
+    return $null
+}
+
+function Read-DarwinEvidence {
+    param([string] $Directory)
+
+    # row -> list of records. Every TSV's header names its columns, so a column added later never shifts one.
+    $byRow = @{}
+    foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.tsv' | Sort-Object Name)) {
+        foreach ($record in @([System.IO.File]::ReadAllText($file.FullName) | ConvertFrom-Csv -Delimiter "`t")) {
+            if (-not $byRow.ContainsKey($record.row)) { $byRow[$record.row] = New-Object System.Collections.Generic.List[object] }
+            $byRow[$record.row].Add($record)
+        }
+    }
+    return $byRow
+}
+
+# The refusal's contract, against fixtures, every way: on a roster the evidence agrees with, the loop
+# below refuses nothing, and a broken predicate would read exactly like a clean one.
+function New-DarwinFixtureRecord([string] $rid, [string] $status, [string] $agree, [int] $matched, [int] $disclosed) {
+    [PSCustomObject]@{ RID = $rid; status = $status; agree = $agree; matched = "$matched"; disclosed = "$disclosed" }
+}
+$darwinBanked = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'yes' 98 2), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'yes' 98 2))
+$darwinSplit = @((New-DarwinFixtureRecord 'osx-arm64' 'failing' 'NO' 107 0), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'NO' 108 0))
+$darwinSeg = { param($n, $d) [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d } }
+Assert-Equal 'darwin segment age: a banked row whose segment equals the reading is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 2))
+Assert-Equal 'darwin segment age: a banked row whose segment differs is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 0)))
+Assert-Equal 'darwin segment age: a banked row with no segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment $null))
+Assert-Equal 'darwin segment age: a row read and NOT banked that still carries a segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinSplit -Segment (& $darwinSeg 108 0)))
+Assert-Equal 'darwin segment age: a row read and not banked with no segment is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinSplit -Segment $null)
+Assert-Equal 'darwin segment age: one RID alone is refused, never read as banked' $true ($null -ne (Get-DarwinSegmentRefusal -Records @($darwinBanked[0]) -Segment (& $darwinSeg 98 2)))
+
+$darwinEvidenceDir = Join-Path $repo "docs/phase4/h10-evidence/go$goPin/darwin"
+$darwinRowsGated = 0
+$darwinRowsUnread = 0
+$darwinRefused = 0
+if (Test-Path -LiteralPath $darwinEvidenceDir) {
+    $darwinEvidence = Read-DarwinEvidence -Directory $darwinEvidenceDir
+    foreach ($row in $rows) {
+        if (-not $darwinEvidence.ContainsKey($row.Package)) { $darwinRowsUnread++; continue }
+        $darwinRowsGated++
+        $segment = if ($row.OS.ContainsKey('darwin')) { $row.OS['darwin'] } else { $null }
+        $refusal = Get-DarwinSegmentRefusal -Records $darwinEvidence[$row.Package] -Segment $segment
+        if ($null -ne $refusal) {
+            $darwinRefused++
+            Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence docs/phase4/h10-evidence/go$goPin/darwin)" $true $false
+        }
+    }
+    Assert-Equal 'darwin segment age: the evidence named at least one roster row (a zero means the rows were never matched)' $true ($darwinRowsGated -gt 0)
+}
+
+# Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
+Write-Host ('darwin segments against the go{0} darwin evidence: {1} rows read at the pin, {2} not yet read (not gated), {3} refused{4}' -f $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence at the pin yet, so nothing is gated' })) -ForegroundColor Cyan
+
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
 # reader, which nothing else does -- and the two can disagree silently.

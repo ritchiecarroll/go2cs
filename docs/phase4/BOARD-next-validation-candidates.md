@@ -28567,6 +28567,52 @@ plants all three settings on both sides and reads what a child spawned from a te
 red-first on linux. On windows it would be vacuous by the mechanism above, and on a linux host the default build
 binds the windows syscall flavor, whose static initializer cannot run. Proof: the linux syscall row's results file
 now has one writer, the parent (121 events).
+## 2026-10-25 — G (COORD's ruling, D-W1): `internal/trace` `TestTraceCPUProfile/Default` on darwin x64 is a Go-side host skip — no darwin annotation at 1.26, no mint
+
+**What D-W1 read.** On the osx-x64 runner, Go SKIPS `TestTraceCPUProfile/Default`, and the converted side runs it and
+passes. osx-arm64 agrees with windows. The two darwin RIDs disagree, so the row carries no darwin annotation at
+go1.26.10.
+
+**The mechanism.** Go's skip is not an environment or CPU predicate. It is data: `trace_test.go:120` skips when
+`pprofSamples == 0` ("CPU profile did not include any samples while tracing was active"). `pprofSamples` counts the
+profile samples labelled `tracing=on` that the `cpu-profile.go` testprog summarizes to stderr after its 100 ms
+labelled `cpuHogger`. On the x64 mac runner, Go's signal-driven profiler (setitimer/SIGPROF) delivered none in that
+window. The converted code reproduces the predicate exactly, but its input differs: its samples come from go2cs's
+opt-in managed sampler (`src/core/runtime/cpusampler_impl.cs`; the trace test projects set
+`<GoCpuProfiler>true</GoCpuProfiler>`). That sampler runs on its own timer thread and does not depend on signal
+delivery, so the converted side has samples, runs the rest of the check, and passes.
+
+**Owed.** The i9 confirms the Go-side stderr summary is empty in the C1 run artifact (zero `tracing=on` samples). With
+that, it's a host-identity skip on that runner and no conversion gap. Nothing is minted at this hop.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (the tail-call seat, accepted at 5d8d4efc4f): the BROAD implicit-tail-call rule — POST-PUBLISH, unmeasured
+
+**What the seat closed.** The JIT's opportunistic tail calls erase the calling frame, which Go never does. The seat
+(batch 42) closes the two shapes its rows failed on, and nothing wider:
+- lever A: `[System.Security.DynamicSecurityMethod]` on the frame APIs, so nothing tail-calls INTO them;
+- lever B: NoInlining on a declaration or literal whose LAST call goes through a func value bound to a
+  frame-observing function (`Helper`, or `runtime.Caller`/`Callers`): 64 test sites in 21 packages, 0 in production
+  std.
+
+The guard is `src/tests/GolibTests/TailCallFrameGuardTests.cs`.
+
+**What it leaves.** The seat's go/types census over std (go1.26.10, production and `_test.go`) counts the tail calls
+it did NOT judge:
+- 922 through a func value whose target the census cannot resolve statically;
+- 528 through an interface method;
+- 509 test plus 16 production direct same-package calls into a function that itself calls `Helper` or a runtime
+  caller walker. These are left to the converter's existing rules (the seed, the decorator set, the skip window and
+  the forwarder fixed point).
+
+Which of them still lose a frame Go would report is UNMEASURED. A lost frame there moves only a reported file:line
+(a `Helper`-attributed failure line, or a `runtime.Caller` result), so a passing verdict moves only where a test
+compares a position.
+
+**Owed post-publish.** Measure before widening. Plant a failing check behind each shape and read whether the
+reported line lands on Go's. A blanket NoInlining on every tail call is the shortcut that the 139-site over-mark
+(lever B's first, decorator-wide predicate) already showed costs frames the JIT never needed to keep.
 
 — G (2026-10-25)
 
