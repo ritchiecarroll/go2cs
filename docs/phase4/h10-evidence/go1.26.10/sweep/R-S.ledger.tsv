@@ -1,0 +1,9 @@
+ended_utc	row	tree	word	count	banked	rc	wall_s	sweep_row_s	timing_tsv	restored
+2026-10-26T10:10:59Z	net/smtp	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	20	20	0	439	406	20261026-050412-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:14:30Z	net/http/httptest	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	62	62	0	192	189	20261026-051120-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:15:38Z	net/http/httptrace	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	2	2	0	63	61	20261026-051435-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:18:23Z	net/http/cgi	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	39	39	0	161	159	20261026-051543-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:24:08Z	crypto/x509	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	540	540	0	342	339	20261026-051828-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:28:55Z	os/exec	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	117	117	0	283	280	20261026-052414-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:36:02Z	net/http	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	1526	1526	0	423	421	20261026-052901-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-26T10:51:46Z	crypto/tls	ac1454281f11f9ff9832d3032b48e1a8e9668acb	PASS	1393	1393	0	939	937	20261026-053608-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
