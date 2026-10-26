@@ -64,8 +64,9 @@ Measured with `GC.GetAllocatedBytesForCurrentThread` over 5,000 Release calls, t
 **nothing** with no defers and **nothing** with one or two whose targets are cached static method groups;
 for the two-capturing-defer shape of `internal/poll.FD.Write` the only allocation is the
 display class and delegate of each defer that genuinely closes over something. The body-owning
-alternative allocates in all three shapes. The full as-built record
-of the frame's design lives in [`phase4/DESIGN-closure-emission.md`](../phase4/DESIGN-closure-emission.md).
+alternative allocates in all three shapes.
+<!-- The full as-built record of the frame's design lives in
+     [`phase4/DESIGN-closure-emission.md`](../phase4/DESIGN-closure-emission.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 <!-- measured at the design (platform not recorded): frame 0 B / 0 B / 192 B; body-owning alternative 160 B / 248 B / 440 B. -->
 
 ## The named-result form: results outside the try, exits through a label

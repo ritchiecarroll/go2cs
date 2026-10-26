@@ -106,7 +106,7 @@ Phase 4 converts each package's `_test.go` suite and compares it, verdict for ve
 It is not finished, and it stands in three parts:
 
 - **Phases 4A to 4C are complete.** The test pipeline, subtests and parallelism, and the package-by-package
-  campaign are done: every implementable package validates on Windows and Linux. Their record is in
+  validation are done: every implementable package validates on Windows and Linux. Their record is in
   [Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests).
 - **macOS parity is in progress.** Each roster row gains a macOS count when the package validates on
   both Apple silicon and Intel with the two agreeing test for test. The
@@ -122,10 +122,11 @@ again. For a user that means each go2cs release names exactly one Go release and
 The project advances by release migrations, called [hops](Glossary.md#hop): moving the converted
 standard library (the *corpus*) to a new Go release or to a new .NET runtime, one variable at a time
 and never both in one hop. Each Go hop re-validates every package against that release's own tests.
-This page states which releases come next. How a hop is run is in
-[`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md), and the step-by-step procedure is in
-[`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go release and
-[`DotNetMigration.md`](DotNetMigration.md) for a .NET one.
+This page states which releases come next.
+<!-- How a hop is run: [`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md); the step-by-step procedure:
+     [`GoCorpusMigration.md`](GoCorpusMigration.md) for a Go release and
+     [`DotNetMigration.md`](DotNetMigration.md) for a .NET one. Internal records, unlinked from the visible
+     text by the 2026-10-26 owner ruling (OQ-1) on user-facing pages. -->
 
 ## Go releases
 
@@ -159,8 +160,9 @@ meaning, such as `closed`, `union` and `safe` when they name a type.
 **A .NET 11 measurement stage follows the Go 1.26 hop**, once .NET 11 has shipped (November 2026), and
 never overlaps a Go hop. It compares JIT and allocation behavior on .NET 11 over identical code, and
 reviews the deployment shape, including the full-trim publish floor, which depends on the runtime
-library's trim safety ([Native AOT and trimming](#native-aot-and-trimming);
-[`PLAN-bflat-perf-exploration.md`](PLAN-bflat-perf-exploration.md)). Its findings inform the move
+library's trim safety ([Native AOT and trimming](#native-aot-and-trimming)).
+<!-- plan: [`PLAN-bflat-perf-exploration.md`](PLAN-bflat-perf-exploration.md) (internal record, unlinked
+     2026-10-26, OQ-1) --> Its findings inform the move
 to `net12.0`; `net10.0` stays the published target until then.
 
 ### Declared host limits and their retirement path
@@ -220,10 +222,11 @@ has packages and is being validated package by package now. Other platforms are 
 
 **Windows and Linux.** The converter runs on both, and the standard library is multi-target on disk:
 platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per
-target OS ([design](phase4/DESIGN-multiplatform-corpus.md)). Each platform-varying package ships a
-`win-x64` and a `linux-x64` flavor, and roster rows record their Linux verdict counts beside the
-Windows record. Remaining Linux operational items are tracked in
-[`PLAN-linux-operation.md`](PLAN-linux-operation.md) and the multi-target design.
+target OS. <!-- design: [design](phase4/DESIGN-multiplatform-corpus.md) --> Each platform-varying package
+ships a `win-x64` and a `linux-x64` flavor, and roster rows record their Linux verdict counts beside the
+Windows record. A few Linux operational items remain open.
+<!-- Remaining Linux operational items are tracked in [`PLAN-linux-operation.md`](PLAN-linux-operation.md)
+     and the multi-target design (internal records, unlinked 2026-10-26, OQ-1). -->
 
 **macOS (Intel and Apple silicon):** packages ship for both chips, the behavioral suite passes on both,
 and the README walkthrough runs. The standard library is being validated package by package on macOS
@@ -276,8 +279,8 @@ source generators as published NuGet packages, and the same substitution reaches
 the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
 packages of their conversions, so a dependency someone has already converted becomes a package restore
 instead of a local transpile. The converter side is built and on by default (see
-[Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)). The design is
-[`PLAN-nugetgo.md`](PLAN-nugetgo.md).
+[Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)).
+<!-- The design is [`PLAN-nugetgo.md`](PLAN-nugetgo.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 - **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
   the converted standard library's alone.
@@ -297,7 +300,8 @@ instead of a local transpile. The converter side is built and on by default (see
 stops, naming the file, and a bridge to native code is planned from 2027.
 
 A Go file that imports `"C"` is not converted, and the standard library is converted with
-`CGO_ENABLED=0`. The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md):
+`CGO_ENABLED=0`. The plan:
+<!-- The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 - **It fails loudly today.** When a file the build selects imports `"C"`, the conversion stops with
   error `GO2CS2001`, which names the file and the cause, instead of skipping the file silently
@@ -322,8 +326,10 @@ Validation counts a package's `Test` functions. Phase 4D, the next validation sl
 
 Active fuzzing, race-detector equivalence and coverage-percentage equivalence stay outside the
 correctness gate. The design kickoff is planned for Q1 2027, and the work proceeds without delaying
-Phase 5. Detail:
-[`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md#phase-4d--later-test-kinds).
+Phase 5.
+<!-- Detail:
+     [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md#phase-4d--later-test-kinds)
+     (internal record, unlinked 2026-10-26, OQ-1). -->
 
 ## Phase 5 — Implement assembly-backed declarations in C#
 
@@ -334,9 +340,10 @@ it is ever called. Phase 5 gives each one a real C# body. Making portable code t
 run faster is a different subject, under [Performance](#performance).
 
 **What it means for you.** No validated package's tests reach a stub, and a call that does reach one
-fails loudly and by name, never silently. Which exported functions can reach one is measured, in the
-[exported-reach record](phase4/CENSUS-phase5-exported-reach.md), taken on the Go 1.24 standard
-library. Every call it confirmed reaching one now reaches a real body instead. Clearing coverage
+fails loudly and by name, never silently. Which exported functions can reach one is measured, on the
+Go 1.24 standard library. <!-- the measurement: [exported-reach record](phase4/CENSUS-phase5-exported-reach.md)
+(internal record, unlinked 2026-10-26, OQ-1) --> Every call it confirmed reaching one now reaches a real body
+instead. Clearing coverage
 counters in a program built without coverage, and `runtime.Breakpoint`, answer exactly as Go does. On
 macOS, verifying a certificate against the system's root certificates and CPU profiling no longer
 reach a stub.
@@ -346,18 +353,18 @@ portable Go path and needs nothing from Phase 5. The declarations it is about ar
 body at all: they are backed by assembler, cgo, runtime or compiler intrinsics, or platform services.
 The `PartialStubGenerator` writes the throwing stub for each until a C# implementation exists.
 
-**It proceeds package by package, as validation demands, not as one campaign.** When a package's own
+**It proceeds package by package, as validation demands, not all at once.** When a package's own
 tests need a declaration, it gets a hand-written C# body and the package validates with it. That is how
 most of the surface that matters has been implemented so far, including the gaps the macOS validation
 found: `os.Executable`, the system page size, and an arm64 path for `hash/crc32`. A declaration no
 validated test reaches can still be a throwing stub, and a program that calls one stops with a
 `NotImplementedException` that names it.
 
-**The remaining stubs are measured.** The
-[Phase 5 stub inventory](phase4/CENSUS-phase5-stub-inventory.md) is a measured inventory of the
-declarations that still compile against throwing stubs, per package and per operating system, taken
-on the Go 1.24 standard library. None of them was reached by a validated package's tests. The record
-carries the counts, so this page quotes none.
+**The remaining stubs are measured.** A measured inventory lists the declarations that still compile
+against throwing stubs, per package and per operating system, taken on the Go 1.24 standard library.
+None of them was reached by a validated package's tests.
+<!-- The inventory: [Phase 5 stub inventory](phase4/CENSUS-phase5-stub-inventory.md) (internal record,
+     unlinked 2026-10-26, OQ-1). The record carries the counts, so this page quotes none. -->
 
 **How a declaration gets its implementation.**
 
@@ -380,8 +387,9 @@ carries the counts, so this page quotes none.
 implemented member has a real companion or a documented target exclusion; and every applicable package
 is validated.
 
-**What is closed first.** Priority follows the
-[exported-reach record](phase4/CENSUS-phase5-exported-reach.md): a stub that an ordinary program can
+**What is closed first.** Priority follows that reach measurement: a stub that an ordinary program can
+<!-- [exported-reach record](phase4/CENSUS-phase5-exported-reach.md) (internal record, unlinked
+     2026-10-26, OQ-1) -->
 easily reach is closed ahead of everything else. The stubs no exported call reaches stay as they
 are, by name, until a real use needs one; closing those has no date.
 
@@ -413,9 +421,10 @@ and under Native AOT. The follow-ups run off the critical path:
   not yet reproduce. The work closes the gap by construction (storage for Go array values,
   frame-local allocations kept off the heap, and ref-receiver method emission), and each disclosure
   retires when its assertion matches.
-- **Interface conversions** (unscheduled): the remaining
-  items from the [interface-shell caching design](phase4/DESIGN-iface-shell-caching.md), a per-value
-  shell-cache experiment and a base-class marker. A converter-emitted per-call-site inline cache
+- **Interface conversions** (unscheduled): the remaining interface-shell caching items, a per-value
+  shell-cache experiment and a base-class marker.
+  <!-- items from the [interface-shell caching design](phase4/DESIGN-iface-shell-caching.md) (internal
+       record, unlinked 2026-10-26, OQ-1) --> A converter-emitted per-call-site inline cache
   stays deferred.
 - **Stack strings**: the two remaining increments below, unscheduled.
 
@@ -453,7 +462,8 @@ keys, where a zero-allocation lookup would need a custom comparer that slows eve
 
 A gated experiment in writing Go in an editor and running and debugging it as .NET, with the debugger
 showing Go values the way a Go developer expects. Its feasibility is tested first, and nothing in it is
-a commitment yet. The plan: [IDE mode](PLAN-ide-mode.md).
+a commitment yet.
+<!-- The plan: [IDE mode](PLAN-ide-mode.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 ## Open converter items
 

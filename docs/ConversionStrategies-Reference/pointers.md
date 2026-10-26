@@ -186,7 +186,7 @@ Neither changes the emitted code. (Guarded by `GolibTests.PointerDereferenceAllo
 
 ## A pointer parameter whose every use is a dereference is a `ref` parameter — the ж-box ref-lowering
 
-The emitted-form rule (design: [`docs/phase4/DESIGN-zh-box-reduction.md`](../phase4/DESIGN-zh-box-reduction.md), §10.1/§10.3/§10.4): an **unexported package-level function's** pointer parameter whose every body use is a dereference (`*p`, `p.f`, `p[i]`, `range p`), a derived address feeding another lowered position (`&p.f` → a lowered argument), or a forward into another lowered position, emits as a C# **`ref T` parameter** instead of the boxed `ж<T>` — and every call site passes a `ref` expression instead of minting or carrying a box. A `ref T` argument is an alias into the caller's storage the GC tracks and updates, so no pinning, no box, no allocation, and writes through it land in the caller's storage by construction. The signature reads as Go's `*T`, `ref` reads as Go's `&`, and the entry deref preamble disappears because the parameter *is* the alias:
+The emitted-form rule<!-- design: [`docs/phase4/DESIGN-zh-box-reduction.md`](../phase4/DESIGN-zh-box-reduction.md), §10.1/§10.3/§10.4 (internal record, unlinked 2026-10-26, OQ-1) -->: an **unexported package-level function's** pointer parameter whose every body use is a dereference (`*p`, `p.f`, `p[i]`, `range p`), a derived address feeding another lowered position (`&p.f` → a lowered argument), or a forward into another lowered position, emits as a C# **`ref T` parameter** instead of the boxed `ж<T>` — and every call site passes a `ref` expression instead of minting or carrying a box. A `ref T` argument is an alias into the caller's storage the GC tracks and updates, so no pinning, no box, no allocation, and writes through it land in the caller's storage by construction. The signature reads as Go's `*T`, `ref` reads as Go's `&`, and the entry deref preamble disappears because the parameter *is* the alias:
 
 ```go
 func p224Sub(out1, arg1, arg2 *p224MontgomeryDomainFieldElement) { ... }
@@ -225,7 +225,7 @@ Effect on `crypto/internal/fips140/nistec/fiat`: it transpiles with **no** `.of(
 
 ## The lowered emission, row by row — the seven argument shapes in emitted code
 
-The seven rows of [`DESIGN-zh-box-reduction.md`](../phase4/DESIGN-zh-box-reduction.md) §3.3, each with its emitted form and the golden that pins it. Every snippet is verbatim from a committed `.cs.target`, quoted through [`EXEMPLARS-a2-ref-lowering.md`](../phase4/EXEMPLARS-a2-ref-lowering.md) — which carries the before/after pair and the history for each; only the *current* form is stated here.
+The seven argument shapes, each with its emitted form and the golden that pins it. Every snippet is verbatim from a committed `.cs.target`; only the *current* form is stated here. <!-- The seven rows of [`DESIGN-zh-box-reduction.md`](../phase4/DESIGN-zh-box-reduction.md) §3.3, quoted through [`EXEMPLARS-a2-ref-lowering.md`](../phase4/EXEMPLARS-a2-ref-lowering.md), which carries the before/after pair and the history for each (internal records, unlinked 2026-10-26, OQ-1). -->
 
 | # | Go argument | boxed emission | lowered emission | golden |
 |:-:|:--|:--|:--|:--|
@@ -740,8 +740,9 @@ deleted.
 <!-- Measured over the full stdlib (seeded A/B reconvert, Go 1.23.1, windows/amd64): 262 expression
 sites folded across 61 files in 16 packages — runtime 129, debug/elf 70, syscall 17,
 internal/poll 13, then a long tail; declaration sites byte-identical. -->
-Design record:
-[`docs/phase4/DESIGN-unsafe-constant-folding.md`](../phase4/DESIGN-unsafe-constant-folding.md). Guarded by
+<!-- Design record:
+[`docs/phase4/DESIGN-unsafe-constant-folding.md`](../phase4/DESIGN-unsafe-constant-folding.md) (internal record, unlinked 2026-10-26, OQ-1). -->
+Guarded by
 `UnsafeOperations`, extended with all three builtins in call-argument, arithmetic, comparison,
 assignment and compound-assignment, and `make`-size positions, over structs whose Go layout is
 padding-, embedding- and array-sensitive (and non-blittable once converted); output-compared vs
@@ -2085,8 +2086,9 @@ reference, would find none and return a **nil** pointer, and stepping through a 
 dereference address 0 on the very first step.
 
 `unsafe.Slice` over a genuinely native address yields a **native-backed** slice over that memory
-(`slice<T>.OverNativeMemory`), so writes reach the memory as in Go — see
-[`DESIGN-native-backed-slice.md`](../phase4/DESIGN-native-backed-slice.md). `unsafe.String` copies the
+(`slice<T>.OverNativeMemory`), so writes reach the memory as in Go.
+<!-- see [`DESIGN-native-backed-slice.md`](../phase4/DESIGN-native-backed-slice.md) (internal record, unlinked 2026-10-26, OQ-1) -->
+`unsafe.String` copies the
 bytes into a managed string, which is faithful because a Go string is immutable. <!-- Both used to
 snapshot native memory into a managed buffer, so writes through an unsafe.Slice result did not reach
 it; src/core/unsafe/unsafe.cs, Slice, records that limitation as retired. -->
@@ -2417,8 +2419,8 @@ and the read comes back silently wrong once another allocation reuses the addres
 
 That is exactly what `reflect` does — `canonType` caches the reinterpreted `rtype` for process
 lifetime — so after enough heap churn `TypeOf(x).Kind()` would report `Invalid` mid-process, which
-inverts `fmt.Sprint`'s "space only between two non-strings" rule. See
-[`docs/phase4/FINDING-managed-box-uintptr-lifetime.md`](../phase4/FINDING-managed-box-uintptr-lifetime.md).
+inverts `fmt.Sprint`'s "space only between two non-strings" rule.
+<!-- See [`docs/phase4/FINDING-managed-box-uintptr-lifetime.md`](../phase4/FINDING-managed-box-uintptr-lifetime.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 The golib extension `Reinterpret<T, TDst>()` decides by **provenance first**:
 
