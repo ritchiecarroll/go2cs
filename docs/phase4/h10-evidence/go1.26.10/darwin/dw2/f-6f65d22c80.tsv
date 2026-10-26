@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-6f65d22c80	crypto/internal/fips140test	osx-arm64	2278	2270	8	8	0	validated	yes	2270	8	-	no
+f-6f65d22c80	crypto/internal/fips140test	osx-x64	2278	2270	8	8	0	validated	yes	2270	8	-	no
+f-6f65d22c80	crypto/ed25519	osx-arm64	10	9	1	1	0	validated	yes	9	1	9/1/True	no
+f-6f65d22c80	crypto/ed25519	osx-x64	10	9	1	1	0	validated	yes	9	1	9/1/True	no
+f-6f65d22c80	crypto/md5	osx-arm64	15	14	1	1	0	validated	yes	14	1	11/1/True	no
+f-6f65d22c80	crypto/md5	osx-x64	15	14	1	1	0	validated	yes	14	1	11/1/True	no
+f-6f65d22c80	crypto/sha1	osx-arm64	15	13	1	2	1	failing	NO	13	1	-	no
+f-6f65d22c80	crypto/sha1	osx-x64	15	14	1	1	0	validated	NO	13	1	-	yes
+f-6f65d22c80	crypto/sha256	osx-arm64	31	29	2	2	0	validated	yes	29	2	22/1/True	no
+f-6f65d22c80	crypto/sha256	osx-x64	31	29	2	2	0	validated	yes	29	2	22/1/True	no
+f-6f65d22c80	crypto/sha3	osx-arm64	59	54	5	5	0	validated	yes	54	5	18/5/True	no
+f-6f65d22c80	crypto/sha3	osx-x64	59	54	5	5	0	validated	yes	54	5	18/5/True	no

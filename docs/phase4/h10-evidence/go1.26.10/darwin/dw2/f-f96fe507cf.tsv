@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-f96fe507cf	crypto/rsa	osx-arm64	591	590	1	1	0	validated	yes	590	1	568/1/True	no
+f-f96fe507cf	crypto/rsa	osx-x64	591	590	1	1	0	validated	yes	590	1	568/1/True	no
+f-f96fe507cf	crypto/rand	osx-arm64	315	314	1	1	0	validated	yes	314	1	314/1/True	no
+f-f96fe507cf	crypto/rand	osx-x64	315	314	1	1	0	validated	yes	314	1	314/1/True	no
+f-f96fe507cf	crypto/sha512	osx-arm64	45	44	1	1	0	validated	yes	44	1	35/1/True	no
+f-f96fe507cf	crypto/sha512	osx-x64	45	44	1	1	0	validated	yes	44	1	35/1/True	no
+f-f96fe507cf	database/sql	osx-arm64	143	141	2	2	0	validated	yes	141	2	140/2/True	no
+f-f96fe507cf	database/sql	osx-x64	143	141	2	2	0	validated	yes	141	2	140/2/True	no
+f-f96fe507cf	encoding/binary	osx-arm64	146	143	3	3	0	validated	yes	143	3	142/4/True	no
+f-f96fe507cf	encoding/binary	osx-x64	146	143	3	3	0	validated	yes	143	3	142/4/True	no
+f-f96fe507cf	internal/coverage/cfile	osx-arm64	16	15	0	1	1	failing	yes	16	0	15/1/True	yes
+f-f96fe507cf	internal/coverage/cfile	osx-x64	16	15	0	1	1	failing	yes	16	0	15/1/True	yes

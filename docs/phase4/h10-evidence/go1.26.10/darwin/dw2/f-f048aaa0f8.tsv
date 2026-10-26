@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-f048aaa0f8	net	osx-arm64	555	542	3	13	10	failing	NO	505	3	-	yes
+f-f048aaa0f8	net	osx-x64	555	543	3	12	9	failing	NO	505	3	-	yes
+f-f048aaa0f8	net/netip	osx-arm64	268	211	57	57	0	validated	yes	211	57	211/57/True	no
+f-f048aaa0f8	net/netip	osx-x64	268	211	57	57	0	validated	yes	211	57	211/57/True	no
+f-f048aaa0f8	net/http/internal	osx-arm64	15	14	1	1	0	validated	yes	14	1	14/1/True	no
+f-f048aaa0f8	net/http/internal	osx-x64	15	14	1	1	0	validated	yes	14	1	14/1/True	no
+f-f048aaa0f8	mime	osx-arm64	19	18	1	1	0	validated	yes	17	1	-	yes
+f-f048aaa0f8	mime	osx-x64	19	18	1	1	0	validated	yes	17	1	-	yes
+f-f048aaa0f8	log	osx-arm64	24	23	1	1	0	validated	yes	23	1	8/1/True	no
+f-f048aaa0f8	log	osx-x64	24	23	1	1	0	validated	yes	23	1	8/1/True	no
+f-f048aaa0f8	log/slog/internal/buffer	osx-arm64	2	1	1	1	0	validated	yes	1	1	1/1/True	no
+f-f048aaa0f8	log/slog/internal/buffer	osx-x64	2	1	1	1	0	validated	yes	1	1	1/1/True	no
