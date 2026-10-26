@@ -48,6 +48,15 @@
 .PARAMETER PackageReadme
     The author's package README (docs/NugetgoPublish.md, "Customizing the package page"): a fenced generated block,
     which the pack fills, and the author's text outside it. Without it, the pack seeds one.
+.PARAMETER ThirdPartyPackage
+    For a module that requires other nugetgo modules (cobra): '<module>=<nuget-id>@<package-version>', one per
+    module, passed to the pack, which makes each a NuGet dependency.
+.PARAMETER Feed
+    The pack's single restore source. nuget.org by default; a local folder when it must hold release candidates that
+    are not published yet, beside the go.* release they were packed against.
+.PARAMETER ConversionReadme
+    The conversion repository's root README as it will be committed at nuget-<PV>, a local file, checked by the pack
+    in place of the module table's ConversionReadme (the README at the repository's last tag).
 #>
 [CmdletBinding()]
 param(
@@ -62,6 +71,9 @@ param(
     [string]$TestTimeout,
     [int]$FloorGB = 10,
     [string]$PackageReadme,
+    [string[]]$ThirdPartyPackage = @(),
+    [string]$Feed = 'https://api.nuget.org/v3/index.json',
+    [string]$ConversionReadme,
     [string]$ModulesFile = (Join-Path $PSScriptRoot 'nugetgo-modules.psd1')
 )
 
@@ -223,7 +235,10 @@ try {
         Say "package README  the author's, put in place"
     }
     $readme = $null
-    if ($row.ConversionReadme) {
+    if ($ConversionReadme) {
+        $readme = (Resolve-Path -LiteralPath $ConversionReadme).Path
+        Say "readme   $readme"
+    } elseif ($row.ConversionReadme) {
         if ($row.ConversionReadme -notmatch '^([^@]+)@([^:]+):(.+)$') { Refuse "ConversionReadme '$($row.ConversionReadme)' is not <owner/repo>@<tag>:<path>" }
         $repo, $tag, $path = $Matches[1], $Matches[2], $Matches[3]
         $clone = Join-Path $Work 'conversion-repo'
@@ -244,12 +259,13 @@ try {
         $packArgs = @('-NoProfile', '-NonInteractive', '-File', (Join-Path $T 'src/tools/nugetgo/nugetgo-pack.ps1'),
             '-ModulePath', $modPath, '-GoVersion', $goVersion, '-Revision', $Revision, '-RecurseRoot', $PR,
             '-ValidationDir', (Join-Path $VR "validation/$modPath"), '-ClosureVersion', $Release,
-            '-Feed', 'https://api.nuget.org/v3/index.json', '-OutDir', (Join-Path $Work "out-$pack"),
+            '-Feed', $Feed, '-OutDir', (Join-Path $Work "out-$pack"),
             '-Scratch', (Join-Path $Work "scratch-$pack"), '-RepositoryUrl', $row.RepositoryUrl, '-Upstream', $row.Upstream,
             '-LicenseSpdx', $row.LicenseSpdx, '-Converter', $G)
         if ($row.UpstreamPublishes) { $packArgs += '-UpstreamPublishes' }
         if ($readme) { $packArgs += @('-ConversionReadme', $readme) }
         foreach ($x in $excluded) { $packArgs += @('-ExcludePackage', $x) }
+        foreach ($x in $ThirdPartyPackage) { $packArgs += @('-ThirdPartyPackage', $x) }
         $packArgs += if ($pack -eq 'int1') { @('-RehearsalSuffix', 'int.1') } else { @('-Release') }
         $start = Get-Date
         $p = Start-Process -FilePath $pwsh -ArgumentList (Join-Argv $packArgs) -NoNewWindow -PassThru -Wait `
