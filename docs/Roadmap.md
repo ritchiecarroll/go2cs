@@ -121,18 +121,15 @@ one wins when two disagree, is in [`Glossary.md`](Glossary.md#document-types).
 
 ## Go releases
 
-**In short.** The converted standard library is on Go 1.24.13, a release Go no longer patches, so it
-lacks the security fixes Go has issued since. Two planned moves bring it to a supported Go release and
-keep it there: Go 1.26, straight from 1.24, and then Go 1.27. 1.24.13.7 is the last 1.24 release.
+**In short.** The converted standard library is on Go 1.26.10, a release Go still supports. The next
+move is Go 1.27, before the 1.26 series leaves support. 1.24.13.7 is the last 1.24 release.
 
 Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so
 packages built from either carry none of the Go security fixes issued since. The Go 1.24 line is
-closed: 1.24.13.7 is its last release. The next hop goes straight to Go 1.26, with no Go 1.25 release,
-and the hop after it brings Go 1.27:
+closed: 1.24.13.7 is its last release, and there is no Go 1.25 release. The next hop brings Go 1.27:
 
 | Hop | When | What it involves |
 |:--|:--|:--|
-| **Go 1.26** (1.26.10), straight from 1.24.13 | After 1.24.13.7, the last 1.24 release | One hop across two Go releases. Go 1.25's changes are behavioral (its nil-check fix, updated `unicode` tables, the `AllocsPerRun` change) plus testing-API additions in the converted test host; Go 1.26 adds `new(expr)` and self-referential generic constraints. Every failure is first attributed to the release that caused it, by converting at 1.25.14 as well, without publishing it. Then every package is re-validated at 1.26. |
 | **Go 1.27** | Q1 2027, by about February | Generic methods, which need a conversion design first. The 1.26 series leaves support when Go 1.28 ships, around February 2027, so the corpus reaches 1.27 before then. |
 
 How often later hops run is decided ahead of the Go 1.27 hop.
@@ -466,8 +463,7 @@ something else finishing first.
 | When | Planned |
 |:--|:--|
 | Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
-| Next | The Go 1.26 hop, straight from 1.24.13.7, the last 1.24 release. The performance re-baseline at 1.24.13.7. |
-| After the Go 1.26 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Next | The performance re-baseline at 1.24.13.7. The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
 | Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
