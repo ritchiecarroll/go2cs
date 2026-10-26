@@ -28507,4 +28507,45 @@ re-bank, since every exported value variable's emission changes.
 
 — C2 (2026-10-25)
 
+## 2026-10-25 — P2 (COORD ruling): an amd64-constrained test file runs on the osx-arm64 RID — POST-PUBLISH
+
+**What happens.** The darwin corpus is converted for darwin/amd64, and the osx-arm64 RID runs that same conversion.
+A `_test.go` file whose build line requires amd64 is therefore compiled into the darwin test host and executed on
+arm64, where Go would never build it. Found at crypto/sha1 `TestOutOfBoundsRead` (`issue15617_test.go`,
+`//go:build amd64 && (linux || darwin)`): it hardcodes `const pageSize = 4 << 10`, mmaps two pages and mprotects
+`data[pageSize:]`; on Apple silicon (16 KiB pages) that offset is not page-aligned and mprotect answers EINVAL,
+panic "invalid argument". x64 passes. The converted page size is the real one (runtime/darwin/os_darwin_impl.cs sets
+`physPageSize = Environment.SystemPageSize`; `syscall_Getpagesize` returns it), so this is not a page-size bug.
+
+**Census.** 33 std `_test.go` files name amd64 positively on their build line (one more negates it). Some also admit
+arm64 and run correctly there; the at-risk set is the amd64-only remainder, not yet split.
+
+**Ruled (COORD, 2026-10-25).** No per-RID disclosure (the disclosure schema scopes by OS, not RID); crypto/sha1 stays
+darwin-unbanked at 1.26 because its two arms disagree. The candidate fix is a harness skip: the test host does not run,
+on a process whose GOARCH the file's build line excludes, the tests declared in that file. Owed: split the 33 files,
+then size the skip (where the build line is read, how a skipped test reports).
+
+**For G's design view.** The broader question is the darwin corpus being converted for amd64 and run on arm64 at all:
+any GOARCH-dependent production code (constants, `runtime.GOARCH` branches, assembly-stub choices) takes the amd64 arm
+on Apple silicon. This row is the first measured consequence, not the whole of it.
+
+— P2 (2026-10-25)
+
+## 2026-10-25 — P2: darwin libc arguments that still cross as order tokens — the same class as writev/readdir_r, unreached in std
+
+**What happens.** darwin's libc funnel leaves an order token for any pointee that holds a non-nil Go pointer (the
+2026-09-27 ruling, option (b)), and marshals one box per token. The iovec/dirent seat (claude/p2-darwin-iovec-dirent)
+(at 002bfdaa71) mirrors the two std paths that reached it (writev, Getdirentries). Two more generated wrappers carry the same shape:
+- `execve(path *byte, argv **byte, envp **byte)` (zsyscall_darwin_amd64.go): argv/envp are `ж<ж<byte>>`. Its only std
+  caller is `Exec`, which is hand-owned on darwin (syscall/darwin/exec_libc2_impl.cs) and calls its own unmanaged
+  execve, so the generated wrapper is unreached in std.
+- `Kevent(kq, changes, events []Kevent_t, timeout)` (syscall_bsd.go): `&changes[0]` is one box, so any element past
+  `[0]` would not cross even with nil `Udata`. No std production or test code calls `syscall.Kevent` on darwin (the
+  netpoller is native, internal/poll/darwin/runtime_netpoll_impl.cs).
+
+Both are reachable only from user code converted with `-recurse`. Owed when one is reached: a native mirror, as for
+writev. Measured by grep over src/core (darwin flavours) and every std `_test.go` at go1.26.10.
+
+— P2 (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
