@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+golang.org/x/sync	nugetgo.golang.org.x.sync	community	https://github.com/ritchiecarroll/sync-cs	2026-10-14	ritchiecarroll

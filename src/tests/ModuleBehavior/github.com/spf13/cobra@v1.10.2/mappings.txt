@@ -1,0 +1,4 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/inconshreveable/mousetrap	nugetgo.github.com.inconshreveable.mousetrap	community	https://github.com/ritchiecarroll/mousetrap-cs	2026-10-27	ritchiecarroll
+github.com/spf13/cobra	nugetgo.github.com.spf13.cobra	community	https://github.com/ritchiecarroll/cobra-cs	2026-10-27	ritchiecarroll
+github.com/spf13/pflag	nugetgo.github.com.spf13.pflag	community	https://github.com/ritchiecarroll/pflag-cs	2026-10-14	ritchiecarroll
