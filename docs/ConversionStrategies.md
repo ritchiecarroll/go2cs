@@ -527,7 +527,9 @@ public static Action<@string> GetPrintLn() {
 }
 ```
 
-A method is `public` only when both its own name and its receiver type's name are exported. A package-level
+A method is `public` only when its own name is exported and its receiver type is emitted `public`: an
+exported type, or an unexported type that an exported signature exposes
+([Functions and Methods](#functions-and-methods)). A package-level
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
@@ -1336,7 +1338,7 @@ var _Lu = &RangeTable{
 
 `ж<RangeTable>` is golib's form of Go's pointer `*RangeTable`, and `Ꮡ(…)` takes an address, as Go's `&`
 does ([Pointers](#pointers)). Inside each holder is the declaration the var would have without it. go2cs-gen,
-the go2cs [source generator](#source-generators), gives the package class an accessor under the var's Go
+go2cs's [source generators](#source-generators), gives the package class an accessor under the var's Go
 name, `internal static ref ж<RangeTable> _Lu => ref lazyᴛ_Lu._Lu;`, so code reads and writes `_Lu` as it
 would a field, and neither the package's static constructor nor `package_init.cs` builds it.
 <!-- the holder line: src/go2cs/lazyPackageVarOperations.go:576 `func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`;
@@ -2950,7 +2952,7 @@ prints `*int`. A C# `null` carries no type, so the converter stores the shared n
 ```
 
 Go and C# both print `*int`, then `x==nil false`. `"x==nil"` is a plain C# literal: it is an `any`
-argument to `fmt.Println`, so go2cs-gen, the go2cs [source generator](#source-generators), intercepts the
+argument to `fmt.Println`, so go2cs-gen, go2cs's [source generators](#source-generators), intercepts the
 call and passes it as a boxed Go string
 ([Empty Interface](#empty-interface-any)). The `"%T\n"u8` format string is a C# UTF-8 literal
 ([Strings](#strings-string-and-sstring)).
@@ -3373,7 +3375,7 @@ literals in read-only memory (RODATA) at no run-time cost, so the C# allocates e
 type `object`. If any use needs a plain `string`, the field is a `@string` instead
 ([Strings](#strings-string-and-sstring)). Here `"hello"` feeds only `var i interface{}`, so `helloˢ` is an
 `object`. Outside the standard library, the literals passed to `fmt.Println`, whose parameter is `...any`,
-are not hoisted. They stay plain C# literals, and go2cs-gen, the go2cs [source generator](#source-generators),
+are not hoisted. They stay plain C# literals, and go2cs-gen, go2cs's [source generators](#source-generators),
 intercepts each of those calls at compile time and passes the literal as a boxed `@string`:
 
 <!-- source: src/tests/Behavioral/TypeAssert/TypeAssert.go:34-50 -->
@@ -5642,8 +5644,9 @@ generator completes `Stack<T>`, including its zero-value constructor used below.
 `Pop`'s two results become a C# tuple ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
 `var zero T` becomes `T zero = GoZero<T>()`. golib's `GoZero<T>()` is `default` for most type arguments
 and builds the zero value of a struct whose `default` is not Go's zero value. The sub-slice
-`s.elements[:index]` becomes `s.elements.slice(0, index)`: a C# range takes only an `int`, so a bound that is
-not a small constant goes to golib's `slice` method. It shares the backing array as Go's `s[:i]` does, and does
+`s.elements[:index]` becomes `s.elements.slice(0, index)`. A C# range would narrow each bound to `int` and
+cannot hold a negative one, so Go's out-of-range panic could be lost. A bound that is not a constant within
+`int` goes to golib's `slice` method, which checks it as Go does. The result shares the backing array as Go's `s[:i]` does, and does
 not copy ([Slices and Arrays](#slices-and-arrays)).
 <!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1624 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:371-389 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
 
@@ -6433,7 +6436,7 @@ Reading the C# piece by piece:
   when formed, so golib's `nonnil` checks first and raises Go's nil-pointer panic.
   `initSelf` needs no such check, because its plain field write fails at once.
 - The string literals passed to `fmt.Println` stay plain C# literals. Each is an `any` argument, so
-  go2cs-gen, the go2cs [source generator](#source-generators), intercepts the call and passes the literal as a
+  go2cs-gen, go2cs's [source generators](#source-generators), intercepts the call and passes the literal as a
   boxed Go `@string`, boxed once per file rather than on every call
   ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
 <!-- box allocated once per literal per file: src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file` -->
@@ -6514,8 +6517,9 @@ A call such as `sum(5)` stays `sum(5)`. Spreading a slice, `sum(a...)`, becomes 
 property `.ꓸꓸꓸ` returns a `Span` over the slice's own storage, so nothing is copied.
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:66 (fmt.Println("sum:", sum(a...), sum(), sum(5))) -> VariadicPackPassThrough.cs.target:95 (fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));); property: src/core/golib/slice.cs:654 (public Span<T> ꓸꓸꓸ => ToSpan()); sslice is a ref struct: src/core/golib/sslice.cs:19 -->
 
-**An unnamed parameter gets a made-up name**, because C# requires one. A lone one is `_`. Otherwise they
-become `_Δp0`, `_Δp1` and so on, and an unnamed variadic pack is just `ʗp`:
+**An unnamed parameter gets a made-up name**, because C# requires one. A lone one is `_`, unless the
+body uses `_` as a discard (`_ = …`, or `case <-ch:` in a `select`), which a parameter named `_` would capture.
+Otherwise they become `_Δp0`, `_Δp1` and so on, and an unnamed variadic pack is just `ʗp`:
 
 <!-- lone blank: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:8#428801 (public delegate void Handler(nint _);) -->
 <!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.go:68 -->
@@ -6656,8 +6660,8 @@ internal static nint sum(this reader f, nint extra) {
 ```
 
 **A named func type without methods usually has no declaration of its own.** Each use is written as the
-underlying `Func<…>` or `Action<…>`, because Go converts freely between the two. A comment marks where the
-declaration would be. In this example, `Stringy` as a return type is written `Func<@string>`.
+underlying `Func<…>` or `Action<…>`, because Go converts freely between a named func type and its
+underlying type. A comment marks where the declaration would be. In this example, `Stringy` as a return type is written `Func<@string>`.
 
 **A func literal used as a value becomes a lambda.** In the same example, `returnsAFunction` returns a
 literal, so the literal becomes the C# lambda `() => { … }`.
@@ -6713,12 +6717,13 @@ internal static void p2() {
 
 `base` is a C# keyword, so the local is written `@base`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `fmt.Println` takes `any` arguments. The
-literal `"P2:"` stays a plain C# literal, and go2cs-gen, the go2cs [source generator](#source-generators),
+literal `"P2:"` stays a plain C# literal, and go2cs-gen, go2cs's [source generators](#source-generators),
 intercepts the call to pass it as a Go `@string` boxed once per file ([Strings](#strings-string-and-sstring)).
 <!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals outside the standard library unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42-54 `PLAIN LITERALS … opt-in for everything else (-hoist-literals)` -->
 
-**A literal whose name is also used as a value stays a lambda.** A local function has no value form. Here
-`f := next` copies the function value, so `next` is a lambda. Both names share one `c`, and this prints
+**A literal whose name is also used as a value stays a lambda.** A local function allocates nothing only
+while it is only ever called: C# makes one used as a value into a delegate, which allocates as a lambda does.
+Here `f := next` copies the function value, so `next` is a lambda. Both names share one `c`, and this prints
 `P4: 2 3 3`.
 
 <!-- source: src/tests/Behavioral/LocalFunctionEmission/main.go:80-86 -->
@@ -7038,9 +7043,10 @@ names only the index (`for i := range s`, `for i, _ := range s`, or `for range s
 reads the length once and counts the indexes, as Go does. The same holds for a variadic parameter
 that the converter emits as golib's stack-only `sslice<T>` ([Slices and Arrays](#slices-and-arrays)). A pointer
 to an array held in a variable passes its type's length, `range(p, N)`, so a nil one ranges `N` times without
-being read, as in Go. A pointer parameter or pointer receiver ranges the count itself, `range(N)`, because Go does
-not evaluate the range operand when at most one iteration variable is present and the length is constant; a nil
-one ranges `N` times there too. A string keeps the pair form, `foreach (var (i, _) in s)`, because its indexes are the byte offsets
+being read, as in Go. A pointer parameter or pointer receiver ranges the count itself, `range(N)`. In C# it
+arrives already dereferenced, as a `ref` to the array, which is null for a nil pointer and faults when read.
+Leaving it out is safe: Go does not evaluate the range operand when at most one iteration variable is present
+and the length is constant, so a nil one ranges `N` times there too. A string keeps the pair form, `foreach (var (i, _) in s)`, because its indexes are the byte offsets
 where each rune starts.
 
 <!-- Moved to the reference ("Reassigned or ref-bound range variable"): a range variable the body reassigns
@@ -7170,8 +7176,9 @@ internal static void g2() {
 }
 ```
 
-`fsᴷ` is the stack buffer described under `g1`. Go copies a slice out of that buffer before a `range`
-over it, and `fs = move2heap(fsᴷ, fs);` is that copy; `moves: true` declares the buffer for it
+`fsᴷ` is the stack buffer described under `g1`. Here `fs` escapes at one
+statement outside its loops, the `range`, so Go still lets its appends use the buffer and copies the slice to
+the heap just before that statement. `fs = move2heap(fsᴷ, fs);` is that copy; `moves: true` declares the buffer for it
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 
 **A body that takes `&i` gets a fresh heap box each iteration.** Go's `&i` needs `i` to live on the heap,
@@ -7210,7 +7217,7 @@ the box like Go's `*p`. A boxed `i` is always copied back, since code holding th
 
 <!-- Reference gap: range over a function is covered only in generic-constraints.md (the named/generic Seq rule: .Invoke, spelled-out type arguments, yield false on break). No page states the Coro handoff or the panic rethrow into the ranging function (golib runtime/YieldFunctionEnumerator.cs). Move or add the rule in labels-and-loop-variables.md with its guard tests, and extend the Full detail line. -->
 **Range over a function becomes a `foreach` over golib's `range` helper.** In Go, an iterator is a
-function that takes a `yield` callback and calls it once per value. A named Go func type such as
+function that takes a `yield` callback and calls it once per value. A generic named Go func type such as
 `Seq[V]` becomes a C# delegate. The iterator's function literal becomes a lambda that takes
 `Func<nint, bool> yield`, C#'s type for a function from `nint` to `bool`:
 
@@ -7273,8 +7280,9 @@ fmt.Println(sum);
 ```
 
 <!-- src/core/golib/runtime/Coro.cs:18#afacfa (a coro is not a goroutine; control alternates, the two contexts are never runnable at once); YieldFunctionEnumerator.cs:20-24#056d36 (seq on a second stack, a real goroutine) and :31-39#6f2f83 (early exit answers false; panic rethrown on the ranging side). -->
-Go runs the iterator as an ordinary call on the same goroutine. A C# `foreach` cannot do that, so golib
-runs the iterator on a second goroutine and uses its `Coro` handoff type to pass each value to the loop
+Go runs the iterator as an ordinary call on the same goroutine. A C# `foreach` pulls each value from an
+enumerator, while the iterator pushes each one by calling `yield`, so the iterator needs a stack of its own to
+pause on. golib runs it on a second goroutine and uses its `Coro` handoff type to pass each value to the loop
 ([Goroutines](#goroutines)). The iterator and the loop take turns and never run at the same time. A
 `break` or `return` in the loop makes `yield` return false, so the iterator finishes and runs its defers.
 
@@ -7393,8 +7401,9 @@ A tag of a named type, such as `type Weekday int`, also rules out a C# `switch`.
 as a C# struct, and a plain number is not a constant of that struct
 ([Named Numeric Types](#named-numeric-types-and-constant-contexts)).
 
-Each case body is wrapped in `{ }` and ends in `break;` (or a `return`), since C# requires it. A list of
-labels becomes an `or` pattern: `case 4, 5, 6:` becomes `case 4 or 5 or 6:`. A block Go writes inside a
+Each case body ends in `break;` (or a `return`), since C# requires it, and is wrapped in `{ }`, so each
+case has its own scope as in Go. A list of labels becomes an `or` pattern: `case 4, 5, 6:` becomes
+`case 4 or 5 or 6:`. A block Go writes inside a
 case stays a block. The final `}}` closes the last case block and the switch together:
 
 <!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:42-57 -->
@@ -7693,8 +7702,9 @@ never fall through. The last arm's closing brace and the switch's closing brace 
 That is only layout; it has no meaning. [Expression Switch Statements](#expression-switch-statements)
 uses the same arm shape for value switches.
 
-**A complete example.** `whatAmI` is a Go function literal, so it becomes a C# local function inside
-`Main` ([Function Values and Closures](#function-values-and-closures)). Go's `interface{}` becomes C#
+**A complete example.** `whatAmI` is a Go function literal that `whatAmI := func…` declares and that is only
+ever called, so it becomes a C# local function inside `Main`
+([Function Values and Closures](#function-values-and-closures)). Go's `interface{}` becomes C#
 `any`, an alias for `object` ([Empty Interface](#empty-interface-any)):
 
 <!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.go:12-30 (shown without the one leading tab of its enclosing main) -->
@@ -7760,8 +7770,8 @@ line ending in `int64` and in `uint64`; `Don't know type string`; and `I'm nil`.
 type names, so a C# `nint` prints as `int`. A few names in the C# need a word of explanation:
 
 - The literals passed to `fmt.Println` stay plain C# literals: [go2cs-gen](#source-generators) intercepts each of those calls and
-  passes the literal as a boxed Go string. `whatAmI` is a func value, whose call no interceptor can
-  replace, so `"hey"` is created once in the static field `heyˢ` instead, already boxed as an `object`. The
+  passes the literal as a boxed Go string. `whatAmI` is a variable, not a declared
+  function or method, and go2cs-gen intercepts only calls to those, so `"hey"` is created once in the static field `heyˢ` instead, already boxed as an `object`. The
   `ˢ` suffix marks such a generated name, and the field holds a golib `@string`, Go's byte string
   ([Strings](#strings-string-and-sstring)).
 - `"…"u8` is a C# UTF-8 literal. A format string, like the one passed to `Printf`, keeps that form. In the
