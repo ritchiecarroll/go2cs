@@ -320,6 +320,10 @@ COORD rules sections 1-3 green before this step.
 
 ## 5. The registry row (owner, through the nugetgo repository's CI)
 
+A module whose row exists needs no new row for a rebuild or a later version: the row names the package ID, not a
+version, and the `ci` workflow's checks 2 to 4 run only on rows a pull request adds or changes. Step 1 still applies,
+so that the next row checked against `R` passes check 4(b).
+
 1. If `R` is not listed in the nugetgo repository's `cmd/sitegen/go2cs-releases.txt`, a maintainer adds it in its
    own pull request first. The row's pull request must change only `v1/mappings.txt` to be eligible for the
    `auto-merge-eligible` label, and check 4(b) refuses a package built against an unlisted release.
@@ -394,4 +398,9 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
     has put .NET 10 first on `PATH`. So a sheet opens with `& "$env:USERPROFILE\.dotnet\tools\pwsh.exe"`, a check
     that `$PSVersionTable.PSVersion` reads 7.x, and `Set-Location` to the go2cs clone, before its environment
     block. It also says to stop at the first red line: a `throw` stops only its own statement, and pasted lines
-    after it keep running.
+    after it keep running. The `pwsh.exe` step runs in a NEW window: a window that ran the release block or an
+    earlier sheet keeps `DOTNET_ROOT` and `PATH` pointed at .NET 10, and this `pwsh` needs .NET 8, so it does not start
+    there.
+    <!-- 2026-10-27: on the S1 sheet of the 1.26.10.1 rebuild wave, the owner's block 0 FIX (run pwsh.exe in THIS
+         window) failed in a window that still held the release block's DOTNET_ROOT and PATH; a fresh window ran it. -->
+
