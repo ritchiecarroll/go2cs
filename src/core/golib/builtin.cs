@@ -4421,6 +4421,8 @@ public static partial class builtin
         if (type is null)
             return "nil";
 
+        // Go's %T spelling, as GoReflect.GoTypeName renders it: Go's int is nint (handled below), so a C# int is
+        // Go's int32 (rune included) and a C# byte is Go's uint8 (byte included).
         return Type.GetTypeCode(type) switch
         {
             TypeCode.String => "string",
@@ -4428,9 +4430,9 @@ public static partial class builtin
             TypeCode.Boolean => "bool",
             TypeCode.SByte => "int8",
             TypeCode.Int16 => "int16",
-            TypeCode.Int32 => "int",
+            TypeCode.Int32 => "int32",
             TypeCode.Int64 => "int64",
-            TypeCode.Byte => "byte",
+            TypeCode.Byte => "uint8",
             TypeCode.UInt16 => "uint16",
             TypeCode.UInt32 => "uint32",
             TypeCode.UInt64 => "uint64",

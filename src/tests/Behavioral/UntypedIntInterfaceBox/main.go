@@ -5,7 +5,7 @@ import "fmt"
 // store mimics a non-variadic `any` sink (e.g. atomic.Value.Store, context.WithValue,
 // sync.Map.Store): the value is boxed into an interface and later type-asserted, so an untyped
 // int literal MUST box as Go's default type `int` (go2cs nint), not a bare C# System.Int32 — else
-// the `.(int)` round-trip below panics ("interface conversion: interface {} is int, not int").
+// the `.(int)` round-trip below panics ("interface conversion: interface {} is int32, not int").
 func store(v any) any { return v }
 
 func ret() any { return 42 }
