@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/spf13/pflag	nugetgo.github.com.spf13.pflag	community	https://github.com/ritchiecarroll/pflag-cs	2026-10-14	ritchiecarroll

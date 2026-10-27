@@ -15,3 +15,8 @@ Each module has one directory, `<module path>@<version>/`, laid out like `src/te
 
 A row records both outputs' hashes, and the pack (`nugetgo-pack.ps1 -BehaviorProofDir`) refuses a row whose outputs
 differ, whose assembly is not the packed bytes for its RID, or that was recorded on another RID or GOOS.
+
+The same programs are the runbook's sample-program demo (`docs/NugetgoPublish.md`, section 6), which converts each one
+against the registry with no `-nuget-map` and compares `dotnet run` with `go run`. So a module with Go tests has a
+directory here too. Each program's output is fixed: it reads no clock, environment or `os.Args`, and sorts anything
+it prints from a map.
