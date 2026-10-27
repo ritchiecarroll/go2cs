@@ -1,0 +1,66 @@
+# classify_test_refresh.py over each real-drift row's convert-only diff (go2cs -tests -test-action convert at TIP
+# f75e0c53ec, same tree as the sweep; each diff's numstat equals its sweep row's). rc 0 = every line in the class.
+== 28-internal.runtime.atomic
+src/core/internal/runtime/atomic/atomic_andor_test.cs	test-refresh-1262	a=4	b=0
+src/core/internal/runtime/atomic/atomic_test.cs	test-refresh-1262	a=4	b=0
+TOTAL files=2 in_class=2 unclassified=0 lines_a=8 lines_b=0
+rc=0
+== 53-go.token
+src/core/go/token/position_test.cs	test-refresh-1262	a=3	b=0
+TOTAL files=1 in_class=1 unclassified=0 lines_a=3 lines_b=0
+rc=0
+== 58-fmt
+src/core/fmt/fmt_test.cs	test-refresh-1262	a=0	b=3
+TOTAL files=1 in_class=1 unclassified=0 lines_a=0 lines_b=3
+rc=0
+== 59-sync
+src/core/sync/cond_test.cs	test-refresh-1262	a=1	b=0
+src/core/sync/example_test.cs	test-refresh-1262	a=1	b=0
+src/core/sync/map_test.cs	test-refresh-1262	a=1	b=0
+src/core/sync/mutex_test.cs	test-refresh-1262	a=4	b=0
+src/core/sync/rwmutex_test.cs	test-refresh-1262	a=1	b=0
+src/core/sync/waitgroup_test.cs	test-refresh-1262	a=5	b=0
+TOTAL files=6 in_class=6 unclassified=0 lines_a=13 lines_b=0
+rc=0
+== 60-html.template
+src/core/html/template/exec_test.cs	test-refresh-1262	a=1	b=0
+TOTAL files=1 in_class=1 unclassified=0 lines_a=1 lines_b=0
+rc=0
+== 67-net.http.fcgi
+src/core/net/http/fcgi/fcgi_test.cs	test-refresh-1262	a=1	b=0
+TOTAL files=1 in_class=1 unclassified=0 lines_a=1 lines_b=0
+rc=0
+== 68-sync.atomic
+src/core/sync/atomic/example_test.cs	test-refresh-1262	a=2	b=0
+src/core/sync/atomic/value_test.cs	test-refresh-1262	a=1	b=0
+TOTAL files=2 in_class=2 unclassified=0 lines_a=3 lines_b=0
+rc=0
+== 70-testing.synctest
+src/core/testing/synctest/example_test.cs	test-refresh-1262	a=1	b=0
+src/core/testing/synctest/synctest_test.cs	test-refresh-1262	a=1	b=0
+TOTAL files=2 in_class=2 unclassified=0 lines_a=2 lines_b=0
+rc=0
+== 74-database.sql
+src/core/database/sql/convert_test.cs	test-refresh-1262	a=0	b=2
+TOTAL files=1 in_class=1 unclassified=0 lines_a=0 lines_b=2
+rc=0
+== 78-time
+src/core/time/example_test.cs	test-refresh-1262	a=1	b=0
+src/core/time/sleep_test.cs	test-refresh-1262	a=9	b=0
+src/core/time/tick_test.cs	test-refresh-1262	a=6	b=0
+src/core/time/time_test.cs	test-refresh-1262	a=3	b=0
+TOTAL files=4 in_class=4 unclassified=0 lines_a=19 lines_b=0
+rc=0
+== 79-runtime
+src/core/runtime/chan_test.cs	test-refresh-1262	a=23	b=0
+src/core/runtime/chanbarrier_test.cs	test-refresh-1262	a=2	b=0
+src/core/runtime/gc_test.cs	test-refresh-1262	a=2	b=0
+src/core/runtime/map_test.cs	test-refresh-1262	a=2	b=0
+src/core/runtime/proc_test.cs	test-refresh-1262	a=13	b=0
+src/core/runtime/runtime_test.cs	test-refresh-1262	a=1	b=0
+src/core/runtime/stack_test.cs	test-refresh-1262	a=1	b=0
+src/core/runtime/syscall_windows_test.cs	test-refresh-1262	a=2	b=0
+src/core/runtime/traceback_system_test.cs	test-refresh-1262	a=1	b=0
+src/core/runtime/tracebackx_test.cs	test-refresh-1262	a=1	b=0
+TOTAL files=10 in_class=10 unclassified=0 lines_a=48 lines_b=0
+rc=0
