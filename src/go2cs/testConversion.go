@@ -7649,6 +7649,12 @@ type testComparison struct {
 	// proof page. Empty for every package with no gated declaration, which is nearly all of them.
 	Gated []capabilityGatedDeclaration `json:"gated,omitempty"`
 
+	// TargetArchExcluded names, with its file, build line and reason, each test withdrawn from both sides
+	// because its file is not built for every architecture the target GOOS ships (testTargetArch.go):
+	// darwin ships one build under osx-x64 and osx-arm64. Absent on windows and linux, which ship amd64
+	// alone, and on every darwin row with no such file, which leaves those records byte-identical.
+	TargetArchExcluded []string `json:"targetArchExcluded,omitempty"`
+
 	// Withdrawn is the same honesty for the DOWNWARD disclosure dual (matchTerminalStatuses'
 	// withdrawal rule): the Go-side verdict rows underneath a signature-matched disclosed root,
 	// which the converted host never reached because the disclosed failure precedes its case
@@ -7934,17 +7940,7 @@ const hostFatalClass = "host-fatal"
 // reader comparing two logs should see the same expression, not a map-iteration reshuffle).
 // Returns "" when the manifest names no host-fatal test, which is every package but one.
 func hostFatalSkipExpression(disclosures map[string]testDisclosure) string {
-	var names []string
-	for name, d := range disclosures {
-		if d.Class == hostFatalClass {
-			names = append(names, regexp.QuoteMeta(name))
-		}
-	}
-	if len(names) == 0 {
-		return ""
-	}
-	sort.Strings(names)
-	return "^(?:" + strings.Join(names, "|") + ")$"
+	return withdrawnSkipExpression(disclosures, nil)
 }
 
 // corpusImportPathOf reports the import path a CONVERTED package directory denotes -- the inverse of
@@ -9913,7 +9909,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		fmt.Fprintf(os.Stderr, "WARNING: host-fatal disclosure UNCHECKED at mint (no evidence either way, not a refusal):\n  %s\n",
 			strings.Join(mintUnchecked, "\n  "))
 	}
-	hostFatalSkip := hostFatalSkipExpression(disclosures)
+	// A test file some shipped architecture of the target GOOS does not build leaves both sides with the
+	// host-fatal names (testTargetArch.go).
+	archExcluded := targetArchExcludedTests(inputPath, options)
+	hostFatalSkip := withdrawnSkipExpression(disclosures, targetArchExcludedNames(archExcluded))
 
 	goArgs := oracleTestArgs(options, hostFatalSkip)
 	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, options, "go", goArgs...)
@@ -10001,6 +10000,11 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
 		Gated: gated, Withdrawn: []string{}, RuntimeDeclared: runtimeDeclared, Environment: environment,
+		TargetArchExcluded: targetArchExcludedRecord(archExcluded),
+	}
+	if len(archExcluded) > 0 {
+		fmt.Printf("Withdrew %d test(s) from both sides, their files not built for every architecture %s ships:\n  %s\n",
+			len(archExcluded), goosOfTarget(options.targetPlatform), strings.Join(result.TargetArchExcluded, "\n  "))
 	}
 	if addressPairs != (addressPairCounts{}) {
 		result.AddressPairs = &addressPairs

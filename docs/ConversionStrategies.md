@@ -331,7 +331,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:179-190#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:22#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1373-1387#03b3c7 and :2834-2842#701c82; :56-64#c625cd and :1925#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
-Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:507#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
+Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:512#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:75-79#b0ed6c and :124#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals).
@@ -10640,7 +10640,7 @@ go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
 A `defer` or `go` call to such a function works too. The statement stores the address as a box when it
 runs, and turns it into a `ref` only when the call itself runs, so the call sees the variable's latest value
-([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:189#1e7a38, :201#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#008246; reference: docs/ConversionStrategies-Reference/pointers.md:216#25611d, :220#fed198 -->
+([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:189#cd7334, :201#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#008246; reference: docs/ConversionStrategies-Reference/pointers.md:216#25611d, :220#fed198 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter
@@ -11372,7 +11372,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:49-55#0b034b (remarks), :229 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :265-281#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2268-2277#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:49-55#0b034b (remarks), :229 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :265-281#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2270-2279#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter
@@ -12359,15 +12359,15 @@ names its portable fallback `math_big_pure_go` rather than `purego`, so both tag
 A `go2cs -recurse` conversion of your own module adds only `safe`, for the reason given at the end of this
 section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
 pass and nothing else.
-<!-- src/go2cs/commandLineOptions.go:283 (`var defaultModuleBuildTags = []string{"safe"}`),
-     :297-307 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
+<!-- src/go2cs/commandLineOptions.go:286 (`var defaultModuleBuildTags = []string{"safe"}`),
+     :300-310 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:272#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:296#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:275#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:299#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`

@@ -1,7 +1,7 @@
 # PLAN — the post-hop performance re-baseline (Go 1.26 packages)
 
 > **STATUS: DRAFT (G, 2026-10-23). RULED by COORD on 2026-10-23: accepted as a draft, and it stays DRAFT until
-> S0 lands. The rulings on its open questions are in section 9.** Document type: an [instance plan](Glossary.md#plan). The
+> S0 lands. The rulings on its open questions are in section 9.** Document type: an [instance plan](doctrine/ProcessGlossary.md#plan). The
 > owner ruled the run itself: after the 1.26 NuGet publish, re-run the [performance suite](Performance.md) (Go against
 > converted C#, JIT and Native AOT), with every timed run on G-LAPTOP for comparability with the original baselines.
 > The i9 only builds the Native AOT apps and ships them to G-LAPTOP. The procedure for a re-measurement is

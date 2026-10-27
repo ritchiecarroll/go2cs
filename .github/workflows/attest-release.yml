@@ -1,0 +1,112 @@
+name: Attest release assets
+
+# Attests the six go2cs archives ON A DRAFT RELEASE, as the draft holds them, and puts the attestation bundle back
+# on the draft. Started by hand with the release tag, after src/sign-release-binaries.ps1 -Apply.
+#
+# WHY. release-binaries.yml builds and attests the archives, then drafts the Release with them and that build's
+# attestation bundle. The release machine then Authenticode-signs go2cs.exe inside the two Windows archives, replaces
+# them on the draft with a GPG-signed SHA256SUMS, and deletes the bundle, because it no longer matches the Windows
+# archives. A Release must never carry an attestation that does not match its assets, so the draft is not published
+# until this workflow has attested what it holds now.
+#
+# WHAT THE ATTESTATION SAYS, honestly. This workflow builds nothing. Its attestation's predicate names this workflow
+# run at this commit, so it says: these are the bytes the draft Release for <tag> held when attest-release.yml ran
+# here. It does not say this run built them. The build provenance of what CI built stays in the repository's
+# attestation store from the release-binaries run, and the four archives the release machine does not change (Linux
+# and macOS) are verified against it below before anything is attested, so their chain to the build is checked here.
+# The two Windows archives differ from the build only by the Authenticode signature on go2cs.exe, which
+# sign-release-binaries.ps1 verified against the build attestation, SHA256SUMS and a byte-for-byte record comparison
+# before it uploaded them.
+#
+# The alternatives, and why not: keeping only the build's bundle would leave the Release carrying an attestation that
+# does not match its Windows archives; signing inside the build run is impossible, because the release certificate is
+# on a smart card in the release machine.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The release tag, nuget-N.N.N.N, whose DRAFT Release holds the signed archives.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: attest-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  attest:
+    name: Attest the draft's archives
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # to put the bundle back on the draft
+      id-token: write       # the attestation's signing identity
+      attestations: write   # to store the attestation
+    steps:
+      - name: Download the draft's assets and check them
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$TAG" | grep -Eq '^nuget-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag '$TAG' is not nuget-N.N.N.N"
+            exit 1
+          fi
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" != "true" ]; then
+            echo "::error::the Release for $TAG is not a draft; this workflow attests a draft before it is published"
+            exit 1
+          fi
+          mkdir dist
+          gh release download "$TAG" --dir dist
+          cd dist
+          ls -l
+          if [ -e go2cs-attestation.sigstore.jsonl ]; then
+            echo "::error::the draft still carries an attestation bundle; run src/sign-release-binaries.ps1 -Apply first (it removes the build's bundle)"
+            exit 1
+          fi
+          if [ ! -s SHA256SUMS.asc ]; then
+            echo "::error::the draft has no SHA256SUMS.asc; run src/sign-release-binaries.ps1 -Apply first"
+            exit 1
+          fi
+          test "$(ls go2cs-*.zip go2cs-*.tar.gz | wc -l)" -eq 6
+          test "$(grep -c . SHA256SUMS)" -eq 6
+          sha256sum --check --strict SHA256SUMS
+          for f in go2cs-*.tar.gz; do
+            if ! gh attestation verify "$f" --repo "$GH_REPO"; then
+              echo "::error::$f has no build attestation: the release machine changes only the Windows archives"
+              exit 1
+            fi
+          done
+
+      - name: Attest the archives as the draft holds them
+        id: attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/go2cs-*.zip
+            dist/go2cs-*.tar.gz
+
+      - name: Put the bundle back on the draft and verify every archive against it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          test -s "$BUNDLE"
+          cp "$BUNDLE" go2cs-attestation.sigstore.jsonl
+          for f in dist/go2cs-*.zip dist/go2cs-*.tar.gz; do
+            gh attestation verify "$f" --repo "$GH_REPO" --bundle go2cs-attestation.sigstore.jsonl
+          done
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" != "true" ]; then
+            echo "::error::the Release for $TAG was published while this ran; the bundle was not uploaded"
+            exit 1
+          fi
+          gh release upload "$TAG" go2cs-attestation.sigstore.jsonl --clobber
+          echo "Attested the six archives on the draft for \`$TAG\` and put the bundle back. The draft can be published." >> "$GITHUB_STEP_SUMMARY"

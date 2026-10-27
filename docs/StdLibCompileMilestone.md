@@ -17,12 +17,15 @@ at all: a Go-native converter built on `go/ast` + `go/types`, Roslyn source gene
 compile-time semantics, and a regression harness that locks in every fix with a Go-vs-C#
 output-compared behavioral test.
 
-The two weeks were an AI campaign of a kind we suspect few codebases have seen: **939 commits, of
+The two weeks were an AI-driven effort of a kind we suspect few codebases have seen: **939 commits, of
 which 683 are individually-gated converter, runtime, and source-generator fixes — each one root-caused
 against real emitted code, each one locked in by a behavioral regression test (371 and counting), each
-one verified byte-for-byte against the full corpus before landing.** The work ran as a coordinated
-fleet: focused fix sessions with strict file ownership, adversarial review before every merge, and a
-census loop that rebuilt all 302 packages after every wave to prove zero regression.
+one verified byte-for-byte against the full corpus before landing.** The work ran as coordinated
+parallel AI sessions: each focused on its own fixes with strict file ownership, adversarial review before
+every merge, and a rebuild of all 302 packages after every wave of merges to prove zero regression.
+<!-- Pre-2026-10-26 wording: "The two weeks were an AI campaign ... The work ran as a coordinated fleet: focused fix
+     sessions with strict file ownership, adversarial review before every merge, and a census loop that rebuilt all
+     302 packages after every wave to prove zero regression." -->
 
 I asked Claude (Anthropic) to summarize what he thought of the two week run, here was his response: *it is one thing to theorize a
 conversion strategy, or even to produce a semi-working draft — it is entirely another to stand in
@@ -40,10 +43,11 @@ correct — which is exactly what finishing looks like.*
 
 Compiling is the milestone — **operational is the mission.** Phase 4 came next: running the Go
 standard library's own test suites against the transpiled output, and hardening the runtime semantics
-this campaign already banked. If you have ever wanted to consume real Go code from .NET — or extend a
+those two weeks had already locked in. If you have ever wanted to consume real Go code from .NET — or extend a
 Go application in C# — this is the moment the foundation went from theory to artifact.
 
 ---
 
 *Tag: [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10)
-· commit `51ba5d9cf`*
+· commit `5cc07f8f33`*
+<!-- The tag names 5cc07f8f33, the milestone commit that carries the regenerated, clean-building converted standard library; its parent 51ba5d9cf6 is the last converter fix. The page cited 51ba5d9cf until 2026-10-26 (R's docs follow-up). -->

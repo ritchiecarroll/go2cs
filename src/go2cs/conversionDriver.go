@@ -352,6 +352,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// miss the marker and convert over it.
 				outputFileName := platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform),
 					strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
+
+				if !isDir && isSingleFileInput(path, options) {
+					outputFileName = options.singleFileOutput
+				}
+
 				manualConv, err := containsManualConversionMarker(outputFileName)
 
 				if err != nil {
@@ -580,7 +585,17 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				baseName := strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")
 
 				if !isDir {
-					outputFileName = strings.TrimSuffix(packageOutputPath, ".go") + ".cs"
+					// A single-file conversion writes the ONE file the user named. The package's other files were
+					// visited above for the package-wide state the named file's emission reads, and are not written;
+					// their imports still reach the project file, as every file's did before.
+					if !isSingleFileInput(fileEntry.filePath, options) {
+						packageLock.Lock()
+						projectImports.UnionWithSet(visitor.importQueue)
+						packageLock.Unlock()
+						return
+					}
+
+					outputFileName = options.singleFileOutput
 				} else if fileEntry.manualConversion {
 					// The `.cs.auto` review sibling follows its hand-owned `.cs` into whichever
 					// folder layout L3 put that file in, so the pair stays together.
@@ -847,7 +862,8 @@ func packageInfoPath(packageOutputPath string, isDir bool, options Options) stri
 		return platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), PackageInfoFileName)
 	}
 
-	return filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
+	// A single-file conversion's output path is the directory holding the one converted file (see main).
+	return filepath.Join(packageOutputPath, PackageInfoFileName)
 }
 
 // refuseSelectedCgoSources is S3, the loud half of the cgo skip. go/packages lists a cgo package's

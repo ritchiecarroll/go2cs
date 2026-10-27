@@ -108,6 +108,58 @@ public class LinuxSpawnSeamTests
     // for runtime_doAllThreadsSyscall, recording the same reasoning: a throwing stub "turned that
     // skip into an infrastructure-error", and ENOTSUP restored it.
     //
+    // A CHILD THE HOST MOVES KEEPS A PWD NAMING WHERE IT STARTS (seat #8 (b); cfile's TestIssue59563).
+    // os/exec sets PWD to cmd.Dir, and the test host's childDirectoryComposer moves a toolchain child that
+    // starts in the staged ancestry to the real GOROOT directory. Where the staged directory is a link to
+    // that same directory, the old PWD still named the child's cwd by the staged spelling, so the child's
+    // os.Getwd answered it and cmd/go read the staged go.mod as a module named std. The child here is
+    // printenv, which reports PWD verbatim; a shell would recompute it and hide both halves.
+    [TestMethod]
+    public void AMovedChildsPwdNamesTheDirectoryItStartsIn()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Assert.Inconclusive("the posix_spawn seam is the linux flavor");
+            return;
+        }
+
+        const string printenv = "/usr/bin/printenv";
+        string root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "c1-spawn-pwd-" + Guid.NewGuid().ToString("N"));
+        string real = System.IO.Path.Combine(root, "real");
+        string link = System.IO.Path.Combine(root, "link");
+        string other = System.IO.Path.Combine(root, "other");
+        System.Reflection.FieldInfo seam = typeof(go.syscall_package).GetField("childDirectoryComposer",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+
+        try
+        {
+            System.IO.Directory.CreateDirectory(real);
+            System.IO.Directory.CreateDirectory(other);
+            System.IO.Directory.CreateSymbolicLink(link, real);
+
+            // The host's composer reduced to this case: printenv started in the link starts in the real directory.
+            seam.SetValue(null, (Func<string, string, string?>)((executable, directory) =>
+                executable == printenv && directory == link ? real : null));
+
+            Assert.AreEqual(real, ChildPwd(printenv, root, link, link),
+                "a moved child's PWD named its directory by the link's spelling; it must name the directory it starts in");
+            Assert.AreEqual(other, ChildPwd(printenv, root, link, other),
+                "a PWD naming another directory is the caller's own and must pass through unchanged");
+        }
+        finally
+        {
+            seam.SetValue(null, null);
+
+            try
+            {
+                System.IO.Directory.Delete(root, recursive: true);
+            }
+            catch (System.IO.IOException)
+            {
+            }
+        }
+    }
+
     // Asserting the KIND and the NAME, never the rendered message — this file's established idiom.
     [TestMethod]
     public void UnsupportedSysProcAttrFieldAnswersErrUnsupported()
@@ -415,6 +467,46 @@ public class LinuxSpawnSeamTests
         }
 
         return kids;
+    }
+
+    // Spawns `printenv PWD` through the converted surface in dir, with PWD as its only environment entry, and
+    // answers what it printed.
+    private static string ChildPwd(string printenv, string root, string dir, string pwd)
+    {
+        string output = System.IO.Path.Combine(root, "pwd-" + Guid.NewGuid().ToString("N"));
+        var (fd, oerr) = syscall.Open(output, (nint)(syscall.O_WRONLY | syscall.O_CREAT | syscall.O_TRUNC | syscall.O_CLOEXEC), 0x1a4);
+
+        Assert.IsNull(oerr, $"opening {output} failed: {oerr}");
+
+        try
+        {
+            var attr = new go.syscall_package.ProcAttr
+            {
+                Dir = dir,
+                Env = new slice<@string>(new @string[] { "PWD=" + pwd }),
+                Files = new slice<uintptr>(new uintptr[] { 0, (uintptr)fd, 2 }),
+            };
+
+            var (pid, _, err) = syscall.StartProcess(
+                printenv,
+                new slice<@string>(new @string[] { printenv, "PWD"u8 }),
+                new StandardBox<go.syscall_package.ProcAttr>(attr));
+
+            Assert.IsNull(err, $"spawning {printenv} failed: {err}");
+
+            ref var status = ref heap(new go.syscall_package.WaitStatus(), out var Ꮡstatus);
+            var (waited, werr) = syscall.Wait4(pid, Ꮡstatus, 0, nil);
+
+            Assert.IsNull(werr, $"Wait4 failed: {werr}");
+            Assert.AreEqual(pid, waited, "Wait4 returned a different pid");
+            Assert.AreEqual((nint)0, status.ExitStatus(), $"{printenv} PWD must exit 0");
+        }
+        finally
+        {
+            syscall.Close(fd);
+        }
+
+        return System.IO.File.ReadAllText(output).TrimEnd('\n');
     }
 
     private static string ProcState(int pid)

@@ -339,7 +339,7 @@ phantom extra project by the multi-platform merge's solution-recovery path, whic
 stdLibImportPathFromTargetDir, crypto/ecdh's test project named chacha20 twice, once with the unvendored file name; the
 pre-fix crypto.ecdh.tests.csproj built with 0 errors and the phantom project reached go2cs-stdlib.slnx. -->
 
-Guarded by `TestGorootVendoredReferenceNamesTheVendoredProject` (the vendored spelling, the metadata key, and the leaf package name), `TestStdLibImportPathFromTargetDir` (the recovery, including the non-core-rooted no-match that leaves the caller on the import path) and `TestStdLibReferenceUnchangedForUnvendoredPackage` (the no-op half — the whole corpus bar the `vendor/` tree, which is what makes a zero-movement [CNR](../Glossary.md#cnr) verdict meaningful rather than lucky), all in `importOperations_test.go`.
+Guarded by `TestGorootVendoredReferenceNamesTheVendoredProject` (the vendored spelling, the metadata key, and the leaf package name), `TestStdLibImportPathFromTargetDir` (the recovery, including the non-core-rooted no-match that leaves the caller on the import path) and `TestStdLibReferenceUnchangedForUnvendoredPackage` (the no-op half — the whole corpus bar the `vendor/` tree, which is what makes a zero-movement verdict from the behavioral regression check meaningful rather than lucky)<!-- [CNR](../Glossary.md#cnr) -->, all in `importOperations_test.go`.
 
 ## An importer spells the package class from the package NAME — the standard library included
 
@@ -434,7 +434,7 @@ and the template's `using static <namespace>.<class>;` line are converged on the
 (`convergePackageNamespace`); otherwise a package that started keeping its directory would carry the old namespace in
 that one file. <!-- Ruled 2026-10-04: option 1 of docs/phase4/DESIGN-sibling-package-name-collision.md. The case-only
 row's standard-library instance, crypto/x509/internal/macos (package macOS), held through Go 1.24; Go 1.26 renamed the
-package macos. --> The design is [the sibling-package design note](../phase4/DESIGN-sibling-package-name-collision.md).
+package macos. --> <!-- The design is [the sibling-package design note](../phase4/DESIGN-sibling-package-name-collision.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 Guarded by `siblingPackageNamespace_test.go` (two siblings sharing a name, the four exempt shapes, the convergence) and
 the behavioral `SiblingPackageNames` test.
 
@@ -482,8 +482,8 @@ change; platform not recorded --> On the measurement side, `PerformanceRunner` r
 Go selects its platform sources at *build* time — filename suffixes and `//go:build` constraints — so a
 conversion does not merely target a platform, it **is** that platform. A converted package whose emission
 varies across `GOOS` therefore keeps the varying files in per-GOOS subfolders, and the `.csproj` compiles
-exactly one of them; files that are byte-identical on every platform stay flat. This is layout **L3**
-([`phase4/DESIGN-multiplatform-corpus.md`](../phase4/DESIGN-multiplatform-corpus.md) §8). <!-- accepted 2026-08-08 -->
+exactly one of them; files that are byte-identical on every platform stay flat. This is layout **L3**.
+<!-- [`phase4/DESIGN-multiplatform-corpus.md`](../phase4/DESIGN-multiplatform-corpus.md) §8 (internal record, unlinked 2026-10-26, OQ-1) --> <!-- accepted 2026-08-08 -->
 `internal/goos` carries it:
 
 ```
@@ -587,7 +587,7 @@ scope means every target, and a scoped entry turns only those targets' declarati
 Linux's `dir_unix.go` flavor converts as ordinary Go. A scope does not express a per-platform signature:
 `notetsleep_internal` is four parameters in `lock_sema.go` and two in `lock_futex.go`, so it is one
 every-target entry, and each flavor's own `*_impl.cs` declares its own signature, which L3 routes per GOOS.
-Background in [`phase4/DESIGN-multiplatform-corpus.md`](../phase4/DESIGN-multiplatform-corpus.md) §7.
+<!-- Background in [`phase4/DESIGN-multiplatform-corpus.md`](../phase4/DESIGN-multiplatform-corpus.md) §7 (internal record, unlinked 2026-10-26, OQ-1). -->
 
 Guarded by `platformHandOwn_test.go`, which walks the **real** `src/core` rather than a synthetic tree —
 the next offender will be a file somebody adds by hand. Three structural rules: an `*_impl.cs` whose
@@ -664,7 +664,8 @@ of every platform must reproduce the merged project file byte for byte.
 
 Both templates carry one suppression policy, and it is a policy rather than an accretion: every entry is a
 diagnostic that is **structural to the Go emission model**, and every diagnostic that is *not* is left
-visible on purpose. The full census, code by code, is [`docs/phase4/DESIGN-warning-suppression.md`](../phase4/DESIGN-warning-suppression.md).
+visible on purpose.
+<!-- The full census, code by code, is [`docs/phase4/DESIGN-warning-suppression.md`](../phase4/DESIGN-warning-suppression.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 ```xml
 <Nullable>annotations</Nullable>
@@ -1028,7 +1029,7 @@ Inverting costs **zero** new project references here — `isw → runtime` alrea
 
 **It needs a curated registry**, `linknameVarAliasTargets`, for the identical reason `linknamePushTargets` does: converting `internal/syscall/windows`, the converter cannot see runtime's directive. A package is converted from its own syntax, and its dependencies contribute *types, not comments* — so from isw's side a var under a one-arg handle is indistinguishable from any other opened var, and nothing in it names `runtime`. The row records the missing half as a judgment; `linknameVarAliasStorage` is **derived** from it (the `linknamePushSources` pattern) so the publicize arm and the registry cannot drift. Go's authorization is still required — the forwarding side must carry its one-arg handle, so a row that outlives Go's directive fails closed to a plain field rather than inventing an alias — and gate (3) is inherited on the target side, because an address-taken forwarding property would name a `Ꮡ` box that does not exist.
 
-**Forwarding and populating are one change** — the `GetSystemDirectory` rule again. `canUseLongPaths` is written only by `initLongPathSupport`, called only from `osinit`, which the converter emits already marked not-run and whose body bottoms out in `asmstdcall`; so the alias alone would have faithfully forwarded a permanent `false`. A naive "set it true" would be worse than the gap: `os.fixLongPath` would stop adding the `\\?\` prefix on a host where the PEB `IsLongPathAwareProcess` bit was *not* actually set, producing paths that silently fail. The flag is therefore tied to the **outcome**: golib's `InitializeWindowsLongPaths` reads the PEB bit back after writing it and records that observation in `WindowsLongPathsEnabled`, and the hand-owned `runtime/windows/os_windows_impl.cs` copies it into `canUseLongPaths` from a `[ModuleInitializer]` — the same slot, file and pattern as that file's existing `ᴛInitSysDirectory`. (Guarded by `TestRecurseLinknameVarAlias` for the four emission arms, `TestLinknameVarAliasRegistryMatchesGoSource` for both halves of each row against GOROOT, and the `LongPathRoundTrip` behavioral test for the semantics — a >MAX_PATH path round-tripped through `os` and output-compared vs `go run`. Design and the corrected root: [`docs/phase4/DESIGN-linkname-push-cycles.md`](../phase4/DESIGN-linkname-push-cycles.md).)
+**Forwarding and populating are one change** — the `GetSystemDirectory` rule again. `canUseLongPaths` is written only by `initLongPathSupport`, called only from `osinit`, which the converter emits already marked not-run and whose body bottoms out in `asmstdcall`; so the alias alone would have faithfully forwarded a permanent `false`. A naive "set it true" would be worse than the gap: `os.fixLongPath` would stop adding the `\\?\` prefix on a host where the PEB `IsLongPathAwareProcess` bit was *not* actually set, producing paths that silently fail. The flag is therefore tied to the **outcome**: golib's `InitializeWindowsLongPaths` reads the PEB bit back after writing it and records that observation in `WindowsLongPathsEnabled`, and the hand-owned `runtime/windows/os_windows_impl.cs` copies it into `canUseLongPaths` from a `[ModuleInitializer]` — the same slot, file and pattern as that file's existing `ᴛInitSysDirectory`. (Guarded by `TestRecurseLinknameVarAlias` for the four emission arms, `TestLinknameVarAliasRegistryMatchesGoSource` for both halves of each row against GOROOT, and the `LongPathRoundTrip` behavioral test for the semantics — a >MAX_PATH path round-tripped through `os` and output-compared vs `go run`.)<!-- Design and the corrected root: [`docs/phase4/DESIGN-linkname-push-cycles.md`](../phase4/DESIGN-linkname-push-cycles.md) (internal record, unlinked 2026-10-26, OQ-1). -->
 
 **Exported structs and interfaces cross packages.** An exported struct's fields and methods are reachable on the consumer side exactly as the producer emits them — `CrossPkgLib.Sensor{Name: …, Temp: …}` lowers to a C# constructor call and `s.Name` / `s.Hot()` to field/method access on the imported struct — because the struct and its `this ref` extension methods live in the (referenced) library assembly.
 
@@ -1084,7 +1085,8 @@ could not see that a stdlib alias's leading segment collides with it: bidirule (
 vendored `unicode` namespace rather than stdlib `go.unicode` (CS0234). With the vendored namespaces in the map the alias
 root-qualifies to `go.unicode.utf8_package`. Gated on GOROOT so a user module's own `golang.org/x` dependency is
 untouched. No unit or behavioral test covers it: the rule fires only for a GOROOT-vendored package, which the behavioral
-harness — never under GOROOT — cannot express; the bidirule reconvert [A/B](../Glossary.md#ab) validated it.
+harness — never under GOROOT — cannot express; the bidirule reconvert, compared before and after the change, validated
+it. <!-- [A/B](../Glossary.md#ab) -->
 
 **A DOTTED build tag (`goexperiment.X`, `amd64.vN`) is matched against the host toolchain's tool tags.** The converter
 re-checks each file's `//go:build` constraint after `go/packages` has already loaded it (to drop files for the wrong
@@ -1257,9 +1259,8 @@ using registry = BlankImportSideEffects.registry_package;
 ```
 
 The hooks live in the metadata file rather than in each importing file's class body, so that converted
-code reads like the Go it came from
-([`phase4/DESIGN-import-hook-relocation.md`](../phase4/DESIGN-import-hook-relocation.md),
-`importInitSection.go`). <!-- history: until 2026-09-01 the hooks sat at the top of each importing file's class
+code reads like the Go it came from (`importInitSection.go`).
+<!-- design: [`phase4/DESIGN-import-hook-relocation.md`](../phase4/DESIGN-import-hook-relocation.md) (internal record, unlinked 2026-10-26, OQ-1) --> <!-- history: until 2026-09-01 the hooks sat at the top of each importing file's class
 body, where they ran before that file's own inits only. -->
 
 Four decisions make that emission what it is.

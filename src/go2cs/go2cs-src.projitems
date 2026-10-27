@@ -82,6 +82,7 @@
     <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
@@ -98,6 +99,8 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testTargetArch.go" />
+    <None Include="$(MSBuildThisFileDirectory)testTargetArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)unionNonOperatorMember_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedTypeParamArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyPointerUnion_test.go" />
@@ -293,6 +296,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsRetiredAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsProvenanceNotes_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsExcludedLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsFragmentLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />

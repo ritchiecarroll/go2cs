@@ -14,7 +14,7 @@ Converter output is **byte-reproducible**: converting the same Go source with th
   Sequential conversion costs nothing measurable: a conversion's time is dominated by `go/packages` type-graph loading,
   not emission. <!-- Measured at landing: a full-stdlib conversion (305 packages) took 3m42s concurrent vs 3m39s
   sequential, recorded in
-  src/go2cs/conversionDriver.go:540-551 (`3m42s with the concurrent per-file goroutines and 3m39s sequential`);
+  src/go2cs/conversionDriver.go:545-556 (`3m42s with the concurrent per-file goroutines and 3m39s sequential`);
   the platform was not recorded. -->
 * **The stdlib conversion queue is deterministic and dependency-complete.** The topological sort walks sorted roots
   (map-iteration roots would make unrelated packages' order flip run-to-run), and a GOROOT-**vendored** dependency

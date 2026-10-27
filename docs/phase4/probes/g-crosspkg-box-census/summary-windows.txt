@@ -1,0 +1,79 @@
+windows tests=false all                                      620
+windows tests=false boxed-today kind=pointer                 1
+windows tests=false boxed-today kind=value:array             1
+windows tests=false boxed-today kind=value:basic:int         1
+windows tests=false boxed-today kind=value:slice             1
+windows tests=false boxed-today kind=value:struct            6
+windows tests=false kind=interface                           146
+windows tests=false kind=pointer                             294
+windows tests=false kind=value:array                         9
+windows tests=false kind=value:basic:bool                    35
+windows tests=false kind=value:basic:int                     7
+windows tests=false kind=value:basic:int32                   1
+windows tests=false kind=value:basic:string                  15
+windows tests=false kind=value:basic:uintptr                 6
+windows tests=false kind=value:func                          21
+windows tests=false kind=value:map                           11
+windows tests=false kind=value:slice                         33
+windows tests=false kind=value:struct                        42
+windows tests=false to-box handown kind=interface            1
+windows tests=false to-box handown kind=value:basic:uintptr  2
+windows tests=false to-box handown kind=value:struct         1
+windows tests=false to-box kind=interface                    146
+windows tests=false to-box kind=pointer                      293
+windows tests=false to-box kind=value:array                  8
+windows tests=false to-box kind=value:basic:bool             35
+windows tests=false to-box kind=value:basic:int              6
+windows tests=false to-box kind=value:basic:int32            1
+windows tests=false to-box kind=value:basic:string           15
+windows tests=false to-box kind=value:basic:uintptr          6
+windows tests=false to-box kind=value:func                   21
+windows tests=false to-box kind=value:map                    11
+windows tests=false to-box kind=value:slice                  32
+windows tests=false to-box kind=value:struct                 36
+windows tests=false to-box linkname kind=value:basic:bool    1
+windows tests=false to-box linkname kind=value:basic:int32   1
+windows tests=false to-box linkname kind=value:struct        8
+windows tests=true all                                      257
+windows tests=true boxed-today kind=value:basic:uint32      1
+windows tests=true boxed-today kind=value:basic:uint64      1
+windows tests=true emitted=no                               2
+windows tests=true kind=interface                           22
+windows tests=true kind=pointer                             19
+windows tests=true kind=value:array                         1
+windows tests=true kind=value:basic:Pointer                 1
+windows tests=true kind=value:basic:bool                    4
+windows tests=true kind=value:basic:float64                 2
+windows tests=true kind=value:basic:int                     8
+windows tests=true kind=value:basic:string                  2
+windows tests=true kind=value:basic:uint                    1
+windows tests=true kind=value:basic:uint32                  1
+windows tests=true kind=value:basic:uint64                  2
+windows tests=true kind=value:basic:uintptr                 4
+windows tests=true kind=value:func                          146
+windows tests=true kind=value:map                           2
+windows tests=true kind=value:slice                         35
+windows tests=true kind=value:struct                        7
+windows tests=true to-box handown kind=value:slice          1
+windows tests=true to-box kind=interface                    22
+windows tests=true to-box kind=pointer                      19
+windows tests=true to-box kind=value:array                  1
+windows tests=true to-box kind=value:basic:Pointer          1
+windows tests=true to-box kind=value:basic:bool             4
+windows tests=true to-box kind=value:basic:float64          2
+windows tests=true to-box kind=value:basic:int              8
+windows tests=true to-box kind=value:basic:string           2
+windows tests=true to-box kind=value:basic:uint             1
+windows tests=true to-box kind=value:basic:uint64           1
+windows tests=true to-box kind=value:basic:uintptr          4
+windows tests=true to-box kind=value:func                   144
+windows tests=true to-box kind=value:map                    2
+windows tests=true to-box kind=value:slice                  35
+windows tests=true to-box kind=value:struct                 7
+windows importers use=addr         kind=value     test=false 1
+windows importers use=addr         kind=value     test=true 12
+windows importers use=ptrcall      kind=value     test=true 2
+windows importers use=read         kind=interface test=false 577
+windows importers use=read         kind=interface test=true 1370
+windows importers use=read         kind=value     test=false 473
+windows importers use=read         kind=value     test=true 503
