@@ -454,7 +454,7 @@ code, and the section that explains it in full.
 
 | Glyph or pattern | Meaning | Example | Explained in |
 |---|---|---|---|
-| `ᶠ` suffix | A shared delegate, used when a function that has an `sstring` twin is taken as a value. The twin is a second overload that takes golib's `sstring`, a string view that allocates nothing | `fmt.Sprintfᶠ` | [Strings](#strings-string-and-sstring) |
+| `ᶠ` suffix | A shared delegate, used when a function that has an `@string` twin is taken as a value. The function takes golib's `sstring`, a string view that allocates nothing, and the twin is a second overload that takes `@string` | `fmt.Sprintfᶠ` | [Strings](#strings-string-and-sstring) |
 | `ᐧᐧ` | A `true` that C# does not treat as a constant (a `static readonly` field). It marks a leading `case true:` in a tagless switch, so C# still accepts the cases after it | `case {} when ᐧᐧ:` | [Reference → Expression Switch](ConversionStrategies-Reference/expression-switch.md#a-leading-constant-true-case-stays-opaque-to-the-compiler) |
 | `ᴋ` | A temporary that keeps a pointer passed to a system call alive until the call returns | `var ᴋ0 = @unsafe.SliceData(p);` | [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr) |
 | `ᴷ` suffix | Go's 32-byte stack buffer for a slice variable whose append does not escape, or whose one escape Go moves to the heap (`x = move2heap(xᴷ, x);` ahead of that statement). The function declares one per variable at its entry, and the variable's first qualifying append passes it | `var xᴷ = new stackAppend<int64>();`, then `x = append(xᴷ, x, (int64)i);` | [Reference → Slices and Arrays](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer) |
@@ -2751,7 +2751,8 @@ IEEE 754, as Go's do, so infinities, NaN and negative zero behave as in Go: a fl
 except in a typed `const` declaration, which writes a `float64` value bare and a `float32` one with C#'s `f`.
 A Go-only form that C# cannot read, such as the hex float `0x1p-2` or the trailing-dot `2.`, is written as its
 decimal value instead (`0.25D`, `2D`). A float constant follows the rules in [Constant Values](#constant-values):
-a `float32` or `float64` one is a C# `const`, and an untyped one is a property of golib's `UntypedFloat`.
+a `float32` or `float64` one is a C# `const`, and an untyped one is a static property of type `UntypedFloat`,
+a golib type that keeps the constant's exact value.
 <!-- golden: src/tests/Behavioral/GoOnlyFloatLiteralForms/main.cs.target:8 `var a = 0.25D;` and :13 `var d = 2D;`
      for main.go:25 `a := 0x1p-2` and :31 `d := 2.`. Typed const:
      src/core/math/asinh.cs:49 `const float64 Ln2 = 6.93147180559945286227e-01;` and
@@ -2803,7 +2804,7 @@ intended. The [golib runtime library](#the-golib-runtime-library) types give tha
 behavior, so reading a nil map, or taking `len` of a nil slice, works as it does in Go.
 
 A few Go forms need something other than `default!`. Each one has its own rule in this section. In the table,
-`ж<T>` is golib's heap box for a Go pointer `*T`, and the `Ꮡ` prefix marks a name that holds one
+`ж<T>` is golib's heap box for a Go pointer `*T`, and the `Ꮡ` prefix marks a pointer parameter that holds one
 ([glyph table](#reading-converted-code-names-and-glyphs)):
 
 | Go | C# | Why |
@@ -2861,13 +2862,14 @@ behaviors:
 | slice | `len` and `cap` are 0, and `append` works ([Slices and Arrays](#slices-and-arrays)). |
 | map | golib's `map<K, V>` is a struct with no dictionary behind it, so nothing throws a C# null error. Reads return the zero value, `len` is 0, `range` is empty and `delete` does nothing. A write panics ([Maps](#maps)). |
 | channel | A send or receive blocks forever, and in a `select` its case is never chosen ([Channels](#channels-and-select)). |
-| pointer | Comparing it is safe. A method can be called on it, because a method is a C# extension method, which accepts a null receiver ([Functions and Methods](#functions-and-methods)). Reading or writing through it panics with Go's `invalid memory address or nil pointer dereference`, which `recover` catches ([Defer / Panic / Recover](#defer--panic--recover)). |
+| pointer | Comparing it is safe. A pointer-receiver method can be called on it, because go2cs reads through the pointer only where the method's body does ([Functions and Methods](#functions-and-methods)). Reading or writing through it panics with Go's `invalid memory address or nil pointer dereference`, which `recover` catches ([Defer / Panic / Recover](#defer--panic--recover)). |
 | interface | `== nil` is true only when it holds nothing at all, not even a nil pointer ([Interfaces](#interfaces)). |
 
 **A pointer compared with `nil`, or passed `nil` as an argument, uses golib's `nil`.** A Go pointer `*T`
-becomes golib's `ж<T>` heap box (read "zhe"). A pointer parameter `p` is named `Ꮡp` in C#: the `Ꮡ` prefix
-marks a name that holds a box. When a body reads through the pointer, C# reaches the value by `ref`, either
-as a `ref var p` local or as a `ref T p` parameter ([Pointers](#pointers),
+becomes golib's `ж<T>` heap box (read "zhe"). A pointer parameter `p` that arrives as a box is named `Ꮡp`
+in C#, which leaves `p` free for the value it points at. A local pointer variable keeps its Go name, as `dp`
+does below. When a body reads through the pointer, C# reaches the value by `ref`, either as a `ref var p`
+local or as a `ref T p` parameter ([Pointers](#pointers),
 [glyph table](#reading-converted-code-names-and-glyphs)). The functions below only compare or forward the
 pointer, so they keep the box:
 
@@ -3133,7 +3135,7 @@ built-in and where it is explained in more depth:
 |---|---|---|
 | `len(x)`, `cap(x)` | `len(x)`, `cap(x)`. Both return `nint`, which is how go2cs writes Go's `int`. The `len` of a string counts bytes, as in Go | [Slices and Arrays](#slices-and-arrays), [Strings](#strings-string-and-sstring) |
 | `append(s, a, b)` | `append(s, a, b)`. Past capacity it grows the backing array by Go's own growth rule. An append that Go keeps on the stack passes a 32-byte stack buffer first, `append(xᴷ, x, v)` | [Slices and Arrays](#slices-and-arrays), [`ᴷ` buffer](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer) |
-| `append(s, t...)`, with `t` a slice | `appendꓸꓸꓸ(s, t)`. The `ꓸꓸꓸ` glyph stands for Go's `...`. golib takes a `slice<T>` operand as the slice it is, with no box | [Reading Converted Code](#reading-converted-code-names-and-glyphs), [Slices and Arrays](#slices-and-arrays) |
+| `append(s, t...)`, with `t` a slice | `appendꓸꓸꓸ(s, t)`. The `ꓸꓸꓸ` glyph stands for Go's `...`. golib takes a `slice<T>` operand as the slice it is, never boxed to an interface | [Reading Converted Code](#reading-converted-code-names-and-glyphs), [Slices and Arrays](#slices-and-arrays) |
 | `copy(dst, src)` | `copy(dst, src)` | [Slices and Arrays](#slices-and-arrays) |
 | `clear(x)` | `clear(x)`. It zeroes a slice's elements and empties a map | [Slices and Arrays](#slices-and-arrays), [Maps](#maps) |
 | `make(T, …)` | a constructor: `new slice<T>(…)`, `new map<K, V>()` or `new channel<T>(…)` | [Slices and Arrays](#slices-and-arrays), [Maps](#maps), [Channels and `select`](#channels-and-select) |
@@ -3223,7 +3225,7 @@ The `for … range` loop becomes a C# `foreach` over index and value
 `m`. In C#, the call is named `appendꓸꓸꓸ`, and the whole slice `m` passes as one argument. The `ꓸꓸꓸ`
 glyph in a name stands for Go's `...` ([Reading Converted Code](#reading-converted-code-names-and-glyphs)).
 golib has an `appendꓸꓸꓸ` overload for each operand kind, and the one for a `slice<T>` takes `m` as the
-slice it is, so the call boxes nothing. This complete function shows `make` and the spread together:
+slice it is, never boxed to an interface. This complete function shows `make` and the spread together:
 <!-- src/core/golib/builtin.cs:542 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)` -->
 
 <!-- source: src/tests/Behavioral/AppendOfMake/AppendOfMake.go:32-35 -->
@@ -3727,7 +3729,7 @@ Go's `readThenBump` returns `1 1`. Without the temporary, `return (c.n, c.bump()
 
 In the C#, a pointer-receiver method becomes an extension method on `ref counter`; the `ref` is what lets `bump` change the caller's `c` ([Functions and Methods](#functions-and-methods)). `default!` is C#'s default value, here Go's zero `counter`. The `!` matters only for reference types, where it tells the compiler a null is intended; the converter writes it everywhere ([Nil and Zero Values](#nil-and-zero-values)).
 
-**Most returns stay one tuple, as written in Go.** A call can change an earlier operand only when it gets that operand's address. That happens through a pointer-receiver method on it, an `&x` argument, or a pointer the operand is read through. The converter checks just those cases, within the `return` statement itself. When the call works on something else, as here, nothing moves.
+**Most returns stay one tuple, as written in Go.** The converter moves a call only when the `return` statement itself shows that the call can reach an earlier operand: through a pointer-receiver method on it, an `&x` argument, or a pointer the operand is read through. A call that changes the operand some other way, such as through a package-level variable or a variable captured by a closure, is not detected. When the call works on something else, as here, nothing moves.
 
 <!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.go:93-98 -->
 ```go
@@ -4113,9 +4115,10 @@ internal static (nint, nint) streams() {
 `"one"` and `"two"` are passed to `string` parameters, so they are plain C# literals that golib converts
 once ([Strings](#strings-string-and-sstring)).
 
-**A multi-value `return` keeps Go's order.** Go runs the calls in a `return` first, and reads the plain
-values beside them afterwards. A C# tuple evaluates left to right instead. So when a call could change a
-value beside it, the converter runs the call first, into a temporary. A name starting with `ᴛ` is a
+**A multi-value `return` keeps Go's order.** gc, the standard Go compiler, runs the calls in a `return`
+first and reads the plain values beside them afterwards, an order Go's spec leaves open. A C# tuple
+evaluates left to right instead. So when a call could change a value beside it, the converter runs the call
+first, into a temporary. A name starting with `ᴛ` is a
 temporary the converter makes up ([Names and Glyphs](#reading-converted-code-names-and-glyphs)):
 
 <!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.go:66-74 -->
@@ -4296,8 +4299,8 @@ inside the name is part of the name, not the comma-ok argument
 **Type assertion:** `ok` reports whether the interface holds the asserted type. `x.(T)` becomes golib's
 `x._<T>()`, and the extra `ᐧ` picks the comma-ok form. `any` is Go's empty interface, an alias for C#'s
 `object` ([Empty Interface](#empty-interface-any)). `helloˢ` is the literal `"hello"`, stored once in a
-`static readonly` field typed `object`, because it is assigned to an `any` variable rather than passed to a
-call ([Strings](#strings-string-and-sstring)):
+`static readonly` field typed `object`, because it is used only as an `any` value, so the field holds it
+already boxed ([Strings](#strings-string-and-sstring)):
 
 <!-- source: src/tests/Behavioral/TypeAssert/TypeAssert.go:34-50 -->
 ```go
@@ -4572,7 +4575,8 @@ internal static void test(/*[2]*/ array<@string> a) {
 }
 ```
 
-The comment `/*[2]*/` records the Go array length, which `array<T>` does not carry, for
+The comment `/*[2]*/` records the Go array length. An `array<T>` value carries its length, but the C# type
+does not, so [go2cs-gen](#source-generators) reads the comment and records the length for
 [Reflection](#reflection-reflect). `@string` is Go's `string` ([Strings](#strings-string-and-sstring)).
 
 Slicing an array does not copy it. `test3(a[:])` becomes `test3(a[..])`, and a write through that slice
@@ -4777,8 +4781,9 @@ costs one conversion per program run, however often it is evaluated
 
 **Elsewhere a literal is a C# UTF-8 literal, `"text"u8`.** A `u8` literal is a `ReadOnlySpan<byte>` over
 bytes compiled into the program, so by itself it costs nothing. A comparison, a concatenation and a
-`[]byte` conversion read those bytes in place. A named string type and a generic type parameter take it
-too, because a C# string there would bind the wrong C# type; the analyzer rule `GO2CS0004` makes such a
+`[]byte` conversion read those bytes in place. A named string type takes it
+too, because no conversion leads from a C# string to the named type. A generic type parameter takes it
+because C# would infer it as `System.String` from a C# string; the analyzer rule `GO2CS0004` makes that
 binding a build error.
 
 **Conversions to and from `[]byte` copy**, as they do in Go. `[]byte(s)` becomes a golib
@@ -4811,7 +4816,7 @@ literal in a `static readonly` field of the package's class
 ([Package Conversion](#package-conversion)), declared just before the first function that uses it, named
 from the literal's words, with the suffix `ˢ` marking it as generated: `return "zero value return"`
 becomes `return zeroValueReturnˢ;`. Reading a field skips the cache lookup a plain literal makes, so
-`-hoist-literals` gives any other package this form, and it is the recommended opt-out for
+`-hoist-literals` gives any other package this form, and it is recommended for
 performance-critical code ([Command Line](CommandLine.md)). By default the same function reads as Go does:
 
 <!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:12-18 -->
@@ -5070,9 +5075,10 @@ line, `defer(…, ref ᒐ)` is golib's form of Go's `defer`
 ([Defer / Panic / Recover](#defer--panic--recover)), and `deferredCountˢ` is the literal
 `"deferred count"` stored once in a field, the form a `defer` argument takes.
 
-**A twinned function used as a value is named with `ᶠ`.** With two overloads, C# has no single method to
-turn into a delegate. So the generators also declare one shared delegate field, `Sprintfᶠ`, and the
-converter uses it wherever Go uses the function as a value:
+**A twinned function used as a value is named with `ᶠ`.** Converted to a delegate, the function would bind
+its `sstring` overload, which C# prefers, and that overload does not match a delegate typed on `@string`.
+So the generators also declare one shared delegate field, `Sprintfᶠ`, and the converter uses it wherever
+Go uses the function as a value:
 
 <!-- source: src/tests/Behavioral/SStringTwinPilot/main.go:28-29 -->
 ```go
@@ -5193,8 +5199,8 @@ visited. Each range starts its walk at a random entry, as Go's does.
 [Loops, Range and Labels](#loops-range-and-labels) covers `range` over other types.
 <!-- The snapshot: src/core/golib/map.cs:1057 `private static IEnumerator<KeyValuePair<TKey, TValue>> enumerateStore(NilKeyDictionary store)`. -->
 
-Go's package functions become static methods of a class for the package, so `main` becomes `Main`
-([Package Conversion](#package-conversion)). `"insert visited:"` stays a plain C# literal: it is passed to
+Go's package functions become static methods of a class for the package, and `main` becomes `Main`, the C#
+entry point ([Package Conversion](#package-conversion)). `"insert visited:"` stays a plain C# literal: it is passed to
 `fmt.Println` as an `any` value, so [go2cs-gen](#source-generators) intercepts the call and boxes it once as a Go string, not on
 every call ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
 
@@ -5393,8 +5399,9 @@ of `"Zlpha"` misses. Plain and comma-ok reads both take this path.
 
 `slice<byte>("alpha"u8)` is golib's form of Go's `[]byte("alpha")`: it copies the literal's bytes into a
 new slice. `w["alpha"]` passes a plain C# literal, which golib converts to `@string` once and shares
-([Strings](#strings-string-and-sstring)). `(rune)'Z'` is Go's constant `'Z'`, where golib's
-`rune` is `int32`. C# converts an in-range constant to `byte` implicitly, so the store into `k[0]` compiles.
+([Strings](#strings-string-and-sstring)). `(rune)'Z'` is Go's constant `'Z'`, where `rune` is
+the project file's alias for `int32`. C# converts an in-range constant to `byte` implicitly, so the store
+into `k[0]` compiles.
 
 **Full detail:** [Reference → Maps and Channels](ConversionStrategies-Reference/maps-and-channels.md#maps-and-channels) — how a range survives changes to its own map, nil and interface keys, exactly which `string(b)` lookups skip the copy, named map types, and map access through type parameters.
 
