@@ -120,7 +120,7 @@ internal static partial void probeF1() {
     goǃ(() => {
         Ꮡt.Value.total += 100;
         doneʗ1.ᐸꟷ(1);
-    });
+    }, GoStack.Bounded);
     ᐸꟷ(done);
     fmt.Println("F1:", t.total);
 }

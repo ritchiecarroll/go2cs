@@ -45,7 +45,7 @@ internal static nint nestedStructCapture() {
         var pʗ2 = pʗ1;
         goǃ(() => {
             outʗ2.ᐸꟷ(pʗ2.sum());
-        });
+        }, GoStack.Bounded);
     }
     outer();
     return ᐸꟷ(@out);
@@ -90,7 +90,7 @@ internal static nint nestedArgLiteralCapture() {
             var itemsʗ1 = items;
             goǃ(() => {
                 doneʗ1.ᐸꟷ(itemsʗ1[iΔ1] * 10);
-            });
+            }, GoStack.Bounded);
         }
         nint sum = 0;
         foreach (var _ᴛ1 in range(items)) {

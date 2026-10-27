@@ -8580,12 +8580,14 @@ space rather than memory, but it is what makes a hundred thousand goroutines par
 converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
 to a function the converter can see, and no chain of calls may return to a function already on it. A goroutine it
 proves cannot recurse is started with a mark, and golib runs it on a 16 MiB stack
-(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it):
+(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce` only computes and sends on a channel:
 
+<!-- source: src/tests/Behavioral/GoroutineStackReserve/main.go:47 -->
 ```go
-go produce(i, out) // produce only computes and sends
+go produce(i, out)
 ```
 
+<!-- source: src/tests/Behavioral/GoroutineStackReserve/main.cs.target:43 -->
 ```csharp
 goǃ(produce, i, @out.WithDirection(GoChanDir.Send), GoStack.Bounded);
 ```

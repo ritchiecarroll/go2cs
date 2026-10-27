@@ -895,6 +895,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
 
     [TestMethod]
+    public void CheckGoroutineStackReserve() => CheckTarget("GoroutineStackReserve");
+
+    [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
 
     [TestMethod]

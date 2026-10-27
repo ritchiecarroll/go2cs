@@ -33,7 +33,7 @@ internal static partial void Main() {
     var uʗ1 = u;
     goǃ(() => {
         uʗ1.ᐸꟷ(7);
-    });
+    }, GoStack.Bounded);
     var selᴛ4 = nilCh;
     var selᴛ5 = u;
     switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {

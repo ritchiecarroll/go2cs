@@ -28,7 +28,7 @@ internal static partial nint idxBlocking(nint i) {
     var readyʗ1 = ready;
     goǃ(() => {
         readyʗ1.ᐸꟷ(100 + i);
-    });
+    }, GoStack.Bounded);
     var selᴛ2 = ready;
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v): {

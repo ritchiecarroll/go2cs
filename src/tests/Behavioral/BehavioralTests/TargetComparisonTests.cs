@@ -898,6 +898,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
 
     [TestMethod]
+    public void CheckGoroutineStackReserve() => CheckTarget("GoroutineStackReserve");
+
+    [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
 
     [TestMethod]

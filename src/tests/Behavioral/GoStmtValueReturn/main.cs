@@ -30,22 +30,22 @@ internal static void emit(channel<nint> @out) {
 internal static partial void Main() {
     var @out = new channel<nint>(0);
 
-    goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
+    goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4, GoStack.Bounded);
     fmt.Println("sum:", ᐸꟷ(@out));
 
-    goǃ((ᴛ1, ᴛ2) => pair(ᴛ1, ᴛ2), @out, 6);
+    goǃ((ᴛ1, ᴛ2) => pair(ᴛ1, ᴛ2), @out, 6, GoStack.Bounded);
     fmt.Println("pair:", ᐸꟷ(@out));
 
-    goǃ(() => nib());
+    goǃ(() => nib(), GoStack.Bounded);
     fmt.Println("nib:", ᐸꟷ(gch));
 
     var outʗ1 = @out;
     goǃ(() => {
         outʗ1.ᐸꟷ(1);
-    });
+    }, GoStack.Bounded);
     fmt.Println("lit:", ᐸꟷ(@out));
 
-    goǃ(emit, @out);
+    goǃ(emit, @out, GoStack.Bounded);
     fmt.Println("emit:", ᐸꟷ(@out));
 
     goǃ((channel<nint> o) => {
@@ -61,7 +61,7 @@ internal static partial void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
         ᒐdone: return retErr;
-    }, @out);
+    }, @out, GoStack.Bounded);
     fmt.Println("litval:", ᐸꟷ(@out));
 
     goǃ(error (channel<nint> o, nint n) => {

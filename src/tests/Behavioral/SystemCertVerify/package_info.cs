@@ -18,6 +18,7 @@ global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;

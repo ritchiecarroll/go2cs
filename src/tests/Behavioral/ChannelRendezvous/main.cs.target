@@ -39,7 +39,7 @@ internal static partial void Main() {
     goǃ(() => {
         nint v = ᐸꟷ(chʗ1);
         replyʗ1.ᐸꟷ(v * 2);
-    });
+    }, GoStack.Bounded);
     ch.ᐸꟷ(21);
     fmt.Println("reply:", ᐸꟷ(reply));
     fmt.Println("after rendezvous: len:", len(ch), "cap:", cap(ch));
@@ -53,7 +53,7 @@ internal static partial void Main() {
             nint v = ᐸꟷ(pingʗ1);
             pongʗ1.ᐸꟷ(v + 1);
         }
-    });
+    }, GoStack.Bounded);
     for (nint i = 0; i < 3; i++) {
         ping.ᐸꟷ(i * 10);
         fmt.Println("pong:", ᐸꟷ(pong));

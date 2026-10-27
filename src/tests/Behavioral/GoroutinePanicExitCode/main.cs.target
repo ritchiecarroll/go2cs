@@ -12,7 +12,7 @@ internal static partial void Main() {
 
     goǃ(() => {
         throw panic("goroutine boom");
-    });
+    }, GoStack.Bounded);
 
     ᐸꟷ(done);
 }
