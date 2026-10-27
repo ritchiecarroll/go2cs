@@ -16,7 +16,8 @@
       6. cobra's README without its release line (the package rewritten, its hash too)   -> "does not name release"
       7. pflag required at 1.0.9, which the nuspec does not name                         -> "does not require"
       8. the nuspec rewritten to name pflag 1.0.9.9, required at that version            -> "nuget.org does not list"
-    Block 0 is run twice: outside any git worktree (refuses, printing the fix) and inside one (passes). Its 5.1
+    Block 0 is run three times: outside any git worktree and inside another repository (both refuse, printing the
+    fix), and inside the go2cs clone (passes). Its 5.1
     refusal cannot be run here (no Windows PowerShell); its syntax is 5.1-only by construction.
     Run with PowerShell 7: pwsh -NoProfile -File Test-PINGates.ps1 -Repo <go2cs clone> -KitRoot <folder of run-<name>>
     Exit code = the number of failed cases.
@@ -50,6 +51,10 @@ if ($errors.Count) { $failed++; Write-Host "  FAIL  block 0 does not parse: $($e
 $outside = Join-Path ([IO.Path]::GetTempPath()) "pin-outside-$PID"
 New-Item -ItemType Directory -Force $outside | Out-Null
 Check 'block 0 outside a git worktree' { Push-Location $outside; try { . ([scriptblock]::Create($block0)) } finally { Pop-Location } } 'not inside the go2cs clone'
+$otherRepo = Join-Path ([IO.Path]::GetTempPath()) "pin-other-$PID"
+New-Item -ItemType Directory -Force $otherRepo | Out-Null; git -C $otherRepo init -q
+Check 'block 0 inside another git repository' { Push-Location $otherRepo; try { . ([scriptblock]::Create($block0)) } finally { Pop-Location } } 'not inside the go2cs clone'
+Remove-Item -Recurse -Force $otherRepo
 Check 'block 0 inside the go2cs clone' { Push-Location $Repo; try { . ([scriptblock]::Create($block0)); if (-not $GuardOK) { throw 'GuardOK not set' } } finally { Pop-Location } } $null
 Remove-Item -Recurse -Force $outside
 

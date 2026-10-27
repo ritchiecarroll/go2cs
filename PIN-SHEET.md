@@ -22,7 +22,8 @@ stops before the push if a gate fails.
 
 Each block is ONE statement (a dot-sourced `{ ... }`). A `throw` stops that whole block, so no line after a red line
 runs. Read each block's output before you paste the next. Block 0 refuses the two missteps of 2026-10-14 with the
-fix printed: a Windows PowerShell 5.1 window, and a window outside the go2cs clone.
+fix printed: a Windows PowerShell 5.1 window, and a window outside the go2cs clone (another repository, such as the
+registry clone, counts as outside: it checks for `src/go2cs/main.go`).
 
 ## Before the first block
 
@@ -46,7 +47,7 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
         throw 'block 0: not PowerShell 7'
     }
     $Repo = git rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -or -not $Repo) {
+    if ($LASTEXITCODE -or -not $Repo -or -not (Test-Path -LiteralPath (Join-Path $Repo 'src/go2cs/main.go'))) {
         Write-Host "STOP: $((Get-Location).Path) is not inside your go2cs clone." -ForegroundColor Red
         Write-Host '  FIX: Set-Location <the root of your go2cs clone>, then paste block 0 again.' -ForegroundColor Yellow
         throw 'block 0: not inside the go2cs clone'
