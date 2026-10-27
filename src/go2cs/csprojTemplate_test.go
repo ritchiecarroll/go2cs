@@ -633,12 +633,14 @@ func TestQuickJitForLoopsOptInShipsCommentedInTheExecutableGroupOnly(t *testing.
 	}
 }
 
-// TestSingleFileProfilesTurnReadyToRunOff pins every embedded publish profile that publishes a single
-// file to ReadyToRun off. csproj-template.xml turns ReadyToRun on for an executable, and a single-file
-// ReadyToRun publish ran crossgen2 out of memory on linux-x64 (docs/KnownIssues.md). The SDK imports a
-// profile after the project body, so a condition in the template cannot see the profile's
-// PublishSingleFile: the override has to live in the profile.
-func TestSingleFileProfilesTurnReadyToRunOff(t *testing.T) {
+// TestSingleFileProfilesCompileReadyToRunPerAssembly pins every embedded publish profile that publishes a
+// single file to PER-ASSEMBLY ReadyToRun. csproj-template.xml turns ReadyToRun on for an executable, and the
+// SDK compiles a single-file ReadyToRun publish as ONE composite image by default; crossgen2 then expands
+// golib's nested generics until it runs out of memory (docs/KnownIssues.md). Per assembly it does not, and
+// it starts faster than either the JIT or the composite. The SDK imports a profile after the project body,
+// so a condition in the template cannot see the profile's PublishSingleFile: the setting lives in the
+// profile, and the profile must not turn ReadyToRun off, which was the workaround before.
+func TestSingleFileProfilesCompileReadyToRunPerAssembly(t *testing.T) {
 	entries, err := publishProfiles.ReadDir("profiles")
 	if err != nil {
 		t.Fatalf("reading the embedded profiles: %v", err)
@@ -654,8 +656,11 @@ func TestSingleFileProfilesTurnReadyToRunOff(t *testing.T) {
 			continue
 		}
 		singleFile++
-		if !strings.Contains(text, "<PublishReadyToRun>false</PublishReadyToRun>") {
-			t.Errorf("%s publishes a single file with the template's ReadyToRun still on", entry.Name())
+		if !strings.Contains(text, "<PublishReadyToRunComposite>false</PublishReadyToRunComposite>") {
+			t.Errorf("%s publishes a single file without turning the composite ReadyToRun image off", entry.Name())
+		}
+		if strings.Contains(text, "<PublishReadyToRun>") {
+			t.Errorf("%s sets PublishReadyToRun itself; the template's ReadyToRun must reach the single-file publish", entry.Name())
 		}
 	}
 	if singleFile == 0 {
