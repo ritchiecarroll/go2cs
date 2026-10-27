@@ -20,8 +20,8 @@ internal static void initᴛhead() { var tupleᴛ2ʗ = makeTrio(); head = tuple�
 internal static @string chained;
 internal static void initᴛchained() { chained = single + "?"u8; }
 
-internal static ж<@string> Ꮡboxed = new StaticBox<@string>(default(@string));
-internal static ref @string boxed => ref Ꮡboxed.Value;
+internal static readonly ж<@string> Ꮡboxed = new StaticBox<@string>(default(@string));
+internal static ref @string boxed => ref ((StaticBox<@string>)Ꮡboxed).ValueSlot;
 internal static error _ᴛ3ʗ;
 internal static void initᴛboxed() { boxed = makeGreeting().Item1; }
 

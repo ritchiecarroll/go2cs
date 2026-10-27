@@ -45,8 +45,8 @@ public partial struct codeNode {
 
 internal static slice<byte> codeJSON;
 
-internal static ж<codeResponse> ᏑcodeStruct = new StaticBox<codeResponse>(default(codeResponse));
-internal static ref codeResponse codeStruct => ref ᏑcodeStruct.Value;
+internal static readonly ж<codeResponse> ᏑcodeStruct = new StaticBox<codeResponse>(default(codeResponse));
+internal static ref codeResponse codeStruct => ref ((StaticBox<codeResponse>)ᏑcodeStruct).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string internalJsontestTestdataˢ = "internal/jsontest/testdata/golang_source.json.zst"u8;

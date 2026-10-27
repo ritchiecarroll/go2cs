@@ -12,7 +12,7 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-internal static ж<Δsync.Pool> ᏑbufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
+internal static readonly ж<Δsync.Pool> ᏑbufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The Pool's New function should generally only return pointer
         // types, since a pointer can be put into the return interface
@@ -20,7 +20,7 @@ internal static ж<Δsync.Pool> ᏑbufPool = new StaticBox<Δsync.Pool>(new Δsy
         return @new<bytes.Buffer>();
     }
 ));
-internal static ref Δsync.Pool bufPool => ref ᏑbufPool.Value;
+internal static ref Δsync.Pool bufPool => ref ((StaticBox<Δsync.Pool>)ᏑbufPool).ValueSlot;
 
 // timeNow is a fake version of time.Now for tests.
 internal static time.Time timeNow() {

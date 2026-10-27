@@ -86,8 +86,8 @@ internal static net.Listener newLocalListener() {
 // We only register this flag if it looks like the caller knows about it
 // and is trying to use it as we don't want to pollute flags and this
 // isn't really part of our API. Don't depend on this.
-internal static ж<@string> ᏑserveFlag = new StaticBox<@string>(default(@string));
-internal static ref @string serveFlag => ref ᏑserveFlag.Value;
+internal static readonly ж<@string> ᏑserveFlag = new StaticBox<@string>(default(@string));
+internal static ref @string serveFlag => ref ((StaticBox<@string>)ᏑserveFlag).ValueSlot;
 
 [GoInit] internal static void init() {
     if (strSliceContainsPrefix(os.Args, "-httptest.serve="u8) || strSliceContainsPrefix(os.Args, "--httptest.serve="u8)) {

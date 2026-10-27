@@ -173,7 +173,8 @@ public partial struct snapshot {
     public nint At;
 }
 
-public static snapshot Latest = new snapshot(At: 42);
+public static readonly ж<snapshot> ᏑLatest = new StaticBox<snapshot>(new snapshot(At: 42));
+public static ref snapshot Latest => ref ((StaticBox<snapshot>)ᏑLatest).ValueSlot;
 
 public static snapshot Peek() {
     return Latest;

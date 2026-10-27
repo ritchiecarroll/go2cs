@@ -30,7 +30,8 @@ using runtime;
 partial class testdeps_package {
 
 // Cover indicates whether coverage is enabled.
-public static bool Cover;
+public static readonly ж<bool> ᏑCover = new StaticBox<bool>(default(bool));
+public static ref bool Cover => ref ((StaticBox<bool>)ᏑCover).ValueSlot;
 
 // TestDeps is an implementation of the testing.testDeps interface,
 // suitable for passing to [testing.MainStart].
@@ -68,13 +69,15 @@ public static error WriteProfileTo(this TestDeps _, @string name, io.Writer w, n
 }
 
 // ImportPath is the import path of the testing binary, set by the generated main function.
-public static @string ΔImportPath;
+public static readonly ж<@string> ᏑΔImportPath = new StaticBox<@string>(default(@string));
+public static ref @string ΔImportPath => ref ((StaticBox<@string>)ᏑΔImportPath).ValueSlot;
 
 public static @string ImportPath(this TestDeps _) {
     return ΔImportPath;
 }
 
-public static @string ΔModulePath;
+public static readonly ж<@string> ᏑΔModulePath = new StaticBox<@string>(default(@string));
+public static ref @string ΔModulePath => ref ((StaticBox<@string>)ᏑΔModulePath).ValueSlot;
 
 public static @string ModulePath(this TestDeps _) {
     return ΔModulePath;
@@ -140,8 +143,8 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<testLog> Ꮡlog = new StaticBox<testLog>(default(testLog));
-internal static ref testLog log => ref Ꮡlog.Value;
+internal static readonly ж<testLog> Ꮡlog = new StaticBox<testLog>(default(testLog));
+internal static ref testLog log => ref ((StaticBox<testLog>)Ꮡlog).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string testLogˢ = "# test log\n"u8;
@@ -248,19 +251,25 @@ public static void SnapshotCoverage(this TestDeps _) {
     fuzz.SnapshotCoverage();
 }
 
-public static @string CoverMode;
+public static readonly ж<@string> ᏑCoverMode = new StaticBox<@string>(default(@string));
+public static ref @string CoverMode => ref ((StaticBox<@string>)ᏑCoverMode).ValueSlot;
 
-public static @string Covered;
+public static readonly ж<@string> ᏑCovered = new StaticBox<@string>(default(@string));
+public static ref @string Covered => ref ((StaticBox<@string>)ᏑCovered).ValueSlot;
 
-public static slice<@string> CoverSelectedPackages;
+public static readonly ж<slice<@string>> ᏑCoverSelectedPackages = new StaticBox<slice<@string>>(default(slice<@string>));
+public static ref slice<@string> CoverSelectedPackages => ref ((StaticBox<slice<@string>>)ᏑCoverSelectedPackages).ValueSlot;
 
 // These variables below are set at runtime (via code in testmain) to point
 // to the equivalent functions in package internal/coverage/cfile; doing
 // things this way allows us to have tests import internal/coverage/cfile
 // only when -cover is in effect (as opposed to importing for all tests).
-public static Func<float64> CoverSnapshotFunc;
-public static Func<@string, @string, @string, @string, io.Writer, slice<@string>, error> CoverProcessTestDirFunc;
-public static Action<bool> CoverMarkProfileEmittedFunc;
+public static readonly ж<Func<float64>> ᏑCoverSnapshotFunc = new StaticBox<Func<float64>>(default(Func<float64>));
+public static ref Func<float64> CoverSnapshotFunc => ref ((StaticBox<Func<float64>>)ᏑCoverSnapshotFunc).ValueSlot;
+public static readonly ж<Func<@string, @string, @string, @string, io.Writer, slice<@string>, error>> ᏑCoverProcessTestDirFunc = new StaticBox<Func<@string, @string, @string, @string, io.Writer, slice<@string>, error>>(default(Func<@string, @string, @string, @string, io.Writer, slice<@string>, error>));
+public static ref Func<@string, @string, @string, @string, io.Writer, slice<@string>, error> CoverProcessTestDirFunc => ref ((StaticBox<Func<@string, @string, @string, @string, io.Writer, slice<@string>, error>>)ᏑCoverProcessTestDirFunc).ValueSlot;
+public static readonly ж<Action<bool>> ᏑCoverMarkProfileEmittedFunc = new StaticBox<Action<bool>>(default(Action<bool>));
+public static ref Action<bool> CoverMarkProfileEmittedFunc => ref ((StaticBox<Action<bool>>)ᏑCoverMarkProfileEmittedFunc).ValueSlot;
 
 public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
     @string mode = default!;

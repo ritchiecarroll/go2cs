@@ -88,10 +88,10 @@ partial struct scanner {
     internal int64 bytes;
 }
 
-internal static ж<sync.Pool> ᏑscannerPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> ᏑscannerPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new scanner(nil))
 ));
-internal static ref sync.Pool scannerPool => ref ᏑscannerPool.Value;
+internal static ref sync.Pool scannerPool => ref ((StaticBox<sync.Pool>)ᏑscannerPool).ValueSlot;
 
 internal static ж<scanner> newScanner() {
     var scan = ᏑscannerPool.Get()._<ж<scanner>>();

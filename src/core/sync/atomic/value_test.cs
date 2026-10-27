@@ -186,12 +186,13 @@ partial struct Value_SwapTestsᴛ1 /*dyn*/ {
     internal any want;
     internal any err;
 }
-public static slice<Value_SwapTestsᴛ1> Value_SwapTests = new Value_SwapTestsᴛ1[]{
+public static readonly ж<slice<Value_SwapTestsᴛ1>> ᏑValue_SwapTests = new StaticBox<slice<Value_SwapTestsᴛ1>>(new Value_SwapTestsᴛ1[]{
     new(init: default!, @new: default!, err: (@string)"sync/atomic: swap of nil value into Value"u8),
     new(init: default!, @new: true, want: default!, err: default!),
     new(init: true, @new: (@string)""u8, err: (@string)"sync/atomic: swap of inconsistently typed value into Value"u8),
     new(init: true, @new: false, want: true, err: default!)
-}.slice();
+}.slice());
+public static ref slice<Value_SwapTestsᴛ1> Value_SwapTests => ref ((StaticBox<slice<Value_SwapTestsᴛ1>>)ᏑValue_SwapTests).ValueSlot;
 
 public static void TestValue_Swap(ж<testing.T> Ꮡt) {
     foreach (var (i, vᴛ1) in Value_SwapTests) {
@@ -283,7 +284,7 @@ partial struct Value_CompareAndSwapTestsᴛ1 /*dyn*/ {
     internal bool want;
     internal any err;
 }
-public static slice<Value_CompareAndSwapTestsᴛ1> Value_CompareAndSwapTests = new Value_CompareAndSwapTestsᴛ1[]{
+public static readonly ж<slice<Value_CompareAndSwapTestsᴛ1>> ᏑValue_CompareAndSwapTests = new StaticBox<slice<Value_CompareAndSwapTestsᴛ1>>(new Value_CompareAndSwapTestsᴛ1[]{
     new(init: default!, @new: default!, old: default!, err: (@string)"sync/atomic: compare and swap of nil value into Value"u8),
     new(init: default!, @new: true, old: (@string)""u8, err: (@string)"sync/atomic: compare and swap of inconsistently typed values into Value"u8),
     new(init: default!, @new: true, old: true, want: false, err: default!),
@@ -292,7 +293,8 @@ public static slice<Value_CompareAndSwapTestsᴛ1> Value_CompareAndSwapTests = n
     new(init: true, @new: true, old: false, want: false, err: default!),
     new(init: true, @new: true, old: true, want: true, err: default!),
     new(init: heapA, @new: new heapAᴛ1(1), old: heapB, want: true, err: default!)
-}.slice();
+}.slice());
+public static ref slice<Value_CompareAndSwapTestsᴛ1> Value_CompareAndSwapTests => ref ((StaticBox<slice<Value_CompareAndSwapTestsᴛ1>>)ᏑValue_CompareAndSwapTests).ValueSlot;
 
 public static void TestValue_CompareAndSwap(ж<testing.T> Ꮡt) {
     foreach (var (i, vᴛ1) in Value_CompareAndSwapTests) {

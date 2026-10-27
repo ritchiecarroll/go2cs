@@ -156,7 +156,7 @@ public static void TestEntropySamples(ж<testing.T> Ꮡt) {
     }
 }
 
-public static @string NISTSP80090BDockerfile = """
+public static readonly ж<@string> ᏑNISTSP80090BDockerfile = new StaticBox<@string>("""
 
 FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y build-essential git \
@@ -169,10 +169,11 @@ RUN make all
 RUN cd selftest && ./selftest
 RUN cp ea_non_iid ea_restart /usr/local/bin/
 
-"""u8.Raw();
+"""u8.Raw());
+public static ref @string NISTSP80090BDockerfile => ref ((StaticBox<@string>)ᏑNISTSP80090BDockerfile).ValueSlot;
 
-internal static ж<entropy.ScratchBuffer> Ꮡmemory = new StaticBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
-internal static ref entropy.ScratchBuffer memory => ref Ꮡmemory.Value;
+internal static readonly ж<entropy.ScratchBuffer> Ꮡmemory = new StaticBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
+internal static ref entropy.ScratchBuffer memory => ref ((StaticBox<entropy.ScratchBuffer>)Ꮡmemory).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object entropySamplesFailed10ˢ = (@string)"entropy.Samples() failed 10 times in a row"u8;

@@ -226,8 +226,8 @@ partial struct hookOpenErrᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     internal Func<error> fn;
 }
-internal static ж<hookOpenErrᴛ1> ᏑhookOpenErr = new StaticBox<hookOpenErrᴛ1>(new hookOpenErrᴛ1(nil));
-internal static ref hookOpenErrᴛ1 hookOpenErr => ref ᏑhookOpenErr.Value;
+internal static readonly ж<hookOpenErrᴛ1> ᏑhookOpenErr = new StaticBox<hookOpenErrᴛ1>(new hookOpenErrᴛ1(nil));
+internal static ref hookOpenErrᴛ1 hookOpenErr => ref ((StaticBox<hookOpenErrᴛ1>)ᏑhookOpenErr).ValueSlot;
 
 internal static void setHookOpenErr(Func<error> fn) {
     GoFrame ᒐ = default;
@@ -436,8 +436,8 @@ partial struct hookPostCloseConnᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     internal Action<ж<fakeConn>, error> fn;
 }
-internal static ж<hookPostCloseConnᴛ1> ᏑhookPostCloseConn = new StaticBox<hookPostCloseConnᴛ1>(new hookPostCloseConnᴛ1(nil));
-internal static ref hookPostCloseConnᴛ1 hookPostCloseConn => ref ᏑhookPostCloseConn.Value;
+internal static readonly ж<hookPostCloseConnᴛ1> ᏑhookPostCloseConn = new StaticBox<hookPostCloseConnᴛ1>(new hookPostCloseConnᴛ1(nil));
+internal static ref hookPostCloseConnᴛ1 hookPostCloseConn => ref ((StaticBox<hookPostCloseConnᴛ1>)ᏑhookPostCloseConn).ValueSlot;
 
 internal static void setHookpostCloseConn(Action<ж<fakeConn>, error> fn) {
     GoFrame ᒐ = default;
@@ -716,8 +716,8 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
 }
 
 // hook to simulate broken connections
-internal static ж<Func<bool>> ᏑhookPrepareBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
-internal static ref Func<bool> hookPrepareBadConn => ref ᏑhookPrepareBadConn.ValueSlot;
+internal static readonly ж<Func<bool>> ᏑhookPrepareBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
+internal static ref Func<bool> hookPrepareBadConn => ref ((StaticBox<Func<bool>>)ᏑhookPrepareBadConn).ValueSlot;
 
 internal static (driver.Stmt, error) Prepare(this ref fakeConn c, @string query) {
     throw panic("use PrepareContext");
@@ -861,8 +861,8 @@ internal static error Close(this ref fakeStmt s) {
 internal static error errClosed = errors.New("fakedb: statement has been closed"u8);
 
 // hook to simulate broken connections
-internal static ж<Func<bool>> ᏑhookExecBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
-internal static ref Func<bool> hookExecBadConn => ref ᏑhookExecBadConn.ValueSlot;
+internal static readonly ж<Func<bool>> ᏑhookExecBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
+internal static ref Func<bool> hookExecBadConn => ref ((StaticBox<Func<bool>>)ᏑhookExecBadConn).ValueSlot;
 
 internal static (driver.Result, error) Exec(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Using ExecContext");
@@ -1006,8 +1006,8 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
 }
 
 // hook to simulate broken connections
-internal static ж<Func<bool>> ᏑhookQueryBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
-internal static ref Func<bool> hookQueryBadConn => ref ᏑhookQueryBadConn.ValueSlot;
+internal static readonly ж<Func<bool>> ᏑhookQueryBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
+internal static ref Func<bool> hookQueryBadConn => ref ((StaticBox<Func<bool>>)ᏑhookQueryBadConn).ValueSlot;
 
 internal static (driver.Rows, error) Query(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Use QueryContext");
@@ -1184,8 +1184,8 @@ internal static nint NumInput(this ref fakeStmt s) {
 }
 
 // hook to simulate broken connections
-internal static ж<Func<bool>> ᏑhookCommitBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
-internal static ref Func<bool> hookCommitBadConn => ref ᏑhookCommitBadConn.ValueSlot;
+internal static readonly ж<Func<bool>> ᏑhookCommitBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
+internal static ref Func<bool> hookCommitBadConn => ref ((StaticBox<Func<bool>>)ᏑhookCommitBadConn).ValueSlot;
 
 internal static error Commit(this ref fakeTx tx) {
     tx.c.Value.currTx = default!;
@@ -1197,8 +1197,8 @@ internal static error Commit(this ref fakeTx tx) {
 }
 
 // hook to simulate broken connections
-internal static ж<Func<bool>> ᏑhookRollbackBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
-internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn.ValueSlot;
+internal static readonly ж<Func<bool>> ᏑhookRollbackBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
+internal static ref Func<bool> hookRollbackBadConn => ref ((StaticBox<Func<bool>>)ᏑhookRollbackBadConn).ValueSlot;
 
 internal static error Rollback(this ref fakeTx tx) {
     tx.c.Value.currTx = default!;

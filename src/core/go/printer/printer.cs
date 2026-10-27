@@ -1448,7 +1448,7 @@ partial struct Config {
     public nint Indent; // default: 0 (all code is indented at least by this much)
 }
 
-[GoLazy] partial class lazyᴛprinterPool { internal static ж<sync.Pool> ᏑprinterPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛprinterPool { internal static readonly ж<sync.Pool> ᏑprinterPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new printer(
             // Whitespace sequences are short.
             wsbuf: new slice<whiteSpace>(0, 16),
@@ -1457,7 +1457,7 @@ partial struct Config {
             output: new slice<byte>(0, (16 << 10))
         ))
 )); }
-internal static ref sync.Pool printerPool => ref ᏑprinterPool.Value;
+internal static ref sync.Pool printerPool => ref ((StaticBox<sync.Pool>)ᏑprinterPool).ValueSlot;
 
 internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> Ꮡfset, map<ast.Node, nint> nodeSizes) {
     var p = ᏑprinterPool.Get()._<ж<printer>>();

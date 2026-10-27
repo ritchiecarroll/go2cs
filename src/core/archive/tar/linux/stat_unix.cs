@@ -22,10 +22,10 @@ partial class tar_package {
 
 // userMap and groupMap cache UID and GID lookups for performance reasons.
 // The downside is that renaming uname or gname by the OS never takes effect.
-internal static ж<sync.Map> ᏑuserMap = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map userMap => ref ᏑuserMap.Value;       // map[int]string
-internal static ж<sync.Map> ᏑgroupMap = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map groupMap => ref ᏑgroupMap.Value;
+internal static readonly ж<sync.Map> ᏑuserMap = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map userMap => ref ((StaticBox<sync.Map>)ᏑuserMap).ValueSlot;       // map[int]string
+internal static readonly ж<sync.Map> ᏑgroupMap = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map groupMap => ref ((StaticBox<sync.Map>)ᏑgroupMap).ValueSlot;
 
 internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLookups) {
     ref var h = ref Ꮡh.DerefOrNull();

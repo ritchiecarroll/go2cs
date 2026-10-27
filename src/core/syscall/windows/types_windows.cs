@@ -311,9 +311,12 @@ public static UntypedInt CERT_E_CN_NO_MATCH => 0x800B010F;
 public static UntypedInt AUTHTYPE_CLIENT => 1;
 public static UntypedInt AUTHTYPE_SERVER => 2;
 
-public static slice<byte> OID_PKIX_KP_SERVER_AUTH = slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8);
-public static slice<byte> OID_SERVER_GATED_CRYPTO = slice<byte>("1.3.6.1.4.1.311.10.3.3\x00"u8);
-public static slice<byte> OID_SGC_NETSCAPE = slice<byte>("2.16.840.1.113730.4.1\x00"u8);
+public static readonly ж<slice<byte>> ᏑOID_PKIX_KP_SERVER_AUTH = new StaticBox<slice<byte>>(slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8));
+public static ref slice<byte> OID_PKIX_KP_SERVER_AUTH => ref ((StaticBox<slice<byte>>)ᏑOID_PKIX_KP_SERVER_AUTH).ValueSlot;
+public static readonly ж<slice<byte>> ᏑOID_SERVER_GATED_CRYPTO = new StaticBox<slice<byte>>(slice<byte>("1.3.6.1.4.1.311.10.3.3\x00"u8));
+public static ref slice<byte> OID_SERVER_GATED_CRYPTO => ref ((StaticBox<slice<byte>>)ᏑOID_SERVER_GATED_CRYPTO).ValueSlot;
+public static readonly ж<slice<byte>> ᏑOID_SGC_NETSCAPE = new StaticBox<slice<byte>>(slice<byte>("2.16.840.1.113730.4.1\x00"u8));
+public static ref slice<byte> OID_SGC_NETSCAPE => ref ((StaticBox<slice<byte>>)ᏑOID_SGC_NETSCAPE).ValueSlot;
 
 // Pointer represents a pointer to an arbitrary Windows type.
 //
@@ -1053,13 +1056,13 @@ partial struct GUID {
     public array<byte> Data4 = new(8);
 }
 
-public static ж<GUID> ᏑWSAID_CONNECTEX = new StaticBox<GUID>(new GUID(
+public static readonly ж<GUID> ᏑWSAID_CONNECTEX = new StaticBox<GUID>(new GUID(
     0x25a207b9,
     0xddf3,
     0x4660,
     new byte[]{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e}.array()
 ));
-public static ref GUID WSAID_CONNECTEX => ref ᏑWSAID_CONNECTEX.Value;
+public static ref GUID WSAID_CONNECTEX => ref ((StaticBox<GUID>)ᏑWSAID_CONNECTEX).ValueSlot;
 
 public static UntypedInt FILE_SKIP_COMPLETION_PORT_ON_SUCCESS => 1;
 public static UntypedInt FILE_SKIP_SET_EVENT_ON_HANDLE => 2;

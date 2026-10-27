@@ -7,6 +7,7 @@ using static go.@internal.sysinfo_package;
 
 partial class sysinfo_internal_test_package {
 
-public static Func<@string> XosCPUInfoName = osCPUInfoName;
+public static readonly ж<Func<@string>> ᏑXosCPUInfoName = new StaticBox<Func<@string>>(osCPUInfoName);
+public static ref Func<@string> XosCPUInfoName => ref ((StaticBox<Func<@string>>)ᏑXosCPUInfoName).ValueSlot;
 
 } // end sysinfo_internal_test_package

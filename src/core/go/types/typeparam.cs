@@ -14,8 +14,8 @@ partial class types_package {
 // Note: This is a uint32 rather than a uint64 because the
 // respective 64 bit atomic instructions are not available
 // on all platforms.
-internal static ж<atomic.Uint32> ᏑlastID = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 lastID => ref ᏑlastID.Value;
+internal static readonly ж<atomic.Uint32> ᏑlastID = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 lastID => ref ((StaticBox<atomic.Uint32>)ᏑlastID).ValueSlot;
 
 // nextID returns a value increasing monotonically by 1 with
 // each call, starting with 1. It may be called concurrently.

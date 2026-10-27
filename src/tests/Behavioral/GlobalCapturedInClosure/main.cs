@@ -14,8 +14,8 @@ internal static nint alloc(this ref heap h) {
     return h.count;
 }
 
-internal static ж<heap> Ꮡmheap = new StaticBox<heap>(default(heap));
-internal static ref heap mheap => ref Ꮡmheap.Value;
+internal static readonly ж<heap> Ꮡmheap = new StaticBox<heap>(default(heap));
+internal static ref heap mheap => ref ((StaticBox<heap>)Ꮡmheap).ValueSlot;
 
 internal static partial void keep(ж<heap> Ꮡh) {
     _ = Ꮡh;

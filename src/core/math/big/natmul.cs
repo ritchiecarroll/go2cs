@@ -9,8 +9,8 @@ partial class big_package {
 // Operands that are shorter than karatsubaThreshold are multiplied using
 // "grade school" multiplication; for longer operands the Karatsuba algorithm
 // is used.
-internal static ж<nint> ᏑkaratsubaThreshold = new StaticBox<nint>(40);
-internal static ref nint karatsubaThreshold => ref ᏑkaratsubaThreshold.Value; // see calibrate_test.go
+internal static readonly ж<nint> ᏑkaratsubaThreshold = new StaticBox<nint>(40);
+internal static ref nint karatsubaThreshold => ref ((StaticBox<nint>)ᏑkaratsubaThreshold).ValueSlot; // see calibrate_test.go
 
 // mul sets z = x*y, using stk for temporary storage.
 // The caller may pass stk == nil to request that mul obtain and release one itself.
@@ -75,11 +75,11 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
 // Operands that are shorter than basicSqrThreshold are squared using
 // "grade school" multiplication; for operands longer than karatsubaSqrThreshold
 // we use the Karatsuba algorithm optimized for x == y.
-internal static ж<nint> ᏑbasicSqrThreshold = new StaticBox<nint>(12);
-internal static ref nint basicSqrThreshold => ref ᏑbasicSqrThreshold.Value; // see calibrate_test.go
+internal static readonly ж<nint> ᏑbasicSqrThreshold = new StaticBox<nint>(12);
+internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrThreshold).ValueSlot; // see calibrate_test.go
 
-internal static ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
-internal static ref nint karatsubaSqrThreshold => ref ᏑkaratsubaSqrThreshold.Value; // see calibrate_test.go
+internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
+internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
 
 // sqr sets z = x*x, using stk for temporary storage.
 // The caller may pass stk == nil to request that sqr obtain and release one itself.

@@ -12,8 +12,8 @@ using runtime = runtime_package;
 
 partial class checktest_package {
 
-public static ж<nint> ᏑNOPTRDATA = new StaticBox<nint>(1);
-public static ref nint NOPTRDATA => ref ᏑNOPTRDATA.Value;
+public static readonly ж<nint> ᏑNOPTRDATA = new StaticBox<nint>(1);
+public static ref nint NOPTRDATA => ref ((StaticBox<nint>)ᏑNOPTRDATA).ValueSlot;
 
 // The linkname here disables asan registration of this global,
 // because asan gets mad about rodata globals.
@@ -28,9 +28,11 @@ partial struct DATAᴛ1 /*dyn*/ {
     public ж<nint> P;
     public nint X;
 }
-public static DATAᴛ1 DATA = new DATAᴛ1(ᏑNOPTRDATA, 3);
+public static readonly ж<DATAᴛ1> ᏑDATA = new StaticBox<DATAᴛ1>(new DATAᴛ1(ᏑNOPTRDATA, 3));
+public static ref DATAᴛ1 DATA => ref ((StaticBox<DATAᴛ1>)ᏑDATA).ValueSlot;
 
-public static nint NOPTRBSS;
+public static readonly ж<nint> ᏑNOPTRBSS = new StaticBox<nint>(default(nint));
+public static ref nint NOPTRBSS => ref ((StaticBox<nint>)ᏑNOPTRBSS).ValueSlot;
 
 public static ж<nint> BSS;
 

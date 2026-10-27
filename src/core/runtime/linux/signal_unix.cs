@@ -79,15 +79,15 @@ internal static UntypedInt sigPreempt => /* _SIGURG */ 23;
 //
 // This is read by the signal handler; accesses should use
 // atomic.Loaduintptr and atomic.Storeuintptr.
-internal static ж<array<uintptr>> ᏑfwdSig = new StaticBox<array<uintptr>>(new array<uintptr>(65));
-internal static ref array<uintptr> fwdSig => ref ᏑfwdSig.Value;
+internal static readonly ж<array<uintptr>> ᏑfwdSig = new StaticBox<array<uintptr>>(new array<uintptr>(65));
+internal static ref array<uintptr> fwdSig => ref ((StaticBox<array<uintptr>>)ᏑfwdSig).ValueSlot;
 
 // handlingSig is indexed by signal number and is non-zero if we are
 // currently handling the signal. Or, to put it another way, whether
 // the signal handler is currently set to the Go signal handler or not.
 // This is uint32 rather than bool so that we can use atomic instructions.
-internal static ж<array<uint32>> ᏑhandlingSig = new StaticBox<array<uint32>>(new array<uint32>(65));
-internal static ref array<uint32> handlingSig => ref ᏑhandlingSig.Value;
+internal static readonly ж<array<uint32>> ᏑhandlingSig = new StaticBox<array<uint32>>(new array<uint32>(65));
+internal static ref array<uint32> handlingSig => ref ((StaticBox<array<uint32>>)ᏑhandlingSig).ValueSlot;
 
 // channels for synchronizing signal mask updates with the signal mask
 // thread
@@ -444,8 +444,8 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
 // sigprofCallersUse is set to non-zero while sigprofCallers holds a traceback.
 internal static ΔcgoCallers sigprofCallers;
 
-internal static ж<uint32> ᏑsigprofCallersUse = new StaticBox<uint32>(default(uint32));
-internal static ref uint32 sigprofCallersUse => ref ᏑsigprofCallersUse.Value;
+internal static readonly ж<uint32> ᏑsigprofCallersUse = new StaticBox<uint32>(default(uint32));
+internal static ref uint32 sigprofCallersUse => ref ((StaticBox<uint32>)ᏑsigprofCallersUse).ValueSlot;
 
 // sigprofNonGo is called if we receive a SIGPROF signal on a non-Go thread,
 // and the signal handler collected a stack trace in sigprofCallers.
@@ -557,8 +557,8 @@ internal static void adjustSignalStack2(uint32 sig, uintptr sp, ж<m> Ꮡmp, boo
 
 // crashing is the number of m's we have waited for when implementing
 // GOTRACEBACK=crash when a signal is received.
-internal static ж<atomic.Int32> Ꮡcrashing = new StaticBox<atomic.Int32>(default(atomic.Int32));
-internal static ref atomic.Int32 crashing => ref Ꮡcrashing.Value;
+internal static readonly ж<atomic.Int32> Ꮡcrashing = new StaticBox<atomic.Int32>(default(atomic.Int32));
+internal static ref atomic.Int32 crashing => ref ((StaticBox<atomic.Int32>)Ꮡcrashing).ValueSlot;
 
 // testSigtrap and testSigusr1 are used by the runtime tests. If
 // non-nil, it is called on SIGTRAP/SIGUSR1. If it returns true, the
@@ -568,8 +568,8 @@ internal static Func<ж<siginfo>, ж<sigctxt>, ж<g>, bool> testSigtrap;
 internal static Func<ж<g>, bool> testSigusr1;
 
 // sigsysIgnored is non-zero if we are currently ignoring SIGSYS. See issue #69065.
-internal static ж<uint32> ᏑsigsysIgnored = new StaticBox<uint32>(default(uint32));
-internal static ref uint32 sigsysIgnored => ref ᏑsigsysIgnored.Value;
+internal static readonly ж<uint32> ᏑsigsysIgnored = new StaticBox<uint32>(default(uint32));
+internal static ref uint32 sigsysIgnored => ref ((StaticBox<uint32>)ᏑsigsysIgnored).ValueSlot;
 
 //go:linkname ignoreSIGSYS os.ignoreSIGSYS
 internal static void ignoreSIGSYS() {
@@ -1215,8 +1215,8 @@ internal static void msigrestore(sigset sigmaskʗp) {
 
 // sigsetAllExiting is used by sigblock(true) when a thread is
 // exiting.
-internal static ж<sigset> ᏑsigsetAllExiting = new StaticBox<sigset>(default(sigset));
-internal static ref sigset sigsetAllExiting => ref ᏑsigsetAllExiting.Value;
+internal static readonly ж<sigset> ᏑsigsetAllExiting = new StaticBox<sigset>(default(sigset));
+internal static ref sigset sigsetAllExiting => ref ((StaticBox<sigset>)ᏑsigsetAllExiting).ValueSlot;
 internal static void initᴛsigsetAllExiting() { sigsetAllExiting = ((Func<sigset>)(() => {
     ref var res = ref heap<sigset>(out var Ꮡres);
     res = sigset_all.Clone();

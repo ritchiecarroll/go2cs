@@ -10,7 +10,8 @@ using static go.flag_package;
 partial class flag_internal_test_package {
 
 // Additional routines compiled into the package only during testing.
-public static Action DefaultUsage;
+public static readonly ж<Action> ᏑDefaultUsage = new StaticBox<Action>(default(Action));
+public static ref Action DefaultUsage => ref ((StaticBox<Action>)ᏑDefaultUsage).ValueSlot;
 internal static void initᴛDefaultUsage() { DefaultUsage = Usage; }
 
 // ResetForTesting clears all flag state and sets the usage function as directed.

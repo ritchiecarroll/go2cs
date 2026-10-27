@@ -1267,8 +1267,8 @@ internal static ж<abi.Type> rtypeOf(any i) {
 }
 
 // ptrMap is the cache for PointerTo.
-internal static ж<Δsync.Map> ᏑptrMap = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map ptrMap => ref ᏑptrMap.Value; // map[*rtype]*ptrType
+internal static readonly ж<Δsync.Map> ᏑptrMap = new StaticBox<Δsync.Map>(default(Δsync.Map));
+internal static ref Δsync.Map ptrMap => ref ((StaticBox<Δsync.Map>)ᏑptrMap).ValueSlot; // map[*rtype]*ptrType
 
 // PtrTo returns the pointer type with element t.
 // For example, if t represents type Foo, PtrTo(t) represents *Foo.
@@ -1503,8 +1503,8 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
 }
 
 // The lookupCache caches ArrayOf, ChanOf, MapOf and SliceOf lookups.
-internal static ж<Δsync.Map> ᏑlookupCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map lookupCache => ref ᏑlookupCache.Value; // map[cacheKey]*rtype
+internal static readonly ж<Δsync.Map> ᏑlookupCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
+internal static ref Δsync.Map lookupCache => ref ((StaticBox<Δsync.Map>)ᏑlookupCache).ValueSlot; // map[cacheKey]*rtype
 
 // A cacheKey is the key for use in the lookupCache.
 // Four values describe any of the types we are looking for:
@@ -1525,15 +1525,15 @@ partial struct funcLookupCacheᴛ1 /*dyn*/ {
     // Elements of m are append-only and thus safe for concurrent reading.
     internal Δsync.Map m;
 }
-internal static ж<funcLookupCacheᴛ1> ᏑfuncLookupCache = new StaticBox<funcLookupCacheᴛ1>(new funcLookupCacheᴛ1(nil));
-internal static ref funcLookupCacheᴛ1 funcLookupCache => ref ᏑfuncLookupCache.Value;
+internal static readonly ж<funcLookupCacheᴛ1> ᏑfuncLookupCache = new StaticBox<funcLookupCacheᴛ1>(new funcLookupCacheᴛ1(nil));
+internal static ref funcLookupCacheᴛ1 funcLookupCache => ref ((StaticBox<funcLookupCacheᴛ1>)ᏑfuncLookupCache).ValueSlot;
 
 // go2cs generated this placeholder — func ChanOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static slice<ΔType> funcTypes;
 
-internal static ж<Δsync.Mutex> ᏑfuncTypesMutex = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
-internal static ref Δsync.Mutex funcTypesMutex => ref ᏑfuncTypesMutex.Value;
+internal static readonly ж<Δsync.Mutex> ᏑfuncTypesMutex = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
+internal static ref Δsync.Mutex funcTypesMutex => ref ((StaticBox<Δsync.Mutex>)ᏑfuncTypesMutex).ValueSlot;
 
 internal static ΔType initFuncTypes(nint n) {
     GoFrame ᒐ = default;
@@ -1722,8 +1722,8 @@ internal static void emitGCMask(slice<byte> @out, uintptr @base, ж<abi.Type> �
 // The structLookupCache caches StructOf lookups.
 // StructOf does not share the common lookupCache since we need to pin
 // the memory associated with *structTypeFixedN.
-internal static ж<funcLookupCacheᴛ1> ᏑstructLookupCache = new StaticBox<funcLookupCacheᴛ1>(new funcLookupCacheᴛ1(nil));
-internal static ref funcLookupCacheᴛ1 structLookupCache => ref ᏑstructLookupCache.Value;
+internal static readonly ж<funcLookupCacheᴛ1> ᏑstructLookupCache = new StaticBox<funcLookupCacheᴛ1>(new funcLookupCacheᴛ1(nil));
+internal static ref funcLookupCacheᴛ1 structLookupCache => ref ((StaticBox<funcLookupCacheᴛ1>)ᏑstructLookupCache).ValueSlot;
 
 partial struct structTypeUncommon {
     /*embed*/ internal structType structType;
@@ -1887,8 +1887,8 @@ partial struct layoutType {
     internal abiDesc abid;
 }
 
-internal static ж<Δsync.Map> ᏑlayoutCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map layoutCache => ref ᏑlayoutCache.Value; // map[layoutKey]layoutType
+internal static readonly ж<Δsync.Map> ᏑlayoutCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
+internal static ref Δsync.Map layoutCache => ref ((StaticBox<Δsync.Map>)ᏑlayoutCache).ValueSlot; // map[layoutKey]layoutType
 
 // funcLayout computes a struct type representing the layout of the
 // stack-assigned function arguments and return values for the function

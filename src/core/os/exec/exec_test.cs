@@ -193,8 +193,8 @@ internal static ж<Δexec.Cmd> /*cmd*/ helperCommandContext(ж<testing.T> Ꮡt, 
     return cmd;
 }
 
-internal static ж<sync.Map> ᏑhelperCommandUsed = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map helperCommandUsed => ref ᏑhelperCommandUsed.Value;
+internal static readonly ж<sync.Map> ᏑhelperCommandUsed = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map helperCommandUsed => ref ((StaticBox<sync.Map>)ᏑhelperCommandUsed).ValueSlot;
 
 internal static map<@string, Actionꓸꓸꓸ<@string>> helperCommands;
 internal static void initᴛhelperCommands() { helperCommands = new map<@string, Actionꓸꓸꓸ<@string>>{

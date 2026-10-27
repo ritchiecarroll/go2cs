@@ -14,8 +14,8 @@ using @internal.runtime;
 partial class runtime_package {
 
 internal static int32 kq = -1;
-internal static ж<atomic.Uint32> ᏑnetpollWakeSig = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 netpollWakeSig => ref ᏑnetpollWakeSig.Value; // used to avoid duplicate calls of netpollBreak
+internal static readonly ж<atomic.Uint32> ᏑnetpollWakeSig = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 netpollWakeSig => ref ((StaticBox<atomic.Uint32>)ᏑnetpollWakeSig).ValueSlot; // used to avoid duplicate calls of netpollBreak
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeNetpollinitFailedˢ = "runtime: netpollinit failed"u8;

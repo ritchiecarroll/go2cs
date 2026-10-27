@@ -5,11 +5,11 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static ж<byte> Ꮡsentinel = new StaticBox<byte>(default(byte));
-internal static ref byte sentinel => ref Ꮡsentinel.Value;
+internal static readonly ж<byte> Ꮡsentinel = new StaticBox<byte>(default(byte));
+internal static ref byte sentinel => ref ((StaticBox<byte>)Ꮡsentinel).ValueSlot;
 
-internal static ж<byte> Ꮡother = new StaticBox<byte>(default(byte));
-internal static ref byte other => ref Ꮡother.Value;
+internal static readonly ж<byte> Ꮡother = new StaticBox<byte>(default(byte));
+internal static ref byte other => ref ((StaticBox<byte>)Ꮡother).ValueSlot;
 
 internal static nint classify(ж<byte> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -45,8 +45,8 @@ partial struct schedt {
     internal mu @lock;
 }
 
-internal static ж<schedt> ᏑtheSched = new StaticBox<schedt>(default(schedt));
-internal static ref schedt theSched => ref ᏑtheSched.Value;
+internal static readonly ж<schedt> ᏑtheSched = new StaticBox<schedt>(default(schedt));
+internal static ref schedt theSched => ref ((StaticBox<schedt>)ᏑtheSched).ValueSlot;
 
 internal static bool preferLowLatency(ж<mu> Ꮡp) {
     var exprᴛ1 = Ꮡp;

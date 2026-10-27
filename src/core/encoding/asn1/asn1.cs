@@ -235,10 +235,12 @@ internal static (BitString ret, error err) parseBitString(slice<byte> bytes) {
 // NULL
 
 // NullRawValue is a [RawValue] with its Tag set to the ASN.1 NULL type tag (5).
-public static RawValue NullRawValue = new RawValue(Tag: TagNull);
+public static readonly ж<RawValue> ᏑNullRawValue = new StaticBox<RawValue>(new RawValue(Tag: TagNull));
+public static ref RawValue NullRawValue => ref ((StaticBox<RawValue>)ᏑNullRawValue).ValueSlot;
 
 // NullBytes contains bytes representing the DER-encoded ASN.1 NULL type.
-public static slice<byte> NullBytes = new byte[]{TagNull, 0}.slice();
+public static readonly ж<slice<byte>> ᏑNullBytes = new StaticBox<slice<byte>>(new byte[]{TagNull, 0}.slice());
+public static ref slice<byte> NullBytes => ref ((StaticBox<slice<byte>>)ᏑNullBytes).ValueSlot;
 
 // OBJECT IDENTIFIER
 

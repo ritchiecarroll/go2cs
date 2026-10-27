@@ -187,7 +187,8 @@ internal static @string hexEscapeNonASCII(@string s) {
 // and Close always returns nil. It can be used in an outgoing client
 // request to explicitly signal that a request has zero bytes.
 // An alternative, however, is to simply set [Request.Body] to nil.
-public static noBody NoBody = new noBody(nil);
+public static readonly ж<noBody> ᏑNoBody = new StaticBox<noBody>(new noBody(nil));
+public static ref noBody NoBody => ref ((StaticBox<noBody>)ᏑNoBody).ValueSlot;
 
 public partial struct noBody {
 }

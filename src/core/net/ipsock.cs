@@ -25,8 +25,8 @@ partial struct ipStackCapabilities {
     internal bool ipv4MappedIPv6Enabled;
 }
 
-internal static ж<ipStackCapabilities> ᏑipStackCaps = new StaticBox<ipStackCapabilities>(new ipStackCapabilities(nil));
-internal static ref ipStackCapabilities ipStackCaps => ref ᏑipStackCaps.Value;
+internal static readonly ж<ipStackCapabilities> ᏑipStackCaps = new StaticBox<ipStackCapabilities>(new ipStackCapabilities(nil));
+internal static ref ipStackCapabilities ipStackCaps => ref ((StaticBox<ipStackCapabilities>)ᏑipStackCaps).ValueSlot;
 
 // supportsIPv4 reports whether the platform supports IPv4 networking
 // functionality.

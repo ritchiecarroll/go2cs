@@ -355,11 +355,11 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
     Δruntime.KeepAlive(half);
 }
 
-internal static ж<ж<nint>> ᏑpointerClassBSS = new StaticBox<ж<nint>>(default(ж<nint>));
-internal static ref ж<nint> pointerClassBSS => ref ᏑpointerClassBSS.ValueSlot;
+internal static readonly ж<ж<nint>> ᏑpointerClassBSS = new StaticBox<ж<nint>>(default(ж<nint>));
+internal static ref ж<nint> pointerClassBSS => ref ((StaticBox<ж<nint>>)ᏑpointerClassBSS).ValueSlot;
 
-internal static ж<nint> ᏑpointerClassData = new StaticBox<nint>(42);
-internal static ref nint pointerClassData => ref ᏑpointerClassData.Value;
+internal static readonly ж<nint> ᏑpointerClassData = new StaticBox<nint>(42);
+internal static ref nint pointerClassData => ref ((StaticBox<nint>)ᏑpointerClassData).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object extraAllocationsCauseˢ = (@string)"extra allocations cause this test to fail; see #70079"u8;

@@ -373,7 +373,8 @@ partial struct SpecialBuildTypes {
 }
 
 // NoSpecialBuildTypes indicates a standard, no cgo go build.
-public static SpecialBuildTypes NoSpecialBuildTypes;
+public static readonly ж<SpecialBuildTypes> ᏑNoSpecialBuildTypes = new StaticBox<SpecialBuildTypes>(default(SpecialBuildTypes));
+public static ref SpecialBuildTypes NoSpecialBuildTypes => ref ((StaticBox<SpecialBuildTypes>)ᏑNoSpecialBuildTypes).ValueSlot;
 
 // MustInternalLink checks that the current system can link programs with internal
 // linking.

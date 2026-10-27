@@ -165,10 +165,10 @@ partial struct headerSorter {
     internal slice<keyValues> kvs;
 }
 
-internal static ж<sync.Pool> ᏑheaderSorterPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> ᏑheaderSorterPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<headerSorter>()
 ));
-internal static ref sync.Pool headerSorterPool => ref ᏑheaderSorterPool.Value;
+internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)ᏑheaderSorterPool).ValueSlot;
 
 // sortedKeyValues returns h's keys sorted in the returned kvs
 // slice. The headerSorter used to sort is also returned, for possible

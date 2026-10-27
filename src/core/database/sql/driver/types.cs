@@ -55,7 +55,8 @@ partial interface Valuer {
 //     other integers are an error
 //   - for strings and []byte, same rules as [strconv.ParseBool]
 //   - all other types are an error
-public static boolType Bool;
+public static readonly ж<boolType> ᏑBool = new StaticBox<boolType>(default(boolType));
+public static ref boolType Bool => ref ((StaticBox<boolType>)ᏑBool).ValueSlot;
 
 public partial struct boolType {
 }
@@ -111,7 +112,8 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
 
 // Int32 is a [ValueConverter] that converts input values to int64,
 // respecting the limits of an int32 value.
-public static int32Type Int32;
+public static readonly ж<int32Type> ᏑInt32 = new StaticBox<int32Type>(default(int32Type));
+public static ref int32Type Int32 => ref ((StaticBox<int32Type>)ᏑInt32).ValueSlot;
 
 public partial struct int32Type {
 }
@@ -149,7 +151,8 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
 // If the value is already a string or []byte, it's unchanged.
 // If the value is of another type, conversion to string is done
 // with fmt.Sprintf("%v", v).
-public static stringType ΔString;
+public static readonly ж<stringType> ᏑΔString = new StaticBox<stringType>(default(stringType));
+public static ref stringType ΔString => ref ((StaticBox<stringType>)ᏑΔString).ValueSlot;
 
 public partial struct stringType {
 }
@@ -229,7 +232,8 @@ public static bool IsScanValue(any v) {
 // If the argument is a non-nil pointer, it is dereferenced and
 // defaultConverter.ConvertValue is called recursively. Other types
 // are an error.
-public static defaultConverter DefaultParameterConverter;
+public static readonly ж<defaultConverter> ᏑDefaultParameterConverter = new StaticBox<defaultConverter>(default(defaultConverter));
+public static ref defaultConverter DefaultParameterConverter => ref ((StaticBox<defaultConverter>)ᏑDefaultParameterConverter).ValueSlot;
 
 public partial struct defaultConverter {
 }

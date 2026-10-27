@@ -431,7 +431,8 @@ public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
     }
 }
 
-public static slice<int64> One = new int64[]{1}.slice();
+public static readonly ж<slice<int64>> ᏑOne = new StaticBox<slice<int64>>(new int64[]{1}.slice());
+public static ref slice<int64> One => ref ((StaticBox<slice<int64>>)ᏑOne).ValueSlot;
 
 public static void TestAppendSliceGrowth(ж<testing.T> Ꮡt) {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);

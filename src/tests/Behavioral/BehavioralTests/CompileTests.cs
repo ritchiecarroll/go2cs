@@ -349,6 +349,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]
+    public void CheckCrossPackageExportedVarAddress() => CheckTarget("CrossPackageExportedVarAddress");
+
+    [TestMethod]
     public void CheckCrossPackagePointerReceiverVar() => CheckTarget("CrossPackagePointerReceiverVar");
 
     [TestMethod]

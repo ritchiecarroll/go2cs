@@ -28,7 +28,7 @@ internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
 internal static readonly GoBigConst above1e23 = /* 100000000000000008388608 */
     GoBigConst.Parse("100000000000000008388608");
 
-internal static ж<slice<ftoaTest>> Ꮡftoatests = new StaticBox<slice<ftoaTest>>(new ftoaTest[]{
+internal static readonly ж<slice<ftoaTest>> Ꮡftoatests = new StaticBox<slice<ftoaTest>>(new ftoaTest[]{
     new(1D, (rune)'e', 5, "1.00000e+00"u8),
     new(1D, (rune)'f', 5, "1.00000"u8),
     new(1D, (rune)'g', 5, "1"u8),
@@ -221,7 +221,7 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StaticBox<slice<ftoaTest>
     new(7.450580596923828e-09D, (rune)'e', 17, "7.45058059692382812e-09"u8),
     new(4.547473508864641e-13D, (rune)'e', 17, "4.54747350886464119e-13"u8)
 }.slice());
-internal static ref slice<ftoaTest> ftoatests => ref Ꮡftoatests.ValueSlot;
+internal static ref slice<ftoaTest> ftoatests => ref ((StaticBox<slice<ftoaTest>>)Ꮡftoatests).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testN64ˢ = (@string)"testN=64"u8;

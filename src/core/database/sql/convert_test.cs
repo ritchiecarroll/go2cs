@@ -21,8 +21,8 @@ partial class sql_internal_test_package {
 
 internal static time.Time someTime = time.Unix(123, 0);
 
-internal static ж<int64> Ꮡanswer = new StaticBox<int64>(42);
-internal static ref int64 answer => ref Ꮡanswer.Value;
+internal static readonly ж<int64> Ꮡanswer = new StaticBox<int64>(42);
+internal static ref int64 answer => ref ((StaticBox<int64>)Ꮡanswer).ValueSlot;
 
 internal partial struct userDefined /*num:float64*/;
 
@@ -51,30 +51,30 @@ internal partial struct conversionTest {
 }
 
 // Target variables for scanning into.
-internal static ж<@string> Ꮡscanstr = new StaticBox<@string>(default(@string));
-internal static ref @string scanstr => ref Ꮡscanstr.Value;
-internal static ж<slice<byte>> Ꮡscanbytes = new StaticBox<slice<byte>>(default(slice<byte>));
-internal static ref slice<byte> scanbytes => ref Ꮡscanbytes.ValueSlot;
-internal static ж<global::go.database.sql_package.RawBytes> Ꮡscanraw = new StaticBox<global::go.database.sql_package.RawBytes>(default(global::go.database.sql_package.RawBytes));
-internal static ref global::go.database.sql_package.RawBytes scanraw => ref Ꮡscanraw.ValueSlot;
-internal static ж<nint> Ꮡscanint = new StaticBox<nint>(default(nint));
-internal static ref nint scanint => ref Ꮡscanint.Value;
-internal static ж<uint8> Ꮡscanuint8 = new StaticBox<uint8>(default(uint8));
-internal static ref uint8 scanuint8 => ref Ꮡscanuint8.Value;
-internal static ж<uint16> Ꮡscanuint16 = new StaticBox<uint16>(default(uint16));
-internal static ref uint16 scanuint16 => ref Ꮡscanuint16.Value;
-internal static ж<bool> Ꮡscanbool = new StaticBox<bool>(default(bool));
-internal static ref bool scanbool => ref Ꮡscanbool.Value;
-internal static ж<float32> Ꮡscanf32 = new StaticBox<float32>(default(float32));
-internal static ref float32 scanf32 => ref Ꮡscanf32.Value;
-internal static ж<float64> Ꮡscanf64 = new StaticBox<float64>(default(float64));
-internal static ref float64 scanf64 => ref Ꮡscanf64.Value;
-internal static ж<time.Time> Ꮡscantime = new StaticBox<time.Time>(default(time.Time));
-internal static ref time.Time scantime => ref Ꮡscantime.Value;
-internal static ж<ж<int64>> Ꮡscanptr = new StaticBox<ж<int64>>(default(ж<int64>));
-internal static ref ж<int64> scanptr => ref Ꮡscanptr.ValueSlot;
-internal static ж<any> Ꮡscaniface = new StaticBox<any>(default(any));
-internal static ref any scaniface => ref Ꮡscaniface.ValueSlot;
+internal static readonly ж<@string> Ꮡscanstr = new StaticBox<@string>(default(@string));
+internal static ref @string scanstr => ref ((StaticBox<@string>)Ꮡscanstr).ValueSlot;
+internal static readonly ж<slice<byte>> Ꮡscanbytes = new StaticBox<slice<byte>>(default(slice<byte>));
+internal static ref slice<byte> scanbytes => ref ((StaticBox<slice<byte>>)Ꮡscanbytes).ValueSlot;
+internal static readonly ж<global::go.database.sql_package.RawBytes> Ꮡscanraw = new StaticBox<global::go.database.sql_package.RawBytes>(default(global::go.database.sql_package.RawBytes));
+internal static ref global::go.database.sql_package.RawBytes scanraw => ref ((StaticBox<global::go.database.sql_package.RawBytes>)Ꮡscanraw).ValueSlot;
+internal static readonly ж<nint> Ꮡscanint = new StaticBox<nint>(default(nint));
+internal static ref nint scanint => ref ((StaticBox<nint>)Ꮡscanint).ValueSlot;
+internal static readonly ж<uint8> Ꮡscanuint8 = new StaticBox<uint8>(default(uint8));
+internal static ref uint8 scanuint8 => ref ((StaticBox<uint8>)Ꮡscanuint8).ValueSlot;
+internal static readonly ж<uint16> Ꮡscanuint16 = new StaticBox<uint16>(default(uint16));
+internal static ref uint16 scanuint16 => ref ((StaticBox<uint16>)Ꮡscanuint16).ValueSlot;
+internal static readonly ж<bool> Ꮡscanbool = new StaticBox<bool>(default(bool));
+internal static ref bool scanbool => ref ((StaticBox<bool>)Ꮡscanbool).ValueSlot;
+internal static readonly ж<float32> Ꮡscanf32 = new StaticBox<float32>(default(float32));
+internal static ref float32 scanf32 => ref ((StaticBox<float32>)Ꮡscanf32).ValueSlot;
+internal static readonly ж<float64> Ꮡscanf64 = new StaticBox<float64>(default(float64));
+internal static ref float64 scanf64 => ref ((StaticBox<float64>)Ꮡscanf64).ValueSlot;
+internal static readonly ж<time.Time> Ꮡscantime = new StaticBox<time.Time>(default(time.Time));
+internal static ref time.Time scantime => ref ((StaticBox<time.Time>)Ꮡscantime).ValueSlot;
+internal static readonly ж<ж<int64>> Ꮡscanptr = new StaticBox<ж<int64>>(default(ж<int64>));
+internal static ref ж<int64> scanptr => ref ((StaticBox<ж<int64>>)Ꮡscanptr).ValueSlot;
+internal static readonly ж<any> Ꮡscaniface = new StaticBox<any>(default(any));
+internal static ref any scaniface => ref ((StaticBox<any>)Ꮡscaniface).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string hereˢ = "here"u8;

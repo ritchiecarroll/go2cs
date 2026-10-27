@@ -3,12 +3,14 @@
 This page lists specific bugs, each with a workaround. For the limits that come with running Go on .NET, and
 the rough spots real code hits today, see [Limitations](Limitations.md).
 
-## Writes through the address of another package's variable are lost
+## Writes through the address of another package's pointer or interface variable are lost
 
-In 1.26.10.1, taking the address of a variable that another package exports, including
-`flag.BoolVar(&otherpkg.Debug, ...)`, gives a pointer to a copy, unless the package that declares the variable
-takes its address itself. [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes
-the cases and the workarounds.
+Taking the address of a variable that another package exports gives a pointer to the variable itself when its
+type is a value type. When its type is a pointer or an interface (`&otherpkg.ErrMissing`, for an
+`ErrMissing error`), the pointer refers to a copy, and so does the address of `runtime.MemProfileRate` and of a
+variable declared with a two-argument `//go:linkname`.
+[Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
+workarounds.
 
 ## Ubuntu's packaged .NET 10 can end a converted program early
 

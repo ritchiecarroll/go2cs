@@ -13,8 +13,8 @@ partial struct getwdCacheᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
 }
-internal static ж<getwdCacheᴛ1> ᏑgetwdCache = new StaticBox<getwdCacheᴛ1>(new getwdCacheᴛ1(nil));
-internal static ref getwdCacheᴛ1 getwdCache => ref ᏑgetwdCache.Value;
+internal static readonly ж<getwdCacheᴛ1> ᏑgetwdCache = new StaticBox<getwdCacheᴛ1>(new getwdCacheᴛ1(nil));
+internal static ref getwdCacheᴛ1 getwdCache => ref ((StaticBox<getwdCacheᴛ1>)ᏑgetwdCache).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getwdˢ = "getwd"u8;

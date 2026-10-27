@@ -41,8 +41,10 @@ public static UntypedInt FULL_RESOURCE_DESCRIPTOR => 9;
 public static UntypedInt RESOURCE_REQUIREMENTS_LIST => 10;
 public static UntypedInt QWORD => 11;
 
-public static syscall.Errno ErrShortBuffer = syscall.ERROR_MORE_DATA;
-public static syscall.Errno ErrNotExist = syscall.ERROR_FILE_NOT_FOUND;
+public static readonly ж<syscall.Errno> ᏑErrShortBuffer = new StaticBox<syscall.Errno>(syscall.ERROR_MORE_DATA);
+public static ref syscall.Errno ErrShortBuffer => ref ((StaticBox<syscall.Errno>)ᏑErrShortBuffer).ValueSlot;
+public static readonly ж<syscall.Errno> ᏑErrNotExist = new StaticBox<syscall.Errno>(syscall.ERROR_FILE_NOT_FOUND);
+public static ref syscall.Errno ErrNotExist => ref ((StaticBox<syscall.Errno>)ᏑErrNotExist).ValueSlot;
 public static error ErrUnexpectedType = errors.New("unexpected key value type"u8);
 
 // GetValue retrieves the type and data for the specified value associated

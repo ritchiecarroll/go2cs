@@ -47,8 +47,8 @@ partial struct hostsᴛ1 /*dyn*/ {
     internal time.Time mtime;
     internal int64 size;
 }
-internal static ж<hostsᴛ1> Ꮡhosts = new StaticBox<hostsᴛ1>(new hostsᴛ1(nil));
-internal static ref hostsᴛ1 hosts => ref Ꮡhosts.Value;
+internal static readonly ж<hostsᴛ1> Ꮡhosts = new StaticBox<hostsᴛ1>(new hostsᴛ1(nil));
+internal static ref hostsᴛ1 hosts => ref ((StaticBox<hostsᴛ1>)Ꮡhosts).ValueSlot;
 
 internal static void readHosts() {
     GoFrame ᒐ = default;

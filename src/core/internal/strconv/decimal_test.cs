@@ -17,7 +17,7 @@ partial struct shiftTest {
     internal @string @out;
 }
 
-internal static ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>(new shiftTest[]{
+internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>(new shiftTest[]{
     new(0, -100, "0"u8),
     new(0, 100, "0"u8),
     new(1, 100, "1267650600228229401496703205376"u8),
@@ -29,7 +29,7 @@ internal static ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTe
     new(195312, 9, "99999744"u8),
     new(1953125, 9, "1000000000"u8)
 }.slice());
-internal static ref slice<shiftTest> shifttests => ref Ꮡshifttests.ValueSlot;
+internal static ref slice<shiftTest> shifttests => ref ((StaticBox<slice<shiftTest>>)Ꮡshifttests).ValueSlot;
 
 public static void TestDecimalShift(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(shifttests); i++) {
@@ -51,7 +51,7 @@ partial struct roundTest {
     internal uint64 @int;
 }
 
-internal static ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>(new roundTest[]{
+internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>(new roundTest[]{
     new(0, 4, "0"u8, "0"u8, "0"u8, 0),
     new(12344999, 4, "12340000"u8, "12340000"u8, "12350000"u8, 12340000),
     new(12345000, 4, "12340000"u8, "12340000"u8, "12350000"u8, 12340000),
@@ -68,7 +68,7 @@ internal static ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTe
     new(12995000, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000),
     new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8, 13000000)
 }.slice());
-internal static ref slice<roundTest> roundtests => ref Ꮡroundtests.ValueSlot;
+internal static ref slice<roundTest> roundtests => ref ((StaticBox<slice<roundTest>>)Ꮡroundtests).ValueSlot;
 
 public static void TestDecimalRound(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(roundtests); i++) {

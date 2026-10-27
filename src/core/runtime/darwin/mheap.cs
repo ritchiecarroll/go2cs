@@ -240,8 +240,8 @@ partial struct mheap {
     internal ж<specialfinalizer> unused; // never set, just here to force the specialfinalizer type into DWARF
 }
 
-internal static ж<mheap> Ꮡmheap_ = new StaticBox<mheap>(new mheap());
-internal static ref mheap mheap_ => ref Ꮡmheap_.Value;
+internal static readonly ж<mheap> Ꮡmheap_ = new StaticBox<mheap>(new mheap());
+internal static ref mheap mheap_ => ref ((StaticBox<mheap>)Ꮡmheap_).ValueSlot;
 
 // A heapArena stores metadata for a heap arena. heapArenas are stored
 // outside of the Go heap and accessed via the mheap_.arenas index.
@@ -2964,8 +2964,8 @@ partial struct gcBitsArenasᴛ1 /*dyn*/ {
     internal ж<gcBitsArena> current;
     internal ж<gcBitsArena> previous;
 }
-internal static ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new StaticBox<gcBitsArenasᴛ1>(new gcBitsArenasᴛ1());
-internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ᏑgcBitsArenas.Value;
+internal static readonly ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new StaticBox<gcBitsArenasᴛ1>(new gcBitsArenasᴛ1());
+internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ((StaticBox<gcBitsArenasᴛ1>)ᏑgcBitsArenas).ValueSlot;
 
 // tryAlloc allocates from b or returns nil if b does not have enough room.
 // This is safe to call concurrently.

@@ -21,8 +21,8 @@ partial struct cbsᴛ1 /*dyn*/ {
     internal map<winCallbackKey, nint> index;
     internal nint n;
 }
-internal static ж<cbsᴛ1> Ꮡcbs = new StaticBox<cbsᴛ1>(new cbsᴛ1());
-internal static ref cbsᴛ1 cbs => ref Ꮡcbs.Value;
+internal static readonly ж<cbsᴛ1> Ꮡcbs = new StaticBox<cbsᴛ1>(new cbsᴛ1());
+internal static ref cbsᴛ1 cbs => ref ((StaticBox<cbsᴛ1>)Ꮡcbs).ValueSlot;
 
 internal static void cbsLock() {
     @lock(Ꮡcbs.of(cbsᴛ1.Ꮡlock));

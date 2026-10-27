@@ -425,8 +425,8 @@ internal static UntypedInt _SS_DISABLE => 4;
 partial struct sigset /*num:uint32*/;
 
 //extern SigTabTT runtime·sigtab[];
-internal static ж<sigset> Ꮡsigset_all = new StaticBox<sigset>(~((sigset)((sigset)0)));
-internal static ref sigset sigset_all => ref Ꮡsigset_all.Value;
+internal static readonly ж<sigset> Ꮡsigset_all = new StaticBox<sigset>(~((sigset)((sigset)0)));
+internal static ref sigset sigset_all => ref ((StaticBox<sigset>)Ꮡsigset_all).ValueSlot;
 
 //go:nosplit
 //go:nowritebarrierrec

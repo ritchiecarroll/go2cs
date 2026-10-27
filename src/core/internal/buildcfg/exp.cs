@@ -28,8 +28,8 @@ partial struct ExperimentFlags {
 // Experiment.baseline specifies the experiment flags that are enabled by
 // default in the current toolchain. This is, in effect, the "control"
 // configuration and any variation from this is an experiment.
-public static ж<ExperimentFlags> ᏑExperiment = new StaticBox<ExperimentFlags>(default(ExperimentFlags));
-public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
+public static readonly ж<ExperimentFlags> ᏑExperiment = new StaticBox<ExperimentFlags>(default(ExperimentFlags));
+public static ref ExperimentFlags Experiment => ref ((StaticBox<ExperimentFlags>)ᏑExperiment).ValueSlot;
 internal static void initᴛExperiment() { Experiment = ((Func<ExperimentFlags>)(() => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT"u8, defaultGOEXPERIMENT));
     if (err != default!) {
@@ -50,7 +50,8 @@ public static readonly @string DefaultGOEXPERIMENT = "";
 // platforms that support it.
 //
 // Note: must agree with runtime.framepointer_enabled.
-public static bool FramePointerEnabled;
+public static readonly ж<bool> ᏑFramePointerEnabled = new StaticBox<bool>(default(bool));
+public static ref bool FramePointerEnabled => ref ((StaticBox<bool>)ᏑFramePointerEnabled).ValueSlot;
 internal static void initᴛFramePointerEnabled() { FramePointerEnabled = GOARCH == "amd64"u8 || GOARCH == "arm64"u8; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

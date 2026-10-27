@@ -48,6 +48,7 @@ public class LazyHolderGeneratorTests
         """;
 
     // The converter's rendering of a var whose address is taken: the box inside the holder, the var's ref property beside it.
+    // Every package box is readonly (one emitter constructs it, as a field initializer, and nothing reassigns it).
     private const string AddressedPackage = """
         using System.Collections.Generic;
 
@@ -59,7 +60,7 @@ public class LazyHolderGeneratorTests
 
         private static int[] make() { built.Add("table"); return new[] { 1, 2, 3 }; }
 
-        [GoLazy] partial class lazyᴛtable { internal static Cell<int[]> Ꮡtable = new Cell<int[]>(make()); }
+        [GoLazy] partial class lazyᴛtable { internal static readonly Cell<int[]> Ꮡtable = new Cell<int[]>(make()); }
         internal static ref int[] table => ref Ꮡtable.Value;
 
         // `&table` before the first read builds it; a write through `table` lands in that box; the address is unchanged.
@@ -193,12 +194,13 @@ public class LazyHolderGeneratorTests
     public void AnAddressedVarsHolderCarriesItsBoxAndTheAddressIsOneBeforeAndAfterTheFirstRead()
     {
         // The address-of increment (docs/DESIGN-lazy-static-data.md, "Use sites and address-of"): the holder holds the box,
-        // the converter keeps `ref T X => ref ᏑX.Value`, and the generator writes the box accessor under the box's name.
+        // the converter keeps `ref T X => ref ᏑX.Value`, and the generator writes the box accessor under the box's name. The
+        // box is readonly, which a writable ref cannot return (CS8161), so the accessor returns the box itself.
         Run run = Generate(Stubs, AddressedPackage);
         string generated = string.Join("\r\n", run.Generated.Values);
 
         Assert.IsNotNull(run.Image, Describe(run));
-        StringAssert.Contains(generated, "internal static ref Cell<int[]> Ꮡtable => ref lazyᴛtable.Ꮡtable;", Describe(run));
+        StringAssert.Contains(generated, "internal static Cell<int[]> Ꮡtable => lazyᴛtable.Ꮡtable;", Describe(run));
         Assert.AreEqual(0, run.GeneratorDiagnostics.Length, Describe(run));
 
         Assembly assembly = Assembly.Load(run.Image!);

@@ -14,8 +14,8 @@ using @unsafe = unsafe_package;
 
 partial class cmp_test_package {
 
-internal static ж<float64> Ꮡnegzero = new StaticBox<float64>(Δmath.Copysign(0D, -1D));
-internal static ref float64 negzero => ref Ꮡnegzero.Value;
+internal static readonly ж<float64> Ꮡnegzero = new StaticBox<float64>(Δmath.Copysign(0D, -1D));
+internal static ref float64 negzero => ref ((StaticBox<float64>)Ꮡnegzero).ValueSlot;
 
 internal static uintptr nonnilptr = (uintptr)Ꮡnegzero;
 

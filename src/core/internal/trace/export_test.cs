@@ -7,7 +7,8 @@ using static go.@internal.trace_package;
 
 partial class trace_internal_test_package {
 
-public static nint BandsPerSeries;
+public static readonly ж<nint> ᏑBandsPerSeries = new StaticBox<nint>(default(nint));
+public static ref nint BandsPerSeries => ref ((StaticBox<nint>)ᏑBandsPerSeries).ValueSlot;
 internal static void initᴛBandsPerSeries() { BandsPerSeries = bandsPerSeries; }
 
 } // end trace_internal_test_package

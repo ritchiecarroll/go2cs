@@ -188,8 +188,10 @@ partial struct stack {
     internal nint len;
 }
 
-public static @string NoString = ""u8;
-public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice();
+public static readonly ж<@string> ᏑNoString = new StaticBox<@string>(""u8);
+public static ref @string NoString => ref ((StaticBox<@string>)ᏑNoString).ValueSlot;
+public static readonly ж<slice<trace.StackFrame>> ᏑNoStack = new StaticBox<slice<trace.StackFrame>>(new trace.StackFrame[]{}.slice());
+public static ref slice<trace.StackFrame> NoStack => ref ((StaticBox<slice<trace.StackFrame>>)ᏑNoStack).ValueSlot;
 
 // Generation represents a single generation in the trace.
 partial struct ΔGeneration {

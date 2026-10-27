@@ -58,7 +58,7 @@ using static go.crypto.@internal.fips140.check.checktest_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/check/checktest/asm_none.go", "asm_none.cs", "AAoWgKKA")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/check/checktest/test.go", "test.cs", "AB40AAUS3oKCgpSCgpSCpoKClII=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/check/checktest/test.go", "test.cs", "AB40AAcS3oKCgpSCgpSCpoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.check;

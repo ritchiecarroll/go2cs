@@ -30,11 +30,11 @@ partial struct globalRandᴛ1 /*dyn*/ {
     internal chacha8rand.State state;
     internal bool init;
 }
-internal static ж<globalRandᴛ1> ᏑglobalRand = new StaticBox<globalRandᴛ1>(new globalRandᴛ1());
-internal static ref globalRandᴛ1 globalRand => ref ᏑglobalRand.Value;
+internal static readonly ж<globalRandᴛ1> ᏑglobalRand = new StaticBox<globalRandᴛ1>(new globalRandᴛ1());
+internal static ref globalRandᴛ1 globalRand => ref ((StaticBox<globalRandᴛ1>)ᏑglobalRand).ValueSlot;
 
-internal static ж<bool> ᏑreadRandomFailed = new StaticBox<bool>(default(bool));
-internal static ref bool readRandomFailed => ref ᏑreadRandomFailed.Value;
+internal static readonly ж<bool> ᏑreadRandomFailed = new StaticBox<bool>(default(bool));
+internal static ref bool readRandomFailed => ref ((StaticBox<bool>)ᏑreadRandomFailed).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string randinitTwiceˢ = "randinit twice"u8;

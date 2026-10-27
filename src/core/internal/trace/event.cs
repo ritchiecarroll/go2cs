@@ -311,7 +311,8 @@ internal static void printStack(io.Writer w, @string prefix, iter.Seq<StackFrame
 
 // NoStack is a sentinel value that can be compared against any Stack value, indicating
 // a lack of a stack trace.
-public static ΔStack NoStack = new ΔStack(nil);
+public static readonly ж<ΔStack> ᏑNoStack = new StaticBox<ΔStack>(new ΔStack(nil));
+public static ref ΔStack NoStack => ref ((StaticBox<ΔStack>)ᏑNoStack).ValueSlot;
 
 // StackFrame represents a single frame of a stack.
 partial struct StackFrame {

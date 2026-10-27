@@ -49,7 +49,7 @@ using static go.LazyPackageVars.tables_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("tables.go", "tables.cs", "ABAmgoKolpaWlpaWAAUQpoCkgqiC")]
+[assembly: go.GoPositionMap("tables.go", "tables.cs", "ABEmgoKolpampqaWAAYQpoCkgqiC")]
 // </GoSourcePositionMaps>
 
 namespace go.LazyPackageVars;

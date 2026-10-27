@@ -2,7 +2,8 @@
 
 **Status:** ACCEPTED (COORD, 2026-10-26, on `6f88cc796a`): the owner predicate plus the importer field/element arm,
 through `addressedGlobalDecl`, sharing item 2's `StaticBox`, with no fifth box kind. The rulings on the open questions
-are in section 9. The seat is G's, after item 2. There is no code change in this file.
+are in section 9. The seat is G's, after item 2. There is no code change in this file. BUILT 2026-10-27:
+section 11 records the seat as built, with every measured difference from this design.
 **Ruling it implements:** the owner's option (b) of 2026-10-25 (BOARD, *C2 (owner's ruling, R's diagnosis): the address
 of ANOTHER package's exported value variable binds a copy*): box every exported package-level value variable, with a
 full re-bank. Item 1 of [`PLAN-release-1-26-10-2.md`](../PLAN-release-1-26-10-2.md).
@@ -306,3 +307,115 @@ Off the master that has item 2. It carries:
 
 Gates: go test, GenTests, GolibTests, the solution build, CNR, and a `-p:GoTargetOS=linux` build for the L3 flavours.
 Then the re-bank by the runbook.
+
+---
+
+## 11. The seat, as built (G, 2026-10-27; claude/g-crosspkg-box on master 71a2363e5e)
+
+Recorded as an amendment, as built against the accepted design above. Every difference was measured, and COORD
+ruled each one before it shipped.
+
+**The box form.** Sections 3 and 5 asked the read A/B to choose between a `static readonly` sealed box and
+`ValueSlot`. The answer was both, and then one refinement. The bench, `docs/phase4/probes/g-crosspkg-read-ab`, reads
+an exported var in a hot loop in each form. Arms are interleaved per round, median of 9, each runtime run twice, ns per
+iteration:
+
+| Form | JIT, nint | AOT, nint | AOT, LittleEndian |
+|---|---:|---:|---:|
+| plain field | 0.25 | 0.32-0.47 | 26.7-27.3 |
+| `ж<T>` read through `Value` (the emitter's old form) | 3.96 | 7.67 | 30.7 |
+| `static readonly ж<T>`, `Value` | 0.88-0.95 | 7.44 | 30.7 |
+| `static readonly StaticBox<T>`, `Value` | 0.90-0.97 | 7.65 | 30.6 |
+| `ж<T>`, `ValueSlot` | 3.07-3.13 | 3.25-3.57 | 28.5-29.2 |
+| `static readonly StaticBox<T>`, `ValueSlot` | 0.79-0.81 | 0.92-0.95 | 27.4-27.9 |
+| **`static readonly ж<T>`, `((StaticBox<T>)ᏑX).ValueSlot` (adopted)** | **0.80** | **1.18** | **27.9-28.0** |
+| `static readonly ж<T>`, `ValueSlot`, no cast | 0.80 | 3.32 | 29.4 |
+
+Neither mitigation alone answers Native AOT: `Value`'s IsNull check and throw path keep it from inlining, and
+without the sealed type at the read it cannot devirtualize. The JIT's LittleEndian rows are bimodal and do not follow
+the form: one arm read 13.5 and then 6.1 in two runs. That is code layout, not the box, so those rows are not
+used.
+
+The accepted form declared the field as `StaticBox<T>`. Converting the behavioral probe showed what that does to Go
+code that re-points a pointer: `p := &lib.N` becomes `var p = lib.ᏑN;` with type StaticBox<nint>, and a later
+`p = &y` is CS0266. The emitted form therefore keeps the field DECLARED `ж<T>` and casts at the read. That costs
+0.24 ns under AOT, nothing on the JIT, and is level on LittleEndian. COORD accepted it.
+
+**readonly.** Every package box is constructed by one emitter, `addressedGlobalDecl`, as a field initializer (eager,
+or inside its `[GoLazy]` holder). A census of assignments to a `Ꮡ`-named variable over src/core and src/gen finds 9,
+all local or parameter boxes (crypto/x509 verify, go/types api_test, net/http client and h2_bundle, runtime
+signal_windows, syscall exec_windows). golib's only reflection write to a static field, `LinknameVar.Set`, writes a
+remote VALUE field by name, never a box. A later assignment would be CS0198, which the three-flavour stdlib build,
+the slnx build and the behavioral compile phase all catch.
+
+**readonly and the lazy holder.** The census above counted assignments. It missed a different shape, a writable ref
+TAKEN of a box. go2cs-gen's `LazyHolderGenerator` gave each `[GoLazy]` holder's field a `ref` accessor,
+`static ref ж<T> ᏑX => ref lazyᴛX.ᏑX;`, and a readonly field cannot be returned by writable ref (CS8161). 290 of the
+corpus's 1,041 lazy holders hold a box.
+- The red-first plant series' control arm caught it, before any plant: the behavioral project's compile builds flag
+  and fmt, whose dependencies carry such holders.
+- The generator now returns a readonly field by value, `static ж<T> ᏑX => lazyᴛX.ᏑX;`. The box is a reference, so
+  every reader still gets the same box. A value field keeps the `ref` accessor.
+- A census of every other writable-ref taking of a `Ꮡ` name reads 0. It covered `ref Ꮡx` and `ref q.Ꮡx` ending at the
+  name, as an argument, a ref local or a ref return, over src/core, src/gen and golib. Its control matched both shapes
+  and refused `ref Ꮡb.DerefOrNull()`.
+
+**The rule's exclusions, as built.** Beyond `package main`, pointers and interfaces:
+- every exported var with a TWO-argument `//go:linkname` (`linknameForwardVars`), not only the pulls
+  `varLinknamePull` accepts: `crypto/internal/fips140/check.Linkinfo` and `checktest.RODATA` stay plain fields,
+  their storage being the linker's;
+- the registry's inverted alias (`internal/syscall/windows.CanUseLongPaths`);
+- a new registry, `externalStorageVars`, for a DISPLACED var whose hand-owned companion keeps its storage elsewhere.
+  It holds one entry, `runtime.MemProfileRate`, a `ref` property over golib's `GoMemProfile.Rate`, read on every
+  charged allocation.
+
+`TestDisplacedExportedVarsAreBoxedOrRegistered` re-derives the displaced set from the corpus's placeholders.
+
+**The importer arm, as built.** `rootsAtImportedBoxedGlobal` roots a field or element path at the owner's box, in
+`convUnaryExpr`'s field arm and array-element branch. A third site, in `exprFieldRootsAtAddressedGlobal` (a
+pointer-receiver call on a value field, `lib.S.WG.Add(1)`), was removed before the seat was posted. Its red-first
+plant read green on the converter test and on all four behavioral phases. The emission was unchanged: the generic
+direct-ж fallback for a value field chain already routes that receiver through `&`, onto the field arm.
+A `[GoRecv] ref` method needs no route, since it binds on `lib.S`, a `ref` property. The two-seeded A/B of the
+removal reads 0 files. Neither arm's -stdlib wrote a file on any of the three targets, each arm's 65-package -tests
+leg wrote 2,828, and a planted byte was named.
+
+**Footprint** (the two-seeded, three-target A/B plus a 65-package `-tests` leg; base and seat as in the corpus commit):
+- 522 files, +2590/-2183, 0 conflicts applied;
+- form change on 794 existing boxes x 2 lines;
+- 407 new boxes;
+- 116 position-map records;
+- 4 importer sites: `&checktest.DATA` x2, `&unicode.Categories`, slog's `IgnorePC`. The two `&checktest.RODATA`
+  stay copies.
+
+The first prediction (section 4's census) met the form count and the importer sites. It missed the new boxes, 400
+predicted against 407: +8 vendored `golang.org/x/sys/cpu` vars the census never read, and -1 for the displaced
+`MemProfileRate`. It missed the map records, 96 against 116: the predicate read only package_info.cs, and 8
+declaration-only files keep their record. Re-predicted with those mechanisms on batch 52 (43752cff98), every count was
+met exactly. Batch 53 (71a2363e5e) then landed P2's seat #4 converter change, so the A/B ran again on it. The
+prediction was the same diff, line for line, and it was met: 0 files whose changed lines differ.
+
+**Hand-owns.** Four were boxed by hand:
+- registry `ErrShortBuffer` and `ErrNotExist`;
+- `syscall.ForkLock` (windows);
+- registry_test's `ValueTests`.
+
+`TestHandOwnExportedPackageBoxesMatchTheirTwins` holds every hand-own to its twin's exported boxes. It read red on
+master's `ForkLock`, naming it.
+
+**Pack (OQ-2).** `GoExactProjectReferenceVersions` in go.lib.pack.targets pins each go.* project-reference dependency
+to `[<version>]`.
+
+**Docs.** Limitations and KnownIssues now name exactly what still binds a copy: pointer- and interface-typed exported
+vars, `runtime.MemProfileRate`, and two-argument linkname vars.
+
+**For the 1.26.10.2 NEWS and release notes** (COORD's OQ-2 ruling; release day copies this):
+> **Another package's variables, by address.** Taking the address of a variable another package exports now
+> reaches the variable, as in Go: `&otherpkg.V`, `flag.BoolVar(&otherpkg.Debug, ...)`, a pointer-receiver method
+> value such as `f := otherpkg.V.Reset`, and an address inside it, `&otherpkg.S.Field` or `&otherpkg.Arr[i]`. Only a
+> pointer- or interface-typed variable is still handed over as a copy (see Limitations). **This is a
+> breaking change for compiled C# code**: each exported variable of a value type is now a `ref` property over its
+> storage, not a field, so an assembly compiled against 1.26.10.1 must be rebuilt against 1.26.10.2. C# source that
+> reads or assigns `pkg.V` compiles unchanged. go.* packages now depend on each other at the EXACT release version,
+> so a project that mixes 1.26.10.1 and 1.26.10.2 packages fails at restore and names them. A read of such a variable
+> costs about 0.5 ns more than a field read on the JIT, and about 0.7-0.9 ns more under Native AOT.

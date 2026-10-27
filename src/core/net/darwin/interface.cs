@@ -186,11 +186,11 @@ partial struct ipv6ZoneCache {
     internal map<nint, @string> toName; // interface index to its name
 }
 
-internal static ж<ipv6ZoneCache> ᏑzoneCache = new StaticBox<ipv6ZoneCache>(new ipv6ZoneCache(
+internal static readonly ж<ipv6ZoneCache> ᏑzoneCache = new StaticBox<ipv6ZoneCache>(new ipv6ZoneCache(
     toIndex: new map<@string, nint>(),
     toName: new map<nint, @string>()
 ));
-internal static ref ipv6ZoneCache zoneCache => ref ᏑzoneCache.Value;
+internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)ᏑzoneCache).ValueSlot;
 
 // update refreshes the network interface information if the cache was last
 // updated more than 1 minute ago, or if force is set. It reports whether the

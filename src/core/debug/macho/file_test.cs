@@ -25,7 +25,7 @@ internal partial struct fileTest {
     internal slice<@string> importedSyms;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/gcc-386-darwin-exec.base64"u8,
         new FileHeader(0xfeedfaceU, Cpu386, 0x3, 0x2, 0xc, 0x3c0, 0x85),
@@ -240,7 +240,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>
         new @string[]{"_printf"u8}.slice()
     )
 }.slice());
-internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
+internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 internal static (io.ReaderAt, error) readerAtFromObscured(@string name) {
     var (b, err) = obscuretestdata.ReadFile(name);

@@ -1052,10 +1052,10 @@ internal static (nint, error) flush(this ref Conn c) {
 }
 
 // outBufPool pools the record-sized scratch buffers used by writeRecordLocked.
-internal static ж<sync.Pool> ᏑoutBufPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> ᏑoutBufPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<slice<byte>>()
 ));
-internal static ref sync.Pool outBufPool => ref ᏑoutBufPool.Value;
+internal static ref sync.Pool outBufPool => ref ((StaticBox<sync.Pool>)ᏑoutBufPool).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInternalErrorSendingˢ = "tls: internal error: sending non-handshake message to QUIC transport"u8;

@@ -436,10 +436,10 @@ internal static error UnreadRune(this ref readRune r) {
     return default!;
 }
 
-internal static ж<Δsync.Pool> ᏑssFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
+internal static readonly ж<Δsync.Pool> ᏑssFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => @new<ss>()
 ));
-internal static ref Δsync.Pool ssFree => ref ᏑssFree.Value;
+internal static ref Δsync.Pool ssFree => ref ((StaticBox<Δsync.Pool>)ᏑssFree).ValueSlot;
 
 // newScanState allocates a new ss struct or grab a cached one.
 internal static (ж<ss> s, ssave old) newScanState(Δio.Reader r, bool nlIsSpace, bool nlIsEnd) {

@@ -2268,8 +2268,8 @@ public static void TestQueryRowClosingStmt(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static ж<atomic.Value> ᏑatomicRowsCloseHook = new StaticBox<atomic.Value>(default(atomic.Value));
-internal static ref atomic.Value atomicRowsCloseHook => ref ᏑatomicRowsCloseHook.Value; // of func(*Rows, *error)
+internal static readonly ж<atomic.Value> ᏑatomicRowsCloseHook = new StaticBox<atomic.Value>(default(atomic.Value));
+internal static ref atomic.Value atomicRowsCloseHook => ref ((StaticBox<atomic.Value>)ᏑatomicRowsCloseHook).ValueSlot; // of func(*Rows, *error)
 
 [GoInit] internal static void initΔ2() {
     rowsCloseHook = () => {

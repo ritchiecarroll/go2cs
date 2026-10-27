@@ -16,7 +16,8 @@ partial class cpu_package {
 // For some GOOS/GOARCH combinations initialization of the CPU features depends
 // on reading an operating specific file, e.g. /proc/self/auxv on linux/arm
 // Initialized will report false if reading the file fails.
-public static bool Initialized;
+public static readonly ж<bool> ᏑInitialized = new StaticBox<bool>(default(bool));
+public static ref bool Initialized => ref ((StaticBox<bool>)ᏑInitialized).ValueSlot;
 
 // CacheLinePad is used to pad structs to avoid false sharing.
 partial struct CacheLinePad {
@@ -79,8 +80,8 @@ partial struct X86ᴛ1 /*dyn*/ {
     public bool HasAVXVNNIInt8; // Advanced vector extension Vector Neural Network Int8 instructions
     internal CacheLinePad __;
 }
-public static ж<X86ᴛ1> ᏑX86 = new StaticBox<X86ᴛ1>(default(X86ᴛ1));
-public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
+public static readonly ж<X86ᴛ1> ᏑX86 = new StaticBox<X86ᴛ1>(default(X86ᴛ1));
+public static ref X86ᴛ1 X86 => ref ((StaticBox<X86ᴛ1>)ᏑX86).ValueSlot;
 
 // ARM64 contains the supported CPU features of the
 // current ARMv8(aarch64) platform. If the current platform
@@ -116,7 +117,8 @@ partial struct ARM64ᴛ1 /*dyn*/ {
     public bool HasI8MM; // Advanced SIMD Int8 matrix multiplication instructions
     internal CacheLinePad __;
 }
-public static ARM64ᴛ1 ARM64;
+public static readonly ж<ARM64ᴛ1> ᏑARM64 = new StaticBox<ARM64ᴛ1>(default(ARM64ᴛ1));
+public static ref ARM64ᴛ1 ARM64 => ref ((StaticBox<ARM64ᴛ1>)ᏑARM64).ValueSlot;
 
 // ARM contains the supported CPU features of the current ARM (32-bit) platform.
 // All feature flags are false if:
@@ -153,7 +155,8 @@ partial struct ARMᴛ1 /*dyn*/ {
     public bool HasCRC32; // CRC32 hardware implementation
     internal CacheLinePad __;
 }
-public static ARMᴛ1 ARM;
+public static readonly ж<ARMᴛ1> ᏑARM = new StaticBox<ARMᴛ1>(default(ARMᴛ1));
+public static ref ARMᴛ1 ARM => ref ((StaticBox<ARMᴛ1>)ᏑARM).ValueSlot;
 
 // The booleans in Loong64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
@@ -166,7 +169,8 @@ partial struct Loong64ᴛ1 /*dyn*/ {
     public bool HasLAMCAS; // support AMCAS[_DB].{B/H/W/D} instruction
     internal CacheLinePad __;
 }
-public static Loong64ᴛ1 Loong64;
+public static readonly ж<Loong64ᴛ1> ᏑLoong64 = new StaticBox<Loong64ᴛ1>(default(Loong64ᴛ1));
+public static ref Loong64ᴛ1 Loong64 => ref ((StaticBox<Loong64ᴛ1>)ᏑLoong64).ValueSlot;
 
 // MIPS64X contains the supported CPU features of the current mips64/mips64le
 // platforms. If the current platform is not mips64/mips64le or the current
@@ -176,7 +180,8 @@ partial struct MIPS64Xᴛ1 /*dyn*/ {
     public bool HasMSA; // MIPS SIMD architecture
     internal CacheLinePad __;
 }
-public static MIPS64Xᴛ1 MIPS64X;
+public static readonly ж<MIPS64Xᴛ1> ᏑMIPS64X = new StaticBox<MIPS64Xᴛ1>(default(MIPS64Xᴛ1));
+public static ref MIPS64Xᴛ1 MIPS64X => ref ((StaticBox<MIPS64Xᴛ1>)ᏑMIPS64X).ValueSlot;
 
 // PPC64 contains the supported CPU features of the current ppc64/ppc64le platforms.
 // If the current platform is not ppc64/ppc64le then all feature flags are false.
@@ -193,7 +198,8 @@ partial struct PPC64ᴛ1 /*dyn*/ {
     public bool IsPOWER9; // ISA v3.00 (POWER9), implies IsPOWER8
     internal CacheLinePad __;
 }
-public static PPC64ᴛ1 PPC64;
+public static readonly ж<PPC64ᴛ1> ᏑPPC64 = new StaticBox<PPC64ᴛ1>(default(PPC64ᴛ1));
+public static ref PPC64ᴛ1 PPC64 => ref ((StaticBox<PPC64ᴛ1>)ᏑPPC64).ValueSlot;
 
 // S390X contains the supported CPU features of the current IBM Z
 // (s390x) platform. If the current platform is not IBM Z then all
@@ -224,7 +230,8 @@ partial struct S390Xᴛ1 /*dyn*/ {
     public bool HasVXE; // vector-enhancements facility 1
     internal CacheLinePad __;
 }
-public static S390Xᴛ1 S390X;
+public static readonly ж<S390Xᴛ1> ᏑS390X = new StaticBox<S390Xᴛ1>(default(S390Xᴛ1));
+public static ref S390Xᴛ1 S390X => ref ((StaticBox<S390Xᴛ1>)ᏑS390X).ValueSlot;
 
 // RISCV64 contains the supported CPU features and performance characteristics for riscv64
 // platforms. The booleans in RISCV64, with the exception of HasFastMisaligned, indicate
@@ -255,7 +262,8 @@ partial struct RISCV64ᴛ1 /*dyn*/ {
     public bool HasZvksg; // ShangMi Algorithm Suite with GCM
     internal CacheLinePad __;
 }
-public static RISCV64ᴛ1 RISCV64;
+public static readonly ж<RISCV64ᴛ1> ᏑRISCV64 = new StaticBox<RISCV64ᴛ1>(default(RISCV64ᴛ1));
+public static ref RISCV64ᴛ1 RISCV64 => ref ((StaticBox<RISCV64ᴛ1>)ᏑRISCV64).ValueSlot;
 
 [GoInit] internal static void init() {
     archInit();

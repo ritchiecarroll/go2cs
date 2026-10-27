@@ -54,10 +54,10 @@ using static go.time_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("time/abs_test.go", "abs_test.cs", "AB4uAAgYgoaCgoKCgoKmgIK2goKUgIKC2oKCgoKCgoKCgoCCtoCCgtqCgoKClIKCgoKCgoKCgoKmgILIgoKCpoCCyICCgqSCgoKCgsqChoKCgoKCgoCCtoKCyoKGgoKCgoKClIKCgoCC/oKCgoI=", "36-38:1;85-88:1;133-135:1;154-156:1")]
-[assembly: go.GoPositionMap("time/export_test.go", "export_test.cs", "AAsWgoKmgoKmgqaCgriCkoKCkoKSkoKCgpKWggARKIKC7rgAN26UoqKiog==")]
+[assembly: go.GoPositionMap("time/abs_test.go", "abs_test.cs", "AB4uAAkYgoaCgoKCgoKmgIK2goKUgIKC2oKCgoKCgoKCgoCCtoCCgtqCgoKClIKCgoKCgoKCgoKmgILIgoKCpoCCyICCgqSCgoKCgsqChoKCgoKCgoCCtoKCyoKGgoKCgoKClIKCgoCC/oKCgoI=", "36-38:1;85-88:1;133-135:1;154-156:1")]
+[assembly: go.GoPositionMap("time/export_test.go", "export_test.cs", "AAsWgoKmgoKmgqaCgsiCsoKSooKyooKSkqKWggARKIKC7rgAOW6UwrKysg==")]
 [assembly: go.GoPositionMap("time/export_windows_test.go", "export_windows_test.cs", "AAoOgoKAtoKCgLaC", "9-9:1;14-14:1")]
-[assembly: go.GoPositionMap("time/internal_test.go", "internal_test.cs", "AAoOlNbcgoKClIK2lIKCgriSlK4ACgiC/qK2kpQ=", "31-33:1")]
+[assembly: go.GoPositionMap("time/internal_test.go", "internal_test.cs", "AAoOlNbcgoKClIK2lIKCgriipK4ACgiC/qLGopQ=", "31-33:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

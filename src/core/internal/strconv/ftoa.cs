@@ -26,10 +26,10 @@ internal static UntypedInt float64MantBits => 52;
 internal static UntypedInt float64ExpBits => 11;
 internal static UntypedInt float64Bias => -1023;
 
-internal static ж<floatInfo> Ꮡfloat32info = new StaticBox<floatInfo>(new floatInfo(float32MantBits, float32ExpBits, float32Bias));
-internal static ref floatInfo float32info => ref Ꮡfloat32info.Value;
-internal static ж<floatInfo> Ꮡfloat64info = new StaticBox<floatInfo>(new floatInfo(float64MantBits, float64ExpBits, float64Bias));
-internal static ref floatInfo float64info => ref Ꮡfloat64info.Value;
+internal static readonly ж<floatInfo> Ꮡfloat32info = new StaticBox<floatInfo>(new floatInfo(float32MantBits, float32ExpBits, float32Bias));
+internal static ref floatInfo float32info => ref ((StaticBox<floatInfo>)Ꮡfloat32info).ValueSlot;
+internal static readonly ж<floatInfo> Ꮡfloat64info = new StaticBox<floatInfo>(new floatInfo(float64MantBits, float64ExpBits, float64Bias));
+internal static ref floatInfo float64info => ref ((StaticBox<floatInfo>)Ꮡfloat64info).ValueSlot;
 
 // FormatFloat converts the floating-point number f to a string,
 // according to the format fmt and precision prec. It rounds the

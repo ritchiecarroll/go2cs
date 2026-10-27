@@ -7,8 +7,8 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static ж<uintptr> ᏑlabelSync = new StaticBox<uintptr>(default(uintptr));
-internal static ref uintptr labelSync => ref ᏑlabelSync.Value;
+internal static readonly ж<uintptr> ᏑlabelSync = new StaticBox<uintptr>(default(uintptr));
+internal static ref uintptr labelSync => ref ((StaticBox<uintptr>)ᏑlabelSync).ValueSlot;
 
 // runtime_setProfLabel should be an internal detail,
 // but widely used packages access it using linkname.

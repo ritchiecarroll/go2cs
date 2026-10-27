@@ -30,7 +30,7 @@ internal static @string noBodyStr = ""u8;
 
 internal static global::go.net.http_package.ΔHeader noTrailer = default!;
 
-internal static ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>(new reqTest[]{
+internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>(new reqTest[]{
     // Baseline test; All Request fields included for template use
     new(
         "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Content-Length: 7\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8 + "abcdef\n???"u8,
@@ -387,7 +387,7 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>(n
         noError
     )
 }.slice());
-internal static ref slice<reqTest> reqTests => ref ᏑreqTests.ValueSlot;
+internal static ref slice<reqTest> reqTests => ref ((StaticBox<slice<reqTest>>)ᏑreqTests).ValueSlot;
 
 public static void TestReadRequest(ж<testing.T> Ꮡt) {
     foreach (var i in range(reqTests)) {

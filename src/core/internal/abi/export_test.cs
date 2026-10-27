@@ -11,7 +11,8 @@ partial class abi_internal_test_package {
 
 public static partial void FuncPCTestFn();
 
-public static uintptr FuncPCTestFnAddr; // address of FuncPCTestFn, directly retrieved from assembly
+public static readonly ж<uintptr> ᏑFuncPCTestFnAddr = new StaticBox<uintptr>(default(uintptr));
+public static ref uintptr FuncPCTestFnAddr => ref ((StaticBox<uintptr>)ᏑFuncPCTestFnAddr).ValueSlot; // address of FuncPCTestFn, directly retrieved from assembly
 
 //go:noinline
 public static partial uintptr FuncPCTest() {

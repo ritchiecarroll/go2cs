@@ -67,21 +67,22 @@ public static void TestFmtInterface(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static float64 NaN = Δmath.NaN();
+public static readonly ж<float64> ᏑNaN = new StaticBox<float64>(Δmath.NaN());
+public static ref float64 NaN => ref ((StaticBox<float64>)ᏑNaN).ValueSlot;
 internal static float64 posInf = Δmath.Inf(1);
 internal static float64 negInf = Δmath.Inf(-1);
 
-internal static ж<nint> ᏑintVar = new StaticBox<nint>(0);
-internal static ref nint intVar => ref ᏑintVar.Value;
+internal static readonly ж<nint> ᏑintVar = new StaticBox<nint>(0);
+internal static ref nint intVar => ref ((StaticBox<nint>)ᏑintVar).ValueSlot;
 
-internal static ж<array<nint>> ᏑΔarray = new StaticBox<array<nint>>(new nint[]{1, 2, 3, 4, 5}.array());
-internal static ref array<nint> Δarray => ref ᏑΔarray.Value;
-internal static ж<array<any>> Ꮡiarray = new StaticBox<array<any>>(new any[]{(nint)1, (@string)"hello"u8, 2.5D, default!}.array());
-internal static ref array<any> iarray => ref Ꮡiarray.Value;
-internal static ж<slice<nint>> ᏑΔslice = new StaticBox<slice<nint>>(Δarray[..]);
-internal static ref slice<nint> Δslice => ref ᏑΔslice.ValueSlot;
-internal static ж<slice<any>> Ꮡislice = new StaticBox<slice<any>>(iarray[..]);
-internal static ref slice<any> islice => ref Ꮡislice.ValueSlot;
+internal static readonly ж<array<nint>> ᏑΔarray = new StaticBox<array<nint>>(new nint[]{1, 2, 3, 4, 5}.array());
+internal static ref array<nint> Δarray => ref ((StaticBox<array<nint>>)ᏑΔarray).ValueSlot;
+internal static readonly ж<array<any>> Ꮡiarray = new StaticBox<array<any>>(new any[]{(nint)1, (@string)"hello"u8, 2.5D, default!}.array());
+internal static ref array<any> iarray => ref ((StaticBox<array<any>>)Ꮡiarray).ValueSlot;
+internal static readonly ж<slice<nint>> ᏑΔslice = new StaticBox<slice<nint>>(Δarray[..]);
+internal static ref slice<nint> Δslice => ref ((StaticBox<slice<nint>>)ᏑΔslice).ValueSlot;
+internal static readonly ж<slice<any>> Ꮡislice = new StaticBox<slice<any>>(iarray[..]);
+internal static ref slice<any> islice => ref ((StaticBox<slice<any>>)Ꮡislice).ValueSlot;
 
 partial struct A {
     internal nint i;
@@ -130,8 +131,8 @@ partial struct SI {
 // P is a type with a String method with pointer receiver for testing %p.
 partial struct P /*num:nint*/;
 
-internal static ж<P> ᏑpValue = new StaticBox<P>(default(P));
-internal static ref P pValue => ref ᏑpValue.Value;
+internal static readonly ж<P> ᏑpValue = new StaticBox<P>(default(P));
+internal static ref P pValue => ref ((StaticBox<P>)ᏑpValue).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stringPˢ = "String(p)"u8;
@@ -155,11 +156,11 @@ partial struct U {
     internal Fn fn;
 }
 
-internal static ж<array<renamedUint8>> Ꮡbarray = new StaticBox<array<renamedUint8>>(new renamedUint8[]{1, 2, 3, 4, 5}.array());
-internal static ref array<renamedUint8> barray => ref Ꮡbarray.Value;
+internal static readonly ж<array<renamedUint8>> Ꮡbarray = new StaticBox<array<renamedUint8>>(new renamedUint8[]{1, 2, 3, 4, 5}.array());
+internal static ref array<renamedUint8> barray => ref ((StaticBox<array<renamedUint8>>)Ꮡbarray).ValueSlot;
 
-internal static ж<slice<renamedUint8>> Ꮡbslice = new StaticBox<slice<renamedUint8>>(barray[..]);
-internal static ref slice<renamedUint8> bslice => ref Ꮡbslice.ValueSlot;
+internal static readonly ж<slice<renamedUint8>> Ꮡbslice = new StaticBox<slice<renamedUint8>>(barray[..]);
+internal static ref slice<renamedUint8> bslice => ref ((StaticBox<slice<renamedUint8>>)Ꮡbslice).ValueSlot;
 
 partial struct byteStringer /*num:byte*/;
 
@@ -1556,8 +1557,8 @@ public static void BenchmarkFprintIntNoAlloc(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-internal static ж<bytes.Buffer> ᏑmallocBuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
-internal static ref bytes.Buffer mallocBuf => ref ᏑmallocBuf.Value;
+internal static readonly ж<bytes.Buffer> ᏑmallocBuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ref bytes.Buffer mallocBuf => ref ((StaticBox<bytes.Buffer>)ᏑmallocBuf).ValueSlot;
 
 internal static ж<nint> mallocPointer; // A pointer so we know the interface value won't allocate.
 

@@ -98,10 +98,10 @@ internal static void initᴛcoverageSnapshot() { coverageSnapshot = new slice<by
 // _counters and _ecounters mark the start and end, respectively, of where
 // the 8-bit coverage counters reside in memory. They're known to cmd/link,
 // which specially assigns their addresses for this purpose.
-internal static ж<array<byte>> Ꮡ_counters = new StaticBox<array<byte>>(new array<byte>(0));
-internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
-internal static ж<array<byte>> Ꮡ_ecounters = new StaticBox<array<byte>>(new array<byte>(0));
-internal static ref array<byte> _ecounters => ref Ꮡ_ecounters.Value;
+internal static readonly ж<array<byte>> Ꮡ_counters = new StaticBox<array<byte>>(new array<byte>(0));
+internal static ref array<byte> _counters => ref ((StaticBox<array<byte>>)Ꮡ_counters).ValueSlot;
+internal static readonly ж<array<byte>> Ꮡ_ecounters = new StaticBox<array<byte>>(new array<byte>(0));
+internal static ref array<byte> _ecounters => ref ((StaticBox<array<byte>>)Ꮡ_ecounters).ValueSlot;
 
 // lookup table for faster power of two rounding
 internal static array<byte> pow2Table = new(256);

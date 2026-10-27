@@ -169,16 +169,16 @@ internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
 
 internal static encoding.TextUnmarshaler _ᴛ2ʗ = new json_internal_test_package.u8marshalжTextUnmarshaler(((ж<u8marshal>)nil));
 
-internal static ж<unmarshaler> Ꮡumtrue = new StaticBox<unmarshaler>(new unmarshaler(true));
-internal static ref unmarshaler umtrue => ref Ꮡumtrue.Value;
-internal static ж<slice<unmarshaler>> Ꮡumslice = new StaticBox<slice<unmarshaler>>(new unmarshaler[]{new(true)}.slice());
-internal static ref slice<unmarshaler> umslice => ref Ꮡumslice.ValueSlot;
+internal static readonly ж<unmarshaler> Ꮡumtrue = new StaticBox<unmarshaler>(new unmarshaler(true));
+internal static ref unmarshaler umtrue => ref ((StaticBox<unmarshaler>)Ꮡumtrue).ValueSlot;
+internal static readonly ж<slice<unmarshaler>> Ꮡumslice = new StaticBox<slice<unmarshaler>>(new unmarshaler[]{new(true)}.slice());
+internal static ref slice<unmarshaler> umslice => ref ((StaticBox<slice<unmarshaler>>)Ꮡumslice).ValueSlot;
 internal static ustruct umstruct = new ustruct(new unmarshaler(true));
 
-internal static ж<unmarshalerText> ᏑumtrueXY = new StaticBox<unmarshalerText>(new unmarshalerText("x"u8, "y"u8));
-internal static ref unmarshalerText umtrueXY => ref ᏑumtrueXY.Value;
-internal static ж<slice<unmarshalerText>> ᏑumsliceXY = new StaticBox<slice<unmarshalerText>>(new unmarshalerText[]{new("x"u8, "y"u8)}.slice());
-internal static ref slice<unmarshalerText> umsliceXY => ref ᏑumsliceXY.ValueSlot;
+internal static readonly ж<unmarshalerText> ᏑumtrueXY = new StaticBox<unmarshalerText>(new unmarshalerText("x"u8, "y"u8));
+internal static ref unmarshalerText umtrueXY => ref ((StaticBox<unmarshalerText>)ᏑumtrueXY).ValueSlot;
+internal static readonly ж<slice<unmarshalerText>> ᏑumsliceXY = new StaticBox<slice<unmarshalerText>>(new unmarshalerText[]{new("x"u8, "y"u8)}.slice());
+internal static ref slice<unmarshalerText> umsliceXY => ref ((StaticBox<slice<unmarshalerText>>)ᏑumsliceXY).ValueSlot;
 internal static ustructText umstructXY = new ustructText(new unmarshalerText("x"u8, "y"u8));
 
 internal static map<unmarshalerText, bool> ummapXY = new map<unmarshalerText, bool>{[new("x"u8, "y"u8)] = true};
@@ -1785,7 +1785,7 @@ public partial struct Small {
     public @string Tag;
 }
 
-internal static ж<All> ᏑallValue = new StaticBox<All>(new All(
+internal static readonly ж<All> ᏑallValue = new StaticBox<All>(new All(
     Bool: true,
     Int: 2,
     Int8: 3,
@@ -1823,9 +1823,9 @@ internal static ж<All> ᏑallValue = new StaticBox<All>(new All(
     PSmall: Ꮡ(new Small(Tag: "tag31"u8)),
     Interface: 5.2D
 ));
-internal static ref All allValue => ref ᏑallValue.Value;
+internal static ref All allValue => ref ((StaticBox<All>)ᏑallValue).ValueSlot;
 
-internal static ж<All> ᏑpallValue = new StaticBox<All>(new All(
+internal static readonly ж<All> ᏑpallValue = new StaticBox<All>(new All(
     PBool: ᏑallValue.of(All.ᏑBool),
     PInt: ᏑallValue.of(All.ᏑInt),
     PInt8: ᏑallValue.of(All.ᏑInt8),
@@ -1848,7 +1848,7 @@ internal static ж<All> ᏑpallValue = new StaticBox<All>(new All(
     PPSmall: ᏑallValue.of(All.ᏑPSmall),
     PInterface: ᏑallValue.of(All.ᏑInterface)
 ));
-internal static ref All pallValue => ref ᏑpallValue.Value;
+internal static ref All pallValue => ref ((StaticBox<All>)ᏑpallValue).ValueSlot;
 
 internal static @string allValueIndent = """
 {

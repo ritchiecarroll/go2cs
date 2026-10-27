@@ -1611,8 +1611,8 @@ internal static error writeKeyLog(this ref Config c, @string label, slice<byte> 
 
 // writerMutex protects all KeyLogWriters globally. It is rarely enabled,
 // and is only for debugging, so a global mutex saves space.
-internal static ж<sync.Mutex> ᏑwriterMutex = new StaticBox<sync.Mutex>(default(sync.Mutex));
-internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
+internal static readonly ж<sync.Mutex> ᏑwriterMutex = new StaticBox<sync.Mutex>(default(sync.Mutex));
+internal static ref sync.Mutex writerMutex => ref ((StaticBox<sync.Mutex>)ᏑwriterMutex).ValueSlot;
 
 // A Certificate is a chain of one or more certificates, leaf first.
 partial struct Certificate {
@@ -1761,8 +1761,8 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
     finally { if (ᒐd1) Ꮡc.of(lruSessionCache.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<Config> ᏑemptyConfig = new StaticBox<Config>(new Config());
-internal static ref Config emptyConfig => ref ᏑemptyConfig.Value;
+internal static readonly ж<Config> ᏑemptyConfig = new StaticBox<Config>(new Config());
+internal static ref Config emptyConfig => ref ((StaticBox<Config>)ᏑemptyConfig).ValueSlot;
 
 internal static ж<Config> defaultConfig() {
     return ᏑemptyConfig;

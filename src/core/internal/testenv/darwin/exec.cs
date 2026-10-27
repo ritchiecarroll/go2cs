@@ -106,8 +106,8 @@ public static @string Executable(testing.TB t) {
 
 internal static Func<(@string, error)> exePath = sync.OnceValues((@string, error) () => os.Executable());
 
-internal static ж<sync.Map> ᏑexecPaths = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map execPaths => ref ᏑexecPaths.Value; // path -> error
+internal static readonly ж<sync.Map> ᏑexecPaths = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map execPaths => ref ((StaticBox<sync.Map>)ᏑexecPaths).ValueSlot; // path -> error
 
 // MustHaveExecPath checks that the current system can start the named executable
 // using os.StartProcess or (more commonly) exec.Command.

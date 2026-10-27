@@ -71,7 +71,8 @@ public static bool Eq(this Point p, Point q) {
 // ZP is the zero [Point].
 //
 // Deprecated: Use a literal [image.Point] instead.
-public static Point ZP;
+public static readonly ж<Point> ᏑZP = new StaticBox<Point>(default(Point));
+public static ref Point ZP => ref ((StaticBox<Point>)ᏑZP).ValueSlot;
 
 // Pt is shorthand for [Point]{X, Y}.
 public static Point Pt(nint X, nint Y) {
@@ -265,7 +266,8 @@ public static color.Model ColorModel(this Rectangle r) {
 // ZR is the zero [Rectangle].
 //
 // Deprecated: Use a literal [image.Rectangle] instead.
-public static Rectangle ZR;
+public static readonly ж<Rectangle> ᏑZR = new StaticBox<Rectangle>(default(Rectangle));
+public static ref Rectangle ZR => ref ((StaticBox<Rectangle>)ᏑZR).ValueSlot;
 
 // Rect is shorthand for [Rectangle]{Pt(x0, y0), [Pt](x1, y1)}. The returned
 // rectangle has minimum and maximum coordinates swapped if necessary so that

@@ -39,7 +39,8 @@ public static bool Temporary(this errNetClosing e) {
 
 // ErrNetClosing is returned when a network descriptor is used after
 // it has been closed.
-public static errNetClosing ErrNetClosing = new errNetClosing(nil);
+public static readonly ж<errNetClosing> ᏑErrNetClosing = new StaticBox<errNetClosing>(new errNetClosing(nil));
+public static ref errNetClosing ErrNetClosing => ref ((StaticBox<errNetClosing>)ᏑErrNetClosing).ValueSlot;
 
 // ErrFileClosing is returned when a file descriptor is used after it
 // has been closed.
@@ -103,8 +104,9 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
 }
 
 // TestHookDidWritev is a hook for testing writev.
-public static Action<nint> TestHookDidWritev = (nint wrote) => {
-};
+public static readonly ж<Action<nint>> ᏑTestHookDidWritev = new StaticBox<Action<nint>>((nint wrote) => {
+});
+public static ref Action<nint> TestHookDidWritev => ref ((StaticBox<Action<nint>>)ᏑTestHookDidWritev).ValueSlot;
 
 // String is an internal string definition for methods/functions
 // that is not intended for use outside the standard libraries.

@@ -135,7 +135,7 @@ partial struct ValueTest {
     public bool WillFail;
 }
 
-public static slice<ValueTest> ValueTests = new ValueTest[]{
+public static readonly ж<slice<ValueTest>> ᏑValueTests = new StaticBox<slice<ValueTest>>(new ValueTest[]{
     new(Type: registry.SZ, Name: "String1"u8, Value: (@string)""u8),
     new(Type: registry.SZ, Name: "String2"u8, Value: (@string)"\u0000"u8, WillFail: true),
     new(Type: registry.SZ, Name: "String3"u8, Value: (@string)"Hello World"u8),
@@ -169,7 +169,8 @@ public static slice<ValueTest> ValueTests = new ValueTest[]{
     new(Type: registry.MULTI_SZ, Name: "MultiString7"u8, Value: new @string[]{"ab"u8, "\u0000"u8, "cd"u8}.slice(), WillFail: true),
     new(Type: registry.MULTI_SZ, Name: "MultiString8"u8, Value: new @string[]{"\u0000"u8, "cd"u8}.slice(), WillFail: true),
     new(Type: registry.MULTI_SZ, Name: "MultiString9"u8, Value: new @string[]{"ab"u8, "\u0000"u8}.slice(), WillFail: true)
-}.slice();
+}.slice());
+public static ref slice<ValueTest> ValueTests => ref ((StaticBox<slice<ValueTest>>)ᏑValueTests).ValueSlot;
 
 internal static void setValues(ж<testing.T> Ꮡt, registry.Key k) {
     foreach (var (_, test) in ValueTests) {

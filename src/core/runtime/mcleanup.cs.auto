@@ -309,8 +309,8 @@ internal static UntypedInt cleanupBlockSize => 512;
     internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
 }
 
-internal static ж<array<uint8>> ᏑcleanupFnPtrMask = new StaticBox<array<uint8>>(new uint8[]{0b111}.array());
-internal static ref array<uint8> cleanupFnPtrMask => ref ᏑcleanupFnPtrMask.Value;
+internal static readonly ж<array<uint8>> ᏑcleanupFnPtrMask = new StaticBox<array<uint8>>(new uint8[]{0b111}.array());
+internal static ref array<uint8> cleanupFnPtrMask => ref ((StaticBox<array<uint8>>)ᏑcleanupFnPtrMask).ValueSlot;
 
 // cleanupFn represents a cleanup function with it's argument, yet to be called.
 partial struct cleanupFn {
@@ -320,8 +320,8 @@ partial struct cleanupFn {
     internal @unsafe.Pointer arg; // pointer to argument to pass to cleanup function.
 }
 
-internal static ж<array<byte>> ᏑcleanupBlockPtrMask = new StaticBox<array<byte>>(new array<byte>(8));
-internal static ref array<byte> cleanupBlockPtrMask => ref ᏑcleanupBlockPtrMask.Value;
+internal static readonly ж<array<byte>> ᏑcleanupBlockPtrMask = new StaticBox<array<byte>>(new array<byte>(8));
+internal static ref array<byte> cleanupBlockPtrMask => ref ((StaticBox<array<byte>>)ᏑcleanupBlockPtrMask).ValueSlot;
 
 partial struct cleanupBlockHeader {
     internal sys.NotInHeap _;
@@ -729,8 +729,8 @@ internal static uint32 maxCleanupGs() {
 }
 
 // gcCleanups is the global cleanup queue.
-internal static ж<cleanupQueue> ᏑgcCleanups = new StaticBox<cleanupQueue>(new cleanupQueue());
-internal static ref cleanupQueue gcCleanups => ref ᏑgcCleanups.Value;
+internal static readonly ж<cleanupQueue> ᏑgcCleanups = new StaticBox<cleanupQueue>(new cleanupQueue());
+internal static ref cleanupQueue gcCleanups => ref ((StaticBox<cleanupQueue>)ᏑgcCleanups).ValueSlot;
 
 // runCleanups is the entrypoint for all cleanup-running goroutines.
 internal static void runCleanups() {

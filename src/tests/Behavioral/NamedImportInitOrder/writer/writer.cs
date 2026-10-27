@@ -5,7 +5,8 @@ using go.NamedImportInitOrder;
 
 partial class writer_package {
 
-public static @string Name = "writer";
+public static readonly ж<@string> ᏑName = new StaticBox<@string>("writer");
+public static ref @string Name => ref ((StaticBox<@string>)ᏑName).ValueSlot;
 
 [GoInit] internal static void init() {
     store.Value = "written-by-writer-init";

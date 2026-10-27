@@ -312,8 +312,8 @@ public static error SkipAll = fs.SkipAll;
 // Readdirnames.
 // type WalkFunc is a methodless func type — rendered inline as its base delegate
 
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;                   // for testing
+internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot;                   // for testing
 
 // walkDir recursively descends path, calling walkDirFn.
 internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirEntry, error, error> walkDirFn) {

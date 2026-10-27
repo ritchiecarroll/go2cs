@@ -572,7 +572,8 @@ public static void BenchmarkMapStringConversion(ж<testing.B> Ꮡb) {
     }
 }
 
-public static bool BoolSink;
+public static readonly ж<bool> ᏑBoolSink = new StaticBox<bool>(default(bool));
+public static ref bool BoolSink => ref ((StaticBox<bool>)ᏑBoolSink).ValueSlot;
 
 public static void BenchmarkMapInterfaceString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

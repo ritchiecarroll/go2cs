@@ -12,6 +12,7 @@ partial class startlinetest_package {
 public static partial nint AsmFunc();
 
 // Provided by runtime_test.
-public static Func<bool, nint> CallerStartLine;
+public static readonly ж<Func<bool, nint>> ᏑCallerStartLine = new StaticBox<Func<bool, nint>>(default(Func<bool, nint>));
+public static ref Func<bool, nint> CallerStartLine => ref ((StaticBox<Func<bool, nint>>)ᏑCallerStartLine).ValueSlot;
 
 } // end startlinetest_package

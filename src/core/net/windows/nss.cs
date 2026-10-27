@@ -16,8 +16,8 @@ partial class net_package {
 
 internal static readonly @string nssConfigPath = "/etc/nsswitch.conf"u8;
 
-internal static ж<nsswitchConfig> ᏑnssConfig = new StaticBox<nsswitchConfig>(default(nsswitchConfig));
-internal static ref nsswitchConfig nssConfig => ref ᏑnssConfig.Value;
+internal static readonly ж<nsswitchConfig> ᏑnssConfig = new StaticBox<nsswitchConfig>(default(nsswitchConfig));
+internal static ref nsswitchConfig nssConfig => ref ((StaticBox<nsswitchConfig>)ᏑnssConfig).ValueSlot;
 
 partial struct nsswitchConfig {
     internal Δsync.Once initOnce; // guards init of nsswitchConfig

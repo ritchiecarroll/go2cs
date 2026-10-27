@@ -33,10 +33,12 @@ public static UntypedInt RESOURCE_REQUIREMENTS_LIST => 10;
 public static UntypedInt QWORD => 11;
 
 // ErrShortBuffer is returned when the buffer was too short for the operation.
-public static syscall.Errno ErrShortBuffer = syscall.ERROR_MORE_DATA;
+public static readonly ж<syscall.Errno> ᏑErrShortBuffer = new StaticBox<syscall.Errno>(syscall.ERROR_MORE_DATA);
+public static ref syscall.Errno ErrShortBuffer => ref ((StaticBox<syscall.Errno>)ᏑErrShortBuffer).ValueSlot;
 
 // ErrNotExist is returned when a registry key or value does not exist.
-public static syscall.Errno ErrNotExist = syscall.ERROR_FILE_NOT_FOUND;
+public static readonly ж<syscall.Errno> ᏑErrNotExist = new StaticBox<syscall.Errno>(syscall.ERROR_FILE_NOT_FOUND);
+public static ref syscall.Errno ErrNotExist => ref ((StaticBox<syscall.Errno>)ᏑErrNotExist).ValueSlot;
 
 // ErrUnexpectedType is returned by Get*Value when the value's type was unexpected.
 public static error ErrUnexpectedType = errors.New("unexpected key value type"u8);

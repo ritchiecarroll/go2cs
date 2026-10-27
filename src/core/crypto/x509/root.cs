@@ -19,10 +19,10 @@ partial class x509_package {
 // See go.dev/issue/67401.
 //
 //go:linkname systemRoots
-internal static ж<sync.Once> Ꮡonce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once once => ref Ꮡonce.Value;
-internal static ж<sync.RWMutex> ᏑsystemRootsMu = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
-internal static ref sync.RWMutex systemRootsMu => ref ᏑsystemRootsMu.Value;
+internal static readonly ж<sync.Once> Ꮡonce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once once => ref ((StaticBox<sync.Once>)Ꮡonce).ValueSlot;
+internal static readonly ж<sync.RWMutex> ᏑsystemRootsMu = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
+internal static ref sync.RWMutex systemRootsMu => ref ((StaticBox<sync.RWMutex>)ᏑsystemRootsMu).ValueSlot;
 public static ж<CertPool> systemRoots;
 internal static error systemRootsErr;
 internal static bool fallbacksSet;

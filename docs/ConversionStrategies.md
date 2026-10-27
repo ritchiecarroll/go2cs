@@ -223,7 +223,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 <!-- sources, one per row, top to bottom (every C# form is copied from real emission):
   src/core/bufio/bufio.cs:17#3ddbb0 · src/core/bufio/bufio.cs:14#a6e909 ·
   src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#063eb6 + src/core/image/png/reader.cs:1202#c96c26 ·
-  (the lazy holder: src/core/unicode/tables.cs:2884 `[GoLazy] partial class lazyᴛ_Lu {`) ·
+  (the lazy holder: src/core/unicode/tables.cs:2886 `[GoLazy] partial class lazyᴛ_Lu {`) ·
   src/core/reflect/all_test.cs:64#791abc + src/core/reflect/go2cs_test_host.cs:1#0abf19 ·
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:162#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
@@ -317,8 +317,8 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#27f39f; GoCallVariations.cs.target:45#b0efbe and UnsafeOperations.cs.target:26#27f39f; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1186#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:55#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:45#b0efbe and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:55#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#4614b9; GoCallVariations.cs.target:52#1baedb; GoCallVariations.cs.target:53#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:305#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:82#c69f13).
@@ -335,7 +335,7 @@ _ΔpN: src/go2cs/visitFuncDecl.go:1373-1387#03b3c7 and :2834-2842#701c82; :56-64
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:75-79#b0ed6c and :124#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals).
-lazyᴛ_Lu (the ᴛ row's holder example): src/core/unicode/tables.cs:2884 `[GoLazy] partial class lazyᴛ_Lu {`. -->
+lazyᴛ_Lu (the ᴛ row's holder example): src/core/unicode/tables.cs:2886 `[GoLazy] partial class lazyᴛ_Lu {`. -->
 
 **A first example.** This Go program declares a struct type, a method with a pointer receiver, and a
 function that takes a pointer and binds the method to a variable:
@@ -1320,7 +1320,7 @@ var _Lu = &RangeTable{
 	Upper  = _Lu // Upper is the set of Unicode upper case letters.
 	Lu     = _Lu // Lu is the set of Unicode characters in category Lu (Letter, uppercase).
 ```
-<!-- source: src/core/unicode/tables.cs:2884-5185 -->
+<!-- source: src/core/unicode/tables.cs:2886-5187 -->
 ```csharp
 [GoLazy] partial class lazyᴛ_Lu { internal static ж<RangeTable> _Lu = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -1338,8 +1338,8 @@ the go2cs [source generator](#source-generators), gives the package class an acc
 name, `internal static ref ж<RangeTable> _Lu => ref lazyᴛ_Lu._Lu;`, so code reads and writes `_Lu` as it
 would a field, and neither the package's static constructor nor `package_init.cs` builds it.
 <!-- the holder line: src/go2cs/lazyPackageVarOperations.go:576 `func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`;
-     the accessor: src/gen/go2cs-gen/LazyHolderGenerator.cs:129 `source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`,
-     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 `"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`;
+     the accessor: src/gen/go2cs-gen/LazyHolderGenerator.cs:134 `source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`,
+     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:165 `"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`;
      left out of the ordered static constructor: src/go2cs/initOrderOperations.go:286 `if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`. -->
 
 **Which vars are built this way.** The value must not depend on when it is built, and building it must do
@@ -1349,8 +1349,8 @@ and reads of same-package vars that are themselves eligible and never assigned o
 imported var or of a field, an index or a dereference, a method value, `&` of storage, a channel receive or a type
 assertion keeps the var eager. So does a var declared in a `_test.go` file, a var whose declaration is hand-owned
 and a var that copies another whose storage a slice aliases. A var whose address is taken keeps its heap box:
-the holder holds the box, `[GoLazy] partial class lazyᴛX { internal static ж<T> ᏑX = new StaticBox<T>(…); }`,
-the `ref` property `X => ref ᏑX.Value` follows it unchanged, and `&X` is the same box before and after the first
+the holder holds the box, `[GoLazy] partial class lazyᴛX { internal static readonly ж<T> ᏑX = new StaticBox<T>(…); }`,
+the `ref` property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` follows it unchanged, and `&X` is the same box before and after the first
 read. A var whose address only a pointer-receiver method value takes, such as `f := X.M`, has no box of its own,
 so it stays eager. Of the eligible vars, a var is built on its
 first read when its initializer has at least 20 syntax nodes, or when it reads a var that is, because an eager
@@ -1381,7 +1381,7 @@ marked `[GoLazy(Initial = true)]`: the generator keeps `Lu`'s initial value in t
 each initializer built on a first read reads that field, as `["Lu"u8] = lazyᴛLu.initial`. An exported var that
 such an initializer reads is always built on its first read too, so it has a holder to keep the value in.
 <!-- src/core/unicode/tables.cs:23 `["Lu"u8] = lazyᴛLu.initial,` (Go: GOROOT/src/unicode/tables.go:22 `"Lu": Lu,`);
-     the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:132 `source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");`;
+     the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:137 `source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");`;
      the importer's assignment is the LazyPackageVars behavioral test's case (tables.Heavy, read by ByName). -->
 
 **A package with nothing left to order has no `package_init.cs`.** A var built on its first read never enters
@@ -2299,7 +2299,7 @@ internal static uint32 lowestSetBit(uint32 x) {
 ```
 
 Here `((uint32)0 - x)` is the negation. Both operands of `&` are `uint32`, so the `&` has no cast.
-<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1275-1281#05e413; golden
+<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1294-1300#05e413; golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:19
      `fmt.Println(z & ((uint64)0 - z));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
      C# spec: unary minus on uint converts to long, on byte/ushort promotes to int, on ulong/nuint
@@ -10448,15 +10448,16 @@ form, so both sides see one variable. [Function Values and Closures](#function-v
 covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1155, 1162#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1139-1141 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2845-2854#4ff829); go/defer arms: escapeAnalysisOperations.go:994, 1038#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2102-2107#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2166-2174, 1982-1996#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:167#5420af. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:19-23 (`ref var t = ref heap<Tally>(out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:38-42 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:215-220 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:343#ca6b44. heap overloads: src/core/golib/builtin.cs:2858#f029f1 (zero value) and :2884#d2c34a (starting value). -->
 
 A package-level variable whose address is taken is declared the same way, as a static box `ᏑX` and a `ref`
-property `X => ref ᏑX.Value` that reads and writes through it, so `&X` is `ᏑX`. When go2cs builds the
+property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` that reads and writes through it, so `&X` is `ᏑX`. Every exported
+variable of a value type is declared so too, because another package may take its address. When go2cs builds the
 variable on its first read instead of at startup, the `[GoLazy]` holder class that builds it holds the box,
 and `&X` names the same box before and after that read
 ([Package-Level Variable Initialization Order](#package-level-variable-initialization-order)).
 <!-- eager, the field-addressed var of AnonymousStructs (Go src/tests/Behavioral/AnonymousStructs/AnonymousStructs.go:16
-     `var settings = struct {`): AnonymousStructs.cs.target:17 `internal static ж<settingsᴛ1> Ꮡsettings =`
-     and :18 `internal static ref settingsᴛ1 settings => ref Ꮡsettings.Value;`.
-     Built on first read: src/tests/Behavioral/LazyPackageVars/tables/tables.cs:40 `[GoLazy] partial class lazyᴛGrid {`
-     and :41 `public static ref array<nint> Grid => ref ᏑGrid.Value;`; the importer's `&tables.Grid` is
+     `var settings = struct {`): AnonymousStructs.cs.target:17 `internal static readonly ж<settingsᴛ1> Ꮡsettings =`
+     and :18 `internal static ref settingsᴛ1 settings => ref ((StaticBox<settingsᴛ1>)Ꮡsettings).ValueSlot;`.
+     Built on first read: src/tests/Behavioral/LazyPackageVars/tables/tables.cs:45 `[GoLazy] partial class lazyᴛGrid {`
+     and :46 `public static ref array<nint> Grid => ref ((StaticBox<array<nint>>)ᏑGrid).ValueSlot;`; the importer's `&tables.Grid` is
      src/tests/Behavioral/LazyPackageVars/main.cs.target:31 `tables.ᏑGrid == before`.
      Guard: TestLazyPackageVarCarriesItsBox (src/go2cs/lazyPackageVar_test.go). -->
 
@@ -11491,7 +11492,7 @@ or parameter shape, or a literal in an `any` slot. These are the generators conv
      EscapeRegistryGenerator, FieldAccessGenerator, MemberRecordGenerator, NativeArrayOpenerGenerator,
      RuntimeInitHookGenerator) are described in the reference, all but RuntimeInitHookGenerator in its
      generator list. LazyHolderGenerator's accessor:
-     src/gen/go2cs-gen/LazyHolderGenerator.cs:129 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`); guard GenTests LazyHolderGeneratorTests. -->
+     src/gen/go2cs-gen/LazyHolderGenerator.cs:134 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`); guard GenTests LazyHolderGeneratorTests. -->
 
 ### A converted struct lists only its fields
 

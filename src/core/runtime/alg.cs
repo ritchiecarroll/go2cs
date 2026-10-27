@@ -57,8 +57,8 @@ internal static uintptr memhash_varlen(@unsafe.Pointer Δp, uintptr h) {
 // runtime variable to check if the processor we're running on
 // actually supports the instructions used by the AES-based
 // hash implementation.
-internal static ж<bool> ᏑuseAeshash = new StaticBox<bool>(default(bool));
-internal static ref bool useAeshash => ref ᏑuseAeshash.Value;
+internal static readonly ж<bool> ᏑuseAeshash = new StaticBox<bool>(default(bool));
+internal static ref bool useAeshash => ref ((StaticBox<bool>)ᏑuseAeshash).ValueSlot;
 
 // in asm_*.s
 
@@ -430,8 +430,8 @@ internal partial interface ifaceHash_i /*dyn*/ {
 internal static UntypedInt hashRandomBytes => /* goarch.PtrSize / 4 * 64 */ 128;
 
 // used in asm_{386,amd64,arm64}.s to seed the hash function
-internal static ж<array<byte>> Ꮡaeskeysched = new StaticBox<array<byte>>(new array<byte>(128));
-internal static ref array<byte> aeskeysched => ref Ꮡaeskeysched.Value;
+internal static readonly ж<array<byte>> Ꮡaeskeysched = new StaticBox<array<byte>>(new array<byte>(128));
+internal static ref array<byte> aeskeysched => ref ((StaticBox<array<byte>>)Ꮡaeskeysched).ValueSlot;
 
 // used in hash{32,64}.go to seed the hash function
 internal static array<uintptr> hashkey = new(4);

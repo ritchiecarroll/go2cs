@@ -14,8 +14,8 @@ partial struct outer {
     internal nint tag;
 }
 
-internal static ж<outer> Ꮡg = new StaticBox<outer>(default(outer));
-internal static ref outer g => ref Ꮡg.Value;
+internal static readonly ж<outer> Ꮡg = new StaticBox<outer>(default(outer));
+internal static ref outer g => ref ((StaticBox<outer>)Ꮡg).ValueSlot;
 
 internal static partial void keep(ж<outer> Ꮡp) {
     _ = Ꮡp;

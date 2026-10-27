@@ -54,7 +54,8 @@ public static (uint32 major, uint32 minor, uint32 build) Version() {
 // to a maximum of two. Please see:
 // https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-transmitfile
 // https://golang.org/issue/73746
-public static Func<bool> SupportUnlimitedTransmitFile;
+public static readonly ж<Func<bool>> ᏑSupportUnlimitedTransmitFile = new StaticBox<Func<bool>>(default(Func<bool>));
+public static ref Func<bool> SupportUnlimitedTransmitFile => ref ((StaticBox<Func<bool>>)ᏑSupportUnlimitedTransmitFile).ValueSlot;
 internal static void initᴛSupportUnlimitedTransmitFile() { SupportUnlimitedTransmitFile = sync.OnceValue(bool () => {
     var info = getVersionInfo();
     return (~info).productType != VER_NT_WORKSTATION;
@@ -115,7 +116,8 @@ public static bool SupportTCPKeepAliveCount() {
 // SupportTCPInitialRTONoSYNRetransmissions indicates whether the current
 // Windows version supports the TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS.
 // The minimal requirement is Windows 10.0.16299.
-public static Func<bool> SupportTCPInitialRTONoSYNRetransmissions;
+public static readonly ж<Func<bool>> ᏑSupportTCPInitialRTONoSYNRetransmissions = new StaticBox<Func<bool>>(default(Func<bool>));
+public static ref Func<bool> SupportTCPInitialRTONoSYNRetransmissions => ref ((StaticBox<Func<bool>>)ᏑSupportTCPInitialRTONoSYNRetransmissions).ValueSlot;
 internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { SupportTCPInitialRTONoSYNRetransmissions = sync.OnceValue(bool () => {
     var (major, _, build) = Version();
     return major >= 10 && build >= 16299;
@@ -124,7 +126,7 @@ internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { Support
 // SupportUnixSocket indicates whether the current Windows version supports
 // Unix Domain Sockets.
 // The minimal requirement is Windows 10.0.17063.
-public static Func<bool> SupportUnixSocket = sync.OnceValue(bool () => {
+public static readonly ж<Func<bool>> ᏑSupportUnixSocket = new StaticBox<Func<bool>>(sync.OnceValue(bool () => {
     ref var size = ref heap(new uint32(), out var Ꮡsize);
     // First call to get the required buffer size in bytes.
     // Ignore the error, it will always fail.
@@ -142,6 +144,7 @@ public static Func<bool> SupportUnixSocket = sync.OnceValue(bool () => {
         }
     }
     return false;
-});
+}));
+public static ref Func<bool> SupportUnixSocket => ref ((StaticBox<Func<bool>>)ᏑSupportUnixSocket).ValueSlot;
 
 } // end windows_package

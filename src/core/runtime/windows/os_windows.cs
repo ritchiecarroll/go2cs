@@ -226,8 +226,8 @@ internal static stdFunction windowsFindfunc(uintptr lib, slice<byte> name) {
 
 internal static UntypedInt _MAX_PATH => 260; // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
 
-internal static ж<array<byte>> ᏑsysDirectory = new StaticBox<array<byte>>(new array<byte>(261));
-internal static ref array<byte> sysDirectory => ref ᏑsysDirectory.Value;
+internal static readonly ж<array<byte>> ᏑsysDirectory = new StaticBox<array<byte>>(new array<byte>(261));
+internal static ref array<byte> sysDirectory => ref ((StaticBox<array<byte>>)ᏑsysDirectory).ValueSlot;
 
 internal static uintptr sysDirectoryLen;
 
@@ -355,8 +355,8 @@ internal static uintptr getPageSize() {
 // in sys_windows_386.s and sys_windows_amd64.s:
 internal static partial uint32 getlasterror();
 
-internal static ж<uint32> ᏑtimeBeginPeriodRetValue = new StaticBox<uint32>(default(uint32));
-internal static ref uint32 timeBeginPeriodRetValue => ref ᏑtimeBeginPeriodRetValue.Value;
+internal static readonly ж<uint32> ᏑtimeBeginPeriodRetValue = new StaticBox<uint32>(default(uint32));
+internal static ref uint32 timeBeginPeriodRetValue => ref ((StaticBox<uint32>)ᏑtimeBeginPeriodRetValue).ValueSlot;
 
 // osRelaxMinNS indicates that sysmon shouldn't osRelax if the next
 // timer is less than 60 ms from now. Since osRelaxing may reduce
@@ -543,8 +543,8 @@ internal static void goenvs() {
 }
 
 // exiting is set to non-zero when the process is exiting.
-internal static ж<uint32> Ꮡexiting = new StaticBox<uint32>(default(uint32));
-internal static ref uint32 exiting => ref Ꮡexiting.Value;
+internal static readonly ж<uint32> Ꮡexiting = new StaticBox<uint32>(default(uint32));
+internal static ref uint32 exiting => ref ((StaticBox<uint32>)Ꮡexiting).ValueSlot;
 
 //go:nosplit
 internal static void exit(int32 code) {
@@ -601,8 +601,8 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
 }
 
 internal static array<uint16> utf16ConsoleBack = new(1000);
-internal static ж<mutex> Ꮡutf16ConsoleBackLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex utf16ConsoleBackLock => ref Ꮡutf16ConsoleBackLock.Value;
+internal static readonly ж<mutex> Ꮡutf16ConsoleBackLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex utf16ConsoleBackLock => ref ((StaticBox<mutex>)Ꮡutf16ConsoleBackLock).ValueSlot;
 
 // writeConsole writes bufLen bytes from buf to the console File.
 // It returns the number of bytes written.
@@ -1068,8 +1068,8 @@ internal static uintptr ctrlHandler(uint32 _type) {
 // called from zcallback_windows_*.s to sys_windows_*.s
 internal static partial void callbackasm1();
 
-internal static ж<uintptr> Ꮡprofiletimer = new StaticBox<uintptr>(default(uintptr));
-internal static ref uintptr profiletimer => ref Ꮡprofiletimer.Value;
+internal static readonly ж<uintptr> Ꮡprofiletimer = new StaticBox<uintptr>(default(uintptr));
+internal static ref uintptr profiletimer => ref ((StaticBox<uintptr>)Ꮡprofiletimer).ValueSlot;
 
 internal static void profilem(ж<m> Ꮡmp, uintptr thread) {
     // Align Context to 16 bytes.
@@ -1163,8 +1163,8 @@ internal const bool preemptMSupported = true;
 
 // suspendLock protects simultaneous SuspendThread operations from
 // suspending each other.
-internal static ж<mutex> ᏑsuspendLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex suspendLock => ref ᏑsuspendLock.Value;
+internal static readonly ж<mutex> ᏑsuspendLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex suspendLock => ref ((StaticBox<mutex>)ᏑsuspendLock).ValueSlot;
 
 // threadPausedLockRank warns the runtime against acquiring new locks on this
 // thread while it has another thread paused. The holder of this lock rank is

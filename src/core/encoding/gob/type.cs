@@ -37,8 +37,8 @@ internal static UntypedInt xGob => /* 1 + iota */ 1; // GobEncoder or GobDecoder
 internal static UntypedInt xBinary => 2; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
 internal static UntypedInt xText => 3; // encoding.TextMarshaler or encoding.TextUnmarshaler
 
-internal static ж<sync.Map> ᏑuserTypeCache = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map userTypeCache => ref ᏑuserTypeCache.Value; // map[reflect.Type]*userTypeInfo
+internal static readonly ж<sync.Map> ᏑuserTypeCache = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map userTypeCache => ref ((StaticBox<sync.Map>)ᏑuserTypeCache).ValueSlot; // map[reflect.Type]*userTypeInfo
 
 // validUserType returns, and saves, the information associated with user-provided type rt.
 // If the user type is not valid, err will be non-nil. To be used when the error handler
@@ -179,8 +179,8 @@ internal static ж<userTypeInfo> userType(reflectꓸType rt) {
 // Internally, typeIds are used as keys to a map to recover the underlying type info.
 public partial struct typeId /*num:int32*/;
 
-internal static ж<sync.Mutex> ᏑtypeLock = new StaticBox<sync.Mutex>(default(sync.Mutex));
-internal static ref sync.Mutex typeLock => ref ᏑtypeLock.Value; // set while building a type
+internal static readonly ж<sync.Mutex> ᏑtypeLock = new StaticBox<sync.Mutex>(default(sync.Mutex));
+internal static ref sync.Mutex typeLock => ref ((StaticBox<sync.Mutex>)ᏑtypeLock).ValueSlot; // set while building a type
 
 internal static UntypedInt firstUserId => 64; // lowest id number granted to user
 
@@ -787,8 +787,8 @@ partial struct typeInfo {
 // the map and atomically update the pointer to point to the new map.
 // Under heavy read contention, this is significantly faster than a map
 // protected by a mutex.
-internal static ж<atomic.Value> ᏑtypeInfoMap = new StaticBox<atomic.Value>(default(atomic.Value));
-internal static ref atomic.Value typeInfoMap => ref ᏑtypeInfoMap.Value;
+internal static readonly ж<atomic.Value> ᏑtypeInfoMap = new StaticBox<atomic.Value>(default(atomic.Value));
+internal static ref atomic.Value typeInfoMap => ref ((StaticBox<atomic.Value>)ᏑtypeInfoMap).ValueSlot;
 
 // typeInfoMapInit is used instead of typeInfoMap during init time,
 // as types are registered sequentially during init and we can save
@@ -934,10 +934,10 @@ partial interface GobDecoder {
     error GobDecode(slice<byte> _);
 }
 
-internal static ж<sync.Map> ᏑnameToConcreteType = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map nameToConcreteType => ref ᏑnameToConcreteType.Value; // map[string]reflect.Type
-internal static ж<sync.Map> ᏑconcreteTypeToName = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map concreteTypeToName => ref ᏑconcreteTypeToName.Value; // map[reflect.Type]string
+internal static readonly ж<sync.Map> ᏑnameToConcreteType = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map nameToConcreteType => ref ((StaticBox<sync.Map>)ᏑnameToConcreteType).ValueSlot; // map[string]reflect.Type
+internal static readonly ж<sync.Map> ᏑconcreteTypeToName = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map concreteTypeToName => ref ((StaticBox<sync.Map>)ᏑconcreteTypeToName).ValueSlot; // map[reflect.Type]string
 
 // RegisterName is like [Register] but uses the provided name rather than the
 // type's default.

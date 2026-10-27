@@ -327,8 +327,8 @@ internal static ж<atomic.Pointer<spanSetBlock>> lookup(this spanSetSpinePointer
 }
 
 // spanSetBlockPool is a global pool of spanSetBlocks.
-internal static ж<spanSetBlockAlloc> ᏑspanSetBlockPool = new StaticBox<spanSetBlockAlloc>(default(spanSetBlockAlloc));
-internal static ref spanSetBlockAlloc spanSetBlockPool => ref ᏑspanSetBlockPool.Value;
+internal static readonly ж<spanSetBlockAlloc> ᏑspanSetBlockPool = new StaticBox<spanSetBlockAlloc>(default(spanSetBlockAlloc));
+internal static ref spanSetBlockAlloc spanSetBlockPool => ref ((StaticBox<spanSetBlockAlloc>)ᏑspanSetBlockPool).ValueSlot;
 
 // spanSetBlockAlloc represents a concurrent pool of spanSetBlocks.
 partial struct spanSetBlockAlloc {

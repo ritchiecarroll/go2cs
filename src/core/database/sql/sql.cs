@@ -39,8 +39,8 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class sql_package {
 
-internal static ж<sync.RWMutex> ᏑdriversMu = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
-internal static ref sync.RWMutex driversMu => ref ᏑdriversMu.Value;
+internal static readonly ж<sync.RWMutex> ᏑdriversMu = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
+internal static ref sync.RWMutex driversMu => ref ((StaticBox<sync.RWMutex>)ᏑdriversMu).ValueSlot;
 
 // drivers should be an internal detail,
 // but widely used packages access it using linkname.

@@ -55,7 +55,7 @@ using static go.crypto.@internal.fips140deps.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140deps/cpu/cpu.go", "cpu.cs", "ABEqgoKCgpSClIKCgoKCgoKClIKCgoKCgoKC")]
+[assembly: go.GoPositionMap("crypto/internal/fips140deps/cpu/cpu.go", "cpu.cs", "ABEqkpKSkqSSpJKSkpKSkpKSpJKSkpKSkpKS")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140deps;

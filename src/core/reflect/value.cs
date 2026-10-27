@@ -248,8 +248,8 @@ public static bool CanSet(this ΔValue v) {
 
 // go2cs generated this placeholder — func CallSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<bool> ᏑcallGC = new StaticBox<bool>(default(bool));
-internal static ref bool callGC => ref ᏑcallGC.Value; // for testing; see TestCallMethodJump and TestCallArgLive
+internal static readonly ж<bool> ᏑcallGC = new StaticBox<bool>(default(bool));
+internal static ref bool callGC => ref ((StaticBox<bool>)ᏑcallGC).ValueSlot; // for testing; see TestCallMethodJump and TestCallArgLive
 
 internal const bool debugReflectCall = false;
 
@@ -1871,8 +1871,8 @@ public static ΔValue Indirect(ΔValue v) {
 // go2cs generated this placeholder — func Zero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:linkname zeroVal runtime.zeroVal
-internal static ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(new array<byte>(1024));
-internal static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
+internal static readonly ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(new array<byte>(1024));
+internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroVal).ValueSlot;
 
 // go2cs generated this placeholder — func New is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

@@ -21,8 +21,8 @@ public static (int32 fd, uintptr errno) EpollCreate1(int32 flags) {
     return ((int32)r1, e);
 }
 
-internal static ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
-internal static ref uintptr _zero => ref Ꮡ_zero.Value;
+internal static readonly ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
+internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlot;
 
 public static (int32 n, uintptr errno) EpollWait(int32 epfd, slice<EpollEvent> events, int32 maxev, int32 waitms) {
     @unsafe.Pointer ev = default!;

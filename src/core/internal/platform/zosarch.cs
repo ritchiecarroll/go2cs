@@ -7,7 +7,7 @@ partial class platform_package {
 
 // List is the list of all valid GOOS/GOARCH combinations,
 // including known-broken ports.
-[GoLazy] partial class lazyᴛList { public static slice<OSArch> List = new OSArch[]{
+[GoLazy] partial class lazyᴛList { public static readonly ж<slice<OSArch>> ᏑList = new StaticBox<slice<OSArch>>(new OSArch[]{
     new("aix"u8, "ppc64"u8),
     new("android"u8, "386"u8),
     new("android"u8, "amd64"u8),
@@ -58,7 +58,8 @@ partial class platform_package {
     new("windows"u8, "386"u8),
     new("windows"u8, "amd64"u8),
     new("windows"u8, "arm64"u8)
-}.slice(); }
+}.slice()); }
+public static ref slice<OSArch> List => ref ((StaticBox<slice<OSArch>>)ᏑList).ValueSlot;
 
 [GoLazy] partial class lazyᴛdistInfo { internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("aix"u8, "ppc64"u8)] = new(CgoSupported: true),

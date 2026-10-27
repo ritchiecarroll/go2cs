@@ -6,7 +6,8 @@ namespace go.@internal.runtime;
 
 partial class sys_package {
 
-public static bool DITSupported = false;
+public static readonly ж<bool> ᏑDITSupported = new StaticBox<bool>(false);
+public static ref bool DITSupported => ref ((StaticBox<bool>)ᏑDITSupported).ValueSlot;
 
 public static bool EnableDIT() {
     return false;

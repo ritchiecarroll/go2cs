@@ -29,69 +29,95 @@ using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
 [GoFieldAccess(typeof(global::go.runtime_package.Δsliceᴛ))]
 partial class runtime_internal_test_package {
 
-public static Func<uint64, uint64, uint64> Fadd64 = fadd64;
+public static readonly ж<Func<uint64, uint64, uint64>> ᏑFadd64 = new StaticBox<Func<uint64, uint64, uint64>>(fadd64);
+public static ref Func<uint64, uint64, uint64> Fadd64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFadd64).ValueSlot;
 
-public static Func<uint64, uint64, uint64> Fsub64 = fsub64;
+public static readonly ж<Func<uint64, uint64, uint64>> ᏑFsub64 = new StaticBox<Func<uint64, uint64, uint64>>(fsub64);
+public static ref Func<uint64, uint64, uint64> Fsub64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFsub64).ValueSlot;
 
-public static Func<uint64, uint64, uint64> Fmul64 = fmul64;
+public static readonly ж<Func<uint64, uint64, uint64>> ᏑFmul64 = new StaticBox<Func<uint64, uint64, uint64>>(fmul64);
+public static ref Func<uint64, uint64, uint64> Fmul64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFmul64).ValueSlot;
 
-public static Func<uint64, uint64, uint64> Fdiv64 = fdiv64;
+public static readonly ж<Func<uint64, uint64, uint64>> ᏑFdiv64 = new StaticBox<Func<uint64, uint64, uint64>>(fdiv64);
+public static ref Func<uint64, uint64, uint64> Fdiv64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFdiv64).ValueSlot;
 
-public static Func<uint64, uint32> F64to32 = f64to32;
+public static readonly ж<Func<uint64, uint32>> ᏑF64to32 = new StaticBox<Func<uint64, uint32>>(f64to32);
+public static ref Func<uint64, uint32> F64to32 => ref ((StaticBox<Func<uint64, uint32>>)ᏑF64to32).ValueSlot;
 
-public static Func<uint32, uint64> F32to64 = f32to64;
+public static readonly ж<Func<uint32, uint64>> ᏑF32to64 = new StaticBox<Func<uint32, uint64>>(f32to64);
+public static ref Func<uint32, uint64> F32to64 => ref ((StaticBox<Func<uint32, uint64>>)ᏑF32to64).ValueSlot;
 
-public static Func<uint64, uint64, (int32, bool)> Fcmp64 = fcmp64;
+public static readonly ж<Func<uint64, uint64, (int32, bool)>> ᏑFcmp64 = new StaticBox<Func<uint64, uint64, (int32, bool)>>(fcmp64);
+public static ref Func<uint64, uint64, (int32, bool)> Fcmp64 => ref ((StaticBox<Func<uint64, uint64, (int32, bool)>>)ᏑFcmp64).ValueSlot;
 
-public static Func<int64, uint64> Fintto64 = fintto64;
+public static readonly ж<Func<int64, uint64>> ᏑFintto64 = new StaticBox<Func<int64, uint64>>(fintto64);
+public static ref Func<int64, uint64> Fintto64 => ref ((StaticBox<Func<int64, uint64>>)ᏑFintto64).ValueSlot;
 
-public static Func<uint64, (int64, bool)> F64toint = f64toint;
+public static readonly ж<Func<uint64, (int64, bool)>> ᏑF64toint = new StaticBox<Func<uint64, (int64, bool)>>(f64toint);
+public static ref Func<uint64, (int64, bool)> F64toint => ref ((StaticBox<Func<uint64, (int64, bool)>>)ᏑF64toint).ValueSlot;
 
-public static Action Entersyscall;
+public static readonly ж<Action> ᏑEntersyscall = new StaticBox<Action>(default(Action));
+public static ref Action Entersyscall => ref ((StaticBox<Action>)ᏑEntersyscall).ValueSlot;
 internal static void initᴛEntersyscall() { Entersyscall = entersyscall; }
 
-public static Action Exitsyscall;
+public static readonly ж<Action> ᏑExitsyscall = new StaticBox<Action>(default(Action));
+public static ref Action Exitsyscall => ref ((StaticBox<Action>)ᏑExitsyscall).ValueSlot;
 internal static void initᴛExitsyscall() { Exitsyscall = exitsyscall; }
 
-public static Func<bool> LockedOSThread = lockedOSThread;
+public static readonly ж<Func<bool>> ᏑLockedOSThread = new StaticBox<Func<bool>>(lockedOSThread);
+public static ref Func<bool> LockedOSThread => ref ((StaticBox<Func<bool>>)ᏑLockedOSThread).ValueSlot;
 
-public static Func<ж<uintptr>, uintptr, uintptr> Xadduintptr = atomic.Xadduintptr;
+public static readonly ж<Func<ж<uintptr>, uintptr, uintptr>> ᏑXadduintptr = new StaticBox<Func<ж<uintptr>, uintptr, uintptr>>(atomic.Xadduintptr);
+public static ref Func<ж<uintptr>, uintptr, uintptr> Xadduintptr => ref ((StaticBox<Func<ж<uintptr>, uintptr, uintptr>>)ᏑXadduintptr).ValueSlot;
 
 public static ж<bool> ReadRandomFailed;
 internal static void initᴛReadRandomFailed() { ReadRandomFailed = ᏑreadRandomFailed; }
 
-public static Func<float64, float64> Fastlog2;
+public static readonly ж<Func<float64, float64>> ᏑFastlog2 = new StaticBox<Func<float64, float64>>(default(Func<float64, float64>));
+public static ref Func<float64, float64> Fastlog2 => ref ((StaticBox<Func<float64, float64>>)ᏑFastlog2).ValueSlot;
 internal static void initᴛFastlog2() { Fastlog2 = fastlog2; }
 
-public static Func<@string, (int64, bool)> ParseByteCount = parseByteCount;
+public static readonly ж<Func<@string, (int64, bool)>> ᏑParseByteCount = new StaticBox<Func<@string, (int64, bool)>>(parseByteCount);
+public static ref Func<@string, (int64, bool)> ParseByteCount => ref ((StaticBox<Func<@string, (int64, bool)>>)ᏑParseByteCount).ValueSlot;
 
-public static Func<int64> Nanotime = nanotime;
+public static readonly ж<Func<int64>> ᏑNanotime = new StaticBox<Func<int64>>(nanotime);
+public static ref Func<int64> Nanotime => ref ((StaticBox<Func<int64>>)ᏑNanotime).ValueSlot;
 
-public static Func<int64> Cputicks = cputicks;
+public static readonly ж<Func<int64>> ᏑCputicks = new StaticBox<Func<int64>>(cputicks);
+public static ref Func<int64> Cputicks => ref ((StaticBox<Func<int64>>)ᏑCputicks).ValueSlot;
 
-public static Func<int64> CyclesPerSecond;
+public static readonly ж<Func<int64>> ᏑCyclesPerSecond = new StaticBox<Func<int64>>(default(Func<int64>));
+public static ref Func<int64> CyclesPerSecond => ref ((StaticBox<Func<int64>>)ᏑCyclesPerSecond).ValueSlot;
 internal static void initᴛCyclesPerSecond() { CyclesPerSecond = pprof_cyclesPerSecond; }
 
-public static Action NetpollBreak;
+public static readonly ж<Action> ᏑNetpollBreak = new StaticBox<Action>(default(Action));
+public static ref Action NetpollBreak => ref ((StaticBox<Action>)ᏑNetpollBreak).ValueSlot;
 internal static void initᴛNetpollBreak() { NetpollBreak = netpollBreak; }
 
-public static Action<uint32> Usleep;
+public static readonly ж<Action<uint32>> ᏑUsleep = new StaticBox<Action<uint32>>(default(Action<uint32>));
+public static ref Action<uint32> Usleep => ref ((StaticBox<Action<uint32>>)ᏑUsleep).ValueSlot;
 internal static void initᴛUsleep() { Usleep = usleep; }
 
-public static uintptr PhysPageSize;
+public static readonly ж<uintptr> ᏑPhysPageSize = new StaticBox<uintptr>(default(uintptr));
+public static ref uintptr PhysPageSize => ref ((StaticBox<uintptr>)ᏑPhysPageSize).ValueSlot;
 internal static void initᴛPhysPageSize() { PhysPageSize = physPageSize; }
 
-public static uintptr PhysHugePageSize;
+public static readonly ж<uintptr> ᏑPhysHugePageSize = new StaticBox<uintptr>(default(uintptr));
+public static ref uintptr PhysHugePageSize => ref ((StaticBox<uintptr>)ᏑPhysHugePageSize).ValueSlot;
 internal static void initᴛPhysHugePageSize() { PhysHugePageSize = physHugePageSize; }
 
-public static Action NetpollGenericInit;
+public static readonly ж<Action> ᏑNetpollGenericInit = new StaticBox<Action>(default(Action));
+public static ref Action NetpollGenericInit => ref ((StaticBox<Action>)ᏑNetpollGenericInit).ValueSlot;
 internal static void initᴛNetpollGenericInit() { NetpollGenericInit = netpollGenericInit; }
 
-public static Action<@unsafe.Pointer, @unsafe.Pointer, uintptr> Memmove = memmove;
+public static readonly ж<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>> ᏑMemmove = new StaticBox<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>>(memmove);
+public static ref Action<@unsafe.Pointer, @unsafe.Pointer, uintptr> Memmove => ref ((StaticBox<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>>)ᏑMemmove).ValueSlot;
 
-public static Action<@unsafe.Pointer, uintptr> MemclrNoHeapPointers = memclrNoHeapPointers;
+public static readonly ж<Action<@unsafe.Pointer, uintptr>> ᏑMemclrNoHeapPointers = new StaticBox<Action<@unsafe.Pointer, uintptr>>(memclrNoHeapPointers);
+public static ref Action<@unsafe.Pointer, uintptr> MemclrNoHeapPointers => ref ((StaticBox<Action<@unsafe.Pointer, uintptr>>)ᏑMemclrNoHeapPointers).ValueSlot;
 
-public static Action<any, any> CgoCheckPointer;
+public static readonly ж<Action<any, any>> ᏑCgoCheckPointer = new StaticBox<Action<any, any>>(default(Action<any, any>));
+public static ref Action<any, any> CgoCheckPointer => ref ((StaticBox<Action<any, any>>)ᏑCgoCheckPointer).ValueSlot;
 internal static void initᴛCgoCheckPointer() { CgoCheckPointer = cgoCheckPointer; }
 
 public const bool CrashStackImplemented = /* crashStackImplemented */ false;
@@ -100,7 +126,8 @@ public static UntypedInt TracebackInnerFrames => /* tracebackInnerFrames */ 50;
 
 public static UntypedInt TracebackOuterFrames => /* tracebackOuterFrames */ 50;
 
-internal static slice<slice<global::go.runtime_package.lockRank>> LockPartialOrder;
+internal static readonly ж<slice<slice<global::go.runtime_package.lockRank>>> ᏑLockPartialOrder = new StaticBox<slice<slice<global::go.runtime_package.lockRank>>>(default(slice<slice<global::go.runtime_package.lockRank>>));
+internal static ref slice<slice<global::go.runtime_package.lockRank>> LockPartialOrder => ref ((StaticBox<slice<slice<global::go.runtime_package.lockRank>>>)ᏑLockPartialOrder).ValueSlot;
 internal static void initᴛLockPartialOrder() { LockPartialOrder = lockPartialOrder; }
 
 public partial struct LockRank /*num:nint*/;
@@ -263,16 +290,25 @@ public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
     }
 }
 
-public static Func<@string, uintptr, uintptr> StringHash = stringHash;
-public static Func<slice<byte>, uintptr, uintptr> BytesHash = bytesHash;
-public static Func<uint32, uintptr, uintptr> Int32Hash = int32Hash;
-public static Func<uint64, uintptr, uintptr> Int64Hash = int64Hash;
-public static Func<@unsafe.Pointer, uintptr, uintptr, uintptr> MemHash = memhash;
-public static Func<@unsafe.Pointer, uintptr, uintptr> MemHash32 = memhash32;
-public static Func<@unsafe.Pointer, uintptr, uintptr> MemHash64 = memhash64;
-public static Func<any, uintptr, uintptr> EfaceHash;
+public static readonly ж<Func<@string, uintptr, uintptr>> ᏑStringHash = new StaticBox<Func<@string, uintptr, uintptr>>(stringHash);
+public static ref Func<@string, uintptr, uintptr> StringHash => ref ((StaticBox<Func<@string, uintptr, uintptr>>)ᏑStringHash).ValueSlot;
+public static readonly ж<Func<slice<byte>, uintptr, uintptr>> ᏑBytesHash = new StaticBox<Func<slice<byte>, uintptr, uintptr>>(bytesHash);
+public static ref Func<slice<byte>, uintptr, uintptr> BytesHash => ref ((StaticBox<Func<slice<byte>, uintptr, uintptr>>)ᏑBytesHash).ValueSlot;
+public static readonly ж<Func<uint32, uintptr, uintptr>> ᏑInt32Hash = new StaticBox<Func<uint32, uintptr, uintptr>>(int32Hash);
+public static ref Func<uint32, uintptr, uintptr> Int32Hash => ref ((StaticBox<Func<uint32, uintptr, uintptr>>)ᏑInt32Hash).ValueSlot;
+public static readonly ж<Func<uint64, uintptr, uintptr>> ᏑInt64Hash = new StaticBox<Func<uint64, uintptr, uintptr>>(int64Hash);
+public static ref Func<uint64, uintptr, uintptr> Int64Hash => ref ((StaticBox<Func<uint64, uintptr, uintptr>>)ᏑInt64Hash).ValueSlot;
+public static readonly ж<Func<@unsafe.Pointer, uintptr, uintptr, uintptr>> ᏑMemHash = new StaticBox<Func<@unsafe.Pointer, uintptr, uintptr, uintptr>>(memhash);
+public static ref Func<@unsafe.Pointer, uintptr, uintptr, uintptr> MemHash => ref ((StaticBox<Func<@unsafe.Pointer, uintptr, uintptr, uintptr>>)ᏑMemHash).ValueSlot;
+public static readonly ж<Func<@unsafe.Pointer, uintptr, uintptr>> ᏑMemHash32 = new StaticBox<Func<@unsafe.Pointer, uintptr, uintptr>>(memhash32);
+public static ref Func<@unsafe.Pointer, uintptr, uintptr> MemHash32 => ref ((StaticBox<Func<@unsafe.Pointer, uintptr, uintptr>>)ᏑMemHash32).ValueSlot;
+public static readonly ж<Func<@unsafe.Pointer, uintptr, uintptr>> ᏑMemHash64 = new StaticBox<Func<@unsafe.Pointer, uintptr, uintptr>>(memhash64);
+public static ref Func<@unsafe.Pointer, uintptr, uintptr> MemHash64 => ref ((StaticBox<Func<@unsafe.Pointer, uintptr, uintptr>>)ᏑMemHash64).ValueSlot;
+public static readonly ж<Func<any, uintptr, uintptr>> ᏑEfaceHash = new StaticBox<Func<any, uintptr, uintptr>>(default(Func<any, uintptr, uintptr>));
+public static ref Func<any, uintptr, uintptr> EfaceHash => ref ((StaticBox<Func<any, uintptr, uintptr>>)ᏑEfaceHash).ValueSlot;
 internal static void initᴛEfaceHash() { EfaceHash = efaceHash; }
-internal static Func<ifaceHash_i, uintptr, uintptr> IfaceHash;
+internal static readonly ж<Func<ifaceHash_i, uintptr, uintptr>> ᏑIfaceHash = new StaticBox<Func<ifaceHash_i, uintptr, uintptr>>(default(Func<ifaceHash_i, uintptr, uintptr>));
+internal static ref Func<ifaceHash_i, uintptr, uintptr> IfaceHash => ref ((StaticBox<Func<ifaceHash_i, uintptr, uintptr>>)ᏑIfaceHash).ValueSlot;
 internal static void initᴛIfaceHash() { IfaceHash = ifaceHash; }
 
 public static ж<bool> UseAeshash;
@@ -298,16 +334,20 @@ public static @string /*s*/ GostringW(slice<uint16> w) {
     return s;
 }
 
-public static Func<ж<byte>, int32, int32, int32> Open;
+public static readonly ж<Func<ж<byte>, int32, int32, int32>> ᏑOpen = new StaticBox<Func<ж<byte>, int32, int32, int32>>(default(Func<ж<byte>, int32, int32, int32>));
+public static ref Func<ж<byte>, int32, int32, int32> Open => ref ((StaticBox<Func<ж<byte>, int32, int32, int32>>)ᏑOpen).ValueSlot;
 internal static void initᴛOpen() { Open = (ж<byte> ᴛ0, int32 ᴛ1, int32 ᴛ2) => open(ref ᴛ0.DerefOrNull(), ᴛ1, ᴛ2); }
 
-public static Func<int32, int32> ΔClose;
+public static readonly ж<Func<int32, int32>> ᏑΔClose = new StaticBox<Func<int32, int32>>(default(Func<int32, int32>));
+public static ref Func<int32, int32> ΔClose => ref ((StaticBox<Func<int32, int32>>)ᏑΔClose).ValueSlot;
 internal static void initᴛΔClose() { ΔClose = closefd; }
 
-public static Func<int32, @unsafe.Pointer, int32, int32> ΔRead;
+public static readonly ж<Func<int32, @unsafe.Pointer, int32, int32>> ᏑΔRead = new StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>(default(Func<int32, @unsafe.Pointer, int32, int32>));
+public static ref Func<int32, @unsafe.Pointer, int32, int32> ΔRead => ref ((StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>)ᏑΔRead).ValueSlot;
 internal static void initᴛΔRead() { ΔRead = read; }
 
-public static Func<uintptr, @unsafe.Pointer, int32, int32> ΔWrite;
+public static readonly ж<Func<uintptr, @unsafe.Pointer, int32, int32>> ᏑΔWrite = new StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>(default(Func<uintptr, @unsafe.Pointer, int32, int32>));
+public static ref Func<uintptr, @unsafe.Pointer, int32, int32> ΔWrite => ref ((StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>)ᏑΔWrite).ValueSlot;
 internal static void initᴛΔWrite() { ΔWrite = write; }
 
 public static slice<@string> Envs() {
@@ -337,9 +377,11 @@ public static void SetTracebackEnv(@string level) {
     traceback_env = traceback_cache;
 }
 
-public static Func<@unsafe.Pointer, uint32> ReadUnaligned32 = readUnaligned32;
+public static readonly ж<Func<@unsafe.Pointer, uint32>> ᏑReadUnaligned32 = new StaticBox<Func<@unsafe.Pointer, uint32>>(readUnaligned32);
+public static ref Func<@unsafe.Pointer, uint32> ReadUnaligned32 => ref ((StaticBox<Func<@unsafe.Pointer, uint32>>)ᏑReadUnaligned32).ValueSlot;
 
-public static Func<@unsafe.Pointer, uint64> ReadUnaligned64 = readUnaligned64;
+public static readonly ж<Func<@unsafe.Pointer, uint64>> ᏑReadUnaligned64 = new StaticBox<Func<@unsafe.Pointer, uint64>>(readUnaligned64);
+public static ref Func<@unsafe.Pointer, uint64> ReadUnaligned64 => ref ((StaticBox<Func<@unsafe.Pointer, uint64>>)ᏑReadUnaligned64).ValueSlot;
 
 public static (uintptr pagesInUse, uintptr counted) CountPagesInUse() {
     uintptr pagesInUse = default!;
@@ -1293,7 +1335,7 @@ public static void FreePageAlloc(ж<PageAlloc> Ꮡpp) {
 //
 // This should not be higher than 0x100*pallocChunkBytes to support
 // mips and mipsle, which only have 31-bit address spaces.
-public static ChunkIdx BaseChunkIdx = ((Func<ChunkIdx>)(() => {
+public static readonly ж<ChunkIdx> ᏑBaseChunkIdx = new StaticBox<ChunkIdx>(((Func<ChunkIdx>)(() => {
     uintptr prefix = default!;
     if (pageAlloc64Bit != 0){
         prefix = 0xc000;
@@ -1305,7 +1347,8 @@ public static ChunkIdx BaseChunkIdx = ((Func<ChunkIdx>)(() => {
         baseAddr += arenaBaseOffset;
     }
     return (ChunkIdx)(nuint)chunkIndex(baseAddr);
-}))();
+}))());
+public static ref ChunkIdx BaseChunkIdx => ref ((StaticBox<ChunkIdx>)ᏑBaseChunkIdx).ValueSlot;
 
 // PageBase returns an address given a chunk index and a page index
 // relative to that chunk.
@@ -1420,28 +1463,35 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
     return leaked;
 }
 
-public static Action<uint32> ProcYield = procyield;
+public static readonly ж<Action<uint32>> ᏑProcYield = new StaticBox<Action<uint32>>(procyield);
+public static ref Action<uint32> ProcYield => ref ((StaticBox<Action<uint32>>)ᏑProcYield).ValueSlot;
 
-public static Action OSYield;
+public static readonly ж<Action> ᏑOSYield = new StaticBox<Action>(default(Action));
+public static ref Action OSYield => ref ((StaticBox<Action>)ᏑOSYield).ValueSlot;
 internal static void initᴛOSYield() { OSYield = osyield; }
 
-internal static Action<ж<global::go.runtime_package.mutex>> ΔLock;
+internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔLock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
+internal static ref Action<ж<global::go.runtime_package.mutex>> ΔLock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔLock).ValueSlot;
 internal static void initᴛΔLock() { ΔLock = @lock; }
 
-internal static Action<ж<global::go.runtime_package.mutex>> ΔUnlock;
+internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔUnlock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
+internal static ref Action<ж<global::go.runtime_package.mutex>> ΔUnlock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔUnlock).ValueSlot;
 internal static void initᴛΔUnlock() { ΔUnlock = unlock; }
 
-internal static Func<ж<global::go.runtime_package.mutex>, bool> MutexContended = mutexContended;
+internal static readonly ж<Func<ж<global::go.runtime_package.mutex>, bool>> ᏑMutexContended = new StaticBox<Func<ж<global::go.runtime_package.mutex>, bool>>(mutexContended);
+internal static ref Func<ж<global::go.runtime_package.mutex>, bool> MutexContended => ref ((StaticBox<Func<ж<global::go.runtime_package.mutex>, bool>>)ᏑMutexContended).ValueSlot;
 
 internal static ж<global::go.runtime_package.mutex> SemRootLock(ж<uint32> Ꮡaddr) {
     var root = semtable.rootFor(Ꮡaddr);
     return root.of(global::go.runtime_package.semaRoot.Ꮡlock);
 }
 
-public static Action<ж<uint32>> Semacquire;
+public static readonly ж<Action<ж<uint32>>> ᏑSemacquire = new StaticBox<Action<ж<uint32>>>(default(Action<ж<uint32>>));
+public static ref Action<ж<uint32>> Semacquire => ref ((StaticBox<Action<ж<uint32>>>)ᏑSemacquire).ValueSlot;
 internal static void initᴛSemacquire() { Semacquire = semacquire; }
 
-public static Action<ж<uint32>, bool, nint> Semrelease1;
+public static readonly ж<Action<ж<uint32>, bool, nint>> ᏑSemrelease1 = new StaticBox<Action<ж<uint32>, bool, nint>>(default(Action<ж<uint32>, bool, nint>));
+public static ref Action<ж<uint32>, bool, nint> Semrelease1 => ref ((StaticBox<Action<ж<uint32>, bool, nint>>)ᏑSemrelease1).ValueSlot;
 internal static void initᴛSemrelease1() { Semrelease1 = semrelease1; }
 
 // go2cs generated this placeholder — func SemNwait is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1535,7 +1585,8 @@ public static void Record(this ж<TimeHistogram> Ꮡth, int64 duration) {
     (Ꮡth.Reinterpret<TimeHistogram, global::go.runtime_package.timeHistogram>()).record(duration);
 }
 
-public static Func<slice<float64>> TimeHistogramMetricsBuckets = timeHistogramMetricsBuckets;
+public static readonly ж<Func<slice<float64>>> ᏑTimeHistogramMetricsBuckets = new StaticBox<Func<slice<float64>>>(timeHistogramMetricsBuckets);
+public static ref Func<slice<float64>> TimeHistogramMetricsBuckets => ref ((StaticBox<Func<slice<float64>>>)ᏑTimeHistogramMetricsBuckets).ValueSlot;
 
 public static nint SetIntArgRegs(nint a) {
     @lock(Ꮡfinlock);
@@ -1554,7 +1605,8 @@ public static bool FinalizerGAsleep() {
 // For GCTestMoveStackOnNextCall, it's important not to introduce an
 // extra layer of call, since then there's a return before the "real"
 // next call.
-public static Action GCTestMoveStackOnNextCall = gcTestMoveStackOnNextCall;
+public static readonly ж<Action> ᏑGCTestMoveStackOnNextCall = new StaticBox<Action>(gcTestMoveStackOnNextCall);
+public static ref Action GCTestMoveStackOnNextCall => ref ((StaticBox<Action>)ᏑGCTestMoveStackOnNextCall).ValueSlot;
 
 // For GCTestIsReachable, it's important that we do this as a call so
 // escape analysis can see through it.
@@ -1994,7 +2046,8 @@ public static bool CheckPackScavChunkData(uint32 gen, uint16 inUse, uint16 lastI
 
 public static UntypedInt GTrackingPeriod => /* gTrackingPeriod */ 8;
 
-public static @unsafe.Pointer ZeroBase;
+public static readonly ж<@unsafe.Pointer> ᏑZeroBase = new StaticBox<@unsafe.Pointer>(default(@unsafe.Pointer));
+public static ref @unsafe.Pointer ZeroBase => ref ((StaticBox<@unsafe.Pointer>)ᏑZeroBase).ValueSlot;
 internal static void initᴛZeroBase() { ZeroBase = @unsafe.Pointer.FromBox(Ꮡzerobase); }
 
 public static uintptr UserArenaChunkBytes => /* userArenaChunkBytes */ 4194304;
@@ -2033,7 +2086,8 @@ public static T UserArenaClone<T>(T s) {
     return arena_heapify((s).OrTypedNilOf())._<T>();
 }
 
-public static Func<uintptr, uintptr, uintptr> AlignUp = alignUp;
+public static readonly ж<Func<uintptr, uintptr, uintptr>> ᏑAlignUp = new StaticBox<Func<uintptr, uintptr, uintptr>>(alignUp);
+public static ref Func<uintptr, uintptr, uintptr> AlignUp => ref ((StaticBox<Func<uintptr, uintptr, uintptr>>)ᏑAlignUp).ValueSlot;
 
 public static bool BlockUntilEmptyFinalizerQueue(int64 timeout) {
     return blockUntilEmptyFinalizerQueue(timeout);
@@ -2065,9 +2119,11 @@ public static nint FPCallers(slice<uintptr> pcBuf) {
 
 public const bool FramePointerEnabled = /* framepointer_enabled */ true;
 
-public static Func<@unsafe.Pointer, bool> IsPinned;
+public static readonly ж<Func<@unsafe.Pointer, bool>> ᏑIsPinned = new StaticBox<Func<@unsafe.Pointer, bool>>(default(Func<@unsafe.Pointer, bool>));
+public static ref Func<@unsafe.Pointer, bool> IsPinned => ref ((StaticBox<Func<@unsafe.Pointer, bool>>)ᏑIsPinned).ValueSlot;
 internal static void initᴛIsPinned() { IsPinned = isPinned; }
-public static Func<@unsafe.Pointer, ж<uintptr>> GetPinCounter;
+public static readonly ж<Func<@unsafe.Pointer, ж<uintptr>>> ᏑGetPinCounter = new StaticBox<Func<@unsafe.Pointer, ж<uintptr>>>(default(Func<@unsafe.Pointer, ж<uintptr>>));
+public static ref Func<@unsafe.Pointer, ж<uintptr>> GetPinCounter => ref ((StaticBox<Func<@unsafe.Pointer, ж<uintptr>>>)ᏑGetPinCounter).ValueSlot;
 internal static void initᴛGetPinCounter() { GetPinCounter = pinnerGetPinCounter; }
 
 public static void SetPinnerLeakPanic(Action f) {
@@ -2293,9 +2349,13 @@ public static @string DumpPrint<T>(T v) {
     return (@string)buf;
 }
 
-public static nint Float64Bytes = float64Bytes;
-public static nint Float32Bytes = float32Bytes;
-public static nint Complex128Bytes = complex128Bytes;
-public static nint Complex64Bytes = complex64Bytes;
+public static readonly ж<nint> ᏑFloat64Bytes = new StaticBox<nint>(float64Bytes);
+public static ref nint Float64Bytes => ref ((StaticBox<nint>)ᏑFloat64Bytes).ValueSlot;
+public static readonly ж<nint> ᏑFloat32Bytes = new StaticBox<nint>(float32Bytes);
+public static ref nint Float32Bytes => ref ((StaticBox<nint>)ᏑFloat32Bytes).ValueSlot;
+public static readonly ж<nint> ᏑComplex128Bytes = new StaticBox<nint>(complex128Bytes);
+public static ref nint Complex128Bytes => ref ((StaticBox<nint>)ᏑComplex128Bytes).ValueSlot;
+public static readonly ж<nint> ᏑComplex64Bytes = new StaticBox<nint>(complex64Bytes);
+public static ref nint Complex64Bytes => ref ((StaticBox<nint>)ᏑComplex64Bytes).ValueSlot;
 
 } // end runtime_internal_test_package

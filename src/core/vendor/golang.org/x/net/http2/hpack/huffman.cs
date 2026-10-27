@@ -10,10 +10,10 @@ using sync = sync_package;
 
 partial class hpack_package {
 
-[GoLazy] partial class lazyᴛbufPool { internal static ж<sync.Pool> ᏑbufPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛbufPool { internal static readonly ж<sync.Pool> ᏑbufPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<bytes.Buffer>()
 )); }
-internal static ref sync.Pool bufPool => ref ᏑbufPool.Value;
+internal static ref sync.Pool bufPool => ref ((StaticBox<sync.Pool>)ᏑbufPool).ValueSlot;
 
 // HuffmanDecode decodes the string in v and writes the expanded
 // result to w, returning the number of bytes written to w and the
@@ -143,8 +143,8 @@ internal static ж<node> newInternalNode() {
     return Ꮡ(new node(children: Ꮡ(new array<ж<node>>(256))));
 }
 
-internal static ж<sync.Once> ᏑbuildRootOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once buildRootOnce => ref ᏑbuildRootOnce.Value;
+internal static readonly ж<sync.Once> ᏑbuildRootOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once buildRootOnce => ref ((StaticBox<sync.Once>)ᏑbuildRootOnce).ValueSlot;
 internal static ж<node> lazyRootHuffmanNode;
 
 internal static ж<node> getRootHuffmanNode() {

@@ -43,7 +43,7 @@ public partial struct T {
     public array<nint> Array = new(4);
 }
 
-internal static ж<Struct> Ꮡs = new StaticBox<Struct>(new Struct(
+internal static readonly ж<Struct> Ꮡs = new StaticBox<Struct>(new Struct(
     0x01,
     0x0203,
     0x04050607,
@@ -67,7 +67,7 @@ internal static ж<Struct> Ꮡs = new StaticBox<Struct>(new Struct(
     true,
     new bool[]{true, false, true, false}.array()
 ));
-internal static ref Struct s => ref Ꮡs.Value;
+internal static ref Struct s => ref ((StaticBox<Struct>)Ꮡs).ValueSlot;
 
 internal static slice<byte> big = new byte[]{
     1,

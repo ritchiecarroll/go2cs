@@ -47,9 +47,11 @@ public static void TestMulUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-public static uintptr SinkUintptr;
+public static readonly ж<uintptr> ᏑSinkUintptr = new StaticBox<uintptr>(default(uintptr));
+public static ref uintptr SinkUintptr => ref ((StaticBox<uintptr>)ᏑSinkUintptr).ValueSlot;
 
-public static bool SinkBool;
+public static readonly ж<bool> ᏑSinkBool = new StaticBox<bool>(default(bool));
+public static ref bool SinkBool => ref ((StaticBox<bool>)ᏑSinkBool).ValueSlot;
 
 internal static uintptr x;
 internal static uintptr y;

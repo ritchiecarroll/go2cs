@@ -40,8 +40,8 @@ internal static UntypedInt finBlockSize => /* 4 * 1024 */ 4096;
     internal array<finalizer> fin = new((uintptr)(finBlockSize - 2 * goarch.PtrSize - 2 * 4) / /* unsafe.Sizeof(finalizer{}) */ (uintptr)40);
 }
 
-internal static ж<atomic.Uint32> ᏑfingStatus = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 fingStatus => ref ᏑfingStatus.Value;
+internal static readonly ж<atomic.Uint32> ᏑfingStatus = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 fingStatus => ref ((StaticBox<atomic.Uint32>)ᏑfingStatus).ValueSlot;
 
 // finalizer goroutine status.
 internal const uint32 fingUninitialized = /* iota */ 0;
@@ -50,14 +50,14 @@ internal const uint32 fingRunningFinalizer = 2;
 internal const uint32 fingWait = 4;
 internal const uint32 fingWake = 8;
 
-internal static ж<mutex> Ꮡfinlock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex finlock => ref Ꮡfinlock.Value; // protects the following variables
+internal static readonly ж<mutex> Ꮡfinlock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex finlock => ref ((StaticBox<mutex>)Ꮡfinlock).ValueSlot; // protects the following variables
 internal static ж<g> fing;  // goroutine that runs finalizers
-internal static ж<ж<finBlock>> Ꮡfinq = new StaticBox<ж<finBlock>>(default(ж<finBlock>));
-internal static ref ж<finBlock> finq => ref Ꮡfinq.ValueSlot;         // list of finalizers that are to be executed
+internal static readonly ж<ж<finBlock>> Ꮡfinq = new StaticBox<ж<finBlock>>(default(ж<finBlock>));
+internal static ref ж<finBlock> finq => ref ((StaticBox<ж<finBlock>>)Ꮡfinq).ValueSlot;         // list of finalizers that are to be executed
 internal static ж<finBlock> finc;         // cache of free blocks
-internal static ж<array<byte>> Ꮡfinptrmask = new StaticBox<array<byte>>(new array<byte>(64));
-internal static ref array<byte> finptrmask => ref Ꮡfinptrmask.Value;
+internal static readonly ж<array<byte>> Ꮡfinptrmask = new StaticBox<array<byte>>(new array<byte>(64));
+internal static ref array<byte> finptrmask => ref ((StaticBox<array<byte>>)Ꮡfinptrmask).ValueSlot;
 internal static uint64 finqueued; // monotonic count of queued finalizers
 internal static uint64 finexecuted; // monotonic count of executed finalizers
 

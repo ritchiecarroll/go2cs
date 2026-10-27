@@ -89,12 +89,14 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
 // Exported (global) variable serving as input for some
 // of the benchmarks to ensure side-effect free calls
 // are not optimized away.
-public static uint64 Input = bits_internal_test_package.DeBruijn64;
+public static readonly ж<uint64> ᏑInput = new StaticBox<uint64>(bits_internal_test_package.DeBruijn64);
+public static ref uint64 Input => ref ((StaticBox<uint64>)ᏑInput).ValueSlot;
 
 // Exported (global) variable to store function results
 // during benchmarking to ensure side-effect free calls
 // are not optimized away.
-public static nint Output;
+public static readonly ж<nint> ᏑOutput = new StaticBox<nint>(default(nint));
+public static ref nint Output => ref ((StaticBox<nint>)ᏑOutput).ValueSlot;
 
 public static void BenchmarkLeadingZeros(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

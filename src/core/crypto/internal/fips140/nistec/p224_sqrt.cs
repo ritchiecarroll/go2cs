@@ -9,11 +9,11 @@ using go.crypto.@internal.fips140.nistec;
 
 partial class nistec_package {
 
-internal static ж<ж<array<fiat.P224Element>>> Ꮡp224GG = new StaticBox<ж<array<fiat.P224Element>>>(default(ж<array<fiat.P224Element>>));
-internal static ref ж<array<fiat.P224Element>> p224GG => ref Ꮡp224GG.ValueSlot;
+internal static readonly ж<ж<array<fiat.P224Element>>> Ꮡp224GG = new StaticBox<ж<array<fiat.P224Element>>>(default(ж<array<fiat.P224Element>>));
+internal static ref ж<array<fiat.P224Element>> p224GG => ref ((StaticBox<ж<array<fiat.P224Element>>>)Ꮡp224GG).ValueSlot;
 
-internal static ж<sync.Once> Ꮡp224GGOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once p224GGOnce => ref Ꮡp224GGOnce.Value;
+internal static readonly ж<sync.Once> Ꮡp224GGOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once p224GGOnce => ref ((StaticBox<sync.Once>)Ꮡp224GGOnce).ValueSlot;
 
 // p224SqrtCandidate sets r to a square root candidate for x. r and x must not overlap.
 internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224Element> Ꮡx) {

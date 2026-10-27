@@ -17,8 +17,10 @@ partial struct Direction {
     internal slice<byte> macKeyTag;
 }
 
-public static Direction ServerKeys;
-public static Direction ClientKeys;
+public static readonly ж<Direction> ᏑServerKeys = new StaticBox<Direction>(default(Direction));
+public static ref Direction ServerKeys => ref ((StaticBox<Direction>)ᏑServerKeys).ValueSlot;
+public static readonly ж<Direction> ᏑClientKeys = new StaticBox<Direction>(default(Direction));
+public static ref Direction ClientKeys => ref ((StaticBox<Direction>)ᏑClientKeys).ValueSlot;
 
 [GoInit] internal static void init() {
     ServerKeys = new Direction(new byte[]{(rune)'B'}.slice(), new byte[]{(rune)'D'}.slice(), new byte[]{(rune)'F'}.slice());

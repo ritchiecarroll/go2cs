@@ -630,8 +630,8 @@ internal static void initᴛall() { all = new allScalars(
     PtrString: Ꮡsixteen
 ); }
 
-internal static ж<@string> Ꮡsixteen = new StaticBox<@string>("16"u8);
-internal static ref @string sixteen => ref Ꮡsixteen.Value;
+internal static readonly ж<@string> Ꮡsixteen = new StaticBox<@string>("16"u8);
+internal static ref @string sixteen => ref ((StaticBox<@string>)Ꮡsixteen).ValueSlot;
 
 internal static readonly @string testScalarsInput = """
 <allscalars>

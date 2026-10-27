@@ -97,18 +97,28 @@ public static IPMask CIDRMask(nint ones, nint bits) {
 }
 
 // Well-known IPv4 addresses
-public static IP IPv4bcast = IPv4(255, 255, 255, 255); // limited broadcast
-public static IP IPv4allsys = IPv4(224, 0, 0, 1); // all systems
-public static IP IPv4allrouter = IPv4(224, 0, 0, 2); // all routers
-public static IP IPv4zero = IPv4(0, 0, 0, 0); // all zeros
+public static readonly ж<IP> ᏑIPv4bcast = new StaticBox<IP>(IPv4(255, 255, 255, 255));
+public static ref IP IPv4bcast => ref ((StaticBox<IP>)ᏑIPv4bcast).ValueSlot; // limited broadcast
+public static readonly ж<IP> ᏑIPv4allsys = new StaticBox<IP>(IPv4(224, 0, 0, 1));
+public static ref IP IPv4allsys => ref ((StaticBox<IP>)ᏑIPv4allsys).ValueSlot; // all systems
+public static readonly ж<IP> ᏑIPv4allrouter = new StaticBox<IP>(IPv4(224, 0, 0, 2));
+public static ref IP IPv4allrouter => ref ((StaticBox<IP>)ᏑIPv4allrouter).ValueSlot; // all routers
+public static readonly ж<IP> ᏑIPv4zero = new StaticBox<IP>(IPv4(0, 0, 0, 0));
+public static ref IP IPv4zero => ref ((StaticBox<IP>)ᏑIPv4zero).ValueSlot; // all zeros
 
 // Well-known IPv6 addresses
-public static IP IPv6zero = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-public static IP IPv6unspecified = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-public static IP IPv6loopback = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.slice());
-public static IP IPv6interfacelocalallnodes = new IP(new byte[]{0xff, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
-public static IP IPv6linklocalallnodes = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
-public static IP IPv6linklocalallrouters = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice());
+public static readonly ж<IP> ᏑIPv6zero = new StaticBox<IP>(new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice()));
+public static ref IP IPv6zero => ref ((StaticBox<IP>)ᏑIPv6zero).ValueSlot;
+public static readonly ж<IP> ᏑIPv6unspecified = new StaticBox<IP>(new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice()));
+public static ref IP IPv6unspecified => ref ((StaticBox<IP>)ᏑIPv6unspecified).ValueSlot;
+public static readonly ж<IP> ᏑIPv6loopback = new StaticBox<IP>(new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.slice()));
+public static ref IP IPv6loopback => ref ((StaticBox<IP>)ᏑIPv6loopback).ValueSlot;
+public static readonly ж<IP> ᏑIPv6interfacelocalallnodes = new StaticBox<IP>(new IP(new byte[]{0xff, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice()));
+public static ref IP IPv6interfacelocalallnodes => ref ((StaticBox<IP>)ᏑIPv6interfacelocalallnodes).ValueSlot;
+public static readonly ж<IP> ᏑIPv6linklocalallnodes = new StaticBox<IP>(new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice()));
+public static ref IP IPv6linklocalallnodes => ref ((StaticBox<IP>)ᏑIPv6linklocalallnodes).ValueSlot;
+public static readonly ж<IP> ᏑIPv6linklocalallrouters = new StaticBox<IP>(new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice()));
+public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linklocalallrouters).ValueSlot;
 
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".

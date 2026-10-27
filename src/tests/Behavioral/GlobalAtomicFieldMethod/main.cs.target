@@ -11,8 +11,8 @@ partial struct controller {
     internal atomic.Int64 total;
 }
 
-internal static ж<controller> Ꮡctrl = new StaticBox<controller>(default(controller));
-internal static ref controller ctrl => ref Ꮡctrl.Value;
+internal static readonly ж<controller> Ꮡctrl = new StaticBox<controller>(default(controller));
+internal static ref controller ctrl => ref ((StaticBox<controller>)Ꮡctrl).ValueSlot;
 
 internal static partial void keep(ж<controller> Ꮡc) {
     _ = Ꮡc;

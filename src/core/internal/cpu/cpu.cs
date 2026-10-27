@@ -18,7 +18,8 @@ partial struct CacheLinePad {
 // CacheLineSize is the CPU's assumed cache line size.
 // There is currently no runtime detection of the real cache line size
 // so we use the constant per GOARCH CacheLinePadSize as an approximation.
-public static uintptr CacheLineSize = CacheLinePadSize;
+public static readonly ж<uintptr> ᏑCacheLineSize = new StaticBox<uintptr>(CacheLinePadSize);
+public static ref uintptr CacheLineSize => ref ((StaticBox<uintptr>)ᏑCacheLineSize).ValueSlot;
 
 // The booleans in X86 contain the correspondingly named cpuid feature bit.
 // HasAVX and HasAVX2 are only set if the OS does support XMM and YMM registers
@@ -63,8 +64,8 @@ partial struct X86ᴛ1 /*dyn*/ {
     public bool HasVAES;
     internal CacheLinePad __;
 }
-public static ж<X86ᴛ1> ᏑX86 = new StaticBox<X86ᴛ1>(default(X86ᴛ1));
-public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
+public static readonly ж<X86ᴛ1> ᏑX86 = new StaticBox<X86ᴛ1>(default(X86ᴛ1));
+public static ref X86ᴛ1 X86 => ref ((StaticBox<X86ᴛ1>)ᏑX86).ValueSlot;
 
 // The booleans in ARM contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
@@ -75,7 +76,8 @@ partial struct ARMᴛ1 /*dyn*/ {
     public bool HasV7Atomics;
     internal CacheLinePad __;
 }
-public static ARMᴛ1 ARM;
+public static readonly ж<ARMᴛ1> ᏑARM = new StaticBox<ARMᴛ1>(default(ARMᴛ1));
+public static ref ARMᴛ1 ARM => ref ((StaticBox<ARMᴛ1>)ᏑARM).ValueSlot;
 
 // The booleans in ARM64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
@@ -94,7 +96,8 @@ partial struct ARM64ᴛ1 /*dyn*/ {
     public bool IsNeoverse;
     internal CacheLinePad __;
 }
-public static ARM64ᴛ1 ARM64;
+public static readonly ж<ARM64ᴛ1> ᏑARM64 = new StaticBox<ARM64ᴛ1>(default(ARM64ᴛ1));
+public static ref ARM64ᴛ1 ARM64 => ref ((StaticBox<ARM64ᴛ1>)ᏑARM64).ValueSlot;
 
 // The booleans in Loong64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
@@ -107,14 +110,16 @@ partial struct Loong64ᴛ1 /*dyn*/ {
     public bool HasLAM_BH; // support AM{SWAP/ADD}[_DB].{B/H} instruction
     internal CacheLinePad __;
 }
-public static Loong64ᴛ1 Loong64;
+public static readonly ж<Loong64ᴛ1> ᏑLoong64 = new StaticBox<Loong64ᴛ1>(default(Loong64ᴛ1));
+public static ref Loong64ᴛ1 Loong64 => ref ((StaticBox<Loong64ᴛ1>)ᏑLoong64).ValueSlot;
 
 partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasMSA; // MIPS SIMD architecture
     internal CacheLinePad __;
 }
-public static MIPS64Xᴛ1 MIPS64X;
+public static readonly ж<MIPS64Xᴛ1> ᏑMIPS64X = new StaticBox<MIPS64Xᴛ1>(default(MIPS64Xᴛ1));
+public static ref MIPS64Xᴛ1 MIPS64X => ref ((StaticBox<MIPS64Xᴛ1>)ᏑMIPS64X).ValueSlot;
 
 // For ppc64(le), it is safe to check only for ISA level starting on ISA v3.00,
 // since there are no optional categories. There are some exceptions that also
@@ -130,7 +135,8 @@ partial struct PPC64ᴛ1 /*dyn*/ {
     public bool IsPOWER10; // ISA v3.1  (POWER10)
     internal CacheLinePad __;
 }
-public static PPC64ᴛ1 PPC64;
+public static readonly ж<PPC64ᴛ1> ᏑPPC64 = new StaticBox<PPC64ᴛ1>(default(PPC64ᴛ1));
+public static ref PPC64ᴛ1 PPC64 => ref ((StaticBox<PPC64ᴛ1>)ᏑPPC64).ValueSlot;
 
 partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
@@ -157,7 +163,8 @@ partial struct S390Xᴛ1 /*dyn*/ {
     public bool HasEDDSA; // Edwards curves
     internal CacheLinePad __;
 }
-public static S390Xᴛ1 S390X;
+public static readonly ж<S390Xᴛ1> ᏑS390X = new StaticBox<S390Xᴛ1>(default(S390Xᴛ1));
+public static ref S390Xᴛ1 S390X => ref ((StaticBox<S390Xᴛ1>)ᏑS390X).ValueSlot;
 
 // RISCV64 contains the supported CPU features and performance characteristics for riscv64
 // platforms. The booleans in RISCV64, with the exception of HasFastMisaligned, indicate
@@ -170,7 +177,8 @@ partial struct RISCV64ᴛ1 /*dyn*/ {
     public bool HasZbb; // Basic bit-manipulation extension
     internal CacheLinePad __;
 }
-public static RISCV64ᴛ1 RISCV64;
+public static readonly ж<RISCV64ᴛ1> ᏑRISCV64 = new StaticBox<RISCV64ᴛ1>(default(RISCV64ᴛ1));
+public static ref RISCV64ᴛ1 RISCV64 => ref ((StaticBox<RISCV64ᴛ1>)ᏑRISCV64).ValueSlot;
 
 // CPU feature variables are accessed by assembly code in various packages.
 //go:linkname X86

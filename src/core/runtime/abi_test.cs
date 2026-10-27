@@ -22,8 +22,8 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-internal static ж<atomic.Int32> ᏑregConfirmRun = new StaticBox<atomic.Int32>(default(atomic.Int32));
-internal static ref atomic.Int32 regConfirmRun => ref ᏑregConfirmRun.Value;
+internal static readonly ж<atomic.Int32> ᏑregConfirmRun = new StaticBox<atomic.Int32>(default(atomic.Int32));
+internal static ref atomic.Int32 regConfirmRun => ref ((StaticBox<atomic.Int32>)ᏑregConfirmRun).ValueSlot;
 
 //go:registerparams
 internal static (nint, float32, array<byte>) regFinalizerPointer(ж<TintPointer> Ꮡv) {

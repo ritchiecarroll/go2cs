@@ -48,11 +48,12 @@ public static @string Synopsis(@string text) {
 // This helps to avoid misinterpreting the common mistake
 // of a copyright notice immediately before a package statement
 // as being a doc comment.
-public static slice<@string> IllegalPrefixes = new @string[]{
+public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<slice<@string>>(new @string[]{
     "copyright"u8,
     "all rights"u8,
     "author"u8
-}.slice();
+}.slice());
+public static ref slice<@string> IllegalPrefixes => ref ((StaticBox<slice<@string>>)ᏑIllegalPrefixes).ValueSlot;
 
 // Synopsis returns a cleaned version of the first sentence in text.
 // That sentence ends after the first period followed by space and not

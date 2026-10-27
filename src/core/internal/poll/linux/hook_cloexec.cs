@@ -9,6 +9,7 @@ using Δsyscall = syscall_package;
 partial class poll_package {
 
 // Accept4Func is used to hook the accept4 call.
-public static Func<nint, nint, (nint, Δsyscall.Sockaddr, error)> Accept4Func = Δsyscall.Accept4;
+public static readonly ж<Func<nint, nint, (nint, Δsyscall.Sockaddr, error)>> ᏑAccept4Func = new StaticBox<Func<nint, nint, (nint, Δsyscall.Sockaddr, error)>>(Δsyscall.Accept4);
+public static ref Func<nint, nint, (nint, Δsyscall.Sockaddr, error)> Accept4Func => ref ((StaticBox<Func<nint, nint, (nint, Δsyscall.Sockaddr, error)>>)ᏑAccept4Func).ValueSlot;
 
 } // end poll_package

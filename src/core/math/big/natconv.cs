@@ -522,8 +522,8 @@ partial struct cacheBase10ᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     internal array<divisor> table = new(64); // cached divisors for base 10
 }
-internal static ж<cacheBase10ᴛ1> ᏑcacheBase10 = new StaticBox<cacheBase10ᴛ1>(new cacheBase10ᴛ1(nil));
-internal static ref cacheBase10ᴛ1 cacheBase10 => ref ᏑcacheBase10.Value;
+internal static readonly ж<cacheBase10ᴛ1> ᏑcacheBase10 = new StaticBox<cacheBase10ᴛ1>(new cacheBase10ᴛ1(nil));
+internal static ref cacheBase10ᴛ1 cacheBase10 => ref ((StaticBox<cacheBase10ᴛ1>)ᏑcacheBase10).ValueSlot;
 
 // expWW computes x**y
 internal static Δnat expWW(this Δnat z, ж<stack> Ꮡstk, Word x, Word y) {

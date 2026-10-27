@@ -122,8 +122,8 @@ public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byt
 
 internal static ж<fiat.P224Element> _p224B;
 
-internal static ж<sync.Once> Ꮡ_p224BOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once _p224BOnce => ref Ꮡ_p224BOnce.Value;
+internal static readonly ж<sync.Once> Ꮡ_p224BOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once _p224BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p224BOnce).ValueSlot;
 
 internal static ж<fiat.P224Element> p224B() {
     Ꮡ_p224BOnce.Do(() => {
@@ -423,8 +423,8 @@ public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224
 
 internal static ж<array<p224Table>> p224GeneratorTable;
 
-internal static ж<sync.Once> Ꮡp224GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once p224GeneratorTableOnce => ref Ꮡp224GeneratorTableOnce.Value;
+internal static readonly ж<sync.Once> Ꮡp224GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp224GeneratorTableOnce).ValueSlot;
 
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four

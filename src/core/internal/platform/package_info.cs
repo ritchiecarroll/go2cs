@@ -56,7 +56,7 @@ using static go.@internal.platform_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/platform/supported.go", "supported.cs", "AA0cggACENKUpKSkvKKUpKS8opSkvKKUpLyipqS8ooK4yIK4lNq4lIK2gqassoKmgIK2gpSmlKS4AAgQtpSmnpSmpqYAARKUppSUppqUpriCmpSsspSkppSklKqilJQAChiSqqKqog==")]
-[assembly: go.GoPositionMap("internal/platform/zosarch.go", "zosarch.cs", "AAkUADRq")]
+[assembly: go.GoPositionMap("internal/platform/zosarch.go", "zosarch.cs", "AAkUADVq")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

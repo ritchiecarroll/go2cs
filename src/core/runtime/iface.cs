@@ -16,13 +16,13 @@ partial class runtime_package {
 
 internal static UntypedInt itabInitSize => 512;
 
-internal static ж<mutex> ᏑitabLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex itabLock => ref ᏑitabLock.Value;                         // lock for accessing itab table
-internal static ж<ж<itabTableType>> ᏑitabTable = new StaticBox<ж<itabTableType>>(default(ж<itabTableType>));
-internal static ref ж<itabTableType> itabTable => ref ᏑitabTable.ValueSlot;
+internal static readonly ж<mutex> ᏑitabLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex itabLock => ref ((StaticBox<mutex>)ᏑitabLock).ValueSlot;                         // lock for accessing itab table
+internal static readonly ж<ж<itabTableType>> ᏑitabTable = new StaticBox<ж<itabTableType>>(default(ж<itabTableType>));
+internal static ref ж<itabTableType> itabTable => ref ((StaticBox<ж<itabTableType>>)ᏑitabTable).ValueSlot;
 internal static void initᴛitabTable() { itabTable = ᏑitabTableInit; }                    // pointer to current table
-internal static ж<itabTableType> ᏑitabTableInit = new StaticBox<itabTableType>(new itabTableType(size: itabInitSize));
-internal static ref itabTableType itabTableInit => ref ᏑitabTableInit.Value; // starter table
+internal static readonly ж<itabTableType> ᏑitabTableInit = new StaticBox<itabTableType>(new itabTableType(size: itabInitSize));
+internal static ref itabTableType itabTableInit => ref ((StaticBox<itabTableType>)ᏑitabTableInit).ValueSlot; // starter table
 
 // Note: change the formula in the mallocgc call in itabAdd if you change these fields.
 partial struct itabTableType {
@@ -349,16 +349,16 @@ partial struct stringInterfacePtr /*@string*/;
 
 partial struct sliceInterfacePtr /*[]byte*/;
 
-internal static ж<any> Ꮡuint16Eface = new StaticBox<any>(((uint16InterfacePtr)0));
-internal static ref any uint16Eface => ref Ꮡuint16Eface.ValueSlot;
-internal static ж<any> Ꮡuint32Eface = new StaticBox<any>(((uint32InterfacePtr)0));
-internal static ref any uint32Eface => ref Ꮡuint32Eface.ValueSlot;
-internal static ж<any> Ꮡuint64Eface = new StaticBox<any>(((uint64InterfacePtr)0));
-internal static ref any uint64Eface => ref Ꮡuint64Eface.ValueSlot;
-internal static ж<any> ᏑstringEface = new StaticBox<any>(((stringInterfacePtr)(@string)""u8));
-internal static ref any stringEface => ref ᏑstringEface.ValueSlot;
-internal static ж<any> ᏑsliceEface = new StaticBox<any>(((sliceInterfacePtr)default!));
-internal static ref any sliceEface => ref ᏑsliceEface.ValueSlot;
+internal static readonly ж<any> Ꮡuint16Eface = new StaticBox<any>(((uint16InterfacePtr)0));
+internal static ref any uint16Eface => ref ((StaticBox<any>)Ꮡuint16Eface).ValueSlot;
+internal static readonly ж<any> Ꮡuint32Eface = new StaticBox<any>(((uint32InterfacePtr)0));
+internal static ref any uint32Eface => ref ((StaticBox<any>)Ꮡuint32Eface).ValueSlot;
+internal static readonly ж<any> Ꮡuint64Eface = new StaticBox<any>(((uint64InterfacePtr)0));
+internal static ref any uint64Eface => ref ((StaticBox<any>)Ꮡuint64Eface).ValueSlot;
+internal static readonly ж<any> ᏑstringEface = new StaticBox<any>(((stringInterfacePtr)(@string)""u8));
+internal static ref any stringEface => ref ((StaticBox<any>)ᏑstringEface).ValueSlot;
+internal static readonly ж<any> ᏑsliceEface = new StaticBox<any>(((sliceInterfacePtr)default!));
+internal static ref any sliceEface => ref ((StaticBox<any>)ᏑsliceEface).ValueSlot;
 
 internal static ж<_type> uint16Type = (~efaceOf(Ꮡuint16Eface))._type;
 internal static ж<_type> uint32Type = (~efaceOf(Ꮡuint32Eface))._type;
@@ -764,8 +764,8 @@ internal static void iterate_itabs(Action<ж<itab>> fn) {
 // staticuint64s is used to avoid allocating in convTx for small integer values.
 // staticuint64s[0] == 0, staticuint64s[1] == 1, and so forth.
 // It is defined in assembler code so that it is read-only.
-internal static ж<array<uint64>> Ꮡstaticuint64s = new StaticBox<array<uint64>>(new array<uint64>(256));
-internal static ref array<uint64> staticuint64s => ref Ꮡstaticuint64s.Value;
+internal static readonly ж<array<uint64>> Ꮡstaticuint64s = new StaticBox<array<uint64>>(new array<uint64>(256));
+internal static ref array<uint64> staticuint64s => ref ((StaticBox<array<uint64>>)Ꮡstaticuint64s).ValueSlot;
 
 // getStaticuint64s is called by the reflect package to get a pointer
 // to the read-only array.

@@ -27,7 +27,8 @@ partial class check_package {
 
 // Verified is set when verification succeeded. It can be expected to always be
 // true when [fips140.Enabled] is true, or init would have panicked.
-public static bool Verified;
+public static readonly ж<bool> ᏑVerified = new StaticBox<bool>(default(bool));
+public static ref bool Verified => ref ((StaticBox<bool>)ᏑVerified).ValueSlot;
 
 // Linkinfo holds the go:fipsinfo symbol prepared by the linker.
 // See cmd/link/internal/ld/fips.go for details.

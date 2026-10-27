@@ -18,7 +18,7 @@ partial class fipsdeps_internal_test_package {
 // validated module, which can be years.
 //
 // DO NOT add new packages here just to make the tests pass.
-public static map<@string, bool> AllowedInternalPackages = new map<@string, bool>{
+public static readonly ж<map<@string, bool>> ᏑAllowedInternalPackages = new StaticBox<map<@string, bool>>(new map<@string, bool>{
     // entropy.Depleted/Seed is the entropy source, and sysrand.Read
     // is the actual (but uncredited!) random bytes source.
     ["crypto/internal/entropy"u8] = true,
@@ -34,7 +34,8 @@ public static map<@string, bool> AllowedInternalPackages = new map<@string, bool
 
     // constanttime are the constant-time intrinsics.
     ["crypto/internal/constanttime"u8] = true
-};
+});
+public static ref map<@string, bool> AllowedInternalPackages => ref ((StaticBox<map<@string, bool>>)ᏑAllowedInternalPackages).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string listˢ = "list"u8;

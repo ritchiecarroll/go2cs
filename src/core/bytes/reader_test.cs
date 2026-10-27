@@ -231,7 +231,7 @@ partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<bytes.Reader>> f;
 }
-public static slice<UnreadRuneErrorTestsᴛ1> UnreadRuneErrorTests = new UnreadRuneErrorTestsᴛ1[]{
+public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTests = new StaticBox<slice<UnreadRuneErrorTestsᴛ1>>(new UnreadRuneErrorTestsᴛ1[]{
     new("Read"u8, (ж<bytes.Reader> r) => {
         r.Read(new byte[]{0}.slice());
     }),
@@ -247,7 +247,8 @@ public static slice<UnreadRuneErrorTestsᴛ1> UnreadRuneErrorTests = new UnreadR
     new("WriteTo"u8, (ж<bytes.Reader> r) => {
         r.WriteTo(new bytes_test_package.bytes_BufferжWriter(Ꮡ(new Buffer(nil))));
     })
-}.slice();
+}.slice());
+public static ref slice<UnreadRuneErrorTestsᴛ1> UnreadRuneErrorTests => ref ((StaticBox<slice<UnreadRuneErrorTestsᴛ1>>)ᏑUnreadRuneErrorTests).ValueSlot;
 
 public static void TestUnreadRuneError(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in UnreadRuneErrorTests) {

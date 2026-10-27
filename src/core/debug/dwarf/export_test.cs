@@ -7,6 +7,7 @@ using static go.debug.dwarf_package;
 
 partial class dwarf_internal_test_package {
 
-public static Func<@string, @string, @string> PathJoin = pathJoin;
+public static readonly ж<Func<@string, @string, @string>> ᏑPathJoin = new StaticBox<Func<@string, @string, @string>>(pathJoin);
+public static ref Func<@string, @string, @string> PathJoin => ref ((StaticBox<Func<@string, @string, @string>>)ᏑPathJoin).ValueSlot;
 
 } // end dwarf_internal_test_package

@@ -65,7 +65,7 @@ using static go.go.doc_package;
 [assembly: global::go.GoPositionMap("go/doc/exports.go", "exports.cs", "AAwgooKCgoKmppSCgoKCuIKCgpS0gIKkgILGgpSqwoKClKaokoKCpqiSgoKCgoCUgILGgoKmgpSu8oKUgoKCgoCUgoKCkriCAAcQpoKClIK2goKCpoKUgqiygoIABBCy2LS0gsaCgsa0gsaCgrSCxoK0yIKmpILugoKmgoKC/ICCgpKCgpTGrLKUpICU/KaChqKCgpSUlJTKgoKCgqamgpSC7JSosoKCgoKm", "", "", "310=NewIdent/1/1/1")]
 [assembly: global::go.GoPositionMap("go/doc/filter.go", "filter.cs", "AAwWooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpqqigoKCgg==")]
 [assembly: global::go.GoPositionMap("go/doc/reader.go", "reader.cs", "ACJAopSktraCgoKCgoKClIK21oKAgqSu4pKA3LaSgpSAgqSU7oK+0oKCgpSUAAYY0pSkpKSAptaklAAycoKuwoKUgIK23IKu8oKClICCgoKkpqaCgoKUpoKClKaCgpSCpqgACAqCgoKCgoKClIKmgIL6pJSmgpSClIK4griCgpSAgsjcgtyowoKUgrSkgpSowoKCyqaClJSCgpSasoKCgsySqMSCuJSmlIKmlICC/sqCgoKCgoCmpICCppSAgoKCggAIDoKCyqrCgpSCgoK4uoKawoKCgoKClIKCuICCpKiSgoDKkoKCAAoe0oKCgoKCgpSmgszUgoKCyoKUpoKAgoCCgoKCgoKmgoKUgoKSggAKEMbcgIKklIKAygAKFgAKEIKCuMSCgoKCgoK4goKClKaCgoKUpoKCyoKCgIIABhLCgriSkoKCgoKClKaSppKmkoKUlKiygtyClIKmgqaokpSUAAgSgoIABBLCgoKU7pSmpoKUgILsggAEEKKCgoKClIKokoKAgramgoKCgoKCppSCgoKUpqaCgoKCAAgSppimgoKUpoKCgpT8graChqqigoKUrsKmABgyABQqAAYUsp6CgoCCgoLIgoCCpA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "112=Text/1/1/1;373=Text/1/1/1,specNames/1/1/2;596=Pos/1/1/1,End/1/1/2;708=Pos/1/1/7;969=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
-[assembly: global::go.GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AAwgsqKigpSClIKUlK7CggAHEAAFGAAIAoKCgoKmgoKCgpSAgqSC")]
+[assembly: global::go.GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AAwgsqKigpSClIKUlK7CggAHEAAGGAAIAoKCgoKmgoKCgpSAgqSC")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -12,8 +12,8 @@ using sync;
 
 partial class fips140tls_package {
 
-internal static ж<atomic.Bool> Ꮡrequired = new StaticBox<atomic.Bool>(default(atomic.Bool));
-internal static ref atomic.Bool @required => ref Ꮡrequired.Value;
+internal static readonly ж<atomic.Bool> Ꮡrequired = new StaticBox<atomic.Bool>(default(atomic.Bool));
+internal static ref atomic.Bool @required => ref ((StaticBox<atomic.Bool>)Ꮡrequired).ValueSlot;
 
 [GoInit] internal static void init() {
     if (fips140.Enabled()) {

@@ -688,8 +688,8 @@ internal static (ж<ecdsaꓸPublicKey>, error) publicKeyToFIPS<P>(ж<ecdsa.Curve
     return ecdsa.NewPublicKey(Ꮡc, Q);
 }
 
-internal static ж<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>>(default(fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>));
-internal static ref fips140cache.Cache<PrivateKey, ecdsa.PrivateKey> privateKeyCache => ref ᏑprivateKeyCache.Value;
+internal static readonly ж<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>>(default(fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>));
+internal static ref fips140cache.Cache<PrivateKey, ecdsa.PrivateKey> privateKeyCache => ref ((StaticBox<fips140cache.Cache<PrivateKey, ecdsa.PrivateKey>>)ᏑprivateKeyCache).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ecdsaPrivateKeyScalarTooˢ = "ecdsa: private key scalar too large"u8;

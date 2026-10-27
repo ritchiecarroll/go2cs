@@ -21,8 +21,8 @@ partial struct vgetrandomAllocᴛ1 /*dyn*/ {
     internal int32 mmapProt;
     internal int32 mmapFlags;
 }
-internal static ж<vgetrandomAllocᴛ1> ᏑvgetrandomAlloc = new StaticBox<vgetrandomAllocᴛ1>(new vgetrandomAllocᴛ1());
-internal static ref vgetrandomAllocᴛ1 vgetrandomAlloc => ref ᏑvgetrandomAlloc.Value;
+internal static readonly ж<vgetrandomAllocᴛ1> ᏑvgetrandomAlloc = new StaticBox<vgetrandomAllocᴛ1>(new vgetrandomAllocᴛ1());
+internal static ref vgetrandomAllocᴛ1 vgetrandomAlloc => ref ((StaticBox<vgetrandomAllocᴛ1>)ᏑvgetrandomAlloc).ValueSlot;
 
 internal partial struct vgetrandomInit_params /*dyn*/ {
     public uint32 SizeOfOpaqueState;

@@ -56,7 +56,7 @@ using static go.@internal.trace.tracev2_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/trace/tracev2/events.go", "events.cs", "AF/CAYIACBaCpgAfRIKmAO8C1AWClKSkpJQAGjSClKSklA==")]
-[assembly: go.GoPositionMap("internal/trace/tracev2/spec.go", "spec.cs", "AEmiAQAMHJKCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/tracev2/spec.go", "spec.cs", "AEmiAQANHJKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

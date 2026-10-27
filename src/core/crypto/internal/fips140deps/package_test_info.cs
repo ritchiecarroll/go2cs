@@ -36,7 +36,7 @@ using static global::go.crypto.@internal.fips140deps.fipsdeps_internal_test_pack
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140deps/fipsdeps_test.go", "fipsdeps_test.cs", "ABQkACUkggAAFIKClLiCgoKCpqaUgoKUlJSC3IaUgpSCyoIAERSC", "", "", "96=HasPrefix/1/2/1,HasPrefix/2/2/2")]
+[assembly: go.GoPositionMap("crypto/internal/fips140deps/fipsdeps_test.go", "fipsdeps_test.cs", "ABQkACYkggAAFIKClLiCgoKCpqaUgoKUlJSC3IaUgpSCyoIAERSC", "", "", "97=HasPrefix/1/2/1,HasPrefix/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140deps;

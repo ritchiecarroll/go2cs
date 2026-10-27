@@ -55,8 +55,8 @@ partial struct Ptr<T>
 // Ptr is a Word
 internal static Word _ᴛ1ʗ = new Ptr<@void>(nil);
 
-internal static ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map(nil));
-internal static ref sync.Map ptrKinds => ref ᏑptrKinds.Value; // *kind -> *kind
+internal static readonly ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map(nil));
+internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).ValueSlot; // *kind -> *kind
 
 internal static ж<Δkind> kind<T>(this Ptr<T> _Δp0)
     where T : Value

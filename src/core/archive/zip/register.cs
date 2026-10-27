@@ -25,8 +25,8 @@ partial class zip_package {
 // one goroutine at a time.
 // type Decompressor is a methodless func type — rendered inline as its base delegate
 
-internal static ж<sync.Pool> ᏑflateWriterPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool flateWriterPool => ref ᏑflateWriterPool.Value;
+internal static readonly ж<sync.Pool> ᏑflateWriterPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool flateWriterPool => ref ((StaticBox<sync.Pool>)ᏑflateWriterPool).ValueSlot;
 
 internal static io.WriteCloser newFlateWriter(io.Writer w) {
     var (fw, ok) = ᏑflateWriterPool.Get()._<ж<flate.Writer>>(ᐧ);
@@ -85,8 +85,8 @@ internal static error Close(this ж<pooledFlateWriter> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<sync.Pool> ᏑflateReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool flateReaderPool => ref ᏑflateReaderPool.Value;
+internal static readonly ж<sync.Pool> ᏑflateReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool flateReaderPool => ref ((StaticBox<sync.Pool>)ᏑflateReaderPool).ValueSlot;
 
 internal static io.ReadCloser newFlateReader(io.Reader r) {
     var (fr, ok) = ᏑflateReaderPool.Get()._<io.ReadCloser>(ᐧ);
@@ -145,10 +145,10 @@ internal static error Close(this ж<pooledFlateReader> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<sync.Map> Ꮡcompressors = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map compressors => ref Ꮡcompressors.Value; // map[uint16]Compressor
-internal static ж<sync.Map> Ꮡdecompressors = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map decompressors => ref Ꮡdecompressors.Value; // map[uint16]Decompressor
+internal static readonly ж<sync.Map> Ꮡcompressors = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map compressors => ref ((StaticBox<sync.Map>)Ꮡcompressors).ValueSlot; // map[uint16]Compressor
+internal static readonly ж<sync.Map> Ꮡdecompressors = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecompressors).ValueSlot; // map[uint16]Decompressor
 
 [GoInit] internal static void init() {
     Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default!)));

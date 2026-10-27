@@ -211,12 +211,12 @@ internal static @string sprintKey(reflectꓸValue key) {
     }
 }
 
-internal static ж<array<nint>> Ꮡints = new StaticBox<array<nint>>(new array<nint>(3));
-internal static ref array<nint> ints => ref Ꮡints.Value;
+internal static readonly ж<array<nint>> Ꮡints = new StaticBox<array<nint>>(new array<nint>(3));
+internal static ref array<nint> ints => ref ((StaticBox<array<nint>>)Ꮡints).ValueSlot;
 internal static slice<channel<nint>> chans;
 internal static void initᴛchans() { chans = makeChans(); }
-internal static ж<Δruntime.Pinner> Ꮡpin = new StaticBox<Δruntime.Pinner>(new Δruntime.Pinner(nil));
-internal static ref Δruntime.Pinner pin => ref Ꮡpin.Value;
+internal static readonly ж<Δruntime.Pinner> Ꮡpin = new StaticBox<Δruntime.Pinner>(new Δruntime.Pinner(nil));
+internal static ref Δruntime.Pinner pin => ref ((StaticBox<Δruntime.Pinner>)Ꮡpin).ValueSlot;
 
 internal static slice<channel<nint>> makeChans() {
     var cs = new channel<nint>[]{new channel<nint>(0), new channel<nint>(0), new channel<nint>(0)}.slice();

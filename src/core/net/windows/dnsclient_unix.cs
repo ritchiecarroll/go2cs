@@ -420,8 +420,8 @@ partial struct resolverConfig {
     internal atomic.Pointer<dnsConfig> dnsConfig; // parsed resolv.conf structure used in lookups
 }
 
-internal static ж<resolverConfig> ᏑresolvConf = new StaticBox<resolverConfig>(default(resolverConfig));
-internal static ref resolverConfig resolvConf => ref ᏑresolvConf.Value;
+internal static readonly ж<resolverConfig> ᏑresolvConf = new StaticBox<resolverConfig>(default(resolverConfig));
+internal static ref resolverConfig resolvConf => ref ((StaticBox<resolverConfig>)ᏑresolvConf).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string etcResolvConfˢ = "/etc/resolv.conf"u8;

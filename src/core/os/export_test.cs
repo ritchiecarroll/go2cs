@@ -10,7 +10,8 @@ using time = time_package;
 partial class os_internal_test_package {
 
 // Export for testing.
-public static Func<fs.FileInfo, time.Time> Atime = atime;
+public static readonly ж<Func<fs.FileInfo, time.Time>> ᏑAtime = new StaticBox<Func<fs.FileInfo, time.Time>>(atime);
+public static ref Func<fs.FileInfo, time.Time> Atime => ref ((StaticBox<Func<fs.FileInfo, time.Time>>)ᏑAtime).ValueSlot;
 
 public static error ErrWriteAtInAppendMode;
 internal static void initᴛErrWriteAtInAppendMode() { ErrWriteAtInAppendMode = errWriteAtInAppendMode; }
@@ -25,7 +26,8 @@ internal static void initᴛErrPathEscapes() { ErrPathEscapes = errPathEscapes; 
     checkWrapErr = true;
 }
 
-public static Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)> ExportReadFileContents = readFileContents;
+public static readonly ж<Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)>> ᏑExportReadFileContents = new StaticBox<Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)>>(readFileContents);
+public static ref Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)> ExportReadFileContents => ref ((StaticBox<Func<int64, Func<slice<byte>, (nint, error)>, (slice<byte>, error)>>)ᏑExportReadFileContents).ValueSlot;
 
 // cleanuper stands in for *testing.T, since we can't import testing in os.
 public partial interface cleanuper {

@@ -497,8 +497,8 @@ public static void TestCanSetField(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<nint> Ꮡ_i = new StaticBox<nint>(7);
-internal static ref nint _i => ref Ꮡ_i.Value;
+internal static readonly ж<nint> Ꮡ_i = new StaticBox<nint>(7);
+internal static ref nint _i => ref ((StaticBox<nint>)Ꮡ_i).ValueSlot;
 
 internal static slice<pair> valueToStringTests = new pair[]{
     new((nint)123, "123"u8),
@@ -667,15 +667,15 @@ partial struct self {
 
 partial class Loop /*ж<Loop>*/;
 
-internal static ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
-internal static ref Loop loop1 => ref Ꮡloop1.ValueSlot;
-internal static ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
-internal static ref Loop loop2 => ref Ꮡloop2.ValueSlot;
+internal static readonly ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
+internal static ref Loop loop1 => ref ((StaticBox<Loop>)Ꮡloop1).ValueSlot;
+internal static readonly ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
+internal static ref Loop loop2 => ref ((StaticBox<Loop>)Ꮡloop2).ValueSlot;
 
-internal static ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
-internal static ref Loopy loopy1 => ref Ꮡloopy1.ValueSlot;
-internal static ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
-internal static ref Loopy loopy2 => ref Ꮡloopy2.ValueSlot;
+internal static readonly ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
+internal static ref Loopy loopy1 => ref ((StaticBox<Loopy>)Ꮡloopy1).ValueSlot;
+internal static readonly ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
+internal static ref Loopy loopy2 => ref ((StaticBox<Loopy>)Ꮡloopy2).ValueSlot;
 
 [GoInit] internal static void init() {
     loop1 = Ꮡloop2;

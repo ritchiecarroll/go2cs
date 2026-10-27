@@ -58,10 +58,12 @@ partial interface AppendByteOrder {
 }
 
 // LittleEndian is the little-endian implementation of [ByteOrder] and [AppendByteOrder].
-public static littleEndian LittleEndian;
+public static readonly ж<littleEndian> ᏑLittleEndian = new StaticBox<littleEndian>(default(littleEndian));
+public static ref littleEndian LittleEndian => ref ((StaticBox<littleEndian>)ᏑLittleEndian).ValueSlot;
 
 // BigEndian is the big-endian implementation of [ByteOrder] and [AppendByteOrder].
-public static bigEndian BigEndian;
+public static readonly ж<bigEndian> ᏑBigEndian = new StaticBox<bigEndian>(default(bigEndian));
+public static ref bigEndian BigEndian => ref ((StaticBox<bigEndian>)ᏑBigEndian).ValueSlot;
 
 public partial struct littleEndian {
 }
@@ -875,8 +877,8 @@ public static nint Size(any v) {
     return dataSize(reflect.Indirect(reflect.ValueOf(v)));
 }
 
-internal static ж<sync.Map> ᏑstructSize = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map structSize => ref ᏑstructSize.Value; // map[reflect.Type]int
+internal static readonly ж<sync.Map> ᏑstructSize = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map structSize => ref ((StaticBox<sync.Map>)ᏑstructSize).ValueSlot; // map[reflect.Type]int
 
 // dataSize returns the number of bytes the actual data represented by v occupies in memory.
 // For compound structures, it sums the sizes of the elements. Thus, for instance, for a slice

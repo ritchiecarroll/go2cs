@@ -23,12 +23,12 @@ using Δio = io_package;
 
 partial class net_internal_test_package {
 
-internal static ж<socktest.Switch> Ꮡsw = new StaticBox<socktest.Switch>(default(socktest.Switch));
-internal static ref socktest.Switch sw => ref Ꮡsw.Value;
+internal static readonly ж<socktest.Switch> Ꮡsw = new StaticBox<socktest.Switch>(default(socktest.Switch));
+internal static ref socktest.Switch sw => ref ((StaticBox<socktest.Switch>)Ꮡsw).ValueSlot;
 
 // uninstallTestHooks runs just before a run of benchmarks.
-internal static ж<Δsync.Once> ᏑtestHookUninstaller = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once testHookUninstaller => ref ᏑtestHookUninstaller.Value;
+internal static readonly ж<Δsync.Once> ᏑtestHookUninstaller = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once testHookUninstaller => ref ((StaticBox<Δsync.Once>)ᏑtestHookUninstaller).ValueSlot;
 
 internal static ж<bool> testTCPBig = flag.Bool("tcpbig"u8, false, "whether to test massive size of data per read or write call on TCP connection"u8);
 

@@ -27,8 +27,8 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-internal static ж<sweepdata> ᏑΔsweep = new StaticBox<sweepdata>(new sweepdata());
-internal static ref sweepdata Δsweep => ref ᏑΔsweep.Value;
+internal static readonly ж<sweepdata> ᏑΔsweep = new StaticBox<sweepdata>(new sweepdata());
+internal static ref sweepdata Δsweep => ref ((StaticBox<sweepdata>)ᏑΔsweep).ValueSlot;
 
 // State of background sweep.
 partial struct sweepdata {

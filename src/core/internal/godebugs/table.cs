@@ -27,7 +27,7 @@ partial struct Info {
 //
 // Note: After adding entries to this table, update the list in doc/godebug.md as well.
 // (Otherwise the test in this package will fail.)
-[GoLazy] partial class lazyᴛAll { public static ж<slice<Info>> ᏑAll = new StaticBox<slice<Info>>(new Info[]{
+[GoLazy] partial class lazyᴛAll { public static readonly ж<slice<Info>> ᏑAll = new StaticBox<slice<Info>>(new Info[]{
     new(Name: "allowmultiplevcs"u8, Package: "cmd/go"u8),
     new(Name: "asynctimerchan"u8, Package: "time"u8, Changed: 23, Old: "1"u8),
     new(Name: "containermaxprocs"u8, Package: "runtime"u8, Changed: 25, Old: "0"u8),
@@ -86,7 +86,7 @@ partial struct Info {
     new(Name: "x509usepolicies"u8, Package: "crypto/x509"u8, Changed: 24, Old: "0"u8),
     new(Name: "zipinsecurepath"u8, Package: "archive/zip"u8)
 }.slice()); }
-public static ref slice<Info> All => ref ᏑAll.ValueSlot;
+public static ref slice<Info> All => ref ((StaticBox<slice<Info>>)ᏑAll).ValueSlot;
 
 partial struct RemovedInfo {
     public @string Name; // name of the removed GODEBUG setting.
@@ -94,9 +94,10 @@ partial struct RemovedInfo {
 }
 
 // Removed contains all GODEBUGs that we have removed.
-public static slice<RemovedInfo> Removed = new RemovedInfo[]{
+public static readonly ж<slice<RemovedInfo>> ᏑRemoved = new StaticBox<slice<RemovedInfo>>(new RemovedInfo[]{
     new(Name: "x509sha1"u8, Removed: 24)
-}.slice();
+}.slice());
+public static ref slice<RemovedInfo> Removed => ref ((StaticBox<slice<RemovedInfo>>)ᏑRemoved).ValueSlot;
 
 // Lookup returns the Info with the given name.
 public static ж<Info> Lookup(@string name) {

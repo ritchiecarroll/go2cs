@@ -11,11 +11,14 @@ using testing = testing_package;
 
 partial class netip_package {
 
-internal static unique.Handle<addrDetail> Z0;
+internal static readonly ж<unique.Handle<addrDetail>> ᏑZ0 = new StaticBox<unique.Handle<addrDetail>>(default(unique.Handle<addrDetail>));
+internal static ref unique.Handle<addrDetail> Z0 => ref ((StaticBox<unique.Handle<addrDetail>>)ᏑZ0).ValueSlot;
 internal static void initᴛZ0() { Z0 = z0; }
-internal static unique.Handle<addrDetail> Z4;
+internal static readonly ж<unique.Handle<addrDetail>> ᏑZ4 = new StaticBox<unique.Handle<addrDetail>>(default(unique.Handle<addrDetail>));
+internal static ref unique.Handle<addrDetail> Z4 => ref ((StaticBox<unique.Handle<addrDetail>>)ᏑZ4).ValueSlot;
 internal static void initᴛZ4() { Z4 = z4; }
-internal static unique.Handle<addrDetail> Z6noz;
+internal static readonly ж<unique.Handle<addrDetail>> ᏑZ6noz = new StaticBox<unique.Handle<addrDetail>>(default(unique.Handle<addrDetail>));
+internal static ref unique.Handle<addrDetail> Z6noz => ref ((StaticBox<unique.Handle<addrDetail>>)ᏑZ6noz).ValueSlot;
 internal static void initᴛZ6noz() { Z6noz = z6noz; }
 
 internal static AddrDetail MakeAddrDetail(bool isV6, @string zoneV6) {
@@ -34,7 +37,8 @@ public static ΔAddr IPv4(uint8 a, uint8 b, uint8 c, uint8 d) {
     return AddrFrom4(new byte[]{a, b, c, d}.array());
 }
 
-public static Action<ж<testing.T>, appendMarshaler> TestAppendToMarshal = testAppendToMarshal;
+public static readonly ж<Action<ж<testing.T>, appendMarshaler>> ᏑTestAppendToMarshal = new StaticBox<Action<ж<testing.T>, appendMarshaler>>(testAppendToMarshal);
+public static ref Action<ж<testing.T>, appendMarshaler> TestAppendToMarshal => ref ((StaticBox<Action<ж<testing.T>, appendMarshaler>>)ᏑTestAppendToMarshal).ValueSlot;
 
 public static bool IsZero(this ΔAddr a) {
     return a.isZero();

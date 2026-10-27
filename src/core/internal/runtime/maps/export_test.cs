@@ -14,7 +14,8 @@ partial class maps_internal_test_package {
 
 public const bool DebugLog = /* debugLog */ false;
 
-public static Func<uint64, (uint64, bool)> AlignUpPow2 = alignUpPow2;
+public static readonly ж<Func<uint64, (uint64, bool)>> ᏑAlignUpPow2 = new StaticBox<Func<uint64, (uint64, bool)>>(alignUpPow2);
+public static ref Func<uint64, (uint64, bool)> AlignUpPow2 => ref ((StaticBox<Func<uint64, (uint64, bool)>>)ᏑAlignUpPow2).ValueSlot;
 
 public static UntypedInt MaxTableCapacity => /* maxTableCapacity */ 1024;
 

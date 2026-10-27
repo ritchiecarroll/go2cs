@@ -77,8 +77,8 @@ using static go.database.sql.driver_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCUAaACgqaCAAoUxILWgg==")]
-[assembly: go.GoPositionMap("database/sql/driver/types.go", "types.cs", "AD5+xICkgpSkgoKUpIKClKaClIKClKSCgpSmAAkSlIKClIKClKSCgpSkgoKUlAALFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAVKpQAARoACwKAhqSmgoKmlIKClIKUuKaCpoKUtqSkgoKUpKSkgoKUpJQ=")]
+[assembly: go.GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCUAaACgqaCAAsUxILWgg==")]
+[assembly: go.GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+xICkgpSkgoKUpIKClKaClIKClKSCgpSmAAoSlIKClIKClKSCgpSkgoKUlAAMFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAWKpQAARoACwKAhqSmgoKmlIKClIKUuKaCpoKUtqSkgoKUpKSkgoKUpJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;

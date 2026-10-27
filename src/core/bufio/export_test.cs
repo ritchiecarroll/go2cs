@@ -10,7 +10,8 @@ using unicode;
 
 partial class bufio_internal_test_package {
 
-public static Func<rune, bool> IsSpace = isSpace;
+public static readonly ж<Func<rune, bool>> ᏑIsSpace = new StaticBox<Func<rune, bool>>(isSpace);
+public static ref Func<rune, bool> IsSpace => ref ((StaticBox<Func<rune, bool>>)ᏑIsSpace).ValueSlot;
 
 public static UntypedInt DefaultBufSize => /* defaultBufSize */ 4096;
 

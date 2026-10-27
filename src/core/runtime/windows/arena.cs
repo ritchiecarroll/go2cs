@@ -302,8 +302,8 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
     // Protected by lock.
     internal slice<liveUserArenaChunk> fault;
 }
-internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
-internal static ref userArenaStateᴛ1 userArenaState => ref ᏑuserArenaState.Value;
+internal static readonly ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
+internal static ref userArenaStateᴛ1 userArenaState => ref ((StaticBox<userArenaStateᴛ1>)ᏑuserArenaState).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mallocDeadlockˢ = "malloc deadlock"u8;

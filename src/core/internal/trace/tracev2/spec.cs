@@ -71,7 +71,7 @@ partial struct EventSpec {
 // EventArgTypes is a list of valid argument types for use in Args.
 //
 // See the documentation of Args for more details.
-public static array<@string> EventArgTypes = new @string[]{
+public static readonly ж<array<@string>> ᏑEventArgTypes = new StaticBox<array<@string>>(new @string[]{
     "seq"u8, // sequence number
     "pstatus"u8, // P status
     "gstatus"u8, // G status
@@ -82,7 +82,8 @@ public static array<@string> EventArgTypes = new @string[]{
     "stack"u8, // stack ID
     "value"u8, // uint64
     "task"u8 // trace.TaskID
-}.array();
+}.array());
+public static ref array<@string> EventArgTypes => ref ((StaticBox<array<@string>>)ᏑEventArgTypes).ValueSlot;
 
 // EventNames is a helper that produces a mapping of event names to event types.
 public static map<@string, EventType> EventNames(slice<EventSpec> specs) {

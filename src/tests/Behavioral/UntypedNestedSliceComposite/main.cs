@@ -26,8 +26,8 @@ partial struct dbgVar {
     internal ж<int32> value;
 }
 
-internal static ж<int32> Ꮡx = new StaticBox<int32>(7);
-internal static ref int32 x => ref Ꮡx.Value;
+internal static readonly ж<int32> Ꮡx = new StaticBox<int32>(7);
+internal static ref int32 x => ref ((StaticBox<int32>)Ꮡx).ValueSlot;
 
 internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "a"u8, value: Ꮡx)),
