@@ -310,7 +310,7 @@ Then the re-bank by the runbook.
 
 ---
 
-## 11. The seat, as built (G, 2026-10-27; claude/g-crosspkg-box on master 43752cff98)
+## 11. The seat, as built (G, 2026-10-27; claude/g-crosspkg-box on master 71a2363e5e)
 
 Recorded as an amendment, as built against the accepted design above. Every difference was measured, and COORD
 ruled each one before it shipped.
@@ -373,8 +373,9 @@ the slnx build and the behavioral compile phase all catch.
 The first prediction (section 4's census) met the form count and the importer sites. It missed the new boxes, 400
 predicted against 407: +8 vendored `golang.org/x/sys/cpu` vars the census never read, and -1 for the displaced
 `MemProfileRate`. It missed the map records, 96 against 116: the predicate read only package_info.cs, and 8
-declaration-only files keep their record. Re-predicted with those mechanisms on the landed base, every count was met
-exactly.
+declaration-only files keep their record. Re-predicted with those mechanisms on batch 52 (43752cff98), every count was
+met exactly. Batch 53 (71a2363e5e) then landed P2's seat #4 converter change, so the A/B ran again on it. The
+prediction was the same diff, line for line, and it was met: 0 files whose changed lines differ.
 
 **Hand-owns.** Four were boxed by hand:
 - registry `ErrShortBuffer` and `ErrNotExist`;

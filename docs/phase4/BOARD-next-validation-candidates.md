@@ -29307,9 +29307,10 @@ write, `LinknameVar.Set`, writes a remote VALUE field by name, never a box. A la
 - `runtime.MemProfileRate`, displaced into runtime/mprof_impl.cs over golib's `GoMemProfile.Rate` and registered in
   `externalStorageVars`. `TestDisplacedExportedVarsAreBoxedOrRegistered` keeps that registry complete.
 
-**Footprint** (two-seeded, three targets, plus a 65-package `-tests` leg on master 43752cff98): 522 files,
-+2590/-2183, 0 conflicts. Form change on 794 boxes, 407 new boxes, 116 map records, 4 importer sites. The corrected
-prediction was met exactly. The first prediction and its misses are scored in the corpus commit.
+**Footprint** (two-seeded, three targets, plus a 65-package `-tests` leg, measured on batch 52 at 43752cff98 and again
+on batch 53 at 71a2363e5e): 522 files, +2590/-2183, 0 conflicts. Form change on 794 boxes, 407 new boxes, 116 map
+records, 4 importer sites. The corrected prediction was met exactly on both bases. The first prediction and its misses
+are scored in the corpus commit.
 
 — G (2026-10-27)
 
