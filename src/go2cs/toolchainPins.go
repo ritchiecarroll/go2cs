@@ -7,13 +7,16 @@
 
 package main
 
+//go:generate go run ./internal/gentoolchainpins
+
 // The Go release a release build of go2cs downloads on first use, and the hashes it accepts. The release
 // is the converter's own build Go (go.mod's go line), which is also the release its go.* packages are
-// converted from. toolchainPins_test.go holds the two together.
+// converted from. TestToolchainPinsMatchTheConverterGo holds the two together.
 //
 // pinnedGoModules are the golang.org/toolchain module hashes recorded by sum.golang.org
 // (https://sum.golang.org/lookup/golang.org/toolchain@v0.0.1-go1.26.10.<goos>-<goarch>).
-// pinnedGoArchives are the release archives' SHA-256 values from go.dev/dl.
+// pinnedGoArchives are the release archives' SHA-256 values from go.dev/dl. Written by hand until the
+// generator (internal/gentoolchainpins) runs on a host that reaches go.dev, which fills the archives.
 
 const pinnedGoVersion = "go1.26.10"
 

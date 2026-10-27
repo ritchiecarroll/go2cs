@@ -202,6 +202,11 @@ func main() {
 	// stalls during option resolution or package loading is still reachable by a profiler.
 	startDiagnosticProfiling()
 
+	// `go2cs toolchain ...` manages that Go (toolchainCommand.go).
+	if len(os.Args) > 1 && os.Args[1] == "toolchain" {
+		os.Exit(runToolchainCommand(os.Args[2:], os.Stdout, os.Stderr))
+	}
+
 	// A release build brings its own Go when the host has none of its release (toolchainProvision.go).
 	// Before GOROOT is resolved below, which is the first thing that needs one.
 	if err := ensureGoToolchain(os.Args[1:]); err != nil {

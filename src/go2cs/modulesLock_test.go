@@ -75,3 +75,19 @@ func TestModulesLockRoundTripAndClash(t *testing.T) {
 		}
 	}
 }
+
+// A module whose go line is newer than the converting Go is refused as that, not as a cache or go.sum
+// problem; any other preflight failure keeps the general wording.
+func TestGoModDownloadFailureNamesANewerGo(t *testing.T) {
+	newer := goModDownloadFailure("m", "go: go.mod requires go >= 1.27 (running go 1.26.10; GOTOOLCHAIN=local)").Error()
+
+	if !strings.Contains(newer, "needs a newer Go") || strings.Contains(newer, "go.sum verification") {
+		t.Fatalf("a newer go line was worded as another failure: %s", newer)
+	}
+
+	other := goModDownloadFailure("m", "verifying example.com/x@v1.0.0: checksum mismatch").Error()
+
+	if !strings.Contains(other, "go.sum verification") || strings.Contains(other, "newer Go") {
+		t.Fatalf("a checksum failure was worded as a newer go line: %s", other)
+	}
+}

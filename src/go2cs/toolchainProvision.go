@@ -82,6 +82,18 @@ type toolchainProvisioner struct {
 // ensureGoToolchain is main's first step. It returns an error only when a Go is needed and cannot be
 // provided; the message says what to do.
 func ensureGoToolchain(args []string) error {
+	provisioner := newToolchainProvisioner()
+
+	if provisioner == nil {
+		return nil
+	}
+
+	return provisioner.ensure(!argsNeedNoToolchain(args))
+}
+
+// newToolchainProvisioner returns the provisioner for this process, or nil for a build that provisions
+// nothing: one built with another Go than the pinned release, or for a platform with no pin.
+func newToolchainProvisioner() *toolchainProvisioner {
 	if runtime.Version() != pinnedGoVersion {
 		return nil
 	}
@@ -110,7 +122,7 @@ func ensureGoToolchain(args []string) error {
 
 	provisioner.sources = provisioner.defaultSources
 
-	return provisioner.ensure(!argsNeedNoToolchain(args))
+	return provisioner
 }
 
 // argsNeedNoToolchain reports a command line that only asks for the version or for help. Those answer
@@ -256,6 +268,11 @@ func (p *toolchainProvisioner) installFrom(source toolchainSource, root string) 
 
 	defer os.Remove(file)
 
+	return p.installFile(source, file, root)
+}
+
+// installFile verifies a fetched file with source's check and unpacks it into root.
+func (p *toolchainProvisioner) installFile(source toolchainSource, file, root string) error {
 	if err := source.verify(file); err != nil {
 		return err
 	}
@@ -326,46 +343,93 @@ func (p *toolchainProvisioner) download(url string) (string, error) {
 
 // defaultSources lists the release archive first (go.dev, what a person downloading Go gets) and then
 // each module proxy GOPROXY names, which serves the same release as the golang.org/toolchain module
-// (what GOTOOLCHAIN downloads). A host that reaches only a proxy still gets the same bytes' release.
+// (what GOTOOLCHAIN downloads). A host that reaches only a proxy still gets the pinned release.
 func (p *toolchainProvisioner) defaultSources() []toolchainSource {
 	var sources []toolchainSource
+	archive, module := p.pinnedForms()
+
+	if archive != nil {
+		archive.name = "go.dev"
+		archive.url = "https://go.dev/dl/" + pinnedGoArchives[p.goos+"-"+p.goarch].file
+		sources = append(sources, *archive)
+	}
+
+	if module != nil {
+		version := toolchainModuleVersion(p.goVersion, p.goos+"-"+p.goarch)
+
+		for _, proxy := range goProxyURLs(p.getenv("GOPROXY")) {
+			source := *module
+			source.name = proxy
+			source.url = proxy + "/golang.org/toolchain/@v/" + version + ".zip"
+			sources = append(sources, source)
+		}
+	}
+
+	return sources
+}
+
+// pinnedForms returns how to check and unpack each form the pinned release comes in, the release
+// archive and the toolchain module zip; nil for a form this platform has no pin for.
+func (p *toolchainProvisioner) pinnedForms() (archive, module *toolchainSource) {
 	platform := p.goos + "-" + p.goarch
 
-	if archive, ok := pinnedGoArchives[platform]; ok {
-		sources = append(sources, toolchainSource{
-			name:   "go.dev",
-			url:    "https://go.dev/dl/" + archive.file,
-			verify: func(file string) error { return verifySHA256(file, archive.sha256) },
+	if pin, ok := pinnedGoArchives[platform]; ok {
+		archive = &toolchainSource{
+			name:   pin.file,
+			verify: func(file string) error { return verifySHA256(file, pin.sha256) },
 			unpack: func(file, dest string) error {
-				if strings.HasSuffix(archive.file, ".zip") {
+				if strings.HasSuffix(pin.file, ".zip") {
 					return unpackZip(file, dest, "go/")
 				}
 
 				return unpackTarGz(file, dest, "go/")
 			},
-		})
-	}
-
-	if sum, ok := pinnedGoModules[platform]; ok {
-		module := toolchainModuleVersion(p.goVersion, platform)
-
-		for _, proxy := range goProxyURLs(p.getenv("GOPROXY")) {
-			sources = append(sources, toolchainSource{
-				name:   proxy,
-				url:    proxy + "/golang.org/toolchain/@v/" + module + ".zip",
-				verify: func(file string) error { return verifyModuleZip(file, sum) },
-				unpack: func(file, dest string) error {
-					if err := unpackZip(file, dest, "golang.org/toolchain@"+module+"/"); err != nil {
-						return err
-					}
-
-					return finishToolchainModule(dest, p.goos)
-				},
-			})
 		}
 	}
 
-	return sources
+	if sum, ok := pinnedGoModules[platform]; ok {
+		version := toolchainModuleVersion(p.goVersion, platform)
+
+		module = &toolchainSource{
+			name:   "golang.org/toolchain@" + version,
+			verify: func(file string) error { return verifyModuleZip(file, sum) },
+			unpack: func(file, dest string) error {
+				if err := unpackZip(file, dest, "golang.org/toolchain@"+version+"/"); err != nil {
+					return err
+				}
+
+				return finishToolchainModule(dest, p.goos)
+			},
+		}
+	}
+
+	return archive, module
+}
+
+// installLocal installs the pinned release from a file the user already has: the release archive or
+// the toolchain module zip, accepted only when it matches that form's pin.
+func (p *toolchainProvisioner) installLocal(file string) error {
+	if err := os.MkdirAll(p.cacheRoot, 0o755); err != nil {
+		return err
+	}
+
+	var failures []string
+	archive, module := p.pinnedForms()
+
+	for _, form := range []*toolchainSource{archive, module} {
+		if form == nil {
+			continue
+		}
+
+		if err := form.verify(file); err != nil {
+			failures = append(failures, fmt.Sprintf("as %s: %v", form.name, err))
+			continue
+		}
+
+		return p.installFile(*form, file, p.cachedRoot())
+	}
+
+	return fmt.Errorf("%s is not the pinned %s for %s/%s:\n  %s", file, p.goVersion, p.goos, p.goarch, strings.Join(failures, "\n  "))
 }
 
 // toolchainModuleVersion is the golang.org/toolchain version carrying a release: v0.0.1-go1.26.10.linux-amd64.
