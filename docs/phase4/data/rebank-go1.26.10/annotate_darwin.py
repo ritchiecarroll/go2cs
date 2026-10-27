@@ -1,9 +1,14 @@
 # The go1.26.10 darwin ANNOTATION LEG (PLAN-rebank-go126.md 13.3 step 3): rewrite each roster row's `darwin:`
 # segment from the hop's darwin evidence, by the same rule src/check-roster-format.ps1 §2h checks.
-# Usage: py -3 -I annotate_darwin.py <worktree> [--write]
+# Usage: py -3 -I annotate_darwin.py <worktree> [--evidence <dir>] [--write]
 #   Without --write it prints the change list and changes nothing.
+#   --evidence names the evidence directory, relative to <worktree> (or absolute). It defaults to the guard's
+#   $DarwinEvidenceDirectory, the one place the darwin evidence is declared, so that the annotation and the guard
+#   read the same directory; the annotation seat of a re-bank at an unchanged pin points that line at its own
+#   directory (1.26.10.2: docs/phase4/rebank-1.26.10.2/darwin) in the same commit. The directory read is printed
+#   with the summary.
 # The rule, §2h's:
-#   - the evidence is docs/phase4/h10-evidence/go<pin>/darwin/, read in DECLARED WAVES ('' = D-W1 at the top, dw2,
+#   - the evidence is <evidence>/, read in DECLARED WAVES ('' = D-W1 at the top, dw2,
 #     e1, reread), and a row's reading of record is its LATEST wave;
 #   - banked = both RIDs `validated`, `agree` yes on both, and equal matched and disclosed-divergent. The segment is
 #     then "matched[ + disclosed-divergent]". Disclosed-divergent is `divergent - new` (the disclosed share of the
@@ -13,10 +18,14 @@
 #   - read and not banked: the row carries NO darwin: segment;
 #   - a row the evidence does not name is left as it is.
 # The waves are the guard's own list, read from the script so the two cannot drift.
-import csv, os, re, sys
+import argparse, csv, os, re, sys
 
-tree = sys.argv[1]
-write = '--write' in sys.argv[2:]
+ap = argparse.ArgumentParser(description='Rewrite the roster rows\' darwin: segments from the darwin evidence TSVs.')
+ap.add_argument('tree')
+ap.add_argument('--evidence', help='the evidence directory, relative to the worktree or absolute (default: the guard\'s $DarwinEvidenceDirectory)')
+ap.add_argument('--write', action='store_true')
+args = ap.parse_args()
+tree, write = args.tree, args.write
 
 props = open(os.path.join(tree, 'src/version.props'), encoding='utf-8').read()
 pin = re.search(r'<GoStdLibVersion>([^<]+)</GoStdLibVersion>', props).group(1)
@@ -29,7 +38,12 @@ rulings_block = re.search(r'^\$DarwinAgreementRulings = @\{(.*?)^\}', guard, re.
 rulings = set(re.findall(r"^\s*'([^']+)'\s*=", rulings_block, re.M))
 assert rulings, 'no agreement rulings parsed'
 
-evdir = os.path.join(tree, f'docs/phase4/h10-evidence/go{pin}/darwin')
+declared = re.search(r"^\$DarwinEvidenceDirectory = '([^']+)'", guard, re.M)
+assert declared, 'no $DarwinEvidenceDirectory parsed from the guard'
+evrel = args.evidence or declared.group(1).replace('{pin}', pin)
+evdir = os.path.join(tree, evrel)
+if not os.path.isdir(evdir):
+    sys.exit(f'evidence directory {evrel} does not exist')
 by_row = {}
 for d, _, files in os.walk(evdir):
     rel = os.path.relpath(d, evdir).replace(os.sep, '/')
@@ -93,6 +107,6 @@ for i, line in enumerate(lines):
 
 for pkg, old, new in changes:
     print(f'{pkg:45} {old:25} -> {new}')
-print(f'{len(changes)} row(s) change; {len(by_row)} rows named by the evidence', file=sys.stderr)
+print(f'{len(changes)} row(s) change; {len(by_row)} rows named by the evidence in {evrel}', file=sys.stderr)
 if write:
     open(table, 'w', encoding='utf-8', newline='').write('\n'.join(lines))

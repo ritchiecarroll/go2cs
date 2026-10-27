@@ -2242,6 +2242,23 @@ function Get-DarwinSegmentRefusal {
 # cannot be read in an undeclared order.
 $DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread')
 
+# THE EVIDENCE DIRECTORY (COORD, 2026-10-27, PLAN-release-1-26-10-2.md, Rulings 1). The ONE place the darwin evidence
+# is named: relative to the repository root, with `{pin}` standing for the corpus pin (src/version.props'
+# GoStdLibVersion). By default it is the hop's own evidence. A re-bank at an unchanged pin writes its own directory
+# (1.26.10.2's darwin leg writes docs/phase4/rebank-1.26.10.2/darwin/), and the annotation seat that banks those
+# readings points this line at it in the same commit, so the roster and its guard read the same evidence.
+# annotate_darwin.py reads its default from this line. A declared directory that does not exist is refused, except the
+# hop default before its darwin leg has run.
+$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'
+$DarwinEvidenceHopDefault = 'docs/phase4/h10-evidence/go{pin}/darwin'
+
+function Resolve-DarwinEvidenceDirectory {
+    param([string] $Repo, [string] $Declared, [string] $Pin)
+
+    $relative = $Declared.Replace('{pin}', $Pin)
+    return [PSCustomObject]@{ Relative = $relative; Path = (Join-Path $Repo $relative) }
+}
+
 function Read-DarwinEvidence {
     param([string] $Directory)
 
@@ -2335,6 +2352,31 @@ finally {
     Remove-Item -LiteralPath $waveFixture -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+# The evidence directory's contract, against a fixture REPO holding two readings of one row at one pin: the hop's
+# (h10-evidence) and a later re-bank's. The declared directory is the one read, so the re-bank's newer reading wins
+# when it is declared, and the hop's is read by default. Red at 43d71ecdca, whose path is built at its one use from
+# the pin alone: the old reading wins there.
+$evidenceFixture = Join-Path ([System.IO.Path]::GetTempPath()) ('g2cs-darwin-evidence-dir-' + [Guid]::NewGuid().ToString('N'))
+try {
+    $header = "shard`trow`tRID`tverdicts`tmatched`tdisclosed`tdivergent`tnew`tstatus`tagree"
+    $oldDir = Join-Path $evidenceFixture 'docs/phase4/h10-evidence/go9.9.9/darwin'
+    $newDir = Join-Path $evidenceFixture 'docs/phase4/rebank-9.9.9.2/darwin'
+    [void](New-Item -ItemType Directory -Force -Path $oldDir, $newDir)
+    [System.IO.File]::WriteAllText((Join-Path $oldDir 'C1-1.tsv'), ($header, "C1-1`tf/pkg`tosx-arm64`t5`t5`t0`t0`t0`tvalidated`tyes", "C1-1`tf/pkg`tosx-x64`t5`t5`t0`t0`t0`tvalidated`tyes") -join "`n")
+    [System.IO.File]::WriteAllText((Join-Path $newDir 'C1-1.tsv'), ($header, "C1-1`tf/pkg`tosx-arm64`t6`t6`t0`t0`t0`tvalidated`tyes", "C1-1`tf/pkg`tosx-x64`t6`t6`t0`t0`t0`tvalidated`tyes") -join "`n")
+    $declaredNew = Resolve-DarwinEvidenceDirectory -Repo $evidenceFixture -Declared 'docs/phase4/rebank-{pin}.2/darwin' -Pin '9.9.9'
+    $fixtureNew = Select-LatestDarwinWave (Read-DarwinEvidence -Directory $declaredNew.Path).ByRow['f/pkg']
+    Assert-Equal 'darwin evidence directory: the declared directory is read, so a re-bank''s newer reading banks (6)' $null (Get-DarwinSegmentRefusal -Records $fixtureNew -Segment (& $darwinSeg 6 0))
+    Assert-Equal 'darwin evidence directory: with the re-bank declared, the hop''s older reading (5) is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $fixtureNew -Segment (& $darwinSeg 5 0)))
+    Assert-Equal 'darwin evidence directory: the declared directory is reported as read' 'docs/phase4/rebank-9.9.9.2/darwin' $declaredNew.Relative
+    $declaredHop = Resolve-DarwinEvidenceDirectory -Repo $evidenceFixture -Declared $DarwinEvidenceHopDefault -Pin '9.9.9'
+    $fixtureOld = Select-LatestDarwinWave (Read-DarwinEvidence -Directory $declaredHop.Path).ByRow['f/pkg']
+    Assert-Equal 'darwin evidence directory: the hop default still reads the hop''s evidence (5)' $null (Get-DarwinSegmentRefusal -Records $fixtureOld -Segment (& $darwinSeg 5 0))
+}
+finally {
+    Remove-Item -LiteralPath $evidenceFixture -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 # The agreement ruling's contract: it banks a row whose RIDs both validate with equal counts though agree reads NO,
 # and NOTHING else -- not a failing RID, not unequal counts, and not a row without a ruling.
 $ruledSplit = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'NO' 552 3), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'NO' 552 3))
@@ -2350,7 +2392,11 @@ $hostFatalShape = @('osx-arm64', 'osx-x64') | ForEach-Object {
 Assert-Equal 'darwin disclosed: a host-fatal name in the list does not count -- the row banks at its divergent 8 + 1' $null (Get-DarwinSegmentRefusal -Records $hostFatalShape -Segment (& $darwinSeg 8 1))
 Assert-Equal 'darwin disclosed: the list length (8 + 2) is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $hostFatalShape -Segment (& $darwinSeg 8 2)))
 
-$darwinEvidenceDir = Join-Path $repo "docs/phase4/h10-evidence/go$goPin/darwin"
+$darwinEvidenceAt = Resolve-DarwinEvidenceDirectory -Repo $repo -Declared $DarwinEvidenceDirectory -Pin $goPin
+$darwinEvidenceDir = $darwinEvidenceAt.Path
+if ((-not (Test-Path -LiteralPath $darwinEvidenceDir)) -and ($DarwinEvidenceDirectory -cne $DarwinEvidenceHopDefault)) {
+    Assert-Equal "darwin segment age: the declared evidence directory $($darwinEvidenceAt.Relative) (`$DarwinEvidenceDirectory) does not exist" $true $false
+}
 $darwinRowsGated = 0
 $darwinRowsUnread = 0
 $darwinRefused = 0
@@ -2368,14 +2414,14 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
             -AgreementRuling $(if ($DarwinAgreementRulings.ContainsKey($row.Package)) { $DarwinAgreementRulings[$row.Package] } else { '' })
         if ($null -ne $refusal) {
             $darwinRefused++
-            Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence docs/phase4/h10-evidence/go$goPin/darwin)" $true $false
+            Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence $($darwinEvidenceAt.Relative))" $true $false
         }
     }
     Assert-Equal 'darwin segment age: the evidence named at least one roster row (a zero means the rows were never matched)' $true ($darwinRowsGated -gt 0)
 }
 
 # Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
-Write-Host ('darwin segments against the go{0} darwin evidence: {1} rows read at the pin, {2} not yet read (not gated), {3} refused{4}' -f $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence at the pin yet, so nothing is gated' })) -ForegroundColor Cyan
+Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused{5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' })) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
