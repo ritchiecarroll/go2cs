@@ -29712,4 +29712,65 @@ byte-identical across 934 behavioral packages (7 platform-exclusive skipped).
 
 — H (2026-10-27)
 
+---
+
+### 2026-10-27 — H (COORD seat #17, .2): panic texts named a Go int32 "int" and a Go uint8 "byte" (FIXED)
+
+**Found by** H during seat #15's hand-owned census, as an adjacent item. **Ruled** a defect by COORD, as 1.26.10.2 seat #17.
+
+**The defect.** `builtin.GetGoTypeName` mapped `TypeCode.Int32 => "int"` and `TypeCode.Byte => "byte"`. Go's `int` is
+`nint` here (System.IntPtr, already named "int" further down), so a C# `int` is Go's `int32` (rune included) and a
+C# `byte` is Go's `uint8` (byte included). Go's `%T` and every runtime panic text say `int32` and `uint8`, and so does
+`GoReflect.GoTypeName`, the renderer reflect and the converted `fmt` use. The mapping dates from the same 2024
+assumption as seat #15's synthetic `case int32` label: an untyped Go int could reach an interface as a C# int. That
+was retired by 96b13eec20.
+
+**Where the name reached a message.**
+- `runtime/pinner_impl.cs:199`: `runtime.Pinner: argument is not a pointer: <T>`. A converted `p.Pin(int32(5))`
+  printed `int` where Go prints `int32`, and `p.Pin(byte(2))` printed `byte` where Go prints `uint8`.
+- `golib/runtime/RuntimeErrorPanic.cs:723`: the golib fallback text of a failed type assertion. It is used only when
+  no runtime has registered `TypeAssertionErrorValue`, and every converted program registers it (its packages' init
+  touches runtime). A converted program's assertion text therefore already read `int32` through
+  `runtime.TypeAssertionError`; the fallback is reached from golib-only callers.
+- `golib/GoEqualityComparer.cs:91`: `hash of unhashable type <T>`, read only for a value adapter whose wrapped value
+  is null. That is a named func/slice/map type, nested in its `<pkg>_package` class and rendered package-qualified
+  before the TypeCode switch. No primitive reaches it, so its text could not misname an int32.
+- `golib/error.cs:146` (`%T` of an `error<T>`) names a converted error type, never a primitive.
+
+**The fix.** Two rows in `GetGoTypeName`: `Int32 => "int32"`, `Byte => "uint8"` (+4/-2 with a two-line comment).
+Every other TypeCode row was checked against Go's names:
+- string, bool, int8, int16, int64, uint16, uint32, uint64, float32 and float64 already agreed.
+- nint and nuint are int and uint (asserted).
+- `Char => "rune"` is kept: no Go type converts to a C# char.
+
+**Guards, red first.**
+- GolibTests `GoTypeNamePanicTextTests`: 3 of 3 RED at master 4f43b0ed66, each on its int32 row, and GREEN at the
+  tip. The three are the renderer table (each primitive against Go's spelling and against `GoReflect.GoTypeName`),
+  the pinner refusal's exact text, and the type-assertion fallback's exact text with the runtime hook cleared and
+  restored. The assembly runs serially.
+- Behavioral `PanicTextGoTypeNames`: Transpile, Compile and Target pass at master, and Output mismatches on 4 of 16
+  lines (pin of int32, rune, uint8 and byte). It is GREEN at the tip. Its assertion and unhashable-key lines are
+  controls that already matched Go through the converted runtime, and they still do.
+
+**Census of committed text quoting these messages.**
+- No behavioral golden and no converted corpus file quotes a misnamed int32 or byte.
+- Two prose quotes described a boxed `Int32` asserted to `.(int)` as printing `interface {} is int, not int`. Both
+  now read `is int32, not int`:
+  - `docs/ConversionStrategies-Reference/empty-interface.md:194`;
+  - a comment in `UntypedIntInterfaceBox/main.go:8`, which changes no emission.
+- The existing `RuntimePinnerTests` arm `Pin(42)` passes a C# int and checks only the substring "Pinner", so it is
+  unaffected.
+
+**Corpus footprint: none by construction.** The converter is unchanged, and the only converted-code caller is the
+hand-owned `pinner_impl.cs`.
+
+**Gates at the tip** (e6168d5142), one battery, sequential: GolibTests unfiltered 2254 passed, 36 skipped, 0 failed;
+golib Release rebuilt (`--no-incremental`, CoreCompile ran) with 0 warnings; repoguard and the docs guards green; the
+behavioral Output comparison, through the apphost against Go, 74 of 74 passed (every project that recovers or prints a
+panic, a type assertion, an unhashable key or a Pinner text; the run asserts its own count). Instrument note: an
+`=` filter naming the wrong class (`OutputComparisonTests`; the class is `D4_OutputComparisonTests`) matched 0 tests
+and exited 0. Count the tests a filtered `dotnet test` ran before reading its rc.
+
+— H (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
