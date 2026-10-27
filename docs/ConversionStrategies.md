@@ -244,7 +244,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:60,66#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#bf71f4 +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:43#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
-  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#47d307 · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#637f15 ·
+  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#47d307 · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#416bab ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:11,32,74,77#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:56#64aa80 + src/core/reflect/type.cs:1258#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
@@ -8566,12 +8566,46 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1100 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));`;
+<!-- src/core/golib/runtime/Goroutine.cs:1134 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
-     `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :151
+     `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
      Guards: GolibTests GoroutinePoolTests (reuse, the locked exit, the goroutine stack on a reused thread, no
      thread state carried over, the creator's ExecutionContext, the idle count) and ThreadStateCensusTests. -->
+
+**A goroutine that cannot recurse starts on a smaller stack.** A Go goroutine's stack grows as it needs, while a
+.NET thread's stack is a fixed reservation that ends the process when it overflows. So golib reserves a Go-scale
+256 MiB stack for each goroutine by default (`GO2CS_GOROUTINE_STACK` changes it). That reservation is address
+space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start. The
+converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
+to a function the converter can see, and no chain of calls may return to a function already on it. A goroutine it
+proves cannot recurse is started with a mark, and golib runs it on a 16 MiB stack
+(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce` only computes and sends on a channel:
+
+<!-- source: src/tests/Behavioral/GoroutineStackReserve/main.go:47 -->
+```go
+go produce(i, out)
+```
+
+<!-- source: src/tests/Behavioral/GoroutineStackReserve/main.cs.target:43 -->
+```csharp
+goǃ(produce, i, @out.WithDirection(GoChanDir.Send), GoStack.Bounded);
+```
+
+Anything the proof cannot follow keeps the full stack, unmarked. That includes a call through an interface or a
+func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
+goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
+crash where Go grows the stack, so the proof gives up rather than guess.
+<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:321
+     `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
+     src/core/golib/runtime/Goroutine.cs:94 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
+     worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
+     `private static readonly Pool s_bounded = new(Goroutine.BoundedStackReserve);`. Sample: the behavioral test
+     GoroutineStackReserve. Measured on Windows x64 (R-LAPTOP, 16 hardware threads, ParkStorm, 100,000 goroutines
+     parked at once, 2026-10-26): 361 s to park at 256 MiB, 70 s at 16 MiB. Over the standard library, 1 of 129
+     production go statements proves bounded (2026-10-26 census): the rest reach an interface method, a func value
+     or a runtime callback. Guards: the converter's goroutineStackAnalysis_test.go, GolibTests GoroutinePoolTests
+     (a bounded goroutine's measured stack; a default goroutine never on a bounded worker). -->
 
 **Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
@@ -10640,7 +10674,7 @@ go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
 A `defer` or `go` call to such a function works too. The statement stores the address as a box when it
 runs, and turns it into a `ref` only when the call itself runs, so the call sees the variable's latest value
-([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#008246; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
+([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#e2705b; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter

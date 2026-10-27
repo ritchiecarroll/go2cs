@@ -895,6 +895,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
 
     [TestMethod]
+    public void CheckGoroutineStackReserve() => CheckTarget("GoroutineStackReserve");
+
+    [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
 
     [TestMethod]

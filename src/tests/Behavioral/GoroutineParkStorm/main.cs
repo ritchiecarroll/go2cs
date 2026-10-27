@@ -32,7 +32,7 @@ internal static partial void Main() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, i);
+        }, i, GoStack.Bounded);
     }
 
     nint sum = 0;

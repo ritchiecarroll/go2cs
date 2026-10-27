@@ -22,7 +22,7 @@ internal static partial void launch(channel<@string> done) {
     var doneʗ1 = done;
     goǃ(() => {
         doneʗ1.ᐸꟷ(Marshal(Unsafe));
-    });
+    }, GoStack.Bounded);
 }
 
 internal static void Main() {

@@ -35,7 +35,7 @@ internal static nint /*seen*/ deferChain<T>(ref Root r, T mark) {
 }
 
 internal static partial nint goChain(ref Root r) {
-    goǃ(r.root.release);
+    goǃ(r.root.release, GoStack.Bounded);
     return ᐸꟷ((~r.root).done);
 }
 

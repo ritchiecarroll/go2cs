@@ -93,7 +93,7 @@ internal static void Main() {
         goǃ(() => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ1);
-        });
+        }, GoStack.Bounded);
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println("parked receive:", len(v.vals), v.vals[3], ok);
     });
@@ -103,7 +103,7 @@ internal static void Main() {
         goǃ(() => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ2);
-        });
+        }, GoStack.Bounded);
         var v = ᐸꟷ(ch);
         fmt.Println("parked bare receive:", len(v.vals), v.vals[3]);
     });

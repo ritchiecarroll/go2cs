@@ -14,7 +14,7 @@ internal static partial void Main() {
                 cʗ1.ᐸꟷ(j);
             }
             close(cʗ1);
-        });
+        }, GoStack.Bounded);
     }
     foreach (var i in c) {
         fmt.Println(i);

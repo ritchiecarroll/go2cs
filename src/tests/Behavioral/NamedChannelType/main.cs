@@ -67,7 +67,7 @@ internal static partial void Main() {
     var pipeʗ1 = pipe;
     goǃ(() => {
         pipeʗ1.ᐸꟷ(77);
-    });
+    }, GoStack.Bounded);
     fmt.Println(ᐸꟷ<nint>(pipe));
 }
 

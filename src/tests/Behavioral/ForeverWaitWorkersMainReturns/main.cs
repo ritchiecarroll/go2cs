@@ -11,15 +11,15 @@ internal static partial void Main() {
 
     goǃ(() => {
         select();
-    });
+    }, GoStack.Bounded);
     var nilcʗ1 = nilc;
     goǃ(() => {
         ᐸꟷ(nilcʗ1);
-    });
+    }, GoStack.Bounded);
     var nilcʗ2 = nilc;
     goǃ(() => {
         nilcʗ2.ᐸꟷ(1);
-    });
+    }, GoStack.Bounded);
 
     time.Sleep(500 * time.Millisecond);
 

@@ -26,11 +26,11 @@ partial struct engine {
 }
 
 internal static partial void start(this ж<engine> Ꮡe, nint delta) {
-    goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1), Ꮡe.Value.tally, delta);
+    goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1), Ꮡe.Value.tally, delta, GoStack.Bounded);
 }
 
 internal static partial void ping(this ж<engine> Ꮡe) {
-    goǃ(ᴛ0 => ᴛ0.report(), Ꮡe.Value.tally);
+    goǃ(ᴛ0 => ᴛ0.report(), Ꮡe.Value.tally, GoStack.Bounded);
 }
 
 partial struct valueSender {
@@ -63,10 +63,10 @@ internal static partial void Main() {
     ref var vs = ref heap<valueSender>(out var Ꮡvs);
     vs = new valueSender(c: new channel<nint>(0));
     var vsʗ1 = vs;
-    goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7);
+    goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7, GoStack.Bounded);
     fmt.Println("value-recv go:", ᐸꟷ(vs.c));
     var vsʗ2 = vs;
-    goǃ(() => vsʗ2.ping());
+    goǃ(() => vsʗ2.ping(), GoStack.Bounded);
     fmt.Println("value-recv nullary go:", ᐸꟷ(vs.c));
 }
 

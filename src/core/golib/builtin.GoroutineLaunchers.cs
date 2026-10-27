@@ -597,4 +597,218 @@ public static partial class builtin
     }
 
     #endregion
+
+    #region [ goǃ(..., GoStack) Implementations ]
+
+    // THE STACK-MARKED TWINS: the same ladder with a trailing GoStack before the caller-info parameters. The
+    // converter writes `goǃ(f, a, GoStack.Bounded)` for a goroutine it proved cannot recurse, which then starts on
+    // Goroutine.BoundedStackReserve instead of the Go-scale default (GoStack.cs). New overloads rather than an
+    // optional parameter on the existing ones: an assembly compiled against the unmarked signatures keeps binding
+    // them, and keeps the default reservation.
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ(WaitCallback action, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(null), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ(Action action, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T>(Action<T> action, T arg, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3>(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16), action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T, TResult>(Func<T, TResult> action, T arg, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, TResult>(Func<T1, T2, TResult> action, T1 arg1, T2 arg2, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> action, T1 arg1, T2 arg2, T3 arg3, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, TResult>(Func<T1, T2, T3, T4, T5, T6, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    /// <summary>Starts a goroutine the converter proved cannot recurse, on a <paramref name="stack"/> reservation.</summary>
+    public static void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, GoStack stack, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
+    {
+        Goroutine.Start(() => { action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16); }, action, stack, ᴛcallerFile, ᴛcallerLine);
+    }
+
+    #endregion
 }

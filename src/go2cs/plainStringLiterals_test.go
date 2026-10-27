@@ -176,7 +176,7 @@ func TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong(t *testing.T) {
 		`b.Set(genericMethodValueˢ);`,
 		`token(namedStringSlotˢ);`,
 		`defer(note, deferredArgumentValueˢ, ref ᒐ);`,
-		`goǃ(note, goroutineArgumentValueˢ);`,
+		`goǃ(note, goroutineArgumentValueˢ, GoStack.Bounded);`,
 		".Raw();",
 	} {
 		if !strings.Contains(emitted, want) {

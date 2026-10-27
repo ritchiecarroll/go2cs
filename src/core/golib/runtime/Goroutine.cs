@@ -64,6 +64,11 @@ public sealed class Goroutine
     /// </summary>
     public const string StackReserveVariable = "GO2CS_GOROUTINE_STACK";
 
+    /// <summary>
+    /// Environment variable overriding <see cref="BoundedStackReserve"/>.
+    /// </summary>
+    public const string BoundedStackReserveVariable = "GO2CS_GOROUTINE_BOUNDED_STACK";
+
     // Go goroutine stacks GROW (to ~1GB on 64-bit), so deeply recursive code is legal Go, while a
     // .NET thread's stack is a FIXED reservation whose overflow is uncatchable and kills the whole
     // process. A reservation is ADDRESS SPACE, not memory — pages commit on demand — so 256MB buys
@@ -78,7 +83,18 @@ public sealed class Goroutine
     // the multipliers differ by orders of magnitude. GO2CS_GOROUTINE_STACK overrides this one alone.
     private const int DefaultStackReserve = 256 * 1024 * 1024;
 
-    private static readonly int s_stackReserve = ResolveStackReserve();
+    private static readonly int s_stackReserve = ResolveStackReserve(StackReserveVariable, DefaultStackReserve);
+
+    // The reservation for a goroutine the converter proved cannot recurse (GoStack.Bounded): its depth is bounded by its
+    // call graph, so it needs no Go-scale headroom. Measured with ParkStorm, 100,000 goroutines parked at once on R-LAPTOP
+    // (Windows x64, Release, 2026-10-26): 1 MiB 67 s, 4 MiB 66 s, 16 MiB 70 s, 64 MiB 86 s, 256 MiB 361 s to park --
+    // 16 MiB costs nothing measurable over the CLR's own 1 MiB default and leaves sixteen times its headroom for a deep
+    // but finite call chain. Never more than the default reservation, so an override that shrinks that one (0 included,
+    // the framework default) shrinks this one too.
+    private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;
+
+    private static readonly int s_boundedStackReserve = BoundedReserve(
+        ResolveStackReserve(BoundedStackReserveVariable, DefaultBoundedStackReserve), s_stackReserve);
 
     // The live-goroutine REGISTRY. The set answers "which goroutines exist" for the consumers this
     // unblocks (runtime.NumGoroutine, the deadlock detector, Goexit option A — none of which land
@@ -319,6 +335,11 @@ public sealed class Goroutine
     /// The stack size, in bytes, reserved for each goroutine's thread.
     /// </summary>
     public static int StackReserve => s_stackReserve;
+
+    /// <summary>
+    /// The stack size, in bytes, reserved for a goroutine started with <see cref="GoStack.Bounded"/>.
+    /// </summary>
+    public static int BoundedStackReserve => s_boundedStackReserve;
 
     /// <summary>
     /// The number of goroutines that currently exist, including the main goroutine.
@@ -987,13 +1008,19 @@ public sealed class Goroutine
     /// <paramref name="callerFile"/>:<paramref name="callerLine"/>, whose creator is resolved once per site (see
     /// <see cref="CreatorOfSite"/>); <c>builtin.goǃ</c> passes its own caller's site.
     /// </summary>
-    public static void Start(Action body, string callerFile, int callerLine)
+    public static void Start(Action body, string callerFile, int callerLine) => Start(body, GoStack.Default, callerFile, callerLine);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine on a <paramref name="stack"/> reservation, launched from the
+    /// <c>go</c> site at <paramref name="callerFile"/>:<paramref name="callerLine"/> (see <see cref="Start(Action, string, int)"/>).
+    /// </summary>
+    public static void Start(Action body, GoStack stack, string callerFile, int callerLine)
     {
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
         (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, body.Method);
-        StartWithCreator(body, creator, ilOffset, body.Method);
+        StartWithCreator(body, creator, ilOffset, body.Method, stack: stack);
     }
 
     /// <summary>
@@ -1013,10 +1040,17 @@ public sealed class Goroutine
     /// Starts <paramref name="body"/> as a goroutine whose START FUNCTION is <paramref name="entry"/>, launched from the
     /// <c>go</c> site at <paramref name="callerFile"/>:<paramref name="callerLine"/> (see <see cref="Start(Action, string, int)"/>).
     /// </summary>
-    public static void Start(Action body, Delegate entry, string callerFile, int callerLine)
+    public static void Start(Action body, Delegate entry, string callerFile, int callerLine) =>
+        Start(body, entry, GoStack.Default, callerFile, callerLine);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine whose START FUNCTION is <paramref name="entry"/>, on a
+    /// <paramref name="stack"/> reservation (see <see cref="Start(Action, Delegate, string, int)"/>).
+    /// </summary>
+    public static void Start(Action body, Delegate entry, GoStack stack, string callerFile, int callerLine)
     {
         (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
-        StartWithCreator(body, creator, ilOffset, entry.Method);
+        StartWithCreator(body, creator, ilOffset, entry.Method, stack: stack);
     }
 
     // The creator of a `go` statement, ONCE per site. CreatorFrame resolves a frame for every frame on the stack, so
@@ -1066,7 +1100,7 @@ public sealed class Goroutine
         StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method, systemBasis: creator);
 
     private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry,
-        System.Reflection.MethodBase? systemBasis = null)
+        System.Reflection.MethodBase? systemBasis = null, GoStack stack = GoStack.Default)
     {
         long parentId = t_current?.Id ?? 0;
 
@@ -1097,7 +1131,7 @@ public sealed class Goroutine
         // the next goroutine; one that exits locked to its thread takes the thread with it, as in Go.
         try
         {
-            GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));
+            GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);
         }
         catch
         {
@@ -1255,12 +1289,12 @@ public sealed class Goroutine
         }
     }
 
-    private static int ResolveStackReserve()
+    private static int ResolveStackReserve(string variable, int defaultReserve)
     {
-        string? setting = Environment.GetEnvironmentVariable(StackReserveVariable);
+        string? setting = Environment.GetEnvironmentVariable(variable);
 
         if (string.IsNullOrWhiteSpace(setting))
-            return DefaultStackReserve;
+            return defaultReserve;
 
         // 0 is meaningful and deliberately allowed: it hands Thread the framework default (~1MB),
         // which is the escape hatch for a host where reserved address space is genuinely scarce.
@@ -1271,11 +1305,15 @@ public sealed class Goroutine
         // compared stdout: a misspelled override that silently did nothing would be indistinguishable
         // from one that worked.
         Console.Error.WriteLine(
-            $"go2cs: ignoring {StackReserveVariable}=\"{setting}\" — expected a byte count with an " +
-            $"optional B, KiB, MiB or GiB suffix; using the default {DefaultStackReserve / (1024 * 1024)}MiB reservation.");
+            $"go2cs: ignoring {variable}=\"{setting}\" — expected a byte count with an " +
+            $"optional B, KiB, MiB or GiB suffix; using the default {defaultReserve / (1024 * 1024)}MiB reservation.");
 
-        return DefaultStackReserve;
+        return defaultReserve;
     }
+
+    // A bounded reservation never exceeds the default one; 0 (the framework default) in either is the smaller.
+    internal static int BoundedReserve(int bounded, int defaultReserve) =>
+        bounded == 0 || defaultReserve == 0 ? 0 : Math.Min(bounded, defaultReserve);
 
     // Go's own convention for a memory-sized environment variable (GOMEMLIMIT): a decimal byte count
     // with an optional power-of-two unit suffix.

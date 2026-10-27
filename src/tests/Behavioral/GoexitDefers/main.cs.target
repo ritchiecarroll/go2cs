@@ -66,7 +66,7 @@ internal static partial void Main() {
     var afterʗ1 = after;
     goǃ(() => {
         afterʗ1.ᐸꟷ("a later goroutine still runs");
-    });
+    }, GoStack.Bounded);
     fmt.Println(ᐸꟷ(after));
 
     fmt.Println("main continues past the exited goroutine");

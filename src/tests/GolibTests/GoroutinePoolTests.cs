@@ -135,6 +135,57 @@ public class GoroutinePoolTests
             $"a reused goroutine thread ran out of stack after {reached * (long)FrameBytes / 1024} KiB of recursion; a goroutine's thread reserves {Goroutine.StackReserve / (1024 * 1024)} MiB");
     }
 
+    [TestMethod]
+    public void BoundedGoroutine_RunsOnTheBoundedReserve()
+    {
+        // A goroutine the converter proved cannot recurse (GoStack.Bounded) starts on a worker created with the
+        // small reservation, and its stack really is that small: recursion stops near BoundedStackReserve, far short
+        // of the 64 MiB a default goroutine reaches.
+        int reserve = 0;
+        int reached = 0;
+
+        RunGoroutine(() =>
+        {
+            reserve = GoroutineThreadPool.CurrentStackReserve;
+            reached = Recurse(DeepBytes / FrameBytes);
+        }, go.GoStack.Bounded);
+
+        Assert.AreEqual(Goroutine.BoundedStackReserve, reserve, "a bounded goroutine ran on a worker of another reserve");
+
+        if (Goroutine.BoundedStackReserve >= DeepBytes || Goroutine.BoundedStackReserve == 0)
+            Assert.Inconclusive($"the bounded reserve is {Goroutine.BoundedStackReserve} bytes in this environment; nothing to measure");
+
+        long bytes = reached * (long)FrameBytes;
+
+        Assert.IsTrue(bytes <= Goroutine.BoundedStackReserve,
+            $"a bounded goroutine recursed {bytes / 1024} KiB on a {Goroutine.BoundedStackReserve / 1024} KiB reservation");
+        Assert.IsTrue(bytes >= Goroutine.BoundedStackReserve / 2,
+            $"a bounded goroutine stopped after {bytes / 1024} KiB of a {Goroutine.BoundedStackReserve / 1024} KiB reservation");
+    }
+
+    [TestMethod]
+    public void DefaultGoroutine_NeverRunsOnABoundedWorker()
+    {
+        // The deep-recursion arm across the two pools: warm a BOUNDED worker, then start a default goroutine. It must
+        // land on a default-reserve thread and recurse its full depth -- a small stack lent to a goroutine that may
+        // recurse would end the process where Go grows the stack.
+        RunGoroutine(static () => t_marker ??= new object(), go.GoStack.Bounded);
+        WaitForIdleWorker();
+
+        int reserve = 0;
+        int reached = 0;
+
+        RunGoroutine(() =>
+        {
+            reserve = GoroutineThreadPool.CurrentStackReserve;
+            reached = Recurse(DeepBytes / FrameBytes);
+        });
+
+        Assert.AreEqual(Goroutine.StackReserve, reserve, "a default goroutine ran on a bounded worker");
+        Assert.AreEqual(DeepBytes / FrameBytes, reached,
+            $"a default goroutine ran out of stack after {reached * (long)FrameBytes / 1024} KiB of recursion; a goroutine's thread reserves {Goroutine.StackReserve / (1024 * 1024)} MiB");
+    }
+
     // Returns how many levels it reached before the runtime reported the stack near its end. Checked before
     // each frame is spent, so an undersized stack fails this test instead of the process.
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -276,17 +327,22 @@ public class GoroutinePoolTests
         return last;
     }
 
-    // The workers actually waiting for a body: the idle stack's entries whose state is Idle. A retired worker's
-    // entry stays on the stack and is not one.
+    // The workers actually waiting for a body: the idle stacks' entries whose state is Idle, across both reserves'
+    // pools. A retired worker's entry stays on its stack and is not one.
     private static int LiveIdleWorkers()
     {
-        object stack = typeof(GoroutineThreadPool).GetField("s_idle", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
         int idle = 0;
 
-        foreach (object worker in (System.Collections.IEnumerable)stack)
+        foreach (string poolField in new[] { "s_default", "s_bounded" })
         {
-            if ((int)worker.GetType().GetField("m_state", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(worker)! == 0)
-                idle++;
+            object pool = typeof(GoroutineThreadPool).GetField(poolField, BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            object stack = pool.GetType().GetField("Idle", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(pool)!;
+
+            foreach (object worker in (System.Collections.IEnumerable)stack)
+            {
+                if ((int)worker.GetType().GetField("m_state", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(worker)! == 0)
+                    idle++;
+            }
         }
 
         return idle;
@@ -372,7 +428,9 @@ public class GoroutinePoolTests
 
     // Starts body as a goroutine and waits for it; a failure inside is rethrown here, since a failure on a
     // worker would reach golib's process-killing backstop.
-    internal static void RunGoroutine(Action body)
+    internal static void RunGoroutine(Action body) => RunGoroutine(body, go.GoStack.Default);
+
+    internal static void RunGoroutine(Action body, go.GoStack stack)
     {
         Exception? error = null;
         using ManualResetEventSlim done = new(false);
@@ -391,7 +449,7 @@ public class GoroutinePoolTests
             {
                 done.Set();
             }
-        });
+        }, stack, "", 0);
 
         Assert.IsTrue(done.Wait(30_000), "the goroutine never finished");
 

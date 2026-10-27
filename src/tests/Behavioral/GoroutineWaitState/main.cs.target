@@ -74,14 +74,14 @@ internal static partial void Main() {
         Ꮡmu.Lock();
         Ꮡmu.Unlock();
         doneʗ1.ᐸꟷ("mutex");
-    });
+    }, GoStack.Bounded);
 
     var doneʗ2 = done;
     var recvʗ1 = recv;
     goǃ(() => {
         ᐸꟷ(recvʗ1);
         doneʗ2.ᐸꟷ("recv");
-    });
+    }, GoStack.Bounded);
 
     var doneʗ3 = done;
     var selAʗ1 = selA;
@@ -97,13 +97,13 @@ internal static partial void Main() {
             break;
         }}
         doneʗ3.ᐸꟷ("select");
-    });
+    }, GoStack.Bounded);
 
     var doneʗ4 = done;
     goǃ(() => {
         Ꮡwg.Wait();
         doneʗ4.ᐸꟷ("waitgroup");
-    });
+    }, GoStack.Bounded);
 
     @string blocked = await(buf, parked, true);
 
