@@ -1,9 +1,12 @@
 # The go1.26.10 LINUX annotation leg (PLAN-rebank-go126.md 5.1 and 13.3 step 2): rewrite each roster row's `linux:`
 # segment from the hop's linux evidence TSVs.
-# Usage: py -3 -I annotate_linux.py <worktree> [--write]
+# Usage: py -3 -I annotate_linux.py <worktree> [--evidence <dir>] [--write]
 #   Without --write it prints the change list and changes nothing.
+#   --evidence names the evidence directory, relative to <worktree> (or absolute); it defaults to the hop's,
+#   docs/phase4/h10-evidence/go<pin>/linux. A re-bank at an unchanged pin passes its own (1.26.10.2:
+#   docs/phase4/rebank-1.26.10.2/linux). The directory read is printed with the summary.
 # The rule, the batch-41 leg's (61fe31d90a), extended to the later legs:
-#   - the evidence is docs/phase4/h10-evidence/go<pin>/linux/*.tsv (ledgers and .untracked excluded), read in DECLARED
+#   - the evidence is <evidence>/*.tsv (ledgers and .untracked excluded), read in DECLARED
 #     WAVES by shard name: pass 1 (`P1-3`), L1 (`P2-L1`), L2 (`P1-L2`, `P1-L2-poll`), the final re-read (`P1-R`).
 #     A row's reading of record is its LATEST wave, and within it its LAST line (crypto/x509's SSL_CERT_FILE-unset
 #     re-run is the precedent);
@@ -15,13 +18,20 @@
 #     summary's "K disclosed-divergent" (Get-DisclosedCount), so the row's host-fatal entries in scope on linux are
 #     subtracted (COORD 2026-10-26, R's finding: runtime 11091 + 76 is 11091 + 70);
 #   - a row whose reading of record is NOT PASS keeps its segment and is listed, for its re-read or a ruling.
-import csv, json, os, re, sys
+import argparse, csv, json, os, re, sys
 
-tree = sys.argv[1]
-write = '--write' in sys.argv[2:]
+ap = argparse.ArgumentParser(description='Rewrite the roster rows\' linux: segments from the linux evidence TSVs.')
+ap.add_argument('tree')
+ap.add_argument('--evidence', help='the evidence directory, relative to the worktree or absolute (default: the hop\'s)')
+ap.add_argument('--write', action='store_true')
+args = ap.parse_args()
+tree, write = args.tree, args.write
 props = open(os.path.join(tree, 'src/version.props'), encoding='utf-8').read()
 pin = re.search(r'<GoStdLibVersion>([^<]+)</GoStdLibVersion>', props).group(1)
-evdir = os.path.join(tree, f'docs/phase4/h10-evidence/go{pin}/linux')
+evrel = args.evidence or f'docs/phase4/h10-evidence/go{pin}/linux'
+evdir = os.path.join(tree, evrel)
+if not os.path.isdir(evdir):
+    sys.exit(f'evidence directory {evrel} does not exist')
 
 WAVES = [('pass1', re.compile(r'^[A-Za-z0-9]+-\d+$')), ('L1', re.compile(r'^[A-Za-z0-9]+-L1$')),
          ('L2', re.compile(r'^[A-Za-z0-9]+-L2(-[a-z0-9]+)?$')), ('reread', re.compile(r'^[A-Za-z0-9]+-R$'))]
@@ -83,6 +93,6 @@ for pkg, old, new, src in changes:
     print(f'{pkg:40} {old:22} -> {new:22} ({src})')
 for pkg, old, src in held:
     print(f'{pkg:40} {old:22} HELD: reading of record is {src}')
-print(f'{len(changes)} row(s) change, {len(held)} held; {len(by_row)} rows named by the evidence', file=sys.stderr)
+print(f'{len(changes)} row(s) change, {len(held)} held; {len(by_row)} rows named by the evidence in {evrel}', file=sys.stderr)
 if write:
     open(table, 'w', encoding='utf-8', newline='').write('\n'.join(lines))
