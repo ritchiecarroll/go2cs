@@ -1,0 +1,76 @@
+row	word	count	banked	rc	wall_s	real_drift	oracle_rerun	drift_class	drift_files
+internal/syscall/windows	PASS	7	7	0	225	0	no		
+internal/runtime/math	PASS	1	1	0	30	0	no		
+container/list	PASS	10	10	0	30	0	no		
+internal/gover	PASS	5	5	0	29	0	no		
+container/heap	PASS	7	7	0	34	0	no		
+encoding/asn1	PASS	55	55	0	53	0	no		
+internal/saferio	PASS	17	17	0	30	0	no		
+internal/trace/tracev2	PASS	1	1	0	38	0	no		
+crypto/internal/boring/bcache	PASS	1	1	0	32	0	no		
+go/version	PASS	3	3	0	31	0	no		
+internal/diff	PASS	13	13	0	34	0	no		
+path	PASS	9	9	0	30	0	no		
+encoding/ascii85	PASS	9	9	0	32	0	no		
+log/slog/internal/buffer	PASS	1	1	0	33	0	no		
+internal/fmtsort	PASS	3	3	0	31	0	no		
+weak	PASS	9	9	0	34	0	no		
+internal/xcoff	PASS	3	3	0	48	0	no		
+unicode	PASS	28	28	0	34	0	no		
+image/jpeg	PASS	19	19	0	62	0	no		
+log/slog/internal/benchmarks	PASS	3	3	0	42	0	no		
+text/tabwriter	PASS	3	3	0	35	0	no		
+compress/zlib	PASS	6	6	0	37	0	no		
+encoding/base32	PASS	26	26	0	37	1	no	unclassified	src/core/encoding/base32/base32_test.cs -1/+1
+internal/chacha8rand	PASS	4	4	0	29	0	no		
+internal/trace/internal/tracev1	PASS	3	3	0	40	0	no		
+runtime/debug	PASS	8	8	0	39	0	no		
+image/draw	PASS	9	9	0	41	0	no		
+io/ioutil	PASS	28	28	0	34	0	no		
+internal/profile	PASS	1	1	0	41	0	no		
+testing/fstest	PASS	8	8	0	40	0	no		
+debug/macho	PASS	7	7	0	41	0	no		
+go/scanner	PASS	12	12	0	40	0	no		
+crypto/fips140	PASS	2	2	0	53	0	no		
+crypto/pbkdf2	PASS	5	5	0	43	0	no		
+internal/abi	PASS	1	1	0	39	0	no		
+io/fs	PASS	21	21	0	45	0	no		
+internal/pkgbits	PASS	2	2	0	43	0	no		
+crypto/md5	PASS	14	14	0	47	0	no		
+net/url	PASS	53	53	0	72	0	no		
+internal/platform	PASS	1	1	0	45	0	no		
+image/png	PASS	28	28	0	42	0	no		
+crypto/internal/fips140/rsa	PASS	123	123	0	43	0	no		
+sort	PASS	63	63	0	41	0	no		
+compress/gzip	PASS	15	15	0	44	0	no		
+crypto/subtle	PASS	10	10	0	47	0	no		
+runtime/metrics	PASS	2	2	0	58	0	no		
+crypto/hmac	PASS	202	202	0	45	0	no		
+crypto/internal/fips140/mldsa	PASS	46	46	0	50	0	no		
+crypto/ecdh	PASS	47	47	0	63	0	no		
+image	PASS	8	8	0	42	0	no		
+runtime/trace	PASS	19	19	0	65	0	no		
+debug/pe	PASS	10	10	0	48	0	no		
+go/doc/comment	PASS	10059	10059	0	47	0	no		
+go/internal/srcimporter	PASS	7	7	0	89	0	no		
+crypto/ed25519	PASS	9	9	0	54	0	no		
+archive/tar	PASS	98	98	0	57	0	no		
+debug/gosym	PASS	10	10	0	46	0	no		
+io	PASS	60	60	0	45	0	no		
+go/build	PASS	57	57	0	64	0	no		
+internal/syscall/windows/registry	PASS	6	6	0	41	0	no		
+internal/types/errors	PASS	155	155	0	65	0	no		
+debug/buildinfo	PASS	211	211	0	53	0	no		
+internal/godebug	PASS	6	6	0	80	0	no		
+encoding/gob	PASS	106	106	0	82	0	no		
+internal/synctest	PASS	59	59	0	76	1	no	unclassified	src/core/internal/synctest/synctest_test.cs -17/+17
+net/http/httputil	PASS	62	62	0	172	1	no	unclassified	src/core/net/http/httputil/reverseproxy_test.cs -15/+15
+regexp	PASS	45	45	0	103	0	no		
+encoding/json	PASS	550	550	0	103	1	no	unclassified	src/core/encoding/json/stream_test.cs -1/+1
+internal/coverage/cfile	PASS	16	16	0	67	0	no		
+crypto/internal/fips140/edwards25519	PASS	54	54	0	126	0	no		
+reflect	PASS	445	445	0	138	1	no	unclassified	src/core/reflect/all_test.cs -2/+2
+internal/trace	PASS	187	187	0	210	0	no		
+os	PASS	6826	6826	0	338	0	no		
+crypto/internal/fips140test	PASS	2270	2270	0	281	2	no	unclassified	src/core/crypto/internal/fips140test/entropy_test.cs -1/+1;src/core/crypto/internal/fips140test/indicator_test.cs -2/+2
+go/internal/gcimporter	PASS	638	638	0	374	0	no		
