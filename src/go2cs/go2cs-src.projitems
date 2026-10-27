@@ -283,6 +283,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />

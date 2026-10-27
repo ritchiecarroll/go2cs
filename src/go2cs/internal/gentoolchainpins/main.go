@@ -11,7 +11,8 @@
 // release archives' SHA-256 values from go.dev's JSON index and the golang.org/toolchain modules' h1:
 // values from sum.golang.org. Run from src/go2cs through `go generate .` on a host that reaches both;
 // -dl-json reads a saved copy of the go.dev index instead (https://go.dev/dl/?mode=json&include=all).
-// toolchainProvision_test.go fails while the pins describe another release than go.mod's.
+// toolchainProvision_test.go fails while the pins describe another release than go.mod's, and main_test.go
+// while toolchainPins.go is not what this writes from testdata/, a saved slice of both sources.
 package main
 
 import (
@@ -55,23 +56,25 @@ var (
 
 func main() {
 	dlJSON := flag.String("dl-json", "https://go.dev/dl/?mode=json&include=all", "go.dev's release index: a URL or a saved file")
-	sumDB := flag.String("sumdb", "https://sum.golang.org", "the checksum database recording the golang.org/toolchain modules")
+	sumDB := flag.String("sumdb", "https://sum.golang.org", "the checksum database recording the golang.org/toolchain modules: a URL or a saved lookup/ tree")
 	output := flag.String("o", "toolchainPins.go", "the file to write")
 	flag.Parse()
 
-	if err := run(*dlJSON, *sumDB, *output); err != nil {
+	if err := run("go.mod", *dlJSON, *sumDB, *output); err != nil {
 		fmt.Fprintf(os.Stderr, "gentoolchainpins: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(dlJSON, sumDB, output string) error {
-	data, err := os.ReadFile("go.mod")
+// run reads go.mod's go line, the index at dlJSON and the checksum database at sumDB (an https:// URL, or a
+// directory holding lookup/<module>@<version> files), and writes the pins to output.
+func run(goMod, dlJSON, sumDB, output string) error {
+	data, err := os.ReadFile(goMod)
 	if err != nil {
 		return err
 	}
 
-	parsed, err := modfile.Parse("go.mod", data, nil)
+	parsed, err := modfile.Parse(goMod, data, nil)
 	if err != nil {
 		return err
 	}
@@ -212,7 +215,8 @@ func render(version string, archives map[string][2]string, modules map[string]st
 // The Go release a release build of go2cs downloads on first use (toolchainProvision.go), and the
 // hashes it accepts: the release archives' SHA-256 values from go.dev's JSON index and the
 // golang.org/toolchain modules' h1: values recorded by sum.golang.org. Regenerate with
-// "go generate ." from src/go2cs after the go line in go.mod moves.
+// "go generate ." from src/go2cs after the go line in go.mod moves, and refresh
+// internal/gentoolchainpins/testdata from the same sources (its main_test.go says how).
 
 //go:generate go run ./internal/gentoolchainpins
 

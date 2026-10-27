@@ -304,11 +304,18 @@ func TestToolchainProvisionRefusesAMismatchedDownload(t *testing.T) {
 	second := moduleSource(p, goodServer.URL, sum)
 	p.sources = func() []toolchainSource { return []toolchainSource{only, second} }
 
+	var progress strings.Builder
+	p.progress = &progress
+
 	if err := p.ensure(true); err != nil {
 		t.Fatalf("the second source was not tried after the first was refused: %v", err)
 	}
 
 	assertInstalled(t, p, env)
+
+	if want := "go2cs: " + only.name + " failed ("; !strings.Contains(progress.String(), want) || !strings.Contains(progress.String(), "trying "+second.name) {
+		t.Fatalf("the fallback was not explained; progress:\n%s", progress.String())
+	}
 }
 
 // Each earlier step of the choice wins without a download; -version and help never download.
@@ -441,6 +448,13 @@ func TestToolchainPinsMatchTheConverterGo(t *testing.T) {
 	for _, platform := range []string{"windows-amd64", "windows-arm64", "linux-amd64", "linux-arm64", "darwin-amd64", "darwin-arm64"} {
 		if !strings.HasPrefix(pinnedGoModules[platform], "h1:") {
 			t.Errorf("no toolchain module pin for %s", platform)
+		}
+
+		goos, goarch, _ := strings.Cut(platform, "-")
+		archive := pinnedGoArchives[platform]
+
+		if !strings.HasPrefix(archive.file, pinnedGoVersion+"."+goos+"-"+goarch+".") || len(archive.sha256) != 64 {
+			t.Errorf("no release archive pin for %s: %+v", platform, archive)
 		}
 	}
 }

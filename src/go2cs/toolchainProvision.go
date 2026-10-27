@@ -244,7 +244,9 @@ func (p *toolchainProvisioner) install(root string) error {
 
 	var failures []string
 
-	for _, source := range p.sources() {
+	sources := p.sources()
+
+	for i, source := range sources {
 		err := p.installFrom(source, root)
 
 		if err == nil {
@@ -252,6 +254,10 @@ func (p *toolchainProvisioner) install(root string) error {
 		}
 
 		failures = append(failures, fmt.Sprintf("%s: %v", source.name, err))
+
+		if i+1 < len(sources) {
+			fmt.Fprintf(p.progress, "go2cs: %s failed (%v); trying %s\n", source.name, err, sources[i+1].name)
+		}
 	}
 
 	return fmt.Errorf("go2cs could not download %s for %s/%s:\n  %s\n"+
