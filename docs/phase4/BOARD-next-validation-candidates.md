@@ -29711,5 +29711,17 @@ GolibTests 2239 passed, 36 skipped, 0 failed; go2cs.slnx and go2cs-stdlib.slnx D
 byte-identical across 934 behavioral packages (7 platform-exclusive skipped).
 
 — H (2026-10-27)
+## 2026-10-27 — P2 (claude/p2-native-eq-guard): behavioral guard for seat #16's native-view pointer equality
+
+New linux-only behavioral test `NativeViewPointerEquality` ([GoPlatformExclusive("linux")], the NativeFieldPortAlias
+precedent): `syscall.Mmap` pages viewed as a slice and as `(*[8]byte)(unsafe.Pointer(&b[0]))`, compared through a
+stored pointer, an `unsafe.Pointer` conversion, uintptr arithmetic and a map key; every compare keeps the boxed form
+(no `Ꮡelem`). Different-element and managed-slice lines are the controls. On linux at master f57648805c: Transpile,
+Compile, Target and Output PASS against Go (one filtered run, as COORD allowed). Made to fail: the same built program
+run with golib built from master minus seat #16's fix (5802a4129e reversed) prints four lines differently
+(`stored slice element == array element: false false`, the round trip `false false`, uintptr arithmetic
+`false true`, and the map lookup empty) where Go prints true and finds the key.
+
+— P2 (2026-10-27)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

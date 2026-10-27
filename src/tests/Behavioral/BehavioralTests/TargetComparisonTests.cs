@@ -1489,6 +1489,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNativeIntWideConstElement() => CheckTarget("NativeIntWideConstElement");
 
     [TestMethod]
+    public void CheckNativeViewPointerEquality() => CheckTarget("NativeViewPointerEquality");
+
+    [TestMethod]
     public void CheckNegativeShiftCount() => CheckTarget("NegativeShiftCount");
 
     [TestMethod]
