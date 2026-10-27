@@ -48,8 +48,9 @@ Stop at the first one that fails.
 
    The script never pushes. The pack's own guards prove the rest at pack time: the published closure against `R`'s
    go.lib and go.gen, the host-path scan of the packed bytes, and the proof's input digest.
-4. **The host reaches the services.** `proxy.golang.org`, `api.nuget.org`, `apiint.nugettest.org`, `nugetgo.net` and
-   `github.com`. The toolchain is the corpus Go (`go version`), with `GOTOOLCHAIN=local`, the .NET SDK and pwsh 7.
+4. **The host reaches the services.** `proxy.golang.org`, `api.nuget.org`, `apiint.nugettest.org` (when the rehearsal
+   takes the test gallery), `nugetgo.net` and `github.com`. The toolchain is the corpus Go (`go version`), with
+   `GOTOOLCHAIN=local`, the .NET SDK and pwsh 7.
    Free disk is preflighted as for any battery.
 5. **`ID` is free on nuget.org.** This reads 404, or an index listing only this project's earlier versions (`id` is
    `ID` in lower case):
@@ -60,6 +61,9 @@ Stop at the first one that fails.
 6. **The conversion repository exists and is public (owner).** It is the package's `RepositoryUrl` (B6). For a
    `canonical` row it sits under the same org on the same host as `M` (PLAN section 2); otherwise the row is
    `community`.
+7. **The rehearsal route is stated.** A first publish of `ID` names its route before section 2: the test gallery
+   (section 3), or the hosted rows from a local folder feed (section 3, *From a local folder feed*), which pushes
+   nothing to int.nugettest.org.
 
 ## 1. Convert and validate (lane, at `T`)
 
@@ -194,6 +198,9 @@ assembly is not the bytes the package carries for its RID.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
+The rehearsal runs on the test gallery, or from a local folder feed (*From a local folder feed* below); precondition
+7 states which.
+
 1. **Owner:** push the REHEARSAL package, unsigned, to the test gallery with that gallery's own API key. The
    release candidate never goes there.
    ```
@@ -232,9 +239,10 @@ After step 2, every shipped RID's row is written on a hosted runner of its own O
    gh workflow run os-matrix.yml --ref <T's branch> -f stage=nugetgo-behavior \
      -f nugetgo_module=M@V -f nugetgo_package=PV-int.1
    ```
-   The feed defaults to int.nugettest.org. Each of the four legs (windows-latest, ubuntu-latest, macos-15,
-   macos-15-intel) runs the sample with `go run`, converts it against `PV-int.1`, builds it with `-r <rid>` and runs
-   it with dotnet (`Invoke-NugetgoBehaviorRow.ps1`), which is steps 3 to 5 above on that OS.
+   The feed defaults to int.nugettest.org (*From a local folder feed* below names another). Each of the four legs
+   (windows-latest, ubuntu-latest, macos-15, macos-15-intel) runs the sample with `go run`, converts it against
+   `PV-int.1`, builds it with `-r <rid>` and runs it with dotnet (`Invoke-NugetgoBehaviorRow.ps1`), which is steps 3
+   to 5 above on that OS.
 2. **Lane:** fetch the rows through the annotations API, which a restricted-egress lane can reach:
    `pwsh -File <T>/src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <run> -OutDir <rows>`.
 3. **Gate: four rows.** Each reads `outputs-equal: true`, its `runtime-rid` is its file's RID, its `goos` is that
@@ -242,6 +250,32 @@ After step 2, every shipped RID's row is written on a hosted runner of its own O
    package carries for that RID, one `<file> sha256-<hex>` per Go package. The release candidate's pack (section 2)
    binds each row's `assembly` to the bytes it packs for that RID, so a release whose bytes differ from the rehearsal's
    is refused there.
+
+### From a local folder feed
+
+The hosted rows can read the rehearsal package from a folder of this repository instead of the test gallery. Steps 1
+and 2 of the rehearsal are then skipped: nothing is pushed to int.nugettest.org.
+
+1. **Lane:** commit the rehearsal nupkg in a folder of its own to a ref of this repository that holds only the kit (an
+   orphan branch), and take the nupkg's SHA-256.
+2. **Lane:** dispatch as in *The hosted rows*, step 1, naming the folder and pinning the nupkg:
+   ```
+   gh workflow run os-matrix.yml --ref <T's branch> -f stage=nugetgo-behavior \
+     -f nugetgo_module=M@V -f nugetgo_package=PV-int.1 \
+     -f nugetgo_feed=git:<REF>:<FOLDER> -f nugetgo_feed_sha256=<SHA-256>
+   ```
+   The plan resolves `REF` to one commit, so all four legs read the same bytes. Each leg extracts the folder, refuses
+   it unless it holds exactly one nupkg of version `PV-int.1` and that nupkg has the pinned SHA-256, and passes it to
+   the row as a local feed. The go.* closure still restores from nuget.org. [CIMatrix.md](CIMatrix.md) lists both
+   inputs.
+3. Steps 2 and 3 of *The hosted rows* follow unchanged.
+
+This route does not rehearse a push to a gallery or a restore from a NuGet v3 service: section 4's push is the first
+time a gallery validates the package.
+<!-- 2026-10-26, owner ruling relayed by COORD: the int.nugettest.org push for mousetrap 1.1.0-int.1 was skipped, in the
+     owner's words "I am OK with skipping that step". Its four hosted rows ran from a folder feed instead: the kit ref
+     claude/c2-nugetgo-wave3-mousetrap-int1 at 477b042ae5, folder nupkg/int.1, os-matrix run 40411532955, 4 of 4 PASS
+     (batch 51, 3eea809d44, which added the git:REF:FOLDER feed and its SHA-256 pin). -->
 
 ## 4. Publish to nuget.org (owner; irreversible)
 
@@ -300,6 +334,10 @@ COORD rules sections 1-3 green before this step.
    from the repository reproduce the package's assembly attributes.
 
 ## 5. The registry row (owner, through the nugetgo repository's CI)
+
+A module whose row exists needs no new row for a rebuild or a later version: the row names the package ID, not a
+version, and the `ci` workflow's checks 2 to 4 run only on rows a pull request adds or changes. Step 1 still applies,
+so that the next row checked against `R` passes check 4(b).
 
 1. If `R` is not listed in the nugetgo repository's `cmd/sitegen/go2cs-releases.txt`, a maintainer adds it in its
    own pull request first. The row's pull request must change only `v1/mappings.txt` to be eligible for the
@@ -375,4 +413,9 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
     has put .NET 10 first on `PATH`. So a sheet opens with `& "$env:USERPROFILE\.dotnet\tools\pwsh.exe"`, a check
     that `$PSVersionTable.PSVersion` reads 7.x, and `Set-Location` to the go2cs clone, before its environment
     block. It also says to stop at the first red line: a `throw` stops only its own statement, and pasted lines
-    after it keep running.
+    after it keep running. The `pwsh.exe` step runs in a NEW window: a window that ran the release block or an
+    earlier sheet keeps `DOTNET_ROOT` and `PATH` pointed at .NET 10, and this `pwsh` needs .NET 8, so it does not start
+    there.
+    <!-- 2026-10-27: on the S1 sheet of the 1.26.10.1 rebuild wave, the owner's block 0 FIX (run pwsh.exe in THIS
+         window) failed in a window that still held the release block's DOTNET_ROOT and PATH; a fresh window ran it. -->
+
