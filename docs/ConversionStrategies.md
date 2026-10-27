@@ -9879,7 +9879,8 @@ Reading the C#:
 
 A struct from *another* package also goes in through a value adapter, because the generator cannot add an
 interface to a type compiled elsewhere. Its adapter name starts with the package, such as
-`typelib_Markᴠstamper`.
+`typelib_Markᴠstamper`. When that package's own conversion already declares the struct as implementing the
+interface, the value goes in directly.
 
 **A pointer goes into an interface wrapped in an adapter.** A pointer is golib's generic box class
 `ж<Counter>`, so the generator cannot add a user's interface to it. Instead it writes
@@ -11816,8 +11817,8 @@ From that attribute, `ImplementGenerator` emits the adapter class `SettingжDesc
 "`Setting` pointer (`ж`) as `Describer`": the class holds the `ж<Setting>` box and implements `Describer`
 by calling `Describe` on it. Go's `h.d = s` becomes `h.d = new SettingжDescriber(Ꮡs)`. When a value
 receiver provides the methods, the record has no `Pointer = true`, and a struct of the same package implements
-the interface itself. A named func type, or a struct from another package, goes in through a value adapter
-such as `meterᴠvalued`. [Interfaces](#interfaces) covers these forms, and how equality and type assertions see
+the interface itself. A named func type goes in through a value adapter such as `meterᴠvalued`, and so does a
+struct from another package that does not already implement the interface there. [Interfaces](#interfaces) covers these forms, and how equality and type assertions see
 through an adapter.
 
 The two pointer parameters take different shapes, depending on how the body uses them:
