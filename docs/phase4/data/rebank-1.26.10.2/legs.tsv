@@ -1,0 +1,473 @@
+os	lane	shard	seq	row	projected_s	wall_source
+linux	R-WSL	RWSL-1	1	crypto/internal/fips140/mlkem	33	wsl RWSL-1
+linux	R-WSL	RWSL-1	2	crypto/mlkem	64	wsl RWSL-1
+linux	R-WSL	RWSL-1	3	archive/zip	82	wsl RWSL-1
+linux	R-WSL	RWSL-1	4	crypto/dsa	150	wsl RWSL-1
+linux	R-WSL	RWSL-1	5	index/suffixarray	360	wsl RWSL-1
+linux	R-WSL	RWSL-1	6	hash/maphash	506	wsl RWSL-1
+linux	R-WSL	RWSL-1	7	go/parser	591	wsl RWSL-1
+linux	R-WSL	RWSL-1	8	net	596	wsl RWSL-L2
+linux	R-WSL	RWSL-1	9	time	625	wsl RWSL-1
+linux	R-WSL	RWSL-1	10	net/http	676	wsl RWSL-R
+linux	R-WSL	RWSL-1	11	sync/atomic	684	wsl RWSL-1
+linux	R-WSL	RWSL-1	12	crypto/tls	827	wsl RWSL-R
+linux	R-WSL	RWSL-1	13	internal/poll	1676	est: P1-L2-poll 1951 s - cloud floor
+linux	R-WSL	RWSL-1	14	runtime	3636	wsl RWSL-R
+linux	R-WSL	RWSL-2	1	internal/unsafeheader	23	wsl P1-3
+linux	R-WSL	RWSL-2	2	container/list	24	wsl P1-1
+linux	R-WSL	RWSL-2	3	internal/coverage/cmerge	24	wsl P1-1
+linux	R-WSL	RWSL-2	4	plugin	24	wsl P1-1
+linux	R-WSL	RWSL-2	5	container/heap	25	wsl P1-2
+linux	R-WSL	RWSL-2	6	crypto/internal/boring/bcache	25	wsl P1-2
+linux	R-WSL	RWSL-2	7	crypto/internal/fips140cache	25	wsl P1-3
+linux	R-WSL	RWSL-2	8	encoding/ascii85	25	wsl P1-1
+linux	R-WSL	RWSL-2	9	encoding/hex	25	wsl P1-1
+linux	R-WSL	RWSL-2	10	net/http/internal/ascii	25	wsl P1-1
+linux	R-WSL	RWSL-2	11	path	25	wsl P1-1
+linux	R-WSL	RWSL-2	12	compress/bzip2	26	wsl P1-1
+linux	R-WSL	RWSL-2	13	go/version	26	wsl P1-1
+linux	R-WSL	RWSL-2	14	html	26	wsl P1-2
+linux	R-WSL	RWSL-2	15	internal/coverage/slicewriter	26	wsl P1-1
+linux	R-WSL	RWSL-2	16	testing/iotest	26	wsl P1-1
+linux	R-WSL	RWSL-2	17	unicode/utf8	26	wsl P1-1
+linux	R-WSL	RWSL-2	18	database/sql/driver	27	wsl P1-1
+linux	R-WSL	RWSL-2	19	internal/diff	27	wsl P1-1
+linux	R-WSL	RWSL-2	20	internal/sysinfo	27	wsl P1-1
+linux	R-WSL	RWSL-2	21	text/scanner	27	wsl P1-1
+linux	R-WSL	RWSL-2	22	internal/buildcfg	28	wsl P1-1
+linux	R-WSL	RWSL-2	23	internal/cpu	29	wsl P1-2
+linux	R-WSL	RWSL-2	24	log/slog/internal/benchmarks	29	wsl P1-2
+linux	R-WSL	RWSL-2	25	log/slog/internal/buffer	29	wsl P1-2
+linux	R-WSL	RWSL-2	26	archive/tar	30	est: cloud P2-3 295 s - 275
+linux	R-WSL	RWSL-2	27	cmp	30	est: cloud P2-1 287 s - 275
+linux	R-WSL	RWSL-2	28	compress/lzw	30	est: cloud P2-1 296 s - 275
+linux	R-WSL	RWSL-2	29	container/ring	30	est: cloud P2-1 273 s - 275
+linux	R-WSL	RWSL-2	30	crypto/ecdh	30	est: cloud P2-2 293 s - 275
+linux	R-WSL	RWSL-2	31	crypto/hkdf	30	est: cloud P2-2 279 s - 275
+linux	R-WSL	RWSL-2	32	crypto/hmac	30	est: cloud P2-1 297 s - 275
+linux	R-WSL	RWSL-2	33	crypto/internal/fips140/aes	30	est: cloud P2-2 272 s - 275
+linux	R-WSL	RWSL-2	34	crypto/internal/fips140/bigmod	30	est: cloud P2-2 288 s - 275
+linux	R-WSL	RWSL-2	35	crypto/internal/fips140/ecdh	30	est: cloud P2-2 282 s - 275
+linux	R-WSL	RWSL-2	36	crypto/internal/fips140/nistec	30	est: cloud P2-2 286 s - 275
+linux	R-WSL	RWSL-2	37	crypto/internal/fips140/rsa	30	est: cloud P2-2 282 s - 275
+linux	R-WSL	RWSL-2	38	crypto/internal/fips140/subtle	30	est: cloud P2-3 284 s - 275
+linux	R-WSL	RWSL-2	39	crypto/internal/sysrand	30	est: cloud P2-3 301 s - 275
+linux	R-WSL	RWSL-2	40	crypto/rc4	30	est: cloud P2-1 293 s - 275
+linux	R-WSL	RWSL-2	41	crypto/subtle	30	est: cloud P2-2 297 s - 275
+linux	R-WSL	RWSL-2	42	debug/dwarf	30	est: cloud P2-2 294 s - 275
+linux	R-WSL	RWSL-2	43	debug/macho	30	est: cloud P2-2 281 s - 275
+linux	R-WSL	RWSL-2	44	embed/internal/embedtest	30	est: cloud P2-2 276 s - 275
+linux	R-WSL	RWSL-2	45	encoding/base32	30	wsl P1-2
+linux	R-WSL	RWSL-2	46	encoding/base64	30	est: cloud P2-1 289 s - 275
+linux	R-WSL	RWSL-2	47	encoding/csv	30	est: cloud P2-1 298 s - 275
+linux	R-WSL	RWSL-2	48	encoding/pem	30	est: cloud P2-3 288 s - 275
+linux	R-WSL	RWSL-2	49	errors	30	est: cloud P2-1 284 s - 275
+linux	R-WSL	RWSL-2	50	flag	30	est: cloud P2-2 297 s - 275
+linux	R-WSL	RWSL-2	51	go/build/constraint	30	est: cloud P2-1 295 s - 275
+linux	R-WSL	RWSL-2	52	go/constant	30	wsl P1-1
+linux	R-WSL	RWSL-2	53	go/printer	30	est: cloud P2-2 296 s - 275
+linux	R-WSL	RWSL-2	54	hash/adler32	30	est: cloud P2-1 296 s - 275
+linux	R-WSL	RWSL-2	55	hash/crc32	30	est: cloud P2-1 295 s - 275
+linux	R-WSL	RWSL-2	56	hash/crc64	30	est: cloud P2-1 295 s - 275
+linux	R-WSL	RWSL-2	57	hash/fnv	30	est: cloud P2-1 269 s - 275
+linux	R-WSL	RWSL-2	58	image	30	est: cloud P2-2 283 s - 275
+linux	R-WSL	RWSL-2	59	image/color	30	est: cloud P2-1 284 s - 275
+linux	R-WSL	RWSL-2	60	image/draw	30	est: cloud P2-2 290 s - 275
+linux	R-WSL	RWSL-2	61	image/png	30	est: cloud P2-2 277 s - 275
+linux	R-WSL	RWSL-2	62	internal/chacha8rand	30	est: cloud P2-2 281 s - 275
+linux	R-WSL	RWSL-2	63	internal/coverage/cformat	30	est: cloud P2-1 287 s - 275
+linux	R-WSL	RWSL-2	64	internal/coverage/slicereader	30	est: cloud P2-1 281 s - 275
+linux	R-WSL	RWSL-2	65	internal/dag	30	est: cloud P2-1 283 s - 275
+linux	R-WSL	RWSL-2	66	internal/fmtsort	30	est: cloud P2-1 277 s - 275
+linux	R-WSL	RWSL-2	67	internal/godebugs	30	est: cloud P2-3 297 s - 275
+linux	R-WSL	RWSL-2	68	internal/gover	30	est: cloud P2-1 289 s - 275
+linux	R-WSL	RWSL-2	69	internal/runtime/cgroup	30	est: cloud P2-3 285 s - 275
+linux	R-WSL	RWSL-2	70	internal/runtime/maps	30	est: cloud P2-3 303 s - 275
+linux	R-WSL	RWSL-2	71	internal/runtime/math	30	est: cloud P2-2 264 s - 275
+linux	R-WSL	RWSL-2	72	internal/runtime/sys	30	est: cloud P2-2 270 s - 275
+linux	R-WSL	RWSL-2	73	internal/saferio	30	est: cloud P2-1 273 s - 275
+linux	R-WSL	RWSL-2	74	internal/singleflight	30	est: cloud P2-1 285 s - 275
+linux	R-WSL	RWSL-2	75	internal/sync	30	est: cloud P2-2 280 s - 275
+linux	R-WSL	RWSL-2	76	internal/trace/internal/tracev1	30	est: cloud P2-3 282 s - 275
+linux	R-WSL	RWSL-2	77	internal/trace/tracev2	30	est: cloud P2-3 289 s - 275
+linux	R-WSL	RWSL-2	78	internal/xcoff	30	est: cloud P2-1 289 s - 275
+linux	R-WSL	RWSL-2	79	io/fs	30	est: cloud P1-R 295 s - 275
+linux	R-WSL	RWSL-2	80	io/ioutil	30	est: cloud P2-1 283 s - 275
+linux	R-WSL	RWSL-2	81	maps	30	est: cloud P2-1 280 s - 275
+linux	R-WSL	RWSL-2	82	math/big/internal/asmgen	30	est: cloud P2-3 301 s - 275
+linux	R-WSL	RWSL-2	83	math/cmplx	30	est: cloud P2-1 291 s - 275
+linux	R-WSL	RWSL-2	84	net/http/internal	30	est: cloud P2-L2 304 s - 275
+linux	R-WSL	RWSL-2	85	os/exec/internal/fdtest	30	est: cloud P2-1 291 s - 275
+linux	R-WSL	RWSL-2	86	path/filepath	30	est: cloud P1-R 305 s - 275
+linux	R-WSL	RWSL-2	87	strconv	30	est: cloud P2-L2 304 s - 275
+linux	R-WSL	RWSL-2	88	testing/fstest	30	est: cloud P2-2 282 s - 275
+linux	R-WSL	RWSL-2	89	testing/quick	30	est: cloud P2-1 288 s - 275
+linux	R-WSL	RWSL-2	90	text/tabwriter	30	est: cloud P2-1 281 s - 275
+linux	R-WSL	RWSL-2	91	text/template	30	est: cloud P2-3 276 s - 275
+linux	R-WSL	RWSL-2	92	unicode	30	est: cloud P2-1 287 s - 275
+linux	R-WSL	RWSL-2	93	weak	30	est: cloud P2-2 268 s - 275
+linux	R-WSL	RWSL-2	94	crypto/pbkdf2	31	wsl P1-2
+linux	R-WSL	RWSL-2	95	mime	31	est: cloud P2-L2 306 s - 275
+linux	R-WSL	RWSL-2	96	compress/zlib	32	wsl P1-2
+linux	R-WSL	RWSL-2	97	crypto/fips140	32	wsl P1-3
+linux	R-WSL	RWSL-2	98	hash	32	wsl P1-2
+linux	R-WSL	RWSL-2	99	internal/coverage/pods	32	wsl P1-1
+linux	R-WSL	RWSL-2	100	text/template/parse	32	wsl P1-1
+linux	R-WSL	RWSL-2	101	crypto/sha512	33	wsl P1-1
+linux	R-WSL	RWSL-2	102	regexp/syntax	33	wsl P1-3
+linux	R-WSL	RWSL-2	103	unique	33	est: cloud P2-1 308 s - 275
+linux	R-WSL	RWSL-2	104	internal/coverage/test	34	wsl P1-2
+linux	R-WSL	RWSL-2	105	internal/pkgbits	34	wsl P1-2
+linux	R-WSL	RWSL-2	106	internal/profile	34	wsl P1-1
+linux	R-WSL	RWSL-2	107	internal/reflectlite	34	wsl P1-1
+linux	R-WSL	RWSL-2	108	runtime/debug	34	est: cloud P2-R 309 s - 275
+linux	R-WSL	RWSL-2	109	go/scanner	35	wsl P1-1
+linux	R-WSL	RWSL-2	110	runtime/trace	35	est: cloud P2-3 310 s - 275
+linux	R-WSL	RWSL-2	111	crypto/aes	36	wsl P1-1
+linux	R-WSL	RWSL-2	112	internal/abi	36	wsl P1-2
+linux	R-WSL	RWSL-2	113	internal/runtime/atomic	36	wsl P1-3
+linux	R-WSL	RWSL-2	114	testing/slogtest	36	wsl P1-1
+linux	R-WSL	RWSL-2	115	html/template	37	est: cloud P2-3 312 s - 275
+linux	R-WSL	RWSL-2	116	internal/platform	37	wsl P1-2
+linux	R-WSL	RWSL-2	117	crypto/internal/fips140/ecdsa	38	wsl P1-2
+linux	R-WSL	RWSL-2	118	crypto/md5	38	wsl P1-1
+linux	R-WSL	RWSL-2	119	debug/buildinfo	38	est: cloud P2-3 313 s - 275
+linux	R-WSL	RWSL-2	120	go/doc	38	est: cloud P2-3 313 s - 275
+linux	R-WSL	RWSL-2	121	internal/syscall/unix	38	est: cloud P2-L1 313 s - 275
+linux	R-WSL	RWSL-2	122	crypto/des	39	est: cloud P2-1 314 s - 275
+linux	R-WSL	RWSL-2	123	math/bits	39	wsl P1-1
+linux	R-WSL	RWSL-2	124	encoding/asn1	40	est: cloud P1-R 315 s - 275
+linux	R-WSL	RWSL-2	125	go/format	40	wsl P1-1
+linux	R-WSL	RWSL-2	126	sort	40	wsl P1-3
+linux	R-WSL	RWSL-2	127	unicode/utf16	40	est: cloud P1-L2 315 s - 275
+linux	R-WSL	RWSL-2	128	math/rand/v2	41	est: cloud P2-3 316 s - 275
+linux	R-WSL	RWSL-2	129	slices	42	wsl P1-2
+linux	P1	P1-1	1	math	316	est: wsl P1-2 41 s + 275
+linux	P1	P1-1	2	io	317	cloud P1-L2
+linux	P1	P1-1	3	mime/multipart	318	cloud P2-3
+linux	P1	P1-1	4	os/user	319	est: wsl P1-3 44 s + 275
+linux	P1	P1-1	5	os/signal	320	cloud P2-2
+linux	P1	P1-1	6	encoding/gob	321	cloud P2-3
+linux	P1	P1-1	7	bufio	325	cloud P1-R
+linux	P1	P1-1	8	crypto	328	cloud P2-3
+linux	P1	P1-1	9	net/http/httptest	328	est: wsl P1-3 53 s + 275
+linux	P1	P1-1	10	go/internal/srcimporter	333	cloud P2-3
+linux	P1	P1-1	11	context	338	cloud P2-L2
+linux	P1	P1-1	12	net/netip	339	cloud P1-L2
+linux	P1	P1-1	13	go/build	347	cloud P1-R
+linux	P1	P1-1	14	debug/pe	356	est: wsl P1-2 81 s + 275
+linux	P1	P1-1	15	internal/synctest	372	est: wsl P1-1 97 s + 275
+linux	P1	P1-1	16	net/http/cgi	391	est: wsl P1-3 116 s + 275
+linux	P1	P1-1	17	os	420	cloud P2-R
+linux	P1	P1-1	18	net/http/pprof	434	est: wsl P1-3 159 s + 275
+linux	P1	P1-1	19	net/rpc	447	est: wsl P1-3 172 s + 275
+linux	P1	P1-1	20	net/http/httputil	473	cloud P2-3
+linux	P1	P1-1	21	internal/trace	513	cloud P1-R
+linux	P1	P1-1	22	mime/quotedprintable	533	est: wsl P1-1 258 s + 275
+linux	P1	P1-1	23	log/slog	559	cloud P1-R
+linux	P1	P1-2	1	bytes	317	cloud P1-L2
+linux	P1	P1-2	2	crypto/internal/boring	318	est: wsl P1-1 43 s + 275
+linux	P1	P1-2	3	go/ast	319	est: wsl P1-2 44 s + 275
+linux	P1	P1-2	4	crypto/sha256	320	cloud P1-L2
+linux	P1	P1-2	5	crypto/hpke	321	cloud P2-3
+linux	P1	P1-2	6	net/mail	323	cloud P2-1
+linux	P1	P1-2	7	go/doc/comment	327	est: wsl P1-2 52 s + 275
+linux	P1	P1-2	8	crypto/internal/fips140/edwards25519/field	328	cloud P1-R
+linux	P1	P1-2	9	encoding/binary	331	cloud P1-L2
+linux	P1	P1-2	10	fmt	335	cloud P1-L2
+linux	P1	P1-2	11	crypto/sha3	339	cloud P2-L2
+linux	P1	P1-2	12	net/url	346	est: wsl P1-1 71 s + 275
+linux	P1	P1-2	13	crypto/internal/fips140only	355	cloud P2-3
+linux	P1	P1-2	14	syscall	379	cloud P2-L2
+linux	P1	P1-2	15	regexp	409	est: wsl P1-3 134 s + 275
+linux	P1	P1-2	16	net/rpc/jsonrpc	422	cloud P2-2
+linux	P1	P1-2	17	crypto/rsa	443	cloud P1-R
+linux	P1	P1-2	18	encoding/json	451	cloud P2-3
+linux	P1	P1-2	19	os/exec	500	cloud P2-3
+linux	P1	P1-2	20	internal/testenv	532	est: wsl P1-1 257 s + 275
+linux	P1	P1-2	21	internal/runtime/gc/scan	547	est: wsl P1-3 272 s + 275
+linux	P1	P1-2	22	runtime/pprof	730	est: wsl P1-3 455 s + 275
+linux	P1	P1-2	23	testing	358	cloud P1-R
+linux	P2	P2-1	1	image/jpeg	304	cloud P1-R
+linux	P2	P2-1	2	crypto/elliptic	317	est: wsl P1-2 42 s + 275
+linux	P2	P2-1	3	log	318	cloud P2-R
+linux	P2	P2-1	4	compress/gzip	319	est: wsl P1-3 44 s + 275
+linux	P2	P2-1	5	iter	319	cloud P1-R
+linux	P2	P2-1	6	crypto/internal/fips140/mldsa	321	est: wsl P1-3 46 s + 275
+linux	P2	P2-1	7	net/textproto	323	est: wsl P1-1 48 s + 275
+linux	P2	P2-1	8	internal/fuzz	327	est: wsl P1-2 52 s + 275
+linux	P2	P2-1	9	internal/zstd	328	cloud P1-L2
+linux	P2	P2-1	10	strings	330	cloud P1-L2
+linux	P2	P2-1	11	crypto/rand	333	cloud P2-L2
+linux	P2	P2-1	12	go/internal/gccgoimporter	339	cloud P2-2
+linux	P2	P2-1	13	compress/flate	343	est: wsl P1-3 68 s + 275
+linux	P2	P2-1	14	internal/coverage/cfile	355	cloud P2-L2
+linux	P2	P2-1	15	internal/types/errors	368	est: wsl P1-3 93 s + 275
+linux	P2	P2-1	16	crypto/cipher	377	cloud P2-R
+linux	P2	P2-1	17	go/internal/gcimporter	403	cloud P2-3
+linux	P2	P2-1	18	reflect	428	cloud P2-L2
+linux	P2	P2-1	19	net/http/fcgi	440	est: wsl P1-2 165 s + 275
+linux	P2	P2-1	20	expvar	447	est: wsl P1-2 172 s + 275
+linux	P2	P2-1	21	database/sql	500	cloud P1-R
+linux	P2	P2-1	22	crypto/internal/fips140test	533	cloud P2-L2
+linux	P2	P2-1	23	internal/trace/testtrace	551	est: wsl P1-3 276 s + 275
+linux	P2	P2-1	24	crypto/x509	647	cloud P2-3
+linux	P2	P2-2	1	go/token	308	cloud P1-R
+linux	P2	P2-2	2	internal/godebug	318	cloud P2-3
+linux	P2	P2-2	3	testing/cryptotest	318	est: wsl P1-3 43 s + 275
+linux	P2	P2-2	4	go/importer	319	cloud P2-2
+linux	P2	P2-2	5	debug/elf	320	est: wsl P1-2 45 s + 275
+linux	P2	P2-2	6	image/gif	321	est: wsl P1-2 46 s + 275
+linux	P2	P2-2	7	math/rand	325	est: wsl P1-3 50 s + 275
+linux	P2	P2-2	8	crypto/sha1	328	cloud P2-L2
+linux	P2	P2-2	9	sync	329	cloud P2-L2
+linux	P2	P2-2	10	crypto/ecdsa	333	est: wsl P1-3 58 s + 275
+linux	P2	P2-2	11	debug/gosym	335	est: wsl P1-2 60 s + 275
+linux	P2	P2-2	12	net/smtp	339	cloud P2-3
+linux	P2	P2-2	13	encoding/xml	347	cloud P2-3
+linux	P2	P2-2	14	net/http/httptrace	355	cloud P2-2
+linux	P2	P2-2	15	crypto/ed25519	369	cloud P1-L2
+linux	P2	P2-2	16	crypto/internal/fips140/edwards25519	401	cloud P1-R
+linux	P2	P2-2	17	math/big	415	cloud P1-R
+linux	P2	P2-2	18	testing/synctest	431	cloud P2-3
+linux	P2	P2-2	19	net/http/cookiejar	445	est: wsl P1-3 170 s + 275
+linux	P2	P2-2	20	internal/strconv	485	cloud P2-L2
+linux	P2	P2-2	21	debug/plan9obj	526	est: wsl P1-2 251 s + 275
+linux	P2	P2-2	22	runtime/metrics	533	est: wsl P1-2 258 s + 275
+linux	P2	P2-2	23	go/types	623	est: wsl P1-3 348 s + 275
+darwin	C1	C1-1	1	archive/tar	534	darwin run 40218981427: arm64 182 s, x64 534 s
+darwin	C1	C1-1	2	archive/zip	78	darwin run 40218981427: arm64 71 s, x64 78 s
+darwin	C1	C1-1	3	bufio	110	darwin run 40233485715: arm64 50 s, x64 110 s
+darwin	C1	C1-1	4	bytes	85	darwin run 40233485715: arm64 30 s, x64 85 s
+darwin	C1	C1-1	5	cmp	20	darwin run 40218981427: arm64 18 s, x64 20 s
+darwin	C1	C1-1	6	compress/bzip2	22	darwin run 40218981427: arm64 16 s, x64 22 s
+darwin	C1	C1-1	7	compress/flate	54	darwin run 40218981427: arm64 50 s, x64 54 s
+darwin	C1	C1-1	8	compress/gzip	38	darwin run 40218981427: arm64 37 s, x64 38 s
+darwin	C1	C1-1	9	compress/lzw	26	darwin run 40218981427: arm64 26 s, x64 25 s
+darwin	C1	C1-1	10	compress/zlib	27	darwin run 40218981427: arm64 27 s, x64 24 s
+darwin	C1	C1-1	11	container/heap	28	darwin run 40218981427: arm64 28 s, x64 19 s
+darwin	C1	C1-1	12	container/list	22	darwin run 40218981427: arm64 22 s, x64 18 s
+darwin	C1	C1-1	13	container/ring	19	darwin run 40218981427: arm64 19 s, x64 19 s
+darwin	C1	C1-1	14	context	51	darwin run 40233485715: arm64 23 s, x64 51 s
+darwin	C1	C1-1	15	crypto	105	darwin run 40218981427: arm64 57 s, x64 105 s
+darwin	C1	C1-1	16	crypto/aes	43	darwin run 40218981427: arm64 24 s, x64 43 s
+darwin	C1	C1-1	17	crypto/cipher	122	darwin run 40218981427: arm64 73 s, x64 122 s
+darwin	C1	C1-1	18	crypto/des	38	darwin run 40218981427: arm64 21 s, x64 38 s
+darwin	C1	C1-1	19	crypto/dsa	122	darwin run 40218981427: arm64 50 s, x64 122 s
+darwin	C1	C1-1	20	crypto/ecdh	47	darwin run 40218981427: arm64 35 s, x64 47 s
+darwin	C1	C1-2	1	crypto/ecdsa	757	darwin run 40218964909: arm64 214 s, x64 757 s
+darwin	C1	C1-2	2	crypto/ed25519	68	darwin run 40233618821: arm64 38 s, x64 68 s
+darwin	C1	C1-2	3	crypto/elliptic	135	darwin run 40218964909: arm64 50 s, x64 135 s
+darwin	C1	C1-2	4	crypto/fips140	112	darwin run 40218964909: arm64 25 s, x64 112 s
+darwin	C1	C1-2	5	crypto/hkdf	66	darwin run 40218964909: arm64 23 s, x64 66 s
+darwin	C1	C1-2	6	crypto/hmac	60	darwin run 40218964909: arm64 25 s, x64 60 s
+darwin	C1	C1-2	7	crypto/hpke	85	darwin run 40218964909: arm64 51 s, x64 85 s
+darwin	C1	C1-2	8	crypto/internal/boring	40	darwin run 40218964909: arm64 23 s, x64 40 s
+darwin	C1	C1-2	9	crypto/internal/boring/bcache	30	darwin run 40218964909: arm64 20 s, x64 30 s
+darwin	C1	C1-2	10	crypto/internal/fips140/aes	34	darwin run 40218964909: arm64 26 s, x64 34 s
+darwin	C1	C1-2	11	crypto/internal/fips140/bigmod	49	darwin run 40218964909: arm64 31 s, x64 49 s
+darwin	C1	C1-2	12	crypto/internal/fips140/ecdh	37	darwin run 40218964909: arm64 25 s, x64 37 s
+darwin	C1	C1-2	13	crypto/internal/fips140/ecdsa	45	darwin run 40218964909: arm64 25 s, x64 45 s
+darwin	C1	C1-2	14	crypto/internal/fips140/edwards25519	159	darwin run 40218964909: arm64 95 s, x64 159 s
+darwin	C1	C1-2	15	crypto/internal/fips140/edwards25519/field	59	darwin run 40218964909: arm64 38 s, x64 59 s
+darwin	C1	C1-2	16	crypto/internal/fips140/mldsa	45	darwin run 40218964909: arm64 32 s, x64 45 s
+darwin	C1	C1-2	17	crypto/internal/fips140/mlkem	37	darwin run 40218964909: arm64 25 s, x64 37 s
+darwin	C1	C1-2	18	crypto/internal/fips140/nistec	35	darwin run 40218964909: arm64 23 s, x64 35 s
+darwin	C1	C1-2	19	crypto/internal/fips140/rsa	36	darwin run 40218964909: arm64 25 s, x64 36 s
+darwin	C1	C1-2	20	crypto/internal/fips140/subtle	27	darwin run 40218964909: arm64 20 s, x64 27 s
+darwin	C1	C1-3	1	crypto/internal/fips140cache	462	darwin run 40218842030: arm64 198 s, x64 462 s
+darwin	C1	C1-3	2	crypto/internal/fips140only	192	darwin run 40218842030: arm64 90 s, x64 192 s
+darwin	C1	C1-3	3	crypto/internal/fips140test	926	darwin run 40233618821: arm64 424 s, x64 926 s
+darwin	C1	C1-3	4	crypto/internal/sysrand	68	darwin run 40218842030: arm64 32 s, x64 68 s
+darwin	C1	C1-3	5	crypto/md5	63	darwin run 40233618821: arm64 34 s, x64 63 s
+darwin	C1	C1-3	6	crypto/mlkem	132	darwin run 40218842030: arm64 67 s, x64 132 s
+darwin	C1	C1-3	7	crypto/pbkdf2	44	darwin run 40218842030: arm64 24 s, x64 44 s
+darwin	C1	C1-3	8	crypto/rand	45	darwin run 40233636682: arm64 42 s, x64 45 s
+darwin	C1	C1-3	9	crypto/rc4	47	darwin run 40218842030: arm64 34 s, x64 47 s
+darwin	C1	C1-3	10	crypto/rsa	712	darwin run 40233636682: arm64 318 s, x64 712 s
+darwin	C1	C1-3	11	crypto/sha1	722	darwin run 40400361240: arm64 241 s, x64 722 s
+darwin	C1	C1-3	12	crypto/sha256	58	darwin run 40233618821: arm64 29 s, x64 58 s
+darwin	C1	C1-3	13	crypto/sha3	84	darwin run 40233618821: arm64 52 s, x64 84 s
+darwin	C1	C1-3	14	crypto/sha512	37	darwin run 40233636682: arm64 37 s, x64 37 s
+darwin	C1	C1-3	15	crypto/subtle	50	darwin run 40218842030: arm64 41 s, x64 50 s
+darwin	C1	C1-3	16	crypto/tls	995	darwin run 40218842030: arm64 995 s, x64 981 s
+darwin	C1	C1-3	17	crypto/x509	375	darwin run 40218842030: arm64 215 s, x64 375 s
+darwin	C1	C1-3	18	database/sql	271	darwin run 40233636682: arm64 154 s, x64 271 s
+darwin	C1	C1-3	19	database/sql/driver	23	darwin run 40218842030: arm64 16 s, x64 23 s
+darwin	C1	C1-3	20	debug/buildinfo	569	darwin run 40227203434: arm64 270 s, x64 569 s
+darwin	C1	C1-4	1	debug/dwarf	60	darwin run 40227203434: arm64 32 s, x64 60 s
+darwin	C1	C1-4	2	debug/elf	73	darwin run 40227203434: arm64 53 s, x64 73 s
+darwin	C1	C1-4	3	debug/gosym	35	darwin run 40227203434: arm64 28 s, x64 35 s
+darwin	C1	C1-4	4	debug/macho	30	darwin run 40227203434: arm64 28 s, x64 30 s
+darwin	C1	C1-4	5	debug/pe	46	darwin run 40227203434: arm64 35 s, x64 46 s
+darwin	C1	C1-4	6	debug/plan9obj	26	darwin run 40227203434: arm64 26 s, x64 24 s
+darwin	C1	C1-4	7	embed/internal/embedtest	32	darwin run 40227203434: arm64 31 s, x64 32 s
+darwin	C1	C1-4	8	encoding/ascii85	26	darwin run 40227203434: arm64 26 s, x64 25 s
+darwin	C1	C1-4	9	encoding/asn1	42	darwin run 40227203434: arm64 40 s, x64 42 s
+darwin	C1	C1-4	10	encoding/base32	29	darwin run 40227203434: arm64 28 s, x64 29 s
+darwin	C1	C1-4	11	encoding/base64	31	darwin run 40227203434: arm64 31 s, x64 28 s
+darwin	C1	C1-4	12	encoding/binary	49	darwin run 40233636682: arm64 31 s, x64 49 s
+darwin	C1	C1-4	13	encoding/csv	31	darwin run 40227203434: arm64 31 s, x64 29 s
+darwin	C1	C1-4	14	encoding/gob	98	darwin run 40227203434: arm64 98 s, x64 89 s
+darwin	C1	C1-4	15	encoding/hex	32	darwin run 40227203434: arm64 32 s, x64 24 s
+darwin	C1	C1-4	16	encoding/json	244	darwin run 40227203434: arm64 196 s, x64 244 s
+darwin	C1	C1-4	17	encoding/pem	32	darwin run 40227203434: arm64 32 s, x64 30 s
+darwin	C1	C1-4	18	encoding/xml	83	darwin run 40227203434: arm64 83 s, x64 82 s
+darwin	C1	C1-4	19	errors	26	darwin run 40227203434: arm64 26 s, x64 26 s
+darwin	C1	C1-4	20	expvar	963	darwin run 40218875629: arm64 363 s, x64 963 s
+darwin	C1	C1-5	1	flag	66	darwin run 40218875629: arm64 28 s, x64 66 s
+darwin	C1	C1-5	2	fmt	56	darwin run 40233503315: arm64 47 s, x64 56 s
+darwin	C1	C1-5	3	go/ast	82	darwin run 40218875629: arm64 28 s, x64 82 s
+darwin	C1	C1-5	4	go/build	76	darwin run 40218875629: arm64 45 s, x64 76 s
+darwin	C1	C1-5	5	go/build/constraint	36	darwin run 40218875629: arm64 18 s, x64 36 s
+darwin	C1	C1-5	6	go/constant	35	darwin run 40218875629: arm64 20 s, x64 35 s
+darwin	C1	C1-5	7	go/doc	64	darwin run 40218875629: arm64 29 s, x64 64 s
+darwin	C1	C1-5	8	go/doc/comment	48	darwin run 40218875629: arm64 28 s, x64 48 s
+darwin	C1	C1-5	9	go/format	33	darwin run 40218875629: arm64 22 s, x64 33 s
+darwin	C1	C1-5	10	go/importer	98	darwin run 40218875629: arm64 46 s, x64 98 s
+darwin	C1	C1-5	11	go/internal/gccgoimporter	43	darwin run 40218875629: arm64 26 s, x64 43 s
+darwin	C1	C1-5	12	go/internal/gcimporter	240	darwin run 40218875629: arm64 115 s, x64 240 s
+darwin	C1	C1-5	13	go/internal/srcimporter	58	darwin run 40218875629: arm64 31 s, x64 58 s
+darwin	C1	C1-5	14	go/parser	612	darwin run 40218875629: arm64 350 s, x64 612 s
+darwin	C1	C1-5	15	go/printer	53	darwin run 40218875629: arm64 18 s, x64 53 s
+darwin	C1	C1-5	16	go/scanner	47	darwin run 40218875629: arm64 17 s, x64 47 s
+darwin	C1	C1-5	17	go/token	64	darwin run 40218875629: arm64 23 s, x64 64 s
+darwin	C1	C1-5	18	go/types	333	darwin run 40218875629: arm64 153 s, x64 333 s
+darwin	C1	C1-5	19	go/version	32	darwin run 40218875629: arm64 13 s, x64 32 s
+darwin	C1	C1-5	20	hash	640	darwin run 40227545170: arm64 227 s, x64 640 s
+darwin	C1	C1-6	1	hash/adler32	64	darwin run 40227545170: arm64 37 s, x64 64 s
+darwin	C1	C1-6	2	hash/crc32	45	darwin run 40227545170: arm64 23 s, x64 45 s
+darwin	C1	C1-6	3	hash/crc64	35	darwin run 40227545170: arm64 26 s, x64 35 s
+darwin	C1	C1-6	4	hash/fnv	35	darwin run 40227545170: arm64 24 s, x64 35 s
+darwin	C1	C1-6	5	hash/maphash	500	darwin run 40227545170: arm64 280 s, x64 500 s
+darwin	C1	C1-6	6	html	46	darwin run 40227545170: arm64 26 s, x64 46 s
+darwin	C1	C1-6	7	html/template	110	darwin run 40227545170: arm64 58 s, x64 110 s
+darwin	C1	C1-6	8	image	61	darwin run 40227545170: arm64 32 s, x64 61 s
+darwin	C1	C1-6	9	image/color	35	darwin run 40227545170: arm64 22 s, x64 35 s
+darwin	C1	C1-6	10	image/draw	43	darwin run 40227545170: arm64 23 s, x64 43 s
+darwin	C1	C1-6	11	image/gif	54	darwin run 40227545170: arm64 28 s, x64 54 s
+darwin	C1	C1-6	12	image/jpeg	47	darwin run 40227545170: arm64 29 s, x64 47 s
+darwin	C1	C1-6	13	image/png	49	darwin run 40227545170: arm64 39 s, x64 49 s
+darwin	C1	C1-6	14	index/suffixarray	349	darwin run 40227545170: arm64 242 s, x64 349 s
+darwin	C1	C1-6	15	internal/abi	52	darwin run 40227545170: arm64 22 s, x64 52 s
+darwin	C1	C1-6	16	internal/buildcfg	38	darwin run 40227545170: arm64 15 s, x64 38 s
+darwin	C1	C1-6	17	internal/chacha8rand	50	darwin run 40227545170: arm64 25 s, x64 50 s
+darwin	C1	C1-6	18	internal/coverage/cfile	224	darwin run 40400361240: arm64 113 s, x64 224 s
+darwin	C1	C1-6	19	internal/coverage/cformat	640	darwin run 40227524794: arm64 187 s, x64 640 s
+darwin	C1	C1-7	1	internal/coverage/cmerge	32	darwin run 40227524794: arm64 20 s, x64 32 s
+darwin	C1	C1-7	2	internal/coverage/pods	41	darwin run 40227524794: arm64 21 s, x64 41 s
+darwin	C1	C1-7	3	internal/coverage/slicereader	43	darwin run 40227524794: arm64 24 s, x64 43 s
+darwin	C1	C1-7	4	internal/coverage/slicewriter	28	darwin run 40227524794: arm64 13 s, x64 28 s
+darwin	C1	C1-7	5	internal/coverage/test	41	darwin run 40227524794: arm64 20 s, x64 41 s
+darwin	C1	C1-7	6	internal/cpu	47	darwin run 40227524794: arm64 22 s, x64 47 s
+darwin	C1	C1-7	7	internal/dag	29	darwin run 40227524794: arm64 16 s, x64 29 s
+darwin	C1	C1-7	8	internal/diff	31	darwin run 40227524794: arm64 15 s, x64 31 s
+darwin	C1	C1-7	9	internal/fmtsort	30	darwin run 40227524794: arm64 17 s, x64 30 s
+darwin	C1	C1-7	10	internal/fuzz	81	darwin run 40227524794: arm64 49 s, x64 81 s
+darwin	C1	C1-7	11	internal/godebug	93	darwin run 40227524794: arm64 70 s, x64 93 s
+darwin	C1	C1-7	12	internal/godebugs	123	darwin run 40227524794: arm64 73 s, x64 123 s
+darwin	C1	C1-7	13	internal/gover	26	darwin run 40227524794: arm64 14 s, x64 26 s
+darwin	C1	C1-7	14	internal/pkgbits	46	darwin run 40227524794: arm64 23 s, x64 46 s
+darwin	C1	C1-7	15	internal/platform	45	darwin run 40227524794: arm64 24 s, x64 45 s
+darwin	C1	C1-7	16	internal/poll	90	darwin run 40227524794: arm64 34 s, x64 90 s
+darwin	C1	C1-7	17	internal/profile	60	darwin run 40227524794: arm64 19 s, x64 60 s
+darwin	C1	C1-7	18	internal/reflectlite	67	darwin run 40227524794: arm64 22 s, x64 67 s
+darwin	C1	C1-7	19	internal/runtime/atomic	68	darwin run 40227524794: arm64 25 s, x64 68 s
+darwin	C1	C1-8	1	internal/runtime/cgroup	728	darwin run 40228938914: arm64 189 s, x64 728 s
+darwin	C1	C1-8	2	internal/runtime/gc/scan	50	darwin run 40228938914: arm64 31 s, x64 50 s
+darwin	C1	C1-8	3	internal/runtime/maps	79	darwin run 40228938914: arm64 41 s, x64 79 s
+darwin	C1	C1-8	4	internal/runtime/math	28	darwin run 40228938914: arm64 17 s, x64 28 s
+darwin	C1	C1-8	5	internal/runtime/sys	31	darwin run 40228938914: arm64 16 s, x64 31 s
+darwin	C1	C1-8	6	internal/saferio	35	darwin run 40228938914: arm64 18 s, x64 35 s
+darwin	C1	C1-8	7	internal/singleflight	48	darwin run 40228938914: arm64 38 s, x64 48 s
+darwin	C1	C1-8	8	internal/strconv	219	darwin run 40234478644: arm64 126 s, x64 219 s
+darwin	C1	C1-8	9	internal/sync	70	darwin run 40228938914: arm64 37 s, x64 70 s
+darwin	C1	C1-8	10	internal/synctest	110	darwin run 40228938914: arm64 52 s, x64 110 s
+darwin	C1	C1-8	11	internal/syscall/unix	32	darwin run 40228938914: arm64 21 s, x64 32 s
+darwin	C1	C1-8	12	internal/sysinfo	29	darwin run 40228938914: arm64 17 s, x64 29 s
+darwin	C1	C1-8	13	internal/testenv	32	darwin run 40228938914: arm64 23 s, x64 32 s
+darwin	C1	C1-8	14	internal/trace	322	darwin run 40228938914: arm64 318 s, x64 322 s
+darwin	C1	C1-8	15	internal/trace/internal/tracev1	28	darwin run 40228938914: arm64 20 s, x64 28 s
+darwin	C1	C1-8	16	internal/trace/testtrace	28	darwin run 40228938914: arm64 26 s, x64 28 s
+darwin	C1	C1-8	17	internal/trace/tracev2	21	darwin run 40228938914: arm64 20 s, x64 21 s
+darwin	C1	C1-8	18	internal/types/errors	120	darwin run 40228938914: arm64 73 s, x64 120 s
+darwin	C1	C1-8	19	internal/unsafeheader	22	darwin run 40228938914: arm64 16 s, x64 22 s
+darwin	C1	C1-9	1	internal/xcoff	857	darwin run 40227642718: arm64 245 s, x64 857 s
+darwin	C1	C1-9	2	internal/zstd	66	darwin run 40234478644: arm64 26 s, x64 66 s
+darwin	C1	C1-9	3	io	68	darwin run 40233503315: arm64 52 s, x64 68 s
+darwin	C1	C1-9	4	io/fs	95	darwin run 40227642718: arm64 42 s, x64 95 s
+darwin	C1	C1-9	5	io/ioutil	46	darwin run 40227642718: arm64 21 s, x64 46 s
+darwin	C1	C1-9	6	iter	43	darwin run 40227642718: arm64 19 s, x64 43 s
+darwin	C1	C1-9	7	log	54	darwin run 40233520305: arm64 29 s, x64 54 s
+darwin	C1	C1-9	8	log/slog	559	no darwin wall: estimated as the linux cloud wall (cloud P1-R)
+darwin	C1	C1-9	9	log/slog/internal/benchmarks	72	darwin run 40227642718: arm64 29 s, x64 72 s
+darwin	C1	C1-9	10	log/slog/internal/buffer	26	darwin run 40233520305: arm64 15 s, x64 26 s
+darwin	C1	C1-9	11	maps	42	darwin run 40227642718: arm64 21 s, x64 42 s
+darwin	C1	C1-9	12	math	70	darwin run 40227642718: arm64 31 s, x64 70 s
+darwin	C1	C1-9	13	math/big	141	darwin run 40246104125: arm64 101 s, x64 141 s
+darwin	C1	C1-9	14	math/big/internal/asmgen	46	darwin run 40227642718: arm64 25 s, x64 46 s
+darwin	C1	C1-9	15	math/bits	53	darwin run 40227642718: arm64 28 s, x64 53 s
+darwin	C1	C1-9	16	math/cmplx	39	darwin run 40227642718: arm64 21 s, x64 39 s
+darwin	C1	C1-9	17	math/rand	67	darwin run 40227642718: arm64 43 s, x64 67 s
+darwin	C1	C1-9	18	math/rand/v2	143	darwin run 40227642718: arm64 53 s, x64 143 s
+darwin	C1	C1-9	19	mime	27	darwin run 40233520305: arm64 16 s, x64 27 s
+darwin	C1	C1-10	1	mime/multipart	108	darwin run 40227642718: arm64 67 s, x64 108 s
+darwin	C1	C1-10	2	mime/quotedprintable	545	darwin run 40218859736: arm64 158 s, x64 545 s
+darwin	C1	C1-10	3	net/http	683	darwin run 40218859736: arm64 280 s, x64 683 s
+darwin	C1	C1-10	4	net/http/cgi	855	darwin run 40246104125: arm64 444 s, x64 855 s
+darwin	C1	C1-10	5	net/http/cookiejar	71	darwin run 40218859736: arm64 36 s, x64 71 s
+darwin	C1	C1-10	6	net/http/fcgi	71	darwin run 40218859736: arm64 33 s, x64 71 s
+darwin	C1	C1-10	7	net/http/httptest	78	darwin run 40218859736: arm64 35 s, x64 78 s
+darwin	C1	C1-10	8	net/http/httptrace	57	darwin run 40218859736: arm64 29 s, x64 57 s
+darwin	C1	C1-10	9	net/http/httputil	77	darwin run 40218859736: arm64 45 s, x64 77 s
+darwin	C1	C1-10	10	net/http/internal	33	darwin run 40233520305: arm64 21 s, x64 33 s
+darwin	C1	C1-10	11	net/http/internal/ascii	31	darwin run 40218859736: arm64 13 s, x64 31 s
+darwin	C1	C1-10	12	net/http/pprof	647	darwin run 40273051935: arm64 368 s, x64 647 s
+darwin	C1	C1-10	13	net/mail	33	darwin run 40218859736: arm64 17 s, x64 33 s
+darwin	C1	C1-10	14	net/netip	96	darwin run 40233520305: arm64 61 s, x64 96 s
+darwin	C1	C1-10	15	net/rpc	99	darwin run 40218859736: arm64 39 s, x64 99 s
+darwin	C1	C1-10	16	net/rpc/jsonrpc	73	darwin run 40218859736: arm64 37 s, x64 73 s
+darwin	C1	C1-10	17	net/smtp	69	darwin run 40218859736: arm64 32 s, x64 69 s
+darwin	C1	C1-10	18	net/textproto	32	darwin run 40218859736: arm64 15 s, x64 32 s
+darwin	C1	C1-10	19	net/url	35	darwin run 40218859736: arm64 18 s, x64 35 s
+darwin	C1	C1-11	1	os	583	darwin run 40238984896: arm64 308 s, x64 583 s
+darwin	C1	C1-11	2	os/exec	1243	darwin run 40220248613: arm64 387 s, x64 1243 s
+darwin	C1	C1-11	3	os/exec/internal/fdtest	49	darwin run 40220248613: arm64 22 s, x64 49 s
+darwin	C1	C1-11	4	os/signal	106	darwin run 40238984896: arm64 65 s, x64 106 s
+darwin	C1	C1-11	5	os/user	37	darwin run 40220248613: arm64 25 s, x64 37 s
+darwin	C1	C1-11	6	path	38	darwin run 40220248613: arm64 28 s, x64 38 s
+darwin	C1	C1-11	7	path/filepath	56	darwin run 40220248613: arm64 35 s, x64 56 s
+darwin	C1	C1-11	8	plugin	58	darwin run 40220248613: arm64 24 s, x64 58 s
+darwin	C1	C1-11	9	reflect	217	darwin run 40234478644: arm64 91 s, x64 217 s
+darwin	C1	C1-11	10	regexp	201	darwin run 40220248613: arm64 113 s, x64 201 s
+darwin	C1	C1-11	11	regexp/syntax	48	darwin run 40220248613: arm64 28 s, x64 48 s
+darwin	C1	C1-11	12	runtime/debug	52	darwin run 40220248613: arm64 24 s, x64 52 s
+darwin	C1	C1-11	13	runtime/metrics	87	darwin run 40220248613: arm64 32 s, x64 87 s
+darwin	C1	C1-11	14	runtime/pprof	1209	darwin run 40273051935: arm64 1208 s, x64 1209 s
+darwin	C1	C1-11	15	runtime/trace	89	darwin run 40220248613: arm64 46 s, x64 89 s
+darwin	C1	C1-11	16	slices	35	darwin run 40234478644: arm64 25 s, x64 35 s
+darwin	C1	C1-11	17	sort	63	darwin run 40220248613: arm64 32 s, x64 63 s
+darwin	C1	C1-11	18	strconv	40	darwin run 40233503315: arm64 27 s, x64 40 s
+darwin	C1	C1-11	19	strings	76	darwin run 40233503315: arm64 57 s, x64 76 s
+darwin	C1	C1-12	1	sync	78	darwin run 40233503315: arm64 78 s, x64 72 s
+darwin	C1	C1-12	2	syscall	759	darwin run 40252700084: arm64 249 s, x64 759 s
+darwin	C1	C1-12	3	testing/cryptotest	80	darwin run 40227504052: arm64 73 s, x64 80 s
+darwin	C1	C1-12	4	testing/fstest	41	darwin run 40227504052: arm64 41 s, x64 41 s
+darwin	C1	C1-12	5	testing/iotest	31	darwin run 40227504052: arm64 31 s, x64 27 s
+darwin	C1	C1-12	6	testing/quick	33	darwin run 40227504052: arm64 33 s, x64 30 s
+darwin	C1	C1-12	7	testing/slogtest	41	darwin run 40227504052: arm64 41 s, x64 39 s
+darwin	C1	C1-12	8	testing/synctest	206	darwin run 40227504052: arm64 191 s, x64 206 s
+darwin	C1	C1-12	9	text/scanner	28	darwin run 40227504052: arm64 26 s, x64 28 s
+darwin	C1	C1-12	10	text/tabwriter	27	darwin run 40227504052: arm64 27 s, x64 27 s
+darwin	C1	C1-12	11	text/template	54	darwin run 40227504052: arm64 44 s, x64 54 s
+darwin	C1	C1-12	12	text/template/parse	34	darwin run 40227504052: arm64 23 s, x64 34 s
+darwin	C1	C1-12	13	time	424	darwin run 40227504052: arm64 332 s, x64 424 s
+darwin	C1	C1-12	14	unicode	27	darwin run 40227504052: arm64 26 s, x64 27 s
+darwin	C1	C1-12	15	unicode/utf16	25	darwin run 40233485715: arm64 14 s, x64 25 s
+darwin	C1	C1-12	16	unicode/utf8	25	darwin run 40233485715: arm64 15 s, x64 25 s
+darwin	C1	C1-12	17	unique	47	darwin run 40227504052: arm64 36 s, x64 47 s
+darwin	C1	C1-12	18	weak	23	darwin run 40227504052: arm64 17 s, x64 23 s
+darwin	C1	C1-12	19	testing	101	darwin run 40400361240: arm64 71 s, x64 101 s
+darwin	C1	C1-13	1	runtime	5811	darwin run 40273113850: arm64 2564 s, x64 5811 s
+darwin	C1	C1-14	1	sync/atomic	1115	darwin run 40273013193: arm64 1008 s, x64 1115 s
+darwin	C1	C1-15	1	net	2302	darwin run 40279373649: arm64 616 s, x64 2302 s
