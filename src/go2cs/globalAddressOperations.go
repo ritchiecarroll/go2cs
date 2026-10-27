@@ -407,7 +407,24 @@ func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool 
 		}
 	}
 
+	for key := range externalStorageVars {
+		if name, ok := strings.CutPrefix(key, prefix); ok && !strings.Contains(name, ".") {
+			forwards[name] = true
+		}
+	}
+
 	return forwards
+}
+
+// externalStorageVars names the exported value-kind vars whose declaration is DISPLACED into a hand-owned
+// companion that keeps their storage somewhere other than a field of their own, so no `Ꮡ<name>` box exists for
+// an importer to bind. They are treated as forwards: never boxed, so `&pkg.V` keeps the copy form (a stated
+// limitation) rather than naming a missing member (CS0117). TestDisplacedExportedVarsAreBoxedOrRegistered
+// re-derives the displaced set from the corpus's placeholders, so a new one cannot go unanswered.
+var externalStorageVars = map[string]string{
+	// runtime/mprof_impl.cs: `public static ref nint MemProfileRate => ref GoMemProfile.Rate;`. The storage is
+	// golib's GoMemProfile.Rate, read on every charged allocation; boxing it would put a box read on that path.
+	"runtime.MemProfileRate": "golib GoMemProfile.Rate",
 }
 
 // typeHasBoxOnlyPointerMethod reports whether *T's method set carries a method the emission gives

@@ -18,6 +18,7 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -164,4 +165,98 @@ func TestExportedValueVarIsBoxedAcrossPackages(t *testing.T) {
 	if strings.Contains(main, "ᏑDebug") {
 		t.Errorf("package main's capitalized var is boxed; nothing can import it:\n%s", main)
 	}
+}
+
+// displacedVarPlaceholder matches the placeholder the converter writes where a var's declaration is displaced into a
+// hand-owned companion, capturing the var's name.
+var displacedVarPlaceholder = regexp.MustCompile(`go2cs generated this placeholder — var ([\p{L}_][\p{L}\p{N}_]*) is hand-converted`)
+
+// TestDisplacedExportedVarsAreBoxedOrRegistered closes the gap the hand-own parity guard (repoguard) cannot see:
+// an exported var whose declaration is DISPLACED into a hand-owned companion has no `.cs.auto` twin to compare.
+// The owner predicate boxes it all the same, so every importer would bind `pkg.ᏑV`. Each displaced exported var
+// must therefore be either boxed by a hand-owned file of its package (it declares `Ꮡ<name>`), or registered in
+// externalStorageVars, which keeps it unboxed on both sides. Measured at the seat: runtime.MemProfileRate, whose
+// storage is golib's GoMemProfile.Rate, the only one in the corpus.
+func TestDisplacedExportedVarsAreBoxedOrRegistered(t *testing.T) {
+	core := filepath.Join(repoRootFromPackageDir(t), "src", "core")
+	found := 0
+
+	err := filepath.WalkDir(core, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".cs") {
+			return err
+		}
+
+		data, err := os.ReadFile(path)
+
+		if err != nil {
+			return err
+		}
+
+		for _, m := range displacedVarPlaceholder.FindAllStringSubmatch(string(data), -1) {
+			name := m[1]
+
+			if first := []rune(name)[0]; first < 'A' || first > 'Z' {
+				continue
+			}
+
+			found++
+			pkgDir := filepath.Dir(path)
+
+			if base := filepath.Base(pkgDir); base == "windows" || base == "linux" || base == "darwin" {
+				pkgDir = filepath.Dir(pkgDir)
+			}
+
+			rel, _ := filepath.Rel(core, pkgDir)
+			key := filepath.ToSlash(rel) + "." + name
+
+			if _, registered := externalStorageVars[key]; registered {
+				continue
+			}
+
+			if !packageDeclaresBox(t, pkgDir, name) {
+				t.Errorf("%s: exported var %s is displaced into a hand-owned companion that declares no %s%s; box it there, or register it in externalStorageVars (an importer's &%s would otherwise name a missing member, CS0117)",
+					path, name, AddressPrefix, name, key)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("walking %s: %v", core, err)
+	}
+
+	if found == 0 {
+		t.Fatal("no displaced exported var found under src/core: wrong root, or the placeholder wording moved (runtime.MemProfileRate is one)")
+	}
+
+	for key := range externalStorageVars {
+		pkgPath, name, _ := strings.Cut(key, ".")
+		pkgDir := filepath.Join(core, filepath.FromSlash(pkgPath))
+
+		if packageDeclaresBox(t, pkgDir, name) {
+			t.Errorf("externalStorageVars registers %s, but its package declares %s%s: the registry would hide a real box", key, AddressPrefix, name)
+		}
+	}
+}
+
+func packageDeclaresBox(t *testing.T, pkgDir, name string) bool {
+	t.Helper()
+	decl := regexp.MustCompile(`static\s+(?:readonly\s+)?(?:ж|StaticBox|StandardBox)<.+>\s+` + regexp.QuoteMeta(AddressPrefix+name) + `\b`)
+
+	for _, dir := range []string{pkgDir, filepath.Join(pkgDir, "windows"), filepath.Join(pkgDir, "linux"), filepath.Join(pkgDir, "darwin")} {
+		entries, _ := os.ReadDir(dir)
+
+		for _, e := range entries {
+			if e.IsDir() || !strings.HasSuffix(e.Name(), ".cs") {
+				continue
+			}
+
+			if data, err := os.ReadFile(filepath.Join(dir, e.Name())); err == nil && decl.Match(data) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
