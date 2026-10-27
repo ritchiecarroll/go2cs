@@ -101,6 +101,8 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunCrossgen2ExtraArgs>--enable-generic-cycle-detection</PublishReadyToRunCrossgen2ExtraArgs>
   </PropertyGroup>
 
   <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are

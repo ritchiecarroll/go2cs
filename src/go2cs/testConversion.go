@@ -345,7 +345,9 @@ func testCpuProfilerProperty(importPath string) string {
 // --enable-generic-cycle-detection: without it crossgen2 expands golib's nested array generics
 // (array<array<array<array<runtime.siginfo>>>>.ΔClone) until it runs out of memory, measured at 893 s.
 // A method past the cut-off is not precompiled and JITs at run time, so the flag cannot change behavior.
-var readyToRunTestPackages = map[string]bool{}
+var readyToRunTestPackages = map[string]bool{
+	"crypto/tls": true,
+}
 
 // testReadyToRunProperty is the test csproj's ReadyToRun property lines for importPath, or "". They sit in
 // the publish-only property group, so an ordinary build of the test project is unchanged.

@@ -96,8 +96,7 @@
        framework-dependent shape; the RID is the HOST's own (the pipeline runs and relocates the
        host on the machine that published it — Windows and Linux flavors each publish theirs).
        Trimming stays OFF: the host's reflection surface (GoReflect, the witness tables) does not
-       trim, per the perf tree's TrimMode lessons. A host whose start-up cost decides its row is
-       also published ReadyToRun (readyToRunTestPackages, testConversion.go). -->
+       trim, per the perf tree's TrimMode lessons. -->
   <PropertyGroup Condition="'$(_IsPublishing)'=='true'">
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
