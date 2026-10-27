@@ -204,10 +204,10 @@ What to notice:
   behaves as Go's does ([Built-in Functions](#built-in-functions)).
 
 **The glyphs, in brief.** The glyphs are Unicode letters, not operators, so C# accepts them in names;
-`goǃ`, for example, ends in a letter that only looks like `!`. `ж<T>` is a pointer type, `Ꮡ` takes an
-address, and `~p` reads through a pointer with golib's `~` operator on `ж<T>`. A `Δ` marks a renamed
-name, such as `xΔ1` for a shadowing variable, and `@` escapes a C# keyword. `ꟷ` picks the comma-ok form of
-a map index or channel receive, and `ᐧ` does the same for a type assertion.
+`goǃ`, for example, ends in the Latin letter U+01C3, which most fonts draw like an exclamation mark.
+`ж<T>` is a pointer type, `Ꮡ` takes an address, and `~p` reads through a pointer with golib's `~` operator
+on `ж<T>`. A `Δ` marks a renamed name, such as `xΔ1` for a shadowing variable, and `@` escapes a C# keyword.
+`ꟷ` picks the comma-ok form of a map index or channel receive, and `ᐧ` does the same for a type assertion.
 
 `ᒐ` is the frame that runs a function's deferred calls, and `goǃ` starts a goroutine. `ᐸꟷ`, drawn to look
 like Go's `<-`, sends to or receives from a channel. `ˢ` marks a string literal stored once.
@@ -578,8 +578,9 @@ the section that explains it.
 | `defer`, `panic`, `recover` | `defer`, `panic`, `recover` in `builtin` | [Defer / Panic / Recover](#defer--panic--recover) |
 | `go f(x)` | `goǃ(f, x)` in `builtin` | [Goroutines](#goroutines) |
 
-The `ǃ` in `goǃ` is a letter that looks like `!`. It keeps the method's name apart from `go`, the C#
-namespace every converted file lives in.
+The last character of `goǃ` is not an exclamation mark. It is the Latin letter U+01C3, which most fonts draw
+the same way, and C# accepts a letter in a name. It keeps the method's name apart from `go`, the C# namespace
+every converted file lives in.
 
 **A small program shows golib at work.** This Go program makes a buffered channel and prints its length
 and capacity:
@@ -8368,9 +8369,9 @@ The Reference states it: manual-conversions.md, "A panic raised inside an INLINE
 
 Go's `go` statement becomes a call to `goǃ`, a function in [golib](#the-golib-runtime-library), the
 runtime library every converted program uses ([`goǃ`](../src/core/golib/builtin.GoroutineLaunchers.cs)).
-`goǃ` runs the call on a new goroutine. The `ǃ` that ends the name is a letter that looks like `!`. It keeps
-the method's name apart from `go`, the C# namespace every converted file lives in
-([glyphs](#reading-converted-code-names-and-glyphs)).
+`goǃ` runs the call on a new goroutine. The name's last character is not an exclamation mark: it is the Latin
+letter U+01C3, which most fonts draw the same way. That letter keeps the method's name apart from `go`, the C#
+namespace every converted file lives in ([glyphs](#reading-converted-code-names-and-glyphs)).
 
 Each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
 from Go, and the last part of this section explains what it means for a program.
