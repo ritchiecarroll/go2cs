@@ -10423,8 +10423,10 @@ At a glance:
 
 <!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#4ee3a3 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:22#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); IncDecPointerField/main.cs.target:30#e38e4f ((~@base).n) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and SlicePointerIdentity/main.cs.target:34#d37652 (.at<nint>(1)); PointerToPointer.cs.target:47#8e2aa1 (Ꮡb.of(Buffer.Ꮡoff)). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:826#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:120-134#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#09daa8; `return nil` -> `return default!`: same file :20#8d5fe3 -->
 
-**An address-taken local has two names for one storage.** Go moves a local to the heap when its address
-may outlive the function. A C# `ref` local cannot do that, so golib's `heap(…)` allocates the local in a box.
+**An address-taken local has two names for one storage.** A converted Go pointer is a `ж<T>`
+box, a heap object, and a heap object cannot point at a C# local. So when Go takes a local's address, golib's
+`heap(…)` allocates the local in a box, whether or not Go would move it to the heap. The exception, an
+address that only feeds a `ref T` parameter, comes later in this section.
 `a` is a C# `ref` alias for ordinary reads and writes, and `Ꮡa` is the box, used wherever Go writes `&a`:
 
 <!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.go:17-29 -->
@@ -10466,13 +10468,14 @@ names.
 to a pointer is a box that holds a box. Go's `int` is `nint`
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 
-A local that a closure, a `go` statement or a `defer` statement shares with its caller can also get this
-form, so both sides see one variable. [Function Values and Closures](#function-values-and-closures)
+A local that a closure, a `go` statement or a `defer` statement shares with the function that declares
+the local can also get this form, so both sides see one variable. [Function Values and Closures](#function-values-and-closures)
 covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1155, 1162#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1139-1141 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2845-2854#4ff829); go/defer arms: escapeAnalysisOperations.go:994, 1038#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2102-2107#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2166-2174, 1982-1996#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:167#5420af. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:19-23 (`ref var t = ref heap<Tally>(out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:38-42 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:215-220 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:343#ca6b44. heap overloads: src/core/golib/builtin.cs:2858#f029f1 (zero value) and :2884#d2c34a (starting value). -->
 
 A package-level variable whose address is taken is declared the same way, as a static box `ᏑX` and a `ref`
 property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` that reads and writes through it, so `&X` is `ᏑX`. Every exported
-variable of a value type is declared so too, because another package may take its address. When go2cs builds the
+variable outside `package main` that is not a pointer or an interface is declared so too, because another
+package may take its address. When go2cs builds the
 variable on its first read instead of at startup, the `[GoLazy]` holder class that builds it holds the box,
 and `&X` names the same box before and after that read
 ([Package-Level Variable Initialization Order](#package-level-variable-initialization-order)).
@@ -10665,7 +10668,7 @@ For a nil box, `DerefOrNull()` returns an empty C# `ref` instead of failing. So 
 its first line, and panics with Go's nil-dereference message at `p.name`, just where Go does.
 [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) has more on the alias. <!-- DerefOrNull returns Unsafe.NullRef<T>() for a nil box: src/core/golib/ж.PointerExtensions.cs:610#cf53a4; the NullReferenceException at first use maps to "invalid memory address or nil pointer dereference". box-only parameter, no alias: src/tests/Behavioral/IncDecPointerField/main.cs.target:17-19#18cbb1 -->
 
-**An unexported package-level function that only dereferences a pointer parameter takes `ref T`.** A C#
+**An unexported package-level function that only dereferences a pointer parameter usually takes `ref T`.** A C#
 `ref` parameter needs no box. Every caller of an unexported function is in the same package, so every call
 site can change with it: `&x` becomes `ref x`. A local whose address only feeds such calls stays a plain
 local:
@@ -10696,9 +10699,9 @@ internal static void addTo(ref uint64 @out, uint64 v) {
 `@out` is Go's `out`, escaped because it is a C# keyword. `"total:"` stays a plain C# literal, which
 go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
-A `defer` or `go` call to such a function works too. The statement stores the address as a box when it
-runs, and turns it into a `ref` only when the call itself runs, so the call sees the variable's latest value
-([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#e2705b; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
+A `defer` or `go` call to such a function works too. Its arguments are stored until the call runs, and C# cannot
+store a `ref`, so the statement stores the address as a box when it runs and turns it into a `ref` only when
+the call itself runs ([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#e2705b; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter
@@ -10755,8 +10758,8 @@ field reference the generator adds to the struct. `bump` only dereferences its p
 `ref int32`. `nonnil(ref c)` is golib's nil check on the alias: if the receiver is nil, it raises Go's nil
 panic at `&c.n`, where Go raises it.
 
-The caller's `var c Counter` is a value, and Go takes `&c` to call `Set` and `Add`. So `c` lives in a box, and
-the calls go through `Ꮡc`, while `c.Get()` uses the `ref` alias:
+The caller's `var c Counter` is a value. Go takes `&c` for all three calls, but only `Set` and `Add` take the box,
+so `c` lives in a box, those calls go through `Ꮡc`, and `c.Get()` uses the `ref` alias:
 
 <!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.go:20-27 -->
 ```go
@@ -10918,8 +10921,8 @@ Either way the body reads like Go. [Pointers](#pointers) explains when each form
 
 **A pointer local reads through `~` and writes through `.Value`.** A local that holds a pointer is the box
 itself, so it keeps its plain Go name; there is no `ref` alias to take that name. A read uses `~p`, which
-returns a copy of the value. A write, `++` or `--` goes through `p.Value` instead, because a write to a
-copy would be lost.
+returns a copy of the value, because a C# operator cannot return a `ref`. A write, `++` or `--` goes through
+`p.Value` instead, a `ref` to the real storage, because C# rejects a write into the copy.
 
 This complete program shows both. `Ꮡ(new counter(n: 5))` is Go's `&counter{n: 5}`: `new counter(n: 5)`
 builds the struct value ([Struct Types](#struct-types)), and `Ꮡ(…)` boxes it.
@@ -11145,8 +11148,8 @@ keyword. The [glyph table](#reading-converted-code-names-and-glyphs) lists every
 
 Go's garbage collector does not move heap objects, and the CLR's does. So an address only means
 something in C# while its storage is held still, or "pinned". The CLR can pin a value only when it holds
-no managed references: no strings, slices, maps, interfaces or pointers inside. The rules below say when
-pinning happens, and what a value that cannot be pinned gets instead.
+no managed references: no strings, slices, maps, channels, funcs, interfaces or pointers inside, and no Go
+array fields, because golib's Go array wraps a .NET array. The rules below say when pinning happens, and what a value that cannot be pinned gets instead.
 
 **`Sizeof`, `Alignof` and `Offsetof` fold to Go's numbers.** The converter computes each one from Go's
 layout rules and writes the number into the C#. The Go expression stays beside it as a comment:
@@ -11181,12 +11184,12 @@ Go's for the target architecture, here amd64.
 <!-- main_x declaration: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:58-62 (`internal partial struct main_x /*dyn*/`). Go computes all three at compile time from the static type: UnsafeOperations.go:137-139#6850c9 (comment); the non-blittable Padded case at UnsafeOperations.go:28-40#04effb -> cs.target:124#c89709. -->
 
 These are Go's numbers, not measurements of the C# struct. Adding them to a real address is meant for
-storage laid out like Go's, such as an array of numbers. A struct that holds strings, slices or pointers
-has no address at all in C#, so its pointers get order tokens (the order-token rule in this section).
+storage laid out like Go's, such as an array of numbers. A struct that holds a managed reference
+cannot be pinned, and the CLR lays it out in its own order, so its pointers get order tokens (the order-token rule in this section).
 <!-- the layout question: the CLR lays out a C# struct of unmanaged fields sequentially (the C# default for structs; go2cs adds no StructLayout), while a reference-bearing struct is CLR auto-layout and gets PointerStorage.None (src/core/golib/ж.StandardBox.cs:203#4b2f08). src/core/golib/runtime/RuntimeErrorPanic.cs:50-60#d0188e (remarks) records that a Go-layout offset into a CLR-auto-laid-out struct is refused loudly rather than answered. -->
 
 **Converting a pointer to `uintptr` gives a real address**, when the value it points to holds no
-strings, slices or pointers (for one that does, see the order-token rule in this section). Go's idiom
+managed reference (for one that does, see the order-token rule in this section). Go's idiom
 `uintptr(unsafe.Pointer(p))` becomes a plain `(uintptr)` cast of the pointer's box `Ꮡp`. The
 `unsafe.Pointer` step in the middle leaves no trace in the C#. The cast pins the storage for as long as
 the box lives, so the number stays valid. A nil pointer gives `0`, as in Go:
@@ -11258,7 +11261,7 @@ storage from its address. As in Go, a number alone does not keep its object aliv
 `arr` is still in use.
 <!-- expected output: src/tests/Behavioral/UnsafeOperations (Go's `go run` output is the behavioral oracle; the second element of [4]int{1, 2, 3, 4}). The reverse conversion `explicit operator ж<T>(uintptr)` at src/core/golib/ж.cs:925#2e8f0c resolves a pinned address through its provenance record, a weak entry that dies with its box (ж.cs:1095#7dae18 comment "the WEAK-ENTRY bound"): a program that drops every reference and converts back later is one Go itself declares invalid. -->
 
-**A pointer to a value that holds strings, slices or pointers gets an order token, not an address.**
+**A pointer to a value that holds a managed reference gets an order token, not an address.**
 The CLR cannot pin such a value, so golib hands out a unique stand-in number instead. A token compares
 and sorts like an address. It converts back to the same pointer while that pointer is still in use, as
 an address does in Go.
@@ -11313,8 +11316,8 @@ exactly two `int32`s apart, and the round trip returns the same number. In the C
 
 **Reading a number's bits as another number is a `bitcast`.** A value pun between two number types,
 such as Go's `math.Float64bits`, becomes golib's [`bitcast<TSrc, TDst>`](../src/core/golib/builtin.cs).
-It copies the bits and boxes nothing. It accepts only plain value types, with no strings, slices or
-pointers inside:
+It copies the bits and boxes nothing. It accepts only plain value types, with no managed reference
+inside:
 
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:57-59 -->
 ```go
@@ -11561,7 +11564,7 @@ public static void PrintValPtr(ж<nint> Ꮡptr) {
 
 Reading the C# line by line:
 
-- Go takes the address of `b.off`, so `b` must live on the heap. golib's `heap(…)` allocates a box
+- Go takes the address of `b.off`, so `b` needs a box. golib's `heap(…)` allocates a box
   `Ꮡb` (a `ж<Buffer>`), and `b` is a C# `ref` to the value inside it ([Pointers](#pointers)).
 - `new Buffer(nil)` is a generated constructor. Passing golib's `nil` asks for the zero value, as Go's
   `Buffer{}` does. Unlike C#'s `default`, it also allocates what a Go zero value needs, such as the
@@ -11804,8 +11807,9 @@ Only `*Setting` has the `Describe` method, so `package_info.cs` records the pair
 From that attribute, `ImplementGenerator` emits the adapter class `SettingжDescriber`. The name reads
 "`Setting` pointer (`ж`) as `Describer`": the class holds the `ж<Setting>` box and implements `Describer`
 by calling `Describe` on it. Go's `h.d = s` becomes `h.d = new SettingжDescriber(Ꮡs)`. When a value
-receiver provides the methods, the record has no `Pointer = true`, and the struct itself implements the
-interface. [Interfaces](#interfaces) covers both forms, and how equality and type assertions see
+receiver provides the methods, the record has no `Pointer = true`, and a struct of the same package implements
+the interface itself. A named func type, or a struct from another package, goes in through a value adapter
+such as `meterᴠvalued`. [Interfaces](#interfaces) covers these forms, and how equality and type assertions see
 through an adapter.
 
 The two pointer parameters take different shapes, depending on how the body uses them:
@@ -11845,11 +11849,12 @@ A program whose lookups never miss runs none of them, so under the JIT less code
 
 Go lets a function be declared with no body: only a signature, with the code kept somewhere else. The
 body may be assembly (a `.s` file), a C function, or another package's function joined by the
-`//go:linkname` directive. C# has no bodyless function, but it has a close match: a `partial` method,
+`//go:linkname` directive. The closest C# match is a `partial` method,
 a declaration whose body another part of the same class supplies.
 
 So go2cs keeps each bodyless Go function's name and signature. By default it emits a C# `partial` method,
-but when it can write the body itself it emits an ordinary method instead. The body arrives in one of
+with no body. A forwarder the converter writes stays a `partial` method, with that body; a body that raises a
+panic is written as an ordinary method. The body arrives in one of
 these ways:
 
 - a hand-written companion file supplies it;
@@ -11910,8 +11915,9 @@ public static float64 Max(float64 x, float64 y) {
 }
 ```
 
-**A hand-written companion supplies the body.** C# does not compile a `partial` method that no part
-implements. For `archMax`, a hand-written file named `math_impl.cs` sits beside the converted files and
+**A hand-written companion supplies the body.** C# does not compile a `partial` method that has an
+access modifier, such as `internal` here, until some part implements it. For `archMax`, a hand-written file
+named `math_impl.cs` sits beside the converted files and
 supplies the implementing half. It calls `max`, the same portable Go fallback `math.Max` uses. The file
 fills `archMin` and the other `arch…` functions the same way:
 
@@ -12097,9 +12103,13 @@ list built into the converter, so it covers only the standard library.
 inside an integer, reads an interface's internal machine words through `unsafe.Pointer`, calls a scheduler
 primitive, or is written in assembly. On .NET, an [`any`](#empty-interface-any) is one object reference,
 with no separate words to read. A Go pointer's target lives in a `ж<T>`, golib's heap box for a pointed-to
-value; see [Pointers](#pointers). The .NET garbage collector can move or free that box. If Go code hid its
-address inside an integer, the collector could not see it, so such code cannot be converted mechanically.
-The hand-written C# keeps Go's observable behavior and drops Go's mechanism.
+value; see [Pointers](#pointers). The .NET garbage collector can move that box, and golib can pin it only
+when its value holds no managed reference ([`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr)). Go code that
+keeps an address in an integer and compares it later, as `sync.Cond`'s copy check does, could then see a stale
+number, so that code is written by hand.
+The hand-written C# keeps Go's observable behavior and drops Go's mechanism. A few hot functions, such as
+`math/bits`' `Mul`, are hand-owned for speed instead: Go's compiler replaces each call with a few machine
+instructions, and the converted body is slower.
 
 Hand ownership comes in two sizes: a whole file, or a single declaration.
 
@@ -12404,8 +12414,8 @@ internal static void block(ref Digest dig, slice<byte> p) {
 } // end sha256_package
 ```
 
-**The same choice holds on every target.** The tag is part of the conversion, so every converted platform
-runs the same portable code. The pure-Go path is usually slower than Go's hand-tuned assembly. It is the
+**The same choice holds on every target.** The tag is part of the conversion, so wherever Go has a `purego`
+path, every converted platform runs that same portable code. The pure-Go path is usually slower than Go's hand-tuned assembly. It is the
 path go2cs can convert and run.
 
 **The default is two tags: `purego` and `math/big`'s own `math_big_pure_go`.** These are options of the
