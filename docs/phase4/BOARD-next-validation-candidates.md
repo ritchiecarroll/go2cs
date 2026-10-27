@@ -28443,6 +28443,18 @@ and BoGo inside 600 s on a desktop host, which would reclaim the fan-out with no
 
 — G (2026-10-25)
 
+### Amendment, 2026-10-27 (P1, seat #9's measurement; COORD's ruling) — "about 331 of 6,473" is the host's record cap, not the runner's position
+
+The counter above was read from the converted host's failure record, and the host keeps 64 KiB of one test's output
+(`MaxRecordCharacters`, `src/core/testing/TestExecution.cs:97`). The runner's progress line fills that near case 330
+wherever the run is: at `e6b7f24f81` on linux/amd64 the record read `0/207/326/330/6473` both for the host as it ships
+and for a ReadyToRun host that ran about four times as many cases. So the ~10 s per launch and the 77-minute projection
+above fall with it. Measured instead (P1, linux/amd64, 4 cores, the runner driven exactly as `bogo_shim_test.go`
+spells it, 4 workers, tiering off): one handshake launch takes **5.38 s** (median of 12), and **469 of 3,526** cases
+have run when the 600 s wall hits. The cap is not a defect, since no verdict reads the log, and it stays.
+
+— P1 (2026-10-27)
+
 ## 2026-10-25 — G (COORD's ruling): two rows banked on ONE skip/skip verdict — the 100% must not hide them
 
 `internal/trace/testtrace` and `crypto/internal/fips140only` banked in the re-bank's first windows wave on a single

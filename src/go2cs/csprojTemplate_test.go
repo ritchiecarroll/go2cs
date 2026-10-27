@@ -12,8 +12,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -187,6 +190,12 @@ func TestCsprojTemplateWithFriendAssemblyAccessEmitsWellFormedXml(t *testing.T) 
 // renderTestCsprojTemplate applies the same marker substitution writeTestProject (testConversion.go)
 // does, so what is validated is what actually reaches disk.
 func renderTestCsprojTemplate() string {
+	return renderTestCsprojTemplateFor("runtime/pprof")
+}
+
+// renderTestCsprojTemplateFor renders the template as importPath's test project, with that package's
+// per-package opt-ins.
+func renderTestCsprojTemplateFor(importPath string) string {
 	contents := string(testCsprojTemplate)
 
 	for marker, value := range map[string]string{
@@ -196,7 +205,8 @@ func renderTestCsprojTemplate() string {
 		TestCompileItemsMarker:      "\r\n    <Compile Include=\"value.cs\" />",
 		TestFixtureItemsMarker:      "",
 		TestProjectReferencesMarker: "\r\n    <ProjectReference Include=\"$(go2csPath)core\\testing\\testing.csproj\" />",
-		TestCpuProfilerMarker:       testCpuProfilerProperty("runtime/pprof"),
+		TestCpuProfilerMarker:       testCpuProfilerProperty(importPath),
+		TestReadyToRunMarker:        testReadyToRunProperty(importPath),
 	} {
 		contents = strings.ReplaceAll(contents, marker, value)
 	}
@@ -243,6 +253,81 @@ func TestTestCsprojCpuProfilerOptIn(t *testing.T) {
 
 	if !strings.Contains(contents, "<GoCpuProfiler>true</GoCpuProfiler>") {
 		t.Errorf("the rendered runtime/pprof test csproj does not carry the opt-in property")
+	}
+}
+
+// The ReadyToRun opt-in (seat #9 of the 1.26.10.2 plan): crypto/tls's test host, and no other, is published
+// ReadyToRun with crossgen2's generic-cycle detection, and only by the publish-only property group, so an
+// ordinary build is unchanged. The committed test projects are checked too, since a stale crypto/tls
+// csproj, or the property reaching another host, would publish the wrong shape with this test green.
+func TestTestCsprojReadyToRunOptIn(t *testing.T) {
+	const (
+		readyToRun = "<PublishReadyToRun>true</PublishReadyToRun>"
+		cycleFlag  = "<PublishReadyToRunCrossgen2ExtraArgs>--enable-generic-cycle-detection</PublishReadyToRunCrossgen2ExtraArgs>"
+		publishing = `<PropertyGroup Condition="'$(_IsPublishing)'=='true'">`
+	)
+
+	// publishGroup answers the body of the publish-only property group in a rendered or committed csproj.
+	publishGroup := func(contents string) string {
+		start := strings.Index(contents, publishing)
+		if start < 0 {
+			return ""
+		}
+		end := strings.Index(contents[start:], "</PropertyGroup>")
+		if end < 0 {
+			return ""
+		}
+		return contents[start : start+end]
+	}
+
+	for _, pkg := range []string{"crypto/tls"} {
+		group := publishGroup(renderTestCsprojTemplateFor(pkg))
+		if !strings.Contains(group, readyToRun) || !strings.Contains(group, cycleFlag) {
+			t.Errorf("%s: the test host's publish group must set ReadyToRun with the cycle flag, got %q", pkg, group)
+		}
+	}
+
+	for _, pkg := range []string{"crypto/x509", "net/http", "os/exec", "runtime", "runtime/pprof", "testing", "fmt"} {
+		if got := testReadyToRunProperty(pkg); got != "" {
+			t.Errorf("%s: the test host must NOT be published ReadyToRun, got %q", pkg, got)
+		}
+	}
+
+	core := filepath.Join(repoRootFromPackageDir(t), "src", "core")
+	var carriers []string
+	err := filepath.WalkDir(core, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			if name := entry.Name(); name == "bin" || name == "obj" || name == "Generated" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(entry.Name(), ".tests.csproj") {
+			return nil
+		}
+		content, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		contents := string(content)
+		if strings.Contains(contents, "PublishReadyToRun") {
+			rel, _ := filepath.Rel(core, path)
+			carriers = append(carriers, filepath.ToSlash(rel))
+			if group := publishGroup(contents); !strings.Contains(group, readyToRun) || !strings.Contains(group, cycleFlag) {
+				t.Errorf("%s names ReadyToRun outside its publish group, or without the cycle flag", filepath.ToSlash(rel))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walking %s: %v", core, err)
+	}
+
+	if want := []string{"crypto/tls/crypto.tls.tests.csproj"}; !slices.Equal(carriers, want) {
+		t.Errorf("committed test projects carrying ReadyToRun: %v, want exactly %v", carriers, want)
 	}
 }
 

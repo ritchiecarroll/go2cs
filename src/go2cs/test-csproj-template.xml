@@ -100,7 +100,7 @@
   <PropertyGroup Condition="'$(_IsPublishing)'=='true'">
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
-    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>>>MARKER:TEST_READY_TO_RUN<<
   </PropertyGroup>
 
   <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are
