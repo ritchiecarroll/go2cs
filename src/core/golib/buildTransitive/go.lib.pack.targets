@@ -48,6 +48,32 @@
     <GoLibPackTargetsImported>true</GoLibPackTargetsImported>
   </PropertyGroup>
 
+  <!--
+    EXACT go.* DEPENDENCY VERSIONS. NuGet packs a ProjectReference as a MINIMUM-version dependency
+    (`version="1.26.10.2"` means 1.26.10.2 or later), so a consumer's restore may mix go.* releases: go.flag
+    1.26.10.1 with go.os 1.26.10.2. Within one release line the packages are built and published together, and
+    a later release can change a member's shape. 1.26.10.2 turns every exported value variable into a box and a
+    `ref` property, so an assembly compiled against 1.26.10.1 that reads `os.Args` as a field fails at run time
+    with MissingFieldException. Pinning each project-reference dependency to its exact version (`[1.26.10.2]`)
+    turns that mix into a restore error that names the packages (COORD's ruling on OQ-2,
+    docs/phase4/DESIGN-crosspkg-exported-box.md).
+
+    Only PROJECT references are rewritten. Every go.* package of one release reaches the others that way in the
+    stdlib pack. A PackageReference (a converted module's reference to the published go.* packages) keeps the
+    range its project file states. Set GoExactProjectReferenceVersions=false to pack minimum versions.
+  -->
+  <Target Name="GoExactProjectReferenceVersions"
+          AfterTargets="_GetProjectReferenceVersions"
+          Condition="'$(Product)' == 'go2cs' and '$(GoExactProjectReferenceVersions)' != 'false'">
+    <ItemGroup>
+      <_GoExactProjectReference Include="@(_ProjectReferencesWithVersions)"
+                                ProjectVersion="[%(_ProjectReferencesWithVersions.ProjectVersion)]"
+                                Condition="!$([System.String]::Copy('%(_ProjectReferencesWithVersions.ProjectVersion)').StartsWith('['))" />
+      <_ProjectReferencesWithVersions Remove="@(_GoExactProjectReference)" />
+      <_ProjectReferencesWithVersions Include="@(_GoExactProjectReference)" />
+    </ItemGroup>
+  </Target>
+
   <!-- Before NuGet collects the package's files (_GetPackageFiles gathers every None with Pack=true). -->
   <Target Name="GoWritePackageUsingsProps"
           BeforeTargets="_GetPackageFiles"
