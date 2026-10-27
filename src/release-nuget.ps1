@@ -11,7 +11,9 @@
 
     THE ONLY HUMAN ACTION IS THE PIN. The Smart Card KSP caches a card PIN for the life of the
     process that unlocked it, so the whole package set signs inside ONE `dotnet nuget sign`
-    invocation and the card is unlocked exactly once (measured: 6 packages, one prompt, 9 s).
+    invocation and one prompt unlocks it (measured: 6 packages, one prompt, 9 s). Phase 1b asks
+    once before that, for the go2cs dotnet tool: its Windows executables are Authenticode-signed
+    by one signtool process before they are packed.
 
     SIGNING IS MANDATORY, NOT OPTIONAL. The owner's code-signing certificate is REGISTERED with
     nuget.org (2026-08-24), and registration is an enforcement switch: nuget.org rejects any
@@ -219,6 +221,23 @@ if ($sdk.ExitCode -ne 0) {
 $dotnetPath = (Get-Command dotnet).Source
 Write-Host "  .NET SDK         : $($sdk.Output[-1]) ($dotnetPath; global.json $($sdkWanted.version), rollForward $($sdkWanted.rollForward))"
 
+# Phase 1b cross-compiles the go2cs dotnet tool with the go on PATH, and a go2cs built with any Go other than the
+# release src/go2cs/go.mod names provisions none, so that Go is read here, before anything is bumped. GOTOOLCHAIN
+# is local for the read as for the build: under auto an older go would fetch the named release and answer for it.
+if (-not $ResumePush -and -not $OfflineSigning) {
+    $goWanted = 'go' + (Select-String -Path (Join-Path $SrcRoot 'go2cs/go.mod') -Pattern '^go\s+(\S+)' | Select-Object -First 1).Matches[0].Groups[1].Value
+    $goHave = & {
+        $ErrorActionPreference = 'Continue'
+        $savedToolchain = $env:GOTOOLCHAIN
+        $env:GOTOOLCHAIN = 'local'
+        try { "$(& go env GOVERSION 2>&1 | Select-Object -Last 1)".Trim() } catch { "$_" } finally { $env:GOTOOLCHAIN = $savedToolchain }
+    }
+    if ($goHave -ne $goWanted) {
+        Die "The go on PATH answers '$goHave'; Phase 1b builds the go2cs dotnet tool with $goWanted, the release src/go2cs/go.mod names. Put that Go first on PATH and re-run. Nothing was bumped, tagged, frozen or packed."
+    }
+    Write-Host "  Go (go2cs tool)  : $goHave"
+}
+
 if (-not $env:NuGetCertFingerprint -and -not $OfflineSigning -and -not $ResumePush) {
     Die 'NuGetCertFingerprint is not set. Set it, or pass -OfflineSigning to sign elsewhere.'
 }
@@ -267,6 +286,37 @@ $x = [xml](Get-Content -Raw (Join-Path $SrcRoot 'version.props'))
 $p = $x.Project.PropertyGroup
 $ver = "$($p.GoStdLibVersion).$($p.GoBuildNumber)".Trim()
 Write-Host "  version          : $ver"
+
+# ---- Phase 1b: the go2cs dotnet tool -----------------------------------------------------------
+# Seven more packages for Phase 2 to sign and Phase 3 to push: go2cs.<rid> for the six platforms and the go2cs
+# package that names them (docs/PLAN-dotnet-tool-installer.md, OQ-3). Their binaries are cross-compiled HERE, from
+# this tree, which after Phase 1 is the release's record apart from corpus-release.txt; regenerating that now, as
+# Phase 4 does again for the record commit, makes src/go2cs what the record commit will hold, so each binary
+# reports this release. The Windows executables are Authenticode-signed before packing, by one signtool process:
+# a PIN prompt of its own, ahead of Phase 2's.
+
+$toolPack = Join-Path $PSScriptRoot 'tools/go2cs-tool/pack-go2cs-tool.ps1'
+if ($ResumePush) {
+    # Packed and signed by the run that stopped.
+}
+elseif ($OfflineSigning) {
+    Write-Phase 'Phase 1b: the go2cs dotnet tool is NOT packed (-OfflineSigning)'
+    Write-Host '  Its Windows executables are signed before they are packed, so it is packed where the certificate is:'
+    Write-Host "  on the signing machine, at this tree, run tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the"
+    Write-Host '  copied package folder> before signing; or publish the tool with a later release.'
+}
+else {
+    Write-Phase 'Phase 1b: pack the go2cs dotnet tool (one PIN prompt for its Windows executables)'
+    Push-Location (Join-Path $PSScriptRoot 'go2cs')
+    try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
+    if ($LASTEXITCODE -ne 0) { Die "Phase 1b: regenerating src/go2cs/corpus-release.txt FAILED. Nothing was signed or published. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props, and delete the tag if one was minted." }
+
+    $tool = Invoke-Sibling -Script $toolPack -Arguments @('-Version', $ver, '-OutDir', $OutDir) -Passthru
+    if ($tool.ExitCode -ne 0) {
+        Write-Host ''
+        Die "Phase 1b (go2cs tool) FAILED. Nothing was signed or published. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted."
+    }
+}
 
 # ---- Phase 2: sign ---------------------------------------------------------------------------
 

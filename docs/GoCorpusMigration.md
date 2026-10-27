@@ -4039,8 +4039,18 @@ release published nothing: §2, AMENDED
    $env:GOTOOLCHAIN = 'local'; go version; Remove-Item Env:GOTOOLCHAIN   # the pin itself, not a re-exec
    ```
    Phase 0 refuses a dotnet whose `--version` fails from the repository root, before anything moves, and prints
-   the SDK it resolved. The script has no gate on the Go pin, so `go version` here is the only check of it (the
-   repository root carries no `go.mod`, so `GOTOOLCHAIN=local` reads the bare toolchain).
+   the SDK it resolved. It refuses a go whose `GOVERSION`, read with `GOTOOLCHAIN=local`, is not the release
+   `src/go2cs/go.mod` names, and prints it *(added 2026-10-27, 1.26.10.2 seat #11: Phase 1b builds the go2cs dotnet
+   tool with that Go, and a go2cs built with any other Go downloads none)*; the read-back above stays the
+   operator's own check. <!-- Before 2026-10-27 this read: "The script has no gate on the Go pin, so `go version`
+   here is the only check of it (the repository root carries no `go.mod`, so `GOTOOLCHAIN=local` reads the bare
+   toolchain)." -->
+   **The go2cs dotnet tool** *(added 2026-10-27, 1.26.10.2 seat #11; [PLAN-dotnet-tool-installer.md](PLAN-dotnet-tool-installer.md) §11 OQ-3)*:
+   Phase 1b regenerates `corpus-release.txt` (Phase 4 does again for the record commit), cross-compiles the six
+   `go2cs` binaries from the bumped tree, Authenticode-signs the two Windows executables in one signtool process,
+   which is **a PIN prompt of its own, before Phase 2's**, and packs `go2cs.<rid>` for the six platforms and the
+   `go2cs` package that names them into the artifacts folder. Phase 2 signs them with the `go.*` set; Phase 3
+   pushes `go2cs` last. `-OfflineSigning` packs no tool and says how to pack it on the signing machine.
 4. **To resume a failed Phase 2, NEVER re-run release-nuget** — it re-bumps the version. Run the signer's census,
    then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push. Nothing is re-packed.
 5. **After the publish**, "indexed" means every id in the walkthrough's restore closure is listed — a partial

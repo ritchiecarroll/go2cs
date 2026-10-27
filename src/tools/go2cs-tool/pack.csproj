@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- A stub for `dotnet pack -p:NuspecFile=...`: it builds nothing, and the nuspec decides what each package
+       holds. pack-go2cs-tool.ps1 copies it into a temporary folder, so its restore output never lands here, and
+       passes ToolVersion and ToolRid, which reach the nuspec's $version$ and $rid$ through NuspecProperties (a
+       semicolon inside a -p value on the command line would end it).
+       NU5100: the executables sit under tools/, not lib/, by design. NU5128: a tool package declares no
+       dependency group. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5100;NU5128</NoWarn>
+    <NuspecProperties>version=$(ToolVersion);rid=$(ToolRid)</NuspecProperties>
+  </PropertyGroup>
+
+</Project>

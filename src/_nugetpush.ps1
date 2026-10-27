@@ -30,10 +30,15 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 }
 
-# go.lib and go.gen first: every other package depends on them. nuget.org indexes asynchronously, so the order is a
-# courtesy to anyone restoring mid-publish, not a requirement.
+# go.lib and go.gen first: every other package depends on them. Last, the go2cs dotnet tool's go2cs package
+# (go2cs.<version>.nupkg), after the go2cs.<rid> packages it names. nuget.org indexes asynchronously, so the order is
+# a courtesy to anyone restoring or installing mid-publish, not a requirement.
 function Get-GoNuGetPushOrder([System.IO.FileInfo[]]$Packages) {
-    @($Packages | Where-Object { $_.Name -match '^go\.(lib|gen)\.' }) + @($Packages | Where-Object { $_.Name -notmatch '^go\.(lib|gen)\.' })
+    $first = '^go\.(lib|gen)\.'
+    $last = '^go2cs\.\d'
+    @($Packages | Where-Object { $_.Name -match $first }) +
+        @($Packages | Where-Object { $_.Name -notmatch $first -and $_.Name -notmatch $last }) +
+        @($Packages | Where-Object { $_.Name -match $last })
 }
 
 # The id and version a .nupkg declares, read from the .nuspec at its root (the file name is a convention, the
