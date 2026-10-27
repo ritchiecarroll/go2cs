@@ -113,14 +113,15 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		}
 	}
 
-	// A value-returning callee passed as a BARE method group is a Func<...>, but every goǃ
-	// overload takes a void Action<...> (CS0407 "no overload matches the delegate" —
-	// x/net/nettest's `go chunkedCopy(c2, c2)`, chunkedCopy returning error). Force the
-	// temp-param lambda form so convCallExpr renders `(ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2)`, which
-	// converts to a discarding Action — exactly Go's fire-and-forget goroutine semantics. This
-	// mirrors the defer arm's result handling; the defer PARAM case needs no equivalent only
-	// because defer additionally has Func<...> overloads, while goǃ does not. A VALUE-receiver
-	// method group forces the same lambda form for its CS1113 wall (above).
+	// A value-returning callee passed as a BARE method group is a Func<...>. Force the temp-param
+	// lambda form so convCallExpr renders `(ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2)`, which converts to a
+	// discarding Action — exactly Go's fire-and-forget goroutine semantics. This form is what first
+	// fixed CS0407 "no overload matches the delegate" for x/net/nettest's `go chunkedCopy(c2, c2)`
+	// (chunkedCopy returns error), and it mirrors the defer arm's result handling. goǃ also has
+	// Func<..., TResult> twins (builtin.GoroutineLaunchers.cs), which a value-returning function
+	// literal binds; whether a bare method group could bind them in place of this form is not
+	// measured, so the form stays. A VALUE-receiver method group forces the same lambda form for
+	// its CS1113 wall (above).
 	if (hasResults || valueRecvMethodGroup) && paramCount > 0 {
 		renderLambdaParams = true
 	}
