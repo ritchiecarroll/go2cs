@@ -29458,4 +29458,49 @@ second, unrelated seat.**
 
 — G (2026-10-27)
 
+## 2026-10-27 — G (COORD's ruling on 1.26.10.2 seat #9, P1's measurement): crossgen2 still expands golib's array/ж generic nest after e2move — OPEN, sized as its own seat after .2
+
+**Measured (P1, linux/amd64, 4 cores, master e6b7f24f81).** Arm C of seat #9 publishes the `crypto/tls` test host with
+ReadyToRun. Without `--enable-generic-cycle-detection`, crossgen2 runs out of memory after 893 s, on a golib
+`array<array<array<array<siginfo>>>>.ΔClone()`. With the flag, the publish takes 361 s and peaks at about 9.7 GB.
+KnownIssues' single-file ReadyToRun OOM (crossgen2 at about 10 GB in an 11 GiB cgroup, a converted fmt+strings program)
+is very likely the same nest. That is unproven until seat #14's arm runs.
+
+**Cause, as read at the tree (39f85c0e15); the edge is not yet confirmed by the tool.** e2move (merge b1ba1380b4) broke
+the cycle that ILC expands, and ILC reads 0 cut-off methods since. But ILC compiles what a program reaches. crossgen2
+compiles the methods of every instantiation its dependency analysis builds inside its version bubble. So a loop that no
+program reaches is still a loop to crossgen2. The nest's root is real: runtime's signal code holds `ж<siginfo>`, and no
+source writes `array<siginfo>`, so crossgen2 built every level itself. These are candidate edges, read only, not
+measured:
+- `array<T>` -> `ж<array<T>>`: `array<T>.AliasPointer` builds `StandardBox<array<T>>` and
+  `builtin.NativeArrayPointer<T>`.
+- `ж<T>`'s family -> `array<T>`: `ElemRefBox<T>` builds `new array<T>(m_backing)` (ж.ElemRefBox.cs:388).
+- `NativeArrayBox<T>` is itself a `ж<array<T>>`.
+Any path from `ж<X>` back to such a member closes the loop one level up.
+
+**Who it reaches.** Every converted program's `dotnet publish` runs crossgen2, because the template ships
+`PublishReadyToRun=true` (csproj-template.xml:58). So does any consumer that sets the property. Whether a given publish
+hits the nest depends on its closure: the fmt+strings single-file arm hit it, and the plain publishes on record did
+not. Seat #14 (the flag in the template, gated on P1's 11 GiB single-file arm) is the mitigation. The flag only stops
+precompiling a method past its cut-off, which then JITs at run time, so behavior is safe. This row is the root cause.
+
+**The seat, sized (not .2).** One lane, about 2 to 3 lane-days, golib only, 0 -stdlib footprint expected:
+- **S0, locate (half a day).** Before any change, run crossgen2 on the `crypto/tls` host with the flag and its map
+  output. Take the nest-depth histogram of compiled `array`1`/`ж`1` methods, find the first depth-2 method and the
+  member that creates it, and record the edge with its file:line.
+- **S1, break it (about a day), shaped like e2move.** Move the edge out of the family, so that no `array<T>` member
+  names a `ж<array<T>>` subtype, or no `ж<T>` member names `array<T>`, with zero behavior change. Record the
+  prediction first: crossgen2's peak and time without the flag, against 9.7 GB and 361 s with it.
+- **Gates.**
+  - Without the flag: the `crypto/tls` host publish completes, and the 11 GiB single-file arm completes.
+  - The aot-smoke ILC count stays at 0 cut-off methods.
+  - Full GolibTests, `dotnet build src/go2cs.slnx -c Debug`, and the two-seeded -stdlib diff reading 0.
+  - A deliberate regression arm that restores the edge must OOM again (floor 13).
+- **What it retires, if it clears.** Seat #14's flag becomes defense-in-depth rather than a fix. KnownIssues'
+  single-file section and the nine profiles' `PublishReadyToRun=false` can then go. That is #14's or its own
+  follow-up, by whoever holds it.
+- **Owner of the cut:** G, who cut e2move. P1 runs the linux arms (the box with the measured baseline).
+
+— G (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
