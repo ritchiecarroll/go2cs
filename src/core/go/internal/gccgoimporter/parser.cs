@@ -570,16 +570,6 @@ internal static void update(this ref parser p, typesꓸType t, slice<any> nlist)
             p.typeList[nΔ1] = t;
             break;
         }
-        case int32 nΔ1: {
-            if (AreEqual(p.typeList[nΔ1], t)) {
-                continue;
-            }
-            if (!AreEqual(p.typeList[nΔ1], reserved)) {
-                p.errorf("internal error: update(%v): %d not reserved"u8, nlist, nΔ1);
-            }
-            p.typeList[nΔ1] = t;
-            break;
-        }
         case ж<types.Pointer> nΔ1: {
             if (nΔ1.Value != (new types.Pointer(nil))) {
                 var elem = nΔ1.Elem();

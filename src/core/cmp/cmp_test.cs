@@ -67,10 +67,6 @@ public static void TestLess(ж<testing.T> Ꮡt) {
             b = cmp.Less(test.x._<nint>(), test.y._<nint>());
             break;
         }
-        case int32: {
-            b = cmp.Less(test.x._<nint>(), test.y._<nint>());
-            break;
-        }
         case @string: {
             b = cmp.Less(test.x._<@string>(), test.y._<@string>());
             break;
@@ -94,10 +90,6 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
         nint c = default!;
         switch (test.x.type()) {
         case nint: {
-            c = cmp.Compare(test.x._<nint>(), test.y._<nint>());
-            break;
-        }
-        case int32: {
             c = cmp.Compare(test.x._<nint>(), test.y._<nint>());
             break;
         }
