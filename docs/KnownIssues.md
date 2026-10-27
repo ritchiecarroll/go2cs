@@ -166,21 +166,24 @@ same program built against 1.26.10.1.
      the cut-off shows only as these lines. The release gate's aot-smoke consumer published within its bound before the
      fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it. -->
 
-## A single-file publish with ReadyToRun runs out of memory
+## A single-file publish with composite ReadyToRun runs out of memory
 
-A converted program's project turns ReadyToRun on for `dotnet publish`. Adding `-p:PublishSingleFile=true`
-to that publish ran the ReadyToRun compiler, crossgen2, to about 10 GB of memory on a linux-x64 machine,
-where it failed with `Insufficient memory` and left the build hanging. The publish profiles go2cs writes
-beside a converted program (`-p:PublishProfile=linux-x64` and the others) turn ReadyToRun off, so a profile
-publish is not affected. A program converted by a go2cs earlier than 1.26.10.1 keeps the profiles it already
-has, since go2cs never overwrites one; add `<PublishReadyToRun>false</PublishReadyToRun>` to them. On the
-command line, turn ReadyToRun off yourself:
+A converted program's project turns ReadyToRun on for `dotnet publish`. When the publish is also a single file
+(`-p:PublishSingleFile=true`), the .NET SDK compiles ReadyToRun as a single composite image of the program and the
+framework by default, and on that image the ReadyToRun compiler, crossgen2, expands golib's nested generic types
+until it runs out of memory: past 10 GB on a linux-x64 machine, failing with `Insufficient memory` and leaving
+the build hanging. Compiled one assembly at a time, it does not. The publish profiles go2cs writes beside a
+converted program (`-p:PublishProfile=linux-x64` and the others) set
+`<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`, so a profile publish keeps ReadyToRun and is not
+affected. A program converted by a go2cs earlier than 1.26.10.2 has profiles that turn ReadyToRun off instead,
+since go2cs never overwrites a profile; replace their `<PublishReadyToRun>false</PublishReadyToRun>` with that
+line to get ReadyToRun's faster start back. On the command line, turn the composite image off yourself:
 
 ```
-dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=false
+dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRunComposite=false
 ```
 
-The program then starts without ReadyToRun's head start, as it does under `dotnet run`.
+A publish that is not a single file never makes a composite image, so it is not affected.
 
 <!-- P1's reconciliation, linux-x64, go1.26.10, .NET SDK 10.0.112, at a8821c781a (claude/p1-trim-recon ddf7c054d7,
      docs/phase4/DATA-trim-recon-p1-2026-10-24.md §5 finding 3): "-p:PublishSingleFile=true with the csproj's ReadyToRun
@@ -197,7 +200,20 @@ The program then starts without ReadyToRun's head start, as it does under `dotne
      kill; crossgen2 then stayed alive, idle, until it was stopped by PID. AFTER (the fixed converter's profile)
      PublishReadyToRun=false, publish rc 0 in 438 s from a purged tree, cgroup peak 3,422 MiB, one 20,677,627-byte
      executable whose output equals `go run`. The template's own line is deferred: it would move one line in 1,312
-     committed csproj. -->
+     committed csproj.
+     PER-ASSEMBLY FIX, 2026-10-27 (P1, seat #14, COORD's ruling after G's crossgen2 S0): only a COMPOSITE image runs
+     out of memory, and the SDK turns composite on when PublishSingleFile and PublishReadyToRun are both set
+     (Microsoft.NET.CrossGen.targets). The nine profiles swap PublishReadyToRun=false for
+     PublishReadyToRunComposite=false. Same program, cgroup and linux flavor as above, .NET SDK 10.0.113. Four arms
+     through the 9bb7bb7bf8 converter's profile with -p overrides, one after another on one tree: ReadyToRun off (as
+     shipped) publish 451 s from a purged tree, peak 3,018 MiB, 20,699,137 bytes, median run 1.02 s; PER ASSEMBLY
+     54 s on the built tree, peak 3,145 MiB, 34,586,464 bytes, median run 0.71 s; COMPOSITE WITH crossgen2's
+     generic-cycle-detection flag 158 s, peak 6,172 MiB, 89,475,594 bytes, median run 1.13 s; COMPOSITE WITHOUT
+     the flag (the control) crossgen2 "Insufficient memory" at the 11 GiB cap, no exit before the 2,700 s timeout.
+     THE GATE, the fixed converter's own profile with no override (seat tip over f57648805c): `dotnet msbuild
+     -getProperty` reads PublishReadyToRun=true and PublishReadyToRunComposite=false; publish rc 0 in 505 s from a
+     purged tree, peak 3,069 MiB, 34,286,516 bytes, median run 0.76 s. Every arm that published printed `go run`'s
+     output. Median run = the middle two of 10 warm runs. -->
 
 ## On Linux, a converted test suite can skip its unix-socket tests under a long TMPDIR
 

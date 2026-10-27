@@ -622,7 +622,10 @@ Each item is a first surprise, and what to write instead.
   publishes: `dotnet run` and `dotnet build` never do. A program that go2cs converts sets
   `<PublishReadyToRun>true</PublishReadyToRun>` in its project. In your own project that references `go.*`
   packages, add that property and run the output of `dotnet publish -c Release`. On linux-x64, ReadyToRun cut a
-  converted program's median startup by about a third.
+  converted program's median startup by about a third. A single-file publish also needs
+  `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`, because its default composite image runs the
+  ReadyToRun compiler out of memory
+  ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)).
   <!-- The converter's Exe template: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`
        (with PublishTrimmed, scoped off Library projects). The figure: P1's measurement of PerfStartup
        (src/tests/Performance/PerfStartup) at a5aa6a23f7 on linux-x64, median 488 ms under the JIT and 329 ms with
