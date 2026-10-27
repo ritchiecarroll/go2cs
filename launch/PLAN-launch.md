@@ -7,9 +7,9 @@
 > **The shape is the owner's direction of 2026-10-20:** a Go 1.26 build published before any
 > announcement, soft or hard; a soft stage first, then the venues that need more live response effort;
 > and few venues, because one person answers all of them. **What changed on 2026-10-27:** go.* 1.26.10.1
-> is published and the nugetgo wave is done, so the first two gates are met. The recommendation now
-> anchors day 0 on **go.* 1.26.10.2**, the release that ships the `go2cs` dotnet tool, because the tool
-> removes a newcomer's first obstacle (install) and the README leads with it (D15).
+> is published and the nugetgo wave is done, so the first two gates are met. Day 0 is now **go.* 1.26.10.2**
+> (the owner's ruling, D15), the release that ships the `go2cs` dotnet tool, because the tool
+> removes a newcomer's first obstacle (install) and the README leads with it.
 
 <!-- Provenance of the superseded plan (kept here, costs nothing on the rendered page):
      - 2026-10-11 draft (68621ab718): two stages, soft after 1.24.13.6, wide after Go 1.26.
@@ -315,7 +315,7 @@ the release.
 
 **For the soft stage:**
 
-- **D15. Day 0 on 1.26.10.2** (recommended, section 1), or a soft stage on the published 1.26.10.1 now
+- **D15. Day 0 on 1.26.10.2. RULED by the owner 2026-10-27: day 0 is 1.26.10.2.** The alternative was a soft stage on the published 1.26.10.1 now
   (Wed Nov 4 at the earliest, after election day) with the tool arriving mid-listening. The second is
   about a week sooner, sends the first readers to a release whose compiled C# changes within days, and
   reaches them before the one-command install exists.
