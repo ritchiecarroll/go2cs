@@ -211,6 +211,44 @@ $tornTail = '{"schemaVersion":1,"package":"fixture","events":[]} exit status 0xc
 $result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $tornTail
 Assert-Equal 'torn tree: 0xc0000142 in the tail is not oracle-only' $false $result.OracleOnly
 
+# GO'S CRASH BANNER AS A TEST'S OWN OUTPUT. runtime's crash tests make a child print "fatal error: ..." on
+# purpose and read it back (TestRuntimePanic passes on exactly that text), and a failing test quotes a child's
+# stderr. Inside a NAMED test's event that reached a verdict the host demonstrably ran on past it, so it is
+# not a crash of the run (C1, 2026-10-27: the darwin runtime row, run 40596382419, was misnamed a crash).
+# The fixture's divergence is oracle-only, so the banner is the only thing that could refuse it.
+$bannerInOutputTail = '{"schemaVersion":1,"package":"fixture","events":[' +
+    '{"package":"fixture","test":"TestRuntimePanic","action":"pass","elapsed":0.07,"output":"crash_test.go:955: fatal error: index out of range\n\ngoroutine 1 [running]:","source":"crash_test.go","line":951},' +
+    '{"package":"fixture","test":"TestTracebackSystem/panic","action":"fail","elapsed":2.27,"output":"traceback_system_test.go:171: stderr:\n    fatal error: unexpected signal","records":["traceback_system_test.go:35: runtime_test.child1","redacted.go:0: runtime.goexit"]},' +
+    '{"test":"T4","action":"pass","elapsed":0.01}]}'
+$result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $bannerInOutputTail
+Assert-Equal 'banner: inside named tests'' verdict events it is not a crash' $true $result.OracleOnly
+
+# ...and everywhere else it still is. A banner OUTSIDE any event (the host's own stream, after the last verdict):
+$bannerBareTail = '{"schemaVersion":1,"package":"fixture","events":[{"test":"T4","action":"pass","elapsed":0.01}' +
+    "`nfatal error: unexpected signal during runtime execution"
+$result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $bannerBareTail
+Assert-Equal 'banner: outside any event it is a crash' $false $result.OracleOnly
+Assert-ReasonNames 'banner: the bare refusal names the signature class' $result 'deadline/crash signature'
+
+# ...in an event that reached NO verdict (an output event: the test never finished):
+$bannerNoVerdictTail = '{"schemaVersion":1,"package":"fixture","events":[{"test":"T4","action":"output","output":"fatal error: concurrent map writes"}]}'
+$result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $bannerNoVerdictTail
+Assert-Equal 'banner: in an event with no verdict it is a crash' $false $result.OracleOnly
+
+# ...in a PACKAGE-level verdict (no test name: the package itself died):
+$bannerPackageTail = '{"schemaVersion":1,"package":"fixture","events":[{"test":"","action":"fail","output":"fatal error: out of memory"}]}'
+$result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $bannerPackageTail
+Assert-Equal 'banner: in a package-level event it is a crash' $false $result.OracleOnly
+
+# ...and in an event the 64 KiB tail window CUT (its opening brace is outside the window, so it cannot be shown
+# to be a verdict event, and the answer is NO):
+$bannerCutTail = 'r: index out of range\nfatal error: index out of range","source":"crash_test.go"},{"test":"T4","action":"pass"}]}'
+$result = Test-OracleOnlyFailure -Comparison (Read-Fixture -Go $goFlaked -CSharp $csClean -Errors @($oracleDivergence, $goExit)) -TailText $bannerCutTail
+Assert-Equal 'banner: in an event the tail window cut it is a crash' $false $result.OracleOnly
+
+# The exemption is the banner's alone: any other signature inside a verdict event still refuses (the crash
+# fixture above), and a deadline event is never itself a verdict event.
+
 # NO TAIL AT ALL. The deadline question cannot be answered, so it is answered NO -- the same
 # discipline every absorption rule in the sweep uses: an unreadable input is a rejection.
 #
