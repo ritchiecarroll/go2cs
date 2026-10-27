@@ -80,6 +80,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 function Refuse([string]$why) { throw "REFUSED: $why" }
+Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
 # Under pwsh -File a list arrives as one comma-joined string (Split-NugetgoListArgument in the pack does the same).
 $ThirdPartyPackage = @($ThirdPartyPackage | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 function Say([string]$line) { Write-Host $line }
@@ -204,9 +205,17 @@ try {
     foreach ($pkg in ($row.Expect.Keys + $rows.Keys | Sort-Object -Unique)) {
         $want = $row.Expect[$pkg]
         $got = $rows[$pkg]
-        $wantText = if ($want) { "$($want[0]) + $($want[1])" } else { 'no row' }
-        $gotText = if ($got) { "$($got.Matched) + $($got.Disclosed)" } else { 'no row' }
-        $met = $want -and $got -and $got.Matched -eq $want[0] -and $got.Disclosed -eq $want[1]
+        # A timing-sensitive disclosure's other shape (ExpectOrphaned): the record must list that entry as orphaned.
+        $alternate = if ($row.ExpectOrphaned) { $row.ExpectOrphaned[$pkg] } else { $null }
+        $orphaned = @()
+        $record = Join-Path $VR "src/$pkg/go2cs_test_comparison.json"
+        if ($alternate -and (Test-Path -LiteralPath $record)) {
+            $orphaned = @((Get-Content -Raw -LiteralPath $record | ConvertFrom-Json).orphanedDisclosures | Where-Object { $_ } | ForEach-Object { $_.name })
+        }
+        $wantText = if ($want) { "$($want[0]) + $($want[1])$(if ($alternate) { " or $($alternate.Counts[0]) + $($alternate.Counts[1]) with $($alternate.Orphan) orphaned" })" } else { 'no row' }
+        $gotText = if ($got) { "$($got.Matched) + $($got.Disclosed)$(if ($orphaned) { " (orphaned: $($orphaned -join ', '))" })" } else { 'no row' }
+        $prediction = if ($want -and $got) { Test-NugetgoPrediction -Want $want -Alternate $alternate -Matched $got.Matched -Disclosed $got.Disclosed -Orphaned $orphaned } else { $null }
+        $met = $prediction -and $prediction.Met
         Say ("  {0,-6} {1}: predicted {2}, read {3}" -f $(if ($met) { 'MET' } else { 'MISSED' }), $pkg, $wantText, $gotText)
         if (-not $met) { $failures.Add("1.3: $pkg predicted $wantText, read $gotText") }
     }
