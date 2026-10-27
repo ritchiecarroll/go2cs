@@ -244,7 +244,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:60,66#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#bf71f4 +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:43#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
-  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#47d307 · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#637f15 ·
+  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#47d307 · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#416bab ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:11,32,74,77#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:56#64aa80 + src/core/reflect/type.cs:1258#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
@@ -8596,7 +8596,7 @@ Anything the proof cannot follow keeps the full stack, unmarked. That includes a
 func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
 goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
 crash where Go grows the stack, so the proof gives up rather than guess.
-<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:263
+<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:321
      `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
      src/core/golib/runtime/Goroutine.cs:94 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
      worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
@@ -10674,7 +10674,7 @@ go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
 A `defer` or `go` call to such a function works too. The statement stores the address as a box when it
 runs, and turns it into a `ref` only when the call itself runs, so the call sees the variable's latest value
-([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#008246; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
+([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:191#cd7334, :203#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2920#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#e2705b; reference: docs/ConversionStrategies-Reference/pointers.md:218#25611d, :222#fed198 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter
