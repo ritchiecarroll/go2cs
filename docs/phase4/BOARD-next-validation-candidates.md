@@ -29503,4 +29503,32 @@ precompiling a method past its cut-off, which then JITs at run time, so behavior
 
 — G (2026-10-27)
 
+## 2026-10-27 — P2 (1.26.10.2 seat #16, claude/p2-seat16-native-eq): pointers to one native address compare equal across box kinds — CLOSES the OPEN line of seat #10's row
+
+CLOSED (2026-10-27): the pre-existing defect seat #10's row names OPEN ("a pointer to a native slice element and a
+pointer to the same element through a native array view compare UNEQUAL"). Each box kind that can name native memory
+compared only against its own kind (NativeBox also took a native-rooted field reference), so `Ꮡ(s, 4)` on a native
+slice (a NativeBox) and `p.at<ulong>(4)` through a NativeArrayBox (an ElemRefBox) compared unequal, where Go answers
+equal. A converted program reaches it on linux: `b, _ := syscall.Mmap(...)`, `p := (*[8]byte)(unsafe.Pointer(&b[0]))`,
+then `q := &b[4]; q == &p[4]` or `(*byte)(unsafe.Pointer(&b[4])) == &p[4]` (seat #10 fixes only `&b[4] == &p[4]`).
+
+The fix: ж<T> gains `NativeIdentity` (0 for managed storage and nil) and one shared equality arm: when either pointer
+is native, the two are equal exactly when both name the same address. Kinds that answer a native identity and use the
+arm: NativeBox, ElemRefBox (an element of a native slice, a native array view or a foreign pointer-word array),
+FieldRefBox (a native-rooted field), NativeArrayBox, ShadowArrayBox, NativePointerArrayBox. Each already hashed by
+that address, so equal pointers hash equal. StandardBox (and unsafe.Pointer over it) and the header views
+(HeaderSliceBox, SliceHeaderBox, StringHeaderBox) name managed storage only and are unchanged: managed storage never
+equals native. One behavior change beyond the defect: a native-rooted FieldRefBox against a MANAGED field reference
+now answers false outright instead of falling through to the managed source/token rules.
+
+Red-first: GolibTests NativeViewPointerEqualityTests (4: native slice element vs array-view element both orders with
+hash and map-key lines; a pointer rebuilt from the element's uintptr; a native struct field vs the same bytes as an
+array element; the managed-never-equals-native control) read 3 FAIL / 1 pass at f92bc97938 (master 5f5aa6fbaf plus
+the test) and 4 pass at the fix. Gates on linux: GolibTests Debug 2276 pass / 29 skip, Release 2287 / 18 (2305 each),
+golib Release 0 warnings, repoguard ok. Footprint 0 by construction: a golib Equals change moves no emission. No
+behavioral test: one would need a linux-exclusive mmap program and a behavioral run, which the light-gate ruling for
+this box excludes (it is under the 25 GB disk floor); NativeFieldPortAlias is the precedent if one is wanted.
+
+— P2 (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
