@@ -121,33 +121,61 @@ The S1 and S2 PIN sheets each added detached worktrees of your go2cs clone under
 under `nugetgo-wave3-s1` (`kit-hashset`, `kit-uuid`, `kit-jwt`, `kit-xsync`, `kit-pflag`, `kit-mousetrap` and
 `signer`), and S2 added two under `nugetgo-wave3-s2` (`kit-cobra` and `signer`). This block removes those nine and
 nothing else: it matches only a `kit-*` or `signer` worktree directly under one of those two folders, and
-`git worktree remove` without `--force` refuses a worktree with changes. Then it deletes the two folders (the signed
-packages in `sign\` are on nuget.org) and this sheet's registry clone, but keeps any folder that still holds a
-worktree. Run it from your go2cs clone.
+`git worktree remove` without `--force` refuses a worktree with changes.
+
+Block 2 leaves this window in the registry clone, so first `Set-Location` to your go2cs clone. The block refuses
+anywhere else. Every git call names that clone (`git -C $Repo`), never the current folder. A sheet folder is deleted
+only when this block removed the worktrees inside it and none is left there. If the block finds no sheet worktrees
+while a sheet folder exists, it stops and deletes nothing. The registry clone is deleted last.
 
 ```powershell
 . {
     $Repo = git rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -or -not $Repo) { throw 'block 3: Set-Location to your go2cs clone first' }
+    if ($LASTEXITCODE -or -not $Repo -or -not (Test-Path -LiteralPath (Join-Path $Repo 'src/go2cs/main.go'))) {
+        Write-Host "STOP: $((Get-Location).Path) is not inside your go2cs clone (block 2 leaves this window in the registry clone)." -ForegroundColor Red
+        Write-Host '  FIX: Set-Location <the root of your go2cs clone>, then paste block 3 again.' -ForegroundColor Yellow
+        throw 'block 3: not inside the go2cs clone; nothing was changed'
+    }
+    $tmp = [IO.Path]::GetTempPath()
+    $sheetFolders = @('nugetgo-wave3-s1', 'nugetgo-wave3-s2')
     $listed = @(git -C $Repo worktree list --porcelain | Where-Object { $_ -like 'worktree *' } | ForEach-Object { $_.Substring(9) })
+    if ($LASTEXITCODE) { throw "block 3: git -C $Repo worktree list exited $LASTEXITCODE; nothing was changed" }
+    "go2cs clone: $Repo"
     "worktrees before: $($listed.Count)"
-    $ours = @($listed | Where-Object { $_ -match '[\\/]nugetgo-wave3-s[12][\\/](kit-[a-z]+|signer)$' })
+    $ours = @($listed | Where-Object { $_ -match '[\\/](nugetgo-wave3-s[12])[\\/](kit-[a-z]+|signer)$' })
     "sheet worktrees found: $($ours.Count) (S1 made 7, S2 made 2)"
+    $present = @($sheetFolders | Where-Object { Test-Path -LiteralPath (Join-Path $tmp $_) })
+    if (-not $ours.Count -and $present.Count) {
+        throw "block 3: $Repo lists no sheet worktrees, but $($present -join ' and ') exist under $tmp. Stop and ask; nothing was changed"
+    }
+    $emptied = @{}
     foreach ($w in $ours) {
         git -C $Repo worktree remove $w
-        if ($LASTEXITCODE) { throw "block 3: git refused to remove $w (it has changes?); stop and ask" }
+        if ($LASTEXITCODE) { throw "block 3: git refused to remove $w (it has changes?); stop and ask. Nothing else was deleted" }
+        [void]($w -match '[\\/](nugetgo-wave3-s[12])[\\/]'); $emptied[$Matches[1]] = $true
         "removed  $w"
     }
     git -C $Repo worktree prune
     $left = @(git -C $Repo worktree list --porcelain | Where-Object { $_ -like 'worktree *' } | ForEach-Object { $_.Substring(9) -replace '\\', '/' })
     "worktrees after: $($left.Count)"
-    foreach ($name in 'nugetgo-wave3-s1', 'nugetgo-wave3-s2', 'nugetgo-registry', 'nugetgo-base-mappings.txt') {
-        $p = Join-Path ([IO.Path]::GetTempPath()) $name
+    foreach ($name in $sheetFolders) {
+        $p = Join-Path $tmp $name
+        if (-not (Test-Path -LiteralPath $p)) { continue }
         $inside = @($left | Where-Object { $_ -match "/$([regex]::Escape($name))(/|$)" })
+        if (-not $emptied[$name]) { Write-Host "kept     ${p}: this block removed no worktree there" -ForegroundColor Yellow; continue }
         if ($inside.Count) { Write-Host "kept     ${p}: it still holds a worktree ($($inside -join ', '))" -ForegroundColor Yellow; continue }
-        if (Test-Path $p) { Remove-Item -LiteralPath $p -Recurse -Force; "deleted  $p" }
+        Remove-Item -LiteralPath $p -Recurse -Force; "deleted  $p"
+    }
+    foreach ($name in 'nugetgo-registry', 'nugetgo-base-mappings.txt') {
+        $p = Join-Path $tmp $name
+        if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force; "deleted  $p" }
     }
 }
 ```
 
-Send COORD the `worktrees before`, `sheet worktrees found` and `worktrees after` lines.
+Send COORD the `go2cs clone`, `worktrees before`, `sheet worktrees found` and `worktrees after` lines.
+<!-- 2026-10-27: the first version of this block took $Repo from the current folder, and block 2 leaves the window in
+     the registry clone. The owner's run read the registry clone's worktree list (1 worktree, 0 sheet worktrees), then
+     deleted both sheet folders anyway, which left 9 dangling registrations in the go2cs clone. COORD pruned them, and
+     nothing was lost: the kits were clean, detached checkouts. Since then the block refuses outside a go2cs clone,
+     treats "found 0" with a sheet folder present as a refusal, and deletes a sheet folder only when it emptied it. -->
