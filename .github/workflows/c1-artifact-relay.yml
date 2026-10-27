@@ -1,0 +1,52 @@
+# C1's artifact relay (1.26.10.2 darwin re-bank). C1's container can reach api.github.com but not the blob host that
+# serves artifacts, so this job reads each run named in relay/runs.txt -- an os-matrix sweep-shard run at the TIP --
+# downloads its two mac artifacts on a hosted runner, and prints each row's counts as annotations (.github/relay/
+# relay.py). It runs only on a push to its own branch, measures nothing, and writes nothing to the runs it reads.
+name: c1-artifact-relay
+
+on:
+  push:
+    branches: [claude/c1-darwin-1262-relay]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    outputs:
+      runs: ${{ steps.list.outputs.runs }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: list
+        shell: bash
+        run: |
+          runs=$(grep -E '^[0-9]+$' relay/runs.txt | jq -R . | jq -sc .)
+          echo "runs=$runs" >> "$GITHUB_OUTPUT"
+          echo "runs: $runs"
+
+  relay:
+    needs: list
+    if: needs.list.outputs.runs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        run: ${{ fromJson(needs.list.outputs.runs) }}
+    name: relay ${{ matrix.run }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: download and relay
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ matrix.run }}
+        run: |
+          set -u
+          gh run view "$RUN" -R "$GITHUB_REPOSITORY" --json headSha,headBranch,status,conclusion --jq '"head \(.headSha) on \(.headBranch): \(.status) \(.conclusion)"'
+          for rid in osx-arm64 osx-x64; do
+            gh run download "$RUN" -R "$GITHUB_REPOSITORY" -n "os-matrix-sweep-shard-darwin-$rid" -D "$RUNNER_TEMP/a/$rid" ||
+              echo "::warning title=relay $RUN::no artifact os-matrix-sweep-shard-darwin-$rid"
+          done
+          python3 -I .github/relay/relay.py "$RUN" "$RUNNER_TEMP/a"
