@@ -263,7 +263,10 @@ COORD rules sections 1-3 green before this step.
      project does not restore (NU1015), because `GoStdLibVersion` is set there;
    - the module's LICENSE verbatim (B6), a README (for a third-party conversion, ending with the maintainers section:
      section 2, "The conversion repository's README"), and a `.gitignore` for the build output (`.artifacts/`);
-   - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them.
+   - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them;
+   - when a packed project references another converted module (a `ProjectReference` into `PR/pkg/`), the referenced
+     projects under `PR/pkg/`, at their own paths. The package declares that module as a NuGet dependency; the
+     repository carries its source so the repository builds as-is.
 
    The license file and VALIDATION.md sit at the repository ROOT in either layout below. The package README links
    `<RepositoryUrl>/tree/nuget-<PV>`, `<RepositoryUrl>/blob/nuget-<PV>/VALIDATION.md` and
@@ -282,6 +285,15 @@ COORD rules sections 1-3 green before this step.
    attributes. Only the nested one imports the root file. In the flat one `NugetgoParentBuildTargets` is empty, and
    the generated-files path falls back to a `Generated` folder in the module's own directory instead of `.artifacts`.
    A flat repository for such a module therefore builds, but silently differs from `PR`.
+
+   **A module that references another converted module (COORD ruling, 2026-10-26).** Its projects' references climb
+   to `PR`'s root (`../../../../pkg/<module>/...` from `src/M`), so the repository MIRRORS `PR`: the root build files
+   at its root, the contents of `PR/src/M` at `src/M`, and the referenced `PR/pkg` projects at their own paths. Measured
+   on cobra (2026-10-27, linux/amd64): the mirrored copy builds, and its dll carries the packed linux-x64 dll's
+   version, copyright and company attributes; the nested layout with `pkg/` at the root does not (MSB9008: the
+   referenced pflag project does not exist). Only the projects the PACKED packages reference are carried. An unpacked
+   package that references more (cobra/doc: go-md2man, blackfriday, yaml.v3) does not build from the repository, and the
+   README says so.
 
    Before pushing, build a fresh copy with `dotnet build -c Release -p:GoStdLibVersion=R`. For hashset (2026-10-09)
    the dll it built carried the same version and copyright attributes as the packed one, which is what lets a rebuild

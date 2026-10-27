@@ -131,5 +131,11 @@ Check 'the driver passes each list once, comma-joined' (
 Check 'nugetgo-pack.ps1 takes -ExcludePackage and selects its libraries through Select-NugetgoPackedLibraries' (
     $pack.Contains('[string[]]$ExcludePackage') -and $pack.Contains('Select-NugetgoPackedLibraries')) 'the pack does not select its libraries'
 
+# The pack's lib/ is the module's own assemblies. Its project references each packed library directly; a library's
+# pkg/ reference (cobra -> pflag) must not resolve through it transitively, or pflag's dll ships in cobra's lib/ (C2,
+# 2026-10-26, the cobra release pack; the pack's lib/ check refused it).
+Check 'the pack project resolves its libraries only, not their references' (
+    $pack.Contains('<DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>')) 'the pack project resolves transitive references into lib/'
+
 Write-Host "ran $ran, failed $failed"
 exit $failed

@@ -183,6 +183,30 @@ try {
     $r = Get-NugetgoAssemblyCopyright -LicenseFile (Write-License 'nocopy' 'LICENSE' @('Public domain.'))
     Check 'a license with no Copyright line: refused by name' ($null -eq $r.Copyright -and -not $r.Skip -and $r.Reason -like '*carries no Copyright line*') "got '$($r.Copyright)' skip $($r.Skip) reason '$($r.Reason)'"
 
+    # github.com/spf13/cobra v1.10.2 (COORD ruling 2026-10-26): its Apache LICENSE.txt carries no Copyright line, and
+    # the holder is in every source file's header. The caller states it with -Copyright, used ONLY when the license
+    # carries none, and it must be one of the module's own source-header lines, which the pack prints as the evidence.
+    $cobraDir = Join-Path $copyRoot 'cobra'
+    [void](Write-License 'cobra' 'LICENSE.txt' @('                                 Apache License', '      "Licensor" shall mean the copyright owner', '   2. Grant of Copyright License.'))
+    [void](Write-License 'cobra' 'command.go' @('// Copyright 2013-2023 The Cobra Authors', '//', '// Licensed under the Apache License', 'package cobra'))
+    [void](Write-License (Join-Path 'cobra' 'doc') 'man_docs.go' @('// Copyright 2013-2023 The Cobra Authors', 'package doc'))
+    [void](Write-License 'cobra' 'command_test.go' @('// Copyright 1999 Someone Testing', 'package cobra'))
+    $cobraLicense = Join-Path $cobraDir 'LICENSE.txt'
+    $headers = @(Get-NugetgoSourceCopyrightLines -ModuleDir $cobraDir)
+    Check 'the source headers: one distinct line, counted over the non-test files' ($headers.Count -eq 1 -and $headers[0].Line -ceq 'Copyright 2013-2023 The Cobra Authors' -and $headers[0].Files -eq 2) "got $(@($headers | ForEach-Object { "$($_.Line) x$($_.Files)" }) -join ' | ')"
+    $r = Resolve-NugetgoCopyright -LicenseFile $cobraLicense -Stated 'Copyright 2013-2023 The Cobra Authors' -ModuleDir $cobraDir
+    Check 'a stated line for a license with none (cobra): used, with its header evidence' ($null -eq $r.Reason -and $r.Source -ceq 'stated' -and ($r.Lines -join '|') -ceq 'Copyright 2013-2023 The Cobra Authors' -and $r.Evidence -like '*2 source file*') "got reason '$($r.Reason)' source '$($r.Source)' lines '$($r.Lines -join '|')' evidence '$($r.Evidence)'"
+    $r = Resolve-NugetgoCopyright -LicenseFile $cobraLicense -Stated '' -ModuleDir $cobraDir
+    Check 'no stated line for a license with none: refused, naming -Copyright and the headers' ($r.Reason -like '*carries no Copyright line*-Copyright*Copyright 2013-2023 The Cobra Authors*') "got '$($r.Reason)'"
+    $r = Resolve-NugetgoCopyright -LicenseFile $cobraLicense -Stated 'Copyright 2026 Somebody Else' -ModuleDir $cobraDir
+    Check 'a stated line that is no source header: refused' ($r.Reason -like '*is not a Copyright line of the module*source headers*') "got '$($r.Reason)'"
+    $r = Resolve-NugetgoCopyright -LicenseFile (Join-Path $copyRoot 'uuid/LICENSE') -Stated 'Copyright 2013-2023 The Cobra Authors' -ModuleDir $cobraDir
+    Check 'a stated line for a license that carries one: refused' ($r.Reason -like '*carries 1 Copyright line*-Copyright applies only*') "got '$($r.Reason)'"
+    $r = Resolve-NugetgoCopyright -LicenseFile (Join-Path $copyRoot 'jwt/LICENSE') -Stated '' -ModuleDir $cobraDir
+    Check 'no stated line, a license with lines: the license''s, unchanged' ($null -eq $r.Reason -and $r.Source -ceq 'license' -and ($r.Lines -join '|') -ceq 'Copyright (c) 2012 Dave Grijalva|Copyright (c) 2021 golang-jwt maintainers') "got '$($r.Reason)' '$($r.Lines -join '|')'"
+    $r = Get-NugetgoAssemblyCopyright -LicenseFile $cobraLicense -Lines @('Copyright 2013-2023 The Cobra Authors')
+    Check 'the assembly copyright from resolved lines: the stated holder, then the scaffolding line' ($r.Copyright -ceq "Copyright 2013-2023 The Cobra Authors; $scaffold" -and -not $r.Skip) "got '$($r.Copyright)'"
+
     # The escaping case: a semicolon, a comma and every MSBuild or XML special character survive as one property value.
     $hostile = "Copyright (c) 2024 Alpha; Beta, Gamma & Delta <x> 100% `$(Evil) @(Items) it's *?; $scaffold"
     $targets = New-NugetgoAssemblyMetadataTargets -ModulePath 'example.com/mod' -Copyright $hostile -Company 'go2cs conversion' -Authors 'go2cs conversion'
@@ -199,9 +223,10 @@ finally { Remove-Item -Recurse -Force -LiteralPath $copyRoot -ErrorAction Silent
 # The pack script writes the targets beside the packed projects, shares the nupkg's Copyright extraction, refuses a
 # foreign file, and reads the attribute back from each dll taken out of the nupkg.
 Check 'nugetgo-pack.ps1 writes the assembly copyright beside the packed projects and reads it back from each dll' (
-    $pack.Contains('Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile') -and $pack.Contains('$moduleTargets = Join-Path $moduleSrc ''Directory.Build.targets''') -and
+    $pack.Contains('Get-NugetgoAssemblyCopyright -LicenseFile $LicenseFile -Lines $resolvedCopyright.Lines') -and $pack.Contains('$moduleTargets = Join-Path $moduleSrc ''Directory.Build.targets''') -and
     $pack.Contains('New-NugetgoAssemblyMetadataTargets -ModulePath $ModulePath') -and $pack.Contains('was not written by nugetgo-pack.ps1') -and
-    $pack.Contains('$copyright = (@(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) -join ''; '')') -and
+    $pack.Contains('$resolvedCopyright = Resolve-NugetgoCopyright -LicenseFile $LicenseFile -Stated $Copyright -ModuleDir $moduleCacheDir') -and
+    $pack.Contains('$copyright = ($resolvedCopyright.Lines -join ''; '')') -and
     $pack.Contains('[System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)')) 'the pack script does not wire the assembly copyright end to end'
 # The nupkg's own Copyright field takes the same MSBuild escaping (XML escaping alone let MSBuild expand a '$(...)' or
 # '@(...)' inside a holder string), and the read-back holds it to the license file's lines exactly.

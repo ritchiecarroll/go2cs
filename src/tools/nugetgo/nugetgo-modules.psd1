@@ -9,6 +9,8 @@
 # matched, disclosed; re-read at go1.26.10 by P1 and P2 at 9dcf0bafe1 (2026-10-24), equal to the published counts.
 # cobra's are its 2026-10-14 non-root reading; cobra/doc is validated and excluded from the package (its imports,
 # go-md2man and yaml.v3, are not nugetgo packages). mousetrap has no Go tests and no row here: its proof is behavioral.
+# Copyright states the holder for a license that carries no Copyright line (cobra's LICENSE.txt): one of the module's own
+# source-header lines, which the pack checks (COORD ruling 2026-10-26).
 @{
     'github.com/ritchiecarroll/hashset@v1.0.0' = @{
         RepositoryUrl     = 'https://github.com/ritchiecarroll/hashset-cs'
@@ -71,6 +73,7 @@
         Upstream          = 'The Cobra Authors'
         UpstreamPublishes = $false
         LicenseSpdx       = 'Apache-2.0'
+        Copyright         = 'Copyright 2013-2023 The Cobra Authors'
         ExcludePackage    = @('github.com/spf13/cobra/doc')
         ConversionReadme  = ''
         Kit               = ''

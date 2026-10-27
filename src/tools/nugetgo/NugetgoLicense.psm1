@@ -53,6 +53,56 @@ function Get-NugetgoCopyrightLines {
     @(Get-Content -LiteralPath $LicenseFile | Where-Object { $_ -cmatch '^\s*Copyright\b' } | ForEach-Object { $_.Trim() })
 }
 
+# The distinct Copyright lines of the module's own source headers: the leading // comment block of each non-test .go
+# file under -ModuleDir (testdata excluded), each with the number of files that carry it.
+function Get-NugetgoSourceCopyrightLines {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModuleDir)
+
+    $counts = [ordered]@{}
+    $files = Get-ChildItem -LiteralPath $ModuleDir -Recurse -File -Filter '*.go' |
+        Where-Object { $_.Name -notlike '*_test.go' -and $_.FullName -notmatch '[\\/]testdata[\\/]' } | Sort-Object FullName
+    foreach ($file in $files) {
+        foreach ($line in [System.IO.File]::ReadAllLines($file.FullName)) {
+            if ($line -notmatch '^\s*//') { break }
+            if ($line -cmatch '^\s*//\s*(?<text>Copyright\b.*\S)\s*$') {
+                $text = $Matches['text']
+                $counts[$text] = 1 + $(if ($counts.Contains($text)) { $counts[$text] } else { 0 })
+            }
+        }
+    }
+    foreach ($text in $counts.Keys) { [pscustomobject]@{ Line = $text; Files = $counts[$text] } }
+}
+
+# The Copyright lines the package and its assemblies carry (COORD ruling 2026-10-26): the license file's own, or, when
+# it carries none (cobra's Apache LICENSE.txt), the one line the caller states with -Stated. A stated line is used ONLY
+# then, and only when it is one of the module's own source-header lines, which Evidence names. Returns @{ Lines; Source
+# ('license' or 'stated'); Evidence; Reason }, Reason set when refused.
+function Resolve-NugetgoCopyright {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$LicenseFile, [string]$Stated, [Parameter(Mandatory)][string]$ModuleDir)
+
+    $lines = @(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile)
+    if ($lines.Count -and $Stated) {
+        return [pscustomobject]@{ Lines = @(); Source = $null; Evidence = $null
+            Reason = "the upstream license file carries $($lines.Count) Copyright line(s), so -Copyright applies only to a license that carries none: $LicenseFile" }
+    }
+    if ($lines.Count) { return [pscustomobject]@{ Lines = $lines; Source = 'license'; Evidence = $null; Reason = $null } }
+    $headers = @(Get-NugetgoSourceCopyrightLines -ModuleDir $ModuleDir)
+    $seen = if ($headers.Count) { ($headers | ForEach-Object { "'$($_.Line)' ($($_.Files) file(s))" }) -join ', ' } else { 'none' }
+    if (-not $Stated) {
+        return [pscustomobject]@{ Lines = @(); Source = $null; Evidence = $null
+            Reason = "the upstream license file carries no Copyright line: $LicenseFile. State the holder with -Copyright; the module's source headers read: $seen" }
+    }
+    $match = @($headers | Where-Object { $_.Line -ceq $Stated.Trim() })
+    if (-not $match.Count) {
+        return [pscustomobject]@{ Lines = @(); Source = $null; Evidence = $null
+            Reason = "-Copyright '$Stated' is not a Copyright line of the module's own source headers: $seen" }
+    }
+    [pscustomobject]@{ Lines = @($match[0].Line); Source = 'stated'; Reason = $null
+        Evidence = "'$($match[0].Line)', the header of $($match[0].Files) source file(s)" }
+}
+
 # The last line of every packed third-party assembly's copyright: the go2cs-written scaffolding the conversion adds.
 $script:NugetgoScaffoldingCopyright = 'go2cs scaffolding: Copyright (c) 2018-2026 The go2cs Authors'
 $script:Go2csHolder = 'The go2cs Authors'
@@ -64,9 +114,10 @@ $script:Go2csHolder = 'The go2cs Authors'
 # Skip $false, Reason set).
 function Get-NugetgoAssemblyCopyright {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$LicenseFile)
+    # -Lines: the resolved lines (Resolve-NugetgoCopyright), in place of the license file's own.
+    param([Parameter(Mandatory)][string]$LicenseFile, [string[]]$Lines)
 
-    $lines = @(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile)
+    $lines = if ($PSBoundParameters.ContainsKey('Lines')) { @($Lines) } else { @(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) }
     if ($lines.Count -eq 0) {
         return [pscustomobject]@{ Copyright = $null; Skip = $false; Reason = "the upstream license file carries no Copyright line: $LicenseFile" }
     }
@@ -127,5 +178,6 @@ function New-NugetgoAssemblyMetadataTargets {
     ) -join "`r`n"
 }
 
-Export-ModuleMember -Function Get-NugetgoLicenseNames, Find-NugetgoModuleLicense, Get-NugetgoCopyrightLines, Get-NugetgoAssemblyCopyright,
+Export-ModuleMember -Function Get-NugetgoLicenseNames, Find-NugetgoModuleLicense, Get-NugetgoCopyrightLines, Get-NugetgoSourceCopyrightLines,
+    Resolve-NugetgoCopyright, Get-NugetgoAssemblyCopyright,
     ConvertTo-NugetgoMSBuildLiteral, Get-NugetgoTargetsMarker, New-NugetgoAssemblyMetadataTargets

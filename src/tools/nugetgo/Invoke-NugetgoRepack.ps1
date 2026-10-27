@@ -275,6 +275,8 @@ try {
             '-Scratch', (Join-Path $Work "scratch-$pack"), '-RepositoryUrl', $row.RepositoryUrl, '-Upstream', $row.Upstream,
             '-LicenseSpdx', $row.LicenseSpdx, '-Converter', $G)
         if ($row.UpstreamPublishes) { $packArgs += '-UpstreamPublishes' }
+        # A license with no Copyright line (cobra): the row states the holder, one of the module's source-header lines.
+        if ($row.Copyright) { $packArgs += @('-Copyright', $row.Copyright) }
         if ($readme) { $packArgs += @('-ConversionReadme', $readme) }
         # pwsh -File binds a repeated parameter as an error: each list goes once, comma-joined, and the pack splits it.
         if ($excluded) { $packArgs += @('-ExcludePackage', ($excluded -join ',')) }
