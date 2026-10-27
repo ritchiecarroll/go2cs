@@ -415,8 +415,8 @@ generated constructor that builds the zero value. Elsewhere, Go's `nil` usually 
 does, and panics if it is nil ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 
 **Some glyphs look like punctuation but are letters.** `ꓸ` (U+A4F8) is not a dot, `ᐧ` (U+1427) is not a
-middle dot, `ꟷ` (U+A7F7) is not a dash, and `ᴛ` (U+1D1B) is a small capital T. C# reads each one as part of
-a name, so `reflectꓸValue` is one identifier, not a member access.
+middle dot, `ꟷ` (U+A7F7) is not a dash, `ǃ` (U+01C3) is not an exclamation mark, and `ᴛ` (U+1D1B) is a small
+capital T. C# reads each one as part of a name, so `reflectꓸValue` is one identifier, not a member access.
 
 **The common glyphs.** Each row names a glyph or naming pattern, what it means, real examples from converted
 code, and the section that explains it in full.
@@ -437,7 +437,7 @@ code, and the section that explains it in full.
 | `ꓸꓸꓸ` as an argument | A channel send or receive that registers with a `select` instead of running at once | `ᐸꟷ(selᴛ2, ꓸꓸꓸ)` | [Channels and `select`](#channels-and-select) |
 | `ᐸꟷ`, `ꟷᐳ` | Channel send, receive, and receive inside `select` | `ch.ᐸꟷ(textˢ)`, `ᐸꟷ(done)`, `selᴛ2.ꟷᐳ(out var v)` | [Channels and `select`](#channels-and-select) |
 | `/*<-*/` | A channel's direction, kept as a comment: `/*<-*/channel<T>` is `<-chan T`, `channel/*<-*/<T>` is `chan<- T` | `/*<-*/channel<nint> src` | [Channels and `select`](#channels-and-select) |
-| `goǃ` | The `go` statement | `goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` | [Goroutines](#goroutines) |
+| `goǃ` | The `go` statement; the `ǃ` keeps the method's name apart from `go`, the namespace every converted file lives in | `goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` | [Goroutines](#goroutines) |
 | `ꟷ` | golib's `const bool ꟷ = false`. As an extra argument it picks the overload that returns `(value, ok)`, for a comma-ok receive or map lookup; its value is not used | `var (v, ok) = ᐸꟷ(d, ꟷ);`, `var (_, before) = seen[memo, ꟷ];` | [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
 | `ᐧ` | golib's `const bool ᐧ = true`. It is the `true` of a tagless switch or endless loop, and the extra argument of a comma-ok type assertion | `switch (ᐧ)`, `while (ᐧ)`, `err._<ж<PathError>>(ᐧ)` | [Expression Switch](#expression-switch-statements); [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
 | `._<T>()` | Type assertion `x.(T)`; with `ᐧ`, its comma-ok form | `i._<@string>()`, `err._<ж<PathError>>(ᐧ)` | [Empty Interface (`any`)](#empty-interface-any) |
@@ -8353,8 +8353,9 @@ The Reference states it: manual-conversions.md, "A panic raised inside an INLINE
 
 Go's `go` statement becomes a call to `goǃ`, a function in [golib](#the-golib-runtime-library), the
 runtime library every converted program uses ([`goǃ`](../src/core/golib/builtin.GoroutineLaunchers.cs)).
-`goǃ` runs the call on a new goroutine. The name ends in `ǃ`, a letter that looks like `!`, because a
-C# name cannot contain `!` ([glyphs](#reading-converted-code-names-and-glyphs)).
+`goǃ` runs the call on a new goroutine. The `ǃ` that ends the name is a letter that looks like `!`. It keeps
+the method's name apart from `go`, the C# namespace every converted file lives in
+([glyphs](#reading-converted-code-names-and-glyphs)).
 
 Each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
 from Go, and the last part of this section explains what it means for a program.
