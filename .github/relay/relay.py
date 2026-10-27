@@ -113,6 +113,28 @@ def emit(level, title, lines, cap=8, budget=3000):
     for i, chunk in enumerate(chunks, 1):
         print(f'::{level} title={esc_prop(f"{title} {i}/{len(chunks)}")}::{esc(chunk.rstrip())}')
 
+# relay/probe.txt, optional: "<package><TAB><test>" lines. For each, per RID: both sides' verdicts and every C# event of
+# that test (action, elapsed, output), for a question a count cannot answer (a passing test's own timing).
+probe = []
+probe_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'relay', 'probe.txt')
+if os.path.exists(probe_file):
+    for line in open(probe_file):
+        if '\t' not in line:
+            continue
+        pkg, name = line.rstrip('\n').split('\t', 1)
+        for rid in RIDS:
+            got = by_rid[rid].get(pkg)
+            if not got:
+                probe.append(f'{pkg} {name} {rid}: no record')
+                continue
+            go, cs = got[0].get('go') or {}, got[0].get('csharp') or {}
+            probe.append(f'{pkg} {name} {rid}: go={go.get(name, "-")} csharp={cs.get(name, "-")}')
+            record = results[rid].get(pkg)
+            for ev in (record or {}).get('events') or []:
+                if ev.get('test') == name and ev.get('action') in ('pass', 'fail', 'skip', 'output'):
+                    out = [l for l in str(ev.get('output') or '').splitlines() if l.strip()][:12]
+                    probe.append(f'   {ev.get("action")} elapsed={ev.get("elapsed")}' + (' | ' + ' / '.join(l[:200] for l in out) if out else ''))
+
 summary = f'run {run}: {len(pkgs)} row(s); records arm64 {len(by_rid["osx-arm64"])}, x64 {len(by_rid["osx-x64"])}'
 print(summary)
 emit('notice', f'relay {run} table', [summary] + table)
@@ -120,3 +142,5 @@ if details:
     emit('warning', f'relay {run} details', details)
 if failtext:
     emit('error', f'relay {run} failtext', failtext)
+if probe:
+    emit('notice', f'relay {run} probe', probe, cap=6)

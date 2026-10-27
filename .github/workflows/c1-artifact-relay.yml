@@ -50,3 +50,10 @@ jobs:
               echo "::warning title=relay $RUN::no artifact os-matrix-sweep-shard-darwin-$rid"
           done
           python3 -I .github/relay/relay.py "$RUN" "$RUNNER_TEMP/a"
+      # Its own step, so its annotations have their own per-step allowance.
+      - name: crash text
+        if: always()
+        shell: bash
+        env:
+          RUN: ${{ matrix.run }}
+        run: python3 -I .github/relay/crash.py "$RUN" "$RUNNER_TEMP/a"
