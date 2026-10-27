@@ -152,7 +152,7 @@ internal static partial void goElementReassigned() {
     ref var v = ref heap(new array<valueConn>(1), out var Ꮡv);
     v[0] = new valueConn(name: "first value", @out: @out);
     var vʗ1 = v;
-    goǃ(ᴛ0 => ᴛ0.Close(), vʗ1[0]);
+    goǃ(ᴛ0 => ᴛ0.Close(), vʗ1[0], GoStack.Bounded);
     v[0] = new valueConn(name: "second value", @out: @out);
     var got = new slice<@string>(0, 2);
     for (nint j = 0; j < 2; j++) {
