@@ -28,7 +28,7 @@ internal static error darwinOSRelease(/*[256]*/ ж<array<byte>> Ꮡrelease) {
     return sysctl(mib, Ꮡrelease.at<byte>(0), Ꮡn, nil, 0);
 }
 
-internal static ж<uintptr> Ꮡ_zero = new StandardBox<uintptr>(default(uintptr));
+internal static ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr _zero => ref Ꮡ_zero.Value; // Single-word zero for use when we need a valid pointer to 0 bytes.
 
 // from x/sys/unix/zsyscall_darwin_amd64.go L791-807

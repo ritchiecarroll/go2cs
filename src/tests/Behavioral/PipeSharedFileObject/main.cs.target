@@ -21,9 +21,9 @@ internal static UntypedInt pipeReadModeByte => 0x0;
 
 internal static ж<syscall.LazyDLL> kernel32 = syscall.NewLazyDLL("kernel32.dll");
 internal static ж<syscall.LazyProc> procCreateNamedPipe = kernel32.NewProc("CreateNamedPipeW");
-internal static ж<atomic.Uint64> Ꮡcounter = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ж<atomic.Uint64> Ꮡcounter = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 counter => ref Ꮡcounter.Value;
-internal static ж<atomic.Int64> Ꮡwritten = new StandardBox<atomic.Int64>(default(atomic.Int64));
+internal static ж<atomic.Int64> Ꮡwritten = new StaticBox<atomic.Int64>(default(atomic.Int64));
 internal static ref atomic.Int64 written => ref Ꮡwritten.Value;
 internal static slice<ж<os.File>> keep;
 

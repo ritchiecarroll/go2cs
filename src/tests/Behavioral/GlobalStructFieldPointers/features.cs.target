@@ -8,7 +8,7 @@ partial struct Featuresᴛ1 /*dyn*/ {
     public bool HasWide;
     public nint Level;
 }
-public static ж<Featuresᴛ1> ᏑFeatures = new StandardBox<Featuresᴛ1>(default(Featuresᴛ1));
+public static ж<Featuresᴛ1> ᏑFeatures = new StaticBox<Featuresᴛ1>(default(Featuresᴛ1));
 public static ref Featuresᴛ1 Features => ref ᏑFeatures.Value;
 
 partial struct option {

@@ -1,7 +1,7 @@
 # PLAN — the nugetgo first wave: hashset, uuid and jwt/v5
 
 > **STATUS: DRAFT (C2, 2026-10-09). Its four open questions were RULED by COORD on 2026-10-09 (section 5).**
-> Document type: an [instance plan](Glossary.md#plan). It supplies the first wave's values, readings, sequencing
+> Document type: an [instance plan](doctrine/ProcessGlossary.md#plan). It supplies the first wave's values, readings, sequencing
 > and rulings. The procedure is the runbook [`NugetgoPublish.md`](NugetgoPublish.md), referenced by section
 > number and never restated here. The wave itself is owner ruling B8 in [`PLAN-nugetgo.md`](PLAN-nugetgo.md),
 > section 8, and the order follows the [Roadmap](Roadmap.md): hashset leads, then uuid and jwt. When the wave

@@ -1052,7 +1052,7 @@ internal static (nint, error) flush(this ref Conn c) {
 }
 
 // outBufPool pools the record-sized scratch buffers used by writeRecordLocked.
-internal static ж<sync.Pool> ᏑoutBufPool = new StandardBox<sync.Pool>(new sync.Pool(
+internal static ж<sync.Pool> ᏑoutBufPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<slice<byte>>()
 ));
 internal static ref sync.Pool outBufPool => ref ᏑoutBufPool.Value;

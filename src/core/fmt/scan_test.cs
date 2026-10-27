@@ -43,79 +43,79 @@ partial struct ScanfMultiTest {
     internal @string err;
 }
 
-internal static ж<bool> ᏑboolVal = new StandardBox<bool>(default(bool));
+internal static ж<bool> ᏑboolVal = new StaticBox<bool>(default(bool));
 internal static ref bool boolVal => ref ᏑboolVal.Value;
-internal static ж<nint> ᏑintVal = new StandardBox<nint>(default(nint));
+internal static ж<nint> ᏑintVal = new StaticBox<nint>(default(nint));
 internal static ref nint intVal => ref ᏑintVal.Value;
-internal static ж<int8> Ꮡint8Val = new StandardBox<int8>(default(int8));
+internal static ж<int8> Ꮡint8Val = new StaticBox<int8>(default(int8));
 internal static ref int8 int8Val => ref Ꮡint8Val.Value;
-internal static ж<int16> Ꮡint16Val = new StandardBox<int16>(default(int16));
+internal static ж<int16> Ꮡint16Val = new StaticBox<int16>(default(int16));
 internal static ref int16 int16Val => ref Ꮡint16Val.Value;
-internal static ж<int32> Ꮡint32Val = new StandardBox<int32>(default(int32));
+internal static ж<int32> Ꮡint32Val = new StaticBox<int32>(default(int32));
 internal static ref int32 int32Val => ref Ꮡint32Val.Value;
-internal static ж<int64> Ꮡint64Val = new StandardBox<int64>(default(int64));
+internal static ж<int64> Ꮡint64Val = new StaticBox<int64>(default(int64));
 internal static ref int64 int64Val => ref Ꮡint64Val.Value;
-internal static ж<nuint> ᏑuintVal = new StandardBox<nuint>(default(nuint));
+internal static ж<nuint> ᏑuintVal = new StaticBox<nuint>(default(nuint));
 internal static ref nuint uintVal => ref ᏑuintVal.Value;
-internal static ж<uint8> Ꮡuint8Val = new StandardBox<uint8>(default(uint8));
+internal static ж<uint8> Ꮡuint8Val = new StaticBox<uint8>(default(uint8));
 internal static ref uint8 uint8Val => ref Ꮡuint8Val.Value;
-internal static ж<uint16> Ꮡuint16Val = new StandardBox<uint16>(default(uint16));
+internal static ж<uint16> Ꮡuint16Val = new StaticBox<uint16>(default(uint16));
 internal static ref uint16 uint16Val => ref Ꮡuint16Val.Value;
-internal static ж<uint32> Ꮡuint32Val = new StandardBox<uint32>(default(uint32));
+internal static ж<uint32> Ꮡuint32Val = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 uint32Val => ref Ꮡuint32Val.Value;
-internal static ж<uint64> Ꮡuint64Val = new StandardBox<uint64>(default(uint64));
+internal static ж<uint64> Ꮡuint64Val = new StaticBox<uint64>(default(uint64));
 internal static ref uint64 uint64Val => ref Ꮡuint64Val.Value;
-internal static ж<uintptr> ᏑuintptrVal = new StandardBox<uintptr>(default(uintptr));
+internal static ж<uintptr> ᏑuintptrVal = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr uintptrVal => ref ᏑuintptrVal.Value;
-internal static ж<float32> Ꮡfloat32Val = new StandardBox<float32>(default(float32));
+internal static ж<float32> Ꮡfloat32Val = new StaticBox<float32>(default(float32));
 internal static ref float32 float32Val => ref Ꮡfloat32Val.Value;
-internal static ж<float64> Ꮡfloat64Val = new StandardBox<float64>(default(float64));
+internal static ж<float64> Ꮡfloat64Val = new StaticBox<float64>(default(float64));
 internal static ref float64 float64Val => ref Ꮡfloat64Val.Value;
-internal static ж<@string> ᏑstringVal = new StandardBox<@string>(default(@string));
+internal static ж<@string> ᏑstringVal = new StaticBox<@string>(default(@string));
 internal static ref @string stringVal => ref ᏑstringVal.Value;
-internal static ж<slice<byte>> ᏑbytesVal = new StandardBox<slice<byte>>(default(slice<byte>));
+internal static ж<slice<byte>> ᏑbytesVal = new StaticBox<slice<byte>>(default(slice<byte>));
 internal static ref slice<byte> bytesVal => ref ᏑbytesVal.ValueSlot;
-internal static ж<rune> ᏑruneVal = new StandardBox<rune>(default(rune));
+internal static ж<rune> ᏑruneVal = new StaticBox<rune>(default(rune));
 internal static ref rune runeVal => ref ᏑruneVal.Value;
-internal static ж<complex64> Ꮡcomplex64Val = new StandardBox<complex64>(default(complex64));
+internal static ж<complex64> Ꮡcomplex64Val = new StaticBox<complex64>(default(complex64));
 internal static ref complex64 complex64Val => ref Ꮡcomplex64Val.Value;
-internal static ж<complex128> Ꮡcomplex128Val = new StandardBox<complex128>(default(complex128));
+internal static ж<complex128> Ꮡcomplex128Val = new StaticBox<complex128>(default(complex128));
 internal static ref complex128 complex128Val => ref Ꮡcomplex128Val.Value;
-internal static ж<renamedBool> ᏑrenamedBoolVal = new StandardBox<renamedBool>(default(renamedBool));
+internal static ж<renamedBool> ᏑrenamedBoolVal = new StaticBox<renamedBool>(default(renamedBool));
 internal static ref renamedBool renamedBoolVal => ref ᏑrenamedBoolVal.Value;
-internal static ж<renamedInt> ᏑrenamedIntVal = new StandardBox<renamedInt>(default(renamedInt));
+internal static ж<renamedInt> ᏑrenamedIntVal = new StaticBox<renamedInt>(default(renamedInt));
 internal static ref renamedInt renamedIntVal => ref ᏑrenamedIntVal.Value;
-internal static ж<renamedInt8> ᏑrenamedInt8Val = new StandardBox<renamedInt8>(default(renamedInt8));
+internal static ж<renamedInt8> ᏑrenamedInt8Val = new StaticBox<renamedInt8>(default(renamedInt8));
 internal static ref renamedInt8 renamedInt8Val => ref ᏑrenamedInt8Val.Value;
-internal static ж<renamedInt16> ᏑrenamedInt16Val = new StandardBox<renamedInt16>(default(renamedInt16));
+internal static ж<renamedInt16> ᏑrenamedInt16Val = new StaticBox<renamedInt16>(default(renamedInt16));
 internal static ref renamedInt16 renamedInt16Val => ref ᏑrenamedInt16Val.Value;
-internal static ж<renamedInt32> ᏑrenamedInt32Val = new StandardBox<renamedInt32>(default(renamedInt32));
+internal static ж<renamedInt32> ᏑrenamedInt32Val = new StaticBox<renamedInt32>(default(renamedInt32));
 internal static ref renamedInt32 renamedInt32Val => ref ᏑrenamedInt32Val.Value;
-internal static ж<renamedInt64> ᏑrenamedInt64Val = new StandardBox<renamedInt64>(default(renamedInt64));
+internal static ж<renamedInt64> ᏑrenamedInt64Val = new StaticBox<renamedInt64>(default(renamedInt64));
 internal static ref renamedInt64 renamedInt64Val => ref ᏑrenamedInt64Val.Value;
-internal static ж<renamedUint> ᏑrenamedUintVal = new StandardBox<renamedUint>(default(renamedUint));
+internal static ж<renamedUint> ᏑrenamedUintVal = new StaticBox<renamedUint>(default(renamedUint));
 internal static ref renamedUint renamedUintVal => ref ᏑrenamedUintVal.Value;
-internal static ж<renamedUint8> ᏑrenamedUint8Val = new StandardBox<renamedUint8>(default(renamedUint8));
+internal static ж<renamedUint8> ᏑrenamedUint8Val = new StaticBox<renamedUint8>(default(renamedUint8));
 internal static ref renamedUint8 renamedUint8Val => ref ᏑrenamedUint8Val.Value;
-internal static ж<renamedUint16> ᏑrenamedUint16Val = new StandardBox<renamedUint16>(default(renamedUint16));
+internal static ж<renamedUint16> ᏑrenamedUint16Val = new StaticBox<renamedUint16>(default(renamedUint16));
 internal static ref renamedUint16 renamedUint16Val => ref ᏑrenamedUint16Val.Value;
-internal static ж<renamedUint32> ᏑrenamedUint32Val = new StandardBox<renamedUint32>(default(renamedUint32));
+internal static ж<renamedUint32> ᏑrenamedUint32Val = new StaticBox<renamedUint32>(default(renamedUint32));
 internal static ref renamedUint32 renamedUint32Val => ref ᏑrenamedUint32Val.Value;
-internal static ж<renamedUint64> ᏑrenamedUint64Val = new StandardBox<renamedUint64>(default(renamedUint64));
+internal static ж<renamedUint64> ᏑrenamedUint64Val = new StaticBox<renamedUint64>(default(renamedUint64));
 internal static ref renamedUint64 renamedUint64Val => ref ᏑrenamedUint64Val.Value;
-internal static ж<renamedUintptr> ᏑrenamedUintptrVal = new StandardBox<renamedUintptr>(default(renamedUintptr));
+internal static ж<renamedUintptr> ᏑrenamedUintptrVal = new StaticBox<renamedUintptr>(default(renamedUintptr));
 internal static ref renamedUintptr renamedUintptrVal => ref ᏑrenamedUintptrVal.Value;
-internal static ж<renamedString> ᏑrenamedStringVal = new StandardBox<renamedString>(default(renamedString));
+internal static ж<renamedString> ᏑrenamedStringVal = new StaticBox<renamedString>(default(renamedString));
 internal static ref renamedString renamedStringVal => ref ᏑrenamedStringVal.Value;
-internal static ж<renamedBytes> ᏑrenamedBytesVal = new StandardBox<renamedBytes>(default(renamedBytes));
+internal static ж<renamedBytes> ᏑrenamedBytesVal = new StaticBox<renamedBytes>(default(renamedBytes));
 internal static ref renamedBytes renamedBytesVal => ref ᏑrenamedBytesVal.ValueSlot;
-internal static ж<renamedFloat32> ᏑrenamedFloat32Val = new StandardBox<renamedFloat32>(default(renamedFloat32));
+internal static ж<renamedFloat32> ᏑrenamedFloat32Val = new StaticBox<renamedFloat32>(default(renamedFloat32));
 internal static ref renamedFloat32 renamedFloat32Val => ref ᏑrenamedFloat32Val.Value;
-internal static ж<renamedFloat64> ᏑrenamedFloat64Val = new StandardBox<renamedFloat64>(default(renamedFloat64));
+internal static ж<renamedFloat64> ᏑrenamedFloat64Val = new StaticBox<renamedFloat64>(default(renamedFloat64));
 internal static ref renamedFloat64 renamedFloat64Val => ref ᏑrenamedFloat64Val.Value;
-internal static ж<renamedComplex64> ᏑrenamedComplex64Val = new StandardBox<renamedComplex64>(default(renamedComplex64));
+internal static ж<renamedComplex64> ᏑrenamedComplex64Val = new StaticBox<renamedComplex64>(default(renamedComplex64));
 internal static ref renamedComplex64 renamedComplex64Val => ref ᏑrenamedComplex64Val.Value;
-internal static ж<renamedComplex128> ᏑrenamedComplex128Val = new StandardBox<renamedComplex128>(default(renamedComplex128));
+internal static ж<renamedComplex128> ᏑrenamedComplex128Val = new StaticBox<renamedComplex128>(default(renamedComplex128));
 internal static ref renamedComplex128 renamedComplex128Val => ref ᏑrenamedComplex128Val.Value;
 
 // Xs accepts any non-empty run of the verb character
@@ -137,7 +137,7 @@ public static error Scan(this ref Xs x, fmt.ScanState state, rune verb) {
     return default!;
 }
 
-internal static ж<Xs> ᏑxVal = new StandardBox<Xs>(default(Xs));
+internal static ж<Xs> ᏑxVal = new StaticBox<Xs>(default(Xs));
 internal static ref Xs xVal => ref ᏑxVal.Value;
 
 // IntString accepts an integer followed immediately by a string.
@@ -164,7 +164,7 @@ public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb
     return default!;
 }
 
-internal static ж<IntString> ᏑintStringVal = new StandardBox<IntString>(default(IntString));
+internal static ж<IntString> ᏑintStringVal = new StaticBox<IntString>(default(IntString));
 internal static ref IntString intStringVal => ref ᏑintStringVal.Value;
 
 internal static slice<ScanTest> scanTests = new ScanTest[]{
@@ -484,40 +484,40 @@ internal static slice<ScanTest> overflowTests = new ScanTest[]{
     new("(1-1e500i)"u8, Ꮡcomplex128Val, (nint)0)
 }.slice();
 
-internal static ж<bool> Ꮡtruth = new StandardBox<bool>(default(bool));
+internal static ж<bool> Ꮡtruth = new StaticBox<bool>(default(bool));
 internal static ref bool truth => ref Ꮡtruth.Value;
 
-internal static ж<nint> Ꮡi = new StandardBox<nint>(default(nint));
+internal static ж<nint> Ꮡi = new StaticBox<nint>(default(nint));
 internal static ref nint i => ref Ꮡi.Value;
-internal static ж<nint> Ꮡj = new StandardBox<nint>(default(nint));
+internal static ж<nint> Ꮡj = new StaticBox<nint>(default(nint));
 internal static ref nint j => ref Ꮡj.Value;
-internal static ж<nint> Ꮡk = new StandardBox<nint>(default(nint));
+internal static ж<nint> Ꮡk = new StaticBox<nint>(default(nint));
 internal static ref nint k => ref Ꮡk.Value;
 
-internal static ж<float64> Ꮡf = new StandardBox<float64>(default(float64));
+internal static ж<float64> Ꮡf = new StaticBox<float64>(default(float64));
 internal static ref float64 f => ref Ꮡf.Value;
 
-internal static ж<@string> Ꮡs = new StandardBox<@string>(default(@string));
+internal static ж<@string> Ꮡs = new StaticBox<@string>(default(@string));
 internal static ref @string s => ref Ꮡs.Value;
-internal static ж<@string> Ꮡt = new StandardBox<@string>(default(@string));
+internal static ж<@string> Ꮡt = new StaticBox<@string>(default(@string));
 internal static ref @string t => ref Ꮡt.Value;
 
-internal static ж<complex128> Ꮡc = new StandardBox<complex128>(default(complex128));
+internal static ж<complex128> Ꮡc = new StaticBox<complex128>(default(complex128));
 internal static ref complex128 c => ref Ꮡc.Value;
 
-internal static ж<Xs> Ꮡx = new StandardBox<Xs>(default(Xs));
+internal static ж<Xs> Ꮡx = new StaticBox<Xs>(default(Xs));
 internal static ref Xs x => ref Ꮡx.Value;
-internal static ж<Xs> Ꮡy = new StandardBox<Xs>(default(Xs));
+internal static ж<Xs> Ꮡy = new StaticBox<Xs>(default(Xs));
 internal static ref Xs y => ref Ꮡy.Value;
 
-internal static ж<IntString> Ꮡz = new StandardBox<IntString>(default(IntString));
+internal static ж<IntString> Ꮡz = new StaticBox<IntString>(default(IntString));
 internal static ref IntString z => ref Ꮡz.Value;
 
-internal static ж<rune> Ꮡr1 = new StandardBox<rune>(default(rune));
+internal static ж<rune> Ꮡr1 = new StaticBox<rune>(default(rune));
 internal static ref rune r1 => ref Ꮡr1.Value;
-internal static ж<rune> Ꮡr2 = new StandardBox<rune>(default(rune));
+internal static ж<rune> Ꮡr2 = new StaticBox<rune>(default(rune));
 internal static ref rune r2 => ref Ꮡr2.Value;
-internal static ж<rune> Ꮡr3 = new StandardBox<rune>(default(rune));
+internal static ж<rune> Ꮡr3 = new StaticBox<rune>(default(rune));
 internal static ref rune r3 => ref Ꮡr3.Value;
 
 internal static slice<ScanfMultiTest> multiTests = new ScanfMultiTest[]{

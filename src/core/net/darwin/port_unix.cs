@@ -11,7 +11,7 @@ using @internal;
 
 partial class net_package {
 
-internal static ж<Δsync.Once> ᏑonceReadServices = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ж<Δsync.Once> ᏑonceReadServices = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceReadServices => ref ᏑonceReadServices.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -1102,7 +1102,9 @@ internal static class PackageAncestry
     // and math/big's TestEscape child ran in the staged copy (cmd/go: "package std/math/big … use of internal
     // package internal/byteorder not allowed") on both mac RIDs (go1.26.10 D-W2). Every answer the lexical
     // test gave is kept; the realpath arm admits only a symlink spelling of a directory inside the staged
-    // root, never a sibling. Guarded by GolibTests' HelperSandboxContainmentTests.
+    // root, never a sibling, and asks the directory's physical spelling before following its own links, so a
+    // directory under a staged fixture link still counts as inside. Guarded by GolibTests'
+    // HelperSandboxContainmentTests.
     internal static string? ComposeStagedToolchainDirectory(string goTool, string stagedRoot, string realRoot, string executable, string directory)
     {
         StringComparison paths = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -1117,10 +1119,16 @@ internal static class PackageAncestry
         string full = Path.GetFullPath(directory);
         string relative = Path.GetRelativePath(stagedRoot, full);
 
-        if (EscapesRoot(relative) && !OperatingSystem.IsWindows() &&
-            TestHost.RealPath(stagedRoot) is { } canonicalRoot && TestHost.RealPath(full) is { } canonicalDirectory)
+        // The physical spelling is asked against the canonical root FIRST, before the directory's own links are
+        // resolved: a relative cmd.Dir resolves against getcwd(), so `full` is already physical, and realpath of
+        // the whole directory can follow a staged fixture link out of the root (cfile's TestIssue59563, whose
+        // testdata is a link to the real tree; seat #8 (b), run 40396761653).
+        if (EscapesRoot(relative) && !OperatingSystem.IsWindows() && TestHost.RealPath(stagedRoot) is { } canonicalRoot)
         {
-            relative = Path.GetRelativePath(canonicalRoot, canonicalDirectory);
+            relative = Path.GetRelativePath(canonicalRoot, full);
+
+            if (EscapesRoot(relative) && TestHost.RealPath(full) is { } canonicalDirectory)
+                relative = Path.GetRelativePath(canonicalRoot, canonicalDirectory);
         }
 
         if (EscapesRoot(relative))

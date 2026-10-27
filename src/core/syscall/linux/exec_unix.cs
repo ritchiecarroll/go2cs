@@ -463,6 +463,64 @@ internal static @string composeChildDirectory(@string argv0, @string dir) {
     return composed;
 }
 
+// go2cs HOST SEAM (not in Go), the environment half of childDirectoryComposer: a child the host moved
+// keeps a PWD that names where it now starts. Go's os/exec sets PWD to cmd.Dir, so when the composer
+// moves that directory, a PWD naming the SAME directory by another spelling (realpath-equal, as a staged
+// fixture link is to its target) would make the child's os.Getwd answer the old spelling: cfile's
+// TestIssue59563 child cmd/go then walked up to the staged ancestry's go.mod and read it as a module
+// named std. Such a PWD is respelled as the new directory, the darwin twin of this is exec_libc2_impl.cs,
+// and windows has no PWD to keep. Any other PWD, and every child the composer leaves alone, keeps its
+// environment exactly.
+internal static slice<@string> respellChildPwd(slice<@string> env, @string dir) {
+    string target = dir.ToString();
+    string? canonicalTarget = spawnCanonicalPath(target);
+
+    if (canonicalTarget is null) {
+        return env;
+    }
+
+    for (nint i = len(env) - 1; i >= 0; i--) {
+        string entry = env[i].ToString();
+
+        if (!entry.StartsWith("PWD=", StringComparison.Ordinal)) {
+            continue;
+        }
+
+        string pwd = entry[4..];
+
+        if (pwd == target || !pwd.StartsWith('/') || spawnCanonicalPath(pwd) != canonicalTarget) {
+            return env;
+        }
+
+        var entries = new @string[(int)len(env)];
+
+        for (nint j = 0; j < len(env); j++) {
+            entries[j] = env[j];
+        }
+
+        entries[i] = "PWD=" + target;
+        return new slice<@string>(entries);
+    }
+
+    return env;
+}
+
+// realpath(3) with a NULL buffer, freed here; null on any failure.
+internal static string? spawnCanonicalPath(string path) {
+    IntPtr resolved = spawnRealpath(path, IntPtr.Zero);
+
+    if (resolved == IntPtr.Zero) {
+        return null;
+    }
+
+    try {
+        return System.Runtime.InteropServices.Marshal.PtrToStringUTF8(resolved);
+    }
+    finally {
+        spawnFree(resolved);
+    }
+}
+
 internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr, ref SysProcAttr sys) {
     // glibc's opaque control blocks, driven only through their init/destroy/add functions —
     // never by layout knowledge. The allocations are generous over the real glibc sizes
@@ -479,7 +537,12 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
     try {
         pathz = MarshalStringZ(argv0);
         argvVec = MarshalStringVector(argv);
-        envVec = MarshalStringVector(attr.Env);
+
+        // The directory is composed BEFORE the environment is marshalled, so a child the host moves
+        // keeps a PWD that names where it starts (respellChildPwd).
+        @string dir = composeChildDirectory(argv0, attr.Dir);
+
+        envVec = MarshalStringVector(dir == attr.Dir ? attr.Env : respellChildPwd(attr.Env, dir));
 
         fileActions = System.Runtime.InteropServices.Marshal.AllocHGlobal(128);
         int rc = posix_spawn_file_actions_init(fileActions);
@@ -499,9 +562,7 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
 
         // The child's working directory rides an action so it happens child-side, in order,
         // before exec — glibc ≥ 2.29; probed by call per the design's OQ-5 (never by version
-        // string), with the miss surfacing as a NAMED error.
-        @string dir = composeChildDirectory(argv0, attr.Dir);
-
+        // string), with the miss surfacing as a NAMED error. `dir` was composed above.
         if (dir != ""u8) {
             dirz = MarshalStringZ(dir);
             try {
@@ -807,6 +868,12 @@ internal static extern int posix_spawn_file_actions_addclose(IntPtr fileActions,
 
 [System.Runtime.InteropServices.DllImport("libc", SetLastError = false)]
 internal static extern int posix_spawn_file_actions_addchdir_np(IntPtr fileActions, IntPtr path);
+
+[System.Runtime.InteropServices.DllImport("libc", SetLastError = false, EntryPoint = "realpath")]
+internal static extern IntPtr spawnRealpath([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string path, IntPtr resolved);
+
+[System.Runtime.InteropServices.DllImport("libc", SetLastError = false, EntryPoint = "free")]
+internal static extern void spawnFree(IntPtr pointer);
 
 [System.Runtime.InteropServices.DllImport("libc", SetLastError = false)]
 internal static extern int posix_spawnattr_init(IntPtr attrp);

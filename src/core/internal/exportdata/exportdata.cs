@@ -357,7 +357,7 @@ notfound:
 
 internal static array<@string> pkgExts = new @string[]{".a"u8, ".o"u8}.array(); // a file from the build cache will have no extension
 
-internal static ж<sync.Map> ᏑexportMap = new StandardBox<sync.Map>(default(sync.Map));
+internal static ж<sync.Map> ᏑexportMap = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map exportMap => ref ᏑexportMap.Value; // package dir → func() (string, error)
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

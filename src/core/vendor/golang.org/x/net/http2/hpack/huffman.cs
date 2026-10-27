@@ -10,7 +10,7 @@ using sync = sync_package;
 
 partial class hpack_package {
 
-[GoLazy] partial class lazyᴛbufPool { internal static ж<sync.Pool> ᏑbufPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛbufPool { internal static ж<sync.Pool> ᏑbufPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<bytes.Buffer>()
 )); }
 internal static ref sync.Pool bufPool => ref ᏑbufPool.Value;
@@ -143,7 +143,7 @@ internal static ж<node> newInternalNode() {
     return Ꮡ(new node(children: Ꮡ(new array<ж<node>>(256))));
 }
 
-internal static ж<sync.Once> ᏑbuildRootOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑbuildRootOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once buildRootOnce => ref ᏑbuildRootOnce.Value;
 internal static ж<node> lazyRootHuffmanNode;
 

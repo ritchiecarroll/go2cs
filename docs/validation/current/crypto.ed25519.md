@@ -41,7 +41,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: the run loop builds seed/message slices, derives a key, signs and verifies -- every step allocates in the managed model (golib slices, ж boxes, edwards25519 scalar/point state) where Go's escape analysis and fixed-size arrays keep the whole round on the stack. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. The relabel census's STRUCTURAL proposal (CENSUS c8e6ca9034:95) is refused: the entry is a MIXTURE, and its edwards25519 share moves with crypto/internal/fips140test's to deferred (X(3)). RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 9,503 per run at go1.24.13 to 4,312 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: the run loop builds seed/message slices, derives a key, signs and verifies -- every step allocates in the managed model (golib slices, ж boxes, edwards25519 scalar/point state) where Go's escape analysis and fixed-size arrays keep the whole round on the stack. The converted path counts 4,312 objects per run on windows and linux, a lower bound. Deferred, not a floor: the edwards25519 temporaries, the address-take and receiver boxes and the Scalar/fiat arrays are each storage Go keeps off the heap, and each has planned work that removes it; the entry retires only at zero bytes. |
 
 ## Excluded declarations
 

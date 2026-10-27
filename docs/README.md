@@ -91,7 +91,8 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 ## Requirements
 
 - **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
-- **[Go 1.26.10](https://go.dev/dl/)**, exactly that release. The converter is a Go program and uses
+- **[Go 1.26](https://go.dev/dl/)**, any 1.26.x release, to convert a module. The standard library
+  packages are converted from, and validated on, Go 1.26.10. The converter is a Go program and uses
   the Go toolchain to load and type-check the source it converts, so that source must already build
   with `go build`. The [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own

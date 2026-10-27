@@ -53,7 +53,7 @@ partial struct gccgoDirs {
 
 // gccgoSearch is used to check whether a gccgo package exists in the
 // standard library.
-internal static ж<gccgoDirs> ᏑgccgoSearch = new StandardBox<gccgoDirs>(default(gccgoDirs));
+internal static ж<gccgoDirs> ᏑgccgoSearch = new StaticBox<gccgoDirs>(default(gccgoDirs));
 internal static ref gccgoDirs gccgoSearch => ref ᏑgccgoSearch.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

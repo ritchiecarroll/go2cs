@@ -30,7 +30,10 @@
         ExcludePackage    = @()
         ConversionReadme  = ''
         Kit               = 'claude/c2-nugetgo-uuid-1.6.0'
-        Expect            = @{ 'github.com/google/uuid' = @(54, 0) }
+        # TestVersion6 is disclosed and timing-sensitive (COORD ruling 2026-10-26): a run reads 53 + 1 when the converted
+        # side fails it, or 54 + 0 with the entry orphaned when it passes. Either is banked as read; nothing else is.
+        Expect            = @{ 'github.com/google/uuid' = @(53, 1) }
+        ExpectOrphaned    = @{ 'github.com/google/uuid' = @{ Counts = @(54, 0); Orphan = 'TestVersion6' } }
     }
     'github.com/golang-jwt/jwt/v5@v5.3.1' = @{
         RepositoryUrl     = 'https://github.com/ritchiecarroll/jwt-cs'

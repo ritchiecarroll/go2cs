@@ -71,16 +71,16 @@ public static float64 NaN = Δmath.NaN();
 internal static float64 posInf = Δmath.Inf(1);
 internal static float64 negInf = Δmath.Inf(-1);
 
-internal static ж<nint> ᏑintVar = new StandardBox<nint>(0);
+internal static ж<nint> ᏑintVar = new StaticBox<nint>(0);
 internal static ref nint intVar => ref ᏑintVar.Value;
 
-internal static ж<array<nint>> ᏑΔarray = new StandardBox<array<nint>>(new nint[]{1, 2, 3, 4, 5}.array());
+internal static ж<array<nint>> ᏑΔarray = new StaticBox<array<nint>>(new nint[]{1, 2, 3, 4, 5}.array());
 internal static ref array<nint> Δarray => ref ᏑΔarray.Value;
-internal static ж<array<any>> Ꮡiarray = new StandardBox<array<any>>(new any[]{(nint)1, (@string)"hello"u8, 2.5D, default!}.array());
+internal static ж<array<any>> Ꮡiarray = new StaticBox<array<any>>(new any[]{(nint)1, (@string)"hello"u8, 2.5D, default!}.array());
 internal static ref array<any> iarray => ref Ꮡiarray.Value;
-internal static ж<slice<nint>> ᏑΔslice = new StandardBox<slice<nint>>(Δarray[..]);
+internal static ж<slice<nint>> ᏑΔslice = new StaticBox<slice<nint>>(Δarray[..]);
 internal static ref slice<nint> Δslice => ref ᏑΔslice.ValueSlot;
-internal static ж<slice<any>> Ꮡislice = new StandardBox<slice<any>>(iarray[..]);
+internal static ж<slice<any>> Ꮡislice = new StaticBox<slice<any>>(iarray[..]);
 internal static ref slice<any> islice => ref Ꮡislice.ValueSlot;
 
 partial struct A {
@@ -130,7 +130,7 @@ partial struct SI {
 // P is a type with a String method with pointer receiver for testing %p.
 partial struct P /*num:nint*/;
 
-internal static ж<P> ᏑpValue = new StandardBox<P>(default(P));
+internal static ж<P> ᏑpValue = new StaticBox<P>(default(P));
 internal static ref P pValue => ref ᏑpValue.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -155,10 +155,10 @@ partial struct U {
     internal Fn fn;
 }
 
-internal static ж<array<renamedUint8>> Ꮡbarray = new StandardBox<array<renamedUint8>>(new renamedUint8[]{1, 2, 3, 4, 5}.array());
+internal static ж<array<renamedUint8>> Ꮡbarray = new StaticBox<array<renamedUint8>>(new renamedUint8[]{1, 2, 3, 4, 5}.array());
 internal static ref array<renamedUint8> barray => ref Ꮡbarray.Value;
 
-internal static ж<slice<renamedUint8>> Ꮡbslice = new StandardBox<slice<renamedUint8>>(barray[..]);
+internal static ж<slice<renamedUint8>> Ꮡbslice = new StaticBox<slice<renamedUint8>>(barray[..]);
 internal static ref slice<renamedUint8> bslice => ref Ꮡbslice.ValueSlot;
 
 partial struct byteStringer /*num:byte*/;
@@ -1556,7 +1556,7 @@ public static void BenchmarkFprintIntNoAlloc(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-internal static ж<bytes.Buffer> ᏑmallocBuf = new StandardBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ж<bytes.Buffer> ᏑmallocBuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
 internal static ref bytes.Buffer mallocBuf => ref ᏑmallocBuf.Value;
 
 internal static ж<nint> mallocPointer; // A pointer so we know the interface value won't allocate.

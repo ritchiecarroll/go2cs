@@ -28639,6 +28639,35 @@ on Apple silicon. This row is the first measured consequence, not the whole of i
 
 — P2 (2026-10-25)
 
+**Amended 2026-10-26 (C1, seat #8 (a), COORD ruled OPTION 2, per OS) — FIXED on claude/c1-darwin-harness-2 @ 4f245d9f4b.**
+A test declared in a `_test.go` file that some architecture its target GOOS ships does not build now leaves the run
+on EVERY RID of that GOOS. Its name joins the -skip string handed to both sides, as a host-fatal test's does
+(src/go2cs/testTargetArch.go; `shippedGOARCHs`: darwin amd64 + arm64, windows and linux amd64 alone). It is read
+from the source and the shipped set, so both mac RIDs answer the same, and nothing leaves on windows or linux. It
+is not a disclosure. The comparison record names each one in `targetArchExcluded` (omitempty). The row's proof
+page lists them under "Withdrawn where a shipped architecture does not build the test", with the reason ("… is not
+built for darwin/arm64 (//go:build …); one darwin build serves both RIDs"), whatever platform writes the page.
+Option 1 (per host) was set aside: arm64 alone would withdraw, the two RIDs' counts would part, and three rows
+banked today would unbank.
+
+The split this row owed, at darwin/amd64 + purego over std: 14 tests, 9 files, 5 rows. P2 counted 33 files that
+name amd64; the other 24 also admit arm64, or fall outside the pure-Go conversion.
+
+| Row | Withdrawn on darwin | Roster darwin today | Re-bank reads (predicted) |
+|:--|:--|:--|:--|
+| crypto/sha1 | TestOutOfBoundsRead | none (the RIDs disagreed) | **13** on both RIDs |
+| internal/cpu | 7: TestX86ifAVX2hasAVX, TestX86ifAVX512FhasAVX2, TestX86ifAVX512BWhasAVX512F, TestX86ifAVX512VLhasAVX512F, TestDisableSSE3, TestSSE3DebugOption, TestDataCacheSizes | 9 | **2** |
+| internal/runtime/gc/scan | 3: TestExpandAVX512, TestFilterNilAVX512, TestScanSpanPackedAVX512 | 3095 | **3092** |
+| math/big | TestAddMulVVWWNoADX | 248 + 3 | **247 + 3** |
+| runtime | TestHasAVX, TestStartLineAsm | none | (unbanked; two fewer verdicts) |
+
+**Measured,** filter `crypto/sha1,internal/coverage/cfile,testing`, dotnet 10.0.402:
+- **crypto/sha1, base d269ef477b (run 40396727836):** osx-x64 reads count 14 against the windows column 13; osx-arm64 FAILs TestOutOfBoundsRead.
+- **crypto/sha1, seat (runs 40396761653 and 40400361240):** PASS 13 on BOTH RIDs.
+- **Windows (run 40396858971) and linux (run 40400396727):** crypto/sha1 is unchanged, at 13 and 14.
+
+The seat moves no roster count. The 1.26.10.2 re-bank reads the counts above.
+
 ## 2026-10-25 — P2: darwin libc arguments that still cross as order tokens — the same class as writev/readdir_r, unreached in std
 
 **What happens.** darwin's libc funnel leaves an order token for any pointee that holds a non-nil Go pointer (the
@@ -28745,6 +28774,21 @@ The converted `os.Getwd` is Go's, `$PWD` shortcut and all. Only the host bypasse
 
 — G (2026-10-26)
 
+**Amended 2026-10-26 (C1, seat #8 (c), fix B) — FIXED on claude/c1-darwin-harness-2 @ dfc7539c27.**
+`TestExecution.GoWorkingDirectory` calls the converted `os.Getwd`, which keeps PWD's logical spelling when it names
+".". Both of this row's sites use it: `TestExecution.Chdir`'s relative PWD and `TestRunner.ArtifactRoot`'s
+`filepath.Abs`. Windows keeps getcwd, as Go skips PWD there.
+
+Guard: GolibTests `TestChdirLifecycleTests.TheWorkingDirectoryKeepsPwdsLogicalSpellingUnderASymlink`. It makes a
+symlinked cwd, so linux runs the darwin shape. It went red first under GoTargetOS=linux at each site in turn:
+`t.Chdir(".")` read `<root>/real`, then, with the Chdir hunk alone, the artifact root read `<root>/real/_artifacts`.
+
+**Measured** (darwin, filter `crypto/sha1,internal/coverage/cfile,testing`):
+- At base d269ef477b (run 40396727836), testing FAILs on both RIDs. The oracle names `TestChdir/current_(relative)_with_extra_os.Chdir`.
+- At the seat (runs 40396761653 and 40400361240), testing FAILs on both RIDs with `TestChdir/relative` named instead. That is the disclosed-in-waiting host-identity case, fix A's, not this seat's.
+- The tail names one divergence. The full set, including TestArtifactDirDefault, is the i9's read of the row output.
+- Linux and windows: testing 83 at base and seat.
+
 ## 2026-10-26 — G (COORD's ruling): place the test host's run root under realpath($TMPDIR) on unix (A) — POST-PUBLISH, needs a broad darwin re-proof
 
 The darwin `/var -> /private/var` symlink has now reached this host three ways: helper recognition (fixed in-hop),
@@ -28836,6 +28880,274 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
   today's emission and output-compared with Go.
 
 — P2 (2026-10-26)
+
+## 2026-10-26 — G (COORD's wave, the .2 headline's design): windows `syscall.ForkLock`'s hand-own has no box while its converter twin and every importer's predicate say it does — LATENT, fixed in the headline seat
+
+**What happens.** The owner arm `markExportedBoxOnlyGlobals` boxes `syscall.ForkLock` on every target, and
+`importedGlobalIsBoxed` re-runs that predicate for an importer. On windows the compiled file is the hand-own
+`src/core/syscall/windows/exec_windows.cs`, which declares `public static Δsync.RWMutex ForkLock;`, a plain field.
+Its re-emitted twin `exec_windows.cs.auto` declares the box. So an importer's `syscall.ForkLock.RLock()` on windows
+would emit `syscall.ᏑForkLock` against a member the compiled `syscall` does not have: CS0117.
+
+**Why nothing fails.** No windows emission names `syscall.ᏑForkLock`. Its importers are all unix flavours
+(`internal/poll` on linux and darwin, `os` and `net` on darwin), and the linux and darwin `syscall` both declare the
+box (linux's hand-own, darwin's converted file). Found by the census of
+[`DESIGN-crosspkg-exported-box.md`](DESIGN-crosspkg-exported-box.md), which reads the compiled emission rather than
+the converter's twin.
+
+**Owed (the headline seat, OQ-3 of that note):**
+- Box `ForkLock` in the windows hand-own.
+- Add a guard: every whole-file hand-own declares exactly the package-level boxes its `.cs.auto` twin declares. It is
+  red on master for this row.
+
+— G (2026-10-26)
+
+## 2026-10-26 — G (COORD's wave, the .2 headline's design): an importer's FIELD or ELEMENT path into another package's exported var roots on a copy, and `&lib.Arr[i]` spells a name nothing declares — LATENT in std, fixed by the headline seat's importer arm
+
+**What happens.** Converted at master `62ae00e43e` (the probe is committed in
+`probes/g-crosspkg-box-census/emitprobe`; Go prints `5 2 3 7 4 true`):
+- `q := &lib.S.N` emits `Ꮡ(lib.S).of(lib.Holder.ᏑN)`, a field of a fresh copy of `lib.S`, so `*q = 3` never reaches it.
+- `lib.S.WG.Add(1); lib.S.WG.Done()` (a box-only field type) emits `Ꮡ(lib.S).of(lib.Holder.ᏑWG).Add(1)`: each call
+  takes a NEW copy, so `Done` reaches a WaitGroup that `Add` never touched. Predicted, not run: Go's negative-counter
+  panic, for a program Go runs cleanly.
+- `e := &lib.Arr[1]` emits `Ꮡlib.Arr.at<nint>(1)`. It names `Ꮡlib`, which nothing declares, so it should fail to
+  compile (CS0103; the probe was converted, not built).
+
+Boxing the owner alone does not fix the first two: with the owner arm widened, both still root on `Ꮡ(lib.S)`, because
+the `&m.field` arm of `convUnaryExpr` and `exprFieldRootsAtAddressedGlobal` both need a bare same-package identifier
+root.
+
+**Scope.** None of the three shapes occurs in std or its tests: the importer census of
+[`DESIGN-crosspkg-exported-box.md`](DESIGN-crosspkg-exported-box.md) finds no cross-package field or element address,
+and no field-path pointer-receiver call, on an unboxed var. The `Ꮡ<alias>.<Var>.at<` spelling reads 0 in `src/core`,
+with its positive control 1. User code reaches all three.
+
+**Owed (the headline seat, its section 2):** an importer arm that roots a field or element path at the owner's box
+when `importedGlobalIsBoxed` answers yes: `lib.ᏑS.of(lib.Holder.ᏑN)` and `lib.ᏑArr.at<nint>(1)`. Red first, by the
+three lines above in the new behavioral golden.
+
+— G (2026-10-26)
+## 2026-10-26 — P1 (.2 seat #5, R's finding): single-file output naming and a relative `-go2cspath` — FIXED on `claude/p1-cli-paths`
+
+**Found by R on windows and linux** (the 1.26.10.1 docs veracity review); measured again by P1 on linux at master
+d269ef477b with the converter built from that tree.
+
+**(a) Single-file input.** The usage text's own examples are `go2cs example.go conv/example.cs` and `go2cs example.go`.
+
+| command | before | after |
+|---|---|---|
+| `go2cs example.go conv/example.cs` | `conv/example.cs.cs`, plus a project DIRECTORY `conv/example.cs/` | `conv/example.cs`; project and `package_info.cs` in `conv/` |
+| `go2cs example.go conv` (a directory) | `conv.cs` beside the module; project in `conv/`, `package_info.cs` in the module directory | `conv/example.cs`; project and `package_info.cs` in `conv/` |
+| `go2cs example.go` | a file named `..cs` | `example.cs` beside the input |
+
+Root: main.go replaced the input file with its directory before the output was settled, and the driver's
+single-file branch named the output `TrimSuffix(<output path>, ".go") + ".cs"`, which only works when the output path
+is the .go file itself. It also wrote EVERY file of the package to that one name, so in a multi-file package the
+last file won. Now main.go settles the one output file first (`singleFileOutputPath`: the named `.cs`, else
+`<name>.cs` in the named directory, else beside the input), and the driver writes only the named file there. The
+package's other files are still visited, for the package-wide state the named file's emission reads, and are not
+written; their imports still reach the project file. For a one-file package, single-file and package mode now emit byte-identical `example.cs` and `.csproj`.
+
+**(b) A relative `-go2cspath`** (or `GO2CSPATH`) was carried as written into the `-tests` flow's
+`dotnet publish -p:go2csPath=...` and the child environment, and dotnet runs from the project directory, so the
+root resolved there. It is now made absolute against the working directory when the command line is parsed.
+
+**Guard:** `src/go2cs/cliPaths_test.go`, four CLI tests that re-execute the test binary as the converter from a
+real working directory. Red first at d269ef477b, green with the fix. Run on linux only; windows not run on this box.
+
+**Emission:** package (directory) conversions take the `isDir` branches, which are unchanged, so the corpus and the
+behavioral goldens do not move.
+## 2026-10-26 — P1 (.2 seat #6): the release push stops at nuget.org's per-key quota — FIXED on `claude/p1-resumable-push`
+
+**Found in the 1.26.10.1 publish.** Phase 3 of `release-nuget.ps1` (`dotnet nuget push *.nupkg --skip-duplicate`)
+died on push 351 of 362 with 403 Quota Exceeded and a Retry-After of 2489 s: nuget.org caps pushes at 350 per window
+per API key. `push-nuget.ps1 -Push` has the same loop. Neither could resume except by re-pushing everything.
+
+**Fix.** `src/_nugetpush.ps1`, used by both scripts, pushes one package at a time, `go.lib` and `go.gen` first:
+- It skips a version the feed already has. The check is the flat container's
+  `<id>/<normalized version>/<id>.nuspec`, which answers 200 or 404. The v2 download URL answers 302 for any version
+  and a gallery page answers 200 for a fake one, so neither is used. A 409 on the push also counts as published.
+- It pushes with a direct PUT to the service index's PackagePublish endpoint, as the NuGet client does, so the
+  Retry-After header can be read. `dotnet nuget push` reports only the status line.
+- On 403, 429 or 503 with a Retry-After, it prints the time the push resumes, waits, and pushes the same package
+  again. Any other refusal stops the run, naming the package and how many were pushed before it.
+
+`release-nuget.ps1 -ResumePush` re-enters Phase 3 at the version `version.props` names. It does not bump, pack, sign
+or tag, it skips the clean-tree and certificate gates, and it refuses a folder holding a package of another version.
+`push-nuget.ps1 -Push -BumpBuild:$false` is that script's resume, as before.
+
+**Reusable (COORD scope add, for C2's nugetgo sheet).** Dot-source `src/_nugetpush.ps1`, then call
+`Invoke-GoNuGetPush -Packages <FileInfo[]> -Source <v3 index URL> -ApiKey <key> [-StopOnRateLimit]`. It returns the
+pushed, already-published and wait counts. The resume entry point is the same call again. With `-StopOnRateLimit`, a
+refusal with a Retry-After stops at once and prints the UTC time to re-run, instead of waiting.
+
+**Guard:** `src/tests/nuget-push-selftest.ps1`, against a mock feed on the loopback. Nothing reaches a real feed.
+Red first at the extracted shipped loop: rc 1, 11 failures. Green: rc 0 on all nine cases (201, 409, 403 with and without Retry-After, 503 then 500, `-StopOnRateLimit`), including
+`release-nuget.ps1 -ResumePush` end to end. Run with PowerShell 7 on linux only. The Windows PowerShell 5.1 path and a
+real nuget.org push were not run.
+## 2026-10-26 — P1 (.2 seat #12, owner ruling): signed release binaries — BUILT on `claude/p1-signed-binaries`
+
+**The gap.** `release-binaries.yml` builds the six go2cs archives in CI, attests them and drafts the GitHub Release.
+The Windows executables were not code-signed: the release certificate is on a smart card in the release machine.
+
+**The step.** `src/sign-release-binaries.ps1 -Tag nuget-N.N.N.N [-Apply]`, run on the release machine:
+- It finds the key that signed the release tag, from the tag's own GPG signature, and verifies the tag.
+- It refuses a Release that is not a draft, or one that already carries `SHA256SUMS.asc`.
+- It downloads the draft and checks each archive against `SHA256SUMS` and `gh attestation verify`.
+- It Authenticode-signs both `go2cs.exe` files in ONE signtool call, so one PIN prompt. `src/_authenticode.ps1`
+  (`Invoke-GoAuthenticodeSign -Files ...`) is the signing call the tool packages' executables (seat #11) use too.
+  It finds the certificate by the same SHA-256 fingerprint as `$env:NuGetCertFingerprint`, and timestamps with
+  RFC 3161. `dotnet nuget sign` is a separate process, so the packages' signing asks for the PIN again.
+- It re-packs the two Windows zips: every record is byte-identical except `go2cs.exe`'s CRC-32, sizes and body,
+  and the offsets after it. The tarballs are not touched.
+- It regenerates `SHA256SUMS` (same lines and order) and signs it with the tag's key: `SHA256SUMS.asc`.
+- With `-Apply` it uploads to the draft, deletes the build's attestation bundle, and verifies by re-download.
+  Without `-Apply` nothing on GitHub changes.
+
+**Attestation: choice (a).** `.github/workflows/attest-release.yml`, started by hand with the tag, refuses a published
+Release and checks `SHA256SUMS`. It verifies the four unchanged tarballs against their build attestation, attests
+all six archives as the draft holds them, and uploads the bundle. Its predicate names that workflow run, so it says
+"these bytes were on the draft when this run attested them", not "this run built them". The build's attestation of
+the unsigned bytes stays in the repository's store. (b) would leave the Release carrying a bundle that does not match
+the Windows archives. Signing in CI is impossible because the key is on a card. The draft is published only after
+this workflow, so a published Release never carries a mismatched attestation. macOS and Linux are covered by the
+signed `SHA256SUMS` only; notarization needs an Apple Developer ID and remains the owner's open question.
+
+**Guard:** `src/tests/sign-release-binaries-selftest.ps1`, against a mock `gh` serving a draft Release from a folder.
+It uses real Windows executables cross-compiled with Go, `zip -9` archives as CI makes them, a self-signed test
+certificate (osslsigncode) and a throwaway GPG key that signs a scratch tag and is not the keyring's default. Red
+first, 17 failures, then green. Three sites were each broken once and named, then restored byte-identical: the
+signing key, the attestation check and the zip header. Linux only: the signtool path, Windows PowerShell 5.1 and
+the workflow itself were not run.
+
+— P1 (2026-10-26)
+## 2026-10-26 — C1 (seat #8 (b), COORD's .2 plan): internal/coverage/cfile `TestIssue59563TruncatedCoverPkgAll` — the go child's PWD named the sandbox — FIXED (claude/c1-darwin-harness-2)
+
+**The record.** The row's manifest (src/core/internal/coverage/cfile/go2cs_test_disclosures.json, re-signed at
+e147cdc09f) discloses the test host-identity on linux, signature "go tool cover -func failed: exit status 2". Its
+retire plan reads "keep PWD from naming the sandbox". darwin failed it too, at D-W2 run 40233636682, on both RIDs.
+
+**Root.** The test runs `go test -coverpkg=all` with `cmd.Dir = testdata/issue59563`, so os/exec sets
+`PWD=<abs cmd.Dir>` in the sandbox spelling. The host's staged-toolchain composer moves a go child that starts in
+the staged ancestry to the real GOROOT directory it stands for, but:
+- **linux:** the composer moved the child, but the staged `testdata` is a LINK to the real tree, so the old PWD
+  still named the child's cwd (the same file). The child's os.Getwd answered the sandbox spelling, cmd/go walked up
+  to the staged `src/go.mod`, read it as a module named std, and `go tool cover -func` refused `std/internal/...`.
+- **darwin:** the composer never moved it. The relative cmd.Dir resolves against getcwd's `/private/var` spelling,
+  against the run root's `/var` spelling. And realpath of the whole directory follows that testdata link out of
+  the staged root.
+
+**Fix, two commits:**
+- **b5380a145d:** syscall's linux and darwin spawns compose the child's directory BEFORE marshalling its
+  environment. When the composer moved the child, a realpath-equal PWD is respelled as the new directory. Any other
+  PWD is kept. Guard: `LinuxSpawnSeamTests.AMovedChildsPwdNamesTheDirectoryItStartsIn` (a printenv child; red
+  first, PWD=<root>/link).
+- **cd2870da10:** the composer's realpath arm asks the directory's physical spelling against the canonical root
+  before resolving the directory's own links. Guard:
+  `HelperSandboxContainmentTests.AToolchainChildUnderAStagedFixtureLinkStartsInRealGorootOnUnix` (red first, null).
+
+**Measured,** filter `crypto/sha1,internal/coverage/cfile,testing`, dotnet 10.0.402:
+
+| Leg | Base d269ef477b | Seat |
+|:--|:--|:--|
+| linux | run 40396793909: PASS 15 (linux), the disclosed test failing as banked | runs 40396826412 and 40400396727: **16, disclosed 0** vs the linux expectation 1 (the test passes) |
+| darwin | run 40396727836: FAIL TestIssue59563 on both RIDs | 4f245d9f4b, run 40396761653: still FAIL (the composer half missing); cd2870da10, run 40400361240: **PASS 16** on BOTH RIDs (osx-arm64 and osx-x64) |
+| windows | | run 40396858971: PASS 16, unchanged |
+
+**Owed to the re-bank.** The linux-scoped manifest entry now reports itself an ORPHAN (report-only). Its
+retirement, and linux 15 + 1 -> 16 + 0 and darwin's first reading at 16, are the 1.26.10.2 re-bank's. The seat
+changes no manifest or roster count.
+
+— C1 (2026-10-26)
+## 2026-10-26 — H (COORD seat #7, .2): golib's quiet build — 14 IL warnings and go2cs-gen's CS8602 answered at their sites; a converted generic's type parameter carries no `[DynamicallyAccessedMembers]` (RESIDUAL, converter side)
+
+**What landed.** golib's Release build reads **0** warnings, down from 14, with the trim analyzer on through
+`PublishTrimmed`. go2cs-gen's Release build reads **0**, down from 1. Each warning was answered at its own site:
+
+| Site | Warning | Answer |
+|---|---|---|
+| `runtime/RuntimePanicCheck.cs:81` | IL2026 `StackFrame.GetMethod()` | Reads frames through `DiagnosticMethodInfo`, by name: it needed only the declaring type's name and assembly. `IsRuntimePackageType` now takes the type's full name and reads its outermost class. |
+| `GoFrame.cs:477`, `runtime/Goroutine.cs:1194` | IL2026 `StackFrame.GetMethod()` | The method is compared by identity, and in Goroutine resolved through its IL offset, which only a `MethodBase` answers. A site suppression whose justification states what is read and how the answer degrades without metadata, as `builtin.recoverChecked` (`builtin.cs:383`) already did. A `RequiresUnreferencedCode` would cascade into `GoFrame.Run` and `goǃ`, which every converted program calls. |
+| `GoDelegateSynthesis.cs:155` | IL2026 ×5, IL2111 ×5 | `DefineType`'s parent parameter is `DynamicallyAccessedMembers(All)`, so naming `MulticastDelegate` keeps all its members; the minted type only derives from it. Suppressed at `mint` with that proof. The path's real limit is Native AOT's missing `Reflection.Emit`, IL3050 at `GoStructSynthesis`'s `DefineDynamicAssembly`, which stage 3d owns. |
+| `GoArrayDims.cs:60` | IL2091 | `GoArrayZero.New<T, TDims>` carries `[DynamicallyAccessedMembers(PublicConstructors)]` on `T`, as `builtin.new<T>` does. |
+| go2cs-gen `MethodSet.cs:212` | CS8602 | `IsSpan`'s nullable out parameter becomes `SpanElement`'s return value, since netstandard2.0 has no `NotNullWhen`. |
+
+**Not turned on: the AOT analyzer.** With `-p:IsAotCompatible=true` the same build reads 26 IL3050, and stage 3d of
+[`PLAN-golib-full-trim.md`](../PLAN-golib-full-trim.md) (`RequiresDynamicCode` on what remains, the OQ-3 panic,
+`GoAotFailOnDynamicCode`) is not on master. COORD ruled it a later seat, with this census as its starting
+measurement: `AdapterBinder.cs:317`; `GoReflect.FieldAccess.cs:572, 656, 676, 690`;
+`GoReflect.PointerConversions.cs:125, 131`; `GoReflect.TypeLayout.cs:1516, 1568, 1586-1591, 1595`;
+`GoReflect.VariadicRegistry.cs:65, 85`; `GoStructSynthesis.cs:192`; `GoTypeOps.cs:259`; `builtin.cs:3620`;
+`runtime/TypeExtensions.ExtensionMethodRegistry.cs:331, 446, 450`; `runtime/TypeExtensions.GoMethodSets.cs:380`;
+`runtime/TypeExtensions.cs:143`. Line numbers are read at master `d269ef477b`.
+
+**RESIDUAL (converter side): a converted generic's type parameter carries no `[DynamicallyAccessedMembers]`.**
+The IL2091 annotation moves the requirement to `GoArrayZero.New`'s callers. An Exe build, where the converter's
+template turns on `PublishTrimmed` and so the trim analyzer, now warns at a generic call site. Libraries do not run
+the analyzer, and neither do `-tests` hosts (`runtime.tests.csproj` reads `EnableTrimAnalyzer` and `PublishTrimmed`
+both empty). This is the class a generic `new(T)` already raises against `builtin.new<T>`: at master,
+`Behavioral/ZeroValueNeedyStructPaths/main.cs:26` reads IL2091 for `@new<T>()`. The footprint was measured over the
+committed tree, building each Exe that calls `GoArrayZero.New` from generic code against both golibs. Two projects
+read one new project-own IL2091 each, 0 → 1: `Behavioral/GenericArrayTypeArgZero/main.cs:16` and
+`Behavioral/ReflectBridgeClosure/main.cs:91`. Each build also stops printing golib's 14. The remedy is the converter
+writing `[DynamicallyAccessedMembers(PublicConstructors)]` on a type parameter that reaches `new(T)` or a sized zero,
+which would answer both at once. Owed: a census of the corpus's generic `new(T)` sites before it is sized.
+
+**Proof that behavior did not move.** The probe `src/tests/PackageTests/GolibAotProbe` (golib only, 8 scenarios:
+recover, a recovered bounds panic, a re-panic in a defer, a `recovers: true` handler, a goroutine send, a goroutine
+recover, and `GoArrayZero.New` twice) prints identical stdout on golib at `d269ef477b` and at the seat. That holds
+on the JIT and as a self-contained `TrimMode=full` ILLink publish (sha256 `4e96584f…cbbe5` both arms). On that
+publish the probe's trim warnings go 22 → 19: golib's four frame and IL2091 warnings are gone, and the probe's own
+generic call gains one. The Native AOT arm runs on the i7, since H has no platform linker. Also recorded: a full
+ILLink trim of the probe still reports 18 golib warnings that golib's own build does not, all in the method-set and
+type-registry code that stage 5 owns.
+
+— H (2026-10-26)
+## 2026-10-26 — G: a package-level `sync.WaitGroup` reads Unbubbled, as in Go — CLOSES R's row of 2026-10-15 (the package-level box marker, claude/g-staticbox-r2, re-based from claude/g-waitgroup-bubble)
+
+R's row of 2026-10-15 owed option (b): a marker on a package-level variable's box, so golib can answer Go's
+non-heap questions. Owner, 2026-10-15: "as long as we don't forget". First cut 2026-10-24 at `9dcf0bafe1`
+(`a07906ae84`); re-based and re-measured 2026-10-26 at `7c71410f1a`, which this row records.
+
+**Measured first.** Go 1.26's runtime asks whether a pointer is in the heap in five user-visible places:
+- synctest's association (`getOrSetBubbleSpecial`, `synctest.go`), which `sync.WaitGroup` reads;
+- `AddCleanup`, a no-op for a non-heap pointer;
+- `SetFinalizer`, which ignores one;
+- `weak.Make`, an immortal handle;
+- `Pinner`, which ignores one.
+
+Only the first is observable in converted code. A package-level box lives in a static field, rooted for the life of
+the process, so a converted global already never runs a cleanup or finalizer, never clears a weak pointer, and
+needs no pin.
+
+**The change.**
+- **golib:** `StaticBox<T>`, a sealed `StandardBox<T>` that answers the non-heap question
+  (`IPackageLevelStorage`, read through `PackageLevelStorage.Holds`). A `FieldRefBox` forwards it from its source,
+  so a field of a global answers too.
+- **Converter:** `addressedGlobalDecl`, the one package-level box emitter (eager and `[GoLazy]` holder), constructs
+  `PackageBoxConstructPrefix` (`StaticBox`, new in `symbols.json`).
+- **Hand-owned `sync/waitgroup.cs`:** asks for no bubble when the WaitGroup is package-level, the path Go's
+  `case synctest.Unbubbled:` takes.
+- The expected-difference test `GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated` is replaced by
+  `APackageLevelWaitGroupIsUnbubbled_AsInGo` and `AFieldOfAPackageLevelVariableIsUnbubbled_AsInGo`.
+
+**Footprint at `7c71410f1a`.** Every changed line is one token, `new StandardBox<` → `new StaticBox<`, on a
+package-level box declaration. Predicted before each run by a committed-bytes census, then measured:
+- Corpus: two-seeded, three-target A/B plus a 45-package `-tests` leg. The base arm wrote 0 files. 320 files and
+  794 lines, as predicted, with the file sets equal both ways. Plus `sync/waitgroup.cs`'s own position-map record.
+- Behavioral: 32 projects, 61 committed outputs and goldens, 96 lines. The prediction read 62 and 97: it counted the
+  hand-owned `ManualConversionSiblingState/state.cs`'s golden, which UTT copies from the hand-own and so stays.
+- Hand-owned files keep `StandardBox`: 23 sites in src/core, and `ManualConversionSiblingState`. None holds a
+  WaitGroup.
+
+**Stated limit.** An `ElemRefBox` holds the array's backing, not its box, so an element of a global array
+(`var wgs [4]sync.WaitGroup`) still reads as heap storage here, where Go leaves it Unbubbled.
+
+**The first cut's found-in-passing.** It named 15 package-level `StandardBox` sites in committed test files the 1.26
+hop had left stale (strconv's tests that moved to `internal/strconv`, `internal/poll/fd_windows_test.cs`, the
+uncommitted `strconv/number_test.cs`). None is left at `7c71410f1a`: the re-bank refreshed those files.
+
+— G (measured 2026-10-24; re-measured 2026-10-26 at `7c71410f1a`)
 
 ## 2026-10-26 — C2 (COORD ruling): a MAPPED third-party module could be missing from a nugetgo package's nuspec, silently — REFUSED by the pack (claude/c2-nugetgo-wave3-tools)
 

@@ -6,7 +6,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Reflection;
 
 namespace go.golib;
 
@@ -74,35 +73,34 @@ internal static class RuntimePanicCheck
         if (site is null)
             return false;
 
-        Assembly golib = typeof(RuntimePanicCheck).Assembly;
+        string? golib = typeof(RuntimePanicCheck).Assembly.FullName;
 
+        // Names only, through DiagnosticMethodInfo rather than StackFrame.GetMethod(): a frame's method name, its
+        // declaring type's name and its assembly's are what a trimmed or Native AOT program keeps for its stack
+        // traces, where a MethodBase needs the method's full reflection metadata (IL2026).
         for (int i = 0; i < site.FrameCount; i++)
         {
-            MethodBase? method = site.GetFrame(i)?.GetMethod();
-            Type? type = method?.DeclaringType;
-
-            if (type is null || type.Assembly == golib)
+            if (site.GetFrame(i) is not { } frame ||
+                DiagnosticMethodInfo.Create(frame) is not { DeclaringTypeName: { } typeName } method ||
+                method.DeclaringAssemblyName == golib)
                 continue;
 
-            frameName = $"{type.FullName}.{method!.Name}";
-            return IsRuntimePackageType(type);
+            frameName = $"{typeName}.{method.Name}";
+            return IsRuntimePackageType(typeName);
         }
 
         return false;
     }
 
     /// <summary>
-    /// Reports whether <paramref name="type"/> is package <c>runtime</c>'s class or its internal-test
-    /// bridge, or is nested in either.
+    /// Reports whether the type whose full name is <paramref name="typeName"/> is package <c>runtime</c>'s
+    /// class or its internal-test bridge, or is nested in either.
     /// </summary>
-    internal static bool IsRuntimePackageType(Type type)
+    internal static bool IsRuntimePackageType(string typeName)
     {
-        for (Type? outer = type; outer is not null; outer = outer.DeclaringType)
-        {
-            if (outer.FullName is "go.runtime_package" or "go.runtime_internal_test_package")
-                return true;
-        }
+        // A nested type's full name is its outermost type's, then '+' and each nested name, so the outermost decides.
+        int nested = typeName.IndexOf('+');
 
-        return false;
+        return (nested < 0 ? typeName : typeName[..nested]) is "go.runtime_package" or "go.runtime_internal_test_package";
     }
 }

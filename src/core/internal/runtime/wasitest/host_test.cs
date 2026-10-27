@@ -7,7 +7,7 @@ using flag = flag_package;
 
 partial class wasi_test_package {
 
-internal static ж<@string> Ꮡtarget = new StandardBox<@string>(default(@string));
+internal static ж<@string> Ꮡtarget = new StaticBox<@string>(default(@string));
 internal static ref @string target => ref Ꮡtarget.Value;
 
 [GoInit] internal static void init() {

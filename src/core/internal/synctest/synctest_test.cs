@@ -995,7 +995,7 @@ public static void TestWaitGroupDisassociateInAdd(ж<testing.T> Ꮡt) {
     });
 }
 
-internal static ж<sync.WaitGroup> ᏑtestWaitGroupLinkerAllocatedWG = new StandardBox<sync.WaitGroup>(default(sync.WaitGroup));
+internal static ж<sync.WaitGroup> ᏑtestWaitGroupLinkerAllocatedWG = new StaticBox<sync.WaitGroup>(default(sync.WaitGroup));
 internal static ref sync.WaitGroup testWaitGroupLinkerAllocatedWG => ref ᏑtestWaitGroupLinkerAllocatedWG.Value;
 
 public static void TestWaitGroupLinkerAllocated(ж<testing.T> Ꮡt) {

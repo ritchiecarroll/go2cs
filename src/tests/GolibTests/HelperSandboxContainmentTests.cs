@@ -162,6 +162,33 @@ public class HelperSandboxContainmentTests
                 "a go child started in the physical spelling of the staged math/big directory must start in the real GOROOT's -- math/big TestEscape's darwin shape");
     }
 
+    // cfile's TestIssue59563 (seat #8 (b)): its go child starts in testdata/issue59563 under the staged package,
+    // and that testdata is a STAGED LINK to the real tree. Its relative cmd.Dir resolves against getcwd(), the
+    // physical spelling, so on darwin the lexical test fails by the /var spelling; and realpath of the whole
+    // directory follows the link out of the staged root. Neither arm admitted it, so the child stayed in the
+    // sandbox spelling on both mac RIDs (run 40396761653). The physical spelling is asked against the canonical
+    // root first, before the directory's own links are resolved.
+    [TestMethod]
+    public void AToolchainChildUnderAStagedFixtureLinkStartsInRealGorootOnUnix()
+    {
+        using SymlinkedRoot root = new();
+        StagedToolchain toolchain = new(root);
+        string realTestdata = Path.Combine(toolchain.RealGoroot, "src", "internal", "coverage", "cfile", "testdata");
+        string stagedPackage = Path.Combine(root.PhysicalRun, "src", "internal", "coverage", "cfile");
+
+        Directory.CreateDirectory(Path.Combine(realTestdata, "issue59563"));
+        Directory.CreateDirectory(stagedPackage);
+        Directory.CreateSymbolicLink(Path.Combine(stagedPackage, "testdata"), realTestdata);
+
+        string? composed = toolchain.Compose(root, toolchain.GoTool, Path.Combine(stagedPackage, "testdata", "issue59563"));
+
+        if (OperatingSystem.IsWindows())
+            Assert.IsNull(composed, "windows keeps the LEXICAL relative-path test (COORD's ruling), so a symlink spelling must not widen it there");
+        else
+            Assert.AreEqual(Path.Combine(realTestdata, "issue59563"), composed,
+                "a go child started under a staged fixture link, in the physical spelling of the staged root, must start in the real GOROOT's directory -- cfile TestIssue59563's darwin shape");
+    }
+
     [TestMethod]
     public void TheComposersLexicalAnswersAndPolarityAreUnchanged()
     {

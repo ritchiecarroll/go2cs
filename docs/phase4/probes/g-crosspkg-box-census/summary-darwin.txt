@@ -1,0 +1,75 @@
+darwin tests=false all                                      600
+darwin tests=false boxed-today kind=pointer                 1
+darwin tests=false boxed-today kind=value:array             1
+darwin tests=false boxed-today kind=value:basic:int         1
+darwin tests=false boxed-today kind=value:slice             1
+darwin tests=false boxed-today kind=value:struct            4
+darwin tests=false kind=interface                           144
+darwin tests=false kind=pointer                             294
+darwin tests=false kind=value:array                         9
+darwin tests=false kind=value:basic:bool                    32
+darwin tests=false kind=value:basic:int                     11
+darwin tests=false kind=value:basic:int32                   1
+darwin tests=false kind=value:basic:string                  15
+darwin tests=false kind=value:basic:uintptr                 1
+darwin tests=false kind=value:func                          15
+darwin tests=false kind=value:map                           10
+darwin tests=false kind=value:slice                         30
+darwin tests=false kind=value:struct                        38
+darwin tests=false to-box kind=interface                    144
+darwin tests=false to-box kind=pointer                      293
+darwin tests=false to-box kind=value:array                  8
+darwin tests=false to-box kind=value:basic:bool             32
+darwin tests=false to-box kind=value:basic:int              10
+darwin tests=false to-box kind=value:basic:int32            1
+darwin tests=false to-box kind=value:basic:string           15
+darwin tests=false to-box kind=value:basic:uintptr          1
+darwin tests=false to-box kind=value:func                   15
+darwin tests=false to-box kind=value:map                    10
+darwin tests=false to-box kind=value:slice                  29
+darwin tests=false to-box kind=value:struct                 34
+darwin tests=false to-box linkname kind=value:basic:int32   1
+darwin tests=false to-box linkname kind=value:struct        8
+darwin tests=true all                                      251
+darwin tests=true boxed-today kind=value:basic:uint32      1
+darwin tests=true boxed-today kind=value:basic:uint64      1
+darwin tests=true emitted=no                               12
+darwin tests=true kind=interface                           22
+darwin tests=true kind=pointer                             17
+darwin tests=true kind=value:array                         3
+darwin tests=true kind=value:basic:Pointer                 1
+darwin tests=true kind=value:basic:bool                    4
+darwin tests=true kind=value:basic:float64                 2
+darwin tests=true kind=value:basic:int                     8
+darwin tests=true kind=value:basic:string                  2
+darwin tests=true kind=value:basic:uint                    1
+darwin tests=true kind=value:basic:uint32                  1
+darwin tests=true kind=value:basic:uint64                  2
+darwin tests=true kind=value:basic:uintptr                 4
+darwin tests=true kind=value:func                          141
+darwin tests=true kind=value:map                           2
+darwin tests=true kind=value:slice                         34
+darwin tests=true kind=value:struct                        7
+darwin tests=true to-box kind=interface                    22
+darwin tests=true to-box kind=pointer                      17
+darwin tests=true to-box kind=value:array                  1
+darwin tests=true to-box kind=value:basic:Pointer          1
+darwin tests=true to-box kind=value:basic:bool             4
+darwin tests=true to-box kind=value:basic:float64          2
+darwin tests=true to-box kind=value:basic:int              8
+darwin tests=true to-box kind=value:basic:string           2
+darwin tests=true to-box kind=value:basic:uint             1
+darwin tests=true to-box kind=value:basic:uint64           1
+darwin tests=true to-box kind=value:basic:uintptr          4
+darwin tests=true to-box kind=value:func                   131
+darwin tests=true to-box kind=value:map                    2
+darwin tests=true to-box kind=value:slice                  34
+darwin tests=true to-box kind=value:struct                 7
+darwin importers use=addr         kind=value     test=false 1
+darwin importers use=addr         kind=value     test=true 12
+darwin importers use=ptrcall      kind=value     test=false 7
+darwin importers use=ptrcall      kind=value     test=true 2
+darwin importers use=read         kind=interface test=false 571
+darwin importers use=read         kind=interface test=true 1376
+darwin importers use=read         kind=value     test=false 469
+darwin importers use=read         kind=value     test=true 490

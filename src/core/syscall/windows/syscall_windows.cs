@@ -146,7 +146,7 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
     return formatMessage(flags, (uintptr)msgsrc, msgid, langid, buf, Ꮡargs);
 }
 
-internal static ж<Δsync.Map> ᏑerrnoErrorCache = new StandardBox<Δsync.Map>(default(Δsync.Map));
+internal static ж<Δsync.Map> ᏑerrnoErrorCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map errnoErrorCache => ref ᏑerrnoErrorCache.Value;
 
 public static @string Error(this Errno e) {
@@ -555,7 +555,7 @@ public static error WriteFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж
     return err;
 }
 
-internal static ж<int64> ᏑioSync = new StandardBox<int64>(default(int64));
+internal static ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
 internal static ref int64 ioSync => ref ᏑioSync.Value;
 
 internal static ж<LazyProc> procSetFilePointerEx;
@@ -1075,7 +1075,7 @@ partial struct connectExFuncᴛ1 /*dyn*/ {
     internal uintptr addr;
     internal error err;
 }
-internal static ж<connectExFuncᴛ1> ᏑconnectExFunc = new StandardBox<connectExFuncᴛ1>(default(connectExFuncᴛ1));
+internal static ж<connectExFuncᴛ1> ᏑconnectExFunc = new StaticBox<connectExFuncᴛ1>(default(connectExFuncᴛ1));
 internal static ref connectExFuncᴛ1 connectExFunc => ref ᏑconnectExFunc.Value;
 
 // go2cs generated this placeholder — func LoadConnectEx is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

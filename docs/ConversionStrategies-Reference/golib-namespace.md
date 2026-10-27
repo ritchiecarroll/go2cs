@@ -151,13 +151,13 @@ Three details make the reproduction exact rather than approximate:
   `type Kind = abi.Kind` publishes `go.@internal.abi_package.ΔKind`, because `internal/abi` Δ-renames `Kind`
   against `(*Type).Kind()`. In a full run that Δ arrives from `abi`'s parsed `package_info.cs` (the
   `importedTypeAliases` consult in `convertToCSFullTypeName`'s default arm); the derivation recomputes it
-  with the same foreign-package-aware `packageHasMethodNamed` test the collision lane uses, so the two
+  with the same foreign-package-aware `packageHasMethodNamed` test the collision analysis uses, so the two
   sources agree.
-* **A Go type ALIAS is exempt from the collision lane.** `performNameCollisionAnalysis` records only
+* **A Go type ALIAS is exempt from the collision analysis.** `performNameCollisionAnalysis` records only
   *defined* types (`!typeSpec.Assign.IsValid()`), so an alias name that *also* names a method is **not**
   Δ-renamed — `reflectlite` declares both `type Kind = abi.Kind` and `(*rtype).Kind()` and still publishes
   the plain source name `Kind`. The two derivations split on exactly that line: a colliding *defined* type
-  belongs to the collision lane (which owns the `Token`/`ΔToken`/`object` two-hop), a colliding *alias* to
+  belongs to the collision analysis (which owns the `Token`/`ΔToken`/`object` two-hop), a colliding *alias* to
   this one. Getting that boundary wrong either double-publishes one source name with two targets or drops
   `reflectlite`'s entry entirely.
 * **An empty-interface target is `object`, imported BARE.** `type PublicKey any` is not an alias at all but

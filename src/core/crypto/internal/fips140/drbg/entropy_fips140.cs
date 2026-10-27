@@ -25,7 +25,7 @@ partial class drbg_package {
 // It should end up in the .noptrbss section, and become backed by physical pages
 // at first use. This ensures that programs that do not use the FIPS 140-3 module
 // do not incur any memory use or initialization penalties.
-internal static ж<entropy.ScratchBuffer> Ꮡmemory = new StandardBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
+internal static ж<entropy.ScratchBuffer> Ꮡmemory = new StaticBox<entropy.ScratchBuffer>(default(entropy.ScratchBuffer));
 internal static ref entropy.ScratchBuffer memory => ref Ꮡmemory.Value;
 
 internal static ж<array<byte>> getEntropy() {

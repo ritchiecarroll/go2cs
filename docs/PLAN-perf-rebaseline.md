@@ -1,7 +1,7 @@
 # PLAN — the post-hop performance re-baseline (Go 1.26 packages)
 
 > **STATUS: DRAFT (G, 2026-10-23). RULED by COORD on 2026-10-23: accepted as a draft, and it stays DRAFT until
-> S0 lands. The rulings on its open questions are in section 9.** Document type: an [instance plan](Glossary.md#plan). The
+> S0 lands. The rulings on its open questions are in section 9.** Document type: an [instance plan](doctrine/ProcessGlossary.md#plan). The
 > owner ruled the run itself: after the 1.26 NuGet publish, re-run the [performance suite](Performance.md) (Go against
 > converted C#, JIT and Native AOT), with every timed run on G-LAPTOP for comparability with the original baselines.
 > The i9 only builds the Native AOT apps and ships them to G-LAPTOP. The procedure for a re-measurement is
@@ -60,9 +60,16 @@ Eight binaries per program, in two release legs of four arms each:
   `05b7c851c3`; S2 records the release's own and stops if they differ. The arm sits between the other two
   columns: precompiled code like AOT, but still tiering up under the JIT. It costs a small fraction of an AOT
   publish, so G-LAPTOP builds it.
-- **A fifth, diagnostic arm, only if P1's DATA calls for it.** P1 is measuring consumer-side `PublishReadyToRun`
-  (Startup and Fib: JIT, R2R and AOT). If that DATA recommends a different recipe (composite, or framework-dependent
-  R2R), it runs as a fifth arm, recorded but not published. Whether the template changes is a separate ruling.
+- **A fifth, diagnostic arm: Fd1, framework-dependent ReadyToRun** (P1's consumer-side DATA, mailbox `b8b36f7083`,
+  linux-x64, folded in at S0 per O1). It is recorded but not published. Whether the template changes is a separate
+  ruling.
+  - **P1's PerfStartup medians (ms):** JIT 469, fd0 488, fd1 329, template default 331, AOT 197, Go 2.
+  - **What ReadyToRun saves:** JIT'd methods drop from 2,651 to 1,162. Of the 1,162 still jitted, 1,159 are
+    cross-bubble generic instantiations: `ж<T>` 409, `StandardBox` 181, `System.Collections` 178.
+  - **ReadyToRun is publish-only,** so a `dotnet run` or build consumer never gets it.
+  - **How S0 builds it:** `dotnet publish -c Release -r win-x64 --self-contained false -p:PublishTrimmed=false
+    -p:PublishReadyToRun=true` (`--fd1`). The runner refuses it unless the runtimeconfig is framework-dependent and
+    the program assembly carries ReadyToRun code.
 - **AOT** is `PublishAot`, self-contained, partial trim, `-r win-x64`, at the SDK's default instruction set: no
   `IlcInstructionSet`, nothing host-specific. The i9 builds both legs (34 publishes). Section 4 covers the handoff.
 
@@ -169,7 +176,7 @@ delta that appears at default tiering and not at TC0 is tier-up timing, not code
 
 | step | what | where | gate |
 |:--|:--|:--|:--|
-| **S0** | Instrument seat: the runner gains a package-reference leg (convert with a named converter and `-recurse=nuget` at a named version), the R2R column, the diagnostic TC0 column, a hash-verified adopt-AOT path with a manifest, two-leg interleaved measurement, and the four-column table. Red-first: a planted hash mismatch refuses by name, a planted self-contained JIT binary is refused, and an unadopted foreign AOT binary is never timed. | G, a seat in a batch | lands before S2 |
+| **S0** | Instrument seat: the runner gains a package-reference leg (convert with a named converter and `-recurse=nuget` at a named version), the R2R column, the diagnostic TC0 and Fd1 arms, a hash-verified adopt-AOT path with a manifest, two-leg interleaved measurement, and the four-column table. Red-first: a planted hash mismatch refuses by name, a planted self-contained JIT binary is refused, and an unadopted foreign AOT binary is never timed. | G, a seat in a batch | lands before S2 |
 | **S1** | The 1.26 publish lands. The i9 converts and publishes 34 AOT images, plus a second RefLower and a second Iface publish per leg (4 more), and ships them. | the i9 | manifests complete |
 | **S2** | G-LAPTOP converts both legs, checks the source hashes against the i9's manifest, and builds Go x2, JIT and R2R. If ILC moved, it re-licenses on one row. | G-LAPTOP | hashes equal; licence holds |
 | **S3** | Verify all 17 programs x 8 binaries. | G-LAPTOP | identical output |

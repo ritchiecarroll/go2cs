@@ -73,7 +73,8 @@ a `FileSet` through `encoding/gob` and read it back, which means the converted g
 end to end, in C#. A reflection layer that satisfies gob is a reflection layer that satisfies most
 things. (Gob's *own* test suite is not yet validated; that remains open.)
 
-## What the campaign keeps finding is not cosmetic
+## What validation keeps finding is not cosmetic
+<!-- Heading before 2026-10-26: "What the campaign keeps finding is not cosmetic" (no page links to its anchor). -->
 
 Every package on the table arrived by way of
 defects that compiled perfectly and then behaved wrongly, and the fixes are general rather than local.

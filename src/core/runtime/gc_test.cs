@@ -355,10 +355,10 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
     Δruntime.KeepAlive(half);
 }
 
-internal static ж<ж<nint>> ᏑpointerClassBSS = new StandardBox<ж<nint>>(default(ж<nint>));
+internal static ж<ж<nint>> ᏑpointerClassBSS = new StaticBox<ж<nint>>(default(ж<nint>));
 internal static ref ж<nint> pointerClassBSS => ref ᏑpointerClassBSS.ValueSlot;
 
-internal static ж<nint> ᏑpointerClassData = new StandardBox<nint>(42);
+internal static ж<nint> ᏑpointerClassData = new StaticBox<nint>(42);
 internal static ref nint pointerClassData => ref ᏑpointerClassData.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

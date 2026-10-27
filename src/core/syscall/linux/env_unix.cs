@@ -11,7 +11,7 @@ using Δsync = sync_package;
 partial class syscall_package {
 
 // envLock guards env and envs.
-internal static ж<Δsync.RWMutex> ᏑenvLock = new StandardBox<Δsync.RWMutex>(default(Δsync.RWMutex));
+internal static ж<Δsync.RWMutex> ᏑenvLock = new StaticBox<Δsync.RWMutex>(default(Δsync.RWMutex));
 internal static ref Δsync.RWMutex envLock => ref ᏑenvLock.Value;
 
 // env maps from an environment variable to its first occurrence in envs.

@@ -299,7 +299,8 @@ from it. The six mechanics below are what three independent derivations of that 
   **summary** of how each Go construct maps to C#; each section links into the exhaustive
   [`docs/ConversionStrategies-Reference/`](docs/ConversionStrategies-Reference/README.md) for the full detail.
 - Process/gate terminology as used in commit messages and reviews (CNR, A/B footprint, census, chip, guard, golden,
-  overlay, banked…): [`docs/Glossary.md`](docs/Glossary.md).
+  overlay, banked, seat, train…): [`docs/doctrine/ProcessGlossary.md`](docs/doctrine/ProcessGlossary.md); the visitor terms
+  are on the published [`docs/Glossary.md`](docs/Glossary.md).
 - Generated C# intentionally targets Go-like *behavior first* (no implicit async), and Go-like *appearance* second
   (extra machinery hidden in partial classes / generated files).
 - **A RULING INHERITS ITS REPORT: the lane that RECEIVES a ruling reports against the RULING's predicates,

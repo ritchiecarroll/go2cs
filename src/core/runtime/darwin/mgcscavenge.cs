@@ -253,7 +253,7 @@ partial struct Δscavengeᴛ1 /*dyn*/ {
     // This is reset once a GC cycle ends.
     internal atomic.Int64 backgroundTime;
 }
-internal static ж<Δscavengeᴛ1> ᏑΔscavenge = new StandardBox<Δscavengeᴛ1>(default(Δscavengeᴛ1));
+internal static ж<Δscavengeᴛ1> ᏑΔscavenge = new StaticBox<Δscavengeᴛ1>(default(Δscavengeᴛ1));
 internal static ref Δscavengeᴛ1 Δscavenge => ref ᏑΔscavenge.Value;
 
 // It doesn't really matter what value we start at, but we can't be zero, because
@@ -267,7 +267,7 @@ internal static UntypedFloat startingScavSleepRatio => 0.001;
 internal static UntypedFloat minScavWorkTime => 1e6;
 
 // Sleep/wait state of the background scavenger.
-internal static ж<scavengerState> Ꮡscavenger = new StandardBox<scavengerState>(new scavengerState());
+internal static ж<scavengerState> Ꮡscavenger = new StaticBox<scavengerState>(new scavengerState());
 internal static ref scavengerState scavenger => ref Ꮡscavenger.Value;
 
 partial struct scavengerState {

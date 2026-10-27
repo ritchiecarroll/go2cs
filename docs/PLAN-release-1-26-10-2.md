@@ -1,7 +1,7 @@
 # PLAN — go.* 1.26.10.2: the first fix release on the Go 1.26 line
 
 > **STATUS: DRAFT (COORD, 2026-10-26).** The owner asked for the post-publish wave and this plan on 2026-10-26, right
-> after 1.26.10.1 published. Document type: an [instance plan](Glossary.md#plan). It names the scope of the next
+> after 1.26.10.1 published. Document type: an [instance plan](doctrine/ProcessGlossary.md#plan). It names the scope of the next
 > release on master's Go 1.26.10 line, the seats and their lanes, how they land, and what gates the release.
 > Procedure is not restated: seats land by the train discipline in the `train-assembly` skill, a re-bank follows
 > [`GoCorpusMigration.md`](GoCorpusMigration.md), and the release follows its *Release day* section. If Go publishes
@@ -34,6 +34,9 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 | 8 | Darwin harness items: the amd64-only test skip on the arm64 RID, cfile's host identity, `testing`'s working directory (fix B) | harness + hand-owned `testing` | C1 |
 | 9 | Spawned test processes start faster (ReadyToRun or tiered JIT), so the BoGo suite fits its wall on desktop hosts | harness | G sizes; P1 measures |
 | 10 | Alloc-free element-address compare (`&a[i] == &b[j]`) | converter + golib | after #1 lands; lane by ruling |
+| 11 | The `go2cs` dotnet tool: install with `dotnet tool install -g go2cs` and convert with no Go installed (Go fetched on first use, verified), per [`PLAN-dotnet-tool-installer.md`](PLAN-dotnet-tool-installer.md) | converter + packaging + release ritual | P2 |
+| 12 | Signed release binaries: the release machine downloads the CI-built archives, Authenticode-signs the Windows executables in the release's PIN session, re-packs and re-uploads them, and GPG-signs `SHA256SUMS`; the attestation covers the bytes users download | release ritual + workflow | P1 |
+| 13 | Proof pages show visitor-facing disclosure reasons: each disclosure gains a rendered `reason` in the present tense and a non-rendered history field, and the proof pages are regenerated (the owner's ruling that pages reachable from go2cs.net carry no fleet language) | test tooling + docs | R |
 
 **Not in this release, already scheduled:** the performance re-baseline against the published 1.26.10.1 packages
 ([`PLAN-perf-rebaseline.md`](PLAN-perf-rebaseline.md), G with the i9's AOT builds), the nugetgo rebuild wave against
@@ -41,8 +44,11 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 
 **Later, sized but not scheduled:** stack-allocation parity
 ([`DESIGN-stack-allocation.md`](DESIGN-stack-allocation.md)), the deferred-closure frame marker, `runtime.Goexit` on the
-main goroutine, real `debug.ReadBuildInfo` data, the goroutine-leak profile, the crash block's `created by` line, and
-the remaining darwin list items that need a design.
+main goroutine, real `debug.ReadBuildInfo` data, the goroutine-leak profile, the crash block's `created by` line, the
+remaining darwin list items that need a design, and stage 3d of
+[`PLAN-golib-full-trim.md`](PLAN-golib-full-trim.md) (the dynamic-code class under the AOT analyzer, which reads 26
+IL3050 sites at the plan's base), the named-result constant shift that masks its count, and long `TMPDIR` paths that skip the unix-socket tests
+(both stated in Limitations and Known issues until fixed).
 
 ## 2. Order and landing
 

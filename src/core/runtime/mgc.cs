@@ -219,7 +219,7 @@ internal static partial void gcenable() {
 
 // Garbage collector phase.
 // Indicates to write barrier and synchronization task to perform.
-internal static ж<uint32> Ꮡgcphase = new StandardBox<uint32>(default(uint32));
+internal static ж<uint32> Ꮡgcphase = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 gcphase => ref Ꮡgcphase.Value;
 
 // The compiler knows about this variable.
@@ -246,7 +246,7 @@ internal static writeBarrierᴛ1 writeBarrier = new();
 // gcBlackenEnabled is 1 if mutator assists and background mark
 // workers are allowed to blacken objects. This must only be set when
 // gcphase == _GCmark.
-internal static ж<uint32> ᏑgcBlackenEnabled = new StandardBox<uint32>(default(uint32));
+internal static ж<uint32> ᏑgcBlackenEnabled = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 gcBlackenEnabled => ref ᏑgcBlackenEnabled.Value;
 
 internal static UntypedInt _GCoff => iota; // GC not running; sweeping in background, write barrier disabled
@@ -320,7 +320,7 @@ internal static bool pollFractionalWorkerExit() {
     return (float64)selfTime / (float64)delta > 1.2D * gcController.fractionalUtilizationGoal;
 }
 
-internal static ж<workType> Ꮡwork = new StandardBox<workType>(new workType(nil));
+internal static ж<workType> Ꮡwork = new StaticBox<workType>(new workType(nil));
 internal static ref workType work => ref Ꮡwork.Value;
 
 partial struct workType_wbufSpans /*dyn*/ {
@@ -905,7 +905,7 @@ internal static void gcStart(gcTrigger trigger) {
 // escapes its callback closure, so it can't capture anything.
 //
 // This is protected by markDoneSema.
-internal static ж<uint32> ᏑgcMarkDoneFlushed = new StandardBox<uint32>(default(uint32));
+internal static ж<uint32> ᏑgcMarkDoneFlushed = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 gcMarkDoneFlushed => ref ᏑgcMarkDoneFlushed.Value;
 
 // gcDebugMarkDone contains fields used to debug/test mark termination.
@@ -919,7 +919,7 @@ partial struct gcDebugMarkDoneᴛ1 /*dyn*/ {
     // Protected by worldsema.
     internal bool restartedDueTo27993;
 }
-internal static ж<gcDebugMarkDoneᴛ1> ᏑgcDebugMarkDone = new StandardBox<gcDebugMarkDoneᴛ1>(default(gcDebugMarkDoneᴛ1));
+internal static ж<gcDebugMarkDoneᴛ1> ᏑgcDebugMarkDone = new StaticBox<gcDebugMarkDoneᴛ1>(default(gcDebugMarkDoneᴛ1));
 internal static ref gcDebugMarkDoneᴛ1 gcDebugMarkDone => ref ᏑgcDebugMarkDone.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

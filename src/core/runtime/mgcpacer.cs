@@ -87,7 +87,7 @@ internal static UntypedInt memoryLimitHeapGoalHeadroomPercent => 3;
 // GOMAXPROCS. The high-level design of this algorithm is documented
 // at https://github.com/golang/proposal/blob/master/design/44167-gc-pacer-redesign.md.
 // See https://golang.org/s/go15gcpacing for additional historical context.
-internal static ж<gcControllerState> ᏑgcController = new StandardBox<gcControllerState>(new gcControllerState());
+internal static ж<gcControllerState> ᏑgcController = new StaticBox<gcControllerState>(new gcControllerState());
 internal static ref gcControllerState gcController => ref ᏑgcController.Value;
 
 partial struct gcControllerState {

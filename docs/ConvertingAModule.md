@@ -316,6 +316,6 @@ source, the security caveat, the test badge, the versions, and the license. Ever
 measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
 line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
 
-`nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB). The publishing runbook,
-[`NugetgoPublish.md`](NugetgoPublish.md#customizing-the-package-page), has the same rules in its
-"Customizing the package page" section.
+`nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB).
+<!-- The publishing runbook, [`NugetgoPublish.md`](NugetgoPublish.md#customizing-the-package-page), has the
+     same rules in its "Customizing the package page" section (internal record, unlinked 2026-10-26, OQ-1). -->

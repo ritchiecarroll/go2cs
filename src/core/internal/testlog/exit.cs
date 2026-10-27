@@ -32,7 +32,7 @@ partial struct panicOnExit0ᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal bool val;
 }
-internal static ж<panicOnExit0ᴛ1> ᏑpanicOnExit0 = new StandardBox<panicOnExit0ᴛ1>(default(panicOnExit0ᴛ1));
+internal static ж<panicOnExit0ᴛ1> ᏑpanicOnExit0 = new StaticBox<panicOnExit0ᴛ1>(default(panicOnExit0ᴛ1));
 internal static ref panicOnExit0ᴛ1 panicOnExit0 => ref ᏑpanicOnExit0.Value;
 
 // SetPanicOnExit0 sets panicOnExit0 to v.

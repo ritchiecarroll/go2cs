@@ -13,9 +13,18 @@ plugins:
 # Jekyll excludes every source path that STARTS WITH an entry, so name no file at the docs/ root
 # with one of these prefixes. After the build, .github/site-outside-links.py reads this list,
 # points links into it at GitHub, and fails the run if any of it was built.
+# "PLAN-" and "DESIGN-" cover every plan and design record at the docs/ root; the five names
+# after them are the runbooks and the process records a visitor has no use for (owner ruling
+# OQ-1, 2026-10-26: nothing reachable from go2cs.net carries fleet process; COORD approved this
+# list the same day).
 exclude:
   - phase3
   - phase4
   - doctrine
-  - PLAN-context-diet.md
-  - PLAN-rebank-wave.md
+  - PLAN-
+  - DESIGN-
+  - GoCorpusMigration.md
+  - DotNetMigration.md
+  - NugetgoPublish.md
+  - CleanupBacklog.md
+  - TestingInfrastructureRequirements.md

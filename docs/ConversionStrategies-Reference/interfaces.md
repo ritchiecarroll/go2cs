@@ -905,7 +905,7 @@ The anchor was never in doubt — the record lands in `package_test_info.cs` and
 into the test metadata class both sides name. Only the *simple name* can disagree. `isSameAssemblyPkg`
 is deliberately left alone: it already answers correctly (both reference models clear
 `testPackagePath`), and it remains the RECOMPILE fallback's answer, where production sources really do
-compile into the test assembly. Behavioral CNR is byte-identical — the shape exists only under
+compile into the test assembly. Re-converting every behavioral test reproduces its committed output byte for byte — the shape exists only under
 `-tests`.
 
 ## An exported func type publicizes the unexported types in its signature
@@ -1905,7 +1905,7 @@ its C# lives in the CLOSED referenced production assembly — which is why `type
 subtracts such a declaration (`whiteboxProductionObject`; internal/reflectlite's `flag(typ.Kind())` minted
 a phantom `partial struct flag` in the test class, CS1061). Subtracting it for the pointer-boxing route as
 well would be one notch too far: it would silently shrink a white-box package's `package_test_info.cs`
-on regen, and nothing would catch it, since CNR never runs `-tests`.<!-- history: crypto/rc4 lost its
+on regen, and nothing would catch it, since the behavioral regression check never runs `-tests`.<!-- history: crypto/rc4 lost its
 Cipher → ж<Cipher> record and the `using testing = go.testing_package;` qualifier alias the same record
 site registers; go/types lost three (Basic, Interface, Tuple) -->
 

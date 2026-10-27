@@ -45,7 +45,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [5]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. 7 per run = 6 class-4 + 1 heap<digest> box. New() is outside the measured closure, so no hash.Hash shell is minted per run. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 7 per run at go1.24.13 to 9 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [5]uint32 state and [64]byte block -- golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident. The converted path counts 9 per run on windows and linux: the copy's array storage, non-escaping local buffers and the heap box for the digest. New() is outside the measured closure, so no hash.Hash shell is created per run. Deferred: .NET has value-typed fixed-size storage for a Go array value, and planned work removes the local buffers and the box; the entry retires only at zero bytes. |
 
 ## Excluded declarations
 

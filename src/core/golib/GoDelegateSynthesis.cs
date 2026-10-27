@@ -142,7 +142,16 @@ internal static class GoDelegateSynthesis
         return type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
     }
 
-    // Called under s_mintLock.
+    // Called under s_mintLock. DefineType's parent parameter is DynamicallyAccessedMembers(All), so naming
+    // MulticastDelegate as the parent asks the trimmer to keep all of its members; the two warnings are that
+    // request seen from the members' side. This path's real limit is Native AOT's missing Reflection.Emit, and
+    // that is GoStructSynthesis.SharedModule's DefineDynamicAssembly (IL3050, trim stage 3d), not a trim one.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Names MulticastDelegate as a dynamic type's parent, which keeps every member of it. The minted type " +
+                        "only derives from it; nothing calls its reflection-only constructors or CreateDelegate overloads " +
+                        "(trim class E, docs/PLAN-golib-full-trim.md).")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2111",
+        Justification = "As IL2026: the parent's members are kept whole for derivation, and none is invoked through reflection.")]
     private static Type mint(Type[] parameterTypes, Type returnType)
     {
         // TOP-LEVEL, never nested in a package container — the opposite of GoStructSynthesis's

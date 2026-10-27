@@ -19,7 +19,7 @@ A combined Go field declaration — `x, y int` — emits a single combined C# li
 
 C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `partial struct settingsᴛ1 /*dyn*/`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this). A reference to a lifted type as a bare identifier is renamed to the lifted name, and so is its use as a **slice or array element type** — `[]entry` (where `entry` is a local type) emits `slice<process_entry>`, not the short `slice<entry>` (which is unresolved at package scope → CS0246). The element is resolved through the same lift registry as the bare-identifier and anonymous-struct cases. (Guarded by the `LocalTypeSliceElement` behavioral test, covering both the slice and fixed-array forms; runtime hit this on `printDebugLog`'s `[]readState` and `traceAdvance`'s `[]untracedG`.)
 
-**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `/*dyn*/` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Without it, `go/ast`'s `TestPrint` would report `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`. (Design: [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md).) <!-- landed 2026-08-09 with go/ast's 9/9 bank; internal/platform's decode error had named []platform_test.listEntry rather than Go's structural spelling. -->
+**The `dyn` marker is also the type's RUN-TIME identity, and it must not leak the synthesized name.** An unnamed Go struct has no name to report, so `reflect.Type.String()` and `%T` render it STRUCTURALLY — `struct { X int; y int }`, and `struct {}` for golib's `EmptyStruct`. Because a lift gives the type a synthesized C# name (`settingsᴛ1`), that name would otherwise be what reflection reports; `/*dyn*/` is exactly what distinguishes a lift from an ordinary declared struct, whose Go name IS its own. golib's `GoReflect.TypeNaming` therefore renders a `dyn`-marked value type from the `GoFields` projection — the same field table `NumField`/`Field` and the value side read, so a type's reported name and the fields it hands out cannot disagree — following Go's format exactly: an embedded field contributes its type alone, a tagged field appends the `strconv.Quote`d tag. Without it, `go/ast`'s `TestPrint` would report `ast_internal_test.typeᴛ1` where Go prints `struct { X int; y int }`. <!-- Design: [`docs/phase4/DESIGN-reflection-bridge.md`](../phase4/DESIGN-reflection-bridge.md) (internal record, unlinked 2026-10-26, OQ-1). --> <!-- landed 2026-08-09 with go/ast's 9/9 bank; internal/platform's decode error had named []platform_test.listEntry rather than Go's structural spelling. -->
 
 A **map whose VALUE type is an anonymous struct** is lifted the same way. A package-level `var m = map[K]struct{…}{…}` names its value struct through the lift, so the map type reads `map<uint16, kindsᴛ1>` in the guard's golden; without it, `getAliasQualifiedTypeName`'s map arm would stringify the value as raw Go `struct{…}` syntax straight into the C# map signature (`map<uint16, struct{ name string; … }>`) — which C# cannot parse (a CS1519/CS1003 syntax cascade). <!-- the corpus instances were Go 1.24's crypto/internal/hpke SupportedKEMs (map[uint16]struct{ curve ecdh.Curve; hash crypto.Hash; nSecret uint16 }) and SupportedAEADs, with a func-typed field aead func([]byte) (cipher.AEAD, error); Go 1.26's crypto/hpke declares no such map. --> `extractStructType`'s recursive descent (see [An anonymous struct lifts from ANY depth of its declared type](#an-anonymous-struct-lifts-from-any-depth-of-its-declared-type)) reaches the map **VALUE** struct at the package-level value-spec composite-literal site; the one-off `extractMapValueStructType` that first did this was folded into it. The keyed element literals stay the target-typed `new(…)` constructor form — `[0x0001] = new(name: "alpha", size: 16, scale: (nint n) => n * 2)` in the guard's golden — which binds to the lifted struct's generated constructor; a func-typed value field (the guard's `scale func(int) int`) lifts to a `Func<…>` field that a method-group or func-value element still fills. Both the declaration type (`getCSharpTypeName` → the map arm) and the literal's own type render (`convMapType` → `getExpressionTypeName`) resolve the value through the shared `liftedTypeMap` (the lift runs before the initializer is converted). (Guarded by the `MapAnonStructValue` behavioral test — a package-level map with an anonymous-struct value type, including a func-typed field, constructed and read back by key, output-compared vs Go.)
 
@@ -241,7 +241,7 @@ the box:
 
 <!-- source: src/core/path/filepath/linux/path.cs:315-316 -->
 ```csharp
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StandardBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
+internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
 internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;                   // for testing
 ```
 
@@ -886,7 +886,7 @@ named branch), and the caller trusts that output directly instead of a second pa
 everywhere except named-parameter func types — bare-type func types (`func(int, string)`) were already
 converted once and stay so, just at the `extractTypes` site rather than the caller. (Guarded by the
 `NamedFuncTypeMapParam` behavioral test — `type Importer func(imports map[string]*Node, path string) (pkg
-*Node, err error)` used as a function parameter, output-compared vs Go; CNR byte-identical across the corpus,
+*Node, err error)` used as a function parameter, output-compared vs Go; every behavioral test re-converts unchanged,
 and an A/B reconvert of go/ast shows only that one collapsed-delegate parameter shape moving.)
 
 **A collapsed methodless named func type's DELEGATE TYPE renders through `iifeDelegateType`, not the string
@@ -910,7 +910,7 @@ equal-or-better**: the go/doc mangle fixed, plus `go/parser`/`go/scanner` (`go.t
 `tokenꓸPosition`), `go/internal/gccgoimporter` (a malformed `(io.ReadCloser>, error)` → valid),
 `internal/trace/traceviewer` (`net.http_package.Request` → `http.Request`), and `path/filepath`
 (`io.fs_package.DirEntry` → `fs.DirEntry`) all cleaned up, with `bufio`/`go/ast`/`nettest` only dropping
-cosmetic tuple names; CNR touches only three existing goldens (`NamedFuncTypeMapParam`,
+cosmetic tuple names; re-converting the behavioral tests changes only three existing goldens (`NamedFuncTypeMapParam`,
 `SubpackageFuncTypeParam`, `FirstClassFunctions`), all the same pattern. (Guarded by the `CrossPkgUser`
 extension — a package-level `simpleResolve` passed as a METHOD GROUP to `CrossPkgLib.Resolve`, whose
 `Resolver` is a methodless func type naming the cross-package `*CrossPkgLib.Node`, so the wrapped delegate
@@ -926,7 +926,7 @@ a member of the os package's C# class, so a cross-package reference `os_package.
 **target** — `os.FileInfo` → `fs.FileInfo` (→ `io.fs_package.FileInfo` via the file's `fs` using). Gated
 to a **different-package target**: an alias to a SAME-package type (`CrossPkgLib.Temperature = Celsius`)
 already resolves through the existing `ꓸ` global-using alias (`CrossPkgLibꓸTemperature`) and is left
-untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. CNR byte-identical;
+untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. Every behavioral test re-converts unchanged;
 an A/B of os+io/ioutil (same package set) shows only that one intended resolution (io/ioutil's `ReadDir`
 sort lambda moved `osꓸFileInfo` → `fs.FileInfo`, matching the file's other `fs.FileInfo` refs — still
 compiles). No behavioral test covers it: the shape needs three packages (B declares `Y`, A aliases
@@ -954,7 +954,7 @@ reaching the parser is slash-free (`func(*Server, *tls.Conn, Handler)`) and each
 through the normal alias route. Result NAMES are preserved, so a named multi-result field keeps its
 named C# tuple (the display-path advantage the old struct-field routing existed to protect); a
 same-package/builtin signature renders byte-identically to the old `t.String()` path (zero churn —
-CNR confirmed across the whole behavioral corpus). A variadic tail renders `...elem` (which the old
+every behavioral test re-converts unchanged). A variadic tail renders `...elem` (which the old
 path's `..`-strip reduced to the unparseable `.elem`) and lowers through the parser to the golib
 `ꓸꓸꓸ` delegate family (next paragraph). One side effect: element recursion passes through
 `getAliasQualifiedTypeName`'s foreign-ALIAS arm, so a signature naming a cross-package alias (`os.FileInfo` →
@@ -998,7 +998,7 @@ target is a methodless named func type, the assertion now renders its `getCSharp
 `Func<…>`): `ci._<Func<io.Writer, (io.WriteCloser, error)>>()` — matching how the stored value was
 emitted (a collapsed delegate). Other assertion targets are unchanged. (Guarded by the
 `MethodlessFuncTypeAssert` behavioral test — `i.(Compressor)` on a matching and a non-matching dynamic
-type, output-compared vs Go; CNR byte-identical and an A/B of archive/zip shows only the two intended
+type, output-compared vs Go; every behavioral test re-converts unchanged, and re-converting archive/zip before and after shows only the two intended
 `_<Compressor>`/`_<Decompressor>` → `_<Func<…>>` lines.)
 
 An **UNINITIALIZED local `var` of a methodless named func type** renders its declared type through the
@@ -1218,7 +1218,7 @@ args, an empty tail and a spread; it fails on the pre-change converter with CS15
 which is exactly the `slices` `TestGrow`/`TestConcat` error set.)
 
 A/B footprint: this is the half of the arc that moves anything outside its own guard, and it moves
-two lines. CNR across the behavioral corpus reports `DeferCallOrder` and `GoCallVariations`, both
+two lines. Re-converting the behavioral tests changes `DeferCallOrder` and `GoCallVariations`, both
 `f1 := fmt.Println` — a variadic PACKAGE function bound as a method value, which was the same
 `var`-inferred synthesized delegate and is now `Funcꓸꓸꓸ<any, (nint, error)>`. Both still compile and
 still match `go run`. The whole converted standard library re-emitted byte-identically, because <!-- measured at the
@@ -1395,7 +1395,8 @@ containing a dot could never equal a keyword, so the old whole-string test never
 hyphen/tilde replacement is per-part identical either way. Emission-neutral for both corpora, and
 measured so — the behavioral corpus has no dotted module path at all, and the standard library's only
 dotted element is `golang.org` (the GOROOT-vendored tree), whose `golang`/`org` are not keywords:
-[CNR](../Glossary.md#cnr) byte-identical across the behavioral corpus, and a seeded full reconvert
+the behavioral regression check <!-- [CNR](../Glossary.md#cnr) --> byte-identical across the behavioral corpus,
+and a seeded full reconvert
 byte-identical across every `.cs`/`.csproj`/`README.md` plus the generated `go2cs-stdlib.slnx`. <!-- measured
 at the change: 572 behavioral packages; 5,179 stdlib artifacts -->
 
@@ -1444,7 +1445,7 @@ exactly as it always has, and `descChan` emits
 `/*<-*/channel<go.mongodb.org.mongo_driver.mongo.description_package.Topology>` against the
 `using description = global::go.go.mongodb.org.….description_package;` the same file writes.
 
-Two subtleties the first cut got wrong, both caught by [CNR](../Glossary.md#cnr):
+Two subtleties the first cut got wrong, both caught by the behavioral regression check: <!-- [CNR](../Glossary.md#cnr) -->
 
 - **A non-ASCII byte is a path byte.** Every delimiter this scan looks for is a constructor
   character and all of them are ASCII, but the converter's own synthetic markers are not (`ᴛ`, `ж`,

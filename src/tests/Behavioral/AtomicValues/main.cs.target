@@ -10,7 +10,7 @@ partial struct holder {
     internal atomic.Int64 count;
 }
 
-internal static ж<holder> ᏑgHolder = new StandardBox<holder>(default(holder));
+internal static ж<holder> ᏑgHolder = new StaticBox<holder>(default(holder));
 internal static ref holder gHolder => ref ᏑgHolder.Value;
 
 internal static void Main() {

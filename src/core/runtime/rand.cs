@@ -30,10 +30,10 @@ partial struct globalRandᴛ1 /*dyn*/ {
     internal chacha8rand.State state;
     internal bool init;
 }
-internal static ж<globalRandᴛ1> ᏑglobalRand = new StandardBox<globalRandᴛ1>(new globalRandᴛ1());
+internal static ж<globalRandᴛ1> ᏑglobalRand = new StaticBox<globalRandᴛ1>(new globalRandᴛ1());
 internal static ref globalRandᴛ1 globalRand => ref ᏑglobalRand.Value;
 
-internal static ж<bool> ᏑreadRandomFailed = new StandardBox<bool>(default(bool));
+internal static ж<bool> ᏑreadRandomFailed = new StaticBox<bool>(default(bool));
 internal static ref bool readRandomFailed => ref ᏑreadRandomFailed.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

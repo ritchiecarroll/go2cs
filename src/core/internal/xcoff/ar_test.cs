@@ -16,7 +16,7 @@ internal partial struct archiveTest {
     internal slice<global::go.@internal.xcoff_package.FileHeader> membersFileHeader;
 }
 
-internal static ж<slice<archiveTest>> ᏑarchTest = new StandardBox<slice<archiveTest>>(default(slice<archiveTest>));
+internal static ж<slice<archiveTest>> ᏑarchTest = new StaticBox<slice<archiveTest>>(default(slice<archiveTest>));
 internal static ref slice<archiveTest> archTest => ref ᏑarchTest.ValueSlot;
 internal static void initᴛarchTest() { archTest = new archiveTest[]{
     new(

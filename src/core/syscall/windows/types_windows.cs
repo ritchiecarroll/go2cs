@@ -1053,7 +1053,7 @@ partial struct GUID {
     public array<byte> Data4 = new(8);
 }
 
-public static ж<GUID> ᏑWSAID_CONNECTEX = new StandardBox<GUID>(new GUID(
+public static ж<GUID> ᏑWSAID_CONNECTEX = new StaticBox<GUID>(new GUID(
     0x25a207b9,
     0xddf3,
     0x4660,

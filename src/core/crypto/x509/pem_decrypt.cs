@@ -42,7 +42,7 @@ partial struct rfc1423Algo {
 
 // rfc1423Algos holds a slice of the possible ways to encrypt a PEM
 // block. The ivSize numbers were taken from the OpenSSL source.
-[GoLazy] partial class lazyᴛrfc1423Algos { internal static ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StandardBox<slice<rfc1423Algo>>(new rfc1423Algo[]{new(
+[GoLazy] partial class lazyᴛrfc1423Algos { internal static ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StaticBox<slice<rfc1423Algo>>(new rfc1423Algo[]{new(
     cipher: PEMCipherDES,
     name: "DES-CBC"u8,
     cipherFunc: des.NewCipher,

@@ -60,7 +60,7 @@ partial class syscall_package {
 //     so live with the race.
 //   - [Dup]. Use [F_DUPFD_CLOEXEC] or dup3 if available. Otherwise,
 //     does not block, so use ForkLock.
-public static ж<Δsync.RWMutex> ᏑForkLock = new StandardBox<Δsync.RWMutex>(default(Δsync.RWMutex));
+public static ж<Δsync.RWMutex> ᏑForkLock = new StaticBox<Δsync.RWMutex>(default(Δsync.RWMutex));
 public static ref Δsync.RWMutex ForkLock => ref ᏑForkLock.Value;
 
 // StringSlicePtr converts a slice of strings to a slice of pointers
@@ -140,10 +140,10 @@ partial struct ProcAttr {
     public ж<SysProcAttr> Sys;
 }
 
-internal static ж<ProcAttr> ᏑzeroProcAttr = new StandardBox<ProcAttr>(default(ProcAttr));
+internal static ж<ProcAttr> ᏑzeroProcAttr = new StaticBox<ProcAttr>(default(ProcAttr));
 internal static ref ProcAttr zeroProcAttr => ref ᏑzeroProcAttr.Value;
 
-internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new StandardBox<SysProcAttr>(default(SysProcAttr));
+internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new StaticBox<SysProcAttr>(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 
 // go2cs generated this placeholder — func forkExec is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
