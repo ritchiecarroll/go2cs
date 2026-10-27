@@ -141,8 +141,15 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
         if (ReferenceEquals(this, other))
             return true;
 
+        // One native address is one Go pointer, whichever kind names it (ж<T>.NativeIdentity).
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
+
         return other is NativePointerArrayBox<E> words && m_nativeAddr == words.m_nativeAddr;
     }
+
+    /// <inheritdoc/>
+    internal override nuint NativeIdentity => m_nativeAddr;
 
     /// <inheritdoc/>
     public override int GetHashCode() => m_nativeAddr.GetHashCode();

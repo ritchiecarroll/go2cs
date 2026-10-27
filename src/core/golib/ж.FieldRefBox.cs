@@ -166,6 +166,9 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     internal unsafe nuint NativeSlotAddress =>
         !TargetsSharedZeroSizeSlot && m_source is INativeRooted { IsNativeRooted: true } ? (nuint)Unsafe.AsPointer(ref ValueSlot) : 0;
 
+    /// <inheritdoc/>
+    internal override nuint NativeIdentity => NativeSlotAddress;
+
     // A Go ZERO-SIZE field's ref target is not its storage: a readonly zero-size field laid out at Go's
     // offset answers golib's shared per-type slot (GoZeroSizeSlot, A17), so the TARGET's address names no
     // field at all. Identity stays (source, field): NativeSlotAddress answers 0 above, and StorageKind None
@@ -193,15 +196,10 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
             return true;
 
         // A native-rooted field reference IS its address (see NativeSlotAddress): compare by it, against
-        // either kind that can name the same machine address.
-        if (NativeSlotAddress is var address and not 0)
-        {
-            if (other is NativeBox<T> native)
-                return address == native.NativeAddress;
-
-            if (other is FieldRefBox<T> nativeField && nativeField.NativeSlotAddress is var otherAddress and not 0)
-                return address == otherAddress;
-        }
+        // every kind that can name the same machine address (a NativeBox, another native field reference,
+        // an element box over a native slice or array view), and never equal to a managed pointer.
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
 
         // Pointer into a struct field: same source object and field accessor. The comparison uses
         // the field IDENTITY token — the original accessor delegate — never the stored ref

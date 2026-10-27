@@ -205,11 +205,16 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
         if (ReferenceEquals(this, other))
             return true;
 
-        if (other is NativeArrayBox<T> nab)
-            return m_nativeAddr == nab.m_nativeAddr;
+        // One native address is one Go pointer, whichever kind names it (another array view, a NativeBox, an
+        // element box over a native slice of arrays).
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
 
         return IsNilPointer && other.IsNilPointer;
     }
+
+    /// <inheritdoc/>
+    internal override nuint NativeIdentity => IsNilPointer ? 0 : m_nativeAddr;
 
     /// <inheritdoc/>
     public override int GetHashCode() => IsNilPointer ? 0 : m_nativeAddr.GetHashCode();

@@ -257,6 +257,9 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     internal nuint NativeElementAddress => nativeElementIdentity();
 
     /// <inheritdoc/>
+    internal override nuint NativeIdentity => nativeElementIdentity();
+
+    /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
     // index x Go element size), so same-storage element pointers order exactly like Go addresses and a
     // field view through one (IInteriorPointer) adds its displacement in the same units: an unscaled
@@ -306,17 +309,15 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
         if (NamesZeroBase || other.NamesZeroBase)
             return NamesZeroBase && other.NamesZeroBase;
 
+        // Address identity for native-backed elements (see nativeElementIdentity): two pointers over one
+        // address are one pointer whichever kinds minted them (a NativeBox from Ꮡ on a native slice, a
+        // native-rooted field reference, another element box), and a native element is never the same
+        // pointer as a managed one.
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
+
         if (other is not ElemRefBox<T> er)
             return false;
-
-        // Address identity for native-backed elements (see nativeElementIdentity): two boxes over
-        // one address are one pointer, and a native element is never the same pointer as a managed
-        // one.
-        nuint thisAddr = nativeElementIdentity();
-        nuint otherAddr = er.nativeElementIdentity();
-
-        if (thisAddr != 0 || otherAddr != 0)
-            return thisAddr == otherAddr;
 
         (object storage1, nint element1) = CanonicalPair();
         (object storage2, nint element2) = er.CanonicalPair();
