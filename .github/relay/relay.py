@@ -9,7 +9,7 @@
 #   matched    names whose go and csharp verdicts are equal, identical skips included
 #   disclosed  len(comparison.disclosed), the disclosure list
 #   divergent  verdicts - matched
-#   new        divergent names absent from the disclosure list
+#   new        divergent names absent from the disclosure list (each entry's name, before its " (class)")
 #   agree      osx-arm64 == osx-x64 verdict for verdict, on both the go and the csharp side
 import hashlib, json, os, sys
 
@@ -43,8 +43,10 @@ def reading(rec):
     names = set(go) | set(cs)
     matched = sum(1 for n in names if n in go and n in cs and go[n] == cs[n])
     disclosed = list(rec.get('disclosed') or [])
+    # An entry reads "Name (class): text"; Go spells a space in a test name as '_', so the name ends at the first " (".
+    disclosed_names = {entry.split(' (', 1)[0] for entry in disclosed}
     divergent = sorted(n for n in names if not (n in go and n in cs and go[n] == cs[n]))
-    new = [n for n in divergent if n not in set(disclosed)]
+    new = [n for n in divergent if n not in disclosed_names]
     return len(names), matched, len(disclosed), len(divergent), new, rec.get('status', '?')
 
 by_rid = {rid: load(rid) for rid in RIDS}
