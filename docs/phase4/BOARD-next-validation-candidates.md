@@ -29301,6 +29301,10 @@ The JIT's LittleEndian rows were bimodal across runs and do not follow the form 
 assignments over src/core and src/gen finds 9, all local or parameter boxes. golib's only static-field reflection
 write, `LinknameVar.Set`, writes a remote VALUE field by name, never a box. A later assignment would be CS0198.
 
+That census missed one writable-ref TAKING: go2cs-gen's lazy-holder accessor, `ref ж<T> ᏑX => ref lazyᴛX.ᏑX`. It is
+CS8161 over 290 holders, and the plant series' control arm caught it. The generator now returns a readonly box by
+value, and a census of every other writable-ref taking reads 0.
+
 **What still binds a copy** (stated in Limitations and KnownIssues):
 - a pointer- or interface-typed exported var (the value kind COORD ruled);
 - a two-argument `//go:linkname` var;

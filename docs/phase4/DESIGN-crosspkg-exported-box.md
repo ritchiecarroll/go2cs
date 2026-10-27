@@ -348,6 +348,18 @@ signal_windows, syscall exec_windows). golib's only reflection write to a static
 remote VALUE field by name, never a box. A later assignment would be CS0198, which the three-flavour stdlib build,
 the slnx build and the behavioral compile phase all catch.
 
+**readonly and the lazy holder.** The census above counted assignments. It missed a different shape, a writable ref
+TAKEN of a box. go2cs-gen's `LazyHolderGenerator` gave each `[GoLazy]` holder's field a `ref` accessor,
+`static ref ж<T> ᏑX => ref lazyᴛX.ᏑX;`, and a readonly field cannot be returned by writable ref (CS8161). 290 of the
+corpus's 1,041 lazy holders hold a box.
+- The red-first plant series' control arm caught it, before any plant: the behavioral project's compile builds flag
+  and fmt, whose dependencies carry such holders.
+- The generator now returns a readonly field by value, `static ж<T> ᏑX => lazyᴛX.ᏑX;`. The box is a reference, so
+  every reader still gets the same box. A value field keeps the `ref` accessor.
+- A census of every other writable-ref taking of a `Ꮡ` name reads 0. It covered `ref Ꮡx` and `ref q.Ꮡx` ending at the
+  name, as an argument, a ref local or a ref return, over src/core, src/gen and golib. Its control matched both shapes
+  and refused `ref Ꮡb.DerefOrNull()`.
+
 **The rule's exclusions, as built.** Beyond `package main`, pointers and interfaces:
 - every exported var with a TWO-argument `//go:linkname` (`linknameForwardVars`), not only the pulls
   `varLinknamePull` accepts: `crypto/internal/fips140/check.Linkinfo` and `checktest.RODATA` stay plain fields,
