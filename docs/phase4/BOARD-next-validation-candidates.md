@@ -29430,8 +29430,15 @@ tiering it reads 37-54 before and 28-36 after, still FAIL: the residual is tier-
 `len`/`cap` (the same 56 B per call NamedSliceLenCapAllocationTests records), outside this seat.
 
 Stated differences and limits:
-- a native slice element compared with the same element through a native array view: `Ꮡ` answers false
-  (NativeBox against an element box), `Ꮡelem` answers true, which is Go's answer;
+- OPEN, a PRE-EXISTING DEFECT of `ж<T>` equality on native views, not fixed by this seat: a pointer to a native slice
+  element and a pointer to the same element through a native array view compare UNEQUAL, where Go answers equal.
+  `Ꮡ(s, i)` on a native slice mints a `NativeBox<T>`, `p.at<T>(i)` on a `NativeArrayBox` mints an `ElemRefBox<T>`, and
+  neither Equals accepts the other kind (`NativeBox<T>.Equals` takes only a NativeBox or a native FieldRefBox;
+  `ElemRefBox<T>.Equals` only an ElemRefBox). Probe (GolibTests, linux, 83181a6037), with `s =
+  slice<ulong>.OverNativeMemory(addr, 8)` and `p = NativeArrayBox<ulong>.Over(addr, 8)`: `Ꮡ(s, 4) == p.at<ulong>(4)`
+  False, reversed False, both `PointerOrderToken`s equal; `Ꮡelem(s, 4) == p.Ꮡelem<ulong>(4)` True. Only a compare
+  of two element address-ofs takes `Ꮡelem`, so every other spelling (`q := &s[4]; q == &a[4]`, either operand a
+  stored pointer) still answers false. The fix belongs in the two Equals methods (and their hashes), as a separate seat;
 - kept boxed, by the ruled scope: one operand only, `any(…)`, a pointer conversion, a switch tag, a named array behind a
   pointer or an escaped local (published lazily through the box), a nested element `&m[i][j]` (the note listed it as
   covered; it is not), the receiver copy form, a captured box inside a lambda;
