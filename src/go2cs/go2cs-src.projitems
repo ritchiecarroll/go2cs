@@ -142,6 +142,7 @@
     <None Include="$(MSBuildThisFileDirectory)crashVerdict.go" />
     <None Include="$(MSBuildThisFileDirectory)crashVerdict_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crossAssemblyLiftDedup_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)crosspkgExportedBox_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />
@@ -309,6 +310,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibGrowSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
