@@ -29503,4 +29503,80 @@ precompiling a method past its cut-off, which then JITs at run time, so behavior
 
 — G (2026-10-27)
 
+
+---
+
+### 2026-10-27 — H (COORD seat #15, .2): a type switch's `case int:` matched int32, rune and uint32 (FIXED)
+
+**Found by** R, reading code during a docs pass. **Verified by** H at master 5f5aa6fbaf: Go and C# outputs compared side
+by side, with an A/B run and a control. **Ruled** a defect by COORD, as 1.26.10.2 seat #15.
+
+**The defect.** Go matches a type switch's dynamic type exactly. `visitTypeSwitchStmt.go` appended a synthetic
+`case int32 <bind>:` after every `case nint` label, and `case uint32` after every `case nuint`, running the same body.
+It was skipped only when the switch listed int32, rune or uint32 itself. So `int32(5)`, `rune(5)` and `uint32(5)` took
+Go's `int`/`uint` arm where Go reports `default`: 3 of 11 lines differed in the probe. It was invisible to every
+behavioral test, because none passed an int32 through a switch that had no int32 case.
+
+**Where it came from (step 1).** The label was added in 79ccad9d65 (2024-12-01, "Added type switch handling"), not in
+d96b98e2f3 (2025-04-14), which only gave it a binding. At the time, `whatAmI(1)` emitted a bare C# `1`, which boxed as
+System.Int32, and the label caught it. 96b13eec20 (2026-07-12) made an untyped int constant box as nint
+(`whatAmI((nint)1)`, guarded by UntypedIntInterfaceBox). After that the label no longer caught anything a Go `int`
+produces; it only misrouted. That original case is TypeSwitch's `whatAmI(1)`, and it stays green after the deletion,
+output-compared through the apphost. So the fix is a plain deletion, not a narrowing.
+
+**Hand-owned census (step 2).** A read-only census looked for a C# int or uint boxed into `any`, `object` or a Go
+interface where the Go original has int or uint. It covered 562 hand-owned files: the GoManualConversion files,
+`*_impl.cs`, golib, testing and unsafe.
+- **Risk sites: 0.** Every integer box was one of three kinds:
+  - already nint/nuint (TestFlagBridge, the builtins, the enumerators, runtime/syscall/testing APIs);
+  - a genuine int32/uint32;
+  - typed from the destination (GoReflect `coerceScalar` maps Int to `(nint)`).
+- **Limits.** The Go side was read at go1.24.13 sources. A hand-written member spelled `int32` where Go says `int` would
+  not match the patterns.
+- **Adjacent, OPEN, not in this seat:** `golib/builtin.cs:4362` `GetGoTypeName` maps `TypeCode.Int32 => "int"`, but
+  `UInt32 => "uint32"`, and GoReflect maps int to int32. It names a Go int32 "int" in three panic texts:
+  `RuntimeErrorPanic.cs:723` (the fallback interface-conversion message), `GoEqualityComparer.cs:91` (unhashable type)
+  and `runtime/pinner_impl.cs:199`. This is a message-text defect from the same 2024 assumption. No golden or test was
+  checked for that text.
+
+**The fix.** A converter-only deletion: the append, and the explicitCaseTypes pre-collection that existed only to
+suppress it (`visitTypeSwitchStmt.go`, 3 lines added, 31 removed). There is no golib change.
+
+**Footprint, predicted before the run and scored.**
+- **-stdlib, two-seeded, three targets.** Both binaries are go1.26.10, built from archives of 5f5aa6fbaf and 7f695db261.
+  Both roots were seeded from one archive snapshot.
+  - Base arm: the L3 merge wrote 0 artifacts (2514 already current), so the committed corpus IS master's emission.
+  - Fix arm: 2 artifacts, identical on windows, linux and darwin. `go/internal/gccgoimporter/parser.cs` 0/-10 and its
+    `package_info.cs` +1/-1 (one GoPositionMap re-encode).
+  - Score:
+    - File count MET (2).
+    - Line kind MET (one map re-encode, not retired).
+    - Per-target symmetry MET.
+    - "Zero other files" MET.
+    - parser.cs MISSED: predicted -9, measured -10. I counted the arm as 573-581; its closing brace sits at 582.
+- **-tests, cmp (flat, host target).** `cmp_test.cs` 0/-8 and `package_test_info.cs` +1/-1. Predicted exactly, MET.
+  The committed files equal the base emission. cmp validates: 4 tests against `go test`.
+- **Correction, before the run:** the census's 3 corpus sites were two populations (1 -stdlib, 2 -tests). This was split
+  in the prediction post.
+- **Behavioral.** 10 goldens were re-baselined: AnyStringLitChanSend, DefinedTypeOverInterface,
+  FuncLitStringConcatReturn, MinIntDivide, PanicRecover, TypeSwitch, TypeSwitchImpureTag, TypeSwitchMultiCase,
+  TypeSwitchTagShadowRename and the new TypeSwitchIntWidthCases. Each lost only its synthetic labels and re-encoded
+  one map line. All 20 projects under the 9 filters pass every phase, output-compared against Go.
+  - The A/B also ran two untyped-int guards (UntypedIntInterfaceBox, AnyBoxedUntypedConst): 0 golden lines moved, both
+    green.
+
+**Guards.** TypeSwitchIntWidthCases is RED at master (Output: stdout mismatch, the other three phases pass) and GREEN at
+the tip. NilPointerValueReceiverCall is green at both: it guards R's Q2 reading, which COORD ruled not a defect. A value
+receiver called through a nil `*T` panics because the receiver copy goes through `~p` or `DerefOrNull`.
+
+**Instrument note.** MinIntDivide prints nothing when launched as `dotnet x.dll`, on master's emission too, because it
+filters on `os.Args`. Through the apphost both arms match Go. Read a `dotnet x.dll` empty stdout as a launch artifact
+before calling it a regression.
+
+**Gates at the tip** (960fc9ac84), one battery, sequential: `go test ./...` in src/go2cs rc 0; GenTests 346/346;
+GolibTests 2239 passed, 36 skipped, 0 failed; go2cs.slnx and go2cs-stdlib.slnx Debug builds 0 errors; CNR
+byte-identical across 934 behavioral packages (7 platform-exclusive skipped).
+
+— H (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
