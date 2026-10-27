@@ -38,6 +38,25 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 | 12 | Signed release binaries: the release machine downloads the CI-built archives, Authenticode-signs the Windows executables in the release's PIN session, re-packs and re-uploads them, and GPG-signs `SHA256SUMS`; the attestation covers the bytes users download | release ritual + workflow | P1 |
 | 13 | Proof pages show visitor-facing disclosure reasons: each disclosure gains a rendered `reason` in the present tense and a non-rendered history field, and the proof pages are regenerated (the owner's ruling that pages reachable from go2cs.net carry no fleet language) | test tooling + docs | R |
 
+**#1's NEWS text (breaking for compiled C#).** Release day lifts this verbatim into the 1.26.10.2 NEWS entry and the
+release notes:
+
+> **Another package's variables, by address.** Taking the address of a variable another package exports now
+> reaches the variable, as in Go: `&otherpkg.V`, `flag.BoolVar(&otherpkg.Debug, ...)`, a pointer-receiver method
+> value such as `f := otherpkg.V.Reset`, and an address inside it, `&otherpkg.S.Field` or `&otherpkg.Arr[i]`. Only a
+> pointer- or interface-typed variable is still handed over as a copy ([Limitations](Limitations.md)). **This is a
+> breaking change for compiled C# code**: each exported variable of a value type is now a `ref` property over its
+> storage, not a field, so an assembly compiled against 1.26.10.1 must be rebuilt against 1.26.10.2. C# source that
+> reads or assigns `pkg.V` compiles unchanged. go.* packages now depend on each other at the exact release version,
+> so a project that mixes 1.26.10.1 and 1.26.10.2 packages fails at restore and names them. A read of such a variable
+> costs about 0.5 ns more than a field read on the JIT, and about 0.7 to 0.9 ns more under Native AOT (measured on
+> `win-x64`, one development machine).
+
+<!-- From docs/phase4/DESIGN-crosspkg-exported-box.md section 11 (the seat as built), where the same text sits under
+     COORD's OQ-2 ruling; COORD ruled 2026-10-27 that it ships on release day, lifted from here. The per-read costs are
+     that section's bench (probe docs/phase4/probes/g-crosspkg-read-ab, median of 9, each runtime run twice): JIT nint
+     0.25 for a field against 0.80 adopted; AOT nint 0.32-0.47 against 1.18. -->
+
 **Not in this release, already scheduled:** the performance re-baseline against the published 1.26.10.1 packages
 ([`PLAN-perf-rebaseline.md`](PLAN-perf-rebaseline.md), G with the i9's AOT builds), the nugetgo rebuild wave against
 1.26.10.1 (C2), and R's docs follow-up from the 1.26.10.1 veracity review. They need no converter change.

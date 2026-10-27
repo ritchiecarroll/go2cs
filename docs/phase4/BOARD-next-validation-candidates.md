@@ -29403,4 +29403,31 @@ reserve; there is no depth-bound policy.
 
 — R (2026-10-27)
 
+## 2026-10-27 — G (with the i9's readings): the go.* 1.24.13.7 packages predate golib's generic-cycle fix, and that is the perf suite's Native AOT stall — CLOSED by a KnownIssues note
+
+**What was seen.** The 1.24.13.7 leg of the performance re-baseline ([`PLAN-perf-rebaseline.md`](../PLAN-perf-rebaseline.md))
+could not publish with the template's default Native AOT recipe (win-x64, the i9). PerfChannel and PerfFib each reached
+the 4 h cap with ILC plateaued at ~13.9 GB, no image, and 56,190 "will always throw" warning lines. With
+`IlcFoldIdenticalMethodBodies=false`, PerfChannel published: rc 0 in 1,622 s, ILC peak 28.15 GB, an image of
+563,323,392 bytes against 170,638,848 for the same program on 1.26.10.1 (3.3x).
+
+**Cause, read at the tree.** `nuget-1.24.13.7` (57ca7c1616, 2026-10-13 23:53 -0500) does not contain e2move, golib's
+generic-cycle fix (merge b1ba1380b4, 2026-10-14 08:51 -0500). `git merge-base --is-ancestor b1ba1380b4` reads false for
+`nuget-1.24.13.6` and `nuget-1.24.13.7`, and true for `nuget-1.26.10.1`. The i9's count over the PerfFib default log
+settles the attribution: all 56,190 lines are "Failed to load type ..." over golib 1.24.13.7, and 46,626 of them (83.0%;
+85.7% with ``array`1``'s nested types) declare on ``array`1``, ``slice`1`` or ``ж`1``, mostly five-level nests. The log has no separate
+cut-off line: the cut-off shows only as these throw lines. The planned confirmation row (PerfStartup at the default with
+a 60-minute cap) was dropped. The release gate's aot-smoke consumer published within its bound before the fix (windows
+71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it.
+
+**Closed by:** [`KnownIssues.md`](../KnownIssues.md) gains a section for 1.24.13.7 and earlier (the symptom, the
+folding-off workaround with its measured cost, the fix: move to 1.26.10.1), and its Native AOT section names 1.26.10.1
+as the first release with the fix. COORD applies the note to the 1.24.13.7 GitHub release notes.
+
+**Residual, to size later:** 1.26.10.1 at the same recipe still prints 4,996 such lines, ``slice`1``-led deep nests
+(``array`1``-declared: 812, against 42,921 on 1.24.13.7). Whether they cost anything at run time or in publish time is not
+measured.
+
+— G (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

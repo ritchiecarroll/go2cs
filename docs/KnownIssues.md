@@ -102,7 +102,8 @@ with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14). Befor
 of that day, the same publish took about an hour on Linux and Windows and nearly five hours on an Intel Mac,
 did not finish within six hours on Apple silicon, and produced an executable of about 250 MB. A converted
 project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
-Native AOT are not affected.
+Native AOT are not affected. The fix first shipped in the `go.*` 1.26.10.1 packages; for 1.24.13.7 and earlier,
+see the section that follows.
 
 <!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
      fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
@@ -127,6 +128,43 @@ Native AOT are not affected.
      hours. Two such publishes run side by side on the same machine (ILC 8.7 and 10.3 GB, 1.3 GB left free) were
      both still compiling at the four-hour ceiling. The ~250 MB consumer above measured 243,136,000 bytes on the same
      machine and tree. -->
+
+## With the go.* 1.24.13.7 packages or earlier, a Native AOT publish can take hours or not finish
+
+**Symptom.** A Native AOT publish (`PublishAot`) of a program that references the `go.*` 1.24.13.7 packages, or an
+earlier release, does not finish or takes hours. The ILC compiler holds about 14 GB of memory and prints tens of
+thousands of warnings that a method will always throw because a type from `golib` failed to load. Measured on
+`win-x64`, on one development machine.
+
+**Cause.** These releases were built before the fix to the runtime library's generic cycle (see
+[the Native AOT section](#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)). Native
+AOT expands that cycle until it reaches its nesting limit, and compiles each method that reaches past the limit to
+throw, which is what those warnings report.
+
+**Fix.** Move to the `go.*` 1.26.10.1 packages or later. They carry the fix, and the 1.24.13.7 packages' deprecation
+notice already points to them.
+
+**Workaround on 1.24.13.7.** Turn off identical-method folding in the project file:
+
+```xml
+<IlcFoldIdenticalMethodBodies>false</IlcFoldIdenticalMethodBodies>
+```
+
+The publish then finishes, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times the size of the
+same program built against 1.26.10.1.
+
+<!-- Measured 2026-10-27 on the i9 (win-x64), relayed by COORD; the attribution is G's, settled by the i9's count.
+     The 1.24.13.7 leg of the performance re-baseline (PLAN-perf-rebaseline) published PerfChannel and PerfFib with the
+     template's default Native AOT recipe: each reached the 4 h cap with ILC plateaued at ~13.9 GB and no image, and
+     printed 56,190 "will always throw" lines. With IlcFoldIdenticalMethodBodies=false, PerfChannel published: rc 0 in
+     1,622 s, ILC peak 28.15 GB, image 563,323,392 bytes against 170,638,848 for the same program on 1.26.10.1 (3.3x).
+     Cause, read at the tree: nuget-1.24.13.7 (57ca7c1616, 2026-10-13 23:53 -0500) does not contain golib's generic-cycle
+     fix, e2move (merge b1ba1380b4, 2026-10-14 08:51 -0500); `git merge-base --is-ancestor b1ba1380b4` reads false for
+     nuget-1.24.13.6 and nuget-1.24.13.7 and true for nuget-1.26.10.1. The i9's count over the PerfFib default log: all
+     56,190 lines are "Failed to load type ..." over golib 1.24.13.7, and 46,626 of them (83.0%; 85.7% with array`1's
+     nested types) declare on array`1, slice`1 or ж`1, mostly five-level nests. The log has no separate cut-off line;
+     the cut-off shows only as these lines. The release gate's aot-smoke consumer published within its bound before the
+     fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it. -->
 
 ## A single-file publish with ReadyToRun runs out of memory
 
