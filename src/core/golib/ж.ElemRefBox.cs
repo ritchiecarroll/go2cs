@@ -324,6 +324,20 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
         return ReferenceEquals(storage1, storage2) && element1 == element2;
     }
 
+    // This box's identity as a value (ElementAddress<T>, the element-address compare): the answer Equals gives,
+    // in Equals' own order, so comparing two identities is comparing the two boxes.
+    internal ElementAddress<T> Identity()
+    {
+        if (NamesZeroBase)
+            return ElementAddress<T>.Zerobase;
+
+        if (nativeElementIdentity() is var addr and not 0)
+            return ElementAddress<T>.Native(addr);
+
+        (object storage, nint element) = CanonicalPair();
+        return ElementAddress<T>.Managed(storage, element);
+    }
+
     /// <inheritdoc/>
     public override int GetHashCode()
     {

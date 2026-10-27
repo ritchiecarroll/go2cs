@@ -305,7 +305,7 @@ internal static void flushChild(this ref Builder b) {
         return;
     }
 
-    if (b.fixedSize && Ꮡ(b.result, 0) != Ꮡ((~child).result, 0)) {
+    if (b.fixedSize && Ꮡelem(b.result, 0) != Ꮡelem((~child).result, 0)) {
         throw panic("cryptobyte: BuilderContinuation reallocated a fixed-size buffer");
     }
 

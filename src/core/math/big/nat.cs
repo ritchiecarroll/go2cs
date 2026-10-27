@@ -237,7 +237,7 @@ internal static Δnat montgomery(this Δnat z, Δnat x, Δnat y, Δnat m, Word k
 // no 3-operand slice expressions in this code (or worse,
 // reflect-based operations to the same effect).
 internal static bool alias(Δnat x, Δnat y) {
-    return cap(x) > 0 && cap(y) > 0 && Ꮡ(x.slice(0, cap(x)), cap(x) - 1) == Ꮡ(y.slice(0, cap(y)), cap(y) - 1);
+    return cap(x) > 0 && cap(y) > 0 && Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1);
 }
 
 // addTo implements z += x; z must be long enough.
@@ -408,7 +408,7 @@ internal static (nuint, bool) isPow2(this Δnat x) {
 }
 
 internal static bool same(Δnat x, Δnat y) {
-    return len(x) == len(y) && len(x) > 0 && Ꮡ(x, 0) == Ꮡ(y, 0);
+    return len(x) == len(y) && len(x) > 0 && Ꮡelem<Word>(x, 0) == Ꮡelem<Word>(y, 0);
 }
 
 // z = x << s

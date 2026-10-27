@@ -367,6 +367,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Pointers](pointers.md)**
   - [A colliding pointer-adapter name qualifies its FOREIGN interface side](pointers.md#a-colliding-pointer-adapter-name-qualifies-its-foreign-interface-side)
   - [Pointer equality canonicalizes the STORAGE, not the referent — slice/array element identity](pointers.md#pointer-equality-canonicalizes-the-storage-not-the-referent--slicearray-element-identity)
+  - [Comparing two element addresses allocates nothing — `Ꮡelem`](pointers.md#comparing-two-element-addresses-allocates-nothing--ꮡelem)
   - [A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split](pointers.md#a-pointers-nilness-and-identity-are-structural--the-isnull--isnilpointer-split)
   - [Reading a pointer and taking a field pointer allocate NOTHING — the two costs hidden inside `ж<T>`](pointers.md#reading-a-pointer-and-taking-a-field-pointer-allocate-nothing--the-two-costs-hidden-inside-жt)
   - [A pointer parameter whose every use is a dereference is a `ref` parameter — the ж-box ref-lowering](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering)
