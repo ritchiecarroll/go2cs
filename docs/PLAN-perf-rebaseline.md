@@ -126,10 +126,28 @@ without one is re-published) nor build from package references or publish R2R. S
   this box during a timed window. The second G lane, when one is live on the box, is idle. A process
   census (by executable path, never by name) at the start and the end of each window shows no `dotnet`, `go`,
   `MSBuild` or `link` process except the runner's own. Builds run before the timed window, never inside it.
+- **No relay writes to the box during a window** (COORD, 2026-10-27, standing). A copy over the share runs no local
+  process, so the census cannot see it. COORD asks G before any relay into G-LAPTOP and starts it only on G's
+  go-ahead. The window script also records the newest file time and the file count under `C:\go2cs-perf` at the
+  start and the end of the window, and the window is void if either moved.
+  <!-- 2026-10-27: window 1's first run (14:00-15:11) was voided by an aot-foldoff2 relay that wrote ~560 MB images
+       into C:\go2cs-perf from 15:01, over the last ~10 minutes of the measure phase and the end control; both
+       process censuses read 0. -->
+- **A warm start.** The control and null run once, discarded, before the readings that count. The first window's
+  start control was read on a box that had been idle, and the box then stepped about 2.3 % slower and held there.
 - **Disk:** at least 30 GB free before the AOT drop lands (34 images at about 300 MB each, plus build output).
 - **The session carries its own control.** The 1.24.13 Go Fib and Sieve binaries run at the start, the middle and
-  the end. If either control drifts by more than the session's A/A null (section 6), the window is void and is
-  re-run, not averaged.
+  the end. A window is void, and is re-run rather than averaged, when a control's start-to-end median drift is
+  significant: its bootstrap 95 % interval (5,000 resamples of each side) excludes 0 by more than the session's A/A
+  null (section 6). A control whose own run spread is more than 5 times the null is reported but cannot void a
+  window alone. On G-LAPTOP that is Sieve (15-30 % spread), so Fib carries the void test. (COORD's ruling,
+  2026-10-27.)
+  <!-- Why the rule changed: as first written ("drifts by more than the A/A null") it compared an unpaired
+       start-to-end difference of medians with a paired same-binary difference. Window 1's first run read Fib
+       +2.29 % (bootstrap 95 % interval [-0.71 %, +5.10 %]) and Sieve +2.33 % ([-12.2 %, +8.0 %]) against a null of
+       0.83 % / 0.42 % whose own interval is about +/-1-3 %; the runner's mid-window Go rows sat at the end values.
+       Sieve could not meet the first bar on this box even with no drift. -->
+- **The middle reading** is the runner's own 1.24.13.7 Go rows for Fib and Sieve, measured inside the window.
 
 ## 6. Measurement protocol
 
@@ -180,8 +198,33 @@ delta that appears at default tiering and not at TC0 is tier-up timing, not code
 | **S1** | The 1.26 publish lands. The i9 converts and publishes 34 AOT images, plus a second RefLower and a second Iface publish per leg (4 more), and ships them. | the i9 | manifests complete |
 | **S2** | G-LAPTOP converts both legs, checks the source hashes against the i9's manifest, and builds Go x2, JIT and R2R. If ILC moved, it re-licenses on one row. | G-LAPTOP | hashes equal; licence holds |
 | **S3** | Verify all 17 programs x 8 binaries. | G-LAPTOP | identical output |
-| **S4** | Quiet window: A/A null, control, paired measurement, PERF-REVIEW extras, control again. | G-LAPTOP | control inside the null |
+| **S4** | Quiet window: A/A null, control, paired measurement, PERF-REVIEW extras, control again. Two windows (COORD, 2026-10-27): window 1 is JIT, R2R, Fd1 and TC0; window 2 is the AOT column. Each has its own null and control. | G-LAPTOP | no significant control drift (section 5); no write under `C:\go2cs-perf` |
 | **S5** | Bank: the runner's `--update-readme` writes the 1.26 table. The same session's 1.24.13.7 leg goes into History beside the retained 1.23.1 and .NET 9 tables. Raw medians, runs, hashes, box state and diagnostic arms go to `docs/phase4/DATA-hop126-perf.md`. | G, a docs seat | repoguard green |
+
+**Timing (COORD's ruling, 2026-10-27; the owner asked whether the run goes before or after the 1.26.10.2 re-bank and
+release).**
+
+1. **Now, and before the .2 re-bank starts: S2 to S4 for 1.24.13.7 against 1.26.10.1.** The AOT column uses the
+   folding-off set the i9 publishes. Both windows close on G-LAPTOP before the re-bank starts there, because the
+   re-bank wants the windows boxes and each box runs one battery at a time. COORD holds the re-bank's G-LAPTOP
+   shard until G reports both windows closed.
+2. **After go.\* 1.26.10.2 publishes, only the 1.26 column is measured again**, against 1.26.10.2 as published. The
+   i9 publishes the 1.26 AOT leg again (the template default plus the folding-off cross-version set, about 1.5 h),
+   and G-LAPTOP runs S2 to S4 for that leg. Before that publish, the runner's source hash stops covering the two
+   host-specific lines it reads today (below), and the i9 recomputes its manifest's source column with it.
+3. **S5 banks the Performance page at 1.26.10.2**, the version users install at launch. The 1.26.10.1 and
+   1.24.13.7 legs go into History and into `docs/phase4/DATA-hop126-perf.md`. The target is the page live by about
+   2026-11-07 to 11-09 (launch gate 4), ahead of the soft stage on 2026-11-10.
+
+**The S2 source hash, as S0 built it, is host-specific.** `ConsumerProject.SourceHash` covers `package_info.cs`'s
+`GoPositionMap` line, which names each Go file by its absolute path under the `--work` root, and the project's
+`GoInputDigest`, which folds in a hash of the converter executable's own bytes. Two boxes therefore agree only when
+they convert with the same converter executables in the same `--work` root. For the 1.26.10.1 and 1.24.13.7 legs,
+G-LAPTOP converts with the i9's two executables, and the gate rewrites the path prefix to the i9's root
+(G-LAPTOP has no D: drive); it matched all 27 manifest lines that had landed, and a hash taken without the rewrite
+does not match. The runner fix masks both lines, with a test that fails first, after window 2 and before the
+1.26.10.2 re-publish. Each leg's converter is built from its release's record commit, never from the tag: the tag
+sits one commit earlier, where `corpus-release.txt` still names the previous release.
 
 ## 8. What a regression triggers
 

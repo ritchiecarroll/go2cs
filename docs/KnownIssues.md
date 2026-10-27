@@ -150,8 +150,11 @@ notice already points to them.
 <IlcFoldIdenticalMethodBodies>false</IlcFoldIdenticalMethodBodies>
 ```
 
-The publish then finishes, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times the size of the
-same program built against 1.26.10.1.
+The publish then finishes for most programs, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times
+the size of the same program built against 1.26.10.1. A very large program can still fail at link (`LNK1183`,
+"extended relocation count 9 less than 65535") when the compiler's object file passes 4 GiB, the COFF object
+format's limit, and the workaround has nothing more to offer it: move to 1.26.10.1. Measured on `win-x64`: 16 of the
+performance suite's 17 programs published this way, and the TLS handshake program failed at link.
 
 <!-- Measured 2026-10-27 on the i9 (win-x64), relayed by COORD; the attribution is G's, settled by the i9's count.
      The 1.24.13.7 leg of the performance re-baseline (PLAN-perf-rebaseline) published PerfChannel and PerfFib with the
@@ -164,7 +167,13 @@ same program built against 1.26.10.1.
      56,190 lines are "Failed to load type ..." over golib 1.24.13.7, and 46,626 of them (83.0%; 85.7% with array`1's
      nested types) declare on array`1, slice`1 or ж`1, mostly five-level nests. The log has no separate cut-off line;
      the cut-off shows only as these lines. The release gate's aot-smoke consumer published within its bound before the
-     fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it. -->
+     fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it.
+     Amended 2026-10-27 (COORD's ruling; the i9's aot-foldoff2 queue, win-x64): with IlcFoldIdenticalMethodBodies=false
+     the 1.24.13.7 leg published 16 of 17 programs. PerfTlsHandshake failed at link: LNK1183 "extended relocation
+     count 9 less than 65535", because ILC wrote a 6,594,692,833-byte object, past COFF's 4 GiB; ILC peaked at 51 GB
+     private and printed 97,161 "will always throw" lines against the 56,190 above. The same program on 1.26.10.1
+     writes a 2.67 GB object and links (338.5 MB image). The default recipe stalls on that leg as well, so the
+     performance re-baseline's 1.24 TLS AOT cell reads n/a with this reason. -->
 
 ## A single-file publish with composite ReadyToRun runs out of memory
 
