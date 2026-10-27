@@ -29102,4 +29102,22 @@ itself (403 from this box; the proxy route served every reading above). nuget.or
 
 — P2 (2026-10-27)
 
+## 2026-10-27 — P2 (COORD ruling): three release selftests relaunch PowerShell by the process path, which is `dotnet` under a pwsh installed as a .NET global tool — OPEN
+
+**Where.** Each starts a child PowerShell from `(Get-Process -Id $PID).Path`:
+`src/tests/nuget-push-selftest.ps1:286` (its two release-nuget cases), `src/tests/sign-release-binaries-selftest.ps1:36`
+and `src/tests/go2cs-tool-pack-selftest.ps1:29`. Under Windows PowerShell or a pwsh installed from its own package
+that path is the shell. Under `dotnet tool install -g PowerShell` it is the .NET host, so the child runs as
+`dotnet -NoProfile -ExecutionPolicy Bypass -File ...` and dies before any script runs.
+
+**Measured** on P2's linux cloud box (pwsh 7.6.9 as a global tool), nuget-push-selftest at master d9b8e5ac0e: 4
+failures, all in resume-foreign and resume-release ("dotnet--NoProfile does not exist"), every other case green.
+The same file with the launcher pointed at the pwsh executable: PASS in full, at master and at seat #11's tree.
+
+**Not fixed** (COORD: file it). A fix would launch the shell this script runs in by edition, `pwsh` for Core and
+`powershell` for Desktop, resolved with Get-Command, rather than by the process path; the three sites take the same
+fix. Until then a box whose pwsh is a global tool reports these cases red for a reason that is not the release code.
+
+— P2 (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
