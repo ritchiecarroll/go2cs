@@ -1767,6 +1767,28 @@ function scanIpv4(lineno, text, lo, pass, joinAt,   pos, s, e, quad, lq, k, b, c
         # four-deep suffixes read position-map-funclit, in delta. A self-test case pins both.
         if (STRICT == 0 && posmapFunclit(lo, s, e)) { EXC["ipv4\tposition-map-funclit"]++; continue }
 
+        # RULE 7 -- an OID LITERAL from the declared EXACT set, IN BOTH MODES (COORD 2026-10-27). A dotted
+        # object identifier of five or more arcs carries quads, and a corpus seat that re-emits Go's
+        # Windows certificate-usage constants refused on them in entry mode. The decision token is the
+        # MAXIMAL DOTTED-DECIMAL RUN around the quad (digits and dots only, less one leading and one
+        # trailing dot), and it must EQUAL an entry: one arc more, one arc less or one arc changed is not
+        # an entry, so an address glued to an entry still refuses.
+        #
+        # ⚠ WHY AN EXACT SET AND NOT A SHAPE. "Five or more arcs from root 0, 1 or 2" would admit an arc
+        # prefix with an address appended, and the address would then be readable inside an admitted
+        # run. An exact value is read on the run's own characters and no sentence a lane writes can
+        # arrange it -- rule 5's test for what STRICT may admit. The set is seeded by the grep its
+        # patterns row records, re-run at each Go hop (docs/GoCorpusMigration.md); an OID enters only by
+        # a commit.
+        #
+        # ⚠ CONSULTED LAST, for rule 5's reason. In delta mode rule 2 has already excluded every such
+        # quad (the token run is the whole OID, not the quad), so it keeps ITS reason there; this rule
+        # decides only where rule 2 does not run, which is STRICT.
+        rs = s; while (rs > 1 && substr(lo, rs - 1, 1) ~ /[0-9.]/) rs--
+        rr = e; while (rr < length(lo) && substr(lo, rr + 1, 1) ~ /[0-9.]/) rr++
+        run = substr(lo, rs, rr - rs + 1); sub(/^\./, "", run); sub(/\.$/, "", run)
+        if (admitted("oid_literal", run)) { EXC["ipv4\toid-literal"]++; continue }
+
         if (armRefuses("ipv4")) record("ipv4", pass, lineno, quad, text); else DOWN["ipv4"]++
     }
 }
@@ -3110,6 +3132,35 @@ idc_mode_selftest() {
     # word -- so under rules 1-4 alone it was a hit, and the reason printed is the discriminator.
     printf 'the page %d.%d.%d.%d is linked from the roster\n' 1 24 13 3    > "$d/q08"; idc_st_case "the admit is consulted in DELTA mode as well" "" "$d/q08" 0
     idc_st_exc "  and by the RELEASE ADMIT, not by rules 1-4"     "ipv4|release-literal" "$IDC_TMP/st.status"
+
+    echo
+    echo "  A3. THE OID-LITERAL ADMIT (rule 7) -- BOTH DIRECTIONS, IN THE GATE'S OWN MODE (STRICT)"
+    echo "      (each entry is built from its arcs, never written; every admitted case asserts the"
+    echo "       OID-LITERAL exclusion fired, and every refuse case is one arc or one glued address off)"
+    # The entries in the shapes the corpus carries them: Go's string constant, the converted u8 literal.
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d%sx00"\n' 1 3 6 1 5 5 7 3 1 "$bs" > "$d/o01"; idc_st_case "STRICT admits the first OID entry"         "" "$d/o01" 1
+    idc_st_exc "  and the OID ADMIT is what admitted it"          "ipv4|oid-literal" "$IDC_TMP/st.status"
+    printf 'OID_B = "%d.%d.%d.%d.%d.%d.%d.%d.%d.%d%sx00"\n' 1 3 6 1 4 1 311 10 3 3 "$bs" > "$d/o02"; idc_st_case "STRICT admits the second OID entry"   "" "$d/o02" 1
+    idc_st_exc "  and the OID ADMIT is what admitted it"          "ipv4|oid-literal" "$IDC_TMP/st.status"
+    # The third entry holds no candidate quad under today's octet bound (two of its arcs exceed 255), so
+    # no exclusion can fire on it; this case pins that it stays clean, which is all an entry can owe.
+    printf 'OID_C = "%d.%d.%d.%d.%d.%d.%d%sx00"\n' 2 16 840 1 113730 4 1 "$bs" > "$d/o03"; idc_st_case "STRICT reads the third OID entry clean"   "" "$d/o03" 1
+    printf 'X = slice<byte>("%d.%d.%d.%d.%d.%d.%d.%d.%d%sx00"u8);\n' 1 3 6 1 5 5 7 3 1 "$bs" > "$d/o04"; idc_st_case "STRICT admits an entry in a converted u8 literal" "" "$d/o04" 1
+    idc_st_exc "  and the OID ADMIT is what admitted it"          "ipv4|oid-literal" "$IDC_TMP/st.status"
+    printf 'the usage is %d.%d.%d.%d.%d.%d.%d.%d.%d.\n' 1 3 6 1 5 5 7 3 1  > "$d/o05"; idc_st_case "STRICT admits an entry ending a sentence"  "" "$d/o05" 1
+    idc_st_exc "  and the OID ADMIT is what admitted it"          "ipv4|oid-literal" "$IDC_TMP/st.status"
+    # THE REFUSE DIRECTION: one arc changed, one more, one fewer, an address glued after and before,
+    # and a bare address beside an admitted entry on the same line (per occurrence, never per line).
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3 2      > "$d/o06"; idc_st_case "an entry with one arc changed still refuses" "ipv4" "$d/o06" 1
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3 1 1 > "$d/o07"; idc_st_case "an entry with one arc more still refuses"   "ipv4" "$d/o07" 1
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3           > "$d/o08"; idc_st_case "an entry with one arc fewer still refuses"  "ipv4" "$d/o08" 1
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3 1 192 168 1 20 > "$d/o09"; idc_st_case "an address glued after an entry still refuses" "ipv4" "$d/o09" 1
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 10 0 0 1 1 3 6 1 5 5 7 3 1 > "$d/o10"; idc_st_case "an address glued before an entry still refuses" "ipv4" "$d/o10" 1
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d" via %d.%d.%d.%d\n' 1 3 6 1 5 5 7 3 1 192 168 1 20 > "$d/o11"; idc_st_case "an address beside an admitted entry still refuses" "ipv4" "$d/o11" 1
+    # In DELTA mode rule 2 disposes of an entry first (its token run is the whole OID), and that older
+    # reason is kept: rule 7 is consulted last and re-attributes nothing.
+    printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3 1      > "$d/o12"; idc_st_case "in DELTA an entry keeps rule 2's reason"    "" "$d/o12" 0
+    idc_st_exc "  and it was excluded BY THE TOKEN RUN"           "ipv4|token-run" "$IDC_TMP/st.status"
 
     echo
     echo "  B. KNOWN NEGATIVES -- in DELTA mode, each MUST fire the arm set declared beside it"

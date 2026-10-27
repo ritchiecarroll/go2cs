@@ -592,6 +592,14 @@ population rule is reused until it has been run against the banked set.
 *(Edited in place 2026-10-01, §7 lessons 52-54: three instruments refuse without the population file, an inherited
 rule would have dropped three banked rows, and each construct was first found at H10 or later.)*
 
+**The identifier census's OID admit set is re-seeded here.** Re-run the seed grep that the `oid_literal` row of
+`.claude/coord-scripts/coord-identifier-patterns.txt` records, against the incoming GOROOT. A dotted object
+identifier that Go declares as a constant and the row lacks is added in the hop's own commit, with its self-test
+case. An entry the incoming release no longer declares stays while the corpus still carries it. At go1.26.10 the
+set is three OIDs, all in `syscall/types_windows.go`.
+*(Added 2026-10-27, COORD's ruling on the OID admit set: a seat that re-emits an OID constant the set lacks refuses
+at `entry`, as the crosspkg seat's corpus diff did.)*
+
 **Every count here and after states its axes**: the population (convertible, or raw `go list std`), the tags
 (`purego,math_big_pure_go`), `CGO_ENABLED=0`, `ReleaseTags` pinned per side, the toolchain driven by its own GOROOT,
 and the GOEXPERIMENT baseline read from `internal/buildcfg` at the target (H8's amendment (d) is the detail). **New
