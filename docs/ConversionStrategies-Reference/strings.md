@@ -169,8 +169,9 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
+<!-- source: src/core/net/http/pattern.cs:453-459 -->
 ```csharp
-return fmt.Sprintf("""
+        return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
 But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.

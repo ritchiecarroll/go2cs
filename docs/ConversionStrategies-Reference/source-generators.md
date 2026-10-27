@@ -88,7 +88,7 @@ The deeper remedy — the converter stating the access modifier in source itself
 
 The blind spot above is closed at the root without touching a converted `.cs`:<!-- 2026-07-25 --> `package_info.cs` carries a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
-<!-- source: src/core/io/package_info.cs:94-152 (an excerpt of the section) -->
+<!-- source: src/core/io/package_info.cs:94-96, 103-104, 108, 116, 123, 135, 140, 152 (an excerpt of the section) -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
@@ -334,6 +334,7 @@ are the only way to say those things there.
 
 <!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 ```csharp
 [GoRecv] internal static bool rwlock(this ref fdMutex mu, bool read) {
 ```

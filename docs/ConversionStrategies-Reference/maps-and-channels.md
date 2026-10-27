@@ -411,7 +411,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11-51 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11-12, 49-51 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
 
@@ -694,6 +694,7 @@ case took = <-ch:
 }
 ```
 
+<!-- source: src/tests/Behavioral/SelectSendRecvMix/main.cs:33-42 -->
 ```csharp
 var selᴛ3 = ch.ᐸꟷ(8, ꓸꓸꓸ);
 var selᴛ4 = ch;

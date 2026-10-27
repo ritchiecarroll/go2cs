@@ -241,8 +241,8 @@ the box:
 
 <!-- source: src/core/path/filepath/linux/path.cs:315-316 -->
 ```csharp
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;                   // for testing
+internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot;                   // for testing
 ```
 
 Three properties make this the right shape rather than a `-tests`-only patch:
@@ -344,6 +344,7 @@ rooted `using atomic = go.sync.atomic_package;` / `using go.sync;` binds its lea
 enclosing `go.go` namespace, resolving `go.sync` to the nonexistent `go.go.sync` (CS0234). `rootQualifyIfAmbiguous` routes its rooting returns through `rootQualified`, which emits `global::go.`
 instead of a bare `go.` when the package's namespace second segment is itself `go`:
 
+<!-- source: src/core/go/types/typeparam.cs:8-9 -->
 ```csharp
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
@@ -513,6 +514,7 @@ records an interface pair from a type's *use*, and that use can be entirely impl
 os/signal's test does `cmd.Stdout = &buf`, whose os/exec field type is `io.Writer`, so
 `package_test_info.cs` carries
 
+<!-- source: src/core/flag/package_test_info.cs:45 -->
 ```csharp
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 ```
@@ -1089,6 +1091,7 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
+<!-- source: src/core/testing/quick/quick.cs:230 -->
 ```csharp
 public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 ```
@@ -1243,6 +1246,7 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
 
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1868-1869 -->
 ```csharp
 private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
 { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }

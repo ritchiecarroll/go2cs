@@ -326,7 +326,7 @@ Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.
 /*<-*/: SelectStatement/SelectStatement.cs.target:65#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:70#73a99c (comma-ok: src/core/io/fs/sub.cs:86#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:66#c4196f (goto break_scan;) and :70#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:172-208#3c2428. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:654#e07a2f.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:748#0a8a17 (receive), map.cs:456#629bdd (map index), builtin.cs:3705-3710#ab6e8c (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:198-209#4ddddc), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
-ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:14#e2a6d2.
+ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:15#e2a6d2.
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:193-204#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:22#ee6601).
@@ -1469,6 +1469,7 @@ func TestExt(t *testing.T) {
 ```csharp
 namespace go;
 
+using Δpath = path_package;
 using static path_package;
 …
 using testing = testing_package;
@@ -1896,6 +1897,7 @@ internal static void Main() {
     rune codepoint = replacementChar;
     @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);
+
     float64 factor = scale;
     fmt.Println(factor * 2D);
 …
@@ -2025,7 +2027,10 @@ const (
 ```csharp
 partial struct Order /*num:nint*/;
 
+// LSB means Least Significant Bits first, as used in the GIF file format.
 public static Order LSB => /* iota */ 0;
+// MSB means Most Significant Bits first, as used in the TIFF and PDF
+// file formats.
 public static Order MSB => 1;
 ```
 
@@ -2246,6 +2251,7 @@ fmt.Println(y)
 ```csharp
 var y = (uint8)(a + b);
 fmt.Println(y);
+
 y = (uint8)(y + 1);
 fmt.Println(y);
 ```
@@ -2400,6 +2406,7 @@ for _, k := range c {
 ```csharp
 var c = new nuint[]{0, 1, 63, 64, 65, 200}.slice();
 uint64 u = 0x8000000000000001UL;
+
 foreach (var (_, k) in c) {
     fmt.Println(u.Rsh(k), u.Lsh(k));
 }
@@ -2521,15 +2528,10 @@ func (d Duration) Seconds() float64 {
 partial struct Duration /*num:int64*/;
 …
 public static Duration ΔNanosecond => 1;
-
 public static Duration Microsecond => /* 1000 * Nanosecond */ 1000;
-
 public static Duration Millisecond => /* 1000 * Microsecond */ 1000000;
-
 public static Duration ΔSecond => /* 1000 * Millisecond */ 1000000000;
-
 public static Duration ΔMinute => /* 60 * Second */ 60000000000;
-
 public static Duration ΔHour => /* 60 * Minute */ 3600000000000;
 …
 public static float64 Seconds(this Duration d) {
@@ -3599,6 +3601,7 @@ type edge struct {
     var e = Ꮡ(new edge(@out: 7, arg: 9));
     (e.Value.@out, e.Value.arg) = (e.Value.arg, e.Value.@out);
     fmt.Println((~e).@out, (~e).arg);
+
     var f = new edge(@out: 1, arg: 2);
     var g = new edge(@out: 3, arg: 4);
     (f.@out, g.@out, f.arg) = (g.@out, f.arg, f.@out);
@@ -5354,6 +5357,7 @@ var reg = new registry(new map<uint32, entry>{[2] = new(tag: "leaf", size: 8)});
 var (t1, ok1) = lookup(reg, 2);
 var (t2, ok2) = lookup(reg, 9);
 fmt.Println(t1, ok1, t2, ok2);
+
 var reg2 = new registry(4);
 reg2[7] = new entry(tag: "cap", size: 1);
 var (e7, ok7) = lookup(reg2, 7);
@@ -5735,6 +5739,7 @@ partial struct numbers /*[]nint*/;
     var a = new nint[]{1, 2, 3, 4, 5}.slice();
     reverseSeq<slice<nint>, nint>(a);
     fmt.Println(a);
+
     var b = new numbers(new nint[]{10, 20, 30}.slice());
     reverseSeq<numbers, nint>(b);
     fmt.Println(b);
@@ -6635,6 +6640,7 @@ func apply(f func(prefix string, vals ...int) string) {
 internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
     fmt.Println(f("loose"u8, 1, 2, 3));
     fmt.Println(f("empty"u8));
+
     var nums = new nint[]{4, 5}.slice();
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
 }
@@ -7077,9 +7083,11 @@ for i, num = range nums {
 ```csharp
 var nums = new nint[]{2, 3, 4}.slice();
 nint sum = 0;
+
 nint i = default!;
 nint num = default!;
 nint total = default!;
+
 foreach (var (iᴛ1, vᴛ1) in nums) {
     i = iᴛ1;
     num = vᴛ1;
@@ -8479,10 +8487,10 @@ internal static void emit(channel<nint> @out) {
 internal static partial void Main() {
     var @out = new channel<nint>(0);
 
-    goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
+    goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4, GoStack.Bounded);
     fmt.Println("sum:", ᐸꟷ(@out));
     …
-    goǃ(emit, @out);
+    goǃ(emit, @out, GoStack.Bounded);
     fmt.Println("emit:", ᐸꟷ(@out));
     …
 }
@@ -8563,7 +8571,7 @@ internal static partial void Main() {
 
     goǃ(() => {
         throw panic("goroutine boom");
-    });
+    }, GoStack.Bounded);
 
     ᐸꟷ(done);
 }
@@ -8691,8 +8699,10 @@ fmt.Println(<-ch)
 <!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:94-100 -->
 ```csharp
 var ch = new channel<nint>(2);
+
 ch.ᐸꟷ(1);
 ch.ᐸꟷ(2);
+
 fmt.Println(ᐸꟷ(ch));
 fmt.Println(ᐸꟷ(ch));
 ```
@@ -8773,7 +8783,8 @@ go sendOnly(mychanl)
 <!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:189-191 -->
 ```csharp
 var mychanl = new channel<@string>(0);
-goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send));
+
+goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send), GoStack.Bounded);
 ```
 
 **`range` over a channel becomes `foreach`.** The loop receives each value and ends when the channel
@@ -9418,6 +9429,7 @@ internal static void Main() {
     record.name = "Dr. Michał";
     record.age = 18;
     record.position = "software engineer";
+
     fmt.Println(record);
     fmt.Println(record.name);
     fmt.Println(record.age);
@@ -10275,7 +10287,6 @@ global using eface = object;
 global using namedIface = go.fmt_package.Stringer;
 global using aliasIface = go.fmt_package.Stringer;
 …
-
 public partial interface realIface {
     void Do();
 }
@@ -10289,6 +10300,7 @@ partial struct holder {
 
 internal static void Main() {
     var t = reflect.TypeFor<holder>();
+
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
         fmt.Printf("%s Name=%q String=%q PkgPath=%q Kind=%v\n"u8,
@@ -10472,7 +10484,7 @@ to a pointer is a box that holds a box. Go's `int` is `nint`
 
 A local that a closure, a `go` statement or a `defer` statement shares with the function that declares
 the local can also get this form, so both sides see one variable. [Function Values and Closures](#function-values-and-closures)
-covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1155, 1162#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1139-1141 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2845-2854#4ff829); go/defer arms: escapeAnalysisOperations.go:994, 1038#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2102-2107#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2166-2174, 1982-1996#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:167#5420af. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:19-23 (`ref var t = ref heap<Tally>(out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:38-42 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:215-220 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:386#ca6b44. heap overloads: src/core/golib/builtin.cs:2927#f029f1 (zero value) and :2953#d2c34a (starting value). -->
+covers captures. <!-- other routes to the box: `&a`, a method that keeps its receiver's address, a pointer-method value: src/go2cs/escapeAnalysisOperations.go:1155, 1162#e568f1. rule: src/go2cs/escapeAnalysisOperations.go:1139-1141 (`escapes = (closureContainsIdent && !isValueType(...)) || takesAddress || usedAsRef`; isValueType is true only for basic types, variableAnalysisOperations.go:2845-2854#4ff829); go/defer arms: escapeAnalysisOperations.go:994, 1038#49f594; written-after-capture picks box versus snapshot routing: variableAnalysisOperations.go:2102-2107#9ba65b. reference-shaped types: escapeAnalysisOperations.go:2166-2174, 1982-1996#89b684; probeI1 main.go:152#6d5c24 -> main.cs.target:167#5420af. Examples in src/tests/Behavioral/ClosureWriteVisibility: probeA1 boxed and written through the box, main.cs.target:19-23 (`ref var t = ref heap<Tally>(out var Ꮡt);` … `Ꮡt.Value.total += 100;`); probeA3 boxed but read-only after all writes, so the closure takes a snapshot, main.cs.target:38-42 (`var tʗ1 = t;`); probeN1 captured int stays plain, main.go:193-197#2efa30 -> main.cs.target:215-220 (`nint n = 0; void inc() { n++; }`). Reference: pointers.md:389#ca6b44. heap overloads: src/core/golib/builtin.cs:2927#f029f1 (zero value) and :2953#d2c34a (starting value). -->
 
 A package-level variable whose address is taken is declared the same way, as a static box `ᏑX` and a `ref`
 property `X => ref ((StaticBox<T>)ᏑX).ValueSlot` that reads and writes through it, so `&X` is `ᏑX`. Every exported
@@ -11435,7 +11447,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:49-55#0b034b (remarks), :229 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :265-281#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2315-2324#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:49-55#0b034b (remarks), :229 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :265-281#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2334-2343#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter

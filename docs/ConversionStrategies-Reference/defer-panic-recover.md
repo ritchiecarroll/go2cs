@@ -9,6 +9,7 @@ way out, whatever the way out is. The converted C# says the same thing with stat
 emitted **inline** in the method, wrapped in `try`/`catch`/`finally`, beside a `GoFrame` local that
 holds this call's defer list and nothing else:
 
+<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs:10-19 -->
 ```csharp
 internal static void Main() {
     GoFrame ᒐ = default;
@@ -77,6 +78,7 @@ value the `return` has already evaluated, so the results are declared **before**
 back **after** the `finally`, and every exit inside the `try` leaves through a `goto` — which runs the
 `finally` exactly as a `return` would, without freezing a result the deferred calls may still change:
 
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs:73-90 -->
 ```csharp
 internal static (nint @out, @string label) compute(nint x) {
     nint @out = default!;
@@ -359,6 +361,7 @@ func two() (int, string)              //  Go:
 defer show(two())                     //      two() runs at the defer; show runs at unwind
 ```
 
+<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:66 -->
 ```csharp
 defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
 ```
@@ -416,6 +419,7 @@ defer panic(err)
 err = fmt.Errorf("second")     // Go recovers "first" — arguments evaluate at the defer
 ```
 
+<!-- source: src/core/go/types/check_test.cs:209 -->
 ```csharp
 defer(ᴛ1 => throw panic(ᴛ1), err, ref ᒐ);
 ```
@@ -845,6 +849,7 @@ not only for the func-literal-callee case, so `convFuncLit` (reached via convCal
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:71-74 -->
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
@@ -903,6 +908,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:41-51 -->
 ```csharp
 var baseʗ1 = @base;
 ((Action)(() => {
@@ -1112,6 +1118,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:79 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
@@ -1224,6 +1231,7 @@ var prʗ1 = pr;                                 // snapshot copy — WRONG
 defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
 The capture analysis matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
+<!-- source: src/core/go/internal/gcimporter/ureader.cs:66 -->
 ```csharp
 defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
 ```

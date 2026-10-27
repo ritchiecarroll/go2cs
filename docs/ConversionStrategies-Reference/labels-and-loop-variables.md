@@ -250,6 +250,7 @@ for i := range size {
     s = append(s, i)
 }
 ```
+<!-- source: src/tests/Behavioral/RangeIntIndexAppend/main.cs:8-12 -->
 ```csharp
 nint size = 5;
 slice<nint> s = default!;
@@ -388,6 +389,7 @@ for range b.N {
     _ = Size(data)
 }
 ```
+<!-- source: src/core/encoding/binary/binary_test.cs:1373-1375 -->
 ```csharp
 foreach (var _ᴛ1 in range((~bΔ1).N)) {
     _ = Size(dataʗ1);

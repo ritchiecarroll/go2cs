@@ -2177,9 +2177,13 @@ type intPtr *int
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:16-24 -->
 ```csharp
 partial struct intSET /*[]nint*/;
+
 partial struct byteArray /*[4]byte*/;
+
 partial struct stringMap /*map[@string, nint]*/;
+
 partial struct intChan /*chan nint*/;
+
 partial class intPtr /*ж<nint>*/;
 ```
 
@@ -3438,6 +3442,7 @@ contract, and the entire `poolChain` half:
 
 <!-- source: src/core/sync/poolqueue.cs:73-78 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
+<!-- source: src/core/sync/poolqueue.cs:73-78 -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly; see the file header for why the

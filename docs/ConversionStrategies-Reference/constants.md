@@ -154,6 +154,7 @@ const (
 )
 const c64 complex64 = 1.5 + 2.5i
 ```
+<!-- source: src/tests/Behavioral/ComplexConstContext/main.cs:9-15 -->
 ```csharp
 internal static UntypedComplex cRational => /* 5.5 + 1.5i */ 5.5D + 1.5D.i();
 internal static UntypedComplex cNegImag => /* 2.25 - 0.75i */ 2.25D + -0.75D.i();
@@ -178,6 +179,7 @@ const (
     stateDict
 )
 ```
+<!-- source: src/core/compress/flate/inflate.cs:507-508 -->
 ```csharp
 const nint stateInit = iota; // Zero value must be stateInit
 const nint stateDict = 1;
@@ -203,6 +205,7 @@ var c64 complex64 = complex(2.5, -3.5)
 var c64b complex64 = 2.5 - 3.5i
 var a, b float32 = 2.5, -3.5
 ```
+<!-- source: src/tests/Behavioral/UntypedConstFloatContext/UntypedConstFloatContext.cs:12-15 -->
 ```csharp
 complex64 c64 = complex(2.5F, -3.5F);
 complex64 c64b = 2.5F + -3.5F.i();
@@ -234,6 +237,7 @@ The re-render rounds the **exact** constant straight to the literal's resolved w
 
 A native-sized integer constant (`nint`/`nuint`, and golib's `uintptr` struct) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as a get-only property with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
 
+<!-- source: src/core/internal/runtime/math/math.cs:14 -->
 ```csharp
 public static uintptr MaxUintptr => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 ```
@@ -283,6 +287,7 @@ See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-num
 
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package Untyped* wrapper property, from which `@string` has no conversion (CS0030).<!-- src/core/unicode/utf8/utf8.cs:17 (`public static UntypedInt RuneError =>`) --> The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:249 -->
 ```csharp
 fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```
@@ -334,6 +339,7 @@ constructed at float32 width:
 const maxFloat32 = 3.40282346638528859811704183484516925440e+38
 over := complex(maxFloat32*2, maxFloat32*2)     // complex128, 6.805646932770577e+38
 ```
+<!-- source: src/tests/Behavioral/ComplexConstContext/main.cs:52 -->
 ```csharp
 var over = complex((float64)(maxFloat32 * 2D), (float64)(maxFloat32 * 2D));
 ```

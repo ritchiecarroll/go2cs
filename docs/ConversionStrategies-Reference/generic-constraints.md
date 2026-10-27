@@ -53,6 +53,7 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3733-3734 -->
 ```csharp
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
@@ -73,6 +74,7 @@ The breadcrumb is spelled as Go writes the constraint: a foreign term by its pac
 sees the type set at the declaration and the elided-constraint ratchet (repoguard) can tell it from a
 lost constraint:
 
+<!-- source: src/tests/Behavioral/Constraints/Constraints.cs:92-93 -->
 ```csharp
 internal static T firstOf<T>(slice<T> p)
     where T : /* RecordUnion = recordA | recordB | recordC */ new()
@@ -101,6 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
+<!-- source: src/core/go/types/predicates.cs:684-692 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
@@ -1032,6 +1035,7 @@ The golib `uintptr` struct declares the full generic-math interface set the lift
 
 ## Union-constrained sub-slices ARE the type parameter
 A sub-slice of a `string | []byte` union-constrained value is typed by Go as the type parameter again, so it assigns back to, passes as, and returns as the parameter (time format_rfc3339). The emission is the bare C# range expression:
+<!-- source: src/tests/Behavioral/StringByteUnionConstraint/main.cs:65 -->
 ```csharp
 return parse(s[0..2]) + parse(s[3..5]);
 ```
@@ -1041,6 +1045,7 @@ s = s[19..];                        // Go: s = s[19:]
 Nothing converts it, because nothing needs to: the constraint is the **self-referential** `IByteSeq<T, byte>` (above), whose `TSelf this[Range]` indexer returns `T` itself, so the range expression already has the type parameter's type. All four bound shapes take this route — `s[..hi]`, `s[lo..hi]`, `s[lo..]` and `s[..]` — and a three-index slice cannot occur on a string-including union (Go forbids it on strings), so `Slice3` never reaches it. Downstream members bind through the constraint on the resulting value directly: `s[i..j].ToGoString()` for Go's `string(s[i:j])` (bytealg's Rabin-Karp), `src[lo..hi].ꓸꓸꓸ` for the variadic spread (below).
 
 Func-literal parameters typed as the union type parameter render as the parameter itself (the enclosing method's type parameter is in scope inside a lambda or local function), matching the Go; `digitSum`'s literal emits as a local function:
+<!-- source: src/tests/Behavioral/StringByteUnionConstraint/main.cs:58 -->
 ```csharp
 nint parse(T part) {
 ```

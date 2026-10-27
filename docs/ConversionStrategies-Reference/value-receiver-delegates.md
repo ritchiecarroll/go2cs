@@ -60,9 +60,10 @@ The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`
 var checker func(*driver.NamedValue) error
 checker = nvc.CheckNamedValue   // reassign a method value
 ```
+<!-- source: src/core/database/sql/convert.cs:188-189 -->
 ```csharp
 var nvcʗ1 = nvc;
-checker = nvcʗ1.CheckNamedValue;
+            checker = nvcʗ1.CheckNamedValue;
 ```
 
 This matches the `:=`-define path (which hoists too) and also covers a reassignment inside a tagless `switch` case. (Guarded by the `MethodValueReassignCapture` behavioral test.) `CheckNamedValue` here is an *interface* method, so the assignment binds a plain method group over the hoisted snapshot (see the interface-receiver rule above); a concrete-receiver method value keeps the param-carrying lambda form, referencing the snapshot the same way.

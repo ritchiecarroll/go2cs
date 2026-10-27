@@ -104,6 +104,7 @@ A conversion **between two named slice types** sharing an identical underlying (
 ```go
 f, err := MapFS(fsys).Open(name)          // fsys is shuffledFS
 ```
+<!-- source: src/core/testing/fstest/testfs_test.cs:72 -->
 ```csharp
 var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
 ```
@@ -502,6 +503,7 @@ section count against, seven times in one file:
 ```go
 if len(m.Questions) > int(^uint16(0)) {     // vendor/golang.org/x/net/dns/dnsmessage
 ```
+<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1170 -->
 ```csharp
 if (len(m.Questions) > (nint)(unchecked((uint16)(~(uint16)0)))) {
 ```

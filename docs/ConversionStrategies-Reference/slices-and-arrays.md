@@ -661,7 +661,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-215 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 210, 213-215 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -1047,6 +1047,7 @@ arm). Go's own `slices` tests depend on it.<!-- At the landing: slices validated
 without allocating the `make`, which is why `slices.Grow` says it "allocates only once". The emission
 renders exactly that operand as the length-only `makeꓸꓸꓸ<T>(n)`, and nothing else in the call changes:
 
+<!-- source: src/core/slices/slices.cs:473 -->
 ```csharp
 s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
 ```
@@ -1633,6 +1634,7 @@ underlying `slice<E>` — bit-for-bit the value the unnamed form produces — an
 ```go
 sorted := make(SortedMap, 0, n)           // internal/fmtsort sort.go
 ```
+<!-- source: src/core/internal/fmtsort/sort.cs:57 -->
 ```csharp
 var sorted = new SortedMap(new slice<KeyValue>(0, () => new(), n));
 ```
@@ -1749,6 +1751,7 @@ emitted both public; the CS0111 held fmt's (63 verdicts) and archive/tar's (97) 
 
 The non-generic overload is explicit —
 
+<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:88 -->
 ```csharp
 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 ```
@@ -1777,6 +1780,7 @@ lifted anonymous elements and cross-package generic elements:
 ```go
 ptrs := vals.([]*atomic.Int32)
 ```
+<!-- source: src/tests/Behavioral/ArrayOfCrossPackageType/main.cs.target:18 -->
 ```csharp
 var ptrs = vals._<slice<ж<atomic.Int32>>>();
 ```

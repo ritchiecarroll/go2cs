@@ -8,6 +8,7 @@ All right-hand operands in assignment expressions in Go are evaluated before ass
 x, y = y, x+y
 ```
 the equivalent C# code operates as follows:
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs:34 -->
 ```csharp
 (x, y) = (y, x + y);
 ```
@@ -50,6 +51,7 @@ Go's **partial redeclaration** — `a, b := f()` where `a` already exists in the
 ```go
 frac, e := normalize(frac)   // frac is the existing parameter; e is new
 ```
+<!-- source: src/core/math/ldexp.cs:32 -->
 ```csharp
 (frac, var e) = normalize(frac);
 ```
@@ -72,6 +74,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
+<!-- source: src/core/net/darwin/dial.cs:909-910 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);

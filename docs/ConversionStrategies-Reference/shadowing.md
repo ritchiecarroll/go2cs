@@ -788,6 +788,7 @@ struct with a zero-size field is laid out at Go's offsets with `[StructLayout]` 
 (`System.Runtime.InteropServices`). Where a file reaches Go names bare through a `using static`, the
 namespace is **not** imported; the file gets one alias directive per type the emission names instead:
 
+<!-- source: src/core/go/types/stdlib_test.cs:25-27 -->
 ```csharp
 using static global::go.go.types_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
@@ -857,6 +858,7 @@ sort's own convenience methods are exactly this shape, and they called themselve
 ```go
 func (x StringSlice) Sort() { Sort(x) }
 ```
+<!-- source: src/core/sort/sort.cs:186-188 -->
 ```csharp
 public static void Sort(this StringSlice x) {
     Sort((Interface)(x));

@@ -313,10 +313,12 @@ internal static void f(ref nint y) {
 
 **Row 3 — the callee lowers, the call site unwraps** (`PointerFieldArrayElementAddress`; `c` comes from `.at(…)` indexing and so still carries a box — each function makes its own deal and the convention change composes across the boundary):
 
+<!-- source: src/tests/Behavioral/PointerFieldArrayElementAddress/main.cs:19-26 -->
 ```csharp
 internal static void bump(ref cycle c) {
     c.n++;
 }
+
 internal static void viaParam(ж<rec> Ꮡp, nint i) {
     var c = Ꮡp.at(rec.Ꮡfuture, i);
     bump(ref (c).DerefOrNull());
@@ -327,6 +329,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:126-130 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -535,9 +538,11 @@ A pointer **local** assigned nil is unaffected — a local already *is* the box,
 1. **Compare the box, not the value alias.** The loop guard `p != nil` must emit `Ꮡp != nil` (the box). Each binary operand's pointer context is otherwise taken from the *other* operand's pointer-ness, and `nil` is not a pointer type — so the param would convert in value form (`p != nil`, comparing a `node` struct value, the wrong thing). The converter forces the box form for a deref'd pointer *parameter* in a `==`/`!=` comparison. This is safe only for a parameter: a pointer *local* is already the box, and forcing it would emit a non-existent `Ꮡlocal`.
 2. **Nil-deferring re-alias.** On the final step `p.next` is nil, so `Ꮡp = p.next` repoints the box to nil; re-aliasing through the plain `Ꮡp.Value` getter would then throw a nil-pointer dereference before the guard is re-checked. The deref/re-alias instead routes through the golib `ж<T>` extension `Ꮡp.DerefOrNull()`, which binds `Unsafe.NullRef<T>` when the box is nil — legal to HOLD, faulting only on USE — rather than throwing at the bind. The entry alias uses it too, so an empty-list call (`sumList(nil)`) binds without faulting at entry.
 
+<!-- source: src/tests/Behavioral/PointerParamNilWalk/main.cs:14-23 -->
 ```csharp
 internal static nint sumList(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+
     nint total = 0;
     while (Ꮡp != nil) {
         total += p.val;
@@ -574,6 +579,7 @@ Roslyn compiles a local function that is never converted to a delegate with a **
 
 A literal that **defers or recovers** is no bar: its frame is an ordinary local of the local function, declared in the local function's own body like any other, so the whole shape stays allocation-free —
 
+<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:79-98 -->
 ```csharp
 nint /*r*/ guard(nint n) {
     nint r = default!;
@@ -840,6 +846,7 @@ call sites are few against the folded ones. <!-- 7 run-time call sites against 2
 ```go
 func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.value)) }
 ```
+<!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
     return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.of(UnsafePointer.Ꮡvalue)));
@@ -968,10 +975,11 @@ Passing an `unsafe.Pointer` **argument to an `unsafe.Pointer` parameter** keeps 
 ```go
 r1, _, e1 := SyscallN(procCopySid.Addr(), uintptr(destSidLen), uintptr(unsafe.Pointer(destSid)), uintptr(unsafe.Pointer(srcSid)))
 ```
+<!-- source: src/core/syscall/windows/zsyscall_windows.cs:204-208 -->
 ```csharp
 var ᴋ0 = ᏑdestSid;
 var ᴋ1 = ᏑsrcSid;
-var (r1, _, e1) = SyscallN(procCopySid.Addr(), (uintptr)destSidLen, (uintptr)ᴋ0, (uintptr)ᴋ1);
+    var (r1, _, e1) = SyscallN(procCopySid.Addr(), (uintptr)destSidLen, (uintptr)ᴋ0, (uintptr)ᴋ1);
 System.GC.KeepAlive(ᴋ0);
 System.GC.KeepAlive(ᴋ1);
 ```
@@ -1021,6 +1029,7 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 }
 ```
 
+<!-- source: src/core/syscall/darwin/zsyscall_darwin_amd64.cs:236-258 -->
 ```csharp
 internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> Ꮡfrom, ж<_Socklen> Ꮡfromlen) {
     nint n = default!;
@@ -1055,6 +1064,7 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 }
 ```
 
+<!-- source: src/core/runtime/alg.cs:406-412 -->
 ```csharp
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
@@ -1086,6 +1096,7 @@ address-taken, so `x` stays an ordinary parameter or local when that was its onl
 ```go
 func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(&f)) }
 ```
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs:50-52 -->
 ```csharp
 public static uint64 Float64bits(float64 f) {
     return bitcast<float64, uint64>(f);
@@ -1184,6 +1195,7 @@ func boolFieldAddr(conf *Config, name string) *bool {
 
 which converts to
 
+<!-- source: src/core/go/types/check_test.cs:397-400 -->
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> Ꮡconf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(Ꮡconf.OrTypedNil()));
@@ -1340,6 +1352,7 @@ change, and the decoder would return 0 for 23. So all three arms route through g
 reinterpret — `reinterpretManagedEmission`, the same emission this file produces for the identical
 conversion in a deref or raw-address context:
 
+<!-- source: src/core/encoding/gob/gobencdec_test.cs:115-118 -->
 ```csharp
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
@@ -1407,6 +1420,7 @@ Nine coupled rules, each first needed by one of those packages:
   `go.math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
   statement also explains the otherwise surprising spelling:
 
+  <!-- source: src/core/hash/maphash/maphash_purego.cs:104-105 -->
   ```csharp
   // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
   var (hi, lo) = go.math.bits_package.Mul64(a, b);
@@ -1565,6 +1579,7 @@ The receiver-box render resolves the box base through `boxBaseName` with the lam
 
 ## Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:33 -->
 ```csharp
 var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
 ```
@@ -1572,6 +1587,7 @@ Guarded by `PointerCastSliceRange` (compile-shape).
 
 ## Function literals returning `unsafe.Pointer` state their return type
 A literal with a single `unsafe.Pointer` result can mix return arms of DIFFERENT C# types (reflect `deepEqual`'s `ptrval`: `(uintptr)v.pointer()` on one arm, the raw `v.ptr` on the other), which defeats C# lambda return-type inference (CS8917). The emitted lambda states its return type explicitly; each arm then converts implicitly through the golib operators:
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:37 -->
 ```csharp
 @unsafe.Pointer pick(bool u) {
 ```
@@ -1605,6 +1621,7 @@ NAMED results are included: the trigger — a multi-result literal with a return
 
 ## String-returning literals in assignment position state their return type
 A literal with a single Go `string` result can mix return arms of DIFFERENT C# types even though every arm is a Go string: a bare string literal is a `"…"u8` `ReadOnlySpan<byte>`, a literal+variable concat binds golib's `operator +(@string, @string)` (so it is `@string` regardless of u8 suppression), and a call into a hand-written stub can return C# `string` (the baseline `fmt.Sprintf` does). `@string` and `string` convert implicitly in BOTH directions, so a lambda mixing those arms has no unique best common type and its delegate type is not inferable — CS8917 on `pick := func(v any) string {…}` whose `case string:` arm returns `"string:" + t` alongside `fmt.Sprintf` arms. In assignment position (`var pick = …`, where C# must infer the delegate type), the lambda states its return type explicitly and each arm then converts to `@string` in place:
+<!-- source: src/tests/Behavioral/FuncLitStringConcatReturn/main.cs:11 -->
 ```csharp
 @string pick(any v) {
 ```
@@ -1630,6 +1647,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 
 ## Numeric-returning literals with untyped-constant arms state their return type
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
+<!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:38 -->
 ```csharp
 var maxFn = rune (rune _) => maxRune;
 ```
@@ -2164,6 +2182,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
+<!-- source: src/core/os/os_windows_test.cs:266-268 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();
@@ -2672,6 +2691,7 @@ alias; the array element type is `ж<CommentGroup>`, so the alias form was CS002
 `CommentMap.addComment` — the sibling `append(list, Ꮡc)` already took the box through the
 call-argument pointer arm). The routing mirrors the struct-field pointer arm: the element index
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
+<!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
 list = new ж<CommentGroup>[]{Ꮡc}.slice();
 ```

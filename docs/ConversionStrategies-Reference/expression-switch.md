@@ -5,6 +5,7 @@ Go expression-based `switch` statements are flexible: cases do not fall through 
 
 ## A switch on a `static readonly` constant tag lowers to if-else
 A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch: the int case labels are not constants OF the wrapper struct type, and the `is` constant-pattern lowering fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` forces the if-else form (wrapper `==` operators) and disables the `is` pattern:
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:238-239 -->
 ```csharp
 var exprᴛ1 = CrossPkgLib.Precision;
 if (exprᴛ1 == 1) {
@@ -13,6 +14,7 @@ A variable tag stays switchable. Guarded by `CrossPkgUser` / `CrossPkgLib`.
 
 ## A leading constant-true case stays opaque to the compiler
 Go's `switch { case true: ... case cond: ... }` (time parseStrictRFC3339 deliberately disabling its strict checks) compiles the LATER cases as dead code; a foldable `when true` makes C# reject them outright (CS8120). A constant-true case condition on a NON-LAST clause therefore emits the golib `ᐧᐧ` marker -- a `static readonly bool` the compiler cannot fold:
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:250 -->
 ```csharp
 case {} when ᐧᐧ: {
 ```

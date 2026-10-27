@@ -87,12 +87,14 @@ type SortedMap []KeyValue
 
 Before, the declaration stood alone, with no comment:
 
+<!-- source: src/core/internal/fmtsort/sort.cs:24 -->
 ```csharp
 partial struct SortedMap /*[]KeyValue*/;
 ```
 
 Now:
 
+<!-- source: src/core/internal/fmtsort/sort.cs:20-24 -->
 ```csharp
 // SortedMap is a slice of KeyValue pairs that simplifies sorting
 // and iterating over map entries.

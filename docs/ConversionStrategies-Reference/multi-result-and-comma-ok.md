@@ -131,6 +131,7 @@ The declaration is kept whenever anything can read it, and the check is delibera
 
 ## A grouped var spec with one multi-result call deconstructs
 A grouped `var (name, offset, abs = t.locabs() ...)` spec is not a `:=`, so the assignment tuple machinery never saw it -- the per-name path assigned the WHOLE result tuple to the first name and silently DEFAULTED the rest (time appendFormat read a zero abs; a silent-wrongness class beyond the CS0029 that exposed it). Function-local specs emit the C# tuple deconstruction, matching the `:=` form; package-level specs use the once-evaluated hidden-field component reads:
+<!-- source: src/tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.cs:34 -->
 ```csharp
 var (ln, ls) = pair();
 ```

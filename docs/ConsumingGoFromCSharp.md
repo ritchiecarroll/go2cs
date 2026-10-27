@@ -87,6 +87,7 @@ nested in it, so `strings.Builder` is `strings_package.Builder`. A Go method is 
 **The recommended form is one alias per package**, so call sites read like Go. These are the imports behind every
 example on this page:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:10-24 -->
 ```csharp
 using go;                                   // golib, and the methods of every Go package whose import path has no slash
 using static go.builtin;                    // Go's built-ins: nil, len, append, delete, @new, goǃ, Ꮡ
@@ -117,6 +118,7 @@ all of their methods. A package whose path has a slash needs its own namespace a
 Without it, a method call such as `id.String()` does not compile, and the error names some other package's
 `String` method, which can mislead.
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:78-79 -->
 ```csharp
 time.Duration timeout = 90 * time.ΔSecond;
 @string shown = timeout.String();   // a Go method: found through `using go;`
@@ -145,6 +147,7 @@ as well. Several `using static` lines can collide, though: `Contains` is in `str
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
 itself, through `using go;`, always works and reads a little noisier:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:75-76 -->
 ```csharp
 @string bare = ToUpper("gopher");                       // using static go.strings_package;
 @string qualified = strings_package.ToUpper("gopher");  // using go;
@@ -172,6 +175,7 @@ name.
 
 A Go interface is a C# interface, so a C# class can implement one and hand it to Go:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:318-328 -->
 ```csharp
 sealed class CollectingWriter : io.Writer
 {
@@ -247,6 +251,7 @@ value's `ToString()` returns its `Error()`, else its `String()`, chosen the way 
 `Error()` wins over `String()` whichever of them has the pointer receiver. A value with neither method prints its
 fields or its underlying value, and a pointer with neither prints its address.
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:114 -->
 ```csharp
 Console.WriteLine($"{diskFull} after {wait}");                    // disk full after 1.5s
 ```
@@ -290,6 +295,7 @@ if err != nil {
 }
 ```
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:120-124 -->
 ```csharp
 var (n, err) = strconv.Atoi("42");
 if (err != nil)
@@ -310,6 +316,7 @@ error wrapped = fmt.Errorf("reading config: %w", bad);
 Compare an error with `nil`. To produce a nil error from C#, write `null` (or `default`), and make a Go error with
 `errors.New`:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:53-57 -->
 ```csharp
 static error CheckName(@string name)
 {
@@ -320,6 +327,7 @@ static error CheckName(@string name)
 
 Where the rest of a C# program expects exceptions, turn the error into one at the boundary:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:60-65 -->
 ```csharp
 static nint ParsePort(@string text)
 {
@@ -365,6 +373,7 @@ The other way round, a C# exception thrown from C# code that Go calls (a C# `Str
 say) reaches your C# caller unchanged. Go's deferred calls still run on the way out, and Go's `recover()` does not
 catch it, so Go code cannot swallow it:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:331-334 -->
 ```csharp
 sealed class NotReady : fmt.Stringer
 {
@@ -444,6 +453,7 @@ The `ꟷ` in the comma-ok read comes from `go.builtin`; it picks the form that r
 a `foreach` over a map is randomised, as in Go, so do not depend on it. A Go map is also an `IDictionary<K,V>`, so
 it goes to C# code that takes one:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:221 -->
 ```csharp
 IDictionary<@string, nint> dict = ages;   // a Go map is an IDictionary<K, V>
 ```
@@ -463,6 +473,7 @@ sb.WriteString("pher");
 Every pointer method takes the box. Some, such as uuid's `UnmarshalText`, also take a plain local, passed by
 reference, so the method updates it:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:229-230 -->
 ```csharp
 var target = new uuid.UUID();
 error uerr = target.UnmarshalText("6ba7b810-9dad-11d1-80b4-00c04fd430c8"u8.ToArray());
@@ -494,6 +505,7 @@ goǃ(() => results.Send(42));        // Go: go func() { results <- 42 }()
 `sync.WaitGroup` works as in Go. `Close` closes a channel, and `foreach` ranges over it until it is closed and
 drained:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:245-255 -->
 ```csharp
 var wg = @new<sync.WaitGroup>();
 var squares = new channel<nint>(3);
@@ -556,6 +568,7 @@ Span<byte> view = parsed.ToSpan();
 A Go array is a value: `copied := parsed` copies its 16 bytes. A C# assignment copies only the struct around
 them, so both variables would share the bytes; `Clone()` makes the copy Go makes:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:295 -->
 ```csharp
 uuid.UUID copied = parsed.Clone();  // Go: copied := parsed
 ```

@@ -82,9 +82,11 @@ Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncr
 
 **Non-empty interface-to-interface conversions use a forwarding adapter.** A Go interface value may be assigned or passed to another non-empty interface when the source interface method set satisfies the target (`var local localLabel = foreign`, where `foreign` is `CrossPkgLib.Labeled`). C# has no structural conversion between unrelated interfaces, so the converter records the interface pair as `[assembly: GoImplement<CrossPkgLib_package.Labeled, localLabel>]` and emits the cast site as a generated adapter:
 
+<!-- source: src/tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.cs:17-20 -->
 ```csharp
 CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21D);
 localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
+
 fmt.Println(labelOf(new CrossPkgLib_LabeledᴠlocalLabel(foreign)));
 ```
 
@@ -515,8 +517,8 @@ already composes `Ꮡnull` through `boxBaseName`. The var's own property keeps i
 use site reads the box:
 <!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:11-12, 42 -->
 ```csharp
-internal static ж<slice<byte>> Ꮡnull = new StandardBox<slice<byte>>(slice<byte>("null"u8));
-internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;
+internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
+internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;
 …
     var p = Ꮡnull;
 ```
@@ -1282,6 +1284,7 @@ result list — C# tuple conversions do not consult user conversions element-wis
 converter deconstructs into temps and converts each element through the usual interface
 machinery (which also records the `GoImplement` pairing):
 
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:151-152 -->
 ```csharp
 var (ᴛ1, ᴛ2) = makeRelay();
 return (new relayжReporter(ᴛ1), ᴛ2);
@@ -1328,6 +1331,7 @@ once-evaluated static tuple FIELD (`v.globalDeclHoist`, flushed by visitValueSpe
 field — C# static field initializers run in textual order, the same holder shape `visitPackageTupleVarSpec`
 emits for `var a, b = f()`), and the arguments read its components:
 
+<!-- source: src/tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.cs:33-34 -->
 ```csharp
 internal static (nint, nint) tupleᴛ1ʗ = parts();
 internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
