@@ -32,9 +32,10 @@ namespace go2cs;
 /// </para>
 /// <para>
 /// A var whose address is taken keeps its heap box: the holder holds the box,
-/// <c>[GoLazy] partial class lazyᴛX { internal static ж&lt;T&gt; ᏑX = new StandardBox&lt;T&gt;(…); }</c>, the converter keeps
-/// the var's <c>ref T X => ref ᏑX.Value</c> property beside it, and the generator writes the box accessor,
-/// <c>ref ж&lt;T&gt; ᏑX => ref lazyᴛX.ᏑX</c>. <c>&amp;X</c> and <c>X</c> then read one box, built by the first of either.
+/// <c>[GoLazy] partial class lazyᴛX { internal static readonly ж&lt;T&gt; ᏑX = new StaticBox&lt;T&gt;(…); }</c>, the converter
+/// keeps the var's <c>ref T X => ref ((StaticBox&lt;T&gt;)ᏑX).ValueSlot</c> property beside it, and the generator writes
+/// the box accessor, <c>ж&lt;T&gt; ᏑX => lazyᴛX.ᏑX</c>: the box is readonly, so the accessor returns it rather than a
+/// writable ref to it. <c>&amp;X</c> and <c>X</c> then read one box, built by the first of either.
 /// </para>
 /// <para>
 /// A holder that does not hold exactly one static field named for it (or for its box) is refused by name (GO2CS0009), and
@@ -125,8 +126,12 @@ public class LazyHolderGenerator : ISourceGenerator
                     string holderName = holder.Identifier.ValueText;
                     string fieldName = field.Declaration.Variables[0].Identifier.ValueText;
 
-                    // The var's field, or its box (ᏑX) for a var whose address is taken: the accessor takes the field's name.
-                    source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");
+                    // The var's field, or its box (ᏑX) for a var whose address is taken: the accessor takes the field's name. A
+                    // box is readonly, which a writable ref cannot return (CS8161), so its accessor returns the box itself.
+                    if (field.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+                        source.Append($"{memberIndent}{Accessibility(field)} static {type} {fieldName} => {holderName}.{fieldName};\r\n");
+                    else
+                        source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");
 
                     if (initial)
                         source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");
