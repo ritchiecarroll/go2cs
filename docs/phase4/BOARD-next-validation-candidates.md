@@ -29403,4 +29403,40 @@ reserve; there is no depth-bound policy.
 
 — R (2026-10-27)
 
+## 2026-10-27 — P2 (1.26.10.2 seat #10, claude/p2-seat10-elem-compare): `&x[i] == &y[j]` compares element addresses without boxing them — DONE on the seat branch
+
+Go's `&x[i]` is an interior pointer, so comparing two of them costs nothing. go2cs emitted `Ꮡ(x, i) == Ꮡ(y, j)`,
+which mints an element box per operand and, for a named slice or array, a boxed header as well. When BOTH operands
+of `==` or `!=` are element address-ofs the converter now emits `Ꮡelem(x, i)` (`Ꮡelem<E>` for a named slice) or
+`p.Ꮡelem<E>(i)` through a pointer to an array. golib's `Ꮡelem` applies `Ꮡ`'s index check and returns
+`ElementAddress<T>`, a struct holding the backing storage and absolute index, which has no conversion to or from
+`ж<T>`. Design and census: docs/phase4/DESIGN-element-address-compare.md; COORD's ruling of 11:33Z (names, scope,
+four asks) holds as ruled.
+
+Red-first: the new `ElementAddressCompare` behavioral test's `AllocsPerRun` lines read 144 (a slice compare) and 176
+(through a pointer to an array) before the change and 0 after; every other line matched Go before and after.
+GolibTests' `ElementAddressCompareTests` (8) check `Ꮡelem` against `Ꮡ` shape by shape and assert zero heap bytes
+over 28,000 compares; that assertion was made to fail (1,728,000 B) by routing a slice take through an element box.
+
+Footprint (two seeded `-stdlib` reconverts per target, base `e6b7f24f81`), scored against the note's prediction:
+linux 8 files +12/-12, windows 7 files +11/-11, darwin 8 files +12/-12, the predicted files on every target
+(math/big arith.cs 4 and nat.cs 2, fips140 alias, vendored x/crypto alias and cryptobyte, image/gif, regexp,
+syscall_unix on linux and darwin). 0 position-map lines, 0 imports, 0 `.cs.auto`. MET. Goldens: the 4 predicted,
++17/-17 (SlicePointerIdentity 13, AppendOfMake 2, ArrayPointerElementAlias 1, SliceToArrayPointerAlias 1). MET.
+
+math/big TestMulUnbalanced on linux (this box, before and after the corpus lines, same golib): with
+`DOTNET_TieredCompilation=0` the ratio falls from 14 to 4 (5.73 MB to 1.97 MB) and the test passes. Under default
+tiering it reads 37-54 before and 28-36 after, still FAIL: the residual is tier-0 code boxing a named slice for
+`len`/`cap` (the same 56 B per call NamedSliceLenCapAllocationTests records), outside this seat.
+
+Stated differences and limits:
+- a native slice element compared with the same element through a native array view: `Ꮡ` answers false
+  (NativeBox against an element box), `Ꮡelem` answers true, which is Go's answer;
+- kept boxed, by the ruled scope: one operand only, `any(…)`, a pointer conversion, a switch tag, a named array behind a
+  pointer or an escaped local (published lazily through the box), a nested element `&m[i][j]` (the note listed it as
+  covered; it is not), the receiver copy form, a captured box inside a lambda;
+- a zero-size element of a real array keeps its index under both (Go answers true).
+
+— P2 (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

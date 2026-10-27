@@ -57,7 +57,7 @@ internal static void Main() {
     view[3] = 0x7f;
     fmt.Println("slice of array pointer:", buf[4], "len/cap:", len(view), cap(view));
 
-    fmt.Println("element identity:", p.at<byte>(0) == Ꮡ(buf, 1), "windowed identity:", p.at<byte>(2) == Ꮡ(buf, 3));
+    fmt.Println("element identity:", p.Ꮡelem<byte>(0) == Ꮡelem(buf, 1), "windowed identity:", p.Ꮡelem<byte>(2) == Ꮡelem(buf, 3));
 
     var src = new byte[]{
         0x10, 0x20, 0x30, 0x00,

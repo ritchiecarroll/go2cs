@@ -1800,13 +1800,31 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// the box directly, so the other operand takes the box form exactly as against a `*T`).
 	rhsIsPointer := isPointer(rhsType) || v.typeIsErasedPointerCore(rhsType)
 	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType && !unsafePointerIdentityCompare
-	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
+
+	// Two element address-ofs compared (`&x[i] == &y[j]`) take golib's Ꮡelem, which compares the element's
+	// storage and index without a box (elementAddressCompare.go). Both operands or neither.
+	elementLeft, elementRight, isElementAddressCompare := v.elementAddressCompare(binaryExpr, context)
+
+	var leftOperand string
+
+	if isElementAddressCompare {
+		leftOperand = elementLeft
+	} else {
+		leftOperand = v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
+	}
 
 	binaryOp := binaryExpr.Op.String()
 
 	lhsIsPointer := isPointer(lhsType) || v.typeIsErasedPointerCore(lhsType)
 	identContext.isPointer = (lhsIsPointer || rightIsDerefdPtrParam) && !rhsIsInterfaceType && !unsafePointerIdentityCompare
-	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
+
+	var rightOperand string
+
+	if isElementAddressCompare {
+		rightOperand = elementRight
+	} else {
+		rightOperand = v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
+	}
 
 	// A binary op between an integer-constrained TYPE PARAMETER and an untyped CONSTANT —
 	// `n <= 0` in rand.N[Int intType] — leaves the constant as C# `int`, which the lifted

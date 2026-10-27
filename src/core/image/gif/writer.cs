@@ -320,7 +320,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     // frame's palette is not longer than the global palette...
     nint paddedSize = log2(len(pm.Palette)); // Size of Local Color Table: 2^(1+n).
     {
-        var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡ(gp, 0) == Ꮡ(pm.Palette, 0)){
+        var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡelem<Δcolor.Color>(gp, 0) == Ꮡelem<Δcolor.Color>(pm.Palette, 0)){
             e.writeByte(0); // Use the global color table.
         } else {
             var (ct, err) = encodeColorTable(e.localColorTable[..], pm.Palette, paddedSize);

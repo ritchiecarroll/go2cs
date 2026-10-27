@@ -94,7 +94,7 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
         Ꮡm.of(mmapper.ᏑMutex).Lock();
         defer(Ꮡm.of(mmapper.ᏑMutex).Unlock, ref ᒐ);
         var b = m.active[p];
-        if (b == default! || Ꮡ(b, 0) != Ꮡ(data, 0)) {
+        if (b == default! || Ꮡelem(b, 0) != Ꮡelem(data, 0)) {
             err = EINVAL; goto ᒐdone;
         }
 

@@ -482,6 +482,51 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return new ElemRefBox<Telem>(array, (int)index);
     }
 
+    /// <summary>
+    /// Go's <c>&amp;p[i]</c> through a pointer to an array, as an operand of <c>==</c> or <c>!=</c>: the identity of
+    /// element <paramref name="index"/> (<see cref="ElementAddress{T}"/>, builtin's <c>Ꮡelem</c>), with
+    /// <see cref="at{Telem}(nint)"/>'s index check.
+    /// </summary>
+    /// <remarks>
+    /// Allocation-free when this box holds an <see cref="array{T}"/> of <typeparamref name="Telem"/> directly: the
+    /// header is read in place, and nothing about it is lazy (see computePublishArrayBacking). Every other
+    /// receiver (a native array view, a named array wrapper whose backing is published lazily) takes
+    /// <see cref="at{Telem}(nint)"/>'s element box and answers its identity, which is the same answer.
+    /// </remarks>
+    public ElementAddress<Telem> Ꮡelem<Telem>(nint index)
+    {
+        if (typeof(T) == typeof(array<Telem>) && TryGetNativeArrayView(typeof(Telem)) is null)
+        {
+            array<Telem> storage = Unsafe.As<T, array<Telem>>(ref Value);
+
+            if ((nuint)index >= (nuint)storage.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, storage.Length);
+
+            return ElementAddress<Telem>.OfArray(storage, index);
+        }
+
+        return ((ElemRefBox<Telem>)at<Telem>(index)).Identity();
+    }
+
+    /// <inheritdoc cref="Ꮡelem{Telem}(nint)"/>
+    public ElementAddress<Telem> Ꮡelem<Telem>(int index) => Ꮡelem<Telem>((nint)index);
+
+    /// <inheritdoc cref="Ꮡelem{Telem}(nint)"/>
+    public ElementAddress<Telem> Ꮡelem<Telem>(ulong index)
+    {
+        if (typeof(T) == typeof(array<Telem>) && TryGetNativeArrayView(typeof(Telem)) is null)
+        {
+            array<Telem> storage = Unsafe.As<T, array<Telem>>(ref Value);
+
+            if (index >= (ulong)storage.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, storage.Length);
+
+            return ElementAddress<Telem>.OfArray(storage, (nint)index);
+        }
+
+        return ((ElemRefBox<Telem>)at<Telem>(index)).Identity();
+    }
+
     public ж<TElem> at<TElem>(FieldRefFunc<T, array<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);
 
     public ж<TElem> at<TElem>(FieldRefFunc<array<TElem>> fieldRefFunc, int index) => of(fieldRefFunc).at<TElem>(index);

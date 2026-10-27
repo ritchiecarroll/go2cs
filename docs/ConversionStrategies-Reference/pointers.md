@@ -157,6 +157,46 @@ exist (CS0103). The test reads the underlying. A parameter or a heap-escaping lo
 the `NamedPointerEquality` behavioral output test — same-pointer equality, two
 distinct allocations, nil, `!=` and self-comparison, against Go.)
 
+## Comparing two element addresses allocates nothing — `Ꮡelem`
+
+Go's `&x[i]` is an interior pointer, so `&x[i] == &y[j]` costs nothing, and the standard library compares element
+addresses on hot paths: math/big's `alias` and `addVW`, the crypto alias packages' `InexactOverlap`, regexp,
+cryptobyte and syscall. `Ꮡ(x, i) == Ꮡ(y, j)` answers correctly (see above) but mints an element box per operand,
+and a named slice or array wrapper boxes its header as well to reach the `IArray<T>` overload. When BOTH operands of
+`==` or `!=` are element address-ofs, each renders as golib's `Ꮡelem` instead, which applies `Ꮡ`'s index check and
+returns the element's identity as a value, an `ElementAddress<T>` (the backing storage and absolute index):
+
+| Go | Before | After |
+|---|---|---|
+| `&z[0] != &x[0]` | `Ꮡ(z, 0) != Ꮡ(x, 0)` | `Ꮡelem(z, 0) != Ꮡelem(x, 0)` |
+| `&x[0:cap(x)][cap(x)-1] == …` on a named slice | `Ꮡ(x.slice(0, cap(x)), cap(x) - 1) == …` | `Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == …` |
+| `&p[1] == &s[2]`, `p` a `*[3]int` | `p.at<nint>(1) == Ꮡ(s, 2)` | `p.Ꮡelem<nint>(1) == Ꮡelem(s, 2)` |
+| `&h.q[2] == …`, `h.q` a named array field of the receiver | `Ꮡ(h.q.Value, 2) == …` | `Ꮡelem(h.q.Value, 2) == …` |
+
+A named slice wrapper gets the element type written (`Ꮡelem<Word>`) because C# type inference ignores the
+wrapper's implicit conversion to `slice<T>`; a named array reaches `array<T>` through `.Value`. golib deliberately
+has no `IArray<T>` overload of `Ꮡelem`: it would bind a wrapper by boxing it, which is the allocation this removes,
+and it would make an explicit-type call ambiguous (CS0121) for a wrapper that converts to both kinds.
+
+The rewrite is whole or nothing. `ElementAddress<T>` has no conversion to or from `ж<T>`, so a compare with only one
+element address-of operand, a nil operand, `any(&x[0]) == any(&y[0])`, `(*T)(&x[0]) == &y[0]` and a `switch &x[0]
+{ case &y[0]: }` all keep the boxed form; only parentheses are removed to find the operands. Element address-ofs
+that reach their array through a box the converter publishes lazily (a named array behind a pointer or an escaped
+local), a nested element (`&m[i][j]`), the receiver copy form and a captured box inside a lambda also keep the boxed
+form.
+
+`ElementAddress<T>` answers what `ElemRefBox<T>.Equals` answers, in the same order: every zerobase element is one
+address, a native element is its address, and a managed element is its (backing, absolute index) pair. One answer
+differs, in Go's favor: `Ꮡ` mints a `NativeBox<T>` for a native slice element, which compares false against the
+element box a native array view hands out over the same address; two `ElementAddress<T>` values over one address
+compare true. A zero-size element of a real array backing keeps its index under both (Go answers true there; see
+[`GoZeroSizeFacts`](../../src/core/golib/GoZeroSize.cs)).
+
+(Guarded by the `ElementAddressCompare` behavioral output test against Go, whose `AllocsPerRun` lines for a slice
+and a pointer-to-array compare read 144 and 176 before the change and 0 after, and by GolibTests' `ElementAddressCompareTests`, which checks
+`Ꮡelem(a, i) == Ꮡelem(b, j)` against `Ꮡ(a, i) == Ꮡ(b, j)` shape by shape, the index panics, and zero heap bytes
+over 28,000 compares. Design: [DESIGN-element-address-compare](../phase4/DESIGN-element-address-compare.md).)
+
 ## A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split
 
 `ж<T>` answers two different questions that a single predicate used to conflate, and the conflation was a defect *class*: `IsNull` was `m_isNull || m_val is null`, so it reported **true** for three unrelated things —

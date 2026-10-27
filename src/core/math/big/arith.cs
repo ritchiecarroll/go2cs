@@ -112,7 +112,7 @@ internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
     var (zi, cc) = bits.Add((nuint)x[0], (nuint)y, 0);
     z[0] = (Word)zi;
     if (cc == 0) {
-        if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+        if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {
             copy(z[1..], x[1..]);
         }
         return 0;
@@ -121,7 +121,7 @@ internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
         Word xi = x[i];
         if (xi != ~((Word)((Word)0))) {
             z[i] = xi + 1;
-            if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+            if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {
                 copy(z.slice(i + 1), x.slice(i + 1));
             }
             return 0;
@@ -168,7 +168,7 @@ internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
     var (zi, cc) = bits.Sub((nuint)x[0], (nuint)y, 0);
     z[0] = (Word)zi;
     if (cc == 0) {
-        if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+        if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {
             copy(z[1..], x[1..]);
         }
         return 0;
@@ -177,7 +177,7 @@ internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
         Word xi = x[i];
         if (xi != 0) {
             z[i] = xi - 1;
-            if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+            if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {
                 copy(z.slice(i + 1), x.slice(i + 1));
             }
             return 0;

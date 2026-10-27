@@ -47,10 +47,10 @@ internal static void Main() {
     (stale[2], stale[3]) = (99, 99);
 
     var e = extend(s, 2);
-    fmt.Println("in place:", len(e), cap(e), e, Ꮡ(e, 0) == Ꮡ(s, 0));
+    fmt.Println("in place:", len(e), cap(e), e, Ꮡelem(e, 0) == Ꮡelem(s, 0));
 
     var f = extend(s, 3);
-    fmt.Println("grows:", len(f), cap(f), f, Ꮡ(f, 0) == Ꮡ(s, 0));
+    fmt.Println("grows:", len(f), cap(f), f, Ꮡelem(f, 0) == Ꮡelem(s, 0));
 
     slice<nint> none = default!;
     var n = extend(none, 3);

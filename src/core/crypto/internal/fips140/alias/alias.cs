@@ -19,7 +19,7 @@ partial class alias_package {
 // InexactOverlap can be used to implement the requirements of the crypto/cipher
 // AEAD, Block, BlockMode and Stream interfaces.
 public static bool InexactOverlap(slice<byte> x, slice<byte> y) {
-    if (len(x) == 0 || len(y) == 0 || Ꮡ(x, 0) == Ꮡ(y, 0)) {
+    if (len(x) == 0 || len(y) == 0 || Ꮡelem(x, 0) == Ꮡelem(y, 0)) {
         return false;
     }
     return AnyOverlap(x, y);

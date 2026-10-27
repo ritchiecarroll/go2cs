@@ -514,6 +514,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDynamicInterfaceKeywordMethod() => CheckTarget("DynamicInterfaceKeywordMethod");
 
     [TestMethod]
+    public void CheckElementAddressCompare() => CheckTarget("ElementAddressCompare");
+
+    [TestMethod]
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]

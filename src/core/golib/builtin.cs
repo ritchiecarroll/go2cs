@@ -2706,6 +2706,75 @@ public static partial class builtin
         return ElemRefBox<T>.OfArrayElement(target, (int)index);
     }
 
+    // ---- the ELEMENT-ADDRESS COMPARE (1.26.10.2 seat #10, docs/phase4/DESIGN-element-address-compare.md) ----
+    //
+    // Go's `&x[i] == &y[j]` compares two interior pointers and allocates nothing; `Ꮡ(x, i) == Ꮡ(y, j)` mints two
+    // element boxes to answer it. When BOTH operands of a compare are element address-ofs the converter emits each
+    // as Ꮡelem, which checks the index exactly as Ꮡ does (Go panics on an out-of-range &x[i] even inside a
+    // compare, left operand first) and returns the element's identity as a value (ElementAddress<T>).
+    //
+    // Deliberately NO IArray<T> overload: a named slice or array wrapper reaches these through its implicit
+    // conversion to slice<T> (with the element type written, Ꮡelem<E>, since C# inference ignores user-defined
+    // conversions) or through `.Value` to array<T>. An IArray<T> overload would bind a wrapper by boxing it,
+    // which is the allocation this exists to remove, and would make an explicit-E call ambiguous for a wrapper
+    // that converts to both slice<T> and array<T> (CS0121).
+
+    /// <summary>
+    /// Go's <c>&amp;x[i]</c> as an operand of <c>==</c> or <c>!=</c>: the identity of slice element
+    /// <paramref name="index"/>, with Go's index check and no allocation.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="target">Target slice.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>The element's address identity.</returns>
+    public static ElementAddress<T> Ꮡelem<T>(slice<T> target, int index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfSlice(target, index);
+    }
+
+    /// <inheritdoc cref="Ꮡelem{T}(slice{T}, int)"/>
+    public static ElementAddress<T> Ꮡelem<T>(slice<T> target, nint index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfSlice(target, index);
+    }
+
+    /// <inheritdoc cref="Ꮡelem{T}(slice{T}, int)"/>
+    public static ElementAddress<T> Ꮡelem<T>(slice<T> target, ulong index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfSlice(target, (nint)index);
+    }
+
+    /// <summary>
+    /// Go's <c>&amp;a[i]</c> as an operand of <c>==</c> or <c>!=</c>: the identity of array element
+    /// <paramref name="index"/>, with Go's index check and no allocation.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="target">Target array.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>The element's address identity.</returns>
+    public static ElementAddress<T> Ꮡelem<T>(array<T> target, int index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfArray(target, index);
+    }
+
+    /// <inheritdoc cref="Ꮡelem{T}(array{T}, int)"/>
+    public static ElementAddress<T> Ꮡelem<T>(array<T> target, nint index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfArray(target, index);
+    }
+
+    /// <inheritdoc cref="Ꮡelem{T}(array{T}, int)"/>
+    public static ElementAddress<T> Ꮡelem<T>(array<T> target, ulong index)
+    {
+        CheckElementIndex(index, target.Length);
+        return ElementAddress<T>.OfArray(target, (nint)index);
+    }
+
     /// <summary>
     /// Go's <c>"…"[i]</c>: a byte of a string LITERAL, which the converter renders as a
     /// <c>ReadOnlySpan&lt;byte&gt;</c> (<c>"…"u8</c>). The span's own indexer takes an int and throws

@@ -391,7 +391,7 @@ Again:
         } else {
             t.inst = i;
         }
-        if (len(cap) > 0 && Ꮡ(t.cap, 0) != Ꮡ(cap, 0)) {
+        if (len(cap) > 0 && Ꮡelem(t.cap, 0) != Ꮡelem(cap, 0)) {
             copy(t.cap, cap);
         }
         d.Value.t = Ꮡt;

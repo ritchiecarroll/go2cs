@@ -44,7 +44,7 @@ internal static void Main() {
     inner[0] = 0x21;
     fmt.Println("p[1:3] aliases:", dst[3], "len/cap:", len(inner), cap(inner));
 
-    fmt.Println("element identity:", p.at<uint16>(0) == Ꮡ(dst, 2), "windowed identity:", p.at<uint16>(2) == Ꮡ(dst, 4));
+    fmt.Println("element identity:", p.Ꮡelem<uint16>(0) == Ꮡelem(dst, 2), "windowed identity:", p.Ꮡelem<uint16>(2) == Ꮡelem(dst, 4));
 
     fmt.Println("array length:", 4, len(p.Value));
 
