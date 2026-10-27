@@ -64,7 +64,7 @@ using static go.@internal.poll_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/poll/errno_unix.go", "errno_unix.cs", "ABAqopSkpKSU")]
-[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooDIuLiWkoKUygAIEsCigKKAyJaSgoKCgpSCgso=")]
+[assembly: go.GoPositionMap("internal/poll/fd.go", "fd.cs", "ABcwwKSAooDIyLiWkoKUygAIEsCigKKAyJaSgoKCgpSCgso=")]
 [assembly: go.GoPositionMap("internal/poll/fd_fsync_darwin.go", "fd_fsync_darwin.cs", "AAwg4oCCpIKCyoKU", "21-31:1")]
 [assembly: go.GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACZqAA4CgoKClIKClIIABkyigoKClIKCAAisAaKYwoKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
 [assembly: go.GoPositionMap("internal/poll/fd_opendir_darwin.go", "fd_opendir_darwin.cs", "AA0e1oKClIKCgoKmgoKUrA==")]
@@ -74,7 +74,7 @@ using static go.@internal.poll_package;
 [assembly: go.GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABAgpNzawoKCgoKUgtjigIKkgtwACAKAgqSCgoKCgoKAgtrq4oCCpII=")]
 [assembly: go.GoPositionMap("internal/poll/fd_writev_libc.go", "fd_writev_libc.cs", "AAse")]
 [assembly: go.GoPositionMap("internal/poll/fstatat_unix.go", "fstatat_unix.cs", "AAwcsoCCpII=", "19-21:1")]
-[assembly: go.GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYpg==")]
+[assembly: go.GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYtg==")]
 [assembly: go.GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
 [assembly: go.GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
 [assembly: go.GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCgLjshoKmkoKCmKgACAKClICCpJSAgraCyoKClIKCgpQABxCC/oKUgIIADBTsgrgACArCpraCggAMGoK2goLKpg==", "41-43:1;51-53:2;60-62:1")]

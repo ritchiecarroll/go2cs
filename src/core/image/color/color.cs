@@ -375,9 +375,13 @@ internal static uint32 sqDiff(uint32 x, uint32 y) {
 }
 
 // Standard colors.
-public static Gray16 Black = new Gray16(0);
-public static Gray16 White = new Gray16(0xffff);
-public static Alpha16 Transparent = new Alpha16(0);
-public static Alpha16 Opaque = new Alpha16(0xffff);
+public static readonly ж<Gray16> ᏑBlack = new StaticBox<Gray16>(new Gray16(0));
+public static ref Gray16 Black => ref ((StaticBox<Gray16>)ᏑBlack).ValueSlot;
+public static readonly ж<Gray16> ᏑWhite = new StaticBox<Gray16>(new Gray16(0xffff));
+public static ref Gray16 White => ref ((StaticBox<Gray16>)ᏑWhite).ValueSlot;
+public static readonly ж<Alpha16> ᏑTransparent = new StaticBox<Alpha16>(new Alpha16(0));
+public static ref Alpha16 Transparent => ref ((StaticBox<Alpha16>)ᏑTransparent).ValueSlot;
+public static readonly ж<Alpha16> ᏑOpaque = new StaticBox<Alpha16>(new Alpha16(0xffff));
+public static ref Alpha16 Opaque => ref ((StaticBox<Alpha16>)ᏑOpaque).ValueSlot;
 
 } // end color_package

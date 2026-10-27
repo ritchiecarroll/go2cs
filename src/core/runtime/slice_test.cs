@@ -236,8 +236,10 @@ public static void BenchmarkGrowSlice(ж<testing.B> Ꮡb) {
     });
 }
 
-public static slice<nint> SinkIntSlice;
-public static slice<ж<nint>> SinkIntPointerSlice;
+public static readonly ж<slice<nint>> ᏑSinkIntSlice = new StaticBox<slice<nint>>(default(slice<nint>));
+public static ref slice<nint> SinkIntSlice => ref ((StaticBox<slice<nint>>)ᏑSinkIntSlice).ValueSlot;
+public static readonly ж<slice<ж<nint>>> ᏑSinkIntPointerSlice = new StaticBox<slice<ж<nint>>>(default(slice<ж<nint>>));
+public static ref slice<ж<nint>> SinkIntPointerSlice => ref ((StaticBox<slice<ж<nint>>>)ᏑSinkIntPointerSlice).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string intSliceˢ = "IntSlice"u8;

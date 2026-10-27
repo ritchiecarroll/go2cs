@@ -1533,7 +1533,7 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
     public slice<@string> Args;
     public slice<@string> SArgs; // string arguments
 }
-[GoLazy] partial class lazyᴛEventDescriptions { public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StaticBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
+[GoLazy] partial class lazyᴛEventDescriptions { public static readonly ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StaticBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
     [EvNone] = new("None"u8, 5, false, new @string[]{}.slice(), default!),
     [EvBatch] = new("Batch"u8, 5, false, new @string[]{"p"u8, "ticks"u8}.slice(), default!), // in 1.5 format it was {"p", "seq", "ticks"}
     [EvFrequency] = new("Frequency"u8, 5, false, new @string[]{"freq"u8}.slice(), default!), // in 1.5 format it was {"freq", "unused"}
@@ -1585,7 +1585,7 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
     [EvUserLog] = new("UserLog"u8, 11, true, new @string[]{"id"u8, "keyid"u8}.slice(), new @string[]{"category"u8, "message"u8}.slice()),
     [EvCPUSample] = new("CPUSample"u8, 19, true, new @string[]{"ts"u8, "p"u8, "g"u8}.slice(), default!)
 }.array(256)); }
-public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ᏑEventDescriptions.Value;
+public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((StaticBox<array<EventDescriptionsᴛ1>>)ᏑEventDescriptions).ValueSlot;
 
 //gcassert:inline
 internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {

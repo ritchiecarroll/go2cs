@@ -189,9 +189,10 @@ public static UntypedInt SECURITY_LOCAL_SERVICE_RID => 19;
 // https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
 public static UntypedInt SECURITY_NETWORK_SERVICE_RID => 20;
 
-public static SID_IDENTIFIER_AUTHORITY SECURITY_NT_AUTHORITY = new SID_IDENTIFIER_AUTHORITY(
+public static readonly ж<SID_IDENTIFIER_AUTHORITY> ᏑSECURITY_NT_AUTHORITY = new StaticBox<SID_IDENTIFIER_AUTHORITY>(new SID_IDENTIFIER_AUTHORITY(
     Value: new byte[]{0, 0, 0, 0, 0, 5}.array()
-);
+));
+public static ref SID_IDENTIFIER_AUTHORITY SECURITY_NT_AUTHORITY => ref ((StaticBox<SID_IDENTIFIER_AUTHORITY>)ᏑSECURITY_NT_AUTHORITY).ValueSlot;
 
 //sys	IsValidSid(sid *syscall.SID) (valid bool) = advapi32.IsValidSid
 //sys	getSidIdentifierAuthority(sid *syscall.SID) (idauth uintptr) = advapi32.GetSidIdentifierAuthority

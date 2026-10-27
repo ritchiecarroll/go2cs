@@ -15,8 +15,8 @@ using go.sync;
 
 partial class sysrand_package {
 
-internal static ж<atomic.Bool> ᏑfirstUse = new StaticBox<atomic.Bool>(default(atomic.Bool));
-internal static ref atomic.Bool firstUse => ref ᏑfirstUse.Value;
+internal static readonly ж<atomic.Bool> ᏑfirstUse = new StaticBox<atomic.Bool>(default(atomic.Bool));
+internal static ref atomic.Bool firstUse => ref ((StaticBox<atomic.Bool>)ᏑfirstUse).ValueSlot;
 
 internal static void warnBlocked() {
     println((@string)"crypto/rand: blocked for 60 seconds waiting to read random data from the kernel"u8);
@@ -69,8 +69,8 @@ public static void Read(slice<byte> b) {
 }
 
 // The urandom fallback is only used on Linux kernels before 3.17 and on AIX.
-internal static ж<sync.Once> ᏑurandomOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once urandomOnce => ref ᏑurandomOnce.Value;
+internal static readonly ж<sync.Once> ᏑurandomOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once urandomOnce => ref ((StaticBox<sync.Once>)ᏑurandomOnce).ValueSlot;
 
 internal static ж<os.File> urandomFile;
 

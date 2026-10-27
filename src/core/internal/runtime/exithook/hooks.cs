@@ -28,17 +28,20 @@ partial struct Hook {
     public bool RunOnFailure;   // whether to run on non-zero exit code
 }
 
-internal static ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
-internal static ref atomic.Int32 locked => ref Ꮡlocked.Value;
-internal static ж<atomic.Uint64> ᏑrunGoid = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
+internal static readonly ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
+internal static ref atomic.Int32 locked => ref ((StaticBox<atomic.Int32>)Ꮡlocked).ValueSlot;
+internal static readonly ж<atomic.Uint64> ᏑrunGoid = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ref atomic.Uint64 runGoid => ref ((StaticBox<atomic.Uint64>)ᏑrunGoid).ValueSlot;
 internal static slice<Hook> hooks;
 internal static bool running;
 
 // runtime sets these for us
-public static Action Gosched;
-public static Func<uint64> Goid;
-public static Action<@string> Throw;
+public static readonly ж<Action> ᏑGosched = new StaticBox<Action>(default(Action));
+public static ref Action Gosched => ref ((StaticBox<Action>)ᏑGosched).ValueSlot;
+public static readonly ж<Func<uint64>> ᏑGoid = new StaticBox<Func<uint64>>(default(Func<uint64>));
+public static ref Func<uint64> Goid => ref ((StaticBox<Func<uint64>>)ᏑGoid).ValueSlot;
+public static readonly ж<Action<@string>> ᏑThrow = new StaticBox<Action<@string>>(default(Action<@string>));
+public static ref Action<@string> Throw => ref ((StaticBox<Action<@string>>)ᏑThrow).ValueSlot;
 
 // Add adds a new exit hook.
 public static void Add(Hook h) {

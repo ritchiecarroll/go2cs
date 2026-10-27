@@ -41,14 +41,14 @@ partial struct encBuffer {
     internal array<byte> scratch = new(64);
 }
 
-[GoLazy] partial class lazyᴛencBufferPool { internal static ж<sync.Pool> ᏑencBufferPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛencBufferPool { internal static readonly ж<sync.Pool> ᏑencBufferPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var e = @new<encBuffer>();
         e.Value.data = (~e).scratch[0..0];
         return e.OrTypedNil();
     }
 )); }
-internal static ref sync.Pool encBufferPool => ref ᏑencBufferPool.Value;
+internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)ᏑencBufferPool).ValueSlot;
 
 internal static void writeByte(this ref encBuffer e, byte c) {
     e.data = append(e.data, c);

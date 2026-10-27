@@ -25,7 +25,8 @@ internal static uintptr offsetX86HasPOPCNT => /* unsafe.Offsetof(cpu.X86.HasPOPC
 
 // MaxLen is the maximum length of the string to be searched for (argument b) in Index.
 // If MaxLen is not 0, make sure MaxLen >= 4.
-public static nint MaxLen;
+public static readonly ж<nint> ᏑMaxLen = new StaticBox<nint>(default(nint));
+public static ref nint MaxLen => ref ((StaticBox<nint>)ᏑMaxLen).ValueSlot;
 
 // PrimeRK is the prime base used in Rabin-Karp algorithm.
 public static UntypedInt PrimeRK => 16777619;

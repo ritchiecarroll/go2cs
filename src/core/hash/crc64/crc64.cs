@@ -28,10 +28,10 @@ public static UntypedInt ECMA => 0xC96C5795D7870F42;
 // Table is a 256-word table representing the polynomial for efficient processing.
 partial struct Table /*[256]uint64*/;
 
-internal static ж<ж<array<Table>>> Ꮡslicing8TableISO = new StaticBox<ж<array<Table>>>(default(ж<array<Table>>));
-internal static ref ж<array<Table>> slicing8TableISO => ref Ꮡslicing8TableISO.ValueSlot;
-internal static ж<ж<array<Table>>> Ꮡslicing8TableECMA = new StaticBox<ж<array<Table>>>(default(ж<array<Table>>));
-internal static ref ж<array<Table>> slicing8TableECMA => ref Ꮡslicing8TableECMA.ValueSlot;
+internal static readonly ж<ж<array<Table>>> Ꮡslicing8TableISO = new StaticBox<ж<array<Table>>>(default(ж<array<Table>>));
+internal static ref ж<array<Table>> slicing8TableISO => ref ((StaticBox<ж<array<Table>>>)Ꮡslicing8TableISO).ValueSlot;
+internal static readonly ж<ж<array<Table>>> Ꮡslicing8TableECMA = new StaticBox<ж<array<Table>>>(default(ж<array<Table>>));
+internal static ref ж<array<Table>> slicing8TableECMA => ref ((StaticBox<ж<array<Table>>>)Ꮡslicing8TableECMA).ValueSlot;
 
 internal static Action buildSlicing8TablesOnce = sync.OnceFunc(buildSlicing8Tables);
 

@@ -174,8 +174,8 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
     }
 }
 
-internal static ж<Δsync.Pool> ᏑbufferPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(New: () => @new<slice<byte>>()));
-internal static ref Δsync.Pool bufferPool => ref ᏑbufferPool.Value;
+internal static readonly ж<Δsync.Pool> ᏑbufferPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(New: () => @new<slice<byte>>()));
+internal static ref Δsync.Pool bufferPool => ref ((StaticBox<Δsync.Pool>)ᏑbufferPool).ValueSlot;
 
 internal static ж<slice<byte>> getBuffer() {
     var p = ᏑbufferPool.Get()._<ж<slice<byte>>>();

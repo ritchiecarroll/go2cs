@@ -48,7 +48,8 @@ partial struct Metaᴛ1 /*dyn*/ {
     // Set to true if we discover a package mapping glitch.
     internal bool hardCodedListNeedsUpdating;
 }
-public static Metaᴛ1 Meta;
+public static readonly ж<Metaᴛ1> ᏑMeta = new StaticBox<Metaᴛ1>(default(Metaᴛ1));
+public static ref Metaᴛ1 Meta => ref ((StaticBox<Metaᴛ1>)ᏑMeta).ValueSlot;
 
 // AddMeta is invoked during package "init" functions by the
 // compiler when compiling for coverage instrumentation; here 'p' is a

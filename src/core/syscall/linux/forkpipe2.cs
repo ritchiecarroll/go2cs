@@ -15,8 +15,8 @@ internal static error forkExecPipe(slice<nint> p) {
 }
 
 // Guard the forking variable.
-internal static ж<Δsync.Mutex> ᏑforkingLock = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
-internal static ref Δsync.Mutex forkingLock => ref ᏑforkingLock.Value;
+internal static readonly ж<Δsync.Mutex> ᏑforkingLock = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
+internal static ref Δsync.Mutex forkingLock => ref ((StaticBox<Δsync.Mutex>)ᏑforkingLock).ValueSlot;
 // Number of goroutines currently forking, and thus the
 // number of goroutines holding a conceptual write lock
 // on ForkLock.

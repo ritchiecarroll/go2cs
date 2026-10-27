@@ -486,23 +486,23 @@ public static void TestDefaultsInArray(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<nint> ᏑtestInt = new StaticBox<nint>(default(nint));
-internal static ref nint testInt => ref ᏑtestInt.Value;
+internal static readonly ж<nint> ᏑtestInt = new StaticBox<nint>(default(nint));
+internal static ref nint testInt => ref ((StaticBox<nint>)ᏑtestInt).ValueSlot;
 
-internal static ж<float32> ᏑtestFloat32 = new StaticBox<float32>(default(float32));
-internal static ref float32 testFloat32 => ref ᏑtestFloat32.Value;
+internal static readonly ж<float32> ᏑtestFloat32 = new StaticBox<float32>(default(float32));
+internal static ref float32 testFloat32 => ref ((StaticBox<float32>)ᏑtestFloat32).ValueSlot;
 
-internal static ж<@string> ᏑtestString = new StaticBox<@string>(default(@string));
-internal static ref @string testString => ref ᏑtestString.Value;
+internal static readonly ж<@string> ᏑtestString = new StaticBox<@string>(default(@string));
+internal static ref @string testString => ref ((StaticBox<@string>)ᏑtestString).ValueSlot;
 
-internal static ж<slice<@string>> ᏑtestSlice = new StaticBox<slice<@string>>(default(slice<@string>));
-internal static ref slice<@string> testSlice => ref ᏑtestSlice.ValueSlot;
+internal static readonly ж<slice<@string>> ᏑtestSlice = new StaticBox<slice<@string>>(default(slice<@string>));
+internal static ref slice<@string> testSlice => ref ((StaticBox<slice<@string>>)ᏑtestSlice).ValueSlot;
 
-internal static ж<map<@string, nint>> ᏑtestMap = new StaticBox<map<@string, nint>>(default(map<@string, nint>));
-internal static ref map<@string, nint> testMap => ref ᏑtestMap.ValueSlot;
+internal static readonly ж<map<@string, nint>> ᏑtestMap = new StaticBox<map<@string, nint>>(default(map<@string, nint>));
+internal static ref map<@string, nint> testMap => ref ((StaticBox<map<@string, nint>>)ᏑtestMap).ValueSlot;
 
-internal static ж<array<nint>> ᏑtestArray = new StaticBox<array<nint>>(new array<nint>(7));
-internal static ref array<nint> testArray => ref ᏑtestArray.Value;
+internal static readonly ж<array<nint>> ᏑtestArray = new StaticBox<array<nint>>(new array<nint>(7));
+internal static ref array<nint> testArray => ref ((StaticBox<array<nint>>)ᏑtestArray).ValueSlot;
 
 public partial struct SingleTest {
     internal any @in;

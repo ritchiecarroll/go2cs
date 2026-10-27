@@ -74,7 +74,7 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABUogoKmgoKogoKmgoKsogABFAACEJQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AIMC8gOCgoIAFCSCgoKCgoKClJSClIKCgpSkgpSkpIKmgoKClKaCgoKCuMaCgqaCgqaCgqY=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AIsC8gOCgoIAFCSCgoKCgoKClJSClIKCgpSkgpSkpIKmgoKClKaCgoKCuMaCgqaCgqaCgqY=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_darwin_x86.go", "cpu_darwin_x86.cs", "AAg2ABICqJKCgoKmgoKCgpS0goLGtMaClA==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_x86.go", "cpu_x86.cs", "AAwaggAyZoSUlIKmgpSCgoKCgoKCgoKClKSClJSUpriUgqaCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgoKCgqaCgqaCgoKUgoKCyoI=")]

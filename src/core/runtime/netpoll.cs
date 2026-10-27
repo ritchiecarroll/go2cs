@@ -201,15 +201,15 @@ partial struct pollCache {
 // after the descriptor is closed/reused.
 // Stale notifications are detected using seq variable,
 // seq is incremented when deadlines are changed or descriptor is reused.
-internal static ж<mutex> ᏑnetpollInitLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex netpollInitLock => ref ᏑnetpollInitLock.Value;
-internal static ж<atomic.Uint32> ᏑnetpollInited = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 netpollInited => ref ᏑnetpollInited.Value;
+internal static readonly ж<mutex> ᏑnetpollInitLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex netpollInitLock => ref ((StaticBox<mutex>)ᏑnetpollInitLock).ValueSlot;
+internal static readonly ж<atomic.Uint32> ᏑnetpollInited = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 netpollInited => ref ((StaticBox<atomic.Uint32>)ᏑnetpollInited).ValueSlot;
 
-internal static ж<pollCache> Ꮡpollcache = new StaticBox<pollCache>(new pollCache());
-internal static ref pollCache pollcache => ref Ꮡpollcache.Value;
-public static ж<atomic.Uint32> ᏑnetpollWaiters = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-public static ref atomic.Uint32 netpollWaiters => ref ᏑnetpollWaiters.Value;
+internal static readonly ж<pollCache> Ꮡpollcache = new StaticBox<pollCache>(new pollCache());
+internal static ref pollCache pollcache => ref ((StaticBox<pollCache>)Ꮡpollcache).ValueSlot;
+public static readonly ж<atomic.Uint32> ᏑnetpollWaiters = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+public static ref atomic.Uint32 netpollWaiters => ref ((StaticBox<atomic.Uint32>)ᏑnetpollWaiters).ValueSlot;
 
 // netpollWaiters is accessed in tests
 //go:linkname netpollWaiters
@@ -767,8 +767,8 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     return i;
 }
 
-internal static ж<any> ᏑpdEface = new StaticBox<any>(((ж<pollDesc>)nil));
-internal static ref any pdEface => ref ᏑpdEface.ValueSlot;
+internal static readonly ж<any> ᏑpdEface = new StaticBox<any>(((ж<pollDesc>)nil));
+internal static ref any pdEface => ref ((StaticBox<any>)ᏑpdEface).ValueSlot;
 internal static ж<_type> pdType = (~efaceOf(ᏑpdEface))._type;
 
 } // end runtime_package

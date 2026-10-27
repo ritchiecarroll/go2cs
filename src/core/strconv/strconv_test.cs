@@ -94,7 +94,8 @@ partial struct Sinkᴛ1 /*dyn*/ {
     public error Error;
     public slice<byte> Bytes;
 }
-public static Sinkᴛ1 Sink;
+public static readonly ж<Sinkᴛ1> ᏑSink = new StaticBox<Sinkᴛ1>(default(Sinkᴛ1));
+public static ref Sinkᴛ1 Sink => ref ((StaticBox<Sinkᴛ1>)ᏑSink).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string atoiˢ = "Atoi"u8;

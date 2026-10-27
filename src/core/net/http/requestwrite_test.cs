@@ -32,7 +32,7 @@ internal partial struct reqWriteTest {
     public error WantError; // wanted error from Request.Write
 }
 
-internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBox<slice<reqWriteTest>>(new slice<reqWriteTest>(27){
+internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBox<slice<reqWriteTest>>(new slice<reqWriteTest>(27){
     // HTTP/1.1 => chunked coding; no body; no trailer
     [0] = new(
         Req: new Request(
@@ -491,7 +491,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBox<slice<r
         WantProxy: "PATCH / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n\r\n"u8
     )
 });
-internal static ref slice<reqWriteTest> reqWriteTests => ref ᏑreqWriteTests.ValueSlot;
+internal static ref slice<reqWriteTest> reqWriteTests => ref ((StaticBox<slice<reqWriteTest>>)ᏑreqWriteTests).ValueSlot;
 
 public static void TestRequestWrite(ж<testing.T> Ꮡt) {
     foreach (var i in range(reqWriteTests)) {

@@ -1238,27 +1238,27 @@ internal static array<bool> ΔisIdleInSynctest = new golib.SparseArray<bool>{
 }.array(47);
 
 // Linked-list of all Ms. Written under sched.lock, read atomically.
-internal static ж<ж<m>> Ꮡallm = new StaticBox<ж<m>>(default(ж<m>));
-internal static ref ж<m> allm => ref Ꮡallm.ValueSlot;
+internal static readonly ж<ж<m>> Ꮡallm = new StaticBox<ж<m>>(default(ж<m>));
+internal static ref ж<m> allm => ref ((StaticBox<ж<m>>)Ꮡallm).ValueSlot;
 
-internal static ж<int32> Ꮡgomaxprocs = new StaticBox<int32>(default(int32));
-internal static ref int32 gomaxprocs => ref Ꮡgomaxprocs.Value;
+internal static readonly ж<int32> Ꮡgomaxprocs = new StaticBox<int32>(default(int32));
+internal static ref int32 gomaxprocs => ref ((StaticBox<int32>)Ꮡgomaxprocs).ValueSlot;
 internal static int32 numCPUStartup;
-internal static ж<forcegcstate> Ꮡforcegc = new StaticBox<forcegcstate>(new forcegcstate());
-internal static ref forcegcstate forcegc => ref Ꮡforcegc.Value;
-internal static ж<schedt> Ꮡsched = new StaticBox<schedt>(new schedt());
-internal static ref schedt sched => ref Ꮡsched.Value;
+internal static readonly ж<forcegcstate> Ꮡforcegc = new StaticBox<forcegcstate>(new forcegcstate());
+internal static ref forcegcstate forcegc => ref ((StaticBox<forcegcstate>)Ꮡforcegc).ValueSlot;
+internal static readonly ж<schedt> Ꮡsched = new StaticBox<schedt>(new schedt());
+internal static ref schedt sched => ref ((StaticBox<schedt>)Ꮡsched).ValueSlot;
 internal static int32 newprocs;
 
 // allpLock protects P-less reads and size changes of allp, idlepMask,
 // and timerpMask, and all writes to allp.
-internal static ж<mutex> ᏑallpLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex allpLock => ref ᏑallpLock.Value;
+internal static readonly ж<mutex> ᏑallpLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex allpLock => ref ((StaticBox<mutex>)ᏑallpLock).ValueSlot;
 
 // len(allp) == gomaxprocs; may change at safe points, otherwise
 // immutable.
-internal static ж<slice<ж<Δp>>> Ꮡallp = new StaticBox<slice<ж<Δp>>>(default(slice<ж<Δp>>));
-internal static ref slice<ж<Δp>> allp => ref Ꮡallp.ValueSlot;
+internal static readonly ж<slice<ж<Δp>>> Ꮡallp = new StaticBox<slice<ж<Δp>>>(default(slice<ж<Δp>>));
+internal static ref slice<ж<Δp>> allp => ref ((StaticBox<slice<ж<Δp>>>)Ꮡallp).ValueSlot;
 
 // Bitmask of Ps in _Pidle list, one bit per P. Reads and writes must
 // be atomic. Length may change at safe points.
@@ -1306,8 +1306,8 @@ internal static pMask timerpMask;
 
 // Pool of GC parked background workers. Entries are type
 // *gcBgMarkWorkerNode.
-internal static ж<lfstack> ᏑgcBgMarkWorkerPool = new StaticBox<lfstack>(default(lfstack));
-internal static ref lfstack gcBgMarkWorkerPool => ref ᏑgcBgMarkWorkerPool.Value;
+internal static readonly ж<lfstack> ᏑgcBgMarkWorkerPool = new StaticBox<lfstack>(default(lfstack));
+internal static ref lfstack gcBgMarkWorkerPool => ref ((StaticBox<lfstack>)ᏑgcBgMarkWorkerPool).ValueSlot;
 
 // Total number of gcBgMarkWorker goroutines. Protected by worldsema.
 internal static int32 gcBgMarkWorkerCount;

@@ -3553,7 +3553,8 @@ public static void TestYn(ж<testing.T> Ꮡt) {
     }
 }
 
-public static Func<float64, float64, float64, float64> PortableFMA = FMA;                          // hide call from compiler intrinsic; falls back to portable code
+public static readonly ж<Func<float64, float64, float64, float64>> ᏑPortableFMA = new StaticBox<Func<float64, float64, float64, float64>>(FMA);
+public static ref Func<float64, float64, float64, float64> PortableFMA => ref ((StaticBox<Func<float64, float64, float64, float64>>)ᏑPortableFMA).ValueSlot;                          // hide call from compiler intrinsic; falls back to portable code
 
 public static void TestFMA(ж<testing.T> Ꮡt) {
     foreach (var (_, c) in fmaC) {
@@ -3761,9 +3762,12 @@ public static void TestFloat32Sqrt(ж<testing.T> Ꮡt) {
 // return values of functions measured in the benchmarks.
 // Storing the results in these variables prevents the compiler
 // from completely optimizing the benchmarked functions away.
-public static nint GlobalI;
-public static bool GlobalB;
-public static float64 GlobalF;
+public static readonly ж<nint> ᏑGlobalI = new StaticBox<nint>(default(nint));
+public static ref nint GlobalI => ref ((StaticBox<nint>)ᏑGlobalI).ValueSlot;
+public static readonly ж<bool> ᏑGlobalB = new StaticBox<bool>(default(bool));
+public static ref bool GlobalB => ref ((StaticBox<bool>)ᏑGlobalB).ValueSlot;
+public static readonly ж<float64> ᏑGlobalF = new StaticBox<float64>(default(float64));
+public static ref float64 GlobalF => ref ((StaticBox<float64>)ᏑGlobalF).ValueSlot;
 
 public static void BenchmarkAcos(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

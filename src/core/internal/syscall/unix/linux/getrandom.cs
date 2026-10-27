@@ -18,8 +18,8 @@ partial class unix_package {
     return (ᴛ1, ᴛ2);
 }
 
-internal static ж<atomic.Bool> ᏑgetrandomUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
-internal static ref atomic.Bool getrandomUnsupported => ref ᏑgetrandomUnsupported.Value;
+internal static readonly ж<atomic.Bool> ᏑgetrandomUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
+internal static ref atomic.Bool getrandomUnsupported => ref ((StaticBox<atomic.Bool>)ᏑgetrandomUnsupported).ValueSlot;
 
 // GetRandomFlag is a flag supported by the getrandom system call.
 partial struct GetRandomFlag /*num:uintptr*/;

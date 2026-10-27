@@ -10,7 +10,8 @@ using go.crypto.@internal.fips140deps;
 
 partial class fips140_package {
 
-public static bool Enabled;
+public static readonly ж<bool> ᏑEnabled = new StaticBox<bool>(default(bool));
+public static ref bool Enabled => ref ((StaticBox<bool>)ᏑEnabled).ValueSlot;
 
 internal static bool debug;
 

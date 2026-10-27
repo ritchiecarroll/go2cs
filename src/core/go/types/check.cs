@@ -56,8 +56,8 @@ internal static ж<godebug.Setting> gotypesalias = godebug.New("gotypesalias"u8)
 //	0:        no type checking is occurring
 //	negative: type checking is occurring without _EnableAlias set
 //	positive: type checking is occurring with _EnableAlias set
-internal static ж<int32> Ꮡ_aliasAny = new StaticBox<int32>(default(int32));
-internal static ref int32 _aliasAny => ref Ꮡ_aliasAny.Value;
+internal static readonly ж<int32> Ꮡ_aliasAny = new StaticBox<int32>(default(int32));
+internal static ref int32 _aliasAny => ref ((StaticBox<int32>)Ꮡ_aliasAny).ValueSlot;
 
 internal static bool aliasAny() {
     @string v = gotypesalias.Value();

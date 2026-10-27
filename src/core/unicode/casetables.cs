@@ -9,7 +9,8 @@ namespace go;
 
 partial class unicode_package {
 
-[GoLazy] partial class lazyᴛTurkishCase { public static SpecialCase TurkishCase = _TurkishCase; }
+[GoLazy] partial class lazyᴛTurkishCase { public static readonly ж<SpecialCase> ᏑTurkishCase = new StaticBox<SpecialCase>(_TurkishCase); }
+public static ref SpecialCase TurkishCase => ref ((StaticBox<SpecialCase>)ᏑTurkishCase).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_TurkishCase { internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
     new CaseRange(0x0049, 0x0049, new d(new rune[]{0, 0x131 - 0x49, 0}.array())),
@@ -18,6 +19,7 @@ partial class unicode_package {
     new CaseRange(0x0131, 0x0131, new d(new rune[]{0x49 - 0x131, 0, 0x49 - 0x131}.array()))
 }.slice()); }
 
-[GoLazy] partial class lazyᴛAzeriCase { public static SpecialCase AzeriCase = _TurkishCase; }
+[GoLazy] partial class lazyᴛAzeriCase { public static readonly ж<SpecialCase> ᏑAzeriCase = new StaticBox<SpecialCase>(_TurkishCase); }
+public static ref SpecialCase AzeriCase => ref ((StaticBox<SpecialCase>)ᏑAzeriCase).ValueSlot;
 
 } // end unicode_package

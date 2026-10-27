@@ -317,8 +317,8 @@ public static slice<@string> SrcDirs(this ref Context ctxt) {
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
 // if set, or else the compiled code's GOARCH, GOOS, and GOROOT.
-public static ж<Context> ᏑDefault = new StaticBox<Context>(default(Context));
-public static ref Context Default => ref ᏑDefault.Value;
+public static readonly ж<Context> ᏑDefault = new StaticBox<Context>(default(Context));
+public static ref Context Default => ref ((StaticBox<Context>)ᏑDefault).ValueSlot;
 internal static void initᴛDefault() { Default = defaultContext(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1548,8 +1548,8 @@ public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @strin
     return (info != nil, err);
 }
 
-internal static ж<Package> ᏑdummyPkg = new StaticBox<Package>(default(Package));
-internal static ref Package dummyPkg => ref ᏑdummyPkg.Value;
+internal static readonly ж<Package> ᏑdummyPkg = new StaticBox<Package>(default(Package));
+internal static ref Package dummyPkg => ref ((StaticBox<Package>)ᏑdummyPkg).ValueSlot;
 
 // fileInfo records information learned about a file included in a build.
 partial struct fileInfo {
@@ -2230,7 +2230,8 @@ internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@st
 }
 
 // ToolDir is the directory containing build tools.
-public static @string ToolDir = getToolDir();
+public static readonly ж<@string> ᏑToolDir = new StaticBox<@string>(getToolDir());
+public static ref @string ToolDir => ref ((StaticBox<@string>)ᏑToolDir).ValueSlot;
 
 // IsLocalImport reports whether the import path is
 // a local import path, like ".", "..", "./foo", or "../foo".

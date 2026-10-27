@@ -62,8 +62,8 @@ internal static map<@string, nint> protocols = new map<@string, nint>{
 
 // dnsWaitGroup can be used by tests to wait for all DNS goroutines to
 // complete. This avoids races on the test hooks.
-internal static ж<Δsync.WaitGroup> ᏑdnsWaitGroup = new StaticBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
-internal static ref Δsync.WaitGroup dnsWaitGroup => ref ᏑdnsWaitGroup.Value;
+internal static readonly ж<Δsync.WaitGroup> ᏑdnsWaitGroup = new StaticBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
+internal static ref Δsync.WaitGroup dnsWaitGroup => ref ((StaticBox<Δsync.WaitGroup>)ᏑdnsWaitGroup).ValueSlot;
 
 internal const nint maxProtoLength = /* len("RSVP-E2E-IGNORE") + 10 */ 25; // with room to grow
 
@@ -139,8 +139,8 @@ internal static byte ipVersion(@string network) {
 
 // DefaultResolver is the resolver used by the package-level Lookup
 // functions and by Dialers without a specified Resolver.
-public static ж<ж<Resolver>> ᏑDefaultResolver = new StaticBox<ж<Resolver>>(Ꮡ(new Resolver(nil)));
-public static ref ж<Resolver> DefaultResolver => ref ᏑDefaultResolver.ValueSlot;
+public static readonly ж<ж<Resolver>> ᏑDefaultResolver = new StaticBox<ж<Resolver>>(Ꮡ(new Resolver(nil)));
+public static ref ж<Resolver> DefaultResolver => ref ((StaticBox<ж<Resolver>>)ᏑDefaultResolver).ValueSlot;
 
 // A Resolver looks up names and numbers.
 //

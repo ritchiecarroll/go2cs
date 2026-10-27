@@ -1318,17 +1318,17 @@ internal static void printPreFatalDeferPanic(ж<_panic> Ꮡp) {
 
 // runningPanicDefers is non-zero while running deferred functions for panic.
 // This is used to try hard to get a panic stack trace out when exiting.
-internal static ж<atomic.Uint32> ᏑrunningPanicDefers = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 runningPanicDefers => ref ᏑrunningPanicDefers.Value;
+internal static readonly ж<atomic.Uint32> ᏑrunningPanicDefers = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 runningPanicDefers => ref ((StaticBox<atomic.Uint32>)ᏑrunningPanicDefers).ValueSlot;
 
 // panicking is non-zero when crashing the program for an unrecovered panic.
-internal static ж<atomic.Uint32> Ꮡpanicking = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 panicking => ref Ꮡpanicking.Value;
+internal static readonly ж<atomic.Uint32> Ꮡpanicking = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 panicking => ref ((StaticBox<atomic.Uint32>)Ꮡpanicking).ValueSlot;
 
 // paniclk is held while printing the panic information and stack trace,
 // so that two concurrent panics don't overlap their output.
-internal static ж<mutex> Ꮡpaniclk = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex paniclk => ref Ꮡpaniclk.Value;
+internal static readonly ж<mutex> Ꮡpaniclk = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex paniclk => ref ((StaticBox<mutex>)Ꮡpaniclk).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noDeferreturnˢ = "no deferreturn"u8;
@@ -1622,8 +1622,8 @@ internal static bool startpanic_m() {
 
 internal static bool didothers;
 
-internal static ж<mutex> Ꮡdeadlock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex deadlock => ref Ꮡdeadlock.Value;
+internal static readonly ж<mutex> Ꮡdeadlock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex deadlock => ref ((StaticBox<mutex>)Ꮡdeadlock).ValueSlot;
 
 // gp is the crashing g running on this M, but may be a user G, while getg() is
 // always g0.

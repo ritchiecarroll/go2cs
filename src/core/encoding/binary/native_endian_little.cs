@@ -11,6 +11,7 @@ public partial struct nativeEndian {
 }
 
 // NativeEndian is the native-endian implementation of [ByteOrder] and [AppendByteOrder].
-public static nativeEndian NativeEndian = new(nil);
+public static readonly ж<nativeEndian> ᏑNativeEndian = new StaticBox<nativeEndian>(new nativeEndian(nil));
+public static ref nativeEndian NativeEndian => ref ((StaticBox<nativeEndian>)ᏑNativeEndian).ValueSlot;
 
 } // end binary_package

@@ -245,8 +245,8 @@ public static void TestPKIXMismatchPublicKeyFormat(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<ж<rsa.PrivateKey>> ᏑtestPrivateKey = new StaticBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
-internal static ref ж<rsa.PrivateKey> testPrivateKey => ref ᏑtestPrivateKey.ValueSlot;
+internal static readonly ж<ж<rsa.PrivateKey>> ᏑtestPrivateKey = new StaticBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
+internal static ref ж<rsa.PrivateKey> testPrivateKey => ref ((StaticBox<ж<rsa.PrivateKey>>)ᏑtestPrivateKey).ValueSlot;
 
 [GoInit] internal static void init() {
     var (block, _) = pem.Decode(slice<byte>(pemPrivateKey));

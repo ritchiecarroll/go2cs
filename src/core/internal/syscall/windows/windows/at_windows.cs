@@ -197,7 +197,8 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
 
 // TestOpenatFallback should only be used for testing purposes.
 // When set, Openat simulates a system that does not support OBJ_DONT_REPARSE.
-public static bool TestOpenatFallback;
+public static readonly ж<bool> ᏑTestOpenatFallback = new StaticBox<bool>(default(bool));
+public static ref bool TestOpenatFallback => ref ((StaticBox<bool>)ᏑTestOpenatFallback).ValueSlot;
 
 // openatFallback implements O_NOFOLLOW_ANY for a single path component on
 // Windows versions that do not support OBJ_DONT_REPARSE (including Windows 10
@@ -418,7 +419,8 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
 
 // TestDeleteatFallback should only be used for testing purposes.
 // When set, [Deleteat] uses the fallback path unconditionally.
-public static bool TestDeleteatFallback;
+public static readonly ж<bool> ᏑTestDeleteatFallback = new StaticBox<bool>(default(bool));
+public static ref bool TestDeleteatFallback => ref ((StaticBox<bool>)ᏑTestDeleteatFallback).ValueSlot;
 
 // deleteatFallback is a deleteat implementation that strives
 // for compatibility with older Windows versions and file systems

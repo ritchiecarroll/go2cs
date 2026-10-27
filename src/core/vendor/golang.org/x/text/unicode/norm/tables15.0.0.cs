@@ -6976,8 +6976,8 @@ internal static uint16 lookupValue(this ref nfkcTrie t, uint32 n, byte b) {
 // recompMap: 7528 bytes (entries only)
 internal static map<uint32, rune> recompMap;
 
-internal static ж<sync.Once> ᏑrecompMapOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once recompMapOnce => ref ᏑrecompMapOnce.Value;
+internal static readonly ж<sync.Once> ᏑrecompMapOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once recompMapOnce => ref ((StaticBox<sync.Once>)ᏑrecompMapOnce).ValueSlot;
 
 internal static readonly @string recompMapPacked = ((@string)(new byte[]{
     0x00, 0x41, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc0, // 0x00410300: 0x000000C0

@@ -38,7 +38,7 @@ using static go.fmt_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("fmt/export_test.go", "export_test.cs", "AAoOkg==")]
+[assembly: go.GoPositionMap("fmt/export_test.go", "export_test.cs", "AAsOkg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

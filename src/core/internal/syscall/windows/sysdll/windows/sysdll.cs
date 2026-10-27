@@ -20,7 +20,8 @@ partial class sysdll_package {
 //
 // It has no associated mutex and should only be mutated serially
 // (currently: during init), and not concurrent with DLL loading.
-public static map<@string, bool> IsSystemDLL = new map<@string, bool>{};
+public static readonly ж<map<@string, bool>> ᏑIsSystemDLL = new StaticBox<map<@string, bool>>(new map<@string, bool>{});
+public static ref map<@string, bool> IsSystemDLL => ref ((StaticBox<map<@string, bool>>)ᏑIsSystemDLL).ValueSlot;
 
 // Add notes that dll is a system32 DLL which should only be loaded
 // from the Windows SYSTEM32 directory. It returns its argument back,

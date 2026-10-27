@@ -208,8 +208,8 @@ internal static void initᴛtestHeader() { testHeader = new ΔHeader(new map<@st
     ["Server"u8] = new @string[]{DefaultUserAgent}.slice()
 }); }
 
-internal static ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
-internal static ref bytes.Buffer buf => ref Ꮡbuf.Value;
+internal static readonly ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ref bytes.Buffer buf => ref ((StaticBox<bytes.Buffer>)Ꮡbuf).ValueSlot;
 
 public static void BenchmarkHeaderWriteSubset(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

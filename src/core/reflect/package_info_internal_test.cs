@@ -136,7 +136,7 @@ using static go.reflect_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeABICgoKClKaCgqaCuIKClJSCgriCgoKCgqbmooKCgoKCgqa2/OyUgpSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSUlIKC", "51-56:1")]
+[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeABICgoKClKaCgqaCuIKClJSCgriCgoKCgqbmooKCgoKCgqa2AAgM7JSClIKClIKCgpQACRyC7oKmwoKCgoKCgoKmpKSkgoI=", "51-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

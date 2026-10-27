@@ -81,7 +81,7 @@ using static go.image.color_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKAgqSCpoKAgqSCpoKAgqSCgpSCpoKCgqaCgIKkgoKUgqaCgoKmgoCCpIKmgoCCpIKmgoCCpAAJFJSmgoCCpO6U3pKClKrGgpKCgoKCgpSmrgAaLoK6goKC")]
+[assembly: go.GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKAgqSCpoKAgqSCpoKAgqSCgpSCpoKCgqaCgIKkgoKUgqaCgoKmgoCCpIKmgoCCpIKmgoCCpAAJFJSmgoCCpO6U3pKClKrGgpKCgoKCgpSmrgAaLoK6kpKS")]
 [assembly: go.GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAcQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABEkABEkgoIADBqCgpSmgoKUpoKClKa4lIKAgqSCggAJFJSCggAMGoKClKaCgpSmgoKUuILKlIKUpJSmgoKCpoKokoKCgoKClIKUgpSCgoKokoKCgoIACha4goKCgriUgoCCpIKC")]
 // </GoSourcePositionMaps>
 

@@ -53,7 +53,8 @@ partial class coverage_package {
 // will be in the meta-data blobs themselves).
 
 // CovMetaMagic holds the magic string for a meta-data file.
-public static array<byte> CovMetaMagic = new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x76', (rune)'\x6d'}.array();
+public static readonly ж<array<byte>> ᏑCovMetaMagic = new StaticBox<array<byte>>(new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x76', (rune)'\x6d'}.array());
+public static ref array<byte> CovMetaMagic => ref ((StaticBox<array<byte>>)ᏑCovMetaMagic).ValueSlot;
 
 // MetaFilePref is a prefix used when emitting meta-data files; these
 // files are of the form "covmeta.<hash>", where hash is a hash
@@ -301,7 +302,8 @@ partial struct MetaFileCollection {
 // run of a give binary) followed by a footer.
 
 // CovCounterMagic holds the magic string for a coverage counter-data file.
-public static array<byte> CovCounterMagic = new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x77', (rune)'\x6d'}.array();
+public static readonly ж<array<byte>> ᏑCovCounterMagic = new StaticBox<array<byte>>(new byte[]{(rune)'\x00', (rune)'\x63', (rune)'\x77', (rune)'\x6d'}.array());
+public static ref array<byte> CovCounterMagic => ref ((StaticBox<array<byte>>)ᏑCovCounterMagic).ValueSlot;
 
 // CounterFileVersion stores the most recent counter data file version.
 public static UntypedInt CounterFileVersion => 1;

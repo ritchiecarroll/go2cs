@@ -1726,7 +1726,8 @@ internal static bool isNameString(@string s) {
 // standard HTML entity characters.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-[GoLazy] partial class lazyᴛHTMLEntity { public static map<@string, @string> HTMLEntity = htmlEntity; }
+[GoLazy] partial class lazyᴛHTMLEntity { public static readonly ж<map<@string, @string>> ᏑHTMLEntity = new StaticBox<map<@string, @string>>(htmlEntity); }
+public static ref map<@string, @string> HTMLEntity => ref ((StaticBox<map<@string, @string>>)ᏑHTMLEntity).ValueSlot;
 
 [GoLazy] partial class lazyᴛhtmlEntity { internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     /*
@@ -1995,7 +1996,8 @@ internal static bool isNameString(@string s) {
 // should be considered to close automatically.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-public static slice<@string> HTMLAutoClose;
+public static readonly ж<slice<@string>> ᏑHTMLAutoClose = new StaticBox<slice<@string>>(default(slice<@string>));
+public static ref slice<@string> HTMLAutoClose => ref ((StaticBox<slice<@string>>)ᏑHTMLAutoClose).ValueSlot;
 internal static void initᴛHTMLAutoClose() { HTMLAutoClose = htmlAutoClose; }
 
 internal static slice<@string> htmlAutoClose = new @string[]{

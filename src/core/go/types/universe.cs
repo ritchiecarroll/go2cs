@@ -36,7 +36,7 @@ internal static Object universeComparable;
 // The *Basic type for Typ[Byte] will have the name "uint8".
 // Use Universe.Lookup("byte").Type() to obtain the specific
 // alias basic type named "byte" (and analogous for "rune").
-[GoLazy] partial class lazyᴛTyp { public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
+[GoLazy] partial class lazyᴛTyp { public static readonly ж<slice<ж<Basic>>> ᏑTyp = new StaticBox<slice<ж<Basic>>>(new golib.SparseArray<ж<Basic>>{
     [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type"u8)),
 
     [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool"u8)),
@@ -65,7 +65,8 @@ internal static Object universeComparable;
     [(int)ΔUntypedComplex] = Ꮡ(new Basic(ΔUntypedComplex, (BasicInfo)(IsComplex | IsUntyped), "untyped complex"u8)),
     [(int)UntypedString] = Ꮡ(new Basic(UntypedString, (BasicInfo)(IsString | IsUntyped), "untyped string"u8)),
     [(int)UntypedNil] = Ꮡ(new Basic(UntypedNil, IsUntyped, "untyped nil"u8))
-}.slice(); }
+}.slice()); }
+public static ref slice<ж<Basic>> Typ => ref ((StaticBox<slice<ж<Basic>>>)ᏑTyp).ValueSlot;
 
 internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
     Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte"u8)),

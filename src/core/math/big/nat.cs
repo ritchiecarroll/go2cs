@@ -305,8 +305,8 @@ partial struct stack {
     internal slice<Word> w;
 }
 
-internal static ж<sync.Pool> ᏑstackPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool stackPool => ref ᏑstackPool.Value;
+internal static readonly ж<sync.Pool> ᏑstackPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool stackPool => ref ((StaticBox<sync.Pool>)ᏑstackPool).ValueSlot;
 
 // getStack returns a temporary stack.
 // The caller must call [stack.free] to give up use of the stack when finished.

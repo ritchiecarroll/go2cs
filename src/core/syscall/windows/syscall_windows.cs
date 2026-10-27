@@ -146,8 +146,8 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
     return formatMessage(flags, (uintptr)msgsrc, msgid, langid, buf, Ꮡargs);
 }
 
-internal static ж<Δsync.Map> ᏑerrnoErrorCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map errnoErrorCache => ref ᏑerrnoErrorCache.Value;
+internal static readonly ж<Δsync.Map> ᏑerrnoErrorCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
+internal static ref Δsync.Map errnoErrorCache => ref ((StaticBox<Δsync.Map>)ᏑerrnoErrorCache).ValueSlot;
 
 public static @string Error(this Errno e) {
     // deal with special go errors
@@ -555,8 +555,8 @@ public static error WriteFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж
     return err;
 }
 
-internal static ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
-internal static ref int64 ioSync => ref ᏑioSync.Value;
+internal static readonly ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
+internal static ref int64 ioSync => ref ((StaticBox<int64>)ᏑioSync).ValueSlot;
 
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
@@ -609,11 +609,14 @@ public static error /*err*/ Close(ΔHandle fd) {
     return CloseHandle(fd);
 }
 
-public static ΔHandle Stdin;
+public static readonly ж<ΔHandle> ᏑStdin = new StaticBox<ΔHandle>(default(ΔHandle));
+public static ref ΔHandle Stdin => ref ((StaticBox<ΔHandle>)ᏑStdin).ValueSlot;
 internal static void initᴛStdin() { Stdin = getStdHandle(STD_INPUT_HANDLE); }
-public static ΔHandle Stdout;
+public static readonly ж<ΔHandle> ᏑStdout = new StaticBox<ΔHandle>(default(ΔHandle));
+public static ref ΔHandle Stdout => ref ((StaticBox<ΔHandle>)ᏑStdout).ValueSlot;
 internal static void initᴛStdout() { Stdout = getStdHandle(STD_OUTPUT_HANDLE); }
-public static ΔHandle Stderr;
+public static readonly ж<ΔHandle> ᏑStderr = new StaticBox<ΔHandle>(default(ΔHandle));
+public static ref ΔHandle Stderr => ref ((StaticBox<ΔHandle>)ᏑStderr).ValueSlot;
 internal static void initᴛStderr() { Stderr = getStdHandle(STD_ERROR_HANDLE); }
 
 internal static ΔHandle /*fd*/ getStdHandle(nint h) {
@@ -882,7 +885,8 @@ internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uin
 
 // For testing: clients can set this flag to force
 // creation of IPv6 sockets to return [EAFNOSUPPORT].
-public static bool SocketDisableIPv6;
+public static readonly ж<bool> ᏑSocketDisableIPv6 = new StaticBox<bool>(default(bool));
+public static ref bool SocketDisableIPv6 => ref ((StaticBox<bool>)ᏑSocketDisableIPv6).ValueSlot;
 
 partial struct RawSockaddrInet4 {
     public uint16 Family;
@@ -1075,8 +1079,8 @@ partial struct connectExFuncᴛ1 /*dyn*/ {
     internal uintptr addr;
     internal error err;
 }
-internal static ж<connectExFuncᴛ1> ᏑconnectExFunc = new StaticBox<connectExFuncᴛ1>(default(connectExFuncᴛ1));
-internal static ref connectExFuncᴛ1 connectExFunc => ref ᏑconnectExFunc.Value;
+internal static readonly ж<connectExFuncᴛ1> ᏑconnectExFunc = new StaticBox<connectExFuncᴛ1>(default(connectExFuncᴛ1));
+internal static ref connectExFuncᴛ1 connectExFunc => ref ((StaticBox<connectExFuncᴛ1>)ᏑconnectExFunc).ValueSlot;
 
 // go2cs generated this placeholder — func LoadConnectEx is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

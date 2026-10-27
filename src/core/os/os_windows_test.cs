@@ -1998,8 +1998,8 @@ internal static Func<@string> currentProcess = Δsync.OnceValue(@string () => {
     return strconv.FormatUint((uint64)Δos.Getpid(), 10);
 });
 
-internal static ж<atomic.Uint64> ᏑpipeCounter = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 pipeCounter => ref ᏑpipeCounter.Value;
+internal static readonly ж<atomic.Uint64> ᏑpipeCounter = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ref atomic.Uint64 pipeCounter => ref ((StaticBox<atomic.Uint64>)ᏑpipeCounter).ValueSlot;
 
 internal static ж<Δos.File> newBytePipe(Δtesting.TB t, @string name, bool overlapped) {
     return newPipe(t, name, false, overlapped);

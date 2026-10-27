@@ -226,8 +226,8 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
 // so matchPool[0] has 16*2*128 = 4kB queues, etc.
 // The final matchPool is a catch-all for very large queues.
 internal static array<nint> matchSize = new nint[]{128, 512, 2048, 16384, 0}.array();
-internal static ж<array<Δsync.Pool>> ᏑmatchPool = new StaticBox<array<Δsync.Pool>>(new array<Δsync.Pool>(5));
-internal static ref array<Δsync.Pool> matchPool => ref ᏑmatchPool.Value;
+internal static readonly ж<array<Δsync.Pool>> ᏑmatchPool = new StaticBox<array<Δsync.Pool>>(new array<Δsync.Pool>(5));
+internal static ref array<Δsync.Pool> matchPool => ref ((StaticBox<array<Δsync.Pool>>)ᏑmatchPool).ValueSlot;
 
 // get returns a machine to use for matching re.
 // It uses the re's machine cache if possible, to avoid

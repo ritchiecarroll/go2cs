@@ -11,6 +11,7 @@ partial class internal_package {
 // output function.
 // It allows slog.defaultHandler to call into an unexported function of
 // the log package.
-public static Func<uintptr, slice<byte>, error> DefaultOutput;
+public static readonly ж<Func<uintptr, slice<byte>, error>> ᏑDefaultOutput = new StaticBox<Func<uintptr, slice<byte>, error>>(default(Func<uintptr, slice<byte>, error>));
+public static ref Func<uintptr, slice<byte>, error> DefaultOutput => ref ((StaticBox<Func<uintptr, slice<byte>, error>>)ᏑDefaultOutput).ValueSlot;
 
 } // end internal_package

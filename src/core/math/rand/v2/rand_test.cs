@@ -522,8 +522,8 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
 }
 
 // Benchmarks
-public static ж<uint64> ᏑSink = new StaticBox<uint64>(default(uint64));
-public static ref uint64 Sink => ref ᏑSink.Value;
+public static readonly ж<uint64> ᏑSink = new StaticBox<uint64>(default(uint64));
+public static ref uint64 Sink => ref ((StaticBox<uint64>)ᏑSink).ValueSlot;
 
 internal static ж<rand.Rand> testRand() {
     return New(new rand.PCGжSource(NewPCG(1, 2)));
@@ -591,7 +591,8 @@ public static void BenchmarkInt64(ж<testing.B> Ꮡb) {
     Sink = (uint64)t;
 }
 
-public static bool AlwaysFalse = false;
+public static readonly ж<bool> ᏑAlwaysFalse = new StaticBox<bool>(false);
+public static ref bool AlwaysFalse => ref ((StaticBox<bool>)ᏑAlwaysFalse).ValueSlot;
 
 internal static T keep<T>(T x)
     where T : /* int | uint | int32 | uint32 | int64 | uint64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

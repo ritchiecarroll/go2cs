@@ -128,8 +128,8 @@ public static void TestHandlers(ж<testing.T> Ꮡt) {
     }
 }
 
-public static ж<uint32> ᏑSink = new StaticBox<uint32>(default(uint32));
-public static ref uint32 Sink => ref ᏑSink.Value;
+public static readonly ж<uint32> ᏑSink = new StaticBox<uint32>(default(uint32));
+public static ref uint32 Sink => ref ((StaticBox<uint32>)ᏑSink).ValueSlot;
 
 internal static void mutexHog1(ж<sync.Mutex> Ꮡmu1, ж<sync.Mutex> Ꮡmu2, time.Time start, time.Duration dt) {
     atomic.AddUint32(ᏑSink, 1);

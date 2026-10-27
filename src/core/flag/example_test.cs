@@ -20,8 +20,8 @@ internal static ж<@string> species = flag.String("species"u8, "gopher"u8, "the 
 // Example 2: Two flags sharing a variable, so we can have a shorthand.
 // The order of initialization is undefined, so make sure both use the
 // same default value. They must be set up with an init function.
-internal static ж<@string> ᏑgopherType = new StaticBox<@string>(default(@string));
-internal static ref @string gopherType => ref ᏑgopherType.Value;
+internal static readonly ж<@string> ᏑgopherType = new StaticBox<@string>(default(@string));
+internal static ref @string gopherType => ref ((StaticBox<@string>)ᏑgopherType).ValueSlot;
 
 [GoInit] internal static void init() {
     @string defaultGopher = "pocket"u8;
@@ -67,8 +67,8 @@ internal static error ΔSet(this ref interval i, @string value) {
 // Define a flag to accumulate durations. Because it has a special type,
 // we need to use the Var function and therefore create the flag during
 // init.
-internal static ж<interval> ᏑintervalFlag = new StaticBox<interval>(default(interval));
-internal static ref interval intervalFlag => ref ᏑintervalFlag.ValueSlot;
+internal static readonly ж<interval> ᏑintervalFlag = new StaticBox<interval>(default(interval));
+internal static ref interval intervalFlag => ref ((StaticBox<interval>)ᏑintervalFlag).ValueSlot;
 
 [GoInit] internal static void initΔ1() {
     // Tie the command-line flag to the intervalFlag variable and

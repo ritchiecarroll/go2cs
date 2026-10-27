@@ -55,7 +55,7 @@ using static go.@internal.runtime.gc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/gc/sizeclasses.go", "sizeclasses.cs", "AF7EAZKSkpI=")]
+[assembly: go.GoPositionMap("internal/runtime/gc/sizeclasses.go", "sizeclasses.cs", "AF7EAaKioqI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

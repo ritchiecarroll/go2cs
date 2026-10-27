@@ -107,7 +107,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/path_unix.go", "path_unix.cs", "AAsekqikpoKmpoK4poKCgpSUgrg=")]
 [assembly: go.GoPositionMap("os/pidfd_linux.go", "pidfd_linux.cs", "ABg60oKmlIK4gpKCpqqigqaCgoKClJSokoKmgoKU2gAMEILKpJSUmIaCypQACRDCgpSklJTYksgABhIACwaCgsqCgpSmgqamgriAggAIEICCttzKxg==", "107-109:1;171-176:1", "", "123=WaitStatus/1/1/2")]
 [assembly: go.GoPositionMap("os/pipe2_unix.go", "pipe2_unix.cs", "AA0aopSCgqY=")]
-[assembly: go.GoPositionMap("os/proc.go", "proc.cs", "ABAkgpSUprrQqrCqsKqw3MKCAAIQ0rgABxCUpg==")]
+[assembly: go.GoPositionMap("os/proc.go", "proc.cs", "ABEkgpSUprrQqrCqsKqw3MKCAAIQ0rgABxCUpg==")]
 [assembly: go.GoPositionMap("os/rawconn.go", "rawconn.cs", "ABMkgoCCpIKC1oKAgqSCgtaCgIKkgoKmgg==")]
 [assembly: go.GoPositionMap("os/removeall_at.go", "removeall_at.cs", "AA0eoqbKgriCgsqUgsqUgpSUgpSkgIKAgoKkpNaUgoIACBKClJaSgoKmgoKClJSUgJSkgqaClJSCgoKUpoKCgoKAgqSCgu6CAAgSpoLKgoKmgpQAAhYACAKCgpQ=")]
 [assembly: go.GoPositionMap("os/removeall_unix.go", "removeall_unix.cs", "AAgSlA==")]

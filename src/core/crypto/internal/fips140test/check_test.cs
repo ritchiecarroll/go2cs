@@ -164,7 +164,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
             sect(2, staticDataˢ, @unsafe.Pointer.FromPinnedBox(p));
         }
     }
-    sect(3, dataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.DATA)));
+    sect(3, dataˢ, @unsafe.Pointer.FromPinnedBox(checktest.ᏑDATA));
 
     // Check that some symbols are not in FIPS sections.
     void no(@string name, @unsafe.Pointer p, params ꓸꓸꓸnint ixʗp) {
@@ -181,11 +181,11 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
     no(checktestTextˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(checktest.TEXT), 1, 2, 3);
     no(checktestRodataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.RODATA)), 0, 2, 3);
     no(checktestNoptrdataˢ, @unsafe.Pointer.FromPinnedBox(checktest.ᏑNOPTRDATA), 0, 1, 3);
-    no(checktestDataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.DATA)), 0, 1, 2);
+    no(checktestDataˢ, @unsafe.Pointer.FromPinnedBox(checktest.ᏑDATA), 0, 1, 2);
 
     // Check that non-FIPS symbols are not in any of the sections.
     no(fmtPrintfˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(fmt.Printfᶠ), 0, 1, 2, 3); // TEXT
-    no(unicodeCategoriesˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(unicode.Categories)), 0, 1, 2, 3); // BSS
+    no(unicodeCategoriesˢ, @unsafe.Pointer.FromPinnedBox(unicode.ᏑCategories), 0, 1, 2, 3); // BSS
     no(unicodeAsciiHexDigitˢ, @unsafe.Pointer.FromBox(Ꮡ(unicode.ASCII_Hex_Digit)), 0, 1, 2, 3); // DATA
 
     // Check that we have enough data in total.

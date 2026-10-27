@@ -56,7 +56,7 @@ using static go.@internal.runtime.sys_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/runtime/sys/intrinsics.go", "intrinsics.cs", "AAgS7gAKOJKCpqiSggAMGqiSAAQ08oKClIKClIKClAAJFAABKAATAoKCgoKCgqiQppCmkqqigoKCgoKCgoKCgoKCqqKCgoKCgoKCggACEAAHEAAIMgAXBAABKg==")]
-[assembly: go.GoPositionMap("internal/runtime/sys/no_dit.go", "no_dit.cs", "AAoWgKKAog==")]
+[assembly: go.GoPositionMap("internal/runtime/sys/no_dit.go", "no_dit.cs", "AAsWgKKAog==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

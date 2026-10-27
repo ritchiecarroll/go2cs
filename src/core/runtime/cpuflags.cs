@@ -25,8 +25,8 @@ internal static uintptr offsetLOONG64HasLASX => /* unsafe.Offsetof(cpu.Loong64.H
 
 // Set in runtime.cpuinit.
 // TODO: deprecate these; use internal/cpu directly.
-internal static ж<bool> Ꮡx86HasAVX = new StaticBox<bool>(default(bool));
-internal static ref bool x86HasAVX => ref Ꮡx86HasAVX.Value;
+internal static readonly ж<bool> Ꮡx86HasAVX = new StaticBox<bool>(default(bool));
+internal static ref bool x86HasAVX => ref ((StaticBox<bool>)Ꮡx86HasAVX).ValueSlot;
 internal static bool x86HasFMA;
 internal static bool x86HasPOPCNT;
 internal static bool x86HasSSE41;

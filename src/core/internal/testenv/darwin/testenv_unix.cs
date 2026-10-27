@@ -13,7 +13,8 @@ partial class testenv_package {
 
 // Sigquit is the signal to send to kill a hanging subprocess.
 // Send SIGQUIT to get a stack trace.
-public static syscallꓸSignal Sigquit = Δsyscall.SIGQUIT;
+public static readonly ж<syscallꓸSignal> ᏑSigquit = new StaticBox<syscallꓸSignal>(Δsyscall.SIGQUIT);
+public static ref syscallꓸSignal Sigquit => ref ((StaticBox<syscallꓸSignal>)ᏑSigquit).ValueSlot;
 
 internal static bool syscallIsNotSupported(error err) {
     if (err == default!) {

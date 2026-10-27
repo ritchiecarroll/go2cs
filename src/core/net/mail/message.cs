@@ -1014,10 +1014,10 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this
     return (s, false, default!);
 }
 
-[GoLazy] partial class lazyᴛrfc2047Decoder { internal static ж<mime.WordDecoder> Ꮡrfc2047Decoder = new StaticBox<mime.WordDecoder>(new mime.WordDecoder(
+[GoLazy] partial class lazyᴛrfc2047Decoder { internal static readonly ж<mime.WordDecoder> Ꮡrfc2047Decoder = new StaticBox<mime.WordDecoder>(new mime.WordDecoder(
     CharsetReader: (@string charset, io.Reader input) => (default!, ((charsetError)charset))
 )); }
-internal static ref mime.WordDecoder rfc2047Decoder => ref Ꮡrfc2047Decoder.Value;
+internal static ref mime.WordDecoder rfc2047Decoder => ref ((StaticBox<mime.WordDecoder>)Ꮡrfc2047Decoder).ValueSlot;
 
 partial struct charsetError /*@string*/;
 

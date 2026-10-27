@@ -358,8 +358,8 @@ internal static slice<map<typeOff, ж<_type>>> pinnedTypemaps;
 // the relocated one.
 internal static uintptr aixStaticDataBase; // linker symbol
 
-internal static ж<moduledata> Ꮡfirstmoduledata = new StaticBox<moduledata>(new moduledata(nil));
-internal static ref moduledata firstmoduledata => ref Ꮡfirstmoduledata.Value; // linker symbol
+internal static readonly ж<moduledata> Ꮡfirstmoduledata = new StaticBox<moduledata>(new moduledata(nil));
+internal static ref moduledata firstmoduledata => ref ((StaticBox<moduledata>)Ꮡfirstmoduledata).ValueSlot; // linker symbol
 
 // lastmoduledatap should be an internal detail,
 // but widely used packages access it using linkname.
@@ -373,8 +373,8 @@ internal static ref moduledata firstmoduledata => ref Ꮡfirstmoduledata.Value; 
 //go:linkname lastmoduledatap
 internal static ж<moduledata> lastmoduledatap; // linker symbol
 
-internal static ж<ж<slice<ж<moduledata>>>> ᏑmodulesSlice = new StaticBox<ж<slice<ж<moduledata>>>>(default(ж<slice<ж<moduledata>>>));
-internal static ref ж<slice<ж<moduledata>>> modulesSlice => ref ᏑmodulesSlice.ValueSlot;    // see activeModules
+internal static readonly ж<ж<slice<ж<moduledata>>>> ᏑmodulesSlice = new StaticBox<ж<slice<ж<moduledata>>>>(default(ж<slice<ж<moduledata>>>));
+internal static ref ж<slice<ж<moduledata>>> modulesSlice => ref ((StaticBox<ж<slice<ж<moduledata>>>>)ᏑmodulesSlice).ValueSlot;    // see activeModules
 
 // activeModules returns a slice of active modules.
 //

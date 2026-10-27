@@ -21,15 +21,17 @@ internal static UntypedInt pLo => /* pLl | pLu */ 96; // a letter that is neithe
 internal static UntypedInt pLmask => /* pLo */ 96;
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
-[GoLazy] partial class lazyᴛGraphicRanges { public static slice<ж<RangeTable>> GraphicRanges = new ж<RangeTable>[]{
+[GoLazy] partial class lazyᴛGraphicRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑGraphicRanges = new StaticBox<slice<ж<RangeTable>>>(new ж<RangeTable>[]{
     lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial, lazyᴛZs.initial
-}.slice(); }
+}.slice()); }
+public static ref slice<ж<RangeTable>> GraphicRanges => ref ((StaticBox<slice<ж<RangeTable>>>)ᏑGraphicRanges).ValueSlot;
 
 // PrintRanges defines the set of printable characters according to Go.
 // ASCII space, U+0020, is handled separately.
-[GoLazy] partial class lazyᴛPrintRanges { public static slice<ж<RangeTable>> PrintRanges = new ж<RangeTable>[]{
+[GoLazy] partial class lazyᴛPrintRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑPrintRanges = new StaticBox<slice<ж<RangeTable>>>(new ж<RangeTable>[]{
     lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial
-}.slice(); }
+}.slice()); }
+public static ref slice<ж<RangeTable>> PrintRanges => ref ((StaticBox<slice<ж<RangeTable>>>)ᏑPrintRanges).ValueSlot;
 
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode.
 // Such characters include letters, marks, numbers, punctuation, symbols, and

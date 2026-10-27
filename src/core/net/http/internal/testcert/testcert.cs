@@ -13,7 +13,7 @@ partial class testcert_package {
 // "127.0.0.1" and "[::1]", expiring at Jan 29 16:00:00 2084 GMT.
 // generated from src/crypto/tls:
 // go run generate_cert.go  --rsa-bits 2048 --host 127.0.0.1,::1,example.com,*.example.com --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
-public static slice<byte> LocalhostCert = slice<byte>("""
+public static readonly ж<slice<byte>> ᏑLocalhostCert = new StaticBox<slice<byte>>(slice<byte>("""
 -----BEGIN CERTIFICATE-----
 MIIDSDCCAjCgAwIBAgIQEP/md970HysdBTpuzDOf0DANBgkqhkiG9w0BAQsFADAS
 MRAwDgYDVQQKEwdBY21lIENvMCAXDTcwMDEwMTAwMDAwMFoYDzIwODQwMTI5MTYw
@@ -34,10 +34,12 @@ Y/dEpa0D0EHhDxxVg6UzKOXB355n0IetGE/aWvyTV9SiDs6QsaC57Q9qq1/mitx5
 6/YBacNZ7ff1/57Etg4i5mNA6ubCpuc4Gi9oYqCNNohftr2lkJr7REdDR6OW0lsL
 rF7r4gUnKeC7mYIH1zypY7laskopiLFAfe96Kg==
 -----END CERTIFICATE-----
-"""u8.Raw());
+"""u8.Raw()));
+public static ref slice<byte> LocalhostCert => ref ((StaticBox<slice<byte>>)ᏑLocalhostCert).ValueSlot;
 
 // LocalhostKey is the private key for LocalhostCert.
-public static slice<byte> LocalhostKey;
+public static readonly ж<slice<byte>> ᏑLocalhostKey = new StaticBox<slice<byte>>(default(slice<byte>));
+public static ref slice<byte> LocalhostKey => ref ((StaticBox<slice<byte>>)ᏑLocalhostKey).ValueSlot;
 internal static void initᴛLocalhostKey() { LocalhostKey = slice<byte>(testingKey("""
 -----BEGIN RSA TESTING KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFyXr1E4l3GM34

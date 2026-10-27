@@ -7,7 +7,7 @@ partial class unicode_package {
 public static readonly @string Version = "15.0.0"u8;
 
 // Categories is the set of Unicode category tables.
-[GoLazy] partial class lazyᴛCategories { public static map<@string, ж<RangeTable>> Categories = new map<@string, ж<RangeTable>>{
+[GoLazy] partial class lazyᴛCategories { public static readonly ж<map<@string, ж<RangeTable>>> ᏑCategories = new StaticBox<map<@string, ж<RangeTable>>>(new map<@string, ж<RangeTable>>{
     ["C"u8] = lazyᴛC.initial,
     ["Cc"u8] = lazyᴛCc.initial,
     ["Cf"u8] = lazyᴛCf.initial,
@@ -46,10 +46,11 @@ public static readonly @string Version = "15.0.0"u8;
     ["Zl"u8] = lazyᴛZl.initial,
     ["Zp"u8] = lazyᴛZp.initial,
     ["Zs"u8] = lazyᴛZs.initial
-}; }
+}); }
+public static ref map<@string, ж<RangeTable>> Categories => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑCategories).ValueSlot;
 
 // CategoryAliases maps category aliases to standard category names.
-[GoLazy] partial class lazyᴛCategoryAliases { public static map<@string, @string> CategoryAliases = new map<@string, @string>{
+[GoLazy] partial class lazyᴛCategoryAliases { public static readonly ж<map<@string, @string>> ᏑCategoryAliases = new StaticBox<map<@string, @string>>(new map<@string, @string>{
     ["Cased_Letter"u8] = "LC"u8,
     ["Close_Punctuation"u8] = "Pe"u8,
     ["Combining_Mark"u8] = "M"u8,
@@ -92,7 +93,8 @@ public static readonly @string Version = "15.0.0"u8;
     ["cntrl"u8] = "Cc"u8,
     ["digit"u8] = "Nd"u8,
     ["punct"u8] = "P"u8
-}; }
+}); }
+public static ref map<@string, @string> CategoryAliases => ref ((StaticBox<map<@string, @string>>)ᏑCategoryAliases).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_C { internal static ж<RangeTable> _C = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -5188,7 +5190,7 @@ internal static ж<RangeTable> _Zp = Ꮡ(new RangeTable(
 [GoLazy(Initial = true)] partial class lazyᴛZs { public static ж<RangeTable> Zs = _Zs; } // Zs is the set of Unicode characters in category Zs (Separator, space).
 
 // Scripts is the set of Unicode script tables.
-[GoLazy] partial class lazyᴛScripts { public static map<@string, ж<RangeTable>> Scripts = new map<@string, ж<RangeTable>>{
+[GoLazy] partial class lazyᴛScripts { public static readonly ж<map<@string, ж<RangeTable>>> ᏑScripts = new StaticBox<map<@string, ж<RangeTable>>>(new map<@string, ж<RangeTable>>{
     ["Adlam"u8] = lazyᴛAdlam.initial,
     ["Ahom"u8] = lazyᴛAhom.initial,
     ["Anatolian_Hieroglyphs"u8] = lazyᴛAnatolian_Hieroglyphs.initial,
@@ -5352,7 +5354,8 @@ internal static ж<RangeTable> _Zp = Ꮡ(new RangeTable(
     ["Yezidi"u8] = lazyᴛYezidi.initial,
     ["Yi"u8] = lazyᴛYi.initial,
     ["Zanabazar_Square"u8] = lazyᴛZanabazar_Square.initial
-}; }
+}); }
+public static ref map<@string, ж<RangeTable>> Scripts => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑScripts).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_Adlam { internal static ж<RangeTable> _Adlam = Ꮡ(new RangeTable(
     R16: new Range16[]{}.slice(),
@@ -7383,7 +7386,7 @@ internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
 [GoLazy(Initial = true)] partial class lazyᴛZanabazar_Square { public static ж<RangeTable> Zanabazar_Square = _Zanabazar_Square; }      // Zanabazar_Square is the set of Unicode characters in script Zanabazar_Square.
 
 // Properties is the set of Unicode property tables.
-[GoLazy] partial class lazyᴛProperties { public static map<@string, ж<RangeTable>> Properties = new map<@string, ж<RangeTable>>{
+[GoLazy] partial class lazyᴛProperties { public static readonly ж<map<@string, ж<RangeTable>>> ᏑProperties = new StaticBox<map<@string, ж<RangeTable>>>(new map<@string, ж<RangeTable>>{
     ["ASCII_Hex_Digit"u8] = lazyᴛASCII_Hex_Digit.initial,
     ["Bidi_Control"u8] = lazyᴛBidi_Control.initial,
     ["Dash"u8] = lazyᴛDash.initial,
@@ -7419,7 +7422,8 @@ internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
     ["Unified_Ideograph"u8] = lazyᴛUnified_Ideograph.initial,
     ["Variation_Selector"u8] = lazyᴛVariation_Selector.initial,
     ["White_Space"u8] = lazyᴛWhite_Space.initial
-}; }
+}); }
+public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑProperties).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_ASCII_Hex_Digit { internal static ж<RangeTable> _ASCII_Hex_Digit = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -8616,7 +8620,8 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
 
 // CaseRanges is the table describing case mappings for all letters with
 // non-self mappings.
-[GoLazy] partial class lazyᴛCaseRanges { public static slice<CaseRange> CaseRanges = _CaseRanges; }
+[GoLazy] partial class lazyᴛCaseRanges { public static readonly ж<slice<CaseRange>> ᏑCaseRanges = new StaticBox<slice<CaseRange>>(_CaseRanges); }
+public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange>>)ᏑCaseRanges).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_CaseRanges { internal static slice<CaseRange> _CaseRanges = new CaseRange[]{
     new(0x0041, 0x005A, new d(new rune[]{0, 32, 0}.array())),
@@ -9434,14 +9439,15 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
 // code points outside the category that are equivalent under
 // simple case folding to code points inside the category.
 // If there is no entry for a category name, there are no such points.
-[GoLazy] partial class lazyᴛFoldCategory { public static map<@string, ж<RangeTable>> FoldCategory = new map<@string, ж<RangeTable>>{
+[GoLazy] partial class lazyᴛFoldCategory { public static readonly ж<map<@string, ж<RangeTable>>> ᏑFoldCategory = new StaticBox<map<@string, ж<RangeTable>>>(new map<@string, ж<RangeTable>>{
     ["L"u8] = foldL,
     ["Ll"u8] = foldLl,
     ["Lt"u8] = foldLt,
     ["Lu"u8] = foldLu,
     ["M"u8] = foldM,
     ["Mn"u8] = foldMn
-}; }
+}); }
+public static ref map<@string, ж<RangeTable>> FoldCategory => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑFoldCategory).ValueSlot;
 
 internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -9734,7 +9740,8 @@ internal static ж<RangeTable> foldMn = Ꮡ(new RangeTable(
 // code points outside the script that are equivalent under
 // simple case folding to code points inside the script.
 // If there is no entry for a script name, there are no such points.
-public static map<@string, ж<RangeTable>> FoldScript;
+public static readonly ж<map<@string, ж<RangeTable>>> ᏑFoldScript = new StaticBox<map<@string, ж<RangeTable>>>(default(map<@string, ж<RangeTable>>));
+public static ref map<@string, ж<RangeTable>> FoldScript => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑFoldScript).ValueSlot;
 internal static void initᴛFoldScript() { FoldScript = new map<@string, ж<RangeTable>>{
     ["Common"u8] = foldCommon,
     ["Greek"u8] = foldGreek,

@@ -84,8 +84,8 @@ partial struct seqCodeInfoData {
 }
 
 // seqCodeInfo is the seqCodeInfoData for each kind of sequence code.
-internal static ж<array<seqCodeInfoData>> ᏑseqCodeInfo = new StaticBox<array<seqCodeInfoData>>(default(array<seqCodeInfoData>));
-internal static ref array<seqCodeInfoData> seqCodeInfo => ref ᏑseqCodeInfo.Value;
+internal static readonly ж<array<seqCodeInfoData>> ᏑseqCodeInfo = new StaticBox<array<seqCodeInfoData>>(default(array<seqCodeInfoData>));
+internal static ref array<seqCodeInfoData> seqCodeInfo => ref ((StaticBox<array<seqCodeInfoData>>)ᏑseqCodeInfo).ValueSlot;
 internal static void initᴛseqCodeInfo() { seqCodeInfo = new golib.SparseArray<seqCodeInfoData>{
     [(int)seqLiteral] = new(
         predefTable: predefinedLiteralTable[..],

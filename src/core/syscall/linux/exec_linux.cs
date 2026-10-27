@@ -109,13 +109,13 @@ partial struct SysProcAttr {
     public ж<nint> PidFD;
 }
 
-internal static ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(new byte[]{(rune)'n', (rune)'o', (rune)'n', (rune)'e', 0}.array());
-internal static ref array<byte> none => ref Ꮡnone.Value;
-internal static ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(new byte[]{(rune)'/', 0}.array());
-internal static ref array<byte> slash => ref Ꮡslash.Value;
+internal static readonly ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(new byte[]{(rune)'n', (rune)'o', (rune)'n', (rune)'e', 0}.array());
+internal static ref array<byte> none => ref ((StaticBox<array<byte>>)Ꮡnone).ValueSlot;
+internal static readonly ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(new byte[]{(rune)'/', 0}.array());
+internal static ref array<byte> slash => ref ((StaticBox<array<byte>>)Ꮡslash).ValueSlot;
 
-internal static ж<bool> ᏑforceClone3 = new StaticBox<bool>(false);
-internal static ref bool forceClone3 => ref ᏑforceClone3.Value; // Used by unit tests only.
+internal static readonly ж<bool> ᏑforceClone3 = new StaticBox<bool>(false);
+internal static ref bool forceClone3 => ref ((StaticBox<bool>)ᏑforceClone3).ValueSlot; // Used by unit tests only.
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeFork();

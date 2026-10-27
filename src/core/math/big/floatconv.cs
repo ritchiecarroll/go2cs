@@ -10,8 +10,8 @@ using strings = strings_package;
 
 partial class big_package {
 
-internal static ж<Float> ᏑfloatZero = new StaticBox<Float>(default(Float));
-internal static ref Float floatZero => ref ᏑfloatZero.Value;
+internal static readonly ж<Float> ᏑfloatZero = new StaticBox<Float>(default(Float));
+internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).ValueSlot;
 
 // SetString sets z to the value of s and returns z and a boolean indicating
 // success. s must be a floating-point number of the same format as accepted

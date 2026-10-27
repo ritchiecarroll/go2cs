@@ -46,8 +46,8 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     return val;
 }
 
-internal static ж<byte> ᏑfirstStoreInProgress = new StaticBox<byte>(default(byte));
-internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.Value;
+internal static readonly ж<byte> ᏑfirstStoreInProgress = new StaticBox<byte>(default(byte));
+internal static ref byte firstStoreInProgress => ref ((StaticBox<byte>)ᏑfirstStoreInProgress).ValueSlot;
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.

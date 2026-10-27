@@ -10,10 +10,10 @@ using @internal;
 
 partial class os_package {
 
-internal static ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollCopyFileRange = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.CopyFileRange);
-internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollCopyFileRange => ref ᏑpollCopyFileRange.ValueSlot;
-internal static ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollSplice = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.Splice);
-internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollSplice => ref ᏑpollSplice.ValueSlot;
+internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollCopyFileRange = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.CopyFileRange);
+internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollCopyFileRange => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollCopyFileRange).ValueSlot;
+internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollSplice = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.Splice);
+internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollSplice => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollSplice).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sendfileˢ = "sendfile"u8;

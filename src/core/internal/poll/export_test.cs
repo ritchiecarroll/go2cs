@@ -10,7 +10,8 @@ using static go.@internal.poll_package;
 
 partial class poll_internal_test_package {
 
-public static Action<ж<slice<slice<byte>>>, int64> Consume = (ж<slice<slice<byte>>> ᴛ0, int64 ᴛ1) => consume(ref ᴛ0.DerefOrNull(), ᴛ1);
+public static readonly ж<Action<ж<slice<slice<byte>>>, int64>> ᏑConsume = new StaticBox<Action<ж<slice<slice<byte>>>, int64>>((ж<slice<slice<byte>>> ᴛ0, int64 ᴛ1) => consume(ref ᴛ0.DerefOrNull(), ᴛ1));
+public static ref Action<ж<slice<slice<byte>>>, int64> Consume => ref ((StaticBox<Action<ж<slice<slice<byte>>>, int64>>)ᏑConsume).ValueSlot;
 
 public partial struct XFDMutex {
     /*embed*/ internal global::go.@internal.poll_package.fdMutex fdMutex;

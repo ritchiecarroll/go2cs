@@ -17,8 +17,8 @@ internal static UntypedInt _SIG_SETMASK => 2;
 // are running, this is right.
 partial struct sigset /*[2]uint32*/;
 
-internal static ж<sigset> Ꮡsigset_all = new StaticBox<sigset>(new sigset(new uint32[]{~(uint32)0, ~(uint32)0}.array()));
-internal static ref sigset sigset_all => ref Ꮡsigset_all.Value;
+internal static readonly ж<sigset> Ꮡsigset_all = new StaticBox<sigset>(new sigset(new uint32[]{~(uint32)0, ~(uint32)0}.array()));
+internal static ref sigset sigset_all => ref ((StaticBox<sigset>)Ꮡsigset_all).ValueSlot;
 
 //go:nosplit
 //go:nowritebarrierrec

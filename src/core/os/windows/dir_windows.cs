@@ -37,14 +37,14 @@ partial struct dirInfo {
 // Windows 8.1 and earlier only works with buffer sizes up to 64 kB.
 internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 
-[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛdirBufPool { internal static readonly ж<Δsync.Pool> ᏑdirBufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(dirBufSize);
         return Ꮡ(buf);
     }
 )); }
-internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
+internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)ᏑdirBufPool).ValueSlot;
 
 internal static void close(this ref dirInfo d) {
     d.h = 0;
@@ -57,8 +57,8 @@ internal static void close(this ref dirInfo d) {
 // allowReadDirFileID indicates whether File.readdir should try to use FILE_ID_BOTH_DIR_INFO
 // if the underlying file system supports it.
 // Useful for testing purposes.
-internal static ж<bool> ᏑallowReadDirFileID = new StaticBox<bool>(true);
-internal static ref bool allowReadDirFileID => ref ᏑallowReadDirFileID.Value;
+internal static readonly ж<bool> ᏑallowReadDirFileID = new StaticBox<bool>(true);
+internal static ref bool allowReadDirFileID => ref ((StaticBox<bool>)ᏑallowReadDirFileID).ValueSlot;
 
 internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
     ref var d = ref Ꮡd.DerefOrNull();

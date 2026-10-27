@@ -23,10 +23,10 @@ partial struct format {
 }
 
 // Formats is the list of registered formats.
-internal static ж<Δsync.Mutex> ᏑformatsMu = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
-internal static ref Δsync.Mutex formatsMu => ref ᏑformatsMu.Value;
-internal static ж<atomic.Value> ᏑatomicFormats = new StaticBox<atomic.Value>(default(atomic.Value));
-internal static ref atomic.Value atomicFormats => ref ᏑatomicFormats.Value;
+internal static readonly ж<Δsync.Mutex> ᏑformatsMu = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
+internal static ref Δsync.Mutex formatsMu => ref ((StaticBox<Δsync.Mutex>)ᏑformatsMu).ValueSlot;
+internal static readonly ж<atomic.Value> ᏑatomicFormats = new StaticBox<atomic.Value>(default(atomic.Value));
+internal static ref atomic.Value atomicFormats => ref ((StaticBox<atomic.Value>)ᏑatomicFormats).ValueSlot;
 
 // RegisterFormat registers an image format for use by [Decode].
 // Name is the name of the format, like "jpeg" or "png".

@@ -19,18 +19,18 @@ partial class runtime_package {
 
 // NOTE(rsc): Everything here could use cas if contention became an issue.
 // profInsertLock protects changes to the start of all *bucket linked lists
-internal static ж<mutex> ᏑprofInsertLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex profInsertLock => ref ᏑprofInsertLock.Value;
+internal static readonly ж<mutex> ᏑprofInsertLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex profInsertLock => ref ((StaticBox<mutex>)ᏑprofInsertLock).ValueSlot;
 // profBlockLock protects the contents of every blockRecord struct
-internal static ж<mutex> ᏑprofBlockLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex profBlockLock => ref ᏑprofBlockLock.Value;
+internal static readonly ж<mutex> ᏑprofBlockLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex profBlockLock => ref ((StaticBox<mutex>)ᏑprofBlockLock).ValueSlot;
 // profMemActiveLock protects the active field of every memRecord struct
-internal static ж<mutex> ᏑprofMemActiveLock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex profMemActiveLock => ref ᏑprofMemActiveLock.Value;
+internal static readonly ж<mutex> ᏑprofMemActiveLock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex profMemActiveLock => ref ((StaticBox<mutex>)ᏑprofMemActiveLock).ValueSlot;
 // profMemFutureLock is a set of locks that protect the respective elements
 // of the future array of every memRecord struct
-internal static ж<array<mutex>> ᏑprofMemFutureLock = new StaticBox<array<mutex>>(new array<mutex>(3, () => new(nil)));
-internal static ref array<mutex> profMemFutureLock => ref ᏑprofMemFutureLock.Value;
+internal static readonly ж<array<mutex>> ᏑprofMemFutureLock = new StaticBox<array<mutex>>(new array<mutex>(3, () => new(nil)));
+internal static ref array<mutex> profMemFutureLock => ref ((StaticBox<array<mutex>>)ᏑprofMemFutureLock).ValueSlot;
 
 // All memory allocations are local and do not escape outside of the profiler.
 // The profiler is forbidden from referring to garbage-collected memory.
@@ -167,17 +167,17 @@ partial struct blockRecord {
     internal int64 cycles;
 }
 
-internal static ж<atomic.UnsafePointer> Ꮡmbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer mbuckets => ref Ꮡmbuckets.Value;                    // *bucket, memory profile buckets
-internal static ж<atomic.UnsafePointer> Ꮡbbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer bbuckets => ref Ꮡbbuckets.Value;                    // *bucket, blocking profile buckets
-internal static ж<atomic.UnsafePointer> Ꮡxbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer xbuckets => ref Ꮡxbuckets.Value;                    // *bucket, mutex profile buckets
-internal static ж<atomic.UnsafePointer> Ꮡbuckhash = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
-internal static ref atomic.UnsafePointer buckhash => ref Ꮡbuckhash.Value;                    // *buckhashArray
+internal static readonly ж<atomic.UnsafePointer> Ꮡmbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
+internal static ref atomic.UnsafePointer mbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡmbuckets).ValueSlot;                    // *bucket, memory profile buckets
+internal static readonly ж<atomic.UnsafePointer> Ꮡbbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
+internal static ref atomic.UnsafePointer bbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbbuckets).ValueSlot;                    // *bucket, blocking profile buckets
+internal static readonly ж<atomic.UnsafePointer> Ꮡxbuckets = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
+internal static ref atomic.UnsafePointer xbuckets => ref ((StaticBox<atomic.UnsafePointer>)Ꮡxbuckets).ValueSlot;                    // *bucket, mutex profile buckets
+internal static readonly ж<atomic.UnsafePointer> Ꮡbuckhash = new StaticBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
+internal static ref atomic.UnsafePointer buckhash => ref ((StaticBox<atomic.UnsafePointer>)Ꮡbuckhash).ValueSlot;                    // *buckhashArray
 
-internal static ж<mProfCycleHolder> ᏑmProfCycle = new StaticBox<mProfCycleHolder>(default(mProfCycleHolder));
-internal static ref mProfCycleHolder mProfCycle => ref ᏑmProfCycle.Value;
+internal static readonly ж<mProfCycleHolder> ᏑmProfCycle = new StaticBox<mProfCycleHolder>(default(mProfCycleHolder));
+internal static ref mProfCycleHolder mProfCycle => ref ((StaticBox<mProfCycleHolder>)ᏑmProfCycle).ValueSlot;
 
 /* [buckHashSize]@internal.runtime.atomic_package.UnsafePointer */
 partial struct buckhashArray /*[179999]global::go.@internal.runtime.atomic_package.UnsafePointer*/; // *bucket
@@ -375,8 +375,8 @@ internal static void mProf_Free(ж<bucket> Ꮡb, uintptr size) {
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
 }
 
-internal static ж<uint64> Ꮡblockprofilerate = new StaticBox<uint64>(default(uint64));
-internal static ref uint64 blockprofilerate => ref Ꮡblockprofilerate.Value; // in CPU ticks
+internal static readonly ж<uint64> Ꮡblockprofilerate = new StaticBox<uint64>(default(uint64));
+internal static ref uint64 blockprofilerate => ref ((StaticBox<uint64>)Ꮡblockprofilerate).ValueSlot; // in CPU ticks
 
 // SetBlockProfileRate controls the fraction of goroutine blocking events
 // that are reported in the blocking profile. The profiler aims to sample
@@ -686,8 +686,8 @@ internal static void saveBlockEventStack(int64 cycles, int64 rate, slice<uintptr
     unlock(ᏑprofBlockLock);
 }
 
-internal static ж<uint64> Ꮡmutexprofilerate = new StaticBox<uint64>(default(uint64));
-internal static ref uint64 mutexprofilerate => ref Ꮡmutexprofilerate.Value; // fraction sampled
+internal static readonly ж<uint64> Ꮡmutexprofilerate = new StaticBox<uint64>(default(uint64));
+internal static ref uint64 mutexprofilerate => ref ((StaticBox<uint64>)Ꮡmutexprofilerate).ValueSlot; // fraction sampled
 
 // SetMutexProfileFraction controls the fraction of mutex contention events
 // that are reported in the mutex profile. On average 1/rate events are
@@ -1170,10 +1170,10 @@ partial struct goroutineProfileᴛ1 /*dyn*/ {
     internal slice<profilerecord.StackRecord> records;
     internal slice<@unsafe.Pointer> labels;
 }
-[GoLazy] partial class lazyᴛgoroutineProfile { internal static ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StaticBox<goroutineProfileᴛ1>(new goroutineProfileᴛ1(
+[GoLazy] partial class lazyᴛgoroutineProfile { internal static readonly ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StaticBox<goroutineProfileᴛ1>(new goroutineProfileᴛ1(
     sema: 1
 )); }
-internal static ref goroutineProfileᴛ1 goroutineProfile => ref ᏑgoroutineProfile.Value;
+internal static ref goroutineProfileᴛ1 goroutineProfile => ref ((StaticBox<goroutineProfileᴛ1>)ᏑgoroutineProfile).ValueSlot;
 
 // goroutineProfileState indicates the status of a goroutine's stack for the
 // current in-progress goroutine profile. Goroutines' stacks are initially

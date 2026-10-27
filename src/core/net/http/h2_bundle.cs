@@ -971,14 +971,14 @@ internal static bool http2http2ConfigStrictMaxConcurrentRequests(ref HTTP2Config
 // TODO: Benchmark to determine if the pools are necessary. The GC may have
 // improved enough that we can instead allocate chunks like this:
 // make([]byte, max(16<<10, expectedBytesRemaining))
-[GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StaticBox<array<sync.Pool>>(new sync.Pool[]{
+[GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static readonly ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StaticBox<array<sync.Pool>>(new sync.Pool[]{
     new(New: () => Ꮡ(new array<byte>(1024))),
     new(New: () => Ꮡ(new array<byte>(2048))),
     new(New: () => Ꮡ(new array<byte>(4096))),
     new(New: () => Ꮡ(new array<byte>(8192))),
     new(New: () => Ꮡ(new array<byte>(16384)))
 }.array()); }
-internal static ref array<sync.Pool> http2dataChunkPools => ref Ꮡhttp2dataChunkPools.Value;
+internal static ref array<sync.Pool> http2dataChunkPools => ref ((StaticBox<array<sync.Pool>>)Ꮡhttp2dataChunkPools).ValueSlot;
 
 internal static slice<byte> http2getDataBufferChunk(int64 size) {
     switch (ᐧ) {
@@ -1616,13 +1616,13 @@ internal static void invalidate(this ref http2FrameHeader h) {
 
 // frame header bytes.
 // Used only by ReadFrameHeader.
-[GoLazy] partial class lazyᴛhttp2fhBytes { internal static ж<sync.Pool> Ꮡhttp2fhBytes = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2fhBytes { internal static readonly ж<sync.Pool> Ꮡhttp2fhBytes = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<byte>(http2frameHeaderLen);
         return Ꮡ(buf);
     }
 )); }
-internal static ref sync.Pool http2fhBytes => ref Ꮡhttp2fhBytes.Value;
+internal static ref sync.Pool http2fhBytes => ref ((StaticBox<sync.Pool>)Ꮡhttp2fhBytes).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string http11ˢ = "HTTP/1.1 "u8;
@@ -3321,8 +3321,8 @@ internal static bool http2DebugGoroutines = os.Getenv("DEBUG_HTTP2_GOROUTINES"u8
 // Disable goroutine debugging during individual tests with an atomic bool.
 // (Note that it's safe to enable/disable debugging mid-test, so the actual race condition
 // here is harmless.)
-internal static ж<atomic.Bool> Ꮡhttp2disableDebugGoroutines = new StaticBox<atomic.Bool>(default(atomic.Bool));
-internal static ref atomic.Bool http2disableDebugGoroutines => ref Ꮡhttp2disableDebugGoroutines.Value;
+internal static readonly ж<atomic.Bool> Ꮡhttp2disableDebugGoroutines = new StaticBox<atomic.Bool>(default(atomic.Bool));
+internal static ref atomic.Bool http2disableDebugGoroutines => ref ((StaticBox<atomic.Bool>)Ꮡhttp2disableDebugGoroutines).ValueSlot;
 
 partial struct http2goroutineLock /*num:uint64*/;
 
@@ -3377,13 +3377,13 @@ internal static partial uint64 http2curGoroutineID() {
     finally { ᒐ.Run(); }
 }
 
-[GoLazy] partial class lazyᴛhttp2littleBuf { internal static ж<sync.Pool> Ꮡhttp2littleBuf = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2littleBuf { internal static readonly ж<sync.Pool> Ꮡhttp2littleBuf = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<byte>(64);
         return Ꮡ(buf);
     }
 )); }
-internal static ref sync.Pool http2littleBuf => ref Ꮡhttp2littleBuf.Value;
+internal static ref sync.Pool http2littleBuf => ref ((StaticBox<sync.Pool>)Ꮡhttp2littleBuf).ValueSlot;
 
 // parseUintBytes is like strconv.ParseUint, but using a []byte.
 internal static (uint64 n, error err) http2parseUintBytes(slice<byte> s, nint @base, nint bitSize) {
@@ -3738,10 +3738,10 @@ internal static ж<http2bufferedWriter> http2newBufferedWriter(net.Conn conn, ti
 // not much thought went into it.
 internal static UntypedInt http2bufWriterPoolBufferSize => /* 4 << 10 */ 4096;
 
-[GoLazy] partial class lazyᴛhttp2bufWriterPool { internal static ж<sync.Pool> Ꮡhttp2bufWriterPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2bufWriterPool { internal static readonly ж<sync.Pool> Ꮡhttp2bufWriterPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => bufio.NewWriterSize(default!, http2bufWriterPoolBufferSize).OrTypedNil()
 )); }
-internal static ref sync.Pool http2bufWriterPool => ref Ꮡhttp2bufWriterPool.Value;
+internal static ref sync.Pool http2bufWriterPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2bufWriterPool).ValueSlot;
 
 internal static nint Available(this ref http2bufferedWriter w) {
     if (w.bw == nil) {
@@ -3848,8 +3848,8 @@ partial interface http2connectionStater {
     tlsꓸConnectionState ConnectionState();
 }
 
-internal static ж<sync.Pool> Ꮡhttp2sorterPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<http2sorter>()));
-internal static ref sync.Pool http2sorterPool => ref Ꮡhttp2sorterPool.Value;
+internal static readonly ж<sync.Pool> Ꮡhttp2sorterPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<http2sorter>()));
+internal static ref sync.Pool http2sorterPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2sorterPool).ValueSlot;
 
 partial struct http2sorter {
     internal slice<@string> v; // owned by sorter
@@ -4159,14 +4159,14 @@ internal static error http2errClosedBody = errors.New("body closed by handler"u8
 internal static error http2errHandlerComplete = errors.New("http2: request body closed due to handler exiting"u8);
 internal static error http2errStreamClosed = errors.New("http2: stream closed"u8);
 
-[GoLazy] partial class lazyᴛhttp2responseWriterStatePool { internal static ж<sync.Pool> Ꮡhttp2responseWriterStatePool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2responseWriterStatePool { internal static readonly ж<sync.Pool> Ꮡhttp2responseWriterStatePool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var rws = Ꮡ(new http2responseWriterState(nil));
         rws.Value.bw = bufio.NewWriterSize(new http2chunkWriter(rws), http2handlerChunkWriteSize);
         return rws.OrTypedNil();
     }
 )); }
-internal static ref sync.Pool http2responseWriterStatePool => ref Ꮡhttp2responseWriterStatePool.Value;
+internal static ref sync.Pool http2responseWriterStatePool => ref ((StaticBox<sync.Pool>)Ꮡhttp2responseWriterStatePool).ValueSlot;
 
 // Test hooks.
 internal static Action http2testHookOnConn;
@@ -4295,10 +4295,10 @@ internal static void startGracefulShutdown(this ж<http2serverInternalState> Ꮡ
 
 // Global error channel pool used for uninitialized Servers.
 // We use a per-Server pool when possible to avoid using channels across synctest bubbles.
-internal static ж<sync.Pool> Ꮡhttp2errChanPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> Ꮡhttp2errChanPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => new channel<error>(1)
 ));
-internal static ref sync.Pool http2errChanPool => ref Ꮡhttp2errChanPool.Value;
+internal static ref sync.Pool http2errChanPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2errChanPool).ValueSlot;
 
 internal static channel<error> getErrChan(this ж<http2serverInternalState> Ꮡs) {
     if (Ꮡs == nil) {
@@ -5409,10 +5409,10 @@ internal static partial error readPreface(this ж<http2serverConn> Ꮡsc) {
     finally { ᒐ.Run(); }
 }
 
-internal static ж<sync.Pool> Ꮡhttp2writeDataPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> Ꮡhttp2writeDataPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<http2writeData>()
 ));
-internal static ref sync.Pool http2writeDataPool => ref Ꮡhttp2writeDataPool.Value;
+internal static ref sync.Pool http2writeDataPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2writeDataPool).ValueSlot;
 
 // writeDataFromHandler writes DATA response frames from a handler on
 // the given stream.
@@ -10110,8 +10110,8 @@ internal static nint frameScratchBufferLen(this ref http2clientStream cs, nint m
 // In practice, the maximum scratch buffer size should not exceed 512 KB due to
 // frameScratchBufferLen(maxFrameSize), thus the "infinity pool" should never be used.
 // It exists mainly as a safety measure, for potential future increases in max buffer size.
-internal static ж<array<sync.Pool>> Ꮡhttp2bufPools = new StaticBox<array<sync.Pool>>(new array<sync.Pool>(7));
-internal static ref array<sync.Pool> http2bufPools => ref Ꮡhttp2bufPools.Value; // of *[]byte
+internal static readonly ж<array<sync.Pool>> Ꮡhttp2bufPools = new StaticBox<array<sync.Pool>>(new array<sync.Pool>(7));
+internal static ref array<sync.Pool> http2bufPools => ref ((StaticBox<array<sync.Pool>>)Ꮡhttp2bufPools).ValueSlot; // of *[]byte
 
 internal static nint http2bufPoolIndex(nint size) {
     if (size <= 16384) {
@@ -11743,8 +11743,8 @@ internal static (byte, error) ReadByte(this http2eofReader _) {
     return (0, io.EOF);
 }
 
-internal static ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
-internal static ref sync.Pool http2gzipPool => ref Ꮡhttp2gzipPool.Value;
+internal static readonly ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
+internal static ref sync.Pool http2gzipPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2gzipPool).ValueSlot;
 
 // gzipPoolGet gets a gzip.Reader from the pool and resets it to read from r.
 internal static (ж<gzip.Reader>, error) http2gzipPoolGet(io.Reader r) {

@@ -59,8 +59,8 @@ internal static (uint32 lout, uint32 rout) feistel(uint32 l, uint32 r, uint64 k0
 // for sBoxes[s][i][j] << 4*(7-s)
 internal static array<array<uint32>> feistelBox = new(8, () => new(64));
 
-internal static ж<sync.Once> ᏑfeistelBoxOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once feistelBoxOnce => ref ᏑfeistelBoxOnce.Value;
+internal static readonly ж<sync.Once> ᏑfeistelBoxOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once feistelBoxOnce => ref ((StaticBox<sync.Once>)ᏑfeistelBoxOnce).ValueSlot;
 
 // general purpose function to perform DES block permutations.
 internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutation) {

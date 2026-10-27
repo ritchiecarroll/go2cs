@@ -14,8 +14,8 @@ partial class runtime_package {
 
 internal static int32 epfd = -1;           // epoll descriptor
 internal static uintptr netpollEventFd; // eventfd for netpollBreak
-internal static ж<atomic.Uint32> ᏑnetpollWakeSig = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 netpollWakeSig => ref ᏑnetpollWakeSig.Value;     // used to avoid duplicate calls of netpollBreak
+internal static readonly ж<atomic.Uint32> ᏑnetpollWakeSig = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 netpollWakeSig => ref ((StaticBox<atomic.Uint32>)ᏑnetpollWakeSig).ValueSlot;     // used to avoid duplicate calls of netpollBreak
 
 // netpollPackData stores pd and its fdseq in the epoll data field of ev as
 // a taggedPointer. A nil pd marks the netpollBreak eventfd: netpollopen always

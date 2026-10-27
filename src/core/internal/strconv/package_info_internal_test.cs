@@ -33,7 +33,7 @@ using static go.@internal.strconv_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/strconv/export_test.go", "export_test.cs", "AA4egpKSgoKSkoKWgoKCpoKCgg==")]
+[assembly: go.GoPositionMap("internal/strconv/export_test.go", "export_test.cs", "AA4ekrKigpKyooKmgoKCpoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

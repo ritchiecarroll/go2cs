@@ -12,7 +12,8 @@ using @internal;
 partial class os_package {
 
 // Args hold the command-line arguments, starting with the program name.
-public static slice<@string> Args;
+public static readonly ж<slice<@string>> ᏑArgs = new StaticBox<slice<@string>>(default(slice<@string>));
+public static ref slice<@string> Args => ref ((StaticBox<slice<@string>>)ᏑArgs).ValueSlot;
 
 [GoInit] internal static void init() {
     if (runtime.GOOS == "windows"u8) {

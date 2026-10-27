@@ -19,7 +19,7 @@ using time = time_package;
 partial class benchmarks_internal_test_package {
 
 [GoInit] internal static void init() {
-    flag.BoolVar(Ꮡ(@internal.IgnorePC), "nopc"u8, false, "do not invoke runtime.Callers"u8);
+    flag.BoolVar(@internal.ᏑIgnorePC, "nopc"u8, false, "do not invoke runtime.Callers"u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

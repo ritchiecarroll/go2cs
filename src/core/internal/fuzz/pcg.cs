@@ -30,8 +30,8 @@ partial interface mutatorRand {
 // implementation is geared specifically towards the needs of fuzzing: Simple
 // creation and use, no reproducibility, no concurrency safety, just the
 // necessary methods, optimized for speed.
-internal static ж<atomic.Uint64> ᏑglobalInc = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 globalInc => ref ᏑglobalInc.Value;     // PCG stream
+internal static readonly ж<atomic.Uint64> ᏑglobalInc = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ref atomic.Uint64 globalInc => ref ((StaticBox<atomic.Uint64>)ᏑglobalInc).ValueSlot;     // PCG stream
 
 internal const uint64 multiplier = 6364136223846793005;
 

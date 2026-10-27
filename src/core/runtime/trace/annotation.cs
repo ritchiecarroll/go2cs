@@ -86,16 +86,16 @@ public static void End(this ref Task t) {
     userTaskEnd(t.id);
 }
 
-internal static ж<uint64> ᏑlastTaskID = new StaticBox<uint64>(0);
-internal static ref uint64 lastTaskID => ref ᏑlastTaskID.Value; // task id issued last time
+internal static readonly ж<uint64> ᏑlastTaskID = new StaticBox<uint64>(0);
+internal static ref uint64 lastTaskID => ref ((StaticBox<uint64>)ᏑlastTaskID).ValueSlot; // task id issued last time
 
 internal static uint64 newID() {
     // TODO(hyangah): use per-P cache
     return atomic.AddUint64(ᏑlastTaskID, 1);
 }
 
-internal static ж<Task> ᏑbgTask = new StaticBox<Task>(new Task(id: (uint64)0));
-internal static ref Task bgTask => ref ᏑbgTask.Value;
+internal static readonly ж<Task> ᏑbgTask = new StaticBox<Task>(new Task(id: (uint64)0));
+internal static ref Task bgTask => ref ((StaticBox<Task>)ᏑbgTask).ValueSlot;
 
 // Log emits a one-off event with the given category and message.
 // Category can be empty and the API assumes there are only a handful of

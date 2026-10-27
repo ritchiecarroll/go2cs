@@ -319,8 +319,8 @@ partial struct encodeState {
 
 internal static UntypedInt startDetectingCyclesAfter => 1000;
 
-internal static ж<sync.Pool> ᏑencodeStatePool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool encodeStatePool => ref ᏑencodeStatePool.Value;
+internal static readonly ж<sync.Pool> ᏑencodeStatePool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool encodeStatePool => ref ((StaticBox<sync.Pool>)ᏑencodeStatePool).ValueSlot;
 
 internal static ж<encodeState> newEncodeState() {
     {
@@ -399,8 +399,8 @@ partial struct encOpts {
 
 // type encoderFunc is a methodless func type — rendered inline as its base delegate
 
-internal static ж<sync.Map> ᏑencoderCache = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map encoderCache => ref ᏑencoderCache.Value; // map[reflect.Type]encoderFunc
+internal static readonly ж<sync.Map> ᏑencoderCache = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map encoderCache => ref ((StaticBox<sync.Map>)ᏑencoderCache).ValueSlot; // map[reflect.Type]encoderFunc
 
 internal static Action<ж<encodeState>, reflectꓸValue, encOpts> valueEncoder(reflectꓸValue v) {
     if (!v.IsValid()) {
@@ -1447,8 +1447,8 @@ internal static (field, bool) dominantField(slice<field> fields) {
     return (fields[0], true);
 }
 
-internal static ж<sync.Map> ᏑfieldCache = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map fieldCache => ref ᏑfieldCache.Value; // map[reflect.Type]structFields
+internal static readonly ж<sync.Map> ᏑfieldCache = new StaticBox<sync.Map>(default(sync.Map));
+internal static ref sync.Map fieldCache => ref ((StaticBox<sync.Map>)ᏑfieldCache).ValueSlot; // map[reflect.Type]structFields
 
 // cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
 internal static structFields cachedTypeFields(reflectꓸType t) {

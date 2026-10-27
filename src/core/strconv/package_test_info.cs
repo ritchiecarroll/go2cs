@@ -49,7 +49,7 @@ using static global::go.strconv_test_package;
 [assembly: go.GoPositionMap("strconv/import_test.go", "import_test.cs", "AAsUgg==")]
 [assembly: go.GoPositionMap("strconv/number_test.go", "number_test.cs", "AB02AAcQooKClIKmgriClILcyoKCgIIACxbKgoKCgsyCgoKUgoKCAAcSggCaAbYCgoKClIKClIKmgoKClIKCAAgOkoKUgoKClIIAChYAFy6mgoKCyoKCgoKCgriCgoKCgpSCggAMGgARIgATJgARIgAUKAASJAAQINymgoKCpoKCgqaCgoKmgoKCpoKCgqaCgoLKgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgpSCgoKC2oKCgoLugpSCgoKC2oKCgoLugpSCgoKCgpSC2oKCgoKClILugqaCpoIACRAACA4ACBKCgpSClNaCgoKCgoIACAyCgoKCgoLcgoKCgoKC3IKCgoKCggAIDIKCyoCCAAgKgoKCAAsIggARMIKCgtyigoCCtqIACBAADRaigoKCpoKCuIKCgqaCgsqCgoLugoCCtqIACBAACBKCgoKCpoKCAAkOABY0goKCgg==", "823-827:1;884-888:1", "", "116=NaN/1/4/26,NaN/2/4/27,NaN/3/4/28,NaN/4/4/28;801=New/1/1/3")]
 [assembly: go.GoPositionMap("strconv/quote_test.go", "quote_test.cs", "AA0esoKCgoKCgt6ygoKCgoKCAAwaAAsYgoKAgqSAgtqCgoCCpICC2oKCgIKkgILaooK4ooLcooLcooIAChYAECKCgoCCpICC2oKCgIKkgILagoKAgqSAggAKFAAtXIKCgIIAChQAJ1AAHj6CgpSClIIACgqyAAYagriUgoLcgpSCgpSCgoKClILoooLoooI=")]
-[assembly: go.GoPositionMap("strconv/strconv_test.go", "strconv_test.cs", "AA8g9JyCpKSCpMaioqSmAAkOgoKUgqaCgpSCgoCCACAigoL+AAgSkpSSlJKUkpSSlJKUkpSSlJKUkgALCIKCgoKClAAHFoKCgoKUgII=", "90-97:1;91-96:1.1;99-101:2;102-104:3;105-107:4;108-110:5;111-113:6;114-116:7;117-119:8;120-122:9;123-125:10;126-128:11")]
+[assembly: go.GoPositionMap("strconv/strconv_test.go", "strconv_test.cs", "AA8g9JyCpKSCpMaioqSmAAkOgoKUgqaCgpSCgoCCACEigoL+AAgSkpSSlJKUkpSSlJKUkpSSlJKUkgALCIKCgoKClAAHFoKCgoKUgII=", "90-97:1;91-96:1.1;99-101:2;102-104:3;105-107:4;108-110:5;111-113:6;114-116:7;117-119:8;120-122:9;123-125:10;126-128:11")]
 // </GoSourcePositionMaps>
 
 namespace go;

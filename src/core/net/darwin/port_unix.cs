@@ -11,8 +11,8 @@ using @internal;
 
 partial class net_package {
 
-internal static ж<Δsync.Once> ᏑonceReadServices = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once onceReadServices => ref ᏑonceReadServices.Value;
+internal static readonly ж<Δsync.Once> ᏑonceReadServices = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once onceReadServices => ref ((StaticBox<Δsync.Once>)ᏑonceReadServices).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string etcServicesˢ = "/etc/services"u8;

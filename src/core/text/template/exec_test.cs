@@ -142,8 +142,8 @@ public static @string Error(this ж<W> Ꮡw) {
     return fmt.Sprintf("[%d]"u8, w.k);
 }
 
-internal static ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
-internal static ref I siVal => ref ᏑsiVal.ValueSlot;
+internal static readonly ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
+internal static ref I siVal => ref ((StaticBox<I>)ᏑsiVal).ValueSlot;
 
 internal static ж<T> tVal;
 internal static void initᴛtVal() {
@@ -220,8 +220,8 @@ public partial interface I {
     @string Method0();
 }
 
-internal static ж<I> ᏑiVal = new StaticBox<I>(default(I));
-internal static ref I iVal => ref ᏑiVal.ValueSlot;
+internal static readonly ж<I> ᏑiVal = new StaticBox<I>(default(I));
+internal static ref I iVal => ref ((StaticBox<I>)ᏑiVal).ValueSlot;
 internal static void initᴛiVal() { iVal = new template_internal_test_package.TжI(tVal); }
 
 // Helpers for creation.

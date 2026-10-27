@@ -356,8 +356,8 @@ public static void TestIssue70739(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<T> Ꮡimmortal = new StaticBox<T>(default(T));
-internal static ref T immortal => ref Ꮡimmortal.Value;
+internal static readonly ж<T> Ꮡimmortal = new StaticBox<T>(default(T));
+internal static ref T immortal => ref ((StaticBox<T>)Ꮡimmortal).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object immortalWeakPointersToˢ = (@string)"immortal weak pointers to the same pointer not equal"u8;

@@ -19,8 +19,8 @@ using go.os;
 
 partial class nettest_package {
 
-internal static ж<sync.Once> ᏑstackOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once stackOnce => ref ᏑstackOnce.Value;
+internal static readonly ж<sync.Once> ᏑstackOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once stackOnce => ref ((StaticBox<sync.Once>)ᏑstackOnce).ValueSlot;
 internal static bool ipv4Enabled;
 internal static bool canListenTCP4OnLoopback;
 internal static bool ipv6Enabled;

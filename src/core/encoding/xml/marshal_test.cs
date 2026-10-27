@@ -538,14 +538,14 @@ public partial struct Generic<T> {
     public T X;
 }
 
-internal static ж<@string> ᏑnameAttr = new StaticBox<@string>("Sarah"u8);
-internal static ref @string nameAttr => ref ᏑnameAttr.Value;
-internal static ж<nuint> ᏑageAttr = new StaticBox<nuint>((nuint)12);
-internal static ref nuint ageAttr => ref ᏑageAttr.Value;
-internal static ж<@string> ᏑcontentsAttr = new StaticBox<@string>("lorem ipsum"u8);
-internal static ref @string contentsAttr => ref ᏑcontentsAttr.Value;
-internal static ж<@string> Ꮡempty = new StaticBox<@string>(""u8);
-internal static ref @string empty => ref Ꮡempty.Value;
+internal static readonly ж<@string> ᏑnameAttr = new StaticBox<@string>("Sarah"u8);
+internal static ref @string nameAttr => ref ((StaticBox<@string>)ᏑnameAttr).ValueSlot;
+internal static readonly ж<nuint> ᏑageAttr = new StaticBox<nuint>((nuint)12);
+internal static ref nuint ageAttr => ref ((StaticBox<nuint>)ᏑageAttr).ValueSlot;
+internal static readonly ж<@string> ᏑcontentsAttr = new StaticBox<@string>("lorem ipsum"u8);
+internal static ref @string contentsAttr => ref ((StaticBox<@string>)ᏑcontentsAttr).ValueSlot;
+internal static readonly ж<@string> Ꮡempty = new StaticBox<@string>(""u8);
+internal static ref @string empty => ref ((StaticBox<@string>)Ꮡempty).ValueSlot;
 
 // Unless explicitly stated as such (or *Plain), all of the
 // tests below are two-way tests. When introducing new tests,

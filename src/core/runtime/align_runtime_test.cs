@@ -13,7 +13,7 @@ partial class runtime_internal_test_package {
 
 // AtomicFields is the set of fields on which we perform 64-bit atomic
 // operations (all the *64 operations in internal/runtime/atomic).
-public static slice<uintptr> AtomicFields = new uintptr[]{
+public static readonly ж<slice<uintptr>> ᏑAtomicFields = new StaticBox<slice<uintptr>>(new uintptr[]{
     /* unsafe.Offsetof(m{}.procid) */ (uintptr)64,
     /* unsafe.Offsetof(profBuf{}.overflow) */ (uintptr)16,
     /* unsafe.Offsetof(profBuf{}.overflowTime) */ (uintptr)24,
@@ -33,11 +33,13 @@ public static slice<uintptr> AtomicFields = new uintptr[]{
     /* unsafe.Offsetof(mstats{}.last_gc_nanotime) */ (uintptr)7696,
     /* unsafe.Offsetof(mstats{}.last_gc_unix) */ (uintptr)3568,
     /* unsafe.Offsetof(workType{}.bytesMarked) */ (uintptr)368
-}.slice();
+}.slice());
+public static ref slice<uintptr> AtomicFields => ref ((StaticBox<slice<uintptr>>)ᏑAtomicFields).ValueSlot;
 
 // AtomicVariables is the set of global variables on which we perform
 // 64-bit atomic operations.
-public static slice<@unsafe.Pointer> AtomicVariables;
+public static readonly ж<slice<@unsafe.Pointer>> ᏑAtomicVariables = new StaticBox<slice<@unsafe.Pointer>>(default(slice<@unsafe.Pointer>));
+public static ref slice<@unsafe.Pointer> AtomicVariables => ref ((StaticBox<slice<@unsafe.Pointer>>)ᏑAtomicVariables).ValueSlot;
 internal static void initᴛAtomicVariables() { AtomicVariables = new @unsafe.Pointer[]{
     @unsafe.Pointer.FromPinnedBox(Ꮡncgocall),
     @unsafe.Pointer.FromPinnedBox(Ꮡtest_z64),

@@ -1239,7 +1239,7 @@ partial struct EvalSymlinksTest {
     internal @string path, dest;
 }
 
-public static slice<EvalSymlinksTest> EvalSymlinksTestDirs = new EvalSymlinksTest[]{
+public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTestDirs = new StaticBox<slice<EvalSymlinksTest>>(new EvalSymlinksTest[]{
     new("test"u8, ""u8),
     new("test/dir"u8, ""u8),
     new("test/dir/link3"u8, "../../"u8),
@@ -1258,9 +1258,10 @@ public static slice<EvalSymlinksTest> EvalSymlinksTestDirs = new EvalSymlinksTes
     new("src/versions/v1/modules"u8, ""u8),
     new("src/versions/v1/modules/test"u8, "../../../pool/test"u8),
     new("version"u8, "src/versions/v1"u8)
-}.slice();
+}.slice());
+public static ref slice<EvalSymlinksTest> EvalSymlinksTestDirs => ref ((StaticBox<slice<EvalSymlinksTest>>)ᏑEvalSymlinksTestDirs).ValueSlot;
 
-public static slice<EvalSymlinksTest> EvalSymlinksTests = new EvalSymlinksTest[]{
+public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTests = new StaticBox<slice<EvalSymlinksTest>>(new EvalSymlinksTest[]{
     new("test"u8, "test"u8),
     new("test/dir"u8, "test/dir"u8),
     new("test/dir/../.."u8, "."u8),
@@ -1273,7 +1274,8 @@ public static slice<EvalSymlinksTest> EvalSymlinksTests = new EvalSymlinksTest[]
     new("test/linkabs"u8, "/"u8),
     new("test/link4/.."u8, "test"u8),
     new("src/versions/current/modules/test"u8, "src/pool/test"u8)
-}.slice();
+}.slice());
+public static ref slice<EvalSymlinksTest> EvalSymlinksTests => ref ((StaticBox<slice<EvalSymlinksTest>>)ᏑEvalSymlinksTests).ValueSlot;
 
 // simpleJoin builds a file name from the directory and path.
 // It does not use Join because we don't want ".." to be evaluated.

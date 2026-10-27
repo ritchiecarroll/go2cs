@@ -17,7 +17,7 @@ internal partial struct fileTest {
     internal slice<@string> needed;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/gcc-ppc32-aix-dwarf2-exec"u8,
         new FileHeader(U802TOCMAGIC),
@@ -53,7 +53,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>
         new @string[]{"libc.a/shr_64.o"u8}.slice()
     )
 }.slice());
-internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
+internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 public static void TestOpen(ж<testing.T> Ꮡt) {
     foreach (var i in range(fileTests)) {

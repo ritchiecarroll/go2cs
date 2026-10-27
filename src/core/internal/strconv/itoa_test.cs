@@ -268,6 +268,7 @@ public static void BenchmarkAppendUintVarlen(ж<testing.B> Ꮡb) {
     }
 }
 
-public static nint BenchSink; // make sure compiler cannot optimize away benchmarks
+public static readonly ж<nint> ᏑBenchSink = new StaticBox<nint>(default(nint));
+public static ref nint BenchSink => ref ((StaticBox<nint>)ᏑBenchSink).ValueSlot; // make sure compiler cannot optimize away benchmarks
 
 } // end strconv_test_package

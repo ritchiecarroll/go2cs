@@ -17,11 +17,11 @@ partial struct sparseBlocks {
     internal slice<uint16> offset;
 }
 
-[GoLazy] partial class lazyᴛidnaSparse { internal static ж<sparseBlocks> ᏑidnaSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
+[GoLazy] partial class lazyᴛidnaSparse { internal static readonly ж<sparseBlocks> ᏑidnaSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
     values: idnaSparseValues[..],
     offset: idnaSparseOffset[..]
 )); }
-internal static ref sparseBlocks idnaSparse => ref ᏑidnaSparse.Value;
+internal static ref sparseBlocks idnaSparse => ref ((StaticBox<sparseBlocks>)ᏑidnaSparse).ValueSlot;
 
 // Don't use newIdnaTrie to avoid unconditional linking in of the table.
 internal static ж<idnaTrie> trie = Ꮡ(new idnaTrie(nil));

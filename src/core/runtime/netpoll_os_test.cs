@@ -12,8 +12,8 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-internal static ж<Δsync.WaitGroup> Ꮡwg = new StaticBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
-internal static ref Δsync.WaitGroup wg => ref Ꮡwg.Value;
+internal static readonly ж<Δsync.WaitGroup> Ꮡwg = new StaticBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
+internal static ref Δsync.WaitGroup wg => ref ((StaticBox<Δsync.WaitGroup>)Ꮡwg).ValueSlot;
 
 [GoInit] internal static void initΔ4() {
     runtime_internal_test_package.NetpollGenericInit();

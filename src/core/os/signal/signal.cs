@@ -25,8 +25,8 @@ partial struct handlersᴛ1 /*dyn*/ {
     // value for a channel being stopped. See the Stop function.
     internal slice<stopping> stopping;
 }
-internal static ж<handlersᴛ1> Ꮡhandlers = new StaticBox<handlersᴛ1>(new handlersᴛ1(nil));
-internal static ref handlersᴛ1 handlers => ref Ꮡhandlers.Value;
+internal static readonly ж<handlersᴛ1> Ꮡhandlers = new StaticBox<handlersᴛ1>(new handlersᴛ1(nil));
+internal static ref handlersᴛ1 handlers => ref ((StaticBox<handlersᴛ1>)Ꮡhandlers).ValueSlot;
 
 partial struct stopping {
     internal channel/*<-*/<osꓸSignal> c = channel/*<-*/<osꓸSignal>.SendOnly;
@@ -108,8 +108,8 @@ public static bool Ignored(osꓸSignal sig) {
 // initialized watchSignalLoop. If watchSignalLoop is non-nil,
 // it will be run in a goroutine lazily once Notify is invoked.
 // See Issue 21576.
-internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once watchSignalLoopOnce => ref ᏑwatchSignalLoopOnce.Value;
+internal static readonly ж<sync.Once> ᏑwatchSignalLoopOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once watchSignalLoopOnce => ref ((StaticBox<sync.Once>)ᏑwatchSignalLoopOnce).ValueSlot;
 internal static Action watchSignalLoop;
 
 // Notify causes package signal to relay incoming signals to c.

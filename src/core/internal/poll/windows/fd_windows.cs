@@ -23,8 +23,8 @@ using unicode;
 partial class poll_package {
 
 internal static error initErr;
-internal static ж<uint64> ᏑioSync = new StaticBox<uint64>(default(uint64));
-internal static ref uint64 ioSync => ref ᏑioSync.Value;
+internal static readonly ж<uint64> ᏑioSync = new StaticBox<uint64>(default(uint64));
+internal static ref uint64 ioSync => ref ((StaticBox<uint64>)ᏑioSync).ValueSlot;
 
 // This package uses the SetFileCompletionNotificationModes Windows
 // API to skip calling GetQueuedCompletionStatus if an IO operation
@@ -62,14 +62,15 @@ internal static void checkSetFileCompletionNotificationModes() {
 // InitWSA initiates the use of the Winsock DLL by the current process.
 // It is called from the net package at init time to avoid
 // loading ws2_32.dll when net is not used.
-public static Action InitWSA = sync.OnceFunc(() => {
+public static readonly ж<Action> ᏑInitWSA = new StaticBox<Action>(sync.OnceFunc(() => {
     ref var d = ref heap(new Δsyscall.WSAData(), out var Ꮡd);
     var e = Δsyscall.WSAStartup((uint32)0x202, Ꮡd);
     if (e != default!) {
         initErr = e;
     }
     checkSetFileCompletionNotificationModes();
-});
+}));
+public static ref Action InitWSA => ref ((StaticBox<Action>)ᏑInitWSA).ValueSlot;
 
 // operation contains superset of data necessary to perform all async IO.
 partial struct operation {
@@ -96,13 +97,13 @@ internal static ж<Δsyscall.WSABuf> newWsaBuf(slice<byte> b) {
     return Ꮡ(new Δsyscall.WSABuf(Buf: @unsafe.SliceData(b), Len: (uint32)len(b)));
 }
 
-[GoLazy] partial class lazyᴛwsaBufsPool { internal static ж<sync.Pool> ᏑwsaBufsPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaBufsPool { internal static readonly ж<sync.Pool> ᏑwsaBufsPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<Δsyscall.WSABuf>(0, 16);
         return Ꮡ(buf);
     }
 )); }
-internal static ref sync.Pool wsaBufsPool => ref ᏑwsaBufsPool.Value;
+internal static ref sync.Pool wsaBufsPool => ref ((StaticBox<sync.Pool>)ᏑwsaBufsPool).ValueSlot;
 
 internal static ж<slice<Δsyscall.WSABuf>> newWSABufs(ref slice<slice<byte>> buf) {
     var bufsPtr = ᏑwsaBufsPool.Get()._<ж<slice<Δsyscall.WSABuf>>>();
@@ -146,13 +147,13 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 }
 
 // wsaMsgPool is a pool of WSAMsg structures that can only hold a single WSABuf.
-[GoLazy] partial class lazyᴛwsaMsgPool { internal static ж<sync.Pool> ᏑwsaMsgPool = new StaticBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaMsgPool { internal static readonly ж<sync.Pool> ᏑwsaMsgPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new windows.WSAMsg(
             Buffers: Ꮡ(new Δsyscall.WSABuf(nil)),
             BufferCount: 1
         ))
 )); }
-internal static ref sync.Pool wsaMsgPool => ref ᏑwsaMsgPool.Value;
+internal static ref sync.Pool wsaMsgPool => ref ((StaticBox<sync.Pool>)ᏑwsaMsgPool).ValueSlot;
 
 // newWSAMsg creates a new WSAMsg with the provided parameters.
 // Use [freeWSAMsg] to free it.
@@ -204,10 +205,10 @@ partial struct wsaRsa {
     internal int32 namelen;
 }
 
-internal static ж<sync.Pool> ᏑwsaRsaPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> ᏑwsaRsaPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<wsaRsa>()
 ));
-internal static ref sync.Pool wsaRsaPool => ref ᏑwsaRsaPool.Value;
+internal static ref sync.Pool wsaRsaPool => ref ((StaticBox<sync.Pool>)ᏑwsaRsaPool).ValueSlot;
 
 internal static ж<wsaRsa> newWSARsa() {
     var rsa = ᏑwsaRsaPool.Get()._<ж<wsaRsa>>();
@@ -216,10 +217,10 @@ internal static ж<wsaRsa> newWSARsa() {
     return rsa;
 }
 
-internal static ж<sync.Pool> ᏑoperationPool = new StaticBox<sync.Pool>(new sync.Pool(
+internal static readonly ж<sync.Pool> ᏑoperationPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<operation>()
 ));
-internal static ref sync.Pool operationPool => ref ᏑoperationPool.Value;
+internal static ref sync.Pool operationPool => ref ((StaticBox<sync.Pool>)ᏑoperationPool).ValueSlot;
 
 // waitIO waits for the IO operation o to complete.
 internal static error waitIO(this ж<FD> Ꮡfd, ж<operation> Ꮡo) {
@@ -656,7 +657,8 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
     finally { if (ᒐd2) Ꮡfd.readUnlock(); if (ᒐd1) Ꮡfd.readWriteUnlock(); ᒐ.Run(); }
 }
 
-public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error> ReadConsole = Δsyscall.ReadConsole;                                                         // changed for testing
+public static readonly ж<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>> ᏑReadConsole = new StaticBox<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>(Δsyscall.ReadConsole);
+public static ref Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error> ReadConsole => ref ((StaticBox<Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error>>)ᏑReadConsole).ValueSlot;                                                         // changed for testing
 
 // readConsole reads utf16 characters from console File,
 // encodes them into utf8 and stores them in buffer b.

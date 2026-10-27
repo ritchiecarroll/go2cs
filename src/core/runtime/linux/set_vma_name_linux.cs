@@ -12,8 +12,8 @@ using @internal.runtime.syscall;
 
 partial class runtime_package {
 
-internal static ж<atomic.Bool> ᏑprSetVMAUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
-internal static ref atomic.Bool prSetVMAUnsupported => ref ᏑprSetVMAUnsupported.Value;
+internal static readonly ж<atomic.Bool> ᏑprSetVMAUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
+internal static ref atomic.Bool prSetVMAUnsupported => ref ((StaticBox<atomic.Bool>)ᏑprSetVMAUnsupported).ValueSlot;
 
 internal static bool setVMANameSupported() {
     return !ᏑprSetVMAUnsupported.Load();

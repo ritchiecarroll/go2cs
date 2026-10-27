@@ -15,17 +15,17 @@ partial struct sparseBlocks {
     internal slice<uint16> offset;
 }
 
-[GoLazy] partial class lazyᴛnfcSparse { internal static ж<sparseBlocks> ᏑnfcSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
+[GoLazy] partial class lazyᴛnfcSparse { internal static readonly ж<sparseBlocks> ᏑnfcSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
     values: nfcSparseValues[..],
     offset: nfcSparseOffset[..]
 )); }
-internal static ref sparseBlocks nfcSparse => ref ᏑnfcSparse.Value;
+internal static ref sparseBlocks nfcSparse => ref ((StaticBox<sparseBlocks>)ᏑnfcSparse).ValueSlot;
 
-[GoLazy] partial class lazyᴛnfkcSparse { internal static ж<sparseBlocks> ᏑnfkcSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
+[GoLazy] partial class lazyᴛnfkcSparse { internal static readonly ж<sparseBlocks> ᏑnfkcSparse = new StaticBox<sparseBlocks>(new sparseBlocks(
     values: nfkcSparseValues[..],
     offset: nfkcSparseOffset[..]
 )); }
-internal static ref sparseBlocks nfkcSparse => ref ᏑnfkcSparse.Value;
+internal static ref sparseBlocks nfkcSparse => ref ((StaticBox<sparseBlocks>)ᏑnfkcSparse).ValueSlot;
 
 internal static ж<nfcTrie> nfcData = newNfcTrie(0);
 internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);

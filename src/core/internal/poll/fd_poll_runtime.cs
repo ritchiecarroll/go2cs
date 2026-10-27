@@ -40,8 +40,8 @@ partial struct pollDesc {
     internal uintptr runtimeCtx;
 }
 
-internal static ж<sync.Once> ᏑserverInit = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once serverInit => ref ᏑserverInit.Value;
+internal static readonly ж<sync.Once> ᏑserverInit = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)ᏑserverInit).ValueSlot;
 
 internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();

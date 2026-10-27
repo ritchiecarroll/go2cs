@@ -352,8 +352,8 @@ public static @string String(this Func f) {
 }
 
 // All published variables.
-internal static ж<Map> Ꮡvars = new StaticBox<Map>(default(Map));
-internal static ref Map vars => ref Ꮡvars.Value;
+internal static readonly ж<Map> Ꮡvars = new StaticBox<Map>(default(Map));
+internal static ref Map vars => ref ((StaticBox<Map>)Ꮡvars).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object reuseOfExportedVarNameˢ = (@string)"Reuse of exported var name:"u8;

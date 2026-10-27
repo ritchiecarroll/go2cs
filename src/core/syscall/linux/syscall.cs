@@ -79,8 +79,8 @@ public static (ж<byte>, error) BytePtrFromString(@string s) {
 
 // Single-word zero for use when we need a valid pointer to 0 bytes.
 // See mksyscall.pl.
-internal static ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
-internal static ref uintptr _zero => ref Ꮡ_zero.Value;
+internal static readonly ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
+internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlot;
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.
 public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) {

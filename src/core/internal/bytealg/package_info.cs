@@ -55,7 +55,7 @@ using static go.@internal.bytealg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/bytealg/bytealg.go", "bytealg.cs", "ACBKwoKClJKCgpSUqsKCgpSSgoKUlKrUgoKCgpSClIKCgoKCgqaq1IKCgoKClIKUgoKCgoKmrg==")]
+[assembly: go.GoPositionMap("internal/bytealg/bytealg.go", "bytealg.cs", "ACFKwoKClJKCgpSUqsKCgpSSgoKUlKrUgoKCgpSClIKCgoKCgqaq1IKCgoKClIKUgoKCgoKmrg==")]
 [assembly: go.GoPositionMap("internal/bytealg/compare_native.go", "compare_native.cs", "AAoYpIIAAhA=")]
 [assembly: go.GoPositionMap("internal/bytealg/count_native.go", "count_native.cs", "AAgUpqaSgoKCpqSCgoKCpg==")]
 [assembly: go.GoPositionMap("internal/bytealg/equal_generic.go", "equal_generic.cs", "AAccAAkG")]

@@ -15,15 +15,15 @@ using static go.crypto.@internal.boring.bcache_package;
 
 partial class bcache_internal_test_package {
 
-internal static ж<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>> ᏑregisteredCache = new StaticBox<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>(default(global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>));
-internal static ref global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32> registeredCache => ref ᏑregisteredCache.Value;
+internal static readonly ж<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>> ᏑregisteredCache = new StaticBox<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>(default(global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>));
+internal static ref global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32> registeredCache => ref ((StaticBox<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>)ᏑregisteredCache).ValueSlot;
 
 [GoInit] internal static void init() {
     ᏑregisteredCache.Register();
 }
 
-internal static ж<atomic.Uint32> Ꮡseq = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
-internal static ref atomic.Uint32 seq => ref Ꮡseq.Value;
+internal static readonly ж<atomic.Uint32> Ꮡseq = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ref atomic.Uint32 seq => ref ((StaticBox<atomic.Uint32>)Ꮡseq).ValueSlot;
 
 internal static ж<T> next<T>()
     where T : /* int | int32 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

@@ -33,8 +33,8 @@ internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
     return Δp;
 }
 
-internal static ж<uint32> ᏑadviseUnused = new StaticBox<uint32>((uint32)_MADV_FREE);
-internal static ref uint32 adviseUnused => ref ᏑadviseUnused.Value;
+internal static readonly ж<uint32> ᏑadviseUnused = new StaticBox<uint32>((uint32)_MADV_FREE);
+internal static ref uint32 adviseUnused => ref ((StaticBox<uint32>)ᏑadviseUnused).ValueSlot;
 
 internal static UntypedInt madviseUnsupported => 0;
 

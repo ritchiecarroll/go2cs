@@ -386,8 +386,8 @@ internal static void runCleanups() {
 internal static Action onceFunc = Δsync.OnceFunc(() => {
 });
 
-internal static ж<Δsync.Once> ᏑonceFuncOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once onceFuncOnce => ref ᏑonceFuncOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑonceFuncOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once onceFuncOnce => ref ((StaticBox<Δsync.Once>)ᏑonceFuncOnce).ValueSlot;
 
 internal static Action onceFuncFunc;
 
@@ -441,8 +441,8 @@ public static void BenchmarkOnceFunc(ж<Δtesting.B> Ꮡb) {
 
 internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
 
-internal static ж<Δsync.Once> ᏑonceValueOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once onceValueOnce => ref ᏑonceValueOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑonceValueOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once onceValueOnce => ref ((StaticBox<Δsync.Once>)ᏑonceValueOnce).ValueSlot;
 internal static nint onceValueValue;
 
 internal static Func<nint> onceValueFunc;
@@ -503,8 +503,8 @@ internal const bool onceValuesWant2 = true;
 
 internal static Func<(nint, bool)> onceValues = Δsync.OnceValues((nint, bool) () => (onceValuesWant1, onceValuesWant2));
 
-internal static ж<Δsync.Once> ᏑonceValuesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once onceValuesOnce => ref ᏑonceValuesOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑonceValuesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once onceValuesOnce => ref ((StaticBox<Δsync.Once>)ᏑonceValuesOnce).ValueSlot;
 internal static nint onceValuesValue1;
 internal static bool onceValuesValue2;
 

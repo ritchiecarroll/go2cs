@@ -187,8 +187,8 @@ partial struct profilesᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal map<@string, ж<Profile>> m;
 }
-internal static ж<profilesᴛ1> Ꮡprofiles = new StaticBox<profilesᴛ1>(default(profilesᴛ1));
-internal static ref profilesᴛ1 profiles => ref Ꮡprofiles.Value;
+internal static readonly ж<profilesᴛ1> Ꮡprofiles = new StaticBox<profilesᴛ1>(default(profilesᴛ1));
+internal static ref profilesᴛ1 profiles => ref ((StaticBox<profilesᴛ1>)Ꮡprofiles).ValueSlot;
 
 internal static ж<Profile> goroutineProfile;
 internal static void initᴛgoroutineProfile() { goroutineProfile = Ꮡ(new Profile(
@@ -262,8 +262,8 @@ internal static void initᴛmutexProfile() { mutexProfile = Ꮡ(new Profile(
 //	.                     | .                           | Write profile
 //	----------------------+-----------------------------+---------------------
 //	Incomplete profile    |+++++++++++++++++++++++++++++| Complete profile
-internal static ж<sync.Mutex> ᏑgoroutineLeakProfileLock = new StaticBox<sync.Mutex>(default(sync.Mutex));
-internal static ref sync.Mutex goroutineLeakProfileLock => ref ᏑgoroutineLeakProfileLock.Value;
+internal static readonly ж<sync.Mutex> ᏑgoroutineLeakProfileLock = new StaticBox<sync.Mutex>(default(sync.Mutex));
+internal static ref sync.Mutex goroutineLeakProfileLock => ref ((StaticBox<sync.Mutex>)ᏑgoroutineLeakProfileLock).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goroutineleakˢ = "goroutineleak"u8;
@@ -976,8 +976,8 @@ partial struct cpuᴛ1 /*dyn*/ {
     internal bool profiling;
     internal channel<bool> done;
 }
-internal static ж<cpuᴛ1> Ꮡcpu = new StaticBox<cpuᴛ1>(new cpuᴛ1(nil));
-internal static ref cpuᴛ1 cpu => ref Ꮡcpu.Value;
+internal static readonly ж<cpuᴛ1> Ꮡcpu = new StaticBox<cpuᴛ1>(new cpuᴛ1(nil));
+internal static ref cpuᴛ1 cpu => ref ((StaticBox<cpuᴛ1>)Ꮡcpu).ValueSlot;
 
 // StartCPUProfile enables CPU profiling for the current process.
 // While profiling, the profile will be buffered and written to w.

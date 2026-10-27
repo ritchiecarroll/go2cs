@@ -28,14 +28,15 @@ partial struct InternalTestsᴛ1 /*dyn*/ {
     public @string Name;
     public Action<testingT> Test;
 }
-public static slice<InternalTestsᴛ1> InternalTests = new InternalTestsᴛ1[]{
+public static readonly ж<slice<InternalTestsᴛ1>> ᏑInternalTests = new StaticBox<slice<InternalTestsᴛ1>>(new InternalTestsᴛ1[]{
     new("AbsDaysSplit"u8, testAbsDaysSplit),
     new("AbsYdaySplit"u8, testAbsYdaySplit),
     new("AbsDate"u8, testAbsDate),
     new("DateToAbsDays"u8, testDateToAbsDays),
     new("DaysIn"u8, testDaysIn),
     new("DaysBefore"u8, testDaysBefore)
-}.slice();
+}.slice());
+public static ref slice<InternalTestsᴛ1> InternalTests => ref ((StaticBox<slice<InternalTestsᴛ1>>)ᏑInternalTests).ValueSlot;
 
 internal static void testAbsDaysSplit(testingT t) {
     bool isLeap(uint64 year) => year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);

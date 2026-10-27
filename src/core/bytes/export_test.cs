@@ -8,6 +8,7 @@ using static go.bytes_package;
 partial class bytes_internal_test_package {
 
 // Export func for testing
-public static Func<slice<byte>, byte, nint> IndexBytePortable = indexBytePortable;
+public static readonly ж<Func<slice<byte>, byte, nint>> ᏑIndexBytePortable = new StaticBox<Func<slice<byte>, byte, nint>>(indexBytePortable);
+public static ref Func<slice<byte>, byte, nint> IndexBytePortable => ref ((StaticBox<Func<slice<byte>, byte, nint>>)ᏑIndexBytePortable).ValueSlot;
 
 } // end bytes_internal_test_package

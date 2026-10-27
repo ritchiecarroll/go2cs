@@ -14,7 +14,7 @@ partial class syslist_package {
 // KnownOS is the list of past, present, and future known GOOS values.
 // Do not remove from this list, as it is used for filename matching.
 // If you add an entry to this list, look at UnixOS, below.
-[GoLazy] partial class lazyᴛKnownOS { public static map<@string, bool> KnownOS = new map<@string, bool>{
+[GoLazy] partial class lazyᴛKnownOS { public static readonly ж<map<@string, bool>> ᏑKnownOS = new StaticBox<map<@string, bool>>(new map<@string, bool>{
     ["aix"u8] = true,
     ["android"u8] = true,
     ["darwin"u8] = true,
@@ -33,12 +33,13 @@ partial class syslist_package {
     ["wasip1"u8] = true,
     ["windows"u8] = true,
     ["zos"u8] = true
-}; }
+}); }
+public static ref map<@string, bool> KnownOS => ref ((StaticBox<map<@string, bool>>)ᏑKnownOS).ValueSlot;
 
 // UnixOS is the set of GOOS values matched by the "unix" build tag.
 // This is not used for filename matching.
 // This list also appears in cmd/dist/build.go.
-[GoLazy] partial class lazyᴛUnixOS { public static map<@string, bool> UnixOS = new map<@string, bool>{
+[GoLazy] partial class lazyᴛUnixOS { public static readonly ж<map<@string, bool>> ᏑUnixOS = new StaticBox<map<@string, bool>>(new map<@string, bool>{
     ["aix"u8] = true,
     ["android"u8] = true,
     ["darwin"u8] = true,
@@ -51,11 +52,12 @@ partial class syslist_package {
     ["netbsd"u8] = true,
     ["openbsd"u8] = true,
     ["solaris"u8] = true
-}; }
+}); }
+public static ref map<@string, bool> UnixOS => ref ((StaticBox<map<@string, bool>>)ᏑUnixOS).ValueSlot;
 
 // KnownArch is the list of past, present, and future known GOARCH values.
 // Do not remove from this list, as it is used for filename matching.
-[GoLazy] partial class lazyᴛKnownArch { public static map<@string, bool> KnownArch = new map<@string, bool>{
+[GoLazy] partial class lazyᴛKnownArch { public static readonly ж<map<@string, bool>> ᏑKnownArch = new StaticBox<map<@string, bool>>(new map<@string, bool>{
     ["386"u8] = true,
     ["amd64"u8] = true,
     ["amd64p32"u8] = true,
@@ -80,6 +82,7 @@ partial class syslist_package {
     ["sparc"u8] = true,
     ["sparc64"u8] = true,
     ["wasm"u8] = true
-}; }
+}); }
+public static ref map<@string, bool> KnownArch => ref ((StaticBox<map<@string, bool>>)ᏑKnownArch).ValueSlot;
 
 } // end syslist_package

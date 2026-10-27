@@ -69,8 +69,8 @@ internal static void initᴛΔUTC() { ΔUTC = ᏑutcLoc; }
 // utcLoc is separate so that get can refer to &utcLoc
 // and ensure that it never returns a nil *Location,
 // even if a badly behaved client has changed UTC.
-internal static ж<ΔLocation> ᏑutcLoc = new StaticBox<ΔLocation>(new ΔLocation(name: "UTC"u8));
-internal static ref ΔLocation utcLoc => ref ᏑutcLoc.Value;
+internal static readonly ж<ΔLocation> ᏑutcLoc = new StaticBox<ΔLocation>(new ΔLocation(name: "UTC"u8));
+internal static ref ΔLocation utcLoc => ref ((StaticBox<ΔLocation>)ᏑutcLoc).ValueSlot;
 
 // Local represents the system's local time zone.
 // On Unix systems, Local consults the TZ environment
@@ -83,11 +83,11 @@ internal static void initᴛΔLocal() { ΔLocal = ᏑlocalLoc; }
 
 // localLoc is separate so that initLocal can initialize
 // it even if a client has changed Local.
-internal static ж<ΔLocation> ᏑlocalLoc = new StaticBox<ΔLocation>(default(ΔLocation));
-internal static ref ΔLocation localLoc => ref ᏑlocalLoc.Value;
+internal static readonly ж<ΔLocation> ᏑlocalLoc = new StaticBox<ΔLocation>(default(ΔLocation));
+internal static ref ΔLocation localLoc => ref ((StaticBox<ΔLocation>)ᏑlocalLoc).ValueSlot;
 
-internal static ж<Δsync.Once> ᏑlocalOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once localOnce => ref ᏑlocalOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑlocalOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)ᏑlocalOnce).ValueSlot;
 
 internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
     if (Ꮡl == nil) {
@@ -107,8 +107,8 @@ public static @string String(this ж<ΔLocation> Ꮡl) {
 
 internal static slice<ж<ΔLocation>> unnamedFixedZones;
 
-internal static ж<Δsync.Once> ᏑunnamedFixedZonesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once unnamedFixedZonesOnce => ref ᏑunnamedFixedZonesOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑunnamedFixedZonesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once unnamedFixedZonesOnce => ref ((StaticBox<Δsync.Once>)ᏑunnamedFixedZonesOnce).ValueSlot;
 
 // FixedZone returns a [Location] that always uses
 // the given zone name and offset (seconds east of UTC).
@@ -673,8 +673,8 @@ internal static error errLocation = errors.New("time: invalid location name"u8);
 
 internal static ж<@string> zoneinfo;
 
-internal static ж<Δsync.Once> ᏑzoneinfoOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once zoneinfoOnce => ref ᏑzoneinfoOnce.Value;
+internal static readonly ж<Δsync.Once> ᏑzoneinfoOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
+internal static ref Δsync.Once zoneinfoOnce => ref ((StaticBox<Δsync.Once>)ᏑzoneinfoOnce).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string zoneinfoˢ = "ZONEINFO"u8;

@@ -118,8 +118,8 @@ internal static uintptr syscall_cgocaller(@unsafe.Pointer fn, params ꓸꓸꓸui
     return @as.retval;
 }
 
-internal static ж<uint64> Ꮡncgocall = new StaticBox<uint64>(default(uint64));
-internal static ref uint64 ncgocall => ref Ꮡncgocall.Value; // number of cgo calls in total for dead m
+internal static readonly ж<uint64> Ꮡncgocall = new StaticBox<uint64>(default(uint64));
+internal static ref uint64 ncgocall => ref ((StaticBox<uint64>)Ꮡncgocall).ValueSlot; // number of cgo calls in total for dead m
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cgocallUnavailableˢ = "cgocall unavailable"u8;
@@ -557,8 +557,8 @@ internal static void cgounimpl() {
     @throw(cgoNotImplementedˢ);
 }
 
-internal static ж<uint64> Ꮡracecgosync = new StaticBox<uint64>(default(uint64));
-internal static ref uint64 racecgosync => ref Ꮡracecgosync.Value; // represents possible synchronization in C code
+internal static readonly ж<uint64> Ꮡracecgosync = new StaticBox<uint64>(default(uint64));
+internal static ref uint64 racecgosync => ref ((StaticBox<uint64>)Ꮡracecgosync).ValueSlot; // represents possible synchronization in C code
 
 // Pointer checking for cgo code.
 // We want to detect all cases where a program that does not use

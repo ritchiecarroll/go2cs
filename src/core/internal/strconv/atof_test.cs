@@ -22,7 +22,7 @@ partial struct atofTest {
     internal error err;
 }
 
-internal static ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>>(new atofTest[]{
+internal static readonly ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>>(new atofTest[]{
     new(""u8, "0"u8, ErrSyntax),
     new("1"u8, "1"u8, default!),
     new("+1"u8, "1"u8, default!),
@@ -347,7 +347,7 @@ internal static ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>
     new("1e100x"u8, "0"u8, ErrSyntax),
     new("1e1000x"u8, "0"u8, ErrSyntax)
 }.slice());
-internal static ref slice<atofTest> atoftests => ref Ꮡatoftests.ValueSlot;
+internal static ref slice<atofTest> atoftests => ref ((StaticBox<slice<atofTest>>)Ꮡatoftests).ValueSlot;
 
 internal static slice<atofTest> atof32tests = new atofTest[]{
     // Hex
@@ -437,8 +437,8 @@ partial struct atofSimpleTest {
     internal @string s;
 }
 
-internal static ж<sync.Once> ᏑatofOnce = new StaticBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once atofOnce => ref ᏑatofOnce.Value;
+internal static readonly ж<sync.Once> ᏑatofOnce = new StaticBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once atofOnce => ref ((StaticBox<sync.Once>)ᏑatofOnce).ValueSlot;
 internal static slice<atofSimpleTest> atofRandomTests;
 internal static array<@string> benchmarksRandomBits = new(1024);
 internal static array<@string> benchmarksRandomNormal = new(1024);

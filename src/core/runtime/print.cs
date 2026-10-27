@@ -49,8 +49,8 @@ internal static void recordForPanic(slice<byte> b) {
     printunlock();
 }
 
-internal static ж<mutex> Ꮡdebuglock = new StaticBox<mutex>(new mutex(nil));
-internal static ref mutex debuglock => ref Ꮡdebuglock.Value;
+internal static readonly ж<mutex> Ꮡdebuglock = new StaticBox<mutex>(new mutex(nil));
+internal static ref mutex debuglock => ref ((StaticBox<mutex>)Ꮡdebuglock).ValueSlot;
 
 // The compiler emits calls to printlock and printunlock around
 // the multiple calls that implement a single Go print or println

@@ -10,8 +10,8 @@ using go.sync;
 partial class syscall_package {
 
 // origRlimitNofile, if non-nil, is the original soft RLIMIT_NOFILE.
-internal static ж<atomic.Pointer<Rlimit>> ᏑorigRlimitNofile = new StaticBox<atomic.Pointer<Rlimit>>(default(atomic.Pointer<Rlimit>));
-internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ᏑorigRlimitNofile.Value;
+internal static readonly ж<atomic.Pointer<Rlimit>> ᏑorigRlimitNofile = new StaticBox<atomic.Pointer<Rlimit>>(default(atomic.Pointer<Rlimit>));
+internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ((StaticBox<atomic.Pointer<Rlimit>>)ᏑorigRlimitNofile).ValueSlot;
 
 // Some systems set an artificially low soft limit on open file count, for compatibility
 // with code that uses select and its hard-coded maximum file descriptor

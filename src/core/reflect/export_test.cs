@@ -106,7 +106,8 @@ public static slice<@string> TypeLinks() {
     return r;
 }
 
-public static Func<any, slice<byte>> GCBits = gcbits;
+public static readonly ж<Func<any, slice<byte>>> ᏑGCBits = new StaticBox<Func<any, slice<byte>>>(gcbits);
+public static ref Func<any, slice<byte>> GCBits => ref ((StaticBox<Func<any, slice<byte>>>)ᏑGCBits).ValueSlot;
 
 // go2cs generated this placeholder — func gcbits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -172,11 +173,14 @@ public static (nint oldInts, nint oldFloats, uintptr oldFloatSize) SetArgRegs(ni
     return (oldInts, oldFloats, oldFloatSize);
 }
 
-public static Func<uintptr> MethodValueCallCodePtr = methodValueCallCodePtr;
+public static readonly ж<Func<uintptr>> ᏑMethodValueCallCodePtr = new StaticBox<Func<uintptr>>(methodValueCallCodePtr);
+public static ref Func<uintptr> MethodValueCallCodePtr => ref ((StaticBox<Func<uintptr>>)ᏑMethodValueCallCodePtr).ValueSlot;
 
-public static Func<slice<byte>, bool> InternalIsZero = isZero;
+public static readonly ж<Func<slice<byte>, bool>> ᏑInternalIsZero = new StaticBox<Func<slice<byte>, bool>>(isZero);
+public static ref Func<slice<byte>, bool> InternalIsZero => ref ((StaticBox<Func<slice<byte>, bool>>)ᏑInternalIsZero).ValueSlot;
 
-public static Func<global::go.reflect_package.ΔType, bool> IsRegularMemory = isRegularMemory;
+public static readonly ж<Func<global::go.reflect_package.ΔType, bool>> ᏑIsRegularMemory = new StaticBox<Func<global::go.reflect_package.ΔType, bool>>(isRegularMemory);
+public static ref Func<global::go.reflect_package.ΔType, bool> IsRegularMemory => ref ((StaticBox<Func<global::go.reflect_package.ΔType, bool>>)ᏑIsRegularMemory).ValueSlot;
 
 public static global::go.reflect_package.ΔType MapGroupOf(global::go.reflect_package.ΔType x, global::go.reflect_package.ΔType y) {
     var (grp, _) = groupAndSlotOf(x, y);

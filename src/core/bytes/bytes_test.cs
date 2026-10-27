@@ -1464,7 +1464,7 @@ partial struct RepeatTest {
 
 internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << 16))) + "z"u8;
 
-public static slice<RepeatTest> RepeatTests = new RepeatTest[]{
+public static readonly ж<slice<RepeatTest>> ᏑRepeatTests = new StaticBox<slice<RepeatTest>>(new RepeatTest[]{
     new(""u8, ""u8, 0),
     new(""u8, ""u8, 1),
     new(""u8, ""u8, 2),
@@ -1475,7 +1475,8 @@ public static slice<RepeatTest> RepeatTests = new RepeatTest[]{
     // Tests for results over the chunkLimit
     new((@string)(rune)0, (@string)new slice<byte>((1 << 16)), 1 << 16),
     new(longString, longString + longString, 2)
-}.slice();
+}.slice());
+public static ref slice<RepeatTest> RepeatTests => ref ((StaticBox<slice<RepeatTest>>)ᏑRepeatTests).ValueSlot;
 
 public static void TestRepeat(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in RepeatTests) {
@@ -1572,7 +1573,7 @@ partial struct RunesTest {
     internal bool lossy;
 }
 
-public static slice<RunesTest> RunesTests = new RunesTest[]{
+public static readonly ж<slice<RunesTest>> ᏑRunesTests = new StaticBox<slice<RunesTest>>(new RunesTest[]{
     new(""u8, new rune[]{}.slice(), false),
     new(" "u8, new rune[]{32}.slice(), false),
     new("ABC"u8, new rune[]{65, 66, 67}.slice(), false),
@@ -1580,7 +1581,8 @@ public static slice<RunesTest> RunesTests = new RunesTest[]{
     new("\u65e5\u672c\u8a9e"u8, new rune[]{26085, 26412, 35486}.slice(), false),
     new(((@string)(new byte[]{0x61, 0x62, 0x80, 0x63})), new rune[]{97, 98, 0xFFFD, 99}.slice(), true),
     new(((@string)(new byte[]{0x61, 0x62, 0xc0, 0x63})), new rune[]{97, 98, 0xFFFD, 99}.slice(), true)
-}.slice();
+}.slice());
+public static ref slice<RunesTest> RunesTests => ref ((StaticBox<slice<RunesTest>>)ᏑRunesTests).ValueSlot;
 
 public static void TestRunes(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in RunesTests) {
@@ -1902,7 +1904,7 @@ partial struct ReplaceTest {
     internal @string @out;
 }
 
-public static slice<ReplaceTest> ReplaceTests = new ReplaceTest[]{
+public static readonly ж<slice<ReplaceTest>> ᏑReplaceTests = new StaticBox<slice<ReplaceTest>>(new ReplaceTest[]{
     new("hello"u8, "l"u8, "L"u8, 0, "hello"u8),
     new("hello"u8, "l"u8, "L"u8, -1, "heLLo"u8),
     new("hello"u8, "x"u8, "X"u8, -1, "hello"u8),
@@ -1922,7 +1924,8 @@ public static slice<ReplaceTest> ReplaceTests = new ReplaceTest[]{
     new("banana"u8, "a"u8, "a"u8, -1, "banana"u8),
     new("banana"u8, "a"u8, "a"u8, 1, "banana"u8),
     new("☺☻☹"u8, ""u8, "<>"u8, -1, "<>☺<>☻<>☹<>"u8)
-}.slice();
+}.slice());
+public static ref slice<ReplaceTest> ReplaceTests => ref ((StaticBox<slice<ReplaceTest>>)ᏑReplaceTests).ValueSlot;
 
 public static void TestReplace(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2045,7 +2048,7 @@ partial struct TitleTest {
     internal @string @in, @out;
 }
 
-public static slice<TitleTest> TitleTests = new TitleTest[]{
+public static readonly ж<slice<TitleTest>> ᏑTitleTests = new StaticBox<slice<TitleTest>>(new TitleTest[]{
     new(""u8, ""u8),
     new("a"u8, "A"u8),
     new(" aaa aaa aaa "u8, " Aaa Aaa Aaa "u8),
@@ -2055,7 +2058,8 @@ public static slice<TitleTest> TitleTests = new TitleTest[]{
     new("ÿøû"u8, "Ÿøû"u8),
     new("with_underscore"u8, "With_underscore"u8),
     new(((@string)(new byte[]{0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x20, 0xe2, 0x80, 0xa8, 0x20, 0x6c, 0x69, 0x6e, 0x65, 0x20, 0x73, 0x65, 0x70, 0x61, 0x72, 0x61, 0x74, 0x6f, 0x72})), ((@string)(new byte[]{0x55, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x20, 0xe2, 0x80, 0xa8, 0x20, 0x4c, 0x69, 0x6e, 0x65, 0x20, 0x53, 0x65, 0x70, 0x61, 0x72, 0x61, 0x74, 0x6f, 0x72})))
-}.slice();
+}.slice());
+public static ref slice<TitleTest> TitleTests => ref ((StaticBox<slice<TitleTest>>)ᏑTitleTests).ValueSlot;
 
 public static void TestTitle(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in TitleTests) {
@@ -2067,7 +2071,7 @@ public static void TestTitle(ж<testing.T> Ꮡt) {
     }
 }
 
-public static slice<TitleTest> ToTitleTests = new TitleTest[]{
+public static readonly ж<slice<TitleTest>> ᏑToTitleTests = new StaticBox<slice<TitleTest>>(new TitleTest[]{
     new(""u8, ""u8),
     new("a"u8, "A"u8),
     new(" aaa aaa aaa "u8, " AAA AAA AAA "u8),
@@ -2075,7 +2079,8 @@ public static slice<TitleTest> ToTitleTests = new TitleTest[]{
     new("123a456"u8, "123A456"u8),
     new("double-blind"u8, "DOUBLE-BLIND"u8),
     new("ÿøû"u8, "ŸØÛ"u8)
-}.slice();
+}.slice());
+public static ref slice<TitleTest> ToTitleTests => ref ((StaticBox<slice<TitleTest>>)ᏑToTitleTests).ValueSlot;
 
 public static void TestToTitle(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in ToTitleTests) {
@@ -2091,7 +2096,7 @@ partial struct EqualFoldTestsᴛ1 /*dyn*/ {
     internal @string s, t;
     internal bool @out;
 }
-public static slice<EqualFoldTestsᴛ1> EqualFoldTests = new EqualFoldTestsᴛ1[]{
+public static readonly ж<slice<EqualFoldTestsᴛ1>> ᏑEqualFoldTests = new StaticBox<slice<EqualFoldTestsᴛ1>>(new EqualFoldTestsᴛ1[]{
     new("abc"u8, "abc"u8, true),
     new("ABcd"u8, "ABcd"u8, true),
     new("123abc"u8, "123ABC"u8, true),
@@ -2103,7 +2108,8 @@ public static slice<EqualFoldTestsᴛ1> EqualFoldTests = new EqualFoldTestsᴛ1[
     new("abcdefghijK"u8, "abcdefghij\u212A"u8, true),
     new("abcdefghijkz"u8, "abcdefghij\u212Ay"u8, false),
     new("abcdefghijKz"u8, "abcdefghij\u212Ay"u8, false)
-}.slice();
+}.slice());
+public static ref slice<EqualFoldTestsᴛ1> EqualFoldTests => ref ((StaticBox<slice<EqualFoldTestsᴛ1>>)ᏑEqualFoldTests).ValueSlot;
 
 public static void TestEqualFold(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2283,7 +2289,7 @@ partial struct ContainsAnyTestsᴛ1 /*dyn*/ {
     internal @string substr;
     internal bool expected;
 }
-public static slice<ContainsAnyTestsᴛ1> ContainsAnyTests = new ContainsAnyTestsᴛ1[]{
+public static readonly ж<slice<ContainsAnyTestsᴛ1>> ᏑContainsAnyTests = new StaticBox<slice<ContainsAnyTestsᴛ1>>(new ContainsAnyTestsᴛ1[]{
     new(slice<byte>(""u8), ""u8, false),
     new(slice<byte>(""u8), "a"u8, false),
     new(slice<byte>(""u8), "abc"u8, false),
@@ -2295,7 +2301,8 @@ public static slice<ContainsAnyTestsᴛ1> ContainsAnyTests = new ContainsAnyTest
     new(slice<byte>("a☺b☻c☹d"u8), "uvw☻xyz"u8, true),
     new(slice<byte>("aRegExp*"u8), ".(|)*+?^$[]"u8, true),
     new(slice<byte>(dots + dots + dots), " "u8, false)
-}.slice();
+}.slice());
+public static ref slice<ContainsAnyTestsᴛ1> ContainsAnyTests => ref ((StaticBox<slice<ContainsAnyTestsᴛ1>>)ᏑContainsAnyTests).ValueSlot;
 
 public static void TestContainsAny(ж<testing.T> Ꮡt) {
     foreach (var (_, ct) in ContainsAnyTests) {
@@ -2311,7 +2318,7 @@ partial struct ContainsRuneTestsᴛ1 /*dyn*/ {
     internal rune r;
     internal bool expected;
 }
-public static slice<ContainsRuneTestsᴛ1> ContainsRuneTests = new ContainsRuneTestsᴛ1[]{
+public static readonly ж<slice<ContainsRuneTestsᴛ1>> ᏑContainsRuneTests = new StaticBox<slice<ContainsRuneTestsᴛ1>>(new ContainsRuneTestsᴛ1[]{
     new(slice<byte>(""u8), (rune)'a', false),
     new(slice<byte>("a"u8), (rune)'a', true),
     new(slice<byte>("aaa"u8), (rune)'a', true),
@@ -2320,7 +2327,8 @@ public static slice<ContainsRuneTestsᴛ1> ContainsRuneTests = new ContainsRuneT
     new(slice<byte>("a☺b☻c☹d"u8), (rune)'x', false),
     new(slice<byte>("a☺b☻c☹d"u8), (rune)'☻', true),
     new(slice<byte>("aRegExp*"u8), (rune)'*', true)
-}.slice();
+}.slice());
+public static ref slice<ContainsRuneTestsᴛ1> ContainsRuneTests => ref ((StaticBox<slice<ContainsRuneTestsᴛ1>>)ᏑContainsRuneTests).ValueSlot;
 
 public static void TestContainsRune(ж<testing.T> Ꮡt) {
     foreach (var (_, ct) in ContainsRuneTests) {

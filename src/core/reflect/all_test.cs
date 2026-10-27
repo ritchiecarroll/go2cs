@@ -324,7 +324,7 @@ internal static slice<pair> typeTests = new pair[]{
     )
 }.slice();
 
-internal static ж<slice<pair>> ᏑvalueTests = new StaticBox<slice<pair>>(new pair[]{
+internal static readonly ж<slice<pair>> ᏑvalueTests = new StaticBox<slice<pair>>(new pair[]{
     new(@new<nint>(), "132"u8),
     new(@new<int8>(), "8"u8),
     new(@new<int16>(), "16"u8),
@@ -361,7 +361,7 @@ internal static ж<slice<pair>> ᏑvalueTests = new StaticBox<slice<pair>>(new p
         "struct { a int8; b int8; c int32 }{0, 0, 0}"u8
     )
 }.slice());
-internal static ref slice<pair> valueTests => ref ᏑvalueTests.ValueSlot;
+internal static ref slice<pair> valueTests => ref ((StaticBox<slice<pair>>)ᏑvalueTests).ValueSlot;
 
 internal static partial void testType(ж<Δtesting.T> Ꮡt, nint i, reflectꓸType typ, @string want) {
     @string s = typ.String();
@@ -781,8 +781,8 @@ public static void TestCanSetField(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-internal static ж<nint> Ꮡ_i = new StaticBox<nint>(7);
-internal static ref nint _i => ref Ꮡ_i.Value;
+internal static readonly ж<nint> Ꮡ_i = new StaticBox<nint>(7);
+internal static ref nint _i => ref ((StaticBox<nint>)Ꮡ_i).ValueSlot;
 
 internal static slice<pair> valueToStringTests = new pair[]{
     new((nint)123, "123"u8),
@@ -1340,22 +1340,22 @@ partial struct self {
 
 partial class Loop /*ж<Loop>*/;
 
-internal static ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
-internal static ref Loop loop1 => ref Ꮡloop1.ValueSlot;
-internal static ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
-internal static ref Loop loop2 => ref Ꮡloop2.ValueSlot;
+internal static readonly ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
+internal static ref Loop loop1 => ref ((StaticBox<Loop>)Ꮡloop1).ValueSlot;
+internal static readonly ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
+internal static ref Loop loop2 => ref ((StaticBox<Loop>)Ꮡloop2).ValueSlot;
 
-internal static ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
-internal static ref Loopy loopy1 => ref Ꮡloopy1.ValueSlot;
-internal static ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
-internal static ref Loopy loopy2 => ref Ꮡloopy2.ValueSlot;
+internal static readonly ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
+internal static ref Loopy loopy1 => ref ((StaticBox<Loopy>)Ꮡloopy1).ValueSlot;
+internal static readonly ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
+internal static ref Loopy loopy2 => ref ((StaticBox<Loopy>)Ꮡloopy2).ValueSlot;
 
-internal static ж<map<@string, any>> ᏑcycleMap1 = new StaticBox<map<@string, any>>(default(map<@string, any>));
-internal static ref map<@string, any> cycleMap1 => ref ᏑcycleMap1.ValueSlot;
-internal static ж<map<@string, any>> ᏑcycleMap2 = new StaticBox<map<@string, any>>(default(map<@string, any>));
-internal static ref map<@string, any> cycleMap2 => ref ᏑcycleMap2.ValueSlot;
-internal static ж<map<@string, any>> ᏑcycleMap3 = new StaticBox<map<@string, any>>(default(map<@string, any>));
-internal static ref map<@string, any> cycleMap3 => ref ᏑcycleMap3.ValueSlot;
+internal static readonly ж<map<@string, any>> ᏑcycleMap1 = new StaticBox<map<@string, any>>(default(map<@string, any>));
+internal static ref map<@string, any> cycleMap1 => ref ((StaticBox<map<@string, any>>)ᏑcycleMap1).ValueSlot;
+internal static readonly ж<map<@string, any>> ᏑcycleMap2 = new StaticBox<map<@string, any>>(default(map<@string, any>));
+internal static ref map<@string, any> cycleMap2 => ref ((StaticBox<map<@string, any>>)ᏑcycleMap2).ValueSlot;
+internal static readonly ж<map<@string, any>> ᏑcycleMap3 = new StaticBox<map<@string, any>>(default(map<@string, any>));
+internal static ref map<@string, any> cycleMap3 => ref ((StaticBox<map<@string, any>>)ᏑcycleMap3).ValueSlot;
 
 partial struct structWithSelfPtr {
     internal ж<structWithSelfPtr> p;
@@ -2617,8 +2617,8 @@ partial struct selectWatchᴛ1 /*dyn*/ {
     internal time.Time now;
     internal slice<caseInfo> info;
 }
-internal static ж<selectWatchᴛ1> ᏑselectWatch = new StaticBox<selectWatchᴛ1>(new selectWatchᴛ1(nil));
-internal static ref selectWatchᴛ1 selectWatch => ref ᏑselectWatch.Value;
+internal static readonly ж<selectWatchᴛ1> ᏑselectWatch = new StaticBox<selectWatchᴛ1>(new selectWatchᴛ1(nil));
+internal static ref selectWatchᴛ1 selectWatch => ref ((StaticBox<selectWatchᴛ1>)ᏑselectWatch).ValueSlot;
 
 internal static void selectWatcher() {
     while (ᐧ) {
@@ -5494,7 +5494,8 @@ public static void TestAlias(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static Func<any, reflectꓸValue> V = ValueOf;
+public static readonly ж<Func<any, reflectꓸValue>> ᏑV = new StaticBox<Func<any, reflectꓸValue>>(ValueOf);
+public static ref Func<any, reflectꓸValue> V => ref ((StaticBox<Func<any, reflectꓸValue>>)ᏑV).ValueSlot;
 
 public static reflectꓸValue EmptyInterfaceV(any xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
@@ -10459,13 +10460,13 @@ partial struct ValueEqualTest {
     internal bool vDeref, uDeref;
 }
 
-internal static ж<any> ᏑequalI = new StaticBox<any>((nint)1);
-internal static ref any equalI => ref ᏑequalI.ValueSlot;
+internal static readonly ж<any> ᏑequalI = new StaticBox<any>((nint)1);
+internal static ref any equalI => ref ((StaticBox<any>)ᏑequalI).ValueSlot;
 
 internal static any equalSlice = new nint[]{1}.slice();
 
-internal static ж<any> ᏑnilInterface = new StaticBox<any>(default(any));
-internal static ref any nilInterface => ref ᏑnilInterface.ValueSlot;
+internal static readonly ж<any> ᏑnilInterface = new StaticBox<any>(default(any));
+internal static ref any nilInterface => ref ((StaticBox<any>)ᏑnilInterface).ValueSlot;
 
 internal static any mapInterface = new map<nint, nint>{};
 

@@ -8,6 +8,7 @@ using static go.crypto.rsa_package;
 
 partial class rsa_internal_test_package {
 
-public static Func<slice<byte>, io.Reader, error> NonZeroRandomBytes = nonZeroRandomBytes;
+public static readonly ж<Func<slice<byte>, io.Reader, error>> ᏑNonZeroRandomBytes = new StaticBox<Func<slice<byte>, io.Reader, error>>(nonZeroRandomBytes);
+public static ref Func<slice<byte>, io.Reader, error> NonZeroRandomBytes => ref ((StaticBox<Func<slice<byte>, io.Reader, error>>)ᏑNonZeroRandomBytes).ValueSlot;
 
 } // end rsa_internal_test_package

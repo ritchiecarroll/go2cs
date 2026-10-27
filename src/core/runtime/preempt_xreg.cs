@@ -55,8 +55,8 @@ partial struct xRegAllocᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal fixalloc alloc;
 }
-internal static ж<xRegAllocᴛ1> ᏑxRegAlloc = new StaticBox<xRegAllocᴛ1>(new xRegAllocᴛ1());
-internal static ref xRegAllocᴛ1 xRegAlloc => ref ᏑxRegAlloc.Value;
+internal static readonly ж<xRegAllocᴛ1> ᏑxRegAlloc = new StaticBox<xRegAllocᴛ1>(new xRegAllocᴛ1());
+internal static ref xRegAllocᴛ1 xRegAlloc => ref ((StaticBox<xRegAllocᴛ1>)ᏑxRegAlloc).ValueSlot;
 
 internal static void xRegInitAlloc() {
     lockInit(ref xRegAlloc.@lock, lockRankXRegAlloc);

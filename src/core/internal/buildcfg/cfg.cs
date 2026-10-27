@@ -23,36 +23,52 @@ using path;
 
 partial class buildcfg_package {
 
-public static @string GOROOT = os.Getenv("GOROOT"u8); // cached for efficiency
-public static @string GOARCH;
+public static readonly ж<@string> ᏑGOROOT = new StaticBox<@string>(os.Getenv("GOROOT"u8));
+public static ref @string GOROOT => ref ((StaticBox<@string>)ᏑGOROOT).ValueSlot; // cached for efficiency
+public static readonly ж<@string> ᏑGOARCH = new StaticBox<@string>(default(@string));
+public static ref @string GOARCH => ref ((StaticBox<@string>)ᏑGOARCH).ValueSlot;
 internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH"u8, defaultGOARCH); }
-public static @string GOOS;
+public static readonly ж<@string> ᏑGOOS = new StaticBox<@string>(default(@string));
+public static ref @string GOOS => ref ((StaticBox<@string>)ᏑGOOS).ValueSlot;
 internal static void initᴛGOOS() { GOOS = envOr("GOOS"u8, defaultGOOS); }
-public static @string GO386;
+public static readonly ж<@string> ᏑGO386 = new StaticBox<@string>(default(@string));
+public static ref @string GO386 => ref ((StaticBox<@string>)ᏑGO386).ValueSlot;
 internal static void initᴛGO386() { GO386 = envOr("GO386"u8, DefaultGO386); }
-public static nint GOAMD64;
+public static readonly ж<nint> ᏑGOAMD64 = new StaticBox<nint>(default(nint));
+public static ref nint GOAMD64 => ref ((StaticBox<nint>)ᏑGOAMD64).ValueSlot;
 internal static void initᴛGOAMD64() { GOAMD64 = goamd64(); }
-public static GoarmFeatures GOARM;
+public static readonly ж<GoarmFeatures> ᏑGOARM = new StaticBox<GoarmFeatures>(default(GoarmFeatures));
+public static ref GoarmFeatures GOARM => ref ((StaticBox<GoarmFeatures>)ᏑGOARM).ValueSlot;
 internal static void initᴛGOARM() { GOARM = goarm(); }
-public static Goarm64Features GOARM64;
+public static readonly ж<Goarm64Features> ᏑGOARM64 = new StaticBox<Goarm64Features>(default(Goarm64Features));
+public static ref Goarm64Features GOARM64 => ref ((StaticBox<Goarm64Features>)ᏑGOARM64).ValueSlot;
 internal static void initᴛGOARM64() { GOARM64 = goarm64(); }
-public static @string GOMIPS;
+public static readonly ж<@string> ᏑGOMIPS = new StaticBox<@string>(default(@string));
+public static ref @string GOMIPS => ref ((StaticBox<@string>)ᏑGOMIPS).ValueSlot;
 internal static void initᴛGOMIPS() { GOMIPS = gomips(); }
-public static @string GOMIPS64;
+public static readonly ж<@string> ᏑGOMIPS64 = new StaticBox<@string>(default(@string));
+public static ref @string GOMIPS64 => ref ((StaticBox<@string>)ᏑGOMIPS64).ValueSlot;
 internal static void initᴛGOMIPS64() { GOMIPS64 = gomips64(); }
-public static nint GOPPC64;
+public static readonly ж<nint> ᏑGOPPC64 = new StaticBox<nint>(default(nint));
+public static ref nint GOPPC64 => ref ((StaticBox<nint>)ᏑGOPPC64).ValueSlot;
 internal static void initᴛGOPPC64() { GOPPC64 = goppc64(); }
-public static nint GORISCV64;
+public static readonly ж<nint> ᏑGORISCV64 = new StaticBox<nint>(default(nint));
+public static ref nint GORISCV64 => ref ((StaticBox<nint>)ᏑGORISCV64).ValueSlot;
 internal static void initᴛGORISCV64() { GORISCV64 = goriscv64(); }
-public static gowasmFeatures GOWASM;
+public static readonly ж<gowasmFeatures> ᏑGOWASM = new StaticBox<gowasmFeatures>(default(gowasmFeatures));
+public static ref gowasmFeatures GOWASM => ref ((StaticBox<gowasmFeatures>)ᏑGOWASM).ValueSlot;
 internal static void initᴛGOWASM() { GOWASM = gowasm(); }
-public static slice<@string> ToolTags;
+public static readonly ж<slice<@string>> ᏑToolTags = new StaticBox<slice<@string>>(default(slice<@string>));
+public static ref slice<@string> ToolTags => ref ((StaticBox<slice<@string>>)ᏑToolTags).ValueSlot;
 internal static void initᴛToolTags() { ToolTags = toolTags(); }
-public static @string GO_LDSO;
+public static readonly ж<@string> ᏑGO_LDSO = new StaticBox<@string>(default(@string));
+public static ref @string GO_LDSO => ref ((StaticBox<@string>)ᏑGO_LDSO).ValueSlot;
 internal static void initᴛGO_LDSO() { GO_LDSO = defaultGO_LDSO; }
-public static @string GOFIPS140;
+public static readonly ж<@string> ᏑGOFIPS140 = new StaticBox<@string>(default(@string));
+public static ref @string GOFIPS140 => ref ((StaticBox<@string>)ᏑGOFIPS140).ValueSlot;
 internal static void initᴛGOFIPS140() { GOFIPS140 = gofips140(); }
-public static @string Version;
+public static readonly ж<@string> ᏑVersion = new StaticBox<@string>(default(@string));
+public static ref @string Version => ref ((StaticBox<@string>)ᏑVersion).ValueSlot;
 internal static void initᴛVersion() { Version = version; }
 
 // Error is one of the errors found (if any) in the build configuration.

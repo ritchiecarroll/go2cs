@@ -408,8 +408,8 @@ partial struct onePassMachine {
     internal slice<nint> matchcap;
 }
 
-internal static ж<Δsync.Pool> ᏑonePassPool = new StaticBox<Δsync.Pool>(default(Δsync.Pool));
-internal static ref Δsync.Pool onePassPool => ref ᏑonePassPool.Value;
+internal static readonly ж<Δsync.Pool> ᏑonePassPool = new StaticBox<Δsync.Pool>(default(Δsync.Pool));
+internal static ref Δsync.Pool onePassPool => ref ((StaticBox<Δsync.Pool>)ᏑonePassPool).ValueSlot;
 
 internal static ж<onePassMachine> newOnePassMachine() {
     var (m, ok) = ᏑonePassPool.Get()._<ж<onePassMachine>>(ᐧ);

@@ -16,7 +16,7 @@ partial struct ParseRangeTestsᴛ1 /*dyn*/ {
     internal int64 length;
     internal slice<global::go.net.http_package.httpRange> r;
 }
-public static slice<ParseRangeTestsᴛ1> ParseRangeTests = new ParseRangeTestsᴛ1[]{
+public static readonly ж<slice<ParseRangeTestsᴛ1>> ᏑParseRangeTests = new StaticBox<slice<ParseRangeTestsᴛ1>>(new ParseRangeTestsᴛ1[]{
     new(""u8, 0, default!),
     new(""u8, 1000, default!),
     new("foo"u8, 0, default!),
@@ -58,7 +58,8 @@ public static slice<ParseRangeTestsᴛ1> ParseRangeTests = new ParseRangeTests�
 
     // Match Apache laxity:
     new("bytes=   1 -2   ,  4- 5, 7 - 8 , ,,"u8, 11, new global::go.net.http_package.httpRange[]{new(1, 2), new(4, 2), new(7, 2)}.slice())
-}.slice();
+}.slice());
+public static ref slice<ParseRangeTestsᴛ1> ParseRangeTests => ref ((StaticBox<slice<ParseRangeTestsᴛ1>>)ᏑParseRangeTests).ValueSlot;
 
 public static void TestParseRange(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in ParseRangeTests) {

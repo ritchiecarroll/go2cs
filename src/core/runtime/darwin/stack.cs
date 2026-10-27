@@ -148,8 +148,8 @@ partial struct stackpoolᴛ1 /*dyn*/ {
     internal stackpoolItem item;
     internal array<byte> _ = new(40);
 }
-internal static ж<array<stackpoolᴛ1>> Ꮡstackpool = new StaticBox<array<stackpoolᴛ1>>(new array<stackpoolᴛ1>(4, () => new()));
-internal static ref array<stackpoolᴛ1> stackpool => ref Ꮡstackpool.Value;
+internal static readonly ж<array<stackpoolᴛ1>> Ꮡstackpool = new StaticBox<array<stackpoolᴛ1>>(new array<stackpoolᴛ1>(4, () => new()));
+internal static ref array<stackpoolᴛ1> stackpool => ref ((StaticBox<array<stackpoolᴛ1>>)Ꮡstackpool).ValueSlot;
 
 partial struct stackpoolItem {
     internal sys.NotInHeap _;
@@ -162,8 +162,8 @@ partial struct stackLargeᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal array<mSpanList> free = new(35); // free lists by log_2(s.npages)
 }
-internal static ж<stackLargeᴛ1> ᏑstackLarge = new StaticBox<stackLargeᴛ1>(new stackLargeᴛ1());
-internal static ref stackLargeᴛ1 stackLarge => ref ᏑstackLarge.Value;
+internal static readonly ж<stackLargeᴛ1> ᏑstackLarge = new StaticBox<stackLargeᴛ1>(new stackLargeᴛ1());
+internal static ref stackLargeᴛ1 stackLarge => ref ((StaticBox<stackLargeᴛ1>)ᏑstackLarge).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cacheSizeMustBeAMultipleˢ = "cache size must be a multiple of page size"u8;

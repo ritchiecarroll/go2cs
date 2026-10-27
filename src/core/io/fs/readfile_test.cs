@@ -27,8 +27,8 @@ internal static void initᴛtestFsys() { testFsys = new fstest.MapFS(new map<@st
         Sys: ᏑsysValue))
 }); }
 
-internal static ж<nint> ᏑsysValue = new StaticBox<nint>(default(nint));
-internal static ref nint sysValue => ref ᏑsysValue.Value;
+internal static readonly ж<nint> ᏑsysValue = new StaticBox<nint>(default(nint));
+internal static ref nint sysValue => ref ((StaticBox<nint>)ᏑsysValue).ValueSlot;
 
 partial struct readFileOnly {
     /*embed*/ public go.io.fs_package.ReadFileFS ReadFileFS;

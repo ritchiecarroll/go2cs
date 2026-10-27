@@ -19,9 +19,12 @@ using @internal;
 [GoFieldAccess(typeof(RawSockaddrInet4), typeof(RawSockaddrInet6))]
 partial class syscall_package {
 
-public static nint Stdin = 0;
-public static nint Stdout = 1;
-public static nint Stderr = 2;
+public static readonly ж<nint> ᏑStdin = new StaticBox<nint>(0);
+public static ref nint Stdin => ref ((StaticBox<nint>)ᏑStdin).ValueSlot;
+public static readonly ж<nint> ᏑStdout = new StaticBox<nint>(1);
+public static ref nint Stdout => ref ((StaticBox<nint>)ᏑStdout).ValueSlot;
+public static readonly ж<nint> ᏑStderr = new StaticBox<nint>(2);
+public static ref nint Stderr => ref ((StaticBox<nint>)ᏑStderr).ValueSlot;
 
 internal const bool darwin64Bit = /* (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && sizeofPtr == 8 */ true;
 internal const bool netbsd32Bit = /* runtime.GOOS == "netbsd" && sizeofPtr == 4 */ false;
@@ -295,7 +298,8 @@ public static (nint n, error err) Pwrite(nint fd, slice<byte> p, int64 offset) {
 
 // For testing: clients can set this flag to force
 // creation of IPv6 sockets to return [EAFNOSUPPORT].
-public static bool SocketDisableIPv6;
+public static readonly ж<bool> ᏑSocketDisableIPv6 = new StaticBox<bool>(default(bool));
+public static ref bool SocketDisableIPv6 => ref ((StaticBox<bool>)ᏑSocketDisableIPv6).ValueSlot;
 
 partial interface Sockaddr {
     (@unsafe.Pointer ptr, _Socklen len, error err) sockaddr(); // lowercase; only we can define Sockaddrs
@@ -566,7 +570,7 @@ public static (nint written, error err) Sendfile(nint outfd, nint infd, ж<int64
     return sendfile(outfd, infd, ref (Ꮡoffset).DerefOrNull(), count);
 }
 
-internal static ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
-internal static ref int64 ioSync => ref ᏑioSync.Value;
+internal static readonly ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
+internal static ref int64 ioSync => ref ((StaticBox<int64>)ᏑioSync).ValueSlot;
 
 } // end syscall_package

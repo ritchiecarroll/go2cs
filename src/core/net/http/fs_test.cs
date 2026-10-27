@@ -55,7 +55,7 @@ partial struct ServeFileRangeTestsᴛ1 /*dyn*/ {
     internal nint code;
     internal slice<wantRange> ranges;
 }
-public static slice<ServeFileRangeTestsᴛ1> ServeFileRangeTests = new ServeFileRangeTestsᴛ1[]{
+public static readonly ж<slice<ServeFileRangeTestsᴛ1>> ᏑServeFileRangeTests = new StaticBox<slice<ServeFileRangeTestsᴛ1>>(new ServeFileRangeTestsᴛ1[]{
     new(r: ""u8, code: StatusOK),
     new(r: "bytes=0-4"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, 5)}.slice()),
     new(r: "bytes=2-"u8, code: StatusPartialContent, ranges: new wantRange[]{new(2, testFileLen)}.slice()),
@@ -78,7 +78,8 @@ public static slice<ServeFileRangeTestsᴛ1> ServeFileRangeTests = new ServeFile
     new(r: "bytes=12-100"u8, code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=100-"u8, code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=100-1000"u8, code: StatusRequestedRangeNotSatisfiable)
-}.slice();
+}.slice());
+public static ref slice<ServeFileRangeTestsᴛ1> ServeFileRangeTests => ref ((StaticBox<slice<ServeFileRangeTestsᴛ1>>)ᏑServeFileRangeTests).ValueSlot;
 
 public static void TestServeFile(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServeFile(Δp0, Δp1));

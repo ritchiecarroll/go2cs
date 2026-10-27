@@ -28,8 +28,8 @@ internal static error darwinOSRelease(/*[256]*/ ж<array<byte>> Ꮡrelease) {
     return sysctl(mib, Ꮡrelease.at<byte>(0), Ꮡn, nil, 0);
 }
 
-internal static ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
-internal static ref uintptr _zero => ref Ꮡ_zero.Value; // Single-word zero for use when we need a valid pointer to 0 bytes.
+internal static readonly ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
+internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlot; // Single-word zero for use when we need a valid pointer to 0 bytes.
 
 // from x/sys/unix/zsyscall_darwin_amd64.go L791-807
 internal static error sysctl(slice<_C_int> mib, ж<byte> Ꮡold, ж<uintptr> Ꮡoldlen, ж<byte> Ꮡnew, uintptr newlen) {

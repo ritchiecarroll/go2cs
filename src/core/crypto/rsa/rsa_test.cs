@@ -529,11 +529,11 @@ internal static ж<rsa.PrivateKey> parseKey(@string s) {
     return k;
 }
 
-internal static ж<ж<rsa.PrivateKey>> ᏑrsaPrivateKey = new StaticBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
-internal static ref ж<rsa.PrivateKey> rsaPrivateKey => ref ᏑrsaPrivateKey.ValueSlot;
+internal static readonly ж<ж<rsa.PrivateKey>> ᏑrsaPrivateKey = new StaticBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
+internal static ref ж<rsa.PrivateKey> rsaPrivateKey => ref ((StaticBox<ж<rsa.PrivateKey>>)ᏑrsaPrivateKey).ValueSlot;
 internal static void initᴛrsaPrivateKey() { rsaPrivateKey = test1024Key; }
 
-internal static ж<ж<rsa.PrivateKey>> Ꮡtest512Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(testingKey("""
+internal static readonly ж<ж<rsa.PrivateKey>> Ꮡtest512Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(testingKey("""
 -----BEGIN RSA TESTING KEY-----
 MIIBOgIBAAJBALKZD0nEffqM1ACuak0bijtqE2QrI/KLADv7l3kK3ppMyCuLKoF0
 fd7Ai2KW5ToIwzFofvJcS/STa6HA5gQenRUCAwEAAQJBAIq9amn00aS0h/CrjXqu
@@ -544,7 +544,7 @@ IU2snfRJ6Nq2CQIgFrPsWRCkV+gOYcajD17rEqmuLrdIRexpg8N1DOSXoJ8CIGlS
 tAboUGBxTDq3ZroNism3DaMIbKPyYrAqhKov1h5V
 -----END RSA TESTING KEY-----
 """u8.Raw())));
-internal static ref ж<rsa.PrivateKey> test512Key => ref Ꮡtest512Key.ValueSlot;
+internal static ref ж<rsa.PrivateKey> test512Key => ref ((StaticBox<ж<rsa.PrivateKey>>)Ꮡtest512Key).ValueSlot;
 
 internal static ж<rsa.PrivateKey> test512KeyTwo = parseKey(testingKey("""
 -----BEGIN TESTING KEY-----
@@ -608,8 +608,8 @@ fLVGuFoTVIu2bF0cWAjNNMg=
 -----END TESTING KEY-----
 """u8.Raw());
 
-internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
-internal static ref ж<rsa.PrivateKey> test2048Key => ref Ꮡtest2048Key.ValueSlot;
+internal static readonly ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
+internal static ref ж<rsa.PrivateKey> test2048Key => ref ((StaticBox<ж<rsa.PrivateKey>>)Ꮡtest2048Key).ValueSlot;
 
 internal static ж<rsa.PrivateKey> test2048KeyOnlyD = Ꮡ(new PrivateKey(
     PublicKey: (~test2048Key).PublicKey,

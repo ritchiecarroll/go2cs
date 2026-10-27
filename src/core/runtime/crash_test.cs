@@ -89,8 +89,8 @@ partial struct testprogᴛ1 /*dyn*/ {
     internal @string dir;
     internal map<@string, ж<buildexe>> target;
 }
-internal static ж<testprogᴛ1> Ꮡtestprog = new StaticBox<testprogᴛ1>(new testprogᴛ1(nil));
-internal static ref testprogᴛ1 testprog => ref Ꮡtestprog.Value;
+internal static readonly ж<testprogᴛ1> Ꮡtestprog = new StaticBox<testprogᴛ1>(new testprogᴛ1(nil));
+internal static ref testprogᴛ1 testprog => ref ((StaticBox<testprogᴛ1>)Ꮡtestprog).ValueSlot;
 
 partial struct buildexe {
     internal Δsync.Once once;

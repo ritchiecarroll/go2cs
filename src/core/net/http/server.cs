@@ -859,17 +859,17 @@ internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> 
     return (n, err);
 }
 
-internal static ж<sync.Pool> ᏑbufioReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool bufioReaderPool => ref ᏑbufioReaderPool.Value;
-internal static ж<sync.Pool> ᏑbufioWriter2kPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool bufioWriter2kPool => ref ᏑbufioWriter2kPool.Value;
-internal static ж<sync.Pool> ᏑbufioWriter4kPool = new StaticBox<sync.Pool>(default(sync.Pool));
-internal static ref sync.Pool bufioWriter4kPool => ref ᏑbufioWriter4kPool.Value;
+internal static readonly ж<sync.Pool> ᏑbufioReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool bufioReaderPool => ref ((StaticBox<sync.Pool>)ᏑbufioReaderPool).ValueSlot;
+internal static readonly ж<sync.Pool> ᏑbufioWriter2kPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool bufioWriter2kPool => ref ((StaticBox<sync.Pool>)ᏑbufioWriter2kPool).ValueSlot;
+internal static readonly ж<sync.Pool> ᏑbufioWriter4kPool = new StaticBox<sync.Pool>(default(sync.Pool));
+internal static ref sync.Pool bufioWriter4kPool => ref ((StaticBox<sync.Pool>)ᏑbufioWriter4kPool).ValueSlot;
 
 internal static UntypedInt copyBufPoolSize => /* 32 * 1024 */ 32768;
 
-internal static ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => Ꮡ(new array<byte>(32768))));
-internal static ref sync.Pool copyBufPool => ref ᏑcopyBufPool.Value;
+internal static readonly ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => Ꮡ(new array<byte>(32768))));
+internal static ref sync.Pool copyBufPool => ref ((StaticBox<sync.Pool>)ᏑcopyBufPool).ValueSlot;
 
 internal static slice<byte> getCopyBuf() {
     return ᏑcopyBufPool.Get()._<ж<array<byte>>>().slice();
@@ -2853,8 +2853,8 @@ public static ж<ServeMux> NewServeMux() {
 public static ж<ServeMux> DefaultServeMux;
 internal static void initᴛDefaultServeMux() { DefaultServeMux = ᏑdefaultServeMux; }
 
-internal static ж<ServeMux> ᏑdefaultServeMux = new StaticBox<ServeMux>(default(ServeMux));
-internal static ref ServeMux defaultServeMux => ref ᏑdefaultServeMux.Value;
+internal static readonly ж<ServeMux> ᏑdefaultServeMux = new StaticBox<ServeMux>(default(ServeMux));
+internal static ref ServeMux defaultServeMux => ref ((StaticBox<ServeMux>)ᏑdefaultServeMux).ValueSlot;
 
 // cleanPath returns the canonical path for p, eliminating . and .. elements.
 internal static @string cleanPath(@string p) {
@@ -4492,8 +4492,8 @@ internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => 
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-internal static ж<sync.Mutex> ᏑuniqNameMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
-internal static ref sync.Mutex uniqNameMu => ref ᏑuniqNameMu.Value;
+internal static readonly ж<sync.Mutex> ᏑuniqNameMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
+internal static ref sync.Mutex uniqNameMu => ref ((StaticBox<sync.Mutex>)ᏑuniqNameMu).ValueSlot;
 internal static map<@string, nint> uniqNameNext = new map<@string, nint>();
 
 internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {

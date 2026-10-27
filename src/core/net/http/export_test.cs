@@ -21,14 +21,19 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-public static @string DefaultUserAgent;
+public static readonly ж<@string> ᏑDefaultUserAgent = new StaticBox<@string>(default(@string));
+public static ref @string DefaultUserAgent => ref ((StaticBox<@string>)ᏑDefaultUserAgent).ValueSlot;
 internal static void initᴛDefaultUserAgent() { DefaultUserAgent = defaultUserAgent; }
-public static Func<@string, net.Conn, net.Conn> NewLoggingConn;
+public static readonly ж<Func<@string, net.Conn, net.Conn>> ᏑNewLoggingConn = new StaticBox<Func<@string, net.Conn, net.Conn>>(default(Func<@string, net.Conn, net.Conn>));
+public static ref Func<@string, net.Conn, net.Conn> NewLoggingConn => ref ((StaticBox<Func<@string, net.Conn, net.Conn>>)ᏑNewLoggingConn).ValueSlot;
 internal static void initᴛNewLoggingConn() { NewLoggingConn = newLoggingConn; }
-public static Func<ж<url.URL>, ж<url.URL>, @string, @string> ExportRefererForURL = (ж<url.URL> ᴛ0, ж<url.URL> ᴛ1, @string ᴛ2) => refererForURL(ᴛ0, ref ᴛ1.DerefOrNull(), ᴛ2);
-internal static Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>> ExportServerNewConn;
+public static readonly ж<Func<ж<url.URL>, ж<url.URL>, @string, @string>> ᏑExportRefererForURL = new StaticBox<Func<ж<url.URL>, ж<url.URL>, @string, @string>>((ж<url.URL> ᴛ0, ж<url.URL> ᴛ1, @string ᴛ2) => refererForURL(ᴛ0, ref ᴛ1.DerefOrNull(), ᴛ2));
+public static ref Func<ж<url.URL>, ж<url.URL>, @string, @string> ExportRefererForURL => ref ((StaticBox<Func<ж<url.URL>, ж<url.URL>, @string, @string>>)ᏑExportRefererForURL).ValueSlot;
+internal static readonly ж<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>> ᏑExportServerNewConn = new StaticBox<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>>(default(Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>));
+internal static ref Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>> ExportServerNewConn => ref ((StaticBox<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>>)ᏑExportServerNewConn).ValueSlot;
 internal static void initᴛExportServerNewConn() { ExportServerNewConn = ((Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>)(global::go.net.http_package.newConn)); }
-internal static Action<ж<global::go.net.http_package.conn>> ExportCloseWriteAndWait;
+internal static readonly ж<Action<ж<global::go.net.http_package.conn>>> ᏑExportCloseWriteAndWait = new StaticBox<Action<ж<global::go.net.http_package.conn>>>(default(Action<ж<global::go.net.http_package.conn>>));
+internal static ref Action<ж<global::go.net.http_package.conn>> ExportCloseWriteAndWait => ref ((StaticBox<Action<ж<global::go.net.http_package.conn>>>)ᏑExportCloseWriteAndWait).ValueSlot;
 internal static void initᴛExportCloseWriteAndWait() { ExportCloseWriteAndWait = ((Action<ж<global::go.net.http_package.conn>>)(global::go.net.http_package.closeWriteAndWait)); }
 public static error ExportErrRequestCanceled;
 internal static void initᴛExportErrRequestCanceled() { ExportErrRequestCanceled = errRequestCanceled; }
@@ -36,14 +41,20 @@ public static error ExportErrRequestCanceledConn;
 internal static void initᴛExportErrRequestCanceledConn() { ExportErrRequestCanceledConn = errRequestCanceledConn; }
 public static error ExportErrServerClosedIdle;
 internal static void initᴛExportErrServerClosedIdle() { ExportErrServerClosedIdle = errServerClosedIdle; }
-public static Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool> ExportServeFile;
+public static readonly ж<Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool>> ᏑExportServeFile = new StaticBox<Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool>>(default(Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool>));
+public static ref Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool> ExportServeFile => ref ((StaticBox<Action<global::go.net.http_package.ResponseWriter, ж<global::go.net.http_package.Request>, global::go.net.http_package.FileSystem, @string, bool>>)ᏑExportServeFile).ValueSlot;
 internal static void initᴛExportServeFile() { ExportServeFile = serveFile; }
-public static Func<@string, (@string, @string)> ExportScanETag = scanETag;
-internal static Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error> ExportHttp2ConfigureServer;
+public static readonly ж<Func<@string, (@string, @string)>> ᏑExportScanETag = new StaticBox<Func<@string, (@string, @string)>>(scanETag);
+public static ref Func<@string, (@string, @string)> ExportScanETag => ref ((StaticBox<Func<@string, (@string, @string)>>)ᏑExportScanETag).ValueSlot;
+internal static readonly ж<Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error>> ᏑExportHttp2ConfigureServer = new StaticBox<Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error>>(default(Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error>));
+internal static ref Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error> ExportHttp2ConfigureServer => ref ((StaticBox<Func<ж<global::go.net.http_package.Server>, ж<global::go.net.http_package.http2Server>, error>>)ᏑExportHttp2ConfigureServer).ValueSlot;
 internal static void initᴛExportHttp2ConfigureServer() { ExportHttp2ConfigureServer = http2ConfigureServer; }
-public static Func<ж<url.URL>, ж<url.URL>, bool> Export_shouldCopyHeaderOnRedirect = shouldCopyHeaderOnRedirect;
-public static Action<ж<bufio.Writer>, bool, nint, slice<byte>> Export_writeStatusLine = writeStatusLine;
-public static Func<slice<byte>, bool> Export_is408Message = is408Message;
+public static readonly ж<Func<ж<url.URL>, ж<url.URL>, bool>> ᏑExport_shouldCopyHeaderOnRedirect = new StaticBox<Func<ж<url.URL>, ж<url.URL>, bool>>(shouldCopyHeaderOnRedirect);
+public static ref Func<ж<url.URL>, ж<url.URL>, bool> Export_shouldCopyHeaderOnRedirect => ref ((StaticBox<Func<ж<url.URL>, ж<url.URL>, bool>>)ᏑExport_shouldCopyHeaderOnRedirect).ValueSlot;
+public static readonly ж<Action<ж<bufio.Writer>, bool, nint, slice<byte>>> ᏑExport_writeStatusLine = new StaticBox<Action<ж<bufio.Writer>, bool, nint, slice<byte>>>(writeStatusLine);
+public static ref Action<ж<bufio.Writer>, bool, nint, slice<byte>> Export_writeStatusLine => ref ((StaticBox<Action<ж<bufio.Writer>, bool, nint, slice<byte>>>)ᏑExport_writeStatusLine).ValueSlot;
+public static readonly ж<Func<slice<byte>, bool>> ᏑExport_is408Message = new StaticBox<Func<slice<byte>, bool>>(is408Message);
+public static ref Func<slice<byte>, bool> Export_is408Message => ref ((StaticBox<Func<slice<byte>, bool>>)ᏑExport_is408Message).ValueSlot;
 
 public static ж<time.Duration> MaxWriteWaitBeforeConnReuse;
 internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeConnReuse = ᏑmaxWriteWaitBeforeConnReuse; }
@@ -81,9 +92,11 @@ public static partial void CondSkipHTTP2(testing.TB t) {
     }
 }
 
-public static Action<Action> SetEnterRoundTripHook;
+public static readonly ж<Action<Action>> ᏑSetEnterRoundTripHook = new StaticBox<Action<Action>>(default(Action<Action>));
+public static ref Action<Action> SetEnterRoundTripHook => ref ((StaticBox<Action<Action>>)ᏑSetEnterRoundTripHook).ValueSlot;
 internal static void initᴛSetEnterRoundTripHook() { SetEnterRoundTripHook = hookSetter(ᏑtestHookEnterRoundTrip); }
-public static Action<Action> SetRoundTripRetried;
+public static readonly ж<Action<Action>> ᏑSetRoundTripRetried = new StaticBox<Action<Action>>(default(Action<Action>));
+public static ref Action<Action> SetRoundTripRetried => ref ((StaticBox<Action<Action>>)ᏑSetRoundTripRetried).ValueSlot;
 internal static void initᴛSetRoundTripRetried() { SetRoundTripRetried = hookSetter(ᏑtestHookRoundTripRetried); }
 
 public static void SetReadLoopBeforeNextReadHook(Action fʗp) {

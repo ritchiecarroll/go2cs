@@ -115,8 +115,8 @@ public static void TestNewBuffer(ж<testing.T> Ꮡt) {
     check(Ꮡt, newBufferˢ, buf, testString);
 }
 
-internal static ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
-internal static ref bytes.Buffer buf => ref Ꮡbuf.Value;
+internal static readonly ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ref bytes.Buffer buf => ref ((StaticBox<bytes.Buffer>)Ꮡbuf).ValueSlot;
 
 // Calling NewBuffer and immediately shallow copying the Buffer struct
 // should not result in any allocations.

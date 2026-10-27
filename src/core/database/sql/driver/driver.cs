@@ -535,7 +535,8 @@ public static (int64, error) RowsAffected(this ΔRowsAffected v) {
 // ResultNoRows is a pre-defined [Result] for drivers to return when a DDL
 // command (such as a CREATE TABLE) succeeds. It returns an error for both
 // LastInsertId and [RowsAffected].
-public static noRows ResultNoRows;
+public static readonly ж<noRows> ᏑResultNoRows = new StaticBox<noRows>(default(noRows));
+public static ref noRows ResultNoRows => ref ((StaticBox<noRows>)ᏑResultNoRows).ValueSlot;
 
 public partial struct noRows {
 }

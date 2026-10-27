@@ -196,8 +196,8 @@ internal static void init(this ref huffmanLUT h, huffmanSpec s) {
 }
 
 // theHuffmanLUT are compiled representations of theHuffmanSpec.
-internal static ж<array<huffmanLUT>> ᏑtheHuffmanLUT = new StaticBox<array<huffmanLUT>>(new array<huffmanLUT>(4));
-internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Value;
+internal static readonly ж<array<huffmanLUT>> ᏑtheHuffmanLUT = new StaticBox<array<huffmanLUT>>(new array<huffmanLUT>(4));
+internal static ref array<huffmanLUT> theHuffmanLUT => ref ((StaticBox<array<huffmanLUT>>)ᏑtheHuffmanLUT).ValueSlot;
 
 [GoInit] internal static void initΔ1() {
     foreach (var (i, vᴛ1) in theHuffmanSpec.ΔRangeSnapshot()) {

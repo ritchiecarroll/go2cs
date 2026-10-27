@@ -8,6 +8,7 @@ using static go.@internal.cpu_package;
 
 partial class cpu_internal_test_package {
 
-public static Func<int32> GetGOAMD64level = getGOAMD64level;
+public static readonly ж<Func<int32>> ᏑGetGOAMD64level = new StaticBox<Func<int32>>(getGOAMD64level);
+public static ref Func<int32> GetGOAMD64level => ref ((StaticBox<Func<int32>>)ᏑGetGOAMD64level).ValueSlot;
 
 } // end cpu_internal_test_package

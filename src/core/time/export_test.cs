@@ -28,23 +28,34 @@ public static void ResetZoneinfoForTesting() {
     zoneinfoOnce = new Δsync.Once(nil);
 }
 
-public static Func<Action> DisablePlatformSources;
+public static readonly ж<Func<Action>> ᏑDisablePlatformSources = new StaticBox<Func<Action>>(default(Func<Action>));
+public static ref Func<Action> DisablePlatformSources => ref ((StaticBox<Func<Action>>)ᏑDisablePlatformSources).ValueSlot;
 internal static void initᴛDisablePlatformSources() { DisablePlatformSources = disablePlatformSources; }
-public static Func<@string, (@string, bool)> GorootZoneSource = gorootZoneSource;
-public static Func<@string, (nint, bool)> ParseTimeZone;
+public static readonly ж<Func<@string, (@string, bool)>> ᏑGorootZoneSource = new StaticBox<Func<@string, (@string, bool)>>(gorootZoneSource);
+public static ref Func<@string, (@string, bool)> GorootZoneSource => ref ((StaticBox<Func<@string, (@string, bool)>>)ᏑGorootZoneSource).ValueSlot;
+public static readonly ж<Func<@string, (nint, bool)>> ᏑParseTimeZone = new StaticBox<Func<@string, (nint, bool)>>(default(Func<@string, (nint, bool)>));
+public static ref Func<@string, (nint, bool)> ParseTimeZone => ref ((StaticBox<Func<@string, (nint, bool)>>)ᏑParseTimeZone).ValueSlot;
 internal static void initᴛParseTimeZone() { ParseTimeZone = parseTimeZone; }
-public static Action<ж<global::go.time_package.Time>, int64> SetMono = ((Action<ж<global::go.time_package.Time>, int64>)(global::go.time_package.setMono));
-public static Func<ж<global::go.time_package.Time>, int64> GetMono = ((Func<ж<global::go.time_package.Time>, int64>)(global::go.time_package.mono));
+public static readonly ж<Action<ж<global::go.time_package.Time>, int64>> ᏑSetMono = new StaticBox<Action<ж<global::go.time_package.Time>, int64>>(((Action<ж<global::go.time_package.Time>, int64>)(global::go.time_package.setMono)));
+public static ref Action<ж<global::go.time_package.Time>, int64> SetMono => ref ((StaticBox<Action<ж<global::go.time_package.Time>, int64>>)ᏑSetMono).ValueSlot;
+public static readonly ж<Func<ж<global::go.time_package.Time>, int64>> ᏑGetMono = new StaticBox<Func<ж<global::go.time_package.Time>, int64>>(((Func<ж<global::go.time_package.Time>, int64>)(global::go.time_package.mono)));
+public static ref Func<ж<global::go.time_package.Time>, int64> GetMono => ref ((StaticBox<Func<ж<global::go.time_package.Time>, int64>>)ᏑGetMono).ValueSlot;
 public static error ErrLocation;
 internal static void initᴛErrLocation() { ErrLocation = errLocation; }
-public static Func<@string, (slice<byte>, error)> ReadFile = readFile;
-public static Func<@string, @string, (slice<byte>, error)> LoadTzinfo;
+public static readonly ж<Func<@string, (slice<byte>, error)>> ᏑReadFile = new StaticBox<Func<@string, (slice<byte>, error)>>(readFile);
+public static ref Func<@string, (slice<byte>, error)> ReadFile => ref ((StaticBox<Func<@string, (slice<byte>, error)>>)ᏑReadFile).ValueSlot;
+public static readonly ж<Func<@string, @string, (slice<byte>, error)>> ᏑLoadTzinfo = new StaticBox<Func<@string, @string, (slice<byte>, error)>>(default(Func<@string, @string, (slice<byte>, error)>));
+public static ref Func<@string, @string, (slice<byte>, error)> LoadTzinfo => ref ((StaticBox<Func<@string, @string, (slice<byte>, error)>>)ᏑLoadTzinfo).ValueSlot;
 internal static void initᴛLoadTzinfo() { LoadTzinfo = loadTzinfo; }
-public static Func<@string, (@string, nint, @string)> NextStdChunk;
+public static readonly ж<Func<@string, (@string, nint, @string)>> ᏑNextStdChunk = new StaticBox<Func<@string, (@string, nint, @string)>>(default(Func<@string, (@string, nint, @string)>));
+public static ref Func<@string, (@string, nint, @string)> NextStdChunk => ref ((StaticBox<Func<@string, (@string, nint, @string)>>)ᏑNextStdChunk).ValueSlot;
 internal static void initᴛNextStdChunk() { NextStdChunk = nextStdChunk; }
-public static Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)> Tzset = tzset;
-public static Func<@string, (@string, @string, bool)> TzsetName = tzsetName;
-public static Func<@string, (nint, @string, bool)> TzsetOffset = tzsetOffset;
+public static readonly ж<Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)>> ᏑTzset = new StaticBox<Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)>>(tzset);
+public static ref Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)> Tzset => ref ((StaticBox<Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)>>)ᏑTzset).ValueSlot;
+public static readonly ж<Func<@string, (@string, @string, bool)>> ᏑTzsetName = new StaticBox<Func<@string, (@string, @string, bool)>>(tzsetName);
+public static ref Func<@string, (@string, @string, bool)> TzsetName => ref ((StaticBox<Func<@string, (@string, @string, bool)>>)ᏑTzsetName).ValueSlot;
+public static readonly ж<Func<@string, (nint, @string, bool)>> ᏑTzsetOffset = new StaticBox<Func<@string, (nint, @string, bool)>>(tzsetOffset);
+public static ref Func<@string, (nint, @string, bool)> TzsetOffset => ref ((StaticBox<Func<@string, (nint, @string, bool)>>)ᏑTzsetOffset).ValueSlot;
 public static ж<godebug.Setting> AsynctimerChan;
 internal static void initᴛAsynctimerChan() { AsynctimerChan = asynctimerchan; }
 
@@ -80,7 +91,7 @@ public static (Rule, @string, bool) TzsetRule(@string s) {
 }
 
 // StdChunkNames maps from nextStdChunk results to the matched strings.
-public static map<nint, @string> StdChunkNames = new map<nint, @string>{
+public static readonly ж<map<nint, @string>> ᏑStdChunkNames = new StaticBox<map<nint, @string>>(new map<nint, @string>{
     [0] = ""u8,
     [stdLongMonth] = "January"u8,
     [stdMonth] = "Jan"u8,
@@ -133,23 +144,30 @@ public static map<nint, @string> StdChunkNames = new map<nint, @string>{
     [(nint)((nint)stdFracSecond9 | (nint)(7 << (int)(stdArgShift)))] = ".9999999"u8,
     [(nint)((nint)stdFracSecond9 | (nint)(8 << (int)(stdArgShift)))] = ".99999999"u8,
     [(nint)((nint)stdFracSecond9 | (nint)(9 << (int)(stdArgShift)))] = ".999999999"u8
-};
+});
+public static ref map<nint, @string> StdChunkNames => ref ((StaticBox<map<nint, @string>>)ᏑStdChunkNames).ValueSlot;
 
-public static Func<@string, @string> Quote;
+public static readonly ж<Func<@string, @string>> ᏑQuote = new StaticBox<Func<@string, @string>>(default(Func<@string, @string>));
+public static ref Func<@string, @string> Quote => ref ((StaticBox<Func<@string, @string>>)ᏑQuote).ValueSlot;
 internal static void initᴛQuote() { Quote = quote; }
 
-public static Func<slice<byte>, nint, nint, slice<byte>> AppendInt = appendInt;
+public static readonly ж<Func<slice<byte>, nint, nint, slice<byte>>> ᏑAppendInt = new StaticBox<Func<slice<byte>, nint, nint, slice<byte>>>(appendInt);
+public static ref Func<slice<byte>, nint, nint, slice<byte>> AppendInt => ref ((StaticBox<Func<slice<byte>, nint, nint, slice<byte>>>)ᏑAppendInt).ValueSlot;
 
-public static Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>> AppendFormatAny;
+public static readonly ж<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>> ᏑAppendFormatAny = new StaticBox<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>>(default(Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>));
+public static ref Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>> AppendFormatAny => ref ((StaticBox<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>>)ᏑAppendFormatAny).ValueSlot;
 internal static void initᴛAppendFormatAny() { AppendFormatAny = ((Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>)(global::go.time_package.appendFormat)); }
 
-public static Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>> AppendFormatRFC3339;
+public static readonly ж<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>> ᏑAppendFormatRFC3339 = new StaticBox<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>>(default(Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>));
+public static ref Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>> AppendFormatRFC3339 => ref ((StaticBox<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>>)ᏑAppendFormatRFC3339).ValueSlot;
 internal static void initᴛAppendFormatRFC3339() { AppendFormatRFC3339 = ((Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>)(global::go.time_package.appendFormatRFC3339)); }
 
-public static Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)> ParseAny;
+public static readonly ж<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>> ᏑParseAny = new StaticBox<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>>(default(Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>));
+public static ref Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)> ParseAny => ref ((StaticBox<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>>)ᏑParseAny).ValueSlot;
 internal static void initᴛParseAny() { ParseAny = parse; }
 
-public static Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)> ParseRFC3339;
+public static readonly ж<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>> ᏑParseRFC3339 = new StaticBox<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>>(default(Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>));
+public static ref Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)> ParseRFC3339 => ref ((StaticBox<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>>)ᏑParseRFC3339).ValueSlot;
 internal static void initᴛParseRFC3339() { ParseRFC3339 = parseRFC3339<@string>; }
 
 } // end time_internal_test_package

@@ -85,8 +85,8 @@ public static slice<byte> Seed(this PrivateKey priv) {
 
 // privateKeyCache uses a pointer to the first byte of underlying storage as a
 // key, because [PrivateKey] is a slice header passed around by value.
-internal static ж<fips140cache.Cache<byte, ed25519.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>(default(fips140cache.Cache<byte, ed25519.PrivateKey>));
-internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache => ref ᏑprivateKeyCache.Value;
+internal static readonly ж<fips140cache.Cache<byte, ed25519.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>(default(fips140cache.Cache<byte, ed25519.PrivateKey>));
+internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache => ref ((StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>)ᏑprivateKeyCache).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cryptoEd25519UseOfˢ = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;

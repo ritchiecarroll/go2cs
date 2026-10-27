@@ -40,8 +40,8 @@ partial struct mstats {
     internal bool enablegc;
 }
 
-internal static ж<mstats> Ꮡmemstats = new StaticBox<mstats>(new mstats());
-internal static ref mstats memstats => ref Ꮡmemstats.Value;
+internal static readonly ж<mstats> Ꮡmemstats = new StaticBox<mstats>(new mstats());
+internal static ref mstats memstats => ref ((StaticBox<mstats>)Ꮡmemstats).ValueSlot;
 
 partial struct MemStats_BySize /*dyn*/ {
     // Size is the maximum byte size of an object in this
@@ -317,8 +317,8 @@ partial struct MemStats {
 // doubleCheckReadMemStats controls a double-check mode for ReadMemStats that
 // ensures consistency between the values that ReadMemStats is using and the
 // runtime-internal stats.
-internal static ж<bool> ᏑdoubleCheckReadMemStats = new StaticBox<bool>(false);
-internal static ref bool doubleCheckReadMemStats => ref ᏑdoubleCheckReadMemStats.Value;
+internal static readonly ж<bool> ᏑdoubleCheckReadMemStats = new StaticBox<bool>(false);
+internal static ref bool doubleCheckReadMemStats => ref ((StaticBox<bool>)ᏑdoubleCheckReadMemStats).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string heapInUseAndConsistentˢ = "heapInUse and consistent stats are not equal"u8;
