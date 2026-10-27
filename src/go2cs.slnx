@@ -846,6 +846,7 @@
     <Project Path="tests/Behavioral/NilReceiverMethods/NilReceiverMethods.csproj" />
     <Project Path="tests/Behavioral/NilPointerParamUnsafePointer/NilPointerParamUnsafePointer.csproj" />
     <Project Path="tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
+    <Project Path="tests/Behavioral/NilPointerValueReceiverCall/NilPointerValueReceiverCall.csproj" />
     <Project Path="tests/Behavioral/NilReceiverNormalization/NilReceiverNormalization.csproj" />
     <Project Path="tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NilVarNamedFuncConv/NilVarNamedFuncConv.csproj" />
@@ -1132,6 +1133,7 @@
     <Project Path="tests/Behavioral/TypeSwitchCollapsedFuncCase/TypeSwitchCollapsedFuncCase.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchGuardShadow/TypeSwitchGuardShadow.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchImpureTag/TypeSwitchImpureTag.csproj" />
+    <Project Path="tests/Behavioral/TypeSwitchIntWidthCases/TypeSwitchIntWidthCases.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchMultiCase/TypeSwitchMultiCase.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchNamedInterfaceCase/TypeSwitchNamedInterfaceCase.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchNilPointer/TypeSwitchNilPointer.csproj" />
