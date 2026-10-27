@@ -243,7 +243,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   whose variable is only called; a `var f T = func…` stays a lambda, LambdaFunctions.go:49,52#68e74a) ·
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:60,66#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#bf71f4 +
-  src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:43#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
+  src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:42#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
   src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#47d307 · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#416bab ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:11,32,74,77#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
@@ -318,7 +318,7 @@ Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
 <!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:45#b0efbe and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:55#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#4614b9; GoCallVariations.cs.target:52#1baedb; GoCallVariations.cs.target:53#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:305#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:82#c69f13).
@@ -2200,7 +2200,7 @@ Its use with `unsafe.Pointer` is covered in [`unsafe.Pointer` and `uintptr`](#un
 <!-- uintptr: a distinct golib struct, not an alias of nuint, so an alias cannot erase the uint/uintptr
      difference (src/core/golib/uintptr.cs:16-20#ce6348, :39#d446ed). Goldens:
      src/tests/Behavioral/SwitchPointerSentinelCase/main.cs.target:96#7511f0;
-     src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:85 (`case uintptr:` beside `case nuint:`). -->
+     src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:80 (`case uintptr:` beside `case nuint:`). -->
 
 **Narrow arithmetic is cast back to its type.** Go computes `int8`, `uint8`, `int16` and `uint16` arithmetic at
 that width, so the `uint8` sum `200 + 100` wraps to 44. C# promotes these types to `int` first, so the sum is 300.
@@ -5871,7 +5871,7 @@ func main() {
 	fmt.Println(n.String())
 }
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-51 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-48 -->
 ```csharp
 global using Token = object;
 global using Named = go.main_package.Stringer;
@@ -7707,7 +7707,7 @@ whatAmI(uint64(2))
 whatAmI("hey")
 whatAmI(nil)
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:8, 11-40 (the function body is shown without the four spaces of its enclosing Main) -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:8, 11-39 (the function body is shown without the four spaces of its enclosing Main) -->
 ```csharp
 private static readonly object heyˢ = (@string)"hey"u8;
 …
@@ -7722,7 +7722,6 @@ void whatAmI(any i) {
         break;
     }
     case nint _:
-    case int32 _:
     case int64 _:
     case uint64 _: {
         var t = i;
@@ -7784,7 +7783,7 @@ func sizeOf(v any) int {
 	return 0
 }
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:161-172 -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:156-167 -->
 ```csharp
 internal static nint sizeOf(any v) {
     switch (v.type()) {
@@ -7822,7 +7821,7 @@ func scanInto(v any) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:149-159 -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:144-154 -->
 ```csharp
 internal static void scanInto(any v) {
     switch (v.type()) {
@@ -7845,15 +7844,11 @@ An interface that holds a nil `*T` is not a nil interface in Go, and it matches 
 so `type()` returns that box and the `ж<T>` pattern matches it. The `TypeSwitchNilPointer` behavioral test
 checks this against Go.
 
-**`case int:` also catches a C# `int`.** Go's `int` becomes the native-sized `nint`
-([Integer Types](#integer-types-and-arithmetic)). A value can still reach an interface as a plain C#
-`int`, for example from hand-written C# code, and its dynamic type is then `int32`. So the converter adds
-an `int32` case that runs Go's `int` clause. `case uint:` adds `uint32` the same way.
-
-How the extra case appears depends on the clause. In a multi-type case, such as `whatAmI`'s, it is one
-more stacked `_` label. A single-type `case int` binds `v` as an `nint`, so an `int32` label cannot share
-its body; the arm is repeated as `case int32 v:`, as the next example shows. When the switch already
-lists `int32` (or `uint32`) as its own case, nothing is added, and each value goes to its own clause.
+**`case int:` matches only a Go `int`.** Go's `int` becomes the native-sized `nint`
+([Integer Types](#integer-types-and-arithmetic)), so `case int:` is `case nint` and `case uint:` is
+`case nuint`. As in Go, an `int32` or a `rune` held in the interface does not take the `int` arm, and a
+`uint32` does not take the `uint` arm: each goes to its own case, or to `default`. The
+`TypeSwitchIntWidthCases` behavioral test checks this against Go.
 
 **An interface case matches by method set.** A C# type pattern only sees the interfaces a class
 declares. Go satisfies an interface by having its methods, so a case such as `case error:` asks golib
@@ -7876,7 +7871,7 @@ default:
 	out = "other (not a plain string)"
 }
 ```
-<!-- source: src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:55-81 (the switch is shown without the sixteen spaces of its enclosing lambdas) -->
+<!-- source: src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:55-77 (the switch is shown without the sixteen spaces of its enclosing lambdas) -->
 ```csharp
 var p = recover();
 switch (p.type()) {
@@ -7893,10 +7888,6 @@ case {} Δv when Δv._<error>(out var v): {
     break;
 }
 case nint v: {
-    @out = fmt.Sprintf("int(%d)"u8, v);
-    break;
-}
-case int32 v: {
     @out = fmt.Sprintf("int(%d)"u8, v);
     break;
 }
@@ -7927,7 +7918,6 @@ The other names in this example:
 - `case string:` becomes `case @string v:`, since Go's `string` is golib's `@string`. An `@string`
   compares and concatenates directly with `"…"u8` literals, so `v == "x"u8` and `"error("u8 + …` read
   like the Go.
-- `case int:` gets a repeated `case int32 v:` arm, which catches a plain C# `int` held in the interface.
 
 **Full detail:** [Reference → Type Switch Statements](ConversionStrategies-Reference/type-switch.md#type-switch-statements) — switches with no case variable, how cases that share one C# type merge, anonymous interface labels, and how interface cases find methods declared on a pointer.
 
