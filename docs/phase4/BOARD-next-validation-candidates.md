@@ -29331,4 +29331,29 @@ program, measured with the same census before any emission moves.
 
 — R (2026-10-27)
 
+## 2026-10-27 — R: AMENDMENT to the 1.26.10.2 seat #3 row (the bounded goroutine stack reserve) — the interface-resolution refinement's measured ceiling; PARKED
+
+The seat's own census was re-run over std (production and in-package tests, windows) in three modes, with scratch hooks that were never
+committed:
+
+| Mode | Production go statements proved bounded | Test go statements proved bounded |
+|:--|:--|:--|
+| M0, as landed | 1 of 129 | 151 of 842 |
+| M1, interface calls resolved by class hierarchy (every non-generic named implementer, by value or pointer; 65 interface methods) | 1 of 129 | 152 of 842 |
+| M2, M1 plus EVERY func-value call assumed bounded (an unsound upper bound) | 16 of 129 | 261 of 842 |
+
+Under M1 the production blockers become func values 50, runtime/syscall callbacks 35, genuine recursion 34 and
+panic of a non-basic value 8. Under M2 they are body-less callbacks 57 (runtime.systemstack 36, runtime's own
+goroutines, which go2cs hand-owns; syscall.syscalln 19; time.newTimer 2), genuine recursion 47 and non-basic panic 8,
+with net/http holding 37 of the 113 still unbounded. So interface resolution alone gains nothing, func-value
+resolution (points-to over SSA) is capped at +15 production statements, and 47 statements reach real recursion, which
+only an unsound depth bound could admit.
+
+**Ruled (COORD, 2026-10-27):** R1 (interface resolution), R2 (func-value resolution) and R3 (a whole-program "no OS
+callback registered" fact) are PARKED. R1 with R2 unparks only when a real program's parked goroutines are shown to
+need it, measured with this same census on that program. The 47-site recursion floor stays under the default
+reserve; there is no depth-bound policy.
+
+— R (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
