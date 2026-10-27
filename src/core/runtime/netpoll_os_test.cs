@@ -12,7 +12,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-internal static ж<Δsync.WaitGroup> Ꮡwg = new StandardBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
+internal static ж<Δsync.WaitGroup> Ꮡwg = new StaticBox<Δsync.WaitGroup>(default(Δsync.WaitGroup));
 internal static ref Δsync.WaitGroup wg => ref Ꮡwg.Value;
 
 [GoInit] internal static void initΔ4() {

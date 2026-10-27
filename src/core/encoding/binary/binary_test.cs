@@ -43,7 +43,7 @@ public partial struct T {
     public array<nint> Array = new(4);
 }
 
-internal static ж<Struct> Ꮡs = new StandardBox<Struct>(new Struct(
+internal static ж<Struct> Ꮡs = new StaticBox<Struct>(new Struct(
     0x01,
     0x0203,
     0x04050607,

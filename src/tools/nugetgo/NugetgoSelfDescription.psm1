@@ -42,6 +42,12 @@ function Get-NugetgoPackedPackages {
     }
 }
 
+# A list parameter of a script run as `pwsh -File`: a repeated parameter does not bind there, and a comma list arrives
+# as ONE string, so a list is passed once, comma-joined, and split here. Entries are trimmed and empties dropped.
+function Split-NugetgoListArgument([string[]]$Values) {
+    @($Values | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+}
+
 function Get-NugetgoThirdPartyRequires {
     [CmdletBinding()]
     # -AllowUnreferenced: one flavor of a module whose requires differ by GOOS (nugetgo-pack.ps1 checks the union instead).
@@ -78,6 +84,16 @@ function Get-NugetgoThirdPartyRequires {
 
     foreach ($library in $Libraries) {
         [xml]$project = Get-Content -Raw -LiteralPath $library.FullName
+        # A MAPPED third-party module (COORD, 2026-10-26): where the converter reaches the nugetgo.net registry, it
+        # references a published module as an exact-pinned PackageReference instead of converting it into pkg/. Only
+        # pkg/ modules become NuGet dependencies here, so the mapped one would be missing from the nuspec, silently.
+        foreach ($reference in @($project.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
+            if (([string]$reference.Include).ToLowerInvariant().StartsWith('go.', [StringComparison]::Ordinal)) { continue }
+            throw ("REFUSED: $($library.Name) references the third-party package $($reference.Include) $($reference.Version) as a " +
+                "PackageReference: the converter mapped it to its published package rather than converting it into pkg/, and the " +
+                "pack makes a NuGet dependency only of a module converted into pkg/, so this package's nuspec would lack it. " +
+                "Convert where the mapping does not apply (no registry row for that module at this go2cs release), so it converts locally")
+        }
         foreach ($reference in @($project.Project.ItemGroup | ForEach-Object { $_.ProjectReference } | Where-Object { $_ })) {
             $include = ([string]$reference.Include).Replace('\', [System.IO.Path]::DirectorySeparatorChar).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
             $target = [System.IO.Path]::GetFullPath((Join-Path $library.DirectoryName $include))
@@ -214,4 +230,4 @@ function Get-NugetgoTestOnlyPackages {
     }
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages
+Export-ModuleMember -Function Split-NugetgoListArgument, Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages

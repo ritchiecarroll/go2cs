@@ -77,7 +77,7 @@ internal interface IFirstFieldView
     object? FirstFieldParent { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -250,6 +250,9 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
 
     /// <inheritdoc/>
     bool INativeRooted.IsNativeRooted => m_source is INativeRooted { IsNativeRooted: true };
+
+    // A field of a package-level variable is package-level storage too (Go: outside every heap span).
+    bool IPackageLevelStorage.IsPackageLevel => m_source is IPackageLevelStorage { IsPackageLevel: true };
 
     // The field at its GO offset off a NATIVE root, one hop -- never NativeSlotAddress, which is the CLR
     // slot: a struct carrying a managed reference is laid out automatically, and darwin's converted

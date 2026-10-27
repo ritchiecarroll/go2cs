@@ -99,8 +99,9 @@ linker and toolchain, which differs by host:
 
 Deliberately **not** scripted: `run-performance.ps1` does not install any of these. A benchmark
 harness that silently mutates the machine's toolchain is not a harness anyone should trust with a
-performance claim. `--no-aot` drops the whole column and needs none of them
-([PLAN-linux-operation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-linux-operation.md)).
+performance claim. `--no-aot` drops the whole column and needs none of them.
+<!-- Rationale: [PLAN-linux-operation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-linux-operation.md)
+     (an internal record; its visible link was removed 2026-10-26 under owner ruling OQ-1 on visitor pages). -->
 
 The environment line of the results block reads the CPU name from the registry on Windows and from
 `/proc/cpuinfo` on Linux, so a published table always names the part that produced it.
@@ -187,14 +188,15 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
   `@string` (see the [strings reference](https://github.com/ritchiecarroll/go2cs/blob/master/docs/ConversionStrategies-Reference/strings.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)).
   The converter hoists one `sstring` view per call rather than re-materializing it per comparison,
   since the JIT won't lift a `ref struct` view out of a loop on its own. **Runs at parity with Go
-  or better in both C# variants** — and the number to watch as the eligibility surface widens; arc
-  detail in
-  [DESIGN-string-literal-allocation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-string-literal-allocation.md).
+  or better in both C# variants** — and the number to watch as the eligibility surface widens.
+  <!-- Design detail: [DESIGN-string-literal-allocation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-string-literal-allocation.md)
+       (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **StringMatch:** literal-heavy hot paths — switch-on-string dispatch, `strings.HasPrefix` against
   a literal prefix, literal returns, literal map-key counters. The instrument for the same
   literal-comparison optimizations StringView exercises (span operators, `u8` casts, hoisted
-  literals); arc detail in
-  [DESIGN-string-literal-allocation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-string-literal-allocation.md).
+  literals).
+  <!-- Design detail: [DESIGN-string-literal-allocation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-string-literal-allocation.md)
+       (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **Map:** transpiled C# is *faster than Go* — `map<K,V>` rides .NET's heavily-optimized
   `Dictionary`, and the AOT build wins by the widest margin on this insert/lookup/delete churn.
 - **Sort:** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via
@@ -202,17 +204,19 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 - **Channel:** `channel<T>` + goroutine emulation over managed threading vs Go's runtime scheduler —
   real unbuffered rendezvous, single-fire select, operand-once hoisting. Currently between 2× and 3× on
   this producer→consumer churn: the rendezvous rides managed synchronization primitives where Go's
-  scheduler hands off directly, a cost the cooperative-scheduler arc
-  ([DESIGN-cooperative-scheduler.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-cooperative-scheduler.md))
-  owns. Notably machine-sensitive — measure on your own hardware before drawing conclusions.
+  scheduler hands off directly, a cost that planned cooperative-scheduler work addresses. Notably
+  machine-sensitive — measure on your own hardware before drawing conclusions.
+  <!-- Pre-2026-10-26 wording: "a cost the cooperative-scheduler arc
+       ([DESIGN-cooperative-scheduler.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-cooperative-scheduler.md))
+       owns" (an internal record; visible link removed under OQ-1). -->
 - **IfaceCall:** pure interface method dispatch — no asserts, no shell construction, just calling
   through an interface value built once, in a megamorphic hot loop. The floor for what *calling*
   through an interface costs, distinct from *obtaining* one (the two rows below).
 - **Iface — the everyday interface story:** dispatch through statically-known interface values, a
   comma-ok assertion, and a type switch over a closed set, all resolved by generated adapters and
   ordinary casts — the compile-time (nominal) machinery, with no runtime shell construction.
-  Mechanism notes in
-  [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md).
+  <!-- Mechanism notes: [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md)
+       (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **IfaceShell — the one operation C# has no native answer for:** satisfying an interface
   **structurally at run time**. Go resolves this with a cached itab lookup — two machine words, a
   nanosecond hash probe. C# has no two-word interface value, so go2cs constructs a wrapper ("shell")
@@ -220,15 +224,17 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
   construction plus, on the value-typed tier, a reflective forwarded call. An assertion the
   converter can resolve at compile time (the Iface row above) skips this path via a generated
   adapter instead. AOT can be *slower* here, unlike Startup: its generic shell tier can degrade to
-  the reflective object shell, and AOT's reflective invokers can't emit IL stubs. Optimization
-  directions:
-  [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md).
+  the reflective object shell, and AOT's reflective invokers can't emit IL stubs.
+  <!-- Optimization directions: [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md)
+       (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **RefLower:** the ж-bound hot path — pointer parameters feeding pointer parameters, address-taken
-  locals, field addresses — after the ref-lowering arc replaced its heap boxes with native `ref`
-  (before that arc this shape ran about 25× Go; the lowering brought the JIT within 3×). AOT
+  locals, field addresses — after the converter's ref-lowering replaced its heap boxes with native `ref`
+  (before that work this shape ran about 25× Go; the lowering brought the JIT within 3×). AOT
   trails the JIT here by a wide margin — ILC's codegen of the ref-lowered loop is a priced
-  open question for the arc's next phase
-  ([DESIGN-zh-box-reduction.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-zh-box-reduction.md)).
+  open question for the next phase of that work.
+  <!-- Pre-2026-10-26 wording: "after the ref-lowering arc ... before that arc ... a priced open question for the
+       arc's next phase ([DESIGN-zh-box-reduction.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-zh-box-reduction.md))"
+       (an internal record; visible link removed under OQ-1). -->
 
 ### What the AOT column costs to produce — the honesty footnote
 
@@ -240,8 +246,9 @@ binary costs to **build**, and the cost is large enough that omitting it would m
   effective cores regardless of machine). Measured at the move to .NET 10: **hours per publish** on
   laptop-class hardware — roughly an order of magnitude over the .NET 9 era on identical input —
   so a full AOT re-baseline was days serial, overnight when publishes ran concurrently on a
-  high-memory box (measured figures and the run series:
-  [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)).
+  high-memory machine.
+  <!-- Measured figures and the run series: [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)
+       (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **Build memory.** A publish peaked at roughly **15–18 GB working set**, and at 22.2 GB when
   re-measured on 2026-10-13 (re-measure at each Go or .NET release move — the floor moves with the
   corpus). A 16 GB machine swaps; concurrent publishes need that much *each*. The produced images
@@ -292,8 +299,10 @@ binary passed the suite's own Verify phase (output-identical to Go) before it wa
 adoption is licensed by a direct A/B rather than by assumption: one benchmark published on both
 machines measured **0.25 %** apart, against a **1.19 %** empirical null established by two
 known-equivalent binaries from the same host — that is, the cross-machine difference is smaller
-than the host's own run-to-run spread. Raw data, including all four binary hashes:
-[`docs/phase4/evidence-aot-farm-ab-session.md`](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/evidence-aot-farm-ab-session.md).
+than the host's own run-to-run spread. The raw data, including all four binary hashes, is kept with the
+project's measurement records.
+<!-- Raw data: [`docs/phase4/evidence-aot-farm-ab-session.md`](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/evidence-aot-farm-ab-session.md)
+     (an internal record; visible link removed 2026-10-26, OQ-1). -->
 
 ### .NET 9 (SDK 9.0.316) — 2026-08-24
 
@@ -337,7 +346,7 @@ than the host's own run-to-run spread. Raw data, including all four binary hashe
 | IfaceShell | 5.3 | 66.6 | 96.3 |
 | RefLower | 5.3 | 46.9 | 77.1 |
 
-**What the .NET 10 hop changed.** Two results dominate, and they are why this table is kept:
+**What the move to .NET 10 changed.** Two results dominate, and they are why this table is kept:
 
 - **The Native AOT working-set penalty inverted, and did so universally.** Under .NET 9, AOT's peak
   working set was *higher than the JIT's on all fourteen rows* (Startup 76.9 MB vs 46.1). Under
@@ -349,16 +358,17 @@ than the host's own run-to-run spread. Raw data, including all four binary hashe
   benchmark is what identifies that regression as runtime-load-side rather than
   converted-closure-side: the closure is identical in both.
 
-Elsewhere the hop is mostly favourable and often within the noise band. The largest single JIT gain
+Elsewhere the move is mostly favourable and often within the noise band. The largest single JIT gain
 is String (11.56× to 6.78× Go), with StringMatch (5.00× to 4.70×) and IfaceShell (40.90× to 34.88×)
 following it down; the AOT column's time cells are broadly flat outside Startup.
 
 ## Performance-floor exploration
 
-The dated floor exploration (stock-SDK trim profiles vs bflat; concluded 2026-08-16 — the floor
-is a trim-rooting question, not a toolchain question) lives in
-[`docs/PLAN-bflat-perf-exploration.md`](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-bflat-perf-exploration.md),
-results section included.
+A floor exploration compared stock-SDK trim profiles with bflat and found that the floor is a
+trim-rooting question, not a toolchain question.
+<!-- Concluded 2026-08-16. The exploration and its results section:
+     [`docs/PLAN-bflat-perf-exploration.md`](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-bflat-perf-exploration.md)
+     (an internal record; visible link removed 2026-10-26, OQ-1). -->
 [`run-performance-floor.ps1`](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/run-performance-floor.ps1)
 is its measurement harness and is not part of the canonical suite above. (Links are absolute
 because this file mirrors verbatim to `docs/Performance.md` after each canonical run.)

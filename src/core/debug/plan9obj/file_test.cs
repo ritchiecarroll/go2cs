@@ -15,7 +15,7 @@ internal partial struct fileTest {
     internal slice<ж<global::go.debug.plan9obj_package.SectionHeader>> sections;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
+internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/386-plan9-exec"u8,
         new FileHeader(Magic386, 0x324, 0x14, 4, 0x1000, 32),

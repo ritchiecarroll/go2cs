@@ -28,9 +28,9 @@ partial struct Hook {
     public bool RunOnFailure;   // whether to run on non-zero exit code
 }
 
-internal static ж<atomic.Int32> Ꮡlocked = new StandardBox<atomic.Int32>(default(atomic.Int32));
+internal static ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
 internal static ref atomic.Int32 locked => ref Ꮡlocked.Value;
-internal static ж<atomic.Uint64> ᏑrunGoid = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ж<atomic.Uint64> ᏑrunGoid = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
 internal static slice<Hook> hooks;
 internal static bool running;

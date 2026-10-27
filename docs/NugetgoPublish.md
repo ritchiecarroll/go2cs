@@ -2,7 +2,7 @@
 
 > **STATUS: DRAFT (C2, 2026-10-09). Its four open questions were RULED by COORD on 2026-10-09 and are folded in
 > below; the document as a whole is not yet ruled, and nothing is executed from it until it is.**
-> Document type: a [runbook](Glossary.md#runbook). It is the procedure for any one module, on any go2cs release, and
+> Document type: a [runbook](doctrine/ProcessGlossary.md#runbook). It is the procedure for any one module, on any go2cs release, and
 > names no release or module. The first wave's values (hashset, uuid, jwt/v5) and its open questions are the instance
 > plan [`PLAN-nugetgo-first-wave.md`](PLAN-nugetgo-first-wave.md). The rulings it follows (B1-B8: publisher, IDs,
 > versions, ranges, metadata, rehearsal, first wave) are in [`PLAN-nugetgo.md`](PLAN-nugetgo.md), section 8.
@@ -142,7 +142,10 @@ The package page belongs to the module's author; the pack keeps its facts true (
   it. From then on the file is the author's: retitle it, rewrite the synopsis, add sections.
 - **The generated block** lies between `[//]: # (nugetgo:generated:begin)` and `[//]: # (nugetgo:generated:end)`.
   Every pack rewrites it from what it measured: the callout with the Go-source link and the security caveat, the
-  Tests, C# Source, Go module and go2cs badges, the license line, and the artwork line when the icon is go2cs's.
+  Tests, C# Source, Go module and go2cs badges, the license line (which links the Go source and the conversion
+  repository at `nuget-<PV>`), the release line (the package is compiled against the go.* release `-ClosureVersion`
+  names, and a release that changes a package's public shape takes the package's rebuild), and the artwork line when
+  the icon is go2cs's.
   When the file's block is stale, the pack rewrites it in the file and in the packed copy, and prints `REWRITTEN
   with package version <PV>, tag nuget-<PV>`. A rehearsal pack writes its rehearsal version there, so commit the
   file after the RELEASE pack. Nothing outside the block is ever touched.

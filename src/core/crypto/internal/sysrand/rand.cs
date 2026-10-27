@@ -15,7 +15,7 @@ using go.sync;
 
 partial class sysrand_package {
 
-internal static ж<atomic.Bool> ᏑfirstUse = new StandardBox<atomic.Bool>(default(atomic.Bool));
+internal static ж<atomic.Bool> ᏑfirstUse = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool firstUse => ref ᏑfirstUse.Value;
 
 internal static void warnBlocked() {
@@ -69,7 +69,7 @@ public static void Read(slice<byte> b) {
 }
 
 // The urandom fallback is only used on Linux kernels before 3.17 and on AIX.
-internal static ж<sync.Once> ᏑurandomOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑurandomOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once urandomOnce => ref ᏑurandomOnce.Value;
 
 internal static ж<os.File> urandomFile;

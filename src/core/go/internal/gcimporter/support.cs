@@ -76,7 +76,7 @@ internal static void setLines(this ref fakeFileSet s) {
 }
 
 internal static slice<nint> fakeLines;
-internal static ж<sync.Once> ᏑfakeLinesOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑfakeLinesOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once fakeLinesOnce => ref ᏑfakeLinesOnce.Value;
 
 // See cmd/compile/internal/noder.derivedInfo.

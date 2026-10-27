@@ -2454,7 +2454,7 @@ partial struct globalAllocᴛ1 /*dyn*/ {
     /*embed*/ internal mutex mutex;
     /*embed*/ internal persistentAlloc persistentAlloc;
 }
-internal static ж<globalAllocᴛ1> ᏑglobalAlloc = new StandardBox<globalAllocᴛ1>(new globalAllocᴛ1(nil));
+internal static ж<globalAllocᴛ1> ᏑglobalAlloc = new StaticBox<globalAllocᴛ1>(new globalAllocᴛ1(nil));
 internal static ref globalAllocᴛ1 globalAlloc => ref ᏑglobalAlloc.Value;
 
 // persistentChunkSize is the number of bytes we allocate when we grow
@@ -2464,7 +2464,7 @@ internal static UntypedInt persistentChunkSize => /* 256 << 10 */ 262144;
 // persistentChunks is a list of all the persistent chunks we have
 // allocated. The list is maintained through the first word in the
 // persistent chunk. This is updated atomically.
-internal static ж<ж<notInHeap>> ᏑpersistentChunks = new StandardBox<ж<notInHeap>>(default(ж<notInHeap>));
+internal static ж<ж<notInHeap>> ᏑpersistentChunks = new StaticBox<ж<notInHeap>>(default(ж<notInHeap>));
 internal static ref ж<notInHeap> persistentChunks => ref ᏑpersistentChunks.ValueSlot;
 
 // Wrapper around sysAlloc that can allocate small chunks.

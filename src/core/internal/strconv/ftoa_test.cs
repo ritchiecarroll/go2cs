@@ -28,7 +28,7 @@ internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
 internal static readonly GoBigConst above1e23 = /* 100000000000000008388608 */
     GoBigConst.Parse("100000000000000008388608");
 
-internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTest>>(new ftoaTest[]{
+internal static ж<slice<ftoaTest>> Ꮡftoatests = new StaticBox<slice<ftoaTest>>(new ftoaTest[]{
     new(1D, (rune)'e', 5, "1.00000e+00"u8),
     new(1D, (rune)'f', 5, "1.00000"u8),
     new(1D, (rune)'g', 5, "1"u8),

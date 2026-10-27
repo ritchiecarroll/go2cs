@@ -120,6 +120,11 @@ type proofPageProvenance struct {
 	// the go2cs checkout's committed -module-disclosures tree (thirdPartyDisclosureURL); "" names the manifest beside
 	// the converted package instead. A stdlib page keeps its src/core link and never reads this.
 	disclosureURL string
+
+	// archWithdrawals lists, for a STANDARD-LIBRARY page, each test a GOOS that ships more than one architecture
+	// withdraws from both sides, as "<goos>: <name>: <detail>" (proofPageArchWithdrawals, testTargetArch.go). Empty
+	// renders nothing, so every page with no such test is unchanged.
+	archWithdrawals []string
 }
 
 // proofInputDigestPattern reads a third-party proof page's input digest back, for its MODULE.md row.
@@ -533,6 +538,20 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		}
 	}
 
+	if len(provenance.archWithdrawals) > 0 {
+		page.WriteString("\n## Withdrawn where a shipped architecture does not build the test\n\n")
+		page.WriteString("One converted build of a GOOS serves every RID it ships, and the roster banks one count for it.\n")
+		page.WriteString("A test whose file one of those architectures does not build is therefore withdrawn from **both**\n")
+		page.WriteString("sides on that GOOS, on every RID, and is not claimed by that GOOS's count. It still runs, and is\n")
+		page.WriteString("compared, on every GOOS that builds it:\n\n")
+
+		for _, entry := range provenance.archWithdrawals {
+			goos, rest, _ := strings.Cut(entry, ": ")
+			name, detail, _ := strings.Cut(rest, ": ")
+			fmt.Fprintf(&page, "- %s: `%s` — %s\n", goos, escapeProofCell(name), detail)
+		}
+	}
+
 	if len(comparison.Excluded) > 0 {
 		excluded := make([]string, len(comparison.Excluded))
 		copy(excluded, comparison.Excluded)
@@ -926,6 +945,8 @@ func emitValidationProofPage(outputPath string, comparison testComparison, manif
 		platform:   options.targetPlatform,
 		date:       time.Now().UTC().Format("2006-01-02"),
 		commit:     shortGitRevision(filepath.Dir(docsPath)),
+
+		archWithdrawals: proofPageArchWithdrawals(options.goRoot, manifest.PackageImportPath, options.buildTags),
 	}
 
 	return writeValidationProofPage(docsPath, provenance, comparison, disclosures, notes)

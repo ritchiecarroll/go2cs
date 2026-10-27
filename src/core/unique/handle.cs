@@ -11,7 +11,7 @@ using Δsync = @internal.sync_package;
 
 partial class unique_package {
 
-internal static ж<uintptr> Ꮡzero = new StandardBox<uintptr>(default(uintptr));
+internal static ж<uintptr> Ꮡzero = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr zero => ref Ꮡzero.Value;
 
 // Handle is a globally unique identity for some value of type T.
@@ -63,7 +63,7 @@ public static Handle<T> Make<T>(T value) {
 // benefit of not cramming every different type into a single map, but that's certainly
 // not enough to outweigh the cost of two map lookups. What is worth it though, is saving
 // on those allocations.
-internal static ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new StandardBox<isync.HashTrieMap<ж<abi.Type>, any>>(default(isync.HashTrieMap<ж<abi.Type>, any>));
+internal static ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new StaticBox<isync.HashTrieMap<ж<abi.Type>, any>>(default(isync.HashTrieMap<ж<abi.Type>, any>));
 internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ᏑuniqueMaps.Value;                                            // any is always a *uniqueMap[T].
 
 partial struct uniqueMap<T> {

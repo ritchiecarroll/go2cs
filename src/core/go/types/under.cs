@@ -45,7 +45,7 @@ partial struct typeError {
     internal slice<any> args;
 }
 
-internal static ж<typeError> ᏑemptyTypeError = new StandardBox<typeError>(default(typeError));
+internal static ж<typeError> ᏑemptyTypeError = new StaticBox<typeError>(default(typeError));
 internal static ref typeError emptyTypeError => ref ᏑemptyTypeError.Value;
 
 internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany argsʗp) {

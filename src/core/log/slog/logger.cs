@@ -20,10 +20,10 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class slog_package {
 
-internal static ж<atomic.Pointer<Logger>> ᏑdefaultLogger = new StandardBox<atomic.Pointer<Logger>>(default(atomic.Pointer<Logger>));
+internal static ж<atomic.Pointer<Logger>> ᏑdefaultLogger = new StaticBox<atomic.Pointer<Logger>>(default(atomic.Pointer<Logger>));
 internal static ref atomic.Pointer<Logger> defaultLogger => ref ᏑdefaultLogger.Value;
 
-internal static ж<LevelVar> ᏑlogLoggerLevel = new StandardBox<LevelVar>(default(LevelVar));
+internal static ж<LevelVar> ᏑlogLoggerLevel = new StaticBox<LevelVar>(default(LevelVar));
 internal static ref LevelVar logLoggerLevel => ref ᏑlogLoggerLevel.Value;
 
 // SetLogLoggerLevel controls the level for the bridge to the [log] package.

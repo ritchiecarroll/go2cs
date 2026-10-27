@@ -6,7 +6,7 @@ namespace go;
 
 partial class runtime_package {
 
-[GoLazy] partial class lazyᴛsigtable { internal static ж<array<sigTabT>> Ꮡsigtable = new StandardBox<array<sigTabT>>(new sigTabT[]{
+[GoLazy] partial class lazyᴛsigtable { internal static ж<array<sigTabT>> Ꮡsigtable = new StaticBox<array<sigTabT>>(new sigTabT[]{
     /* 0 */
     new(0, "SIGNONE: no trap"u8),
     /* 1 */

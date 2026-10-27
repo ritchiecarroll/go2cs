@@ -1852,6 +1852,39 @@ public sealed class TestExecution
     }
 
     /// <summary>
+    /// The working directory as Go's <c>os.Getwd</c> answers it, for the host sites where Go's testing
+    /// package calls <c>os.Getwd</c>: <see cref="Chdir"/>'s relative case and the artifact root's
+    /// <c>filepath.Abs</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// On unix Go's <c>os.Getwd</c> answers <c>$PWD</c> when it is absolute and names the same file as
+    /// <c>"."</c>, and getcwd only otherwise. getcwd, which is what <see cref="Directory.GetCurrentDirectory"/>
+    /// and <see cref="Path.GetFullPath(string)"/> read, answers the PHYSICAL path. Under a symlinked
+    /// directory the two spellings part: darwin's <c>$TMPDIR</c> is under <c>/var</c>, a link to
+    /// <c>/private/var</c>, and the host's sandbox sits there. So this calls the converted
+    /// <c>os.Getwd</c>, which reads <c>PWD</c> from the converted environment that
+    /// <see cref="Setenv"/> and the host's own PWD publication write.
+    /// </para>
+    /// <para>
+    /// Windows keeps <see cref="Directory.GetCurrentDirectory"/>: Go's <c>os.Getwd</c> skips <c>$PWD</c>
+    /// there, and the host's windows behaviour stays byte-identical.
+    /// </para>
+    /// </remarks>
+    internal static string GoWorkingDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+            return Directory.GetCurrentDirectory();
+
+        (@string dir, error err) = os_package.Getwd();
+
+        if (err is not null)
+            throw new IOException(err.Error().ToString());
+
+        return dir.ToString();
+    }
+
+    /// <summary>
     /// Go 1.24's <c>common.Chdir</c> (testing.go:1351) — change the process working directory for
     /// the duration of the test, restoring it on cleanup.
     /// </summary>
@@ -1869,9 +1902,12 @@ public sealed class TestExecution
     /// it and absent exactly where Go leaves it absent.
     /// </para>
     /// <para>
-    /// FIDELITY 2 — the relative-path case resolves through <c>GetCurrentDirectory</c> AFTER the
-    /// change, as Go's <c>os.Getwd</c> does, so PWD records an absolute path rather than the
-    /// relative spelling the caller passed.
+    /// FIDELITY 2 — the relative-path case resolves through <see cref="GoWorkingDirectory"/> AFTER
+    /// the change, as Go's does through <c>os.Getwd</c>, so PWD records an absolute path rather than
+    /// the relative spelling the caller passed. Because <c>os.Getwd</c> reads the still-unchanged
+    /// <c>$PWD</c> first, <c>t.Chdir(".")</c> under a symlinked directory keeps PWD's LOGICAL spelling
+    /// where getcwd would answer the physical one (testing's TestChdir, "current (relative) with extra
+    /// os.Chdir", on darwin).
     /// </para>
     /// <para>
     /// ⚠ DIVERGENCE 1, and it is a HOST DECISION rather than Go fidelity — say so plainly, because
@@ -1942,7 +1978,7 @@ public sealed class TestExecution
             {
                 try
                 {
-                    pwd = Directory.GetCurrentDirectory();
+                    pwd = GoWorkingDirectory();
                 }
                 catch (Exception ex)
                 {

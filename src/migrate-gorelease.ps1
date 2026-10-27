@@ -592,7 +592,8 @@ $pathClasses = @(
     @{ Match = '^docs/ConversionStrategies-Reference(\.md|/.+\.md)$'; Class = 'MUST-NOT-CHANGE'; Note = 'the reference pages and the old single-page stub: census records ("across the whole Go X stdlib, N sites") and illustrative doc-link examples' }
     @{ Match = '^docs/GoCorpusMigration\.md$';            Class = 'MUST-NOT-CHANGE'; Note = 'this runbook is version-agnostic by design' }
     @{ Match = '^docs/doctrine/JOURNAL-';                 Class = 'MUST-NOT-CHANGE'; Note = "the frozen pre-diet CLAUDE.md; TestContextBudget's repoguard asserts its BLOB IDENTITY, so any edit at all fails the converter suite" }
-    @{ Match = '^docs/Glossary\.md$';                     Class = 'MUST-NOT-CHANGE'; Note = 'the hop-lettering key NAMES its campaign (Hop A = Go X); substituting would destroy the definition' }
+    @{ Match = '^docs/Glossary\.md$';                     Class = 'MUST-NOT-CHANGE'; Note = 'the visitor glossary: its definitions name no corpus release; any release string that appears in one is an example, never a pin' }
+    @{ Match = '^docs/doctrine/ProcessGlossary\.md$';     Class = 'MUST-NOT-CHANGE'; Note = 'the hop-lettering key NAMES its campaign (Hop A = Go X); substituting would destroy the definition (moved here from docs/Glossary.md, 2026-10-26)' }
 
     # The context diet (56ff452a5) relocated 7,722 lines of CLAUDE.md into path-scoped rules and
     # on-demand skills, so the release now appears in files this table had never seen. Classified

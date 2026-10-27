@@ -89,13 +89,45 @@ try {
     $orphan = Write-Fixture 'src/example.com/mod/orphan/example.com.mod.orphan.csproj' (Project 'example.com.mod.orphan' @('../../../../pkg/example.com/stranger/example.com.stranger.csproj'))
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($orphan) -ThirdPartyPackage @() }
     Check 'a pkg/ reference no lock entry covers is refused' ($why -like '*example.com/stranger*go2cs.modules.lock*') "got '$why'"
+
+    # A MAPPED third-party module (COORD, 2026-10-26): on a host that reaches nugetgo.net, the converter references a
+    # published module as an exact-pinned PackageReference instead of converting it into pkg/. The pack carries only
+    # pkg/ modules into the nuspec, so the mapped one would be silently missing there: refused by name, with or
+    # without -ThirdPartyPackage naming it. go.* PackageReferences are the standard library and pass.
+    $goRefs = "<Project Sdk=`"Microsoft.NET.Sdk`">`n  <ItemGroup>`n    <PackageReference Include=`"go.gen`" Version=`"`$(GoStdLibVersion)`" PrivateAssets=`"all`" />`n    <PackageReference Include=`"go.lib`" Version=`"`$(GoStdLibVersion)`" />`n  </ItemGroup>`n</Project>`n"
+    $stdLib = Write-Fixture 'src/example.com/mod/std/example.com.mod.std.csproj' $goRefs
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($stdLib) -ThirdPartyPackage @() }
+    Check 'go.* PackageReferences are the standard library, not a third-party edge' ($null -eq $why) "got '$why'"
+    $mapped = Write-Fixture 'src/example.com/mod/mapped/example.com.mod.mapped.csproj' ($goRefs.Replace('</ItemGroup>', "  <PackageReference Include=`"nugetgo.example.com.dep`" Version=`"[0.2.0]`" />`n  </ItemGroup>"))
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($mapped) -ThirdPartyPackage @() }
+    Check 'a mapped third-party PackageReference is refused, naming the package and its version' ($why -like '*example.com.mod.mapped.csproj*nugetgo.example.com.dep `[0.2.0`]*PackageReference*') "got '$why'"
+    $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($mapped) -ThirdPartyPackage @($depPackage) -AllowUnreferenced }
+    Check 'it is refused the same way when -ThirdPartyPackage names the module' ($why -like '*nugetgo.example.com.dep `[0.2.0`]*PackageReference*') "got '$why'"
 }
 finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+Write-Host 'list arguments across pwsh -File'
+# pwsh -File binds a repeated parameter as an error and a comma list as ONE string, so the driver passes a list once,
+# comma-joined, and the pack splits it (C2, 2026-10-26: the cobra run's two -ThirdPartyPackage entries).
+$one = @(Split-NugetgoListArgument @('example.com/a=nugetgo.example.com.a@1.0.0'))
+Check 'one entry stays one' ($one.Count -eq 1 -and $one[0] -ceq 'example.com/a=nugetgo.example.com.a@1.0.0') "got [$($one -join ' | ')]"
+$joined = @(Split-NugetgoListArgument @('example.com/a=nugetgo.example.com.a@1.0.0,example.com/b=nugetgo.example.com.b@2.0.0'))
+Check 'a comma-joined argument is two entries' ($joined.Count -eq 2 -and $joined[1] -ceq 'example.com/b=nugetgo.example.com.b@2.0.0') "got [$($joined -join ' | ')]"
+$mixed = @(Split-NugetgoListArgument @('x', 'y, z', ''))
+Check 'an array of joined arguments flattens, trimmed, empties dropped' (($mixed -join '|') -ceq 'x|y|z') "got [$($mixed -join ' | ')]"
+Check 'nothing is nothing' (@(Split-NugetgoListArgument @()).Count -eq 0) 'not empty'
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+$driver = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Invoke-NugetgoRepack.ps1'))
+Check 'nugetgo-pack.ps1 splits -ThirdPartyPackage and -ExcludePackage before using them' (
+    $pack.Contains('$ThirdPartyPackage = @(Split-NugetgoListArgument $ThirdPartyPackage)') -and
+    $pack.Contains('$ExcludePackage = @(Split-NugetgoListArgument $ExcludePackage)')) 'the pack does not split its list arguments'
+Check 'the driver passes each list once, comma-joined' (
+    $driver.Contains("'-ThirdPartyPackage', (`$ThirdPartyPackage -join ',')") -and $driver.Contains("'-ExcludePackage', (`$excluded -join ',')") -and
+    -not $driver.Contains('foreach ($x in $ThirdPartyPackage)') -and -not $driver.Contains('foreach ($x in $excluded)')) 'the driver repeats a list parameter'
 Check 'nugetgo-pack.ps1 takes -ExcludePackage and selects its libraries through Select-NugetgoPackedLibraries' (
     $pack.Contains('[string[]]$ExcludePackage') -and $pack.Contains('Select-NugetgoPackedLibraries')) 'the pack does not select its libraries'
 

@@ -29,7 +29,7 @@ partial interface Interface {
 // That must not cause a race detector failure,
 // although it will still result in limited visibility
 // into exactly what those goroutines do.
-internal static ж<atomic.Pointer<Interface>> Ꮡlogger = new StandardBox<atomic.Pointer<Interface>>(default(atomic.Pointer<Interface>));
+internal static ж<atomic.Pointer<Interface>> Ꮡlogger = new StaticBox<atomic.Pointer<Interface>>(default(atomic.Pointer<Interface>));
 internal static ref atomic.Pointer<Interface> logger => ref Ꮡlogger.Value;
 
 // SetLogger sets the test logger implementation for the current process.

@@ -271,7 +271,7 @@ public static void TestSwapUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<array<byte>> Ꮡglobal = new StandardBox<array<byte>>(new array<byte>(1024));
+internal static ж<array<byte>> Ꮡglobal = new StaticBox<array<byte>>(new array<byte>(1024));
 internal static ref array<byte> global => ref Ꮡglobal.Value;
 
 internal static slice<@unsafe.Pointer> testPointers() {

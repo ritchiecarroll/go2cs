@@ -30,7 +30,7 @@ and compared against a committed expected output, and each runnable one is execu
 compared against Go's. [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md)
 says how to run them before you send a change.
 
-Three focused checks run by hand when you change what they guard:
+These focused checks run by hand when you change what they guard:
 
 - `src/check-warning-entries.sh`: the per-file warning entries the converter writes match the compiler's
   warnings, in both directions.
@@ -38,6 +38,8 @@ Three focused checks run by hand when you change what they guard:
   the paths planted in fabricated packages.
 - `src/tools/nugetgo/Test-NugetgoSelfDescription.ps1`: the module pack's self-description, on a
   fabricated conversion output.
+- `src/tests/sign-release-binaries-selftest.ps1`: the release-signing step (`src/sign-release-binaries.ps1`),
+  against a mock draft Release with a self-signed test certificate and a throwaway GPG key.
 
 ## Validate a converted test suite
 

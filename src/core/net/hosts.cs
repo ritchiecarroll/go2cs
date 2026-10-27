@@ -47,7 +47,7 @@ partial struct hostsᴛ1 /*dyn*/ {
     internal time.Time mtime;
     internal int64 size;
 }
-internal static ж<hostsᴛ1> Ꮡhosts = new StandardBox<hostsᴛ1>(new hostsᴛ1(nil));
+internal static ж<hostsᴛ1> Ꮡhosts = new StaticBox<hostsᴛ1>(new hostsᴛ1(nil));
 internal static ref hostsᴛ1 hosts => ref Ꮡhosts.Value;
 
 internal static void readHosts() {

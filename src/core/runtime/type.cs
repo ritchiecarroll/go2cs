@@ -105,7 +105,7 @@ internal static ж<byte> getGCMask(ж<_type> Ꮡt) {
 
 // inProgress is a byte whose address is a sentinel indicating that
 // some thread is currently building the GC bitmask for a type.
-internal static ж<byte> ᏑinProgress = new StandardBox<byte>(default(byte));
+internal static ж<byte> ᏑinProgress = new StaticBox<byte>(default(byte));
 internal static ref byte inProgress => ref ᏑinProgress.Value;
 
 // nosplit because it is used during write barriers and must not be preempted.
@@ -303,7 +303,7 @@ partial struct reflectOffsᴛ1 /*dyn*/ {
     internal map<int32, @unsafe.Pointer> m;
     internal map<@unsafe.Pointer, int32> minv;
 }
-internal static ж<reflectOffsᴛ1> ᏑreflectOffs = new StandardBox<reflectOffsᴛ1>(new reflectOffsᴛ1());
+internal static ж<reflectOffsᴛ1> ᏑreflectOffs = new StaticBox<reflectOffsᴛ1>(new reflectOffsᴛ1());
 internal static ref reflectOffsᴛ1 reflectOffs => ref ᏑreflectOffs.Value;
 
 internal static void reflectOffsLock() {

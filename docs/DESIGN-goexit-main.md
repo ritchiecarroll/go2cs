@@ -80,9 +80,9 @@ The design uses those frames as the chain of catch points:
 `os.Exit` and a panic on another goroutine keep their existing paths: both end the process from their own thread
 while the main thread is parked.
 
-<!-- The filter: src/core/golib/GoFrame.cs:666 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
-:677 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
-:366 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1241
+<!-- The filter: src/core/golib/GoFrame.cs:672 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
+:683 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
+:366 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1247
 (`private static void Unregister(Goroutine goroutine)`), :890 (`internal static bool AllGoroutinesForeverBlocked()`),
 :937 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:109
 (`internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>`). The deadlock text:

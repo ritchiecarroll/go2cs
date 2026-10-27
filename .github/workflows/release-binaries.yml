@@ -17,8 +17,11 @@ name: Release binaries
 #   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
 #   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
 #   - creates a DRAFT GitHub Release for the tag holding the six archives, SHA256SUMS and the attestation bundle.
-# A DRAFT IS NOT PUBLISHED. A person reads it, replaces its placeholder notes with the release notes, and
-# publishes it. This workflow never publishes, and it refuses to touch a Release that already exists for the tag.
+# A DRAFT IS NOT PUBLISHED. On the release machine, src/sign-release-binaries.ps1 Authenticode-signs the Windows
+# executables, re-packs those two archives, GPG-signs SHA256SUMS and replaces them on the draft, removing this run's
+# attestation bundle (it no longer matches); attest-release.yml then attests the draft's archives and puts a bundle
+# back. A person replaces the placeholder notes and publishes it. This workflow never publishes, and it refuses to
+# touch a Release that already exists for the tag.
 #
 # STARTED BY HAND WITH NO TAG it builds the commit it was started on and smokes it: no attestation, no Release.
 #
@@ -294,7 +297,7 @@ jobs:
           test "$(ls dist/go2cs-*.zip dist/go2cs-*.tar.gz | wc -l)" -eq 6
           test -s dist/SHA256SUMS
           test -s dist/go2cs-attestation.sigstore.jsonl
-          notes="DRAFT, created by the release-binaries workflow for tag $TAG. The binaries were built from the release record commit $RECORD. Replace this text with the release notes before publishing."
+          notes="DRAFT, created by the release-binaries workflow for tag $TAG. The binaries were built from the release record commit $RECORD. Before publishing: on the release machine run src/sign-release-binaries.ps1 -Tag $TAG -Apply (signs the Windows executables and SHA256SUMS), then run the attest-release workflow for $TAG; and replace this text with the release notes."
           gh release create "$TAG" --draft --verify-tag --title "go2cs $VERSION" --notes "$notes" \
             dist/go2cs-*.zip dist/go2cs-*.tar.gz dist/SHA256SUMS dist/go2cs-attestation.sigstore.jsonl
           draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"

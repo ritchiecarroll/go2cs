@@ -79,7 +79,7 @@ public static (ж<byte>, error) BytePtrFromString(@string s) {
 
 // Single-word zero for use when we need a valid pointer to 0 bytes.
 // See mksyscall.pl.
-internal static ж<uintptr> Ꮡ_zero = new StandardBox<uintptr>(default(uintptr));
+internal static ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr _zero => ref Ꮡ_zero.Value;
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.

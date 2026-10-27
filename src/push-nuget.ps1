@@ -63,11 +63,17 @@
 .PARAMETER BumpBuild
     Force or suppress the GoBuildNumber increment in src\version.props (then commit it). Defaults to
     ON with -Push (each publish is a new version) and OFF for a pack-only run. Pass -BumpBuild:$false
-    to publish the CURRENT version without bumping -- e.g. finishing a partially-failed push (with
-    --skip-duplicate) or serial automation that manages the version itself.
+    to publish the CURRENT version without bumping -- e.g. finishing a partially-failed push (every
+    package already published is skipped) or serial automation that manages the version itself.
 
 .PARAMETER Push
     Actually push the packed .nupkg to the feed. Without this switch the script only packs.
+
+    The push is resumable and rate-aware (src\_nugetpush.ps1): one package at a time, go.lib and go.gen
+    first; a version the feed's flat container already has is skipped; a refusal carrying a Retry-After
+    (nuget.org's per-key push quota answers 403 Quota Exceeded) is waited out, printing when the push
+    resumes, and the same package is pushed again. Any other refusal stops the run, naming the package
+    and how many were pushed before it; re-run with -Push -BumpBuild:$false to finish.
 
 .PARAMETER VerifyOnly
     Run the pre-flight verification and the release census, print the result, and exit -- 0 when
@@ -116,7 +122,7 @@
 .EXAMPLE
     .\push-nuget.ps1 -Push -BumpBuild:$false
     Re-push the CURRENT version without bumping -- e.g. to finish a partially-failed publish
-    (--skip-duplicate skips the packages already on the feed).
+    (every package already published is skipped).
 #>
 #Requires -Version 5.1
 [CmdletBinding(SupportsShouldProcess = $true)]
@@ -2103,19 +2109,21 @@ if (-not $Push) {
 
 if (-not $ApiKey) { throw "-Push requires an API key: pass -ApiKey or set `$env:NUGET_API_KEY." }
 
-# Publish go.lib and go.gen first (dependencies of every stdlib package). --skip-duplicate makes a
-# re-run idempotent; nuget.org indexes asynchronously so strict ordering is a nicety, not required.
-$deps = @($pkgs | Where-Object { $_.Name -match '^go\.(lib|gen)\.' })
-$rest = @($pkgs | Where-Object { $_.Name -notmatch '^go\.(lib|gen)\.' })
-$ordered = $deps + $rest
+# One package at a time, go.lib and go.gen first, skipping every version the feed already has and waiting out a
+# rate limit (nuget.org's per-key push quota stopped 1.26.10.1 at push 351 of 362): see _nugetpush.ps1. A run that
+# stops anyway is resumed by re-running with -Push -BumpBuild:$false.
+. (Join-Path $PSScriptRoot '_nugetpush.ps1')
+$ordered = Get-GoNuGetPushOrder $pkgs
 
 Write-Step "Pushing $($ordered.Count) package(s) to $Source"
-$pushed = 0
-foreach ($p in $ordered) {
-    if ($PSCmdlet.ShouldProcess($p.Name, "nuget push -> $Source")) {
-        & dotnet nuget push $p.FullName --source $Source --api-key $ApiKey --skip-duplicate
-        if ($LASTEXITCODE -ne 0) { throw "push failed for $($p.Name) ($LASTEXITCODE)" }
-        $pushed++
+if ($PSCmdlet.ShouldProcess("$($ordered.Count) package(s) at version $fullVersion", "nuget push -> $Source")) {
+    try {
+        $result = Invoke-GoNuGetPush -Packages $ordered -Source $Source -ApiKey $ApiKey
     }
+    catch {
+        throw "$($_.Exception.Message). To resume at this version: .\push-nuget.ps1 -Push -BumpBuild:`$false"
+    }
+
+    Write-Step ("Done. Pushed $($result.Pushed) package(s) at version $fullVersion; $($result.AlreadyPublished) were already " +
+        "published; $($result.Waits) rate-limit wait(s).")
 }
-Write-Step "Done. Pushed $pushed package(s) at version $fullVersion."

@@ -191,6 +191,76 @@ public class TestChdirLifecycleTests
         }
     }
 
+    // Go's Chdir and its artifact root read the working directory through os.Getwd, which answers $PWD
+    // when it names the same file as "." -- the LOGICAL spelling. getcwd answers the PHYSICAL one. They
+    // part under a symlinked directory, which is darwin's $TMPDIR (/var -> /private/var), where the
+    // host's sandbox sits: testing's TestChdir ("current (relative) with extra os.Chdir") and
+    // TestArtifactDirDefault both read /private/var/... there while Go reads /var/... (BOARD 2026-10-26,
+    // fix B). This arm makes the symlink itself, so linux runs the darwin shape. Windows does not use
+    // PWD, which the arm above already asserts, so there is nothing to assert here.
+    [TestMethod]
+    public void TheWorkingDirectoryKeepsPwdsLogicalSpellingUnderASymlink()
+    {
+        if (OperatingSystem.IsWindows())
+            Assert.Inconclusive("windows does not use PWD; ChdirTouchesPwdOnPosixAndLeavesItAloneOnWindows covers it");
+
+        string original = Directory.GetCurrentDirectory();
+        string? pwdBefore = Environment.GetEnvironmentVariable("PWD");
+        var (syscallPwdBefore, syscallHadPwd) = go.syscall_package.Getenv("PWD");
+        string root = Path.Combine(Path.GetTempPath(), "c1-chdir-symlink-" + Guid.NewGuid().ToString("N"));
+        string real = Path.Combine(root, "real");
+        string link = Path.Combine(root, "link");
+
+        try
+        {
+            Directory.CreateDirectory(real);
+            Directory.CreateSymbolicLink(link, real);
+            Directory.SetCurrentDirectory(link);
+
+            // What a shell, and the host's own run setup, do on entering a directory: PWD names it as
+            // entered, in both env stores (the converted os reads the syscall one).
+            go.syscall_package.Setenv("PWD", link);
+            Environment.SetEnvironmentVariable("PWD", link);
+
+            Assert.AreNotEqual(link, Directory.GetCurrentDirectory(),
+                "PRECONDITION: getcwd must answer the physical spelling, or this arm cannot tell the two apart");
+
+            TestExecution parent = NewExecution("TestChdirSymlink");
+            string? pwdDuring = null;
+            bool bodyRan = false;
+
+            parent.Run("child", t =>
+            {
+                bodyRan = true;
+                t.Value.Execution.Chdir(".");
+                pwdDuring = go.syscall_package.Getenv("PWD").Item1.ToString();
+            });
+
+            Assert.IsTrue(bodyRan, "the test body must have run, or nothing below means anything");
+            Assert.AreEqual(link, pwdDuring,
+                "t.Chdir(\".\") records PWD from os.Getwd, which keeps PWD's logical spelling -- not getcwd's physical one");
+
+            TestReporter reporter = new("guard", json: false, verbose: false);
+            TestRunner runner = new(new TestRegistry("guard", []), TestOptions.Parse(["-test.artifacts"]), reporter, ".", ".");
+            string artifactDir = runner.MakeArtifactDir();
+
+            Assert.AreEqual(Path.Combine(link, "_artifacts"), Path.GetDirectoryName(artifactDir),
+                "the artifact root is filepath.Abs(\"_artifacts\"), joined to os.Getwd's logical spelling");
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(original);
+            Environment.SetEnvironmentVariable("PWD", pwdBefore);
+
+            if (syscallHadPwd)
+                go.syscall_package.Setenv("PWD", syscallPwdBefore);
+            else
+                go.syscall_package.Unsetenv("PWD");
+
+            TryDelete(root);
+        }
+    }
+
     private static void TryDelete(string directory)
     {
         try

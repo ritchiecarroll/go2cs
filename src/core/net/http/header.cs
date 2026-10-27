@@ -165,7 +165,7 @@ partial struct headerSorter {
     internal slice<keyValues> kvs;
 }
 
-internal static ж<sync.Pool> ᏑheaderSorterPool = new StandardBox<sync.Pool>(new sync.Pool(
+internal static ж<sync.Pool> ᏑheaderSorterPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<headerSorter>()
 ));
 internal static ref sync.Pool headerSorterPool => ref ᏑheaderSorterPool.Value;

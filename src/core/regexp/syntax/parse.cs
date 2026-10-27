@@ -1824,7 +1824,7 @@ partial struct categoryAliasesᴛ1 /*dyn*/ {
     internal sync.Once once;
     internal map<@string, @string> m;
 }
-internal static ж<categoryAliasesᴛ1> ᏑcategoryAliases = new StandardBox<categoryAliasesᴛ1>(default(categoryAliasesᴛ1));
+internal static ж<categoryAliasesᴛ1> ᏑcategoryAliases = new StaticBox<categoryAliasesᴛ1>(default(categoryAliasesᴛ1));
 internal static ref categoryAliasesᴛ1 categoryAliases => ref ᏑcategoryAliases.Value;
 
 // initCategoryAliases initializes categoryAliases by canonicalizing unicode.CategoryAliases.

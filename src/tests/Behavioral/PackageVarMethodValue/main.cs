@@ -50,30 +50,30 @@ internal static void apply(Action f) {
     f();
 }
 
-internal static ж<T> Ꮡg = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡg = new StaticBox<T>(default(T));
 internal static ref T g => ref Ꮡg.Value;
-internal static ж<H> Ꮡgh = new StandardBox<H>(default(H));
+internal static ж<H> Ꮡgh = new StaticBox<H>(default(H));
 internal static ref H gh => ref Ꮡgh.Value;
-internal static ж<array<T>> Ꮡga = new StandardBox<array<T>>(new array<T>(2));
+internal static ж<array<T>> Ꮡga = new StaticBox<array<T>>(new array<T>(2));
 internal static ref array<T> ga => ref Ꮡga.Value;
-internal static ж<T> Ꮡgp = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡgp = new StaticBox<T>(default(T));
 internal static ref T gp => ref Ꮡgp.Value;
-internal static ж<T> Ꮡgf = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡgf = new StaticBox<T>(default(T));
 internal static ref T gf => ref Ꮡgf.Value;
-internal static ж<T> Ꮡgl = new StandardBox<T>(mk());
+internal static ж<T> Ꮡgl = new StaticBox<T>(mk());
 internal static ref T gl => ref Ꮡgl.Value;
-internal static ж<V> Ꮡgvv = new StandardBox<V>(new V(nil));
+internal static ж<V> Ꮡgvv = new StaticBox<V>(new V(nil));
 internal static ref V gvv => ref Ꮡgvv.Value;
-internal static ж<T> Ꮡgr = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡgr = new StaticBox<T>(default(T));
 internal static ref T gr => ref Ꮡgr.Value;
-internal static ж<T> Ꮡgw = new StandardBox<T>(default(T));
+internal static ж<T> Ꮡgw = new StaticBox<T>(default(T));
 internal static ref T gw => ref Ꮡgw.Value;
 internal static T gv;
 internal static ж<T> gpp = Ꮡ(new T(nil));
 internal static slice<T> gs = new slice<T>(1);
 internal static E ge = new E(Ꮡ(new T(nil)));
 
-[GoLazy] partial class lazyᴛlz { internal static ж<Tab> Ꮡlz = new StandardBox<Tab>(new Tab(vals: new nint[]{1, 2, 3, 4, 5, 6, 7, 8 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1}.array())); }
+[GoLazy] partial class lazyᴛlz { internal static ж<Tab> Ꮡlz = new StaticBox<Tab>(new Tab(vals: new nint[]{1, 2, 3, 4, 5, 6, 7, 8 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1}.array())); }
 internal static ref Tab lz => ref Ꮡlz.Value;
 
 internal static void Main() {

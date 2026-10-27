@@ -31,7 +31,7 @@ partial struct cpuProfile {
     internal ж<profBuf> log;
 }
 
-internal static ж<cpuProfile> Ꮡcpuprof = new StandardBox<cpuProfile>(default(cpuProfile));
+internal static ж<cpuProfile> Ꮡcpuprof = new StaticBox<cpuProfile>(default(cpuProfile));
 internal static ref cpuProfile cpuprof => ref Ꮡcpuprof.Value;
 
 internal static void incr(ref nint p) {

@@ -436,7 +436,7 @@ internal static error UnreadRune(this ref readRune r) {
     return default!;
 }
 
-internal static ж<Δsync.Pool> ᏑssFree = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+internal static ж<Δsync.Pool> ᏑssFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => @new<ss>()
 ));
 internal static ref Δsync.Pool ssFree => ref ᏑssFree.Value;

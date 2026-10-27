@@ -17,10 +17,10 @@ internal partial struct valueConverterTest {
     internal @string err;
 }
 
-internal static ж<time.Time> Ꮡnow = new StandardBox<time.Time>(time.Now());
+internal static ж<time.Time> Ꮡnow = new StaticBox<time.Time>(time.Now());
 internal static ref time.Time now => ref Ꮡnow.Value;
 
-internal static ж<int64> Ꮡanswer = new StandardBox<int64>(42);
+internal static ж<int64> Ꮡanswer = new StaticBox<int64>(42);
 internal static ref int64 answer => ref Ꮡanswer.Value;
 
 internal partial struct i /*num:int64*/;

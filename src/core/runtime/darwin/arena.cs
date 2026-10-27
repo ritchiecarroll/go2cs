@@ -302,7 +302,7 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
     // Protected by lock.
     internal slice<liveUserArenaChunk> fault;
 }
-internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new StandardBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
+internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ᏑuserArenaState.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

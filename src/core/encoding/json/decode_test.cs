@@ -169,15 +169,15 @@ internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
 
 internal static encoding.TextUnmarshaler _ᴛ2ʗ = new json_internal_test_package.u8marshalжTextUnmarshaler(((ж<u8marshal>)nil));
 
-internal static ж<unmarshaler> Ꮡumtrue = new StandardBox<unmarshaler>(new unmarshaler(true));
+internal static ж<unmarshaler> Ꮡumtrue = new StaticBox<unmarshaler>(new unmarshaler(true));
 internal static ref unmarshaler umtrue => ref Ꮡumtrue.Value;
-internal static ж<slice<unmarshaler>> Ꮡumslice = new StandardBox<slice<unmarshaler>>(new unmarshaler[]{new(true)}.slice());
+internal static ж<slice<unmarshaler>> Ꮡumslice = new StaticBox<slice<unmarshaler>>(new unmarshaler[]{new(true)}.slice());
 internal static ref slice<unmarshaler> umslice => ref Ꮡumslice.ValueSlot;
 internal static ustruct umstruct = new ustruct(new unmarshaler(true));
 
-internal static ж<unmarshalerText> ᏑumtrueXY = new StandardBox<unmarshalerText>(new unmarshalerText("x"u8, "y"u8));
+internal static ж<unmarshalerText> ᏑumtrueXY = new StaticBox<unmarshalerText>(new unmarshalerText("x"u8, "y"u8));
 internal static ref unmarshalerText umtrueXY => ref ᏑumtrueXY.Value;
-internal static ж<slice<unmarshalerText>> ᏑumsliceXY = new StandardBox<slice<unmarshalerText>>(new unmarshalerText[]{new("x"u8, "y"u8)}.slice());
+internal static ж<slice<unmarshalerText>> ᏑumsliceXY = new StaticBox<slice<unmarshalerText>>(new unmarshalerText[]{new("x"u8, "y"u8)}.slice());
 internal static ref slice<unmarshalerText> umsliceXY => ref ᏑumsliceXY.ValueSlot;
 internal static ustructText umstructXY = new ustructText(new unmarshalerText("x"u8, "y"u8));
 
@@ -1785,7 +1785,7 @@ public partial struct Small {
     public @string Tag;
 }
 
-internal static ж<All> ᏑallValue = new StandardBox<All>(new All(
+internal static ж<All> ᏑallValue = new StaticBox<All>(new All(
     Bool: true,
     Int: 2,
     Int8: 3,
@@ -1825,7 +1825,7 @@ internal static ж<All> ᏑallValue = new StandardBox<All>(new All(
 ));
 internal static ref All allValue => ref ᏑallValue.Value;
 
-internal static ж<All> ᏑpallValue = new StandardBox<All>(new All(
+internal static ж<All> ᏑpallValue = new StaticBox<All>(new All(
     PBool: ᏑallValue.of(All.ᏑBool),
     PInt: ᏑallValue.of(All.ᏑInt),
     PInt8: ᏑallValue.of(All.ᏑInt8),

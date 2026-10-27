@@ -298,8 +298,9 @@ the orphan. Because the wrapper is several words wide, the half-done copy-back c
 *observed*, surfacing as a spurious `IndexOutOfRangeException` out of `at`'s bounds check rather
 than as a lost write.
 
-`crypto/internal/boring/bcache`'s concurrent section is the measured victim (on windows/amd64, .NET 10,
-[`phase4/INVESTIGATION-element-aliasing.md`](../phase4/INVESTIGATION-element-aliasing.md)): entries lost in a
+`crypto/internal/boring/bcache`'s concurrent section is the measured victim (on windows/amd64, .NET 10): entries
+<!-- [`phase4/INVESTIGATION-element-aliasing.md`](../phase4/INVESTIGATION-element-aliasing.md) (internal record, unlinked 2026-10-26, OQ-1) -->
+lost in a
 large share of runs, and always among the first few of the section's 102,100 — the fingerprint of a bounded
 start-up window rather than of a broken CAS or a GC interaction (both A/B-eliminated). <!-- as first written:
 "entries lost in ~28% of runs, and always in the first ~15 of 102,100"; the investigation record's own batch
@@ -637,8 +638,8 @@ renamed enclosing type carries over unchanged. Promotion is unaffected — the `
 the `Ꮡ` accessor and every promoted forwarder from the DECLARED member name, so `Ꮡ` + the renamed
 member is what both the generator and the converter's call sites spell (`rb.of(Buffer.ᏑΔBuffer)`).
 The collision is only expressible across packages (one package cannot declare two types with the same
-name), so it is absent from the single-package behavioral corpus and [CNR](../Glossary.md#cnr) is
-byte-identical apart from the new guard. Cleared io's test-host CS0542. Guarded by
+name), so it is absent from the single-package behavioral corpus, and the behavioral regression check is
+byte-identical apart from the new guard. <!-- [CNR](../Glossary.md#cnr) --> Cleared io's test-host CS0542. Guarded by
 `EmbeddedTypeNameCollision` (a `main.Buffer` embedding `inner.Buffer`, exercising BOTH halves the
 rename must keep consistent — the explicit field selector `b.Buffer.Data` incl. a write-through, and
 the promoted fields plus value- and pointer-receiver methods reached through it — with a composite

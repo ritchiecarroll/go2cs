@@ -352,7 +352,7 @@ public static @string String(this Func f) {
 }
 
 // All published variables.
-internal static ж<Map> Ꮡvars = new StandardBox<Map>(default(Map));
+internal static ж<Map> Ꮡvars = new StaticBox<Map>(default(Map));
 internal static ref Map vars => ref Ꮡvars.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

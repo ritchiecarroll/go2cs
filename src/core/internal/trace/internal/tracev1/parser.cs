@@ -1533,7 +1533,7 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
     public slice<@string> Args;
     public slice<@string> SArgs; // string arguments
 }
-[GoLazy] partial class lazyᴛEventDescriptions { public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StandardBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
+[GoLazy] partial class lazyᴛEventDescriptions { public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StaticBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
     [EvNone] = new("None"u8, 5, false, new @string[]{}.slice(), default!),
     [EvBatch] = new("Batch"u8, 5, false, new @string[]{"p"u8, "ticks"u8}.slice(), default!), // in 1.5 format it was {"p", "seq", "ticks"}
     [EvFrequency] = new("Frequency"u8, 5, false, new @string[]{"freq"u8}.slice(), default!), // in 1.5 format it was {"freq", "unused"}

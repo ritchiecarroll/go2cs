@@ -28,7 +28,7 @@ partial struct dirInfo {
 // More than 5760 to work around https://golang.org/issue/24015.
 internal static UntypedInt blockSize => 8192;
 
-[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(blockSize);

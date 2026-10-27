@@ -145,7 +145,7 @@ partial struct pp {
     internal slice<nint> wrappedErrs;
 }
 
-internal static ж<Δsync.Pool> ᏑppFree = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+internal static ж<Δsync.Pool> ᏑppFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => @new<pp>()
 ));
 internal static ref Δsync.Pool ppFree => ref ᏑppFree.Value;

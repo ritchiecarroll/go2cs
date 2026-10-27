@@ -442,11 +442,12 @@ func addressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsR
 	}
 
 	// THE construction-position emitter (B2-I2's role split; see BoxConstructPrefix in
-	// symbols.json): the DECLARED type here is PointerPrefix and never changes; the target-typed
-	// `new(...)` constructs the box, and B2-I3 rewrites it to name the concrete standard-kind
-	// class — `new BoxConstructPrefix<T>(...)` — when the base goes abstract. This line is the
-	// 754-site class of the design's emission-priced radius.
-	boxDecl = fmt.Sprintf("%s static %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, BoxConstructPrefix, csTypeName, initExpr)
+	// symbols.json): the DECLARED type here is PointerPrefix and never changes; the box is
+	// constructed as the PACKAGE-LEVEL kind, golib's StaticBox<T> (PackageBoxConstructPrefix), a
+	// StandardBox<T> that also answers Go's non-heap question: a package-level sync.WaitGroup reads
+	// Unbubbled in a synctest bubble, as in Go. This line is the 754-site class of the design's
+	// emission-priced radius.
+	boxDecl = fmt.Sprintf("%s static %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, PackageBoxConstructPrefix, csTypeName, initExpr)
 	refProperty = fmt.Sprintf("%s static ref %s %s => ref %s.%s;", access, csTypeName, csIDName, box, accessor)
 
 	return boxDecl, refProperty

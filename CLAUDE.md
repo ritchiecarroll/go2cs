@@ -13,7 +13,7 @@
 > point-in-time **records** — amended with dated blocks, never rewritten, never executed from. The
 > BOARD is the append-only findings ledger; the mailbox is transport, not record. A lesson lands the day
 > it is learned, routed by the table in *This file's own budget*.
-> (Doc-type definitions: [`docs/Glossary.md`](docs/Glossary.md), *Document types*.)
+> (Doc-type definitions: [`docs/doctrine/ProcessGlossary.md`](docs/doctrine/ProcessGlossary.md), *Document types*.)
 
 ## What this is
 
@@ -198,7 +198,7 @@ conditions the guard exists for.
 (findings ledger) · [`docs/ValidatedTestPackages.md`](docs/ValidatedTestPackages.md) (roster of record) ·
 [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) → its
 [reference](docs/ConversionStrategies-Reference/README.md) (how each Go construct maps) ·
-[`docs/Glossary.md`](docs/Glossary.md) (CNR, census, chip, guard, golden, banked…) ·
+[`docs/doctrine/ProcessGlossary.md`](docs/doctrine/ProcessGlossary.md) (CNR, census, chip, seat, train, banked…) ·
 [`docs/Roadmap.md`](docs/Roadmap.md) (what is planned next) ·
 [`docs/RoadmapHistory.md`](docs/RoadmapHistory.md) (completed phases and git anchors) ·
 [`docs/coding-style.md`](docs/coding-style.md).

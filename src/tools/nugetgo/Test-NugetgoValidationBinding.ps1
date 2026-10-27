@@ -104,6 +104,26 @@ try {
 }
 finally { if (Test-Path $mod) { Remove-Item -Recurse -Force $mod } }
 
+# A timing-sensitive disclosed test (COORD ruling 2026-10-26: uuid's TestVersion6). A disclosure counts only when the
+# converted side fails with its signature; when it passes, the row reads one more matched and the record lists the
+# entry as orphaned. The prediction accepts exactly those two shapes for the named entry, and nothing else.
+Write-Host 'a prediction with an orphan-shaped alternative'
+$alt = @{ Counts = @(54, 0); Orphan = 'TestVersion6' }
+$p = Test-NugetgoPrediction -Want @(53, 1) -Alternate $alt -Matched 53 -Disclosed 1 -Orphaned @()
+Check 'the disclosed shape: 53 + 1, met' ($p.Met -and $p.Shape -ceq 'predicted') "met $($p.Met) shape $($p.Shape)"
+$p = Test-NugetgoPrediction -Want @(53, 1) -Alternate $alt -Matched 54 -Disclosed 0 -Orphaned @('TestVersion6')
+Check 'the orphan shape: 54 + 0 with TestVersion6 orphaned, met' ($p.Met -and $p.Shape -ceq 'orphaned TestVersion6') "met $($p.Met) shape $($p.Shape)"
+$p = Test-NugetgoPrediction -Want @(53, 1) -Alternate $alt -Matched 54 -Disclosed 0 -Orphaned @()
+Check '54 + 0 without the orphan record: missed' (-not $p.Met) "met $($p.Met)"
+$p = Test-NugetgoPrediction -Want @(53, 1) -Alternate $alt -Matched 54 -Disclosed 0 -Orphaned @('TestSomethingElse')
+Check '54 + 0 with another entry orphaned: missed' (-not $p.Met) "met $($p.Met)"
+$p = Test-NugetgoPrediction -Want @(53, 1) -Alternate $alt -Matched 52 -Disclosed 1 -Orphaned @('TestVersion6')
+Check 'any other count: missed' (-not $p.Met) "met $($p.Met)"
+$p = Test-NugetgoPrediction -Want @(37, 0) -Matched 37 -Disclosed 0 -Orphaned @()
+Check 'no alternate: the one count, as before' ($p.Met) "met $($p.Met)"
+$p = Test-NugetgoPrediction -Want @(37, 0) -Matched 38 -Disclosed 0 -Orphaned @('TestX')
+Check 'no alternate: an orphan excuses nothing' (-not $p.Met) "met $($p.Met)"
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 Check 'nugetgo-pack.ps1 reads each packed project''s digest and the proof''s' (

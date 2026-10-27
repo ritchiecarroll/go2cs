@@ -11,7 +11,7 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-internal static ж<global::go.runtime_internal_test_package.TimeHistogram> ᏑdummyTimeHistogram = new StandardBox<global::go.runtime_internal_test_package.TimeHistogram>(new global::go.runtime_internal_test_package.TimeHistogram());
+internal static ж<global::go.runtime_internal_test_package.TimeHistogram> ᏑdummyTimeHistogram = new StaticBox<global::go.runtime_internal_test_package.TimeHistogram>(new global::go.runtime_internal_test_package.TimeHistogram());
 internal static ref global::go.runtime_internal_test_package.TimeHistogram dummyTimeHistogram => ref ᏑdummyTimeHistogram.Value;
 
 public static void TestTimeHistogram(ж<testing.T> Ꮡt) {

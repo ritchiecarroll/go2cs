@@ -60,9 +60,9 @@ internal static void cpuHogger(Func<nint, nint> f, ж<nint> Ꮡy, time.Duration 
     y = accum;
 }
 
-internal static ж<nint> Ꮡsalt1 = new StandardBox<nint>(0);
+internal static ж<nint> Ꮡsalt1 = new StaticBox<nint>(0);
 internal static ref nint salt1 => ref Ꮡsalt1.Value;
-internal static ж<nint> Ꮡsalt2 = new StandardBox<nint>(0);
+internal static ж<nint> Ꮡsalt2 = new StaticBox<nint>(0);
 internal static ref nint salt2 => ref Ꮡsalt2.Value;
 
 // The actual CPU hogging function.

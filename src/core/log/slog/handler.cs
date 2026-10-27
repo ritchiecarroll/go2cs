@@ -414,7 +414,7 @@ partial struct handleState {
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
-[GoLazy] partial class lazyᴛgroupPool { internal static ж<sync.Pool> ᏑgroupPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => {
+[GoLazy] partial class lazyᴛgroupPool { internal static ж<sync.Pool> ᏑgroupPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => {
     var s = new slice<@string>(0, 10);
     return Ꮡ(s);
 }

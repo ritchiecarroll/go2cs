@@ -87,7 +87,7 @@ partial struct stackfreelist {
 }
 
 // dummy mspan that contains no free objects.
-internal static ж<mspan> Ꮡemptymspan = new StandardBox<mspan>(new mspan());
+internal static ж<mspan> Ꮡemptymspan = new StaticBox<mspan>(new mspan());
 internal static ref mspan emptymspan => ref Ꮡemptymspan.Value;
 
 internal static ж<mcache> allocmcache() {

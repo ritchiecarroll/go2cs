@@ -12,7 +12,7 @@ internal static void inc(this ref counter c) {
     c.n++;
 }
 
-internal static ж<array<counter>> Ꮡpool = new StandardBox<array<counter>>(new array<counter>(3));
+internal static ж<array<counter>> Ꮡpool = new StaticBox<array<counter>>(new array<counter>(3));
 internal static ref array<counter> pool => ref Ꮡpool.Value;
 
 internal static void Main() {

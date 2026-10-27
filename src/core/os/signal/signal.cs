@@ -25,7 +25,7 @@ partial struct handlersᴛ1 /*dyn*/ {
     // value for a channel being stopped. See the Stop function.
     internal slice<stopping> stopping;
 }
-internal static ж<handlersᴛ1> Ꮡhandlers = new StandardBox<handlersᴛ1>(new handlersᴛ1(nil));
+internal static ж<handlersᴛ1> Ꮡhandlers = new StaticBox<handlersᴛ1>(new handlersᴛ1(nil));
 internal static ref handlersᴛ1 handlers => ref Ꮡhandlers.Value;
 
 partial struct stopping {
@@ -108,7 +108,7 @@ public static bool Ignored(osꓸSignal sig) {
 // initialized watchSignalLoop. If watchSignalLoop is non-nil,
 // it will be run in a goroutine lazily once Notify is invoked.
 // See Issue 21576.
-internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once watchSignalLoopOnce => ref ᏑwatchSignalLoopOnce.Value;
 internal static Action watchSignalLoop;
 

@@ -32,7 +32,7 @@ internal partial struct reqWriteTest {
     public error WantError; // wanted error from Request.Write
 }
 
-internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice<reqWriteTest>>(new slice<reqWriteTest>(27){
+internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBox<slice<reqWriteTest>>(new slice<reqWriteTest>(27){
     // HTTP/1.1 => chunked coding; no body; no trailer
     [0] = new(
         Req: new Request(

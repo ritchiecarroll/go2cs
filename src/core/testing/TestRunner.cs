@@ -162,6 +162,9 @@ public sealed class TestRunner
     /// Go's run-wide artifact directory, <c>filepath.Abs(toOutputDir("_artifacts"))</c>
     /// (testing.go:2647-2655): <c>_artifacts</c> under <c>-test.outputdir</c> when one is given, else
     /// under the working directory. Made once, as runTests makes it before the first test.
+    /// <c>filepath.Abs</c> joins a relative path to <c>os.Getwd</c>, so this does too, through
+    /// <see cref="TestExecution.GoWorkingDirectory"/>: under a symlinked working directory the root keeps
+    /// <c>$PWD</c>'s spelling, as Go's does (testing's TestArtifactDirDefault on darwin).
     /// </summary>
     private string ArtifactRoot()
     {
@@ -169,9 +172,13 @@ public sealed class TestRunner
         {
             if (m_artifactRoot is null)
             {
-                string root = Path.GetFullPath(string.IsNullOrEmpty(m_options.OutputDir)
+                string relative = string.IsNullOrEmpty(m_options.OutputDir)
                     ? "_artifacts"
-                    : Path.Combine(m_options.OutputDir, "_artifacts"));
+                    : Path.Combine(m_options.OutputDir, "_artifacts");
+
+                string root = Path.GetFullPath(Path.IsPathRooted(relative)
+                    ? relative
+                    : Path.Combine(TestExecution.GoWorkingDirectory(), relative));
 
                 Directory.CreateDirectory(root);
                 m_artifactRoot = root;

@@ -90,7 +90,7 @@ partial struct dloggerImpl {
 // allDloggers is a list of all dloggers, linked through
 // dlogger.allLink. This is accessed atomically. This is prepend only,
 // so it doesn't need to protect against ABA races.
-internal static ж<ж<dloggerImpl>> ᏑallDloggers = new StandardBox<ж<dloggerImpl>>(default(ж<dloggerImpl>));
+internal static ж<ж<dloggerImpl>> ᏑallDloggers = new StaticBox<ж<dloggerImpl>>(default(ж<dloggerImpl>));
 internal static ref ж<dloggerImpl> allDloggers => ref ᏑallDloggers.ValueSlot;
 
 // A dloggerFake is a no-op implementation of dlogger.

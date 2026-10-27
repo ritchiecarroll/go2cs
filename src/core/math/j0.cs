@@ -244,7 +244,7 @@ public static float64 Y0(float64 x) {
 //      | pzero(x)-1-R/S | <= 2  ** ( -60.26)
 
 // for x in [inf, 8]=1/[0,0.125]
-internal static ж<array<float64>> Ꮡp0R8 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0R8 = new StaticBox<array<float64>>(new float64[]{
     0.00000000000000000000e+00D, // 0x0000000000000000
     -7.03124999999900357484e-02D, // 0xBFB1FFFFFFFFFD32
     -8.08167041275349795626e+00D, // 0xC02029D0B44FA779
@@ -254,7 +254,7 @@ internal static ж<array<float64>> Ꮡp0R8 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> p0R8 => ref Ꮡp0R8.Value;
 
-internal static ж<array<float64>> Ꮡp0S8 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0S8 = new StaticBox<array<float64>>(new float64[]{
     1.16534364619668181717e+02D, // 0x405D223307A96751
     3.83374475364121826715e+03D, // 0x40ADF37D50596938
     4.05978572648472545552e+04D, // 0x40E3D2BB6EB6B05F
@@ -264,7 +264,7 @@ internal static ж<array<float64>> Ꮡp0S8 = new StandardBox<array<float64>>(new
 internal static ref array<float64> p0S8 => ref Ꮡp0S8.Value;
 
 // for x in [8,4.5454]=1/[0.125,0.22001]
-internal static ж<array<float64>> Ꮡp0R5 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0R5 = new StaticBox<array<float64>>(new float64[]{
     -1.14125464691894502584e-11D, // 0xBDA918B147E495CC
     -7.03124940873599280078e-02D, // 0xBFB1FFFFE69AFBC6
     -4.15961064470587782438e+00D, // 0xC010A370F90C6BBF
@@ -274,7 +274,7 @@ internal static ж<array<float64>> Ꮡp0R5 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> p0R5 => ref Ꮡp0R5.Value;
 
-internal static ж<array<float64>> Ꮡp0S5 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0S5 = new StaticBox<array<float64>>(new float64[]{
     6.07539382692300335975e+01D, // 0x404E60810C98C5DE
     1.05125230595704579173e+03D, // 0x40906D025C7E2864
     5.97897094333855784498e+03D, // 0x40B75AF88FBE1D60
@@ -284,7 +284,7 @@ internal static ж<array<float64>> Ꮡp0S5 = new StandardBox<array<float64>>(new
 internal static ref array<float64> p0S5 => ref Ꮡp0S5.Value;
 
 // for x in [4.547,2.8571]=1/[0.2199,0.35001]
-internal static ж<array<float64>> Ꮡp0R3 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0R3 = new StaticBox<array<float64>>(new float64[]{
     -2.54704601771951915620e-09D, // 0xBE25E1036FE1AA86
     -7.03119616381481654654e-02D, // 0xBFB1FFF6F7C0E24B
     -2.40903221549529611423e+00D, // 0xC00345B2AEA48074
@@ -294,7 +294,7 @@ internal static ж<array<float64>> Ꮡp0R3 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> p0R3 => ref Ꮡp0R3.Value;
 
-internal static ж<array<float64>> Ꮡp0S3 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0S3 = new StaticBox<array<float64>>(new float64[]{
     3.58560338055209726349e+01D, // 0x4041ED9284077DD3
     3.61513983050303863820e+02D, // 0x40769839464A7C0E
     1.19360783792111533330e+03D, // 0x4092A66E6D1061D6
@@ -304,7 +304,7 @@ internal static ж<array<float64>> Ꮡp0S3 = new StandardBox<array<float64>>(new
 internal static ref array<float64> p0S3 => ref Ꮡp0S3.Value;
 
 // for x in [2.8570,2]=1/[0.3499,0.5]
-internal static ж<array<float64>> Ꮡp0R2 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0R2 = new StaticBox<array<float64>>(new float64[]{
     -8.87534333032526411254e-08D, // 0xBE77D316E927026D
     -7.03030995483624743247e-02D, // 0xBFB1FF62495E1E42
     -1.45073846780952986357e+00D, // 0xBFF736398A24A843
@@ -314,7 +314,7 @@ internal static ж<array<float64>> Ꮡp0R2 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> p0R2 => ref Ꮡp0R2.Value;
 
-internal static ж<array<float64>> Ꮡp0S2 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡp0S2 = new StaticBox<array<float64>>(new float64[]{
     2.22202997532088808441e+01D, // 0x40363865908B5959
     1.36206794218215208048e+02D, // 0x4061069E0EE8878F
     2.70470278658083486789e+02D, // 0x4070E78642EA079B
@@ -358,7 +358,7 @@ internal static float64 pzero(float64 x) {
 //      | qzero(x)/s +1.25-R/S | <= 2**(-61.22)
 
 // for x in [inf, 8]=1/[0,0.125]
-internal static ж<array<float64>> Ꮡq0R8 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0R8 = new StaticBox<array<float64>>(new float64[]{
     0.00000000000000000000e+00D, // 0x0000000000000000
     7.32421874999935051953e-02D, // 0x3FB2BFFFFFFFFE2C
     1.17682064682252693899e+01D, // 0x402789525BB334D6
@@ -368,7 +368,7 @@ internal static ж<array<float64>> Ꮡq0R8 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> q0R8 => ref Ꮡq0R8.Value;
 
-internal static ж<array<float64>> Ꮡq0S8 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0S8 = new StaticBox<array<float64>>(new float64[]{
     1.63776026895689824414e+02D, // 0x406478D5365B39BC
     8.09834494656449805916e+03D, // 0x40BFA2584E6B0563
     1.42538291419120476348e+05D, // 0x4101665254D38C3F
@@ -379,7 +379,7 @@ internal static ж<array<float64>> Ꮡq0S8 = new StandardBox<array<float64>>(new
 internal static ref array<float64> q0S8 => ref Ꮡq0S8.Value;
 
 // for x in [8,4.5454]=1/[0.125,0.22001]
-internal static ж<array<float64>> Ꮡq0R5 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0R5 = new StaticBox<array<float64>>(new float64[]{
     1.84085963594515531381e-11D, // 0x3DB43D8F29CC8CD9
     7.32421766612684765896e-02D, // 0x3FB2BFFFD172B04C
     5.83563508962056953777e+00D, // 0x401757B0B9953DD3
@@ -389,7 +389,7 @@ internal static ж<array<float64>> Ꮡq0R5 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> q0R5 => ref Ꮡq0R5.Value;
 
-internal static ж<array<float64>> Ꮡq0S5 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0S5 = new StaticBox<array<float64>>(new float64[]{
     8.27766102236537761883e+01D, // 0x4054B1B3FB5E1543
     2.07781416421392987104e+03D, // 0x40A03BA0DA21C0CE
     1.88472887785718085070e+04D, // 0x40D267D27B591E6D
@@ -400,7 +400,7 @@ internal static ж<array<float64>> Ꮡq0S5 = new StandardBox<array<float64>>(new
 internal static ref array<float64> q0S5 => ref Ꮡq0S5.Value;
 
 // for x in [4.547,2.8571]=1/[0.2199,0.35001]
-internal static ж<array<float64>> Ꮡq0R3 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0R3 = new StaticBox<array<float64>>(new float64[]{
     4.37741014089738620906e-09D, // 0x3E32CD036ADECB82
     7.32411180042911447163e-02D, // 0x3FB2BFEE0E8D0842
     3.34423137516170720929e+00D, // 0x400AC0FC61149CF5
@@ -410,7 +410,7 @@ internal static ж<array<float64>> Ꮡq0R3 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> q0R3 => ref Ꮡq0R3.Value;
 
-internal static ж<array<float64>> Ꮡq0S3 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0S3 = new StaticBox<array<float64>>(new float64[]{
     4.87588729724587182091e+01D, // 0x40486122BFE343A6
     7.09689221056606015736e+02D, // 0x40862D8386544EB3
     3.70414822620111362994e+03D, // 0x40ACF04BE44DFC63
@@ -421,7 +421,7 @@ internal static ж<array<float64>> Ꮡq0S3 = new StandardBox<array<float64>>(new
 internal static ref array<float64> q0S3 => ref Ꮡq0S3.Value;
 
 // for x in [2.8570,2]=1/[0.3499,0.5]
-internal static ж<array<float64>> Ꮡq0R2 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0R2 = new StaticBox<array<float64>>(new float64[]{
     1.50444444886983272379e-07D, // 0x3E84313B54F76BDB
     7.32234265963079278272e-02D, // 0x3FB2BEC53E883E34
     1.99819174093815998816e+00D, // 0x3FFFF897E727779C
@@ -431,7 +431,7 @@ internal static ж<array<float64>> Ꮡq0R2 = new StandardBox<array<float64>>(new
 }.array());
 internal static ref array<float64> q0R2 => ref Ꮡq0R2.Value;
 
-internal static ж<array<float64>> Ꮡq0S2 = new StandardBox<array<float64>>(new float64[]{
+internal static ж<array<float64>> Ꮡq0S2 = new StaticBox<array<float64>>(new float64[]{
     3.03655848355219184498e+01D, // 0x403E5D96F7C07AED
     2.69348118608049844624e+02D, // 0x4070D591E4D14B40
     8.44783757595320139444e+02D, // 0x408A664522B3BF22
