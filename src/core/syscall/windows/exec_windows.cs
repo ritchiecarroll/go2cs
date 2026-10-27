@@ -60,7 +60,8 @@ using unicode;
 partial class syscall_package {
 
 // ForkLock is not used on Windows.
-public static Δsync.RWMutex ForkLock;
+public static readonly ж<Δsync.RWMutex> ᏑForkLock = new StaticBox<Δsync.RWMutex>(default(Δsync.RWMutex));
+public static ref Δsync.RWMutex ForkLock => ref ((StaticBox<Δsync.RWMutex>)ᏑForkLock).ValueSlot;
 
 // EscapeArg rewrites command line argument s as prescribed
 // in https://msdn.microsoft.com/en-us/library/ms880421.

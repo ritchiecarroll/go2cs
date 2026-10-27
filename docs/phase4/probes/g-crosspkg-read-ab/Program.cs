@@ -8,6 +8,10 @@
 //   S   static readonly StaticBox<T> (the sealed type), ref ᏑV.Value
 //   V   static ж<T>, ref ᏑV.ValueSlot (no nil check)
 //   SV  static readonly StaticBox<T>, ref ᏑV.ValueSlot
+//   RC  static readonly ж<T>, ref ((StaticBox<T>)ᏑV).ValueSlot  -- the emitted form (the field keeps type ж<T>)
+//   RU  static readonly ж<T>, ref Unsafe.As<StaticBox<T>>(ᏑV).ValueSlot (unchecked; not used)
+//   RV  static readonly ж<T>, ref ᏑV.ValueSlot (no cast)
+// Runs: jit/jit2 and aot/aot2 are the first six arms; jit3/jit4 and aot3/aot4 add RC, RU and RV.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,6 +60,27 @@ public static class V
     public static ж<nint> ᏑN = new StaticBox<nint>(3);
     public static ref nint N => ref ᏑN.ValueSlot;
 }
+public static class RC
+{
+    public static readonly ж<littleEndian> ᏑLE = new StaticBox<littleEndian>(default(littleEndian));
+    public static ref littleEndian LE => ref ((StaticBox<littleEndian>)ᏑLE).ValueSlot;
+    public static readonly ж<nint> ᏑN = new StaticBox<nint>(3);
+    public static ref nint N => ref ((StaticBox<nint>)ᏑN).ValueSlot;
+}
+public static class RU
+{
+    public static readonly ж<littleEndian> ᏑLE = new StaticBox<littleEndian>(default(littleEndian));
+    public static ref littleEndian LE => ref System.Runtime.CompilerServices.Unsafe.As<StaticBox<littleEndian>>(ᏑLE).ValueSlot;
+    public static readonly ж<nint> ᏑN = new StaticBox<nint>(3);
+    public static ref nint N => ref System.Runtime.CompilerServices.Unsafe.As<StaticBox<nint>>(ᏑN).ValueSlot;
+}
+public static class RV
+{
+    public static readonly ж<littleEndian> ᏑLE = new StaticBox<littleEndian>(default(littleEndian));
+    public static ref littleEndian LE => ref ᏑLE.ValueSlot;
+    public static readonly ж<nint> ᏑN = new StaticBox<nint>(3);
+    public static ref nint N => ref ᏑN.ValueSlot;
+}
 public static class SV
 {
     public static readonly StaticBox<littleEndian> ᏑLE = new StaticBox<littleEndian>(default(littleEndian));
@@ -74,6 +99,9 @@ public static class Program
     [MethodImpl(MethodImplOptions.NoInlining)] static uint LeR(long n) { uint s = 0; for (long i = 0; i < n; i++) s += R.LE.Uint32(buf[(int)(i & 7)..]); return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static uint LeS(long n) { uint s = 0; for (long i = 0; i < n; i++) s += S.LE.Uint32(buf[(int)(i & 7)..]); return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static uint LeV(long n) { uint s = 0; for (long i = 0; i < n; i++) s += V.LE.Uint32(buf[(int)(i & 7)..]); return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static uint LeRC(long n) { uint s = 0; for (long i = 0; i < n; i++) s += RC.LE.Uint32(buf[(int)(i & 7)..]); return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static uint LeRU(long n) { uint s = 0; for (long i = 0; i < n; i++) s += RU.LE.Uint32(buf[(int)(i & 7)..]); return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static uint LeRV(long n) { uint s = 0; for (long i = 0; i < n; i++) s += RV.LE.Uint32(buf[(int)(i & 7)..]); return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static uint LeSV(long n) { uint s = 0; for (long i = 0; i < n; i++) s += SV.LE.Uint32(buf[(int)(i & 7)..]); return s; }
 
     [MethodImpl(MethodImplOptions.NoInlining)] static long NF(long n) { long s = 0; for (long i = 0; i < n; i++) { s += F.N; F.N ^= 1; } return s; }
@@ -81,6 +109,9 @@ public static class Program
     [MethodImpl(MethodImplOptions.NoInlining)] static long NR(long n) { long s = 0; for (long i = 0; i < n; i++) { s += R.N; R.N ^= 1; } return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static long NS(long n) { long s = 0; for (long i = 0; i < n; i++) { s += S.N; S.N ^= 1; } return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static long NV(long n) { long s = 0; for (long i = 0; i < n; i++) { s += V.N; V.N ^= 1; } return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static long NRC(long n) { long s = 0; for (long i = 0; i < n; i++) { s += RC.N; RC.N ^= 1; } return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static long NRU(long n) { long s = 0; for (long i = 0; i < n; i++) { s += RU.N; RU.N ^= 1; } return s; }
+    [MethodImpl(MethodImplOptions.NoInlining)] static long NRV(long n) { long s = 0; for (long i = 0; i < n; i++) { s += RV.N; RV.N ^= 1; } return s; }
     [MethodImpl(MethodImplOptions.NoInlining)] static long NSV(long n) { long s = 0; for (long i = 0; i < n; i++) { s += SV.N; SV.N ^= 1; } return s; }
 
     public static int Main(string[] args)
@@ -89,8 +120,8 @@ public static class Program
         int rounds = args.Length > 1 ? int.Parse(args[1]) : 9;
         var arms = new (string name, Func<long, long> run)[]
         {
-            ("le.F", k => LeF(k)), ("le.B", k => LeB(k)), ("le.R", k => LeR(k)), ("le.S", k => LeS(k)), ("le.V", k => LeV(k)), ("le.SV", k => LeSV(k)),
-            ("n.F", NF), ("n.B", NB), ("n.R", NR), ("n.S", NS), ("n.V", NV), ("n.SV", NSV),
+            ("le.F", k => LeF(k)), ("le.B", k => LeB(k)), ("le.R", k => LeR(k)), ("le.S", k => LeS(k)), ("le.V", k => LeV(k)), ("le.SV", k => LeSV(k)), ("le.RC", k => LeRC(k)), ("le.RU", k => LeRU(k)), ("le.RV", k => LeRV(k)),
+            ("n.F", NF), ("n.B", NB), ("n.R", NR), ("n.S", NS), ("n.V", NV), ("n.SV", NSV), ("n.RC", NRC), ("n.RU", NRU), ("n.RV", NRV),
         };
         // warm-up: every arm, enough iterations for tier-1 (and OSR) under the default tiered JIT
         for (int w = 0; w < 3; w++) foreach (var a in arms) sink += a.run(n / 5);

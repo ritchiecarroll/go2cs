@@ -50,7 +50,7 @@ func main() {
 
 	main := files["main.cs"]
 
-	if want := "internal static ж<sync.WaitGroup> Ꮡwg = new StaticBox<sync.WaitGroup>("; !strings.Contains(main, want) {
+	if want := "internal static readonly ж<sync.WaitGroup> Ꮡwg = new StaticBox<sync.WaitGroup>("; !strings.Contains(main, want) {
 		t.Errorf("the package-level WaitGroup's box is not a StaticBox; want %q in:\n%s", want, main)
 	}
 

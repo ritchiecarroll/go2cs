@@ -367,8 +367,8 @@ func TestLazyPackageVarBuildsAPointerAddressedPoolInItsBox(t *testing.T) {
 	pool := files["pool.cs"]
 
 	for _, want := range []string{
-		"[GoLazy] partial class lazyᴛpool { internal static ж<sync.Pool> Ꮡpool = new StaticBox<sync.Pool>(",
-		"internal static ref sync.Pool pool => ref Ꮡpool.Value;",
+		"[GoLazy] partial class lazyᴛpool { internal static readonly ж<sync.Pool> Ꮡpool = new StaticBox<sync.Pool>(",
+		"internal static ref sync.Pool pool => ref ((StaticBox<sync.Pool>)Ꮡpool).ValueSlot;",
 		"Ꮡpool.Get()",
 		"defer(Ꮡpool.Put,",
 	} {
@@ -428,13 +428,13 @@ func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 	table := files["table.cs"]
 
 	for _, want := range []string{
-		"[GoLazy] partial class lazyᴛtable { internal static ж<array<nint>> Ꮡtable = new StaticBox<array<nint>>(",
-		"internal static ref array<nint> table => ref Ꮡtable.Value;",
+		"[GoLazy] partial class lazyᴛtable { internal static readonly ж<array<nint>> Ꮡtable = new StaticBox<array<nint>>(",
+		"internal static ref array<nint> table => ref ((StaticBox<array<nint>>)Ꮡtable).ValueSlot;",
 		"return Ꮡtable;",
-		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StaticBox<array<P>>(",
-		"internal static ref array<P> counters => ref Ꮡcounters.Value;",
-		"[GoLazy] partial class lazyᴛbumpers { internal static ж<array<P>> Ꮡbumpers = new StaticBox<array<P>>(",
-		"internal static ref array<P> bumpers => ref Ꮡbumpers.Value;",
+		"[GoLazy] partial class lazyᴛcounters { internal static readonly ж<array<P>> Ꮡcounters = new StaticBox<array<P>>(",
+		"internal static ref array<P> counters => ref ((StaticBox<array<P>>)Ꮡcounters).ValueSlot;",
+		"[GoLazy] partial class lazyᴛbumpers { internal static readonly ж<array<P>> Ꮡbumpers = new StaticBox<array<P>>(",
+		"internal static ref array<P> bumpers => ref ((StaticBox<array<P>>)Ꮡbumpers).ValueSlot;",
 		"return Ꮡbumpers.at<P>(0).Bump;",
 	} {
 		if !strings.Contains(table, want) {

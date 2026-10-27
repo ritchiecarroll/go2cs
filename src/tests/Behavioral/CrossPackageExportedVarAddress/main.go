@@ -17,6 +17,13 @@ func main() {
 
 	fmt.Println("&lib.N identity:", &lib.N == &lib.N, p == &lib.N)
 
+	// Re-pointing the pointer is ordinary Go; the converted pointer must keep a type that any other pointer
+	// to int also has (a box declared as its own sealed type made `p = &y` CS0266).
+	y := 9
+	p = &y
+	*p = 10
+	fmt.Println("re-point:", lib.N, y)
+
 	f := lib.V.Inc
 	f()
 	f()

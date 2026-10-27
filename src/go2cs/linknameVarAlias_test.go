@@ -184,7 +184,7 @@ func TestRecurseLinknameVarAlias(t *testing.T) {
 
 	// The INHERITED guard: an address-taken var keeps its heap box. A forwarding property has no
 	// address, so the `Ꮡ` box every use-site composition names has to be really declared.
-	if !strings.Contains(mainCs, "ref bool Addressed => ref "+AddressPrefix+"Addressed") {
+	if !strings.Contains(mainCs, "ref bool Addressed => ref ((StaticBox<bool>)"+AddressPrefix+"Addressed).ValueSlot") {
 		t.Errorf("address-taken var alias lost its heap box: the emitted %sAddressed has no declaration (CS0103):\n%s", AddressPrefix, mainCs)
 	}
 

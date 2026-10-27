@@ -1,0 +1,19 @@
+le.F	median=13.450	min=13.413	max=13.528	ns/iter
+le.B	median=15.293	min=15.209	max=15.502	ns/iter
+le.R	median=13.899	min=13.817	max=14.062	ns/iter
+le.S	median=6.194	min=6.083	max=6.244	ns/iter
+le.V	median=6.891	min=6.838	max=6.948	ns/iter
+le.SV	median=6.002	min=5.911	max=6.050	ns/iter
+le.RC	median=5.959	min=5.922	max=6.075	ns/iter
+le.RU	median=6.127	min=6.060	max=6.319	ns/iter
+le.RV	median=5.982	min=5.890	max=6.211	ns/iter
+n.F	median=0.257	min=0.253	max=0.276	ns/iter
+n.B	median=4.026	min=3.970	max=4.107	ns/iter
+n.R	median=0.885	min=0.871	max=0.906	ns/iter
+n.S	median=0.968	min=0.952	max=0.992	ns/iter
+n.V	median=3.126	min=3.107	max=3.351	ns/iter
+n.SV	median=0.806	min=0.796	max=0.843	ns/iter
+n.RC	median=0.803	min=0.794	max=0.823	ns/iter
+n.RU	median=0.804	min=0.798	max=0.816	ns/iter
+n.RV	median=0.802	min=0.795	max=0.816	ns/iter
+sink=214937487360

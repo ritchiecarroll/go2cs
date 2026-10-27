@@ -689,6 +689,19 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
 					}
 
+					// A field of ANOTHER package's exported var -- `&lib.S.N`, `&lib.S.Inner.F`, or the
+					// receiver of a pointer-receiver call through the field (`lib.S.WG.Add(1)`). The owner
+					// boxes the var (markExportedBoxOnlyGlobals), so the field reference roots on that box:
+					// recurse for the base's address (`&lib.S` is the cross-package arm's `lib.ᏑS`) and
+					// field-ref this level, `lib.ᏑS.of(lib.Holder.ᏑN)`. The `Ꮡ(value).of(...)` fallback
+					// below takes the field of a COPY: a write through it is lost, and two calls take two
+					// different copies (`lib.S.WG.Add(1); lib.S.WG.Done()` panicked "sync: negative
+					// WaitGroup counter", CrossPackageExportedVarAddress).
+					if v.rootsAtImportedBoxedGlobal(selectorExpr.X) {
+						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+					}
+
 					if v.isHeapBoxedExpr(selectorExpr.X) {
 						// When the base is itself a nested field selector or an array/slice index —
 						// `&work.sweepWaiters.lock` (field of a field) or `&stackpool[i].item.mu`
@@ -939,7 +952,13 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 							}
 						}
 
-						if v.isHeapBoxedExpr(sel) || baseIsPointer || chainRootIsPointer {
+						// An array that IS, or is a value field of, ANOTHER package's exported var
+						// (`&lib.Arr[1]`, `&lib.S.Arr[i]`) roots on the owner's box the same way: the
+						// recursion renders `lib.ᏑArr` (the cross-package arm) or `lib.ᏑS.of(…ᏑArr)`. Its
+						// base `lib` is a package name, which neither pointer check above can see, so it
+						// fell to the naive fallback at the end of this branch, `Ꮡlib.Arr.at<E>(i)`, a name
+						// nothing declares (CS0103, CrossPackageExportedVarAddress).
+						if v.isHeapBoxedExpr(sel) || baseIsPointer || chainRootIsPointer || v.rootsAtImportedBoxedGlobal(sel) {
 							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
 							index := v.convArrayIndex(indexExpr.Index)
 

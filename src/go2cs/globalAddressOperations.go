@@ -66,8 +66,16 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 	// library `var Plain sync.RWMutex` it never touches emitted a plain static field, and an importer's
 	// `lib.Plain.RLock(); lib.Plain.RUnlock()` (the copy form) fataled `sync: RUnlock of unlocked
 	// RWMutex`. Corpus footprint at the rule's landing: syscall.ForkLock on windows (boxed on the
-	// other flavours by its own in-package calls), nothing else.
-	markExportedBoxOnlyGlobals(pkg, packageAddressedGlobals)
+	// other flavours by its own in-package calls), nothing else. The same arm also boxes every exported
+	// value-kind var of an importable package, the cross-package address of a variable
+	// (docs/phase4/DESIGN-crosspkg-exported-box.md).
+	astFiles := make([]*ast.File, 0, len(files))
+
+	for _, fileEntry := range files {
+		astFiles = append(astFiles, fileEntry.file)
+	}
+
+	markExportedBoxOnlyGlobals(pkg, astFiles, packageAddressedGlobals)
 }
 
 // scanAddressedGlobals records into `into` every package-level value var of `pkg` that `file` takes
@@ -325,8 +333,20 @@ func siblingMethodValueRoot(pkg *types.Package, candidate siblingMethodValue) *t
 	return varObj
 }
 
-// markExportedBoxOnlyGlobals is the owner arm described in collectAddressedGlobals.
-func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {
+// markExportedBoxOnlyGlobals is the owner arm described in collectAddressedGlobals. It boxes an EXPORTED
+// package-level var on two rules, both decided from the owner's own types and syntax, so an importer
+// (importedGlobalIsBoxed) runs this same function and agrees by construction:
+//   - a var whose pointer method set carries a box-only method (the 2026-09-03 rule above), whatever
+//     package declares it;
+//   - every exported VALUE-kind var of an importable package (go.* 1.26.10.2's headline,
+//     docs/phase4/DESIGN-crosspkg-exported-box.md): Go hands an importer the variable itself, so `&pkg.V`,
+//     a pointer-receiver method value and a field or element pointer must reach it, and only the owner can
+//     declare the box. Not a pointer or an interface (the value kind COORD ruled, OQ-1), not `package main`
+//     (nothing can import it), and not a linkname FORWARD (see linknameForwardVars): its storage is
+//     another package's, and a box would sever Go's alias.
+func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {
+	var forwards map[string]bool
+
 	for _, name := range pkg.Scope().Names() {
 		varObj, ok := pkg.Scope().Lookup(name).(*types.Var)
 
@@ -340,8 +360,54 @@ func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) 
 
 		if typeHasBoxOnlyPointerMethod(varObj.Type()) {
 			into[varObj] = true
+			continue
+		}
+
+		if pkg.Name() == "main" {
+			continue
+		}
+
+		if _, isInterface := types.Unalias(varObj.Type()).Underlying().(*types.Interface); isInterface {
+			continue
+		}
+
+		if forwards == nil {
+			forwards = linknameForwardVars(pkg, files)
+		}
+
+		if !forwards[name] {
+			into[varObj] = true
 		}
 	}
+}
+
+// linknameForwardVars names the package-level vars of `pkg` whose storage is ANOTHER symbol's, which
+// visitValueSpec emits as a forwarding property and never as a field of their own: a two-argument
+// `//go:linkname local remote` pull (varLinknamePull), and the inverted alias the registry records
+// (linknameVarAliasTargets: internal/syscall/windows.CanUseLongPaths -> runtime.canUseLongPaths). A
+// one-argument handle (`//go:linkname X86`) names the var's OWN storage and is not a forward.
+func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {
+	forwards := map[string]bool{}
+
+	for _, file := range files {
+		for _, group := range file.Comments {
+			for _, comment := range group.List {
+				if fields := strings.Fields(comment.Text); len(fields) == 3 && fields[0] == "//go:linkname" {
+					forwards[fields[1]] = true
+				}
+			}
+		}
+	}
+
+	prefix := pkg.Path() + "."
+
+	for key := range linknameVarAliasTargets {
+		if name, ok := strings.CutPrefix(key, prefix); ok && !strings.Contains(name, ".") {
+			forwards[name] = true
+		}
+	}
+
+	return forwards
 }
 
 // typeHasBoxOnlyPointerMethod reports whether *T's method set carries a method the emission gives
@@ -395,13 +461,68 @@ func importedGlobalIsBoxed(varObj *types.Var) bool {
 				scanAddressedGlobals(file, owner, loaded.TypesInfo, boxed)
 			}
 
-			markExportedBoxOnlyGlobals(owner, boxed)
+			markExportedBoxOnlyGlobals(owner, loaded.Syntax, boxed)
 		}
 
 		importedAddressedGlobals[owner] = boxed
 	}
 
 	return boxed[varObj]
+}
+
+// importedBoxedGlobal reports whether expr is a package-qualified selector `pkg.V` naming ANOTHER
+// package's package-level value var whose owner emission declares its box (importedGlobalIsBoxed), so
+// `&pkg.V` is `pkg.ᏑV`. The importer's field and element arms root an address inside the var on it.
+func (v *Visitor) importedBoxedGlobal(expr ast.Expr) bool {
+	selectorExpr, ok := expr.(*ast.SelectorExpr)
+
+	if !ok || v.selectorBasePackageObj(selectorExpr) == nil {
+		return false
+	}
+
+	varObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Var)
+
+	if !ok || varObj.Pkg() == nil || varObj.Parent() != varObj.Pkg().Scope() {
+		return false
+	}
+
+	if _, isPtr := types.Unalias(varObj.Type()).(*types.Pointer); isPtr {
+		return false
+	}
+
+	return importedGlobalIsBoxed(varObj)
+}
+
+// rootsAtImportedBoxedGlobal reports whether expr is `pkg.V`, or a chain of VALUE field selectors over
+// it (`pkg.V.f.g`), with pkg.V an importedBoxedGlobal: the storage expr names lives inside the owner's
+// box, so its address is a field reference through `pkg.ᏑV`, never a `Ꮡ(value)` copy. Any pointer hop
+// ends the walk: beyond a pointer the storage already has a real address of its own.
+func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {
+	for {
+		if v.importedBoxedGlobal(expr) {
+			return true
+		}
+
+		selectorExpr, ok := expr.(*ast.SelectorExpr)
+
+		if !ok {
+			return false
+		}
+
+		selection, ok := v.info.Selections[selectorExpr]
+
+		if !ok || selection.Kind() != types.FieldVal || selection.Indirect() {
+			return false
+		}
+
+		if t := v.info.TypeOf(selectorExpr.X); t != nil {
+			if _, isPtr := t.Underlying().(*types.Pointer); isPtr {
+				return false
+			}
+		}
+
+		expr = selectorExpr.X
+	}
 }
 
 // writeAddressedGlobalDecl emits a package-level var that is backed by a heap box so
@@ -431,24 +552,30 @@ func addressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsR
 		initExpr = fmt.Sprintf("default(%s)", csTypeName)
 	}
 
-	// A REFERENCE-LIKE valued global (`var head *node`) reads the HELD value through the box,
-	// which may legitimately be nil (Go reads a nil pointer global freely; only DEREFERENCING
-	// it panics). The strict `val` nil-checks the slot, so the property reads `ValueSlot`
-	// (the identical real slot, no check); a plain value global keeps the strict `val`.
-	accessor := "Value"
+	// The property reads `ValueSlot`, the real slot with no nil check, for every package-level box. A
+	// package box is never nil (it is constructed here with a value), and for a value-typed T the strict
+	// `Value`'s IsNull is constant false, so the two read the same storage. For a REFERENCE-LIKE valued
+	// global (`var head *node`) the held value may legitimately be nil (Go reads a nil pointer global
+	// freely; only DEREFERENCING it panics), which is why it read `ValueSlot` before every box did, and
+	// why valueIsRefLike once chose the accessor.
 
-	if valueIsRefLike {
-		accessor = "ValueSlot"
-	}
-
-	// THE construction-position emitter (B2-I2's role split; see BoxConstructPrefix in
-	// symbols.json): the DECLARED type here is PointerPrefix and never changes; the box is
-	// constructed as the PACKAGE-LEVEL kind, golib's StaticBox<T> (PackageBoxConstructPrefix), a
+	// THE construction-position emitter (B2-I2's role split; see BoxConstructPrefix in symbols.json): the
+	// box is constructed as the PACKAGE-LEVEL kind, golib's StaticBox<T> (PackageBoxConstructPrefix), a
 	// StandardBox<T> that also answers Go's non-heap question: a package-level sync.WaitGroup reads
-	// Unbubbled in a synctest bubble, as in Go. This line is the 754-site class of the design's
-	// emission-priced radius.
-	boxDecl = fmt.Sprintf("%s static %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, PackageBoxConstructPrefix, csTypeName, initExpr)
-	refProperty = fmt.Sprintf("%s static ref %s %s => ref %s.%s;", access, csTypeName, csIDName, box, accessor)
+	// Unbubbled in a synctest bubble, as in Go.
+	//
+	// Its field is `static readonly`, still DECLARED `ж<T>` so `&X` keeps that type (`var p = ᏑX;` may later
+	// be re-pointed, `p = Ꮡ(y)`), and the property reads it as the sealed StaticBox<T>'s `ValueSlot`
+	// (DESIGN-crosspkg-exported-box.md section 5, the read A/B in docs/phase4/probes/g-crosspkg-read-ab).
+	// An exported var read in a hot loop cost 16x a field on the JIT and 24x under Native AOT as `ж<T>`
+	// read through `Value`: the read is a virtual call, and Value's IsNull branch keeps AOT from inlining
+	// it. `readonly` lets tier-1 see the exact object, and the cast to the sealed type lets AOT inline
+	// `ValueSlot` too: 3.1x a field on the JIT, 2.5x under AOT, and +2-3% on encoding/binary's
+	// LittleEndian.Uint32. Without the cast, AOT stays at 7x. The cast cannot fail, since the field is
+	// constructed as a StaticBox<T> right here and is never rebound: nothing assigns a package box after
+	// its initializer, and an assignment that did would be CS0198 on the readonly field.
+	boxDecl = fmt.Sprintf("%s static readonly %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, PackageBoxConstructPrefix, csTypeName, initExpr)
+	refProperty = fmt.Sprintf("%s static ref %s %s => ref ((%s<%s>)%s).ValueSlot;", access, csTypeName, csIDName, PackageBoxConstructPrefix, csTypeName, box)
 
 	return boxDecl, refProperty
 }
