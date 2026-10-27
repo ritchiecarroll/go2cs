@@ -372,7 +372,13 @@ corpus's 1,041 lazy holders hold a box.
 `TestDisplacedExportedVarsAreBoxedOrRegistered` re-derives the displaced set from the corpus's placeholders.
 
 **The importer arm, as built.** `rootsAtImportedBoxedGlobal` roots a field or element path at the owner's box, in
-`convUnaryExpr`'s field arm and array-element branch and in `exprFieldRootsAtAddressedGlobal`.
+`convUnaryExpr`'s field arm and array-element branch. A third site, in `exprFieldRootsAtAddressedGlobal` (a
+pointer-receiver call on a value field, `lib.S.WG.Add(1)`), was removed before the seat was posted. Its red-first
+plant read green on the converter test and on all four behavioral phases. The emission was unchanged: the generic
+direct-ж fallback for a value field chain already routes that receiver through `&`, onto the field arm.
+A `[GoRecv] ref` method needs no route, since it binds on `lib.S`, a `ref` property. The two-seeded A/B of the
+removal reads 0 files. Neither arm's -stdlib wrote a file on any of the three targets, each arm's 65-package -tests
+leg wrote 2,828, and a planted byte was named.
 
 **Footprint** (the two-seeded, three-target A/B plus a 65-package `-tests` leg; base and seat as in the corpus commit):
 - 522 files, +2590/-2183, 0 conflicts applied;

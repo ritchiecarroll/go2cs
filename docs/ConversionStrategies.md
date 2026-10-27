@@ -1338,8 +1338,8 @@ the go2cs [source generator](#source-generators), gives the package class an acc
 name, `internal static ref ж<RangeTable> _Lu => ref lazyᴛ_Lu._Lu;`, so code reads and writes `_Lu` as it
 would a field, and neither the package's static constructor nor `package_init.cs` builds it.
 <!-- the holder line: src/go2cs/lazyPackageVarOperations.go:576 `func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`;
-     the accessor: src/gen/go2cs-gen/LazyHolderGenerator.cs:129 `source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`,
-     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 `"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`;
+     the accessor: src/gen/go2cs-gen/LazyHolderGenerator.cs:134 `source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`,
+     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:165 `"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`;
      left out of the ordered static constructor: src/go2cs/initOrderOperations.go:286 `if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`. -->
 
 **Which vars are built this way.** The value must not depend on when it is built, and building it must do
@@ -1381,7 +1381,7 @@ marked `[GoLazy(Initial = true)]`: the generator keeps `Lu`'s initial value in t
 each initializer built on a first read reads that field, as `["Lu"u8] = lazyᴛLu.initial`. An exported var that
 such an initializer reads is always built on its first read too, so it has a holder to keep the value in.
 <!-- src/core/unicode/tables.cs:23 `["Lu"u8] = lazyᴛLu.initial,` (Go: GOROOT/src/unicode/tables.go:22 `"Lu": Lu,`);
-     the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:132 `source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");`;
+     the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:137 `source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");`;
      the importer's assignment is the LazyPackageVars behavioral test's case (tables.Heavy, read by ByName). -->
 
 **A package with nothing left to order has no `package_init.cs`.** A var built on its first read never enters
@@ -11458,7 +11458,7 @@ or parameter shape, or a literal in an `any` slot. These are the generators conv
      EscapeRegistryGenerator, FieldAccessGenerator, MemberRecordGenerator, NativeArrayOpenerGenerator,
      RuntimeInitHookGenerator) are described in the reference, all but RuntimeInitHookGenerator in its
      generator list. LazyHolderGenerator's accessor:
-     src/gen/go2cs-gen/LazyHolderGenerator.cs:129 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`); guard GenTests LazyHolderGeneratorTests. -->
+     src/gen/go2cs-gen/LazyHolderGenerator.cs:134 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`); guard GenTests LazyHolderGeneratorTests. -->
 
 ### A converted struct lists only its fields
 

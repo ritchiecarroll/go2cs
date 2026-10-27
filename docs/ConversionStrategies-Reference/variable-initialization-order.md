@@ -150,8 +150,9 @@ A holder must hold exactly one static field, named for the holder, or for a var 
 the package's static constructor never builds it.
 <!-- The holder line: src/go2cs/lazyPackageVarOperations.go:576 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
      its name :606 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :593 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
-     src/gen/go2cs-gen/LazyHolderGenerator.cs:129 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
-     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`).
+     src/gen/go2cs-gen/LazyHolderGenerator.cs:134 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
+     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:165 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`);
+     a readonly box's by-value accessor src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}{Accessibility(field)} static {type} {fieldName} => {holderName}.{fieldName};\r\n");`).
      The marker: src/core/golib/GoLazyAttribute.cs. Kept out of the ordered ctor:
      src/go2cs/initOrderOperations.go:286 (`if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`). -->
 
@@ -193,7 +194,8 @@ that only just gained one. `unicode`'s `Upper = _Lu` is one short line, and it h
 call on it) with a heap box, `ᏑX`, and a `ref` property `X` over it. Built on its first read, the var keeps both: the
 holder holds the box field exactly as the eager declaration writes it, `[GoLazy] partial class lazyᴛX { internal
 static readonly ж<T> ᏑX = new StaticBox<T>(…); }`, the `ref` property `internal static ref T X => ref ((StaticBox<T>)ᏑX).ValueSlot;` follows it
-unchanged, and the generator adds the box accessor `ref ж<T> ᏑX => ref lazyᴛX.ᏑX`. A use site does not change: `&X`
+unchanged, and the generator adds the box accessor `ж<T> ᏑX => lazyᴛX.ᏑX`. The box field is readonly, which a
+writable `ref` cannot return, so the accessor returns the box itself, a reference. A use site does not change: `&X`
 reads `ᏑX` and `X` reads through it, the first of either builds the box, and the address is the same before and after
 the first read. Such a var is never read by another initializer built on a first read, so its holder never needs an
 initial value (the generator refuses `[GoLazy(Initial = true)]` on a box holder). `io`'s `blackHolePool` and the
@@ -217,7 +219,7 @@ field instead of the var:
 
 An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
 reader of an exported var with a constant initializer, which has no holder, stays eager.
-<!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
+<!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:137 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
      the marker argument: src/go2cs/lazyPackageVarOperations.go:580 (`marker = "GoLazy(Initial = true)"`). The importer's
      assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
 
