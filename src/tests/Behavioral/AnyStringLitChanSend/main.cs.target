@@ -34,10 +34,6 @@ internal static void describe(@string prefix, any v) {
         fmt.Println(prefix, "int:", s);
         break;
     }
-    case int32 s: {
-        fmt.Println(prefix, "int:", s);
-        break;
-    }
     default: {
         var s = v;
         fmt.Println(prefix, "other:", s);

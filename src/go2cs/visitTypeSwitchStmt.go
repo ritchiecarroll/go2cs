@@ -99,27 +99,6 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 	identContext := DefaultIdentContext()
 	identContext.isType = true
 
-	// Go `int`/`uint` are matched in a type switch by BOTH their native (`nint`/`nuint`) and a
-	// synthetic concrete (`int32`/`uint32`) boxed form (added below). But if the SAME switch also
-	// has an explicit `case int32:`/`case uint32:` (or `case rune:` ≡ int32), the synthetic case
-	// would be emitted first and make the explicit one unreachable (CS8120) — and steal its values.
-	// Pre-collect the explicitly-listed concrete case types so the synthetic is skipped when it
-	// would duplicate one (runtime's printpanicval switches over int, int32, uint, uint32, …).
-	explicitCaseTypes := map[string]bool{}
-
-	for _, caseClause := range caseClauses {
-		for _, expr := range caseClause.List {
-			if ident, ok := expr.(*ast.Ident); ok {
-				switch ident.Name {
-				case "int32", "rune":
-					explicitCaseTypes["int32"] = true
-				case "uint32":
-					explicitCaseTypes["uint32"] = true
-				}
-			}
-		}
-	}
-
 	// Go type distinctions can VANISH in the C# type map: two Go types that are distinct case
 	// labels may resolve to ONE C# type, which makes the later case unreachable (CS8120). A
 	// duplicate-mapped case is therefore merged — skipped, with a marker comment — but ONLY when
@@ -281,17 +260,10 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					caseExpr = fmt.Sprintf("%s %s", caseExpr, bindIdent)
 				}
 
+				// One label per Go type: `case int:` is `nint` alone. Go matches the dynamic type
+				// exactly, so an int32 (or rune) must NOT take the int arm; a Go int reaches an
+				// interface boxed as nint, untyped constants included (`(nint)1`).
 				caseExprs = append(caseExprs, caseExpr)
-
-				if strings.HasPrefix(caseExpr, "nint ") {
-					if !explicitCaseTypes["int32"] {
-						caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", bindIdent))
-					}
-				} else if strings.HasPrefix(caseExpr, "nuint ") {
-					if !explicitCaseTypes["uint32"] {
-						caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", bindIdent))
-					}
-				}
 			}
 
 			// The clause's printed Go body — the identity key for the duplicate-mapped-case merge.

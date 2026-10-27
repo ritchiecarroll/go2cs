@@ -19,7 +19,6 @@ internal static void Main() {
             break;
         }
         case nint _:
-        case int32 _:
         case int64 _:
         case uint64 _: {
             var t = i;
@@ -75,10 +74,6 @@ internal static void Main() {
     void kind(any i) {
         switch (i.type()) {
         case nuint: {
-            fmt.Println("uint word");
-            break;
-        }
-        case uint32: {
             fmt.Println("uint word");
             break;
         }

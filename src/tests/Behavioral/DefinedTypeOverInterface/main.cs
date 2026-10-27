@@ -24,9 +24,6 @@ internal static @string describe(Token t) {
     case nint v: {
         return fmt.Sprintf("int:%d"u8, v);
     }
-    case int32 v: {
-        return fmt.Sprintf("int:%d"u8, v);
-    }
     case @string v: {
         return "str:"u8 + v;
     }

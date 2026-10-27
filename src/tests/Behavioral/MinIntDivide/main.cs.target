@@ -99,9 +99,6 @@ internal static nint typeSwitch(any a, nint b) {
     switch (a.type()) {
     case nint quo: {
         return builtin.quo(quo, b);
-    }
-    case int32 quo: {
-        return builtin.quo(quo, b);
     }}
     return 0;
 }

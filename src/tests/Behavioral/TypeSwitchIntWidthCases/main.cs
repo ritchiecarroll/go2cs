@@ -9,13 +9,7 @@ internal static @string whatAmI(any i) {
     case nint: {
         return "I'm an int";
     }
-    case int32: {
-        return "I'm an int";
-    }
     case nuint: {
-        return "I'm a uint";
-    }
-    case uint32: {
         return "I'm a uint";
     }
     default: {
