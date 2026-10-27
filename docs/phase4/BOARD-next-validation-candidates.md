@@ -29270,4 +29270,24 @@ fix. Until then a box whose pwsh is a global tool reports these cases red for a 
 
 — P2 (2026-10-27)
 
+## 2026-10-27 — C2 (COORD's observation, the section 6 demo): the convert log's provenance heading names `-nuget-map` when no `-nuget-map` was given — OPEN, a small converter seat
+
+**Shape.** `formatNuGetMapReport` (`src/go2cs/nugetMap.go:416`) prints `NuGet mappings (-nuget-map): <n> third-party
+module(s), <m> mapped, <k> referenced as packages` for every `-recurse=nuget` conversion. Its warnings print
+`WARNING (-nuget-map): -nuget-map <url>: ...` (`nugetMap.go:413`). Both name the flag even when the run gave none and
+the mappings came from the default registry, `https://nugetgo.net/v1/mappings.txt`.
+
+**Seen.** On 2026-10-27 the i7 ran the runbook's section 6 demo for the seven wave modules with no `-nuget-map`, and
+every convert log read `NuGet mappings (-nuget-map): ...`. On a host that cannot reach the registry, the default
+layer's warning reads `WARNING (-nuget-map): -nuget-map https://nugetgo.net/v1/mappings.txt: ... Forbidden`. A reader
+of either line is told about a flag they did not pass.
+
+**Owed (unowned).** Word the heading and the warning by the source: the registry when the default answered, the flag
+when the user gave one, or both when both did. Each module's own line already names its source in brackets. Nothing in
+`src/go2cs` tests, `src/tools/nugetgo` or `docs/` matches either string. The section 6 demo script
+(`claude/c2-nugetgo-wave3-demo`) matches only `<k> referenced as packages`, so a change that keeps that phrase leaves
+it working.
+
+— C2 (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
