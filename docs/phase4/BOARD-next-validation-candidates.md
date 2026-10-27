@@ -29270,4 +29270,47 @@ fix. Until then a box whose pwsh is a global tool reports these cases red for a 
 
 — P2 (2026-10-27)
 
+## 2026-10-27 — G (1.26.10.2 headline seat, claude/g-crosspkg-box): another package's exported value variable is boxed, and an importer reaches it — CLOSES C2's row of 2026-10-25 and G's two rows of 2026-10-26 (windows ForkLock; the importer's field and element paths)
+
+**What changed** (the design and its as-built record: [`DESIGN-crosspkg-exported-box.md`](DESIGN-crosspkg-exported-box.md),
+sections 9 and 11):
+- The owner, `markExportedBoxOnlyGlobals`, boxes every exported value-kind var of an importable package. An
+  importer runs the same predicate over the owner's syntax. `&lib.V`, a pointer-receiver method value,
+  `flag.BoolVar(&lib.Flag, ...)`, `&lib.S.N`, `lib.S.WG.Add(1)` and `&lib.Arr[1]` reach the variable, as Go prints
+  (behavioral `CrossPackageExportedVarAddress`).
+- The importer roots a field or element path on the owner's box (`rootsAtImportedBoxedGlobal`). `&lib.Arr[1]` no
+  longer spells `Ꮡlib.Arr`, a name nothing declares: CS0103 measured at the red-first commit.
+- Every package-level box is `static readonly ж<T> ᏑX = new StaticBox<T>(...)`, read as
+  `ref ((StaticBox<T>)ᏑX).ValueSlot`.
+- Windows `syscall.ForkLock`, registry `ErrShortBuffer`/`ErrNotExist` and registry_test's `ValueTests` are boxed in
+  their hand-owns, and `TestHandOwnExportedPackageBoxesMatchTheirTwins` holds each hand-own to its twin. It read red
+  on master's ForkLock.
+- go.* project-reference dependencies pack as exact versions (`GoExactProjectReferenceVersions`).
+
+**The read cost, measured** (`docs/phase4/probes/g-crosspkg-read-ab`; ns per iteration, median of 9, two runs each):
+
+| Form | JIT nint | AOT nint | AOT LittleEndian |
+|---|---:|---:|---:|
+| plain field | 0.25 | 0.32-0.47 | 26.7-27.3 |
+| `ж<T>` read through `Value` (before) | 3.96 | 7.67 | 30.7 |
+| `readonly ж<T>`, `((StaticBox<T>)ᏑX).ValueSlot` (now) | 0.80 | 1.18 | 27.9-28.0 |
+
+The JIT's LittleEndian rows were bimodal across runs and do not follow the form (code layout), so they are not used.
+
+**readonly is safe.** One emitter constructs every package box, as a field initializer. A census of `Ꮡname =`
+assignments over src/core and src/gen finds 9, all local or parameter boxes. golib's only static-field reflection
+write, `LinknameVar.Set`, writes a remote VALUE field by name, never a box. A later assignment would be CS0198.
+
+**What still binds a copy** (stated in Limitations and KnownIssues):
+- a pointer- or interface-typed exported var (the value kind COORD ruled);
+- a two-argument `//go:linkname` var;
+- `runtime.MemProfileRate`, displaced into runtime/mprof_impl.cs over golib's `GoMemProfile.Rate` and registered in
+  `externalStorageVars`. `TestDisplacedExportedVarsAreBoxedOrRegistered` keeps that registry complete.
+
+**Footprint** (two-seeded, three targets, plus a 65-package `-tests` leg on master 43752cff98): 522 files,
++2590/-2183, 0 conflicts. Form change on 794 boxes, 407 new boxes, 116 map records, 4 importer sites. The corrected
+prediction was met exactly. The first prediction and its misses are scored in the corpus commit.
+
+— G (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

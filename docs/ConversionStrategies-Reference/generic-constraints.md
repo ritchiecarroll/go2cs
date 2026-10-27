@@ -911,7 +911,7 @@ C# generic constraints are conjunctive ("and"), so they cannot express Go's `str
 ```go
 func HashStr[T string | []byte](sep T) (uint32, uint32) { /* uses sep[i], len(sep) */ }
 ```
-<!-- source: src/core/internal/bytealg/bytealg.cs:35-36 -->
+<!-- source: src/core/internal/bytealg/bytealg.cs:36-37 -->
 ```csharp
 public static (uint32, uint32) HashStr<T>(T sep)
     where T : /* string | []byte */ IByteSeq<T, byte>, new()

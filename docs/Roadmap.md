@@ -479,7 +479,7 @@ the rest are tracked in `src/go2cs/ToDo.md`:
   are lost. That covers `&otherpkg.V`, a pointer-receiver method value such as `f := otherpkg.V.Reset`,
   and `flag.BoolVar(&otherpkg.Debug, ...)`. It is a current limitation;
   [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) and
-  [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-variable-are-lost)
+  [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-pointer-or-interface-variable-are-lost)
   give the workarounds.
 - **The remaining dynamic-struct implicit-cast checks** in the `AssignStmt`, `CompositeLit`,
   `IndexExpr`, `BinaryExpr`, `UnaryExpr`, `SelectorExpr`, `TypeSwitchStmt` and `ValueSpec` visitors.

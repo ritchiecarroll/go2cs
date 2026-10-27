@@ -51,7 +51,7 @@ method value such as `f := otherpkg.V.Reset`, and the common `flag.BoolVar(&othe
 where parsing the flag leaves `otherpkg.Debug` unchanged. A direct call (`otherpkg.V.Reset()`) and a
 read both work, and inside one package all of these work. To avoid it, keep the variable and the code
 that takes its address in one package, or have the package export a pointer or an accessor function.
-[Limitations](Limitations.md) and [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-variable-are-lost)
+[Limitations](Limitations.md) and [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-pointer-or-interface-variable-are-lost)
 carry the details.
 
 **`crypto/tls` and process start-up.** Part of `crypto/tls`'s test suite runs BoringSSL's interop

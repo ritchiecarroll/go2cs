@@ -115,29 +115,32 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
-* **In 1.26.10.1, the address of another package's variable can be the address of a copy.** When code takes
-  the address of a variable that a different package exports and that is not itself a pointer, the pointer it
-  gets refers to a copy, so writes through it never reach the variable, unless the package that declares the
-  variable takes its address itself (with `&V`, or by calling a pointer method on it or taking one as a
-  value). That covers `&otherpkg.V`, a pointer-receiver method value used as a value
-  (`f := otherpkg.V.Reset`), and the common `flag.BoolVar(&otherpkg.Debug, "debug", false, "...")`, where
-  parsing the flag leaves `otherpkg.Debug` unchanged. Calling the method directly
-  (`otherpkg.V.Reset()`) and reading the variable both work, and inside one package all of these work. To avoid it,
-  keep the variable and the code that takes its address in the same package, or have the package export a pointer
-  (`var V = &T{}`) or an accessor function instead of the value.
-  <!-- Diagnosed by lane R on windows/amd64 and linux/amd64 at 9b0269c2e8 (COORD inbox, 2026-10-25T19:24:56Z):
-       `f := lib.G.Inc` emits `Ꮡ(lib.G).Inc`, a box of a copy (Go prints 1, converted 0); `&lib.G2` and
-       `bump(&lib.Count)` likewise. An importer binds the owner's own box only when the owner boxes the variable, which
-       it decides from its own syntax: src/go2cs/globalAddressOperations.go:378 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`),
-       with exported variables boxed only for a box-only pointer method at
-       :329 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
-       value is fixed for the 1.26 publication (R's seat F1); the cross-package case is ruled a documented limitation
-       (owner, 2026-10-25), with the fix in the BOARD row of that date.
-       2026-10-26: re-read at a6214f0c5d: the owner's predicate, run by an importer over the owner's syntax, is
-       src/go2cs/globalAddressOperations.go:79 (`func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, into map[types.Object]bool) {`):
-       it boxes a package-level value var the owner itself writes `&V` (or `&V.f`, `&V[i]`) for, calls a
-       pointer-receiver method on, or takes a pointer-receiver method value of; so the copy happens only when the
-       owner does none of these (and markExportedBoxOnlyGlobals, cited above, does not fire). -->
+* **The address of another package's pointer- or interface-typed variable is the address of a copy.** Every
+  variable a package exports with a value type has its own storage, so code in another package that takes its
+  address reaches the variable itself, as in Go: `&otherpkg.V`, a pointer-receiver method value
+  (`f := otherpkg.V.Reset`), `flag.BoolVar(&otherpkg.Debug, "debug", false, "...")`, and an address inside the
+  variable, `&otherpkg.S.Field` or `&otherpkg.Arr[i]`. Two kinds of exported variable are still handed to another
+  package as a copy when it takes their address:
+  - a variable whose type is a pointer or an interface, such as `var DefaultClient *Client` or
+    `var ErrMissing = errors.New("missing")`: `&otherpkg.ErrMissing` points at a copy, so a write through it never
+    reaches the variable;
+  - a variable whose storage lives somewhere else: `runtime.MemProfileRate`, and a variable declared with a
+    two-argument `//go:linkname`.
+
+  Reading these variables, assigning to them, and calling their methods directly all work, and inside the declaring
+  package their addresses are real. To avoid the copy, take the address in the package that declares the variable,
+  or have that package export an accessor function.
+  <!-- The fix of 1.26.10.2 (docs/phase4/DESIGN-crosspkg-exported-box.md, ACCEPTED; owner's option (b) of 2026-10-25,
+       COORD's OQ-1 ruling value kind only). The owner boxes an exported value-kind var:
+       src/go2cs/globalAddressOperations.go:347 (`func markExportedBoxOnlyGlobals(pkg *types.Package, files []*ast.File, into map[types.Object]bool) {`),
+       skipping a pointer, an interface, `package main`, and a linkname forward or registered external-storage var:
+       :389 (`func linknameForwardVars(pkg *types.Package, files []*ast.File) map[string]bool {`) and
+       :424 (`var externalStorageVars = map[string]string{`). An importer runs the same predicate over the owner's
+       syntax, :461 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`), and roots a field or element address on
+       the owner's box, :517 (`func (v *Visitor) rootsAtImportedBoxedGlobal(expr ast.Expr) bool {`).
+       Behavioral guard: src/tests/Behavioral/CrossPackageExportedVarAddress (every shape above, against Go's output).
+       Before 1.26.10.2 every non-pointer exported var bound a copy unless its own package addressed it (diagnosed by
+       lane R on windows/amd64 and linux/amd64 at 9b0269c2e8, 2026-10-25). -->
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
