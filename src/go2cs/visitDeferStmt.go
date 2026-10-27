@@ -154,6 +154,22 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		renderLambdaParams = true
 	}
 
+	// An INTERFACE or POINTER receiver reached through an expression that is not a plain identifier (an
+	// array, slice or map element, a field, a call result) is evaluated at the defer statement too. The
+	// method-group form binds it there; the LAMBDA form read it when the thunk ran: `() => cʗ1[i].Close()`
+	// indexed the array copy at unwind, and an array copy shares its elements, so `c[i] = other` after the
+	// defer leaked in. Such a receiver takes the `ᴛ0` snapshot as well, and one Go reaches by its ADDRESS
+	// snapshots the address (see lateReceiverSnapshot).
+	var recvAddressOf ast.Expr
+
+	if !recvSnapshot {
+		recvSnapshot, recvAddressOf = v.lateReceiverSnapshot(deferStmt.Call, renderLambdaParams)
+
+		if recvSnapshot && paramCount > 0 {
+			renderLambdaParams = true
+		}
+	}
+
 	// A callee that RETURNS results does NOT need the temp-parameter form at arity N, and an
 	// earlier cut of this file said it did. golib carries BOTH shapes of `defer` at every arity
 	// with parameters -- `defer<T1, T2>(Action<T1, T2>, T1, T2, ref GoFrame)` and
@@ -203,6 +219,10 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 				recvArg = head[:dot]
 				callExpr = fmt.Sprintf("%s%d%s", TempVarMarker, 0, callExpr[dot:])
 			}
+		}
+
+		if recvArg != "" && recvAddressOf != nil {
+			recvArg = v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: recvAddressOf}, DefaultUnaryExprContext())
 		}
 	}
 
@@ -561,6 +581,157 @@ func (v *Visitor) deferReceiverIsIdentifier(call *ast.CallExpr) bool {
 	selection, ok := v.info.Selections[selectorExpr]
 
 	return ok && !selection.Indirect()
+}
+
+// lateReceiver describes the receiver of a deferred or spawned method VALUE that deferGoLateReceiver selects.
+type lateReceiver struct {
+	sig       *types.Signature
+	x         ast.Expr
+	addressed bool
+}
+
+// deferGoLateReceiver selects a deferred or spawned call `X.M(…)` whose callee is a method VALUE with an INTERFACE
+// or POINTER receiver and whose receiver expression X is not a plain identifier: an array, slice or map element,
+// a field, a dereference or a call result (`defer c[i].Close()`, `defer res.Body.Close()`, `go Client(c,
+// cfg).Handshake()`). Go evaluates X at the statement. `addressed` marks a pointer method on an addressable VALUE
+// (`defer v[i].Close()` on a `[N]conn`): Go evaluates `&v[i]` there, so the call sees a later write to the
+// element through that address. Nil for every other callee: a value receiver is deferCalleeValueReceiverMethod's,
+// an identifier is copied by the capture hoist, and an addressed receiver keeps its existing emission when its
+// box has no method extension (a method promoted through an embedded field) or the address would bind a copy
+// (another package's variable, the documented cross-package limitation).
+func (v *Visitor) deferGoLateReceiver(call *ast.CallExpr) *lateReceiver {
+	selectorExpr, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+	if !ok {
+		return nil
+	}
+
+	if _, isIdent := ast.Unparen(selectorExpr.X).(*ast.Ident); isIdent {
+		return nil
+	}
+
+	if selection, ok := v.info.Selections[selectorExpr]; !ok || selection.Kind() != types.MethodVal {
+		return nil
+	}
+
+	funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func)
+
+	if !ok {
+		return nil
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return nil
+	}
+
+	if types.IsInterface(sig.Recv().Type()) {
+		return &lateReceiver{sig: sig, x: selectorExpr.X}
+	}
+
+	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+
+	if !isPtrRecv {
+		return nil
+	}
+
+	xType := v.info.TypeOf(selectorExpr.X)
+
+	if xType == nil {
+		return nil
+	}
+
+	if _, xIsPtr := xType.Underlying().(*types.Pointer); xIsPtr {
+		return &lateReceiver{sig: sig, x: selectorExpr.X}
+	}
+
+	if _, named := xType.(*types.Named); !named || !types.Identical(recvPtr.Elem(), xType) || v.rootedInOtherPackage(selectorExpr.X) {
+		return nil
+	}
+
+	return &lateReceiver{sig: sig, x: selectorExpr.X, addressed: true}
+}
+
+// rootedInOtherPackage reports whether an element or field chain starts at another package's variable
+// (`otherpkg.V.f[i]`).
+func (v *Visitor) rootedInOtherPackage(expr ast.Expr) bool {
+	for {
+		switch node := ast.Unparen(expr).(type) {
+		case *ast.IndexExpr:
+			expr = node.X
+		case *ast.StarExpr:
+			expr = node.X
+		case *ast.SelectorExpr:
+			if ident, ok := node.X.(*ast.Ident); ok {
+				_, isPkg := v.info.ObjectOf(ident).(*types.PkgName)
+				return isPkg
+			}
+
+			expr = node.X
+		default:
+			return false
+		}
+	}
+}
+
+// lateReceiverSnapshot decides whether a deferred or spawned call's late receiver (see deferGoLateReceiver) takes
+// the `ᴛ0` snapshot: wherever the call is not a method group that binds the receiver at the statement already.
+// An addressed receiver returns the expression whose ADDRESS is the snapshot. Its every form is evaluated at the
+// statement (the method group, or the snapshot), and the snapshot is the form wherever the method group is not.
+func (v *Visitor) lateReceiverSnapshot(call *ast.CallExpr, renderLambdaParams bool) (bool, ast.Expr) {
+	lateRecv := v.deferGoLateReceiver(call)
+	paramCount := len(call.Args)
+
+	if lateRecv == nil || paramCount >= 16 {
+		return false, nil
+	}
+
+	results := lateRecv.sig.Results().Len() > 0
+
+	if lateRecv.addressed {
+		methodGroupForm := paramCount > 0 && !renderLambdaParams || paramCount == 0 && !results && !lateRecv.sig.Variadic()
+
+		return !methodGroupForm, lateRecv.x
+	}
+
+	lambdaForm := paramCount > 0 && renderLambdaParams || paramCount == 0 && (results || lateRecv.sig.Variadic())
+
+	return lambdaForm, nil
+}
+
+// addressedLateReceiverBox returns the root variable of a deferred or spawned call's late receiver that Go reaches
+// by its address (see deferGoLateReceiver) when that variable is heap-boxed (`v` of `defer v[i].Close()`), or nil.
+// Every form of such a call evaluates the address at the statement, through the variable's box, so capture
+// analysis takes no copy of it: a copy has no box, and `Ꮡvʗ1.at<conn>(0)` named one that does not exist (CS0103).
+// Any other root keeps its capture copy, through which the address reads the same storage.
+func (v *Visitor) addressedLateReceiverBox(call *ast.CallExpr) *ast.Ident {
+	lateRecv := v.deferGoLateReceiver(call)
+
+	if lateRecv == nil || !lateRecv.addressed || len(call.Args) >= 16 {
+		return nil
+	}
+
+	expr := lateRecv.x
+
+	for {
+		switch node := ast.Unparen(expr).(type) {
+		case *ast.IndexExpr:
+			expr = node.X
+		case *ast.SelectorExpr:
+			expr = node.X
+		case *ast.StarExpr:
+			expr = node.X
+		case *ast.Ident:
+			if v.isHeapBoxedExpr(node) {
+				return node
+			}
+
+			return nil
+		default:
+			return nil
+		}
+	}
 }
 
 // isPlainIdentifier reports whether s is a single C# identifier (no member access, call or cast).

@@ -4024,7 +4024,7 @@ public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
         // from Next will not be modified again." (for instance, if
         // they were obtained from the network anyway) But for now we
         // don't care.
-        defer(() => Ꮡr.Value.rows.Close(), ref ᒐ);
+        defer(ᴛ0 => ᴛ0.Close(), Ꮡr.Value.rows, ref ᒐ);
         if (scanArgsContainRawBytes(dest)) {
             return errors.New(sqlRawBytesIsnTAllowedOnˢ);
         }

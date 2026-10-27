@@ -1218,10 +1218,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			// Process function expression. Skip the receiver of a capture-mode method value on a
 			// boxed/addressed receiver (`defer locked.Store(0)`): its box is used directly, not a copy.
+			// The same for the boxed variable of a receiver Go reaches by its ADDRESS (`defer v[i].Close()`
+			// on a value element): every form evaluates that address at the statement (see
+			// addressedLateReceiverBox).
 			skipRecv := v.captureModeMethodValueReceiver(node.Call)
+			addressedBox := v.addressedLateReceiverBox(node.Call)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
 				if id, ok := n.(*ast.Ident); ok {
-					if id == skipRecv {
+					if id == skipRecv || id == addressedBox {
 						return true
 					}
 					v.processPotentialCapture(id)
@@ -1269,10 +1273,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			// Process function expression. Skip the receiver of a capture-mode method value on a
 			// boxed/addressed receiver (`defer locked.Store(0)`): its box is used directly, not a copy.
+			// The same for the boxed variable of a receiver Go reaches by its ADDRESS (`defer v[i].Close()`
+			// on a value element): every form evaluates that address at the statement (see
+			// addressedLateReceiverBox).
 			skipRecv := v.captureModeMethodValueReceiver(node.Call)
+			addressedBox := v.addressedLateReceiverBox(node.Call)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
 				if id, ok := n.(*ast.Ident); ok {
-					if id == skipRecv {
+					if id == skipRecv || id == addressedBox {
 						return true
 					}
 					v.processPotentialCapture(id)

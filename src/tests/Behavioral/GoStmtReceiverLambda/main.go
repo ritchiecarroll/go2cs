@@ -31,12 +31,12 @@ type engine struct {
 }
 
 // start exercises the ARGUMENT arm: the value-returning callee forces
-// `goǃ(ᴛ1 => …tally.bump(ᴛ1), delta)` with the callee chain rooted at e.
+// `goǃ((ᴛ0, ᴛ1) => ᴛ0.bump(ᴛ1), …tally, delta)`, the receiver chain rooted at e and evaluated at the go statement.
 func (e *engine) start(delta int) {
 	go e.tally.bump(delta)
 }
 
-// ping exercises the NULLARY arm (`goǃ(() => …tally.report())`).
+// ping exercises the NULLARY arm (`goǃ(ᴛ0 => ᴛ0.report(), …tally)`).
 func (e *engine) ping() {
 	go e.tally.report()
 }

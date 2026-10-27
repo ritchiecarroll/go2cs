@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -159,6 +160,26 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		renderLambdaParams = true
 	}
 
+	// Go evaluates the receiver on the CURRENT goroutine at the `go` statement. The lambda form read it on the
+	// new one when it ran: `() => cʗ1[i].Close()` indexed the array copy then, and an array copy shares its
+	// elements, so `c[i] = other` after the statement leaked in. A VALUE receiver that is not a plain
+	// identifier (a value method always takes the lambda form here), and an interface or pointer receiver
+	// under the lambda form, take the `ᴛ0` snapshot instead -- exact mirror of the receiver snapshot in
+	// visitDeferStmt. One Go reaches by its ADDRESS snapshots the address (see lateReceiverSnapshot).
+	recvSnapshot := false
+
+	var recvAddressOf ast.Expr
+
+	if valueRecvMethodGroup {
+		recvSnapshot = !v.deferReceiverIsIdentifier(goStmt.Call) && paramCount < 16
+	} else {
+		recvSnapshot, recvAddressOf = v.lateReceiverSnapshot(goStmt.Call, renderLambdaParams)
+	}
+
+	if recvSnapshot && paramCount > 0 {
+		renderLambdaParams = true
+	}
+
 	if paramCount > 0 {
 		lambdaContext.callArgs = make([]string, paramCount)
 		lambdaContext.renderParams = renderLambdaParams
@@ -168,6 +189,28 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	wroteDecls := false
 
 	callExpr := strings.TrimSpace(v.convCallExpr(goStmt.Call, lambdaContext))
+
+	// The receiver snapshot splits the rendered call exactly as visitDeferStmt's does.
+	recvArg := ""
+
+	if recvSnapshot {
+		temps := make([]string, paramCount)
+
+		for i := range temps {
+			temps[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+		}
+
+		if head, ok := strings.CutSuffix(callExpr, "("+strings.Join(temps, ", ")+")"); ok {
+			if dot := strings.LastIndex(head, "."); dot > 0 && isPlainIdentifier(head[dot+1:]) {
+				recvArg = head[:dot]
+				callExpr = fmt.Sprintf("%s%d%s", TempVarMarker, 0, callExpr[dot:])
+			}
+		}
+
+		if recvArg != "" && recvAddressOf != nil {
+			recvArg = v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: recvAddressOf}, DefaultUnaryExprContext())
+		}
+	}
 
 	if lambdaContext.deferredDecls != nil && lambdaContext.deferredDecls.Len() > 0 {
 		result.WriteString(lambdaContext.deferredDecls.String())
@@ -209,7 +252,9 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		// parameter, inconvertible the same way. Keep the invocation and take the wrapping arm.
 		variadicLit := v.variadicFuncLitCallee(goStmt.Call) != nil
 
-		if boxGroup != "" {
+		if recvArg != "" {
+			callExpr = fmt.Sprintf("%s%d => %s, %s", TempVarMarker, 0, callExpr, recvArg)
+		} else if boxGroup != "" {
 			callExpr = boxGroup
 		} else if !hasResults && !namedFuncType && !valueRecvMethodGroup && !variadicLit && !variadicCallee && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
@@ -227,19 +272,26 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		result.WriteString(callExpr)
 	} else {
 		if renderLambdaParams {
-			if paramCount > 1 {
+			// A receiver snapshot leads the thunk's parameters as `ᴛ0` (and its eager arguments below).
+			firstParam := 1
+
+			if recvArg != "" {
+				firstParam = 0
+			}
+
+			if paramCount+1-firstParam > 1 {
 				result.WriteRune('(')
 			}
 
-			for i := range paramCount {
-				if i > 0 {
+			for i := firstParam; i <= paramCount; i++ {
+				if i > firstParam {
 					result.WriteString(", ")
 				}
 
-				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
+				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i))
 			}
 
-			if paramCount > 1 {
+			if paramCount+1-firstParam > 1 {
 				result.WriteRune(')')
 			}
 
@@ -255,6 +307,12 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 
 		result.WriteString(callExpr)
 		result.WriteString(", ")
+
+		if recvArg != "" {
+			result.WriteString(recvArg)
+			result.WriteString(", ")
+		}
+
 		result.WriteString(strings.Join(lambdaContext.callArgs, ", "))
 	}
 

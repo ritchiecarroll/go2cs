@@ -267,6 +267,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Deferred calls whose callee returns a value take the lambda form](defer-panic-recover.md#deferred-calls-whose-callee-returns-a-value-take-the-lambda-form)
   - [Deferred pointer-receiver nullary calls bind the box method group](defer-panic-recover.md#deferred-pointer-receiver-nullary-calls-bind-the-box-method-group)
   - [A deferred VALUE-receiver method passes its receiver as the thunk's first eager argument](defer-panic-recover.md#a-deferred-value-receiver-method-passes-its-receiver-as-the-thunks-first-eager-argument)
+  - [A deferred or spawned call evaluates an element or field receiver at the statement](defer-panic-recover.md#a-deferred-or-spawned-call-evaluates-an-element-or-field-receiver-at-the-statement)
   - [A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy](defer-panic-recover.md#a-deferred-pointer-receiver-method-on-an-escaping-value-local-captures-by-box-not-by-copy)
 - **[Expression Switch Statements](expression-switch.md)**
   - [A switch on a `static readonly` constant tag lowers to if-else](expression-switch.md#a-switch-on-a-static-readonly-constant-tag-lowers-to-if-else)

@@ -20,6 +20,20 @@ internal static error Close(this ref conn c) {
     return default!;
 }
 
+internal static void Reset(this ref conn c) {
+    fmt.Println("reset", c.name);
+}
+
+partial struct valueConn {
+    internal @string name;
+    internal channel<@string> @out;
+}
+
+internal static error Close(this valueConn a) {
+    a.@out.ᐸꟷ(a.name);
+    return default!;
+}
+
 partial struct asyncConn {
     internal @string name;
     internal channel<@string> @out;
@@ -53,7 +67,7 @@ internal static void deferIndexedReceiverInLoop() {
             var i = iᴛ1;
             c[i] = new connжcloser(Ꮡ(new conn(name: fmt.Sprint("conn", i))));
             var cʗ1 = c;
-            defer(() => cʗ1[i].Close(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -70,7 +84,7 @@ internal static partial void goIndexedReceiverInLoop() {
         var i = iᴛ1;
         c[i] = new asyncConnжcloser(Ꮡ(new asyncConn(name: fmt.Sprint("g", i), @out: @out)));
         var cʗ1 = c;
-        goǃ(() => cʗ1[i].Close());
+        goǃ(ᴛ0 => ᴛ0.Close(), cʗ1[i]);
     }
     var got = new slice<@string>(0, 3);
     for (nint j = 0; j < 3; j++) {
@@ -82,6 +96,74 @@ internal static partial void goIndexedReceiverInLoop() {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
+            got = append(got, "TIMEOUT"u8);
+            break;
+        }}
+    }
+    sort.Strings(got);
+    foreach (var (_, s) in got) {
+        fmt.Println("closed", s);
+    }
+}
+
+internal static void deferElementReassigned() {
+    GoFrame ᒐ = default;
+    try {
+        fmt.Println("-- red 3: defer c[0].Close(), then c[0] = other --");
+        ref var c = ref heap(new array<closer>(2), out var Ꮡc);
+        c[0] = new connжcloser(Ꮡ(new conn(name: "first")));
+        var cʗ1 = c;
+        defer(ᴛ0 => ᴛ0.Close(), cʗ1[0], ref ᒐ);
+        ref var p = ref heap(new array<ж<conn>>(2), out var Ꮡp);
+        p[0] = Ꮡ(new conn(name: "first ptr"));
+        var pʗ1 = p;
+        defer(ᴛ0 => ᴛ0.Close(), pʗ1[0], ref ᒐ);
+        c[0] = new connжcloser(Ꮡ(new conn(name: "second")));
+        p[0] = Ꮡ(new conn(name: "second ptr"));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static void deferElementAddressReceiver() {
+    GoFrame ᒐ = default;
+    try {
+        fmt.Println("-- red 4: defer v[0].Close() on a [2]conn, then v[0] = other --");
+        ref var v = ref heap(new array<conn>(2), out var Ꮡv);
+        v[0] = new conn(name: "first value");
+        defer(ᴛ0 => ᴛ0.Close(), Ꮡv.at<conn>(0), ref ᒐ);
+        defer(Ꮡv.at<conn>(0).Reset, ref ᒐ);
+        v[0] = new conn(name: "second value");
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal static partial void goElementReassigned() {
+    var gotᴷ = new stackAppend<@string>();
+
+    fmt.Println("-- red 5: go c[0].Close(), then c[0] = other --");
+    var @out = new channel<@string>(2);
+    ref var c = ref heap(new array<closer>(1), out var Ꮡc);
+    c[0] = new asyncConnжcloser(Ꮡ(new asyncConn(name: "first", @out: @out)));
+    var cʗ1 = c;
+    goǃ(ᴛ0 => ᴛ0.Close(), cʗ1[0]);
+    c[0] = new asyncConnжcloser(Ꮡ(new asyncConn(name: "second", @out: @out)));
+    ref var v = ref heap(new array<valueConn>(1), out var Ꮡv);
+    v[0] = new valueConn(name: "first value", @out: @out);
+    var vʗ1 = v;
+    goǃ(ᴛ0 => ᴛ0.Close(), vʗ1[0]);
+    v[0] = new valueConn(name: "second value", @out: @out);
+    var got = new slice<@string>(0, 2);
+    for (nint j = 0; j < 2; j++) {
+        var selᴛ3 = @out;
+        var selᴛ4 = time.After((time.Duration)(5000000000L));
+        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+        case 0 when selᴛ3.ꟷᐳ(out var s): {
+            got = append(gotᴷ, got, s);
+            break;
+        }
+        case 1 when selᴛ4.ꟷᐳ(out _): {
             got = append(got, "TIMEOUT"u8);
             break;
         }}
@@ -143,6 +225,9 @@ internal static void Main() {
     closureCapture3Clause();
     closureCaptureRange();
     plainArgs();
+    deferElementReassigned();
+    deferElementAddressReceiver();
+    goElementReassigned();
 }
 
 } // end main_package
