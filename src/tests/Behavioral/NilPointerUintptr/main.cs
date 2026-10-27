@@ -9,8 +9,8 @@ partial struct T {
     internal nint x;
 }
 
-internal static ж<T> Ꮡglobal = new StaticBox<T>(new T(x: 42));
-internal static ref T global => ref Ꮡglobal.Value;
+internal static readonly ж<T> Ꮡglobal = new StaticBox<T>(new T(x: 42));
+internal static ref T global => ref ((StaticBox<T>)Ꮡglobal).ValueSlot;
 
 internal static uintptr gPtr = (uintptr)Ꮡglobal;
 

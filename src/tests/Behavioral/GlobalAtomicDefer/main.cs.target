@@ -6,10 +6,10 @@ using sync;
 
 partial class main_package {
 
-internal static ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
-internal static ref atomic.Int32 locked => ref Ꮡlocked.Value;
-internal static ж<atomic.Uint64> ᏑrunGoid = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
+internal static readonly ж<atomic.Int32> Ꮡlocked = new StaticBox<atomic.Int32>(default(atomic.Int32));
+internal static ref atomic.Int32 locked => ref ((StaticBox<atomic.Int32>)Ꮡlocked).ValueSlot;
+internal static readonly ж<atomic.Uint64> ᏑrunGoid = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ref atomic.Uint64 runGoid => ref ((StaticBox<atomic.Uint64>)ᏑrunGoid).ValueSlot;
 
 internal static int32 lockUnlock(uint64 id) {
     GoFrame ᒐ = default;

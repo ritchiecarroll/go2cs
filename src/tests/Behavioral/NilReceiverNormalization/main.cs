@@ -9,8 +9,8 @@ partial struct loc {
     internal nint offset;
 }
 
-internal static ж<loc> ᏑutcLoc = new StaticBox<loc>(new loc(name: "UTC", offset: 0));
-internal static ref loc utcLoc => ref ᏑutcLoc.Value;
+internal static readonly ж<loc> ᏑutcLoc = new StaticBox<loc>(new loc(name: "UTC", offset: 0));
+internal static ref loc utcLoc => ref ((StaticBox<loc>)ᏑutcLoc).ValueSlot;
 
 internal static ж<loc> get(this ж<loc> Ꮡl) {
     if (Ꮡl == nil) {

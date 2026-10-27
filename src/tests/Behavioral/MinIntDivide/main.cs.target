@@ -12,8 +12,8 @@ partial struct small /*num:int32*/;
 
 internal static nint i = Δmath.MinInt;
 internal static int32 i32 = Δmath.MinInt32;
-internal static ж<int64> Ꮡi64 = new StaticBox<int64>(Δmath.MinInt64);
-internal static ref int64 i64 => ref Ꮡi64.Value;
+internal static readonly ж<int64> Ꮡi64 = new StaticBox<int64>(Δmath.MinInt64);
+internal static ref int64 i64 => ref ((StaticBox<int64>)Ꮡi64).ValueSlot;
 internal static rune r = Δmath.MinInt32;
 internal static word w = Δmath.MinInt64;
 internal static small s = Δmath.MinInt32;

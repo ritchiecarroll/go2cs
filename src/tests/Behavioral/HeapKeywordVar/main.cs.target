@@ -8,8 +8,8 @@ internal static void set(ref nint p) {
     p = 42;
 }
 
-internal static ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
-internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;
+internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
+internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;
 
 partial struct @decimal {
     internal nint d;

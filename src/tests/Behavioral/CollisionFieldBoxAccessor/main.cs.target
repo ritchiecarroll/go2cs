@@ -20,11 +20,11 @@ partial struct holder {
     internal nint extra;
 }
 
-internal static ж<holder> Ꮡh = new StaticBox<holder>(default(holder));
-internal static ref holder h => ref Ꮡh.Value;
+internal static readonly ж<holder> Ꮡh = new StaticBox<holder>(default(holder));
+internal static ref holder h => ref ((StaticBox<holder>)Ꮡh).ValueSlot;
 
-internal static ж<Δmark> Ꮡgm = new StaticBox<Δmark>(default(Δmark));
-internal static ref Δmark gm => ref Ꮡgm.Value;
+internal static readonly ж<Δmark> Ꮡgm = new StaticBox<Δmark>(default(Δmark));
+internal static ref Δmark gm => ref ((StaticBox<Δmark>)Ꮡgm).ValueSlot;
 
 internal static partial nint localShadowsCollisionType() {
     var m = Ꮡ(new Δmark(id: 10));

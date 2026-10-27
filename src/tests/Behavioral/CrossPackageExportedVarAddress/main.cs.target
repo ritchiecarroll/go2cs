@@ -9,13 +9,19 @@ using xpkgvar = global::go.go.xpkgvar_package;
 partial class main_package {
 
 internal static void Main() {
-    var p = Ꮡ(lib.N);
+    var p = lib.ᏑN;
     p.Value = 5;
     fmt.Println("&lib.N write:", lib.N, lib.ReadN());
 
-    fmt.Println("&lib.N identity:", Ꮡ(lib.N) == Ꮡ(lib.N), p == Ꮡ(lib.N));
+    fmt.Println("&lib.N identity:", lib.ᏑN == lib.ᏑN, p == lib.ᏑN);
 
-    var f = Ꮡ(lib.V).Inc;
+    ref var y = ref heap<nint>(out var Ꮡy);
+    y = 9;
+    p = Ꮡy;
+    p.Value = 10;
+    fmt.Println("re-point:", lib.N, y);
+
+    var f = lib.ᏑV.Inc;
     f();
     f();
     fmt.Println("method value:", lib.V.Value());
@@ -24,24 +30,24 @@ internal static void Main() {
     fmt.Println("direct call:", lib.V.Value());
 
     var fs = flag.NewFlagSet("guard", flag.ContinueOnError);
-    fs.BoolVar(Ꮡ(lib.Flag), "x", false, "");
+    fs.BoolVar(lib.ᏑFlag, "x", false, "");
     fs.Parse(new @string[]{"-x"}.slice());
     fmt.Println("flag.BoolVar:", lib.Flag);
 
-    var q = Ꮡ(lib.S).of(lib.Holder.ᏑN);
+    var q = lib.ᏑS.of(lib.Holder.ᏑN);
     q.Value = 3;
     fmt.Println("field pointer:", lib.S.N, lib.ReadS());
 
-    Ꮡ(lib.S).of(lib.Holder.ᏑWG).Add(1);
-    Ꮡ(lib.S).of(lib.Holder.ᏑWG).Done();
-    Ꮡ(lib.S).of(lib.Holder.ᏑWG).Wait();
+    lib.ᏑS.of(lib.Holder.ᏑWG).Add(1);
+    lib.ᏑS.of(lib.Holder.ᏑWG).Done();
+    lib.ᏑS.of(lib.Holder.ᏑWG).Wait();
     fmt.Println("field-path pointer calls: ok");
 
-    var e = Ꮡlib.Arr.at<nint>(1);
+    var e = lib.ᏑArr.at<nint>(1);
     e.Value = 7;
     fmt.Println("element pointer:", lib.Arr[1], lib.Arr);
 
-    var t = Ꮡ(lib.Table);
+    var t = lib.ᏑTable;
     t.ValueSlot = append(t.ValueSlot, (nint)4);
     fmt.Println("lazy slice:", len(lib.Table), lib.Table);
 }

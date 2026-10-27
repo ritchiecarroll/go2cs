@@ -10,8 +10,8 @@ partial struct holder {
     internal atomic.Int64 count;
 }
 
-internal static ж<holder> ᏑgHolder = new StaticBox<holder>(default(holder));
-internal static ref holder gHolder => ref ᏑgHolder.Value;
+internal static readonly ж<holder> ᏑgHolder = new StaticBox<holder>(default(holder));
+internal static ref holder gHolder => ref ((StaticBox<holder>)ᏑgHolder).ValueSlot;
 
 internal static void Main() {
     ref var n = ref heap(new atomic.Int32(), out var Ꮡn);

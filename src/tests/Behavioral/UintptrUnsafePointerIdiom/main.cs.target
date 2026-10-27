@@ -9,8 +9,8 @@ partial struct point {
     internal int32 x, y;
 }
 
-internal static ж<point> Ꮡorigin = new StaticBox<point>(new point(x: 3, y: 4));
-internal static ref point origin => ref Ꮡorigin.Value;
+internal static readonly ж<point> Ꮡorigin = new StaticBox<point>(new point(x: 3, y: 4));
+internal static ref point origin => ref ((StaticBox<point>)Ꮡorigin).ValueSlot;
 
 internal static uintptr addrOf(ж<point> Ꮡp) {
     return (uintptr)Ꮡp;

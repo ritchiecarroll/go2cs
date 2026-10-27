@@ -13,16 +13,16 @@ partial struct item {
     internal sub inner;
 }
 
-internal static ж<array<item>> Ꮡpool = new StaticBox<array<item>>(new array<item>(3));
-internal static ref array<item> pool => ref Ꮡpool.Value;
+internal static readonly ж<array<item>> Ꮡpool = new StaticBox<array<item>>(new array<item>(3));
+internal static ref array<item> pool => ref ((StaticBox<array<item>>)Ꮡpool).ValueSlot;
 
 
 partial struct gridᴛ1 /*dyn*/ {
     internal sub cell;
     internal array<byte> pad = new(4);
 }
-internal static ж<array<gridᴛ1>> Ꮡgrid = new StaticBox<array<gridᴛ1>>(new array<gridᴛ1>(3, () => new()));
-internal static ref array<gridᴛ1> grid => ref Ꮡgrid.Value;
+internal static readonly ж<array<gridᴛ1>> Ꮡgrid = new StaticBox<array<gridᴛ1>>(new array<gridᴛ1>(3, () => new()));
+internal static ref array<gridᴛ1> grid => ref ((StaticBox<array<gridᴛ1>>)Ꮡgrid).ValueSlot;
 
 internal static partial void setInt(ref nint p) {
     p = 7;

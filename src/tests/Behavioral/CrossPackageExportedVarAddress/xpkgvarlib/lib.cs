@@ -21,17 +21,23 @@ partial struct Holder {
     public nint N;
 }
 
-public static nint N;
+public static readonly ж<nint> ᏑN = new StaticBox<nint>(default(nint));
+public static ref nint N => ref ((StaticBox<nint>)ᏑN).ValueSlot;
 
-public static Counter V;
+public static readonly ж<Counter> ᏑV = new StaticBox<Counter>(default(Counter));
+public static ref Counter V => ref ((StaticBox<Counter>)ᏑV).ValueSlot;
 
-public static Holder S;
+public static readonly ж<Holder> ᏑS = new StaticBox<Holder>(default(Holder));
+public static ref Holder S => ref ((StaticBox<Holder>)ᏑS).ValueSlot;
 
-public static array<nint> Arr = new(3);
+public static readonly ж<array<nint>> ᏑArr = new StaticBox<array<nint>>(new array<nint>(3));
+public static ref array<nint> Arr => ref ((StaticBox<array<nint>>)ᏑArr).ValueSlot;
 
-public static bool Flag;
+public static readonly ж<bool> ᏑFlag = new StaticBox<bool>(default(bool));
+public static ref bool Flag => ref ((StaticBox<bool>)ᏑFlag).ValueSlot;
 
-public static slice<nint> Table = new nint[]{1, 2, 3}.slice();
+public static readonly ж<slice<nint>> ᏑTable = new StaticBox<slice<nint>>(new nint[]{1, 2, 3}.slice());
+public static ref slice<nint> Table => ref ((StaticBox<slice<nint>>)ᏑTable).ValueSlot;
 
 public static nint ReadN() {
     return N;

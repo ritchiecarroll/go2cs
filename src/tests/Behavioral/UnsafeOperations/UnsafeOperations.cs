@@ -23,8 +23,8 @@ partial struct Outer {
     internal Inner @in;
 }
 
-internal static ж<Outer> ᏑgOuter = new StaticBox<Outer>(default(Outer));
-internal static ref Outer gOuter => ref ᏑgOuter.Value;
+internal static readonly ж<Outer> ᏑgOuter = new StaticBox<Outer>(default(Outer));
+internal static ref Outer gOuter => ref ((StaticBox<Outer>)ᏑgOuter).ValueSlot;
 
 partial struct Padded {
     internal bool flag;

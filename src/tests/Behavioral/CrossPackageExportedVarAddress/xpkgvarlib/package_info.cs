@@ -49,7 +49,7 @@ using static go.go.xpkgvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("lib.go", "lib.cs", "AAoYgKKAABEeloCmgA==")]
+[assembly: global::go.GoPositionMap("lib.go", "lib.cs", "AAoYgKKAABYepoCmgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
