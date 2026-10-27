@@ -115,7 +115,7 @@ public static void TestNewBuffer(ж<testing.T> Ꮡt) {
     check(Ꮡt, newBufferˢ, buf, testString);
 }
 
-internal static ж<bytes.Buffer> Ꮡbuf = new StandardBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
 internal static ref bytes.Buffer buf => ref Ꮡbuf.Value;
 
 // Calling NewBuffer and immediately shallow copying the Buffer struct

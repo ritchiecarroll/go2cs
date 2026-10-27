@@ -16,7 +16,7 @@ using go.sync;
 
 partial class trace_package {
 
-internal static ж<traceMultiplexer> Ꮡtracing = new StandardBox<traceMultiplexer>(new traceMultiplexer(nil));
+internal static ж<traceMultiplexer> Ꮡtracing = new StaticBox<traceMultiplexer>(new traceMultiplexer(nil));
 internal static ref traceMultiplexer tracing => ref Ꮡtracing.Value;
 
 partial struct traceMultiplexer {

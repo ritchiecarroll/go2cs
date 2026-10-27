@@ -875,7 +875,7 @@ public static nint Size(any v) {
     return dataSize(reflect.Indirect(reflect.ValueOf(v)));
 }
 
-internal static ж<sync.Map> ᏑstructSize = new StandardBox<sync.Map>(default(sync.Map));
+internal static ж<sync.Map> ᏑstructSize = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map structSize => ref ᏑstructSize.Value; // map[reflect.Type]int
 
 // dataSize returns the number of bytes the actual data represented by v occupies in memory.

@@ -241,7 +241,7 @@ internal static void panicIfNotOnCurve(Curve curve, ж<bigꓸInt> Ꮡx, ж<big�
     }
 }
 
-internal static ж<sync.Once> Ꮡinitonce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> Ꮡinitonce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once initonce => ref Ꮡinitonce.Value;
 
 internal static void initAll() {

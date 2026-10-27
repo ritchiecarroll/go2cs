@@ -29,7 +29,7 @@ partial class runtime_package {
 // if the capacity of the bucket is 1 cpu-second, then the limiter will not
 // kick in until at least 1 full cpu-second in the last 2 cpu-second window
 // is spent on GC CPU time.
-internal static ж<gcCPULimiterState> ᏑgcCPULimiter = new StandardBox<gcCPULimiterState>(default(gcCPULimiterState));
+internal static ж<gcCPULimiterState> ᏑgcCPULimiter = new StaticBox<gcCPULimiterState>(default(gcCPULimiterState));
 internal static ref gcCPULimiterState gcCPULimiter => ref ᏑgcCPULimiter.Value;
 
 partial struct gcCPULimiterState_bucket /*dyn*/ {

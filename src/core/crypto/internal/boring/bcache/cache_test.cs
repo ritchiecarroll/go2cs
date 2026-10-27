@@ -15,14 +15,14 @@ using static go.crypto.@internal.boring.bcache_package;
 
 partial class bcache_internal_test_package {
 
-internal static ж<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>> ᏑregisteredCache = new StandardBox<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>(default(global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>));
+internal static ж<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>> ᏑregisteredCache = new StaticBox<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>(default(global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>));
 internal static ref global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32> registeredCache => ref ᏑregisteredCache.Value;
 
 [GoInit] internal static void init() {
     ᏑregisteredCache.Register();
 }
 
-internal static ж<atomic.Uint32> Ꮡseq = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ж<atomic.Uint32> Ꮡseq = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 seq => ref Ꮡseq.Value;
 
 internal static ж<T> next<T>()

@@ -41,7 +41,7 @@ partial struct encBuffer {
     internal array<byte> scratch = new(64);
 }
 
-[GoLazy] partial class lazyᴛencBufferPool { internal static ж<sync.Pool> ᏑencBufferPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛencBufferPool { internal static ж<sync.Pool> ᏑencBufferPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var e = @new<encBuffer>();
         e.Value.data = (~e).scratch[0..0];

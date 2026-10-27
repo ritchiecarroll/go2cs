@@ -101,7 +101,7 @@ internal static error ReadRequestBody(this ref serverCodec c, any x) {
     return json.Unmarshal(c.req.Params.ValueSlot, Ꮡparams);
 }
 
-internal static ж<json.RawMessage> Ꮡnull = new StandardBox<json.RawMessage>(((json.RawMessage)slice<byte>("null"u8)));
+internal static ж<json.RawMessage> Ꮡnull = new StaticBox<json.RawMessage>(((json.RawMessage)slice<byte>("null"u8)));
 internal static ref json.RawMessage @null => ref Ꮡnull.ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

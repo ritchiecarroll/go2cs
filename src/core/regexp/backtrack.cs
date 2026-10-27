@@ -41,7 +41,7 @@ partial struct bitState {
     internal inputs inputs;
 }
 
-internal static ж<Δsync.Pool> ᏑbitStatePool = new StandardBox<Δsync.Pool>(default(Δsync.Pool));
+internal static ж<Δsync.Pool> ᏑbitStatePool = new StaticBox<Δsync.Pool>(default(Δsync.Pool));
 internal static ref Δsync.Pool bitStatePool => ref ᏑbitStatePool.Value;
 
 internal static ж<bitState> newBitState() {

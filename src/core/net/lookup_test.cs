@@ -26,7 +26,7 @@ using Δio = io_package;
 
 partial class net_internal_test_package {
 
-internal static ж<global::go.net_package.Resolver> ᏑgoResolver = new StandardBox<global::go.net_package.Resolver>(new Resolver(PreferGo: true));
+internal static ж<global::go.net_package.Resolver> ᏑgoResolver = new StaticBox<global::go.net_package.Resolver>(new Resolver(PreferGo: true));
 internal static ref global::go.net_package.Resolver goResolver => ref ᏑgoResolver.Value;
 
 internal static bool hasSuffixFold(@string s, @string suffix) {

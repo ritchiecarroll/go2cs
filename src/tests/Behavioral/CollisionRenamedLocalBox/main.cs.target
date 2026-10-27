@@ -36,7 +36,7 @@ internal static void bump(ж<nint> Ꮡnp) {
     np += 100;
 }
 
-internal static ж<box> ᏑΔcounter = new StandardBox<box>(default(box));
+internal static ж<box> ᏑΔcounter = new StaticBox<box>(default(box));
 internal static ref box Δcounter => ref ᏑΔcounter.Value;
 
 internal static nint counter(this tagger _) {

@@ -1448,7 +1448,7 @@ partial struct Config {
     public nint Indent; // default: 0 (all code is indented at least by this much)
 }
 
-[GoLazy] partial class lazyᴛprinterPool { internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛprinterPool { internal static ж<sync.Pool> ᏑprinterPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new printer(
             // Whitespace sequences are short.
             wsbuf: new slice<whiteSpace>(0, 16),

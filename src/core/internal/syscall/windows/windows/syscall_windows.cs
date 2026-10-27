@@ -225,7 +225,7 @@ public static UntypedInt MSG_CTRUNC => 0x0200;
 
 internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uintptr)4294967295);
 
-[GoLazy] partial class lazyᴛWSAID_WSASENDMSG { public static ж<syscall.GUID> ᏑWSAID_WSASENDMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
+[GoLazy] partial class lazyᴛWSAID_WSASENDMSG { public static ж<syscall.GUID> ᏑWSAID_WSASENDMSG = new StaticBox<syscall.GUID>(new syscall.GUID(
     Data1: 0xa441e712U,
     Data2: 0x754f,
     Data3: 0x43ca,
@@ -233,7 +233,7 @@ internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uin
 )); }
 public static ref syscall.GUID WSAID_WSASENDMSG => ref ᏑWSAID_WSASENDMSG.Value;
 
-[GoLazy] partial class lazyᴛWSAID_WSARECVMSG { public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
+[GoLazy] partial class lazyᴛWSAID_WSARECVMSG { public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StaticBox<syscall.GUID>(new syscall.GUID(
     Data1: 0xf689d7c8U,
     Data2: 0x6f1f,
     Data3: 0x436b,
@@ -247,7 +247,7 @@ partial struct sendRecvMsgFuncᴛ1 /*dyn*/ {
     internal uintptr recvAddr;
     internal error err;
 }
-internal static ж<sendRecvMsgFuncᴛ1> ᏑsendRecvMsgFunc = new StandardBox<sendRecvMsgFuncᴛ1>(default(sendRecvMsgFuncᴛ1));
+internal static ж<sendRecvMsgFuncᴛ1> ᏑsendRecvMsgFunc = new StaticBox<sendRecvMsgFuncᴛ1>(default(sendRecvMsgFuncᴛ1));
 internal static ref sendRecvMsgFuncᴛ1 sendRecvMsgFunc => ref ᏑsendRecvMsgFunc.Value;
 
 partial struct WSAMsg {

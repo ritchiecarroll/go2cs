@@ -560,7 +560,7 @@ public static (nint written, error err) Sendfile(nint outfd, nint infd, ж<int64
     return sendfile(outfd, infd, Ꮡoffset, count);
 }
 
-internal static ж<int64> ᏑioSync = new StandardBox<int64>(default(int64));
+internal static ж<int64> ᏑioSync = new StaticBox<int64>(default(int64));
 internal static ref int64 ioSync => ref ᏑioSync.Value;
 
 } // end syscall_package

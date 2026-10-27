@@ -1096,7 +1096,7 @@ internal static (@string method, @string requestURI, @string proto, bool ok) par
     return (method, requestURI, proto, true);
 }
 
-internal static ж<sync.Pool> ᏑtextprotoReaderPool = new StandardBox<sync.Pool>(default(sync.Pool));
+internal static ж<sync.Pool> ᏑtextprotoReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool textprotoReaderPool => ref ᏑtextprotoReaderPool.Value;
 
 internal static ж<textproto.Reader> newTextprotoReader(ж<bufio.Reader> Ꮡbr) {

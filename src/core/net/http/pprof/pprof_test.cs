@@ -128,7 +128,7 @@ public static void TestHandlers(ж<testing.T> Ꮡt) {
     }
 }
 
-public static ж<uint32> ᏑSink = new StandardBox<uint32>(default(uint32));
+public static ж<uint32> ᏑSink = new StaticBox<uint32>(default(uint32));
 public static ref uint32 Sink => ref ᏑSink.Value;
 
 internal static void mutexHog1(ж<sync.Mutex> Ꮡmu1, ж<sync.Mutex> Ꮡmu2, time.Time start, time.Duration dt) {

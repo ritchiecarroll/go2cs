@@ -67,7 +67,7 @@ internal static (@string lower, bool ok) asciiToLower(@string s) {
     return (strings.ToLower(s), true);
 }
 
-internal static ж<sync.Once> ᏑcommonBuildOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑcommonBuildOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once commonBuildOnce => ref ᏑcommonBuildOnce.Value;
 internal static map<@string, @string> commonLowerHeader;     // Go-Canonical-Case -> lower-case
 internal static map<@string, @string> commonCanonHeader;     // lower-case -> Go-Canonical-Case

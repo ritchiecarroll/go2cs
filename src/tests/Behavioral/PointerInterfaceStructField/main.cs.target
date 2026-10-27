@@ -26,7 +26,7 @@ internal static void assignDescriber(ref holder h, ж<Setting> Ꮡs) {
     h.d = new SettingжDescriber(Ꮡs);
 }
 
-internal static ж<Setting> ᏑglobalSetting = new StandardBox<Setting>(new Setting(name: "verbosity", value: 3));
+internal static ж<Setting> ᏑglobalSetting = new StaticBox<Setting>(new Setting(name: "verbosity", value: 3));
 internal static ref Setting globalSetting => ref ᏑglobalSetting.Value;
 
 internal static void Main() {

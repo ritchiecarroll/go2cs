@@ -14,7 +14,7 @@ partial struct settingsᴛ1 /*dyn*/ {
     public bool Verbose;
     public nint Retries;
 }
-internal static ж<settingsᴛ1> Ꮡsettings = new StandardBox<settingsᴛ1>(new settingsᴛ1(Verbose: true, Retries: 3));
+internal static ж<settingsᴛ1> Ꮡsettings = new StaticBox<settingsᴛ1>(new settingsᴛ1(Verbose: true, Retries: 3));
 internal static ref settingsᴛ1 settings => ref Ꮡsettings.Value;
 
 internal partial struct processAnonymousStruct_data /*dyn*/ {

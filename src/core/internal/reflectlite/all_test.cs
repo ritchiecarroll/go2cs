@@ -497,7 +497,7 @@ public static void TestCanSetField(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static ж<nint> Ꮡ_i = new StandardBox<nint>(7);
+internal static ж<nint> Ꮡ_i = new StaticBox<nint>(7);
 internal static ref nint _i => ref Ꮡ_i.Value;
 
 internal static slice<pair> valueToStringTests = new pair[]{
@@ -667,14 +667,14 @@ partial struct self {
 
 partial class Loop /*ж<Loop>*/;
 
-internal static ж<Loop> Ꮡloop1 = new StandardBox<Loop>(default(Loop));
+internal static ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
 internal static ref Loop loop1 => ref Ꮡloop1.ValueSlot;
-internal static ж<Loop> Ꮡloop2 = new StandardBox<Loop>(default(Loop));
+internal static ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
 internal static ref Loop loop2 => ref Ꮡloop2.ValueSlot;
 
-internal static ж<Loopy> Ꮡloopy1 = new StandardBox<Loopy>(default(Loopy));
+internal static ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
 internal static ref Loopy loopy1 => ref Ꮡloopy1.ValueSlot;
-internal static ж<Loopy> Ꮡloopy2 = new StandardBox<Loopy>(default(Loopy));
+internal static ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
 internal static ref Loopy loopy2 => ref Ꮡloopy2.ValueSlot;
 
 [GoInit] internal static void init() {

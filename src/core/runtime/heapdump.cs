@@ -45,13 +45,13 @@ internal static UntypedInt tagAllocSample => 17;
 
 internal static uintptr dumpfd; // fd to write the dump to.
 
-internal static ж<slice<byte>> Ꮡtmpbuf = new StandardBox<slice<byte>>(default(slice<byte>));
+internal static ж<slice<byte>> Ꮡtmpbuf = new StaticBox<slice<byte>>(default(slice<byte>));
 internal static ref slice<byte> tmpbuf => ref Ꮡtmpbuf.ValueSlot;
 
 // buffer of pending write data
 internal static UntypedInt bufSize => 4096;
 
-internal static ж<array<byte>> Ꮡbuf = new StandardBox<array<byte>>(new array<byte>(4096));
+internal static ж<array<byte>> Ꮡbuf = new StaticBox<array<byte>>(new array<byte>(4096));
 internal static ref array<byte> buf => ref Ꮡbuf.Value;
 
 internal static uintptr nbuf;
@@ -100,7 +100,7 @@ partial struct typeCacheBucket {
     internal array<ж<_type>> t = new(typeCacheAssoc);
 }
 
-internal static ж<array<typeCacheBucket>> Ꮡtypecache = new StandardBox<array<typeCacheBucket>>(new array<typeCacheBucket>(256, () => new()));
+internal static ж<array<typeCacheBucket>> Ꮡtypecache = new StaticBox<array<typeCacheBucket>>(new array<typeCacheBucket>(256, () => new()));
 internal static ref array<typeCacheBucket> typecache => ref Ꮡtypecache.Value;
 
 // dump a uint64 in a varint format parseable by encoding/binary.
@@ -690,7 +690,7 @@ internal static void dumpmemprof() {
     }
 }
 
-internal static ж<slice<byte>> Ꮡdumphdr = new StandardBox<slice<byte>>(slice<byte>("go1.7 heap dump\n"u8));
+internal static ж<slice<byte>> Ꮡdumphdr = new StaticBox<slice<byte>>(slice<byte>("go1.7 heap dump\n"u8));
 internal static ref slice<byte> dumphdr => ref Ꮡdumphdr.ValueSlot;
 
 internal static void mdump(ref MemStats m) {

@@ -273,7 +273,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     return (locals, args, objs);
 }
 
-internal static ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new StandardBox<array<stackObjectRecord>>(new array<stackObjectRecord>(1));
+internal static ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new StaticBox<array<stackObjectRecord>>(new array<stackObjectRecord>(1));
 internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ᏑmethodValueCallFrameObjs.Value;    // initialized in stkobjinit
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -208,7 +208,7 @@ internal static void initᴛtestHeader() { testHeader = new ΔHeader(new map<@st
     ["Server"u8] = new @string[]{DefaultUserAgent}.slice()
 }); }
 
-internal static ж<bytes.Buffer> Ꮡbuf = new StandardBox<bytes.Buffer>(default(bytes.Buffer));
+internal static ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
 internal static ref bytes.Buffer buf => ref Ꮡbuf.Value;
 
 public static void BenchmarkHeaderWriteSubset(ж<testing.B> Ꮡb) {

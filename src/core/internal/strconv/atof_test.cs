@@ -22,7 +22,7 @@ partial struct atofTest {
     internal error err;
 }
 
-internal static ж<slice<atofTest>> Ꮡatoftests = new StandardBox<slice<atofTest>>(new atofTest[]{
+internal static ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>>(new atofTest[]{
     new(""u8, "0"u8, ErrSyntax),
     new("1"u8, "1"u8, default!),
     new("+1"u8, "1"u8, default!),
@@ -437,7 +437,7 @@ partial struct atofSimpleTest {
     internal @string s;
 }
 
-internal static ж<sync.Once> ᏑatofOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑatofOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once atofOnce => ref ᏑatofOnce.Value;
 internal static slice<atofSimpleTest> atofRandomTests;
 internal static array<@string> benchmarksRandomBits = new(1024);

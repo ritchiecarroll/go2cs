@@ -17,7 +17,7 @@ partial struct parseUint64Test {
     internal error err;
 }
 
-internal static ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StandardBox<slice<parseUint64Test>>(new parseUint64Test[]{
+internal static ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StaticBox<slice<parseUint64Test>>(new parseUint64Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
     new("1"u8, 1, default!),
@@ -45,7 +45,7 @@ partial struct parseUint64BaseTest {
     internal error err;
 }
 
-internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new StandardBox<slice<parseUint64BaseTest>>(new parseUint64BaseTest[]{
+internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new StaticBox<slice<parseUint64BaseTest>>(new parseUint64BaseTest[]{
     new(""u8, 0, 0, ErrSyntax),
     new("0"u8, 0, 0, default!),
     new("0x"u8, 0, 0, ErrSyntax),
@@ -140,7 +140,7 @@ partial struct parseInt64Test {
     internal error err;
 }
 
-internal static ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StandardBox<slice<parseInt64Test>>(new parseInt64Test[]{
+internal static ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StaticBox<slice<parseInt64Test>>(new parseInt64Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
     new("-0"u8, 0, default!),
@@ -176,7 +176,7 @@ partial struct parseInt64BaseTest {
     internal error err;
 }
 
-internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new StandardBox<slice<parseInt64BaseTest>>(new parseInt64BaseTest[]{
+internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new StaticBox<slice<parseInt64BaseTest>>(new parseInt64BaseTest[]{
     new(""u8, 0, 0, ErrSyntax),
     new("0"u8, 0, 0, default!),
     new("-0"u8, 0, 0, default!),
@@ -258,7 +258,7 @@ partial struct parseUint32Test {
     internal error err;
 }
 
-internal static ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StandardBox<slice<parseUint32Test>>(new parseUint32Test[]{
+internal static ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StaticBox<slice<parseUint32Test>>(new parseUint32Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
     new("1"u8, 1, default!),
@@ -282,7 +282,7 @@ partial struct parseInt32Test {
     internal error err;
 }
 
-internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StandardBox<slice<parseInt32Test>>(new parseInt32Test[]{
+internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StaticBox<slice<parseInt32Test>>(new parseInt32Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
     new("-0"u8, 0, default!),
@@ -462,7 +462,7 @@ partial struct parseErrorTest {
     internal error err;
 }
 
-internal static ж<slice<parseErrorTest>> ᏑparseBitSizeTests = new StandardBox<slice<parseErrorTest>>(new parseErrorTest[]{
+internal static ж<slice<parseErrorTest>> ᏑparseBitSizeTests = new StaticBox<slice<parseErrorTest>>(new parseErrorTest[]{
     new(-1, ErrBitSize),
     new(0, default!),
     new(64, default!),
@@ -470,7 +470,7 @@ internal static ж<slice<parseErrorTest>> ᏑparseBitSizeTests = new StandardBox
 }.slice());
 internal static ref slice<parseErrorTest> parseBitSizeTests => ref ᏑparseBitSizeTests.ValueSlot;
 
-internal static ж<slice<parseErrorTest>> ᏑparseBaseTests = new StandardBox<slice<parseErrorTest>>(new parseErrorTest[]{
+internal static ж<slice<parseErrorTest>> ᏑparseBaseTests = new StaticBox<slice<parseErrorTest>>(new parseErrorTest[]{
     new(-1, ErrBase),
     new(0, default!),
     new(1, ErrBase),

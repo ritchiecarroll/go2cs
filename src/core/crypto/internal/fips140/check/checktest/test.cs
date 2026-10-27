@@ -12,7 +12,7 @@ using runtime = runtime_package;
 
 partial class checktest_package {
 
-public static ж<nint> ᏑNOPTRDATA = new StandardBox<nint>(1);
+public static ж<nint> ᏑNOPTRDATA = new StaticBox<nint>(1);
 public static ref nint NOPTRDATA => ref ᏑNOPTRDATA.Value;
 
 // The linkname here disables asan registration of this global,

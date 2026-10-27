@@ -201,14 +201,14 @@ partial struct pollCache {
 // after the descriptor is closed/reused.
 // Stale notifications are detected using seq variable,
 // seq is incremented when deadlines are changed or descriptor is reused.
-internal static ж<mutex> ᏑnetpollInitLock = new StandardBox<mutex>(new mutex(nil));
+internal static ж<mutex> ᏑnetpollInitLock = new StaticBox<mutex>(new mutex(nil));
 internal static ref mutex netpollInitLock => ref ᏑnetpollInitLock.Value;
-internal static ж<atomic.Uint32> ᏑnetpollInited = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+internal static ж<atomic.Uint32> ᏑnetpollInited = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 netpollInited => ref ᏑnetpollInited.Value;
 
-internal static ж<pollCache> Ꮡpollcache = new StandardBox<pollCache>(new pollCache());
+internal static ж<pollCache> Ꮡpollcache = new StaticBox<pollCache>(new pollCache());
 internal static ref pollCache pollcache => ref Ꮡpollcache.Value;
-public static ж<atomic.Uint32> ᏑnetpollWaiters = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
+public static ж<atomic.Uint32> ᏑnetpollWaiters = new StaticBox<atomic.Uint32>(default(atomic.Uint32));
 public static ref atomic.Uint32 netpollWaiters => ref ᏑnetpollWaiters.Value;
 
 // netpollWaiters is accessed in tests
@@ -767,7 +767,7 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     return i;
 }
 
-internal static ж<any> ᏑpdEface = new StandardBox<any>(((ж<pollDesc>)nil));
+internal static ж<any> ᏑpdEface = new StaticBox<any>(((ж<pollDesc>)nil));
 internal static ref any pdEface => ref ᏑpdEface.ValueSlot;
 internal static ж<_type> pdType = (~efaceOf(ᏑpdEface))._type;
 

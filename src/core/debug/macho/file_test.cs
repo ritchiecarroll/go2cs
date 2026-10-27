@@ -25,7 +25,7 @@ internal partial struct fileTest {
     internal slice<@string> importedSyms;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
+internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/gcc-386-darwin-exec.base64"u8,
         new FileHeader(0xfeedfaceU, Cpu386, 0x3, 0x2, 0xc, 0x3c0, 0x85),

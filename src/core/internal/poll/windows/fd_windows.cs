@@ -23,7 +23,7 @@ using unicode;
 partial class poll_package {
 
 internal static error initErr;
-internal static ж<uint64> ᏑioSync = new StandardBox<uint64>(default(uint64));
+internal static ж<uint64> ᏑioSync = new StaticBox<uint64>(default(uint64));
 internal static ref uint64 ioSync => ref ᏑioSync.Value;
 
 // This package uses the SetFileCompletionNotificationModes Windows
@@ -96,7 +96,7 @@ internal static ж<Δsyscall.WSABuf> newWsaBuf(slice<byte> b) {
     return Ꮡ(new Δsyscall.WSABuf(Buf: @unsafe.SliceData(b), Len: (uint32)len(b)));
 }
 
-[GoLazy] partial class lazyᴛwsaBufsPool { internal static ж<sync.Pool> ᏑwsaBufsPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaBufsPool { internal static ж<sync.Pool> ᏑwsaBufsPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<Δsyscall.WSABuf>(0, 16);
         return Ꮡ(buf);
@@ -146,7 +146,7 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 }
 
 // wsaMsgPool is a pool of WSAMsg structures that can only hold a single WSABuf.
-[GoLazy] partial class lazyᴛwsaMsgPool { internal static ж<sync.Pool> ᏑwsaMsgPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaMsgPool { internal static ж<sync.Pool> ᏑwsaMsgPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new windows.WSAMsg(
             Buffers: Ꮡ(new Δsyscall.WSABuf(nil)),
             BufferCount: 1
@@ -204,7 +204,7 @@ partial struct wsaRsa {
     internal int32 namelen;
 }
 
-internal static ж<sync.Pool> ᏑwsaRsaPool = new StandardBox<sync.Pool>(new sync.Pool(
+internal static ж<sync.Pool> ᏑwsaRsaPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<wsaRsa>()
 ));
 internal static ref sync.Pool wsaRsaPool => ref ᏑwsaRsaPool.Value;
@@ -216,7 +216,7 @@ internal static ж<wsaRsa> newWSARsa() {
     return rsa;
 }
 
-internal static ж<sync.Pool> ᏑoperationPool = new StandardBox<sync.Pool>(new sync.Pool(
+internal static ж<sync.Pool> ᏑoperationPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<operation>()
 ));
 internal static ref sync.Pool operationPool => ref ᏑoperationPool.Value;

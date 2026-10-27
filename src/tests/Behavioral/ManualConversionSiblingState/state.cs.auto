@@ -18,7 +18,7 @@ partial struct schedlike {
     internal @string label;
 }
 
-internal static ж<schedlike> Ꮡsched = new StandardBox<schedlike>(default(schedlike));
+internal static ж<schedlike> Ꮡsched = new StaticBox<schedlike>(default(schedlike));
 internal static ref schedlike sched => ref Ꮡsched.Value;
 
 internal static int32 newprocs;

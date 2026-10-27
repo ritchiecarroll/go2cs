@@ -12,7 +12,7 @@ partial struct threeOnceᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Once Once;
     internal ж<Float> v;
 }
-internal static ж<threeOnceᴛ1> ᏑthreeOnce = new StandardBox<threeOnceᴛ1>(new threeOnceᴛ1(nil));
+internal static ж<threeOnceᴛ1> ᏑthreeOnce = new StaticBox<threeOnceᴛ1>(new threeOnceᴛ1(nil));
 internal static ref threeOnceᴛ1 threeOnce => ref ᏑthreeOnce.Value;
 
 internal static ж<Float> three() {
