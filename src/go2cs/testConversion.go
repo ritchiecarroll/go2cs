@@ -306,6 +306,7 @@ const (
 	TestFixtureItemsMarker      = ">>MARKER:TEST_FIXTURE_ITEMS<<"
 	TestProjectReferencesMarker = ">>MARKER:TEST_PROJECT_REFERENCES<<"
 	TestCpuProfilerMarker       = ">>MARKER:TEST_CPU_PROFILER<<"
+	TestReadyToRunMarker        = ">>MARKER:TEST_READY_TO_RUN<<"
 )
 
 // cpuProfilerTestPackages names the packages whose -tests host opts into the CPU sampler
@@ -324,6 +325,34 @@ var cpuProfilerTestPackages = map[string]bool{
 func testCpuProfilerProperty(importPath string) string {
 	if cpuProfilerTestPackages[importPath] {
 		return "\r\n    <GoCpuProfiler>true</GoCpuProfiler>"
+	}
+
+	return ""
+}
+
+// readyToRunTestPackages names the packages whose -tests host is published ReadyToRun: seat #9 of the
+// 1.26.10.2 plan, ruled for crypto/tls ONLY. Its TestBogoSuite launches the host once per BoGo case
+// (about 3,527 launches) inside the BoGo runner's 10-minute wall, so the host's start-up cost decides
+// the row. Measured on linux/amd64 at e6b7f24f81 (one handshake launch, median of 12): 5.38 s as JIT,
+// 1.17 s ReadyToRun; the whole row's verdicts read identically in both. Tiering stays OFF (testHostRunEnv):
+// with it off the runtime uses the precompiled code as final, so this changes start-up, not the
+// configuration of record.
+//
+// The table is EXPLICIT on purpose. The publish costs about 6 minutes and 9.7 GB of crossgen2 memory and
+// grows the host from 148 MB to 499 MB, and crossgen2 inlines differently from the JIT, which could move a
+// runtime.Caller-shaped verdict in another row. Another row joins only with its own A/B.
+//
+// --enable-generic-cycle-detection: without it crossgen2 expands golib's nested array generics
+// (array<array<array<array<runtime.siginfo>>>>.ΔClone) until it runs out of memory, measured at 893 s.
+// A method past the cut-off is not precompiled and JITs at run time, so the flag cannot change behavior.
+var readyToRunTestPackages = map[string]bool{}
+
+// testReadyToRunProperty is the test csproj's ReadyToRun property lines for importPath, or "". They sit in
+// the publish-only property group, so an ordinary build of the test project is unchanged.
+func testReadyToRunProperty(importPath string) string {
+	if readyToRunTestPackages[importPath] {
+		return "\r\n    <PublishReadyToRun>true</PublishReadyToRun>" +
+			"\r\n    <PublishReadyToRunCrossgen2ExtraArgs>--enable-generic-cycle-detection</PublishReadyToRunCrossgen2ExtraArgs>"
 	}
 
 	return ""
@@ -4770,6 +4799,7 @@ func writeTestProject(projectFile, projectName, namespace, importPath string, mo
 		TestFixtureItemsMarker, fixtureItems.String(),
 		TestProjectReferencesMarker, referenceItems.String(),
 		TestCpuProfilerMarker, testCpuProfilerProperty(importPath),
+		TestReadyToRunMarker, testReadyToRunProperty(importPath),
 	).Replace(string(testCsprojTemplate)))
 
 	if needToWriteFile(projectFile, contents) {
