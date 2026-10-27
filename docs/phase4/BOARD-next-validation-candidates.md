@@ -29060,4 +29060,46 @@ changes no manifest or roster count.
 
 — C1 (2026-10-26)
 
+## 2026-10-27 — P2 (seat #11, the .2 plan): the `go2cs` dotnet tool — converts with no Go installed; packed, signed and pushed by the release ritual (claude/p2-dotnet-tool)
+
+**What it is.** `dotnet tool install -g go2cs` installs the converter itself: seven packages, `go2cs.<rid>` for
+win-x64, win-arm64, linux-x64, linux-arm64, osx-x64 and osx-arm64 (DotnetToolRidPackage, the native executable run
+with `Runner="executable"`) and `go2cs` (DotnetTool, naming the six). Plan:
+[PLAN-dotnet-tool-installer.md](../PLAN-dotnet-tool-installer.md), option D, §11 rulings OQ-1 to OQ-5.
+
+**The converter brings its own Go** (`toolchainProvision.go`). A go2cs built with the release go.mod names (here
+go1.26.10) uses, in order: `GO2CS_GOROOT` (that release only), an operator's `GOROOT`, the go on PATH or its own
+build GOROOT when either is that release, else `<user cache>/go2cs/toolchains/go1.26.10.<goos>-<goarch>`, downloaded
+once from go.dev (archive SHA-256) or the module proxy (`golang.org/toolchain`, sum.golang.org h1:), verified, then
+exported with `GOTOOLCHAIN=local`. `-version` and `-h` never download and no longer need a Go. `go2cs toolchain
+install [-from FILE] | env | prune [-all]`. A module needing a newer Go is refused by name. The pins are generated
+(`internal/gentoolchainpins`) and guarded against a saved slice of both sources
+(`TestToolchainPinsAreWhatTheGeneratorWrites`); the archive SHA-256 values were read from go.dev on the i7 by COORD.
+
+**Measured on a linux-amd64 cloud box (P2), no Go on PATH, empty cache:**
+- prototype: `-recurse=nuget` on a sample module downloaded Go from proxy.golang.org (23 s) and emitted 16 files
+  BYTE-IDENTICAL to the same binary's conversion with Go installed; a second run 1 s, no download; go1.24.7 first on
+  PATH: identical; the output built against the published go.* packages and ran as `go run` does.
+- `smoke-go2cs-tool.ps1` against seven packages packed by `pack-go2cs-tool.ps1 -Unsigned`: installed, 13 files
+  byte-identical on the first (downloading) and second runs, `toolchain env` named the cached Go. Made red twice:
+  a mutated and a missing emitted file each named `main.cs`; a provisioned Go without `compile` or `link` fails the
+  conversion outright (exit 1).
+- the tour's start scripts, with only the tool binary on PATH, ran `go version` from the tool's Go.
+
+**Release.** `release-nuget.ps1` Phase 0 refuses a go other than go.mod's release; Phase 1b regenerates
+`corpus-release.txt` and packs the tool from the bumped tree (the record commit's `src/go2cs`), refusing unless the
+host binary reports the package version; both Windows executables are Authenticode-signed by
+`Invoke-GoAuthenticodeSign` in one signtool process, a PIN prompt of its own before Phase 2's (COORD ruling: two
+prompts accepted); Phase 2 signs the seven packages with the go.* set; `_nugetpush.ps1` pushes `go2cs` last.
+`release-binaries.yml` packs the tool unsigned on every run and `tool-smoke` repeats the no-Go smoke on the six
+platforms' runners; the draft Release waits on it.
+
+**Owed.** `src/tests/go2cs-tool-pack-selftest.ps1` (self-signed certificate, osslsigncode) passed here only with a
+stand-in signer, which this box has no osslsigncode for: P1 runs it for real. Not run anywhere yet: the Windows
+signtool path, Windows PowerShell 5.1, the six-runner `tool-smoke`, and the go.dev archive route against go.dev
+itself (403 from this box; the proxy route served every reading above). nuget.org's `go2cs` ID returned 404 on
+2026-10-26: no published versions, reservation unknown.
+
+— P2 (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
