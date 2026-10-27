@@ -88,6 +88,14 @@ function Get-NugetgoModuleSourceUrl([string]$ModulePath, [string]$GoVersion) {
     "https://pkg.go.dev/$ModulePath@$tag"
 }
 
+# The conversion repository as a README names it (owner, 2026-10-15): owner/repo on github.com, the host and path
+# elsewhere. The link that carries the name points at the conversion tag, never HEAD.
+function Get-NugetgoRepositoryName([string]$RepositoryUrl) {
+    $rest = ($RepositoryUrl.TrimEnd('/') -replace '^https?://', '')
+    if ($rest -match '^github\.com/(?<path>.+)$') { return $Matches['path'] }
+    $rest
+}
+
 function New-NugetgoBadge([string]$Alt, [string]$Label, [string]$Message, [string]$Color, [string]$Logo, [string]$Target) {
     "[![$Alt]($script:ShieldsHost/badge/$(ConvertTo-NugetgoShieldsText $Label)-$(ConvertTo-NugetgoShieldsText $Message)-$Color`?logo=$Logo)]($Target)"
 }
@@ -139,7 +147,13 @@ function New-NugetgoGeneratedBlock {
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("> $callout")
     $blocks.Add("$tests $(if ($sample) { "$sample " })$source\`n$module $release")
-    $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
+    # The license line names both sides of the conversion (owner, 2026-10-15): the Go module's source, and the C# it
+    # became, in the conversion repository at the tag this package names.
+    $blocks.Add("Converted from $moduleLink source to C# in [$(Get-NugetgoRepositoryName $repo)]($repo/tree/$RepositoryTag); licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
+    # The release line (owner ruling 2026-10-26): the package is compiled against one go.* release, and a later release
+    # can change a package's public shape (1.26.10.2 turns exported package-level value variables into ref
+    # properties), so it says which release, and that such a release takes this package's rebuild.
+    $blocks.Add("This package is compiled against the go2cs standard-library packages at release ${ClosureVersion}: use it with that release of them. A later release that changes a package's public shape needs this package's rebuild for that release.")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     $blocks -join "`n`n"
 }
@@ -340,7 +354,7 @@ function Test-NugetgoConversionReadme([string]$Text, [string]$ModulePath, [switc
     @("the README's '$($script:MaintainersHeading)' is not the section for $ModulePath as the template words it, or it is not the README's last section")
 }
 
-Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
+Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, Get-NugetgoRepositoryName, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
     Get-NugetgoModuleSourceUrl, New-NugetgoGeneratedBlock, New-NugetgoPackageReadme, Test-NugetgoReadmeFence, Merge-NugetgoReadme,
     Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon, New-NugetgoMaintainersSection,
     Test-NugetgoConversionReadme
