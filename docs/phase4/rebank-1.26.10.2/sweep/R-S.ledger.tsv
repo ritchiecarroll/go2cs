@@ -26,3 +26,7 @@ ended_utc	row	tree	word	count	banked	rc	wall_s	sweep_row_s	timing_tsv	restored
 #   responsecontroller 7, serve 22, transport 21. crypto/tls: fips140_test.cs 1.
 # crypto/tls: TestBogoSuite ran under its host-limit pin; no separate full-suite BoGo measurement was taken. The
 #   row's wall was 1350 s (1348 s in the sweep), against 939 s at 1.26.10.1 (the ReadyToRun host build, seat #9).
+# RULED 2026-10-27T23:47:36Z: the class test-refresh-1262 gains shape (c) (seat #4's receiver snapshot). The pairing
+#   classifier R-S.classify-drift.py now admits a/b/c (+ maps); R-S.classify-plants.py red-tests it (a clean control
+#   rc 0; ten plants refused by name, five of them near-misses of (c)). Re-run over the three rows' convert-only
+#   diffs: c=1 (net/http/cgi), c=78 (net/http), c=1 (crypto/tls), OUTSIDE 0 -- all three rows read PASS for the sweep.
