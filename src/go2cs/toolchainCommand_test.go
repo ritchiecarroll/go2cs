@@ -83,7 +83,9 @@ func TestToolchainInstallFromALocalFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if want := "GOROOT=" + p.cachedRoot() + "\nGOVERSION=" + fakeRelease + "\n"; out.String() != want {
+	want := "GOROOT=" + p.cachedRoot() + "\nGOVERSION=" + fakeRelease + "\nGO=" + filepath.Join(p.cachedRoot(), "bin", "go"+exeSuffix(runtime.GOOS)) + "\n"
+
+	if out.String() != want {
 		t.Fatalf("env printed %q, want %q", out.String(), want)
 	}
 }

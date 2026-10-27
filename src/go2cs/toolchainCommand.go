@@ -25,7 +25,8 @@ The Go release go2cs converts with, which a release build downloads on first use
 
   install [-from <file>]  download the pinned Go now, or install it from a release archive or
                           golang.org/toolchain module zip you already have (checked against the pin)
-  env                     print the GOROOT and GOVERSION go2cs converts with, downloading if needed
+  env                     print the GOROOT, GOVERSION and go command go2cs converts with, downloading
+                          if needed
   prune [-all]            remove cached Go releases other than the pinned one (-all: the pinned one too)
 `
 
@@ -104,7 +105,8 @@ func (p *toolchainProvisioner) command(name string, args []string, stdout io.Wri
 			root = value
 		}
 
-		fmt.Fprintf(stdout, "GOROOT=%s\nGOVERSION=%s\n", root, p.goVersion)
+		// GO is the command itself, for a script that puts this Go first on PATH (src/tour/scripts).
+		fmt.Fprintf(stdout, "GOROOT=%s\nGOVERSION=%s\nGO=%s\n", root, p.goVersion, filepath.Join(root, "bin", "go"+exeSuffix(p.goos)))
 	case "prune":
 		removed, err := p.prune(*all)
 		if err != nil {

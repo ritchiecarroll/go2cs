@@ -11,6 +11,17 @@ tour_version=v0.0.0-20261021155534-52d470bcf26e
 tour_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 repo_root=$(CDPATH= cd -- "$tour_root/../.." && pwd)
 
+# A machine with only the go2cs dotnet tool installed has no go on PATH. The Go the tool downloads
+# for its conversions is the release the tour needs too, so use it (`go2cs toolchain env`).
+if ! command -v go >/dev/null 2>&1 && command -v go2cs >/dev/null 2>&1; then
+  go_command=$(go2cs toolchain env | sed -n 's/^GO=//p')
+  if [ -n "$go_command" ]; then
+    echo "No go on PATH: using the Go the go2cs dotnet tool provides, $go_command"
+    PATH="$(dirname -- "$go_command"):$PATH"
+    export PATH
+  fi
+fi
+
 go version
 dotnet --version
 
