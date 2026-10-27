@@ -608,12 +608,6 @@ func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
 		return false
 	}
 
-	// A value field of ANOTHER package's exported var (`lib.S.WG.Add(1)`): its owner boxes the var, so the
-	// receiver routes through the &-machinery onto `lib.ᏑS.of(…)`, exactly as for a same-package global.
-	if v.rootsAtImportedBoxedGlobal(sel.X) {
-		return true
-	}
-
 	base := sel.X
 
 	for {
