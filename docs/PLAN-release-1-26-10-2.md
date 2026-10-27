@@ -32,11 +32,12 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 | 6 | A rate-aware, resumable NuGet push (honours Retry-After; skips what is already published) | release tooling | P1 |
 | 7 | golib's quiet build, stage 4 of [`PLAN-golib-full-trim.md`](PLAN-golib-full-trim.md): the 14 IL warnings the 1.26.10.1 pack printed | golib | H (G reviews) |
 | 8 | Darwin harness items: the amd64-only test skip on the arm64 RID, cfile's host identity, `testing`'s working directory (fix B) | harness + hand-owned `testing` | C1 |
-| 9 | Spawned test processes start faster (ReadyToRun or tiered JIT), so the BoGo suite fits its wall on desktop hosts | harness | G sizes; P1 measures |
+| 9 | Spawned test processes start faster: the crypto/tls test host is published ReadyToRun (a per-package opt-in), and its BoGo fan-out banks only from a measured full run of 480 s or less on the bank host | harness | P1 |
 | 10 | Alloc-free element-address compare (`&a[i] == &b[j]`) | converter + golib | after #1 lands; lane by ruling |
 | 11 | The `go2cs` dotnet tool: install with `dotnet tool install -g go2cs` and convert with no Go installed (Go fetched on first use, verified), per [`PLAN-dotnet-tool-installer.md`](PLAN-dotnet-tool-installer.md) | converter + packaging + release ritual | P2 |
 | 12 | Signed release binaries: the release machine downloads the CI-built archives, Authenticode-signs the Windows executables in the release's PIN session, re-packs and re-uploads them, and GPG-signs `SHA256SUMS`; the attestation covers the bytes users download | release ritual + workflow | P1 |
 | 13 | Proof pages show visitor-facing disclosure reasons: each disclosure gains a rendered `reason` in the present tense and a non-rendered history field, and the proof pages are regenerated (the owner's ruling that pages reachable from go2cs.net carry no fleet language) | test tooling + docs | R |
+| 14 | A ReadyToRun publish of a converted program does not run out of memory on golib's nested generic types: the project template passes crossgen2's generic-cycle detection, and the profiles' ReadyToRun workaround comes off, gated on the single-file publish completing inside an 11 GiB memory limit | template + docs | P1 |
 
 **#1's NEWS text (breaking for compiled C#).** Release day lifts this verbatim into the 1.26.10.2 NEWS entry and the
 release notes:
@@ -61,7 +62,7 @@ release notes:
 ([`PLAN-perf-rebaseline.md`](PLAN-perf-rebaseline.md), G with the i9's AOT builds), the nugetgo rebuild wave against
 1.26.10.1 (C2), and R's docs follow-up from the 1.26.10.1 veracity review. They need no converter change.
 
-**Later, sized but not scheduled:** stack-allocation parity
+**Later, sized but not scheduled:** breaking the golib generic nest crossgen2 still expands, which is the root cause behind #14's flag (one lane, golib only), stack-allocation parity
 ([`DESIGN-stack-allocation.md`](DESIGN-stack-allocation.md)), the deferred-closure frame marker, `runtime.Goexit` on the
 main goroutine, real `debug.ReadBuildInfo` data, the goroutine-leak profile, the crash block's `created by` line, the
 remaining darwin list items that need a design, and stage 3d of
