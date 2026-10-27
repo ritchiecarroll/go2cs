@@ -1,0 +1,28 @@
+event	seq	row	corpus	converter	bin_mtime	boot	utc	timeout	testdeadline	word	verdicts	rc	wall_s
+# HOST 2026-10-27T22:48:04Z uid=0 TMPDIR=/tmp(4 bytes) GOROOT test/=3458 files toolchain: PATH go=go1.26.10 resolved=<GOROOT>/bin/go VERSION=go1.26.10 .NET sdk=10.0.113 runtime=10.0.13 nproc=4 mem=15G free=23G boot=11b8a79e
+# VOID (argv derived against the module-cache GOROOT, which lacks test/; rc 1 in 2 s; re-derived and re-run) START 1 image/jpeg f75e0c53ec523161f1990db7a407c9249c9ed326 f75e0c53ec523161f1990db7a407c9249c9ed326 1793140928 11b8a79e 2026-10-27T22:48:04Z 30m 15m    
+# VOID (argv derived against the module-cache GOROOT, which lacks test/; rc 1 in 2 s; re-derived and re-run) END 1 image/jpeg f75e0c53ec523161f1990db7a407c9249c9ed326 f75e0c53ec523161f1990db7a407c9249c9ed326 1793140928 11b8a79e 2026-10-27T22:48:07Z 30m 15m NOVERDICT NOMATCH 1 2
+# HOST 2026-10-27T22:48:41Z uid=0 TMPDIR=/tmp(4 bytes) GOROOT test/=3458 files toolchain: PATH go=go1.26.10 resolved=<GOROOT>/bin/go VERSION=go1.26.10 .NET sdk=10.0.113 runtime=10.0.13 nproc=4 mem=15G free=23G boot=11b8a79e
+START	1	image/jpeg	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T22:48:42Z	30m	15m				
+END	1	image/jpeg	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T22:54:09Z	30m	15m	PASS	19	0	323
+# HOST 2026-10-27T22:54:18Z uid=0 TMPDIR=/tmp(4 bytes) GOROOT test/=3458 files toolchain: PATH go=go1.26.10 resolved=<GOROOT>/bin/go VERSION=go1.26.10 .NET sdk=10.0.113 runtime=10.0.13 nproc=4 mem=15G free=23G boot=11b8a79e
+START	2	crypto/elliptic	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T22:54:20Z	30m	15m				
+END	2	crypto/elliptic	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:00:00Z	30m	15m	PASS	81	0	335
+START	3	log	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:00:00Z	30m	15m				
+END	3	log	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:05:11Z	30m	15m	PASS	23	0	308
+START	4	compress/gzip	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:05:11Z	30m	15m				
+END	4	compress/gzip	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:10:21Z	30m	15m	PASS	15	0	307
+START	5	iter	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:10:21Z	30m	15m				
+END	5	iter	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:14:36Z	30m	15m	PASS	28	0	252
+START	6	crypto/internal/fips140/mldsa	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:14:36Z	30m	15m				
+END	6	crypto/internal/fips140/mldsa	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:18:54Z	30m	15m	PASS	46	0	256
+START	7	net/textproto	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:18:55Z	30m	15m				
+END	7	net/textproto	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:23:11Z	30m	15m	PASS	27	0	254
+START	8	internal/fuzz	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:23:11Z	30m	15m				
+END	8	internal/fuzz	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:27:40Z	30m	15m	PASS	52	0	265
+START	9	internal/zstd	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	11b8a79e	2026-10-27T23:27:40Z	30m	15m				
+# RESTART 2026-10-27T23:31:36Z container restarted during seq 9 internal/zstd (boot 11b8a79e -> be435518); its START has no END, so it re-runs at the raised budget; its residue (14 ignored files under src/core/internal/zstd plus build output) removed by path before the resume
+# HOST 2026-10-27T23:31:57Z uid=0 TMPDIR=/tmp(4 bytes) GOROOT test/=3458 files toolchain: PATH go=go1.26.10 resolved=<GOROOT>/bin/go VERSION=go1.26.10 .NET sdk=10.0.113 runtime=10.0.13 nproc=4 mem=15G free=23G boot=be435518
+START	9	internal/zstd	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	be435518	2026-10-27T23:32:00Z	60m	30m				
+END	9	internal/zstd	f75e0c53ec523161f1990db7a407c9249c9ed326	f75e0c53ec523161f1990db7a407c9249c9ed326	1793140928	be435518	2026-10-27T23:39:15Z	60m	30m	PASS	536	0	429
+# DRY RUN 2026-10-27T23:39:35Z: dry run, stopped by ruling (COORD 23:36Z relaying the owner: "go for best known .2 possible"; the re-bank re-dispatches at a NEW TIP). Rows 1-9 recorded; row 9 was the row in flight and finished; rows 10-24 and shard P2-2 not run.
