@@ -32,16 +32,17 @@ for pkg in [l.strip() for l in open(crash_file) if l.strip()]:
             lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
             fatal = [i for i, l in enumerate(lines) if 'fatal error' in l]
             out.append(f'== {os.path.relpath(path, root)}: {len(lines)} lines, fatal-error lines at {fatal[:10]}')
+            # One line per match, with the test it sits in: a match inside a test's EXPECTED output (Go's own
+            # TestRuntimePanic prints a dump on purpose) is not a crash of the run.
+            for i in fatal[:12]:
+                m = re.search(r'"Test":"([^"]*)"', lines[i])
+                out.append(f'   line {i} test {m.group(1) if m else "?"}: {lines[i][-160:]}')
             if fatal:
-                first = fatal[0]
-                runs = [l for l in lines[:first] if RUN_RE.search(l)][-6:]
-                out.append('-- last test starts before it:')
-                out.extend('   ' + l[:240] for l in runs)
-                out.append(f'-- lines {max(0, first - 8)}..{first + 60}:')
-                out.extend('   ' + l[:240] for l in lines[max(0, first - 8):first + 60])
-            else:
-                out.append('-- no fatal error line; the last 40 lines:')
-                out.extend('   ' + l[:240] for l in lines[-40:])
+                last = fatal[-1]
+                out.append(f'-- the LAST match, lines {max(0, last - 3)}..{last + 25}:')
+                out.extend('   ' + l[:240] for l in lines[max(0, last - 3):last + 25])
+            out.append('-- the last 30 lines:')
+            out.extend('   ' + l[:240] for l in lines[-30:])
         chunks, cur = [], ''
         for line in out:
             if cur and len(cur) + len(line) + 1 > 3000:
@@ -50,6 +51,6 @@ for pkg in [l.strip() for l in open(crash_file) if l.strip()]:
             cur += line + '\n'
         if cur:
             chunks.append(cur)
-        chunks = chunks[:4]
+        chunks = chunks[:6]
         for i, chunk in enumerate(chunks, 1):
             print(f'::warning title={esc_prop(f"relay {run} crash {pkg} {rid} {i}/{len(chunks)}")}::{esc(chunk.rstrip())}')

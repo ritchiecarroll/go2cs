@@ -1,1 +1,8 @@
 net	TestDialerFallbackDelay
+runtime	TestMemHash32Equality
+runtime	TestMemHash64Equality
+runtime	TestMemHashGlobalSeed/aes
+runtime	TestMmapErrorSign
+runtime	TestNetpollBreak
+runtime	TestSignalM
+runtime	TestUnsafePoint

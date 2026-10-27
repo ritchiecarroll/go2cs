@@ -26,14 +26,17 @@ def load(rid):
     rows, results = {}, {}
     base = os.path.join(root, rid)
     for d, _, files in os.walk(base):
-        if 'go2cs_test_comparison.json' not in files:
+        # failing-rows/ holds a failed row's PRESERVED attempts (an oracle re-run's records among them); the row's
+        # record of the run is the one under rows/.
+        if 'go2cs_test_comparison.json' not in files or 'failing-rows' in os.path.relpath(d, base).split(os.sep):
             continue
         path = os.path.join(d, 'go2cs_test_comparison.json')
         raw = open(path, 'rb').read()
         rec = json.loads(raw.decode('utf-8-sig'))
         pkg = rec.get('package') or os.path.relpath(d, base)
         if pkg in rows:
-            sys.exit(f'{rid}: two comparison records for {pkg}')
+            print(f'::error title=relay {run}::{rid}: two comparison records for {pkg}')
+            sys.exit(1)
         rows[pkg] = (rec, hashlib.sha256(raw).hexdigest()[:12])
         # The C# host's own results beside it: the only record that carries a failing test's TEXT.
         rpath = os.path.join(d, 'go2cs_test_results.json')
