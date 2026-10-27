@@ -75,6 +75,21 @@ function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed, [s
 
 <#
 .SYNOPSIS
+    Whether a package's proof reads its predicted counts. -Want is matched, disclosed. -Alternate (COORD ruling
+    2026-10-26, uuid's TestVersion6) is the one other shape a timing-sensitive disclosure can read: @{ Counts; Orphan },
+    met only when the record lists exactly that entry as orphaned (-Orphaned, the comparison record's
+    orphanedDisclosures names), because a disclosed test that passes counts as matched. Returns @{ Met; Shape }.
+#>
+function Test-NugetgoPrediction([int[]]$Want, [hashtable]$Alternate, [int]$Matched, [int]$Disclosed, [string[]]$Orphaned = @()) {
+    if ($Want -and $Matched -eq $Want[0] -and $Disclosed -eq $Want[1]) { return [pscustomobject]@{ Met = $true; Shape = 'predicted' } }
+    if ($Alternate -and $Matched -eq $Alternate.Counts[0] -and $Disclosed -eq $Alternate.Counts[1] -and @($Orphaned) -ccontains $Alternate.Orphan) {
+        return [pscustomobject]@{ Met = $true; Shape = "orphaned $($Alternate.Orphan)" }
+    }
+    [pscustomobject]@{ Met = $false; Shape = $null }
+}
+
+<#
+.SYNOPSIS
     The import paths among -ImportPaths whose package directory in the module source (-ModuleDir, the module root for
     -ModulePath) holds Go test files: *_test.go in the package's own directory, the predicate the -tests -recurse driver
     uses to choose the packages it validates (mainModulePackagesWithTests).
@@ -91,4 +106,5 @@ function Get-NugetgoTestedImportPaths([string]$ModuleDir, [string]$ModulePath, [
     return $tested.ToArray()
 }
 
-Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding, Get-NugetgoTestedImportPaths
+Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding, Test-NugetgoPrediction,
+    Get-NugetgoTestedImportPaths
