@@ -7497,7 +7497,7 @@ internal static partial /*<-*/channel<bool> CloseNotify(this ref http2responseWr
         goǃ(() => {
             cwʗ1.Wait(); // wait for close
             chʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     rws.of(http2responseWriterState.ᏑcloseNotifierMu).Unlock();
     return ch.WithDirection(GoChanDir.Recv);
