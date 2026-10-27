@@ -29543,4 +29543,50 @@ Stated differences and limits:
 
 — P2 (2026-10-27)
 
+## 2026-10-27 — G: AMENDMENT to the crossgen2 nest row (S0 located) — only COMPOSITE ReadyToRun hits it, and the one level-raising edge is `array<T>.AliasPointer`
+
+Read at master 5f5aa6fbaf, read-only. This corrects the row above. The two edges
+it named as candidates are wrong, and its "every instantiation in its version bubble" holds only for a COMPOSITE
+image.
+
+- **Which publishes hit it: composite ReadyToRun only.** The .NET SDK (10.0.400) turns composite on when
+  `PublishSingleFile` and `PublishReadyToRun` are both set (`Microsoft.NET.CrossGen.targets` line 21). The `-tests`
+  host publishes single-file, and so does KnownIssues' single-file arm. The SDK's own crossgen2 response file for
+  the `crypto/tls` test host read `--composite`, with 182 converted assemblies, the test assembly and 172 framework
+  assemblies all compiled as inputs.
+- **Measured on G-LAPTOP (crossgen2 win-x64 10.0.11, `--targetos linux`).**
+  - Per assembly, no flag: all 184 converted assemblies complete; the largest is golib at 6 s and 0.55 GB.
+  - Composite, no flag, 8 GB guard: golib alone completes (6 s, 0.57 GB). golib with runtime reaches 8 GB at
+    124 s, and all converted assemblies reach it at 116 s. The SDK's own publish reached 14.1 GB in 255 s of
+    crossgen2, when the 14 GB guard killed it.
+  - Composite golib with runtime, with `--enable-generic-cycle-detection`: 18 s, 1.39 GB.
+  - So a ReadyToRun publish that is not single-file does not hit the nest.
+- **The edge, from crossgen2's own `--dgmllog`** (a golib-only composite, breadth cut-off widened to 4). crossgen2
+  compiles ALL methods of each generic type it builds in a composite:
+  - `GoTypeOps.register<T>` builds `ж<T>`.
+  - `ж<T>.viewsHead` type-tests `ElemRefBox<T>`.
+  - `ElemRefBox<T>`'s constructor names `array<T>`.
+  - `array<T>.AliasPointer` casts to `ж<array<T>>`, one level up, and the chain repeats.
+
+  Every level-raising step in that log traces to `array<T>.AliasPointer` (454) or the `builtin.NativeArrayPointer<T>`
+  it calls (362), and nothing else. `ElemRefBox<T>`'s `array<T>` is a same-level edge, and `NativeArrayBox<T>` is
+  not on the path. Under the widened cut-off, golib with runtime compiles about 223,000 depth-2 and 212,000 depth-3
+  methods (`array<array<X>>` for thousands of runtime types `X`): the cost is breadth times depth.
+- **S1, re-sized (COORD 2026-10-27: after .2, G's).**
+  - Move `AliasPointer` off `array<T>` to a non-generic holder, so that it is instantiated only where called rather
+    than for every `array<T>`.
+  - The converter emits `array<T>.AliasPointer` (convCallExpr.go:5604) at 35 sites in 16 corpus files, so the seat
+    carries that emission change and its position-map lines.
+  - Gates:
+    - the golib-only composite reproducer's 816 level-raising steps read 0;
+    - a golib-with-runtime composite completes without the flag;
+    - plus the row's existing gates.
+- **The second mitigation, routed by COORD.** `PublishReadyToRunComposite=false` keeps ReadyToRun per assembly: it
+  compiles in seconds at under 0.6 GB per assembly, with no flag. It does not precompile golib generics over another
+  assembly's types, so its startup gain is likely smaller (unmeasured). P1 measures it as arm C' in seat #9, and as
+  #14's alternative to the flag. The arm that measures better on the 11 GiB gate and on startup goes into the
+  template.
+
+— G (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
