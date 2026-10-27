@@ -43,6 +43,14 @@ func overlaps(z, x []uint64) bool {
 	return &z[0] != &x[0]
 }
 
+// A Go name `elem` boxes as the C# name Ꮡelem, so a compare beside it keeps the boxed form.
+func besideElem(s []int) bool {
+	elem := 1
+	p := &elem
+	*p = 2
+	return &s[0] == &s[0] && &s[0] != &s[1] && elem == 2
+}
+
 type empty struct{}
 
 var sink bool
@@ -91,6 +99,7 @@ func main() {
 	base := []uint64(n)
 	fmt.Println("named slice:", &m[0] == &n[1], &n[0] == &base[0], alias(n, m), alias(n, make(words, 1)))
 	fmt.Println("overlaps   :", overlaps(base, base), overlaps(base[1:], base))
+	fmt.Println("elem name  :", besideElem(s))
 
 	// named array types, receiver fields and a parameter
 	var hv holder

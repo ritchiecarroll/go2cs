@@ -32,7 +32,8 @@ import (
 // ж<T>. Every other arm (a named array behind a box, whose backing the box publishes lazily; an array field
 // reached through a box; a nested element chain; the receiver copy form; a captured box inside a lambda)
 // keeps today's boxed compare. Only parentheses are removed to find the operands, so `any(&x[0])`, a
-// pointer conversion and a switch tag stay boxed. (1.26.10.2 seat #10, COORD ruling 2026-10-27.)
+// pointer conversion and a switch tag stay boxed, and so does a compare where a Go name `elem` would make
+// `Ꮡelem` a C# variable (elementTakeNameShadowed). (1.26.10.2 seat #10, COORD ruling 2026-10-27.)
 
 // elementAddressTakeKind is the golib form an element address-of takes in a compare.
 type elementAddressTakeKind int
@@ -74,7 +75,39 @@ func (v *Visitor) elementAddressCompare(binaryExpr *ast.BinaryExpr, context Patt
 		return "", "", false
 	}
 
+	if (left.kind == elementTakeHeader || right.kind == elementTakeHeader) && v.elementTakeNameShadowed() {
+		return "", "", false
+	}
+
 	return v.renderElementAddressTake(left), v.renderElementAddressTake(right), true
+}
+
+// elementTakeNameShadowed reports whether a Go object named `elem` is declared at package level or anywhere in the
+// current function. Its box is the C# name `Ꮡelem`, which a bare `Ꮡelem(x, i)` would bind instead of golib's
+// method, and a C# local binds for its whole block, even before its declaration. The compare then keeps its boxed
+// form. (`p.Ꮡelem<E>(i)` is a member access and is not affected.)
+func (v *Visitor) elementTakeNameShadowed() bool {
+	const boxedName = "elem"
+
+	if v.pkg != nil && v.pkg.Scope().Lookup(boxedName) != nil {
+		return true
+	}
+
+	if v.currentFuncDecl == nil {
+		return true
+	}
+
+	shadowed := false
+
+	ast.Inspect(v.currentFuncDecl, func(node ast.Node) bool {
+		if ident, ok := node.(*ast.Ident); ok && ident.Name == boxedName && v.info.Defs[ident] != nil {
+			shadowed = true
+		}
+
+		return !shadowed
+	})
+
+	return shadowed
 }
 
 // elementAddressTakeOf classifies one operand without rendering it, so a compare whose other operand is not

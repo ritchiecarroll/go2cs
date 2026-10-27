@@ -29435,6 +29435,11 @@ Stated differences and limits:
 - kept boxed, by the ruled scope: one operand only, `any(…)`, a pointer conversion, a switch tag, a named array behind a
   pointer or an escaped local (published lazily through the box), a nested element `&m[i][j]` (the note listed it as
   covered; it is not), the receiver copy form, a captured box inside a lambda;
+- also kept boxed, added after the ruling: a compare with a slice or array operand in a function that declares
+  anything named `elem`, or in a package with a package-level `elem`. The converter names that variable's box
+  `Ꮡelem`, so a bare `Ꮡelem(…)` binds the variable. Red reading: the test's `besideElem` function failed to compile
+  with CS0149 at main.cs(44); with the guard it emits `Ꮡ(s, 0) == Ꮡ(s, 0)` and matches Go. No production file of the
+  footprint packages declares `elem` in a function holding a rewritten compare, so the footprint is unchanged;
 - a zero-size element of a real array keeps its index under both (Go answers true).
 
 — P2 (2026-10-27)

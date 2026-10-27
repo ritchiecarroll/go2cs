@@ -36,6 +36,14 @@ internal static bool overlaps(slice<uint64> z, slice<uint64> x) {
     return Ꮡelem(z, 0) != Ꮡelem(x, 0);
 }
 
+internal static bool besideElem(slice<nint> s) {
+    ref var elem = ref heap<nint>(out var Ꮡelem);
+    elem = 1;
+    var p = Ꮡelem;
+    p.Value = 2;
+    return Ꮡ(s, 0) == Ꮡ(s, 0) && Ꮡ(s, 0) != Ꮡ(s, 1) && elem == 2;
+}
+
 partial struct empty {
 }
 
@@ -86,6 +94,7 @@ internal static void Main() {
     var @base = (slice<uint64>)n;
     fmt.Println("named slice:", Ꮡelem<uint64>(m, 0) == Ꮡelem<uint64>(n, 1), Ꮡelem<uint64>(n, 0) == Ꮡelem(@base, 0), alias(n, m), alias(n, new words(1)));
     fmt.Println("overlaps   :", overlaps(@base, @base), overlaps(@base[1..], @base));
+    fmt.Println("elem name  :", besideElem(s));
 
     holder hv = new();
     fmt.Println("fields     :");

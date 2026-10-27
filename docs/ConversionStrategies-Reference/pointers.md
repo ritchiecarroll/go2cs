@@ -183,7 +183,10 @@ element address-of operand, a nil operand, `any(&x[0]) == any(&y[0])`, `(*T)(&x[
 { case &y[0]: }` all keep the boxed form; only parentheses are removed to find the operands. Element address-ofs
 that reach their array through a box the converter publishes lazily (a named array behind a pointer or an escaped
 local), a nested element (`&m[i][j]`), the receiver copy form and a captured box inside a lambda also keep the boxed
-form.
+form. So does a compare with a slice or array operand in a function that declares anything named `elem`, or in a
+package with a package-level `elem`: the converter names that variable's box `Ꮡelem`, and a bare `Ꮡelem(…)` call
+would bind the variable instead of golib's method (CS0149). The pointer-to-array form `p.Ꮡelem<E>(i)` is a member
+access and is unaffected, but it falls back with its partner.
 
 `ElementAddress<T>` answers what `ElemRefBox<T>.Equals` answers, in the same order: every zerobase element is one
 address, a native element is its address, and a managed element is its (backing, absolute index) pair. One answer
@@ -195,7 +198,7 @@ compare true. A zero-size element of a real array backing keeps its index under 
 (Guarded by the `ElementAddressCompare` behavioral output test against Go, whose `AllocsPerRun` lines for a slice
 and a pointer-to-array compare read 144 and 176 before the change and 0 after, and by GolibTests' `ElementAddressCompareTests`, which checks
 `Ꮡelem(a, i) == Ꮡelem(b, j)` against `Ꮡ(a, i) == Ꮡ(b, j)` shape by shape, the index panics, and zero heap bytes
-over 28,000 compares. Design: [DESIGN-element-address-compare](../phase4/DESIGN-element-address-compare.md).)
+over 28,000 compares.)<!-- design and census: docs/phase4/DESIGN-element-address-compare.md -->
 
 ## A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split
 

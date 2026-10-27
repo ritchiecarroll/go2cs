@@ -107,12 +107,14 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
 - **Element address-of used only for an identity compare.** `alias()` compares `&x[cap(x)-1] == &y[cap(y)-1]` and
   `addVW` compares `&z[0] != &x[0]`. In Go an element address is a plain interior pointer and costs nothing. In
   golib each take mints an `ElemRefBox`. This is not a stack allocation in Go, but it is the largest share of
-  TestMulUnbalanced's excess.
+  TestMulUnbalanced's excess. Done in 1.26.10.2 seat #10: a compare of two element address-ofs takes golib's
+  `Ꮡelem`, which allocates nothing.
 
 <!-- src/core/math/big/natmul.cs:229-238 (`var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm()))`…`var ty =
 Ꮡ(new ΔInt(abs: z.slice(n2, 2 * n2)));`), :324-331 (`var z0 = Ꮡ(new ΔInt(abs: z.slice(0, 2 * n2)));`…`var tx =
 Ꮡ(new ΔInt(abs: z.slice(0, n2)));`). src/core/math/big/nat.cs:240
-(`Ꮡ(x.slice(0, cap(x)), cap(x) - 1) == Ꮡ(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:115 (`if (Ꮡ(z, 0) != Ꮡ(x, 0)) {`).
+(`Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:115 (`if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {`).
+Both read `Ꮡ(…)` until 1.26.10.2 seat #10 gave the compare `Ꮡelem` (docs/phase4/DESIGN-element-address-compare.md).
 src/core/golib/builtin.cs:2505-2506 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
 src/go2cs/escapeAnalysisOperations.go:40-41 (`Phase A never lowers a METHOD's pointer`…`parameters (the §10.1
 boundary in the ref-lowering doc)`). -->
