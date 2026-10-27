@@ -1,0 +1,10 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	matched	disclosed
+math	PASS	76	334	1	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	334	0	76	0
+io	PASS	60	361	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	361	0	60	1
+mime/multipart	PASS	53	385	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	385	0	53	0
+os/user	PASS	12	334	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	334	0	12	0
+os/signal	PASS	30	372	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	372	0	30	1
+encoding/gob	PASS	106	410	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	410	0	106	0
+bufio	PASS	81	350	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	350	0	81	1
+crypto	PASS	8	414	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	414	0	8	0
+net/http/httptest	PASS	62	507	0	0	0	linux/amd64	f75e0c53ec523161f1990db7a407c9249c9ed326	507	0	62	0
