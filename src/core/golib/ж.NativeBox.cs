@@ -216,17 +216,18 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
         if (ReferenceEquals(this, other))
             return true;
 
-        if (other is NativeBox<T> nb)
-            return m_nativeAddr == nb.m_nativeAddr;
-
-        // A field reference rooted in NATIVE memory names a real machine address, and Go's contract for
-        // such a pointer is address identity — `&n.LFNode` over a persistentalloc'd node and the pointer
-        // lfstackUnpack rebuilds from its bits are ONE pointer. See FieldRefBox.NativeSlotAddress.
-        if (other is FieldRefBox<T> fr && fr.NativeSlotAddress is var address and not 0)
-            return m_nativeAddr == address;
+        // Go's contract for a pointer into NATIVE memory is address identity, whichever kind names it: a field
+        // reference rooted in native memory (`&n.LFNode` over a persistentalloc'd node and the pointer lfstackUnpack
+        // rebuilds from its bits are ONE pointer; see FieldRefBox.NativeSlotAddress) and an element box over a native
+        // slice or array view (`&b[4]` and `&p[4]` with p viewing b's pages) included.
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
 
         return m_isNull && other.IsNilPointer;
     }
+
+    /// <inheritdoc/>
+    internal override nuint NativeIdentity => IsNilPointer ? 0 : m_nativeAddr;
 
     /// <inheritdoc/>
     // A native alias hashes by the address it aliases, so two boxes over one address (which

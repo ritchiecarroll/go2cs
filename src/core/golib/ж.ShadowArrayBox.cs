@@ -155,8 +155,15 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
         if (ReferenceEquals(this, other))
             return true;
 
+        // The block's address is this pointer's identity, as for every native kind (ж<T>.NativeIdentity).
+        if (TryNativeIdentityEquals(other, out bool equal))
+            return equal;
+
         return other is ShadowArrayBox<T> shadow && m_nativeAddr == shadow.m_nativeAddr;
     }
+
+    /// <inheritdoc/>
+    internal override nuint NativeIdentity => m_nativeAddr;
 
     /// <inheritdoc/>
     public override int GetHashCode() => m_nativeAddr.GetHashCode();

@@ -1281,4 +1281,22 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return ptr;
         }
     }
+
+    /// <summary>
+    /// The machine address this pointer IS when its storage is native memory, else 0 (managed storage, and nil). Not
+    /// <see cref="NativeAddress"/>, which gates the native-word accessors and stays each kind's own: a native element
+    /// box and a native-rooted field reference answer here and not there.
+    /// </summary>
+    internal virtual nuint NativeIdentity => 0;
+
+    // Equality's native arm, shared by every kind that can name native memory: one native address is one Go pointer,
+    // whichever kinds minted the two boxes, and a native pointer never equals a managed one. Answers whether either
+    // pointer is native; when neither is, the kind's own rule decides.
+    private protected bool TryNativeIdentityEquals(ж<T> other, out bool equal)
+    {
+        nuint address = NativeIdentity;
+        nuint otherAddress = other.NativeIdentity;
+        equal = address == otherAddress;
+        return address != 0 || otherAddress != 0;
+    }
 }
