@@ -178,9 +178,23 @@ func goModDownloadPreflight(moduleDir string) error {
 	cmd.Env = append(os.Environ(), "GOFLAGS="+strings.TrimSpace(os.Getenv("GOFLAGS")+" -mod=readonly"))
 
 	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("go mod download preflight failed in %s -- a dependency is missing from the module cache "+
-			"or fails go.sum verification, and nothing was converted:\n%s", moduleDir, strings.TrimSpace(string(output)))
+		return goModDownloadFailure(moduleDir, strings.TrimSpace(string(output)))
 	}
 
 	return nil
+}
+
+// goModDownloadFailure words the preflight's refusal. A module (or a dependency) whose go line asks for
+// a newer Go than the one converting is its own case: go2cs converts with exactly the release its go.*
+// packages are built from, so the cache and go.sum are not the problem and the remedy is different.
+func goModDownloadFailure(moduleDir, output string) error {
+	if strings.Contains(output, "requires go >=") {
+		return fmt.Errorf("%s needs a newer Go than this go2cs converts with, and nothing was converted:\n%s\n"+
+			"go2cs converts with the Go release its go.* packages are built from. Use a go2cs release built for "+
+			"the Go the module requires, or lower the module's go line if the module builds with the older release",
+			moduleDir, output)
+	}
+
+	return fmt.Errorf("go mod download preflight failed in %s -- a dependency is missing from the module cache "+
+		"or fails go.sum verification, and nothing was converted:\n%s", moduleDir, output)
 }

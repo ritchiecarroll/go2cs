@@ -17,6 +17,9 @@ name: Release binaries
 #   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
 #   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
 #   - creates a DRAFT GitHub Release for the tag holding the six archives, SHA256SUMS and the attestation bundle.
+# Every run also packs the go2cs dotnet tool from the same source, UNSIGNED, and proves on each platform's runner that
+# it installs and converts with no Go installed, byte-identically to a conversion with Go (tool-smoke). The packages
+# nuget.org gets are packed and signed on the release machine (src/release-nuget.ps1 Phase 1b), never by this workflow.
 # A DRAFT IS NOT PUBLISHED. On the release machine, src/sign-release-binaries.ps1 Authenticode-signs the Windows
 # executables, re-packs those two archives, GPG-signs SHA256SUMS and replaces them on the draft, removing this run's
 # attestation bundle (it no longer matches); attest-release.yml then attests the draft's archives and puts a bundle
@@ -59,6 +62,7 @@ jobs:
       release-version: ${{ steps.tag.outputs.version }}
       release-tag: ${{ steps.tag.outputs.tag }}
       record-sha: ${{ steps.tag.outputs.record }}
+      tool-version: ${{ steps.tool.outputs.version }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -187,6 +191,30 @@ jobs:
           TARGETS
           (cd "$out" && sha256sum go2cs-* > SHA256SUMS && cat SHA256SUMS)
 
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # The smoke's packages carry a prerelease version of the release the converter reports, so they can never be
+      # mistaken for, or collide with, the signed ones on nuget.org.
+      - name: Pack the go2cs dotnet tool, unsigned, for the smoke
+        id: tool
+        env:
+          GOTOOLCHAIN: local
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < src/go2cs/corpus-release.txt)-smoke.$RUN_NUMBER"
+          pwsh -NoProfile -File src/tools/go2cs-tool/pack-go2cs-tool.ps1 -Version "$version" -Unsigned -OutDir "$RUNNER_TEMP/tool-feed"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: go2cs-tool-feed
+          path: ${{ runner.temp }}/tool-feed/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Attest the archives' build provenance
         id: attest
         if: steps.tag.outputs.version != ''
@@ -225,15 +253,9 @@ jobs:
           - { rid: osx-x64,     runner: macos-15-intel }
           - { rid: osx-arm64,   runner: macos-15 }
     steps:
-      # go2cs needs Go even to print its version today: main.go resolves GOROOT before it reads any flag, and a
-      # -trimpath binary carries no GOROOT of its own. The first run of this prototype (38168160233) failed on
-      # both macOS runners for that reason: their images do not put Go on PATH. Installing Go here is what a
-      # user must do anyway before converting.
-      - uses: actions/setup-go@v6
-        with:
-          go-version: ${{ needs.build.outputs.go-version }}
-          cache: false
-
+      # No Go is installed here: `go2cs -version` reads no Go. It once did (main.go resolved GOROOT before it read a
+      # flag, and the first run of this prototype, 38168160233, failed on both macOS runners, whose images put no
+      # Go on PATH); a release build now resolves its Go only to convert, downloading it on first use.
       - uses: actions/download-artifact@v5
         with:
           name: release-binaries
@@ -264,9 +286,50 @@ jobs:
           $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
           Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
 
+  tool-smoke:
+    name: go2cs dotnet tool with no Go on ${{ matrix.rid }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,     runner: windows-latest }
+          - { rid: win-arm64,   runner: windows-11-arm }
+          - { rid: linux-x64,   runner: ubuntu-latest }
+          - { rid: linux-arm64, runner: ubuntu-24.04-arm }
+          - { rid: osx-x64,     runner: macos-15-intel }
+          - { rid: osx-arm64,   runner: macos-15 }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.build.outputs.record-sha || github.sha }}
+          sparse-checkout: |
+            src/tools/go2cs-tool
+            src/go2cs
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # The reference conversion is made with this Go on PATH; the smoke then hides it.
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.build.outputs.go-version }}
+          cache: false
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: go2cs-tool-feed
+          path: tool-feed
+
+      - name: Install the tool, convert with Go, then with none, and compare the emission
+        shell: pwsh
+        run: ./src/tools/go2cs-tool/smoke-go2cs-tool.ps1 -Feed tool-feed -Version '${{ needs.build.outputs.tool-version }}' -Work "${{ runner.temp }}/tool-smoke"
+
   draft-release:
     name: Create the DRAFT GitHub Release
-    needs: [build, smoke]
+    needs: [build, smoke, tool-smoke]
     if: needs.build.outputs.release-version != ''
     runs-on: ubuntu-latest
     permissions:

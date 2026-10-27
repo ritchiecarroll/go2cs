@@ -1,15 +1,26 @@
 #!/usr/bin/env sh
 set -eu
 
-# The x/website revision the offline Tour is installed from: the newest commit whose go.mod says
-# go 1.24.x (9e72c5721b9d, 2026-02-11; the next commit raises it to 1.25). Never @latest: that
-# declares a newer Go than the converter's, so the install fails under GOTOOLCHAIN=local and
+# The x/website revision the offline Tour is installed from: 52d470bcf26e (2026-10-21), whose go.mod
+# says go 1.26.0, which the converter's Go 1.26.10 satisfies. Never @latest: that can
+# declare a newer Go than the converter's, so the install fails under GOTOOLCHAIN=local and
 # silently downloads another toolchain under auto. This moves with the corpus's Go release (the
-# Go 1.26 hop bumps it); keep it equal to start.ps1 and to tourModule in tour.go.
-tour_version=v0.0.0-20260211181957-9e72c5721b9d
+# Go 1.27 hop bumps it); keep it equal to start.ps1 and to tourModule in tour.go.
+tour_version=v0.0.0-20261021155534-52d470bcf26e
 
 tour_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 repo_root=$(CDPATH= cd -- "$tour_root/../.." && pwd)
+
+# A machine with only the go2cs dotnet tool installed has no go on PATH. The Go the tool downloads
+# for its conversions is the release the tour needs too, so use it (`go2cs toolchain env`).
+if ! command -v go >/dev/null 2>&1 && command -v go2cs >/dev/null 2>&1; then
+  go_command=$(go2cs toolchain env | sed -n 's/^GO=//p')
+  if [ -n "$go_command" ]; then
+    echo "No go on PATH: using the Go the go2cs dotnet tool provides, $go_command"
+    PATH="$(dirname -- "$go_command"):$PATH"
+    export PATH
+  fi
+fi
 
 go version
 dotnet --version

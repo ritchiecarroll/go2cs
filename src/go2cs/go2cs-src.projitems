@@ -282,6 +282,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensymbols\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
@@ -572,6 +574,11 @@
     <None Include="$(MSBuildThisFileDirectory)testManifestEmbedDigest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainCommand.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainCommand_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainPins.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainProvision.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainProvision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingComments_test.go" />

@@ -324,7 +324,11 @@ func TestConverterIdentifiesRejectsAnythingButTheConverter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	imposter := filepath.Join(root, "go2cs")
+	// In a directory of its own: without the .exe suffix, root/go2cs is the source directory.
+	imposter := filepath.Join(root, "bin", "go2cs")
+	if err := os.MkdirAll(filepath.Dir(imposter), 0o755); err != nil {
+		t.Fatal(err)
+	}
 	if filepath.Separator == '\\' {
 		imposter += ".exe"
 	}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The go2cs dotnet tool, packed by pack-go2cs-tool.ps1 with NuspecProperties version. It holds no executable: its
+     DotnetToolSettings.xml names the go2cs.<rid> package (go2cs.rid.nuspec) for each platform, and the .NET CLI
+     installs the one for the machine's RID. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>go2cs</id>
+    <version>$version$</version>
+    <title>go2cs converter</title>
+    <authors>go2cs Authors</authors>
+    <copyright>Copyright © 2018-2026 The go2cs Authors</copyright>
+    <description>Converts Go source code into C# that reads like the Go it came from. Install with dotnet tool install -g go2cs; the first conversion downloads the Go release go2cs converts with.</description>
+    <license type="expression">AGPL-3.0-only</license>
+    <projectUrl>https://github.com/ritchiecarroll/go2cs</projectUrl>
+    <repository type="git" url="https://github.com/ritchiecarroll/go2cs" />
+    <icon>go2cs.png</icon>
+    <readme>README.md</readme>
+    <tags>go2cs Golang go transpiler converter dotnet-tool</tags>
+    <packageTypes>
+      <packageType name="DotnetTool" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="tool/*" target="tools/net10.0/any/" />
+    <file src="LICENSE" target="LICENSE" />
+    <file src="LICENSE-EXCEPTION" target="LICENSE-EXCEPTION" />
+    <file src="README.md" target="README.md" />
+    <file src="go2cs.png" target="go2cs.png" />
+  </files>
+</package>

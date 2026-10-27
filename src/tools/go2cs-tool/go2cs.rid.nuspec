@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The go2cs dotnet tool's package for one platform, packed by pack-go2cs-tool.ps1 with NuspecProperties
+     version and rid. It holds that platform's go2cs executable; the go2cs package (go2cs.nuspec) names it. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>go2cs.$rid$</id>
+    <version>$version$</version>
+    <title>go2cs converter ($rid$)</title>
+    <authors>go2cs Authors</authors>
+    <copyright>Copyright © 2018-2026 The go2cs Authors</copyright>
+    <description>The go2cs converter for $rid$, installed by the go2cs dotnet tool: dotnet tool install -g go2cs</description>
+    <license type="expression">AGPL-3.0-only</license>
+    <projectUrl>https://github.com/ritchiecarroll/go2cs</projectUrl>
+    <repository type="git" url="https://github.com/ritchiecarroll/go2cs" />
+    <icon>go2cs.png</icon>
+    <readme>README.md</readme>
+    <tags>go2cs Golang go</tags>
+    <packageTypes>
+      <packageType name="DotnetToolRidPackage" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="tool/*" target="tools/net10.0/$rid$/" />
+    <file src="LICENSE" target="LICENSE" />
+    <file src="LICENSE-EXCEPTION" target="LICENSE-EXCEPTION" />
+    <file src="README.md" target="README.md" />
+    <file src="go2cs.png" target="go2cs.png" />
+  </files>
+</package>

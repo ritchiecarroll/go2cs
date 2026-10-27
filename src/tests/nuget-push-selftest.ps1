@@ -17,6 +17,8 @@
       stop       -StopOnRateLimit: 403 with Retry-After 2489 -> throws at once with the UTC resume time, no wait; the
                  same call again (the resume) PUTs only the refused package
       server     503 with Retry-After 3 -> waited out and pushed; then 500 with none -> throws, naming the package
+      order      Get-GoNuGetPushOrder: go.lib and go.gen first; the go2cs dotnet tool's go2cs.<rid> packages before the
+                 go2cs package that names them, which goes last
       resume-foreign  release-nuget.ps1 -ResumePush over a folder holding a package of another version -> refused by
                  name, nothing PUT, version.props untouched
       resume-release  release-nuget.ps1 -ResumePush, end to end, over three packages of the release (one published, a
@@ -165,6 +167,13 @@ function Invoke-Case([System.IO.FileInfo[]] $Packages, [switch] $Stop) {
 try {
     $version = '1.26.10.2'
     $packages = @('go.lib', 'go.gen', 'go.a', 'go.b', 'go.c' | ForEach-Object { New-FakePackage $_ $version })
+
+    # ---- order ----------------------------------------------------------------------------------------------------
+    $orderDir = Join-Path $work 'order'
+    New-Item -ItemType Directory -Path $orderDir | Out-Null
+    $unordered = @('go2cs', 'go.a', 'go2cs.win-x64', 'go.gen', 'go2cs.linux-arm64', 'go.lib' | ForEach-Object { New-FakePackage $_ $version $orderDir })
+    $ordered = @(Get-GoNuGetPushOrder $unordered | ForEach-Object { $_.Name -replace "\.$([regex]::Escape($version))\.nupkg$", '' })
+    Check (($ordered -join ',') -eq 'go.gen,go.lib,go.a,go2cs.win-x64,go2cs.linux-arm64,go2cs') "order: $($ordered -join ', '); want go.gen, go.lib, go.a, go2cs.win-x64, go2cs.linux-arm64, go2cs"
 
     # ---- quota ----------------------------------------------------------------------------------------------------
     $state.Published["go.a/$version"] = $true
@@ -322,5 +331,5 @@ finally {
 }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host 'nuget-push selftest: PASS (quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
+Write-Host 'nuget-push selftest: PASS (the go2cs tool pointer pushed last; quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
 exit 0

@@ -38,7 +38,8 @@ The interface is deliberately parallel:
 
 ## Requirements
 
-- Go, at the release `src/go2cs/go.mod` names
+- Go, at the release `src/go2cs/go.mod` names. With no `go` on `PATH`, the start scripts use the Go the
+  go2cs dotnet tool downloads (`go2cs toolchain env`), so installing the tool is enough
 - The .NET 10 SDK, the one the repository's `global.json` pins
 - A local clone of this `go2cs` repository
 - Network access on the first start to install the official offline Tour and restore the go2cs NuGet
@@ -56,8 +57,8 @@ From the repository root:
 ```
 
 The bootstrap script verifies Go and .NET, installs
-`golang.org/x/website/tour` when needed (pinned to the newest revision that builds with
-Go 1.24; see `$TourVersion` in the script), and opens
+`golang.org/x/website/tour` when needed (pinned to a revision that builds with
+Go 1.26; see `$TourVersion` in the script), and opens
 <http://127.0.0.1:4000>. `-Runtime nuget` builds converted lessons against the
 published go2cs packages, so no standard library has to be staged first; the
 alternatives are described under *.NET runtime sources* below, and the
