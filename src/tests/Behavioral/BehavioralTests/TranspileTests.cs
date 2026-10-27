@@ -1633,6 +1633,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
+    public void CheckPanicTextGoTypeNames() => CheckTarget("PanicTextGoTypeNames");
+
+    [TestMethod]
     public void CheckPanicValueRendering() => CheckTarget("PanicValueRendering");
 
     [TestMethod]

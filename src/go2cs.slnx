@@ -869,6 +869,7 @@
     <Project Path="tests/Behavioral/PanicDeferCalleeFrame/PanicDeferCalleeFrame.csproj" />
     <Project Path="tests/Behavioral/PanicOnlyFuncLiteralVar/PanicOnlyFuncLiteralVar.csproj" />
     <Project Path="tests/Behavioral/PanicRecover/PanicRecover.csproj" />
+    <Project Path="tests/Behavioral/PanicTextGoTypeNames/PanicTextGoTypeNames.csproj" />
     <Project Path="tests/Behavioral/PanicValueRendering/PanicValueRendering.csproj" />
     <Project Path="tests/Behavioral/ParallelAssignmentHazard/ParallelAssignmentHazard.csproj" />
     <Project Path="tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.csproj" />

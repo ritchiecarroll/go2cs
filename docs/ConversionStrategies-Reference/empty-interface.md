@@ -191,8 +191,8 @@ The numeric twin of the `@string` boxing above. Go materializes an untyped const
 at its **default type**: untyped int → `int` (go2cs `nint`, an `IntPtr`), untyped rune → `rune`
 (`int32`), untyped float → `float64`. The boxed CLR type must match, because every observation of an
 interface value dispatches on it: `x.(int)` (emitted `x._<nint>()`) panics on a boxed `Int32`
-(`interface conversion: interface {} is int, not int` — both sides print "int", but one is `Int32`,
-one is `nint`); a `case int:` type switch falls through; golib `AreEqual` bails early on
+(`interface conversion: interface {} is int32, not int`: a boxed `Int32` is Go's `int32`, and only
+`nint` is Go's `int`); a `case int:` type switch falls through; golib `AreEqual` bails early on
 `leftType != right.GetType()`; and `fmt`'s `printArg` type-switch drops to its reflection fallback.
 Two renderings need a cast, for different reasons:
 
