@@ -1,0 +1,28 @@
+ended_utc	row	tree	word	count	banked	rc	wall_s	sweep_row_s	timing_tsv	restored
+2026-10-27T22:45:40Z	net/smtp	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	20	20	0	484	434	20261027-173824-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-27T22:49:13Z	net/http/httptest	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	62	62	0	196	193	20261027-174559-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-27T22:50:21Z	net/http/httptrace	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	2	2	0	64	61	20261027-174919-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-27T22:53:02Z	net/http/cgi	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	39	39	0	158	155	20261027-175026-sweep.tsv	modified=1 untracked=0 deleted=0 left=0
+2026-10-27T22:59:37Z	crypto/x509	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	540	540	0	392	389	20261027-175307-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-27T23:04:42Z	os/exec	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	117	117	0	302	299	20261027-175942-sweep.tsv	modified=0 untracked=0 deleted=0 left=0
+2026-10-27T23:11:46Z	net/http	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	1526	1526	0	419	417	20261027-180448-sweep.tsv	modified=10 untracked=0 deleted=0 left=0
+2026-10-27T23:34:21Z	crypto/tls	f75e0c53ec523161f1990db7a407c9249c9ed326	PASS	1393	1393	0	1350	1348	20261027-181152-sweep.tsv	modified=1 untracked=0 deleted=0 left=0
+# DRY RUN, stopped by ruling (COORD 2026-10-27T23:36:19Z, owner: "go for best known .2 possible"). Every row
+#   finished before the STOP; no row was in flight. The gate pass re-runs at the new tip.
+# Tree f75e0c53ec523161f1990db7a407c9249c9ed326, detached throwaway worktree. Toolchain: go1.26.10 (PATH go, the
+#   resolved go.exe and GOROOT's VERSION agree), GOTOOLCHAIN=local, CGO_ENABLED=0, .NET 10.0.400. Default config,
+#   no -TestConfig. Canary: net/smtp alone, rc 0 PASS 20 [434s], confirmed from a separate call before rows 2-8.
+# Residue: never-built tracked-dirty=0 untracked=0 ignored=0; after the run tracked-dirty=0 untracked=0, ignored
+#   9813 (build output under ignored paths).
+# FINDING (STOP under the ruling of 2026-10-27T23:27:49Z, rule 2): real drift in 3 rows, 12 converted *_test.cs
+#   files, 80 line pairs, NONE of class test-refresh-1262 (shape a GoStack.Bounded / shape b Ꮡelem). The pairing
+#   classifier (red-tested: a clean control rc 0, five plants refused by name) refuses all 80. Every pair is ONE
+#   other shape, seat #4 (5895dfe675, batch 53): a deferred or go method call evaluates its receiver at the
+#   statement --  defer(() => RECV.M(), ref ᒐ)  ->  defer(ᴛ0 => ᴛ0.M(), RECV, ref ᒐ)  (79 pairs) and
+#   goǃ(() => RECV.M())  ->  goǃ(ᴛ0 => ᴛ0.M(), RECV)  (1 pair, crypto/tls fips140_test.cs). No GoPositionMap
+#   line moved (each pair keeps its line count). The diffs were reproduced convert-only with the sweep's own
+#   go2cs.exe; their numstat equals each row's sweep drift block file for file.
+#   net/http/cgi: host_test.cs 1. net/http: alpn 1, client 8, clientserver 12, csrf 1, fs 1, request 4, response 1,
+#   responsecontroller 7, serve 22, transport 21. crypto/tls: fips140_test.cs 1.
+# crypto/tls: TestBogoSuite ran under its host-limit pin; no separate full-suite BoGo measurement was taken. The
+#   row's wall was 1350 s (1348 s in the sweep), against 939 s at 1.26.10.1 (the ReadyToRun host build, seat #9).

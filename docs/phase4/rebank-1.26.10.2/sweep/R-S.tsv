@@ -1,0 +1,9 @@
+row	word	count	banked	rc	wall_s	real_drift	oracle_rerun	drift_class
+net/smtp	PASS	20	20	0	484	0	no	-
+net/http/httptest	PASS	62	62	0	196	0	no	-
+net/http/httptrace	PASS	2	2	0	64	0	no	-
+net/http/cgi	PASS	39	39	0	158	1	no	seat4-receiver-snapshot
+crypto/x509	PASS	540	540	0	392	0	no	-
+os/exec	PASS	117	117	0	302	0	no	-
+net/http	PASS	1526	1526	0	419	10	no	seat4-receiver-snapshot
+crypto/tls	PASS	1393	1393	0	1350	1	no	seat4-receiver-snapshot
