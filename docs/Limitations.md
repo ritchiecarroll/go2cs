@@ -198,8 +198,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   warns, measured on linux-x64: a project that uses the `go.*` packages gets one IL2104 for each package
   with trim warnings, eight for a program that uses `fmt`, and `-p:TrimmerSingleWarn=false` lists the
   hundred or so behind them, most of them golib's, `runtime`'s and `reflect`'s use of reflection. A
-  project built from the converted source lists them all. A single-file publish needs ReadyToRun turned
-  off ([Known issues](KnownIssues.md#a-single-file-publish-with-readytorun-runs-out-of-memory)), and a
+  project built from the converted source lists them all. A single-file publish needs ReadyToRun compiled
+  per assembly ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)), and a
   Native AOT publish is slow either way
   ([Known issues](KnownIssues.md)).
   <!-- ReadyToRun: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`; the startup figure is
