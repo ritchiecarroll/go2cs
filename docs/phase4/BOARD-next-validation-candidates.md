@@ -29290,4 +29290,45 @@ it working.
 
 — C2 (2026-10-27)
 
+## 2026-10-27 — R (1.26.10.2 seat #3, option A of DESIGN-mn-scheduler-sizing.md): a goroutine the converter PROVES cannot recurse starts on a 16 MiB stack reserve; every other keeps 256 MiB — LANDED on claude/r-stack-reserve
+
+**What changed.** The converter proves, per `go` statement, that the goroutine cannot recurse
+(`src/go2cs/goroutineStackAnalysis.go`): every call it can make, through the LoadAllSyntax graph, must resolve
+statically to a body, and no chain may revisit a function. An interface method (a type parameter's included), a func
+value, a range-over-func loop, panic/print of a non-basic value, and a body-less function that can call back read as
+"may recurse". A proved statement is emitted `goǃ(..., GoStack.Bounded)`, and golib starts it on
+`Goroutine.BoundedStackReserve` (16 MiB, `GO2CS_GOROUTINE_BOUNDED_STACK`, never above the default) from a worker pool
+of its own, so a bounded worker never runs a default body. Unmarked `goǃ` keeps today's 256 MiB, and so does every
+assembly built against the old signatures (the marked overloads are new twins).
+
+**Reach, stated plainly (COORD's ruling: conservative as built).** Over std with tests, 1 of 129 PRODUCTION go
+statements proves bounded (net/http h2_bundle.go, one goroutine) and 151 of 842 in tests. The production misses: 31
+func values, 23 runtime.systemstack (hand-owned anyway), the rest interface calls (net.Conn, io.WriterTo,
+context.Context, ...). So user goroutines that only compute, send and sync (fan-out workers, ParkStorm) gain the
+faster park; any goroutine that reaches an interface or a func value — every std server goroutine — keeps 256 MiB.
+A wrong "bounded" is an uncatchable crash, so nothing is widened without its own census.
+
+**Measured, before (base converter, 256 MiB everywhere) and after.** ParkStorm, Release, one run at a time:
+- windows (R-LAPTOP, Windows x64, 16 hw threads), N=100,000, time to park / private MB: 256 MiB default 361 s / 5,900;
+  16 MiB 70 s / 5,650 (1 MiB 67 s, 4 MiB 66 s, 64 MiB 86 s). AFTER (the seat's converter and golib, no override; ParkStorm's goroutine is proved
+  bounded): 68.7 s / 5,655 MB and 67.3 s / 5,647 MB, about 100,009 threads, release 67 s and 69 s: 5.3 times faster
+  to park than the 256 MiB default.
+- linux (WSL Ubuntu 22.04, 10 cores, 19 GB): N=10,000 parks in 5.7 s (default) / 6.4 s (16 MiB). N=20,000 stops at
+  about 16,200 threads at BOTH reserves ("Out of memory." from thread creation): vm.max_map_count 65,530 at about 4
+  mappings per thread, a kernel limit the reserve does not move; no sysctl changed. AFTER (seat converter and golib, the
+  goroutine marked): N=10,000 parks in 6.95 s and 5.37 s, RssAnon 263 MB, release 1.2 s: no change at a size the
+  reserve never limited (as on windows at 10,000); the ~16,200-thread kernel ceiling is untouched by design.
+
+**Footprint.** Two-seeded -stdlib diff, three targets (windows/linux/darwin amd64, 363 projects each): exactly one line,
+`net/http/h2_bundle.cs:7500` `});` -> `}, GoStack.Bounded);`, identical on all three; re-measured after rebasing over
+batch 53 (P2's seat #4) on the five packages it touched: unchanged. Behavioral: 29 goldens gained the mark (59 + 5
+goǃ lines), plus the new GoroutineStackReserve (a 200,000-level recursion in an unmarked goroutine beside 100 bounded
+ones). Test-source emission is NOT in that footprint: the 151 bounded test go statements reach the committed
+`*_test.cs` files at their next regeneration (the .2 re-bank).
+
+**Owed, separately sized:** a refinement that resolves interface calls through every implementation in the loaded
+program, measured with the same census before any emission moves.
+
+— R (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
