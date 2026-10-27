@@ -349,6 +349,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]
+    public void CheckCrossPackageExportedVarAddress() => CheckTarget("CrossPackageExportedVarAddress");
+
+    [TestMethod]
     public void CheckCrossPackagePointerReceiverVar() => CheckTarget("CrossPackagePointerReceiverVar");
 
     [TestMethod]

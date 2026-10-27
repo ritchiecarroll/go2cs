@@ -400,6 +400,8 @@
     <Project Path="tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="tests/Behavioral/CrossPackageArrayZeroValue/CrossPackageArrayZeroValue.csproj" />
     <Project Path="tests/Behavioral/CrossPackageArrayZeroValue/bufpkg/CrossPackageArrayZeroValue.bufpkg.csproj" />
+    <Project Path="tests/Behavioral/CrossPackageExportedVarAddress/CrossPackageExportedVarAddress.csproj" />
+    <Project Path="tests/Behavioral/CrossPackageExportedVarAddress/xpkgvarlib/go.xpkgvar.csproj" />
     <Project Path="tests/Behavioral/CrossPackagePointerReceiverVar/CrossPackagePointerReceiverVar.csproj" />
     <Project Path="tests/Behavioral/CrossPackagePointerReceiverVar/xpkgmulib/go.xpkgmu.csproj" />
     <Project Path="tests/Behavioral/CrossPackagePromotedValueMethod/CrossPackagePromotedValueMethod.csproj" />
