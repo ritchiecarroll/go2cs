@@ -153,7 +153,7 @@ literal's default `"…"u8` span would fail against the channel's `in object` se
 In converted code both sends then read the literal's hoisted pre-boxed field (see above), never a bare
 `"text"u8`:
 
-<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:49-50, 55, 61-62 -->
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:45-46, 51, 57-58 -->
 ```csharp
 private static readonly object textˢ = (@string)"text"u8;
 private static readonly object selˢ = (@string)"sel"u8;

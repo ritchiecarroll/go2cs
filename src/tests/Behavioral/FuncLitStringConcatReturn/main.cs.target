@@ -16,9 +16,6 @@ internal static void Main() {
         case nint t: {
             return fmt.Sprintf("int:%d"u8, t);
         }
-        case int32 t: {
-            return fmt.Sprintf("int:%d"u8, t);
-        }
         default: {
             var t = v;
             return fmt.Sprintf("other:%v"u8, t);

@@ -19,7 +19,7 @@ func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
 	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
 	fmt.Println(n.String())
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 49-50 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 46-47 -->
 ```csharp
 partial interface Stringer {
     @string String();

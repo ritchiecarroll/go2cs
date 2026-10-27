@@ -70,10 +70,6 @@ internal static @string panicValueKind(Action f) {
                     @out = fmt.Sprintf("int(%d)"u8, v);
                     break;
                 }
-                case int32 v: {
-                    @out = fmt.Sprintf("int(%d)"u8, v);
-                    break;
-                }
                 default: {
                     var v = p;
                     @out = "other (not a plain string)";

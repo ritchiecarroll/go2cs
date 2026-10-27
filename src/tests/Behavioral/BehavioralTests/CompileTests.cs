@@ -1564,6 +1564,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
 
     [TestMethod]
+    public void CheckNilPointerValueReceiverCall() => CheckTarget("NilPointerValueReceiverCall");
+
+    [TestMethod]
     public void CheckNilReceiverMethods() => CheckTarget("NilReceiverMethods");
 
     [TestMethod]
@@ -2393,6 +2396,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitchImpureTag() => CheckTarget("TypeSwitchImpureTag");
+
+    [TestMethod]
+    public void CheckTypeSwitchIntWidthCases() => CheckTarget("TypeSwitchIntWidthCases");
 
     [TestMethod]
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");

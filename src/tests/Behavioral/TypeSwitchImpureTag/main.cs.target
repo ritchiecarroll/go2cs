@@ -17,9 +17,6 @@ internal static @string classify(any x) {
     case nint v: {
         return fmt.Sprintf("int:%d"u8, v);
     }
-    case int32 v: {
-        return fmt.Sprintf("int:%d"u8, v);
-    }
     case @string _:
     case bool _: {
         var v = switchᴛ1;
@@ -39,8 +36,7 @@ internal static @string /*result*/ recovered(any v) {
             var switchᴛ2 = recover();
             switch (switchᴛ2.type()) {
             case @string _:
-            case nint _:
-            case int32 _: {
+            case nint _: {
                 var p = switchᴛ2;
                 result = fmt.Sprintf("caught:%v"u8, p);
                 break;
@@ -66,7 +62,6 @@ internal static @string fromChan(channel<any> ch) {
     var switchᴛ3 = (ᐸꟷ(ch));
     switch (switchᴛ3.type()) {
     case nint _:
-    case int32 _:
     case int64 _: {
         var v = switchᴛ3;
         return fmt.Sprintf("num:%v"u8, v);

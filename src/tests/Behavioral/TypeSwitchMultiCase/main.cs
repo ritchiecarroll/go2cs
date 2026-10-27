@@ -50,7 +50,6 @@ internal static @string describe(shape v) {
 internal static @string classify(any x) {
     switch (x.type()) {
     case nint _:
-    case int32 _:
     case int64 _: {
         var v = x;
         return fmt.Sprintf("integer %v"u8, v);
@@ -97,7 +96,6 @@ internal static @string kind(shape v) {
 internal static @string tag(any x) {
     switch (x.type()) {
     case nint _:
-    case int32 _:
     case @string _: {
         return "common";
     }

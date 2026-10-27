@@ -25,10 +25,6 @@ internal static void @do(any i) {
         fmt.Printf("Twice %v is %v\n"u8, v, v * 2);
         break;
     }
-    case int32 v: {
-        fmt.Printf("Twice %v is %v\n"u8, v, v * 2);
-        break;
-    }
     case @string v: {
         fmt.Printf("%q is %v bytes long\n"u8, v, len(v));
         break;
@@ -41,7 +37,7 @@ internal static void @do(any i) {
 }
 ```
 
-**Go `int`/`uint` cases and the synthetic concrete case.** A Go `int` maps to C# `nint`. The converter boxes an untyped constant passed as an interface at `nint` (`do(1)` emits `@do((nint)1)`; see [Empty Interface](empty-interface.md#an-untyped-constant-boxed-as-any-boxes-at-gos-default-type)), but a C# `int` boxed into an interface by hand-written code has dynamic type `int32`, not `nint`. So a `case int:` emits its native form **plus** a synthetic concrete `case int32:` (and `case uint:` adds `case uint32:`) running the same Go body, to catch both boxings; a single-type case repeats the arm, as above, because its variable is bound at each label's own type. The exception: if the *same* switch also lists an explicit `case int32:`/`case uint32:` (or `case rune:` ≡ int32), the synthetic is **skipped** — emitting it would duplicate the explicit case (CS8120 "unreachable case") and, being emitted first, would steal the explicit case's values and run the wrong body. With the synthetic suppressed, a typed `int` value (`nint`) hits `case int:` and a typed `int32` value hits `case int32:`, distinctly. (Runtime's `printpanicval` switches over `int, int8, …, int32, …, uint, …, uint32, …`; guarded by the `TypeSwitch` behavioral test.)
+**`case int:` matches a Go `int` and nothing else.** A Go `int` maps to C# `nint` and `uint` to `nuint`, so `case int:` emits one label, `case nint`, and `case uint:` one label, `case nuint`. Go matches the dynamic type exactly, so an `int32`, a `rune` (≡ `int32`) or a `uint32` held in the interface does NOT take that arm: it goes to its own `case int32:`/`case uint32:` when the switch lists one, and to `default` otherwise, as in Go. That holds because every Go `int` reaches an interface boxed as `nint`, untyped constants included (`do(1)` emits `@do((nint)1)`; see [Empty Interface](empty-interface.md#an-untyped-constant-boxed-as-any-boxes-at-gos-default-type)). Guarded by the `TypeSwitchIntWidthCases` behavioral test (`int`, `int32`, `int64`, `uint`, `uint32`, `uint64`, `rune` and untyped constants over `case int`/`case uint`/`default`, output-compared vs Go).<!-- history: until 1.26.10.2 (seat #15) every `case nint` label was followed by a synthetic `case int32` (and `case nuint` by `case uint32`) running the same body, skipped only when the switch listed int32/rune/uint32 itself. It dated from 79ccad9d65 (2024-12-01), when an untyped `whatAmI(1)` emitted a bare C# `1` that boxed as System.Int32; once 96b13eec20 (2026-07-12) boxed untyped ints as nint it only misrouted int32(5), rune(5) and uint32(5) into Go's int/uint arm. A census of hand-owned code found no site boxing a C# int where Go has int. -->
 
 **Duplicate-mapped cases — the identical-body merge.** Go type distinctions can *vanish* in the C# type map, making a later case unreachable (CS8120). `uint` + `uintptr` does not collide: `uintptr` is golib's distinct `uintptr` struct (see [Constant Values](constants.md#constant-values)), so both cases emit their own labels, each dynamic type routing to its own body exactly as in Go.<!-- history: the canonical example was uint + uintptr under the old System.UIntPtr alias --> The merge machinery serves any pair of Go types that shares a C# type — two methodless named func types with one signature, which both render as their base delegate (`type Left func(bool) bool` and `type Right func(bool) bool` are both `Func<bool, bool>`): a duplicate-mapped case merges **only when its Go body is byte-identical** to the first occurrence's — the earlier label already routes both dynamic types to that shared body, so the merge is exact. A marker comment replaces the duplicate label:
 
@@ -53,7 +49,7 @@ case Func<bool, bool>: {
 /* case Func<bool, bool>: merged with an earlier case mapping to the same C# type (identical body) */}
 ```
 
-If the bodies **differ**, both labels are kept and the CS8120 stands: a compile error is preferable to silently routing one Go case's values into another case's body. Duplicate detection keys on the resolved C# type (`rune`→`int32`, `byte`→`uint8`) per switch statement; the synthetic `int32`/`uint32` cases register too, so an explicit later duplicate of a synthetic with the same body also merges. Guarded by `TestTypeSwitchCollapsedFuncCase` (an identical-body pair that merges, a differing-body pair that keeps both labels, and two different delegates that never merge); the `TypeSwitch` behavioral test keeps `uint` + `uintptr` with different bodies, each value hitting its own case.
+If the bodies **differ**, both labels are kept and the CS8120 stands: a compile error is preferable to silently routing one Go case's values into another case's body. Duplicate detection keys on the resolved C# type (`rune`→`int32`, `byte`→`uint8`) per switch statement. Guarded by `TestTypeSwitchCollapsedFuncCase` (an identical-body pair that merges, a differing-body pair that keeps both labels, and two different delegates that never merge); the `TypeSwitch` behavioral test keeps `uint` + `uintptr` with different bodies, each value hitting its own case.
 
 **Multi-type cases stack labels and bind at the tag's interface type.** Go binds a type-switch case
 variable at the listed CONCRETE type only when the clause lists exactly **one** type; a multi-type clause
@@ -81,15 +77,14 @@ The `_` designation is load-bearing, not stylistic: it forces the label into PAT
 the same-named conversion FUNCTION (`int8(…)`) — a method group, neither constant nor type — failing
 CS8917 (encoding/binary's `Size`/`intDataSize` stacks).<!-- caught by the census build, not the behavioral
 corpus, whose labels happened not to collide --> `case nil` stacks as `case null:`, a dynamic-interface
-label stacks in its non-binding `{} ᴛn when ᴛn._<Iface>(out var _)` form, and the synthetic
-`int32`/`uint32` companions of `case int:`/`case uint:` stack with the same discard. The
+label stacks in its non-binding `{} ᴛn when ᴛn._<Iface>(out var _)` form. The
 duplicate-mapped-case merge applies per label (a merged label leaves its marker comment above the stack).
 An UNBOUND multi-type clause (`switch x.(type)`) stacks the same way with no re-bind, over one body. The re-bind
 re-evaluates the guard EXPRESSION at body entry — harmless
 for a pure tag (nothing can mutate it between dispatch and entry), and an IMPURE tag is hoisted into
 a one-time temporary first (see *The type-switch tag evaluates exactly once* below). (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
 cases over values and pointers with interface-dispatched body uses, `nil` stacked with a concrete type, an
-unbound multi-type clause, and the synthetic-int stacking, output-compared vs Go.)
+unbound multi-type clause, and an `int` stacked with other types, output-compared vs Go.)
 **Runtime dispatch — `.type()` unwraps the interface adapters.** The case patterns match against
 whatever object the switch operand `.type()` returns, so it must surface the Go DYNAMIC value, not
 the C#-only wrapper classes the runtime uses to carry it. A non-empty interface value created from

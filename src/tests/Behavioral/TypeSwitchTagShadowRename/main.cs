@@ -15,9 +15,6 @@ internal static @string inspect(any n) {
         case nint: {
             return "node:int";
         }
-        case int32: {
-            return "node:int";
-        }
         case @string: {
             return "node:string";
         }
@@ -49,9 +46,6 @@ internal static (@string, @string) classifyVia(any v) {
         var switchᴛ1 = unwrapʗ1(vΔ2);
         switch (switchᴛ1.type()) {
         case nint vΔ3: {
-            return fmt.Sprintf("int:%d"u8, vΔ3);
-        }
-        case int32 vΔ3: {
             return fmt.Sprintf("int:%d"u8, vΔ3);
         }
         case @string vΔ3: {
