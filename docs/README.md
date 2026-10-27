@@ -91,10 +91,12 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 ## Requirements
 
 - **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
-- **[Go 1.26](https://go.dev/dl/)**, any 1.26.x release, to convert a module. The standard library
-  packages are converted from, and validated on, Go 1.26.10. The converter is a Go program and uses
-  the Go toolchain to load and type-check the source it converts, so that source must already build
-  with `go build`. The [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
+- **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
+  type-check the source it converts, so that source must already build with `go build`. The
+  [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.10, on first use.
+  To build the converter from source instead, you need [Go 1.26](https://go.dev/dl/). The standard
+  library packages are converted from, and validated on, Go 1.26.10, and the
+  [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
   tests. macOS, on Intel and Apple silicon, has packages and is being validated package by package
   ([Platforms](Roadmap.md#platforms)).
@@ -103,6 +105,19 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
   ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
 
 ## Installing the converter
+
+Install it as a .NET tool:
+
+```shell
+dotnet tool install -g go2cs
+```
+
+The tool is the converter itself, built for Windows, Linux and macOS on x64 and Arm64, and it needs no Go: the
+first conversion downloads the Go release go2cs converts with, checks it against hashes built into go2cs, and
+keeps it in your user cache folder. [The go2cs dotnet tool](DotnetTool.md) explains where that Go comes from,
+how to install it from a file on a machine with no network access, and `go2cs toolchain`.
+
+### Building it from source
 
 Clone the repository and install the converter from the clone. `go install` puts the `go2cs` binary in
 `GOBIN` (or `GOPATH/bin`), which a standard Go setup already has on its `PATH`:
