@@ -23,7 +23,7 @@ def esc_prop(text):
     return esc(text).replace(':', '%3A').replace(',', '%2C')
 
 def load(rid):
-    rows = {}
+    rows, results = {}, {}
     base = os.path.join(root, rid)
     for d, _, files in os.walk(base):
         if 'go2cs_test_comparison.json' not in files:
@@ -35,7 +35,23 @@ def load(rid):
         if pkg in rows:
             sys.exit(f'{rid}: two comparison records for {pkg}')
         rows[pkg] = (rec, hashlib.sha256(raw).hexdigest()[:12])
-    return rows
+        # The C# host's own results beside it: the only record that carries a failing test's TEXT.
+        rpath = os.path.join(d, 'go2cs_test_results.json')
+        if os.path.exists(rpath):
+            try:
+                results[pkg] = json.loads(open(rpath, 'rb').read().decode('utf-8-sig'))
+            except ValueError:
+                results[pkg] = None
+    return rows, results
+
+def fail_text(record, name, lines=12):
+    if not record:
+        return ['(no go2cs_test_results.json)']
+    out = []
+    for ev in record.get('events') or []:
+        if ev.get('test') == name and ev.get('action') == 'fail':
+            out.extend(str(ev.get('output') or '').splitlines())
+    return [l for l in out if l.strip()][:lines] or ['(no fail event)']
 
 def reading(rec):
     go = rec.get('go') or {}
@@ -49,10 +65,12 @@ def reading(rec):
     new = [n for n in divergent if n not in disclosed_names]
     return len(names), matched, len(disclosed), len(divergent), new, rec.get('status', '?')
 
-by_rid = {rid: load(rid) for rid in RIDS}
+loaded = {rid: load(rid) for rid in RIDS}
+by_rid = {rid: loaded[rid][0] for rid in RIDS}
+results = {rid: loaded[rid][1] for rid in RIDS}
 pkgs = sorted(set(by_rid['osx-arm64']) | set(by_rid['osx-x64']))
 
-table, details = [], []
+table, details, failtext = [], [], []
 for pkg in pkgs:
     a = by_rid['osx-arm64'].get(pkg)
     x = by_rid['osx-x64'].get(pkg)
@@ -76,6 +94,9 @@ for pkg in pkgs:
         table.append(f'{pkg}\t{rid}\t{verdicts}\t{matched}\t{disclosed}\t{divergent}\t{len(new)}\t{status}\t{agree}\t{got[1]}')
         if new:
             details.append(f'{pkg} {rid} new {len(new)}: ' + ', '.join(new[:15]) + (' ...' if len(new) > 15 else ''))
+            for name in new[:5]:
+                failtext.append(f'== {pkg} {rid} {name}: C# fail text')
+                failtext.extend('   ' + l[:240] for l in fail_text(results[rid].get(pkg), name))
 
 def emit(level, title, lines, cap=8, budget=3000):
     chunks, cur = [], ''
@@ -97,3 +118,5 @@ print(summary)
 emit('notice', f'relay {run} table', [summary] + table)
 if details:
     emit('warning', f'relay {run} details', details)
+if failtext:
+    emit('error', f'relay {run} failtext', failtext)
