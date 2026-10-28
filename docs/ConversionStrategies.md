@@ -244,7 +244,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:60,66#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#b164fa +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:42#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
-  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#416bab ·
+  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#3d4175 ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:11,32,74,77#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:56#64aa80 + src/core/reflect/type.cs:1258#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
