@@ -80,7 +80,7 @@ internal static void walkChain(slice<byte> der) {
             fmt.Println("open store error:", err);
             return;
         }
-        defer(syscall.CertCloseStore, store, (uint32)0, ref ᒐ);
+        defer(ᴛ1 => syscall.CertCloseStore(ᴛ1, 0), store, ref ᒐ);
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
         {
