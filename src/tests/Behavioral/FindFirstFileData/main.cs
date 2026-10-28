@@ -95,7 +95,7 @@ internal static void build(@string root) {
     foreach (var (_, f) in files) {
         var body = new slice<byte>(f.size);
         foreach (var i in range(body)) {
-            body[i] = (byte)((rune)'a' + i % 26);
+            body[i] = (byte)('a' + i % 26);
         }
         {
             var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != nil) {
@@ -226,7 +226,7 @@ internal static @string ascii(@string s) {
             @out = append(@out, (byte)r);
             continue;
         }
-        @out = append(@out, (byte)((rune)'\\'), (byte)((rune)'u'));
+        @out = append(@out, (byte)'\\', (byte)'u');
         for (nint shift = 12; shift >= 0; shift -= 4) {
             @out = append(@out, hexDigits[((r.Rsh((nuint)shift)) & 0xf)]);
         }

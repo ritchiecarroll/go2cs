@@ -228,9 +228,9 @@ internal static void Main() {
 
                 Ꮡwg.Add(2);
                 var runʗ1 = run;
-                goǃ(runʗ1, (nint)0, a1, a2, (byte)((rune)'a'));
+                goǃ(runʗ1, (nint)0, a1, a2, (byte)'a');
                 var runʗ2 = run;
-                goǃ(runʗ2, (nint)1, b1, b2, (byte)((rune)'b'));
+                goǃ(runʗ2, (nint)1, b1, b2, (byte)'b');
                 Ꮡwg.Wait();
 
                 return results[0] + ", " + results[1];

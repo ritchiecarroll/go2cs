@@ -25,7 +25,7 @@ internal static void utf16() {
 
     show("unterminated", syscall.UTF16ToString(encode("NoTerminator")));
 
-    var poisoned = new uint16[]{0, (rune)'x', (rune)'y', (rune)'z'}.array();
+    var poisoned = new uint16[]{0, 'x', 'y', 'z'}.array();
     show("leading NUL", syscall.UTF16ToString(poisoned[..]));
 
     show("empty slice", syscall.UTF16ToString(new uint16[]{}.slice()));
