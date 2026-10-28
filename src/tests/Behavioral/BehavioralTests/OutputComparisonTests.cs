@@ -1613,6 +1613,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
 
     [TestMethod]
+    public void CheckParitySmallFour() => CheckTarget("ParitySmallFour");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]

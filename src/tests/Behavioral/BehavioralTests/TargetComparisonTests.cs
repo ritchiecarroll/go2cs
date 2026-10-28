@@ -1666,6 +1666,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
 
     [TestMethod]
+    public void CheckParitySmallFour() => CheckTarget("ParitySmallFour");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]
