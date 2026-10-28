@@ -30742,4 +30742,28 @@ The untyped var, `:=` and a generic argument that infers T were already kept, an
 
 — P2 (2026-10-28)
 
+## 2026-10-28 — P2 (1.26.10.2 parity seat #23, C1, claude/p2-seat23-rune-lit-r3): the stdlib compile arm, and the cut on batch 81
+
+**A second red, found by the stdlib compile arm.** The -stdlib emission at the batch-80 cut, built with
+go2cs-stdlib.slnx per GoTargetOS, failed with CS0266 (char to byte) on every target: internal/strconv's atof.cs,
+`case s[i] == '_':` under `switch {` and `case c == '_':` under `switch c := s[i]; true {`, and on darwin
+internal/cpu's cpu_darwin.cs, `case b >= '0' && b <= '9':`. r2 emitted the same lines, so batch 80's held cut
+carried them too; its gates (CNR, go2cs.slnx) never build the stdlib emission. A tagless switch's case comparison
+renders as a C# pattern (`c is '_'`), whose constant must convert to the operand's type, and a char does not reach
+byte. Rule: such a comparison (tag absent or the constant true, alone or joined by && and || and parentheses) takes
+the typed-slot form, `c is (byte)'_'`; a rune operand keeps the bare char. Guard arms: TestRuneLiteralForms'
+taglessByte and trueTagByte, and RuneLiteralContexts' two switch shapes over byte, int8 and rune; at the base the
+guard's C# compile fails with the same CS0266, at the fix it compiles and matches Go.
+
+**The cut.** Rebased per §3.3 onto batch 81 (904c363f67), goldens re-minted last.
+- Stdlib emission at the tip, built per GoTargetOS: 0 errors on linux, windows and darwin (1,279 / 1,236 / 1,288
+  files written). The warnings are not this seat's: CS9113 in testing/TestReporter.cs on all three, and CS0219 in
+  syscall/linux/exec_linux.cs on linux.
+- CNR changed the same 43 goldens and consumer.cs as at batch 80; pcensus `classify -items C1` reads 177 pairs, all
+  C1, 0 refused, identical per file to the batch-80 cut. TestPlants holds no AMBIGUOUS against N2 or GD.
+- All 45 projects pass the behavioral Compile and Output phases on linux. No doc sample moves.
+- Windows-exclusive goldens left to the i7: EnvironBlockWalk, FindFirstFileData, RawConnSyncSocketIO, UnsafeStringEmpty.
+
+— P2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
