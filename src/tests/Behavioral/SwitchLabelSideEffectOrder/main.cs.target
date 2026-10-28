@@ -18,40 +18,48 @@ internal static @string s(@string name, @string v) {
 
 internal static void flush(@string label, @string arm) {
     fmt.Printf("%s -> %s %v\n"u8, label, arm, log);
-    log = default!;
+    log = default;
 }
 
 internal static void leading(nint t) {
-    var exprᴛ1 = t;
-    if (exprᴛ1 == f("a", 1) || exprᴛ1 == f("b", 2)) {
-        flush(fmt.Sprint("leading ", t), "ab");
-    }
-    else if (exprᴛ1 is 3) {
-        flush(fmt.Sprint("leading ", t), "const3");
-    }
-    else if (exprᴛ1 == f("c", 3) || exprᴛ1 == f("d", 4)) {
-        flush(fmt.Sprint("leading ", t), "cd");
-    }
-    else { /* default: */
+    switch (t) {
+    default: {
         flush(fmt.Sprint("leading ", t), "default");
+        break;
     }
+    case var ᴛ when ᴛ == f("a", 1) || ᴛ == f("b", 2): {
+        flush(fmt.Sprint("leading ", t), "ab");
+        break;
+    }
+    case 3: {
+        flush(fmt.Sprint("leading ", t), "const3");
+        break;
+    }
+    case var ᴛ when ᴛ == f("c", 3) || ᴛ == f("d", 4): {
+        flush(fmt.Sprint("leading ", t), "cd");
+        break;
+    }}
 
 }
 
 internal static void middle(nint t) {
-    var exprᴛ1 = t;
-    if (exprᴛ1 == f("e", 5)) {
+    switch (t) {
+    case var ᴛ when ᴛ == f("e", 5): {
         flush(fmt.Sprint("middle ", t), "e");
+        break;
     }
-    else if (exprᴛ1 is 6) {
-        flush(fmt.Sprint("middle ", t), "const6");
-    }
-    else if (exprᴛ1 == f("g", 6) || exprᴛ1 == f("h", 7)) {
-        flush(fmt.Sprint("middle ", t), "gh");
-    }
-    else { /* default: */
+    default: {
         flush(fmt.Sprint("middle ", t), "default");
+        break;
     }
+    case 6: {
+        flush(fmt.Sprint("middle ", t), "const6");
+        break;
+    }
+    case var ᴛ when ᴛ == f("g", 6) || ᴛ == f("h", 7): {
+        flush(fmt.Sprint("middle ", t), "gh");
+        break;
+    }}
 
 }
 
@@ -59,53 +67,80 @@ internal static void nested(@string a, nint b) {
     {
         @string x = a + "!"u8;
         var exprᴛ1 = x;
-        if (exprᴛ1 == s("p", "p!")) {
-            var exprᴛ2 = b;
-            if (exprᴛ2 == f("q", 1)) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == s("p", "p!"): {
+            switch (b) {
+            case var ᴛ when ᴛ == f("q", 1): {
                 flush("nested "u8 + x, fmt.Sprint("p/q ", b));
+                break;
             }
-            else { /* default: */
+            default: {
                 flush("nested "u8 + x, fmt.Sprint("p/default ", b));
-            }
+                break;
+            }}
 
+            break;
         }
-        else if (exprᴛ1 == s("r", "r!") || exprᴛ1 == s("t", "t!")) {
+        case {} when exprᴛ1 == s("r", "r!") || exprᴛ1 == s("t", "t!"): {
             flush("nested "u8 + x, "rt");
-        }
+            break;
+        }}
     }
 
 }
 
 internal static void iface(any v) {
-    var exprᴛ1 = v;
-    if (AreEqual(exprᴛ1, ((any)f("i", 1)))) {
+    switch (v) {
+    case var ᴛ when AreEqual(ᴛ, ((any)f("i", 1))): {
         flush(fmt.Sprintf("iface %v"u8, v), "int 1");
+        break;
     }
-    else if (AreEqual(exprᴛ1, ((any)s("j", "one")))) {
+    case var ᴛ when AreEqual(ᴛ, ((any)s("j", "one"))): {
         flush(fmt.Sprintf("iface %v"u8, v), "string one");
+        break;
     }
-    else { /* default: */
+    default: {
         flush(fmt.Sprintf("iface %v"u8, v), "default");
+        break;
+    }}
+
+}
+
+internal static void bytesNotText(@string t, @string y) {
+    var exprᴛ1 = t;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == y: {
+        flush(fmt.Sprintf("bytes %x"u8, t), fmt.Sprintf("matched %x"u8, y));
+        break;
     }
+    case {} when exprᴛ1 == ((@string)(new byte[]{0xff})): {
+        flush(fmt.Sprintf("bytes %x"u8, t), "ff");
+        break;
+    }
+    default: {
+        flush(fmt.Sprintf("bytes %x"u8, t), "default");
+        break;
+    }}
 
 }
 
 internal static void loop() {
     for (nint i = 0; i < 5; i++) {
-        var exprᴛ1 = i;
-        if (exprᴛ1 == f("x", 1)) {
-            do {
-                if (i > 0) {
-                    break;
-                }
-                flush("loop unreachable", "x");
-            } while (false);
+        switch (i) {
+        case var ᴛ when ᴛ == f("x", 1): {
+            if (i > 0) {
+                break;
+            }
+            flush("loop unreachable", "x");
+            break;
         }
-        else if (exprᴛ1 == f("y", 2)) {
+        case var ᴛ when ᴛ == f("y", 2): {
             continue;
+            break;
         }
-        else { /* default: */
-        }
+        default: {
+            break;
+        }}
 
         flush(fmt.Sprint("loop ", i), "after");
     }
@@ -127,6 +162,9 @@ internal static void Main() {
     iface("one");
     iface(2.5D);
     loop();
+    bytesNotText(((@string)(new byte[]{0xff})), ((@string)(new byte[]{0xfe})));
+    bytesNotText(((@string)(new byte[]{0xfe})), ((@string)(new byte[]{0xfd})));
+    bytesNotText(((@string)(new byte[]{0xfe})), ((@string)(new byte[]{0xfe})));
 }
 
 } // end main_package

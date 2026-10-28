@@ -41,13 +41,13 @@ internal static F64 typedF64 => 0.1;
 internal const float32 plainF32 = 0.1f;
 
 internal static @string classify(C128 c) {
-    var exprᴛ1 = c;
-    if (exprᴛ1 == (C128)(0D)) {
+    switch (c) {
+    case var ᴛ when ᴛ == (C128)(0D): {
         return "zero";
     }
-    if (exprᴛ1 == (C128)(1D) || exprᴛ1 == (C128)(2.5D)) {
+    case var ᴛ when ᴛ == (C128)(1D) || ᴛ == (C128)(2.5D): {
         return "small";
-    }
+    }}
 
     return "other";
 }

@@ -20,9 +20,11 @@ internal static void Main() {
 
     foreach (var (_, setting) in (~bi).Settings) {
         var exprᴛ1 = setting.Key;
-        if (exprᴛ1 == "GOOS"u8 || exprᴛ1 == "GOARCH"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "GOOS"u8 || exprᴛ1 == "GOARCH"u8: {
             fmt.Printf("%s: %s\n"u8, setting.Key, setting.Value);
-        }
+            break;
+        }}
 
     }
 }

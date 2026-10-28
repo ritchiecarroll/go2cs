@@ -12,31 +12,34 @@ internal static bucketType mutexProfile => 2;
 
 internal static @string size(bucketType typ) {
     @string s = default;
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == memProfile) {
-        s = "mem";
-    }
-    else if (exprᴛ1 == blockProfile || exprᴛ1 == mutexProfile) {
-        s = "block-or-mutex";
-    }
-    else { /* default: */
+    switch (typ) {
+    default: {
         s = "invalid";
+        break;
     }
+    case var ᴛ when ᴛ == memProfile: {
+        s = "mem";
+        break;
+    }
+    case var ᴛ when ᴛ == blockProfile || ᴛ == mutexProfile: {
+        s = "block-or-mutex";
+        break;
+    }}
 
     return s;
 }
 
 internal static nint mid(bucketType typ) {
-    var exprᴛ1 = typ;
-    if (exprᴛ1 == memProfile) {
+    switch (typ) {
+    case var ᴛ when ᴛ == memProfile: {
         return 1;
     }
-    if (exprᴛ1 == blockProfile) {
-        return 2;
-    }
-    { /* default: */
+    default: {
         return -1;
     }
+    case var ᴛ when ᴛ == blockProfile: {
+        return 2;
+    }}
 
 }
 

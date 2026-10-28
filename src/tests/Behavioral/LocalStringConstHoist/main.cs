@@ -83,9 +83,10 @@ internal static @string classify(@string x) {
     @string yes = "matched";
     @string no = "unmatched";
     var exprᴛ1 = x;
-    if (exprᴛ1 == yes) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == yes: {
         return "case:" + yes;
-    }
+    }}
 
     return no;
 }

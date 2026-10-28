@@ -142,15 +142,15 @@ public static bool HasName(this ref Type t) {
 public static ж<Type> Elem(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == Array) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == Array: {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
         return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
-    if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
         return tt.of(main_package.ΔMapType.ᏑElem).Value;
-    }
+    }}
 
     return default;
 }
@@ -209,13 +209,13 @@ internal static @string stateMachine(nint step) {
     const int64 wideLocal = /* iota */ 0;
     int64 offset = wideLocal;
 
-    var exprᴛ1 = step;
-    if (exprᴛ1 == stateInit) {
+    switch (step) {
+    case var ᴛ when ᴛ == stateInit: {
         return fmt.Sprintf("init[%d]"u8, offset);
     }
-    if (exprᴛ1 == stateDict) {
+    case var ᴛ when ᴛ == stateDict: {
         return fmt.Sprintf("dict[%d]"u8, offset);
-    }
+    }}
 
     return "unknown";
 }

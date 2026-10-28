@@ -48,13 +48,13 @@ internal static bool /*recovered*/ tryRecover(bool doPanic) {
 }
 
 internal static @string describe(any v) {
-    var exprᴛ1 = v;
-    if (AreEqual(exprᴛ1, default)) {
+    switch (v) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         return "nil interface";
     }
-    { /* default: */
+    default: {
         return fmt.Sprintf("non-nil %T"u8, v);
-    }
+    }}
 
 }
 

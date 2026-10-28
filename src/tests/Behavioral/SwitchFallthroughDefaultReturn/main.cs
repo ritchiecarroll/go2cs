@@ -131,18 +131,17 @@ internal static nint waitObject0 = 0;
 internal static nint waitFailed = -1;
 
 internal static partial @string waitShape(nint s) {
-    var exprᴛ1 = s;
-    if (exprᴛ1 == waitObject0) {
-        do {
-            break;
-        } while (false);
+    switch (s) {
+    case var ᴛ when ᴛ == waitObject0: {
+        break;
+        break;
     }
-    else if (exprᴛ1 == waitFailed) {
+    case var ᴛ when ᴛ == waitFailed: {
         return "failed";
     }
-    else { /* default: */
+    default: {
         return "unexpected";
-    }
+    }}
 
     return "ok";
 }

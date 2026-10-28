@@ -100,12 +100,13 @@ internal static @string concatCall(slice<byte> b, Func<@string> f) {
 
 internal static nint switchTag(slice<byte> b) {
     var exprᴛ1 = ((sstring)b);
-    if (exprᴛ1 == "get"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "get"u8: {
         return 1;
     }
-    if (exprᴛ1 == "put"u8) {
+    case {} when exprᴛ1 == "put"u8: {
         return 2;
-    }
+    }}
 
     return 0;
 }
@@ -113,12 +114,13 @@ internal static nint switchTag(slice<byte> b) {
 internal static nint switchLocal(slice<byte> b) {
     sstring s = (sstring)b;
     var exprᴛ1 = s;
-    if (exprᴛ1 == "on"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "on"u8: {
         return 1;
     }
-    if (exprᴛ1 == "off"u8) {
+    case {} when exprᴛ1 == "off"u8: {
         return 2;
-    }
+    }}
 
     return -1;
 }
@@ -129,21 +131,23 @@ internal static readonly @string gzMagic = ((@string)(new byte[]{0x1f, 0x8b}));
 
 internal static nint switchMagic(slice<byte> b) {
     var exprᴛ1 = ((sstring)b);
-    if (exprᴛ1 == zipMagic) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == zipMagic: {
         return 1;
     }
-    if (exprᴛ1 == gzMagic) {
+    case {} when exprᴛ1 == gzMagic: {
         return 2;
-    }
+    }}
 
     return 0;
 }
 
 internal static nint switchCall(slice<byte> b) {
     var exprᴛ1 = ((@string)b);
-    if (exprᴛ1 == labelValue()) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == labelValue(): {
         return 1;
-    }
+    }}
 
     return 0;
 }

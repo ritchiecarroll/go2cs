@@ -285,61 +285,61 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
         return default;
     }
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == Struct) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == Struct: {
         return Ꮡ((Ꮡt.Reinterpret<Type, structTypeUncommon>()).Value.u);
     }
-    if (exprᴛ1 == Pointer) {
+    case var ᴛ when ᴛ == Pointer: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_u>()).Value.u);
     }
-    if (exprᴛ1 == Func) {
+    case var ᴛ when ᴛ == Func: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>()).Value.u);
     }
-    if (exprᴛ1 == Slice) {
+    case var ᴛ when ᴛ == Slice: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>()).Value.u);
     }
-    if (exprᴛ1 == Array) {
+    case var ᴛ when ᴛ == Array: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>()).Value.u);
     }
-    if (exprᴛ1 == Chan) {
+    case var ᴛ when ᴛ == Chan: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>()).Value.u);
     }
-    if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>()).Value.u);
     }
-    if (exprᴛ1 == Interface) {
+    case var ᴛ when ᴛ == Interface: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>()).Value.u);
     }
-    { /* default: */
+    default: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>()).Value.u);
-    }
+    }}
 
 }
 
 public static ж<Type> Elem(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == Array) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == Array: {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
         return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
-    if (exprᴛ1 == Chan) {
+    case var ᴛ when ᴛ == Chan: {
         var tt = Ꮡt.Reinterpret<Type, ChanType>();
         return tt.of(ChanType.ᏑElem).Value;
     }
-    if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
         return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
-    if (exprᴛ1 == Pointer) {
+    case var ᴛ when ᴛ == Pointer: {
         var tt = Ꮡt.Reinterpret<Type, PtrType>();
         return tt.of(PtrType.ᏑElem).Value;
     }
-    if (exprᴛ1 == Slice) {
+    case var ᴛ when ᴛ == Slice: {
         var tt = Ꮡt.Reinterpret<Type, SliceType>();
         return tt.of(SliceType.ᏑElem).Value;
-    }
+    }}
 
     return default;
 }

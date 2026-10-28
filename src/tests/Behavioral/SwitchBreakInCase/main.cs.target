@@ -10,27 +10,26 @@ internal static UntypedInt stateC => 2;
 
 internal static @string classify(nint n, bool flag) {
     @string result = "none";
-    var exprᴛ1 = n;
-    if (exprᴛ1 == stateA) {
-        do {
-            if (flag) {
-                break;
-            }
-            result = "a";
-        } while (false);
+    switch (n) {
+    case var ᴛ when ᴛ == stateA: {
+        if (flag) {
+            break;
+        }
+        result = "a";
+        break;
     }
-    else if (exprᴛ1 == stateB) {
-        do {
-            result = "b";
-            if (flag) {
-                break;
-            }
-            result = "b-noflag";
-        } while (false);
+    case var ᴛ when ᴛ == stateB: {
+        result = "b";
+        if (flag) {
+            break;
+        }
+        result = "b-noflag";
+        break;
     }
-    else { /* default: */
+    default: {
         result = "other";
-    }
+        break;
+    }}
 
     return result;
 }

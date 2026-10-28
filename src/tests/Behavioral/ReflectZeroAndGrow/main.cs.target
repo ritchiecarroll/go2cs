@@ -31,10 +31,11 @@ partial struct outer {
 internal static void z(@string label, any v) {
     var rv = reflect.ValueOf(v);
     fmt.Printf("%-22s kind=%-9v IsZero=%-5v"u8, label, rv.Kind(), rv.IsZero());
-    var exprᴛ1 = rv.Kind();
-    if (exprᴛ1 == reflect.ΔString || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Map) {
+    switch (rv.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔString || ᴛ == reflect.ΔSlice || ᴛ == reflect.Array || ᴛ == reflect.Map: {
         fmt.Printf(" Len=%d"u8, rv.Len());
-    }
+        break;
+    }}
 
     fmt.Println();
 }

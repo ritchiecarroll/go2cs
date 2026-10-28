@@ -82,16 +82,19 @@ internal static void checkErr(nint n) {
     if (!AreEqual(err, errAgain)) {
         fmt.Println("not again");
     }
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, errAgain)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, errAgain): {
         fmt.Println("switch: again");
+        break;
     }
-    else if (AreEqual(exprᴛ1, default)) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         fmt.Println("switch: nil");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("switch: other");
-    }
+        break;
+    }}
 
 }
 

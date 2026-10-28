@@ -165,19 +165,19 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> chainCtx, @s
         }
     }
 
-    var exprᴛ1 = status.Error;
-    if (exprᴛ1 is 0) {
+    switch (status.Error) {
+    case 0: {
         return "ok";
     }
-    if (exprᴛ1 == syscall.CERT_E_CN_NO_MATCH) {
+    case var ᴛ when ᴛ == syscall.CERT_E_CN_NO_MATCH: {
         return "cn mismatch";
     }
-    if (exprᴛ1 == syscall.CERT_E_UNTRUSTEDROOT) {
+    case var ᴛ when ᴛ == syscall.CERT_E_UNTRUSTEDROOT: {
         return "untrusted root";
     }
-    { /* default: */
+    default: {
         return fmt.Sprintf("0x%08x"u8, status.Error);
-    }
+    }}
 
 }
 

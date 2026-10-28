@@ -142,10 +142,10 @@ internal static void Main() {
     });
     arm("case value", () => {
         uint8 v = 144;
-        var exprᴛ1 = v;
-        if (exprᴛ1 == (uint8)(u + u)) {
+        switch (v) {
+        case var ᴛ when ᴛ == (uint8)(u + u): {
             return "wrapped";
-        }
+        }}
 
         return "unwrapped";
     });
@@ -154,15 +154,17 @@ internal static void Main() {
         any x = (int8)50;
         any y = (uint8)66;
         @string r = "nomatch";
-        var exprᴛ2 = x;
-        if (AreEqual(exprᴛ2, (int8)((h >> 1)))) {
+        switch (x) {
+        case var ᴛ when AreEqual(ᴛ, (int8)((h >> 1))): {
             r = "match";
-        }
+            break;
+        }}
 
-        var exprᴛ3 = y;
-        if (AreEqual(exprᴛ3, (uint8)(u / 3))) {
+        switch (y) {
+        case var ᴛ when AreEqual(ᴛ, (uint8)(u / 3)): {
             r += " match"u8;
-        }
+            break;
+        }}
 
         return r;
     });

@@ -7,27 +7,27 @@ partial class main_package {
 public static UntypedInt Width => 8;
 
 internal static @string classify(uintptr n) {
-    var exprᴛ1 = n;
-    if (exprᴛ1 == Width) {
+    switch (n) {
+    case var ᴛ when ᴛ == Width: {
         return "width";
     }
-    { /* default: */
+    default: {
         return "other";
-    }
+    }}
 
 }
 
 internal static @string matchVar(uintptr p, uintptr a, uintptr b) {
-    var exprᴛ1 = p;
-    if (exprᴛ1 == a) {
+    switch (p) {
+    case var ᴛ when ᴛ == a: {
         return "A";
     }
-    if (exprᴛ1 == b) {
+    case var ᴛ when ᴛ == b: {
         return "B";
     }
-    { /* default: */
+    default: {
         return "?";
-    }
+    }}
 
 }
 
