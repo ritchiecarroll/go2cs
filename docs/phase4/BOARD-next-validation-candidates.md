@@ -30193,6 +30193,21 @@ first cut, `f821dfb6c7`; this record commit, placed beneath it, touches only `do
 - The branch was then rebased onto batch 75 (`e9f05d8c09`), which changes only
   `src/core/runtime/go2cs_test_disclosures.json`, a file the seat does not touch; repoguard re-read green at the final tip.
 
+**Rebased onto batch 76 (`a4711608e1`, #20's N1 and D1), as the r2 branch.** The goldens commit was dropped,
+the eight commits replayed, and the goldens re-minted `--only` for the 57 projects as the last commit.
+- Conflicts: a ConversionStrategies provenance line both sides had re-fingerprinted (master's taken, then
+  SelectStatement:75 re-cited to this seat's `#3d4175`), and the BOARD append.
+- The seat's converter, pcensus, golib and test deltas carry the same stable patch-ids as at the first base, so
+  the footprint above stands as measured.
+- Goldens: 57 `.cs.target` and 57 `.cs`, every golden byte-equal to its emission, 0 `package_info.cs`.
+- pcensus `-items F1,DIR,FOR,SHIFT` on the goldens refused 1 pair: D1's `default!` to `default` in this seat's
+  own ParitySmallFour, minted before batch 76. With D1 allowed: REFUSED 0 on the goldens and on the emissions
+  (F1 114, DIR 19, FOR 22, SHIFT 2 per side, the same counts as at the first base).
+- Gates at the r2 tree (goldens re-minted, one battery on the box): `go test -timeout 60m ./...` 10 packages ok;
+  GenTests 346/346; GolibTests unfiltered 2,257 passed, 0 failed, 36 skipped; golib Release `--no-incremental` 0
+  warnings with csc over the full source list; `go2cs.slnx` 0 errors (158 standing warnings); `go2cs-stdlib.slnx`
+  0/0; behavioral on the 57: trx total = executed = passed = 226, failed 0 (A1 57, B2 57, C3 57, D4 55).
+
 — H (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
