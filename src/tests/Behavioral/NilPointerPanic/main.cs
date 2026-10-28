@@ -87,6 +87,16 @@ internal static void Main() {
         fmt.Println((~(~realʗ1).next).name);
     });
 
+    var q = (ж<node>)nil;
+    var qʗ1 = q;
+    @catch("typed-nil-field-read", () => {
+        fmt.Println((~qʗ1).name);
+    });
+    var qʗ2 = q;
+    @catch("typed-nil-field-write", () => {
+        qʗ2.Value.name = "x";
+    });
+
     var pʗ5 = p;
     @catch("nil-safe-method", () => {
         fmt.Println(pʗ5.isNil());
