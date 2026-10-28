@@ -32,8 +32,8 @@ internal static void Main() {
     fmt.Println("lookup other:", lookup(err, q));
 }
 
-internal static @string lookup(any key, ж<node> Ꮡwant) {
-    if (AreEqual(key, Ꮡwant)) {
+internal static @string lookup(any key, ж<node> want) {
+    if (AreEqual(key, want)) {
         return "found";
     }
 

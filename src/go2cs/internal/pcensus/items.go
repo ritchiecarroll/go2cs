@@ -199,9 +199,16 @@ var items = []item{
 	{
 		ID: "R5", Seat: "#25", Title: "un-aliased pointer parameters keep their Go name",
 		Measures: []measure{m("R5", "box-param", `(?:\(|, )ж<`+generic+`> Ꮡ[\p{L}_]`)},
-		// A box name loses its `Ꮡ` wherever it is not a member (a field's `T.Ꮡf` is P2's, never R5's).
-		Canon: []rewrite{rw(`(^|[^.\p{L}\p{N}_])Ꮡ(`+id+`)`, "$1$2")},
-		Old:   rx(`(?:^|[^.\p{L}\p{N}_])Ꮡ` + id),
+		// A box name loses its `Ꮡ` wherever it is not a member (a field's `T.Ꮡf` is P2's, never R5's). The name it
+		// takes is the parameter's analyzed one: a C# keyword escaped (`Ꮡout` → `@out`), a collision prefixed or
+		// numbered (`Ꮡp` → `Δp`, `Ꮡrand` → `randΔ1`). Both lines drop that decoration, so a pair compares on the Go
+		// name; Old still requires the pair to lose a box token.
+		Canon: []rewrite{
+			rw(`(^|[^.\p{L}\p{N}_])Ꮡ(`+id+`)`, "$1$2"),
+			rw(`(^|[^.\p{L}\p{N}_])[@Δ](`+id+`)`, "$1$2"),
+			rw(`(^|[^.\p{L}\p{N}_])([\p{L}_][\p{L}\p{N}_]*?)Δ\d+`, "$1$2"),
+		},
+		Old: rx(`(?:^|[^.\p{L}\p{N}_])Ꮡ` + id),
 	},
 	{
 		ID: "N2", Seat: "#26", Title: "a named numeric converts to a basic numeric in one cast",

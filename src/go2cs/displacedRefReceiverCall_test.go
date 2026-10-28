@@ -55,8 +55,9 @@ import (
 //     close over or pass on its receiver, and defers nothing, so the capture-mode pass leaves it a
 //     plain `[GoRecv] this ref seq` primary — the shape reflect's regAssign has.
 //   - `add` calls it on ITS OWN `ref` receiver: the defect's shape, no box in scope.
-//   - `addViaParam` calls it on a pointer PARAMETER: the box `Ꮡp` IS the parameter, so the box form
-//     is correct and must survive.
+//   - `addViaParam` calls it on a pointer PARAMETER: the box IS the parameter, so the box form is
+//     correct and must survive. With no deref alias it keeps its Go name `p` (R5), so the box form
+//     reads `p`.
 //   - `addBoxed` takes its receiver's field address, which makes it direct-ж (`this ж<seq> Ꮡs`), so
 //     its receiver box exists and the box form is correct there too.
 const refReceiverCallSource = `package main
@@ -178,7 +179,8 @@ func TestDisplacedRefReceiverCallKeepsRefForm(t *testing.T) {
 	requireCallForm(t, lines, "add(", "s")
 
 	// Control — a pointer PARAMETER's box IS the parameter, so the box form is right and must stay.
-	requireCallForm(t, lines, "addViaParam(", AddressPrefix+"p")
+	// It has no deref alias, so the parameter keeps its Go name (R5) and the box form reads `p`.
+	requireCallForm(t, lines, "addViaParam(", "p")
 
 	// Control — a direct-ж caller's receiver box `Ꮡs` is its own parameter, so the box form is
 	// right there too. This is the arm that keeps the fix from collapsing into "never emit Ꮡ".

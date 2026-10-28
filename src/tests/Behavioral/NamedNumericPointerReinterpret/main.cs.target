@@ -29,8 +29,8 @@ internal static uint32 peek(this ж<sweepClass> Ꮡsc) {
     return load32(Ꮡsc.Reinterpret<sweepClass, uint32>());
 }
 
-internal static uint64 peekVia(ж<lfstack> Ꮡp) {
-    return load64(Ꮡp.Reinterpret<lfstack, uint64>());
+internal static uint64 peekVia(ж<lfstack> p) {
+    return load64(p.Reinterpret<lfstack, uint64>());
 }
 
 partial struct hexval /*num:uint64*/;
@@ -57,8 +57,8 @@ partial struct coord {
 
 partial struct point /*coord*/;
 
-internal static partial void bump(ж<coord> Ꮡc) {
-    var p = Ꮡc.Reinterpret<coord, point>();
+internal static partial void bump(ж<coord> c) {
+    var p = c.Reinterpret<coord, point>();
     (p.Value.X, p.Value.Y) = (3, 4);
 }
 

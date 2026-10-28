@@ -38,8 +38,8 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) {
     finally { ᒐ.Run(); }
 }
 
-internal static error closeIt(ж<nint> Ꮡp, nint tag) {
-    fmt.Println("closeIt", Ꮡp == nil, tag);
+internal static error closeIt(ж<nint> p, nint tag) {
+    fmt.Println("closeIt", p == nil, tag);
     return default;
 }
 

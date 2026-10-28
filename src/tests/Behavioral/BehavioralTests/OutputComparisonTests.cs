@@ -1697,6 +1697,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerParamNames() => CheckTarget("PointerParamNames");
+
+    [TestMethod]
     public void CheckPointerParamNilWalk() => CheckTarget("PointerParamNilWalk");
 
     [TestMethod]

@@ -15,8 +15,8 @@ internal static void initSelf(this ж<ring> Ꮡr) {
     r.next = Ꮡr;
 }
 
-internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
-    r.next = Ꮡother;
+internal static void linkTo(this ref ring r, ж<ring> other) {
+    r.next = other;
 }
 
 internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
@@ -40,8 +40,8 @@ internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
     return nodes;
 }
 
-internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> Ꮡother) {
-    return new ж<ring>[]{Ꮡr, Ꮡother}.array();
+internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> other) {
+    return new ж<ring>[]{Ꮡr, other}.array();
 }
 
 internal static void Main() {

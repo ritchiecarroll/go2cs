@@ -50,8 +50,8 @@ public static @string Describe(Labeled l) {
     return l.Label();
 }
 
-public static Labeled LabeledOf(ж<Sensor> Ꮡs) {
-    return new SensorжLabeled(Ꮡs);
+public static Labeled LabeledOf(ж<Sensor> s) {
+    return new SensorжLabeled(s);
 }
 
 partial struct Meter {
@@ -83,12 +83,12 @@ public static @string Error(this ref Alarm a) {
     return a.Msg;
 }
 
-public static error AsErr(ж<Alarm> Ꮡa) {
-    return new Alarmжerror(Ꮡa);
+public static error AsErr(ж<Alarm> a) {
+    return new Alarmжerror(a);
 }
 
-public static Reporter AsReporter(ж<Meter> Ꮡm) {
-    return new MeterжReporter(Ꮡm);
+public static Reporter AsReporter(ж<Meter> m) {
+    return new MeterжReporter(m);
 }
 
 partial struct Cache<T> {

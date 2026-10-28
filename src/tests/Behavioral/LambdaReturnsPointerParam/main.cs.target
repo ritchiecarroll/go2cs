@@ -16,16 +16,16 @@ internal static slice<entry> register(slice<entry> table, Func<(ж<item>, error)
     return append(table, new entry(get: get));
 }
 
-internal static slice<entry> addItem(slice<entry> table, ж<item> Ꮡit) {
-    return register(table, () => (Ꮡit, default));
+internal static slice<entry> addItem(slice<entry> table, ж<item> it) {
+    return register(table, () => (it, default));
 }
 
-internal static Func<ж<item>> pick(ж<item> Ꮡit) {
-    return () => Ꮡit;
+internal static Func<ж<item>> pick(ж<item> it) {
+    return () => it;
 }
 
-internal static ж<item> passthrough(ж<item> Ꮡit) {
-    return Ꮡit;
+internal static ж<item> passthrough(ж<item> it) {
+    return it;
 }
 
 internal static void Main() {

@@ -137,8 +137,8 @@ internal static void Main() {
     fmt.Println(pairTotal(a, b, c));
 }
 
-internal static nint pairTotal(ж<box> Ꮡp, ж<box> Ꮡq, ж<box> Ꮡr) {
-    return total(Ꮡp, Ꮡq, Ꮡr);
+internal static nint pairTotal(ж<box> p, ж<box> q, ж<box> r) {
+    return total(p, q, r);
 }
 
 } // end main_package

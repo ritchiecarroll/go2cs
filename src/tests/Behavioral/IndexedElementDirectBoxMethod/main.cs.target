@@ -21,8 +21,8 @@ partial struct holder {
     internal array<counter> arr = new(3);
 }
 
-internal static void bump(ж<holder> Ꮡh, nint i) {
-    Ꮡh.at(holder.Ꮡarr, i).inc();
+internal static void bump(ж<holder> h, nint i) {
+    h.at(holder.Ꮡarr, i).inc();
 }
 
 internal static void Main() {

@@ -38,19 +38,19 @@ public static nint Sum(this Thing t) {
     return t.val + t.inner.n;
 }
 
-public static nint PtrShadowCall(this ref Thing t, ж<Thing> Ꮡother) {
+public static nint PtrShadowCall(this ref Thing t, ж<Thing> other) {
     nint sum = t.Sum();
     {
-        var tΔ1 = Ꮡother;
+        var tΔ1 = other;
         sum += (~tΔ1).Sum();
     }
     return sum;
 }
 
-public static nint PtrShadowChain(this ref Thing t, ж<Thing> Ꮡother) {
+public static nint PtrShadowChain(this ref Thing t, ж<Thing> other) {
     t.inner.n = 1;
     {
-        var tΔ1 = Ꮡother;
+        var tΔ1 = other;
         var q = tΔ1.of(Thing.Ꮡinner).of(Inner.Ꮡn);
         q.Value = 77;
     }
@@ -82,10 +82,10 @@ public static nint SliceShadowIndex(this ref Thing t) {
     }
 }
 
-public static @string IfaceShadowEmbed(this ref Box b, ж<Box> Ꮡother) {
+public static @string IfaceShadowEmbed(this ref Box b, ж<Box> other) {
     @string name = b.HasName.Name();
     {
-        var bΔ1 = Ꮡother;
+        var bΔ1 = other;
         name += (~bΔ1).HasName.Name();
     }
     return name;

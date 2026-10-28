@@ -27,10 +27,10 @@ internal static stateFn stateB(ж<machine> Ꮡm) {
     return stateA;
 }
 
-internal static void run(ж<machine> Ꮡm) {
+internal static void run(ж<machine> m) {
     stateFn state = stateA;
     while (state != nil) {
-        state = state(Ꮡm);
+        state = state(m);
     }
 }
 

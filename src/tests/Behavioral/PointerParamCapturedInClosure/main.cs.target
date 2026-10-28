@@ -9,13 +9,13 @@ partial struct config {
     internal nint tag;
 }
 
-internal static Func<nint, nint> scaler(ж<config> Ꮡc) {
-    return (nint x) => x * Ꮡc.Value.size + Ꮡc.Value.tag;
+internal static Func<nint, nint> scaler(ж<config> c) {
+    return (nint x) => x * c.Value.size + c.Value.tag;
 }
 
-internal static Action mutate(ж<config> Ꮡc) {
+internal static Action mutate(ж<config> c) {
     return () => {
-        Ꮡc.Value.size++;
+        c.Value.size++;
     };
 }
 

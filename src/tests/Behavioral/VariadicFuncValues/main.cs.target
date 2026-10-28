@@ -47,11 +47,11 @@ internal static void logf(this ref logger l, @string format, params ꓸꓸꓸany
     fmt.Printf(l.tag + "~"u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
 
-internal static void swapEmitter(ж<logger> Ꮡl, bool swap) {
-    Actionꓸꓸꓸ<@string, any> emit = (@string p1, params ꓸꓸꓸany p2) => Ꮡl.errorf(p1, p2);
+internal static void swapEmitter(ж<logger> l, bool swap) {
+    Actionꓸꓸꓸ<@string, any> emit = (@string p1, params ꓸꓸꓸany p2) => l.errorf(p1, p2);
 
     if (swap) {
-        emit = (@string p1, params ꓸꓸꓸany p2) => Ꮡl.logf(p1, p2);
+        emit = (@string p1, params ꓸꓸꓸany p2) => l.logf(p1, p2);
     }
 
     emit("one %d", (nint)1);

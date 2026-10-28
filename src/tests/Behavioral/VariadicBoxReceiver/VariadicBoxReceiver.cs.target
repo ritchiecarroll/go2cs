@@ -15,8 +15,8 @@ internal static void add(this ref sink s, params ꓸꓸꓸbyte bytesʗp) {
     s.buf = appendꓸꓸꓸ(s.buf, bytes);
 }
 
-internal static void with(ж<sink> Ꮡs, Action<ж<sink>> f) {
-    f(Ꮡs);
+internal static void with(ж<sink> s, Action<ж<sink>> f) {
+    f(s);
 }
 
 internal static void Main() {

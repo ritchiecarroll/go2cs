@@ -73,14 +73,14 @@ internal static Func<nint> capture(params ꓸꓸꓸnint xsʗp) {
     return () => sum(xsʗ1.ꓸꓸꓸ);
 }
 
-internal static void deferred(ж<nint> Ꮡout, params ꓸꓸꓸnint xsʗp) {
+internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
     GoFrame ᒐ = default;
     try {
         var xs = xsʗp.slice();
 
         var xsʗ1 = xs;
         defer(() => {
-            Ꮡout.Value = sum(xsʗ1.ꓸꓸꓸ);
+            @out.Value = sum(xsʗ1.ꓸꓸꓸ);
         }, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

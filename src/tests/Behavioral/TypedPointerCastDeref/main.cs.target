@@ -11,24 +11,24 @@ partial struct Pt {
 
 partial struct Count /*num:uint32*/;
 
-internal static Pt derefStruct(ж<Pt> Ꮡp) {
-    return ~Ꮡp;
+internal static Pt derefStruct(ж<Pt> p) {
+    return ~p;
 }
 
-internal static Count derefNamedNum(ж<Count> Ꮡp) {
-    return ~Ꮡp;
+internal static Count derefNamedNum(ж<Count> p) {
+    return ~p;
 }
 
-internal static ж<Pt> viaUnsafe(ж<Pt> Ꮡp) {
-    return Ꮡp;
+internal static ж<Pt> viaUnsafe(ж<Pt> p) {
+    return p;
 }
 
-internal static ж<Pt> convIdentity(ж<Pt> Ꮡp) {
-    return Ꮡp;
+internal static ж<Pt> convIdentity(ж<Pt> p) {
+    return p;
 }
 
-internal static void assignThrough(ж<Pt> Ꮡp) {
-    (Ꮡp).Value = new Pt(7, 8);
+internal static void assignThrough(ж<Pt> p) {
+    (p).Value = new Pt(7, 8);
 }
 
 internal static Pt derefLocal() {

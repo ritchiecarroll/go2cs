@@ -52,8 +52,8 @@ internal static void stop(this ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void other(this ref tracker t, ж<tracker> Ꮡo) {
-    goǃ(Ꮡo.loop, GoStack.Bounded);
+internal static partial void other(this ref tracker t, ж<tracker> o) {
+    goǃ(o.loop, GoStack.Bounded);
 }
 
 internal static void Main() {

@@ -118,7 +118,7 @@ The three receiver-shadow arms above (`.of()` receiver equals the type, its capt
 
 <!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:70, 83 -->
 ```csharp
-    Ꮡp.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    p.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     …
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
 ```

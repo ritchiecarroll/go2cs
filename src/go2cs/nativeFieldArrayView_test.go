@@ -207,12 +207,12 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 
 	// The helper is handed the FIELD REFERENCE, once, and N — never an offset literal, which is a property
 	// of the target and would make one source file emit differently per flavour.
-	if body := emittedFunctionBody(t, mainCs, "portOf"); !strings.Contains(body, "@unsafe.ArrayPointer<byte>.Of(Ꮡsa.of(sockaddr.ᏑPort), 2);") || strings.Count(body, "Ꮡsa.of(sockaddr.ᏑPort)") != 1 {
-		t.Errorf("portOf: expected the helper over Ꮡsa.of(sockaddr.ᏑPort), named once, with N 2, got:\n%s", body)
+	if body := emittedFunctionBody(t, mainCs, "portOf"); !strings.Contains(body, "@unsafe.ArrayPointer<byte>.Of(sa.of(sockaddr.ᏑPort), 2);") || strings.Count(body, "sa.of(sockaddr.ᏑPort)") != 1 {
+		t.Errorf("portOf: expected the helper over sa.of(sockaddr.ᏑPort), named once, with N 2, got:\n%s", body)
 	}
 
-	if body := emittedFunctionBody(t, mainCs, "words"); !strings.Contains(body, "@unsafe.ArrayPointer<uint32>.Of(Ꮡh.of(holder.Ꮡcheap), 2);") || strings.Count(body, "Ꮡh.of(holder.Ꮡcheap)") != 1 {
-		t.Errorf("words: expected the helper over Ꮡh.of(holder.Ꮡcheap), named once, with N 2, got:\n%s", body)
+	if body := emittedFunctionBody(t, mainCs, "words"); !strings.Contains(body, "@unsafe.ArrayPointer<uint32>.Of(h.of(holder.Ꮡcheap), 2);") || strings.Count(body, "h.of(holder.Ꮡcheap)") != 1 {
+		t.Errorf("words: expected the helper over h.of(holder.Ꮡcheap), named once, with N 2, got:\n%s", body)
 	}
 
 	// CONTROL 1 — the re-pointed local keeps Value: after `q = other` it may name a managed array.

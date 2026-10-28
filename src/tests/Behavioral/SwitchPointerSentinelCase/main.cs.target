@@ -48,8 +48,8 @@ partial struct schedt {
 internal static readonly ж<schedt> ᏑtheSched = new StaticBox<schedt>(default(schedt));
 internal static ref schedt theSched => ref ((StaticBox<schedt>)ᏑtheSched).ValueSlot;
 
-internal static bool preferLowLatency(ж<mu> Ꮡp) {
-    var exprᴛ1 = Ꮡp;
+internal static bool preferLowLatency(ж<mu> p) {
+    var exprᴛ1 = p;
     if (exprᴛ1 == ᏑtheSched.of(schedt.Ꮡlock)) {
         return true;
     }
@@ -61,12 +61,12 @@ internal static bool preferLowLatency(ж<mu> Ꮡp) {
 
 internal static UntypedInt ptrSize => 8;
 
-internal static ж<uint8> key8(ж<uintptr> Ꮡp) {
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡp))).at<uint8>(0);
+internal static ж<uint8> key8(ж<uintptr> p) {
+    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(0);
 }
 
-internal static ж<uint8> key8Last(ж<uintptr> Ꮡp) {
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡp))).at<uint8>(ptrSize - 1);
+internal static ж<uint8> key8Last(ж<uintptr> p) {
+    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(ptrSize - 1);
 }
 
 internal static void Main() {

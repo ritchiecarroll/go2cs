@@ -30415,4 +30415,100 @@ to the timed tip; the three re-cites are re-resolved against this base. The gate
 
 — G (2026-10-28)
 
+## 2026-10-28 — C2 (1.26.10.2 seat #25 R5, claude/c2-seat25-r5): a pointer parameter with no deref alias keeps its Go name — DONE on the seat branch
+
+**The change.** `Ꮡp` names a pointer parameter's box only where the body also binds the value alias
+`ref var p = ref Ꮡp.DerefOrNull()`. A parameter with no alias keeps its Go name, so a test's `Ꮡt.Errorf(…)` reads
+`t.Errorf(…)`. Receivers keep `Ꮡ` (`this ж<T> Ꮡr`). So do bodyless declarations, whose implementing part is a
+hand-owned file that spells the box name. Func-literal parameters were already plain, and a named pointer result is a
+plain local.
+
+**Where the decision is made (a deviation from the plan's "in ANALYSIS").** The alias decision is the existing
+post-emission dead-alias scan (`bodyReferencesIdentAsValue`). Once a function's text is complete,
+`renameUnaliasedPointerParams` renames the box token inside that function's own span, which a new
+`FUNC_<name>_GO_NAMES` marker opens: the signature, preamble, body and frame. Every site that spelled the parameter
+takes the name, including the entry path a defer→finally lowering re-roots on, a closure capture and a call argument.
+The rename is whole-token: not after `.` (a field accessor `T.Ꮡp`) and not inside a longer identifier (`Ꮡpʗ1`,
+`ᏑpΔ1`). The new name is the analyzed one (`@out`, `Δp`, `randΔ1`). Deciding before emission would repeat the scan
+the emission already makes. Both drivers emit through `visitFuncDecl`, so the rule binds `-stdlib` and `-tests` alike.
+The `-tests` samples confirm it: strings, 8 files and 326 pairs; encoding/json, 9 files and 335 pairs; all R5, with
+`t.Errorf(` present.
+
+**Footprint.** A two-seeded, three-target `-stdlib -comments` emission: base `f2d6b3e56f` against the seat's converter
+(the converter is unchanged by the rebase onto `56e4fba06f`). 4,559 seeded `.cs` files per arm, exit 0 for both arms.
+
+| Target | Files written per arm | Files that differ | Line pairs | pcensus classify `-items R5` |
+|:--|--:|--:|--:|:--|
+| windows/amd64 | 1,975 | 407 (397 `.cs` + 10 `.cs.auto`) | 4,486 | 4,486 R5, 0 refused |
+| linux/amd64 | 2,049 | 416 (407 + 9) | 4,184 | 4,184 R5, 0 refused |
+| darwin/amd64 | 2,042 | 417 (409 + 8) | 4,250 | 4,250 R5, 0 refused |
+
+- No `package_info.cs` file changes, so there are no `GoPositionMap` lines.
+- Renamed parameters: 1,908, 1,666 and 1,726 per target. The plan's ceiling was ~5,065 production parameters,
+  counted by regex; the rule excludes the aliased ones.
+- Behavioral corpus (878 projects): R5 moves 74 projects, 246 pairs, all R5. 72 goldens are re-baselined here, plus
+  the new guard. PipeSharedFileObject and RawConnSyncSocketIO are Windows-native, and R5 moves them too; their
+  goldens are owed on the i7.
+- pcensus count `-items R5` (golden set): 207 box parameters in 108 files at `56e4fba06f`, 91 in 49 at the seat.
+
+**Reach by class (COORD's reconciliation).** This is a declaration-and-body scan of every non-receiver
+`ж<T> Ꮡname` parameter. "Aliased" means the body binds `ref … <alias> = ref Ꮡname…`, where the alias is
+`name` or its sanitized form (`Δp`, `urlΔ1`).
+
+First, the `-stdlib` emission, reading the files each arm wrote:
+
+| Target | Base total | Aliased | Bodyless | Unaliased at base | Aliased after R5 | Unaliased, not renamed | Receivers |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| windows | 4,007 | 2,101 | 0 | 1,906 | 2,101 | 0 | 3,407 |
+| linux | 3,757 | 2,101 | 0 | 1,656 | 2,101 | 0 | 3,420 |
+| darwin | 3,803 | 2,089 | 0 | 1,714 | 2,089 | 0 | 3,412 |
+
+Every unaliased parameter is renamed and no aliased one is. The alias bindings are identical in both arms:
+1,604 distinct (file, parameter) pairs, compared by diff. The scan was shown to fail first: it counted 12 unaliased-not-renamed
+parameters, all of them aliased under a sanitized name, and a `'{'` character literal threw off its brace match
+once. Both were fixed before the table above was read.
+
+Second, the committed corpus at `56e4fba06f`, read statically. This is what the plan's ~15.4K counted.
+
+| Set | Non-receiver box parameters | Aliased | Bodyless | Unaliased |
+|:--|--:|--:|--:|--:|
+| converted tests | 10,311 | 1,839 | 0 | **8,472** |
+| production | 5,251 | 2,510 | 10 | 2,731 |
+
+- **The 8,472 unaliased test parameters are the END REGEN's R5 share.** `-stdlib` never emits a converted test.
+  The end regen's `-tests` pass moves these parameters through the same `visitFuncDecl` rule (the strings and
+  encoding/json samples above). The expected count is about 8,472 renamed, ±10%, with 0 aliased renamed and every
+  pair classified R5.
+- The production 2,731 splits by file:
+
+  | Shared | Per-flavour windows | Per-flavour linux | Per-flavour darwin | `.cs.auto` siblings | Hand-owned |
+  |--:|--:|--:|--:|--:|--:|
+  | 1,379 | 483 | 243 | 257 | 49 | 320 |
+
+  Shared plus one flavour reads 1,862 / 1,622 / 1,636 against the 1,906 / 1,656 / 1,714 renamed. The
+  remainder is the `.cs.auto` siblings and the drift between committed and fresh emission.
+- The 320 hand-owned parameters keep `Ꮡ` because they are not converter output. Examples are syscall's
+  `Getdirentries(…, ж<uintptr> Ꮡbasep)`, `ForkExec(…, ж<ProcAttr> Ꮡattr)` and
+  `Select(nint nfd, ж<FdSet> Ꮡr, …)`. Whether they should follow the convention by hand is open; it is not this seat's
+  question.
+
+**pcensus canon.** R5's item now compares on the analyzed name. Without that canon, 12 golden pairs and 127, 143 and
+131 census pairs (windows, linux, darwin) are UNCLASSIFIED, all `@`/`Δ` forms; with it, none are. The item still
+requires a pair to lose a box token, so an escape alone stays UNCLASSIFIED (plant).
+
+**Gates (this box, linux).**
+- `go test -count=1 ./...` in src/go2cs: all green, repoguard included.
+- `TestRenameBoxTokenTakesWholeTokensOnly` passes its 7 cases. Five converter tests take the R5 spelling.
+- PointerParamNames is red-first: at the base, its emission differs from the golden on 10 lines, and R5's equals it.
+  Built for linux, its output matches `go run`.
+- Every re-baselined golden equals R5's emission. The doc samples sourced from the moved goldens are re-copied, and
+  `TestDocsSamplesHoldTheirLines` passes.
+- Samples sourced from src/core (`path_test.cs` `TestExt`, darwin `recvfrom`, `check_test.cs` `boolFieldAddr`) move
+  at the end regen.
+- Each pcensus rewrite this seat adds fails its plant when deleted.
+
+**Not run here.** The behavioral battery, the rung build and the two Windows-native goldens: these are the i7's legs.
+
+— C2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -8,8 +8,8 @@ partial class main_package {
 
 partial struct utp /*num:uintptr*/;
 
-internal static partial uintptr readViaParam(ж<uintptr> Ꮡp) {
-    var q = Ꮡp;
+internal static partial uintptr readViaParam(ж<uintptr> p) {
+    var q = p;
     return q.Value;
 }
 
@@ -43,8 +43,8 @@ internal static partial (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, ui
     return (n + 1, fd);
 }
 
-internal static partial ж<uintptr> same(ж<uintptr> Ꮡp) {
-    return Ꮡp;
+internal static partial ж<uintptr> same(ж<uintptr> p) {
+    return p;
 }
 
 internal static void Main() {

@@ -197,14 +197,14 @@ internal static void writeShape(this ж<box> Ꮡx, bool isFile) {
     finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().finish(); ᒐ.Run(); }
 }
 
-internal static void rebound(this ж<box> Ꮡx, ж<box> Ꮡother) {
+internal static void rebound(this ж<box> Ꮡx, ж<box> other) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
 
         x.a.touch();
         defer(Ꮡx.of(box.Ꮡa).done, ref ᒐ);
-        Ꮡx = Ꮡother; x = ref Ꮡx.DerefOrNull();
+        Ꮡx = other; x = ref Ꮡx.DerefOrNull();
         fmt.Println("body rebound", x.a.id);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

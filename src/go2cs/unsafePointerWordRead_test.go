@@ -122,7 +122,7 @@ func main() {
 	}{
 		// The pointer arms take the STORED pointer: the parameter's own box, the local's own value.
 		{"onFunc", regexp.MustCompile(`@unsafe\.Pointer\.OfFunc\(f\)`), false},
-		{"onPointer", regexp.MustCompile(`@unsafe\.Pointer\.FromPinnedBox\(Ꮡp\)`), false},
+		{"onPointer", regexp.MustCompile(`@unsafe\.Pointer\.FromPinnedBox\(p\)`), false},
 		{"onPointerLocal", regexp.MustCompile(`@unsafe\.Pointer\.FromPinnedBox\(q\)`), false},
 		// Ꮡ(u) is folded to Ꮡu by the emitter, so the read is the stored Pointer itself.
 		{"probeVariadic", regexp.MustCompile(`sink\(0, 0, \(uintptr\)\(~Ꮡ\(@unsafe\.Pointer\.OfFunc\(f\)\)\)\)`), false},

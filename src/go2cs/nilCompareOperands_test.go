@@ -91,7 +91,7 @@ func main() {
 	for _, want := range []string{
 		"return err != nil && nil != a;", // interfaces, either side
 		"return f == nil || nil == h;",   // funcs, named or not, either side
-		"return Ꮡp == nil;",              // pointers already took the pointer context
+		"return p == nil;",               // pointers already took the pointer context; an un-aliased pointer parameter keeps its Go name (seat #25 R5)
 		"return s == default;",           // slices, maps and chans: stage 2
 		"return m == default;",
 		"return c == default;",

@@ -39,8 +39,8 @@ internal static void free(this ж<pp> Ꮡp) {
     poolPut(Ꮡp.OrTypedNil());
 }
 
-internal static void keep(ж<pp> Ꮡq) {
-    poolPut(Ꮡq.OrTypedNil());
+internal static void keep(ж<pp> q) {
+    poolPut(q.OrTypedNil());
 }
 
 internal static void Main() {

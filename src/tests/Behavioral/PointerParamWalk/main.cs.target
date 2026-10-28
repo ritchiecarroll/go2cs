@@ -64,11 +64,11 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
     return sum;
 }
 
-internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> Ꮡp) {
+internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> p) {
     if (len(list) == 0) {
-        list = new ж<node>[]{Ꮡp}.slice();
+        list = new ж<node>[]{p}.slice();
     } else {
-        list = append(list, Ꮡp);
+        list = append(list, p);
     }
     return list;
 }

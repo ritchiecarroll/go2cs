@@ -327,8 +327,8 @@ internal static void bump(ref cycle c) {
     c.n++;
 }
 
-internal static void viaParam(ж<rec> Ꮡp, nint i) {
-    var c = Ꮡp.at(rec.Ꮡfuture, i);
+internal static void viaParam(ж<rec> p, nint i) {
+    var c = p.at(rec.Ꮡfuture, i);
     bump(ref (c).DerefOrNull());
 }
 ```
@@ -509,7 +509,7 @@ Once a method is direct-ж, its receiver is the box `Ꮡc`, but the deref'd valu
 
 The receiver placed whole into a **composite-literal element** whose field is a pointer — `func (f *_func) funcInfo() funcInfo { …; return funcInfo{f, mod} }` (runtime `symtab.go`; `funcInfo`'s first field is the embedded `*_func`) — needs the same box, and is itself a **direct-ж promotion trigger** (`bodyUsesReceiverAsPointerValue`'s composite arm): a boxless `ref` receiver has no `Ꮡf` to place in the field (CS1503). Once promoted, the composite renders the box through the existing pointer-field element machinery: `new ΔfuncInfo(Ꮡf, mod)`. Both positional and keyed elements trigger, gated on the **field's declared type being a Go pointer** (resolved positionally or by key from the composite's struct type — the element expression's own type is always `*T` for a pointer receiver): a receiver placed into an *interface*-typed field also typechecks in Go, but that emission compiles, and promoting for it would re-route every such method stdlib-wide (the field gate trims the audit only slightly — the shape is genuinely pervasive: <!-- first-cut audit 73 files, 68 with the field gate -->  go/types' Checker methods, net/textproto's dotReader{r: r}, zstd readers — every audited site the same signature+box re-routing) — its pointer-identity semantics are logged as a separate question. (Guarded by the `DirectBoxReceiverPassedWhole` extension — positional + keyed composites, identity verified by writing through the wrapped pointer and reading the original.)
 
-The same composite arm also fires when the receiver is stored **as an element of a SLICE or ARRAY literal whose element type is a pointer** — `func (s *UserTaskSummary) Descendents() []*UserTaskSummary { descendents := []*UserTaskSummary{s}; … }` (internal/trace `summary.go`). Without promotion the boxless `ref` receiver renders the value alias `s` into a `ж<T>[]` slot (CS0029); once promoted direct-ж, the element renders the box: `new ж<UserTaskSummary>[]{Ꮡs}.slice()` (and `[2]*T{s, other}` → `new ж<T>[]{Ꮡs, Ꮡother}.array()`). Gated on the **slice/array element type being a pointer** (the `*types.Slice`/`*types.Array` arms of `bodyUsesReceiverAsPointerValue`), mirroring the struct-field pointer gate. (Guarded by the `ReceiverPointerValue` extension — the receiver stored into a `[]*ring` and a `[2]*ring` literal, `chain[0]` identity verified by mutating through the stored pointer and reading back through the receiver.)
+The same composite arm also fires when the receiver is stored **as an element of a SLICE or ARRAY literal whose element type is a pointer** — `func (s *UserTaskSummary) Descendents() []*UserTaskSummary { descendents := []*UserTaskSummary{s}; … }` (internal/trace `summary.go`). Without promotion the boxless `ref` receiver renders the value alias `s` into a `ж<T>[]` slot (CS0029); once promoted direct-ж, the element renders the box: `new ж<UserTaskSummary>[]{Ꮡs}.slice()` (and `[2]*T{s, other}` → `new ж<T>[]{Ꮡs, other}.array()`, where the parameter `other` keeps its Go name). Gated on the **slice/array element type being a pointer** (the `*types.Slice`/`*types.Array` arms of `bodyUsesReceiverAsPointerValue`), mirroring the struct-field pointer gate. (Guarded by the `ReceiverPointerValue` extension — the receiver stored into a `[]*ring` and a `[2]*ring` literal, `chain[0]` identity verified by mutating through the stored pointer and reading back through the receiver.)
 
 The same pointer-element boxing must also fire for an **ELIDED (type-inferred) nested composite** — the inner `{c}` of `[][]*Certificate{{c}}` (crypto/x509 `Verify`). The inner literal has no `Type` node; its inferred element type is `*Certificate`, and its sole element `c` is the deref-aliased `*Certificate` receiver. The typed composite path boxes a bare pointer-typed ident element (`argTypeIsPtr`), but the untyped-elided slice/array path rendered its elements with a **nil** context, so that treatment never ran and `c` emitted the value alias into a `ж<Certificate>[]` array (CS0029). The elided path supplies a context that boxes a bare pointer-typed ident when the element type is a pointer — `new ж<Certificate>[]{Ꮡc}.slice()` — returning nil (unchanged nil-context rendering) when the element type is not a pointer or no element is a bare pointer ident, so non-pointer elided literals stay byte-identical. (Guarded by the `ElidedNestedPtrComposite` behavioral test — `[][]*Node{{n}}` where `n` is a pointer receiver.)
 
@@ -983,8 +983,8 @@ internal static Pt derefStruct(ж<Pt> Ꮡp) {
 ```
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-internal static Pt derefStruct(ж<Pt> Ꮡp) {
-    return ~Ꮡp;                            // the box, dereferenced in place
+internal static Pt derefStruct(ж<Pt> p) {
+    return ~p;                             // the box, dereferenced in place
 }
 ```
 
@@ -1896,7 +1896,8 @@ receiver/param — is the nil-deferring `DerefOrNull()` entry alias's (see
 [A pointer PARAMETER is nil-deferring for exactly the reason a receiver is](#a-pointer-parameter-is-nil-deferring-for-exactly-the-reason-a-receiver-is) below). (Guarded by the
 `DeadPointerParamAlias` behavioral test — a pointer param used only in `p == nil`, one forwarded as a
 pointer, and one dereferenced (alias kept), each called with nil and non-nil, output-compared vs Go; the
-nil calls NRE'd before the fix.)
+nil calls NRE'd before the fix.) With no alias the parameter then keeps its Go name: see
+[A pointer parameter with no deref alias keeps its Go name](#a-pointer-parameter-with-no-deref-alias-keeps-its-go-name).
 
 ⚠ **Keeping a dead alias is not free, so the scan excludes the one spurious match that is systematic: a
 C# NAMED-ARGUMENT LABEL** (`isNamedArgumentLabel`). The converter renders a Go composite literal's field
@@ -1921,6 +1922,32 @@ dereferencing positive control whose alias must survive; the exclusion's own bou
 `case X:` arm, a spaced conditional colon, an interpolated format specifier, and a label that does not
 mask a real use elsewhere — are pinned by the `TestBodyReferencesIdentAsValueIgnoresNamedArgumentLabels`
 converter unit test, since a behavioral program cannot put most of them in that position.)
+
+## A pointer parameter with no deref alias keeps its Go name
+The box name `Ꮡp` tells a pointer parameter's box from its value alias `p`. A parameter with no alias (the
+rule above) has nothing to tell apart, so it keeps its Go name, and only a parameter whose alias exists is
+spelled `Ꮡp`. A test's `t.Errorf(…)` stays `t.Errorf(…)`:
+
+```go
+func isNil(c *counter) bool { return c == nil }
+```
+
+converts to `internal static bool isNil(ж<counter> c) { return c == nil; }`, where a function that also reads
+through the pointer keeps both names: `ж<counter> Ꮡc` and `ref var c = ref Ꮡc.DerefOrNull();`.
+
+The decision is the alias scan's, made after the body is converted. Once the function's text is complete,
+`renameUnaliasedPointerParams` renames the box token in that text alone: the signature, the preamble, the
+body and the frame. So every site that spelled the parameter takes the name, including the entry path a
+defer→finally lowering re-roots on, a closure's capture and a call argument. The rename is by whole token: a
+field accessor `T.Ꮡp` follows a `.`, and a longer identifier (`Ꮡpʗ1`, `ᏑpΔ1`) is another token. The name is
+the analyzed one, so a collision rename stands (`randΔ1` for a parameter named like an imported package).
+Receivers keep `Ꮡ` (`this ж<T> Ꮡr`). So does a bodyless declaration (assembly, cgo or a linkname pull), whose
+implementing part is a hand-owned file that spells the box name. Func literals already name their pointer
+parameters plainly (`ж<T> pΔ1`, read as `(~pΔ1).f`). (Guarded by the `PointerParamNames` behavioral test: a
+parameter compared with nil, one passed on with a pointer method called on it, one with its alias, a nested
+scope that reuses the name, a closure capturing it, a method of an imported pointer type (`b.WriteString`,
+the `t.Errorf` shape), a deferred pointer method, and one function with an aliased and an unaliased
+parameter, output-compared vs Go.)
 
 ## A pointer RECEIVER compared to `nil` compares its box, not its deref'd value
 A method with a pointer receiver — `func (f *File) checkValid() error { if f == nil { … } }` — is emitted
@@ -2060,13 +2087,13 @@ func newIndirectNode[K comparable, V any](parent *indirect[K, V]) *indirect[K, V
 ```
 <!-- illustration: not converter output -->
 ```csharp
-internal static ж<Δindirect<K, V>> newIndirectNode<K, V>(ж<Δindirect<K, V>> Ꮡparent) {
-    return Ꮡ(new Δindirect<K, V>(node: new node<K, V>(isEntry: false), parent: Ꮡparent));
+internal static ж<Δindirect<K, V>> newIndirectNode<K, V>(ж<Δindirect<K, V>> parent) {
+    return Ꮡ(new Δindirect<K, V>(node: new node<K, V>(isEntry: false), parent: parent));
 }
 ```
 This body never dereferences `parent`, so it gets no entry alias at all (*A pointer parameter
-used only through its box gets no deref VALUE alias*, above); a body that does dereference binds
-`ref var parent = ref Ꮡparent.DerefOrNull();`, never the eager `ref Ꮡparent.Value`.
+used only through its box gets no deref VALUE alias*, above) and keeps its Go name; a body that does dereference
+names the box `Ꮡparent` and binds `ref var parent = ref Ꮡparent.DerefOrNull();`, never the eager `ref Ꮡparent.Value`.
 <!-- go1.26.10: GOROOT/src/internal/sync/hashtriemap.go:50 (`ht.root.Store(newIndirectNode[K, V](nil))`),
 :549-551 (newIndirectNode). Emission quoted from src/core/internal/sync/hashtriemap.cs.auto:631-633 (the
 auto sibling; internal/sync's hashtriemap.cs is hand-owned at 3e3f18925a). At Go 1.24.13 the root was set
@@ -2774,8 +2801,8 @@ internal static void free(this ж<pp> Ꮡp) {
     poolPut(Ꮡp.OrTypedNil());
 }
 
-internal static void keep(ж<pp> Ꮡq) {
-    poolPut(Ꮡq.OrTypedNil());
+internal static void keep(ж<pp> q) {
+    poolPut(q.OrTypedNil());
 }
 ```
 The call is `poolPut(Ꮡp.OrTypedNil())`, not `poolPut(p)`: a `pp` value would lose the pointer's identity.

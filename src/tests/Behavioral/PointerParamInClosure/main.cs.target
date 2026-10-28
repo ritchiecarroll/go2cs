@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void setViaDefer(ж<nint> Ꮡp) {
+internal static void setViaDefer(ж<nint> p) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            Ꮡp.Value = 42;
+            p.Value = 42;
         }, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static void bumpInClosure(ж<nint> Ꮡp) {
+internal static void bumpInClosure(ж<nint> p) {
     void add() {
-        Ꮡp.Value = Ꮡp.Value + 1;
+        p.Value = p.Value + 1;
     }
     add();
     add();

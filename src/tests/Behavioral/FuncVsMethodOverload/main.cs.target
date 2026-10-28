@@ -23,8 +23,8 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     return (ж<nih>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
 }
 
-internal static partial uint32 step(ж<uint32> Ꮡv) {
-    var q = (ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡv), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
+internal static partial uint32 step(ж<uint32> v) {
+    var q = (ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
     return q.Value;
 }
 

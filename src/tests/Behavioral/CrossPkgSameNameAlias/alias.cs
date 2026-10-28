@@ -7,8 +7,8 @@ using sync;
 
 partial class atomic_package {
 
-public static ж<Int32> Wrap(ж<atomic.Int32> Ꮡv) {
-    return Ꮡv;
+public static ж<Int32> Wrap(ж<atomic.Int32> v) {
+    return v;
 }
 
 } // end atomic_package

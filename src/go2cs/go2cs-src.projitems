@@ -476,6 +476,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformProjectConverted_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerNamedArraySlice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerParamNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionCalls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMapOperations.go" />

@@ -26,8 +26,8 @@ partial struct outer {
     /*embed*/ internal inner inner;
 }
 
-internal static partial void viaParam(ж<outer> Ꮡo) {
-    Ꮡo.of(outer.Ꮡinner).bump(100);
+internal static partial void viaParam(ж<outer> o) {
+    o.of(outer.Ꮡinner).bump(100);
 }
 
 partial struct flags /*num:uint8*/;
@@ -57,9 +57,9 @@ internal static void free(this ref chunk c, uint16 n) {
     c.flags.clear(1);
 }
 
-internal static void bump(this ref chunk c, ж<chunk> Ꮡother) {
+internal static void bump(this ref chunk c, ж<chunk> other) {
     {
-        var cΔ1 = Ꮡother;
+        var cΔ1 = other;
         cΔ1.of(chunk.Ꮡflags).set(2);
     }
 }

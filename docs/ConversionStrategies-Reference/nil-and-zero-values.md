@@ -468,8 +468,8 @@ func assignDescriber(h *holder, s *Setting) {
 ```
 <!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:25-27 -->
 ```csharp
-internal static void assignDescriber(ref holder h, ж<Setting> Ꮡs) {
-    h.d = new SettingжDescriber(Ꮡs);
+internal static void assignDescriber(ref holder h, ж<Setting> s) {
+    h.d = new SettingжDescriber(s);
 }
 ```
 

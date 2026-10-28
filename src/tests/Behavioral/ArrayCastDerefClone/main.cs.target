@@ -7,24 +7,24 @@ partial class main_package {
 
 partial struct Row /*[3]nint*/;
 
-internal static Row typedCastDeref(ж<Row> Ꮡp) {
-    return (~Ꮡp).Clone();
+internal static Row typedCastDeref(ж<Row> p) {
+    return (~p).Clone();
 }
 
-internal static array<uintptr> typedCastDerefDirect(/*[2]*/ ж<array<uintptr>> Ꮡp) {
-    return (~Ꮡp).Clone();
+internal static array<uintptr> typedCastDerefDirect(/*[2]*/ ж<array<uintptr>> p) {
+    return (~p).Clone();
 }
 
 partial struct holder {
     internal Row r;
 }
 
-internal static holder typedCastDerefIntoStruct(ж<Row> Ꮡp) {
-    return new holder(r: (~Ꮡp).Clone());
+internal static holder typedCastDerefIntoStruct(ж<Row> p) {
+    return new holder(r: (~p).Clone());
 }
 
-internal static void typedCastDerefAssign(ж<Row> Ꮡp) {
-    (Ꮡp).Value = new Row(new nint[]{40, 50, 60}.array());
+internal static void typedCastDerefAssign(ж<Row> p) {
+    (p).Value = new Row(new nint[]{40, 50, 60}.array());
 }
 
 internal static Row castDerefReturn(@unsafe.Pointer p) {

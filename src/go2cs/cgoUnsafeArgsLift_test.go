@@ -229,10 +229,10 @@ func TestCgoUnsafeArgsLiftSynthesizesTheParameterBlock(t *testing.T) {
 
 	// shape (c)
 	liftRequireBlock(t, mainCs, "open_args", []string{"internal uintptr name;", "internal int32 mode;", "internal uintptr ts;"})
-	open := liftFunctionBody(t, mainCs, "internal static int32 open(ж<byte> Ꮡname, int32 mode, ж<timespec> Ꮡts) {")
-	liftRequireContains(t, "open", open, "ref var args = ref heap(new open_args((uintptr)Ꮡname.OrTypedNil(), mode, (uintptr)Ꮡts.OrTypedNil()), out var Ꮡargs);", "each pointer field is minted through golib's address model from the parameter's box")
+	open := liftFunctionBody(t, mainCs, "internal static int32 open(ж<byte> name, int32 mode, ж<timespec> ts) {")
+	liftRequireContains(t, "open", open, "ref var args = ref heap(new open_args((uintptr)name.OrTypedNil(), mode, (uintptr)ts.OrTypedNil()), out var Ꮡargs);", "each pointer field is minted through golib's address model from the parameter's box")
 	liftRequireContains(t, "open", open, "@unsafe.Pointer.FromPinnedBox(Ꮡargs)", "the libcCall receives the block's pinned box")
-	liftRequireAbsent(t, "open", open, "FromPinnedBox(Ꮡname)", "the consumed &name is no longer the argument")
+	liftRequireAbsent(t, "open", open, "FromPinnedBox(name)", "the consumed &name is no longer the argument")
 
 	if n := strings.Count(open, "KeepAlive("); n != 2 {
 		t.Errorf("open: expected the two KeepAlive lines untouched, found %d:\n%s", n, open)

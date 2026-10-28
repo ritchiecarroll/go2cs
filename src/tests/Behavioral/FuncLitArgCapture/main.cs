@@ -64,10 +64,10 @@ internal static partial nint selfRefCapture() {
     return ᐸꟷ(done);
 }
 
-internal static void deferArgCapture(ж<box> Ꮡout) {
+internal static void deferArgCapture(ж<box> @out) {
     GoFrame ᒐ = default;
     try {
-        var pf = Ꮡout;
+        var pf = @out;
         var pfʗ1 = pf;
         defer(run, () => {
             pfʗ1.Value.x = 77;

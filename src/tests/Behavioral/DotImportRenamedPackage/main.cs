@@ -6,8 +6,8 @@ using Δsync = sync_package;
 
 partial class main_package {
 
-internal static bool ready(ж<Δsync.Mutex> Ꮡmu) {
-    return Ꮡmu != nil;
+internal static bool ready(ж<Δsync.Mutex> mu) {
+    return mu != nil;
 }
 
 internal static void Main() {

@@ -74,6 +74,11 @@ var plants = []plant{
 	one("R5 good param", prodFile, `public static void TestX(ж<testing.T> Ꮡt) {`, `public static void TestX(ж<testing.T> t) {`, "R5"),
 	one("R5 good use", testFile, `Ꮡt.Errorf("bad"u8);`, `t.Errorf("bad"u8);`, "R5"),
 	one("R5 bad: a field's Ꮡ is not a parameter's", prodFile, `x = Ꮡb.of(Buffer.Ꮡoff);`, `x = Ꮡb.of(Buffer.off);`, "UNCLASSIFIED"),
+	one("R5 good keyword-escaped name", prodFile, `void deferred(ж<nint> Ꮡout, params ꓸꓸꓸnint xsʗp) {`, `void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {`, "R5"),
+	one("R5 good collision-prefixed name", prodFile, `return Ꮡp.Reinterpret<T, U>();`, `return Δp.Reinterpret<T, U>();`, "R5"),
+	one("R5 good collision-numbered name", prodFile, `f(Ꮡrand, randΔ2);`, `f(randΔ1, randΔ2);`, "R5"),
+	one("R5 bad: an escape alone is no box rename", prodFile, `var x = @out;`, `var x = out;`, "UNCLASSIFIED"),
+	one("R5 bad: the name changed", prodFile, `f(Ꮡrand);`, `f(sizeΔ1);`, "UNCLASSIFIED"),
 	one("R5+N1 composition", testFile, `if (Ꮡt.err != default!) {`, `if (t.err != nil) {`, "N1+R5"),
 	// N2 (#26)
 	one("N2 good", prodFile, `var n = (nint)(byte)k;`, `var n = (nint)k;`, "N2"),

@@ -65,9 +65,9 @@ public static bool Verify(this ref DeepHash d, slice<byte> expected) {
     return acc == len(expected);
 }
 
-internal static array<byte> resetVia(ж<DeepHash> Ꮡp) {
+internal static array<byte> resetVia(ж<DeepHash> p) {
     ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);
-    Ꮡp.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    p.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     return acc.Clone();
 }
 

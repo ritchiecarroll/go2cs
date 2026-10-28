@@ -120,8 +120,8 @@ func main() {
 	for _, want := range []string{
 		"internal static void stop(this ж<tracker> Ꮡt)",
 		"defer(Ꮡt.bump, ref ᒐ);",
-		"internal static partial void other(this ref tracker t, ж<tracker> Ꮡo)",
-		"goǃ(Ꮡo.loop, GoStack.Bounded);",
+		"internal static partial void other(this ref tracker t, ж<tracker> o)",
+		"goǃ(o.loop, GoStack.Bounded);",
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

@@ -8,19 +8,19 @@ partial struct node {
     internal nint val;
 }
 
-internal static @string onlyNilCheck(ж<node> Ꮡp) {
-    if (Ꮡp == nil) {
+internal static @string onlyNilCheck(ж<node> p) {
+    if (p == nil) {
         return "nil";
     }
     return "set";
 }
 
-internal static bool inner(ж<node> Ꮡp) {
-    return Ꮡp == nil;
+internal static bool inner(ж<node> p) {
+    return p == nil;
 }
 
-internal static bool passThrough(ж<node> Ꮡp) {
-    return inner(Ꮡp);
+internal static bool passThrough(ж<node> p) {
+    return inner(p);
 }
 
 internal static nint usesValue(ref node p) {

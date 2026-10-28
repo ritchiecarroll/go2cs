@@ -5,16 +5,16 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-internal static partial @unsafe.Pointer ptrOf(ж<int64> Ꮡx) {
-    return @unsafe.Pointer.FromPinnedBox(Ꮡx);
+internal static partial @unsafe.Pointer ptrOf(ж<int64> x) {
+    return @unsafe.Pointer.FromPinnedBox(x);
 }
 
 internal static partial bool isNil(@unsafe.Pointer p) {
     return p == nil;
 }
 
-internal static partial slice<@unsafe.Pointer> makePtrs(ж<int64> Ꮡx) {
-    return new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡx)}.slice();
+internal static partial slice<@unsafe.Pointer> makePtrs(ж<int64> x) {
+    return new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(x)}.slice();
 }
 
 } // end main_package
