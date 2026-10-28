@@ -14,7 +14,7 @@ internal static void @try(@string label, Action set) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: PANIC %v\n"u8, label, r);
                     return;
                 }
@@ -50,8 +50,8 @@ internal static void Main() {
 
     var st = reflect.TypeOf("");
     var St = reflect.TypeOf((S)(@string)""u8);
-    var bt = reflect.TypeOf(slice<byte>(default!));
-    var Bt = reflect.TypeOf((B)default!);
+    var bt = reflect.TypeOf(slice<byte>(default));
+    var Bt = reflect.TypeOf((B)default);
     fmt.Println("S->string:", St.AssignableTo(st), "| string->S:", st.AssignableTo(St));
     fmt.Println("[]byte->B:", bt.AssignableTo(Bt), "| B->[]byte:", Bt.AssignableTo(bt));
 }

@@ -27,7 +27,7 @@ internal static void Main() {
     @in = new dotted.T(N: dotted.F());
 
     {
-        var err = gob.NewEncoder(new bytes_BufferжWriter(Ꮡbuf)).Encode(Ꮡin); if (err != default!) {
+        var err = gob.NewEncoder(new bytes_BufferжWriter(Ꮡbuf)).Encode(Ꮡin); if (err != nil) {
             fmt.Println("encode:", err);
             return;
         }
@@ -37,7 +37,7 @@ internal static void Main() {
 
     ref var @out = ref heap<any>(out var Ꮡout);
     {
-        var err = gob.NewDecoder(new bytes_BufferжReader(Ꮡbuf)).Decode(Ꮡout); if (err != default!) {
+        var err = gob.NewDecoder(new bytes_BufferжReader(Ꮡbuf)).Decode(Ꮡout); if (err != nil) {
             fmt.Println("decode:", err);
             return;
         }

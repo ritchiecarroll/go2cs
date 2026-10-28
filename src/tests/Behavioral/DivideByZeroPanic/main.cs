@@ -5,13 +5,13 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
-    nint result = default!;
-    bool recovered = default!;
+    nint result = default;
+    bool recovered = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println("  recovered:", r);
                     (result, recovered) = (-1, true);
                 }
@@ -26,13 +26,13 @@ internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
 }
 
 internal static (nint result, bool recovered) safeMod(nint a, nint b) {
-    nint result = default!;
-    bool recovered = default!;
+    nint result = default;
+    bool recovered = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     (result, recovered) = (-2, true);
                 }
             }
@@ -50,11 +50,11 @@ internal static nint divide(nint a, nint b) {
 }
 
 internal static bool /*ok*/ outerGuard(nint a, nint b) {
-    bool ok = default!;
+    bool ok = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            if (recover() != default!) {
+            if (recover() != nil) {
                 ok = false;
             }
         }, ref ᒐ);

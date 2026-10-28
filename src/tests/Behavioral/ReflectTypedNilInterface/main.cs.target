@@ -18,9 +18,9 @@ public static (@string, error) Encode(this ж<Blob> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
-        return ("<nil blob>", default!);
+        return ("<nil blob>", default);
     }
-    return (b.Data, default!);
+    return (b.Data, default);
 }
 
 partial struct Tag {
@@ -31,9 +31,9 @@ public static (@string, error) Encode(this ж<Tag> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
-        return ("<nil tag>", default!);
+        return ("<nil tag>", default);
     }
-    return (fmt.Sprintf("tag:%d"u8, t.N), default!);
+    return (fmt.Sprintf("tag:%d"u8, t.N), default);
 }
 
 partial struct holder {
@@ -61,12 +61,12 @@ internal static @string sink(params ꓸꓸꓸany argsʗp) {
         return "none";
     }
     return fmt.Sprintf("argIsNil=%v valid=%v type=%v printed=%v"u8,
-        args[0] == default!, reflect.ValueOf(args[0]).IsValid(), reflect.TypeOf(args[0]), fmt.Sprint(args[0]));
+        args[0] == nil, reflect.ValueOf(args[0]).IsValid(), reflect.TypeOf(args[0]), fmt.Sprint(args[0]));
 }
 
 internal static void report(@string label, reflectꓸValue v) {
     var iface = v.Interface();
-    fmt.Printf("%s: kind=%v isNil=%v ifaceIsNil=%v type=%v\n"u8, label, v.Kind(), v.IsNil(), iface == default!, reflect.TypeOf(iface));
+    fmt.Printf("%s: kind=%v isNil=%v ifaceIsNil=%v type=%v\n"u8, label, v.Kind(), v.IsNil(), iface == nil, reflect.TypeOf(iface));
     var (e, ok) = iface._<Encoder>(ᐧ);
     fmt.Printf("  assert Encoder ok=%v\n"u8, ok);
     if (ok) {
@@ -108,7 +108,7 @@ internal static void Main() {
         report("field "u8 + rh.Type().Field(i).Name, rh.Field(i));
     }
 
-    var m = new map<@string, ж<Blob>>{["nil"] = default!};
+    var m = new map<@string, ж<Blob>>{["nil"] = default};
     var it = reflect.ValueOf(m).MapRange();
     while (it.Next()) {
         report("map["u8 + it.Key().String() + "]"u8, it.Value());
@@ -118,11 +118,11 @@ internal static void Main() {
     report("new(*Blob).Elem()", rn);
 
     var iface = rs.Index(0).Interface();
-    fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, AreEqual(iface, ((ж<Blob>)nil)), iface == default!);
+    fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, AreEqual(iface, ((ж<Blob>)nil)), iface == nil);
 
     fmt.Printf("elem-of-typed-nil valid=%v\n"u8, rs.Index(0).Elem().IsValid());
 
-    ж<Blob> np = default!;
+    ж<Blob> np = default;
     var si = new main_si(I: np.OrTypedNil());
     var f = reflect.ValueOf(si).Field(0);
     fmt.Printf("ifaceField: kind=%v isNil=%v isZero=%v elemKind=%v elemIsNil=%v\n"u8,
@@ -132,7 +132,7 @@ internal static void Main() {
     var fn = reflect.ValueOf(sn).Field(0);
     fmt.Printf("nilIfaceField: isNil=%v isZero=%v elemValid=%v\n"u8, fn.IsNil(), fn.IsZero(), fn.Elem().IsValid());
 
-    ж<Blob> np2 = default!;
+    ж<Blob> np2 = default;
     var sp = new main_sp(P: np2);
     var pf = reflect.ValueOf(sp).Field(0);
     fmt.Printf("call-into-any: %s\n"u8, reflect.ValueOf(sink).Call(new reflectꓸValue[]{pf}.slice())[0].String());
@@ -140,7 +140,7 @@ internal static void Main() {
     var concrete = reflect.ValueOf(@string (ж<Blob> b) => fmt.Sprintf("concrete nil=%v"u8, b == nil));
     fmt.Printf("call-into-concrete: %s\n"u8, concrete.Call(new reflectꓸValue[]{pf}.slice())[0].String());
 
-    ж<Stamp> stamp = default!;
+    ж<Stamp> stamp = default;
     var sh = new main_sh(S: stamp);
     var si2 = reflect.ValueOf(sh).Field(0).Interface();
     fmt.Printf("shell-tier: printed=%v type=%v\n"u8, fmt.Sprint(si2), reflect.TypeOf(si2));

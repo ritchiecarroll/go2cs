@@ -103,7 +103,7 @@ internal static void Main() {
     show(false, "S4", f(),
         f());
 
-    impl im = default!;
+    impl im = default;
     show(false, "S5", im.Line(),
         im.Line());
 

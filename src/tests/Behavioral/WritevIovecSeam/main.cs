@@ -11,7 +11,7 @@ internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
         var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("listen:", err);
             return;
         }
@@ -25,8 +25,8 @@ internal static partial void Main() {
             GoFrame ᒐ = default;
             try {
                 var (cΔ1, errΔ1) = lnʗ2.Accept();
-                if (errΔ1 != default!) {
-                    doneʗ1.ᐸꟷ(default!);
+                if (errΔ1 != nil) {
+                    doneʗ1.ᐸꟷ(default);
                     return;
                 }
                 var cʗ1 = cΔ1;
@@ -39,7 +39,7 @@ internal static partial void Main() {
         });
 
         (var c, err) = Δnet.Dial("tcp", ln.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("dial:", err);
             return;
         }

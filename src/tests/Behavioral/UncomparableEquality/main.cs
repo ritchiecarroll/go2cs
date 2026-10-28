@@ -56,7 +56,7 @@ internal static void check(@string name, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%-24s PANIC: %v\n"u8, name, r);
                     return;
                 }
@@ -74,7 +74,7 @@ internal static void checkPanicOnly(@string name, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%-24s PANIC\n"u8, name);
                     return;
                 }
@@ -218,26 +218,26 @@ internal static void Main() {
 
     var mʗ2 = m;
     check("map == nil", () => {
-        _ = mʗ2 == default!;
+        _ = mʗ2 == nil;
     });
     var sʗ2 = s;
     check("slice == nil", () => {
-        _ = sʗ2 == default!;
+        _ = sʗ2 == nil;
     });
     var fnʗ2 = fn;
     check("func == nil", () => {
-        _ = fnʗ2 == default!;
+        _ = fnʗ2 == nil;
     });
     var wsʗ2 = ws;
     check("struct w/ slice == nil", () => {
-        _ = wsʗ2 == default!;
+        _ = wsʗ2 == nil;
     });
     var aosʗ2 = aos;
     check("array of slice == nil", () => {
-        _ = aosʗ2 == default!;
+        _ = aosʗ2 == nil;
     });
 
-    any nilIface = default!;
+    any nilIface = default;
     var mʗ3 = m;
     var nilIfaceʗ1 = nilIface;
     check("nil iface == map", () => {

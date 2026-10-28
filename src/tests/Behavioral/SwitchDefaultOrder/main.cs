@@ -11,7 +11,7 @@ internal static bucketType blockProfile => 1;
 internal static bucketType mutexProfile => 2;
 
 internal static @string size(bucketType typ) {
-    @string s = default!;
+    @string s = default;
     var exprᴛ1 = typ;
     if (exprᴛ1 == memProfile) {
         s = "mem";

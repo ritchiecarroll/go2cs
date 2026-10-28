@@ -18,7 +18,7 @@ internal static void unconnectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv4: listen failed");
             return;
         }
@@ -26,7 +26,7 @@ internal static void unconnectedRoundTrip() {
         defer(() => serverʗ1.Close(), ref ᒐ);
 
         (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv4: client listen failed");
             return;
         }
@@ -35,7 +35,7 @@ internal static void unconnectedRoundTrip() {
 
         var payload = slice<byte>("datagram-payload"u8);
         {
-            (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != default!) {
+            (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != nil) {
                 fmt.Println("ipv4: WriteTo failed");
                 return;
             }
@@ -44,7 +44,7 @@ internal static void unconnectedRoundTrip() {
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv4: ReadFrom failed");
             return;
         }
@@ -53,14 +53,14 @@ internal static void unconnectedRoundTrip() {
         fmt.Printf("ipv4: senderAddrMatchesClient=%v\n"u8, from.String() == client.LocalAddr().String());
 
         {
-            (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != default!) {
+            (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != nil) {
                 fmt.Println("ipv4: reply WriteTo failed");
                 return;
             }
         }
         client.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rfrom, rerr) = client.ReadFrom(buf);
-        if (rerr != default!) {
+        if (rerr != nil) {
             fmt.Println("ipv4: reply ReadFrom failed");
             return;
         }
@@ -75,7 +75,7 @@ internal static void zeroLengthDatagram() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("zerolen: listen failed");
             return;
         }
@@ -83,7 +83,7 @@ internal static void zeroLengthDatagram() {
         defer(() => serverʗ1.Close(), ref ᒐ);
 
         (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("zerolen: client listen failed");
             return;
         }
@@ -91,7 +91,7 @@ internal static void zeroLengthDatagram() {
         defer(() => clientʗ1.Close(), ref ᒐ);
 
         {
-            (_, err) = client.WriteTo(new byte[]{}.slice(), server.LocalAddr()); if (err != default!) {
+            (_, err) = client.WriteTo(new byte[]{}.slice(), server.LocalAddr()); if (err != nil) {
                 fmt.Println("zerolen: WriteTo failed");
                 return;
             }
@@ -100,7 +100,7 @@ internal static void zeroLengthDatagram() {
         var buf = new slice<byte>(8);
         (var n, var from, err) = server.ReadFrom(buf);
         fmt.Printf("zerolen: arrived=%v length=%v senderKnown=%v\n"u8,
-            err == default!, n == 0, err == default! && from.String() == client.LocalAddr().String());
+            err == nil, n == 0, err == nil && from.String() == client.LocalAddr().String());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -110,7 +110,7 @@ internal static void connectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("connected: listen failed");
             return;
         }
@@ -118,7 +118,7 @@ internal static void connectedRoundTrip() {
         defer(() => serverʗ1.Close(), ref ᒐ);
 
         (var conn, err) = Δnet.Dial("udp4", server.LocalAddr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("connected: dial failed");
             return;
         }
@@ -126,7 +126,7 @@ internal static void connectedRoundTrip() {
         defer(() => connʗ1.Close(), ref ᒐ);
 
         {
-            (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != default!) {
+            (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != nil) {
                 fmt.Println("connected: write failed");
                 return;
             }
@@ -134,7 +134,7 @@ internal static void connectedRoundTrip() {
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("connected: ReadFrom failed");
             return;
         }
@@ -142,14 +142,14 @@ internal static void connectedRoundTrip() {
             ((sstring)(buf.slice(0, n))) == "connected-payload"u8, from.String() == conn.LocalAddr().String());
 
         {
-            (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != default!) {
+            (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != nil) {
                 fmt.Println("connected: reply failed");
                 return;
             }
         }
         conn.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rerr) = conn.Read(buf);
-        fmt.Printf("connected: replyMatches=%v\n"u8, rerr == default! && ((sstring)(buf.slice(0, rn))) == "connected-reply"u8);
+        fmt.Printf("connected: replyMatches=%v\n"u8, rerr == nil && ((sstring)(buf.slice(0, rn))) == "connected-reply"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -159,7 +159,7 @@ internal static void ipv6RoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp6", "[::1]:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv6: available=false");
             return;
         }
@@ -167,7 +167,7 @@ internal static void ipv6RoundTrip() {
         defer(() => serverʗ1.Close(), ref ᒐ);
 
         (var client, err) = Δnet.ListenPacket("udp6", "[::1]:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv6: available=false");
             return;
         }
@@ -177,7 +177,7 @@ internal static void ipv6RoundTrip() {
         fmt.Println("ipv6: available=true");
 
         {
-            (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != default!) {
+            (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != nil) {
                 fmt.Println("ipv6: WriteTo failed");
                 return;
             }
@@ -185,7 +185,7 @@ internal static void ipv6RoundTrip() {
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("ipv6: ReadFrom failed");
             return;
         }

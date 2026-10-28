@@ -29,7 +29,7 @@ internal static partial @string dump(slice<byte> buf) {
 }
 
 internal static @string await(slice<byte> buf, slice<@string> want, bool sense) {
-    @string d = default!;
+    @string d = default;
 
     for (nint i = 0; i < pollLimit; i++) {
         d = dump(buf);

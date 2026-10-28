@@ -45,7 +45,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
 
-    ж<setting> p = default!;
+    ж<setting> p = default;
     s.Value.setting = p;
     fmt.Println((~s).setting == nil);
 

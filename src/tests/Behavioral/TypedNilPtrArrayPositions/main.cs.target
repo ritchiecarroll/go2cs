@@ -24,7 +24,7 @@ internal static void Main() {
     a = ж<array<nint>>.NilBoxOfDims(3L);
     fmt.Println("assign local  Len:", reflect.ValueOf(a.OrTypedNil()).Len(), "Cap:", reflect.ValueOf(a.OrTypedNil()).Cap());
 
-    holder h = default!;
+    holder h = default;
     h.versym = ж<array<uint16>>.NilBoxOfDims(3L);
     fmt.Println("assign field  elem len:", reflect.ValueOf(h.versym.OrTypedNil()).Type().Elem().Len());
 

@@ -70,9 +70,9 @@ internal static void Main() {
         return fmt.Sprintf("%s|%d"u8, prefix, len(vals));
     });
 
-    Funcꓸꓸꓸ<@string, nint, @string> f = default!;
+    Funcꓸꓸꓸ<@string, nint, @string> f = default;
 
-    if (f == default!) {
+    if (f == nil) {
         fmt.Println("nil func value");
     }
 

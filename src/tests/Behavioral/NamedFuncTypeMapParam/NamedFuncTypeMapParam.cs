@@ -16,7 +16,7 @@ internal static ж<Node> newPackage(Func<map<@string, ж<Node>>, @string, (ж<No
 }
 
 internal static (ж<Node> pkg, error err) lookup(map<@string, ж<Node>> imports, @string path) {
-    return (imports["a"], default!);
+    return (imports["a"], default);
 }
 
 internal static void Main() {

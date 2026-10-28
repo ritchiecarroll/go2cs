@@ -28,12 +28,12 @@ public static int64 Value(this ref Counter c) {
 }
 
 internal static void Main() {
-    Counter c = default!;
+    Counter c = default;
     c.Add(5);
     c.Add(3);
     fmt.Println("counter:", c.Value());
 
-    Counter d = default!;
+    Counter d = default;
     fmt.Println("zero:", d.Value());
 }
 

@@ -88,7 +88,7 @@ internal static void Main() {
     fmt.Println(classify(new circleжshape(c)));
     fmt.Println(classify(new squareжshape(q)));
     fmt.Println(classify(d));
-    fmt.Println(classify(default!));
+    fmt.Println(classify(default));
 
     fmt.Println(classifyMulti(new circleжshape(c)));
     fmt.Println(classifyMulti(new squareжshape(q)));

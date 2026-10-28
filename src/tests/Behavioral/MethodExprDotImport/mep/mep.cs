@@ -7,11 +7,11 @@ partial struct Reader {
 }
 
 public static (@string, error) Read(this ref Reader r, byte delim) {
-    return (r.Name, default!);
+    return (r.Name, default);
 }
 
 public static (@string, error) Peek(this ref Reader r, byte delim) {
-    return ("peek:" + r.Name, default!);
+    return ("peek:" + r.Name, default);
 }
 
 } // end mep_package

@@ -26,7 +26,7 @@ public static nint Add(this ж<Guarded> Ꮡg, nint d) {
         g.n += d;
         return g.n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡg.of(Guarded.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 

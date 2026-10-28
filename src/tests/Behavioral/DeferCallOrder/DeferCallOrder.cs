@@ -131,7 +131,7 @@ internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
         }
         return total;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -140,15 +140,15 @@ partial struct acc {
 }
 
 internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
-    nint sum = default!;
-    error err = default!;
+    nint sum = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var a = ref Ꮡa.DerefOrNull();
 
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     err = fmt.Errorf("boom"u8);
                 }
             }

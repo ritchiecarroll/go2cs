@@ -12,7 +12,7 @@ internal static void note(@string s) {
 
 internal static void show(@string label, bool open) {
     fmt.Println(label, "open =", open, trace);
-    trace = default!;
+    trace = default;
 }
 
 internal static bool open;

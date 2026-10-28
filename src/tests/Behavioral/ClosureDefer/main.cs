@@ -41,7 +41,7 @@ internal static void Main() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Println("closure recovered:", r);
                     }
                 }
@@ -55,12 +55,12 @@ internal static void Main() {
     divPrint(1, 0);
 
     nint /*result*/ safeDiv(nint a, nint b) {
-        nint result = default!;
+        nint result = default;
         GoFrame ᒐ = default;
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         result = -1;
                     }
                 }
@@ -75,7 +75,7 @@ internal static void Main() {
     fmt.Println(safeDiv(1, 0));
 
     nint /*n*/ counted() {
-        nint n = default!;
+        nint n = default;
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -111,7 +111,7 @@ internal static void Main() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Println("outer recovered:", r);
                     }
                 }
@@ -125,9 +125,9 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => fmt.Println(ᴛ1), fetchDeferredˢ, ref ᒐ);
-            return (42, default!);
+            return (42, default);
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     }
     var (v, err) = fetch();

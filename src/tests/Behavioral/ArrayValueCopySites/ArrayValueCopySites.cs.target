@@ -119,7 +119,7 @@ internal static void rangeHeapBoxed() {
 internal static void rangeAssignExisting() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
     array<nint> row = new(3);
-    nint i = default!;
+    nint i = default;
 
     foreach (var (iᴛ1, vᴛ1) in m.ΔRangeSnapshot()) {
         i = iᴛ1;
@@ -270,7 +270,7 @@ internal static void appendElement() {
     var sᴷ = new stackAppend<array<nint>>();
 
     var a = new nint[]{1, 2, 3}.array();
-    slice<array<nint>> s = default!;
+    slice<array<nint>> s = default;
     s = append(sᴷ, s, a.Clone());
     a[0] = 99;
     fmt.Println("appendElement:", s[0], a);

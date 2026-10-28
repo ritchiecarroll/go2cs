@@ -19,17 +19,17 @@ internal static void Main() {
 }
 
 internal static (ж<Δnet.UDPConn> server, ж<Δnet.UDPConn> client, bool ok) listenPair(@string network, @string host) {
-    ж<Δnet.UDPConn> server = default!;
-    ж<Δnet.UDPConn> client = default!;
+    ж<Δnet.UDPConn> server = default;
+    ж<Δnet.UDPConn> client = default;
 
     (server, var err) = Δnet.ListenUDP(network, Ꮡ(new Δnet.UDPAddr(IP: Δnet.ParseIP(host), Port: 0)));
-    if (err != default!) {
-        return (default!, default!, false);
+    if (err != nil) {
+        return (default, default, false);
     }
     (client, err) = Δnet.ListenUDP(network, Ꮡ(new Δnet.UDPAddr(IP: Δnet.ParseIP(host), Port: 0)));
-    if (err != default!) {
+    if (err != nil) {
         server.Close();
-        return (default!, default!, false);
+        return (default, default, false);
     }
     return (server, client, true);
 }
@@ -64,15 +64,15 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
         for (nint i = 0; i < rounds; i++) {
             _ = new slice<byte>(512);
 
-            var (n, oobn, err) = client.WriteMsgUDPAddrPort(payload, default!, target);
-            if (err != default! || n != len(payload) || oobn != 0) {
+            var (n, oobn, err) = client.WriteMsgUDPAddrPort(payload, default, target);
+            if (err != nil || n != len(payload) || oobn != 0) {
                 break;
             }
             writes++;
 
             server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
-            (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDPAddrPort(buf, default!);
-            if (err != default!) {
+            (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDPAddrPort(buf, default);
+            if (err != nil) {
                 break;
             }
             reads++;
@@ -127,15 +127,15 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
         for (nint i = 0; i < rounds; i++) {
             _ = new slice<byte>(512);
 
-            var (n, oobn, err) = client.WriteMsgUDP(payload, default!, target);
-            if (err != default! || n != len(payload) || oobn != 0) {
+            var (n, oobn, err) = client.WriteMsgUDP(payload, default, target);
+            if (err != nil || n != len(payload) || oobn != 0) {
                 break;
             }
             writes++;
 
             server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
-            (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDP(buf, default!);
-            if (err != default!) {
+            (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDP(buf, default);
+            if (err != nil) {
                 break;
             }
             reads++;

@@ -15,7 +15,7 @@ internal partial struct test_R0 /*dyn*/ {
 }
 
 internal static test_R0 test() {
-    test_R0 x = default!;
+    test_R0 x = default;
     x.@string = "Go";
     x.@int = @new<nint>();
     x.P = @new<bool>();

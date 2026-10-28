@@ -36,7 +36,7 @@ internal static void Main() {
     any a = (nint)7;
     fmt.Println(a._<nint>());
 
-    any b = default!;
+    any b = default;
     b = (nint)8;
     fmt.Println(b._<nint>());
 

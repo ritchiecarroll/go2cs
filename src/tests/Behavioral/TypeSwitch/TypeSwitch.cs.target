@@ -36,7 +36,7 @@ internal static void Main() {
     whatAmI((int64)2);
     whatAmI((uint64)2);
     whatAmI(heyˢ);
-    whatAmI(default!);
+    whatAmI(default);
 
     void classify(any i) {
         switch (i.type()) {
@@ -107,7 +107,7 @@ internal static void Main() {
 
     fmt.Println(probe(true), probe((nint)7), probe("ab"));
 
-    marker mk = default!;
+    marker mk = default;
     fmt.Println(mk.tag(new byte[]{7, 8}.slice()));
 }
 

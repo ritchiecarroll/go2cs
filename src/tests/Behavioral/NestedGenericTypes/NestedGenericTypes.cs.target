@@ -14,16 +14,16 @@ partial struct Pair<A, B> {
 }
 
 internal static void Main() {
-    Box<Box<nint>> nested = default!;
+    Box<Box<nint>> nested = default;
     nested.v.v = 42;
     fmt.Println(nested.v.v);
 
-    Pair<Box<nint>, Box<nint>> p = default!;
+    Pair<Box<nint>, Box<nint>> p = default;
     p.a.v = 7;
     p.b.v = 8;
     fmt.Println(p.a.v, p.b.v);
 
-    Box<Box<Box<nint>>> deep = default!;
+    Box<Box<Box<nint>>> deep = default;
     deep.v.v.v = 99;
     fmt.Println(deep.v.v.v);
 }

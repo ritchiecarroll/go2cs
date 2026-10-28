@@ -17,7 +17,7 @@ internal static void Main() {
     b.Value[..][2] = 6;
     var c = @new<two>();
     c.Value[..][3] = 7;
-    two d = default!;
+    two d = default;
     d[..][0] = 8;
     fmt.Println("full-slice writes:", a.Value[1], b.Value[2], c.Value[3], d[0]);
 

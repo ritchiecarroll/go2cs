@@ -8,11 +8,11 @@ internal static (nint, error) pair(nint n) {
     if (n < 0) {
         return (0, fmt.Errorf("negative %d"u8, n));
     }
-    return (n * 2, default!);
+    return (n * 2, default);
 }
 
 internal static (int64 written, error err) send(nint n) {
-    int64 written = default!;
+    int64 written = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -22,7 +22,7 @@ internal static (int64 written, error err) send(nint n) {
             fmt.Println("hook:", written, Ꮡerr.ValueSlot, written > 0);
         }, ref ᒐ);
         (var v, err) = pair(n);
-        if (err != default!) {
+        if (err != nil) {
             (written, err) = (0, fmt.Errorf("send: %w"u8, err));
             goto ᒐdone;
         }
@@ -46,7 +46,7 @@ internal static nint /*x*/ addrv() {
 
 internal static (int64, error) lit(nint n) {
     (int64 w, error e) f() {
-        int64 w = default!;
+        int64 w = default;
         heap<error>(out var Ꮡe);
         GoFrame ᒐ = default;
         try {
@@ -55,7 +55,7 @@ internal static (int64, error) lit(nint n) {
                 fmt.Println("lit hook:", w, Ꮡe.ValueSlot);
             }, ref ᒐ);
             (var v, Ꮡe.ValueSlot) = pair(n);
-            if (Ꮡe.ValueSlot != default!) {
+            if (Ꮡe.ValueSlot != nil) {
                 goto ᒐdone;
             }
             w = (int64)v;

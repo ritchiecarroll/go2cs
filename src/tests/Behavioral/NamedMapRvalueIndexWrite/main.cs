@@ -40,7 +40,7 @@ internal static void Main() {
     fmt.Println(r.Header()["Content-Type"][0]);
 
     var (absent, ok) = r.Header()["absent", ꟷ];
-    fmt.Println(absent == default!, ok);
+    fmt.Println(absent == default, ok);
 
     delete(r.Header(), "X-Trace"u8);
     fmt.Println(len(r.Header()), len((~r).hdr));

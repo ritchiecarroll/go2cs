@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static @string classify(nint n) {
-    @string @out = default!;
+    @string @out = default;
     var exprᴛ1 = n;
     var matchᴛ1 = false;
     if (exprᴛ1 is 1) { matchᴛ1 = true;

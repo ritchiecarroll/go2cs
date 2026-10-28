@@ -35,7 +35,7 @@ internal static partial nint boxedLocal() {
 
 internal static void Main() {
     keep(Ꮡmheap);
-    nint got = default!;
+    nint got = default;
     run(() => {
         got = mheap.alloc();
         var p = Ꮡmheap.of(heap.Ꮡcount);

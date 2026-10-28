@@ -17,11 +17,11 @@ internal static any box<E>(E e) {
 }
 
 internal static bool isNil<E>(E e) {
-    return ((any)(e).OrTypedNilOf()) == default!;
+    return ((any)(e).OrTypedNilOf()) == nil;
 }
 
 internal static any assign<E>(E e) {
-    any x = default!;
+    any x = default;
     x = (e).OrTypedNilOf();
     return x;
 }
@@ -59,16 +59,16 @@ internal static any plain<T>(T t)
 }
 
 internal static void Main() {
-    ж<P> p = default!;
-    Action f = default!;
-    error e = default!;
+    ж<P> p = default;
+    Action f = default;
+    error e = default;
 
     fmt.Println(show(p));
-    fmt.Println(box(p) == default!, isNil(p), assign(p) == default!, slot(p)[0] == default!, send(p) == default!);
+    fmt.Println(box(p) == nil, isNil(p), assign(p) == nil, slot(p)[0] == nil, send(p) == nil);
     fmt.Printf("%T %T\n"u8, box(p), assign(p));
-    fmt.Println(fmt.Sprintf("%T"u8, box((f).OrTypedNilFunc())), box((f).OrTypedNilFunc()) == default!, isNil((f).OrTypedNilFunc()));
+    fmt.Println(fmt.Sprintf("%T"u8, box((f).OrTypedNilFunc())), box((f).OrTypedNilFunc()) == nil, isNil((f).OrTypedNilFunc()));
     fmt.Println(nameOf<ж<myErr>>(nil));
-    fmt.Println(box(e) == default!, isNil(e));
+    fmt.Println(box(e) == nil, isNil(e));
     fmt.Println(show(Ꮡ(new P(1))), plain<nint>(3), plain((@string)"s"));
 }
 

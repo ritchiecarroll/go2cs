@@ -11,7 +11,7 @@ partial class main_package {
 public partial struct celsius /*num:float64*/;
 
 public static (slice<byte>, error) MarshalJSON(this celsius c) {
-    return (slice<byte>(fmt.Sprintf(@"""%.1fC"""u8, (float64)c)), default!);
+    return (slice<byte>(fmt.Sprintf(@"""%.1fC"""u8, (float64)c)), default);
 }
 
 partial struct reading {
@@ -61,7 +61,7 @@ internal static void Main() {
 
     ref var none = ref heap<namer>(out var Ꮡnone);
     (var z, ok) = reflect.TypeAssert<namer>(reflect.ValueOf(Ꮡnone).Elem());
-    fmt.Println("nil interface value:", z == default!, ok);
+    fmt.Println("nil interface value:", z == nil, ok);
 
     (var a, ok) = reflect.TypeAssert<array<nint>>(reflect.ValueOf(new nint[]{3, 4}.array()));
     fmt.Println("array:", a, ok);

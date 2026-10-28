@@ -25,7 +25,7 @@ internal partial struct main_data /*dyn*/ {
 }
 
 internal static void Main() {
-    ж<main_data> data = default!;
+    ж<main_data> data = default;
 
     ref var mine = ref heap(new Person(), out var Ꮡmine);
 

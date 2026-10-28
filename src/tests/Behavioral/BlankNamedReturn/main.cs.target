@@ -8,17 +8,17 @@ internal static bool /*_*/ valid(bool flag) {
     if (flag) {
         return true;
     }
-    return default!;
+    return default;
 }
 
 internal static (nint, @string label) pair(@string tag) {
-    @string label = default!;
+    @string label = default;
 
     label = "empty:"u8 + tag;
     if (tag == "set"u8) {
         return (7, "set");
     }
-    return (default!, label);
+    return (default, label);
 }
 
 internal static void Main() {

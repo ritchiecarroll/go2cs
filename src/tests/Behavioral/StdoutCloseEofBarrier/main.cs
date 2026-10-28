@@ -27,17 +27,17 @@ internal static void parent() {
     var cmd = exec.Command(Δos.Args[0]);
     cmd.Value.Env = append(Δos.Environ(), "EOF_BARRIER_CHILD=1"u8);
     var (stdin, err) = cmd.StdinPipe();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("StdinPipe error:", err);
         Δos.Exit(1);
     }
     (var @out, err) = cmd.StdoutPipe();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("StdoutPipe error:", err);
         Δos.Exit(1);
     }
     {
-        var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
             fmt.Println("Start error:", errΔ1);
             Δos.Exit(1);
         }

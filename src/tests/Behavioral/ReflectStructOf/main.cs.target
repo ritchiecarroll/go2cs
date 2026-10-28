@@ -14,12 +14,12 @@ internal static @string String(this stringer s) {
 }
 
 internal static @string /*msg*/ recovered(Action fn) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     msg = fmt.Sprint(r);
                 }
             }

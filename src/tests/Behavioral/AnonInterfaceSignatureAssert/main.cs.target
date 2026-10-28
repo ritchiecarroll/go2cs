@@ -37,8 +37,8 @@ internal partial interface classify_typeᴛ1 /*dyn*/ {
 }
 
 internal static (bool single, bool multi) classify(any v) {
-    bool single = default!;
-    bool multi = default!;
+    bool single = default;
+    bool multi = default;
 
     (_, single) = v._<classify_type>(ᐧ);
     (_, multi) = v._<classify_typeᴛ1>(ᐧ);

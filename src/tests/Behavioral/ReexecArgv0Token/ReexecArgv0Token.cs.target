@@ -25,7 +25,7 @@ internal static void Main() {
         fmt.Printf("depth %d: child did NOT see the token (os.Args[0] ends %q); re-executing again\n"u8, depth, tail(Δos.Args[0]));
     }
     var (exe, err) = Δos.Executable();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("os.Executable:", err);
         Δos.Exit(1);
     }

@@ -27,7 +27,7 @@ internal static void Main() {
         fmt.Printf(r.format + "\n"u8, r.val.ꓸꓸꓸ);
     }
 
-    SE s = default!;
+    SE s = default;
     s = append(s, (any)1, (any)((@string)"two"u8), (any)3.5D);
     fmt.Println(len(s), cap(s) >= 3, s);
     fmt.Println(s[0], s[1], s[2]);
@@ -45,8 +45,8 @@ internal static void Main() {
     var ops = new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cde"u8}.slice());
     fmt.Println(len(ops), ops, ops[1..2]);
 
-    SE zero = default!;
-    fmt.Println(zero == default!, len(zero), zero, new SE(new any[]{}.slice()) == default!);
+    SE zero = default;
+    fmt.Println(zero == default, len(zero), zero, new SE(new any[]{}.slice()) == default);
 }
 
 } // end main_package

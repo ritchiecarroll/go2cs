@@ -10,7 +10,7 @@ partial struct pusher {
 
 internal static error Push(this pusher p, @string target, nint weight) {
     fmt.Println("push", target, weight, "from", p.id);
-    return default!;
+    return default;
 }
 
 internal static @string Label(this pusher p) {

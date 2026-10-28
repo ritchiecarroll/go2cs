@@ -152,7 +152,7 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
         return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
 
-    return default!;
+    return default;
 }
 
 partial struct ΔMapType {
@@ -171,7 +171,7 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Map) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔMapType>();
 }
@@ -187,7 +187,7 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Array) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔArrayType>();
 }

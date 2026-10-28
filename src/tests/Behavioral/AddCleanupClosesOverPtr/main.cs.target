@@ -29,7 +29,7 @@ internal static void @try(@string name, Action register) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: panic: %v\n"u8, name, r);
                 }
             }
@@ -112,7 +112,7 @@ internal static void Main() {
         runtime.AddCleanup(Ꮡv.ValueSlot, (nint _Δp0) => {
             _ = Ꮡv.ValueSlot;
         }, 0);
-        Ꮡv.ValueSlot = default!;
+        Ꮡv.ValueSlot = default;
         fmt.Println("reassigned is nil:", Ꮡv.ValueSlot == nil);
     });
 
@@ -158,7 +158,7 @@ internal static void Main() {
     @try("array capture holds ptr", () => {
         var v = Ꮡ(new T(f: 17));
         ref var a = ref heap<array<ж<T>>>(out var Ꮡa);
-        a = new ж<T>[]{default!, v}.array();
+        a = new ж<T>[]{default, v}.array();
         var aʗ1 = a;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = aʗ1;

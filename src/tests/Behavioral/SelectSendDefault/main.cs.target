@@ -83,7 +83,7 @@ internal static partial void unbufferedWithReceiver() {
 }
 
 internal static void nilChannel() {
-    channel<nint> ch = default!;
+    channel<nint> ch = default;
     var selᴛ5 = ch.ᐸꟷ(1, ꓸꓸꓸ);
     switch (trySelect(selᴛ5)) {
     case 0: {
@@ -101,7 +101,7 @@ internal static void closedChannel() {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println("closed channel: recovered:", r);
                 }
             }

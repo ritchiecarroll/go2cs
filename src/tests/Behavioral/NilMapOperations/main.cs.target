@@ -12,7 +12,7 @@ internal static void tryWrite(map<@string, nint> m) {
         writePanicked = false;
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     writePanicked = true;
                 }
             }
@@ -24,7 +24,7 @@ internal static void tryWrite(map<@string, nint> m) {
 }
 
 internal static void Main() {
-    map<@string, nint> m = default!;
+    map<@string, nint> m = default;
 
     fmt.Println(m["a"]);
 
@@ -42,10 +42,10 @@ internal static void Main() {
     delete(m, "a"u8);
     fmt.Println("delete ok");
 
-    fmt.Println(m == default!);
+    fmt.Println(m == default);
 
     var e = new map<@string, nint>{};
-    fmt.Println(e == default!);
+    fmt.Println(e == default);
     fmt.Println(len(e));
 
     tryWrite(m);

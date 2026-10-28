@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static void Main() {
     var e1 = @unsafe.StringData(""u8);
-    @string empty = default!;
+    @string empty = default;
     var e2 = @unsafe.StringData(empty);
 
     fmt.Println(e1 == nil, e1 == e2);

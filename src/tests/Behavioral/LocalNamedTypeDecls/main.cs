@@ -49,10 +49,10 @@ internal static void Main() {
     main_NodePtr np = Ꮡ(new main_Node(V: 9));
     fmt.Println(((ж<main_Node>)(np)).Value.V);
 
-    var rs = new main_recursiveSlice(new main_recursiveSlice[]{new main_recursiveSlice(new main_recursiveSlice[]{default!}.slice()), default!}.slice());
+    var rs = new main_recursiveSlice(new main_recursiveSlice[]{new main_recursiveSlice(new main_recursiveSlice[]{default}.slice()), default}.slice());
     fmt.Println(len(rs), len(rs[0]));
 
-    var rm = new main_recursiveMap(new map<@string, main_recursiveMap>{["a"] = new main_recursiveMap(new map<@string, main_recursiveMap>{["b"] = default!})});
+    var rm = new main_recursiveMap(new map<@string, main_recursiveMap>{["a"] = new main_recursiveMap(new map<@string, main_recursiveMap>{["b"] = default})});
     fmt.Println(len(rm), len(rm["a"]));
     fmt.Println(sum);
 }

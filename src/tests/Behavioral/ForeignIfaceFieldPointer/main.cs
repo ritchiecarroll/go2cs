@@ -28,7 +28,7 @@ internal static void Main() {
 
     fmt.Printf("direct T=%T v=%#v\n"u8, ta.OrTypedNil(), ta.OrTypedNil());
 
-    addrlib.Addr nilAddr = default!;
+    addrlib.Addr nilAddr = default;
     fmt.Printf("nil T=%T v=%v\n"u8, nilAddr, nilAddr);
 }
 

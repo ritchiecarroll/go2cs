@@ -18,7 +18,7 @@ public static any GetValue(nint index) {
     if (index >= 0 && index < len(values)) {
         return values[index];
     }
-    return default!;
+    return default;
 }
 
 internal static void Main() {

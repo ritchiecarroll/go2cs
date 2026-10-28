@@ -8,7 +8,7 @@ partial class main_package {
 
 internal static void use(Func<@string, (Δio.ReadCloser, error)> open) {
     var (rc, err) = open("no-such-file-for-go2cs");
-    fmt.Println(rc == default!, err != default!);
+    fmt.Println(rc == nil, err != nil);
 }
 
 internal static void Main() {

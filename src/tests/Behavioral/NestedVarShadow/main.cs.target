@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static nint f(nint x) {
     if (x >= 2) {
-        nint zΔ1 = default!;
+        nint zΔ1 = default;
         if (x > 5) {
             zΔ1 = 100;
         } else {
@@ -31,14 +31,14 @@ internal static (nint, error) check(@string s) {
     if (s == ""u8) {
         return (0, new tagErrжerror(Ꮡ(new tagErr(tag: "empty"))));
     }
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 internal static @string g(@string s) {
     {
         nint n = len(s); if (n >= 0) {
             var (vΔ1, errΔ1) = check("");
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 {
                     var (e, ok) = errΔ1._<ж<tagErr>>(ᐧ); if (ok) {
                         e.Value.tag = "inner";
@@ -50,7 +50,7 @@ internal static @string g(@string s) {
         }
     }
     var (v, err) = check(s);
-    if (err != default!) {
+    if (err != nil) {
         return "outer";
     }
     return fmt.Sprint(v);

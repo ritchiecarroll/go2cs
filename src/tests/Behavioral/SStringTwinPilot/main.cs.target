@@ -47,7 +47,7 @@ internal static void Main() {
         var (count, err) = fmt.Sscanf("42"u8, "%d"u8, Ꮡn);
         fmt.Println(count, err, n);
         fmt.Println(fmt.Errorf("wrapped: %w"u8, errors.New("inner")));
-        fmt.Println((@string)fmt.Appendf(default!, "appended %d"u8, (nint)6));
+        fmt.Println((@string)fmt.Appendf(default, "appended %d"u8, (nint)6));
         fmt.Println(utf8.RuneCountInString(hLloˢ));
         var (r, size) = utf8.DecodeRuneInString("é!"u8);
         fmt.Println(r, size);

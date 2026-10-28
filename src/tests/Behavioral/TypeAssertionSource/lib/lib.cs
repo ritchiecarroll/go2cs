@@ -18,7 +18,7 @@ public static (nint, error) Read(this ref Impl _, slice<byte> p) {
 }
 
 public static (nint, error) Write(this ref Impl _, slice<byte> p) {
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 } // end lib_package

@@ -129,8 +129,8 @@ internal static partial (bool fwd, bool back) callerSeparators() {
 }
 
 internal static partial (bool fwd, bool back) framesSeparators() {
-    bool fwd = default!;
-    bool back = default!;
+    bool fwd = default;
+    bool back = default;
 
     var pc = new slice<uintptr>(64);
     nint n = runtime.Callers(0, pc);

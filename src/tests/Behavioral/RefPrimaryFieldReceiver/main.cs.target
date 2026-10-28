@@ -31,7 +31,7 @@ internal static nint get(this ж<counter> Ꮡc) {
         ᒐd1 = true;
         return c.n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -48,7 +48,7 @@ internal static nint nBeforeTouch(this ж<counter> Ꮡc) {
         ᒐd1 = true;
         return c.n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -128,7 +128,7 @@ internal static partial void Main() {
     q.of(counter.Ꮡmu).Unlock();
     fmt.Println("via local pointer:", (~p).n);
 
-    ж<counter> nilc = default!;
+    ж<counter> nilc = default;
     fmt.Println("nil receiver, early return:", nilc.nBeforeTouch());
 }
 

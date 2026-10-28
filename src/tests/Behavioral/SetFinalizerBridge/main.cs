@@ -48,7 +48,7 @@ internal static @string cleared() {
         runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
             close(doneʗ2);
         });
-        runtime.SetFinalizer(p.OrTypedNil(), default!);
+        runtime.SetFinalizer(p.OrTypedNil(), default);
         _ = p.Value.n;
     }))();
 

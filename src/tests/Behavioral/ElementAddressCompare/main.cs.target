@@ -54,7 +54,7 @@ internal static void recovered(@string label, Func<bool> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println(label, "panic:", r);
                 }
             }
@@ -112,7 +112,7 @@ internal static void Main() {
     var es2 = new slice<empty>(2);
     fmt.Println("zero size  :", Ꮡelem(es, 0) == Ꮡelem(es, 1), Ꮡelem(es, 0) == Ꮡelem(es2, 0));
 
-    slice<nint> nilSlice = default!;
+    slice<nint> nilSlice = default;
     var nilSliceʗ1 = nilSlice;
     var sʗ1 = s;
     recovered("nil slice  :", () => Ꮡelem(nilSliceʗ1, 0) == Ꮡelem(sʗ1, 0));

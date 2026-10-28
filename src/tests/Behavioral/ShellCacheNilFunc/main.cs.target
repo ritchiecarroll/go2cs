@@ -7,7 +7,7 @@ partial class main_package {
 internal delegate nint fn();
 
 internal static nint Len(this fn f) {
-    if (f == default!) {
+    if (f == nil) {
         return -1;
     }
 
@@ -19,7 +19,7 @@ internal partial interface main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    fn none = default!;
+    fn none = default;
     var seven = new fn(() => 7);
     var eight = new fn(() => 8);
     var values = new any[]{(none).OrTypedNilFunc(), (seven).OrTypedNilFunc(), (eight).OrTypedNilFunc(), (none).OrTypedNilFunc()}.slice();

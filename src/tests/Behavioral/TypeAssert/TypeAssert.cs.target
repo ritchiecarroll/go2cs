@@ -59,7 +59,7 @@ internal static void assertionsWithPanic() {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println("Recovered from panic:", r);
                 }
             }

@@ -24,9 +24,9 @@ internal static void Assign(this ref @decimal a, nint v) {
 }
 
 internal static void Main() {
-    nint @base = default!;
-    nint @as = default!;
-    nint @event = default!;
+    nint @base = default;
+    nint @as = default;
+    nint @event = default;
 
     set(ref @base);
     set(ref @as);
@@ -35,7 +35,7 @@ internal static void Main() {
     @base += 1;
     fmt.Println(@base, @as, @event);
 
-    @decimal dec = default!;
+    @decimal dec = default;
     dec.Assign(7);
     fmt.Println(dec.String());
 

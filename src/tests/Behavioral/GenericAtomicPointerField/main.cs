@@ -31,7 +31,7 @@ public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
             return e.of(entry<V>.Ꮡv).Load();
         }
     }
-    return default!;
+    return default;
 }
 
 internal static void Main() {

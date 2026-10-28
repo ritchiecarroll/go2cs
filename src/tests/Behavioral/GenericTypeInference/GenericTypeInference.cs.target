@@ -136,7 +136,7 @@ public static M CloneOrNil<M, K, V>(M m)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
 {
     if (m.IsNil) {
-        return default!;
+        return default;
     }
     var @out = make<M>(len(m));
     foreach (var (k, v) in m) {
@@ -152,7 +152,7 @@ public static void DropKey<M, K, V>(M m, K key)
 }
 
 internal static void Main() {
-    Point p = default!;
+    Point p = default;
     p = new int32[]{1, 2, 3}.slice();
     ScaleAndPrint(p);
     fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), (int32)2).String());
@@ -182,8 +182,8 @@ internal static void Main() {
     foreach (var (k, v) in range<@string, nint>(letters().Invoke)) {
         fmt.Println(k, v);
     }
-    Grades nilG = default!;
-    fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == default!);
+    Grades nilG = default;
+    fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == default);
     var cl = CloneOrNil<Grades, @string, nint>(g1);
     fmt.Println(len(cl), cl["a"]);
     DropKey<Grades, @string, nint>(g1, (@string)"a");

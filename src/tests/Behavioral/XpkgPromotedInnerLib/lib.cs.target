@@ -22,7 +22,7 @@ public static @string Name(this Inner i) {
 }
 
 public static (nint, error) Pair(this Inner i) {
-    return (i.X, default!);
+    return (i.X, default);
 }
 
 public static void Set(this ref Inner i, nint v) {

@@ -114,8 +114,8 @@ internal static void indexOnly() {
 
 internal static void assignVars() {
     var a = new nint[]{1, 2, 3, 4}.array();
-    nint i = default!;
-    nint v = default!;
+    nint i = default;
+    nint v = default;
 
     foreach (var (iᴛ1, vᴛ1) in a.ΔRangeSnapshot()) {
         i = iᴛ1;

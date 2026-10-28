@@ -35,8 +35,8 @@ internal static void loopDefers(nint n) {
 }
 
 internal static (@string label, nint score) classify(nint n) {
-    @string label = default!;
-    nint score = default!;
+    @string label = default;
+    nint score = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -132,7 +132,7 @@ internal static nint mixedScopes() {
         fmt.Println("mixed body, total =", total);
         return total;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -140,13 +140,13 @@ internal static nint mixedScopes() {
 private static readonly object guardedCleanupˢ = (@string)"guarded cleanup"u8;
 
 internal static @string /*msg*/ guarded(bool boom) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => fmt.Println(ᴛ1), guardedCleanupˢ, ref ᒐ);
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     msg = fmt.Sprint("recovered ", r);
                 }
             }

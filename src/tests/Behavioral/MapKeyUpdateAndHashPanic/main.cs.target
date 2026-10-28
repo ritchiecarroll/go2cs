@@ -185,7 +185,7 @@ internal static void @try(@string label, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
                     fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
                 }
@@ -199,10 +199,10 @@ internal static void @try(@string label, Action f) {
 }
 
 internal static void hashPanic() {
-    slice<nint> Δslice = default!;
+    slice<nint> Δslice = default;
     var empty = new map<any, bool>{};
     var full = new map<any, bool>{[(nint)1] = true, [(@string)"a"u8] = true};
-    map<any, bool> nilMap = default!;
+    map<any, bool> nilMap = default;
 
     var emptyʗ1 = empty;
     var sliceʗ1 = Δslice;
@@ -252,7 +252,7 @@ internal static void hashPanic() {
 internal static void reflectSide() {
     ref var m = ref heap<reflectꓸValue>(out var Ꮡm);
     m = reflect.MakeMap(reflect.MapOf(reflect.TypeFor<any>(), reflect.TypeFor<bool>()));
-    slice<nint> Δslice = default!;
+    slice<nint> Δslice = default;
     var mʗ1 = m;
     var sliceʗ1 = Δslice;
     @try("reflect MapIndex []int on empty MapOf(any)", () => {

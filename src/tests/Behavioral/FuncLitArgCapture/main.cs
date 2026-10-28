@@ -163,8 +163,8 @@ internal static void Main() {
     fmt.Println("9:", mul(21));
 
     (nint x, bool ok) pick(nint sel) {
-        nint x = default!;
-        bool ok = default!;
+        nint x = default;
+        bool ok = default;
         if (sel > 0) {
             x = sel * 7;
             ok = true;
@@ -177,8 +177,8 @@ internal static void Main() {
     fmt.Println("10:", a, b, zx, zok);
 
     (nint n, @string s) zero() {
-        nint nΔ1 = default!;
-        @string s = default!;
+        nint nΔ1 = default;
+        @string s = default;
         return (nΔ1, s);
     }
     var (n0, s0) = zero();

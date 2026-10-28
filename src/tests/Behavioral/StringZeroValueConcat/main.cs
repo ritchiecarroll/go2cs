@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static @string build(nint x) {
-    @string s = default!;
+    @string s = default;
     switch (x) {
     case 1: {
         s += "one"u8;
@@ -21,12 +21,12 @@ internal static @string build(nint x) {
 }
 
 internal static void Main() {
-    @string s = default!;
+    @string s = default;
     s += "a"u8;
     s += "b"u8;
     fmt.Println(s);
 
-    @string z = default!;
+    @string z = default;
     fmt.Println(len(z), z == ""u8, "[" + z + "]");
 
     fmt.Println(build(1));

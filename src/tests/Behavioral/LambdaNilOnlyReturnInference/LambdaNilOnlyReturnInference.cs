@@ -9,7 +9,7 @@ partial struct Value {
 }
 
 internal static slice<Value> apply(Func<slice<Value>, slice<Value>> f) {
-    return f(default!);
+    return f(default);
 }
 
 internal static ж<Value> applyPtr(Func<ж<Value>> f) {
@@ -33,26 +33,26 @@ internal static error applyErr(Func<nint, error> f) {
 }
 
 internal static void Main() {
-    var g = slice<Value> (slice<Value> @in) => default!;
-    fmt.Println("A1 slice result:", g(default!) == default!, len(g(default!)));
+    var g = slice<Value> (slice<Value> @in) => default;
+    fmt.Println("A1 slice result:", g(default) == default, len(g(default)));
 
-    var m = map<@string, nint> (@string k) => default!;
-    fmt.Println("A2 map result:", applyMap(m) == default!, len(m("x")));
+    var m = map<@string, nint> (@string k) => default;
+    fmt.Println("A2 map result:", applyMap(m) == default, len(m("x")));
 
-    var p = ж<Value> () => default!;
+    var p = ж<Value> () => default;
     fmt.Println("A3 pointer result:", p() == nil);
 
-    var c = channel<nint> () => default!;
-    fmt.Println("A4 chan result:", applyChan(c) == default!);
+    var c = channel<nint> () => default;
+    fmt.Println("A4 chan result:", applyChan(c) == default);
 
-    var fn = Func<nint, nint> () => default!;
-    fmt.Println("A5 func result:", applyFunc(fn) == default!);
+    var fn = Func<nint, nint> () => default;
+    fmt.Println("A5 func result:", applyFunc(fn) == nil);
 
-    fmt.Println("A6 slice-result lambda passed to a consumer:", apply(g) == default!);
+    fmt.Println("A6 slice-result lambda passed to a consumer:", apply(g) == default);
     fmt.Println("A7 pointer-result lambda passed to a consumer:", applyPtr(p) == nil);
 
-    var e = error (nint x) => default!;
-    fmt.Println("B1 error result:", applyErr(e) == default!);
+    var e = error (nint x) => default;
+    fmt.Println("B1 error result:", applyErr(e) == nil);
 
     void v(@string a, @string b) {
         _ = a;
@@ -66,11 +66,11 @@ internal static void Main() {
 
     slice<Value> mix(bool b) {
         if (b) {
-            return default!;
+            return default;
         }
         return new Value[]{new(N: 3)}.slice();
     }
-    fmt.Println("B4 mixed arms:", mix(true) == default!, mix(false)[0].N);
+    fmt.Println("B4 mixed arms:", mix(true) == default, mix(false)[0].N);
 
     nint num(nint x) => x * 2;
     fmt.Println("B5 int result:", num(21));

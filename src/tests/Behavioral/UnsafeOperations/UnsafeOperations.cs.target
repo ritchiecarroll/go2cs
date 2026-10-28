@@ -93,7 +93,7 @@ internal static void Main() {
     uint8 k = bitcast<int8, uint8>(i);
     fmt.Println(k);
 
-    main_x x = default!;
+    main_x x = default;
     uintptr M = /* unsafe.Sizeof(x.c) */ 16;
     uintptr N = /* unsafe.Sizeof(x) */ 32;
     fmt.Println(M, N);
@@ -117,7 +117,7 @@ internal static void Main() {
 
     fmt.Println(/* unsafe.Offsetof(op.in) */ (uintptr)8);
 
-    Padded p = default!;
+    Padded p = default;
     Embedded e = new(nil);
     Arrays a = new();
 

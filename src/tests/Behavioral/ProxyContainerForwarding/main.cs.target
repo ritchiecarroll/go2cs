@@ -73,7 +73,7 @@ public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (n.next == nil) {
-        return default!;
+        return default;
     }
 
     return () => Ꮡn.Value.next;
@@ -102,7 +102,7 @@ public static slice<@string> Walk<N>(N n)
 {
     var outᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> @out = default!;
+    slice<@string> @out = default;
 
     while (ᐧ) {
         var triple = n.Triple();
@@ -110,7 +110,7 @@ public static slice<@string> Walk<N>(N n)
 
         var next = n.Next();
 
-        if (next == default!) {
+        if (next == nil) {
             break;
         }
 
@@ -124,7 +124,7 @@ public static slice<@string> Walk<N>(N n)
 public static slice<@string> Names<N>(N n)
     where N : Stepper<N>
 {
-    slice<@string> @out = default!;
+    slice<@string> @out = default;
 
     foreach (var p in range<N>(n.Path().Invoke)) {
         @out = append(@out, p.Label());

@@ -22,14 +22,14 @@ internal static stateFn stateB(ж<machine> Ꮡm) {
 
     m.steps++;
     if (m.steps >= 4) {
-        return default!;
+        return default;
     }
     return stateA;
 }
 
 internal static void run(ж<machine> Ꮡm) {
     stateFn state = stateA;
-    while (state != default!) {
+    while (state != nil) {
         state = state(Ꮡm);
     }
 }

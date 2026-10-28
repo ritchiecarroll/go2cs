@@ -8,7 +8,7 @@ partial class main_package {
 
 internal static void Main() {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
-    fmt.Println(Ꮡv.Load() == default!);
+    fmt.Println(Ꮡv.Load() == nil);
 
     @string a = "alpha";
     @string b = "beta";

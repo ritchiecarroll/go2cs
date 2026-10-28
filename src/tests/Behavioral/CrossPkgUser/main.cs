@@ -144,7 +144,7 @@ internal static @string Report(this ref relay r) {
 }
 
 internal static (ж<relay>, error) makeRelay() {
-    return (Ꮡ(new relay(tag: "live")), default!);
+    return (Ꮡ(new relay(tag: "live")), default);
 }
 
 internal static (CrossPkgLib.Reporter, error) getReporter() {
@@ -158,9 +158,9 @@ internal static CrossPkgLib.Emitter branchEmitter = new CrossPkgLib.BranchжEmit
 
 internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string @base) {
     return (@string @file) => {
-        @string name = default!;
-        slice<byte> data = default!;
-        error err = default!;
+        @string name = default;
+        slice<byte> data = default;
+        error err = default;
         name = @file;
         (data, err) = readWith(@base, @file);
         return (name, data, err);
@@ -168,7 +168,7 @@ internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string
 }
 
 internal static (slice<byte>, error) readWith(@string @base, @string @file) {
-    return (slice<byte>(@base + @file), default!);
+    return (slice<byte>(@base + @file), default);
 }
 
 internal static void Main() {
@@ -225,7 +225,7 @@ internal static void Main() {
         fmt.Println((float64)cback, cback == CrossPkgLib.Boiling());
         var (st1, err1) = stampOrErr(false);
         var (st2, err2) = stampOrErr(true);
-        fmt.Println(st1 == st2, err1 != default!, st2 == bigStamp, err2 == default!);
+        fmt.Println(st1 == st2, err1 != nil, st2 == bigStamp, err2 == nil);
 
         var rg = new rig(Device: new CrossPkgLib.Device(Sensor: new CrossPkgLib.Sensor(Name: "deep", Temp: 55D), Serial: 9), id: 1);
         fmt.Println((float64)rg.Temp, rg.Serial, rg.id);
@@ -260,7 +260,7 @@ internal static void Main() {
         fmt.Println((~led.cur).Code);
 
         CrossPkgLibꓸGrade gv = (CrossPkgLibꓸGrade)7;
-        CrossPkgLibꓸStatus stv = default!;
+        CrossPkgLibꓸStatus stv = default;
         stv.Code = (nint)gv;
         fmt.Println(stv.Code);
 
@@ -269,7 +269,7 @@ internal static void Main() {
         CrossPkgLib.Labeled l1 = new badge(name: "a");
         Tagged l2 = new badge(name: "b");
         fmt.Println(l1.Label(), l2.Label());
-        CrossPkgLib.Reporter rep = default!;
+        CrossPkgLib.Reporter rep = default;
         var mtr = CrossPkgLib.NewMeter();
         rep = new CrossPkgLib.MeterжReporter(mtr);
         fmt.Println(rep.Report());
@@ -297,7 +297,7 @@ internal static void Main() {
         fmt.Println(fgl.Label(), CrossPkgLib.Describe(fgl));
 
         var (rp, rerr) = getReporter();
-        fmt.Println(rp.Report(), rerr == default!);
+        fmt.Println(rp.Report(), rerr == nil);
 
         certificate ct = new cert(id: 42);
         fmt.Println(ct.Label(), ct.Seal(), ct.Rating(), ct.Serial());
@@ -326,7 +326,7 @@ internal static void Main() {
         fmt.Println(isHot(60), isHot(40));
 
         var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde");
-        fmt.Println((~nd).ID, nerr == default!);
+        fmt.Println((~nd).ID, nerr == nil);
 
         sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage", Temp: 30D));
         fmt.Println((~(~sensorHolder).item).Name);
@@ -343,7 +343,7 @@ internal static void Main() {
 
         var scan = makeScanner("p:");
         var (scanName, scanData, scanErr) = scan("hello");
-        fmt.Println(scanName, (@string)scanData, scanErr == default!);
+        fmt.Println(scanName, (@string)scanData, scanErr == nil);
 
         var bbuf = slice<byte>("key"u8);
         bbuf = append(bbufᴷ, bbuf, (byte)(CrossPkgLib.Sep));
@@ -381,11 +381,11 @@ internal static (stamp, error) stampOrErr(bool ok) {
     if (!ok) {
         return ((stamp)(CrossPkgLib.Ticks)(0), fmt.Errorf("no stamp"u8));
     }
-    return ((stamp)(CrossPkgLib.Ticks)(bigStamp), default!);
+    return ((stamp)(CrossPkgLib.Ticks)(bigStamp), default);
 }
 
 internal static (ж<CrossPkgLib.Node>, error) simpleResolve(map<@string, ж<CrossPkgLib.Node>> imports, @string path) {
-    return (Ꮡ(new CrossPkgLib.Node(ID: len(path))), default!);
+    return (Ꮡ(new CrossPkgLib.Node(ID: len(path))), default);
 }
 
 partial struct probe {

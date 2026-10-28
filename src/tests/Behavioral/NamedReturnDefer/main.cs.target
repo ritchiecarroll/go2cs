@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static nint /*x*/ incr() {
-    nint x = default!;
+    nint x = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -19,7 +19,7 @@ internal static nint /*x*/ incr() {
 }
 
 internal static nint /*x*/ incrBare() {
-    nint x = default!;
+    nint x = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -33,8 +33,8 @@ internal static nint /*x*/ incrBare() {
 }
 
 internal static (nint a, nint b) swapAndBump() {
-    nint a = default!;
-    nint b = default!;
+    nint a = default;
+    nint b = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -54,7 +54,7 @@ internal static nint @double(nint n) {
 }
 
 internal static nint /*total*/ closures(nint n) {
-    nint total = default!;
+    nint total = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -71,8 +71,8 @@ internal static nint /*total*/ closures(nint n) {
 }
 
 internal static (nint @out, @string label) compute(nint x) {
-    nint @out = default!;
-    @string label = default!;
+    nint @out = default;
+    @string label = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -90,13 +90,13 @@ internal static (nint @out, @string label) compute(nint x) {
 }
 
 internal static (nint code, @string msg) guarded(bool boom) {
-    nint code = default!;
-    @string msg = default!;
+    nint code = default;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     code = -1;
                     msg = "recovered";
                 }
@@ -114,13 +114,13 @@ internal static (nint code, @string msg) guarded(bool boom) {
 }
 
 internal static (ж<box>, error err) parseLimited(nint n) {
-    ж<box> _ᴛ1 = default!;
-    error err = default!;
+    ж<box> _ᴛ1 = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     err = fmt.Errorf("too big: %v"u8, r);
                 }
             }
@@ -128,7 +128,7 @@ internal static (ж<box>, error err) parseLimited(nint n) {
         if (n > 10) {
             throw panic(n);
         }
-        (_ᴛ1, err) = (Ꮡ(new box(n * 2)), default!);
+        (_ᴛ1, err) = (Ꮡ(new box(n * 2)), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -160,7 +160,7 @@ internal static void Main() {
     fmt.Println(c2, m2);
 
     {
-        var (bΔ1, err) = parseLimited(4); if (err == default!) {
+        var (bΔ1, err) = parseLimited(4); if (err == nil) {
             fmt.Println("parseLimited(4):", (~bΔ1).v, err);
         }
     }

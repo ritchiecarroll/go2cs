@@ -15,7 +15,7 @@ internal static void @try(@string name, Func<byte> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: %v\n"u8, name, r);
                 }
             }

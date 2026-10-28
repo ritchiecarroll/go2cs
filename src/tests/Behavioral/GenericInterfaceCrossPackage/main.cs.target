@@ -27,11 +27,11 @@ internal static ж<encKey> EncapsulationKey(this ref decKey d) {
 }
 
 internal static (ж<decKey>, error) generateKey() {
-    return (Ꮡ(new decKey(b: new byte[]{1, 2}.slice(), ek: Ꮡ(new encKey(b: new byte[]{3, 4}.slice())))), default!);
+    return (Ꮡ(new decKey(b: new byte[]{1, 2}.slice(), ek: Ꮡ(new encKey(b: new byte[]{3, 4}.slice())))), default);
 }
 
 internal static (ж<encKey>, error) newEncapKey(slice<byte> b) {
-    return (Ꮡ(new encKey(b: appendꓸꓸꓸ(slice<byte>(default!), b))), default!);
+    return (Ꮡ(new encKey(b: appendꓸꓸꓸ(slice<byte>(default), b))), default);
 }
 
 internal static void Main() {

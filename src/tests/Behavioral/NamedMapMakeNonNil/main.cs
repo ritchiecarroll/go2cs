@@ -8,20 +8,20 @@ partial struct StrIntMap /*map[@string, nint]*/;
 
 internal static void Main() {
     var m = new StrIntMap(0);
-    fmt.Println(m == default!);
+    fmt.Println(m == default);
     fmt.Println(len(m));
     m["a"] = 1;
     fmt.Println(m["a"]);
 
     var m2 = new StrIntMap(0);
-    fmt.Println(m2 == default!);
+    fmt.Println(m2 == default);
 
-    StrIntMap z = default!;
-    fmt.Println(z == default!);
+    StrIntMap z = default;
+    fmt.Println(z == default);
     fmt.Println(len(z));
 
     var e = new StrIntMap(new map<@string, nint>{});
-    fmt.Println(e == default!);
+    fmt.Println(e == default);
 }
 
 } // end main_package

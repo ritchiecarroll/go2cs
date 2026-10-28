@@ -22,7 +22,7 @@ internal static void Main() {
     var b = (structs.AssignB)new main_type(3);
     fmt.Println(b.A, b.Sum());
 
-    main_type s = default!;
+    main_type s = default;
     s.A = 4;
     var l = (local)s;
     fmt.Println(l.A);

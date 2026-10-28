@@ -13,7 +13,7 @@ internal static void @try(@string name, Func<ж<nint>> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: %v\n"u8, name, r);
                 }
             }

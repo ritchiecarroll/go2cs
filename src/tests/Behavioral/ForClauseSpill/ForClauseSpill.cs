@@ -87,7 +87,7 @@ continueᴛ4:;
 break_outer:;
 
     n = 0;
-    slice<Func<nint>> funcs = default!;
+    slice<Func<nint>> funcs = default;
     var (ᴛ13, ᴛ14) = next();
     for (nint iᴛ1 = must(ᴛ13, ᴛ14); iᴛ1 < 4; ) {
         var i = iᴛ1;

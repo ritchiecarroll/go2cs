@@ -8,7 +8,7 @@ partial class main_package {
 internal static partial void loopCaps() {
     var xᴷ = new stackAppend<int64>();
 
-    slice<int64> x = default!;
+    slice<int64> x = default;
     for (nint i = 0; i < 5; i++) {
         x = append(xᴷ, x, (int64)i);
         fmt.Print(cap(x), " ");
@@ -19,12 +19,12 @@ internal static partial void loopCaps() {
 internal static partial void resetCaps() {
     var xᴷ = new stackAppend<int64>();
 
-    slice<int64> x = default!;
+    slice<int64> x = default;
     for (nint i = 0; i < 3; i++) {
         x = append(xᴷ, x, (int64)1);
         fmt.Print(cap(x), " ");
     }
-    x = default!;
+    x = default;
     for (nint i = 0; i < 3; i++) {
         x = append(x, (int64)2);
         fmt.Print(cap(x), " ");
@@ -44,7 +44,7 @@ internal static partial void addressTakenCap() {
 
 internal static partial void spreadCap() {
     var src = new int64[]{7}.slice();
-    slice<int64> x = default!;
+    slice<int64> x = default;
     x = appendꓸꓸꓸ(x, src);
     fmt.Println(cap(x));
 }
@@ -52,7 +52,7 @@ internal static partial void spreadCap() {
 internal static partial void byteCap() {
     var bᴷ = new stackAppend<byte>();
 
-    slice<byte> b = default!;
+    slice<byte> b = default;
     b = append(bᴷ, b, (byte)((rune)'a'));
     fmt.Println(cap(b));
 }
@@ -60,7 +60,7 @@ internal static partial void byteCap() {
 internal static partial void stringCaps() {
     var sᴷ = new stackAppend<@string>();
 
-    slice<@string> s = default!;
+    slice<@string> s = default;
     s = append(sᴷ, s, "x"u8);
     fmt.Print(cap(s), " ");
     s = append(s, "y"u8);
@@ -70,10 +70,10 @@ internal static partial void stringCaps() {
 internal static partial void sliceCaps() {
     var rowsᴷ = new stackAppend<slice<byte>>();
 
-    slice<slice<byte>> rows = default!;
-    rows = append(rowsᴷ, rows, (slice<byte>)(default!));
+    slice<slice<byte>> rows = default;
+    rows = append(rowsᴷ, rows, (slice<byte>)(default));
     fmt.Print(cap(rows), " ");
-    rows = append(rows, (slice<byte>)(default!));
+    rows = append(rows, (slice<byte>)(default));
     fmt.Println(cap(rows));
 }
 
@@ -81,9 +81,9 @@ internal static partial void boundaryCaps() {
     var exactᴷ = new stackAppend<int64>();
     var overᴷ = new stackAppend<int64>();
 
-    slice<int64> exact = default!;
+    slice<int64> exact = default;
     exact = append(exactᴷ, exact, (int64)1, (int64)2, (int64)3, (int64)4);
-    slice<int64> over = default!;
+    slice<int64> over = default;
     over = append(overᴷ, over, (int64)1, (int64)2, (int64)3, (int64)4, (int64)5);
     fmt.Println(cap(exact), cap(over));
 }
@@ -91,7 +91,7 @@ internal static partial void boundaryCaps() {
 internal static partial void closureLocalCaps() {
     var f = () => {
         var wᴷ = new stackAppend<int64>();
-        slice<int64> w = default!;
+        slice<int64> w = default;
         w = append(wᴷ, w, (int64)1);
         return cap(w);
     };
@@ -118,7 +118,7 @@ internal static partial void siblingScopeCaps(nint n) {
 
     switch (n) {
     case 0: {
-        slice<int64> buf = default!;
+        slice<int64> buf = default;
         buf = append(bufᴷ, buf, (int64)1);
         fmt.Print(cap(buf), " ");
         break;
@@ -126,7 +126,7 @@ internal static partial void siblingScopeCaps(nint n) {
 
     switch (n) {
     case 0: {
-        slice<int64> buf = default!;
+        slice<int64> buf = default;
         buf = append(bufᴷΔ1, buf, (int64)2);
         fmt.Println(cap(buf));
         break;
@@ -138,13 +138,13 @@ internal static partial void literalNameCaps() {
     var bufᴷ = new stackAppend<int64>();
 
     {
-        slice<int64> buf = default!;
+        slice<int64> buf = default;
         buf = append(bufᴷ, buf, (int64)1);
         fmt.Print(cap(buf), " ");
     }
     var f = () => {
         var bufᴷ = new stackAppend<int64>();
-        slice<int64> buf = default!;
+        slice<int64> buf = default;
         buf = append(bufᴷ, buf, (int64)1);
         return cap(buf);
     };
@@ -162,7 +162,7 @@ internal static partial void nonEmptyCap() {
 internal static partial slice<byte> movedBytes(nint n) {
     var rᴷ = new stackAppend<byte>(moves: true);
 
-    slice<byte> r = default!;
+    slice<byte> r = default;
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
     }
@@ -180,7 +180,7 @@ internal static void movedCaps() {
 internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
     var rᴷ = new stackAppend<ж<nint>>(moves: true);
 
-    slice<ж<nint>> r = default!;
+    slice<ж<nint>> r = default;
     foreach (var _ᴛ1 in range(n)) {
         r = append(rᴷ, r, (ж<nint>)(nil));
     }
@@ -201,8 +201,8 @@ internal static partial (slice<byte>, slice<nint>) capSeq(nint n) {
     var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
     var seqᴷ = new stackAppend<nint>(moves: true);
 
-    slice<byte> r = default!;
-    slice<nint> seq = default!;
+    slice<byte> r = default;
+    slice<nint> seq = default;
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
         if (len(seq) == 0 || seq[len(seq) - 1] != cap(r)) {
@@ -221,7 +221,7 @@ internal static void capSeqCaps() {
 }
 
 internal static partial slice<byte> /*r*/ movedNamed(nint n) {
-    slice<byte> r = default!;
+    slice<byte> r = default;
     var rᴷ = new stackAppend<byte>(moves: true);
 
     foreach (var i in range(n)) {
@@ -234,7 +234,7 @@ internal static partial slice<byte> /*r*/ movedNamed(nint n) {
 internal static partial nint movedIfInit(nint n) {
     var pᴷ = new stackAppend<ж<nint>>(moves: true);
 
-    slice<ж<nint>> p = default!;
+    slice<ж<nint>> p = default;
     foreach (var _ᴛ1 in range(n)) {
         p = append(pᴷ, p, (ж<nint>)(nil));
     }
@@ -251,8 +251,8 @@ internal static partial (slice<byte>, slice<int16>) movedPair(nint n) {
     var aᴷ = new stackAppend<byte>(moves: true);
     var wᴷ = new stackAppend<int16>(moves: true);
 
-    slice<byte> a = default!;
-    slice<int16> w = default!;
+    slice<byte> a = default;
+    slice<int16> w = default;
     foreach (var i in range(n)) {
         a = append(aᴷ, a, (byte)i);
         w = append(wᴷ, w, (int16)i);

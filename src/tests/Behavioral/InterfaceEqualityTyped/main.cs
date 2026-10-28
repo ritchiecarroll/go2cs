@@ -39,7 +39,7 @@ partial struct node {
 internal delegate nint thunk();
 
 internal static nint Len(this thunk f) {
-    if (f == default!) {
+    if (f == nil) {
         return -1;
     }
     return f();
@@ -54,7 +54,7 @@ internal static bool eq(any a, any b) {
 }
 
 internal static @string /*text*/ panicText(any a, any b) {
-    @string text = default!;
+    @string text = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -69,7 +69,7 @@ internal static @string /*text*/ panicText(any a, any b) {
 }
 
 internal static @string /*text*/ lenText(lener a, lener b) {
-    @string text = default!;
+    @string text = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -122,17 +122,17 @@ internal static void Main() {
     fmt.Println("float and complex:", eq(Δmath.NaN(), Δmath.NaN()), eq(1.0D, 1.0D), eq(complex(Δmath.NaN(), 0D), complex(Δmath.NaN(), 0D)), eq((complex64)1F.i(), (complex64)1F.i()));
 
     fmt.Println("uncomparable:", panicText(new nint[]{1}.slice(), new nint[]{1}.slice()));
-    fmt.Println("uncomparable field:", panicText(new pathError("x", "y", default!), new main_b()));
+    fmt.Println("uncomparable field:", panicText(new pathError("x", "y", default), new main_b()));
     fmt.Println("uncomparable in struct:", panicText(new main_a(new nint[]{1}.slice()), new main_a(new nint[]{1}.slice())));
 
-    thunk none = default!;
+    thunk none = default;
     var seven = new thunk(() => 7);
-    Action unnamed = default!;
+    Action unnamed = default;
     fmt.Println("func nil==nil:", panicText((none).OrTypedNilFunc(), (none).OrTypedNilFunc()));
     fmt.Println("func nil==func:", panicText((none).OrTypedNilFunc(), (seven).OrTypedNilFunc()), "|", panicText((seven).OrTypedNilFunc(), (none).OrTypedNilFunc()));
     fmt.Println("func func==func:", panicText((seven).OrTypedNilFunc(), (seven).OrTypedNilFunc()));
     fmt.Println("unnamed func nil==nil:", panicText((unnamed).OrTypedNilFunc(), (unnamed).OrTypedNilFunc()));
-    fmt.Println("nil func vs nil interface and int:", eq((none).OrTypedNilFunc(), default!), eq((none).OrTypedNilFunc(), (nint)1));
+    fmt.Println("nil func vs nil interface and int:", eq((none).OrTypedNilFunc(), default), eq((none).OrTypedNilFunc(), (nint)1));
 
     lener x = new thunkᴠlener(none);
     lener y = new thunkᴠlener(none);

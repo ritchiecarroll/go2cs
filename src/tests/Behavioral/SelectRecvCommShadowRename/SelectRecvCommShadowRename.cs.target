@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static void Main() {
     for (nint loop = 0; loop < 2; loop++) {
-        channel<nint> cΔ1 = default!;
+        channel<nint> cΔ1 = default;
         cΔ1 = new channel<nint>(2);
         cΔ1.ᐸꟷ(40 + loop);
 
@@ -59,7 +59,7 @@ internal static void Main() {
         fmt.Println("d", ᐸꟷ(d));
     }
 
-    channel<@string> c = default!;
+    channel<@string> c = default;
     c = new channel<@string>(1);
     c.ᐸꟷ("tail");
     fmt.Println(ᐸꟷ(c));

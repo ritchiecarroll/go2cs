@@ -77,9 +77,9 @@ internal static void Main() {
 
     fmt.Println(h.mark, h.extra);
 
-    Δmark m = default!;
+    Δmark m = default;
     m.id = 3;
-    tagger t = default!;
+    tagger t = default;
     t.mark();
     fmt.Println(m.id);
 

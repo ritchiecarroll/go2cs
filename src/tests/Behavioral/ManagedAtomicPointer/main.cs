@@ -28,14 +28,14 @@ internal static void identity() {
     ref var b = ref heap(new int32(), out var Ꮡb);
     @unsafe.Pointer pa = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     @unsafe.Pointer pb = @unsafe.Pointer.FromPinnedBox(Ꮡb);
-    @unsafe.Pointer pn = default!;
+    @unsafe.Pointer pn = default;
 
     fmt.Println(pa == pa, pa == pb, pa != pb);
     fmt.Println(pn == pn, pn == pa, pa != pn);
 
     fmt.Println(@unsafe.Pointer.FromPinnedBox(Ꮡa) == pa);
 
-    var table = new @unsafe.Pointer[]{default!, pa, pb}.slice();
+    var table = new @unsafe.Pointer[]{default, pa, pb}.slice();
     nint same = 0;
     nint diff = 0;
     foreach (var (_, p) in table) {

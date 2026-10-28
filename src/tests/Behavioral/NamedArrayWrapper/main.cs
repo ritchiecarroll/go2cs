@@ -81,8 +81,8 @@ internal static void Main() {
     fmt.Println(t[2], len(t));
 
     var seen = new map<tb, nint>{};
-    tb k1 = default!;
-    tb k2 = default!;
+    tb k1 = default;
+    tb k2 = default;
     (k1[0], k1[3]) = (7, 9);
     (k2[0], k2[3]) = (7, 9);
     seen[k1] = 42;
@@ -90,13 +90,13 @@ internal static void Main() {
     fmt.Println(v, ok, len(seen), k1 == k2);
     seen[k2] = 43;
     fmt.Println(seen[k1], len(seen));
-    tb k3 = default!;
+    tb k3 = default;
     k3[1] = 1;
     seen[k3] = 5;
     fmt.Println(len(seen), seen[k1], seen[k3]);
 
-    tb z1 = default!;
-    tb z2 = default!;
+    tb z1 = default;
+    tb z2 = default;
     var zeroSeen = new map<tb, bool>{};
     zeroSeen[z1] = true;
     fmt.Println(zeroSeen[z2], len(zeroSeen), z1 == z2);
@@ -118,7 +118,7 @@ internal static void Main() {
     fmt.Println(pc.Value[0].n, pc.Value[1].n, pc.Value[2].n, pc == Ꮡcs);
     fmt.Println(bumpVia(Ꮡcs, 1), cs[1].n);
 
-    slots sl = default!;
+    slots sl = default;
     sl.at(1).Value.v = 77;
     sl.at(2).Value.v = (~sl.at(1)).v + 1;
     fmt.Println(sl[1].v, sl[2].v, (~sl.at(1)).v, sl.sum());
@@ -129,7 +129,7 @@ internal static void Main() {
     var ᴛ2 = (nonMont)((sm.s).Value);
     @double(ref sm.s, ref ᴛ2);
     fmt.Println(sm.s[0], sm.s[3]);
-    nonMont dm = default!;
+    nonMont dm = default;
     var ᴛ3 = dm.Value;
     fromBytes(ref ᴛ3, 3);
     fmt.Println(dm[1], dm[2]);

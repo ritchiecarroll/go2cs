@@ -32,7 +32,7 @@ internal static void Main() {
     var o = (ptlike.Outer)a;
     fmt.Println(o.Name, o.In.Vals);
 
-    alias z = default!;
+    alias z = default;
     fmt.Println(z.Name == ""u8, z.In.Len());
 }
 

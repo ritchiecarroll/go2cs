@@ -10,21 +10,21 @@ partial struct Config {
 }
 
 internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string label) {
-    @string @out = default!;
-    error err = default!;
+    @string @out = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var cfg = ref Ꮡcfg.DerefOrNull();
 
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     err = fmt.Errorf("panic: %v"u8, e);
                 }
             }
         }, ref ᒐ);
         cfg.trace = fmt.Sprintf("%s|%s"u8, cfg.trace, label);
-        (@out, err) = (fmt.Sprintf("%s@%d"u8, label, cfg.Indent), default!);
+        (@out, err) = (fmt.Sprintf("%s@%d"u8, label, cfg.Indent), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

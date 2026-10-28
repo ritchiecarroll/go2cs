@@ -48,7 +48,7 @@ internal static void Main() {
 
 internal static @string unmarshal(@string data, any v) {
     {
-        var err = json.Unmarshal(slice<byte>(data), v); if (err != default!) {
+        var err = json.Unmarshal(slice<byte>(data), v); if (err != nil) {
             return "err("u8 + err.Error() + ")"u8;
         }
     }

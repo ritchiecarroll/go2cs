@@ -61,7 +61,7 @@ internal static void Main() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Println("recovered");
                     }
                 }

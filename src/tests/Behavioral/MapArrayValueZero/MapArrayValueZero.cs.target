@@ -35,7 +35,7 @@ internal static void mapMissNested() {
 partial struct quadMap /*map[nint, array<byte>]*/;
 
 internal static void namedMap() {
-    quadMap nilMap = default!;
+    quadMap nilMap = default;
     var v = nilMap[7, () => new array<byte>(4)].Clone();
     fmt.Println("nil named:", len(v), v[0], v[3]);
 
@@ -49,7 +49,7 @@ internal static void namedMap() {
 }
 
 internal static void plainNilAndEmpty() {
-    map<@string, array<rune>> nilMap = default!;
+    map<@string, array<rune>> nilMap = default;
     var a = nilMap["x", () => new array<rune>(2)].Clone();
     fmt.Println("nil plain:", len(a), a[0], a[1]);
 

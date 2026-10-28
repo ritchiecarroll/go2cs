@@ -75,7 +75,7 @@ private static readonly object litˢ = (@string)"lit"u8;
 
 internal static void Main() {
     var e = Ꮡ(new E(nil));
-    nint l = default!;
+    nint l = default;
 
     e.Info(looksDeliciousˢ);
     l = line();

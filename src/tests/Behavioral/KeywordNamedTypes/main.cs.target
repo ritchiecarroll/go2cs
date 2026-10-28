@@ -42,7 +42,7 @@ internal partial struct keywordLocalStruct_params /*dyn*/ {
 }
 
 internal static uintptr keywordLocalStruct() {
-    keywordLocalStruct_params @params = default!;
+    keywordLocalStruct_params @params = default;
     @params.size = 8;
     @params.flags = 3;
     return @params.size + (uintptr)@params.flags;
@@ -53,8 +53,8 @@ internal partial interface keywordLocalIface_params /*dyn*/ {
 }
 
 internal static nint keywordLocalIface() {
-    keywordLocalIface_params @params = default!;
-    if (@params == default!) {
+    keywordLocalIface_params @params = default;
+    if (@params == nil) {
         return -1;
     }
     if (@params.held()) {
@@ -68,7 +68,7 @@ internal partial struct keywordLocalRef_ref /*dyn*/ {
 }
 
 internal static nint keywordLocalRef() {
-    keywordLocalRef_ref @ref = default!;
+    keywordLocalRef_ref @ref = default;
     @ref.n = 7;
     return @ref.n;
 }
@@ -78,7 +78,7 @@ internal partial struct plainLocalStruct_sizes /*dyn*/ {
 }
 
 internal static uintptr plainLocalStruct() {
-    plainLocalStruct_sizes sizes = default!;
+    plainLocalStruct_sizes sizes = default;
     sizes.size = 4;
     return sizes.size;
 }

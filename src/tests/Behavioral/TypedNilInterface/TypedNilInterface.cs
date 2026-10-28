@@ -40,18 +40,18 @@ internal partial struct main_rows /*dyn*/ {
 internal static void Main() {
     any x = ((ж<nint>)nil);
     fmt.Printf("%T\n"u8, x);
-    fmt.Println("x==nil", x == default!);
+    fmt.Println("x==nil", x == nil);
 
     any y = ((ж<nint>)nil);
     fmt.Println("x==y", AreEqual(x, y));
 
-    ж<nint> p = default!;
+    ж<nint> p = default;
     fmt.Println("p==typednil", p == ((ж<nint>)nil));
 
     error e1 = new AErrжerror(((ж<AErr>)nil));
     error e2 = new BErrжerror(((ж<BErr>)nil));
-    fmt.Println("e1==nil", e1 == default!);
-    fmt.Println("e2==nil", e2 == default!);
+    fmt.Println("e1==nil", e1 == nil);
+    fmt.Println("e2==nil", e2 == nil);
     fmt.Println("e1==e2", AreEqual(e1, e2));
 
     any ea = ((ж<AErr>)nil);
@@ -61,10 +61,10 @@ internal static void Main() {
     any sp2 = ((ж<slice<byte>>)nil);
     any mp = ((ж<map<@string, nint>>)nil);
     any stp = ((ж<main_type>)nil);
-    fmt.Println("sp==nil", sp == default!);
+    fmt.Println("sp==nil", sp == nil);
     fmt.Println("sp==sp2", AreEqual(sp, sp2));
     fmt.Println("sp==mp", AreEqual(sp, mp));
-    fmt.Println("stp==nil", stp == default!);
+    fmt.Println("stp==nil", stp == nil);
 
     switch (e1.type()) {
     case ж<AErr> v: {
@@ -77,8 +77,8 @@ internal static void Main() {
         break;
     }}
 
-    ж<nint> dp = default!;
-    main_st st = default!;
+    ж<nint> dp = default;
+    main_st st = default;
     var sl = new slice<ж<BErr>>(1);
     var mm = new map<@string, ж<AErr>>{};
 
@@ -86,22 +86,22 @@ internal static void Main() {
     fmt.Println("printf-v", fmt.Sprintf("%v|%v"u8, dp.OrTypedNil(), st.P.OrTypedNil()));
 
     any dpi = dp.OrTypedNil();
-    fmt.Println("dpi==nil", dpi == default!, "dpi==x", AreEqual(dpi, x));
+    fmt.Println("dpi==nil", dpi == nil, "dpi==x", AreEqual(dpi, x));
     dpi = st.P.OrTypedNil();
-    fmt.Println("assigned==nil", dpi == default!);
+    fmt.Println("assigned==nil", dpi == nil);
 
-    fmt.Println("returned==nil", boxed(sl[0]) == default!);
+    fmt.Println("returned==nil", boxed(sl[0]) == nil);
 
     var anys = new any[]{dp.OrTypedNil(), st.P.OrTypedNil()}.slice();
     var holder = new main_holder(V: dp.OrTypedNil());
     var byName = new map<@string, any>{["p"] = dp.OrTypedNil()};
     var byKey = new map<any, nint>{[dp.OrTypedNil()] = 7};
-    fmt.Println("elem==nil", anys[0] == default!, "field==nil", holder.V == default!);
-    fmt.Println("mapval==nil", byName["p"] == default!, "mapkey", byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
+    fmt.Println("elem==nil", anys[0] == nil, "field==nil", holder.V == nil);
+    fmt.Println("mapval==nil", byName["p"] == nil, "mapkey", byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
 
     var ch = new channel<any>(1);
     ch.ᐸꟷ(dp.OrTypedNil());
-    fmt.Println("chan==nil", (ᐸꟷ(ch)) == default!);
+    fmt.Println("chan==nil", (ᐸꟷ(ch)) == nil);
 
     {
         var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok) {
@@ -114,7 +114,7 @@ internal static void Main() {
     fmt.Println(panicked());
 
     var acc = append(new any[]{}.slice(), (any)(dp.OrTypedNil()), (any)(st.P.OrTypedNil()));
-    fmt.Printf("append %T %T %v %v\n"u8, acc[0], acc[1], acc[0] == default!, acc[1] == default!);
+    fmt.Printf("append %T %T %v %v\n"u8, acc[0], acc[1], acc[0] == nil, acc[1] == nil);
 
     var rows = new main_rows[]{
         new(dp.OrTypedNil(), true),
@@ -122,7 +122,7 @@ internal static void Main() {
         new((nint)7, false)
     }.slice();
     foreach (var (_, r) in rows) {
-        fmt.Printf("row %T %v %v\n"u8, r.value, r.value == default!, r.want);
+        fmt.Printf("row %T %v %v\n"u8, r.value, r.value == nil, r.want);
     }
 
     var dm = new map<any, nint>{[dp.OrTypedNil()] = 1, [st.P.OrTypedNil()] = 2};
@@ -135,7 +135,7 @@ internal static any boxed(ж<BErr> Ꮡp) {
 }
 
 internal static @string /*msg*/ panicked() {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -144,12 +144,12 @@ internal static @string /*msg*/ panicked() {
                 var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok) {
                     msg = fmt.Sprintf("panic-recovered *AErr nil=%v"u8, q == nil);
                 } else {
-                    msg = fmt.Sprintf("panic-recovered other %T %v"u8, r, r == default!);
+                    msg = fmt.Sprintf("panic-recovered other %T %v"u8, r, r == nil);
                 }
             }
         }, ref ᒐ);
 
-        ж<AErr> p = default!;
+        ж<AErr> p = default;
         throw panic(p.OrTypedNil());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

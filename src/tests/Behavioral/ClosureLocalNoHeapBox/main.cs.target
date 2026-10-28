@@ -24,7 +24,7 @@ internal static void run(Action f) {
 
 internal static void n1() {
     run(() => {
-        counter c = default!;
+        counter c = default;
         c.add(3);
         c.add(4);
         fmt.Println("N1:", c.n, c.tag);
@@ -80,7 +80,7 @@ internal static void n6() {
 
 internal static void n7() {
     run(() => {
-        counter c = default!;
+        counter c = default;
         c.n = 5;
         var d = c;
         d.n = 6;

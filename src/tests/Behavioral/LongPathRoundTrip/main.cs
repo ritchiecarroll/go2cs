@@ -23,7 +23,7 @@ internal static void Main() {
 
         var (@base, err) = os.MkdirTemp("", "go2cs-longpath");
 
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("mkdirtemp failed:", err);
             return;
         }
@@ -39,14 +39,14 @@ internal static void Main() {
         fmt.Println("exceeds MAX_PATH:", len(deep) > 260);
 
         {
-            var errΔ1 = os.MkdirAll(deep, 493); if (errΔ1 != default!) {
+            var errΔ1 = os.MkdirAll(deep, 493); if (errΔ1 != nil) {
                 fmt.Println("mkdirall failed:", errΔ1);
                 return;
             }
         }
 
         (var dirInfo, err) = os.Stat(deep);
-        fmt.Println("dir stat:", err == default!, dirInfo != default! && dirInfo.IsDir(), dirInfo != default! && dirInfo.Name() == strings.Repeat("d", 24));
+        fmt.Println("dir stat:", err == nil, dirInfo != nil && dirInfo.IsDir(), dirInfo != nil && dirInfo.Name() == strings.Repeat("d", 24));
 
         @string sep = (@string)(rune)filepath.Separator;
         @string name = "probe.txt";
@@ -54,35 +54,35 @@ internal static void Main() {
         @string payload = "the quick brown fox jumps over the lazy dog";
 
         {
-            var errΔ2 = os.WriteFile(@file, slice<byte>(payload), 420); if (errΔ2 != default!) {
+            var errΔ2 = os.WriteFile(@file, slice<byte>(payload), 420); if (errΔ2 != nil) {
                 fmt.Println("writefile failed:", errΔ2);
                 return;
             }
         }
 
         (var data, err) = os.ReadFile(@file);
-        fmt.Println("read back:", err == default!, ((sstring)data) == payload, len(data));
+        fmt.Println("read back:", err == nil, ((sstring)data) == payload, len(data));
 
         (var info, err) = os.Stat(@file);
-        fmt.Println("file stat:", err == default!, info != default! && info.Size() == (int64)len(payload), info != default! && !info.IsDir(), info != default! && info.Name() == name);
+        fmt.Println("file stat:", err == nil, info != nil && info.Size() == (int64)len(payload), info != nil && !info.IsDir(), info != nil && info.Name() == name);
 
         (var handle, err) = os.OpenFile(@file, (nint)(os.O_APPEND | os.O_WRONLY), 420);
 
-        if (err == default!) {
+        if (err == nil) {
             var (_, werr) = handle.WriteString("!");
             var cerr = handle.Close();
-            fmt.Println("append:", werr == default!, cerr == default!);
+            fmt.Println("append:", werr == nil, cerr == nil);
         } else {
             fmt.Println("openfile failed:", err);
         }
 
         (var grown, err) = os.ReadFile(@file);
-        fmt.Println("after append:", err == default!, len(grown) == len(payload) + 1, strings.HasSuffix((@string)grown, "g!"));
+        fmt.Println("after append:", err == nil, len(grown) == len(payload) + 1, strings.HasSuffix((@string)grown, "g!"));
 
         @string second = deep + sep + "another.dat"u8;
 
         {
-            var errΔ3 = os.WriteFile(second, new byte[]{1, 2, 3}.slice(), 420); if (errΔ3 != default!) {
+            var errΔ3 = os.WriteFile(second, new byte[]{1, 2, 3}.slice(), 420); if (errΔ3 != nil) {
                 fmt.Println("second writefile failed:", errΔ3);
             }
         }
@@ -95,7 +95,7 @@ internal static void Main() {
         }
 
         sort.Strings(names);
-        fmt.Println("readdir:", err == default!, len(names), strings.Join(names, ","));
+        fmt.Println("readdir:", err == nil, len(names), strings.Join(names, ","));
 
         var probes = new main_probes[]{
             new("dot-segment", deep + sep + "."u8 + sep + name),
@@ -106,20 +106,20 @@ internal static void Main() {
 
         foreach (var (_, probe) in probes) {
             var (probeInfo, probeErr) = os.Stat(probe.path);
-            fmt.Println("normalize " + probe.label + ":", probeErr == default!, probeInfo != default! && probeInfo.Size() == (int64)(len(payload) + 1));
+            fmt.Println("normalize " + probe.label + ":", probeErr == nil, probeInfo != nil && probeInfo.Size() == (int64)(len(payload) + 1));
         }
 
         @string renamed = deep + sep + "renamed.txt"u8;
         var renameErr = os.Rename(@file, renamed);
         var (_, oldStatErr) = os.Stat(@file);
         var (moved, readErr) = os.ReadFile(renamed);
-        fmt.Println("rename:", renameErr == default!, os.IsNotExist(oldStatErr), readErr == default!, len(moved) == len(payload) + 1);
+        fmt.Println("rename:", renameErr == nil, os.IsNotExist(oldStatErr), readErr == nil, len(moved) == len(payload) + 1);
 
-        fmt.Println("remove one:", os.Remove(renamed) == default!);
+        fmt.Println("remove one:", os.Remove(renamed) == nil);
 
         var removeErr = os.RemoveAll(@base);
         var (_, goneErr) = os.Stat(@base);
-        fmt.Println("removeall:", removeErr == default!, os.IsNotExist(goneErr));
+        fmt.Println("removeall:", removeErr == nil, os.IsNotExist(goneErr));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

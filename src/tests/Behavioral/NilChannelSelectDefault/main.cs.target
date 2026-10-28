@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    channel<nint> nilRecv = default!;
+    channel<nint> nilRecv = default;
 
     var selᴛ1 = nilRecv;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {

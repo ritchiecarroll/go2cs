@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    channel<@string> c = default!;
+    channel<@string> c = default;
     fmt.Println(ᐸꟷ(c));
 }
 

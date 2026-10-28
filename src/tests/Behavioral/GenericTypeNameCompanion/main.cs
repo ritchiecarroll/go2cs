@@ -33,7 +33,7 @@ internal static void Main() {
     nameOf<ordinary, ordinary>("ordinary");
 
     sizeOf("neg-ordinary", (ordinary)(@string)"x"u8);
-    sizeOf<eface>("neg-eface", default!);
+    sizeOf<eface>("neg-eface", default);
 }
 
 } // end main_package

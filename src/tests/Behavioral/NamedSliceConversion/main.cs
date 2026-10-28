@@ -17,7 +17,7 @@ internal static nint count(slice<CaseRange> rs) {
 }
 
 internal static nint /*total*/ sum(slice<nint> s) {
-    nint total = default!;
+    nint total = default;
 
     foreach (var (_, v) in s) {
         total += v;

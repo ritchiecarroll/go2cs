@@ -10,11 +10,11 @@ partial struct oid {
 
 internal static error fill(this ref oid o, @string text) {
     o.der = slice<byte>(text);
-    return default!;
+    return default;
 }
 
 internal static (oid, error) parseOID(@string text) {
-    oid o = default!;
+    oid o = default;
     var ᴛ1 = o.fill(text);
     return (o, ᴛ1);
 }
@@ -29,13 +29,13 @@ internal static nint bump(this ref counter c) {
 }
 
 internal static (nint, nint) readThenBump() {
-    counter c = default!;
+    counter c = default;
     var ᴛ2 = c.bump();
     return (c.n, ᴛ2);
 }
 
 internal static (nint, @string, nint) orderedCalls(ref slice<@string> log) {
-    counter c = default!;
+    counter c = default;
     var ᴛ3 = note(ref log, "middle");
     var ᴛ4 = c.bump();
     return (c.n, ᴛ3, ᴛ4);
@@ -69,13 +69,13 @@ internal static (ж<counter>, nint) pointerIdentity() {
 }
 
 internal static (nint, nint) unrelatedOperand() {
-    counter a = default!;
-    counter b = default!;
+    counter a = default;
+    counter b = default;
     return (a.n, b.bump());
 }
 
 internal static (nint, nint) valueReceiverCall() {
-    counter c = default!;
+    counter c = default;
     return (c.n, c.peek());
 }
 
@@ -93,7 +93,7 @@ internal static @string String(this ref thing t) {
 }
 
 internal static (ж<thing>, error) newThing(@string name) {
-    return (Ꮡ(new thing(name: name)), default!);
+    return (Ꮡ(new thing(name: name)), default);
 }
 
 internal static (any, error) forwardPointer(@string name) {

@@ -60,7 +60,7 @@ internal static void anonStruct() {
 }
 
 internal static void nonCaptureControl() {
-    wrap w = default!;
+    wrap w = default;
     w.c.inc();
     w.c.inc();
     fmt.Println("control:", w.c.n);

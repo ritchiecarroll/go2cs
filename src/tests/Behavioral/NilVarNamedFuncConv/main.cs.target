@@ -19,15 +19,15 @@ internal static Greetable wrap(Action<@string> handler) {
 }
 
 internal static void Main() {
-    var nilGreetable = wrap(default!);
+    var nilGreetable = wrap(default);
     var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
-    fmt.Println(nilOk, nilGreeter == default!);
+    fmt.Println(nilOk, nilGreeter == nil);
 
     var realGreetable = wrap((@string name) => {
         fmt.Println("hello", name);
     });
     var (realGreeter, realOk) = realGreetable._<Greeter>(ᐧ);
-    fmt.Println(realOk, realGreeter == default!);
+    fmt.Println(realOk, realGreeter == nil);
     realGreeter.Greet("world");
 }
 

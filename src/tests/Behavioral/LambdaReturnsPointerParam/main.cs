@@ -17,7 +17,7 @@ internal static slice<entry> register(slice<entry> table, Func<(ж<item>, error)
 }
 
 internal static slice<entry> addItem(slice<entry> table, ж<item> Ꮡit) {
-    return register(table, () => (Ꮡit, default!));
+    return register(table, () => (Ꮡit, default));
 }
 
 internal static Func<ж<item>> pick(ж<item> Ꮡit) {
@@ -29,7 +29,7 @@ internal static ж<item> passthrough(ж<item> Ꮡit) {
 }
 
 internal static void Main() {
-    slice<entry> table = default!;
+    slice<entry> table = default;
     var a = Ꮡ(new item(name: "alpha"));
     var b = Ꮡ(new item(name: "beta"));
     table = addItem(table, a);

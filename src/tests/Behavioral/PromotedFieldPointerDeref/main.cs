@@ -25,7 +25,7 @@ internal static void Main() {
     b.Value.tag = 9;
     a.Value.next = b;
 
-    list l = default!;
+    list l = default;
     l.head = a;
 
     var x = l.head;

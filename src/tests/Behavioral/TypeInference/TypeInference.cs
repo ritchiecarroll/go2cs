@@ -22,8 +22,8 @@ internal partial struct main_MyBoolᴛ1 /*bool*/;
 
 internal static void Main() {
     const bool c = /* 3 < 4 */ true;
-    nint x = default!;
-    nint y = default!;
+    nint x = default;
+    nint y = default;
     bool b3 = x == y;
     bool b4 = x == y;
     main_MyBoolᴛ1 b5 = x == y;
@@ -33,7 +33,7 @@ internal static void Main() {
     fmt.Println(b4);
     fmt.Println(b5);
 
-    main_MyBool other = default!;
+    main_MyBool other = default;
     ShowValue(other);
 }
 

@@ -20,7 +20,7 @@ internal partial struct main_point /*dyn*/ {
 
 internal static void Main() {
     var a = new main_a(X: 1);
-    main_a b = default!;
+    main_a b = default;
     b = a;
     fmt.Println(a == b);
     ref var p = ref heap<main_point>(out var Ꮡp);
@@ -91,7 +91,7 @@ internal static void foreignUnderlyingLocalTypes() {
     m[t] = "seven";
     var (v, ok) = m[t, ꟷ];
     fmt.Println(v, ok, len(m));
-    foreignUnderlyingLocalTypes_myDur d = default!;
+    foreignUnderlyingLocalTypes_myDur d = default;
     var pd = @new<foreignUnderlyingLocalTypes_myDur>();
     fmt.Println(d == pd.Value, pd != nil);
 
@@ -107,8 +107,8 @@ internal partial struct foreignUnderlyingLocalTypesAgain_myDur /*global::go.time
 
 internal static void foreignUnderlyingLocalTypesAgain() {
     var t = @new<foreignUnderlyingLocalTypesAgain_myTime>();
-    foreignUnderlyingLocalTypesAgain_myDur d = default!;
-    foreignUnderlyingLocalTypesAgain_myDur d2 = default!;
+    foreignUnderlyingLocalTypesAgain_myDur d = default;
+    foreignUnderlyingLocalTypesAgain_myDur d2 = default;
     fmt.Println(t != nil, d == d2);
 }
 

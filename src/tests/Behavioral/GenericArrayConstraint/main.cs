@@ -34,7 +34,7 @@ internal static T scalePoly<T>(T a, fieldElement k)
 internal static fieldElement sum<T>(T a)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
-    fieldElement total = default!;
+    fieldElement total = default;
     foreach (var (_, x) in a) {
         total += x;
     }

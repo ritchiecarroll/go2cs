@@ -138,7 +138,7 @@ partial struct HideC {
 internal static @string methods(reflectꓸType t) {
     var namesᴷ = new stackAppend<@string>();
 
-    slice<@string> names = default!;
+    slice<@string> names = default;
 
     for (nint i = 0; i < t.NumMethod(); i++) {
         names = append(namesᴷ, names, t.Method(i).Name);
@@ -160,7 +160,7 @@ internal static void probe(@string label, Func<@string> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: PANIC %v\n"u8, label, r);
                 }
             }
@@ -268,7 +268,7 @@ internal static void Main() {
     probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));
     probe("SameV value methods", () => methods(reflect.TypeOf(new mid.SameV(nil))));
     probe("SameV ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameV(nil)))));
-    probe("SameP value Method(0) call", () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default!)[0].Int()));
+    probe("SameP value Method(0) call", () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default)[0].Int()));
     probe("SameP value assert+call Ping", () => {
         var (p, okΔ4) = ((any)mid.NewSameP())._<main_typeᴛ4>(ᐧ);
 

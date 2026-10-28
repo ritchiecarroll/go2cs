@@ -29,18 +29,18 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) {
         defer(ᴛ1 => fmt.Println(ᴛ1), findDoneˢ, ref ᒐ);
         foreach (var i in range(xs)) {
             if (xs[i].n == want) {
-                return (Ꮡ(xs, i), default!);
+                return (Ꮡ(xs, i), default);
             }
         }
-        return (default!, fmt.Errorf("not found"u8));
+        return (default, fmt.Errorf("not found"u8));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static error closeIt(ж<nint> Ꮡp, nint tag) {
     fmt.Println("closeIt", Ꮡp == nil, tag);
-    return default!;
+    return default;
 }
 
 internal static byte first(/*[4]*/ array<byte> valueʗp) {
@@ -65,7 +65,7 @@ internal static (uint32, error) mixedRet(bool ok) {
         }
         return (width(), errNil);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -78,12 +78,12 @@ internal static void Main() {
         var hʗ1 = h;
         defer(() => hʗ1.close(), ref ᒐ);
         var (w, werr) = mixedRet(true);
-        fmt.Println(w, werr == default!);
+        fmt.Println(w, werr == nil);
         var (_, werr2) = mixedRet(false);
         fmt.Println(werr2);
         var xs = new item[]{new(1), new(2)}.slice();
         var (p, err) = find(xs, 2);
-        fmt.Println(p != nil, err == default!);
+        fmt.Println(p != nil, err == nil);
         (_, err) = find(xs, 9);
         fmt.Println(err);
         fmt.Println(first(new byte[]{7, 8, 9, 10}.array()));
@@ -100,7 +100,7 @@ partial struct res {
 
 internal static error close(this res h) {
     fmt.Println("closed", h.id);
-    return default!;
+    return default;
 }
 
 } // end main_package

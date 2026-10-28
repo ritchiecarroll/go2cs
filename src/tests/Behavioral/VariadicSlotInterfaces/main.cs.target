@@ -48,7 +48,7 @@ internal static (nint, bool) countArgs(params ꓸꓸꓸany argsʗp) {
     var first = false;
 
     if (len(args) > 0) {
-        first = args[0] == default!;
+        first = args[0] == nil;
     }
 
     return (len(args), first);
@@ -84,13 +84,13 @@ internal static void Main() {
     var shapes = new Shape[]{new RectжShape(Ꮡ(new Rect(w: 2, h: 2))), new CircleжShape(Ꮡ(new Circle(r: 1)))}.slice();
     fmt.Println(totalArea(1, shapes.ꓸꓸꓸ));
 
-    var (ᴛ1, ᴛ2) = countArgs((any)(default!));
+    var (ᴛ1, ᴛ2) = countArgs((any)(default));
     fmt.Println(ᴛ1, ᴛ2);
-    var (ᴛ3, ᴛ4) = countArgs((any)(default!), (nint)1);
+    var (ᴛ3, ᴛ4) = countArgs((any)(default), (nint)1);
     fmt.Println(ᴛ3, ᴛ4);
-    var (ᴛ5, ᴛ6) = countArgs((nint)1, (any)(default!));
+    var (ᴛ5, ᴛ6) = countArgs((nint)1, (any)(default));
     fmt.Println(ᴛ5, ᴛ6);
-    var (ᴛ7, ᴛ8) = countArgs((any)(default!), (any)(default!), (any)(default!));
+    var (ᴛ7, ᴛ8) = countArgs((any)(default), (any)(default), (any)(default));
     fmt.Println(ᴛ7, ᴛ8);
 
     var (ᴛ9, ᴛ10) = countArgs();
@@ -98,12 +98,12 @@ internal static void Main() {
     var (ᴛ11, ᴛ12) = countArgs((nint)1, (nint)2);
     fmt.Println(ᴛ11, ᴛ12);
 
-    fmt.Println(describe((Shape)(default!)));
-    fmt.Println(describe((Shape)(default!), (Shape)(default!)));
-    slice<Shape> none = default!;
+    fmt.Println(describe((Shape)(default)));
+    fmt.Println(describe((Shape)(default), (Shape)(default)));
+    slice<Shape> none = default;
     fmt.Println(describe(none.ꓸꓸꓸ));
 
-    var anys = new any[]{(nint)1, (@string)"two"u8, default!}.slice();
+    var anys = new any[]{(nint)1, (@string)"two"u8, default}.slice();
     var (ᴛ13, ᴛ14) = countArgs((any)(anys));
     fmt.Println(ᴛ13, ᴛ14);
     fmt.Println(nest((any)(anys)));
@@ -112,7 +112,7 @@ internal static void Main() {
     fmt.Println(ᴛ15, ᴛ16);
     fmt.Println(nest(anys.ꓸꓸꓸ));
 
-    slice<any> noAnys = default!;
+    slice<any> noAnys = default;
     var (ᴛ17, ᴛ18) = countArgs((any)(noAnys));
     fmt.Println(ᴛ17, ᴛ18);
     var (ᴛ19, ᴛ20) = countArgs(noAnys.ꓸꓸꓸ);

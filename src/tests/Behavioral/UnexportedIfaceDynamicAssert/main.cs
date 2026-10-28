@@ -19,15 +19,15 @@ public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
             return wv.writeBuffers(Ꮡv);
         }
     }
-    int64 n = default!;
+    int64 n = default;
     foreach (var (_, b) in v) {
         var (nb, err) = w.Write(b);
         n += (int64)nb;
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
     }
-    return (n, default!);
+    return (n, default);
 }
 
 partial struct sink {
@@ -53,7 +53,7 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     }
     c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
     c.fd.Value.mode = "write";
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv) {
@@ -63,13 +63,13 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
     if (!Ꮡc.ok()) {
         return (0, fmt.Errorf("invalid conn"u8));
     }
-    int64 n = default!;
+    int64 n = default;
     foreach (var (_, b) in v) {
         c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
         n += (int64)len(b);
     }
     c.fd.Value.mode = "writeBuffers";
-    return (n, default!);
+    return (n, default);
 }
 
 partial struct TCPConn {
@@ -94,7 +94,7 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
     }
     c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
     c.fd.Value.mode = "write";
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 partial struct PlainConn {
@@ -108,19 +108,19 @@ partial struct valueSink {
 internal static (nint, error) Write(this valueSink s, slice<byte> b) {
     s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
     s.fd.Value.mode = "write";
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
-    int64 n = default!;
+    int64 n = default;
     foreach (var (_, b) in v) {
         s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
         n += (int64)len(b);
     }
     s.fd.Value.mode = "writeBuffers";
-    return (n, default!);
+    return (n, default);
 }
 
 partial struct ValueSink {

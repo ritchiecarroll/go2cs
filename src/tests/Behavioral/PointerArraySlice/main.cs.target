@@ -52,13 +52,13 @@ internal static void Main() {
 }
 
 internal static void rangeIndexOnly() {
-    ж<array<nint>> nilp = default!;
+    ж<array<nint>> nilp = default;
     foreach (var i in range(nilp, 3)) {
         fmt.Print(i, " ");
     }
     fmt.Println();
 
-    ж<grid> nilg = default!;
+    ж<grid> nilg = default;
     nint count = 0;
     foreach (var _ᴛ1 in range(nilg, 4)) {
         count++;
@@ -71,7 +71,7 @@ internal static void rangeIndexOnly() {
     }
     fmt.Println(p.Value[0], p.Value[1]);
 
-    grid g = default!;
+    grid g = default;
     g.fill();
     fmt.Println("receiver ranges", g);
 }

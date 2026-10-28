@@ -22,7 +22,7 @@ internal static void Main() {
 
     fmt.Println(env[..4] == "cpu.");
 
-    @string field = default!;
+    @string field = default;
     (field, env) = (env[..4], env[5..]);
     fmt.Println(field, env);
 

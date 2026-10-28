@@ -29,7 +29,7 @@ internal partial interface testTypeAssertion_type /*dyn*/ {
 internal static void testTypeAssertion(error err) {
     {
         var (x, ok) = err._<testTypeAssertion_type>(ᐧ); if (ok) {
-            fmt.Println("TypeAssertion: Is(nil) =", x.Is(default!));
+            fmt.Println("TypeAssertion: Is(nil) =", x.Is(default));
         } else {
             fmt.Println("TypeAssertion: No match");
         }
@@ -81,11 +81,11 @@ partial struct embeddedImpl {
 }
 
 internal static error Close(this embeddedImpl _) {
-    return default!;
+    return default;
 }
 
 internal static error Flush(this embeddedImpl _) {
-    return default!;
+    return default;
 }
 
 internal static void testInterfaceEmbedding(InlineEmbed x) {
@@ -99,7 +99,7 @@ partial struct fakeReader {
 
 internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
     copy(b, "DATA"u8);
-    return (4, default!);
+    return (4, default);
 }
 
 partial struct fakeError {
@@ -123,7 +123,7 @@ partial struct tally {
 
 internal static (nint, error) Write(this ref tally t, slice<byte> p) {
     t.total += len(p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal partial struct fill_dst /*dyn*/ {
@@ -151,7 +151,7 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
         b.left--;
         n++;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 partial struct quad /*[4]byte*/;
@@ -178,7 +178,7 @@ internal static void Main() {
 
     var tl = Ꮡ(new tally(nil));
     var (n, err) = tl.fill(new byteRepeatжReader(Ꮡ(new byteRepeat(left: 10))));
-    fmt.Println(n, err == default!, (~tl).total);
+    fmt.Println(n, err == nil, (~tl).total);
 
     var fr = new frame(data: new quad(new byte[]{1, 2, 3, 4}.array()));
     fmt.Println(checksum(ref fr));

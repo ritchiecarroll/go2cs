@@ -15,7 +15,7 @@ internal static nint sum(channel<nint> @out, nint a, nint b) {
 
 internal static (nint, error) pair(channel<nint> @out, nint n) {
     @out.ᐸꟷ(n * n);
-    return (n * n, default!);
+    return (n * n, default);
 }
 
 internal static nint nib() {
@@ -49,14 +49,14 @@ internal static partial void Main() {
     fmt.Println("emit:", ᐸꟷ(@out));
 
     goǃ((channel<nint> o) => {
-        error retErr = default!;
+        error retErr = default;
         GoFrame ᒐ = default;
         try {
             var oʗ1 = o;
             defer(() => {
                 oʗ1.ᐸꟷ(11);
             }, ref ᒐ);
-            retErr = default!; goto ᒐdone;
+            retErr = default; goto ᒐdone;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -69,7 +69,7 @@ internal static partial void Main() {
         if (n < 0) {
             return fmt.Errorf("negative %d"u8, n);
         }
-        return default!;
+        return default;
     }, @out, (nint)6);
     fmt.Println("litmulti:", ᐸꟷ(@out));
 }

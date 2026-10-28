@@ -8,9 +8,9 @@ internal static void Main() {
     var nums = new nint[]{2, 3, 4}.slice();
     nint sum = 0;
 
-    nint i = default!;
-    nint num = default!;
-    nint total = default!;
+    nint i = default;
+    nint num = default;
+    nint total = default;
 
     foreach (var (iᴛ1, vᴛ1) in nums) {
         i = iᴛ1;
@@ -54,8 +54,8 @@ internal static void Main() {
         fmt.Println("value:", vΔ2);
     }
 
-    @string k = default!;
-    @string v = default!;
+    @string k = default;
+    @string v = default;
 
     foreach (var (kᴛ1, vᴛ2) in kvs) {
         k = kᴛ1;
@@ -69,8 +69,8 @@ internal static void Main() {
 
         @string strΔ1 = "sub-test";
 
-        nint i1Δ1 = default!;
-        rune c1Δ1 = default!;
+        nint i1Δ1 = default;
+        rune c1Δ1 = default;
 
         foreach (var (iᴛ2, rᴛ1) in strΔ1) {
             i1Δ1 = iᴛ2;
@@ -105,8 +105,8 @@ internal static void Main() {
 
     @string str = "test";
 
-    nint i1 = default!;
-    rune c1 = default!;
+    nint i1 = default;
+    rune c1 = default;
 
     foreach (var (iᴛ3, rᴛ2) in str) {
         i1 = iᴛ3;
@@ -127,7 +127,7 @@ internal static void Main() {
         fmt.Println(iΔ5, vΔ5);
     }
 
-    nint v1 = default!;
+    nint v1 = default;
 
     foreach (var (iᴛ4, vᴛ4) in Δslice) {
         i1 = iᴛ4;
@@ -143,7 +143,7 @@ internal static void Main() {
     }
 
     for (nint iΔ7 = 0; iΔ7 < 10; iΔ7++) {
-        nint j = default!;
+        nint j = default;
         for (j = 0; j < 5; j++) {
             fmt.Println(iΔ7, j);
         }

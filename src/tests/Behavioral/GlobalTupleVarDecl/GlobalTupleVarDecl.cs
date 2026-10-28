@@ -11,7 +11,7 @@ partial struct box {
 internal static nint calls;
 
 internal static (ж<box>, error) makeBox(nint v) {
-    return (Ꮡ(new box(v: v)), default!);
+    return (Ꮡ(new box(v: v)), default);
 }
 
 internal static (nint, @string) pair() {

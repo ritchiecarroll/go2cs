@@ -31,7 +31,7 @@ internal static void Main() {
     ref var s = ref heap(new T(), out var Ꮡs);
     ref var p = ref heap<ж<T>>(out var Ꮡp);
     ref var a = ref heap(new Arr(), out var Ꮡa);
-    nint n = default!;
+    nint n = default;
 
     show("struct TypeOf/TypeFor", reflect.TypeOf(s), reflect.TypeFor<T>());
     show("struct TypeOf/&x.Elem", reflect.TypeOf(s), reflect.TypeOf(Ꮡs).Elem());
@@ -45,7 +45,7 @@ internal static void Main() {
     show("value.Type/TypeFor", reflect.ValueOf(s).Type(), reflect.TypeFor<T>());
     show("anon struct", reflect.TypeOf(new EmptyStruct()), reflect.TypeFor<EmptyStruct>());
 
-    M mm = default!;
+    M mm = default;
     var mt = reflect.ValueOf(mm).Method(0).Type();
     var mmʗ1 = mm;
     show("method value Type/TypeOf", mt, reflect.TypeOf((nint p1) => mmʗ1.Do(p1)));

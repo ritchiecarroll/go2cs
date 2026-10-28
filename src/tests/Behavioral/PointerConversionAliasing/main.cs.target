@@ -44,7 +44,7 @@ internal static void named() {
 }
 
 internal static void nilPointer() {
-    ж<Employee> e = default!;
+    ж<Employee> e = default;
     var p = e.Reinterpret<Employee, Person>();
     fmt.Println("nil, stays nil:", p == nil);
 }
@@ -81,7 +81,7 @@ internal partial struct anonymousNil_a /*dyn*/ {
 }
 
 internal static void anonymousNil() {
-    ж<anonymousNil_a> a = default!;
+    ж<anonymousNil_a> a = default;
     var p = a.Reinterpret<anonymousNil_a, Person>();
     fmt.Println("anonymous nil, stays nil:", p == nil);
 }

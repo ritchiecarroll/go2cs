@@ -13,7 +13,7 @@ partial struct machine {
 }
 
 internal static (nint, error) @double(nint x) {
-    return (x * 2, default!);
+    return (x * 2, default);
 }
 
 internal static void Main() {

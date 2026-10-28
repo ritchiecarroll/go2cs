@@ -11,8 +11,8 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     /*embed*/ internal error error;
 }
 [GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
-    Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
-    Ꮡ(new ptrElemsᴛ1(2, "two"u8, default!))
+    Ꮡ(new ptrElemsᴛ1(1, "one"u8, default)),
+    Ꮡ(new ptrElemsᴛ1(2, "two"u8, default))
 }.slice(); }
 
 
@@ -34,7 +34,7 @@ internal static slice<slice<nestedᴛ1>> nested = new slice<nestedᴛ1>[]{
 
 internal static void Main() {
     foreach (var (_, e) in ptrElems) {
-        fmt.Println((~e).@in, (~e).str, (~e).error == default!);
+        fmt.Println((~e).@in, (~e).str, (~e).error == nil);
     }
 
     fmt.Println((~mapPtrValues["a"]).n + (~mapPtrValues["b"]).n);

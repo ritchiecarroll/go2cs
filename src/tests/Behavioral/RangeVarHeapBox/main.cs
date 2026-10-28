@@ -19,7 +19,7 @@ internal static nint sumWithinIter(slice<nint> s) {
 internal static slice<ж<nint>> collectPointers(slice<nint> s) {
     var ptrsᴷ = new stackAppend<ж<nint>>(moves: true);
 
-    slice<ж<nint>> ptrs = default!;
+    slice<ж<nint>> ptrs = default;
     foreach (var iᴛ1 in range(s)) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
@@ -33,7 +33,7 @@ internal static slice<ж<nint>> collectPointers(slice<nint> s) {
 internal static slice<Func<nint>> intClosures() {
     var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     foreach (var iᴛ1 in range(3)) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
@@ -49,7 +49,7 @@ internal static slice<Func<nint>> intClosures() {
 internal static slice<Func<@string>> stringClosures(@string s) {
     var fsᴷ = new stackAppend<Func<@string>>(moves: true);
 
-    slice<Func<@string>> fs = default!;
+    slice<Func<@string>> fs = default;
     foreach (var (iᴛ1, rᴛ1) in s) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
@@ -68,7 +68,7 @@ internal static slice<Func<@string>> stringClosures(@string s) {
 internal static slice<Func<nint>> chanClosures(channel<nint> ch) {
     var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     foreach (var iᴛ1 in ch) {
         ref var v = ref heap(new nint(), out var Ꮡv);
         v = iᴛ1;

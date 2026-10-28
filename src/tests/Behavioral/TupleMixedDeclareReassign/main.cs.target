@@ -13,7 +13,7 @@ internal static (ж<int64>, int64) next(int64 now) {
 internal static (ж<int64>, int64) step(int64 now) {
     (var pp, now) = next(now);
     if (pp == nil) {
-        return (default!, now);
+        return (default, now);
     }
     return (pp, now);
 }
@@ -45,7 +45,7 @@ partial struct cursor {
 }
 
 internal static (cursor, error) makeCursor(nint pos, @string tag) {
-    return (new cursor(pos: pos, tag: tag), default!);
+    return (new cursor(pos: pos, tag: tag), default);
 }
 
 internal static void bump(ref cursor c) {
@@ -54,11 +54,11 @@ internal static void bump(ref cursor c) {
 
 internal static (nint, nint) streams() {
     var (rbr1, err) = makeCursor(10, "one");
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0);
     }
     (var rbr2, err) = makeCursor(20, "two");
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0);
     }
     bump(ref rbr1);
@@ -72,11 +72,11 @@ internal static (nint, bool) pairAt(nint i) {
 }
 
 internal static (slice<nint> hw, nint count) fill(nint n) {
-    slice<nint> hw = default!;
-    nint count = default!;
+    slice<nint> hw = default;
+    nint count = default;
 
     hw = new slice<nint>(n);
-    bool ok = default!;
+    bool ok = default;
     for (nint i = 0; i < n; i++) {
         {
             (hw[i], ok) = pairAt(i); if (!ok) {

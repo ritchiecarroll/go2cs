@@ -95,7 +95,7 @@ internal static void Main() {
     var dup = Ꮡ(new node(val: 5));
     fmt.Println("visitLocal:", visitLocal(new ж<node>[]{dup, dup, x}.slice()));
 
-    slice<ж<node>> list = default!;
+    slice<ж<node>> list = default;
     list = collect(list, a);
     list = collect(list, b);
     a.Value.val = 11;

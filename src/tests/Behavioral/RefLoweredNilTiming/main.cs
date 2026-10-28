@@ -37,7 +37,7 @@ internal static @string nilGuard(ж<elem> Ꮡp) {
 }
 
 internal static ж<elem> nilElem() {
-    return default!;
+    return default;
 }
 
 internal static void tryEager(@string label, ref elem e) {
@@ -59,7 +59,7 @@ internal static void deferredFault() {
         defer(() => {
             fmt.Println("deferred recovered:", recover());
         }, ref ᒐ);
-        ж<uint64> q = default!;
+        ж<uint64> q = default;
         passThrough(ref (q).DerefOrNull());
         fmt.Println("not reached");
     }
@@ -68,10 +68,10 @@ internal static void deferredFault() {
 }
 
 internal static void Main() {
-    ж<elem> e1 = default!;
+    ж<elem> e1 = default;
     tryEager("zerovar", ref (e1).DerefOrNull());
 
-    tryEager("literal", ref ((ж<elem>)default!).DerefOrNull());
+    tryEager("literal", ref ((ж<elem>)default).DerefOrNull());
 
     any i = nilElem().OrTypedNil();
     var e3 = i._<ж<elem>>();

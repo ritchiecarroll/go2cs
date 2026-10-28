@@ -143,7 +143,7 @@ internal static void Main() {
 
     fmt.Println(multi(c.OrTypedNil()));
     fmt.Println(multi(Ꮡ(new errMark(code: 8))));
-    fmt.Println(multi(default!));
+    fmt.Println(multi(default));
     fmt.Println(multi(1.5D));
 
     fmt.Println(viaInterfaceTag(new circleжshape(c)));

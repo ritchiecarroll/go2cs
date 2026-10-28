@@ -11,7 +11,7 @@ internal static void Main() {
     try {
         var (b, err) = syscall.Mmap(-1, 0, 4096, (nint)((nint)syscall.PROT_READ | (nint)syscall.PROT_WRITE), (nint)((nint)syscall.MAP_ANON | (nint)syscall.MAP_PRIVATE));
 
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("mmap:", err);
             return;
         }

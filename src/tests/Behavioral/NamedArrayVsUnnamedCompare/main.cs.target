@@ -15,8 +15,8 @@ internal static array<byte> sum(slice<byte> b) {
 }
 
 internal static void Main() {
-    Hash h = default!;
-    if (h != ((Hash)(sum(default!)))) {
+    Hash h = default;
+    if (h != ((Hash)(sum(default)))) {
         fmt.Println("differs");
         return;
     }
@@ -25,7 +25,7 @@ internal static void Main() {
 
     var g = (Hash)sum(new byte[]{1, 2, 3, 4}.slice());
     fmt.Println(g == ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))), ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))) == g);
-    fmt.Println(g != ((Hash)(sum(default!))), ((Hash)(sum(default!))) != g, ((Hash)(sum(default!))) == h);
+    fmt.Println(g != ((Hash)(sum(default))), ((Hash)(sum(default))) != g, ((Hash)(sum(default))) == h);
 }
 
 } // end main_package

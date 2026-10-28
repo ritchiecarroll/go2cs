@@ -6,7 +6,7 @@ partial class main_package {
 
 public static Func<T> Once<T>(Func<T> f) {
     ref var v = ref heap<T>(out var Ꮡv);
-    bool done = default!;
+    bool done = default;
     return () => {
         if (!done) {
             Ꮡv.ValueSlot = f();
@@ -19,7 +19,7 @@ public static Func<T> Once<T>(Func<T> f) {
 public static Func<(A, B)> Once2<A, B>(Func<(A, B)> f) {
     ref var a = ref heap<A>(out var Ꮡa);
     ref var b = ref heap<B>(out var Ꮡb);
-    bool done = default!;
+    bool done = default;
     return () => {
         if (!done) {
             (Ꮡa.ValueSlot, Ꮡb.ValueSlot) = f();
@@ -50,7 +50,7 @@ internal static E pick<E>(slice<E> xs, Func<E, E, bool> better) {
 internal static Func<nint> fortyTwo = Once(nint () => 42);
 
 internal static @string describe(any v) {
-    if (v == default!) {
+    if (v == nil) {
         return "<nil>";
     }
     return fmt.Sprintf("%v"u8, v);
@@ -59,7 +59,7 @@ internal static @string describe(any v) {
 internal static void Main() {
     fmt.Println(fortyTwo(), fortyTwo());
 
-    var nilOnce = Once(any () => default!);
+    var nilOnce = Once(any () => default);
     fmt.Println(describe(nilOnce()));
 
     var panicOnce = Once(any () => {
@@ -78,7 +78,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
 
-    var pairOnce = Once2((any, any) () => (default!, default!));
+    var pairOnce = Once2((any, any) () => (default, default));
     var (p, q) = pairOnce();
     fmt.Println(describe(p), describe(q));
 

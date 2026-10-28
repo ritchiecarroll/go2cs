@@ -52,10 +52,10 @@ internal static void Main() {
     var f = extend(s, 3);
     fmt.Println("grows:", len(f), cap(f), f, Ꮡelem(f, 0) == Ꮡelem(s, 0));
 
-    slice<nint> none = default!;
+    slice<nint> none = default;
     var n = extend(none, 3);
     fmt.Println("nil:", len(n), cap(n), n);
-    fmt.Println("zero:", len(extend(s, 0)), extend(default!, 0) == default!);
+    fmt.Println("zero:", len(extend(s, 0)), extend(default, 0) == default);
 
     var g = Grow(new nint[]{1, 2}.slice(), 5);
     fmt.Println("Grow:", len(g), cap(g) >= 7, g);
@@ -65,14 +65,14 @@ internal static void Main() {
     var p = growGeneric<slice<point>, point>(new point[]{new(1, 2)}.slice(), 1);
     fmt.Println("generic struct:", p);
 
-    fmt.Println("refused:", withCap(new nint[]{1}.slice(), 2), named(new nint[]{1}.slice(), 1), arrays(default!, 2));
+    fmt.Println("refused:", withCap(new nint[]{1}.slice(), 2), named(new nint[]{1}.slice(), 1), arrays(default, 2));
 
     var sʗ1 = s;
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println("negative:", recover() != default!);
+                fmt.Println("negative:", recover() != nil);
             }, ref ᒐ);
             nint k = -1;
             _ = extend(sʗ1, k);

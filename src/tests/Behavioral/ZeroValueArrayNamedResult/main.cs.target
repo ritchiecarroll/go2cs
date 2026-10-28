@@ -51,14 +51,14 @@ internal static partial box /*bx*/ makeBox() {
 
 internal static partial (array<byte> a4, error err) withDefer() {
     array<byte> a4 = new(4);
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             a4[0]++;
         }, ref ᒐ);
         a4[1] = 2;
-        (a4, err) = (a4.Clone(), default!);
+        (a4, err) = (a4.Clone(), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -72,8 +72,8 @@ internal static Func<array<byte>> literalAs3 = () => {
 };
 
 internal static partial (nint n, @string s) scalars() {
-    nint n = default!;
-    @string s = default!;
+    nint n = default;
+    @string s = default;
 
     n = 5;
     return (n, s);
@@ -94,7 +94,7 @@ internal static void Main() {
     fmt.Println(bx.id, len(bx.t.aesKey), bx.t.aesKey[0], bx.t.hmacKey[15]);
 
     var (d, err) = withDefer();
-    fmt.Println(len(d), d[0], d[1], err == default!);
+    fmt.Println(len(d), d[0], d[1], err == nil);
 
     var l = literalAs3();
     fmt.Println(len(l), l[2]);

@@ -33,18 +33,18 @@ internal static void Main() {
     var container = new Container(
         IntResult: new Result<nint>(
             Value: 42,
-            Error: default!
+            Error: default
         ),
         StringResult: new Result<@string>(
             Value: "success",
-            Error: default!
+            Error: default
         ),
         FloatValues: new Result<float64>[]{
-            new(Value: 3.14D, Error: default!),
-            new(Value: 2.71D, Error: default!)
+            new(Value: 3.14D, Error: default),
+            new(Value: 2.71D, Error: default)
         }.slice(),
         Mappings: new map<@string, Result<bool>>{
-            ["completed"] = new(Value: true, Error: default!),
+            ["completed"] = new(Value: true, Error: default),
             ["verified"] = new(Value: false, Error: fmt.Errorf("verification pending"u8))
         }
     );
@@ -54,7 +54,7 @@ internal static void Main() {
     fmt.Printf("First float value: %f\n"u8, container.FloatValues[0].Value);
     fmt.Printf("Completion status: %t\n"u8, container.Mappings["completed"].Value);
 
-    Δpool<nint> pl = default!;
+    Δpool<nint> pl = default;
     pl.items = append(pl.items, (nint)7, (nint)8);
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper(nil).pool());

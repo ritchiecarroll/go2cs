@@ -13,19 +13,19 @@ internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp("", "abstractaddr");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL mkdtemp:", err);
             return;
         }
         defer(os.RemoveAll, dir, ref ᒐ);
 
         (var ta, err) = Δnet.ResolveUnixAddr("unix", filepath.Join(dir, "s"));
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL resolve:", err);
             return;
         }
         (var ln, err) = Δnet.ListenUnix("unix", ta);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL listen:", err);
             return;
         }
@@ -34,14 +34,14 @@ internal static partial void Main() {
         var lnʗ2 = ln;
         goǃ(() => {
             {
-                var (cΔ1, e) = lnʗ2.Accept(); if (e == default!) {
+                var (cΔ1, e) = lnʗ2.Accept(); if (e == nil) {
                     cΔ1.Close();
                 }
             }
         });
 
         (var c, err) = Δnet.DialUnix("unix", nil, ta);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL dial:", err);
             return;
         }

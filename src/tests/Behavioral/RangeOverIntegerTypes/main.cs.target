@@ -15,7 +15,7 @@ internal static void Main() {
     fmt.Println("uintptr blank-key iterations:", count);
 
     uintptr stride = 16;
-    uintptr offset = default!;
+    uintptr offset = default;
     var offsets = new uintptr[]{}.slice();
     foreach (var _ᴛ2 in range<uintptr>(n)) {
         offsets = append(offsets, offset);
@@ -38,7 +38,7 @@ internal static void Main() {
     fmt.Println("int64 sum:", sum64);
 
     uint64 u = 3;
-    uint64 sumU = default!;
+    uint64 sumU = default;
     foreach (var i in range<uint64>(u)) {
         sumU += i;
     }

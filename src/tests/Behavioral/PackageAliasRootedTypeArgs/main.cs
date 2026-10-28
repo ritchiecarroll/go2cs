@@ -64,16 +64,16 @@ internal static void Main() {
     names a = new @string[]{"x", "y"}.slice();
     sizes b = new sizes{["k"] = 7};
     grid c = new slice<@string>[]{new @string[]{"g"}.slice()}.slice();
-    errs d = new error[]{default!}.slice();
+    errs d = new error[]{default}.slice();
     cplx e = new complex64[]{complex(1F, 2F)}.slice();
     cplx2 e2 = new complex128[]{complex(3D, 4D)}.slice();
     chans f = new chans(1);
     arr g = new @string[]{"a", "b", "c"}.array();
     hdrs h = new Header[]{new(Name: "n", Size: 1)}.slice();
-    rdrs i = new Δio.Reader[]{default!}.slice();
-    ptrs j = new ж<Header>[]{default!}.slice();
+    rdrs i = new Δio.Reader[]{default}.slice();
+    ptrs j = new ж<Header>[]{default}.slice();
     fn k = (@string sΔ1) => len(sΔ1);
-    fn2 k2 = (Header x) => (x.Name, default!);
+    fn2 k2 = (Header x) => (x.Name, default);
     fn0 k0 = () => {
         fmt.Println("fn0 ran");
     };

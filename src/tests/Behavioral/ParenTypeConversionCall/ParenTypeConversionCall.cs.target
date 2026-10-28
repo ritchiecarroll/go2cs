@@ -26,10 +26,10 @@ internal static void Main() {
 
     var table = new main_table[]{
         new(@unsafe.Pointer.FromPinnedBox(@new<nint>()), false),
-        new(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default!), true)
+        new(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default), true)
     }.slice();
     foreach (var (i, row) in table) {
-        fmt.Println("A4 row", i, "isNil:", AreEqual(row.v, ((any)@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default!))), "want:", row.want);
+        fmt.Println("A4 row", i, "isNil:", AreEqual(row.v, ((any)@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default))), "want:", row.want);
     }
 
     @unsafe.Pointer r = @unsafe.Pointer.FromPinnedBox(@new<nint>());

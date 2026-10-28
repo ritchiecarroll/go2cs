@@ -42,11 +42,11 @@ internal static void sendOnly(channel/*<-*/<@string> c) {
 }
 
 internal static (/*<-*/channel<nint>, error) two() {
-    return (default!, default!);
+    return (default, default);
 }
 
 internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) {
-    return default!;
+    return default;
 }
 
 internal static void nestedDir(channel/*<-*/</*<-*/channel<nint>> c) {
@@ -76,12 +76,12 @@ internal static void Main() {
     fmt.Println("assignable:", reflect.TypeOf(bidiLocal).AssignableTo(reflect.TypeOf(recvLocal)));
     fmt.Println("convertible:", reflect.TypeOf(bidiLocal).ConvertibleTo(reflect.TypeOf(recvLocal)));
 
-    var (ad, _) = reflect.TypeOf((AssignD)default!).MethodByName("Equal");
-    fmt.Println("named recv to param:", reflect.TypeOf((AssignD)default!).AssignableTo(ad.Type.In(1)));
+    var (ad, _) = reflect.TypeOf((AssignD)default).MethodByName("Equal");
+    fmt.Println("named recv to param:", reflect.TypeOf((AssignD)default).AssignableTo(ad.Type.In(1)));
 
-    Func</*<-*/channel<nint>> h = default!;
+    Func</*<-*/channel<nint>> h = default;
     h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflectꓸValue> _Δp0) => new reflectꓸValue[]{reflect.ValueOf(new channel<nint>(0))}.slice()).Interface()._<Func</*<-*/channel<nint>>>();
-    fmt.Println("makefunc:", h() != default!);
+    fmt.Println("makefunc:", h() != default);
     _ = (Action<channel/*<-*/</*<-*/channel<nint>>>)(nestedDir);
 }
 

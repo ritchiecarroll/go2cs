@@ -49,7 +49,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
                     var (_, isError) = r._<error>(ᐧ);
                     fmt.Printf("%s: %T runtime.Error: %v error: %v: %v\n"u8, what, r, isRuntimeError, isError, r);
@@ -87,7 +87,7 @@ internal static void Main() {
         _ = pʗ1._<ж<point>>();
     });
 
-    any nothing = default!;
+    any nothing = default;
     var nothingʗ1 = nothing;
     @catch("nil-to-string", () => {
         _ = nothingʗ1._<@string>();

@@ -25,7 +25,7 @@ internal static void Main() {
     link = Ꮡorigin;
     fmt.Println("param:", addrOf(link) == g1);
 
-    ж<point> missing = default!;
+    ж<point> missing = default;
     fmt.Println("nil param:", addrOf(missing) == 0);
 
     ref var buf = ref heap(new array<int32>(4), out var Ꮡbuf);

@@ -11,7 +11,7 @@ partial class main_package {
 
 internal static @string gidLine(nint tid) {
     var (b, err) = os.ReadFile(fmt.Sprintf("/proc/self/task/%d/status"u8, tid));
-    if (err != default!) {
+    if (err != nil) {
         return "read error";
     }
     foreach (var (_, line) in strings.Split((@string)b, "\n")) {
@@ -61,7 +61,7 @@ internal static partial void Main() {
     fmt.Println("before parked:", gidLine(parked));
 
     {
-        var err = syscall.Setegid(1); if (err != default!) {
+        var err = syscall.Setegid(1); if (err != nil) {
             fmt.Println("setegid(1) failed:", err);
             return;
         }
@@ -76,7 +76,7 @@ internal static partial void Main() {
     fmt.Println("the parked thread followed the change:", parkedAfter == mainAfter);
 
     {
-        var err = syscall.Setegid(0); if (err != default!) {
+        var err = syscall.Setegid(0); if (err != nil) {
             fmt.Println("restore failed:", err);
             return;
         }

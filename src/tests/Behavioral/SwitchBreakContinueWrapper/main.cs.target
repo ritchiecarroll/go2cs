@@ -111,7 +111,7 @@ break_outer:;
 continueᴛ7:;
     }
 
-    slice<nint> got = default!;
+    slice<nint> got = default;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;
         nint f() => i;

@@ -61,7 +61,7 @@ internal static @string multi(Namer i) {
     case ж<T> _:
     case ж<U> _: {
         var v = i;
-        return fmt.Sprint("*T or *U, interface nil: ", v == default!, ", Name: ", v.Name());
+        return fmt.Sprint("*T or *U, interface nil: ", v == nil, ", Name: ", v.Name());
     }
     case null: {
         return "nil interface";
@@ -70,18 +70,18 @@ internal static @string multi(Namer i) {
 }
 
 internal static void Main() {
-    ж<T> p = default!;
+    ж<T> p = default;
     fmt.Println(classify(new TжNamer(p)));
     fmt.Println(classify(new TжNamer(Ꮡ(new T(1)))));
-    fmt.Println(classify(default!));
+    fmt.Println(classify(default));
 
     fmt.Println(classifyAny(p.OrTypedNil()));
-    fmt.Println(classifyAny(default!));
+    fmt.Println(classifyAny(default));
 
-    ж<U> u = default!;
+    ж<U> u = default;
     fmt.Println(multi(new TжNamer(p)));
     fmt.Println(multi(new UжNamer(u)));
-    fmt.Println(multi(default!));
+    fmt.Println(multi(default));
 }
 
 } // end main_package

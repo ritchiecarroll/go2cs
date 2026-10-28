@@ -22,8 +22,8 @@ internal static void Main() {
         }
     }
 
-    nint w = default!;
-    bool present = default!;
+    nint w = default;
+    bool present = default;
     (w, present) = m["b", ꟷ];
     fmt.Println(w, present);
 }

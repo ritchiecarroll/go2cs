@@ -51,7 +51,7 @@ internal static void Main() {
     var n = new main_named(got: new UnixAddrжAddr(ta));
     fmt.Printf("named T=%T v=%#v\n"u8, n.got, n.got);
 
-    Addr nilAddr = default!;
+    Addr nilAddr = default;
     fmt.Printf("nil T=%T v=%v\n"u8, nilAddr, nilAddr);
 }
 

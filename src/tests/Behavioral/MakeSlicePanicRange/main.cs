@@ -6,14 +6,14 @@ using System.Runtime.CompilerServices;
 partial class main_package {
 
 internal static partial any /*r*/ tryMake(nint length, nint capacity) {
-    any r = default!;
+    any r = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             r = recover();
         }, ref ᒐ);
 
-        slice<byte> b = default!;
+        slice<byte> b = default;
 
         if (capacity < 0) {
             b = new slice<byte>(length);
@@ -23,7 +23,7 @@ internal static partial any /*r*/ tryMake(nint length, nint capacity) {
 
         _ = b;
 
-        r = default!;
+        r = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
