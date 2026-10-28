@@ -11203,7 +11203,7 @@ Go's for the target architecture, here amd64.
 These are Go's numbers, not measurements of the C# struct. Adding them to a real address is meant for
 storage laid out like Go's, such as an array of numbers. A struct that holds a managed reference
 cannot be pinned, and the CLR lays it out in its own order, so its pointers get order tokens (the order-token rule in this section).
-<!-- the layout question: the CLR lays out a C# struct of unmanaged fields sequentially (the C# default for structs; go2cs adds no StructLayout), while a reference-bearing struct is CLR auto-layout and gets PointerStorage.None (src/core/golib/ж.StandardBox.cs:203#4b2f08). src/core/golib/runtime/RuntimeErrorPanic.cs:50-60#d0188e (remarks) records that a Go-layout offset into a CLR-auto-laid-out struct is refused loudly rather than answered. -->
+<!-- the layout question: the CLR lays out a C# struct of unmanaged fields sequentially (the C# default for structs; go2cs adds no StructLayout), while a reference-bearing struct is CLR auto-layout and gets PointerStorage.None (src/core/golib/ж.StandardBox.cs:206#4b2f08). src/core/golib/runtime/RuntimeErrorPanic.cs:50-60#d0188e (remarks) records that a Go-layout offset into a CLR-auto-laid-out struct is refused loudly rather than answered. -->
 
 **Converting a pointer to `uintptr` gives a real address**, when the value it points to holds no
 managed reference (for one that does, see the order-token rule in this section). Go's idiom
@@ -11232,7 +11232,7 @@ internal static uintptr addrOf(ж<point> Ꮡp) {
 
 `point` holds only two `int32`s, so its storage can be pinned. It is a type declared in Go,
 which the [source generators](#source-generators) complete.
-<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:28-29 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1187-1206#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1250#828d85, with PointerStorage.None from ж.StandardBox.cs:202-203#435ab0 and ж.ElemRefBox.cs:376-378#b9ec7b. -->
+<!-- nil gives 0: UintptrUnsafePointerIdiom/main.go:45-46#75324d -> main.cs.target:28-29 (`ж<point> missing = default;` / `addrOf(missing) == 0`); golib's ж<T> -> uintptr operator returns 0 for a nil box (src/core/golib/ж.cs:1187-1206#95b7af); since 2026-10-16 that is the structural nil question, so a box HOLDING a nil pointer (`&p`, p nil) is not nil and takes the token arm below. point is reference-free (UintptrUnsafePointerIdiom/main.go:23-25#60ec9e), so it is pinnable. A reference-bearing pointee returns value.PointerOrderToken instead: ж.cs:1250#828d85, with PointerStorage.None from ж.StandardBox.cs:205-206#435ab0 and ж.ElemRefBox.cs:376-378#b9ec7b. -->
 
 **Address arithmetic works, and converting back aliases the same memory.** Adding an offset to a pinned
 address gives the address of the neighbouring value. Converting that number back to a pointer and
@@ -11282,7 +11282,7 @@ storage from its address. As in Go, a number alone does not keep its object aliv
 The CLR cannot pin such a value, so golib hands out a unique stand-in number instead. A token compares
 and sorts like an address. It converts back to the same pointer while that pointer is still in use, as
 an address does in Go.
-<!-- the three storage kinds: src/core/golib/ж.cs:63-84#303dce (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:203#4b2f08 and ж.ElemRefBox.cs:377#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:361-394#da3041 (a field reference always names a real interior address, held still only when the enclosing variable can be pinned, except a reinterpret of a first field whose root's CLR layout is not Go's, which answers its root's token; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
+<!-- the three storage kinds: src/core/golib/ж.cs:63-84#303dce (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:206#4b2f08 and ж.ElemRefBox.cs:377#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:361-394#da3041 (a field reference always names a real interior address, held still only when the enclosing variable can be pinned, except a reinterpret of a first field whose root's CLR layout is not Go's, which answers its root's token; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
 
 A token has no memory behind it, so it has no neighbours. Adding an offset to a token and converting the
 result back to a pointer raises a Go panic that says so. Like any Go panic, `recover` can catch it

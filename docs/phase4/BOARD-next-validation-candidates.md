@@ -30359,5 +30359,60 @@ manual-conversions pages now read `new T()`; docsamples -recite re-copied the 13
 these goldens move, every one Z1; two provenance notes re-cited.
 
 — P1 (2026-10-28)
+## 2026-10-28 — G (1.26.10.2 seat #35, claude/g-seat35-value-fastpath-r2): `ж<T>.Value` on a heap box tests its nil fields inline, so Native AOT and TC0 stop paying a virtual `IsNull` call per access — DONE on the seat branch
+
+**The change (golib only).** `StandardBox<T>.Value` called the virtual `IsNull` on every read. Under Native AOT and
+JIT TieredCompilation=0 nothing devirtualizes that call, and on the P1 micro it was half the cost of a field access
+through a heap box (seat #31's Q1, ruled 2026-10-27). `Value` now tests `IsNull`'s own expression as fields,
+`m_isNull || (s_valueCanBeNull && HeldValueIsNull)`, and `IsNull` is `sealed` so the two cannot drift apart. Nil
+semantics are unchanged: the same site panics with the same text.
+
+**The guard.** `NilPointerPanic` gains case 9, a TYPED nil pointer (`q := (*node)(nil)`): `(ж<node>)nil` is golib's
+canonical nil box, so its field read and write reach the box's own nil check rather than .NET's null dereference.
+Red-first: with `Value`'s inline test planted to drop `m_isNull`, the Output phase fails and the diff names the case
+(`typed-nil-field-write NO PANIC` where Go recovers a nil-pointer runtime error); restored byte-identical, it passes.
+The read arm goes through `~q`, which tests the sealed `IsNull`, so the plant leaves it panicking. Footprint: the
+golden pair and one `GoPositionMap` line.
+
+**The measurement** (G-LAPTOP, win-x64, interleaved arm order, base = master's `StandardBox`, tip = the seat's):
+- **P1 micro, heap box `p.Value.f`, ns per iteration, base → tip:**
+  - Native AOT: 11.35 → 7.26;
+  - TC0: 11.38 → 6.54;
+  - JIT default (PGO): 1.06 → 1.01.
+
+  The field-view rows improve in every mode too: AOT 27.4 → 20.6, TC0 27.1 → 22.9, PGO 28.5 → 20.8.
+- **Perf programs, JIT default tiering, all 17, 7 rounds at batch 70.** Every median is within ±3.7% except
+  PerfStringView, at +13%. PerfStringView is an 18 ms loop of `sstring` compares with no `ж<T>` in it. Under TC0 its
+  arms are equal (24.91 vs 24.89 ms, 21 rounds). Under default tiering the tip is bimodal: its fastest run equals the
+  base's median. So it is tier-up timing, not codegen.
+- **Native AOT, 11 rounds at batch 70.** PerfRefLower: 646.6 → 656.5 ms median, minima equal (639.9 / 639.1); it has
+  no `ж<T>.Value` hot site.
+- **Native AOT PerfFieldView, re-cut on master `e9f05d8c09` (after #36), 15 rounds:**
+  - AOT: 2,579.9 → 2,550.0 ms (−1.2%);
+  - JIT: 1,987.8 → 1,983.8 ms (−0.2%).
+
+  At batch 70, before #36, the same A/B read +22% (48.1 → 58.7 s). That run was dominated by `Delegate.Method`
+  reflection lookups, which `Value` never reaches. #36 removed them, and with them the shift, so it is not a cost of
+  this change.
+
+**Instrument note.** The performance runner's AOT reuse predicate tracks the program's `.cs`, its csproj and
+`go2cs.exe`, not golib or gen. A golib-only seat's tip arm would therefore silently time the base binary. Every tip
+publish here deleted `publish.stamp` first and asserted that base and tip native bytes differ (AOT exe and JIT
+`golib.dll`). The runner fix is routed as seat #37 (P1).
+
+**Gates:**
+- repoguard ok, after re-citing three `ж.StandardBox.cs` provenance notes in `docs/ConversionStrategies.md`. `Value`'s
+  comment moved them +3 lines; their fingerprints are unchanged.
+- full `go test -timeout 30m ./...` exit 0;
+- GolibTests 0 failed (2,268 passed, 25 skipped);
+- NilPointerPanic, all phases, PASS.
+
+**Rebase (§3.3).** The seat was first cut on master `e9f05d8c09` (pushed as `claude/g-seat35-value-fastpath` @
+`733ca51941`, never merged). It is replayed here onto `b17f4351a3`, where #20 had moved the NilPointerPanic golden
+(`default!` → `nil`), so the golden is re-minted, not merged, in its own last commit
+(`UpdateTestTargets --createTargetFiles --only NilPointerPanic`). `ж.StandardBox.cs` and `main.go` are byte-identical
+to the timed tip; the three re-cites are re-resolved against this base. The gates above were re-run on this branch.
+
+— G (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

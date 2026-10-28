@@ -104,7 +104,10 @@ public class StandardBox<T> : ж<T>
     {
         get
         {
-            if (IsNull)
+            // IsNull's own expression, read here as fields: a virtual IsNull call on every `p.Value` was half the
+            // cost of a field access under Native AOT and TC0, where nothing devirtualizes it (1.26.10.2 seat #35).
+            // IsNull is sealed below, so the two cannot drift apart.
+            if (m_isNull || (s_valueCanBeNull && HeldValueIsNull))
                 throw RuntimeErrorPanic.NilPointerDereference();
 
             // The pinnable slot IS the storage when it exists — never a mirror of m_val, so there
@@ -119,8 +122,8 @@ public class StandardBox<T> : ж<T>
 
     // The value-peeking IsNull, standard-kind only (see the base's doc): a real heap box whose
     // reference-typed value is null answers nil for DEREFERENCE guards. s_valueCanBeNull folds at
-    // JIT time per instantiation, exactly as before the split.
-    public override bool IsNull => m_isNull || (s_valueCanBeNull && HeldValueIsNull);
+    // JIT time per instantiation, exactly as before the split. Sealed: Value tests this same expression inline.
+    public sealed override bool IsNull => m_isNull || (s_valueCanBeNull && HeldValueIsNull);
 
     // The held value, read from whichever slot actually holds it (a ж<Nullable<T>> keeps its value
     // in the pinnable slot, so peeking m_val alone answered for the wrong storage).
