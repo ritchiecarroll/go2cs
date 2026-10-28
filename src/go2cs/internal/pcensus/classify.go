@@ -162,7 +162,7 @@ func (c *classifier) endFile(t *tally, file string) {
 		if active != nil {
 			k, done := c.key(r.line), false
 			for j, a := range p.add {
-				if !took[j] && c.key(a.line) == k {
+				if active.Block.Moves && !took[j] && c.key(a.line) == k {
 					took[j], done = true, true
 					break
 				}

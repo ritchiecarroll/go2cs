@@ -446,6 +446,47 @@ func TestBlockPlantsAcrossRuns(t *testing.T) {
 		}
 	}
 
+	// A2: a string tag keeps its temp (context) under the expressionless governor; each label becomes
+	// `case {} when exprᴛ1 == L: {`, and a label that changed, or a guard that no longer reads the temp, is refused.
+	str := []string{
+		`     var exprᴛ1 = cmd;`,
+		`+    switch (ᐧ) {`,
+		`-    if (exprᴛ1 == "get"u8) {`,
+		`+    case {} when exprᴛ1 == "get"u8: {`,
+		`         return 1;`,
+		`     }`,
+		`-    if (exprᴛ1 == alt) {`,
+		`+    case {} when exprᴛ1 == alt: {`,
+		`         return 2;`,
+		`-    }`,
+		`+    }}`,
+	}
+	tl = c.classifyDiff(hunkDiff(prodFile, str))
+	if len(tl.refused) != 0 || tl.labels["S1"] == 0 {
+		t.Errorf("S1 A2: wanted every line to read S1, read %v, refused %v", tl.labels, tl.refused)
+	}
+	withStr := func(i int, s string) []string {
+		out := append([]string(nil), str...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		lines      []string
+	}{
+		{"a label changed", "alt2", withStr(7, `+    case {} when exprᴛ1 == alt2: {`)},
+		{"the guard no longer reads the temp", "cmd == alt", withStr(7, `+    case {} when cmd == alt: {`)},
+	} {
+		tl := c.classifyDiff(hunkDiff(prodFile, b.lines))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("S1 A2, bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
+	}
+
 	// A file whose diff lacks the anchors pools nothing for S1: its scaffolding-shaped lines are refused as before.
 	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `+    break;`, `     g();`, `-    do {`}))
 	if len(tl.refused) != 2 {

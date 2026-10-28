@@ -53,16 +53,12 @@ type joinRule struct {
 	Fold          func(f, s []string) string
 }
 
-// blockRule admits a structural rewrite inside one hunk: a hunk whose removed lines hold OldAnchor and whose added
-// lines hold NewAnchor may delete lines matching Delete and insert lines matching Insert, and may re-indent the
-// lines it keeps. With Moves, a deleted line and an inserted line of the same canonical text pair as a move (a
-// clause the old form emitted out of source order).
-//
-// With Close, the rule's scope is the REGION the rewrite spans rather than one run: a real diff keeps the unchanged
-// lines between as context, so a structural rewrite's scaffolding lands in many runs, and its moved lines in two.
-// The region opens at the run whose added NewAnchor line replaces a removed OldAnchor line, and closes at the added
-// line that is the NewAnchor line's indent followed by Close. The lines its runs leave unpaired are pooled and read
-// together when it closes: moves first, then Delete and Insert, and only what is left is refused.
+// blockRule admits a structural rewrite across a FILE: a real diff keeps the unchanged lines between as context, so
+// the rewrite's scaffolding lands in many runs and its moved lines in two. In a file whose diff removes an OldAnchor
+// line and adds a NewAnchor line, the lines no run explains are read together at the file's end (classifier
+// endFile): a removed and an added line of equal canonical form pair (with Moves, a clause the old form emitted out
+// of source order; a re-indented kept line; a label whose replacement sits in another run), then Delete and Insert
+// admit the scaffolding, and what is left is refused.
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
@@ -70,7 +66,6 @@ type blockRule struct {
 	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
 	Standalone bool
 	Moves      bool
-	Close      string
 }
 
 // id is a C# identifier as the converter spells one (Go identifiers, plus the converter's own letters: Ꮡ, ʗ, ᴛ, ǃ, ꓸ).
@@ -298,10 +293,14 @@ var items = []item{
 		// `switch (tag) { case …: { … break; } … default: { … } }`, as #28 ruled (R1-R3): one label per Go clause; a
 		// clause the chain tested with `is` keeps its constant pattern (`case A or B: {`), the rest become
 		// `case var ᴛ when ᴛ == A || ᴛ == B: {` (AreEqual and the named-wrapper cast kept); a nested pattern switch
-		// names its variable `ᴛ2`, `ᴛ3`. The canon PAIRS each line that carries a label or the tag with the line that
+		// names its variable `ᴛ2`, `ᴛ3`. A tag whose Go type is a string keeps its temp under the expressionless
+		// governor (A2): `var exprᴛ1 = tag;` stays, `switch (ᐧ) {` is inserted and each label is
+		// `case {} when exprᴛ1 == L: {`. The canon PAIRS each line that carries a label or the tag with the line that
 		// replaces it, so a label whose value or operator changed is refused; the block only admits the scaffolding
 		// either side, and a default body the chain had moved to the end is admitted back in Go's position as a move.
+		// (Text cannot see the tag's type, so which of the two forms a switch took is the converter's test to hold.)
 		Canon: []rewrite{
+			rw(`^(\s*)case \{\} when (.*\bexprᴛ\d+\b.*): \{( //.*)?$`, "${1}case var ᴛ when $2: {$3"),
 			rw(`^(\s*)\S+ exprᴛ\d+ = (.*);$`, "${1}switch ($2) {"),
 			rw(`^(\s*)(?:else )?if \(exprᴛ\d+ is (.*)\) \{( //.*)?$`, "${1}case $2: {$3"),
 			rw(`^(\s*)(?:else )?if \((.*\bexprᴛ\d+\b.*)\) \{( //.*)?$`, "${1}case var ᴛ when $2: {$3"),
@@ -311,8 +310,9 @@ var items = []item{
 			rw(`^(\s*)goto continueᴛ\d+;$`, "${1}continue;"),
 		},
 		Old: rx(`\bexprᴛ\d+\b|goto continueᴛ\d+;|/\* default: \*/`),
+		New: rx(`^\s*case \{\} when .*\bexprᴛ\d+\b`),
 		Block: &blockRule{
-			OldAnchor: rx(`^\s*\S+ exprᴛ\d+ = .*;$`),
+			OldAnchor: rx(`^\s*\S+ exprᴛ\d+ = .*;$|^\s*(?:else )?if \(.*\bexprᴛ\d+\b.*\) \{`),
 			NewAnchor: rx(`^\s*switch \(`),
 			Delete: []*regexp.Regexp{
 				rx(`^\s*else \{$`),
@@ -322,11 +322,11 @@ var items = []item{
 				rx(`^\s*[{}]$`),
 			},
 			Insert: []*regexp.Regexp{
+				rx(`^\s*switch \(ᐧ\) \{$`),
 				rx(`^\s*break;$`),
 				rx(`^\s*\}\}?$`),
 			},
 			Moves: true,
-			Close: "}}",
 		},
 	},
 	{
