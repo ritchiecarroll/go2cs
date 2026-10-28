@@ -21,7 +21,7 @@ partial struct @short /*num:int16*/;
 partial struct dword /*num:uint32*/;
 
 internal static @short toShort(dword d) {
-    return (@short)(int16)(uint32)d;
+    return (@short)(int16)d;
 }
 
 internal static nint size(this @fixed f, @string of) {
@@ -106,7 +106,7 @@ internal static void Main() {
 
     dword d = 40000;
     var s = toShort(d);
-    fmt.Println((nint)(int16)s, (nint)(uint32)((dword)(uint32)(int16)s));
+    fmt.Println((nint)s, (nint)((dword)(uint32)s));
 
     fmt.Println(keywordLocalStruct());
     fmt.Println(keywordLocalIface());

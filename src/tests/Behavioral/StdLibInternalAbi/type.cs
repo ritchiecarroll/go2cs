@@ -72,7 +72,7 @@ partial struct TypeOff /*num:int32*/;
 partial struct TextOff /*num:int32*/;
 
 public static @string String(this ΔKind k) {
-    if ((nint)(uint8)k < len(kindNames)) {
+    if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];

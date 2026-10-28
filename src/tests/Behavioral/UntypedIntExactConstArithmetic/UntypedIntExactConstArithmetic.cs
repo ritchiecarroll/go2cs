@@ -37,7 +37,7 @@ internal static void Main() {
     }
 
     foreach (var (_, w) in words) {
-        fmt.Println((uint64)(nuint)w);
+        fmt.Println((uint64)w);
     }
 
     fmt.Println("asserts:", trimmed());

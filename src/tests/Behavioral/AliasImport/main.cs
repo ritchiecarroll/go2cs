@@ -10,7 +10,7 @@ partial class main_package {
 internal static void Main() {
     AliasImportLibꓸIntFn f = (nint x) => x + 1;
     AliasImportLibꓸBoxFn g = (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
-    AliasImportLibꓸDurFn d = (time.Duration t) => (nint)(int64)(t / time.ΔSecond);
+    AliasImportLibꓸDurFn d = (time.Duration t) => (nint)(t / time.ΔSecond);
     AliasImportLibꓸAct a = () => {
         fmt.Println("act");
     };

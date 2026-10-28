@@ -50,7 +50,7 @@ public static ΔKind Struct => 25;
 public static ΔKind UnsafePointer => 26;
 
 public static @string String(this ΔKind k) {
-    if ((nint)(uint8)k < len(kindNames)) {
+    if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
@@ -221,7 +221,7 @@ internal static @string stateMachine(nint step) {
 }
 
 internal static void Main() {
-    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), (nint)(uint8)Slice);
+    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), (nint)Slice);
     fmt.Println((nint)(seqFirst), (nint)(seqSecond), (nint)(seqAgain));
     fmt.Println(wideFirst, wideNext);
     fmt.Println((nint)(rawZero), (nint)(rawOne));

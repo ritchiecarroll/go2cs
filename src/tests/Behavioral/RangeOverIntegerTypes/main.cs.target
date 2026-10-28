@@ -53,7 +53,7 @@ internal static void Main() {
 
     nint named = 0;
     foreach (var i in range<myLen>(((myLen)3))) {
-        named += (nint)(uintptr)i;
+        named += (nint)i;
     }
     fmt.Println("named uintptr sum:", named);
 

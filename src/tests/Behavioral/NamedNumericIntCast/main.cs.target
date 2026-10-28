@@ -13,12 +13,12 @@ internal static void Main() {
 
     idx lo = 1;
     idx hi = 4;
-    fmt.Println(a.slice((nint)(nuint)(lo), (nint)(nuint)(hi)));
+    fmt.Println(a.slice((nint)(lo), (nint)(hi)));
 
     cnt sh = 3;
-    fmt.Println(((uint64)1).Lsh((int64)(nint)(sh)));
+    fmt.Println(((uint64)1).Lsh((int64)(sh)));
 
-    fmt.Println(a.slice((nint)(nuint)(lo + 1), (nint)(nuint)(hi)));
+    fmt.Println(a.slice((nint)(lo + 1), (nint)(hi)));
 }
 
 } // end main_package
