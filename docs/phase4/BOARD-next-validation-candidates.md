@@ -29858,4 +29858,59 @@ converted-file change.
 
 — G (2026-10-27)
 
+## 2026-10-28 — R (1.26.10.2 seat #36, claude/r-seat36-fieldview-aot): the field-view cache's accessor match read Delegate.Method under Native AOT, and PerfFieldView ran 20x slower than 1.24.13.7 — DONE on the seat branch
+
+**The defect.** G's perf window 2 read PerfFieldView under Native AOT at 45.7 s (1.26.10.1) against 5.35 s (1.24.13.7),
+while its JIT time improved. On R-LAPTOP at master `5931bad29b` it read 3.4 s under the JIT and 95 s under AOT. The cause
+is golib's field-view cache (`ж.Views.cs`, `sameAccessor`). Since `4ad8e8df66` (2026-10-21, P2's crypto/x509
+TestBetterTLS work, measured under the JIT) it matched two single-cast accessors by `Target`, `Method.MethodHandle` and
+type. `Delegate.Method` is cached on the delegate under the JIT. Under Native AOT it is a reflection lookup on every
+read, about 0.9 µs. A box holding views of several fields walks past the other fields' entries before its own, so each
+`of()` paid two reads per mismatch: about 10 mismatches per `step()`, about 80 s of the run.
+
+**The measurement.**
+- A probe with no golib, comparing two accessors of DIFFERENT static methods 2 M times:
+  - Native AOT: `Delegate.Equals` 11.5 ns, the MethodHandle form 2,020 ns, a `Delegate.Method` read alone 934 ns;
+  - JIT: 27.8 ns, 35.6 ns and 8.0 ns.
+- An A/B on PerfFieldView with ONLY the match reverted to `ReferenceEquals || Delegate.Equals`:
+  - JIT 3.4 s → 7.8 s;
+  - AOT 95 s → 4.8 s.
+
+  Each runtime wants the other form. `nativeFieldView`'s type test, G's other candidate, stayed in place in that A/B, so
+  it is not the cause.
+
+**The fix (golib only).** `sameAccessor` branches on `RuntimeFeature.IsDynamicCodeSupported`, a constant to both compilers:
+- the JIT keeps the MethodHandle form;
+- Native AOT takes `ReferenceEquals || Delegate.Equals`, 1.24.13.7's form.
+
+`FieldViewCache.CompareByDelegateEquals` is a test-only switch that makes the JIT take the AOT form, so the identity
+assertions run against it.
+
+**The gate.** `src/tests/Performance/run-fieldview-aot-bound.ps1`, modelled on `run-shell-churn-bound.ps1` (the
+exploratory perf-floor harness has no thresholds). It builds PerfFieldView from the tree twice: a JIT build and a
+`PerfAot=true` Native AOT publish. It runs the two alternately, checks that every process prints one checksum, and fails
+when the AOT median workload time is above 3.0x the JIT's.
+
+**Gates.** On R-LAPTOP, win-x64, one at a time.
+- The bound at the base `21f5b91125`: JIT 3.10 s, AOT 95.23 s, ratio 30.75, FAIL. At the fix: JIT 2.87 s, AOT 4.87 s,
+  ratio 1.70, PASS. Checksum `4253926742772923499` in every run of both.
+- GolibTests unfiltered, at the fix: Release 2,268 passed, 25 skipped, 0 failed; Debug 2,257 passed, 36 skipped,
+  0 failed.
+- The new test `TheNativeAotFormOfTheAccessorMatchGivesTheSameAnswers` runs the distinct-instance and multicast
+  identity assertions under the switch. It was made to fail: with the AOT form planted as `false` it went red (2 of 11
+  FieldViewCacheTests), then was restored byte-identical.
+
+Not run here:
+- the linux and darwin AOT legs: the branch is the same code on every target;
+- PerfTlsHandshake under AOT (not built on this box). Its P-256 field arithmetic (crypto/ecdh, crypto/ecdsa, TLS
+  ECDHE) and crypto/x509 take the same `of()` path, so it is a row to read at the .2 perf re-measure.
+
+**Footprint.** golib, GolibTests and the perf gate. 0 emission by construction: no converter, go2cs-gen or converted-file
+change.
+
+**Open, not this seat:** the structural form, one accessor identity per field across all sites and assemblies so that
+every match is `ReferenceEquals` on both runtimes. It is forwarded to G for #31/#32.
+
+— R (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
