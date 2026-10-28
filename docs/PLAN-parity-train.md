@@ -213,7 +213,15 @@ L1 land mostly there.
 ### #29 — H2: fold the heap declaration and its initializer (H, after #28; P1 takes it if H runs late)
 
 - **Changes:** converter, `visitAssignStmt.go`/`visitValueSpec.go`. It emits
-  `ref var a = ref heap(10, out var Ꮡa);` for a single-statement `x := rhs` whose box is not hoisted.
+  `ref var a = ref heap<nint>(10, out var Ꮡa);` for a single-statement `x := rhs` whose box is not hoisted.
+  - **Rulings (COORD, 2026-10-28):** R1 the type argument is always explicit, `heap<T>(value, …)`, never the
+    inferred `heap(10, …)` first written here: inference mis-types (`10` reads int, not nint; an UntypedInt; a named
+    wrapper), and the explicit form is the zero box's own spelling with the value inserted. R2 single-LHS `:=`
+    defines only: a multi-LHS define (Go evaluates every RHS before assigning), a tuple deconstruction and a
+    for-init box hoisted ahead of its loop keep the split.
+  - **Measure-why (the seat's):** the split was structural, from the initial port (the `:=` path wrote the zero box,
+    then the shared value emitter wrote `x = value;`), never semantic; golib's `heap<T>(in T, out ж<T>)` copies
+    the value into the box as the assignment did, and the fold drops one `GoZero<T>()` per site.
 - **Footprint:** ~1.8K pairs and 122 goldens.
 - **Design question:** **measure why the split exists before cutting** (`train-assembly` §2: a dispatch naming an
   unmeasured mechanism is a measure-why order). The candidates are the anonymous-struct lift order, multi-value

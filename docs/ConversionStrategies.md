@@ -1699,7 +1699,7 @@ func PrintValPtr(ptr *int) {
 	*ptr++
 }
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-76 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-75 -->
 ```csharp
 partial struct Buffer {
     internal slice<byte> buf;
@@ -1709,8 +1709,7 @@ partial struct Buffer {
 …
 internal static void Main() {
 …
-    ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer();
+    ref var b = ref heap<Buffer>(new Buffer(), out var Ꮡb);
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 …
@@ -1761,7 +1760,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:12-14, 92-96, 129 -->
+<!-- source: src/tests/Behavioral/RefLoweredParams/main.cs.target:12-14, 92-96, 128 -->
 ```csharp
 internal static void addTo(ref uint64 @out, uint64 v) {
     @out += v;
@@ -2237,7 +2236,7 @@ that holds one `nuint`. It is not an alias, because Go treats `uint` and `uintpt
 ```go
 var i uintptr = 2
 ```
-<!-- source: src/tests/Behavioral/ArrayWideIndexAddress/main.cs.target:11 -->
+<!-- source: src/tests/Behavioral/ArrayWideIndexAddress/main.cs.target:10 -->
 ```csharp
 uintptr i = 2;
 ```
@@ -3117,7 +3116,7 @@ type Embedded struct {
 	var p Padded
 	var e Embedded
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:29-42,120-121 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:29-42,119-120 -->
 ```csharp
 partial struct Padded {
     internal bool flag;
@@ -3341,7 +3340,7 @@ func freeLen() int {
 	return len(s)
 }
 ```
-<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:57-68 -->
+<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:56-67 -->
 ```csharp
 partial struct box {
     internal slice<nint> items;
@@ -4136,7 +4135,7 @@ func streams() (int, int) {
 	}
 …
 ```
-<!-- source: src/tests/Behavioral/TupleMixedDeclareReassign/main.cs.target:47-63 -->
+<!-- source: src/tests/Behavioral/TupleMixedDeclareReassign/main.cs.target:44-60 -->
 ```csharp
 internal static (cursor, error) makeCursor(nint pos, @string tag) {
     return (new cursor(pos: pos, tag: tag), default);
@@ -4606,7 +4605,7 @@ func test(a [2]string) {
 	fmt.Println(a[0], a[1])
 }
 ```
-<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:93-99 -->
+<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:92-98 -->
 ```csharp
 internal static void test(/*[2]*/ array<@string> a) {
     a = a.Clone();
@@ -6780,7 +6779,7 @@ func p4() {
 	fmt.Println("P4:", f(), next(), c)
 }
 ```
-<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:60-69 -->
+<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:58-67 -->
 ```csharp
 internal static void p4() {
     nint c = 0;
@@ -6826,7 +6825,7 @@ func probeA1() {
 	fmt.Println("A1:", t.total, t.log)
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:8-27 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:8-26 -->
 ```csharp
 partial struct Tally {
     internal nint total;
@@ -6834,8 +6833,7 @@ partial struct Tally {
 }
 …
 internal static void probeA1() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     void bump() {
         Ꮡt.Value.total += 100;
     }
@@ -6862,11 +6860,10 @@ func probeA3() {
 	fmt.Println("A3:", get())
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:37-44 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:35-41 -->
 ```csharp
 internal static void probeA3() {
-    ref var t = ref heap<Tally>(out var Ꮡt);
-    t = new Tally(5, "s");
+    ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     t.total += 2;
     var tʗ1 = t;
     nint get() => tʗ1.total;
@@ -6946,7 +6943,7 @@ func viaLocal() (int, int) {
 	return c.n, sum
 }
 ```
-<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:7-47 -->
+<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:7-46 -->
 ```csharp
 partial struct counter {
     internal nint n;
@@ -6960,8 +6957,7 @@ internal static nint dec(this ref counter c, nint step) {
 }
 …
 internal static (nint, nint) viaLocal() {
-    ref var c = ref heap<counter>(out var Ꮡc);
-    c = new counter(n: 100);
+    ref var c = ref heap<counter>(new counter(n: 100), out var Ꮡc);
     nint sum = applyInt(Ꮡc.dec, 5, 7);
     return (c.n, sum);
 }
@@ -9058,7 +9054,7 @@ func main() {
    fmt.Printf("Value of blue = %v\n", blue)
 }
 ```
-<!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.cs.target:7-23 -->
+<!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.cs.target:7-22 -->
 ```csharp
 partial struct ColorList {
     public nint Total;
@@ -9069,8 +9065,7 @@ partial struct ColorList {
 
 internal static void Main() {
     var red = new ColorList(2, "red", nil, nil);
-    ref var blue = ref heap<ColorList>(out var Ꮡblue);
-    blue = new ColorList(2, "blue", nil, nil);
+    ref var blue = ref heap<ColorList>(new ColorList(2, "blue", nil, nil), out var Ꮡblue);
 
     red.Next = Ꮡblue;
 
@@ -9081,9 +9076,9 @@ internal static void Main() {
 
 **A struct whose address is taken lives in a box.** `&blue` is stored in the field `red.Next`, and a C# field
 cannot hold a `ref`, so
-golib's `heap<T>(out var Ꮡblue)` allocates a zeroed box, stores it in `Ꮡblue`, and returns a C# `ref`
-to the value inside. The literal is then assigned through that `ref`. `blue` reads and writes the boxed
-value, and `Ꮡblue` is the box itself, which is what `&blue` gives ([Pointers](#pointers)).
+golib's `heap<T>(value, out var Ꮡblue)` copies the literal into a new box, stores the box in `Ꮡblue`, and
+returns a C# `ref` to the value inside, in one statement as Go's `blue := …` is one. `blue` reads and writes the
+boxed value, and `Ꮡblue` is the box itself, which is what `&blue` gives ([Pointers](#pointers)).
 
 `Ꮡ` is also a golib function: `Ꮡ(value)` boxes a new value and returns the pointer. So `&T{…}` becomes
 `Ꮡ(new T(…))`, and `&counter{n: 5}` becomes `Ꮡ(new counter(n: 5))`.
@@ -9108,15 +9103,14 @@ func plainFunc() int {
 	return x.val
 }
 ```
-<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs.target:7-22 -->
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs.target:7-21 -->
 ```csharp
 partial struct Thing {
     internal nint val;
 }
 …
 internal static nint plainFunc() {
-    ref var x = ref heap<Thing>(out var Ꮡx);
-    x = new Thing(val: 7);
+    ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
     var p = Ꮡx.of(Thing.Ꮡval);
     p.Value = 99;
     return x.val;
@@ -9221,7 +9215,7 @@ func identCopy() {
 	fmt.Println("ident:      ", d.show(), "|", c.show())
 }
 ```
-<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-25, 45-47, 58-63 -->
+<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-25, 45-47, 57-62 -->
 ```csharp
 partial struct digest {
     internal array<nint> h = new(4);
@@ -9287,7 +9281,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:13-37 -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:13-36 -->
 ```csharp
 internal partial struct main_a /*dyn*/ {
     public nint X;
@@ -9302,8 +9296,7 @@ internal static void Main() {
     main_a b = default;
     b = a;
     fmt.Println(a == b);
-    ref var p = ref heap<main_point>(out var Ꮡp);
-    p = new main_point(X: 1, Y: 2);
+    ref var p = ref heap<main_point>(new main_point(X: 1, Y: 2), out var Ꮡp);
     fmt.Println(p.X + p.Y);
     fmt.Printf("%T %T\n"u8, p, Ꮡp);
 …
@@ -10848,7 +10841,7 @@ func bump(c *coord) {
 	bump(&xy)
 	fmt.Println(xy.X, xy.Y) // 3 4
 ```
-<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:54-93 -->
+<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:54-92 -->
 ```csharp
 partial struct coord {
     public nint X, Y;
@@ -10861,8 +10854,7 @@ internal static partial void bump(ж<coord> c) {
     (p.Value.X, p.Value.Y) = (3, 4);
 }
 …
-    ref var xy = ref heap<coord>(out var Ꮡxy);
-    xy = new coord(1, 2);
+    ref var xy = ref heap<coord>(new coord(1, 2), out var Ꮡxy);
     bump(Ꮡxy);
     fmt.Println(xy.X, xy.Y);
 ```
@@ -11207,7 +11199,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 	const M, N = unsafe.Sizeof(x.c), unsafe.Sizeof(x)
 	fmt.Println(M, N)
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:96-99 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:95-98 -->
 ```csharp
     main_x x = default;
     uintptr M = /* unsafe.Sizeof(x.c) */ 16;
@@ -11273,11 +11265,10 @@ reading through it reads the real storage, as in Go:
 	nextPtr := unsafe.Pointer(uintptr(unsafe.Pointer(arrptr)) + unsafe.Sizeof(arr[0]))
 	fmt.Println("Value of the next element:", *(*int)(nextPtr))
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:77-82 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:77-81 -->
 ```csharp
 …
-    ref var arr = ref heap<array<nint>>(out var Ꮡarr);
-    arr = new nint[]{1, 2, 3, 4}.array();
+    ref var arr = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡarr);
     var arrptr = Ꮡarr.at<nint>(0);
 
     @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
@@ -11288,8 +11279,8 @@ This prints `2`, the second element, under both Go and C#. In the C#:
 
 - `array<nint>` is golib's fixed-size Go array, here `[4]int`, and `nint` is Go's `int`
   ([Slices and Arrays](#slices-and-arrays), [Integer Types and Arithmetic](#integer-types-and-arithmetic)).
-- `heap<T>(out var Ꮡarr)` puts a zero `arr` in a box, `Ꮡarr`, because its address is taken. The next
-  line stores the initial value ([Pointers](#pointers)).
+- `heap<T>(value, out var Ꮡarr)` puts `arr` in a box, `Ꮡarr`, because its address is taken, starting from
+  its initial value ([Pointers](#pointers)).
 - `Ꮡarr.at<nint>(0)` is `&arr[0]`, a pointer to one array element.
 - `(ж<nint>)(uintptr)(nextPtr)` is Go's `(*int)(nextPtr)`. The converter goes through the number:
   `(uintptr)` takes the address out of the `@unsafe.Pointer`, and `(ж<nint>)` makes a pointer from it.
@@ -11331,7 +11322,7 @@ the storage, so converting back to `uintptr` gives exactly the same address:
 	up := unsafe.Pointer(e0)
 	fmt.Println("round trip:", uintptr(up) == a0)
 ```
-<!-- source: src/tests/Behavioral/UintptrUnsafePointerIdiom/main.cs.target:31-38 -->
+<!-- source: src/tests/Behavioral/UintptrUnsafePointerIdiom/main.cs.target:30-37 -->
 ```csharp
 …
     ref var buf = ref heap(new array<int32>(4), out var Ꮡbuf);
@@ -11397,7 +11388,7 @@ type T2 struct {
 	t2 := *(*T2)(unsafe.Pointer(&t1))
 	fmt.Println("Value of t2.a:", t2.a)
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:8-14, 84-88 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:8-14, 83-87 -->
 ```csharp
 partial struct T1 {
     internal int32 a;
@@ -11585,7 +11576,7 @@ func PrintValPtr(ptr *int) {
 	*ptr++
 }
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-76 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-75 -->
 ```csharp
 partial struct Buffer {
     internal slice<byte> buf;
@@ -11593,8 +11584,7 @@ partial struct Buffer {
     internal int8 lastRead;
 }
 …
-    ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer();
+    ref var b = ref heap<Buffer>(new Buffer(), out var Ꮡb);
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 …
 public static void PrintValPtr(ж<nint> Ꮡptr) {
@@ -11811,7 +11801,7 @@ func assignDescriber(h *holder, s *Setting) {
 	replacement := Setting{name: "assigned", value: 11}
 	assignDescriber(h, &replacement)
 ```
-<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:7-43 -->
+<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:7-41 -->
 ```csharp
 partial interface Describer {
     @string Describe();
@@ -11835,8 +11825,7 @@ internal static void assignDescriber(ref holder h, ж<Setting> s) {
     h.d = new SettingжDescriber(s);
 }
 …
-    ref var replacement = ref heap<Setting>(out var Ꮡreplacement);
-    replacement = new Setting(name: "assigned", value: 11);
+    ref var replacement = ref heap<Setting>(new Setting(name: "assigned", value: 11), out var Ꮡreplacement);
     assignDescriber(ref (h).DerefOrNull(), Ꮡreplacement);
 ```
 

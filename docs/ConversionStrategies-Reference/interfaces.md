@@ -453,7 +453,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:98-104 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:97-103 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …

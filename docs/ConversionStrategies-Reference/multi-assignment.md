@@ -524,10 +524,9 @@ p := &x.val
 *p = 99
 return x.val                       // Go: 99
 ```
-<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-21 -->
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-20 -->
 ```csharp
-ref var x = ref heap<Thing>(out var Ꮡx);
-x = new Thing(val: 7);
+ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
 var p = Ꮡx.of(Thing.Ꮡval);
 p.Value = 99;
 return x.val;
@@ -795,8 +794,7 @@ sum := applyInt(c.dec, 5, 7)       // (&c).dec — Go: c.n is 88 afterwards
 ```
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-ref var c = ref heap<counter>(out var Ꮡc);
-c = new counter(n: 100);
+ref var c = ref heap<counter>(new counter(n: 100), out var Ꮡc);
 nint sum = applyInt(Ꮡc.dec, 5, 7);   // Ꮡc aliases c — was Ꮡ(c), a copy
 ```
 

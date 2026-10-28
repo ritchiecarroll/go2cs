@@ -238,7 +238,7 @@ prints its result under the label.
 ```go
 sl[counted(1)] /= m1
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:166 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:165 -->
 ```csharp
 sl[counted(1)].QuoAssign(m1);
 ```

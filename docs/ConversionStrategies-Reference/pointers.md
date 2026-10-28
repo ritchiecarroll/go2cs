@@ -413,8 +413,7 @@ The routing, by variable shape:
 <!-- illustration: not converter output -->
 ```csharp
 // Heap-boxed variable (escaping struct local, aliased int, …) → by-box (boxRefVars):
-ref var t = ref heap<Tally>(out var Ꮡt);
-t = new Tally(5, "s");
+ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
 void bump() {
     Ꮡt.Value.total += 100;      // value use → Ꮡt.Value: writes the ONE box the body reads
 }
@@ -475,10 +474,9 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:38-49 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:38-48 -->
 ```csharp
-ref var p = ref heap<payload>(out var Ꮡp);
-p = new payload(vals: new nint[]{1, 2, 3, 4}.slice());
+ref var p = ref heap<payload>(new payload(vals: new nint[]{1, 2, 3, 4}.slice()), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;
@@ -601,7 +599,7 @@ Roslyn compiles a local function that is never converted to a delegate with a **
 
 A literal that **defers or recovers** is no bar: its frame is an ordinary local of the local function, declared in the local function's own body like any other, so the whole shape stays allocation-free —
 
-<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:79-98 -->
+<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:77-96 -->
 ```csharp
 nint /*r*/ guard(nint n) {
     nint r = default;
@@ -1595,9 +1593,9 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
-<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:55, 59 -->
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:55, 58 -->
 ```csharp
-    ref var Δp = ref heap<box>(out var Ꮡp);
+    ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
 …
     bump(Ꮡp.of(box.Ꮡn));
 ```
@@ -1619,7 +1617,7 @@ The receiver-box render resolves the box base through `boxBaseName` with the lam
 
 ## Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
-<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:33 -->
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:31 -->
 ```csharp
 var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
 ```
@@ -1627,7 +1625,7 @@ Guarded by `PointerCastSliceRange` (compile-shape).
 
 ## Function literals returning `unsafe.Pointer` state their return type
 A literal with a single `unsafe.Pointer` result can mix return arms of DIFFERENT C# types (reflect `deepEqual`'s `ptrval`: `(uintptr)v.pointer()` on one arm, the raw `v.ptr` on the other), which defeats C# lambda return-type inference (CS8917). The emitted lambda states its return type explicitly; each arm then converts implicitly through the golib operators:
-<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:37 -->
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:35 -->
 ```csharp
 @unsafe.Pointer pick(bool u) {
 ```
