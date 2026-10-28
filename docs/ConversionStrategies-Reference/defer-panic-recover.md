@@ -932,7 +932,7 @@ state, so the arguments render exactly like any other expression in the enclosin
 <!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:41-51 -->
 ```csharp
 var baseʗ1 = @base;
-((Action)(() => {
+func(() => {
     GoFrame ᒐ = default;
     try {
         defer((Tally t) => {
@@ -941,7 +941,7 @@ var baseʗ1 = @base;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
-}))();
+})();
 ```
 
 `prepareStmtCaptures` still OVERRIDES the statement's own captured-callee entries afterward (their
@@ -1105,7 +1105,7 @@ by `FuncLitArgCapture` case 15.)
 Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the body is emitted inline in `try`/`catch`/`finally` beside a [`GoFrame`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFrame.cs) local that holds this call's defer list. `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in and `recover` the global [`recover`](https://golang.org/pkg/builtin/#recover) (both a `using static go.builtin`). A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`recover` gets no frame at all -- the scope is per function, so a `main` that merely calls `f()` is emitted as a plain method body.
 
 * **Named results + defer.** See *The named-result form* above: the results are declared before the `try` and read back after the `finally`, and every exit inside leaves through a `goto`.
-* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the thread's panic state rather than any handle on a frame.
+* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own lambda, invoked through golib's `func` (`func(() => { GoFrame ... })()`), so its defers are its own -- while its `recover()`, being a static call, still reads the thread's panic state rather than any handle on a frame.
 * **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go.) <!-- the fix cleared runtime's 4 CS8030. -->
 * **Return-type INFERENCE is not a concern.** An inline body returns against the METHOD's own declared result type, so no inference runs over the return statements and the two shapes that would defeat one cannot arise: every return carrying an untyped `default!` (Go `nil` -- syscall's `getProcessEntry`), and returns of two unrelated concrete types sharing only the declared interface (go/parser's `parseTypeName` returning `&ast.SelectorExpr{...}` beside a plain `*ast.Ident`). Both are pinned as guards: `DeferTypelessReturns` (unnamed results, a defer, and every return carrying nil) and `DeferInterfaceReturn` (a defer/recover func returning `Shape` via `Circle` vs `Square`, plus a heterogeneous `(Shape, bool)` tuple return).
 
