@@ -307,16 +307,20 @@ silently losing the recovered value in a `case nil, *bailout:`-style arm that re
 go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is
 HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
 
+<!-- source: src/tests/Behavioral/TypeSwitchImpureTag/main.cs.target:15-16, 20-22, 25-26 -->
 ```csharp
 var switchᴛ1 = next(x);
 switch (switchᴛ1.type()) {
+…
 case @string _:
 case bool _: {
-    var v = switchᴛ1;      // re-bind reads the temp — next() ran exactly once
-    …
+    var v = switchᴛ1;
+…
 default: {
     var v = switchᴛ1;
 ```
+
+Each re-bind reads the temporary, so `next()` runs exactly once.
 
 The hoist is deliberately GATED — only a tag containing a call (conversions hoist
 conservatively; the temp is merely unneeded) or a receive, and only when some arm actually
@@ -1122,8 +1126,10 @@ The lowering targets a golib delegate family carrying a real C# 13 `params Span<
 (`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
 and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
+<!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
 public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+…
 public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
 ```
 

@@ -1353,12 +1353,18 @@ nsLit := ns{}                 // type ns [2]withArray — withArray has a [2][3]
 nbLit := nb{}                 // type nb [4]byte — element needs nothing
 ```
 
+<!-- source: src/tests/Behavioral/CompositeLiteralElements/main.cs:128, 131, 138, 147 -->
 ```csharp
 var nnLit = new nn(new array<array<nint>>(2, () => new(3)));
+…
 var nnPtr = Ꮡ(new nn(new array<array<nint>>(2, () => new(3))));
+…
 var nsLit = new ns(new array<withArray>(2, () => new()));
-var nbLit = new nb(new byte[4].array());          // shortcut PRESERVED — nothing to construct
+…
+var nbLit = new nb(new byte[4].array());
 ```
+
+`nbLit` keeps the shortcut: its element needs nothing constructed.
 
 `arrayLengthArgs`' own comment names the renderers that must carry the factory, "the named-array
 wrapper's" among them, and the wrapper's empty, short and keyed literals all do. Every named array whose
@@ -1433,9 +1439,12 @@ var x [2][4]byte           // len(x), len(x[1]) => 2 4
 var deep [2][3][4]byte
 var se [2]inner            // type inner struct { b [3]byte }
 ```
+<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs:24, 31, 41 -->
 ```csharp
 array<array<byte>> x = new(2, () => new(4));
+…
 array<array<array<byte>>> deep = new(2, () => new(3, () => new(4)));
+…
 array<inner> se = new(2, () => new());
 ```
 
@@ -1718,10 +1727,14 @@ n := nested["zzz"]                    // map[string][2][3]int — inner lengths 
 z, ok := entity2["alsomissing"]       // comma-ok form
 v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
 ```
+<!-- source: src/tests/Behavioral/MapArrayValueZero/MapArrayValueZero.cs.target:12, 18, 28, 39 -->
 ```csharp
 var x = entity2["notthere", () => new array<rune>(2)].Clone();
-var n = nested["zzz", () => new array<array<nint>>(2, () => new(3))].Clone();
+…
 var (z, ok) = entity2["alsomissing", () => new array<rune>(2), ꟷ];
+…
+var n = nested["zzz", () => new array<array<nint>>(2, () => new(3))].Clone();
+…
 var v = nilMap[7, () => new array<byte>(4)].Clone();
 ```
 

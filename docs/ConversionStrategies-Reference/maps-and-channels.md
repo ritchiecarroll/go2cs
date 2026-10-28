@@ -151,11 +151,16 @@ v, ok := m[nil]
 delete(m, nil)
 lit := map[any]int{nil: 1, "b": 2}
 ```
+<!-- source: src/tests/Behavioral/NilMapKey/main.cs:16-18, 25, 44, 57 -->
 ```csharp
 var m = new map<any, @string>();
+
 m[default!] = "nil-key";
+…
 var (v, ok) = m[default!, ꟷ];
+…
 delete(m, default!);
+…
 var lit = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2};
 ```
 
@@ -673,11 +678,12 @@ case v := <-fresh():
 }
 ```
 
+<!-- source: src/tests/Behavioral/SelectOperandOnceEval/main.cs:37-39, 41-42 -->
 ```csharp
 var selᴛ1 = fresh();
 switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
 case 0 when selᴛ1.ꟷᐳ(out var v): {
-    ...
+    …
     break;
 }}
 ```

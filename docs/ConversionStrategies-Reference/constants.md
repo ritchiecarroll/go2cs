@@ -123,9 +123,12 @@ const (
 s := C + r*t
 t *= G + F/(s+E+D/s)
 ```
+<!-- source: src/core/math/cbrt.cs:37, 41, 66-67 -->
 ```csharp
 const float64 C = 5.42857142857142815906e-01; // 19/35     = 0x3FE15F15F15F15F1
+…
 const float64 G = 3.57142857142857150787e-01; // 5/14      = 0x3FD6DB6DB6DB6DB7
+…
 var s = C + r * t;
 t *= G + F / (s + E + D / s);
 ```
@@ -193,8 +196,10 @@ A Go untyped *float* constant defaults to `float64`, so its C# literal carries t
 z := 1.0           // untyped float -> float64
 var f float32 = 2.5 // float32 context
 ```
+<!-- source: src/tests/Behavioral/UntypedFloatDefault/main.cs.target:8, 16 -->
 ```csharp
 var z = 1.0D;
+…
 float32 f = 2.5F;
 ```
 
@@ -431,9 +436,10 @@ var quotients = [3]uint64{maxUint64 / 5, maxUint64 / 5 / 5, maxUint64/10 + 1}
 const div1e8m = 0xc767074b22e90e21
 _ = assert[(div1e8m*5*5*5*5*5*5*5*5)%(1<<64)-1]  // a compile-time assert: the index is 0
 ```
+<!-- source: src/tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.cs:15, 26 -->
 ```csharp
 internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
-
+…
 _ = assert[(nint)(/* (div1e8m*5*5*5*5*5*5*5*5)%(1<<64) - 1 */ 0L)];
 ```
 

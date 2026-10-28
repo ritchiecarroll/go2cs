@@ -269,27 +269,31 @@ Such a `continue` therefore lowers to a `goto` targeting a labeled empty stateme
 enclosing loop's body**, where control reaches the loop's post-statement and condition exactly as
 `continue` would:
 
+<!-- source: src/tests/Behavioral/SwitchBreakContinueWrapper/main.cs:10-28 -->
 ```csharp
-for (nint i = 0; i < len(words); i++) {
-    var exprᴛ1 = words[i];
-    if (exprᴛ1 == "skip"u8) {
-        do {
-            if (i == 0) {
-                fmt.Println("a: breaking at", i);
-                break;                     // Go break-of-switch — exits the wrapper (its purpose)
-            }
-            fmt.Println("a: continuing at", i);
-            goto continueᴛ1;               // Go continue-of-loop — a bare C# continue would bind the wrapper
-        } while (false);
-    }
-    else if (exprᴛ1 == "stop"u8) {
-        fmt.Println("a: stop at", i);
-    }
+    for (nint i = 0; i < len(words); i++) {
+        var exprᴛ1 = words[i];
+        if (exprᴛ1 == "skip"u8) {
+            do {
+                if (i == 0) {
+                    fmt.Println("a: breaking at", i);
+                    break;
+                }
+                fmt.Println("a: continuing at", i);
+                goto continueᴛ1;
+            } while (false);
+        }
+        else if (exprᴛ1 == "stop"u8) {
+            fmt.Println("a: stop at", i);
+        }
 
-    fmt.Println("a: after switch", i);
+        fmt.Println("a: after switch", i);
 continueᴛ1:;
-}
+    }
 ```
+
+The `break` exits the `do { … } while (false)` wrapper, which is Go's break-of-switch and the wrapper's purpose. The
+`goto continueᴛ1` is Go's continue-of-loop: a bare C# `continue` would bind to the wrapper.
 
 Mechanics, each load-bearing:
 

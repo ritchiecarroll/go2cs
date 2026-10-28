@@ -906,17 +906,23 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 
 **Exported type aliases cross packages.** A package-level Go type alias that is exported — `type Temperature = Celsius` — is recorded in that package's `package_info.cs` as an assembly attribute in its `<ExportedTypeAliases>` block:
 
+<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 33, 36 -->
 ```csharp
 // <ExportedTypeAliases>
+…
 [assembly: GoTypeAlias("Temperature", "go.CrossPkgLib_package.Celsius")]
+…
 // </ExportedTypeAliases>
 ```
 
 A consumer that imports the package and names `CrossPkgLib.Temperature` cannot use a C# member-access for it (C# has no namespace-level type alias). Instead, the converter parses the imported package's `package_info.cs`, reads its `[GoTypeAlias]` attributes, and emits a corresponding `global using` into the consumer's own `<ImportedTypeAliases>` block — keyed by a package-qualified name whose `.` separator is the extended-Unicode dot `ꓸ` (`ꓸ`, a valid C# identifier character), since `CrossPkgLib.Temperature` is not a legal C# identifier:
 
+<!-- source: src/tests/Behavioral/CrossPkgBox/package_info.cs:12, 16, 19 -->
 ```csharp
 // <ImportedTypeAliases>
+…
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
+…
 // </ImportedTypeAliases>
 ```
 
@@ -1430,13 +1436,12 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
-<!-- illustration: not converter output -->
+<!-- source: src/core/net/http/pprof/package_test_info.cs:61-63, 97-104 -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package
 {
-    // <TypeAccessibility> … </TypeAccessibility>
-    // <ImportInitializers> … </ImportInitializers>
+    …
     // Go runs every `init` in the package under test - the production files' included -
     // before the first test. The production package is a REFERENCED assembly here, whose
     // module constructor .NET would not run until something in it is touched, so that

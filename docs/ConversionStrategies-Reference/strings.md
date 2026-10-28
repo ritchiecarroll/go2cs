@@ -230,11 +230,13 @@ func FormatBool(b bool) string {
 	return "false"
 }
 ```
+<!-- source: src/core/internal/strconv/atob.cs:22-32 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string trueˢ = "true"u8;
 internal static readonly @string falseˢ = "false"u8;
 
+// FormatBool returns "true" or "false" according to the value of b.
 public static @string FormatBool(bool b) {
     if (b) {
         return trueˢ;
@@ -282,13 +284,15 @@ func Atoi(s string) (int, error) {
 	…
 }
 ```
+<!-- source: src/core/internal/strconv/atoi.cs:254-259, 269 -->
 ```csharp
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string fnAtoiᶜ = "Atoi"u8;
 
+// Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
     @string fnAtoi = fnAtoiᶜ;
-    …
+…
 }
 ```
 
@@ -418,9 +422,12 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 
+<!-- source: src/core/fmt/package_info.cs:61, 67, 69 -->
 ```csharp
 // <SStringTwins>
+…
 [assembly: GoSStringTwin("Sprintf")]
+…
 // </SStringTwins>
 ```
 

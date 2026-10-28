@@ -160,21 +160,35 @@ A deferred call on a field of the receiver — `defer c.mu.Unlock()` — costs a
 registration form above, because the registration has to hold the receiver and holding `c.mu` means
 boxing it (`Ꮡc.of(counter.Ꮡmu)`, a `FieldRefBox<T>`). The call already runs on every exit path, and a
 C# `finally` already runs on every exit path, so where the two provably coincide the call is emitted
-directly into the frame's `finally` and nothing is allocated at all:
+directly into the frame's `finally` and nothing is allocated at all. For this method:
 
+<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.go:36-42 -->
+```go
+func (x *box) two() {
+	x.a.touch()
+	x.b.touch()
+	defer x.a.done()
+	defer x.b.done()
+	fmt.Println("body two")
+}
+```
+
+converts to:
+
+<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.cs.target:24-39 -->
 ```csharp
-//  Go:  func (x *box) two() { x.a.touch(); x.b.touch(); defer x.a.done(); defer x.b.done(); … }
 internal static void two(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
+
         x.a.touch();
         x.b.touch();
         ᒐd1 = true;
         ᒐd2 = true;
-        …
+        fmt.Println("body two");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
@@ -265,10 +279,11 @@ golib already has the right type — the `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` famil
 `params Span<TArg>` — and `iifeDelegateType` already renders it from a signature, because the
 immediately-invoked-literal path needs the same thing. So a variadic literal callee is CAST to its
 family delegate and then invoked, exactly the `((<delegate>)(<lambda>))(<args>)` shape a non-variadic
-IIFE already uses, and the registration takes the temp-parameter form so there is something to invoke:
+IIFE already uses, and the registration takes the temp-parameter form so there is something to invoke. For
+`defer func(dirs ...string) { for _, dir := range dirs { os.RemoveAll(dir) } }(dir1, dir2)`:
 
+<!-- source: src/core/html/template/examplefiles_test.cs:117-122 -->
 ```csharp
-//  Go: defer func(dirs ...string) { for _, dir := range dirs { os.RemoveAll(dir) } }(dir1, dir2)
 defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
     var dirs = dirsʗp.sslice();
     foreach (var (_, dir) in dirs) {
@@ -1017,12 +1032,13 @@ decls in at the statement's own start — it records that offset before conversi
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
 
+<!-- source: src/core/context/x_test.cs:404-405, 409, 412, 439-448, 459 -->
 ```csharp
     var bg = Background();
             var bgʗ1 = bg;
             …
             var bgʗ3 = bg;
-            …
+    …
     foreach (var (_, test) in new TestAllocs_type[]{
         …
         new(
@@ -1035,7 +1051,7 @@ emitted much further down through a dozen different arms:
             limit: 5D,
             gccgoLimit: 8D
         ),
-        …
+    …
     }.slice()) {
 ```
 <!-- excerpt of src/core/context/x_test.cs (TestAllocs); the hoisted snapshots keep the splice's own indentation. -->
@@ -1216,8 +1232,10 @@ defer(Ꮡstate.free, ref ᒐ);          // binds the live variable's box
 This is not merely a compile fix — a value snapshot is taken at defer time, so it would miss any mutation the body makes to `state` before the deferred call runs; binding `Ꮡstate` matches Go's semantics of deferring against the *live* variable. Gated to an escaping local (a non-escaping one has no `Ꮡ` box and keeps the compiling `Ꮡ(copy)` form) used as a value receiver whose type is exactly the method's pointer-receiver pointee (an already-pointer receiver's box group is the pointer variable itself, whose snapshot name IS declared, so it is excluded). The same generalization silently corrects the closure form (`func(){ x.mutate() }` on an escaping value local previously mutated a lost copy — go/types conversions.go/typeset.go) and removes now-dead `var xʗ1 = x;` snapshots wherever the box was already used. (Guarded by the `DeferHeapLocalPtrMethod` behavioral test — a value local deferring a pointer-receiver method, mutated after the defer, with the deferred method observing the final value, output-compared vs Go.)
 
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
+<!-- source: src/core/crypto/x509/cert_pool.cs:265-270 -->
 ```csharp
 ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
+    // This can't fail, as the same bytes already parsed above.
     (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
     ᏑcertBytes.ValueSlot = default!;
 });

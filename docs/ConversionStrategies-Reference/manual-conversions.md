@@ -4239,21 +4239,22 @@ the reconstruction of a **linker** record, which the managed bridge never needs.
 golib's `array<T>` **is** the array type. The one part of a Go array type the managed emission
 cannot hold is its LENGTH (C# has no const generic parameter for the `4` in `[4]byte`), and that is
 exactly what the descriptor's **dims cargo** already carries for every declared array. So the whole
-construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value:
+construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
+`reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
+<!-- source: src/core/reflect/value_impl.cs:3526-3530, 3534-3537, 3546-3547 -->
 ```csharp
-// reflect/value_impl.cs — the hand-own, beside its sibling constructor PointerTo
 public static ΔType ArrayOf(nint length, ΔType elem) {
     if (length < 0) {
         throw panic("reflect: negative length passed to ArrayOf");
     }
     System.Type? st = sysTypeOfReflectType(elem);
-    ...
+    …
     nint[]? elemDims = arrayDimsOfReflectType(elem);
     nint[] dims = new nint[1 + (elemDims is null ? 0 : elemDims.Length)];
     dims[0] = length;
     elemDims?.CopyTo(dims, 1);
-    ...
+    …
     return toType(abi.synthType(typeof(array<>).MakeGenericType(st), dims));
 }
 ```

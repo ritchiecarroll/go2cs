@@ -79,14 +79,17 @@ type IntMap[V any] = map[int]V
 func swap[T comparable](p P[T, T]) P[T, T] { return P[T, T]{Key: p.Val, Val: p.Key} }
 m := IntMap[string]{1: "one"}
 ```
+<!-- source: src/tests/Behavioral/GenericTypeAlias/main.cs.target:15-22, 34 -->
 ```csharp
 // type P[K comparable, V any] = Pair[K, V]
 // type StrPair[V any] = Pair[string, V]
+// type SP[V any] = StrPair[V]
 // type IntMap[V any] = map[int]V
 
 internal static Pair<T, T> swap<T>(Pair<T, T> p) {
     return new Pair<T, T>(Key: p.Val, Val: p.Key);
 }
+…
 var m = new map<nint, @string>{[1] = "one"};
 ```
 

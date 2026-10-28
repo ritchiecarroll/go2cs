@@ -6,29 +6,39 @@ When using Go's short variable declaration syntax, e.g., `x := 2`, a variable ca
 
 C# forbids a local (or a lambda parameter) from shadowing an enclosing local of the same name (CS0136). So rather than saving and restoring the outer value, the converter **renames** the shadowing inner variable with a `Δ` disambiguation suffix (`x` → `xΔ1`, `xΔ2`, …) and rewrites all references within that scope to the renamed identifier. The outer variable is untouched, so its value is naturally preserved. For example:
 
+<!-- source: src/tests/Behavioral/BuiltinShadowLocal/main.go:16-26 -->
 ```go
 func sumWithLenLocal(buf []int) int {
-    total := 0
-    len := len(buf)       // a local named like the built-in, shadowing it
-    for i := 0; i < len; i++ {
-        total += i
-    }
-    return total + len
+	if len(buf) == 0 {
+		return 0
+	}
+	len := len(buf) // local `len` initialized from the built-in `len`
+	total := 0
+	for i := 0; i < len; i++ {
+		total += buf[i]
+	}
+	return total + len // `len` here is the local
 }
 ```
 
 converts to:
 
+<!-- source: src/tests/Behavioral/BuiltinShadowLocal/main.cs:7-17 -->
 ```csharp
 internal static nint sumWithLenLocal(slice<nint> buf) {
+    if (len(buf) == 0) {
+        return 0;
+    }
+    nint lenΔ1 = len(buf);
     nint total = 0;
-    nint lenΔ1 = len(buf);          // renamed; the built-in call stays `len(...)`
     for (nint i = 0; i < lenΔ1; i++) {
-        total += i;
+        total += buf[i];
     }
     return total + lenΔ1;
 }
 ```
+
+The local is renamed `lenΔ1`, and the built-in call stays `len(...)`.
 
 The same `Δ` mechanism handles a local shadowing a called built-in (as above), a nested-block variable shadowing a function-level one, an IIFE/closure parameter colliding with an outer local, and a type-switch guard (`switch x := x.(type)`) whose variable shadows an enclosing one — the guard is renamed within the switch (`case T xΔ1:`) while references after the switch still resolve to the enclosing variable, matching Go's scoping.
 
@@ -825,11 +835,13 @@ its Δ rename). A TYPE reference to the dot-imported package rendered through th
 use. When the name is bound to a different target, the type is therefore named through the dot-import's own
 class, rooted in `global::`:
 
+<!-- source: src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 21, 29 -->
 ```csharp
 using static DotImportNameCollision.a.keys_package;
 using keys = DotImportNameCollision.b.keys_package;
 …
 ж<global::go.DotImportNameCollision.a.keys_package.Key> k = NewKey("dot");
+…
 var other = keys.NewKey(7);
 ```
 

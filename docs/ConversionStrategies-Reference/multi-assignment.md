@@ -95,9 +95,11 @@ small, even := func(v int) bool { return v < n }, func(v int) bool { return v%2 
 d, t := double, triple
 ```
 
+<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:40-41, 44-45 -->
 ```csharp
 var small = (nint v) => v < n;
 var even = (nint v) => v % 2 == 0;
+…
 var d = @double;
 var t = triple;
 ```
@@ -518,13 +520,16 @@ p := &x.val
 *p = 99
 return x.val                       // Go: 99
 ```
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-21 -->
 ```csharp
 ref var x = ref heap<Thing>(out var Ꮡx);
 x = new Thing(val: 7);
 var p = Ꮡx.of(Thing.Ꮡval);
 p.Value = 99;
-return x.val;                      // 99 — the pointer aliases x's box
+return x.val;
 ```
+
+It returns 99: the pointer aliases `x`'s box.
 
 Multi-hop chains chain the accessors (`&w.inner.val` → `Ꮡw.of(Wrap.Ꮡinner).of(Thing.Ꮡval)`),
 and a field promoted through a VALUE embed roots at the local too (`&o.ev` →
@@ -707,10 +712,13 @@ case StartElement:
     d.translate(&t1.Name, true)    // write must land in t1
     t = t1                          // …because Go reads it back out
 ```
+<!-- source: src/core/encoding/xml/xml.cs:317-318, 338, 342 -->
 ```csharp
 case StartElement t1ᴛ1: {
     ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);
+    …
     d.translate(Ꮡt1.of(StartElement.ᏑName), true);
+    …
     t = t1;
 ```
 

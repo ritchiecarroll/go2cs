@@ -390,3 +390,103 @@ distinctive lines, with how many.
 | `docs/ConversionStrategies-Reference/variable-initialization-order.md:146` | written | none (0/1) |
 | `docs/ConversionStrategies.md:12173` | adapted | `src/core/sync/atomic/value.cs` (10/10) |
 | `docs/ConvertingAModule.md:130` | adapted | `src/go2cs/testdata/markercomments/main.cs` (4/7) |
+
+## 2026-10-28: 59 adapted blocks made real, and three corrections
+
+COORD's ruling on this audit: an adapted block is made real (re-copied from its best source and cited), and a
+hand-written one is labelled. This block records the first part. Counts are at the branch tip after it.
+
+**Corrections to the reading above.**
+
+- **The page set has no root `README.md`.** The repository has none; the site's home page is `docs/README.md`.
+  The set is the 333 `docs/` pages and nothing else.
+- **One "uncited" block was cited.** `docs/ConversionStrategies.md`'s `sync/atomic/value.cs` sample had its
+  `<!-- source: ... -->` comment two lines up, with an `attribute-shown:` label between. `src/tools/docsamples`,
+  which already regenerates sourced samples, reads a citation across other comments, and the audit now does too.
+  Re-run with that reading, the audit finds no other such block.
+- **57 of the 310 uncited blocks already carried a label:** 45 `<!-- illustration: ... -->`, 10
+  `<!-- attribute-shown: ... -->`, 1 `generated:` and 1 `before the face lift:`. Of the 125 "adapted" blocks, 2 are
+  `docs/BeforeAndAfterTheFaceLift.md`'s "before" samples, which cite a commit (`git show 541766413e:<path>`) and
+  match it verbatim. They are not adapted, and stay as they are.
+
+**What was done.** Of the 125 adapted blocks, 34 held their best file's lines in order with lines skipped
+between: each is re-copied with `…` where lines are skipped, and cited. 25 more differed in at most a quarter of their
+lines, almost always a comment the page added to explain a line: each is re-copied, and what the comment said
+moves to the prose beside the block. Where the page's Go sample was adapted the same way (`shadowing.md`'s
+`sumWithLenLocal`), it is re-copied from the Go source too, and `defer-panic-recover.md` gains the Go method its
+sample converts. 64 differ in more than a quarter of their lines and are not yet done.
+
+| | at the audit tip | now |
+|:--|--:|--:|
+| cited and matching | 524 | 583 |
+| cited but not checkable | 1 | 1 |
+| uncited | 310 | 251 |
+| ... adapted, not yet made real | 125 | 64 |
+| ... the two "before" samples above | (in adapted) | 2 |
+| ... written for the page | 185 | 185 |
+
+`src/tools/docsamples` (HEAD against HEAD) reads every new citation as unchanged: 869 the same, 0 rewritten.
+
+The blocks made real, at their fence line now:
+
+| Block | Cited source |
+|:--|:--|
+| `docs/ConsumingGoFromCSharp.md:28` | src/tests/CSharpConsumer/Program.cs:16, 19, 70-71 |
+| `docs/ConsumingGoFromCSharp.md:48` | src/tests/CSharpConsumer/Program.cs:12, 23, 284-285 |
+| `docs/ConsumingGoFromCSharp.md:219` | src/tests/CSharpConsumer/Program.cs:86-87, 89, 91-92 |
+| `docs/ConsumingGoFromCSharp.md:250` | src/tests/CSharpConsumer/Program.cs:108-110, 112 |
+| `docs/ConsumingGoFromCSharp.md:354` | src/tests/CSharpConsumer/Program.cs:140, 142-144, 146-148, 150 |
+| `docs/ConsumingGoFromCSharp.md:376` | src/tests/CSharpConsumer/Program.cs:153-155, 157-160, 162 |
+| `docs/ConsumingGoFromCSharp.md:418` | src/tests/CSharpConsumer/Program.cs:183-188, 190-191 |
+| `docs/ConsumingGoFromCSharp.md:444` | src/tests/CSharpConsumer/Program.cs:199-201, 203, 206 |
+| `docs/ConsumingGoFromCSharp.md:468` | src/tests/CSharpConsumer/Program.cs:211-212, 214, 216, 218-219 |
+| `docs/ConsumingGoFromCSharp.md:495` | src/tests/CSharpConsumer/Program.cs:225-227 |
+| `docs/ConsumingGoFromCSharp.md:514` | src/tests/CSharpConsumer/Program.cs:232-233, 235-237 |
+| `docs/ConsumingGoFromCSharp.md:569` | src/tests/CSharpConsumer/Program.cs:271-273 |
+| `docs/ConsumingGoFromCSharp.md:593` | src/tests/CSharpConsumer/Program.cs:284-285, 288, 290, 293 |
+| `docs/ConsumingGoFromCSharp.md:630` | src/tests/CSharpConsumer/Program.cs:302, 306-307, 309 |
+| `docs/ConversionStrategies-Reference/constants.md:127` | src/core/math/cbrt.cs:37, 41, 66-67 |
+| `docs/ConversionStrategies-Reference/constants.md:200` | src/tests/Behavioral/UntypedFloatDefault/main.cs.target:8, 16 |
+| `docs/ConversionStrategies-Reference/constants.md:440` | src/tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.cs:15, 26 |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:179` | src/tests/Behavioral/DeferFinallyLowering/main.cs.target:24-39 |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:286` | src/core/html/template/examplefiles_test.cs:117-122 |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:1036` | src/core/context/x_test.cs:404-405, 409, 412, 439-448, 459 |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:1236` | src/core/crypto/x509/cert_pool.cs:265-270 |
+| `docs/ConversionStrategies-Reference/expression-switch.md:273` | src/tests/Behavioral/SwitchBreakContinueWrapper/main.cs:10-28 |
+| `docs/ConversionStrategies-Reference/generic-constraints.md:323` | src/core/go/ast/walk.cs:18-24, 58 |
+| `docs/ConversionStrategies-Reference/labels-and-loop-variables.md:153` | src/tests/Behavioral/ForLoopPerIterationVars/main.cs:23-26 |
+| `docs/ConversionStrategies-Reference/labels-and-loop-variables.md:165` | src/tests/Behavioral/ForLoopPerIterationVars/main.cs:34-43 |
+| `docs/ConversionStrategies-Reference/labels-and-loop-variables.md:183` | src/tests/Behavioral/ForLoopPerIterationVars/main.cs:55-60 |
+| `docs/ConversionStrategies-Reference/labels-and-loop-variables.md:290` | src/core/unique/clone.cs:137-141, 149, 152 |
+| `docs/ConversionStrategies-Reference/manual-conversions.md:4246` | src/core/reflect/value_impl.cs:3526-3530, 3534-3537, 3546-3547 |
+| `docs/ConversionStrategies-Reference/maps-and-channels.md:155` | src/tests/Behavioral/NilMapKey/main.cs:16-18, 25, 44, 57 |
+| `docs/ConversionStrategies-Reference/maps-and-channels.md:682` | src/tests/Behavioral/SelectOperandOnceEval/main.cs:37-39, 41-42 |
+| `docs/ConversionStrategies-Reference/multi-assignment.md:99` | src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:40-41, 44-45 |
+| `docs/ConversionStrategies-Reference/multi-assignment.md:524` | src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-21 |
+| `docs/ConversionStrategies-Reference/multi-assignment.md:716` | src/core/encoding/xml/xml.cs:317-318, 338, 342 |
+| `docs/ConversionStrategies-Reference/package-conversion.md:910` | src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 33, 36 |
+| `docs/ConversionStrategies-Reference/package-conversion.md:921` | src/tests/Behavioral/CrossPkgBox/package_info.cs:12, 16, 19 |
+| `docs/ConversionStrategies-Reference/package-conversion.md:1440` | src/core/net/http/pprof/package_test_info.cs:61-63, 97-104 |
+| `docs/ConversionStrategies-Reference/pointers.md:290` | src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11-13, 19-23 |
+| `docs/ConversionStrategies-Reference/pointers.md:305` | src/tests/Behavioral/ForVariants/ForVariants.cs:14-19, 99-101 |
+| `docs/ConversionStrategies-Reference/pointers.md:348` | src/tests/Behavioral/GuardedNilPointerParamDeref/main.cs:7, 12, 22 |
+| `docs/ConversionStrategies-Reference/pointers.md:456` | src/core/regexp/onepass.cs:329, 337, 348, 481 |
+| `docs/ConversionStrategies-Reference/pointers.md:472` | src/tests/Behavioral/FuncLitArgCapture/main.cs:38-49 |
+| `docs/ConversionStrategies-Reference/pointers.md:519` | src/core/crypto/x509/windows/verify.cs:786-789 |
+| `docs/ConversionStrategies-Reference/pointers.md:765` | src/core/debug/elf/file.cs:355, 361 |
+| `docs/ConversionStrategies-Reference/pointers.md:836` | src/core/unsafe/unsafe.cs:706-715 |
+| `docs/ConversionStrategies-Reference/pointers.md:1765` | src/core/context/example_test.cs:325, 333-337 |
+| `docs/ConversionStrategies-Reference/pointers.md:2737` | src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:35-44 |
+| `docs/ConversionStrategies-Reference/shadowing.md:27` | src/tests/Behavioral/BuiltinShadowLocal/main.cs:7-17 |
+| `docs/ConversionStrategies-Reference/shadowing.md:839` | src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 21, 29 |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1357` | src/tests/Behavioral/CompositeLiteralElements/main.cs:128, 131, 138, 147 |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1443` | src/tests/Behavioral/NestedFixedArrays/main.cs:24, 31, 41 |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1731` | src/tests/Behavioral/MapArrayValueZero/MapArrayValueZero.cs.target:12, 18, 28, 39 |
+| `docs/ConversionStrategies-Reference/strings.md:234` | src/core/internal/strconv/atob.cs:22-32 |
+| `docs/ConversionStrategies-Reference/strings.md:288` | src/core/internal/strconv/atoi.cs:254-259, 269 |
+| `docs/ConversionStrategies-Reference/strings.md:426` | src/core/fmt/package_info.cs:61, 67, 69 |
+| `docs/ConversionStrategies-Reference/struct-types.md:311` | src/tests/Behavioral/TypeSwitchImpureTag/main.cs.target:15-16, 20-22, 25-26 |
+| `docs/ConversionStrategies-Reference/struct-types.md:1130` | src/core/golib/variadic.cs:26, 53 |
+| `docs/ConversionStrategies-Reference/type-aliasing.md:83` | src/tests/Behavioral/GenericTypeAlias/main.cs.target:15-22, 34 |
+| `docs/ConversionStrategies-Reference/value-receiver-delegates.md:323` | src/tests/Behavioral/BlankIdentifierCollision/main.cs:77-78, 80, 88 |
+| `docs/ConversionStrategies.md:12173` | src/core/sync/atomic/value.cs:6-18, 33-35 |

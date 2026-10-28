@@ -316,9 +316,10 @@ interface-typed and interface-inheriting instantiations then satisfy the constra
 (`Stmt : Node` is emitted inheritance).
 
 A **pointer** instantiation (`walkList(v, n.Names)` with `N=*Ident`) cannot: the `ж<Ident>` box
-does not implement the interface — its generated pointer adapter does. The call site projects the
-slice element-wise through the adapter, instantiating `N` as the interface itself:
+does not implement the interface — its generated pointer adapter does. The call site (the last line
+below) projects the slice element-wise through the adapter, instantiating `N` as the interface itself:
 
+<!-- source: src/core/go/ast/walk.cs:18-24, 58 -->
 ```csharp
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
@@ -327,7 +328,7 @@ internal static void walkList<N>(Visitor v, slice<N> list)
         Walk(v, node);
     }
 }
-// call site, N=*Ident:
+…
 walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
 ```
 

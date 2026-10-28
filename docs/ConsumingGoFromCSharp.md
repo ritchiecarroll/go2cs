@@ -9,7 +9,8 @@ Every snippet comes from a small console app,
 [`src/tests/CSharpConsumer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/tests/CSharpConsumer). Its
 runner converts two Go modules, [`github.com/google/uuid`](https://github.com/google/uuid) and
 [`github.com/ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset), builds the app against them and
-the converted standard library, and checks that each example behaves as shown here.
+the converted standard library, and checks that each example behaves as shown here. A `…` in a snippet marks
+lines it leaves out, most often those checks.
 
 ## A five-minute start
 
@@ -24,10 +25,12 @@ dotnet add package go.fmt
 
 Then, in `Program.cs`:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:16, 19, 70-71 -->
 ```csharp
-using strings = go.strings_package;
 using fmt = go.fmt_package;
-
+…
+using strings = go.strings_package;
+…
 @string shout = strings.ToUpper("hello, gopher");
 fmt.Println(shout, len(shout));     // HELLO, GOPHER 13
 ```
@@ -42,10 +45,12 @@ A published Go module works the same way. `github.com/google/uuid` is `nugetgo.g
 dotnet add package nugetgo.github.com.google.uuid
 ```
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:12, 23, 284-285 -->
 ```csharp
 using go.github.com.google;                 // the methods of github.com/google/uuid
+…
 using uuid = go.github.com.google.uuid_package;
-
+…
 uuid.UUID id = uuid.New();
 @string text = id.String();
 ```
@@ -211,10 +216,13 @@ Go's `int` is a native-sized integer, so it is C# `nint`, and C# `int` is Go's `
 So `len` returns `nint`, and so does `strconv.Atoi`. Hold the result in `var` or `nint`, or cast it where you need
 an `int`. C# integer literals `append` to a `slice<nint>` as they are:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:86-87, 89, 91-92 -->
 ```csharp
 var size = len("héllo");            // nint, Go's int: 6 bytes
 int small = (int)len("héllo");      // C# int is Go's int32, so cast when you need one
+…
 var (num, aerr) = strconv.Atoi("42");   // (nint, error)
+…
 slice<nint> nums = new nint[] { 1, 2, 3 };
 nums = append(nums, 4, 5);              // C# int literals append to a slice<nint>
 ```
@@ -239,10 +247,12 @@ string back = hello;                // and back (UTF-8 to UTF-16)
 
 Print a Go value through `fmt`, or call its `String()` or `Error()` method, and you get the text Go prints:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:108-110, 112 -->
 ```csharp
 error diskFull = errors.New("disk full");
 time.Duration wait = 1500 * time.Millisecond;
 fmt.Println(diskFull, wait);        // disk full 1.5s
+…
 Console.WriteLine($"{diskFull.Error()} after {wait.String()}");    // disk full after 1.5s
 ```
 
@@ -341,33 +351,43 @@ static nint ParsePort(@string text)
 values when the error is nil, and otherwise throws `GoErrorException`. That is a `PanicException`, as a failed Go
 `Must` panics, and its `Err` is the original error, so `errors.Is` still works:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:140, 142-144, 146-148, 150 -->
 ```csharp
 nint port = strconv.Atoi("8080").Must();    // the value, or a GoErrorException
+…
 try
 {
     strconv.Atoi("eighty").Must();
+…
 }
 catch (GoErrorException ex) when (errors.Is(ex.Err, strconv.ErrSyntax))
 {
-    // ex.Message is the error's text: strconv.Atoi: parsing "eighty": invalid syntax
+…
 }
 ```
+
+In the `catch`, `ex.Message` is the Go error's text: `strconv.Atoi: parsing "eighty": invalid syntax`.
 
 ## Panics and exceptions
 
 A Go `panic` that is not recovered reaches C# as a `PanicException`. Its `State` is the value Go passed to
 `panic`, and its `Message` is that value's text, as Go prints it:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:153-155, 157-160, 162 -->
 ```csharp
 try
 {
     uuid.MustParse("not-a-uuid");
+…
 }
 catch (PanicException panic)
 {
-    // panic.Message starts "uuid: Parse(not-a-uuid)"
+    // panic.State is the value Go passed to panic; panic.Message is its text
+…
 }
 ```
+
+Here `panic.Message` starts `uuid: Parse(not-a-uuid)`.
 
 The other way round, a C# exception thrown from C# code that Go calls (a C# `String()` method that `fmt` calls,
 say) reaches your C# caller unchanged. Go's deferred calls still run on the way out, and Go's `recover()` does not
@@ -395,6 +415,7 @@ catch.
 A Go slice is `slice<T>`. `foreach` over a slice gives `(index, value)` pairs, so it reads like Go's `range`; take
 `(_, v)` for the values alone:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:183-188, 190-191 -->
 ```csharp
 slice<@string> words = strings.Fields("  the quick  brown fox ");
 var lengths = new StringBuilder();
@@ -402,6 +423,7 @@ foreach (var (i, w) in words)       // Go: for i, w := range words
 {
     lengths.Append($"{i}:{len(w)} ");
 }
+…
 nint letters = 0;
 foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
 ```
@@ -419,11 +441,14 @@ A C# array converts to a slice implicitly, and the slice **shares** the array, a
 array: a write through either one shows in the other. Converting a slice back to `T[]` makes a copy. `ToSpan()`
 gives a `Span<T>` over the slice's elements without copying.
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:199-201, 203, 206 -->
 ```csharp
 int[] numbers = [1, 2, 3];
 slice<int> shared = numbers;        // wraps the same array: no copy
 shared[0] = 10;
+…
 int[] copy = shared;                // converting back to T[] copies
+…
 Span<int> span = shared.ToSpan();   // a view, no copy
 ```
 
@@ -440,11 +465,15 @@ age, ok := ages["ann"]
 delete(ages, "bob")
 ```
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:211-212, 214, 216, 218-219 -->
 ```csharp
 var ages = new map<@string, nint> { ["ann"] = 31, ["bob"] = 42 };
 nint unknown = ages["zed"];         // a missing key gives the zero value
+…
 var (age, ok) = ages["ann", ꟷ];     // Go: age, ok := ages["ann"]
+…
 delete(ages, "bob");
+…
 nint total = 0;
 foreach (var (name, years) in ages) total += years;   // Go: for name, years := range ages
 ```
@@ -463,14 +492,14 @@ IDictionary<@string, nint> dict = ages;   // a Go map is an IDictionary<K, V>
 A Go `*T` is `ж<T>`, a box holding a value on the heap. Go's `new(T)` is `@new<T>()`, and `var` holds the box
 without your writing its type:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:225-227 -->
 ```csharp
 var sb = @new<strings.Builder>();   // Go: sb := new(strings.Builder)
 sb.WriteString("go");
 sb.WriteString("pher");
-// sb.String() == "gopher"
 ```
 
-Every pointer method takes the box. Some, such as uuid's `UnmarshalText`, also take a plain local, passed by
+`sb.String()` is then `"gopher"`. Every pointer method takes the box. Some, such as uuid's `UnmarshalText`, also take a plain local, passed by
 reference, so the method updates it:
 
 <!-- source: src/tests/CSharpConsumer/Program.cs:229-230 -->
@@ -482,14 +511,17 @@ error uerr = target.UnmarshalText("6ba7b810-9dad-11d1-80b4-00c04fd430c8"u8.ToArr
 `Ꮡ(value)` makes a new box holding a copy of the value, like Go's `&T{...}`, and `.Value` reads or writes what a
 box holds. For a value method, call it on `.Value`.
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:232-233, 235-237 -->
 ```csharp
 ж<uuid.UUID> boxed = Ꮡ(new uuid.UUID());    // Go: boxed := &uuid.UUID{}
 boxed.UnmarshalText("6ba7b810-9dad-11d1-80b4-00c04fd430c8"u8.ToArray());
+…
 nint count = 1;
 ж<nint> counter = Ꮡ(count);         // a new box holding a copy of count
 counter.Value = 2;
-// count is still 1
 ```
+
+`count` is still 1: the box holds a copy.
 
 ## Goroutines and channels
 
@@ -534,12 +566,14 @@ var mailbox = new channel<@string>(1);
 thread. They are the same channel operations, waiting in the channel's own queue with Go's rules, and they take a
 `CancellationToken`: a canceled receive takes no value, and a canceled send delivers nothing.
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:271-273 -->
 ```csharp
 var replies = new channel<nint>(0);
 Task<nint> reply = replies.ReceiveAsync();      // awaitable: no thread waits for the sender
 goǃ(() => replies.Send(99));
-// reply completes with 99
 ```
+
+`reply` completes with 99.
 
 A few things behave as Go's runtime does, so they are worth knowing from the C# side:
 
@@ -556,14 +590,19 @@ A few things behave as Go's runtime does, so they are worth knowing from the C# 
 [`github.com/google/uuid`](https://github.com/google/uuid) shows most of these shapes at once. `uuid.UUID` is a Go
 `[16]byte`, a fixed-size array, and it indexes like one:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:284-285, 288, 290, 293 -->
 ```csharp
 uuid.UUID id = uuid.New();
 @string text = id.String();
+…
 var (parsed, perr) = uuid.Parse("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+…
 var (_, badId) = uuid.Parse("not-a-uuid");
-// perr == nil and badId != nil; parsed[0] == 0x6b, and len(parsed) == 16
+…
 Span<byte> view = parsed.ToSpan();
 ```
+
+`perr` is nil and `badId` is not, `parsed[0]` is `0x6b`, and `len(parsed)` is 16.
 
 A Go array is a value: `copied := parsed` copies its 16 bytes. A C# assignment copies only the struct around
 them, so both variables would share the bytes; `Clone()` makes the copy Go makes:
@@ -588,13 +627,17 @@ uuid.ΔVersion version = parsed.Version();   // Go: uuid.Version
 and its generic functions and methods keep their type parameters. `hashset.NewHashSet<int>` is Go's
 `hashset.NewHashSet[int32]`:
 
+<!-- source: src/tests/CSharpConsumer/Program.cs:302, 306-307, 309 -->
 ```csharp
 var set = hashset.NewHashSet<int>(new[] { 1, 2, 3 });   // Go: hashset.NewHashSet[int32]
-// set.Add(2) is false: 2 is already there; set.Add(4) is true
+…
 var keySum = 0;
 foreach (var (key, _) in set) keySum += key;   // a Go map: (key, value) pairs
+…
 slice<int> keys = set.Keys();
 ```
+
+`set.Add(2)` returns false, since 2 is already in the set, and `set.Add(4)` returns true.
 
 `AsReadOnlySet()` hands any Go map's keys, a plain `map<K,V>` or a named map type like `HashSet<T>`, to C# code
 that takes an `IReadOnlySet<K>`. The view is live and read-only, and a nil map is the empty set:
