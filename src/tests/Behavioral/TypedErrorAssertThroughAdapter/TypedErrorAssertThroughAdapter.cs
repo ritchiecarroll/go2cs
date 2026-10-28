@@ -56,7 +56,7 @@ internal static void Main() {
         }
     }
 
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -71,7 +71,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     {
         var (s, ok) = pointerSourced()._<main_type>(ᐧ); if (ok) {

@@ -219,7 +219,7 @@ internal static partial void closeBreaksBlockedWrite() {
         var doneʗ1 = done;
         goǃ(() => {
             var buf = new slice<byte>(64 * 1024);
-            while (ᐧ) {
+            for (;;) {
                 {
                     var (_, errΔ2) = clientʗ1.Write(buf); if (errΔ2 != nil) {
                         doneʗ1.ᐸꟷ(errΔ2);

@@ -83,7 +83,7 @@ internal static void Main() {
     view.Flags = 0x0d0c0b0a;
     fmt.Println("view bytes:", blob[16..20]);
 
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -96,7 +96,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 }
 
 } // end main_package

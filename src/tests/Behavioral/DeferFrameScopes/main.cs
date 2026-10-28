@@ -117,7 +117,7 @@ internal static nint mixedScopes() {
         bump();
         bump();
 
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
@@ -127,7 +127,7 @@ internal static nint mixedScopes() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
 
         fmt.Println("mixed body, total =", total);
         return total;

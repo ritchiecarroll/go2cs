@@ -48,7 +48,7 @@ internal static void g(nint i) {
 
 internal static @string panicValueKind(Action f) {
     @string @out = default;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -80,7 +80,7 @@ internal static @string panicValueKind(Action f) {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     return @out;
 }
 

@@ -90,7 +90,7 @@ internal static partial void Main() {
 
     var h = new @string[]{"h="}.slice();
     var hʗ1 = h;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             var hʗ2 = hʗ1;
@@ -100,7 +100,7 @@ internal static partial void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     fmt.Println(ᐸꟷ(@out));
 
     var i9 = new @string[]{"i="}.slice();

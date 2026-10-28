@@ -33,7 +33,7 @@ internal static void Main() {
     fmt.Println((~s).setting == nil);
 
     var sʗ1 = s;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -43,7 +43,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     ж<setting> p = default;
     s.Value.setting = p;

@@ -575,7 +575,7 @@ public static bool IsEmbedded(this ΔName n) {
 
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var x = n.DataChecked(off + i, "read varint").Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
@@ -593,9 +593,9 @@ public static bool IsBlank(this ΔName n) {
 }
 
 internal static nint writeVarint(slice<byte> buf, nint n) {
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var b = (byte)(n & 0x7f);
-        n >>= (int)(7);
+        n >>= 7;
         if (n == 0) {
             buf[i] = b;
             return i + 1;

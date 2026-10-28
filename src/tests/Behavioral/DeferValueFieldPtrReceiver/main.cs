@@ -41,7 +41,7 @@ internal static void Main() {
 
     var x = Ꮡ(new builder(nil));
     var xʗ1 = x;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             var xʗ2 = xʗ1;
@@ -51,7 +51,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     fmt.Println("after2:", (~x).c.n);
 }
 

@@ -10,7 +10,7 @@ internal static void Main() {
     fmt.Println(fmt.Errorf("name %s = %d"u8, "x", (nint)7));
     fmt.Println(fmt.Errorf("%v and %v"u8, true, "y"));
 
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -24,7 +24,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     var @base = fmt.Errorf("base failure"u8);
     var wrapped = fmt.Errorf("while doing X: %w"u8, @base);

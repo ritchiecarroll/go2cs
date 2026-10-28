@@ -137,7 +137,7 @@ internal static slice<entry> enumerate(@string dir) {
         defer(syscall.FindClose, h, ref ᒐ);
 
         slice<entry> @out = default;
-        while (ᐧ) {
+        for (;;) {
             {
                 var (e, ok) = toEntry(Ꮡdata); if (ok) {
                     @out = append(@out, e);

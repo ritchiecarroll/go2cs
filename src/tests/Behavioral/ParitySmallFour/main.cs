@@ -73,7 +73,7 @@ internal static void Main() {
         return a * 2;
     })(5);
     var (s, err) = func((@string, error) () => {
-        return ("s", default!);
+        return ("s", default);
     })();
     nint sum = func(nint (nint a, nint b, nint c) => {
         return a + b + c;

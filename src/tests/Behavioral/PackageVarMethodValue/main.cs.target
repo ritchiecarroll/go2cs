@@ -93,10 +93,10 @@ internal static void Main() {
     apply(Ꮡgp.inc);
     fmt.Println("argument", gp.n);
 
-    ((Action)(() => {
+    func(() => {
         var ff = Ꮡgf.inc;
         ff();
-    }))();
+    })();
     fmt.Println("funclit ", gf.n);
 
     var fl = Ꮡgl.inc;

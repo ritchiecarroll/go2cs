@@ -66,7 +66,7 @@ internal static void Main() {
         throw panic("boom");
     });
     var panicOnceʗ1 = panicOnce;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -76,7 +76,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     var pairOnce = Once2((any, any) () => (default, default));
     var (p, q) = pairOnce();

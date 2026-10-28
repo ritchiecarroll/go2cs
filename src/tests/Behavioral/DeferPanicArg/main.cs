@@ -82,7 +82,7 @@ internal static void replacesInFlight() {
         defer(() => {
             fmt.Println("replacesInFlight recovered:", recover());
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => throw panic(ᴛ1), (@string)"from defer", ref ᒐ);
@@ -90,7 +90,7 @@ internal static void replacesInFlight() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

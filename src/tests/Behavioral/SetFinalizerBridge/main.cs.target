@@ -14,14 +14,14 @@ internal static @string registered() {
     var done = new channel<EmptyStruct>(0);
 
     var doneʗ1 = done;
-    ((Action)(() => {
+    func(() => {
         var p = Ꮡ(new payload(n: 1));
         var doneʗ2 = doneʗ1;
         runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
             close(doneʗ2);
         });
         _ = p.Value.n;
-    }))();
+    })();
 
     for (nint i = 0; i < 400; i++) {
         var selᴛ1 = done;
@@ -42,7 +42,7 @@ internal static @string cleared() {
     var done = new channel<EmptyStruct>(0);
 
     var doneʗ1 = done;
-    ((Action)(() => {
+    func(() => {
         var p = Ꮡ(new payload(n: 2));
         var doneʗ2 = doneʗ1;
         runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
@@ -50,7 +50,7 @@ internal static @string cleared() {
         });
         runtime.SetFinalizer(p.OrTypedNil(), default);
         _ = p.Value.n;
-    }))();
+    })();
 
     for (nint i = 0; i < 40; i++) {
         var selᴛ3 = done;

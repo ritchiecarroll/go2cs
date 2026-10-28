@@ -24,7 +24,7 @@ internal static void Main() {
 
     n = 0;
     nint count = 0;
-    while (ᐧ) {
+    for (;;) {
         var (ᴛ1, ᴛ2) = next();
         if (!(keep(ᴛ1, ᴛ2))) break;
         count++;
@@ -36,7 +36,7 @@ internal static void Main() {
 
     n = 0;
     count = 0;
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var (ᴛ3, ᴛ4) = next();
         if (!(keep(ᴛ3, ᴛ4))) break;
         {

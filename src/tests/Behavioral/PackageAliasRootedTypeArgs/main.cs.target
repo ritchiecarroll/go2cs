@@ -88,10 +88,10 @@ internal static void Main() {
     anonI t = new zed(v: 11);
 
     var sendCh = new channel<Header>(1);
-    sends send = sendCh.WithDirection(GoChanDir.Send);
+    sends send = sendCh.AsSendOnly();
     var recvCh = new channel<Header>(1);
     recvCh.ᐸꟷ(new Header(Name: "recv", Size: 12));
-    recvs recv = recvCh.WithDirection(GoChanDir.Recv);
+    recvs recv = recvCh.AsRecvOnly();
 
     f.ᐸꟷ("ch");
     send.ᐸꟷ(new Header(Name: "send", Size: 13));

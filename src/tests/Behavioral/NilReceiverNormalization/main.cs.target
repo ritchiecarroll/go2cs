@@ -73,7 +73,7 @@ internal static void Main() {
     fmt.Println(real.firstUseReads());
 
     var nilLocʗ1 = nilLoc;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -87,7 +87,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 }
 
 } // end main_package

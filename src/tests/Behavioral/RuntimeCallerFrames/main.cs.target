@@ -135,7 +135,7 @@ internal static partial (bool fwd, bool back) framesSeparators() {
     var pc = new slice<uintptr>(64);
     nint n = runtime.Callers(0, pc);
     var frames = runtime.CallersFrames(pc.slice(0, n));
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         if (len(frame.File) > 0) {
             fwd = fwd || hasByte(frame.File, (rune)'/');

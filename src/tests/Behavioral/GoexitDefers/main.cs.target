@@ -48,7 +48,7 @@ internal static partial void Main() {
                 logʗ3.ᐸꟷ("goroutine defer 1 ran");
             }, ref ᒐ);
 
-            exitFromHelper(logʗ1.WithDirection(GoChanDir.Send));
+            exitFromHelper(logʗ1.AsSendOnly());
             logʗ1.ᐸꟷ("goroutine resumed (UNREACHABLE)");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

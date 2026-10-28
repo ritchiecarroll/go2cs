@@ -53,7 +53,7 @@ internal static void Main() {
 internal static partial nint walk(this T t) {
     var pc = new slice<uintptr>(8);
     var frames = runtime.CallersFrames(pc.slice(0, runtime.Callers(1, pc)));
-    while (ᐧ) {
+    for (;;) {
         var (f, more) = frames.Next();
         fmt.Println("frame:                               ", f.Function);
         if (!more || f.Function == "main.main"u8) {

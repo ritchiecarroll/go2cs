@@ -176,9 +176,9 @@ internal static void probeI1() {
 internal static void probeJ1() {
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s");
-    ((Action)(() => {
+    func(() => {
         Ꮡt.Value.total += 100;
-    }))();
+    })();
     fmt.Println("J1:", t.total);
 }
 

@@ -43,9 +43,9 @@ internal static partial (Func<nint>, Func<nint>) twoLiterals() {
 }
 
 internal static partial @string boundInsideLiteral(ж<T> Ꮡt) {
-    return ((Func<@string>)(() => {
+    return func(@string () => {
         return nameOf(Ꮡt.pointerMethod);
-    }))();
+    })();
 }
 
 internal static partial void Main() {

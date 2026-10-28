@@ -13,7 +13,7 @@ internal static nint sum(this ж<node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     nint total = 0;
-    while (ᐧ) {
+    for (;;) {
         total += n.val;
         if (n.next == nil) {
             break;
@@ -38,7 +38,7 @@ internal static nint advance(this ж<node> Ꮡn, nint steps) {
 internal static void scale(this ж<node> Ꮡn, nint factor) {
     ref var n = ref Ꮡn.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         n.val = n.val * factor;
         if (n.next == nil) {
             break;

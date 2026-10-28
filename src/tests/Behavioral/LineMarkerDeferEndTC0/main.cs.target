@@ -79,7 +79,7 @@ private static readonly @string funcLiteralFallsOffTheˢ = "func literal, falls 
 internal static void Main() {
     fallsOffEnd();
     loopDefer();
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(where, funcLiteralFallsOffTheˢ, ref ᒐ);
@@ -88,7 +88,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     endsInReturn();
     endsInSwitch(5);
 }

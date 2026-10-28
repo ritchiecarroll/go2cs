@@ -68,7 +68,7 @@ internal static void Main() {
     fmt.Println("refused:", withCap(new nint[]{1}.slice(), 2), named(new nint[]{1}.slice(), 1), arrays(default, 2));
 
     var sʗ1 = s;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -79,7 +79,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 }
 
 } // end main_package

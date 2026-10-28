@@ -104,7 +104,7 @@ public static slice<@string> Walk<N>(N n)
 
     slice<@string> @out = default;
 
-    while (ᐧ) {
+    for (;;) {
         var triple = n.Triple();
         @out = append(outᴷ, @out, n.Label() + "/"u8 + triple[2].Label());
 

@@ -34,7 +34,7 @@ internal static @string walkRangeShape(reflectꓸValue v) {
 
     slice<@string> @out = default;
 
-    while (ᐧ) {
+    for (;;) {
         var (elem, ok) = v.Recv();
         if (!ok) {
             break;

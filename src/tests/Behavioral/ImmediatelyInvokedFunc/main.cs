@@ -5,16 +5,16 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    ((Action)(() => {
+    func(() => {
         fmt.Println("a");
-    }))();
+    })();
 
-    nint x = ((Func<nint>)(() => {
+    nint x = func(nint () => {
         return 6 * 7;
-    }))();
+    })();
     fmt.Println(x);
 
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -28,42 +28,42 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     fmt.Println("after recover");
 
-    nint total = 10 + ((Func<nint>)(() => {
+    nint total = 10 + func(nint () => {
         nint sum = 0;
         for (nint i = 1; i <= 4; i++) {
             sum += i;
         }
         return sum;
-    }))();
+    })();
     fmt.Println(total);
 
-    nint y = ((Func<nint>)(() => {
-        return ((Func<nint>)(() => {
+    nint y = func(nint () => {
+        return func(nint () => {
             return 5;
-        }))() * 2;
-    }))();
+        })() * 2;
+    })();
     fmt.Println(y);
 
-    ((Action<nint>)(n => {
+    func((nint n) => {
         fmt.Println("n =", n);
-    }))(7);
+    })(7);
 
-    nint tri = ((Func<nint, nint, nint, nint>)((a, b, c) => {
+    nint tri = func(nint (nint a, nint b, nint c) => {
         return a + b + c;
-    }))(1, 2, 3);
+    })(1, 2, 3);
     fmt.Println(tri);
 
     for (nint k = 0; k < 3; k++) {
-        ((Action<nint>)(xΔ1 => {
+        func((nint xΔ1) => {
             fmt.Print(xΔ1, " ");
-        }))(k);
+        })(k);
     }
     fmt.Println();
 
-    ((Action<@string>)(label => {
+    func((@string label) => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
@@ -77,7 +77,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))("scope");
+    })("scope");
     fmt.Println("after arg recover");
 
     nint calls = 0;
@@ -85,9 +85,9 @@ internal static void Main() {
         calls++;
         return 99;
     }
-    ((Action<nint>)(_ => {
+    func((nint _) => {
         fmt.Println("ignored arg; calls =", calls);
-    }))(bump());
+    })(bump());
 }
 
 } // end main_package

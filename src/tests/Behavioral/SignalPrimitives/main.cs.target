@@ -14,10 +14,10 @@ internal static void Main() {
     fmt.Println("after Ignore:", signal.Ignored(Δos.Interrupt));
 
     var c = new channel<osꓸSignal>(1);
-    signal.Notify(c.WithDirection(GoChanDir.Send), Δos.Interrupt);
+    signal.Notify(c.AsSendOnly(), Δos.Interrupt);
     fmt.Println("after Notify:", signal.Ignored(Δos.Interrupt));
 
-    signal.Stop(c.WithDirection(GoChanDir.Send));
+    signal.Stop(c.AsSendOnly());
     fmt.Println("after Stop:", signal.Ignored(Δos.Interrupt));
 
     signal.Ignore(Δos.Interrupt);

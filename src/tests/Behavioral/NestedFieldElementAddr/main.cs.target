@@ -43,10 +43,10 @@ internal static void Main() {
 
     var got = (uintptr)0;
     var ppʗ1 = pp;
-    ((Action)(() => {
+    func(() => {
         bump(ref (ppʗ1.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 1)).DerefOrNull());
         got = (~ppʗ1).wbBuf.buf[1];
-    }))();
+    })();
     fmt.Println(got);
 
     var cache = Ꮡ(new cacheT(entries: new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()));

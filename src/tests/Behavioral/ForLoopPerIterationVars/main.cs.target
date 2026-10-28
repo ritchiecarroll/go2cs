@@ -158,9 +158,9 @@ internal static void g9() {
     nint sum = 0;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        ((Action)(() => {
+        func(() => {
             i++;
-        }))();
+        })();
         sum += i;
         iᴛ1 = i;
     }

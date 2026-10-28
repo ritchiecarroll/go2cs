@@ -16,7 +16,7 @@ internal static nint classify(ж<byte> Ꮡp) {
 
     nint result = 0;
 
-    while (ᐧ) {
+    for (;;) {
         var exprᴛ1 = Ꮡp;
         if (exprᴛ1 == Ꮡsentinel) {
             result = 1;
