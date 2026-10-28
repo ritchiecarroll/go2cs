@@ -120,7 +120,7 @@ internal static void Main() {
     step("2 deadlines", () => {
         var refused = stderrʗ2.SetDeadline(time.Now().Add(time.ΔHour));
         var bound = stdoutʗ2.SetDeadline(time.Now().Add(time.ΔHour));
-        stdoutʗ2.SetDeadline(new time.Time(nil));
+        stdoutʗ2.SetDeadline(new time.Time());
         return fmt.Sprintf("stderr ErrNoDeadline=%v stdout err=%v"u8, errors.Is(refused, os.ErrNoDeadline), bound);
     });
 
@@ -171,7 +171,7 @@ internal static void Main() {
                 return "write before Fd: "u8 + err.Error();
             }
         }
-        var before = f.SetDeadline(new time.Time(nil));
+        var before = f.SetDeadline(new time.Time());
         f.Fd();
         var after = f.SetDeadline(time.Now().Add(time.ΔHour));
         {

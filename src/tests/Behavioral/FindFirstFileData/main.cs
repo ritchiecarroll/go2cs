@@ -172,14 +172,14 @@ internal static entry lookup(@string path) {
 internal static (entry, error) find(@string path) {
     var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != nil) {
-        return (new entry(nil), err);
+        return (new entry(), err);
     }
 
     ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
 
     (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
     if (err != nil) {
-        return (new entry(nil), err);
+        return (new entry(), err);
     }
     syscall.FindClose(h);
 
@@ -192,7 +192,7 @@ internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {
 
     @string name = syscall.UTF16ToString(data.FileName[..]);
     if (name == "."u8 || name == ".."u8) {
-        return (new entry(nil), false);
+        return (new entry(), false);
     }
     return (new entry(
         name: name,

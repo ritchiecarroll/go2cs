@@ -52,7 +52,7 @@ internal static void Main() {
     }
     fmt.Println("parsed cn:", (~cert).Subject.CommonName);
 
-    (var chains, err) = cert.Verify(new x509.VerifyOptions(nil));
+    (var chains, err) = cert.Verify(new x509.VerifyOptions());
     fmt.Println("verify chains:", len(chains));
     fmt.Println("verify error:", err);
     fmt.Println("unknown authority:", isUnknownAuthority(err));
@@ -158,7 +158,7 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
     para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
 
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
-    status = new syscall.CertChainPolicyStatus(nil);
+    status = new syscall.CertChainPolicyStatus();
     {
         var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, ᏑchainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
             return "call error: "u8 + errΔ1.Error();
