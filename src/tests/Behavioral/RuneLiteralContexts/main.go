@@ -1,0 +1,94 @@
+// Rune literals in every slot the converter treats differently: the slots where C# takes a bare
+// char ('x'), the byte-sized slots that keep one cast spelled as the target ((byte)'x'), and the
+// slots that keep (rune)'x' because C# would otherwise infer or box a char.
+package main
+
+import "fmt"
+
+const constLit = 'a'
+const constDiff = 'a' - 'A'
+
+type letter rune
+
+func isByte(b byte) bool { return b == 'x' }
+
+func takesRune(r rune) rune { return r + 1 }
+
+func retRune() rune { return 'Z' }
+
+func retByte() byte { return 'z' }
+
+func main() {
+	// Boxed to an interface: Go prints the int32 value and type.
+	fmt.Println('a')
+	fmt.Printf("%T %v\n", 'a', 'a')
+	var anyv any = 'w'
+	fmt.Printf("%T %v\n", anyv, anyv)
+
+	// Inferred locals stay int32.
+	r := 'a'
+	fmt.Printf("%T %v\n", r, r)
+	var typed rune = 'b'
+	fmt.Println(typed)
+
+	// A const initializer and a constant-only expression keep their value and type.
+	fmt.Printf("%T %v %T %v\n", constLit, constLit, constDiff, constDiff)
+	x := constDiff
+	fmt.Printf("%T %v\n", x, x)
+
+	// Byte, int8 and int16 slots.
+	var b byte = 'q'
+	switch b {
+	case 'p', 'q':
+		fmt.Println("byte case")
+	}
+	fmt.Println(isByte('x'), retByte())
+	bs := []byte{'h', 'i'}
+	bs[0] = 'H'
+	bs = append(bs, '!')
+	fmt.Println(string(bs))
+	var i8 int8 = 'A'
+	var i16 int16 = 'B'
+	fmt.Println(i8, i16)
+
+	// A rune beyond the BMP.
+	astral := '\U0001F600'
+	fmt.Printf("%T %v %c\n", astral, astral, astral)
+
+	// Builtins that infer their type from the arguments.
+	fmt.Println(max('a', r), min(r, 'b'))
+
+	// Rune parameter, return, comparison, case label and arithmetic.
+	fmt.Println(takesRune('y'), retRune())
+	if r == 'a' && r < 'z' {
+		fmt.Println("rune compare")
+	}
+	switch r {
+	case 'a', 'b':
+		fmt.Println("rune case")
+	}
+	digit := byte('7')
+	fmt.Println(digit-'0', int(digit-'0'))
+
+	// Composite literals: elements, values and keys.
+	rs := []rune{'x', 'y'}
+	rs[1] = 'Y'
+	m := map[string]rune{"a": 'A'}
+	keys := [128]bool{'a': true, 'e': true}
+	fmt.Println(string(rs), m["a"], keys['a'], keys['b'])
+
+	// Conversions and wider integer and float targets.
+	fmt.Println(byte('a'), rune('b'), uint16('c'), float64('d'))
+	var u32 uint32 = 'u'
+	var u64 uint64 = 'v'
+	fmt.Println(u32-'a', u64*'b', float32('e')/2)
+
+	// A named rune type keeps its conversion.
+	var l letter = 'L'
+	fmt.Printf("%T %v\n", l, l)
+
+	// A send.
+	ch := make(chan rune, 1)
+	ch <- 's'
+	fmt.Println(<-ch)
+}

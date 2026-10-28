@@ -2053,6 +2053,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
 
     [TestMethod]
+    public void CheckRuneLiteralContexts() => CheckTarget("RuneLiteralContexts");
+
+    [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]
