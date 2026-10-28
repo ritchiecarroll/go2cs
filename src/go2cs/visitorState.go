@@ -581,6 +581,10 @@ type Visitor struct {
 	// any position (see markEmptyInterfaceFuncLits). convFuncLit then states the declared result type.
 	emptyInterfaceFuncLits map[*ast.FuncLit]bool
 
+	// runeLiteralForms marks the rune literals that render without `(rune)` (see markRuneLiteralForms);
+	// convBasicLit consults it, and an unmarked literal keeps the cast.
+	runeLiteralForms map[*ast.BasicLit]runeLiteralForm
+
 	// fileFuncDecls is the current file's function declarations by object (collectFileFuncDecls), for
 	// the recursive callee question methodSetConstraintNeeded asks.
 	fileFuncDecls map[*types.Func]*ast.FuncDecl

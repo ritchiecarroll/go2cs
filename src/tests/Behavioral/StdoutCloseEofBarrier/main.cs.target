@@ -43,7 +43,7 @@ internal static void parent() {
         }
     }
     var (data, _) = Δio.ReadAll(@out);
-    stdin.Write(new byte[]{(rune)'\n'}.slice());
+    stdin.Write(new byte[]{(byte)'\n'}.slice());
     stdin.Close();
     cmd.Wait();
     fmt.Printf("child wrote %q\n"u8, (@string)data);

@@ -15,7 +15,7 @@ internal static void Main() {
 
     var q = @unsafe.StringData("abc"u8);
     @string t = fmt.Sprintf("%v"u8, q.OrTypedNil());
-    fmt.Println(q != nil, len(t) > 2, t[0] == (rune)'0', t[1] == (rune)'x');
+    fmt.Println(q != nil, len(t) > 2, t[0] == '0', t[1] == 'x');
 
     @unsafe.Pointer z = (@unsafe.Pointer)(uintptr)0;
     @unsafe.Pointer back = (@unsafe.Pointer)(uintptr)z;

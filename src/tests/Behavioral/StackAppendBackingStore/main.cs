@@ -53,7 +53,7 @@ internal static partial void byteCap() {
     var bᴷ = new stackAppend<byte>();
 
     slice<byte> b = default;
-    b = append(bᴷ, b, (byte)((rune)'a'));
+    b = append(bᴷ, b, (byte)'a');
     fmt.Println(cap(b));
 }
 

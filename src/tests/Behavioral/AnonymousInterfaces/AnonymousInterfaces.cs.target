@@ -147,7 +147,7 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
         if (b.left == 0) {
             break;
         }
-        p[i] = (rune)'x';
+        p[i] = (byte)'x';
         b.left--;
         n++;
     }

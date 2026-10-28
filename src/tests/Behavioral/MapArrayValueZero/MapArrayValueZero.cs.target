@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static map<@string, array<rune>> entity2 = new map<@string, array<rune>>{
-    ["NotEqualTilde;"] = new rune[]{(rune)'≂', (rune)'̸'}.array()
+    ["NotEqualTilde;"] = new rune[]{'≂', '̸'}.array()
 };
 
 internal static void mapMiss() {
@@ -43,7 +43,7 @@ internal static void namedMap() {
     var e = empty[9, () => new array<byte>(4)].Clone();
     fmt.Println("empty named:", len(e), e[0], e[3]);
 
-    empty[9] = new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'d'}.array();
+    empty[9] = new byte[]{(byte)'a', (byte)'b', (byte)'c', (byte)'d'}.array();
     var (got, ok) = empty[9, () => new array<byte>(4), ꟷ];
     fmt.Println("named hit:", ok, len(got), got[0], got[3]);
 }
@@ -60,7 +60,7 @@ internal static void plainNilAndEmpty() {
 
 internal static void storeThenRead() {
     var m = new map<@string, array<rune>>();
-    m["k"] = new rune[]{(rune)'q', (rune)'r'}.array();
+    m["k"] = new rune[]{'q', 'r'}.array();
     fmt.Println("stored:", len(m["k", () => new array<rune>(2)]), m["k", () => new array<rune>(2)][0], m["k", () => new array<rune>(2)][1]);
     fmt.Println("other:", len(m["other", () => new array<rune>(2)]), m["other", () => new array<rune>(2)][0]);
 }

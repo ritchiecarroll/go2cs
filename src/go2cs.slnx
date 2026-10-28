@@ -1012,6 +1012,7 @@
     <Project Path="tests/Behavioral/RootedUsingCapture/RootedUsingCapture.csproj" />
     <Project Path="tests/Behavioral/RootedUsingCapture/internal/sync/RootedUsingCapture.internal.sync.csproj" />
     <Project Path="tests/Behavioral/RootedUsingCapture/lib/RootedUsingCapture.lib.csproj" />
+    <Project Path="tests/Behavioral/RuneLiteralContexts/RuneLiteralContexts.csproj" />
     <Project Path="tests/Behavioral/RuntimeCallerFrames/RuntimeCallerFrames.csproj" />
     <Project Path="tests/Behavioral/SelfRefGenerics/SelfRefGenerics.csproj" />
     <Project Path="tests/Behavioral/SStringElision/SStringElision.csproj" />

@@ -79,7 +79,7 @@ internal static (nint, error) readN() {
 internal static void Main() {
     var (n, _) = readN();
     nint i = 7;
-    rune r = (rune)'A';
+    rune r = 'A';
     var f = 2.5D;
 
     fmt.Println("var lit zero  :", variadicEq(n, (nint)0));

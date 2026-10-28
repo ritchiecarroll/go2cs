@@ -54,7 +54,7 @@ internal static void Main() {
         var (r2, size2) = utf8.DecodeRuneInString((sstring)(raw[1..]));
         fmt.Println(r2, size2);
         defer(ᴛ1 => fmt.Println("deferred count", ᴛ1), utf8.RuneCountInString((@string)raw), ref ᒐ);
-        raw[1] = (rune)'e';
+        raw[1] = (byte)'e';
         fmt.Println(utf8.RuneCountInString((sstring)raw));
         fmt.Printf("%x %X %08b %5.2f|%-6s|%6s|\n"u8, (nint)255, "hi", (nint)5, 3.14159D, "left", "right");
 

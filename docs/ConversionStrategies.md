@@ -1915,6 +1915,36 @@ converts, and writes that type into the C#.
 string ([Strings](#strings-string-and-sstring)). `2D` is a C# `double` literal: Go's untyped `2` takes
 the `float64` type of `factor`.
 
+**A rune literal is a bare C# `char` where its slot takes one.** C#'s `'x'` is a `char`, which C#
+converts implicitly to `rune` and the wider integer and float types, so a literal compared with a
+variable, or written into a slot of one of those types, stays `'x'`. A `char` does not convert to
+`byte`, `int8` or `int16`, so in those slots the literal carries one cast to the slot's type. Where
+C# would keep the `char` as its own type, as with `var` or a value passed as `any`, the literal stays
+`(rune)'x'`:
+
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.go:29-31 and :40 and :62-63 -->
+```go
+	r := 'a'
+	fmt.Printf("%T %v\n", r, r)
+	var typed rune = 'b'
+…
+	var b byte = 'q'
+…
+	fmt.Println(takesRune('y'), retRune())
+	if r == 'a' && r < 'z' {
+```
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:38-40 and :47 and :68-69 -->
+```csharp
+    var r = (rune)'a';
+    fmt.Printf("%T %v\n"u8, r, r);
+    rune typed = 'b';
+…
+    byte b = (byte)'q';
+…
+    fmt.Println(takesRune('y'), retRune());
+    if (r == 'a' && r < 'z') {
+```
+
 **Passed to an `any` parameter, an untyped constant takes its default type.** Go gives an untyped
 integer the type `int`, which is C# `nint`, so the C# casts to `(nint)`. Without the cast, the wrapper
 struct itself would be passed, and `fmt` would print the struct instead of the number. `"size=%d"u8`
@@ -5074,7 +5104,7 @@ fmt.Println(utf8.RuneCountInString((sstring)raw), utf8.RuneCount(raw[1..]));
 var (r2, size2) = utf8.DecodeRuneInString((sstring)(raw[1..]));
 fmt.Println(r2, size2);
 defer(ᴛ1 => fmt.Println("deferred count", ᴛ1), utf8.RuneCountInString((@string)raw), ref ᒐ);
-raw[1] = (rune)'e';
+raw[1] = (byte)'e';
 fmt.Println(utf8.RuneCountInString((sstring)raw));
 ```
 
@@ -5398,7 +5428,7 @@ internal static void Main() {
     var w = new map<@string, nint>{};
     var k = slice<byte>("alpha"u8);
     w[((@string)k)] = 42;
-    k[0] = (rune)'Z';
+    k[0] = (byte)'Z';
     fmt.Println(w["alpha"], len(w));
     var (_, hit) = w[tmpstring(k), ꟷ];
     fmt.Println(hit);
@@ -5412,9 +5442,9 @@ of `"Zlpha"` misses. Plain and comma-ok reads both take this path.
 
 `slice<byte>("alpha"u8)` is golib's form of Go's `[]byte("alpha")`: it copies the literal's bytes into a
 new slice. `w["alpha"]` passes a plain C# literal, which golib converts to `@string` once and shares
-([Strings](#strings-string-and-sstring)). `(rune)'Z'` is Go's constant `'Z'`, where `rune` is
-the project file's alias for `int32`. C# converts an in-range constant to `byte` implicitly, so the store
-into `k[0]` compiles.
+([Strings](#strings-string-and-sstring)). `(byte)'Z'` is Go's constant `'Z'` written into a byte: a C#
+`char` does not convert to `byte` on its own, so the literal carries one cast to the slot's type
+([Constant Values](#constant-values)).
 
 **Full detail:** [Reference → Maps and Channels](ConversionStrategies-Reference/maps-and-channels.md#maps-and-channels) — how a range survives changes to its own map, nil and interface keys, exactly which `string(b)` lookups skip the copy, named map types, and map access through type parameters.
 

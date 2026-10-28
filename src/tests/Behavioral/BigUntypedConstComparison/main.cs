@@ -20,9 +20,9 @@ partial struct ftoaTest {
 }
 
 internal static slice<ftoaTest> ftoatests = new ftoaTest[]{
-    new((float64)below1e23, (rune)'e', 17, "9.99999999999999748e+22"),
-    new((float64)above1e23, (rune)'f', 17, "100000000000000008388608.00000000000000000"),
-    new(small, (rune)'g', -1, "1000")
+    new((float64)below1e23, (byte)'e', 17, "9.99999999999999748e+22"),
+    new((float64)above1e23, (byte)'f', 17, "100000000000000008388608.00000000000000000"),
+    new(small, (byte)'g', -1, "1000")
 }.slice();
 
 internal static slice<float64> floats = new float64[]{(float64)below1e23, (float64)above1e23, small}.slice();
@@ -31,7 +31,7 @@ internal static array<float64> floatArr = new float64[]{(float64)below1e23, (flo
 
 internal static map<@string, float64> byName = new map<@string, float64>{["below"] = (float64)below1e23, ["above"] = (float64)above1e23, ["small"] = small};
 
-internal static ftoaTest keyed = new ftoaTest(f: (float64)below1e23, fmtc: (rune)'g', prec: -1, s: "keyed");
+internal static ftoaTest keyed = new ftoaTest(f: (float64)below1e23, fmtc: (byte)'g', prec: -1, s: "keyed");
 
 internal static slice<slice<float64>> nested = new slice<float64>[]{new float64[]{(float64)below1e23}.slice(), new float64[]{(float64)above1e23}.slice()}.slice();
 

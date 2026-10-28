@@ -55,7 +55,7 @@ internal static void Main() {
 
     fmt.Printf("%T\n"u8, a);
 
-    var vowels = new array<bool>(128){[(rune)'a'] = true, [(rune)'e'] = true, [(rune)'i'] = true, [(rune)'o'] = true, [(rune)'u'] = true, [(rune)'y'] = true};
+    var vowels = new array<bool>(128){['a'] = true, ['e'] = true, ['i'] = true, ['o'] = true, ['u'] = true, ['y'] = true};
     fmt.Println(vowels);
 }
 

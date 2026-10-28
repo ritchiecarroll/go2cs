@@ -319,6 +319,146 @@ constant expressions render as plain C# literals and keep `var`. Applies in both
 and the mixed-statement paths. (Guarded by the `UntypedConstDefine` behavioral test — untyped rune and
 float package constants `:=`-bound then converted/multiplied, output-compared vs Go.)
 
+## A rune literal is a bare C# char where its slot takes one
+Go's `'x'` is an untyped rune constant that takes its type from where it is used. C#'s `'x'` is a
+`char`, which C# converts implicitly to `int`, `nint`, `long`, `ulong`, `uint`, `ushort`, `float` and
+`double`, but not to `byte`, `sbyte` or `short`. So the literal is written three ways, decided from
+the type Go's type checker records for the literal and for its slot:
+
+- **A bare `'x'`** where the slot fixes a type C# reaches from `char`: a comparison or arithmetic
+  against a non-constant operand of a basic type, and a typed slot (assignment, typed `var`,
+  `return` from a declared function, composite-literal element, value or array index key, channel send, case label, argument
+  of a non-generic function) whose type is `rune`, `int`, `int64`, `uint`, `uint32`, `uint64`,
+  `uint16`, `float32` or `float64`. The operand of a conversion to one of those basic types is bare
+  too, so `uint16('c')` reads `(uint16)'c'`.
+- **One cast spelled as the target**, `(byte)'x'`, `(int8)'x'` or `(int16)'x'`, in the same typed
+  slots of `byte`, `int8` or `int16`, in `append`'s byte elements, and as the operand of `byte('a')`.
+  A case comparison of a switch without a tag (or with the tag `true`) takes this form too, against a
+  `byte`, `int8` or `int16` operand: C# writes the case as a pattern, `c is (byte)'_'`, and a pattern's
+  constant must convert to the operand's type.
+- **`(rune)'x'`** everywhere else, where C# would infer, box or overload on a `char`: a `:=` or `var`
+  without a type, an `any` or other interface slot, a variadic argument, a builtin such as `max`, a
+  generic call, a named type such as `type letter rune`, `uintptr`, an index expression, and
+  constant-only expressions. A rune beyond the BMP is no C# `char` and keeps its code point
+  ([Astral rune literals](struct-types.md#astral-rune-literals)).
+- **A `return` inside a func literal casts to the result type**: `(rune)'a'` for a `rune` result,
+  `(uint16)'u'` for a `uint16` one. The literal is a C# lambda, which infers its return type from its
+  body when nothing else fixes it, so `var shrink = (rune r) => 'a';` would return a `char`.
+
+Bare, in `rune` slots:
+
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.go:62-71 -->
+```go
+	fmt.Println(takesRune('y'), retRune())
+	if r == 'a' && r < 'z' {
+		fmt.Println("rune compare")
+	}
+	switch r {
+	case 'a', 'b':
+		fmt.Println("rune case")
+	}
+	digit := byte('7')
+	fmt.Println(digit-'0', int(digit-'0'))
+```
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:68-79 -->
+```csharp
+    fmt.Println(takesRune('y'), retRune());
+    if (r == 'a' && r < 'z') {
+        fmt.Println("rune compare");
+    }
+    switch (r) {
+    case 'a' or 'b': {
+        fmt.Println("rune case");
+        break;
+    }}
+
+    var digit = (byte)'7';
+    fmt.Println((byte)(digit - '0'), (nint)((byte)(digit - '0')));
+```
+
+Cast to the target, in `byte`, `int8` and `int16` slots:
+
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.go:40-51 -->
+```go
+	var b byte = 'q'
+	switch b {
+	case 'p', 'q':
+		fmt.Println("byte case")
+	}
+	fmt.Println(isByte('x'), retByte())
+	bs := []byte{'h', 'i'}
+	bs[0] = 'H'
+	bs = append(bs, '!')
+	fmt.Println(string(bs))
+	var i8 int8 = 'A'
+	var i16 int16 = 'B'
+```
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:47-60 -->
+```csharp
+    byte b = (byte)'q';
+    switch (b) {
+    case (byte)'p' or (byte)'q': {
+        fmt.Println("byte case");
+        break;
+    }}
+
+    fmt.Println(isByte((byte)'x'), retByte());
+    var bs = new byte[]{(byte)'h', (byte)'i'}.slice();
+    bs[0] = (byte)'H';
+    bs = append(bsᴷ, bs, (byte)'!');
+    fmt.Println((@string)bs);
+    int8 i8 = (int8)'A';
+    int16 i16 = (int16)'B';
+```
+
+Kept, where C# would box or infer a `char`:
+
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.go:23-29 -->
+```go
+	fmt.Println('a')
+	fmt.Printf("%T %v\n", 'a', 'a')
+	var anyv any = 'w'
+	fmt.Printf("%T %v\n", anyv, anyv)
+
+	// Inferred locals stay int32.
+	r := 'a'
+```
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:33-38 -->
+```csharp
+    fmt.Println((rune)'a');
+    fmt.Printf("%T %v\n"u8, (rune)'a', (rune)'a');
+    any anyv = (rune)'w';
+    fmt.Printf("%T %v\n"u8, anyv, anyv);
+
+    var r = (rune)'a';
+```
+
+**Why.** A bare `char` reads as the Go source does, and in each bare slot C# converts it to exactly
+the value Go's constant has there. In a byte-sized slot the `char` does not convert, so the literal
+names the slot's type rather than `rune`, which would need a second conversion. Where C# would keep
+the `char` as its own type (`var`, a boxing, a generic or builtin call that infers from its
+arguments), `fmt` would print a character instead of a number, so the cast stays.
+
+**Limits.** A `const` declaration is unchanged: `const constLit = 'a'` emits
+`/* 'a' */ 97`, and an expression of constants only (`'a' - 'A'`) folds to its value. An index
+expression (`keys['a']`) keeps `(rune)'a'`.
+
+Guarded by: the `RuneLiteralContexts` behavioral test (every slot above, output compared with Go)
+and `TestRuneLiteralForms` in `src/go2cs` (each form and each keep arm by function).
+<!-- seat #23 (C1) of the visual-parity train, COORD ruling 2026-10-28: the rule as written in the
+     design note, with byte/int8/int16 slots respelled as the target (Q1). Census of std at 1.26.10
+     (linux, go/packages, production files): 5,728 literals bare, 265 respelled, 1,690 kept. A net10
+     probe confirmed char converts implicitly to nint/long/ulong/uint/ushort/float/double and not to
+     byte/sbyte/short, and that `case 'A' or 'B'` compiles on int, nint, uint and ulong.
+     2026-10-28: batch 80's go2cs.slnx build read CS1503 on FuncLitUntypedConstReturn's
+     `var shrink = (rune r) => 'a';` (a Func<rune, char>). A func literal's return now spells its result
+     type; the RuneLiteralContexts natural-type arms read a stack overflow under the bare form and match
+     Go under the fix. Source census at 1.26.10: no production func literal in std returns a rune
+     literal (four test files and one cmd file do). The same day the three-target build of the -stdlib
+     emission read CS0266 on `case s[i] == '_':` in internal/strconv and `case b >= '0' && …` in
+     internal/cpu (darwin): a tagless switch's case is a C# pattern. With the case rule all three targets
+     build with 0 errors. -->
+
 ## A computed untyped float constant materializes at its destination's float width
 A named untyped constant can still need its `Untyped*` wrapper because another use demands a different
 type. When that name participates in a computed float constant, C# must not evaluate the expression

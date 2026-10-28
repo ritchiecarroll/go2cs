@@ -58,7 +58,7 @@ internal static nint digitSum<T>(T s)
     nint parse(T part) {
         nint n = 0;
         foreach (var (_, c) in part.ToSlice()) {
-            n = n * 10 + (nint)((byte)(c - (rune)'0'));
+            n = n * 10 + (nint)((byte)(c - '0'));
         }
         return n;
     }
@@ -97,12 +97,12 @@ internal static T wholeSpan<T>(T s)
 internal static slice<byte> appendRun<Bytes>(slice<byte> dst, Bytes src)
     where Bytes : /* []byte | string */ IByteSeq<Bytes, byte>, new()
 {
-    dst = append(dst, (byte)((rune)'['));
+    dst = append(dst, (byte)'[');
     if (len(src) > 1) {
         dst = append(dst, src.slice(1, len(src) - 1).ꓸꓸꓸ);
         dst = append(dst, src.slice(len(src) - 1).ꓸꓸꓸ);
     }
-    dst = append(dst, (byte)((rune)']'));
+    dst = append(dst, (byte)']');
     return dst;
 }
 

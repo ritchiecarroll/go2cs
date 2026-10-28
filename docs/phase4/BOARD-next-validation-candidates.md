@@ -30636,4 +30636,134 @@ master and with this seat alike. Probe: `x := 7; go report(x); defer show(x)` em
 - docsamples `-check` clean, after 18 samples were re-copied.
 <!-- Evidence: C2's scratchpad, gd-evidence (stdlib -diffq per target and run logs, behavioral diffs, pcensus outputs, build-and-run log,
      red and mutation logs), on C2's box. Census binaries: master 50f14bcaf6 and the seat tree at aaa4d7b8c6. -->
+
+## 2026-10-28 — P2 (1.26.10.2 parity seat #23, C1, claude/p2-seat23-rune-lit): a rune literal is a bare C# char where its slot takes one — DONE on the seat branch
+
+**The rule (COORD's ruling of 2026-10-28, as written; Q1 spelled as the target).** `markRuneLiteralForms` decides
+each rune literal's form from the type go/types records for it and for its slot:
+- bare `'x'`: a comparison or arithmetic against a non-constant basic operand, and a typed slot (assignment, typed
+  var, return, composite element, positional or keyed struct field, value or array/slice index key, send, case
+  label, argument of a non-generic function) whose type is int32, int, int64, uint, uint32, uint64, uint16, float32
+  or float64 and is the slot's own type;
+- one cast spelled as the target in the same slots of byte, int8 or int16, in append's byte elements, and as the
+  operand of a conversion: `(byte)'q'`, `(int8)'A'`, `(int16)'B'`, `(byte)'7'` for `(byte)(rune)'7'`. The converter
+  spells the Go names `int8`/`int16`, not `sbyte`/`short`;
+- `(rune)'x'` everywhere else: inference, interface slots, variadic arguments, builtins, generic calls (type
+  arguments written or inferred), named types, uintptr, index expressions, constant-only expressions, astral runes.
+
+**Red first.** Behavioral `RuneLiteralContexts` (every slot; const and `'a' - 'A'` printed with %T and %v) and
+converter `TestRuneLiteralForms` (each form and each keep arm by function) are red at f2d6b3e56f and green at the tip.
+The output matches `go run` on linux.
+
+**A defect the re-baseline found before any push.** A generic call with INFERRED type arguments, `show('a')` for
+`func show[E any](e E)`, first emitted bare: the call's go/types type is the instantiated signature, which has no
+type parameters, and C# would infer E as char. Fixed in a6e92639f5 (keep the cast when `info.Instances` records
+the callee), with a red `keepInferred` check. `UntypedConstTypeArg` and `GenericUntypedConstInfer` guard it.
+
+**Prediction and score** (posted 01:23Z before any reconvert; a go/types census of the behavioral corpus):
+- predicted 48 goldens and 140 literals. Measured on linux: 43 goldens and 130 literals, plus one non-golden
+  output, `GoHostModuleShadow/consumer/consumer.cs`, a sub-package the census did not load. The census had the same
+  inferred-generic flaw (3 literals in 1 golden it should have kept), and it did not type positional struct fields
+  (3 literals in `BigUntypedConstComparison` the converter correctly respells). The other 4 goldens
+  (`EnvironBlockWalk`, `FindFirstFileData`, `RawConnSyncSocketIO`, `UnsafeStringEmpty`, 10 literals) are
+  windows-exclusive and cannot be minted on linux: they are left as they stand for a windows host to re-baseline.
+- C1's pcensus (seat #22, 8d39ef85ec) with this seat's canon additions reads 89 of 89 golden pairs C1, 0 refused.
+  The additions: a conversion's operand (`(byte)(rune)'a'`), a byte/int8/int16 slot respelled as the target, and
+  N2's canon no longer claims a cast pair on a char literal. They are held as a patch and land on this branch once
+  #22 is on master (COORD: score once #22 lands). The first scoring read 7 pairs UNCLASSIFIED; all 7
+  were C1 by inspection, and the canon was corrected (a call's argument parentheses matched the `((rune)'x')` rule,
+  and a conversion inside a conversion lost no `(rune)'`), each with a plant.
+- `(rune)'` in goldens: 171 in 53 files at the base, 43 in the existing goldens after, 10 of them in the 4
+  windows goldens.
+
+**CNR.** Only the seat's outputs move. Two foreign drifts were reverted, each emitted the same by a base converter
+built at f2d6b3e56f: `MulticastGroupJoin/main.cs` (a `range(...)` foreach) and
+`FieldAccessReinterpret/package_info.cs` (an undocumented platform-alias drift, reported by CNR).
+
+**Corpus footprint: none in this seat** (deferred-corpus window). The std census at 1.26.10 linux reads, in
+production files, 5,728 literals bare, 265 respelled and 1,690 kept; the end regen carries them.
+
+**Rebased per §3.3 onto batch 79 (master 2c737cfdfc)** as `claude/p2-seat23-rune-lit-r2`: the seven source commits
+replayed (one BOARD merge), the goldens commit dropped and re-minted last. CNR on linux changed exactly the
+recorded set, 43 goldens plus GoHostModuleShadow/consumer/consumer.cs (no golden); pcensus `classify -items C1`
+reads 90 pairs, all C1, 0 refused, the same per file as at the old base. Each re-minted golden byte-equals its
+transpile; `docsamples -check` is clean.
+
+— P2 (2026-10-28)
+
+## 2026-10-28 — P2 finding (seat #23's CNR on linux): two committed behavioral outputs differ from what master's converter emits — OPEN, unowned
+
+CNR on linux at claude/p2-seat23-rune-lit reported two changed outputs this seat does not make. A converter built at
+the seat's base, f2d6b3e56f, emits the same bytes for both, so each predates the seat. Both were reverted in the seat.
+- `src/tests/Behavioral/MulticastGroupJoin/main.cs` (linux-exclusive, not built by go2cs.slnx): the committed file
+  reads `foreach (var (i, _) in ifis)` where the converter now emits `foreach (var i in range(ifis))`. The project has
+  no golden, so no gate compares it; its committed `.cs` is stale against the converter.
+- `src/tests/Behavioral/FieldAccessReinterpret/package_info.cs`: on linux the converter drops two imported aliases
+  (`syscallꓸHandle`, `syscallꓸSockaddr`) that the committed, windows-captured file carries. CNR names it
+  UNDOCUMENTED PLATFORM-ALIAS DRIFT: either mark the package `[GoPlatformExclusive]` or add it to CNR's documented
+  list beside `OsGetpagesize`, with the platform that captured its output.
+
+Next step for whoever owns it: re-emit `MulticastGroupJoin` on a linux host and commit it, and rule
+`FieldAccessReinterpret` into one of CNR's two classes.
+
+Update at 2c737cfdfc (the seat's rebase): `MulticastGroupJoin` no longer drifts; seat #20 re-baselined it on linux
+(adb454e4aa). `FieldAccessReinterpret/package_info.cs` still does, and UpdateTestTargets re-emits it on every run.
+
+— P2 (2026-10-28)
+
+## 2026-10-28 — P2 (1.26.10.2 parity seat #23, C1, claude/p2-seat23-rune-lit-r3): a func literal's return, and the rebase onto batch 80
+
+**The red.** Batch 80's go2cs.slnx build read CS1503 on `FuncLitUntypedConstReturn`: r2 emitted
+`var shrink = (rune r) => 'a';`, a Func<rune, char>, because a C# lambda infers its return type from its body. CNR
+transpiles and diffs and never compiles, so the seat's gates could not see it; every re-minted project now also runs
+the behavioral Compile and Output phases.
+
+**The rule.** A rune literal that decides a type C# infers keeps a cast. A func literal's return spells its result
+type: `(rune)'a'` for a rune result (master's bytes), `(uint16)'u'` or `(nint)'w'` for any other, which also gives
+those lambdas Go's delegate type where master's `(rune)` gave Func<int>. A return from a declared function stays bare.
+The untyped var, `:=` and a generic argument that infers T were already kept, and are now guarded.
+
+**Measured.**
+- Guard arms red at f7fbe9b5b0: three of TestRuneLiteralForms' lambda arms fail; RuneLiteralContexts' natural-type
+  section compiles but the C# run dies with "Stack overflow." (exit 134) where Go prints the types. Green at the fix.
+- Prediction 0 lines for the -stdlib emission, fix against f7fbe9b5b0, from a go/ast census (5 func literals in
+  1.26.10 return a rune literal: 4 in _test.go files, 1 in cmd). Two-seeded A/B, three targets: 0 files on each
+  (1,195 windows, 1,236 linux, 1,238 darwin files written per arm). MET.
+- Rebased per §3.3 onto batch 80 (9390c32e54) as `-r3`. CNR changed the 43 goldens of r2, consumer.cs, and the guard
+  project, whose golden now rides its red commit. pcensus `classify -items C1` over the goldens commit: 177 pairs, all
+  C1, 0 refused; per file the same as r2 except `FuncLitUntypedConstReturn/main.cs`, 5 pairs to 4 (the shrink line).
+- 45 projects (the 44 re-minted `.cs` files' projects and the guard) pass Compile and Output on linux at r3.
+
+**Findings for others.**
+- `%T` over a C# `Func<int, char>` overflows the stack in golib. The fix no longer emits one; COORD owns the row.
+- `FieldAccessReinterpret/package_info.cs`, the windows-captured file this BOARD named above, does not compile on
+  linux (CS0305 `ΔSockaddr<ΔTTarget>`, CS0426 `ΔHandle`). The project passes once the file is re-transpiled on linux;
+  the runner keeps the committed file when it is newer than its source.
+
+— P2 (2026-10-28)
+
+## 2026-10-28 — P2 (1.26.10.2 parity seat #23, C1, claude/p2-seat23-rune-lit-r3): the stdlib compile arm, and the cut on batch 81
+
+**A second red, found by the stdlib compile arm.** The -stdlib emission at the batch-80 cut, built with
+go2cs-stdlib.slnx per GoTargetOS, failed with CS0266 (char to byte) on every target: internal/strconv's atof.cs,
+`case s[i] == '_':` under `switch {` and `case c == '_':` under `switch c := s[i]; true {`, and on darwin
+internal/cpu's cpu_darwin.cs, `case b >= '0' && b <= '9':`. r2 emitted the same lines, so batch 80's held cut
+carried them too; its gates (CNR, go2cs.slnx) never build the stdlib emission. A tagless switch's case comparison
+renders as a C# pattern (`c is '_'`), whose constant must convert to the operand's type, and a char does not reach
+byte. Rule: such a comparison (tag absent or the constant true, alone or joined by && and || and parentheses) takes
+the typed-slot form, `c is (byte)'_'`; a rune operand keeps the bare char. Guard arms: TestRuneLiteralForms'
+taglessByte and trueTagByte, and RuneLiteralContexts' two switch shapes over byte, int8 and rune; at the base the
+guard's C# compile fails with the same CS0266, at the fix it compiles and matches Go.
+
+**The cut.** Rebased per §3.3 onto batch 81 (904c363f67), goldens re-minted last.
+- Stdlib emission at the tip, built per GoTargetOS: 0 errors on linux, windows and darwin (1,279 / 1,236 / 1,288
+  files written). The warnings are not this seat's: CS9113 in testing/TestReporter.cs on all three, and CS0219 in
+  syscall/linux/exec_linux.cs on linux.
+- CNR changed the same 43 goldens and consumer.cs as at batch 80; pcensus `classify -items C1` reads 177 pairs, all
+  C1, 0 refused, identical per file to the batch-80 cut. TestPlants holds no AMBIGUOUS against N2 or GD.
+- All 45 projects pass the behavioral Compile and Output phases on linux. No doc sample moves.
+- Windows-exclusive goldens left to the i7: EnvironBlockWalk, FindFirstFileData, RawConnSyncSocketIO, UnsafeStringEmpty.
+
+— P2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

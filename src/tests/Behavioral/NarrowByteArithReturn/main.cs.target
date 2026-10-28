@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 partial class main_package {
 
 internal static partial byte lower(byte c) {
-    if ((rune)'A' <= c && c <= (rune)'Z') {
+    if ('A' <= c && c <= 'Z') {
         return (byte)(c + ((rune)'a' - (rune)'A'));
     }
     return c;
@@ -17,7 +17,7 @@ internal static partial byte wrapRet(byte x) {
 }
 
 internal static void Main() {
-    fmt.Println(lower((rune)'A'), lower((rune)'Z'), lower((rune)'a'));
+    fmt.Println(lower((byte)'A'), lower((byte)'Z'), lower((byte)'a'));
     fmt.Println(wrapRet(200));
 }
 

@@ -36,7 +36,7 @@ internal static float64 applyFloat64(Func<float64> f) {
 
 internal static void Main() {
     var maxFn = rune (rune _) => maxRune;
-    fmt.Println(apply(maxFn, (rune)'a'));
+    fmt.Println(apply(maxFn, 'a'));
 
     var encode = rune (rune r) => {
         if (r == runeSelf) {
@@ -49,7 +49,7 @@ internal static void Main() {
     };
     fmt.Println(apply(encode, runeSelf));
     fmt.Println(apply(encode, maxRune));
-    fmt.Println(apply(encode, (rune)'x'));
+    fmt.Println(apply(encode, 'x'));
 
     int64 pick(bool neg) {
         if (neg) {
@@ -60,7 +60,7 @@ internal static void Main() {
     fmt.Println(pick(false), pick(true));
 
     var invalid = rune (rune r) => maxRune + 1;
-    fmt.Println(apply(invalid, (rune)'c'));
+    fmt.Println(apply(invalid, 'c'));
 
     var shrink = (rune r) => (rune)'a';
     fmt.Println(apply(shrink, maxRune));
@@ -97,7 +97,7 @@ internal static void Main() {
     };
     fmt.Println(applyInt32(rank, true), applyInt32(rank, false));
 
-    fmt.Println(apply((rune _) => maxRune, (rune)'b'));
+    fmt.Println(apply((rune _) => maxRune, 'b'));
 }
 
 } // end main_package

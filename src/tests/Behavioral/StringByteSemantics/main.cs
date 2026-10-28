@@ -23,7 +23,7 @@ internal static void Main() {
 
     @string t = "abc";
     var b = slice<byte>(t);
-    b[0] = (rune)'X';
+    b[0] = (byte)'X';
     fmt.Println(t, (@string)b);
 }
 

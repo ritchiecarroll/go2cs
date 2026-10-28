@@ -18,7 +18,7 @@ internal static int8 a = 100;
 internal static uint8 u = 200;
 internal static int16 w = 30000;
 internal static uint16 z = 60000;
-internal static byte c = (rune)'/';
+internal static byte c = (byte)'/';
 internal static uint8 d = 250;
 internal static int8 m8 = -128;
 internal static int8 n1 = -1;
@@ -95,7 +95,7 @@ internal static void Main() {
 
     arm("generic", () => gen((int8)(a + a)) + " "u8 + gen((uint8)(u + u)));
 
-    arm("widening", () => fmt.Sprint((nint)((uint8)(u + u)), " ", (int64)((int8)(a + a)), " ", (float64)((int8)(a + a)), " ", (nint)((byte)(c - (rune)'0')), " ", (uint32)((uint16)(z + z)), " ", (int32)((int16)(w + w))));
+    arm("widening", () => fmt.Sprint((nint)((uint8)(u + u)), " ", (int64)((int8)(a + a)), " ", (float64)((int8)(a + a)), " ", (nint)((byte)(c - '0')), " ", (uint32)((uint16)(z + z)), " ", (int32)((int16)(w + w))));
 
     var tbl = new slice<nint>(256);
     foreach (var k in range(tbl)) {

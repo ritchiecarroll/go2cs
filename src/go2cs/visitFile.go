@@ -81,6 +81,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// markEmptyInterfaceFuncLits)
 	v.markEmptyInterfaceFuncLits(file)
 
+	// Decide which rune literals render as a bare C# char (see markRuneLiteralForms)
+	v.markRuneLiteralForms(file)
+
 	// Index the file's function declarations for methodSetConstraintNeeded
 	v.collectFileFuncDecls(file)
 

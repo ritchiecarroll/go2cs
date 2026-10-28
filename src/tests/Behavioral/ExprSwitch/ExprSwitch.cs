@@ -132,7 +132,7 @@ internal static void Main() {
     var c = (rune)'\r';
 
     switch (c) {
-    case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
+    case ' ' or '\t' or '\n' or '\f' or '\r': {
         fmt.Println("whitespace");
         break;
     }}

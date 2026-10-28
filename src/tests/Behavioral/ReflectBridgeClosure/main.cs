@@ -114,14 +114,14 @@ internal static void Main() {
     var cv = reflect.ValueOf(custom);
     var got = cv.Bytes();
     fmt.Printf("bytes(definedBytes)=%q len=%d cap=%d\n"u8, (@string)got, len(got), cap(got));
-    got[2] = (rune)'?';
+    got[2] = (byte)'?';
     fmt.Printf("alias write visible in source: %q\n"u8, ((@string)new byte[]{(byte)custom[0], (byte)custom[1], (byte)custom[2]}.slice()));
 
     var plain = (namedPlainBytes)slice<byte>((@string)"ok"u8);
     fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, (@string)reflect.ValueOf(plain).Bytes());
 
     ref var arr = ref heap<array<byte>>(out var Ꮡarr);
-    arr = new byte[]{(rune)'a', (rune)'b', (rune)'c'}.array();
+    arr = new byte[]{(byte)'a', (byte)'b', (byte)'c'}.array();
     fmt.Printf("bytes([3]byte)=%q\n"u8, (@string)reflect.ValueOf(Ꮡarr).Elem().Bytes());
 
     ref var dstPlain = ref heap<slice<byte>>(out var ᏑdstPlain);

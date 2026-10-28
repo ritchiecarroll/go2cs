@@ -32,7 +32,7 @@ internal static void Main() {
 
     var t = Ꮡ(new sink());
     t.add(7);
-    t.add((byte)(rune)'A', (byte)(rune)'B');
+    t.add((byte)'A', (byte)'B');
     fmt.Println((~t).buf);
 }
 

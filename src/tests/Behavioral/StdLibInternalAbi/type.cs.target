@@ -589,7 +589,7 @@ public static bool IsBlank(this ΔName n) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
-    return l == 1 && n.Data(2).Value == (rune)'_';
+    return l == 1 && n.Data(2).Value == '_';
 }
 
 internal static nint writeVarint(slice<byte> buf, nint n) {

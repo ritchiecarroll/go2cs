@@ -2056,6 +2056,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
 
     [TestMethod]
+    public void CheckRuneLiteralContexts() => CheckTarget("RuneLiteralContexts");
+
+    [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]

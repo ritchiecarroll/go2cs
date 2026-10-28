@@ -755,13 +755,24 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		value = replaceOctalChars(value)
 		intVal, err := strconv.Atoi(value)
 
+		// The cast a BMP literal carries: none where the slot takes a C# char, the slot's own type
+		// where C# needs a cast to reach it, and `(rune)` otherwise (see markRuneLiteralForms).
+		charCast := "(rune)"
+
+		switch v.runeLiteralForms[basicLit] {
+		case runeLiteralBare:
+			charCast = ""
+		case runeLiteralTarget:
+			charCast = "(" + convertToCSTypeName(v.getAliasQualifiedTypeName(v.info.TypeOf(basicLit), false)) + ")"
+		}
+
 		if err == nil {
 			if intVal <= 0xFFFF {
 				// Character can be represented as a char in C# Rune. QuoteRune escapes control
 				// and special characters (`'\t'`, `'\n'`, `'\\'` — Go's escapes are all valid C#
 				// char escapes for BMP runes); the raw `%c` form emitted literal control bytes,
 				// and a raw newline inside a char literal does not even parse (CS1010).
-				result.WriteString(fmt.Sprintf("(rune)%s", strconv.QuoteRune(rune(intVal))))
+				result.WriteString(charCast + strconv.QuoteRune(rune(intVal)))
 			} else {
 				// For characters beyond BMP, we can use the direct code point
 				result.WriteString(fmt.Sprintf("0x%X", intVal))
@@ -780,7 +791,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			}
 
 			if !emitted {
-				result.WriteString(fmt.Sprintf("(rune)%s", value))
+				result.WriteString(charCast + value)
 			}
 		}
 	case token.STRING:
