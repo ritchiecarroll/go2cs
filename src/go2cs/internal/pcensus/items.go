@@ -361,11 +361,12 @@ var items = []item{
 	{
 		ID: "L1", Seat: "#30", Title: "slice literals as collection expressions",
 		Measures: []measure{m("L1", "slice-literal", `new [^\[\]\s(){}]+\[\]\{[^{}]*\}\.slice\(\)`)},
+		// COORD's ruling of 2026-10-28: a collection expression cannot target slice<T> (its enumerator yields the
+		// Go range pair), so the literal is golib's builtin over one, `new nint[]{1, 2}.slice()` -> `slice<nint>([1,
+		// 2])`, and a local keeps `var`. The element type may carry spaced generic arguments (`map<@string, nint>`).
 		Canon: []rewrite{
-			rw(`new [^\[\]\s(){}]+\[\]\{`, "["),
-			rw(`\}\.slice\(\)`, "]"),
-			// `x := []T{…}` becomes `slice<T> x = […]` (owner ruling §6.3: the type moves to the left).
-			rw(`\bslice<`+generic+`> (`+id+`) = \[`, "var $1 = ["),
+			rw(`new ((?:[^\[\]\s(){}<>]|<(?:[^<>\n]|<[^<>\n]*>)*>)+)\[\]\{`, "slice<$1>(["),
+			rw(`\}\.slice\(\)`, "])"),
 		},
 		Old: rx(`\[\]\{|\}\.slice\(\)`),
 	},
