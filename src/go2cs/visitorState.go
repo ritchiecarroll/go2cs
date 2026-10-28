@@ -550,6 +550,7 @@ type Visitor struct {
 	// enclosing LOOP entry's end-of-body label, marking the label used so the loop declares it
 	// (see wrappedContinueLoopLabel / prepareLoopContinueTarget).
 	continueTargetStack     []*continueTargetEntry
+	patternSwitchDepth      int // pattern switches open around the emission point; names the next one's `ᴛ`, `ᴛ2`, … (visitSwitchStmtCore)
 	lastStatementWasReturn  bool
 	lastReturnIndentLevel   int
 	identEscapesHeap        map[types.Object]bool
