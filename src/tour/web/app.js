@@ -22,6 +22,14 @@
   const connectionLabel = document.querySelector("#connection-label");
   const warmupStatus = document.querySelector("#warmup-status");
   const solutionsLink = document.querySelector("#solutions-link");
+  const generatedView = document.querySelector("#generated-view");
+  const generatedBack = document.querySelector("#generated-back");
+  const generatedUp = document.querySelector("#generated-up");
+  const generatedPath = document.querySelector("#generated-path");
+  const generatedMessage = document.querySelector("#generated-message");
+  const generatedList = document.querySelector("#generated-list");
+  const generatedFile = document.querySelector("#generated-file");
+  const generatedFileCode = document.querySelector("#generated-file code");
 
   let goSource = "";
   let runtimeMode = runtimeSelect.value;
@@ -44,6 +52,9 @@
   let warmupState = "";
   let warmupPoll = null;
   let warmupReadyTimer = null;
+  // The Generated Code tab: the conversion it shows, where it is (a folder, or a file opened from one), the
+  // locations Back returns to, the project names of the root's token folders, and the last load's state.
+  const generated = { conversionId: "", folder: "", file: "", history: [], labels: {}, state: "", request: null };
 
   // Run with Go is on unless this browser turned it off: only a stored "false" unchecks it.
   const syncRunStorageKey = "go2cs-run-with-go";
@@ -289,6 +300,7 @@
       outputs.transpile = result.stage;
       renderGeneratedFiles(result.csharp || "", result.packageInfo || "", result.project || "");
       conversionID = result.conversionId || "";
+      resetGeneratedCode(conversionID);
       dirty = goSource !== sourceAtStart;
 
       if (result.successful && !dirty) {
@@ -363,6 +375,7 @@
       pagePath === pathAtStart && conversionID === request.conversionId;
     outputs.build = buildingStage();
     request.promise.then(stage => {
+      generatedBuildSettled(request.conversionId);
       if (!current()) return;
       outputs.build = stage;
       if (stage.status !== "passed") {
@@ -413,6 +426,7 @@
     try {
       const requestBody = JSON.stringify({ conversionId: conversionAtStart });
       const buildStage = built ? build.stage : await build.promise;
+      generatedBuildSettled(conversionAtStart);
       if (pagePath !== pathAtStart || conversionID !== conversionAtStart) return;
       outputs.build = buildStage;
       renderOutputState();
@@ -492,6 +506,7 @@
     codeView.textContent = "";
     packageInfoView.textContent = "";
     projectView.textContent = "";
+    resetGeneratedCode("");
     outputs.transpile = idleStage("transpile", "");
     outputs.build = idleStage("build", "");
     outputs.run = idleStage("run", "");
@@ -504,6 +519,147 @@
       button.setAttribute("aria-selected", String(selected));
       document.querySelector(`#${button.dataset.view}-view`).hidden = !selected;
     }
+    if (name === "generated" && generated.state !== "ready") loadGeneratedCode();
+  }
+
+  // ---- Generated Code tab ----------------------------------------------------------------------------------
+  // The source generators' output for the current conversion, served read-only by /api/generated from the
+  // conversion's own build: a folder explorer, and a viewer that takes its place when a .cs file is opened.
+
+  function resetGeneratedCode(id) {
+    generated.request?.abort();
+    Object.assign(generated, { conversionId: id, folder: "", file: "", history: [], labels: {}, state: "", request: null });
+    showGeneratedMessage(id ? "The generated code appears here when the conversion's build finishes."
+      : "Convert a Tour page to see the code go2cs-gen writes for it.");
+    renderGeneratedNav();
+    if (id && !generatedView.hidden) loadGeneratedCode();
+  }
+
+  // A build of the shown conversion has ended: its folder is now complete, so a waiting tab loads it.
+  function generatedBuildSettled(id) {
+    if (id !== generated.conversionId || generated.state === "ready") return;
+    generated.state = "";
+    if (!generatedView.hidden) loadGeneratedCode();
+  }
+
+  function generatedNavigate(folder, file) {
+    generated.history.push({ folder: generated.folder, file: generated.file });
+    generated.folder = folder;
+    generated.file = file;
+    loadGeneratedCode();
+  }
+
+  function goGeneratedBack() {
+    if (generated.file) {
+      // The viewer returns to the explorer at the folder the file was opened from.
+      generated.file = "";
+    } else {
+      const previous = generated.history.pop();
+      if (!previous) return;
+      generated.folder = previous.folder;
+      generated.file = previous.file;
+    }
+    loadGeneratedCode();
+  }
+
+  function goGeneratedUp() {
+    if (generated.file) {
+      generated.file = "";
+    } else if (generated.folder) {
+      generated.history.push({ folder: generated.folder, file: "" });
+      generated.folder = generated.folder.includes("/") ? generated.folder.slice(0, generated.folder.lastIndexOf("/")) : "";
+    } else {
+      return;
+    }
+    loadGeneratedCode();
+  }
+
+  async function loadGeneratedCode() {
+    const id = generated.conversionId;
+    renderGeneratedNav();
+    if (!id) return;
+    generated.request?.abort();
+    const controller = new AbortController();
+    generated.request = controller;
+    const target = generated.file || generated.folder;
+    try {
+      const response = await fetch(`/api/generated?${new URLSearchParams({ conversionId: id, path: target })}`, { signal: controller.signal });
+      const result = await response.json();
+      if (generated.request !== controller) return;
+      if (!response.ok) throw new Error(result.error || `Generated code unavailable (${response.status})`);
+      generated.state = result.state;
+      if (result.state !== "ready") {
+        showGeneratedMessage(result.message);
+      } else if (result.kind === "file") {
+        generatedFileCode.innerHTML = highlightCSharp(result.content || "");
+        showGeneratedPart(generatedFile);
+        generatedFile.scrollTop = 0;
+        generatedFile.scrollLeft = 0;
+      } else {
+        renderGeneratedListing(result.entries || []);
+      }
+    } catch (error) {
+      if (error.name === "AbortError" || generated.request !== controller) return;
+      generated.state = "";
+      showGeneratedMessage(error.message);
+    } finally {
+      if (generated.request === controller) generated.request = null;
+      renderGeneratedNav();
+    }
+  }
+
+  function renderGeneratedListing(entries) {
+    generatedList.replaceChildren();
+    if (!entries.length) {
+      showGeneratedMessage("This folder holds no generated C#.");
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.label) generated.labels[entry.name] = entry.label;
+      const item = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `generated-entry generated-entry-${entry.kind}`;
+      const name = document.createElement("span");
+      name.className = "generated-entry-name";
+      name.textContent = entry.label ? entry.label : entry.name;
+      button.append(name);
+      const detail = document.createElement("span");
+      detail.className = "generated-entry-detail";
+      detail.textContent = entry.label ? entry.name : entry.kind === "file" ? formatBytes(entry.size || 0) : "";
+      button.append(detail);
+      button.addEventListener("click", () => entry.kind === "dir"
+        ? generatedNavigate(entry.path, "")
+        : generatedNavigate(generated.folder, entry.path));
+      item.append(button);
+      generatedList.append(item);
+    }
+    showGeneratedPart(generatedList);
+  }
+
+  function showGeneratedMessage(text) {
+    generatedMessage.textContent = text || "";
+    showGeneratedPart(generatedMessage);
+  }
+
+  function showGeneratedPart(part) {
+    for (const candidate of [generatedMessage, generatedList, generatedFile]) candidate.hidden = candidate !== part;
+  }
+
+  // The bar shows where the tab is, folders by their project name where the root's token folder has one, and
+  // offers Back and Up whenever there is somewhere to go.
+  function renderGeneratedNav() {
+    const segments = (generated.file || generated.folder).split("/").filter(Boolean);
+    if (segments.length && generated.labels[segments[0]]) segments[0] = generated.labels[segments[0]];
+    generatedPath.textContent = ["Generated code", ...segments].join(" / ");
+    generatedPath.title = generated.file || generated.folder || "";
+    const ready = Boolean(generated.conversionId);
+    generatedBack.disabled = !ready || (!generated.file && generated.history.length === 0);
+    generatedUp.disabled = !ready || (!generated.file && !generated.folder);
+  }
+
+  function formatBytes(size) {
+    return size < 1024 ? `${size} B` : `${(size / 1024).toFixed(1)} KB`;
   }
 
   function selectOutput(id) {
@@ -665,6 +821,8 @@
   frame.addEventListener("load", () => {
     frame.contentWindow?.postMessage({ type: "go2cs-request-source" }, window.location.origin);
   });
+  generatedBack.addEventListener("click", goGeneratedBack);
+  generatedUp.addEventListener("click", goGeneratedUp);
   sourceTabs.addEventListener("click", event => {
     const button = event.target.closest("[data-view]");
     if (button) selectSourceView(button.dataset.view);
@@ -677,6 +835,7 @@
     runtimeMode = runtimeSelect.value;
     forgetBuild();
     conversionID = "";
+    resetGeneratedCode("");
     dirty = Boolean(goSource);
     outputs.build = idleStage("build", "Run the converted project to see build output.");
     outputs.run = idleStage("run", "Run the converted project to see .NET output.");

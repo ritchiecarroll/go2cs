@@ -71,6 +71,7 @@
         <button id="code-tab" role="tab" type="button" data-view="code" aria-selected="true">Code</button>
         <button id="package-info-tab" role="tab" type="button" data-view="package-info" aria-selected="false">Package Info</button>
         <button id="project-tab" role="tab" type="button" data-view="project" aria-selected="false">Project</button>
+        <button id="generated-tab" role="tab" type="button" data-view="generated" aria-selected="false" title="The code go2cs-gen's source generators wrote for this conversion">Generated Code</button>
         <label class="runtime-picker" title="Choose the .NET runtime dependency source">
           <span>Runtime</span>
           <select id="runtime-mode" aria-label=".NET runtime dependency source">
@@ -85,6 +86,18 @@
         <pre id="code-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="code-tab"><code>// C# appears automatically when a Tour page opens.</code></pre>
         <pre id="package-info-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="package-info-tab" hidden><code>// Generated package metadata appears here.</code></pre>
         <pre id="project-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="project-tab" hidden><code>&lt;!-- The generated project file appears here. --&gt;</code></pre>
+        <div id="generated-view" class="generated-view" role="tabpanel" aria-labelledby="generated-tab" hidden>
+          <nav class="generated-nav" aria-label="Generated code navigation">
+            <button id="generated-back" class="generated-nav-button" type="button" title="Back" aria-label="Back" disabled>&#8592;</button>
+            <button id="generated-up" class="generated-nav-button" type="button" title="Up one folder" aria-label="Up one folder" disabled>&#8593;</button>
+            <span id="generated-path" class="generated-path">Generated code</span>
+          </nav>
+          <div class="generated-body">
+            <p id="generated-message" class="generated-message">Convert a Tour page to see the code go2cs-gen writes for it.</p>
+            <ul id="generated-list" class="generated-list" aria-label="Generated files" hidden></ul>
+            <pre id="generated-file" class="source-view generated-file" tabindex="0" hidden><code></code></pre>
+          </div>
+        </div>
       </div>
 
       <section class="output-panel" aria-label="Conversion and .NET output">
