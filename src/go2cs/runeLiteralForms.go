@@ -27,8 +27,9 @@ import (
 //	runeLiteralBare   `'x'`        comparisons and arithmetic against a non-constant operand, typed
 //	                               slots of an int32/int/int64/uint/uint32/uint64/uint16/float type,
 //	                               and the operand of a conversion to an unnamed basic numeric type
-//	runeLiteralTarget `(byte)'x'`  typed slots of a byte, int8 or int16 type, cast to that type, and
-//	                               a func literal's return of any other result type
+//	runeLiteralTarget `(byte)'x'`  typed slots of a byte, int8 or int16 type, cast to that type (a
+//	                               tagless switch's case comparison among them, since C# writes it as a
+//	                               pattern), and a func literal's return of any other result type
 type runeLiteralForm int
 
 const (
@@ -134,6 +135,12 @@ func (v *Visitor) runeLiteralFormOf(lit *ast.BasicLit, stack []ast.Node) runeLit
 		switch parent.Op {
 		case token.LAND, token.LOR:
 			return runeLiteralKeep
+		}
+
+		// A comparison that is a tagless switch's case renders as a C# pattern (`c is '_'`), whose constant
+		// must convert to the operand's type: a char reaches int but not byte, so the slot's form applies.
+		if v.inTaglessCase(stack[:i+1]) {
+			return typedSlot
 		}
 
 		return runeLiteralBare
@@ -307,6 +314,43 @@ func exprInList(node ast.Node, list []ast.Expr) bool {
 	}
 
 	return false
+}
+
+// inTaglessCase reports whether the comparison on the stack's top is a case of a switch without a tag (or whose tag
+// is the constant true, `switch c := s[i]; true {`), alone or joined by && and || and parentheses.
+func (v *Visitor) inTaglessCase(stack []ast.Node) bool {
+	i := len(stack) - 2
+
+	for i >= 0 {
+		if binary, ok := stack[i].(*ast.BinaryExpr); ok && (binary.Op == token.LAND || binary.Op == token.LOR) {
+			i--
+		} else if _, ok := stack[i].(*ast.ParenExpr); ok {
+			i--
+		} else {
+			break
+		}
+	}
+
+	if i < 2 {
+		return false
+	}
+
+	if _, ok := stack[i].(*ast.CaseClause); !ok {
+		return false
+	}
+
+	switchStmt, ok := stack[i-2].(*ast.SwitchStmt)
+
+	if !ok {
+		return false
+	}
+
+	if switchStmt.Tag == nil {
+		return true
+	}
+
+	tag := v.info.Types[switchStmt.Tag].Value
+	return tag != nil && tag.Kind() == constant.Bool && constant.BoolVal(tag)
 }
 
 // inFuncLit reports whether the innermost function enclosing the stack's top is a func literal.
