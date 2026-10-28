@@ -1139,10 +1139,15 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 			v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 		}
 	} else {
-		// If constructing a struct with no parameters, pass in a nill value (a named-map
-		// composite's braces belong to the inner CONCRETE map literal — nothing to fill)
-		if _, ok := exprType.(*types.Named); ok && !namedMapComposite {
-			result.WriteString("nil")
+		// An empty STRUCT literal `T{}` is `new T()`, as Go writes it: the generated parameterless
+		// constructor builds the same zero value as `T(NilType)` (both run the field initializers and
+		// AppendZeroValueInitializers), and a wrapper over another named struct constructs that one
+		// (`new A(new B())`). Any other named type keeps the NilType argument (a named-map composite's
+		// braces belong to the inner CONCRETE map literal, so it has nothing to fill).
+		if named, ok := exprType.(*types.Named); ok && !namedMapComposite {
+			if _, isStruct := named.Underlying().(*types.Struct); !isStruct {
+				result.WriteString("nil")
+			}
 		}
 	}
 
