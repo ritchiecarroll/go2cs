@@ -327,7 +327,7 @@ the type Go's type checker records for the literal and for its slot:
 
 - **A bare `'x'`** where the slot fixes a type C# reaches from `char`: a comparison or arithmetic
   against a non-constant operand of a basic type, and a typed slot (assignment, typed `var`,
-  `return`, composite-literal element, value or array index key, channel send, case label, argument
+  `return` from a declared function, composite-literal element, value or array index key, channel send, case label, argument
   of a non-generic function) whose type is `rune`, `int`, `int64`, `uint`, `uint32`, `uint64`,
   `uint16`, `float32` or `float64`. The operand of a conversion to one of those basic types is bare
   too, so `uint16('c')` reads `(uint16)'c'`.
@@ -338,6 +338,9 @@ the type Go's type checker records for the literal and for its slot:
   generic call, a named type such as `type letter rune`, `uintptr`, an index expression, and
   constant-only expressions. A rune beyond the BMP is no C# `char` and keeps its code point
   ([Astral rune literals](struct-types.md#astral-rune-literals)).
+- **A `return` inside a func literal casts to the result type**: `(rune)'a'` for a `rune` result,
+  `(uint16)'u'` for a `uint16` one. The literal is a C# lambda, which infers its return type from its
+  body when nothing else fixes it, so `var shrink = (rune r) => 'a';` would return a `char`.
 
 Bare, in `rune` slots:
 
@@ -443,7 +446,12 @@ and `TestRuneLiteralForms` in `src/go2cs` (each form and each keep arm by functi
      design note, with byte/int8/int16 slots respelled as the target (Q1). Census of std at 1.26.10
      (linux, go/packages, production files): 5,728 literals bare, 265 respelled, 1,690 kept. A net10
      probe confirmed char converts implicitly to nint/long/ulong/uint/ushort/float/double and not to
-     byte/sbyte/short, and that `case 'A' or 'B'` compiles on int, nint, uint and ulong. -->
+     byte/sbyte/short, and that `case 'A' or 'B'` compiles on int, nint, uint and ulong.
+     2026-10-28: batch 80's go2cs.slnx build read CS1503 on FuncLitUntypedConstReturn's
+     `var shrink = (rune r) => 'a';` (a Func<rune, char>). A func literal's return now spells its result
+     type; the RuneLiteralContexts natural-type arms read a stack overflow under the bare form and match
+     Go under the fix. Source census at 1.26.10: no production func literal in std returns a rune
+     literal (four test files and one cmd file do). -->
 
 ## A computed untyped float constant materializes at its destination's float width
 A named untyped constant can still need its `Untyped*` wrapper because another use demands a different
