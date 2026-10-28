@@ -542,8 +542,11 @@ namespace PerformanceRunner
             // csproj, and go2cs.exe -- same family as UpToDate above); and a stamp written at
             // publish success matches the CURRENT toolchain, because a toolchain hop moves no
             // source mtime at all -- reusing a 9-ILC binary for a 10-column is exactly the stale-
-            // publish trap this predicate exists to retire. No stamp (every pre-stamp publish, and
-            // any foreign binary placed without one) means publish, never skip. An unreadable SDK
+            // publish trap this predicate exists to retire. The stamp also carries the content
+            // identity of everything the program compiles in from outside its folder (golib, the
+            // go2cs-gen analyzer, the converted packages it references; AotPublishReuse), so a
+            // golib-only change re-publishes too. No stamp (every pre-stamp publish, and any
+            // foreign binary placed without one) means publish, never skip. An unreadable SDK
             // version disables skipping for the whole run rather than matching stamps vacuously.
             ProcResult sdkProbe = Exec("dotnet", "--version", s_perfDir, 60_000, env);
             string sdkVersion = sdkProbe.ExitCode == 0 ? sdkProbe.StdOut.Trim() : "";
