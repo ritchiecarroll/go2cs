@@ -201,9 +201,9 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts))))
 				}
 
-				// An unnamed slice renders through golib's builtin with a collection expression,
-				// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin).
-				takesBuiltin := sliceLiteralTakesBuiltin(inferred)
+				// The slice renders through golib's builtin with a collection expression, `slice<nint>([1, 2])`
+				// (sliceLiteralTakesBuiltin); an elided named slice element binds through its implicit conversion.
+				takesBuiltin := sliceLiteralTakesBuiltin(u)
 				v.collectionExpressionElements = takesBuiltin
 
 				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
@@ -1141,10 +1141,10 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		compositeSuffix += ")"
 	}
 
-	// An unnamed `[]T{…}` renders through golib's builtin with a collection expression,
+	// An unnamed `[]T{…}`, or an alias to one, renders through golib's builtin with a collection expression,
 	// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin). Only the plain form converts: any other shape this
-	// function decorated (an alias, a wrapper ctor, a sparse or sized backing) keeps its `new` form.
-	takesBuiltin := sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !aliasArrayComposite && !namedArrayComposite &&
+	// function decorated (a wrapper ctor, a sparse or sized backing) keeps its `new` form.
+	takesBuiltin := sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !namedArrayComposite &&
 		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
 
 	if takesBuiltin {
@@ -1251,10 +1251,12 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 // A collection expression cannot target slice<T> itself: C# takes a collection's element type from its public
 // enumerator, and slice<T>'s yields Go's range pair (nint, T), which `foreach (var (i, x) in xs)` relies on.
 //
-// Only an UNNAMED slice converts. A named or aliased slice type keeps its own constructor form, and a slice of
-// arrays keeps `new array<T>[]{…}.slice()`, whose element dims are recorded on that form.
+// An UNNAMED slice converts, and so does an alias to one (`type names = []string`, `List[T any] = []T`), which
+// denotes the identical type. A named slice type keeps its own constructor form, and a slice of arrays keeps
+// `new array<T>[]{…}.slice()`, whose element dims are recorded on that form. The elided site asks this of the
+// literal's underlying slice: an elided element of a named slice type (`[3]Digits{{1, 2}}`) takes no constructor.
 func sliceLiteralTakesBuiltin(t types.Type) bool {
-	slice, ok := t.(*types.Slice)
+	slice, ok := types.Unalias(t).(*types.Slice)
 
 	if !ok {
 		return false

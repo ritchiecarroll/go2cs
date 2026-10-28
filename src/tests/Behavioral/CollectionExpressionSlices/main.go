@@ -4,7 +4,9 @@ import "fmt"
 
 // An unnamed slice literal converts to golib's builtin over a C# collection expression, `slice<nint>([1, 2, 3])`,
 // in every position: a non-nil slice with len == cap and a fresh backing array per evaluation, as Go's `[]T{…}`.
-// A keyed literal, a fixed array, a slice of arrays and a named slice type keep their own forms.
+// An alias to an unnamed slice is that type and converts too, and so does an elided element of a named slice type,
+// which takes no constructor. A keyed literal, a fixed array, a slice of arrays and a named slice type's own
+// literal keep their own forms.
 
 type box struct {
 	data []int
@@ -12,6 +14,10 @@ type box struct {
 }
 
 type IntSlice []int
+
+type strs = []string
+
+type List[T any] = []T
 
 func sum(xs []int) int {
 	total := 0
@@ -80,6 +86,13 @@ func main() {
 	fmt.Println(count([]int{1, 2, 3}...))
 	named := IntSlice{3, 1}
 	fmt.Println("named:", named, len(named))
+
+	// an alias, a generic alias, and elided elements of a named slice type convert
+	var ss strs = strs{"a", "b"}
+	ls := List[int]{4, 5, 6}
+	rows := [2]IntSlice{{1, 2}, {3}}
+	list := []IntSlice{{7}, {8, 9}}
+	fmt.Printf("alias: %v %T %v %T %v %T %v %T\n", ss, ss, ls, ls, rows, rows[1], list, list[0])
 
 	// kept: a keyed literal, a fixed array, a slice of arrays
 	keyed := []int{2: 5}

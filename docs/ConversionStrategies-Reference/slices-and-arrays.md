@@ -53,9 +53,14 @@ collection-expression element spelled `with(…)` is the collection's constructi
 element, such as a call's argument, keeps its bare spelling. (Guarded by the converter test
 `TestCSharp15ReservedTypeNamesAreRenamedWhereTheyBite`.)
 
+An alias to an unnamed slice type is that type, so its literal converts too: with `type strs = []string`,
+`strs{"a", "b"}` → `slice<@string>(["a", "b"])`, and a generic alias `List[int]{4, 5}` → `slice<nint>([4, 5])`. So does an
+elided element of a named slice type, which takes no constructor and binds through the type's implicit conversion:
+`[2]IntSlice{{1, 2}, {3}}` → `new IntSlice[]{slice<nint>([1, 2]), slice<nint>([3])}.array()`.
+
 A keyed literal keeps its sparse form, a fixed array its `.array()` projection, a slice of arrays its
-`GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named or
-aliased slice type its own constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices` and by
+`GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named slice
+type's own literal its constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices` and by
 golib's `SliceLiteralBindingTests`; 1.26.10.2 parity seat #30.)
 
 A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
