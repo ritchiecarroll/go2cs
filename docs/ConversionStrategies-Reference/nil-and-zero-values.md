@@ -4,7 +4,53 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#nil-and-zero-values)
 In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses the golib [`NilType`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/NilType.cs) with a default instance called `nil` (defined in [`go.builtin`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/builtin.cs)). `NilType` provides comparison operators so `x == nil` / `x != nil` work across the runtime types (slices, maps, channels, pointers, interfaces), each of which defines what "nil" means for it (e.g. a `map<K,V>` whose backing dictionary is null is the nil map: reads return the zero value, `len` is 0, ranging yields nothing, and a write panics — matching Go).
 
-The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default!`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](../Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
+The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](../Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
+
+## `nil` compared with an interface or a func reads `nil`; a typeless zero value reads `default`
+
+In a `==` or `!=` comparison, an untyped `nil` whose other operand is an interface (`error` and `any` included)
+or a func renders golib's `nil`, the way Go writes it: `err != nil`, `nil == h`. It binds `NilType`'s
+`operator ==(object?, NilType)`, which is `obj is null`, so it is the same reference test the converter made
+before. An interface holding a typed nil pointer is a non-null reference, so it still compares unequal to `nil`,
+as in Go:
+
+<!-- source: src/tests/Behavioral/NilCompareShapes/main.go:12-15, 50-52 -->
+```go
+func typedNilErr() error {
+	var p *myErr
+	return p
+}
+…
+	err := typedNilErr()
+	fmt.Println("typed nil pointer in error != nil:", err != nil)
+	fmt.Println("nil == typed nil pointer in error:", nil == err)
+```
+<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:15-18, 62-64 -->
+```csharp
+internal static error typedNilErr() {
+    ж<myErr> p = default;
+    return new myErrжerror(p);
+}
+…
+    var err = typedNilErr();
+    fmt.Println("typed nil pointer in error != nil:", err != nil);
+    fmt.Println("nil == typed nil pointer in error:", nil == err);
+```
+
+Both lines print as Go does: `true`, then `false`.
+
+A type parameter keeps its own path whatever its constraint: C# binds no user-defined operator on a type
+parameter (CS8761), so a map- or slice-core type parameter reads `IsNil` and an erased pointer core is a pointer.
+Pointers already rendered `nil`. A slice, map or channel compared with `nil` reads `x == default` until its
+operators against `nil` are proven (parity seat #24).
+
+Every other typeless zero value (a declaration's zero, a `return` of zero results, a nil argument) renders
+`default`, with no `!`: converted projects build with `<Nullable>annotations</Nullable>`, so the
+null-forgiving operator says nothing there. `default(T)!` stays where the type must be named.
+
+<!-- parity seat #20 (N1 stage 1 + D1), 2026-10-28: converter convBinaryExpr.go (nilComparandRendersNil) and the
+     14 D1 literals; guards NilCompareShapes (behavioral, Output compared with Go) and
+     TestNilCompareRendersNilForInterfaceAndFuncOperands. -->
 
 ## A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile
 
@@ -185,7 +231,7 @@ fmt.Println(reflect.TypeOf(map[string]int(nil)))
 ```
 <!-- source: src/tests/Behavioral/UnnamedMapNilConversion/main.cs.target:13 -->
 ```csharp
-fmt.Println(reflect.TypeOf((map<@string, nint>)default!));
+fmt.Println(reflect.TypeOf((map<@string, nint>)default));
 ```
 
 The NAMED twin `myMap(nil)` was always correct — `types.ConvertibleTo` holds for it, so the general
@@ -341,8 +387,8 @@ fmt.Printf("%T %T %T\n", ip, st.P, sl[0])   // *int *main.AErr *main.BErr
 ```
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-ж<nint> ip = default!;
-main_st st = default!;
+ж<nint> ip = default;
+main_st st = default;
 var sl = new slice<ж<BErr>>(1);
 fmt.Printf("%T %T %T\n"u8, ip.OrTypedNil(), st.P.OrTypedNil(), sl[0].OrTypedNil());
 ```

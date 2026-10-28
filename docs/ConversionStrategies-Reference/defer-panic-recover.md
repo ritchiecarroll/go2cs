@@ -81,8 +81,8 @@ back **after** the `finally`, and every exit inside the `try` leaves through a `
 <!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs:73-90 -->
 ```csharp
 internal static (nint @out, @string label) compute(nint x) {
-    nint @out = default!;
-    @string label = default!;
+    nint @out = default;
+    @string label = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -547,7 +547,7 @@ internal static void catchError(ж<error> Ꮡerr) {
         ref var err = ref Ꮡerr.DerefOrNull();
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
 ```
 
 <!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:98 -->
@@ -1005,7 +1005,7 @@ a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buf
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
-    }), "label", default!);
+    }), "label", default);
 ```
 
 The buffer is empty for a return with no capturing-literal argument, so the behavioral corpus is

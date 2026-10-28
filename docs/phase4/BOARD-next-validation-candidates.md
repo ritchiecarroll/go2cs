@@ -30028,4 +30028,68 @@ every match is `ReferenceEquals` on both runtimes. It is forwarded to G for #31/
 
 — R (2026-10-28)
 
+## 2026-10-28 — P1 (parity seat #20, claude/p1-seat20-nil-default): nil compared with an interface or func reads `nil`; every `default!` reads `default` — DONE on the seat branch
+
+**What changed (converter only).** N1 stage 1: in a `==`/`!=` comparison, an untyped `nil` whose other operand's
+underlying type is an interface (error and any included) or a func signature renders golib's `nil`
+(`nilComparandRendersNil`, convBinaryExpr.go), so `err != default!` reads `err != nil` as Go writes it. It binds
+NilType's `operator ==(object?, NilType)`, which is `obj is null`, the same reference test as before, so an
+interface holding a typed nil pointer still compares unequal to nil. A type parameter never takes the rule,
+whatever its core (C# binds no user operator there, CS8761). Pointers already rendered `nil`; slices, maps and
+chans keep `default` for stage 2 (#24). D1: the 14 converter literals that emitted `default!` emit `default`, and
+the one reader of that text (the named-result liveness check) matches. Converted projects build with
+`Nullable=annotations`, so the `!` said nothing. Hand-owned files, golib and the gen templates are untouched.
+
+**Guards, red first.** Behavioral `NilCompareShapes`: Transpile, Compile and Output pass at master f2d6b3e56f and
+Target differs on 24 lines; all four phases pass at the fix. Its Output phase compares with Go an `error` holding
+a typed nil pointer (`!= nil` true), an `any` holding a nil map and one holding a nil slice (`!= nil` true), nil
+and assigned funcs, `recover()`, and `switch v { case nil: }` over any. Converter test
+`TestNilCompareRendersNilForInterfaceAndFuncOperands` fails at master on its interface, func, slice, map, chan and
+D1 rows and pins the func-core type-parameter exclusion.
+
+**Corpus footprint, two-seeded `-stdlib -comments` A/B at f2d6b3e56f** (windows / linux / darwin): .cs files
+986 / 1,025 / 1,028 and .cs.auto 19 / 18 / 14; .cs lines 26,660 / 26,782 / 26,746 and .cs.auto 325 / 135 / 101
+(equal -n/+n); `nil` sites 6,414 / 6,359 / 6,316. Every changed line is D1, N1 or both on one line; 0 other,
+0 `GoPositionMap` lines, 0 `default!` left in emitted files, no file added or removed. pcensus `classify -items
+N1,D1` reads the same diffs with 0 refused on every target (D1 20,658 / 20,646 / 20,618, N1 6,313 / 6,255 / 6,213,
+N1+D1 13 / 15 / 15), once this seat widens its N1 canon: a slice or map compare beside an interface compare on
+one line keeps `default`, which the plan's canon read as unexplained (8 lines per target). The linux fix emission
+builds clean (go2cs-stdlib.slnx, 0 errors). Not applied to src/core: the train's end regen carries it.
+
+**Prediction, scored.** MISSED on files, lines and the N1 band (5,900 to 6,300 on windows); MET on the line kinds,
+0 `default!` left and 0 map lines. Cause, owned: the census predicate. It skipped every file QUOTING
+`[module: GoManualConversion]` (placeholder comments in 55 emitted windows files), missed the `.cs.auto`-sibling
+hand-own rule, and tested `"/bin" in path`, which skipped encoding/binary. Corrected, the base seeds read the
+measured file count on every target. The N1 band was the regex ceiling less the census's slice/map/chan/other
+count; it should have been the census's interface plus func count (6,506 on windows), which the measurement
+sits 92 under. A claim that `case nil` under an interface tag takes the rule was also wrong: interface tags go
+through AreEqual, and the two `exprᴛ1 == default` sites are pointer tags.
+
+**Stage 2's population, exact by name.** Compares still reading `default`: 663 / 666 / 660, against the go/types
+census's slice + map + chan 662 / 672 / 666. The files that differ: runtime/os_windows.go, 7 compares of
+`runtime.stdFunction` (a named unsafe.Pointer type, windows only); runtime/type.go and time/format.go, one
+`case nil` over a pointer tag each; runtime/mprof.go:1255, in hand-converted goroutineProfileWithLabels; and the
+hand-owned testing package, 7. The census's 42 untyped sites (go/types could not type them in net and crypto/tls)
+are none of them. Every row, with its Go and C# position at f2d6b3e56f's emission:
+`docs/phase4/DATA-n1-stage2-residual.tsv`.
+
+**Behavioral goldens.** CNR on linux at the fix changed 381 files: 378 carry only D1/N1 lines and were
+re-baselined (373 goldens in 372 projects, each byte-equal to its fresh transpile). Three carry pre-existing linux
+drift that master's converter also emits, so they are NOT this seat's to bank: `MulticastGroupJoin/main.cs`
+(`foreach (var (i, _) in ifis)` against `foreach (var i in range(ifis))`; its golden is held, D1/N1 lines
+included), and the `package_info.cs` of `FieldAccessReinterpret` and `OsGetpagesize` (two `global using syscall…`
+lines). 11 windows-exclusive projects are not transpiled on linux and still hold `default!`: EnvironBlockWalk,
+FindFirstFileData, PipeSharedFileObject, PointerOutParameter, RawConnSyncSocketIO, SockaddrRoundTrip,
+SystemCertVerify, UnsafeStringEmpty, WindowsNewCallback, WsaProtocolInfo, WsaSendtoRoundTrip. They need a
+re-baseline on a windows host.
+
+**Docs.** The Reference rule is in `nil-and-zero-values.md` (its index line in the Reference README), with a
+sample cited from NilCompareShapes. `docsamples -recite` re-copied the golden-sourced samples these goldens move,
+on master 56e4fba06f: 73 lines across `ConversionStrategies.md` and seven Reference pages, every one D1 or N1.
+Nine provenance notes that cite changed golden lines were re-fingerprinted, and the three that quote `default!`
+now quote `default`. The `testdata/markercomments/main.cs` fixture was regenerated (3 D1 lines). Corpus-sourced
+samples and the summary's other `default!` prose wait for the regen.
+
+— P1 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

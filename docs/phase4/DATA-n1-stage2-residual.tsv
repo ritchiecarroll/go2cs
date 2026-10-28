@@ -1,0 +1,2044 @@
+target	go_package	go_file	go_line	class	go_type	cs_file	cs_line	note
+windows	archive/tar	reader.go	205	slice	archive/tar.sparseDatas	archive/tar/reader.cs	230	
+windows	archive/tar	reader.go	292	map	map[string]string	archive/tar/reader.cs	341	
+windows	archive/zip	reader.go	184	map	map[uint16]archive/zip.Decompressor	archive/zip/reader.cs	195	
+windows	archive/zip	writer.go	494	map	map[uint16]archive/zip.Compressor	archive/zip/writer.cs	548	
+windows	bufio	bufio.go	81	slice	[]byte	bufio/bufio.cs	83	
+windows	bufio	bufio.go	626	slice	[]byte	bufio/bufio.cs	668	
+windows	bufio	scan.go	158	slice	[]byte	bufio/scan.cs	154	
+windows	bufio	scan.go	167	slice	[]byte	bufio/scan.cs	163	
+windows	bytes	buffer.go	154	slice	[]byte	bytes/buffer.cs	173	
+windows	bytes	bytes.go	1385	slice	[]byte	bytes/bytes.cs	1443	
+windows	compress/flate	huffman_bit_writer.go	316	slice	[]byte	compress/flate/huffman_bit_writer.cs	317	
+windows	compress/flate	huffman_code.go	273	slice	[]compress/flate.literalNode	compress/flate/huffman_code.cs	285	
+windows	compress/gzip	gzip.go	148	slice	[]byte	compress/gzip/gzip.cs	156	
+windows	compress/gzip	gzip.go	172	slice	[]byte	compress/gzip/gzip.cs	181	
+windows	compress/zlib	writer.go	115	slice	[]byte	compress/zlib/writer.cs	121	
+windows	compress/zlib	writer.go	122	slice	[]byte	compress/zlib/writer.cs	130	
+windows	context	context.go	384	chan	<-chan struct{}	context/context.cs	423	
+windows	context	context.go	409	map	map[context.canceler]struct{}	context/context.cs	450	
+windows	context	context.go	479	chan	<-chan struct{}	context/context.cs	537	
+windows	context	context.go	498	map	map[context.canceler]struct{}	context/context.cs	561	
+windows	context	context.go	564	chan	chan struct{}	context/context.cs	640	
+windows	crypto/hpke	pq.go	319	slice	[]byte	crypto/hpke/pq.cs	379	
+windows	crypto/internal/boring/bbig	big.go	25	slice	crypto/internal/boring.BigInt	crypto/internal/boring/bbig/big.cs	28	
+windows	crypto/internal/fips140/hkdf	hkdf.go	17	slice	[]byte	crypto/internal/fips140/hkdf/hkdf.cs	20	
+windows	crypto/internal/fips140/rsa	rsa.go	179	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	201	
+windows	crypto/internal/fips140/rsa	rsa.go	201	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	237	
+windows	crypto/internal/fips140/rsa	rsa.go	419	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	476	
+windows	crypto/internal/fips140/tls13	tls13.go	43	slice	[]byte	crypto/internal/fips140/tls13/tls13.cs	51	
+windows	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+windows	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+windows	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+windows	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+windows	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+windows	crypto/tls	auth.go	238	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	291	
+windows	crypto/tls	auth.go	304	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	365	
+windows	crypto/tls	cipher_suites.go	620	slice	[]byte	crypto/tls/cipher_suites.cs	649	
+windows	crypto/tls	common.go	1185	slice	[]uint16	crypto/tls/common.cs	1146	
+windows	crypto/tls	common.go	1234	slice	[]byte	crypto/tls/common.cs	1194	
+windows	crypto/tls	common.go	1335	map	map[string]*crypto/tls.Certificate	crypto/tls/common.cs	1294	
+windows	crypto/tls	common.go	1754	slice	[]crypto/tls.SignatureScheme	crypto/tls/common.cs	1782	
+windows	crypto/tls	conn.go	1536	chan	<-chan struct{}	crypto/tls/conn.cs	1780	
+windows	crypto/tls	handshake_client.go	167	slice	[]byte	crypto/tls/handshake_client.cs	189	
+windows	crypto/tls	handshake_client.go	174	slice	[]byte	crypto/tls/handshake_client.cs	196	
+windows	crypto/tls	handshake_client.go	544	slice	[]byte	crypto/tls/handshake_client.cs	606	
+windows	crypto/tls	handshake_client.go	636	slice	[]uint16	crypto/tls/handshake_client.cs	733	
+windows	crypto/tls	handshake_client.go	640	slice	[]uint16	crypto/tls/handshake_client.cs	737	
+windows	crypto/tls	handshake_client.go	819	slice	[]byte	crypto/tls/handshake_client.cs	937	
+windows	crypto/tls	handshake_client.go	881	slice	[]byte	crypto/tls/handshake_client.cs	1002	
+windows	crypto/tls	handshake_client.go	1054	slice	[]byte	crypto/tls/handshake_client.cs	1205	
+windows	crypto/tls	handshake_client.go	1127	slice	[]byte	crypto/tls/handshake_client.cs	1292	
+windows	crypto/tls	handshake_client.go	1313	slice	net.IP	crypto/tls/handshake_client.cs	1508	
+windows	crypto/tls	handshake_client_tls13.go	105	slice	[]byte	crypto/tls/handshake_client_tls13.cs	125	
+windows	crypto/tls	handshake_client_tls13.go	256	slice	[]byte	crypto/tls/handshake_client_tls13.cs	310	
+windows	crypto/tls	handshake_client_tls13.go	285	slice	[]byte	crypto/tls/handshake_client_tls13.cs	343	
+windows	crypto/tls	handshake_client_tls13.go	294	slice	[]byte	crypto/tls/handshake_client_tls13.cs	352	
+windows	crypto/tls	handshake_client_tls13.go	299	slice	[]byte	crypto/tls/handshake_client_tls13.cs	357	
+windows	crypto/tls	handshake_client_tls13.go	547	slice	[]byte	crypto/tls/handshake_client_tls13.cs	643	
+windows	crypto/tls	handshake_client_tls13.go	554	slice	[]byte	crypto/tls/handshake_client_tls13.cs	650	
+windows	crypto/tls	handshake_client_tls13.go	580	slice	[]byte	crypto/tls/handshake_client_tls13.cs	677	
+windows	crypto/tls	handshake_client_tls13.go	864	slice	[]byte	crypto/tls/handshake_client_tls13.cs	998	
+windows	crypto/tls	handshake_messages.go	159	slice	[]byte	crypto/tls/handshake_messages.cs	173	
+windows	crypto/tls	handshake_messages.go	392	slice	[]byte	crypto/tls/handshake_messages.cs	421	
+windows	crypto/tls	handshake_messages.go	1028	slice	[]byte	crypto/tls/handshake_messages.cs	1114	
+windows	crypto/tls	handshake_messages.go	1497	slice	[]byte	crypto/tls/handshake_messages.cs	1610	
+windows	crypto/tls	handshake_messages.go	1506	slice	[][]byte	crypto/tls/handshake_messages.cs	1621	
+windows	crypto/tls	handshake_messages.go	1535	slice	[][]byte	crypto/tls/handshake_messages.cs	1654	
+windows	crypto/tls	handshake_messages.go	1536	slice	[]byte	crypto/tls/handshake_messages.cs	1655	
+windows	crypto/tls	handshake_messages.go	1953	slice	[]byte	crypto/tls/handshake_messages.cs	2080	
+windows	crypto/tls	handshake_server.go	409	slice	[]uint16	crypto/tls/handshake_server.cs	482	
+windows	crypto/tls	handshake_server.go	413	slice	[]uint16	crypto/tls/handshake_server.cs	486	
+windows	crypto/tls	handshake_server.go	473	slice	[]byte	crypto/tls/handshake_server.cs	555	
+windows	crypto/tls	handshake_server.go	794	slice	[]byte	crypto/tls/handshake_server.cs	912	
+windows	crypto/tls	handshake_server_tls13.go	276	slice	[]byte	crypto/tls/handshake_server_tls13.cs	316	
+windows	crypto/tls	handshake_server_tls13.go	282	slice	[]byte	crypto/tls/handshake_server_tls13.cs	322	
+windows	crypto/tls	handshake_server_tls13.go	335	slice	[]byte	crypto/tls/handshake_server_tls13.cs	380	
+windows	crypto/tls	prf.go	195	slice	[]byte	crypto/tls/prf.cs	206	
+windows	crypto/tls	prf.go	264	slice	[]byte	crypto/tls/prf.cs	284	
+windows	crypto/tls	prf.go	272	slice	[]byte	crypto/tls/prf.cs	292	
+windows	crypto/tls	quic.go	369	slice	[]byte	crypto/tls/quic.cs	403	
+windows	crypto/tls	quic.go	477	slice	[]byte	crypto/tls/quic.cs	525	
+windows	crypto/tls	quic.go	482	slice	[]byte	crypto/tls/quic.cs	530	
+windows	crypto/tls	ticket.go	360	slice	[]byte	crypto/tls/ticket.cs	386	
+windows	crypto/x509	parser.go	644	slice	net.IP	crypto/x509/parser.cs	797	
+windows	crypto/x509	root_windows.go	228	slice	[]*byte	crypto/x509/root_windows.cs	267	
+windows	crypto/x509	verify.go	120	slice	net.IP	crypto/x509/verify.cs	145	
+windows	crypto/x509	verify.go	947	slice	net.IP	crypto/x509/verify.cs	1008	
+windows	crypto/x509	x509.go	1171	slice	net.IP	crypto/x509/x509.cs	1208	
+windows	crypto/x509/pkix	pkix.go	253	slice	[]crypto/x509/pkix.AttributeTypeAndValue	crypto/x509/pkix/pkix.cs	279	
+windows	database/sql	ctxutil.go	121	chan	<-chan struct{}	database/sql/ctxutil.cs	150	
+windows	database/sql	sql.go	642	map	map[*database/sql.driverStmt]bool	database/sql/sql.cs	723	
+windows	database/sql	sql.go	751	map	map[database/sql.finalCloser]database/sql.depSet	database/sql/sql.cs	863	
+windows	database/sql	sql.go	755	map	database/sql.depSet	database/sql/sql.cs	867	
+windows	database/sql	sql.go	932	chan	chan struct{}	database/sql/sql.cs	1061	
+windows	database/sql	sql.go	1053	chan	chan struct{}	database/sql/sql.cs	1192	
+windows	database/sql	sql.go	1077	chan	chan struct{}	database/sql/sql.cs	1225	
+windows	database/sql	sql.go	1089	chan	chan struct{}	database/sql/sql.cs	1246	
+windows	database/sql	sql.go	2917	slice	[]database/sql.connStmt	database/sql/sql.cs	3338	
+windows	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+windows	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+windows	database/sql	sql.go	3062	slice	[]database/sql/driver.Value	database/sql/sql.cs	3501	
+windows	database/sql	sql.go	3391	slice	[]database/sql/driver.Value	database/sql/sql.cs	3891	
+windows	debug/buildinfo	buildinfo.go	365	slice	[]byte	debug/buildinfo/buildinfo.cs	405	
+windows	debug/dwarf	buf.go	97	slice	[]byte	debug/dwarf/buf.cs	102	
+windows	debug/dwarf	buf.go	105	slice	[]byte	debug/dwarf/buf.cs	110	
+windows	debug/dwarf	buf.go	117	slice	[]byte	debug/dwarf/buf.cs	122	
+windows	debug/dwarf	buf.go	125	slice	[]byte	debug/dwarf/buf.cs	130	
+windows	debug/dwarf	entry.go	518	slice	[]byte	debug/dwarf/entry.cs	561	
+windows	debug/dwarf	entry.go	977	slice	[]byte	debug/dwarf/entry.cs	1074	
+windows	debug/dwarf	entry.go	1013	slice	[]byte	debug/dwarf/entry.cs	1110	
+windows	debug/dwarf	line.go	144	slice	[]byte	debug/dwarf/line.cs	133	
+windows	debug/elf	file.go	1478	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1584	
+windows	debug/elf	file.go	1551	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1661	
+windows	debug/elf	file.go	1570	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1680	
+windows	debug/elf	file.go	1640	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1754	
+windows	debug/gosym	pclntab.go	447	slice	[]byte	debug/gosym/pclntab.cs	502	
+windows	debug/gosym	pclntab.go	659	map	map[string]uint32	debug/gosym/pclntab.cs	774	
+windows	encoding/binary	binary.go	413	slice	[]byte	encoding/binary/binary.cs	495	
+windows	encoding/gob	decode.go	487	slice	[]int	encoding/gob/decode.cs	554	
+windows	encoding/gob	encode.go	641	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	725	
+windows	encoding/gob	encode.go	648	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	732	
+windows	encoding/gob	type.go	709	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	801	
+windows	encoding/gob	type.go	776	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	884	
+windows	encoding/json	stream.go	265	slice	encoding/json.RawMessage	encoding/json/stream.cs	295	
+windows	encoding/xml	marshal.go	353	map	map[string]string	encoding/xml/marshal.cs	393	
+windows	encoding/xml	marshal.go	566	slice	[]byte	encoding/xml/marshal.cs	632	
+windows	encoding/xml	marshal.go	669	slice	[]byte	encoding/xml/marshal.cs	749	
+windows	encoding/xml	typeinfo.go	294	slice	[]int	encoding/xml/typeinfo.cs	321	
+windows	encoding/xml	xml.go	582	slice	[]byte	encoding/xml/xml.cs	625	
+windows	encoding/xml	xml.go	712	slice	[]byte	encoding/xml/xml.cs	774	
+windows	encoding/xml	xml.go	846	slice	[]byte	encoding/xml/xml.cs	928	
+windows	encoding/xml	xml.go	1104	map	map[string]string	encoding/xml/xml.cs	1214	
+windows	flag	flag.go	513	map	map[string]string	flag/flag.cs	580	
+windows	flag	flag.go	524	map	map[string]*flag.Flag	flag/flag.cs	591	
+windows	flag	flag.go	1033	map	map[string]*flag.Flag	flag/flag.cs	1167	
+windows	flag	flag.go	1142	map	map[string]*flag.Flag	flag/flag.cs	1296	
+windows	fmt	format.go	371	slice	[]byte	fmt/format.cs	386	
+windows	fmt	format.go	419	slice	[]byte	fmt/format.cs	435	
+windows	fmt	print.go	515	slice	[]byte	fmt/print.cs	626	
+windows	go/build	build.go	1037	map	map[string][]go/token.Position	go/build/build.cs	1139	
+windows	go/build	build.go	1042	map	map[string][]go/token.Position	go/build/build.cs	1144	
+windows	go/build	build.go	1110	slice	[]string	go/build/build.cs	1220	
+windows	go/build	build.go	1582	slice	[]byte	go/build/build.cs	1724	
+windows	go/build	build.go	1659	slice	[]byte	go/build/build.cs	1812	
+windows	go/build	build.go	1948	map	map[string]bool	go/build/build.cs	2150	
+windows	go/build	build.go	2017	map	map[string]bool	go/build/build.cs	2220	
+windows	go/doc	example.go	123	slice	[]int	go/doc/example.cs	145	
+windows	go/doc	example.go	465	slice	[]go/ast.Expr	go/doc/example.cs	525	
+windows	go/doc	exports.go	241	map	map[string]bool	go/doc/exports.cs	287	
+windows	go/doc	reader.go	256	map	map[string][]*go/ast.InterfaceType	go/doc/reader.cs	289	
+windows	go/doc	reader.go	520	slice	[]int	go/doc/reader.cs	587	
+windows	go/internal/gccgoimporter	ar.go	144	slice	[]byte	go/internal/gccgoimporter/ar.cs	158	
+windows	go/internal/gccgoimporter	importer.go	124	slice	[]byte	go/internal/gccgoimporter/importer.cs	136	
+windows	go/internal/gccgoimporter	importer.go	217	map	map[*go/types.Package]go/internal/gccgoimporter.InitData	go/internal/gccgoimporter/importer.cs	248	
+windows	go/parser	parser.go	1268	slice	[]*go/ast.Ident	go/parser/parser.cs	1607	
+windows	go/printer	nodes.go	71	slice	[]*go/ast.CommentGroup	go/printer/nodes.cs	80	
+windows	go/printer	nodes.go	449	slice	[]*go/ast.Ident	go/printer/nodes.cs	478	
+windows	go/printer	nodes.go	1419	slice	[]go/ast.Expr	go/printer/nodes.cs	1558	
+windows	go/printer	nodes.go	1467	slice	[]go/ast.Expr	go/printer/nodes.cs	1614	
+windows	go/printer	nodes.go	1590	slice	[]go/ast.Expr	go/printer/nodes.cs	1747	
+windows	go/printer	nodes.go	1626	slice	[]go/ast.Expr	go/printer/nodes.cs	1785	
+windows	go/printer	nodes.go	1707	slice	[]go/ast.Expr	go/printer/nodes.cs	1878	
+windows	go/printer	printer.go	1099	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1191	
+windows	go/printer	printer.go	1138	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1239	
+windows	go/types	api.go	341	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/api.cs	324	
+windows	go/types	builtins.go	685	map	map[*go/ast.CallExpr]bool	go/types/builtins.cs	762	
+windows	go/types	builtins.go	1021	map	map[*go/types.Named]bool	go/types/builtins.cs	1114	
+windows	go/types	call.go	52	slice	[]go/types.Type	go/types/call.cs	59	
+windows	go/types	call.go	114	slice	[]go/types.Type	go/types/call.cs	122	
+windows	go/types	call.go	272	slice	[]go/types.Type	go/types/call.cs	314	
+windows	go/types	call.go	395	slice	[]go/types.Type	go/types/call.cs	457	
+windows	go/types	call.go	430	slice	[]go/types.Type	go/types/call.cs	497	
+windows	go/types	call.go	615	slice	[]go/types.Type	go/types/call.cs	697	
+windows	go/types	call.go	816	slice	[]int	go/types/call.cs	926	
+windows	go/types	check.go	231	map	map[*go/types.TypeName]bool	go/types/check.cs	240	
+windows	go/types	check.go	253	map	map[go/ast.Expr]go/types.exprInfo	go/types/check.cs	264	
+windows	go/types	check.go	274	map	map[go/types.Object]int	go/types/check.cs	285	
+windows	go/types	check.go	383	map	map[*go/ast.File]string	go/types/check.cs	406	
+windows	go/types	decl.go	479	slice	[]*go/types.Var	go/types/decl.cs	611	
+windows	go/types	decl.go	480	slice	[]*go/types.Var	go/types/decl.cs	612	
+windows	go/types	decl.go	732	slice	[]*go/types.Func	go/types/decl.cs	910	
+windows	go/types	errors.go	75	slice	[]go/types.errorDesc	go/types/errors.cs	88	
+windows	go/types	format.go	138	map	map[string]map[string]bool	go/types/format.cs	178	
+windows	go/types	infer.go	42	slice	[]go/types.Type	go/types/infer.cs	54	
+windows	go/types	infer.go	338	map	map[*go/types.TypeParam]go/types.Type	go/types/infer.cs	361	
+windows	go/types	initorder.go	88	slice	[]go/types.Object	go/types/initorder.cs	99	
+windows	go/types	initorder.go	120	slice	[]*go/types.Var	go/types/initorder.cs	131	
+windows	go/types	initorder.go	159	slice	[]go/types.Object	go/types/initorder.cs	170	
+windows	go/types	initorder.go	220	map	go/types.nodeSet	go/types/initorder.cs	233	
+windows	go/types	labels.go	64	map	map[string]*go/ast.LabeledStmt	go/types/labels.cs	81	
+windows	go/types	lookup.go	349	map	map[*go/types.Named][]*go/types.Named	go/types/lookup.cs	390	
+windows	go/types	lookup.go	424	slice	[]int	go/types/lookup.cs	470	
+windows	go/types	lookup.go	541	map	map[*go/types.Struct]bool	go/types/lookup.cs	610	
+windows	go/types	methodset.go	139	map	map[string]bool	go/types/methodset.cs	155	
+windows	go/types	methodset.go	170	map	go/types.methodSet	go/types/methodset.cs	191	
+windows	go/types	methodset.go	181	map	go/types.methodSet	go/types/methodset.cs	204	
+windows	go/types	methodset.go	229	map	go/types.methodSet	go/types/methodset.cs	254	
+windows	go/types	mono.go	168	map	map[*go/types.TypeParam]*go/types.TypeParam	go/types/mono.cs	174	
+windows	go/types	mono.go	303	map	map[*go/types.TypeName]int	go/types/mono.cs	343	
+windows	go/types	mono.go	322	map	map[*go/types.TypeName]int	go/types/mono.cs	368	
+windows	go/types	objset.go	29	map	go/types.objset	go/types/objset.cs	30	
+windows	go/types	predicates.go	164	map	map[go/types.Type]bool	go/types/predicates.cs	221	
+windows	go/types	recording.go	71	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	81	
+windows	go/types	recording.go	105	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	124	
+windows	go/types	recording.go	136	map	map[*go/ast.Ident]go/types.Instance	go/types/recording.cs	156	
+windows	go/types	recording.go	143	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	165	
+windows	go/types	recording.go	151	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	175	
+windows	go/types	recording.go	159	map	map[go/ast.Node]go/types.Object	go/types/recording.cs	185	
+windows	go/types	recording.go	167	map	map[*go/ast.SelectorExpr]*go/types.Selection	go/types/recording.cs	197	
+windows	go/types	recording.go	175	map	map[go/ast.Node]*go/types.Scope	go/types/recording.cs	207	
+windows	go/types	resolver.go	44	map	map[go/types.Object]bool	go/types/resolver.cs	44	
+windows	go/types	resolver.go	203	map	map[string]map[string]bool	go/types/resolver.cs	241	
+windows	go/types	resolver.go	320	map	map[go/types.dotImportKey]*go/types.PkgName	go/types/resolver.cs	371	
+windows	go/types	resolver.go	486	slice	[]go/types.methodInfo	go/types/resolver.cs	557	
+windows	go/types	resolver.go	603	map	map[*go/types.TypeName]bool	go/types/resolver.cs	695	
+windows	go/types	return.go	93	slice	[]go/ast.Expr	go/types/return.cs	109	
+windows	go/types	scope.go	140	map	map[string]go/types.Object	go/types/scope.cs	157	
+windows	go/types	signature.go	222	slice	[]*go/ast.Ident	go/types/signature.cs	265	
+windows	go/types	struct.go	63	slice	[]*go/types.Var	go/types/struct.cs	72	
+windows	go/types	struct.go	86	slice	[]string	go/types/struct.cs	105	
+windows	go/types	struct.go	89	slice	[]string	go/types/struct.cs	108	
+windows	go/types	subst.go	119	slice	[]go/types.Type	go/types/subst.cs	126	
+windows	go/types	subst.go	136	slice	[]*go/types.Var	go/types/subst.cs	148	
+windows	go/types	subst.go	183	slice	[]*go/types.Term	go/types/subst.cs	200	
+windows	go/types	subst.go	193	slice	[]*go/types.Func	go/types/subst.cs	212	
+windows	go/types	subst.go	193	slice	[]go/types.Type	go/types/subst.cs	212	
+windows	go/types	subst.go	194	slice	[]*go/types.Func	go/types/subst.cs	213	
+windows	go/types	subst.go	197	slice	[]go/types.Type	go/types/subst.cs	216	
+windows	go/types	subst.go	261	slice	[]go/types.Type	go/types/subst.cs	284	
+windows	go/types	subst.go	307	slice	[]*go/types.Var	go/types/subst.cs	344	
+windows	go/types	subst.go	321	slice	[]T	go/types/subst.cs	362	
+windows	go/types	typeset.go	199	map	map[*go/types.Union]*go/types._TypeSet	go/types/typeset.cs	228	
+windows	go/types	typexpr.go	429	slice	[]go/types.Type	go/types/typexpr.cs	516	
+windows	go/types	typexpr.go	528	slice	[]go/types.Type	go/types/typexpr.cs	635	
+windows	html/template	context.go	73	slice	[]int	html/template/context.cs	66	
+windows	image/draw	draw.go	1014	slice	[][4]int32	image/draw/draw.cs	1138	
+windows	image/gif	reader.go	391	slice	image/color.Palette	image/gif/reader.cs	411	
+windows	image/gif	writer.go	374	slice	[]byte	image/gif/writer.cs	413	
+windows	image/gif	writer.go	396	slice	[]byte	image/gif/writer.cs	440	
+windows	image/jpeg	reader.go	658	slice	[]byte	image/jpeg/reader.cs	739	
+windows	image/jpeg	scan.go	155	slice	[]image/jpeg.block	image/jpeg/scan.cs	190	
+windows	image/jpeg	scan.go	447	slice	[]image/jpeg.block	image/jpeg/scan.cs	507	
+windows	image/png	writer.go	621	slice	image/color.Palette	image/png/writer.cs	686	
+windows	image/png	writer.go	654	slice	image/color.Palette	image/png/writer.cs	724	
+windows	index/suffixarray	sais.go	214	slice	[]int32	index/suffixarray/sais.cs	212	
+windows	index/suffixarray	sais.go	217	slice	[]int32	index/suffixarray/sais.cs	215	
+windows	index/suffixarray	sais2.go	203	slice	[]int64	index/suffixarray/sais2.cs	206	
+windows	index/suffixarray	sais2.go	206	slice	[]int64	index/suffixarray/sais2.cs	209	
+windows	index/suffixarray	sais2.go	219	slice	[]int32	index/suffixarray/sais2.cs	222	
+windows	index/suffixarray	sais2.go	222	slice	[]int32	index/suffixarray/sais2.cs	225	
+windows	index/suffixarray	sais2.go	234	slice	[]int64	index/suffixarray/sais2.cs	237	
+windows	index/suffixarray	sais2.go	237	slice	[]int64	index/suffixarray/sais2.cs	240	
+windows	index/suffixarray	suffixarray.go	53	slice	[]int32	index/suffixarray/suffixarray.cs	54	
+windows	index/suffixarray	suffixarray.go	60	slice	[]int32	index/suffixarray/suffixarray.cs	61	
+windows	index/suffixarray	suffixarray.go	68	slice	[]int32	index/suffixarray/suffixarray.cs	69	
+windows	index/suffixarray	suffixarray.go	170	slice	[]int32	index/suffixarray/suffixarray.cs	179	
+windows	index/suffixarray	suffixarray.go	170	slice	[]int64	index/suffixarray/suffixarray.cs	179	
+windows	index/suffixarray	suffixarray.go	267	slice	[]int32	index/suffixarray/suffixarray.cs	288	
+windows	index/suffixarray	suffixarray.go	365	slice	[]int	index/suffixarray/suffixarray.cs	392	
+windows	internal/bisect	bisect.go	750	map	map[uint64]bool	internal/bisect/bisect.cs	835	
+windows	internal/coverage/decodemeta	decodefile.go	182	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	195	
+windows	internal/coverage/decodemeta	decodefile.go	209	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	221	
+windows	internal/coverage/pods	pods.go	126	slice	[]string	internal/coverage/pods/pods.cs	140	
+windows	internal/coverage/pods	pods.go	141	slice	[]string	internal/coverage/pods/pods.cs	159	
+windows	internal/coverage/pods	pods.go	149	slice	[]int	internal/coverage/pods/pods.cs	168	
+windows	internal/coverage/rtcov	rtcov.go	75	map	map[int]int	internal/coverage/rtcov/rtcov.cs	78	
+windows	internal/dag	parse.go	80	map	map[string]bool	internal/dag/parse.cs	83	
+windows	internal/dag	parse.go	140	map	map[string]bool	internal/dag/parse.cs	146	
+windows	internal/dag	parse.go	214	slice	[]string	internal/dag/parse.cs	233	
+windows	internal/dag	parse.go	219	slice	[]string	internal/dag/parse.cs	238	
+windows	internal/filepathlite	path.go	33	slice	[]byte	internal/filepathlite/path.cs	36	
+windows	internal/filepathlite	path.go	40	slice	[]byte	internal/filepathlite/path.cs	43	
+windows	internal/filepathlite	path.go	58	slice	[]byte	internal/filepathlite/path.cs	63	
+windows	internal/filepathlite	path_windows.go	305	slice	[]byte	internal/filepathlite/path_windows.cs	314	
+windows	internal/fuzz	fuzz.go	290	slice	[]byte	internal/fuzz/fuzz.cs	322	
+windows	internal/fuzz	fuzz.go	313	slice	[]byte	internal/fuzz/fuzz.cs	345	
+windows	internal/fuzz	fuzz.go	488	slice	[]byte	internal/fuzz/fuzz.cs	528	
+windows	internal/fuzz	fuzz.go	658	slice	[]byte	internal/fuzz/fuzz.cs	667	
+windows	internal/fuzz	fuzz.go	658	slice	[]any	internal/fuzz/fuzz.cs	667	
+windows	internal/fuzz	fuzz.go	782	slice	[]byte	internal/fuzz/fuzz.cs	794	
+windows	internal/fuzz	fuzz.go	827	slice	[]byte	internal/fuzz/fuzz.cs	839	
+windows	internal/fuzz	mutator.go	268	slice	[]byte	internal/fuzz/mutator.cs	319	
+windows	internal/fuzz	worker.go	404	chan	chan struct{}	internal/fuzz/worker.cs	448	
+windows	internal/fuzz	worker.go	707	slice	[]byte	internal/fuzz/worker.cs	774	
+windows	internal/fuzz	worker.go	708	slice	[]byte	internal/fuzz/worker.cs	775	
+windows	internal/fuzz	worker.go	755	slice	[]byte	internal/fuzz/worker.cs	831	
+windows	internal/fuzz	worker.go	791	slice	[]byte	internal/fuzz/worker.cs	869	
+windows	internal/fuzz	worker.go	868	slice	[]byte	internal/fuzz/worker.cs	972	
+windows	internal/fuzz	worker.go	898	slice	[]byte	internal/fuzz/worker.cs	1012	
+windows	internal/fuzz	worker.go	907	slice	[]byte	internal/fuzz/worker.cs	1021	
+windows	internal/fuzz	worker.go	1107	slice	[]byte	internal/fuzz/worker.cs	1275	
+windows	internal/goroot	gc.go	124	slice	[]string	internal/goroot/gc.cs	155	
+windows	internal/pkgbits	encoder.go	218	map	map[internal/pkgbits.RefTableEntry]uint32	internal/pkgbits/encoder.cs	230	
+windows	internal/poll	fd_windows.go	645	slice	[]uint16	internal/poll/fd_windows.cs	671	
+windows	internal/profile	graph.go	167	map	internal/profile.NodeSet	internal/profile/graph.cs	174	
+windows	internal/singleflight	singleflight.go	49	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	53	
+windows	internal/singleflight	singleflight.go	72	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	80	
+windows	internal/testenv	exec.go	127	slice	[]string	internal/testenv/exec.cs	142	
+windows	internal/trace	base.go	66	map	map[string]internal/trace.extraStringID	internal/trace/base.cs	64	
+windows	internal/trace	base.go	101	map	map[EI]E	internal/trace/base.cs	105	
+windows	internal/trace	base.go	113	map	map[EI]E	internal/trace/base.cs	121	
+windows	internal/trace	base.go	125	map	map[EI]E	internal/trace/base.cs	135	
+windows	internal/trace	base.go	171	map	map[EI]E	internal/trace/base.cs	184	
+windows	internal/trace	base.go	189	map	map[EI]E	internal/trace/base.cs	206	
+windows	internal/trace	event.go	702	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/event.cs	775	
+windows	internal/trace	gc.go	716	slice	internal/trace.bandUtilHeap	internal/trace/gc.cs	755	
+windows	internal/trace	generation.go	246	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/generation.cs	286	
+windows	internal/trace	mud.go	175	slice	[]internal/trace.edge	internal/trace/mud.cs	172	
+windows	internal/trace/raw	event.go	56	slice	[]byte	internal/trace/raw/event.cs	60	
+windows	internal/trace/traceviewer	mmu.go	158	slice	[]float64	internal/trace/traceviewer/mmu.cs	176	
+windows	io	io.go	399	slice	[]byte	io/io.cs	416	
+windows	io	io.go	417	slice	[]byte	io/io.cs	441	
+windows	io	multi.go	105	slice	[]byte	io/multi.cs	129	
+windows	log/slog	record.go	140	slice	[]log/slog.Attr	log/slog/record.cs	149	
+windows	math/big	natconv.go	407	slice	[]math/big.divisor	math/big/natconv.cs	443	
+windows	math/big/internal/asmgen	pipe.go	484	slice	[]int	math/big/internal/asmgen/pipe.cs	524	
+windows	mime	mediatype.go	177	map	map[string]map[string]string	mime/mediatype.cs	184	
+windows	mime/multipart	formdata.go	185	slice	[]byte	mime/multipart/formdata.cs	206	
+windows	mime/multipart	formdata.go	268	slice	[]byte	mime/multipart/formdata.cs	295	
+windows	mime/multipart	multipart.go	79	map	map[string]string	mime/multipart/multipart.cs	82	
+windows	mime/multipart	multipart.go	92	map	map[string]string	mime/multipart/multipart.cs	98	
+windows	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+windows	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+windows	net	addrselect.go	336	slice	net.IP	net/addrselect.cs	343	
+windows	net	dial.go	574	chan	<-chan struct{}	net/dial.cs	602	
+windows	net	dnsclient.go	35	slice	net.IP	net/dnsclient.cs	37	
+windows	net	dnsclient.go	38	slice	net.IP	net/dnsclient.cs	40	
+windows	net	dnsclient_unix.go	593	slice	net.IP	net/dnsclient_unix.cs	686	
+windows	net	fd_windows.go	92	chan	<-chan struct{}	net/fd_windows.cs	113	
+windows	net	ip.go	127	slice	net.IP	net/ip.cs	132	
+windows	net	ip.go	136	slice	net.IP	net/ip.cs	143	
+windows	net	ip.go	154	slice	net.IP	net/ip.cs	161	
+windows	net	ip.go	169	slice	net.IP	net/ip.cs	178	
+windows	net	ip.go	178	slice	net.IP	net/ip.cs	189	
+windows	net	ip.go	249	slice	net.IP	net/ip.cs	252	
+windows	net	ip.go	381	slice	net.IP	net/ip.cs	394	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+windows	net	ip.go	457	slice	net.IP	net/ip.cs	480	
+windows	net	ip.go	482	slice	net.IP	net/ip.cs	509	
+windows	net	ip.go	511	slice	net.IP	net/ip.cs	544	
+windows	net	ip.go	511	slice	net.IPMask	net/ip.cs	544	
+windows	net	iprawsock.go	62	slice	net.IP	net/iprawsock.cs	65	
+windows	net	iprawsock_posix.go	28	slice	net.IP	net/iprawsock_posix.cs	29	
+windows	net	ipsock.go	67	slice	net.IP	net/ipsock.cs	67	
+windows	net	ipsock.go	69	slice	net.IP	net/ipsock.cs	70	
+windows	net	ipsock.go	71	slice	net.IP	net/ipsock.cs	73	
+windows	net	ipsock.go	148	slice	net.IP	net/ipsock.cs	159	
+windows	net	ipsock.go	153	slice	net.IP	net/ipsock.cs	164	
+windows	net	ipsock_posix.go	175	slice	net.IP	net/ipsock_posix.cs	187	
+windows	net	ipsock_posix.go	200	slice	net.IP	net/ipsock_posix.cs	212	
+windows	net	nss.go	209	map	map[string][]net.nssSource	net/nss.cs	241	
+windows	net	sock_posix.go	191	slice	net.IP	net/sock_posix.cs	239	
+windows	net	sockopt_posix.go	33	slice	net.IP	net/sockopt_posix.cs	32	
+windows	net	sockopt_posix.go	37	slice	net.IP	net/sockopt_posix.cs	38	
+windows	net	sockoptip4_posix_nonlinux.go	36	slice	net.IP	net/sockoptip4_posix_nonlinux.cs	38	
+windows	net	sockoptip4_posix_nonlinux.go	41	slice	net.IP	net/sockoptip4_posix_nonlinux.cs	47	
+windows	net	tcpsock.go	56	slice	net.IP	net/tcpsock.cs	65	
+windows	net	tcpsock_posix.go	30	slice	net.IP	net/tcpsock_posix.cs	32	
+windows	net	udpsock.go	56	slice	net.IP	net/udpsock.cs	64	
+windows	net	udpsock.go	363	slice	net.IP	net/udpsock.cs	425	
+windows	net	udpsock_posix.go	29	slice	net.IP	net/udpsock_posix.cs	31	
+windows	net	udpsock_posix.go	253	slice	net.IP	net/udpsock_posix.cs	290	
+windows	net/http	client.go	246	map	net/http.Header	net/http/client.cs	268	
+windows	net/http	client.go	363	chan	<-chan struct{}	net/http/client.cs	403	
+windows	net/http	client.go	786	map	map[string][]*net/http.Cookie	net/http/client.cs	891	
+windows	net/http	clientconn.go	218	map	net/http.Header	net/http/clientconn.cs	245	
+windows	net/http	clientconn.go	385	chan	<-chan struct{}	net/http/clientconn.cs	450	
+windows	net/http	clone.go	24	map	net/url.Values	net/http/clone.cs	25	
+windows	net/http	clone.go	70	map	map[string][]*mime/multipart.FileHeader	net/http/clone.cs	75	
+windows	net/http	clone.go	117	map	net/http.Header	net/http/clone.cs	124	
+windows	net/http	cookie.go	422	slice	net.IP	net/http/cookie.cs	486	
+windows	net/http	csrf.go	73	map	map[string]bool	net/http/csrf.cs	79	
+windows	net/http	h2_bundle.go	852	map	map[string]*net/http.http2dialCall	net/http/h2_bundle.cs	590	
+windows	net/http	h2_bundle.go	893	map	map[string]*net/http.http2addConnCall	net/http/h2_bundle.cs	634	
+windows	net/http	h2_bundle.go	942	map	map[string][]*net/http.http2ClientConn	net/http/h2_bundle.cs	684	
+windows	net/http	h2_bundle.go	945	map	map[*net/http.http2ClientConn][]string	net/http/h2_bundle.cs	687	
+windows	net/http	h2_bundle.go	2358	slice	[]byte	net/http/h2_bundle.cs	2161	
+windows	net/http	h2_bundle.go	2362	slice	[]byte	net/http/h2_bundle.cs	2165	
+windows	net/http	h2_bundle.go	4073	chan	chan struct{}	net/http/h2_bundle.cs	4090	
+windows	net/http	h2_bundle.go	4100	chan	chan struct{}	net/http/h2_bundle.cs	4134	
+windows	net/http	h2_bundle.go	4321	slice	[]uint16	net/http/h2_bundle.cs	4358	
+windows	net/http	h2_bundle.go	4356	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/h2_bundle.cs	4393	
+windows	net/http	h2_bundle.go	4597	slice	[]byte	net/http/h2_bundle.cs	4652	
+windows	net/http	h2_bundle.go	4881	map	map[string]string	net/http/h2_bundle.cs	4969	
+windows	net/http	h2_bundle.go	5330	chan	chan error	net/http/h2_bundle.cs	5548	
+windows	net/http	h2_bundle.go	6161	map	net/http.Header	net/http/h2_bundle.cs	6530	
+windows	net/http	h2_bundle.go	6196	map	net/http.Header	net/http/h2_bundle.cs	6571	
+windows	net/http	h2_bundle.go	6228	map	net/http.Header	net/http/h2_bundle.cs	6612	
+windows	net/http	h2_bundle.go	6525	map	net/http.Header	net/http/h2_bundle.cs	6966	
+windows	net/http	h2_bundle.go	6539	chan	chan error	net/http/h2_bundle.cs	6982	
+windows	net/http	h2_bundle.go	6991	chan	chan bool	net/http/h2_bundle.cs	7491	
+windows	net/http	h2_bundle.go	7009	map	net/http.Header	net/http/h2_bundle.cs	7511	
+windows	net/http	h2_bundle.go	7121	slice	[]byte	net/http/h2_bundle.cs	7629	
+windows	net/http	h2_bundle.go	7163	map	net/http.Header	net/http/h2_bundle.cs	7681	
+windows	net/http	h2_bundle.go	7656	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/h2_bundle.cs	8197	
+windows	net/http	h2_bundle.go	7878	chan	chan struct{}	net/http/h2_bundle.cs	8420	
+windows	net/http	h2_bundle.go	7885	chan	chan struct{}	net/http/h2_bundle.cs	8432	
+windows	net/http	h2_bundle.go	8800	chan	chan struct{}	net/http/h2_bundle.cs	9553	
+windows	net/http	h2_bundle.go	8864	chan	chan struct{}	net/http/h2_bundle.cs	9637	
+windows	net/http	h2_bundle.go	9068	chan	chan struct{}	net/http/h2_bundle.cs	9910	
+windows	net/http	h2_bundle.go	9081	chan	chan struct{}	net/http/h2_bundle.cs	9923	
+windows	net/http	h2_bundle.go	9277	map	net/http.Header	net/http/h2_bundle.cs	10140	
+windows	net/http	h2_bundle.go	9322	chan	chan struct{}	net/http/h2_bundle.cs	10187	
+windows	net/http	h2_bundle.go	9417	chan	chan struct{}	net/http/h2_bundle.cs	10298	
+windows	net/http	h2_bundle.go	9825	map	net/http.Header	net/http/h2_bundle.cs	10807	
+windows	net/http	h2_bundle.go	9834	slice	[]string	net/http/h2_bundle.cs	10816	
+windows	net/http	h2_bundle.go	10258	map	net/http.Header	net/http/h2_bundle.cs	11295	
+windows	net/http	h2_bundle.go	11128	slice	[]string	net/http/h2_bundle.cs	12426	
+windows	net/http	h2_bundle.go	11232	slice	[]string	net/http/h2_bundle.cs	12541	
+windows	net/http	h2_bundle.go	11432	chan	chan error	net/http/h2_bundle.cs	12744	
+windows	net/http	h2_bundle.go	11438	chan	chan error	net/http/h2_bundle.cs	12750	
+windows	net/http	header.go	95	map	net/http.Header	net/http/header.cs	99	
+windows	net/http	header.go	107	slice	[]string	net/http/header.cs	111	
+windows	net/http	mapping.go	26	map	map[K]V	net/http/mapping.cs	27	
+windows	net/http	mapping.go	29	map	map[K]V	net/http/mapping.cs	30	
+windows	net/http	mapping.go	47	map	map[K]V	net/http/mapping.cs	52	
+windows	net/http	mapping.go	65	map	map[K]V	net/http/mapping.cs	72	
+windows	net/http	request.go	396	slice	[]string	net/http/request.cs	381	
+windows	net/http	request.go	406	slice	[]string	net/http/request.cs	393	
+windows	net/http	request.go	720	map	net/http.Header	net/http/request.cs	738	
+windows	net/http	request.go	1329	map	net/url.Values	net/http/request.cs	1440	
+windows	net/http	request.go	1333	map	net/url.Values	net/http/request.cs	1444	
+windows	net/http	request.go	1337	map	net/url.Values	net/http/request.cs	1448	
+windows	net/http	request.go	1350	map	net/url.Values	net/http/request.cs	1461	
+windows	net/http	request.go	1353	map	net/url.Values	net/http/request.cs	1464	
+windows	net/http	request.go	1375	map	net/url.Values	net/http/request.cs	1491	
+windows	net/http	request.go	1394	map	net/url.Values	net/http/request.cs	1510	
+windows	net/http	request.go	1420	map	net/url.Values	net/http/request.cs	1538	
+windows	net/http	request.go	1435	map	net/url.Values	net/http/request.cs	1557	
+windows	net/http	request.go	1456	map	map[string][]*mime/multipart.FileHeader	net/http/request.cs	1582	
+windows	net/http	request.go	1482	map	map[string]string	net/http/request.cs	1613	
+windows	net/http	routing_index.go	35	map	map[net/http.routingIndexKey][]*net/http.pattern	net/http/routing_index.cs	38	
+windows	net/http	servemux121.go	66	map	map[string]net/http.muxEntry	net/http/servemux121.cs	72	
+windows	net/http	server.go	416	map	net/http.Header	net/http/server.cs	398	
+windows	net/http	server.go	533	map	net/http.Header	net/http/server.cs	506	
+windows	net/http	server.go	540	map	net/http.Header	net/http/server.cs	514	
+windows	net/http	server.go	1083	map	net/http.Header	net/http/server.cs	1160	
+windows	net/http	server.go	1176	map	net/http.Header	net/http/server.cs	1258	
+windows	net/http	server.go	1220	slice	[]byte	net/http/server.cs	1304	
+windows	net/http	server.go	1225	slice	[]byte	net/http/server.cs	1309	
+windows	net/http	server.go	1268	map	net/http.Header	net/http/server.cs	1355	
+windows	net/http	server.go	1281	map	map[string]bool	net/http/server.cs	1371	
+windows	net/http	server.go	1292	map	map[string]bool	net/http/server.cs	1382	
+windows	net/http	server.go	1667	slice	[]byte	net/http/server.cs	1788	
+windows	net/http	server.go	2250	chan	chan bool	net/http/server.cs	2460	
+windows	net/http	server.go	2266	chan	chan bool	net/http/server.cs	2484	
+windows	net/http	server.go	3534	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/server.cs	3874	
+windows	net/http	server.go	3598	map	map[*net.Listener]struct{}	net/http/server.cs	3945	
+windows	net/http	server.go	3617	map	map[*net/http.conn]struct{}	net/http/server.cs	3972	
+windows	net/http	socks_bundle.go	92	slice	net.IP	net/http/socks_bundle.cs	120	
+windows	net/http	socks_bundle.go	93	slice	net.IP	net/http/socks_bundle.cs	122	
+windows	net/http	socks_bundle.go	96	slice	net.IP	net/http/socks_bundle.cs	127	
+windows	net/http	socks_bundle.go	152	slice	net.IP	net/http/socks_bundle.cs	199	
+windows	net/http	socks_bundle.go	254	slice	net.IP	net/http/socks_bundle.cs	339	
+windows	net/http	socks_bundle.go	411	slice	net.IP	net/http/socks_bundle.cs	522	
+windows	net/http	transfer.go	311	map	net/http.Header	net/http/transfer.cs	348	
+windows	net/http	transfer.go	398	map	net/http.Header	net/http/transfer.cs	451	
+windows	net/http	transfer.go	954	map	net/http.Header	net/http/transfer.cs	1084	
+windows	net/http	transport.go	375	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	357	
+windows	net/http	transport.go	402	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	386	
+windows	net/http	transport.go	471	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	465	
+windows	net/http	transport.go	535	map	net/http.Header	net/http/transport.cs	534	
+windows	net/http	transport.go	599	map	net/http.Header	net/http/transport.cs	615	
+windows	net/http	transport.go	657	chan	<-chan struct{}	net/http/transport.cs	681	
+windows	net/http	transport.go	886	map	map[string]net/http.RoundTripper	net/http/transport.cs	952	
+windows	net/http	transport.go	937	map	map[*net/http.Request]context.CancelCauseFunc	net/http/transport.cs	1012	
+windows	net/http	transport.go	1137	map	map[net/http.connectMethodKey][]*net/http.persistConn	net/http/transport.cs	1233	
+windows	net/http	transport.go	1250	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1358	
+windows	net/http	transport.go	1606	map	map[net/http.connectMethodKey]int	net/http/transport.cs	1799	
+windows	net/http	transport.go	1614	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1808	
+windows	net/http	transport.go	1873	map	net/http.Header	net/http/transport.cs	2141	
+windows	net/http	transport.go	2528	chan	chan<- struct{}	net/http/transport.cs	2900	
+windows	net/http	transport.go	2559	chan	chan<- struct{}	net/http/transport.cs	2933	
+windows	net/http	transport.go	2587	chan	<-chan struct{}	net/http/transport.cs	2961	
+windows	net/http/cgi	host.go	204	slice	[]string	net/http/cgi/host.cs	240	
+windows	net/http/cookiejar	jar.go	211	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	220	
+windows	net/http/cookiejar	jar.go	298	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	321	
+windows	net/http/cookiejar	jar.go	306	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	331	
+windows	net/http/cookiejar	jar.go	406	slice	net.IP	net/http/cookiejar/jar.cs	436	
+windows	net/http/httptest	recorder.go	69	map	net/http.Header	net/http/httptest/recorder.cs	66	
+windows	net/http/httptest	recorder.go	96	slice	[]byte	net/http/httptest/recorder.cs	97	
+windows	net/http/httptest	recorder.go	173	map	net/http.Header	net/http/httptest/recorder.cs	176	
+windows	net/http/httptest	recorder.go	207	map	net/http.Header	net/http/httptest/recorder.cs	214	
+windows	net/http/httptest	recorder.go	252	map	net/http.Header	net/http/httptest/recorder.cs	262	
+windows	net/http/httptest	server.go	177	slice	[]string	net/http/httptest/server.cs	192	
+windows	net/http/httptest	server.go	358	map	map[net.Conn]net/http.ConnState	net/http/httptest/server.cs	422	
+windows	net/http/httptest	server.go	413	chan	chan<- struct{}	net/http/httptest/server.cs	491	
+windows	net/http/httputil	reverseproxy.go	410	chan	<-chan struct{}	net/http/httputil/reverseproxy.cs	445	
+windows	net/http/httputil	reverseproxy.go	460	map	net/http.Header	net/http/httputil/reverseproxy.cs	508	
+windows	net/http/httputil	reverseproxy.go	471	map	net/url.Values	net/http/httputil/reverseproxy.cs	519	
+windows	net/http/httputil	reverseproxy.go	524	slice	[]string	net/http/httputil/reverseproxy.cs	573	
+windows	net/http/internal/httpcommon	httpcommon.go	578	map	map[string][]string	net/http/internal/httpcommon/httpcommon.cs	647	
+windows	net/mail	message.go	767	slice	net.IP	net/mail/message.cs	862	
+windows	net/rpc	client.go	303	chan	chan *net/rpc.Call	net/rpc/client.cs	343	
+windows	net/smtp	smtp.go	230	slice	[]byte	net/smtp/smtp.cs	296	
+windows	net/smtp	smtp.go	253	map	map[string]string	net/smtp/smtp.cs	329	
+windows	net/smtp	smtp.go	347	map	map[string]string	net/smtp/smtp.cs	457	
+windows	net/smtp	smtp.go	386	map	map[string]string	net/smtp/smtp.cs	511	
+windows	net/textproto	header.go	31	map	net/textproto.MIMEHeader	net/textproto/header.cs	32	
+windows	net/textproto	header.go	47	map	net/textproto.MIMEHeader	net/textproto/header.cs	48	
+windows	net/textproto	pipeline.go	88	map	map[uint]chan struct{}	net/textproto/pipeline.cs	91	
+windows	net/textproto	pipeline.go	107	map	map[uint]chan struct{}	net/textproto/pipeline.cs	112	
+windows	net/textproto	reader.go	51	slice	[]byte	net/textproto/reader.cs	50	
+windows	net/textproto	reader.go	72	slice	[]byte	net/textproto/reader.cs	71	
+windows	net/textproto	reader.go	125	slice	[]byte	net/textproto/reader.cs	124	
+windows	net/textproto	reader.go	575	slice	[]string	net/textproto/reader.cs	604	
+windows	net/textproto	reader.go	587	slice	[]string	net/textproto/reader.cs	616	
+windows	os	dir.go	45	slice	[]os.FileInfo	os/dir.cs	49	
+windows	os	dir.go	74	slice	[]string	os/dir.cs	81	
+windows	os	dir.go	102	slice	[]os.DirEntry	os/dir.cs	105	
+windows	os	env.go	22	slice	[]byte	os/env.cs	23	
+windows	os	env.go	41	slice	[]byte	os/env.cs	43	
+windows	os	exec_posix.go	44	slice	[]string	os/exec_posix.cs	51	
+windows	os/exec	exec.go	433	slice	[]byte	os/exec/exec.cs	433	
+windows	os/exec	exec.go	780	chan	<-chan struct{}	os/exec/exec.cs	817	
+windows	os/exec	exec.go	849	chan	<-chan error	os/exec/exec.cs	903	
+windows	os/exec	exec.go	937	chan	<-chan os/exec.ctxResult	os/exec/exec.cs	1000	
+windows	os/exec	exec.go	975	chan	<-chan error	os/exec/exec.cs	1045	
+windows	os/exec	exec.go	1177	slice	[]byte	os/exec/exec.cs	1289	
+windows	os/exec	exec.go	1201	slice	[]string	os/exec/exec.cs	1313	
+windows	os/signal	signal.go	123	chan	chan<- os.Signal	os/signal/signal.cs	136	
+windows	os/signal	signal.go	132	map	map[chan<- os.Signal]*os/signal.handler	os/signal/signal.cs	145	
+windows	path	path.go	27	slice	[]byte	path/path.cs	31	
+windows	path	path.go	34	slice	[]byte	path/path.cs	38	
+windows	path	path.go	47	slice	[]byte	path/path.cs	51	
+windows	reflect	type.go	1339	map	map[*reflect.structType]int	reflect/type.cs	1210	
+windows	regexp	exec.go	76	slice	[]byte	regexp/exec.cs	81	
+windows	regexp	exec.go	89	slice	[]byte	regexp/exec.cs	95	
+windows	regexp	exec.go	514	slice	[]int	regexp/exec.cs	559	
+windows	regexp	exec.go	522	slice	[]int	regexp/exec.cs	569	
+windows	regexp	regexp.go	588	slice	[]byte	regexp/regexp.cs	612	
+windows	regexp	regexp.go	605	slice	[]byte	regexp/regexp.cs	629	
+windows	regexp	regexp.go	622	slice	[]byte	regexp/regexp.cs	646	
+windows	regexp	regexp.go	639	slice	[]byte	regexp/regexp.cs	664	
+windows	regexp	regexp.go	735	slice	[]int	regexp/regexp.cs	762	
+windows	regexp	regexp.go	751	slice	[]byte	regexp/regexp.cs	780	
+windows	regexp	regexp.go	772	slice	[]byte	regexp/regexp.cs	801	
+windows	regexp	regexp.go	801	slice	[]int	regexp/regexp.cs	830	
+windows	regexp	regexp.go	813	slice	[]int	regexp/regexp.cs	842	
+windows	regexp	regexp.go	827	slice	[]int	regexp/regexp.cs	856	
+windows	regexp	regexp.go	839	slice	[]int	regexp/regexp.cs	868	
+windows	regexp	regexp.go	852	slice	[]int	regexp/regexp.cs	881	
+windows	regexp	regexp.go	866	slice	[]int	regexp/regexp.cs	897	
+windows	regexp	regexp.go	929	slice	[]byte	regexp/regexp.cs	960	
+windows	regexp	regexp.go	938	slice	[]byte	regexp/regexp.cs	969	
+windows	regexp	regexp.go	1021	slice	[]int	regexp/regexp.cs	1061	
+windows	regexp	regexp.go	1063	slice	[][]byte	regexp/regexp.cs	1108	
+windows	regexp	regexp.go	1081	slice	[][]int	regexp/regexp.cs	1126	
+windows	regexp	regexp.go	1099	slice	[]string	regexp/regexp.cs	1144	
+windows	regexp	regexp.go	1117	slice	[][]int	regexp/regexp.cs	1162	
+windows	regexp	regexp.go	1135	slice	[][][]byte	regexp/regexp.cs	1181	
+windows	regexp	regexp.go	1159	slice	[][]int	regexp/regexp.cs	1205	
+windows	regexp	regexp.go	1177	slice	[][]string	regexp/regexp.cs	1223	
+windows	regexp	regexp.go	1202	slice	[][]int	regexp/regexp.cs	1248	
+windows	regexp/syntax	parse.go	155	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	147	
+windows	regexp/syntax	parse.go	171	map	map[*regexp/syntax.Regexp]int64	regexp/syntax/parse.cs	165	
+windows	regexp/syntax	parse.go	262	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	267	
+windows	regexp/syntax	parse.go	1059	slice	[]rune	regexp/syntax/parse.cs	1141	
+windows	regexp/syntax	parse.go	1068	slice	[]rune	regexp/syntax/parse.cs	1151	
+windows	regexp/syntax	parse.go	1693	slice	[]byte	regexp/syntax/parse.cs	1868	
+windows	regexp/syntax	parse.go	1706	slice	[]byte	regexp/syntax/parse.cs	1881	
+windows	regexp/syntax	parse.go	1862	slice	[]rune	regexp/syntax/parse.cs	2058	
+windows	regexp/syntax	parse.go	1873	slice	[]rune	regexp/syntax/parse.cs	2069	
+windows	regexp/syntax	parse.go	1879	slice	[]rune	regexp/syntax/parse.cs	2076	
+windows	regexp/syntax	prog.go	333	slice	[]rune	regexp/syntax/prog.cs	377	
+windows	regexp/syntax	regexp.go	117	map	map[*regexp/syntax.Regexp]regexp/syntax.printFlags	regexp/syntax/regexp.cs	113	
+windows	runtime	env_posix.go	11	slice	[]string	runtime/env_posix.cs	15	
+windows	runtime	heapdump.go	717	slice	[]byte	runtime/heapdump.cs	733	
+windows	runtime	heapdump.go	735	slice	[]byte	runtime/heapdump.cs	757	
+windows	runtime	mprof.go	438	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1255	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1269	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1342	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1399	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1568	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1615	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1636	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go	1686	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	334	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1159	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1241	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1303	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1486	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1545	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1572	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	mprof.go				runtime/mprof.cs	1625	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+windows	runtime	os_windows.go				runtime/os_windows.cs	276	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	279	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	283	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	304	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	423	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	436	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	os_windows.go				runtime/os_windows.cs	436	named unsafe.Pointer type (runtime.stdFunction): renders default
+windows	runtime	pinner.go	112	slice	[]unsafe.Pointer	runtime/pinner.cs	55	
+windows	runtime	plugin.go	28	map	map[runtime.typeOff]*runtime._type	runtime/plugin.cs	36	
+windows	runtime	print.go	100	slice	[]byte	runtime/print.cs	93	
+windows	runtime	rand.go	64	slice	[]byte	runtime/rand.cs	70	
+windows	runtime	runtime1.go	500	map	map[string]bool	runtime/runtime1.cs	556	
+windows	runtime	runtime1.go	528	map	map[string]bool	runtime/runtime1.cs	585	
+windows	runtime	runtime1.go	535	map	map[string]bool	runtime/runtime1.cs	592	
+windows	runtime	runtime1.go	543	map	map[string]bool	runtime/runtime1.cs	603	
+windows	runtime	runtime1.go	709	map	map[int32]unsafe.Pointer	runtime/runtime1.cs	787	
+windows	runtime	select.go	148	slice	[]uintptr	runtime/select.cs	159	
+windows	runtime	syscall_windows.go	328	map	map[runtime.winCallbackKey]int	runtime/syscall_windows.cs	350	
+windows	runtime	trace.go	1182	chan	chan struct{}	runtime/trace.cs	1018	
+windows	runtime	tracecpu.go	126	slice	[]unsafe.Pointer	runtime/tracecpu.cs	142	
+windows	runtime	type.go	450	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+windows	runtime	type.go	465	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+windows	runtime	type.go				runtime/type.cs	140	switch case nil over a pointer tag: exprᴛ1 == default
+windows	runtime	type.go				runtime/type.cs	474	switch case nil over a pointer tag: exprᴛ1 == default
+windows	runtime	type.go				runtime/type.cs	491	switch case nil over a pointer tag: exprᴛ1 == default
+windows	runtime/pprof	map.go	78	map	map[uintptr]*runtime/pprof.profMapEntry	runtime/pprof/map.cs	81	
+windows	runtime/pprof	pprof.go	257	map	map[string]*runtime/pprof.Profile	runtime/pprof/pprof.cs	273	
+windows	runtime/pprof	pprof.go	374	slice	[]uintptr	runtime/pprof/pprof.cs	415	
+windows	runtime/pprof	pprof.go	902	chan	chan bool	runtime/pprof/pprof.cs	1009	
+windows	runtime/pprof	proto.go	316	slice	[]unsafe.Pointer	runtime/pprof/proto.cs	311	
+windows	runtime/pprof	proto.go	723	slice	[]byte	runtime/pprof/proto.cs	762	
+windows	runtime/trace	subscribe.go	168	slice	[]byte	runtime/trace/subscribe.cs	218	
+windows	strings	replace.go	82	slice	[]byte	strings/replace.cs	86	
+windows	strings	replace.go	207	slice	[]*strings.trieNode	strings/replace.cs	216	
+windows	strings	replace.go	238	slice	[]*strings.trieNode	strings/replace.cs	252	
+windows	strings	replace.go	445	slice	[]byte	strings/replace.cs	471	
+windows	strings	replace.go	451	slice	[]byte	strings/replace.cs	477	
+windows	strings	replace.go	526	slice	[]byte	strings/replace.cs	555	
+windows	strings	replace.go	540	slice	[]byte	strings/replace.cs	569	
+windows	strings	replace.go	555	slice	[]byte	strings/replace.cs	587	
+windows	testing	benchmark.go	167	map	map[string]float64			testing is hand-owned: not emitted
+windows	testing	fuzz.go	113	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+windows	testing	fuzz.go	277	slice	[]any			testing is hand-owned: not emitted
+windows	testing	testing.go	799	map	map[string]struct{}			testing is hand-owned: not emitted
+windows	testing	testing.go	1278	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+windows	testing	testing.go	1768	chan	chan bool			testing is hand-owned: not emitted
+windows	testing	testing.go	2838	slice	[]int			testing is hand-owned: not emitted
+windows	testing/fstest	mapfs.go	96	slice	[]testing/fstest.mapFileInfo	testing/fstest/mapfs.cs	98	
+windows	text/template	exec.go	773	slice	[]text/template/parse.Node	text/template/exec.cs	931	
+windows	text/template/parse	parse.go	823	map	map[string]any	text/template/parse/parse.cs	1043	
+windows	time	format.go				time/format.cs	630	switch case nil over a pointer tag: exprᴛ1 == default
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	37	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	39	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	44	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	48	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	55	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	61	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	66	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	74	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	77	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	87	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	88	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	100	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	99	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	113	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	108	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	124	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	122	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	140	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	131	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	149	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	162	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	182	
+windows	vendor/golang.org/x/crypto/cryptobyte	string.go	174	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	194	
+windows	vendor/golang.org/x/net/dns/dnsmessage	message.go	574	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	581	
+windows	vendor/golang.org/x/net/dns/dnsmessage	message.go	1264	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	1318	
+windows	vendor/golang.org/x/net/dns/dnsmessage	message.go	2024	map	map[string]uint16	vendor/golang.org/x/net/dns/dnsmessage/message.cs	2239	
+windows	vendor/golang.org/x/net/http/httpproxy	proxy.go	192	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	209	
+windows	vendor/golang.org/x/net/http/httpproxy	proxy.go	247	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	273	
+windows	vendor/golang.org/x/net/http/httpproxy	proxy.go	366	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	401	
+windows	vendor/golang.org/x/net/idna	idna10.0.0.go	571	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	613	
+windows	vendor/golang.org/x/net/idna	idna10.0.0.go	578	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	620	
+windows	vendor/golang.org/x/net/idna	idna10.0.0.go	592	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	634	
+windows	vendor/golang.org/x/net/idna	idna10.0.0.go	605	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	647	
+windows	vendor/golang.org/x/net/nettest	nettest.go	325	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	388	
+windows	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+windows	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+windows	vendor/golang.org/x/net/nettest	nettest.go	336	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	405	
+windows	vendor/golang.org/x/net/nettest	nettest.go	339	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	410	
+windows	vendor/golang.org/x/text/unicode/bidi	core.go	1057	slice	[]rune	vendor/golang.org/x/text/unicode/bidi/core.cs	1119	
+windows	vendor/golang.org/x/text/unicode/norm	forminfo.go	208	map	map[uint32]rune	vendor/golang.org/x/text/unicode/norm/forminfo.cs	216	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	33	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	35	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	40	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	42	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	51	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	53	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	62	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	64	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	72	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	74	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	79	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	81	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	86	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	88	
+windows	vendor/golang.org/x/text/unicode/norm	input.go	94	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	98	
+windows	vendor/golang.org/x/text/unicode/norm	iter.go	98	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	103	
+windows	vendor/golang.org/x/text/unicode/norm	iter.go	241	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	266	
+windows	vendor/golang.org/x/text/unicode/norm	iter.go	257	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	283	
+linux	archive/tar	reader.go	205	slice	archive/tar.sparseDatas	archive/tar/reader.cs	230	
+linux	archive/tar	reader.go	292	map	map[string]string	archive/tar/reader.cs	341	
+linux	archive/zip	reader.go	184	map	map[uint16]archive/zip.Decompressor	archive/zip/reader.cs	195	
+linux	archive/zip	writer.go	494	map	map[uint16]archive/zip.Compressor	archive/zip/writer.cs	548	
+linux	bufio	bufio.go	81	slice	[]byte	bufio/bufio.cs	83	
+linux	bufio	bufio.go	626	slice	[]byte	bufio/bufio.cs	668	
+linux	bufio	scan.go	158	slice	[]byte	bufio/scan.cs	154	
+linux	bufio	scan.go	167	slice	[]byte	bufio/scan.cs	163	
+linux	bytes	buffer.go	154	slice	[]byte	bytes/buffer.cs	173	
+linux	bytes	bytes.go	1385	slice	[]byte	bytes/bytes.cs	1443	
+linux	compress/flate	huffman_bit_writer.go	316	slice	[]byte	compress/flate/huffman_bit_writer.cs	317	
+linux	compress/flate	huffman_code.go	273	slice	[]compress/flate.literalNode	compress/flate/huffman_code.cs	285	
+linux	compress/gzip	gzip.go	148	slice	[]byte	compress/gzip/gzip.cs	156	
+linux	compress/gzip	gzip.go	172	slice	[]byte	compress/gzip/gzip.cs	181	
+linux	compress/zlib	writer.go	115	slice	[]byte	compress/zlib/writer.cs	121	
+linux	compress/zlib	writer.go	122	slice	[]byte	compress/zlib/writer.cs	130	
+linux	context	context.go	384	chan	<-chan struct{}	context/context.cs	423	
+linux	context	context.go	409	map	map[context.canceler]struct{}	context/context.cs	450	
+linux	context	context.go	479	chan	<-chan struct{}	context/context.cs	537	
+linux	context	context.go	498	map	map[context.canceler]struct{}	context/context.cs	561	
+linux	context	context.go	564	chan	chan struct{}	context/context.cs	640	
+linux	crypto/hpke	pq.go	319	slice	[]byte	crypto/hpke/pq.cs	379	
+linux	crypto/internal/boring/bbig	big.go	25	slice	crypto/internal/boring.BigInt	crypto/internal/boring/bbig/big.cs	28	
+linux	crypto/internal/fips140/hkdf	hkdf.go	17	slice	[]byte	crypto/internal/fips140/hkdf/hkdf.cs	20	
+linux	crypto/internal/fips140/rsa	rsa.go	179	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	201	
+linux	crypto/internal/fips140/rsa	rsa.go	201	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	237	
+linux	crypto/internal/fips140/rsa	rsa.go	419	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	476	
+linux	crypto/internal/fips140/tls13	tls13.go	43	slice	[]byte	crypto/internal/fips140/tls13/tls13.cs	51	
+linux	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+linux	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+linux	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+linux	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+linux	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+linux	crypto/tls	auth.go	238	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	291	
+linux	crypto/tls	auth.go	304	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	365	
+linux	crypto/tls	cipher_suites.go	620	slice	[]byte	crypto/tls/cipher_suites.cs	649	
+linux	crypto/tls	common.go	1185	slice	[]uint16	crypto/tls/common.cs	1146	
+linux	crypto/tls	common.go	1234	slice	[]byte	crypto/tls/common.cs	1194	
+linux	crypto/tls	common.go	1335	map	map[string]*crypto/tls.Certificate	crypto/tls/common.cs	1294	
+linux	crypto/tls	common.go	1754	slice	[]crypto/tls.SignatureScheme	crypto/tls/common.cs	1782	
+linux	crypto/tls	conn.go	1536	chan	<-chan struct{}	crypto/tls/conn.cs	1780	
+linux	crypto/tls	handshake_client.go	167	slice	[]byte	crypto/tls/handshake_client.cs	189	
+linux	crypto/tls	handshake_client.go	174	slice	[]byte	crypto/tls/handshake_client.cs	196	
+linux	crypto/tls	handshake_client.go	544	slice	[]byte	crypto/tls/handshake_client.cs	606	
+linux	crypto/tls	handshake_client.go	636	slice	[]uint16	crypto/tls/handshake_client.cs	733	
+linux	crypto/tls	handshake_client.go	640	slice	[]uint16	crypto/tls/handshake_client.cs	737	
+linux	crypto/tls	handshake_client.go	819	slice	[]byte	crypto/tls/handshake_client.cs	937	
+linux	crypto/tls	handshake_client.go	881	slice	[]byte	crypto/tls/handshake_client.cs	1002	
+linux	crypto/tls	handshake_client.go	1054	slice	[]byte	crypto/tls/handshake_client.cs	1205	
+linux	crypto/tls	handshake_client.go	1127	slice	[]byte	crypto/tls/handshake_client.cs	1292	
+linux	crypto/tls	handshake_client.go	1313	slice	net.IP	crypto/tls/handshake_client.cs	1508	
+linux	crypto/tls	handshake_client_tls13.go	105	slice	[]byte	crypto/tls/handshake_client_tls13.cs	125	
+linux	crypto/tls	handshake_client_tls13.go	256	slice	[]byte	crypto/tls/handshake_client_tls13.cs	310	
+linux	crypto/tls	handshake_client_tls13.go	285	slice	[]byte	crypto/tls/handshake_client_tls13.cs	343	
+linux	crypto/tls	handshake_client_tls13.go	294	slice	[]byte	crypto/tls/handshake_client_tls13.cs	352	
+linux	crypto/tls	handshake_client_tls13.go	299	slice	[]byte	crypto/tls/handshake_client_tls13.cs	357	
+linux	crypto/tls	handshake_client_tls13.go	547	slice	[]byte	crypto/tls/handshake_client_tls13.cs	643	
+linux	crypto/tls	handshake_client_tls13.go	554	slice	[]byte	crypto/tls/handshake_client_tls13.cs	650	
+linux	crypto/tls	handshake_client_tls13.go	580	slice	[]byte	crypto/tls/handshake_client_tls13.cs	677	
+linux	crypto/tls	handshake_client_tls13.go	864	slice	[]byte	crypto/tls/handshake_client_tls13.cs	998	
+linux	crypto/tls	handshake_messages.go	159	slice	[]byte	crypto/tls/handshake_messages.cs	173	
+linux	crypto/tls	handshake_messages.go	392	slice	[]byte	crypto/tls/handshake_messages.cs	421	
+linux	crypto/tls	handshake_messages.go	1028	slice	[]byte	crypto/tls/handshake_messages.cs	1114	
+linux	crypto/tls	handshake_messages.go	1497	slice	[]byte	crypto/tls/handshake_messages.cs	1610	
+linux	crypto/tls	handshake_messages.go	1506	slice	[][]byte	crypto/tls/handshake_messages.cs	1621	
+linux	crypto/tls	handshake_messages.go	1535	slice	[][]byte	crypto/tls/handshake_messages.cs	1654	
+linux	crypto/tls	handshake_messages.go	1536	slice	[]byte	crypto/tls/handshake_messages.cs	1655	
+linux	crypto/tls	handshake_messages.go	1953	slice	[]byte	crypto/tls/handshake_messages.cs	2080	
+linux	crypto/tls	handshake_server.go	409	slice	[]uint16	crypto/tls/handshake_server.cs	482	
+linux	crypto/tls	handshake_server.go	413	slice	[]uint16	crypto/tls/handshake_server.cs	486	
+linux	crypto/tls	handshake_server.go	473	slice	[]byte	crypto/tls/handshake_server.cs	555	
+linux	crypto/tls	handshake_server.go	794	slice	[]byte	crypto/tls/handshake_server.cs	912	
+linux	crypto/tls	handshake_server_tls13.go	276	slice	[]byte	crypto/tls/handshake_server_tls13.cs	316	
+linux	crypto/tls	handshake_server_tls13.go	282	slice	[]byte	crypto/tls/handshake_server_tls13.cs	322	
+linux	crypto/tls	handshake_server_tls13.go	335	slice	[]byte	crypto/tls/handshake_server_tls13.cs	380	
+linux	crypto/tls	prf.go	195	slice	[]byte	crypto/tls/prf.cs	206	
+linux	crypto/tls	prf.go	264	slice	[]byte	crypto/tls/prf.cs	284	
+linux	crypto/tls	prf.go	272	slice	[]byte	crypto/tls/prf.cs	292	
+linux	crypto/tls	quic.go	369	slice	[]byte	crypto/tls/quic.cs	403	
+linux	crypto/tls	quic.go	477	slice	[]byte	crypto/tls/quic.cs	525	
+linux	crypto/tls	quic.go	482	slice	[]byte	crypto/tls/quic.cs	530	
+linux	crypto/tls	ticket.go	360	slice	[]byte	crypto/tls/ticket.cs	386	
+linux	crypto/x509	parser.go	644	slice	net.IP	crypto/x509/parser.cs	797	
+linux	crypto/x509	verify.go	120	slice	net.IP	crypto/x509/verify.cs	145	
+linux	crypto/x509	verify.go	947	slice	net.IP	crypto/x509/verify.cs	1008	
+linux	crypto/x509	x509.go	1171	slice	net.IP	crypto/x509/x509.cs	1208	
+linux	crypto/x509/pkix	pkix.go	253	slice	[]crypto/x509/pkix.AttributeTypeAndValue	crypto/x509/pkix/pkix.cs	279	
+linux	database/sql	ctxutil.go	121	chan	<-chan struct{}	database/sql/ctxutil.cs	150	
+linux	database/sql	sql.go	642	map	map[*database/sql.driverStmt]bool	database/sql/sql.cs	723	
+linux	database/sql	sql.go	751	map	map[database/sql.finalCloser]database/sql.depSet	database/sql/sql.cs	863	
+linux	database/sql	sql.go	755	map	database/sql.depSet	database/sql/sql.cs	867	
+linux	database/sql	sql.go	932	chan	chan struct{}	database/sql/sql.cs	1061	
+linux	database/sql	sql.go	1053	chan	chan struct{}	database/sql/sql.cs	1192	
+linux	database/sql	sql.go	1077	chan	chan struct{}	database/sql/sql.cs	1225	
+linux	database/sql	sql.go	1089	chan	chan struct{}	database/sql/sql.cs	1246	
+linux	database/sql	sql.go	2917	slice	[]database/sql.connStmt	database/sql/sql.cs	3338	
+linux	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+linux	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+linux	database/sql	sql.go	3062	slice	[]database/sql/driver.Value	database/sql/sql.cs	3501	
+linux	database/sql	sql.go	3391	slice	[]database/sql/driver.Value	database/sql/sql.cs	3891	
+linux	debug/buildinfo	buildinfo.go	365	slice	[]byte	debug/buildinfo/buildinfo.cs	405	
+linux	debug/dwarf	buf.go	97	slice	[]byte	debug/dwarf/buf.cs	102	
+linux	debug/dwarf	buf.go	105	slice	[]byte	debug/dwarf/buf.cs	110	
+linux	debug/dwarf	buf.go	117	slice	[]byte	debug/dwarf/buf.cs	122	
+linux	debug/dwarf	buf.go	125	slice	[]byte	debug/dwarf/buf.cs	130	
+linux	debug/dwarf	entry.go	518	slice	[]byte	debug/dwarf/entry.cs	561	
+linux	debug/dwarf	entry.go	977	slice	[]byte	debug/dwarf/entry.cs	1074	
+linux	debug/dwarf	entry.go	1013	slice	[]byte	debug/dwarf/entry.cs	1110	
+linux	debug/dwarf	line.go	144	slice	[]byte	debug/dwarf/line.cs	133	
+linux	debug/elf	file.go	1478	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1584	
+linux	debug/elf	file.go	1551	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1661	
+linux	debug/elf	file.go	1570	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1680	
+linux	debug/elf	file.go	1640	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1754	
+linux	debug/gosym	pclntab.go	447	slice	[]byte	debug/gosym/pclntab.cs	502	
+linux	debug/gosym	pclntab.go	659	map	map[string]uint32	debug/gosym/pclntab.cs	774	
+linux	encoding/binary	binary.go	413	slice	[]byte	encoding/binary/binary.cs	495	
+linux	encoding/gob	decode.go	487	slice	[]int	encoding/gob/decode.cs	554	
+linux	encoding/gob	encode.go	641	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	725	
+linux	encoding/gob	encode.go	648	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	732	
+linux	encoding/gob	type.go	709	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	801	
+linux	encoding/gob	type.go	776	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	884	
+linux	encoding/json	stream.go	265	slice	encoding/json.RawMessage	encoding/json/stream.cs	295	
+linux	encoding/xml	marshal.go	353	map	map[string]string	encoding/xml/marshal.cs	393	
+linux	encoding/xml	marshal.go	566	slice	[]byte	encoding/xml/marshal.cs	632	
+linux	encoding/xml	marshal.go	669	slice	[]byte	encoding/xml/marshal.cs	749	
+linux	encoding/xml	typeinfo.go	294	slice	[]int	encoding/xml/typeinfo.cs	321	
+linux	encoding/xml	xml.go	582	slice	[]byte	encoding/xml/xml.cs	625	
+linux	encoding/xml	xml.go	712	slice	[]byte	encoding/xml/xml.cs	774	
+linux	encoding/xml	xml.go	846	slice	[]byte	encoding/xml/xml.cs	928	
+linux	encoding/xml	xml.go	1104	map	map[string]string	encoding/xml/xml.cs	1214	
+linux	flag	flag.go	513	map	map[string]string	flag/flag.cs	580	
+linux	flag	flag.go	524	map	map[string]*flag.Flag	flag/flag.cs	591	
+linux	flag	flag.go	1033	map	map[string]*flag.Flag	flag/flag.cs	1167	
+linux	flag	flag.go	1142	map	map[string]*flag.Flag	flag/flag.cs	1296	
+linux	fmt	format.go	371	slice	[]byte	fmt/format.cs	386	
+linux	fmt	format.go	419	slice	[]byte	fmt/format.cs	435	
+linux	fmt	print.go	515	slice	[]byte	fmt/print.cs	626	
+linux	go/build	build.go	1037	map	map[string][]go/token.Position	go/build/build.cs	1139	
+linux	go/build	build.go	1042	map	map[string][]go/token.Position	go/build/build.cs	1144	
+linux	go/build	build.go	1110	slice	[]string	go/build/build.cs	1220	
+linux	go/build	build.go	1582	slice	[]byte	go/build/build.cs	1724	
+linux	go/build	build.go	1659	slice	[]byte	go/build/build.cs	1812	
+linux	go/build	build.go	1948	map	map[string]bool	go/build/build.cs	2150	
+linux	go/build	build.go	2017	map	map[string]bool	go/build/build.cs	2220	
+linux	go/doc	example.go	123	slice	[]int	go/doc/example.cs	145	
+linux	go/doc	example.go	465	slice	[]go/ast.Expr	go/doc/example.cs	525	
+linux	go/doc	exports.go	241	map	map[string]bool	go/doc/exports.cs	287	
+linux	go/doc	reader.go	256	map	map[string][]*go/ast.InterfaceType	go/doc/reader.cs	289	
+linux	go/doc	reader.go	520	slice	[]int	go/doc/reader.cs	587	
+linux	go/internal/gccgoimporter	ar.go	144	slice	[]byte	go/internal/gccgoimporter/ar.cs	158	
+linux	go/internal/gccgoimporter	importer.go	124	slice	[]byte	go/internal/gccgoimporter/importer.cs	136	
+linux	go/internal/gccgoimporter	importer.go	217	map	map[*go/types.Package]go/internal/gccgoimporter.InitData	go/internal/gccgoimporter/importer.cs	248	
+linux	go/parser	parser.go	1268	slice	[]*go/ast.Ident	go/parser/parser.cs	1607	
+linux	go/printer	nodes.go	71	slice	[]*go/ast.CommentGroup	go/printer/nodes.cs	80	
+linux	go/printer	nodes.go	449	slice	[]*go/ast.Ident	go/printer/nodes.cs	478	
+linux	go/printer	nodes.go	1419	slice	[]go/ast.Expr	go/printer/nodes.cs	1558	
+linux	go/printer	nodes.go	1467	slice	[]go/ast.Expr	go/printer/nodes.cs	1614	
+linux	go/printer	nodes.go	1590	slice	[]go/ast.Expr	go/printer/nodes.cs	1747	
+linux	go/printer	nodes.go	1626	slice	[]go/ast.Expr	go/printer/nodes.cs	1785	
+linux	go/printer	nodes.go	1707	slice	[]go/ast.Expr	go/printer/nodes.cs	1878	
+linux	go/printer	printer.go	1099	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1191	
+linux	go/printer	printer.go	1138	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1239	
+linux	go/types	api.go	341	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/api.cs	324	
+linux	go/types	builtins.go	685	map	map[*go/ast.CallExpr]bool	go/types/builtins.cs	762	
+linux	go/types	builtins.go	1021	map	map[*go/types.Named]bool	go/types/builtins.cs	1114	
+linux	go/types	call.go	52	slice	[]go/types.Type	go/types/call.cs	59	
+linux	go/types	call.go	114	slice	[]go/types.Type	go/types/call.cs	122	
+linux	go/types	call.go	272	slice	[]go/types.Type	go/types/call.cs	314	
+linux	go/types	call.go	395	slice	[]go/types.Type	go/types/call.cs	457	
+linux	go/types	call.go	430	slice	[]go/types.Type	go/types/call.cs	497	
+linux	go/types	call.go	615	slice	[]go/types.Type	go/types/call.cs	697	
+linux	go/types	call.go	816	slice	[]int	go/types/call.cs	926	
+linux	go/types	check.go	231	map	map[*go/types.TypeName]bool	go/types/check.cs	240	
+linux	go/types	check.go	253	map	map[go/ast.Expr]go/types.exprInfo	go/types/check.cs	264	
+linux	go/types	check.go	274	map	map[go/types.Object]int	go/types/check.cs	285	
+linux	go/types	check.go	383	map	map[*go/ast.File]string	go/types/check.cs	406	
+linux	go/types	decl.go	479	slice	[]*go/types.Var	go/types/decl.cs	611	
+linux	go/types	decl.go	480	slice	[]*go/types.Var	go/types/decl.cs	612	
+linux	go/types	decl.go	732	slice	[]*go/types.Func	go/types/decl.cs	910	
+linux	go/types	errors.go	75	slice	[]go/types.errorDesc	go/types/errors.cs	88	
+linux	go/types	format.go	138	map	map[string]map[string]bool	go/types/format.cs	178	
+linux	go/types	infer.go	42	slice	[]go/types.Type	go/types/infer.cs	54	
+linux	go/types	infer.go	338	map	map[*go/types.TypeParam]go/types.Type	go/types/infer.cs	361	
+linux	go/types	initorder.go	88	slice	[]go/types.Object	go/types/initorder.cs	99	
+linux	go/types	initorder.go	120	slice	[]*go/types.Var	go/types/initorder.cs	131	
+linux	go/types	initorder.go	159	slice	[]go/types.Object	go/types/initorder.cs	170	
+linux	go/types	initorder.go	220	map	go/types.nodeSet	go/types/initorder.cs	233	
+linux	go/types	labels.go	64	map	map[string]*go/ast.LabeledStmt	go/types/labels.cs	81	
+linux	go/types	lookup.go	349	map	map[*go/types.Named][]*go/types.Named	go/types/lookup.cs	390	
+linux	go/types	lookup.go	424	slice	[]int	go/types/lookup.cs	470	
+linux	go/types	lookup.go	541	map	map[*go/types.Struct]bool	go/types/lookup.cs	610	
+linux	go/types	methodset.go	139	map	map[string]bool	go/types/methodset.cs	155	
+linux	go/types	methodset.go	170	map	go/types.methodSet	go/types/methodset.cs	191	
+linux	go/types	methodset.go	181	map	go/types.methodSet	go/types/methodset.cs	204	
+linux	go/types	methodset.go	229	map	go/types.methodSet	go/types/methodset.cs	254	
+linux	go/types	mono.go	168	map	map[*go/types.TypeParam]*go/types.TypeParam	go/types/mono.cs	174	
+linux	go/types	mono.go	303	map	map[*go/types.TypeName]int	go/types/mono.cs	343	
+linux	go/types	mono.go	322	map	map[*go/types.TypeName]int	go/types/mono.cs	368	
+linux	go/types	objset.go	29	map	go/types.objset	go/types/objset.cs	30	
+linux	go/types	predicates.go	164	map	map[go/types.Type]bool	go/types/predicates.cs	221	
+linux	go/types	recording.go	71	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	81	
+linux	go/types	recording.go	105	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	124	
+linux	go/types	recording.go	136	map	map[*go/ast.Ident]go/types.Instance	go/types/recording.cs	156	
+linux	go/types	recording.go	143	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	165	
+linux	go/types	recording.go	151	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	175	
+linux	go/types	recording.go	159	map	map[go/ast.Node]go/types.Object	go/types/recording.cs	185	
+linux	go/types	recording.go	167	map	map[*go/ast.SelectorExpr]*go/types.Selection	go/types/recording.cs	197	
+linux	go/types	recording.go	175	map	map[go/ast.Node]*go/types.Scope	go/types/recording.cs	207	
+linux	go/types	resolver.go	44	map	map[go/types.Object]bool	go/types/resolver.cs	44	
+linux	go/types	resolver.go	203	map	map[string]map[string]bool	go/types/resolver.cs	241	
+linux	go/types	resolver.go	320	map	map[go/types.dotImportKey]*go/types.PkgName	go/types/resolver.cs	371	
+linux	go/types	resolver.go	486	slice	[]go/types.methodInfo	go/types/resolver.cs	557	
+linux	go/types	resolver.go	603	map	map[*go/types.TypeName]bool	go/types/resolver.cs	695	
+linux	go/types	return.go	93	slice	[]go/ast.Expr	go/types/return.cs	109	
+linux	go/types	scope.go	140	map	map[string]go/types.Object	go/types/scope.cs	157	
+linux	go/types	signature.go	222	slice	[]*go/ast.Ident	go/types/signature.cs	265	
+linux	go/types	struct.go	63	slice	[]*go/types.Var	go/types/struct.cs	72	
+linux	go/types	struct.go	86	slice	[]string	go/types/struct.cs	105	
+linux	go/types	struct.go	89	slice	[]string	go/types/struct.cs	108	
+linux	go/types	subst.go	119	slice	[]go/types.Type	go/types/subst.cs	126	
+linux	go/types	subst.go	136	slice	[]*go/types.Var	go/types/subst.cs	148	
+linux	go/types	subst.go	183	slice	[]*go/types.Term	go/types/subst.cs	200	
+linux	go/types	subst.go	193	slice	[]*go/types.Func	go/types/subst.cs	212	
+linux	go/types	subst.go	193	slice	[]go/types.Type	go/types/subst.cs	212	
+linux	go/types	subst.go	194	slice	[]*go/types.Func	go/types/subst.cs	213	
+linux	go/types	subst.go	197	slice	[]go/types.Type	go/types/subst.cs	216	
+linux	go/types	subst.go	261	slice	[]go/types.Type	go/types/subst.cs	284	
+linux	go/types	subst.go	307	slice	[]*go/types.Var	go/types/subst.cs	344	
+linux	go/types	subst.go	321	slice	[]T	go/types/subst.cs	362	
+linux	go/types	typeset.go	199	map	map[*go/types.Union]*go/types._TypeSet	go/types/typeset.cs	228	
+linux	go/types	typexpr.go	429	slice	[]go/types.Type	go/types/typexpr.cs	516	
+linux	go/types	typexpr.go	528	slice	[]go/types.Type	go/types/typexpr.cs	635	
+linux	html/template	context.go	73	slice	[]int	html/template/context.cs	66	
+linux	image/draw	draw.go	1014	slice	[][4]int32	image/draw/draw.cs	1138	
+linux	image/gif	reader.go	391	slice	image/color.Palette	image/gif/reader.cs	411	
+linux	image/gif	writer.go	374	slice	[]byte	image/gif/writer.cs	413	
+linux	image/gif	writer.go	396	slice	[]byte	image/gif/writer.cs	440	
+linux	image/jpeg	reader.go	658	slice	[]byte	image/jpeg/reader.cs	739	
+linux	image/jpeg	scan.go	155	slice	[]image/jpeg.block	image/jpeg/scan.cs	190	
+linux	image/jpeg	scan.go	447	slice	[]image/jpeg.block	image/jpeg/scan.cs	507	
+linux	image/png	writer.go	621	slice	image/color.Palette	image/png/writer.cs	686	
+linux	image/png	writer.go	654	slice	image/color.Palette	image/png/writer.cs	724	
+linux	index/suffixarray	sais.go	214	slice	[]int32	index/suffixarray/sais.cs	212	
+linux	index/suffixarray	sais.go	217	slice	[]int32	index/suffixarray/sais.cs	215	
+linux	index/suffixarray	sais2.go	203	slice	[]int64	index/suffixarray/sais2.cs	206	
+linux	index/suffixarray	sais2.go	206	slice	[]int64	index/suffixarray/sais2.cs	209	
+linux	index/suffixarray	sais2.go	219	slice	[]int32	index/suffixarray/sais2.cs	222	
+linux	index/suffixarray	sais2.go	222	slice	[]int32	index/suffixarray/sais2.cs	225	
+linux	index/suffixarray	sais2.go	234	slice	[]int64	index/suffixarray/sais2.cs	237	
+linux	index/suffixarray	sais2.go	237	slice	[]int64	index/suffixarray/sais2.cs	240	
+linux	index/suffixarray	suffixarray.go	53	slice	[]int32	index/suffixarray/suffixarray.cs	54	
+linux	index/suffixarray	suffixarray.go	60	slice	[]int32	index/suffixarray/suffixarray.cs	61	
+linux	index/suffixarray	suffixarray.go	68	slice	[]int32	index/suffixarray/suffixarray.cs	69	
+linux	index/suffixarray	suffixarray.go	170	slice	[]int32	index/suffixarray/suffixarray.cs	179	
+linux	index/suffixarray	suffixarray.go	170	slice	[]int64	index/suffixarray/suffixarray.cs	179	
+linux	index/suffixarray	suffixarray.go	267	slice	[]int32	index/suffixarray/suffixarray.cs	288	
+linux	index/suffixarray	suffixarray.go	365	slice	[]int	index/suffixarray/suffixarray.cs	392	
+linux	internal/bisect	bisect.go	750	map	map[uint64]bool	internal/bisect/bisect.cs	835	
+linux	internal/coverage/decodemeta	decodefile.go	182	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	195	
+linux	internal/coverage/decodemeta	decodefile.go	209	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	221	
+linux	internal/coverage/pods	pods.go	126	slice	[]string	internal/coverage/pods/pods.cs	140	
+linux	internal/coverage/pods	pods.go	141	slice	[]string	internal/coverage/pods/pods.cs	159	
+linux	internal/coverage/pods	pods.go	149	slice	[]int	internal/coverage/pods/pods.cs	168	
+linux	internal/coverage/rtcov	rtcov.go	75	map	map[int]int	internal/coverage/rtcov/rtcov.cs	78	
+linux	internal/dag	parse.go	80	map	map[string]bool	internal/dag/parse.cs	83	
+linux	internal/dag	parse.go	140	map	map[string]bool	internal/dag/parse.cs	146	
+linux	internal/dag	parse.go	214	slice	[]string	internal/dag/parse.cs	233	
+linux	internal/dag	parse.go	219	slice	[]string	internal/dag/parse.cs	238	
+linux	internal/filepathlite	path.go	33	slice	[]byte	internal/filepathlite/path.cs	36	
+linux	internal/filepathlite	path.go	40	slice	[]byte	internal/filepathlite/path.cs	43	
+linux	internal/filepathlite	path.go	58	slice	[]byte	internal/filepathlite/path.cs	63	
+linux	internal/fuzz	fuzz.go	290	slice	[]byte	internal/fuzz/fuzz.cs	322	
+linux	internal/fuzz	fuzz.go	313	slice	[]byte	internal/fuzz/fuzz.cs	345	
+linux	internal/fuzz	fuzz.go	488	slice	[]byte	internal/fuzz/fuzz.cs	528	
+linux	internal/fuzz	fuzz.go	658	slice	[]byte	internal/fuzz/fuzz.cs	667	
+linux	internal/fuzz	fuzz.go	658	slice	[]any	internal/fuzz/fuzz.cs	667	
+linux	internal/fuzz	fuzz.go	782	slice	[]byte	internal/fuzz/fuzz.cs	794	
+linux	internal/fuzz	fuzz.go	827	slice	[]byte	internal/fuzz/fuzz.cs	839	
+linux	internal/fuzz	mutator.go	268	slice	[]byte	internal/fuzz/mutator.cs	319	
+linux	internal/fuzz	worker.go	404	chan	chan struct{}	internal/fuzz/worker.cs	448	
+linux	internal/fuzz	worker.go	707	slice	[]byte	internal/fuzz/worker.cs	774	
+linux	internal/fuzz	worker.go	708	slice	[]byte	internal/fuzz/worker.cs	775	
+linux	internal/fuzz	worker.go	755	slice	[]byte	internal/fuzz/worker.cs	831	
+linux	internal/fuzz	worker.go	791	slice	[]byte	internal/fuzz/worker.cs	869	
+linux	internal/fuzz	worker.go	868	slice	[]byte	internal/fuzz/worker.cs	972	
+linux	internal/fuzz	worker.go	898	slice	[]byte	internal/fuzz/worker.cs	1012	
+linux	internal/fuzz	worker.go	907	slice	[]byte	internal/fuzz/worker.cs	1021	
+linux	internal/fuzz	worker.go	1107	slice	[]byte	internal/fuzz/worker.cs	1275	
+linux	internal/goroot	gc.go	124	slice	[]string	internal/goroot/gc.cs	155	
+linux	internal/pkgbits	encoder.go	218	map	map[internal/pkgbits.RefTableEntry]uint32	internal/pkgbits/encoder.cs	230	
+linux	internal/profile	graph.go	167	map	internal/profile.NodeSet	internal/profile/graph.cs	174	
+linux	internal/singleflight	singleflight.go	49	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	53	
+linux	internal/singleflight	singleflight.go	72	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	80	
+linux	internal/testenv	exec.go	127	slice	[]string	internal/testenv/exec.cs	142	
+linux	internal/trace	base.go	66	map	map[string]internal/trace.extraStringID	internal/trace/base.cs	64	
+linux	internal/trace	base.go	101	map	map[EI]E	internal/trace/base.cs	105	
+linux	internal/trace	base.go	113	map	map[EI]E	internal/trace/base.cs	121	
+linux	internal/trace	base.go	125	map	map[EI]E	internal/trace/base.cs	135	
+linux	internal/trace	base.go	171	map	map[EI]E	internal/trace/base.cs	184	
+linux	internal/trace	base.go	189	map	map[EI]E	internal/trace/base.cs	206	
+linux	internal/trace	event.go	702	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/event.cs	775	
+linux	internal/trace	gc.go	716	slice	internal/trace.bandUtilHeap	internal/trace/gc.cs	755	
+linux	internal/trace	generation.go	246	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/generation.cs	286	
+linux	internal/trace	mud.go	175	slice	[]internal/trace.edge	internal/trace/mud.cs	172	
+linux	internal/trace/raw	event.go	56	slice	[]byte	internal/trace/raw/event.cs	60	
+linux	internal/trace/traceviewer	mmu.go	158	slice	[]float64	internal/trace/traceviewer/mmu.cs	176	
+linux	io	io.go	399	slice	[]byte	io/io.cs	416	
+linux	io	io.go	417	slice	[]byte	io/io.cs	441	
+linux	io	multi.go	105	slice	[]byte	io/multi.cs	129	
+linux	log/slog	record.go	140	slice	[]log/slog.Attr	log/slog/record.cs	149	
+linux	math/big	natconv.go	407	slice	[]math/big.divisor	math/big/natconv.cs	443	
+linux	math/big/internal/asmgen	pipe.go	484	slice	[]int	math/big/internal/asmgen/pipe.cs	524	
+linux	mime	mediatype.go	177	map	map[string]map[string]string	mime/mediatype.cs	184	
+linux	mime/multipart	formdata.go	185	slice	[]byte	mime/multipart/formdata.cs	206	
+linux	mime/multipart	formdata.go	268	slice	[]byte	mime/multipart/formdata.cs	295	
+linux	mime/multipart	multipart.go	79	map	map[string]string	mime/multipart/multipart.cs	82	
+linux	mime/multipart	multipart.go	92	map	map[string]string	mime/multipart/multipart.cs	98	
+linux	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+linux	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+linux	net	addrselect.go	336	slice	net.IP	net/addrselect.cs	343	
+linux	net	dial.go	574	chan	<-chan struct{}	net/dial.cs	602	
+linux	net	dnsclient.go	35	slice	net.IP	net/dnsclient.cs	37	
+linux	net	dnsclient.go	38	slice	net.IP	net/dnsclient.cs	40	
+linux	net	dnsclient_unix.go	593	slice	net.IP	net/dnsclient_unix.cs	686	
+linux	net	fd_unix.go	79	chan	<-chan struct{}	net/fd_unix.cs	103	
+linux	net	ip.go	127	slice	net.IP	net/ip.cs	132	
+linux	net	ip.go	136	slice	net.IP	net/ip.cs	143	
+linux	net	ip.go	154	slice	net.IP	net/ip.cs	161	
+linux	net	ip.go	169	slice	net.IP	net/ip.cs	178	
+linux	net	ip.go	178	slice	net.IP	net/ip.cs	189	
+linux	net	ip.go	249	slice	net.IP	net/ip.cs	252	
+linux	net	ip.go	381	slice	net.IP	net/ip.cs	394	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+linux	net	ip.go	457	slice	net.IP	net/ip.cs	480	
+linux	net	ip.go	482	slice	net.IP	net/ip.cs	509	
+linux	net	ip.go	511	slice	net.IP	net/ip.cs	544	
+linux	net	ip.go	511	slice	net.IPMask	net/ip.cs	544	
+linux	net	iprawsock.go	62	slice	net.IP	net/iprawsock.cs	65	
+linux	net	iprawsock_posix.go	28	slice	net.IP	net/iprawsock_posix.cs	29	
+linux	net	ipsock.go	67	slice	net.IP	net/ipsock.cs	67	
+linux	net	ipsock.go	69	slice	net.IP	net/ipsock.cs	70	
+linux	net	ipsock.go	71	slice	net.IP	net/ipsock.cs	73	
+linux	net	ipsock.go	148	slice	net.IP	net/ipsock.cs	159	
+linux	net	ipsock.go	153	slice	net.IP	net/ipsock.cs	164	
+linux	net	ipsock_posix.go	175	slice	net.IP	net/ipsock_posix.cs	187	
+linux	net	ipsock_posix.go	200	slice	net.IP	net/ipsock_posix.cs	212	
+linux	net	nss.go	209	map	map[string][]net.nssSource	net/nss.cs	241	
+linux	net	sock_posix.go	191	slice	net.IP	net/sock_posix.cs	242	
+linux	net	sockopt_posix.go	33	slice	net.IP	net/sockopt_posix.cs	32	
+linux	net	sockopt_posix.go	37	slice	net.IP	net/sockopt_posix.cs	38	
+linux	net	tcpsock.go	56	slice	net.IP	net/tcpsock.cs	65	
+linux	net	tcpsock_posix.go	30	slice	net.IP	net/tcpsock_posix.cs	32	
+linux	net	udpsock.go	56	slice	net.IP	net/udpsock.cs	64	
+linux	net	udpsock.go	363	slice	net.IP	net/udpsock.cs	425	
+linux	net	udpsock_posix.go	29	slice	net.IP	net/udpsock_posix.cs	31	
+linux	net	udpsock_posix.go	253	slice	net.IP	net/udpsock_posix.cs	290	
+linux	net/http	client.go	246	map	net/http.Header	net/http/client.cs	268	
+linux	net/http	client.go	363	chan	<-chan struct{}	net/http/client.cs	403	
+linux	net/http	client.go	786	map	map[string][]*net/http.Cookie	net/http/client.cs	891	
+linux	net/http	clientconn.go	218	map	net/http.Header	net/http/clientconn.cs	245	
+linux	net/http	clientconn.go	385	chan	<-chan struct{}	net/http/clientconn.cs	450	
+linux	net/http	clone.go	24	map	net/url.Values	net/http/clone.cs	25	
+linux	net/http	clone.go	70	map	map[string][]*mime/multipart.FileHeader	net/http/clone.cs	75	
+linux	net/http	clone.go	117	map	net/http.Header	net/http/clone.cs	124	
+linux	net/http	cookie.go	422	slice	net.IP	net/http/cookie.cs	486	
+linux	net/http	csrf.go	73	map	map[string]bool	net/http/csrf.cs	79	
+linux	net/http	h2_bundle.go	852	map	map[string]*net/http.http2dialCall	net/http/h2_bundle.cs	590	
+linux	net/http	h2_bundle.go	893	map	map[string]*net/http.http2addConnCall	net/http/h2_bundle.cs	634	
+linux	net/http	h2_bundle.go	942	map	map[string][]*net/http.http2ClientConn	net/http/h2_bundle.cs	684	
+linux	net/http	h2_bundle.go	945	map	map[*net/http.http2ClientConn][]string	net/http/h2_bundle.cs	687	
+linux	net/http	h2_bundle.go	2358	slice	[]byte	net/http/h2_bundle.cs	2161	
+linux	net/http	h2_bundle.go	2362	slice	[]byte	net/http/h2_bundle.cs	2165	
+linux	net/http	h2_bundle.go	4073	chan	chan struct{}	net/http/h2_bundle.cs	4090	
+linux	net/http	h2_bundle.go	4100	chan	chan struct{}	net/http/h2_bundle.cs	4134	
+linux	net/http	h2_bundle.go	4321	slice	[]uint16	net/http/h2_bundle.cs	4358	
+linux	net/http	h2_bundle.go	4356	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/h2_bundle.cs	4393	
+linux	net/http	h2_bundle.go	4597	slice	[]byte	net/http/h2_bundle.cs	4652	
+linux	net/http	h2_bundle.go	4881	map	map[string]string	net/http/h2_bundle.cs	4969	
+linux	net/http	h2_bundle.go	5330	chan	chan error	net/http/h2_bundle.cs	5548	
+linux	net/http	h2_bundle.go	6161	map	net/http.Header	net/http/h2_bundle.cs	6530	
+linux	net/http	h2_bundle.go	6196	map	net/http.Header	net/http/h2_bundle.cs	6571	
+linux	net/http	h2_bundle.go	6228	map	net/http.Header	net/http/h2_bundle.cs	6612	
+linux	net/http	h2_bundle.go	6525	map	net/http.Header	net/http/h2_bundle.cs	6966	
+linux	net/http	h2_bundle.go	6539	chan	chan error	net/http/h2_bundle.cs	6982	
+linux	net/http	h2_bundle.go	6991	chan	chan bool	net/http/h2_bundle.cs	7491	
+linux	net/http	h2_bundle.go	7009	map	net/http.Header	net/http/h2_bundle.cs	7511	
+linux	net/http	h2_bundle.go	7121	slice	[]byte	net/http/h2_bundle.cs	7629	
+linux	net/http	h2_bundle.go	7163	map	net/http.Header	net/http/h2_bundle.cs	7681	
+linux	net/http	h2_bundle.go	7656	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/h2_bundle.cs	8197	
+linux	net/http	h2_bundle.go	7878	chan	chan struct{}	net/http/h2_bundle.cs	8420	
+linux	net/http	h2_bundle.go	7885	chan	chan struct{}	net/http/h2_bundle.cs	8432	
+linux	net/http	h2_bundle.go	8800	chan	chan struct{}	net/http/h2_bundle.cs	9553	
+linux	net/http	h2_bundle.go	8864	chan	chan struct{}	net/http/h2_bundle.cs	9637	
+linux	net/http	h2_bundle.go	9068	chan	chan struct{}	net/http/h2_bundle.cs	9910	
+linux	net/http	h2_bundle.go	9081	chan	chan struct{}	net/http/h2_bundle.cs	9923	
+linux	net/http	h2_bundle.go	9277	map	net/http.Header	net/http/h2_bundle.cs	10140	
+linux	net/http	h2_bundle.go	9322	chan	chan struct{}	net/http/h2_bundle.cs	10187	
+linux	net/http	h2_bundle.go	9417	chan	chan struct{}	net/http/h2_bundle.cs	10298	
+linux	net/http	h2_bundle.go	9825	map	net/http.Header	net/http/h2_bundle.cs	10807	
+linux	net/http	h2_bundle.go	9834	slice	[]string	net/http/h2_bundle.cs	10816	
+linux	net/http	h2_bundle.go	10258	map	net/http.Header	net/http/h2_bundle.cs	11295	
+linux	net/http	h2_bundle.go	11128	slice	[]string	net/http/h2_bundle.cs	12426	
+linux	net/http	h2_bundle.go	11232	slice	[]string	net/http/h2_bundle.cs	12541	
+linux	net/http	h2_bundle.go	11432	chan	chan error	net/http/h2_bundle.cs	12744	
+linux	net/http	h2_bundle.go	11438	chan	chan error	net/http/h2_bundle.cs	12750	
+linux	net/http	header.go	95	map	net/http.Header	net/http/header.cs	99	
+linux	net/http	header.go	107	slice	[]string	net/http/header.cs	111	
+linux	net/http	mapping.go	26	map	map[K]V	net/http/mapping.cs	27	
+linux	net/http	mapping.go	29	map	map[K]V	net/http/mapping.cs	30	
+linux	net/http	mapping.go	47	map	map[K]V	net/http/mapping.cs	52	
+linux	net/http	mapping.go	65	map	map[K]V	net/http/mapping.cs	72	
+linux	net/http	request.go	396	slice	[]string	net/http/request.cs	381	
+linux	net/http	request.go	406	slice	[]string	net/http/request.cs	393	
+linux	net/http	request.go	720	map	net/http.Header	net/http/request.cs	738	
+linux	net/http	request.go	1329	map	net/url.Values	net/http/request.cs	1440	
+linux	net/http	request.go	1333	map	net/url.Values	net/http/request.cs	1444	
+linux	net/http	request.go	1337	map	net/url.Values	net/http/request.cs	1448	
+linux	net/http	request.go	1350	map	net/url.Values	net/http/request.cs	1461	
+linux	net/http	request.go	1353	map	net/url.Values	net/http/request.cs	1464	
+linux	net/http	request.go	1375	map	net/url.Values	net/http/request.cs	1491	
+linux	net/http	request.go	1394	map	net/url.Values	net/http/request.cs	1510	
+linux	net/http	request.go	1420	map	net/url.Values	net/http/request.cs	1538	
+linux	net/http	request.go	1435	map	net/url.Values	net/http/request.cs	1557	
+linux	net/http	request.go	1456	map	map[string][]*mime/multipart.FileHeader	net/http/request.cs	1582	
+linux	net/http	request.go	1482	map	map[string]string	net/http/request.cs	1613	
+linux	net/http	routing_index.go	35	map	map[net/http.routingIndexKey][]*net/http.pattern	net/http/routing_index.cs	38	
+linux	net/http	servemux121.go	66	map	map[string]net/http.muxEntry	net/http/servemux121.cs	72	
+linux	net/http	server.go	416	map	net/http.Header	net/http/server.cs	398	
+linux	net/http	server.go	533	map	net/http.Header	net/http/server.cs	506	
+linux	net/http	server.go	540	map	net/http.Header	net/http/server.cs	514	
+linux	net/http	server.go	1083	map	net/http.Header	net/http/server.cs	1160	
+linux	net/http	server.go	1176	map	net/http.Header	net/http/server.cs	1258	
+linux	net/http	server.go	1220	slice	[]byte	net/http/server.cs	1304	
+linux	net/http	server.go	1225	slice	[]byte	net/http/server.cs	1309	
+linux	net/http	server.go	1268	map	net/http.Header	net/http/server.cs	1355	
+linux	net/http	server.go	1281	map	map[string]bool	net/http/server.cs	1371	
+linux	net/http	server.go	1292	map	map[string]bool	net/http/server.cs	1382	
+linux	net/http	server.go	1667	slice	[]byte	net/http/server.cs	1788	
+linux	net/http	server.go	2250	chan	chan bool	net/http/server.cs	2460	
+linux	net/http	server.go	2266	chan	chan bool	net/http/server.cs	2484	
+linux	net/http	server.go	3534	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/server.cs	3874	
+linux	net/http	server.go	3598	map	map[*net.Listener]struct{}	net/http/server.cs	3945	
+linux	net/http	server.go	3617	map	map[*net/http.conn]struct{}	net/http/server.cs	3972	
+linux	net/http	socks_bundle.go	92	slice	net.IP	net/http/socks_bundle.cs	120	
+linux	net/http	socks_bundle.go	93	slice	net.IP	net/http/socks_bundle.cs	122	
+linux	net/http	socks_bundle.go	96	slice	net.IP	net/http/socks_bundle.cs	127	
+linux	net/http	socks_bundle.go	152	slice	net.IP	net/http/socks_bundle.cs	199	
+linux	net/http	socks_bundle.go	254	slice	net.IP	net/http/socks_bundle.cs	339	
+linux	net/http	socks_bundle.go	411	slice	net.IP	net/http/socks_bundle.cs	522	
+linux	net/http	transfer.go	311	map	net/http.Header	net/http/transfer.cs	348	
+linux	net/http	transfer.go	398	map	net/http.Header	net/http/transfer.cs	451	
+linux	net/http	transfer.go	954	map	net/http.Header	net/http/transfer.cs	1084	
+linux	net/http	transport.go	375	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	357	
+linux	net/http	transport.go	402	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	386	
+linux	net/http	transport.go	471	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	465	
+linux	net/http	transport.go	535	map	net/http.Header	net/http/transport.cs	534	
+linux	net/http	transport.go	599	map	net/http.Header	net/http/transport.cs	615	
+linux	net/http	transport.go	657	chan	<-chan struct{}	net/http/transport.cs	681	
+linux	net/http	transport.go	886	map	map[string]net/http.RoundTripper	net/http/transport.cs	952	
+linux	net/http	transport.go	937	map	map[*net/http.Request]context.CancelCauseFunc	net/http/transport.cs	1012	
+linux	net/http	transport.go	1137	map	map[net/http.connectMethodKey][]*net/http.persistConn	net/http/transport.cs	1233	
+linux	net/http	transport.go	1250	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1358	
+linux	net/http	transport.go	1606	map	map[net/http.connectMethodKey]int	net/http/transport.cs	1799	
+linux	net/http	transport.go	1614	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1808	
+linux	net/http	transport.go	1873	map	net/http.Header	net/http/transport.cs	2141	
+linux	net/http	transport.go	2528	chan	chan<- struct{}	net/http/transport.cs	2900	
+linux	net/http	transport.go	2559	chan	chan<- struct{}	net/http/transport.cs	2933	
+linux	net/http	transport.go	2587	chan	<-chan struct{}	net/http/transport.cs	2961	
+linux	net/http/cgi	host.go	204	slice	[]string	net/http/cgi/host.cs	240	
+linux	net/http/cookiejar	jar.go	211	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	220	
+linux	net/http/cookiejar	jar.go	298	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	321	
+linux	net/http/cookiejar	jar.go	306	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	331	
+linux	net/http/cookiejar	jar.go	406	slice	net.IP	net/http/cookiejar/jar.cs	436	
+linux	net/http/httptest	recorder.go	69	map	net/http.Header	net/http/httptest/recorder.cs	66	
+linux	net/http/httptest	recorder.go	96	slice	[]byte	net/http/httptest/recorder.cs	97	
+linux	net/http/httptest	recorder.go	173	map	net/http.Header	net/http/httptest/recorder.cs	176	
+linux	net/http/httptest	recorder.go	207	map	net/http.Header	net/http/httptest/recorder.cs	214	
+linux	net/http/httptest	recorder.go	252	map	net/http.Header	net/http/httptest/recorder.cs	262	
+linux	net/http/httptest	server.go	177	slice	[]string	net/http/httptest/server.cs	192	
+linux	net/http/httptest	server.go	358	map	map[net.Conn]net/http.ConnState	net/http/httptest/server.cs	422	
+linux	net/http/httptest	server.go	413	chan	chan<- struct{}	net/http/httptest/server.cs	491	
+linux	net/http/httputil	reverseproxy.go	410	chan	<-chan struct{}	net/http/httputil/reverseproxy.cs	445	
+linux	net/http/httputil	reverseproxy.go	460	map	net/http.Header	net/http/httputil/reverseproxy.cs	508	
+linux	net/http/httputil	reverseproxy.go	471	map	net/url.Values	net/http/httputil/reverseproxy.cs	519	
+linux	net/http/httputil	reverseproxy.go	524	slice	[]string	net/http/httputil/reverseproxy.cs	573	
+linux	net/http/internal/httpcommon	httpcommon.go	578	map	map[string][]string	net/http/internal/httpcommon/httpcommon.cs	647	
+linux	net/mail	message.go	767	slice	net.IP	net/mail/message.cs	862	
+linux	net/rpc	client.go	303	chan	chan *net/rpc.Call	net/rpc/client.cs	343	
+linux	net/smtp	smtp.go	230	slice	[]byte	net/smtp/smtp.cs	296	
+linux	net/smtp	smtp.go	253	map	map[string]string	net/smtp/smtp.cs	329	
+linux	net/smtp	smtp.go	347	map	map[string]string	net/smtp/smtp.cs	457	
+linux	net/smtp	smtp.go	386	map	map[string]string	net/smtp/smtp.cs	511	
+linux	net/textproto	header.go	31	map	net/textproto.MIMEHeader	net/textproto/header.cs	32	
+linux	net/textproto	header.go	47	map	net/textproto.MIMEHeader	net/textproto/header.cs	48	
+linux	net/textproto	pipeline.go	88	map	map[uint]chan struct{}	net/textproto/pipeline.cs	91	
+linux	net/textproto	pipeline.go	107	map	map[uint]chan struct{}	net/textproto/pipeline.cs	112	
+linux	net/textproto	reader.go	51	slice	[]byte	net/textproto/reader.cs	50	
+linux	net/textproto	reader.go	72	slice	[]byte	net/textproto/reader.cs	71	
+linux	net/textproto	reader.go	125	slice	[]byte	net/textproto/reader.cs	124	
+linux	net/textproto	reader.go	575	slice	[]string	net/textproto/reader.cs	604	
+linux	net/textproto	reader.go	587	slice	[]string	net/textproto/reader.cs	616	
+linux	os	dir.go	45	slice	[]os.FileInfo	os/dir.cs	49	
+linux	os	dir.go	74	slice	[]string	os/dir.cs	81	
+linux	os	dir.go	102	slice	[]os.DirEntry	os/dir.cs	105	
+linux	os	env.go	22	slice	[]byte	os/env.cs	23	
+linux	os	env.go	41	slice	[]byte	os/env.cs	43	
+linux	os	exec_posix.go	44	slice	[]string	os/exec_posix.cs	51	
+linux	os/exec	exec.go	433	slice	[]byte	os/exec/exec.cs	433	
+linux	os/exec	exec.go	780	chan	<-chan struct{}	os/exec/exec.cs	817	
+linux	os/exec	exec.go	849	chan	<-chan error	os/exec/exec.cs	903	
+linux	os/exec	exec.go	937	chan	<-chan os/exec.ctxResult	os/exec/exec.cs	1000	
+linux	os/exec	exec.go	975	chan	<-chan error	os/exec/exec.cs	1045	
+linux	os/exec	exec.go	1177	slice	[]byte	os/exec/exec.cs	1289	
+linux	os/exec	exec.go	1201	slice	[]string	os/exec/exec.cs	1313	
+linux	os/signal	signal.go	123	chan	chan<- os.Signal	os/signal/signal.cs	136	
+linux	os/signal	signal.go	132	map	map[chan<- os.Signal]*os/signal.handler	os/signal/signal.cs	145	
+linux	path	path.go	27	slice	[]byte	path/path.cs	31	
+linux	path	path.go	34	slice	[]byte	path/path.cs	38	
+linux	path	path.go	47	slice	[]byte	path/path.cs	51	
+linux	reflect	type.go	1339	map	map[*reflect.structType]int	reflect/type.cs	1210	
+linux	regexp	exec.go	76	slice	[]byte	regexp/exec.cs	81	
+linux	regexp	exec.go	89	slice	[]byte	regexp/exec.cs	95	
+linux	regexp	exec.go	514	slice	[]int	regexp/exec.cs	559	
+linux	regexp	exec.go	522	slice	[]int	regexp/exec.cs	569	
+linux	regexp	regexp.go	588	slice	[]byte	regexp/regexp.cs	612	
+linux	regexp	regexp.go	605	slice	[]byte	regexp/regexp.cs	629	
+linux	regexp	regexp.go	622	slice	[]byte	regexp/regexp.cs	646	
+linux	regexp	regexp.go	639	slice	[]byte	regexp/regexp.cs	664	
+linux	regexp	regexp.go	735	slice	[]int	regexp/regexp.cs	762	
+linux	regexp	regexp.go	751	slice	[]byte	regexp/regexp.cs	780	
+linux	regexp	regexp.go	772	slice	[]byte	regexp/regexp.cs	801	
+linux	regexp	regexp.go	801	slice	[]int	regexp/regexp.cs	830	
+linux	regexp	regexp.go	813	slice	[]int	regexp/regexp.cs	842	
+linux	regexp	regexp.go	827	slice	[]int	regexp/regexp.cs	856	
+linux	regexp	regexp.go	839	slice	[]int	regexp/regexp.cs	868	
+linux	regexp	regexp.go	852	slice	[]int	regexp/regexp.cs	881	
+linux	regexp	regexp.go	866	slice	[]int	regexp/regexp.cs	897	
+linux	regexp	regexp.go	929	slice	[]byte	regexp/regexp.cs	960	
+linux	regexp	regexp.go	938	slice	[]byte	regexp/regexp.cs	969	
+linux	regexp	regexp.go	1021	slice	[]int	regexp/regexp.cs	1061	
+linux	regexp	regexp.go	1063	slice	[][]byte	regexp/regexp.cs	1108	
+linux	regexp	regexp.go	1081	slice	[][]int	regexp/regexp.cs	1126	
+linux	regexp	regexp.go	1099	slice	[]string	regexp/regexp.cs	1144	
+linux	regexp	regexp.go	1117	slice	[][]int	regexp/regexp.cs	1162	
+linux	regexp	regexp.go	1135	slice	[][][]byte	regexp/regexp.cs	1181	
+linux	regexp	regexp.go	1159	slice	[][]int	regexp/regexp.cs	1205	
+linux	regexp	regexp.go	1177	slice	[][]string	regexp/regexp.cs	1223	
+linux	regexp	regexp.go	1202	slice	[][]int	regexp/regexp.cs	1248	
+linux	regexp/syntax	parse.go	155	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	147	
+linux	regexp/syntax	parse.go	171	map	map[*regexp/syntax.Regexp]int64	regexp/syntax/parse.cs	165	
+linux	regexp/syntax	parse.go	262	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	267	
+linux	regexp/syntax	parse.go	1059	slice	[]rune	regexp/syntax/parse.cs	1141	
+linux	regexp/syntax	parse.go	1068	slice	[]rune	regexp/syntax/parse.cs	1151	
+linux	regexp/syntax	parse.go	1693	slice	[]byte	regexp/syntax/parse.cs	1868	
+linux	regexp/syntax	parse.go	1706	slice	[]byte	regexp/syntax/parse.cs	1881	
+linux	regexp/syntax	parse.go	1862	slice	[]rune	regexp/syntax/parse.cs	2058	
+linux	regexp/syntax	parse.go	1873	slice	[]rune	regexp/syntax/parse.cs	2069	
+linux	regexp/syntax	parse.go	1879	slice	[]rune	regexp/syntax/parse.cs	2076	
+linux	regexp/syntax	prog.go	333	slice	[]rune	regexp/syntax/prog.cs	377	
+linux	regexp/syntax	regexp.go	117	map	map[*regexp/syntax.Regexp]regexp/syntax.printFlags	regexp/syntax/regexp.cs	113	
+linux	runtime	env_posix.go	11	slice	[]string	runtime/env_posix.cs	15	
+linux	runtime	heapdump.go	717	slice	[]byte	runtime/heapdump.cs	733	
+linux	runtime	heapdump.go	735	slice	[]byte	runtime/heapdump.cs	757	
+linux	runtime	mprof.go	438	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1255	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1269	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1342	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1399	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1568	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1615	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1636	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go	1686	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	334	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1159	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1241	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1303	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1486	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1545	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1572	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	mprof.go				runtime/mprof.cs	1625	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+linux	runtime	pinner.go	112	slice	[]unsafe.Pointer	runtime/pinner.cs	55	
+linux	runtime	plugin.go	28	map	map[runtime.typeOff]*runtime._type	runtime/plugin.cs	36	
+linux	runtime	print.go	100	slice	[]byte	runtime/print.cs	93	
+linux	runtime	rand.go	64	slice	[]byte	runtime/rand.cs	70	
+linux	runtime	runtime1.go	500	map	map[string]bool	runtime/runtime1.cs	556	
+linux	runtime	runtime1.go	528	map	map[string]bool	runtime/runtime1.cs	585	
+linux	runtime	runtime1.go	535	map	map[string]bool	runtime/runtime1.cs	592	
+linux	runtime	runtime1.go	543	map	map[string]bool	runtime/runtime1.cs	603	
+linux	runtime	runtime1.go	709	map	map[int32]unsafe.Pointer	runtime/runtime1.cs	787	
+linux	runtime	select.go	148	slice	[]uintptr	runtime/select.cs	159	
+linux	runtime	signal_unix.go	1068	chan	chan struct{}	runtime/signal_unix.cs	1004	
+linux	runtime	trace.go	1182	chan	chan struct{}	runtime/trace.cs	1018	
+linux	runtime	tracecpu.go	126	slice	[]unsafe.Pointer	runtime/tracecpu.cs	142	
+linux	runtime	type.go	450	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+linux	runtime	type.go	465	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+linux	runtime	type.go				runtime/type.cs	140	switch case nil over a pointer tag: exprᴛ1 == default
+linux	runtime	type.go				runtime/type.cs	474	switch case nil over a pointer tag: exprᴛ1 == default
+linux	runtime	type.go				runtime/type.cs	491	switch case nil over a pointer tag: exprᴛ1 == default
+linux	runtime	vgetrandom_linux.go	61	slice	[]uintptr	runtime/vgetrandom_linux.cs	67	
+linux	runtime/pprof	map.go	78	map	map[uintptr]*runtime/pprof.profMapEntry	runtime/pprof/map.cs	81	
+linux	runtime/pprof	pprof.go	257	map	map[string]*runtime/pprof.Profile	runtime/pprof/pprof.cs	273	
+linux	runtime/pprof	pprof.go	374	slice	[]uintptr	runtime/pprof/pprof.cs	415	
+linux	runtime/pprof	pprof.go	902	chan	chan bool	runtime/pprof/pprof.cs	1009	
+linux	runtime/pprof	proto.go	316	slice	[]unsafe.Pointer	runtime/pprof/proto.cs	311	
+linux	runtime/pprof	proto.go	723	slice	[]byte	runtime/pprof/proto.cs	762	
+linux	runtime/trace	subscribe.go	168	slice	[]byte	runtime/trace/subscribe.cs	218	
+linux	strings	replace.go	82	slice	[]byte	strings/replace.cs	86	
+linux	strings	replace.go	207	slice	[]*strings.trieNode	strings/replace.cs	216	
+linux	strings	replace.go	238	slice	[]*strings.trieNode	strings/replace.cs	252	
+linux	strings	replace.go	445	slice	[]byte	strings/replace.cs	471	
+linux	strings	replace.go	451	slice	[]byte	strings/replace.cs	477	
+linux	strings	replace.go	526	slice	[]byte	strings/replace.cs	555	
+linux	strings	replace.go	540	slice	[]byte	strings/replace.cs	569	
+linux	strings	replace.go	555	slice	[]byte	strings/replace.cs	587	
+linux	syscall	exec_linux.go	155	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	158	
+linux	syscall	exec_linux.go	155	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	158	
+linux	syscall	exec_linux.go	263	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	284	
+linux	syscall	exec_linux.go	268	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	289	
+linux	syscall	exec_linux.go	300	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	321	
+linux	syscall	exec_linux.go	300	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	321	
+linux	syscall	exec_linux.go	366	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	389	
+linux	syscall	exec_linux.go	366	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	389	
+linux	syscall	exec_linux.go	427	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	456	
+linux	syscall	exec_linux.go	452	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	497	
+linux	syscall	exec_linux.go	496	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	556	
+linux	syscall	exec_linux.go	737	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	831	
+linux	syscall	exec_linux.go	744	slice	[]syscall.SysProcIDMap	syscall/exec_linux.cs	840	
+linux	syscall	syscall_unix.go	82	slice	[]byte	syscall/syscall_unix.cs	97	
+linux	testing	benchmark.go	167	map	map[string]float64			testing is hand-owned: not emitted
+linux	testing	fuzz.go	113	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+linux	testing	fuzz.go	277	slice	[]any			testing is hand-owned: not emitted
+linux	testing	testing.go	799	map	map[string]struct{}			testing is hand-owned: not emitted
+linux	testing	testing.go	1278	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+linux	testing	testing.go	1768	chan	chan bool			testing is hand-owned: not emitted
+linux	testing	testing.go	2838	slice	[]int			testing is hand-owned: not emitted
+linux	testing/fstest	mapfs.go	96	slice	[]testing/fstest.mapFileInfo	testing/fstest/mapfs.cs	98	
+linux	text/template	exec.go	773	slice	[]text/template/parse.Node	text/template/exec.cs	931	
+linux	text/template/parse	parse.go	823	map	map[string]any	text/template/parse/parse.cs	1043	
+linux	time	format.go				time/format.cs	630	switch case nil over a pointer tag: exprᴛ1 == default
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	37	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	39	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	44	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	48	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	55	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	61	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	66	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	74	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	77	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	87	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	88	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	100	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	99	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	113	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	108	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	124	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	122	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	140	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	131	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	149	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	162	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	182	
+linux	vendor/golang.org/x/crypto/cryptobyte	string.go	174	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	194	
+linux	vendor/golang.org/x/net/dns/dnsmessage	message.go	574	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	581	
+linux	vendor/golang.org/x/net/dns/dnsmessage	message.go	1264	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	1318	
+linux	vendor/golang.org/x/net/dns/dnsmessage	message.go	2024	map	map[string]uint16	vendor/golang.org/x/net/dns/dnsmessage/message.cs	2239	
+linux	vendor/golang.org/x/net/http/httpproxy	proxy.go	192	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	209	
+linux	vendor/golang.org/x/net/http/httpproxy	proxy.go	247	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	273	
+linux	vendor/golang.org/x/net/http/httpproxy	proxy.go	366	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	401	
+linux	vendor/golang.org/x/net/idna	idna10.0.0.go	571	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	613	
+linux	vendor/golang.org/x/net/idna	idna10.0.0.go	578	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	620	
+linux	vendor/golang.org/x/net/idna	idna10.0.0.go	592	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	634	
+linux	vendor/golang.org/x/net/idna	idna10.0.0.go	605	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	647	
+linux	vendor/golang.org/x/net/nettest	nettest.go	325	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	388	
+linux	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+linux	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+linux	vendor/golang.org/x/net/nettest	nettest.go	336	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	405	
+linux	vendor/golang.org/x/net/nettest	nettest.go	339	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	410	
+linux	vendor/golang.org/x/text/unicode/bidi	core.go	1057	slice	[]rune	vendor/golang.org/x/text/unicode/bidi/core.cs	1119	
+linux	vendor/golang.org/x/text/unicode/norm	forminfo.go	208	map	map[uint32]rune	vendor/golang.org/x/text/unicode/norm/forminfo.cs	216	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	33	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	35	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	40	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	42	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	51	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	53	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	62	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	64	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	72	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	74	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	79	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	81	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	86	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	88	
+linux	vendor/golang.org/x/text/unicode/norm	input.go	94	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	98	
+linux	vendor/golang.org/x/text/unicode/norm	iter.go	98	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	103	
+linux	vendor/golang.org/x/text/unicode/norm	iter.go	241	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	266	
+linux	vendor/golang.org/x/text/unicode/norm	iter.go	257	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	283	
+darwin	archive/tar	reader.go	205	slice	archive/tar.sparseDatas	archive/tar/reader.cs	230	
+darwin	archive/tar	reader.go	292	map	map[string]string	archive/tar/reader.cs	341	
+darwin	archive/zip	reader.go	184	map	map[uint16]archive/zip.Decompressor	archive/zip/reader.cs	195	
+darwin	archive/zip	writer.go	494	map	map[uint16]archive/zip.Compressor	archive/zip/writer.cs	548	
+darwin	bufio	bufio.go	81	slice	[]byte	bufio/bufio.cs	83	
+darwin	bufio	bufio.go	626	slice	[]byte	bufio/bufio.cs	668	
+darwin	bufio	scan.go	158	slice	[]byte	bufio/scan.cs	154	
+darwin	bufio	scan.go	167	slice	[]byte	bufio/scan.cs	163	
+darwin	bytes	buffer.go	154	slice	[]byte	bytes/buffer.cs	173	
+darwin	bytes	bytes.go	1385	slice	[]byte	bytes/bytes.cs	1443	
+darwin	compress/flate	huffman_bit_writer.go	316	slice	[]byte	compress/flate/huffman_bit_writer.cs	317	
+darwin	compress/flate	huffman_code.go	273	slice	[]compress/flate.literalNode	compress/flate/huffman_code.cs	285	
+darwin	compress/gzip	gzip.go	148	slice	[]byte	compress/gzip/gzip.cs	156	
+darwin	compress/gzip	gzip.go	172	slice	[]byte	compress/gzip/gzip.cs	181	
+darwin	compress/zlib	writer.go	115	slice	[]byte	compress/zlib/writer.cs	121	
+darwin	compress/zlib	writer.go	122	slice	[]byte	compress/zlib/writer.cs	130	
+darwin	context	context.go	384	chan	<-chan struct{}	context/context.cs	423	
+darwin	context	context.go	409	map	map[context.canceler]struct{}	context/context.cs	450	
+darwin	context	context.go	479	chan	<-chan struct{}	context/context.cs	537	
+darwin	context	context.go	498	map	map[context.canceler]struct{}	context/context.cs	561	
+darwin	context	context.go	564	chan	chan struct{}	context/context.cs	640	
+darwin	crypto/hpke	pq.go	319	slice	[]byte	crypto/hpke/pq.cs	379	
+darwin	crypto/internal/boring/bbig	big.go	25	slice	crypto/internal/boring.BigInt	crypto/internal/boring/bbig/big.cs	28	
+darwin	crypto/internal/fips140/hkdf	hkdf.go	17	slice	[]byte	crypto/internal/fips140/hkdf/hkdf.cs	20	
+darwin	crypto/internal/fips140/rsa	rsa.go	179	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	201	
+darwin	crypto/internal/fips140/rsa	rsa.go	201	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	237	
+darwin	crypto/internal/fips140/rsa	rsa.go	419	slice	[]byte	crypto/internal/fips140/rsa/rsa.cs	476	
+darwin	crypto/internal/fips140/tls13	tls13.go	43	slice	[]byte	crypto/internal/fips140/tls13/tls13.cs	51	
+darwin	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+darwin	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+darwin	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+darwin	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+darwin	crypto/rsa	rsa.go	261	slice	[]byte	crypto/rsa/rsa.cs	286	
+darwin	crypto/tls	auth.go	238	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	291	
+darwin	crypto/tls	auth.go	304	slice	[]crypto/tls.SignatureScheme	crypto/tls/auth.cs	365	
+darwin	crypto/tls	cipher_suites.go	620	slice	[]byte	crypto/tls/cipher_suites.cs	649	
+darwin	crypto/tls	common.go	1185	slice	[]uint16	crypto/tls/common.cs	1146	
+darwin	crypto/tls	common.go	1234	slice	[]byte	crypto/tls/common.cs	1194	
+darwin	crypto/tls	common.go	1335	map	map[string]*crypto/tls.Certificate	crypto/tls/common.cs	1294	
+darwin	crypto/tls	common.go	1754	slice	[]crypto/tls.SignatureScheme	crypto/tls/common.cs	1782	
+darwin	crypto/tls	conn.go	1536	chan	<-chan struct{}	crypto/tls/conn.cs	1780	
+darwin	crypto/tls	handshake_client.go	167	slice	[]byte	crypto/tls/handshake_client.cs	189	
+darwin	crypto/tls	handshake_client.go	174	slice	[]byte	crypto/tls/handshake_client.cs	196	
+darwin	crypto/tls	handshake_client.go	544	slice	[]byte	crypto/tls/handshake_client.cs	606	
+darwin	crypto/tls	handshake_client.go	636	slice	[]uint16	crypto/tls/handshake_client.cs	733	
+darwin	crypto/tls	handshake_client.go	640	slice	[]uint16	crypto/tls/handshake_client.cs	737	
+darwin	crypto/tls	handshake_client.go	819	slice	[]byte	crypto/tls/handshake_client.cs	937	
+darwin	crypto/tls	handshake_client.go	881	slice	[]byte	crypto/tls/handshake_client.cs	1002	
+darwin	crypto/tls	handshake_client.go	1054	slice	[]byte	crypto/tls/handshake_client.cs	1205	
+darwin	crypto/tls	handshake_client.go	1127	slice	[]byte	crypto/tls/handshake_client.cs	1292	
+darwin	crypto/tls	handshake_client.go	1313	slice	net.IP	crypto/tls/handshake_client.cs	1508	
+darwin	crypto/tls	handshake_client_tls13.go	105	slice	[]byte	crypto/tls/handshake_client_tls13.cs	125	
+darwin	crypto/tls	handshake_client_tls13.go	256	slice	[]byte	crypto/tls/handshake_client_tls13.cs	310	
+darwin	crypto/tls	handshake_client_tls13.go	285	slice	[]byte	crypto/tls/handshake_client_tls13.cs	343	
+darwin	crypto/tls	handshake_client_tls13.go	294	slice	[]byte	crypto/tls/handshake_client_tls13.cs	352	
+darwin	crypto/tls	handshake_client_tls13.go	299	slice	[]byte	crypto/tls/handshake_client_tls13.cs	357	
+darwin	crypto/tls	handshake_client_tls13.go	547	slice	[]byte	crypto/tls/handshake_client_tls13.cs	643	
+darwin	crypto/tls	handshake_client_tls13.go	554	slice	[]byte	crypto/tls/handshake_client_tls13.cs	650	
+darwin	crypto/tls	handshake_client_tls13.go	580	slice	[]byte	crypto/tls/handshake_client_tls13.cs	677	
+darwin	crypto/tls	handshake_client_tls13.go	864	slice	[]byte	crypto/tls/handshake_client_tls13.cs	998	
+darwin	crypto/tls	handshake_messages.go	159	slice	[]byte	crypto/tls/handshake_messages.cs	173	
+darwin	crypto/tls	handshake_messages.go	392	slice	[]byte	crypto/tls/handshake_messages.cs	421	
+darwin	crypto/tls	handshake_messages.go	1028	slice	[]byte	crypto/tls/handshake_messages.cs	1114	
+darwin	crypto/tls	handshake_messages.go	1497	slice	[]byte	crypto/tls/handshake_messages.cs	1610	
+darwin	crypto/tls	handshake_messages.go	1506	slice	[][]byte	crypto/tls/handshake_messages.cs	1621	
+darwin	crypto/tls	handshake_messages.go	1535	slice	[][]byte	crypto/tls/handshake_messages.cs	1654	
+darwin	crypto/tls	handshake_messages.go	1536	slice	[]byte	crypto/tls/handshake_messages.cs	1655	
+darwin	crypto/tls	handshake_messages.go	1953	slice	[]byte	crypto/tls/handshake_messages.cs	2080	
+darwin	crypto/tls	handshake_server.go	409	slice	[]uint16	crypto/tls/handshake_server.cs	482	
+darwin	crypto/tls	handshake_server.go	413	slice	[]uint16	crypto/tls/handshake_server.cs	486	
+darwin	crypto/tls	handshake_server.go	473	slice	[]byte	crypto/tls/handshake_server.cs	555	
+darwin	crypto/tls	handshake_server.go	794	slice	[]byte	crypto/tls/handshake_server.cs	912	
+darwin	crypto/tls	handshake_server_tls13.go	276	slice	[]byte	crypto/tls/handshake_server_tls13.cs	316	
+darwin	crypto/tls	handshake_server_tls13.go	282	slice	[]byte	crypto/tls/handshake_server_tls13.cs	322	
+darwin	crypto/tls	handshake_server_tls13.go	335	slice	[]byte	crypto/tls/handshake_server_tls13.cs	380	
+darwin	crypto/tls	prf.go	195	slice	[]byte	crypto/tls/prf.cs	206	
+darwin	crypto/tls	prf.go	264	slice	[]byte	crypto/tls/prf.cs	284	
+darwin	crypto/tls	prf.go	272	slice	[]byte	crypto/tls/prf.cs	292	
+darwin	crypto/tls	quic.go	369	slice	[]byte	crypto/tls/quic.cs	403	
+darwin	crypto/tls	quic.go	477	slice	[]byte	crypto/tls/quic.cs	525	
+darwin	crypto/tls	quic.go	482	slice	[]byte	crypto/tls/quic.cs	530	
+darwin	crypto/tls	ticket.go	360	slice	[]byte	crypto/tls/ticket.cs	386	
+darwin	crypto/x509	parser.go	644	slice	net.IP	crypto/x509/parser.cs	797	
+darwin	crypto/x509	verify.go	120	slice	net.IP	crypto/x509/verify.cs	145	
+darwin	crypto/x509	verify.go	947	slice	net.IP	crypto/x509/verify.cs	1008	
+darwin	crypto/x509	x509.go	1171	slice	net.IP	crypto/x509/x509.cs	1208	
+darwin	crypto/x509/pkix	pkix.go	253	slice	[]crypto/x509/pkix.AttributeTypeAndValue	crypto/x509/pkix/pkix.cs	279	
+darwin	database/sql	ctxutil.go	121	chan	<-chan struct{}	database/sql/ctxutil.cs	150	
+darwin	database/sql	sql.go	642	map	map[*database/sql.driverStmt]bool	database/sql/sql.cs	723	
+darwin	database/sql	sql.go	751	map	map[database/sql.finalCloser]database/sql.depSet	database/sql/sql.cs	863	
+darwin	database/sql	sql.go	755	map	database/sql.depSet	database/sql/sql.cs	867	
+darwin	database/sql	sql.go	932	chan	chan struct{}	database/sql/sql.cs	1061	
+darwin	database/sql	sql.go	1053	chan	chan struct{}	database/sql/sql.cs	1192	
+darwin	database/sql	sql.go	1077	chan	chan struct{}	database/sql/sql.cs	1225	
+darwin	database/sql	sql.go	1089	chan	chan struct{}	database/sql/sql.cs	1246	
+darwin	database/sql	sql.go	2917	slice	[]database/sql.connStmt	database/sql/sql.cs	3338	
+darwin	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+darwin	database/sql	sql.go	2988	chan	<-chan struct{}	database/sql/sql.cs	3408	
+darwin	database/sql	sql.go	3062	slice	[]database/sql/driver.Value	database/sql/sql.cs	3501	
+darwin	database/sql	sql.go	3391	slice	[]database/sql/driver.Value	database/sql/sql.cs	3891	
+darwin	debug/buildinfo	buildinfo.go	365	slice	[]byte	debug/buildinfo/buildinfo.cs	405	
+darwin	debug/dwarf	buf.go	97	slice	[]byte	debug/dwarf/buf.cs	102	
+darwin	debug/dwarf	buf.go	105	slice	[]byte	debug/dwarf/buf.cs	110	
+darwin	debug/dwarf	buf.go	117	slice	[]byte	debug/dwarf/buf.cs	122	
+darwin	debug/dwarf	buf.go	125	slice	[]byte	debug/dwarf/buf.cs	130	
+darwin	debug/dwarf	entry.go	518	slice	[]byte	debug/dwarf/entry.cs	561	
+darwin	debug/dwarf	entry.go	977	slice	[]byte	debug/dwarf/entry.cs	1074	
+darwin	debug/dwarf	entry.go	1013	slice	[]byte	debug/dwarf/entry.cs	1110	
+darwin	debug/dwarf	line.go	144	slice	[]byte	debug/dwarf/line.cs	133	
+darwin	debug/elf	file.go	1478	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1584	
+darwin	debug/elf	file.go	1551	slice	[]debug/elf.DynamicVersion	debug/elf/file.cs	1661	
+darwin	debug/elf	file.go	1570	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1680	
+darwin	debug/elf	file.go	1640	slice	[]debug/elf.DynamicVersionNeed	debug/elf/file.cs	1754	
+darwin	debug/gosym	pclntab.go	447	slice	[]byte	debug/gosym/pclntab.cs	502	
+darwin	debug/gosym	pclntab.go	659	map	map[string]uint32	debug/gosym/pclntab.cs	774	
+darwin	encoding/binary	binary.go	413	slice	[]byte	encoding/binary/binary.cs	495	
+darwin	encoding/gob	decode.go	487	slice	[]int	encoding/gob/decode.cs	554	
+darwin	encoding/gob	encode.go	641	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	725	
+darwin	encoding/gob	encode.go	648	map	map[*encoding/gob.typeInfo]bool	encoding/gob/encode.cs	732	
+darwin	encoding/gob	type.go	709	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	801	
+darwin	encoding/gob	type.go	776	map	map[reflect.Type]*encoding/gob.typeInfo	encoding/gob/type.cs	884	
+darwin	encoding/json	stream.go	265	slice	encoding/json.RawMessage	encoding/json/stream.cs	295	
+darwin	encoding/xml	marshal.go	353	map	map[string]string	encoding/xml/marshal.cs	393	
+darwin	encoding/xml	marshal.go	566	slice	[]byte	encoding/xml/marshal.cs	632	
+darwin	encoding/xml	marshal.go	669	slice	[]byte	encoding/xml/marshal.cs	749	
+darwin	encoding/xml	typeinfo.go	294	slice	[]int	encoding/xml/typeinfo.cs	321	
+darwin	encoding/xml	xml.go	582	slice	[]byte	encoding/xml/xml.cs	625	
+darwin	encoding/xml	xml.go	712	slice	[]byte	encoding/xml/xml.cs	774	
+darwin	encoding/xml	xml.go	846	slice	[]byte	encoding/xml/xml.cs	928	
+darwin	encoding/xml	xml.go	1104	map	map[string]string	encoding/xml/xml.cs	1214	
+darwin	flag	flag.go	513	map	map[string]string	flag/flag.cs	580	
+darwin	flag	flag.go	524	map	map[string]*flag.Flag	flag/flag.cs	591	
+darwin	flag	flag.go	1033	map	map[string]*flag.Flag	flag/flag.cs	1167	
+darwin	flag	flag.go	1142	map	map[string]*flag.Flag	flag/flag.cs	1296	
+darwin	fmt	format.go	371	slice	[]byte	fmt/format.cs	386	
+darwin	fmt	format.go	419	slice	[]byte	fmt/format.cs	435	
+darwin	fmt	print.go	515	slice	[]byte	fmt/print.cs	626	
+darwin	go/build	build.go	1037	map	map[string][]go/token.Position	go/build/build.cs	1139	
+darwin	go/build	build.go	1042	map	map[string][]go/token.Position	go/build/build.cs	1144	
+darwin	go/build	build.go	1110	slice	[]string	go/build/build.cs	1220	
+darwin	go/build	build.go	1582	slice	[]byte	go/build/build.cs	1724	
+darwin	go/build	build.go	1659	slice	[]byte	go/build/build.cs	1812	
+darwin	go/build	build.go	1948	map	map[string]bool	go/build/build.cs	2150	
+darwin	go/build	build.go	2017	map	map[string]bool	go/build/build.cs	2220	
+darwin	go/doc	example.go	123	slice	[]int	go/doc/example.cs	145	
+darwin	go/doc	example.go	465	slice	[]go/ast.Expr	go/doc/example.cs	525	
+darwin	go/doc	exports.go	241	map	map[string]bool	go/doc/exports.cs	287	
+darwin	go/doc	reader.go	256	map	map[string][]*go/ast.InterfaceType	go/doc/reader.cs	289	
+darwin	go/doc	reader.go	520	slice	[]int	go/doc/reader.cs	587	
+darwin	go/internal/gccgoimporter	ar.go	144	slice	[]byte	go/internal/gccgoimporter/ar.cs	158	
+darwin	go/internal/gccgoimporter	importer.go	124	slice	[]byte	go/internal/gccgoimporter/importer.cs	136	
+darwin	go/internal/gccgoimporter	importer.go	217	map	map[*go/types.Package]go/internal/gccgoimporter.InitData	go/internal/gccgoimporter/importer.cs	248	
+darwin	go/parser	parser.go	1268	slice	[]*go/ast.Ident	go/parser/parser.cs	1607	
+darwin	go/printer	nodes.go	71	slice	[]*go/ast.CommentGroup	go/printer/nodes.cs	80	
+darwin	go/printer	nodes.go	449	slice	[]*go/ast.Ident	go/printer/nodes.cs	478	
+darwin	go/printer	nodes.go	1419	slice	[]go/ast.Expr	go/printer/nodes.cs	1558	
+darwin	go/printer	nodes.go	1467	slice	[]go/ast.Expr	go/printer/nodes.cs	1614	
+darwin	go/printer	nodes.go	1590	slice	[]go/ast.Expr	go/printer/nodes.cs	1747	
+darwin	go/printer	nodes.go	1626	slice	[]go/ast.Expr	go/printer/nodes.cs	1785	
+darwin	go/printer	nodes.go	1707	slice	[]go/ast.Expr	go/printer/nodes.cs	1878	
+darwin	go/printer	printer.go	1099	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1191	
+darwin	go/printer	printer.go	1138	slice	[]*go/ast.CommentGroup	go/printer/printer.cs	1239	
+darwin	go/types	api.go	341	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/api.cs	324	
+darwin	go/types	builtins.go	685	map	map[*go/ast.CallExpr]bool	go/types/builtins.cs	762	
+darwin	go/types	builtins.go	1021	map	map[*go/types.Named]bool	go/types/builtins.cs	1114	
+darwin	go/types	call.go	52	slice	[]go/types.Type	go/types/call.cs	59	
+darwin	go/types	call.go	114	slice	[]go/types.Type	go/types/call.cs	122	
+darwin	go/types	call.go	272	slice	[]go/types.Type	go/types/call.cs	314	
+darwin	go/types	call.go	395	slice	[]go/types.Type	go/types/call.cs	457	
+darwin	go/types	call.go	430	slice	[]go/types.Type	go/types/call.cs	497	
+darwin	go/types	call.go	615	slice	[]go/types.Type	go/types/call.cs	697	
+darwin	go/types	call.go	816	slice	[]int	go/types/call.cs	926	
+darwin	go/types	check.go	231	map	map[*go/types.TypeName]bool	go/types/check.cs	240	
+darwin	go/types	check.go	253	map	map[go/ast.Expr]go/types.exprInfo	go/types/check.cs	264	
+darwin	go/types	check.go	274	map	map[go/types.Object]int	go/types/check.cs	285	
+darwin	go/types	check.go	383	map	map[*go/ast.File]string	go/types/check.cs	406	
+darwin	go/types	decl.go	479	slice	[]*go/types.Var	go/types/decl.cs	611	
+darwin	go/types	decl.go	480	slice	[]*go/types.Var	go/types/decl.cs	612	
+darwin	go/types	decl.go	732	slice	[]*go/types.Func	go/types/decl.cs	910	
+darwin	go/types	errors.go	75	slice	[]go/types.errorDesc	go/types/errors.cs	88	
+darwin	go/types	format.go	138	map	map[string]map[string]bool	go/types/format.cs	178	
+darwin	go/types	infer.go	42	slice	[]go/types.Type	go/types/infer.cs	54	
+darwin	go/types	infer.go	338	map	map[*go/types.TypeParam]go/types.Type	go/types/infer.cs	361	
+darwin	go/types	initorder.go	88	slice	[]go/types.Object	go/types/initorder.cs	99	
+darwin	go/types	initorder.go	120	slice	[]*go/types.Var	go/types/initorder.cs	131	
+darwin	go/types	initorder.go	159	slice	[]go/types.Object	go/types/initorder.cs	170	
+darwin	go/types	initorder.go	220	map	go/types.nodeSet	go/types/initorder.cs	233	
+darwin	go/types	labels.go	64	map	map[string]*go/ast.LabeledStmt	go/types/labels.cs	81	
+darwin	go/types	lookup.go	349	map	map[*go/types.Named][]*go/types.Named	go/types/lookup.cs	390	
+darwin	go/types	lookup.go	424	slice	[]int	go/types/lookup.cs	470	
+darwin	go/types	lookup.go	541	map	map[*go/types.Struct]bool	go/types/lookup.cs	610	
+darwin	go/types	methodset.go	139	map	map[string]bool	go/types/methodset.cs	155	
+darwin	go/types	methodset.go	170	map	go/types.methodSet	go/types/methodset.cs	191	
+darwin	go/types	methodset.go	181	map	go/types.methodSet	go/types/methodset.cs	204	
+darwin	go/types	methodset.go	229	map	go/types.methodSet	go/types/methodset.cs	254	
+darwin	go/types	mono.go	168	map	map[*go/types.TypeParam]*go/types.TypeParam	go/types/mono.cs	174	
+darwin	go/types	mono.go	303	map	map[*go/types.TypeName]int	go/types/mono.cs	343	
+darwin	go/types	mono.go	322	map	map[*go/types.TypeName]int	go/types/mono.cs	368	
+darwin	go/types	objset.go	29	map	go/types.objset	go/types/objset.cs	30	
+darwin	go/types	predicates.go	164	map	map[go/types.Type]bool	go/types/predicates.cs	221	
+darwin	go/types	recording.go	71	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	81	
+darwin	go/types	recording.go	105	map	map[go/ast.Expr]go/types.TypeAndValue	go/types/recording.cs	124	
+darwin	go/types	recording.go	136	map	map[*go/ast.Ident]go/types.Instance	go/types/recording.cs	156	
+darwin	go/types	recording.go	143	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	165	
+darwin	go/types	recording.go	151	map	map[*go/ast.Ident]go/types.Object	go/types/recording.cs	175	
+darwin	go/types	recording.go	159	map	map[go/ast.Node]go/types.Object	go/types/recording.cs	185	
+darwin	go/types	recording.go	167	map	map[*go/ast.SelectorExpr]*go/types.Selection	go/types/recording.cs	197	
+darwin	go/types	recording.go	175	map	map[go/ast.Node]*go/types.Scope	go/types/recording.cs	207	
+darwin	go/types	resolver.go	44	map	map[go/types.Object]bool	go/types/resolver.cs	44	
+darwin	go/types	resolver.go	203	map	map[string]map[string]bool	go/types/resolver.cs	241	
+darwin	go/types	resolver.go	320	map	map[go/types.dotImportKey]*go/types.PkgName	go/types/resolver.cs	371	
+darwin	go/types	resolver.go	486	slice	[]go/types.methodInfo	go/types/resolver.cs	557	
+darwin	go/types	resolver.go	603	map	map[*go/types.TypeName]bool	go/types/resolver.cs	695	
+darwin	go/types	return.go	93	slice	[]go/ast.Expr	go/types/return.cs	109	
+darwin	go/types	scope.go	140	map	map[string]go/types.Object	go/types/scope.cs	157	
+darwin	go/types	signature.go	222	slice	[]*go/ast.Ident	go/types/signature.cs	265	
+darwin	go/types	struct.go	63	slice	[]*go/types.Var	go/types/struct.cs	72	
+darwin	go/types	struct.go	86	slice	[]string	go/types/struct.cs	105	
+darwin	go/types	struct.go	89	slice	[]string	go/types/struct.cs	108	
+darwin	go/types	subst.go	119	slice	[]go/types.Type	go/types/subst.cs	126	
+darwin	go/types	subst.go	136	slice	[]*go/types.Var	go/types/subst.cs	148	
+darwin	go/types	subst.go	183	slice	[]*go/types.Term	go/types/subst.cs	200	
+darwin	go/types	subst.go	193	slice	[]*go/types.Func	go/types/subst.cs	212	
+darwin	go/types	subst.go	193	slice	[]go/types.Type	go/types/subst.cs	212	
+darwin	go/types	subst.go	194	slice	[]*go/types.Func	go/types/subst.cs	213	
+darwin	go/types	subst.go	197	slice	[]go/types.Type	go/types/subst.cs	216	
+darwin	go/types	subst.go	261	slice	[]go/types.Type	go/types/subst.cs	284	
+darwin	go/types	subst.go	307	slice	[]*go/types.Var	go/types/subst.cs	344	
+darwin	go/types	subst.go	321	slice	[]T	go/types/subst.cs	362	
+darwin	go/types	typeset.go	199	map	map[*go/types.Union]*go/types._TypeSet	go/types/typeset.cs	228	
+darwin	go/types	typexpr.go	429	slice	[]go/types.Type	go/types/typexpr.cs	516	
+darwin	go/types	typexpr.go	528	slice	[]go/types.Type	go/types/typexpr.cs	635	
+darwin	html/template	context.go	73	slice	[]int	html/template/context.cs	66	
+darwin	image/draw	draw.go	1014	slice	[][4]int32	image/draw/draw.cs	1138	
+darwin	image/gif	reader.go	391	slice	image/color.Palette	image/gif/reader.cs	411	
+darwin	image/gif	writer.go	374	slice	[]byte	image/gif/writer.cs	413	
+darwin	image/gif	writer.go	396	slice	[]byte	image/gif/writer.cs	440	
+darwin	image/jpeg	reader.go	658	slice	[]byte	image/jpeg/reader.cs	739	
+darwin	image/jpeg	scan.go	155	slice	[]image/jpeg.block	image/jpeg/scan.cs	190	
+darwin	image/jpeg	scan.go	447	slice	[]image/jpeg.block	image/jpeg/scan.cs	507	
+darwin	image/png	writer.go	621	slice	image/color.Palette	image/png/writer.cs	686	
+darwin	image/png	writer.go	654	slice	image/color.Palette	image/png/writer.cs	724	
+darwin	index/suffixarray	sais.go	214	slice	[]int32	index/suffixarray/sais.cs	212	
+darwin	index/suffixarray	sais.go	217	slice	[]int32	index/suffixarray/sais.cs	215	
+darwin	index/suffixarray	sais2.go	203	slice	[]int64	index/suffixarray/sais2.cs	206	
+darwin	index/suffixarray	sais2.go	206	slice	[]int64	index/suffixarray/sais2.cs	209	
+darwin	index/suffixarray	sais2.go	219	slice	[]int32	index/suffixarray/sais2.cs	222	
+darwin	index/suffixarray	sais2.go	222	slice	[]int32	index/suffixarray/sais2.cs	225	
+darwin	index/suffixarray	sais2.go	234	slice	[]int64	index/suffixarray/sais2.cs	237	
+darwin	index/suffixarray	sais2.go	237	slice	[]int64	index/suffixarray/sais2.cs	240	
+darwin	index/suffixarray	suffixarray.go	53	slice	[]int32	index/suffixarray/suffixarray.cs	54	
+darwin	index/suffixarray	suffixarray.go	60	slice	[]int32	index/suffixarray/suffixarray.cs	61	
+darwin	index/suffixarray	suffixarray.go	68	slice	[]int32	index/suffixarray/suffixarray.cs	69	
+darwin	index/suffixarray	suffixarray.go	170	slice	[]int32	index/suffixarray/suffixarray.cs	179	
+darwin	index/suffixarray	suffixarray.go	170	slice	[]int64	index/suffixarray/suffixarray.cs	179	
+darwin	index/suffixarray	suffixarray.go	267	slice	[]int32	index/suffixarray/suffixarray.cs	288	
+darwin	index/suffixarray	suffixarray.go	365	slice	[]int	index/suffixarray/suffixarray.cs	392	
+darwin	internal/bisect	bisect.go	750	map	map[uint64]bool	internal/bisect/bisect.cs	835	
+darwin	internal/coverage/decodemeta	decodefile.go	182	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	195	
+darwin	internal/coverage/decodemeta	decodefile.go	209	slice	[]byte	internal/coverage/decodemeta/decodefile.cs	221	
+darwin	internal/coverage/pods	pods.go	126	slice	[]string	internal/coverage/pods/pods.cs	140	
+darwin	internal/coverage/pods	pods.go	141	slice	[]string	internal/coverage/pods/pods.cs	159	
+darwin	internal/coverage/pods	pods.go	149	slice	[]int	internal/coverage/pods/pods.cs	168	
+darwin	internal/coverage/rtcov	rtcov.go	75	map	map[int]int	internal/coverage/rtcov/rtcov.cs	78	
+darwin	internal/dag	parse.go	80	map	map[string]bool	internal/dag/parse.cs	83	
+darwin	internal/dag	parse.go	140	map	map[string]bool	internal/dag/parse.cs	146	
+darwin	internal/dag	parse.go	214	slice	[]string	internal/dag/parse.cs	233	
+darwin	internal/dag	parse.go	219	slice	[]string	internal/dag/parse.cs	238	
+darwin	internal/filepathlite	path.go	33	slice	[]byte	internal/filepathlite/path.cs	36	
+darwin	internal/filepathlite	path.go	40	slice	[]byte	internal/filepathlite/path.cs	43	
+darwin	internal/filepathlite	path.go	58	slice	[]byte	internal/filepathlite/path.cs	63	
+darwin	internal/fuzz	fuzz.go	290	slice	[]byte	internal/fuzz/fuzz.cs	322	
+darwin	internal/fuzz	fuzz.go	313	slice	[]byte	internal/fuzz/fuzz.cs	345	
+darwin	internal/fuzz	fuzz.go	488	slice	[]byte	internal/fuzz/fuzz.cs	528	
+darwin	internal/fuzz	fuzz.go	658	slice	[]byte	internal/fuzz/fuzz.cs	667	
+darwin	internal/fuzz	fuzz.go	658	slice	[]any	internal/fuzz/fuzz.cs	667	
+darwin	internal/fuzz	fuzz.go	782	slice	[]byte	internal/fuzz/fuzz.cs	794	
+darwin	internal/fuzz	fuzz.go	827	slice	[]byte	internal/fuzz/fuzz.cs	839	
+darwin	internal/fuzz	mutator.go	268	slice	[]byte	internal/fuzz/mutator.cs	319	
+darwin	internal/fuzz	worker.go	404	chan	chan struct{}	internal/fuzz/worker.cs	448	
+darwin	internal/fuzz	worker.go	707	slice	[]byte	internal/fuzz/worker.cs	774	
+darwin	internal/fuzz	worker.go	708	slice	[]byte	internal/fuzz/worker.cs	775	
+darwin	internal/fuzz	worker.go	755	slice	[]byte	internal/fuzz/worker.cs	831	
+darwin	internal/fuzz	worker.go	791	slice	[]byte	internal/fuzz/worker.cs	869	
+darwin	internal/fuzz	worker.go	868	slice	[]byte	internal/fuzz/worker.cs	972	
+darwin	internal/fuzz	worker.go	898	slice	[]byte	internal/fuzz/worker.cs	1012	
+darwin	internal/fuzz	worker.go	907	slice	[]byte	internal/fuzz/worker.cs	1021	
+darwin	internal/fuzz	worker.go	1107	slice	[]byte	internal/fuzz/worker.cs	1275	
+darwin	internal/goroot	gc.go	124	slice	[]string	internal/goroot/gc.cs	155	
+darwin	internal/pkgbits	encoder.go	218	map	map[internal/pkgbits.RefTableEntry]uint32	internal/pkgbits/encoder.cs	230	
+darwin	internal/profile	graph.go	167	map	internal/profile.NodeSet	internal/profile/graph.cs	174	
+darwin	internal/singleflight	singleflight.go	49	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	53	
+darwin	internal/singleflight	singleflight.go	72	map	map[string]*internal/singleflight.call	internal/singleflight/singleflight.cs	80	
+darwin	internal/testenv	exec.go	127	slice	[]string	internal/testenv/exec.cs	142	
+darwin	internal/trace	base.go	66	map	map[string]internal/trace.extraStringID	internal/trace/base.cs	64	
+darwin	internal/trace	base.go	101	map	map[EI]E	internal/trace/base.cs	105	
+darwin	internal/trace	base.go	113	map	map[EI]E	internal/trace/base.cs	121	
+darwin	internal/trace	base.go	125	map	map[EI]E	internal/trace/base.cs	135	
+darwin	internal/trace	base.go	171	map	map[EI]E	internal/trace/base.cs	184	
+darwin	internal/trace	base.go	189	map	map[EI]E	internal/trace/base.cs	206	
+darwin	internal/trace	event.go	702	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/event.cs	775	
+darwin	internal/trace	gc.go	716	slice	internal/trace.bandUtilHeap	internal/trace/gc.cs	755	
+darwin	internal/trace	generation.go	246	map	map[internal/trace/tracev2.Experiment][]internal/trace.ExperimentalBatch	internal/trace/generation.cs	286	
+darwin	internal/trace	mud.go	175	slice	[]internal/trace.edge	internal/trace/mud.cs	172	
+darwin	internal/trace/raw	event.go	56	slice	[]byte	internal/trace/raw/event.cs	60	
+darwin	internal/trace/traceviewer	mmu.go	158	slice	[]float64	internal/trace/traceviewer/mmu.cs	176	
+darwin	io	io.go	399	slice	[]byte	io/io.cs	416	
+darwin	io	io.go	417	slice	[]byte	io/io.cs	441	
+darwin	io	multi.go	105	slice	[]byte	io/multi.cs	129	
+darwin	log/slog	record.go	140	slice	[]log/slog.Attr	log/slog/record.cs	149	
+darwin	math/big	natconv.go	407	slice	[]math/big.divisor	math/big/natconv.cs	443	
+darwin	math/big/internal/asmgen	pipe.go	484	slice	[]int	math/big/internal/asmgen/pipe.cs	524	
+darwin	mime	mediatype.go	177	map	map[string]map[string]string	mime/mediatype.cs	184	
+darwin	mime/multipart	formdata.go	185	slice	[]byte	mime/multipart/formdata.cs	206	
+darwin	mime/multipart	formdata.go	268	slice	[]byte	mime/multipart/formdata.cs	295	
+darwin	mime/multipart	multipart.go	79	map	map[string]string	mime/multipart/multipart.cs	82	
+darwin	mime/multipart	multipart.go	92	map	map[string]string	mime/multipart/multipart.cs	98	
+darwin	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+darwin	net	addrselect.go	192	slice	net.IP	net/addrselect.cs	198	
+darwin	net	addrselect.go	336	slice	net.IP	net/addrselect.cs	343	
+darwin	net	cgo_unix.go	53	chan	<-chan struct{}	net/cgo_unix.cs	72	
+darwin	net	cgo_unix.go	291	slice	net.IP	net/cgo_unix.cs	360	
+darwin	net	cgo_unix.go	294	slice	net.IP	net/cgo_unix.cs	365	
+darwin	net	dial.go	574	chan	<-chan struct{}	net/dial.cs	602	
+darwin	net	dnsclient.go	35	slice	net.IP	net/dnsclient.cs	37	
+darwin	net	dnsclient.go	38	slice	net.IP	net/dnsclient.cs	40	
+darwin	net	dnsclient_unix.go	593	slice	net.IP	net/dnsclient_unix.cs	686	
+darwin	net	fd_unix.go	79	chan	<-chan struct{}	net/fd_unix.cs	103	
+darwin	net	interface_bsd.go	117	slice	net.IP	net/interface_bsd.cs	126	
+darwin	net	interface_bsd.go	117	slice	net.IPMask	net/interface_bsd.cs	126	
+darwin	net	interface_darwin.go	42	slice	net.IP	net/interface_darwin.cs	45	
+darwin	net	ip.go	127	slice	net.IP	net/ip.cs	132	
+darwin	net	ip.go	136	slice	net.IP	net/ip.cs	143	
+darwin	net	ip.go	154	slice	net.IP	net/ip.cs	161	
+darwin	net	ip.go	169	slice	net.IP	net/ip.cs	178	
+darwin	net	ip.go	178	slice	net.IP	net/ip.cs	189	
+darwin	net	ip.go	249	slice	net.IP	net/ip.cs	252	
+darwin	net	ip.go	381	slice	net.IP	net/ip.cs	394	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	405	slice	net.IP	net/ip.cs	418	
+darwin	net	ip.go	457	slice	net.IP	net/ip.cs	480	
+darwin	net	ip.go	482	slice	net.IP	net/ip.cs	509	
+darwin	net	ip.go	511	slice	net.IP	net/ip.cs	544	
+darwin	net	ip.go	511	slice	net.IPMask	net/ip.cs	544	
+darwin	net	iprawsock.go	62	slice	net.IP	net/iprawsock.cs	65	
+darwin	net	iprawsock_posix.go	28	slice	net.IP	net/iprawsock_posix.cs	29	
+darwin	net	ipsock.go	67	slice	net.IP	net/ipsock.cs	67	
+darwin	net	ipsock.go	69	slice	net.IP	net/ipsock.cs	70	
+darwin	net	ipsock.go	71	slice	net.IP	net/ipsock.cs	73	
+darwin	net	ipsock.go	148	slice	net.IP	net/ipsock.cs	159	
+darwin	net	ipsock.go	153	slice	net.IP	net/ipsock.cs	164	
+darwin	net	ipsock_posix.go	175	slice	net.IP	net/ipsock_posix.cs	187	
+darwin	net	ipsock_posix.go	200	slice	net.IP	net/ipsock_posix.cs	212	
+darwin	net	nss.go	209	map	map[string][]net.nssSource	net/nss.cs	241	
+darwin	net	sock_posix.go	191	slice	net.IP	net/sock_posix.cs	242	
+darwin	net	sockopt_posix.go	33	slice	net.IP	net/sockopt_posix.cs	32	
+darwin	net	sockopt_posix.go	37	slice	net.IP	net/sockopt_posix.cs	38	
+darwin	net	sockoptip4_posix_nonlinux.go	36	slice	net.IP	net/sockoptip4_posix_nonlinux.cs	38	
+darwin	net	sockoptip4_posix_nonlinux.go	41	slice	net.IP	net/sockoptip4_posix_nonlinux.cs	47	
+darwin	net	tcpsock.go	56	slice	net.IP	net/tcpsock.cs	65	
+darwin	net	tcpsock_posix.go	30	slice	net.IP	net/tcpsock_posix.cs	32	
+darwin	net	udpsock.go	56	slice	net.IP	net/udpsock.cs	64	
+darwin	net	udpsock.go	363	slice	net.IP	net/udpsock.cs	425	
+darwin	net	udpsock_posix.go	29	slice	net.IP	net/udpsock_posix.cs	31	
+darwin	net	udpsock_posix.go	253	slice	net.IP	net/udpsock_posix.cs	290	
+darwin	net/http	client.go	246	map	net/http.Header	net/http/client.cs	268	
+darwin	net/http	client.go	363	chan	<-chan struct{}	net/http/client.cs	403	
+darwin	net/http	client.go	786	map	map[string][]*net/http.Cookie	net/http/client.cs	891	
+darwin	net/http	clientconn.go	218	map	net/http.Header	net/http/clientconn.cs	245	
+darwin	net/http	clientconn.go	385	chan	<-chan struct{}	net/http/clientconn.cs	450	
+darwin	net/http	clone.go	24	map	net/url.Values	net/http/clone.cs	25	
+darwin	net/http	clone.go	70	map	map[string][]*mime/multipart.FileHeader	net/http/clone.cs	75	
+darwin	net/http	clone.go	117	map	net/http.Header	net/http/clone.cs	124	
+darwin	net/http	cookie.go	422	slice	net.IP	net/http/cookie.cs	486	
+darwin	net/http	csrf.go	73	map	map[string]bool	net/http/csrf.cs	79	
+darwin	net/http	h2_bundle.go	852	map	map[string]*net/http.http2dialCall	net/http/h2_bundle.cs	590	
+darwin	net/http	h2_bundle.go	893	map	map[string]*net/http.http2addConnCall	net/http/h2_bundle.cs	634	
+darwin	net/http	h2_bundle.go	942	map	map[string][]*net/http.http2ClientConn	net/http/h2_bundle.cs	684	
+darwin	net/http	h2_bundle.go	945	map	map[*net/http.http2ClientConn][]string	net/http/h2_bundle.cs	687	
+darwin	net/http	h2_bundle.go	2358	slice	[]byte	net/http/h2_bundle.cs	2161	
+darwin	net/http	h2_bundle.go	2362	slice	[]byte	net/http/h2_bundle.cs	2165	
+darwin	net/http	h2_bundle.go	4073	chan	chan struct{}	net/http/h2_bundle.cs	4090	
+darwin	net/http	h2_bundle.go	4100	chan	chan struct{}	net/http/h2_bundle.cs	4134	
+darwin	net/http	h2_bundle.go	4321	slice	[]uint16	net/http/h2_bundle.cs	4358	
+darwin	net/http	h2_bundle.go	4356	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/h2_bundle.cs	4393	
+darwin	net/http	h2_bundle.go	4597	slice	[]byte	net/http/h2_bundle.cs	4652	
+darwin	net/http	h2_bundle.go	4881	map	map[string]string	net/http/h2_bundle.cs	4969	
+darwin	net/http	h2_bundle.go	5330	chan	chan error	net/http/h2_bundle.cs	5548	
+darwin	net/http	h2_bundle.go	6161	map	net/http.Header	net/http/h2_bundle.cs	6530	
+darwin	net/http	h2_bundle.go	6196	map	net/http.Header	net/http/h2_bundle.cs	6571	
+darwin	net/http	h2_bundle.go	6228	map	net/http.Header	net/http/h2_bundle.cs	6612	
+darwin	net/http	h2_bundle.go	6525	map	net/http.Header	net/http/h2_bundle.cs	6966	
+darwin	net/http	h2_bundle.go	6539	chan	chan error	net/http/h2_bundle.cs	6982	
+darwin	net/http	h2_bundle.go	6991	chan	chan bool	net/http/h2_bundle.cs	7491	
+darwin	net/http	h2_bundle.go	7009	map	net/http.Header	net/http/h2_bundle.cs	7511	
+darwin	net/http	h2_bundle.go	7121	slice	[]byte	net/http/h2_bundle.cs	7629	
+darwin	net/http	h2_bundle.go	7163	map	net/http.Header	net/http/h2_bundle.cs	7681	
+darwin	net/http	h2_bundle.go	7656	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/h2_bundle.cs	8197	
+darwin	net/http	h2_bundle.go	7878	chan	chan struct{}	net/http/h2_bundle.cs	8420	
+darwin	net/http	h2_bundle.go	7885	chan	chan struct{}	net/http/h2_bundle.cs	8432	
+darwin	net/http	h2_bundle.go	8800	chan	chan struct{}	net/http/h2_bundle.cs	9553	
+darwin	net/http	h2_bundle.go	8864	chan	chan struct{}	net/http/h2_bundle.cs	9637	
+darwin	net/http	h2_bundle.go	9068	chan	chan struct{}	net/http/h2_bundle.cs	9910	
+darwin	net/http	h2_bundle.go	9081	chan	chan struct{}	net/http/h2_bundle.cs	9923	
+darwin	net/http	h2_bundle.go	9277	map	net/http.Header	net/http/h2_bundle.cs	10140	
+darwin	net/http	h2_bundle.go	9322	chan	chan struct{}	net/http/h2_bundle.cs	10187	
+darwin	net/http	h2_bundle.go	9417	chan	chan struct{}	net/http/h2_bundle.cs	10298	
+darwin	net/http	h2_bundle.go	9825	map	net/http.Header	net/http/h2_bundle.cs	10807	
+darwin	net/http	h2_bundle.go	9834	slice	[]string	net/http/h2_bundle.cs	10816	
+darwin	net/http	h2_bundle.go	10258	map	net/http.Header	net/http/h2_bundle.cs	11295	
+darwin	net/http	h2_bundle.go	11128	slice	[]string	net/http/h2_bundle.cs	12426	
+darwin	net/http	h2_bundle.go	11232	slice	[]string	net/http/h2_bundle.cs	12541	
+darwin	net/http	h2_bundle.go	11432	chan	chan error	net/http/h2_bundle.cs	12744	
+darwin	net/http	h2_bundle.go	11438	chan	chan error	net/http/h2_bundle.cs	12750	
+darwin	net/http	header.go	95	map	net/http.Header	net/http/header.cs	99	
+darwin	net/http	header.go	107	slice	[]string	net/http/header.cs	111	
+darwin	net/http	mapping.go	26	map	map[K]V	net/http/mapping.cs	27	
+darwin	net/http	mapping.go	29	map	map[K]V	net/http/mapping.cs	30	
+darwin	net/http	mapping.go	47	map	map[K]V	net/http/mapping.cs	52	
+darwin	net/http	mapping.go	65	map	map[K]V	net/http/mapping.cs	72	
+darwin	net/http	request.go	396	slice	[]string	net/http/request.cs	381	
+darwin	net/http	request.go	406	slice	[]string	net/http/request.cs	393	
+darwin	net/http	request.go	720	map	net/http.Header	net/http/request.cs	738	
+darwin	net/http	request.go	1329	map	net/url.Values	net/http/request.cs	1440	
+darwin	net/http	request.go	1333	map	net/url.Values	net/http/request.cs	1444	
+darwin	net/http	request.go	1337	map	net/url.Values	net/http/request.cs	1448	
+darwin	net/http	request.go	1350	map	net/url.Values	net/http/request.cs	1461	
+darwin	net/http	request.go	1353	map	net/url.Values	net/http/request.cs	1464	
+darwin	net/http	request.go	1375	map	net/url.Values	net/http/request.cs	1491	
+darwin	net/http	request.go	1394	map	net/url.Values	net/http/request.cs	1510	
+darwin	net/http	request.go	1420	map	net/url.Values	net/http/request.cs	1538	
+darwin	net/http	request.go	1435	map	net/url.Values	net/http/request.cs	1557	
+darwin	net/http	request.go	1456	map	map[string][]*mime/multipart.FileHeader	net/http/request.cs	1582	
+darwin	net/http	request.go	1482	map	map[string]string	net/http/request.cs	1613	
+darwin	net/http	routing_index.go	35	map	map[net/http.routingIndexKey][]*net/http.pattern	net/http/routing_index.cs	38	
+darwin	net/http	servemux121.go	66	map	map[string]net/http.muxEntry	net/http/servemux121.cs	72	
+darwin	net/http	server.go	416	map	net/http.Header	net/http/server.cs	398	
+darwin	net/http	server.go	533	map	net/http.Header	net/http/server.cs	506	
+darwin	net/http	server.go	540	map	net/http.Header	net/http/server.cs	514	
+darwin	net/http	server.go	1083	map	net/http.Header	net/http/server.cs	1160	
+darwin	net/http	server.go	1176	map	net/http.Header	net/http/server.cs	1258	
+darwin	net/http	server.go	1220	slice	[]byte	net/http/server.cs	1304	
+darwin	net/http	server.go	1225	slice	[]byte	net/http/server.cs	1309	
+darwin	net/http	server.go	1268	map	net/http.Header	net/http/server.cs	1355	
+darwin	net/http	server.go	1281	map	map[string]bool	net/http/server.cs	1371	
+darwin	net/http	server.go	1292	map	map[string]bool	net/http/server.cs	1382	
+darwin	net/http	server.go	1667	slice	[]byte	net/http/server.cs	1788	
+darwin	net/http	server.go	2250	chan	chan bool	net/http/server.cs	2460	
+darwin	net/http	server.go	2266	chan	chan bool	net/http/server.cs	2484	
+darwin	net/http	server.go	3534	map	map[string]func(*net/http.Server, *crypto/tls.Conn, net/http.Handler)	net/http/server.cs	3874	
+darwin	net/http	server.go	3598	map	map[*net.Listener]struct{}	net/http/server.cs	3945	
+darwin	net/http	server.go	3617	map	map[*net/http.conn]struct{}	net/http/server.cs	3972	
+darwin	net/http	socks_bundle.go	92	slice	net.IP	net/http/socks_bundle.cs	120	
+darwin	net/http	socks_bundle.go	93	slice	net.IP	net/http/socks_bundle.cs	122	
+darwin	net/http	socks_bundle.go	96	slice	net.IP	net/http/socks_bundle.cs	127	
+darwin	net/http	socks_bundle.go	152	slice	net.IP	net/http/socks_bundle.cs	199	
+darwin	net/http	socks_bundle.go	254	slice	net.IP	net/http/socks_bundle.cs	339	
+darwin	net/http	socks_bundle.go	411	slice	net.IP	net/http/socks_bundle.cs	522	
+darwin	net/http	transfer.go	311	map	net/http.Header	net/http/transfer.cs	348	
+darwin	net/http	transfer.go	398	map	net/http.Header	net/http/transfer.cs	451	
+darwin	net/http	transfer.go	954	map	net/http.Header	net/http/transfer.cs	1084	
+darwin	net/http	transport.go	375	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	357	
+darwin	net/http	transport.go	402	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	386	
+darwin	net/http	transport.go	471	map	map[string]func(authority string, c *crypto/tls.Conn) net/http.RoundTripper	net/http/transport.cs	465	
+darwin	net/http	transport.go	535	map	net/http.Header	net/http/transport.cs	534	
+darwin	net/http	transport.go	599	map	net/http.Header	net/http/transport.cs	615	
+darwin	net/http	transport.go	657	chan	<-chan struct{}	net/http/transport.cs	681	
+darwin	net/http	transport.go	886	map	map[string]net/http.RoundTripper	net/http/transport.cs	952	
+darwin	net/http	transport.go	937	map	map[*net/http.Request]context.CancelCauseFunc	net/http/transport.cs	1012	
+darwin	net/http	transport.go	1137	map	map[net/http.connectMethodKey][]*net/http.persistConn	net/http/transport.cs	1233	
+darwin	net/http	transport.go	1250	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1358	
+darwin	net/http	transport.go	1606	map	map[net/http.connectMethodKey]int	net/http/transport.cs	1799	
+darwin	net/http	transport.go	1614	map	map[net/http.connectMethodKey]net/http.wantConnQueue	net/http/transport.cs	1808	
+darwin	net/http	transport.go	1873	map	net/http.Header	net/http/transport.cs	2141	
+darwin	net/http	transport.go	2528	chan	chan<- struct{}	net/http/transport.cs	2900	
+darwin	net/http	transport.go	2559	chan	chan<- struct{}	net/http/transport.cs	2933	
+darwin	net/http	transport.go	2587	chan	<-chan struct{}	net/http/transport.cs	2961	
+darwin	net/http/cgi	host.go	204	slice	[]string	net/http/cgi/host.cs	240	
+darwin	net/http/cookiejar	jar.go	211	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	220	
+darwin	net/http/cookiejar	jar.go	298	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	321	
+darwin	net/http/cookiejar	jar.go	306	map	map[string]net/http/cookiejar.entry	net/http/cookiejar/jar.cs	331	
+darwin	net/http/cookiejar	jar.go	406	slice	net.IP	net/http/cookiejar/jar.cs	436	
+darwin	net/http/httptest	recorder.go	69	map	net/http.Header	net/http/httptest/recorder.cs	66	
+darwin	net/http/httptest	recorder.go	96	slice	[]byte	net/http/httptest/recorder.cs	97	
+darwin	net/http/httptest	recorder.go	173	map	net/http.Header	net/http/httptest/recorder.cs	176	
+darwin	net/http/httptest	recorder.go	207	map	net/http.Header	net/http/httptest/recorder.cs	214	
+darwin	net/http/httptest	recorder.go	252	map	net/http.Header	net/http/httptest/recorder.cs	262	
+darwin	net/http/httptest	server.go	177	slice	[]string	net/http/httptest/server.cs	192	
+darwin	net/http/httptest	server.go	358	map	map[net.Conn]net/http.ConnState	net/http/httptest/server.cs	422	
+darwin	net/http/httptest	server.go	413	chan	chan<- struct{}	net/http/httptest/server.cs	491	
+darwin	net/http/httputil	reverseproxy.go	410	chan	<-chan struct{}	net/http/httputil/reverseproxy.cs	445	
+darwin	net/http/httputil	reverseproxy.go	460	map	net/http.Header	net/http/httputil/reverseproxy.cs	508	
+darwin	net/http/httputil	reverseproxy.go	471	map	net/url.Values	net/http/httputil/reverseproxy.cs	519	
+darwin	net/http/httputil	reverseproxy.go	524	slice	[]string	net/http/httputil/reverseproxy.cs	573	
+darwin	net/http/internal/httpcommon	httpcommon.go	578	map	map[string][]string	net/http/internal/httpcommon/httpcommon.cs	647	
+darwin	net/mail	message.go	767	slice	net.IP	net/mail/message.cs	862	
+darwin	net/rpc	client.go	303	chan	chan *net/rpc.Call	net/rpc/client.cs	343	
+darwin	net/smtp	smtp.go	230	slice	[]byte	net/smtp/smtp.cs	296	
+darwin	net/smtp	smtp.go	253	map	map[string]string	net/smtp/smtp.cs	329	
+darwin	net/smtp	smtp.go	347	map	map[string]string	net/smtp/smtp.cs	457	
+darwin	net/smtp	smtp.go	386	map	map[string]string	net/smtp/smtp.cs	511	
+darwin	net/textproto	header.go	31	map	net/textproto.MIMEHeader	net/textproto/header.cs	32	
+darwin	net/textproto	header.go	47	map	net/textproto.MIMEHeader	net/textproto/header.cs	48	
+darwin	net/textproto	pipeline.go	88	map	map[uint]chan struct{}	net/textproto/pipeline.cs	91	
+darwin	net/textproto	pipeline.go	107	map	map[uint]chan struct{}	net/textproto/pipeline.cs	112	
+darwin	net/textproto	reader.go	51	slice	[]byte	net/textproto/reader.cs	50	
+darwin	net/textproto	reader.go	72	slice	[]byte	net/textproto/reader.cs	71	
+darwin	net/textproto	reader.go	125	slice	[]byte	net/textproto/reader.cs	124	
+darwin	net/textproto	reader.go	575	slice	[]string	net/textproto/reader.cs	604	
+darwin	net/textproto	reader.go	587	slice	[]string	net/textproto/reader.cs	616	
+darwin	os	dir.go	45	slice	[]os.FileInfo	os/dir.cs	49	
+darwin	os	dir.go	74	slice	[]string	os/dir.cs	81	
+darwin	os	dir.go	102	slice	[]os.DirEntry	os/dir.cs	105	
+darwin	os	env.go	22	slice	[]byte	os/env.cs	23	
+darwin	os	env.go	41	slice	[]byte	os/env.cs	43	
+darwin	os	exec_posix.go	44	slice	[]string	os/exec_posix.cs	51	
+darwin	os/exec	exec.go	433	slice	[]byte	os/exec/exec.cs	433	
+darwin	os/exec	exec.go	780	chan	<-chan struct{}	os/exec/exec.cs	817	
+darwin	os/exec	exec.go	849	chan	<-chan error	os/exec/exec.cs	903	
+darwin	os/exec	exec.go	937	chan	<-chan os/exec.ctxResult	os/exec/exec.cs	1000	
+darwin	os/exec	exec.go	975	chan	<-chan error	os/exec/exec.cs	1045	
+darwin	os/exec	exec.go	1177	slice	[]byte	os/exec/exec.cs	1289	
+darwin	os/exec	exec.go	1201	slice	[]string	os/exec/exec.cs	1313	
+darwin	os/signal	signal.go	123	chan	chan<- os.Signal	os/signal/signal.cs	136	
+darwin	os/signal	signal.go	132	map	map[chan<- os.Signal]*os/signal.handler	os/signal/signal.cs	145	
+darwin	path	path.go	27	slice	[]byte	path/path.cs	31	
+darwin	path	path.go	34	slice	[]byte	path/path.cs	38	
+darwin	path	path.go	47	slice	[]byte	path/path.cs	51	
+darwin	reflect	type.go	1339	map	map[*reflect.structType]int	reflect/type.cs	1210	
+darwin	regexp	exec.go	76	slice	[]byte	regexp/exec.cs	81	
+darwin	regexp	exec.go	89	slice	[]byte	regexp/exec.cs	95	
+darwin	regexp	exec.go	514	slice	[]int	regexp/exec.cs	559	
+darwin	regexp	exec.go	522	slice	[]int	regexp/exec.cs	569	
+darwin	regexp	regexp.go	588	slice	[]byte	regexp/regexp.cs	612	
+darwin	regexp	regexp.go	605	slice	[]byte	regexp/regexp.cs	629	
+darwin	regexp	regexp.go	622	slice	[]byte	regexp/regexp.cs	646	
+darwin	regexp	regexp.go	639	slice	[]byte	regexp/regexp.cs	664	
+darwin	regexp	regexp.go	735	slice	[]int	regexp/regexp.cs	762	
+darwin	regexp	regexp.go	751	slice	[]byte	regexp/regexp.cs	780	
+darwin	regexp	regexp.go	772	slice	[]byte	regexp/regexp.cs	801	
+darwin	regexp	regexp.go	801	slice	[]int	regexp/regexp.cs	830	
+darwin	regexp	regexp.go	813	slice	[]int	regexp/regexp.cs	842	
+darwin	regexp	regexp.go	827	slice	[]int	regexp/regexp.cs	856	
+darwin	regexp	regexp.go	839	slice	[]int	regexp/regexp.cs	868	
+darwin	regexp	regexp.go	852	slice	[]int	regexp/regexp.cs	881	
+darwin	regexp	regexp.go	866	slice	[]int	regexp/regexp.cs	897	
+darwin	regexp	regexp.go	929	slice	[]byte	regexp/regexp.cs	960	
+darwin	regexp	regexp.go	938	slice	[]byte	regexp/regexp.cs	969	
+darwin	regexp	regexp.go	1021	slice	[]int	regexp/regexp.cs	1061	
+darwin	regexp	regexp.go	1063	slice	[][]byte	regexp/regexp.cs	1108	
+darwin	regexp	regexp.go	1081	slice	[][]int	regexp/regexp.cs	1126	
+darwin	regexp	regexp.go	1099	slice	[]string	regexp/regexp.cs	1144	
+darwin	regexp	regexp.go	1117	slice	[][]int	regexp/regexp.cs	1162	
+darwin	regexp	regexp.go	1135	slice	[][][]byte	regexp/regexp.cs	1181	
+darwin	regexp	regexp.go	1159	slice	[][]int	regexp/regexp.cs	1205	
+darwin	regexp	regexp.go	1177	slice	[][]string	regexp/regexp.cs	1223	
+darwin	regexp	regexp.go	1202	slice	[][]int	regexp/regexp.cs	1248	
+darwin	regexp/syntax	parse.go	155	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	147	
+darwin	regexp/syntax	parse.go	171	map	map[*regexp/syntax.Regexp]int64	regexp/syntax/parse.cs	165	
+darwin	regexp/syntax	parse.go	262	map	map[*regexp/syntax.Regexp]int	regexp/syntax/parse.cs	267	
+darwin	regexp/syntax	parse.go	1059	slice	[]rune	regexp/syntax/parse.cs	1141	
+darwin	regexp/syntax	parse.go	1068	slice	[]rune	regexp/syntax/parse.cs	1151	
+darwin	regexp/syntax	parse.go	1693	slice	[]byte	regexp/syntax/parse.cs	1868	
+darwin	regexp/syntax	parse.go	1706	slice	[]byte	regexp/syntax/parse.cs	1881	
+darwin	regexp/syntax	parse.go	1862	slice	[]rune	regexp/syntax/parse.cs	2058	
+darwin	regexp/syntax	parse.go	1873	slice	[]rune	regexp/syntax/parse.cs	2069	
+darwin	regexp/syntax	parse.go	1879	slice	[]rune	regexp/syntax/parse.cs	2076	
+darwin	regexp/syntax	prog.go	333	slice	[]rune	regexp/syntax/prog.cs	377	
+darwin	regexp/syntax	regexp.go	117	map	map[*regexp/syntax.Regexp]regexp/syntax.printFlags	regexp/syntax/regexp.cs	113	
+darwin	runtime	env_posix.go	11	slice	[]string	runtime/env_posix.cs	15	
+darwin	runtime	heapdump.go	717	slice	[]byte	runtime/heapdump.cs	733	
+darwin	runtime	heapdump.go	735	slice	[]byte	runtime/heapdump.cs	757	
+darwin	runtime	mprof.go	438	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1255	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1269	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1342	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1399	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1568	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1615	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1636	slice	[]unsafe.Pointer			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go	1686	slice	[]uintptr			goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	334	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1159	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1241	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1303	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1486	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1545	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1572	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	mprof.go				runtime/mprof.cs	1625	goroutineProfileWithLabels is hand-converted (placeholder): its compare is not emitted
+darwin	runtime	pinner.go	112	slice	[]unsafe.Pointer	runtime/pinner.cs	55	
+darwin	runtime	plugin.go	28	map	map[runtime.typeOff]*runtime._type	runtime/plugin.cs	36	
+darwin	runtime	print.go	100	slice	[]byte	runtime/print.cs	93	
+darwin	runtime	rand.go	64	slice	[]byte	runtime/rand.cs	70	
+darwin	runtime	runtime1.go	500	map	map[string]bool	runtime/runtime1.cs	556	
+darwin	runtime	runtime1.go	528	map	map[string]bool	runtime/runtime1.cs	585	
+darwin	runtime	runtime1.go	535	map	map[string]bool	runtime/runtime1.cs	592	
+darwin	runtime	runtime1.go	543	map	map[string]bool	runtime/runtime1.cs	603	
+darwin	runtime	runtime1.go	709	map	map[int32]unsafe.Pointer	runtime/runtime1.cs	787	
+darwin	runtime	select.go	148	slice	[]uintptr	runtime/select.cs	159	
+darwin	runtime	signal_unix.go	1068	chan	chan struct{}	runtime/signal_unix.cs	1035	
+darwin	runtime	trace.go	1182	chan	chan struct{}	runtime/trace.cs	1018	
+darwin	runtime	tracecpu.go	126	slice	[]unsafe.Pointer	runtime/tracecpu.cs	142	
+darwin	runtime	type.go	450	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+darwin	runtime	type.go	465	map	map[runtime.typeOff]*runtime._type			switch case nil over a pointer tag: exprᴛ1 == default
+darwin	runtime	type.go				runtime/type.cs	140	switch case nil over a pointer tag: exprᴛ1 == default
+darwin	runtime	type.go				runtime/type.cs	474	switch case nil over a pointer tag: exprᴛ1 == default
+darwin	runtime	type.go				runtime/type.cs	491	switch case nil over a pointer tag: exprᴛ1 == default
+darwin	runtime/pprof	map.go	78	map	map[uintptr]*runtime/pprof.profMapEntry	runtime/pprof/map.cs	81	
+darwin	runtime/pprof	pprof.go	257	map	map[string]*runtime/pprof.Profile	runtime/pprof/pprof.cs	273	
+darwin	runtime/pprof	pprof.go	374	slice	[]uintptr	runtime/pprof/pprof.cs	415	
+darwin	runtime/pprof	pprof.go	902	chan	chan bool	runtime/pprof/pprof.cs	1009	
+darwin	runtime/pprof	proto.go	316	slice	[]unsafe.Pointer	runtime/pprof/proto.cs	311	
+darwin	runtime/pprof	proto.go	723	slice	[]byte	runtime/pprof/proto.cs	762	
+darwin	runtime/trace	subscribe.go	168	slice	[]byte	runtime/trace/subscribe.cs	218	
+darwin	strings	replace.go	82	slice	[]byte	strings/replace.cs	86	
+darwin	strings	replace.go	207	slice	[]*strings.trieNode	strings/replace.cs	216	
+darwin	strings	replace.go	238	slice	[]*strings.trieNode	strings/replace.cs	252	
+darwin	strings	replace.go	445	slice	[]byte	strings/replace.cs	471	
+darwin	strings	replace.go	451	slice	[]byte	strings/replace.cs	477	
+darwin	strings	replace.go	526	slice	[]byte	strings/replace.cs	555	
+darwin	strings	replace.go	540	slice	[]byte	strings/replace.cs	569	
+darwin	strings	replace.go	555	slice	[]byte	strings/replace.cs	587	
+darwin	syscall	syscall_unix.go	82	slice	[]byte	syscall/syscall_unix.cs	97	
+darwin	testing	benchmark.go	167	map	map[string]float64			testing is hand-owned: not emitted
+darwin	testing	fuzz.go	113	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+darwin	testing	fuzz.go	277	slice	[]any			testing is hand-owned: not emitted
+darwin	testing	testing.go	799	map	map[string]struct{}			testing is hand-owned: not emitted
+darwin	testing	testing.go	1278	map	map[uintptr]struct{}			testing is hand-owned: not emitted
+darwin	testing	testing.go	1768	chan	chan bool			testing is hand-owned: not emitted
+darwin	testing	testing.go	2838	slice	[]int			testing is hand-owned: not emitted
+darwin	testing/fstest	mapfs.go	96	slice	[]testing/fstest.mapFileInfo	testing/fstest/mapfs.cs	98	
+darwin	text/template	exec.go	773	slice	[]text/template/parse.Node	text/template/exec.cs	931	
+darwin	text/template/parse	parse.go	823	map	map[string]any	text/template/parse/parse.cs	1043	
+darwin	time	format.go				time/format.cs	630	switch case nil over a pointer tag: exprᴛ1 == default
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	37	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	39	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	44	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	48	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	55	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	61	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	66	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	74	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	77	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	87	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	88	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	100	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	99	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	113	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	108	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	124	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	122	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	140	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	131	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	149	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	162	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	182	
+darwin	vendor/golang.org/x/crypto/cryptobyte	string.go	174	slice	[]byte	vendor/golang.org/x/crypto/cryptobyte/string.cs	194	
+darwin	vendor/golang.org/x/net/dns/dnsmessage	message.go	574	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	581	
+darwin	vendor/golang.org/x/net/dns/dnsmessage	message.go	1264	slice	[]byte	vendor/golang.org/x/net/dns/dnsmessage/message.cs	1318	
+darwin	vendor/golang.org/x/net/dns/dnsmessage	message.go	2024	map	map[string]uint16	vendor/golang.org/x/net/dns/dnsmessage/message.cs	2239	
+darwin	vendor/golang.org/x/net/http/httpproxy	proxy.go	192	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	209	
+darwin	vendor/golang.org/x/net/http/httpproxy	proxy.go	247	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	273	
+darwin	vendor/golang.org/x/net/http/httpproxy	proxy.go	366	slice	net.IP	vendor/golang.org/x/net/http/httpproxy/proxy.cs	401	
+darwin	vendor/golang.org/x/net/idna	idna10.0.0.go	571	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	613	
+darwin	vendor/golang.org/x/net/idna	idna10.0.0.go	578	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	620	
+darwin	vendor/golang.org/x/net/idna	idna10.0.0.go	592	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	634	
+darwin	vendor/golang.org/x/net/idna	idna10.0.0.go	605	slice	[]string	vendor/golang.org/x/net/idna/idna10.0.0.cs	647	
+darwin	vendor/golang.org/x/net/nettest	nettest.go	325	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	388	
+darwin	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+darwin	vendor/golang.org/x/net/nettest	nettest.go	332	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	398	
+darwin	vendor/golang.org/x/net/nettest	nettest.go	336	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	405	
+darwin	vendor/golang.org/x/net/nettest	nettest.go	339	slice	net.IP	vendor/golang.org/x/net/nettest/nettest.cs	410	
+darwin	vendor/golang.org/x/text/unicode/bidi	core.go	1057	slice	[]rune	vendor/golang.org/x/text/unicode/bidi/core.cs	1119	
+darwin	vendor/golang.org/x/text/unicode/norm	forminfo.go	208	map	map[uint32]rune	vendor/golang.org/x/text/unicode/norm/forminfo.cs	216	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	33	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	35	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	40	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	42	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	51	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	53	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	62	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	64	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	72	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	74	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	79	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	81	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	86	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	88	
+darwin	vendor/golang.org/x/text/unicode/norm	input.go	94	slice	[]byte	vendor/golang.org/x/text/unicode/norm/input.cs	98	
+darwin	vendor/golang.org/x/text/unicode/norm	iter.go	98	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	103	
+darwin	vendor/golang.org/x/text/unicode/norm	iter.go	241	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	266	
+darwin	vendor/golang.org/x/text/unicode/norm	iter.go	257	slice	[]byte	vendor/golang.org/x/text/unicode/norm/iter.cs	283	
