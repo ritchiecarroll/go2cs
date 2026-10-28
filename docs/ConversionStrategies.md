@@ -10049,7 +10049,7 @@ func checkErr(n int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-99 -->
+<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-102 -->
 ```csharp
 partial struct errno /*num:uintptr*/;
 
@@ -10079,7 +10079,7 @@ internal static void checkErr(nint n) {
         fmt.Println("switch: again");
         break;
     }
-    case var ᴛ when AreEqual(ᴛ, default!): {
+    case var ᴛ when AreEqual(ᴛ, default): {
         fmt.Println("switch: nil");
         break;
     }
@@ -10089,6 +10089,9 @@ internal static void checkErr(nint n) {
     }}
 
 }
+
+internal static error release(errno e) {
+    fmt.Println("released", (uintptr)e);
 ```
 
 `==` becomes `AreEqual(…)` and `!=` becomes `!AreEqual(…)`. The `switch err` becomes a pattern switch,
