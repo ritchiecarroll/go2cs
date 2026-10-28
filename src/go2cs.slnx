@@ -893,6 +893,7 @@
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />
     <Project Path="tests/Behavioral/PointerParamWalk/PointerParamWalk.csproj" />
+    <Project Path="tests/Behavioral/PointerParamNames/PointerParamNames.csproj" />
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceReinterpret/PointerCastSliceReinterpret.csproj" />

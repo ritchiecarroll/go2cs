@@ -29,6 +29,10 @@ const FunctionParametersMarker = ">>MARKER:FUNC_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNC_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNC_%s_BLOCK_PREFIX<<"
 
+// FunctionGoNamesMarker opens the span of a function's own text (signature, preamble, body and frame)
+// in which a pointer parameter with no deref alias takes its Go name back (renameUnaliasedPointerParams).
+const FunctionGoNamesMarker = ">>MARKER:FUNC_%s_GO_NAMES<<"
+
 // hasDuplicateBlankParams reports whether a parameter list has two or more blank (`_`) or unnamed
 // parameters. Go permits repeated blank params, but C# forbids duplicate parameter names (CS0100), so
 // such a list needs synthetic placeholder names. A LONE blank/unnamed param stays `_` (valid C# and
@@ -740,9 +744,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
 	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
+	functionGoNamesMarker := fmt.Sprintf(FunctionGoNamesMarker, goFunctionName)
 
 	v.outputBuilder.WriteString(v.newline)
 	v.outputBuilder.WriteString(functionPrefixMarker)
+	v.outputBuilder.WriteString(functionGoNamesMarker)
 	v.writePositionSentinel(funcDecl.Pos())
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
@@ -879,6 +885,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	functionAccess = v.testMethodAccessDowngrade(functionAccess, funcDecl, signature)
+
+	// The parameters that, with no deref alias, keep their Go name (`t`, not `Ꮡt`): the box name is
+	// only a mark that a value alias of the same name also exists (owner ruling 2026-10-27, R5). Each
+	// pair is the box name every site spelled and the name it becomes (renameUnaliasedPointerParams).
+	var goNamedPointerParams [][2]string
 
 	if !signatureOnly {
 		resultParameters := &strings.Builder{}
@@ -1098,6 +1109,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					}
 
 					v.entryAliasBoxPaths[getSanitizedIdentifier(analyzedName)] = fmt.Sprintf("%s%s.%s", AddressPrefix, param.Name(), NilDeferringDerefAccessor)
+
+					// With no alias, nothing needs the mark: the parameter takes its Go name (the
+					// ANALYZED one, which a collision rename may have changed). Not for a receiver,
+					// which keeps `Ꮡ`, and not for a bodyless declaration, whose implementing part is
+					// a hand-owned file that spells the box name.
+					if funcDecl.Body != nil && !(i == 0 && funcDecl.Recv != nil) {
+						goNamedPointerParams = append(goNamedPointerParams, [2]string{AddressPrefix + param.Name(), getSanitizedIdentifier(analyzedName)})
+					}
+
 					continue
 				}
 
@@ -1638,6 +1658,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.outputBuilder.WriteString(v.newline)
 	}
 
+	// The function's own text is complete: give each unaliased pointer parameter its Go name there.
+	v.renameUnaliasedPointerParams(functionGoNamesMarker, goNamedPointerParams)
+
 	// The phantom dims structs this declaration's call sites pass to its array-dims companions, each
 	// declared once per package, after the first function that needs it (arrayDimsCompanion.go).
 	if dimsTypes := v.arrayDimsTypeDeclarations(currentFuncType); dimsTypes != "" {
@@ -1871,6 +1894,71 @@ func isNamedArgumentLabel(bodyText string, start, end int) bool {
 // includes the go2cs marker glyphs Ꮡ/ж/Δ/ᴛ), a Unicode digit, or underscore.
 func isIdentifierRune(r rune) bool {
 	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
+}
+
+// renameUnaliasedPointerParams removes the function's go-names marker and, in the text after it (the
+// function's own signature, preamble, body and frame, written since the marker), renames each pair's
+// box name to its Go name. Every site that spells a pointer parameter spells its box name, so the
+// rename runs once the function is complete and cannot miss one: the signature, an entry path a
+// defer→finally lowering re-roots on, a closure capture and a call argument alike.
+func (v *Visitor) renameUnaliasedPointerParams(marker string, renames [][2]string) {
+	text := v.outputBuilder.String()
+	start := strings.Index(text, marker)
+
+	if start < 0 {
+		return
+	}
+
+	tail := text[start+len(marker):]
+
+	for _, r := range renames {
+		tail = renameBoxToken(tail, r[0], r[1])
+	}
+
+	v.outputBuilder.Reset()
+	v.outputBuilder.WriteString(text[:start])
+	v.outputBuilder.WriteString(tail)
+}
+
+// renameBoxToken replaces each whole-token occurrence of box with name. What it must not touch: a
+// field accessor `T.Ꮡname` or member `x.Ꮡname` follows a '.', and a longer identifier (`Ꮡnameʗ1`,
+// `ᏑnameΔ1`) is another token. The bare name is free because the dead-alias scan
+// (bodyReferencesIdentAsValue) found no value use of it in the body.
+func renameBoxToken(text, box, name string) string {
+	var out strings.Builder
+
+	for offset := 0; ; {
+		index := strings.Index(text[offset:], box)
+
+		if index < 0 {
+			out.WriteString(text[offset:])
+			return out.String()
+		}
+
+		start := offset + index
+		end := start + len(box)
+		whole := true
+
+		if start > 0 {
+			r, _ := utf8.DecodeLastRuneInString(text[:start])
+			whole = !isIdentifierRune(r) && r != '.'
+		}
+
+		if whole && end < len(text) {
+			r, _ := utf8.DecodeRuneInString(text[end:])
+			whole = !isIdentifierRune(r)
+		}
+
+		out.WriteString(text[offset:start])
+
+		if whole {
+			out.WriteString(name)
+		} else {
+			out.WriteString(box)
+		}
+
+		offset = end
+	}
 }
 
 // isDerefdPointerReceiverIdent reports whether ident is the current method's POINTER (`*T`)
