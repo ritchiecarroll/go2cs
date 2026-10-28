@@ -74,6 +74,10 @@ const id = `[\p{L}_][\p{L}\p{N}_]*`
 // generic is a type-argument list body nested up to three deep (ж<slice<map<K, V>>>).
 const generic = `(?:[^<>\n]|<(?:[^<>\n]|<[^<>\n]*>)*>)*`
 
+// sliceLitElem is a slice literal's C# element type in `new T[]{` or `slice<T>(`: no bracket, brace, paren or space
+// outside its generic arguments, which may hold spaces and nest three deep (`ж<array<array<nint>>>`).
+const sliceLitElem = `(?:[^\[\]\s(){}<>]|<(?:[^<>\n]|<(?:[^<>\n]|<[^<>\n]*>)*>)*>)+`
+
 // basic is the converted spelling of a basic numeric type (golib aliases the Go names; C# keywords appear too).
 const basic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|double|uintptr|rune|float32|float64)`
 
@@ -363,10 +367,14 @@ var items = []item{
 		Measures: []measure{m("L1", "slice-literal", `new [^\[\]\s(){}]+\[\]\{[^{}]*\}\.slice\(\)`)},
 		// COORD's ruling of 2026-10-28: a collection expression cannot target slice<T> (its enumerator yields the
 		// Go range pair), so the literal is golib's builtin over one, `new nint[]{1, 2}.slice()` -> `slice<nint>([1,
-		// 2])`, and a local keeps `var`. The element type may carry spaced generic arguments (`map<@string, nint>`).
+		// 2])`, and a local keeps `var`. The element type may carry spaced generic arguments (`map<@string, nint>`),
+		// nested three deep (`ж<array<array<nint>>>`). A cast over the literal composes: its operand is now a CALL,
+		// so the conversion takes the single-paren form every call operand already takes, `(@string)f()` --
+		// `((@string)new byte[]{1}.slice())` becomes `(@string)slice<byte>([1])`.
 		Canon: []rewrite{
-			rw(`new ((?:[^\[\]\s(){}<>]|<(?:[^<>\n]|<[^<>\n]*>)*>)+)\[\]\{`, "slice<$1>(["),
+			rw(`new (`+sliceLitElem+`)\[\]\{`, "slice<$1>(["),
 			rw(`\}\.slice\(\)`, "])"),
+			rw(`\(\((@?[\p{L}_][\p{L}\p{N}_.]*)\)(slice<`+sliceLitElem+`>\(\[[^\n]*?\]\))\)`, "($1)$2"),
 		},
 		Old: rx(`\[\]\{|\}\.slice\(\)`),
 	},
