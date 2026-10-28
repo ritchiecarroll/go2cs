@@ -272,7 +272,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A deferred or spawned call evaluates an element or field receiver at the statement](defer-panic-recover.md#a-deferred-or-spawned-call-evaluates-an-element-or-field-receiver-at-the-statement)
   - [A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy](defer-panic-recover.md#a-deferred-pointer-receiver-method-on-an-escaping-value-local-captures-by-box-not-by-copy)
 - **[Expression Switch Statements](expression-switch.md)**
-  - [A switch on a `static readonly` constant tag lowers to if-else](expression-switch.md#a-switch-on-a-static-readonly-constant-tag-lowers-to-if-else)
+  - [A string tag keeps its temp under the expressionless governor](expression-switch.md#a-string-tag-keeps-its-temp-under-the-expressionless-governor)
+  - [A switch on a `static readonly` constant tag compares in `when` guards](expression-switch.md#a-switch-on-a-static-readonly-constant-tag-compares-in-when-guards)
   - [A leading constant-true case stays opaque to the compiler](expression-switch.md#a-leading-constant-true-case-stays-opaque-to-the-compiler)
   - [No constant pattern against a named-numeric wrapper](expression-switch.md#no-constant-pattern-against-a-named-numeric-wrapper)
   - [An index-expression case label falls back to equality](expression-switch.md#an-index-expression-case-label-falls-back-to-equality)

@@ -326,7 +326,7 @@ Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.
 /*<-*/: SelectStatement/SelectStatement.cs.target:65#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:70#73a99c (comma-ok: src/core/io/fs/sub.cs:86#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:62#c4196f (goto break_scan;) and :66#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:172-208#3c2428. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:654#e07a2f.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:748#0a8a17 (receive), map.cs:456#629bdd (map index), builtin.cs:3706-3711#ab6e8c (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:198-209#4ddddc), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
-ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:15#e2a6d2.
+ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:40#e2a6d2.
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:193-204#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:14#ee6601).
@@ -2215,7 +2215,7 @@ uintptr i = 2;
 Its use with `unsafe.Pointer` is covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr).
 <!-- uintptr: a distinct golib struct, not an alias of nuint, so an alias cannot erase the uint/uintptr
      difference (src/core/golib/uintptr.cs:16-20#ce6348, :39#d446ed). Goldens:
-     src/tests/Behavioral/SwitchPointerSentinelCase/main.cs.target:96#7511f0;
+     src/tests/Behavioral/SwitchPointerSentinelCase/main.cs.target:98#7511f0;
      src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:80 (`case uintptr:` beside `case nuint:`). -->
 
 **Narrow arithmetic is cast back to its type.** Go computes `int8`, `uint8`, `int16` and `uint16` arithmetic at
@@ -7305,7 +7305,7 @@ pause on. golib runs it on a second goroutine and uses its `Coro` handoff type t
 A panic in the iterator is rethrown in the ranging function, where its own defers can recover it
 ([Defer / Panic / Recover](#defer--panic--recover)).
 
-<!-- Labeled switch placement: src/tests/Behavioral/SwitchBreakInCase/main.go:41#d82a26 (Big: switch … break Big) -> main.cs.target:40-58#9a181e, where `break_Big:;` follows the switch's closing brace. -->
+<!-- Labeled switch placement: src/tests/Behavioral/SwitchBreakInCase/main.go:41#d82a26 (Big: switch … break Big) -> main.cs.target:39-57#9a181e, where `break_Big:;` follows the switch's closing brace. -->
 **Labels become `goto` targets.** C# `break` and `continue` cannot name an outer loop. So the converter
 keeps the Go label, adds `continue_L:;` at the end of the labeled loop's body and `break_L:;` just after
 the loop, and turns `continue L` and `break L` into `goto` statements. A labeled `switch` gets the same
@@ -7350,7 +7350,7 @@ break_scan:;
 `new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays).
 
 <!-- Reference gap: labels-and-loop-variables.md has no rule for the if/switch init clause block; add it there, with its guard tests, and extend the Full detail line. -->
-<!-- A switch init clause gets the same block: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:124#43c487 -> ExprSwitch.cs.target:142-144#31d8f1. -->
+<!-- A switch init clause gets the same block: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:124#43c487 -> ExprSwitch.cs.target:145-147#31d8f1. -->
 **An `if` or `switch` init clause opens a block.** C# `if` and `switch` have no init clause. So the
 declaration and the statement share a new pair of braces, which keeps the variable scoped to the
 statement as in Go. That is why the second `a` here can reuse the name:
