@@ -36,3 +36,22 @@ GoPositionMap re-encodes	>= 400 / 411 / 405	270 / 283 / 277 (B2)	MISSED as poste
 pcensus -items S1 REFUSED	0	0 / 0 / 0 (after the seat's instrument fix)	MET at the fixed instrument; the instrument as it stood refused 6056 on windows (its plants were single runs)
 #
 post-measurement correction (governing-type rule)	string-tag switches on A2: 204 / 210 / 206; other switches on the pattern switch: 780 / 775 / 766; S1 total unchanged
+#
+r2 (rebased onto batch 81 on COORD's call, re-measured)	value
+r2_base	904c363f6713bc461e0c3be52bc3ed488f067497
+r2_arm_A	904c363f67 (the base converter); src/go2cs tree 81fa88d92ae8b13b254378c95bde9d0bc0e09a52; sha256 745e7485aa707544f157e47601b6871f0bfe2bc1ea894daa4d0e1eb92527e822
+r2_arm_B	the r2 seat converter; src/go2cs tree 290f7c9c50338e71eddd44d89be8145ba223d398 (later r2 commits touch internal/pcensus only); sha256 13902edb02e2ea5e6042c07e36ddb5dad694ba719a44b81bf719aea8118ae249
+r2_converter_patch_id	3f1dd4653b (visitSwitchStmt.go, visitorState.go), the same at e9f05d8c09, 482caf78e5 and 904c363f67
+r2_write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4560 per target per arm
+r2_classifier	pcensus classify -items S1 at the r2 instrument (file pool with Standalone, fixpoint key, NONCONVERGENT guard)
+r2_compile_arm	windows go2cs-stdlib.slnx over B's windows tree: 0 errors, 1 warning (CS9113 testing), 363 of 363 projects compiled in the run
+#
+r2 target	files	cs	package_info	auto	added	deleted	S1	MAP	refused	patch_sha256_crlf_stripped_16
+windows	450	331	119	5	9701	7264	10541	270	0	ee110f4aa963bc08
+linux	465	345	120	5	9712	7258	10536	283	0	fd8ecc8b06aa2d04
+darwin	455	337	118	3	9620	7199	10437	277	0	d82305cd8516b09e
+#
+r2 quantity	predicted (posted before arm B)	measured	score
+files, cs, package_info, added, deleted, S1, MAP per target	equal to the e9f05d8c09 rows above	equal on every target; the same file set and the same added/deleted count in every file	MET
+pcensus -items S1 REFUSED	0 per target	0 / 0 / 0	MET
+text of the diff lines	(not predicted)	130 / 124 / 122 line pairs differ from the e9f05d8c09 diff: D1 94 / 90 / 88, Z1 8 / 8 / 8, R5 10 / 8 / 8, N2 18 / 18 / 18	attributed: other landed seats' spellings inside S1 hunks

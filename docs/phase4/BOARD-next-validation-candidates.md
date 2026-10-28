@@ -30774,6 +30774,53 @@ predicate's; the mechanism held everywhere it can be seen:
 - The seat was rebased onto batch 78 after measurement: its converter delta has stable patch-id `3f1dd4653b` at
   both bases, and every other area's delta (pcensus, tests, registrations) is byte-identical across the rebase.
 
+**Rebased onto batch 81 (r2), on COORD's call: `904c363f67`.** The seat's 13 commits were cherry-picked onto the
+batch-81 tip, its goldens dropped and re-minted last; the converter delta (visitSwitchStmt.go, visitorState.go) keeps
+stable patch-id `3f1dd4653b`.
+- Conflicts, each resolved at the code:
+  - `blockRule` holds #33's `Standalone` beside the seat's `Moves`.
+  - #33 extended the per-run block code the seat's file pool replaces; the pool carries `Standalone` (a file is
+    active on OldAnchor alone, and a nil NewAnchor is never matched).
+  - pcensus_test's `tl`, declared by both #33's GD plants and the seat's anchorless plant, re-ordered.
+  - The BOARD row re-appended at the tail.
+  - The pre-rebase re-cite of three ExprSwitch notes came out empty and was dropped; it is made again after the
+    re-mint (104 -> 107, 88 -> 91, 250 -> 253, fingerprints unchanged).
+- A composition defect, found red by the seat's own plant (TestBlockPlants' weekday refused 2 lines after the rebase):
+  the pool's canonical key applied each item's canon once, in list order, and N2 (#26), listed before S1, collapses
+  `))`, which S1's rewrite of `var exprᴛ1 = tag();` into `switch (tag()) {` creates, so the two halves keyed apart.
+  The key now repeats the chain until the line stops changing.
+- COORD's condition on that fixpoint: a line still changing after the key's 8 passes is refused `NONCONVERGENT`, never
+  read at its last pass. TestNonconvergentKeyIsRefused plants an item whose canon grows a line on every pass (`z` ->
+  `zz`): red at the fixpoint alone (`zy` / `zx` paired as a move, X:1, nothing refused), green with the guard (both
+  refused by name), beside the key's own cap and a converging control.
+
+**The r2 footprint, scored against the prediction posted before arm B** (`seat28.lane.tsv`, block r2): EQUAL to the
+`e9f05d8c09` record on all three targets, with REFUSED 0 (MET on every quantity).
+- Two seeded roots at `904c363f67`, one binary per arm (A the base, B the seat's converter), `-stdlib -comments`
+  over windows, linux and darwin; both arms rc 0, 0 degraded/failed/misrouted, 4,560 `.cs` per target.
+- Files 450 / 465 / 455 (`.cs` 331 / 345 / 337, package_info 119 / 120 / 118), +9,701 / -7,264, +9,712 / -7,258,
+  +9,620 / -7,199; S1 10,541 / 10,536 / 10,437, MAP 270 / 283 / 277, REFUSED 0 (pcensus `-items S1` at the seat's
+  instrument, with the guard): the same file set, and the same added and deleted count in every file.
+- The diffs' text differs from the record's in 130 / 124 / 122 line pairs, every one another landed seat's spelling
+  inside an S1 hunk: D1's `default` (94 / 90 / 88), Z1's `new T()` (8 / 8 / 8), R5's un-aliased name (10 / 8 / 8)
+  and N2's single cast (18 / 18 / 18).
+- Compile arm, windows `go2cs-stdlib.slnx` over B's tree: 0 errors, the one standing warning (CS9113, hand-owned
+  `testing`), 363 of 363 projects compiled in the run (362 under `core` and the generator).
+
+**r2 behavioral and goldens.** CNR at the r2 tip moved the same 23 tests as before the rebase. `UpdateTestTargets
+--only` re-minted them (65 files), each golden byte-equal to its emission, SystemCertVerify (windows-exclusive)
+among them; none of the 23 is exclusive to linux or darwin, so no golden is left for another host.
+- pcensus on the goldens, `-items S1,D1`: S1 392, D1 1 (the guard's `log = default!`, minted before D1 landed), and
+  53 refused, by project: SwitchBreakContinueWrapper 40 ((h) and (i)), SwitchLabelSideEffectOrder 13
+  (`bytesNotText`), each new test source. With `-items S1` alone the D1 line's two halves add 2 (55).
+- docsamples: every sample holds its lines at the re-minted goldens (0 to re-copy); repoguard green at the tip.
+
+**r2 gates, at the r2 tip on `904c363f67`, one battery on the box.** `go test -timeout 60m ./...` 10 of 10 packages ok
+(go2cs 979 s, pcensus and repoguard re-run); GenTests 349/349; GolibTests unfiltered 2,257 passed, 0 failed, 36
+skipped; golib Release `--no-incremental` 0 warnings, 0 errors, csc ran; `go2cs.slnx` 0 errors (158 standing
+warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 23 moved tests: trx total = executed = passed = 92, failed 0
+(A1, B2, C3, D4 23 each).
+
 — H (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
