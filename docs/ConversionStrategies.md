@@ -222,7 +222,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 
 <!-- sources, one per row, top to bottom (every C# form is copied from real emission):
   src/core/bufio/bufio.cs:17#3ddbb0 · src/core/bufio/bufio.cs:14#a6e909 ·
-  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#063eb6 + src/core/image/png/reader.cs:1202#c96c26 ·
+  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#840b80 + src/core/image/png/reader.cs:1202#c96c26 ·
   (the lazy holder: src/core/unicode/tables.cs:2886 `[GoLazy] partial class lazyᴛ_Lu {`) ·
   src/core/reflect/all_test.cs:64#791abc + src/core/reflect/go2cs_test_host.cs:1#0abf19 ·
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:162#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
@@ -234,7 +234,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/SliceAliasing/main.cs.target:13#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:116#9a82dc ·
   src/tests/Behavioral/NamedReturnDefer/main.cs.target:41#f6bf33 · src/tests/Behavioral/ShadowedCompoundAssign/main.cs.target:10#434a84 ·
   src/core/internal/strconv/atoi.cs:258#193b08 · src/tests/Behavioral/MapCommaOk/main.cs.target:10#dea2f1 ·
-  src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:8#99d0ac · src/tests/Behavioral/LocalStringConstHoist/main.cs.target:21#3af542 + src/core/internal/strconv/atoi.cs:255#b8f818 ·
+  src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:8#407329 · src/tests/Behavioral/LocalStringConstHoist/main.cs.target:21#3af542 + src/core/internal/strconv/atoi.cs:255#b8f818 ·
   src/tests/Behavioral/MapCommaOk/main.cs.target:8#440e42 · src/tests/Behavioral/GenericFuncDecl/GenericFuncDecl.cs.target:7#6d8518 +
   src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:53#b41110 + GenericInterfaceConstraint.cs.target:47#b015bf ·
   src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:1#b7a909 ·
@@ -275,7 +275,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Shadowing](#short-variable-redeclaration-shadowing) | an inner `x := 5` | `nint xΔ1 = 5;` | converter |
 | [Multiple results](#multi-result-values-and-comma-ok-forms) | `func Atoi(s string) (int, error)` | `public static (nint, error) Atoi(@string s)` | converter |
 | [Comma-ok](#multi-result-values-and-comma-ok-forms) | `v, ok := m["a"]` | `var (v, ok) = m["a", ꟷ];` | golib |
-| [Slices and arrays](#slices-and-arrays) | `[]int{2, 3, 4}` · `[N]T` | `new nint[]{2, 3, 4}.slice()` · `array<T>` | golib |
+| [Slices and arrays](#slices-and-arrays) | `[]int{2, 3, 4}` · `[N]T` | `slice<nint>([2, 3, 4])` · `array<T>` | golib |
 | [Strings](#strings-string-and-sstring) | `string` · `"Atoi"` | `@string` · `"Atoi"`, a plain C# literal golib converts once; `"Atoi"u8` where the bytes are read in place, and in the standard library | golib |
 | [Maps](#maps) | `map[string]int{"a": 1, "b": 2}` | `new map<@string, nint>{["a"] = 1, ["b"] = 2}` | golib |
 | [Generics](#generics) | `func Swap[T any](a, b T) (T, T)` · `[S Shape]` | `public static (T, T) Swap<T>(T a, T b)` · `where S : Shape` | converter |
@@ -879,7 +879,7 @@ internal static nint countAtInit;
 internal static void Main() {
     fmt.Println("count at init:", countAtInit);
 
-    foreach (var (_, name) in new @string[]{"jpeglike", "pnglike", "giflike"}.slice()) {
+    foreach (var (_, name) in slice<@string>(["jpeglike", "pnglike", "giflike"])) {
         {
             var (describe, ok) = registry.Lookup(name); if (ok) {
                 fmt.Println("found:", name, "=>", describe);
@@ -1193,7 +1193,7 @@ internal static void initᴛstdinName() { stdinName = describe(0); }
 ```
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 -->
 ```csharp
-internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
+internal static slice<@string> names = slice<@string>(["stdin", "stdout"]);
 ```
 
 `slice<@string>` is golib's form of Go's `[]string` ([Slices and Arrays](#slices-and-arrays)).
@@ -2422,7 +2422,7 @@ these raise that same panic, which `recover` sees; a count of zero or more goes 
 signed count is never kept native on the strength of `y % M` alone, since Go's `-3 % 8` is -3.
 
 Here the counts come from a slice at run time, and several are 64 or more. In the C#,
-`new nuint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), and `foreach (var (_, k) in c)` is
+`slice<nuint>([…])` builds a golib [slice](#slices-and-arrays), and `foreach (var (_, k) in c)` is
 Go's `for _, k := range c` ([Loops, Range and Labels](#loops-range-and-labels)):
 
 <!-- source: src/tests/Behavioral/GoShiftSemantics/main.go:21-27 -->
@@ -2437,7 +2437,7 @@ for _, k := range c {
 ```
 <!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:14-19 -->
 ```csharp
-var c = new nuint[]{0, 1, 63, 64, 65, 200}.slice();
+var c = slice<nuint>([0, 1, 63, 64, 65, 200]);
 uint64 u = 0x8000000000000001UL;
 
 foreach (var (_, k) in c) {
@@ -2886,7 +2886,7 @@ internal static void Main() {
     slice<byte> zero = default;
     probe("zeroValue", zero == default, len(zero), cap(zero));
 
-    var emptyLit = new byte[]{}.slice();
+    var emptyLit = slice<byte>([]);
     probe("emptyLiteral", emptyLit == default, len(emptyLit), cap(emptyLit));
 ```
 
@@ -3207,8 +3207,8 @@ fmt.Println(n) // 3
 ```
 <!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:45-48 -->
 ```csharp
-var x = new byte[]{1, 2, 3}.slice();
-var y = new byte[]{1, 2, 3, 4, 5}.slice();
+var x = slice<byte>([1, 2, 3]);
+var y = slice<byte>([1, 2, 3, 4, 5]);
 nint n = min(len(x), len(y));
 fmt.Println(n);
 ```
@@ -3352,7 +3352,7 @@ internal static nint len(this ref box b) {
 }
 
 internal static nint freeLen() {
-    var s = new nint[]{1, 2, 3}.slice();
+    var s = slice<nint>([1, 2, 3]);
     return builtin.len(s);
 }
 ```
@@ -4416,9 +4416,9 @@ of the C# types. `uintptr` is golib's own `uintptr` struct
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 <!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:134#1a4b9a). -->
 
-**Literals and `make`.** A composite literal builds a plain C# array and turns it into a Go value with
-`.slice()` or `.array()`. `make` calls a constructor. So `[]uint32{7, 8, 9}` becomes
-`new uint32[]{7, 8, 9}.slice()`, `[6]int{0, 10, 20, 30, 40, 50}` becomes
+**Literals and `make`.** A slice literal is golib's `slice<T>` builtin over a C# collection expression, an
+array literal a plain C# array turned into a Go value with `.array()`, and `make` calls a constructor. So
+`[]uint32{7, 8, 9}` becomes `slice<uint32>([7, 8, 9])`, `[6]int{0, 10, 20, 30, 40, 50}` becomes
 `new nint[]{0, 10, 20, 30, 40, 50}.array()`, and `make([]int, 3, 10)` becomes `new slice<nint>(3, 10)`.
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:20, :34 and :44; src/tests/Behavioral/SliceAliasing/main.cs.target:15, :26 and :34 -->
 
@@ -4449,7 +4449,7 @@ fmt.Println(base[2], d[1])
 ```csharp
 var @base = new slice<uint32>(6);
 var d = @base[2..5];
-copy(d, new uint32[]{7, 8, 9}.slice());
+copy(d, slice<uint32>([7, 8, 9]));
 fmt.Println(@base, d, len(d), cap(d));
 
 d[0] = 42;
@@ -4584,8 +4584,8 @@ that is a slice with no backing array, which is Go's nil. The `!` only silences 
 <!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:15-16 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:13-14 -->
 <!-- slice<T> is a struct (src/core/golib/slice.cs:213#09652a); IsNil is `m_array is null` (slice.cs:237#4db499). -->
 
-An empty literal such as `[]byte{}` becomes `new byte[]{}.slice()`. It has a backing array, so it is not
-nil, as in Go. See [Nil and Zero Values](#nil-and-zero-values).
+An empty literal such as `[]byte{}` becomes `slice<byte>([])`. It has a backing array, a shared empty one,
+so it is not nil, as in Go, and allocates nothing. See [Nil and Zero Values](#nil-and-zero-values).
 <!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:18 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:16 -->
 
 **Arrays are values.** `array<T>` is a struct over a shared `T[]`, so a plain C# copy would share the
@@ -4742,7 +4742,7 @@ func main() {
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.cs.target:90-93 -->
 ```csharp
 internal static void Main() {
-    var a = new nint[]{1, 2, 3}.slice();
+    var a = slice<nint>([1, 2, 3]);
     forward(a.ꓸꓸꓸ);
     fmt.Println("forward wrote through:", a);
 ```
@@ -5550,9 +5550,9 @@ public static float64 Area(this ref Circle c) {
     return 3.0D * c.R * c.R;
 }
 …
-    var circles = new ж<Circle>[]{Ꮡ(new Circle(R: 1D)), Ꮡ(new Circle(R: 2D))}.slice();
+    var circles = slice<ж<Circle>>([Ꮡ(new Circle(R: 1D)), Ꮡ(new Circle(R: 2D))]);
 …
-    var shapes = new Shape[]{new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))}.slice();
+    var shapes = slice<Shape>([new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))]);
 …
     fmt.Printf("circles: %.2f\n"u8, totalArea(widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0))));
 …
@@ -5771,7 +5771,7 @@ type numbers []int
 ```csharp
 partial struct numbers /*[]nint*/;
 …
-    var a = new nint[]{1, 2, 3, 4, 5}.slice();
+    var a = slice<nint>([1, 2, 3, 4, 5]);
     reverseSeq<slice<nint>, nint>(a);
     fmt.Println(a);
 
@@ -5781,8 +5781,8 @@ partial struct numbers /*[]nint*/;
 ```
 
 A named slice type such as `numbers` becomes a wrapper struct, its name followed by `/*[]nint*/`, that
-behaves as a slice. A slice literal builds a C# array and turns it into a slice with `.slice()`
-([Slices and Arrays](#slices-and-arrays)). Calls C# can infer, such as `totalArea(shapes)`, stay bare.
+behaves as a slice. A slice literal is golib's `slice<T>` builtin over a C# collection expression, such as
+`slice<nint>([1, 2])` ([Slices and Arrays](#slices-and-arrays)). Calls C# can infer, such as `totalArea(shapes)`, stay bare.
 
 A type argument Go takes from untyped constants alone is written out too, wherever C# would infer a
 different type. Go gives a constant its default type, so `show(3)` calls `show[int]`; C# infers from the
@@ -6676,12 +6676,12 @@ internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
     fmt.Println(f("loose"u8, 1, 2, 3));
     fmt.Println(f("empty"u8));
 
-    var nums = new nint[]{4, 5}.slice();
+    var nums = slice<nint>([4, 5]);
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
 }
 ```
 
-`new nint[]{4, 5}.slice()` is the slice literal `[]int{4, 5}` ([Slices and Arrays](#slices-and-arrays)).
+`slice<nint>([4, 5])` is the slice literal `[]int{4, 5}` ([Slices and Arrays](#slices-and-arrays)).
 The spread `nums...` becomes `nums.ꓸꓸꓸ`. [Functions and Methods](#functions-and-methods) covers variadic
 parameters.
 
@@ -7116,7 +7116,7 @@ for i, num = range nums {
 ```
 <!-- source: src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:8-21 -->
 ```csharp
-var nums = new nint[]{2, 3, 4}.slice();
+var nums = slice<nint>([2, 3, 4]);
 nint sum = 0;
 
 nint i = default;
@@ -7132,7 +7132,7 @@ foreach (var (iᴛ1, vᴛ1) in nums) {
 }
 ```
 
-`new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), Go's `int` becomes `nint`, and
+`slice<nint>([…])` builds a golib [slice](#slices-and-arrays), Go's `int` becomes `nint`, and
 `default!` is Go's zero value ([Nil and Zero Values](#nil-and-zero-values)).
 
 <!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:412#c54fd4);
@@ -7360,7 +7360,7 @@ scan:
 <!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs.target:54-68 -->
 ```csharp
 …
-    var nums = new nint[]{1, 2, 3, 4}.slice();
+    var nums = slice<nint>([1, 2, 3, 4]);
 scan:
     foreach (var (_, n) in nums) {
         foreach (var (_, m) in nums) {
@@ -7377,7 +7377,7 @@ continue_scan:;
 break_scan:;
 ```
 
-`new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays).
+`slice<nint>([…])` builds a golib [slice](#slices-and-arrays).
 
 <!-- Reference gap: labels-and-loop-variables.md has no rule for the if/switch init clause block; add it there, with its guard tests, and extend the Full detail line. -->
 <!-- A switch init clause gets the same block: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:124#43c487 -> ExprSwitch.cs.target:145-147#31d8f1. -->
@@ -10128,7 +10128,7 @@ internal static error release(errno e) {
 and each case compares through `AreEqual` in the same way, `case var ᴛ when AreEqual(ᴛ, errAgain):`
 ([Expression Switch Statements](#expression-switch-statements)).
 
-<!-- adapter unwrap: src/core/golib/builtin.cs:4130-4146#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:34 `AreEqual(zoo[0], f)` -->
+<!-- adapter unwrap: src/core/golib/builtin.cs:4145-4161#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:34 `AreEqual(zoo[0], f)` -->
 `AreEqual` unwraps adapters first, so an interface holding a pointer equals that pointer: Go's
 `zoo[0] == f`, where `zoo[0]` is an interface holding the pointer `f`, becomes `AreEqual(zoo[0], f)`.
 Comparing two values of a type Go cannot compare, such as a slice or map, panics as it does in Go.
@@ -11374,7 +11374,7 @@ public static uint64 Float64bits(float64 f) {
     return bitcast<float64, uint64>(f);
 }
 ```
-<!-- the reverse pun Float64frombits: UnsafeOperations.go:61-63#2dd660 -> cs.target:54-56 (`bitcast<uint64, float64>(b)`); integer pun UnsafeOperations.go:95#43707c -> cs.target:93 (`uint8 k = bitcast<int8, uint8>(i);`). bitcast: src/core/golib/builtin.cs:4027 (`where TSrc : unmanaged where TDst : unmanaged`). -->
+<!-- the reverse pun Float64frombits: UnsafeOperations.go:61-63#2dd660 -> cs.target:54-56 (`bitcast<uint64, float64>(b)`); integer pun UnsafeOperations.go:95#43707c -> cs.target:93 (`uint8 k = bitcast<int8, uint8>(i);`). bitcast: src/core/golib/builtin.cs:4042 (`where TSrc : unmanaged where TDst : unmanaged`). -->
 
 **Reading a struct as another struct with the same fields is a `Reinterpret`.** Go's
 `*(*T2)(unsafe.Pointer(&t1))` becomes `~Ꮡt1.Reinterpret<T1, T2>()`: a view of the same box, read as the

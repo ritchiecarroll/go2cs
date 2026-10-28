@@ -1657,7 +1657,7 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }
-[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
+[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
 ```
 
 The range and the heap box in `main.cs`:

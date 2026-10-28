@@ -119,7 +119,7 @@ sp := [3]any{1: "sp"}             // sparse-array element
     var p = new pair("tag", (@string)"val"u8);
     var m = new map<@string, any>{["k"] = (@string)"mv"u8};
     var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
-    var s = new any[]{(@string)"a"u8, (@string)"b"u8}.slice();
+    var s = slice<any>([(@string)"a"u8, (@string)"b"u8]);
     …
     var sp = new array<any>(3){[1] = (@string)"sp"u8};
 ```
@@ -356,7 +356,7 @@ already leads with the cast so the two can never double up:
 …
     any sv = seedˢ;
 …
-    var ssl = new any[]{(@string)"seed"u8, (@string)("se" + "ed")}.slice();
+    var ssl = slice<any>([(@string)"seed"u8, (@string)("se" + "ed")]);
 …
     fmt.Println("str mapkey    :", smk[seedˢ], smk[((any)s)]);
 …
