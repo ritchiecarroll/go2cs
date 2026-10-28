@@ -2586,10 +2586,12 @@ internal static word maskFor(nuint s) {
 
 Here `m` is a `word`, because both `<<` and `-` return a `word`. Go's `uint` is C#'s `nuint`.
 
-**A conversion goes through the underlying type.** Among Go's number types, the wrapper converts only to and
-from its exact underlying type. It also accepts golib's untyped-constant wrappers, described in the next rules.
-So `float64(sec)` in `Seconds` becomes `(float64)(int64)sec`: first to `int64`, then to `float64`. This gives
-the same value as Go's conversion. The same rule applies in both directions:
+**A conversion out of the wrapper is one cast; a conversion into it goes through the underlying type.** The
+wrapper converts implicitly to and from its exact underlying type. It also accepts golib's untyped-constant
+wrappers, described in the next rules. Going out, it also declares an explicit operator to every basic number
+type, each the underlying's own C# cast, so `uint64(s)` becomes `(uint64)s` and gives the same value as Go's
+conversion. Going in from another number type, the value goes to the underlying first, so `traceArg(procs)`
+becomes `(traceArg)(uint64)procs`:
 
 <!-- source: src/tests/Behavioral/NamedNumericConversion/main.go:14-40 -->
 ```go
@@ -2601,7 +2603,7 @@ type nameOff int32   // underlying int32
 	a := traceArg(procs) // int32 -> traceArg: ((traceArg)(uint64)procs)
 …
 	var s nameOff = 7
-	e := uint64(s) // nameOff(int32) -> uint64: ((uint64)(int32)s)
+	e := uint64(s) // nameOff(int32) -> uint64: ((uint64)s)
 ```
 <!-- source: src/tests/Behavioral/NamedNumericConversion/main.cs.target:7-33 -->
 ```csharp
@@ -2613,7 +2615,7 @@ partial struct nameOff /*num:int32*/;
     var a = (traceArg)(uint64)procs;
 …
     nameOff s = 7;
-    var e = (uint64)(int32)s;
+    var e = (uint64)s;
 ```
 
 When the other type already is the underlying type, one cast is enough: `int32(s)` becomes `(int32)s`.
