@@ -200,7 +200,16 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts))))
 				}
-				return addrOf(fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))))
+
+				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
+
+				// An unnamed slice renders through golib's builtin with a collection expression,
+				// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin).
+				if sliceLiteralTakesBuiltin(inferred) {
+					return addrOf(fmt.Sprintf("slice<%s>([%s])", csElem, elements))
+				}
+
+				return addrOf(fmt.Sprintf("new %s[]{%s}.slice()", csElem, elements))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getAliasQualifiedTypeName(u.Elem(), false))
 				// An ELIDED array literal is still `[N]T` long, so its projection carries the
@@ -1129,7 +1138,17 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		compositeSuffix += ")"
 	}
 
-	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
+	// An unnamed `[]T{…}` renders through golib's builtin with a collection expression,
+	// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin). Only the plain form converts: any other shape this
+	// function decorated (an alias, a wrapper ctor, a sparse or sized backing) keeps its `new` form.
+	if sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !aliasArrayComposite && !namedArrayComposite &&
+		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0 {
+		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
+		lbrace, rbrace, compositeSuffix = "[", "]", ")"
+		result.WriteString(fmt.Sprintf("slice<%s>(%s%s", csElementType, lbracePrefix, lbrace))
+	} else {
+		result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
+	}
 
 	if len(compositeLit.Elts) > 0 {
 		// The element list writes the comments ahead of its first element itself (writeListComments);
@@ -1210,6 +1229,30 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	result.WriteString(fmt.Sprintf("%s%s%s", rbracePrefix, rbrace, compositeSuffix))
 
 	return result.String()
+}
+
+// sliceLiteralTakesBuiltin reports whether an unkeyed composite literal of type t renders as golib's builtin
+// over a C# collection expression: Go's `[]int{1, 2, 3}` is `slice<nint>([1, 2, 3])` (1.26.10.2 parity seat
+// #30, L1). The collection expression targets builtin.slice<T>(ReadOnlySpan<T>), which copies it into a fresh
+// backing array, so the result keeps Go's literal semantics in every position: never nil (`slice<nint>([])` is
+// empty, not nil), len == cap, and no two evaluations share elements. T is always written, so nothing is
+// inferred from the elements (an untyped `1` would infer System.Int32 where Go's []int is nint).
+//
+// A collection expression cannot target slice<T> itself: C# takes a collection's element type from its public
+// enumerator, and slice<T>'s yields Go's range pair (nint, T), which `foreach (var (i, x) in xs)` relies on.
+//
+// Only an UNNAMED slice converts. A named or aliased slice type keeps its own constructor form, and a slice of
+// arrays keeps `new array<T>[]{…}.slice()`, whose element dims are recorded on that form.
+func sliceLiteralTakesBuiltin(t types.Type) bool {
+	slice, ok := t.(*types.Slice)
+
+	if !ok {
+		return false
+	}
+
+	_, elemIsArray := slice.Elem().Underlying().(*types.Array)
+
+	return !elemIsArray
 }
 
 // compositeLitIsKeyed reports whether a composite literal's elements are index/key keyed
