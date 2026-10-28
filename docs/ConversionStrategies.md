@@ -2859,7 +2859,7 @@ body also reads through it ([glyph table](#reading-converted-code-names-and-glyp
 | `var e Embedded`, a struct that embeds a type | `Embedded e = new(nil);` | The constructor builds each embedded field. |
 | `var ar <-chan int` | `/*<-*/channel<nint> ar = /*<-*/channel<nint>.RecvOnly;` | The nil channel keeps its direction. |
 
-**A variable declared without a value is `default!`, and `== nil` becomes `== default!`.** A Go slice is a
+**A variable declared without a value is `default`, and `== nil` stays `== nil`.** A Go slice is a
 golib [`slice<T>`](#slices-and-arrays), which is nil when it has no backing array. So `[]byte{}` is empty
 but not nil, as in Go. Here `probe` prints its arguments:
 
@@ -2884,10 +2884,10 @@ internal static void probe(@string name, bool isNil, nint length, nint capacity)
 
 internal static void Main() {
     slice<byte> zero = default;
-    probe("zeroValue", zero == default, len(zero), cap(zero));
+    probe("zeroValue", zero == nil, len(zero), cap(zero));
 
     var emptyLit = new byte[]{}.slice();
-    probe("emptyLiteral", emptyLit == default, len(emptyLit), cap(emptyLit));
+    probe("emptyLiteral", emptyLit == nil, len(emptyLit), cap(emptyLit));
 ```
 
 Go and C# both print `zeroValue true 0 0`, then `emptyLiteral false 0 0`. `@string` is Go's `string`, and
@@ -4578,9 +4578,9 @@ omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:40; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
 <!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:449 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:13 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:21 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1810 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
-**A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default!;`, and
-`zero == nil` becomes `zero == default!`. `default!` is C#'s default value for the type. For `slice<T>`
-that is a slice with no backing array, which is Go's nil. The `!` only silences C#'s nullable warning.
+**A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default;`, and
+`zero == nil` stays `zero == nil`, which binds `slice<T>`'s `operator ==(slice<T>, NilType)`. `default` is
+C#'s default value for the type. For `slice<T>` that is a slice with no backing array, which is Go's nil.
 <!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:15-16 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:13-14 -->
 <!-- slice<T> is a struct (src/core/golib/slice.cs:213#09652a); IsNil is `m_array is null` (slice.cs:237#4db499). -->
 
@@ -5306,16 +5306,16 @@ internal static void Main() {
     delete(m, "a"u8);
     fmt.Println("delete ok");
 
-    fmt.Println(m == default);
+    fmt.Println(m == nil);
 
     var e = new map<@string, nint>{};
-    fmt.Println(e == default);
+    fmt.Println(e == nil);
 …
 }
 ```
 
 Every read of a nil map sees no entries: an absent key gives the zero value, `len` is 0, and a `range`
-runs no iterations. `m == nil` becomes `m == default!`, which is true only for a map with no `Dictionary`.
+runs no iterations. `m == nil` stays `m == nil`, which is true only for a map with no `Dictionary`.
 So an empty map built with `{}` is not nil, as in Go.
 
 A `range` with no variables unpacks each pair into two C# discards, `(_, _)`. This is ordinary C#

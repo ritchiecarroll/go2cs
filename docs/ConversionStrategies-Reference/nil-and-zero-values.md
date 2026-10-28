@@ -41,8 +41,7 @@ Both lines print as Go does: `true`, then `false`.
 
 A type parameter keeps its own path whatever its constraint: C# binds no user-defined operator on a type
 parameter (CS8761), so a map- or slice-core type parameter reads `IsNil` and an erased pointer core is a pointer.
-Pointers already rendered `nil`. A slice, map or channel compared with `nil` reads `x == default` until its
-operators against `nil` are proven (parity seat #24).
+Pointers already rendered `nil`. A slice, map or channel compared with `nil` reads `nil` too (next section).
 
 Every other typeless zero value (a declaration's zero, a `return` of zero results, a nil argument) renders
 `default`, with no `!`: converted projects build with `<Nullable>annotations</Nullable>`, so the
@@ -51,6 +50,45 @@ null-forgiving operator says nothing there. `default(T)!` stays where the type m
 <!-- parity seat #20 (N1 stage 1 + D1), 2026-10-28: converter convBinaryExpr.go (nilComparandRendersNil) and the
      14 D1 literals; guards NilCompareShapes (behavioral, Output compared with Go) and
      TestNilCompareRendersNilForInterfaceAndFuncOperands. -->
+
+## A slice, map or channel compared with `nil` reads `nil` too
+
+An untyped `nil` compared with a slice, a map or a channel (named or not, directional or not, on either side)
+renders golib's `nil` the same way: `s == nil`, `nil != m`. It binds the type's own `operator ==(T, NilType)`;
+for a named slice, map or channel, go2cs-gen emits that operator on the wrapper struct. That is the overload
+`x == default` already resolved to, because `NilType` converts implicitly to the type and C# prefers the more
+specific conversion, so only the spelling changed. Only the nil value compares equal: a slice with a null
+backing array, a map with no backing store, a channel with no core. An empty slice that was made, or a
+zero-length slice over real storage, is not nil, as in Go:
+
+<!-- source: src/tests/Behavioral/NilCompareShapes/collections.go:33-34, 37-38 -->
+```go
+	var s []int
+	fmt.Println("nil slice:", s == nil, nil == s, s != nil)
+…
+	fmt.Println("make([]int, 0):", make([]int, 0) == nil, nil != make([]int, 0, 8))
+	fmt.Println("empty literal:", []int{} == nil)
+```
+<!-- source: src/tests/Behavioral/NilCompareShapes/collections.cs.target:34-35, 38-39 -->
+```csharp
+    ref var s = ref heap<slice<nint>>(out var Ꮡs);
+    fmt.Println("nil slice:", s == nil, nil == s, s != nil);
+…
+    fmt.Println("make([]int, 0):", new slice<nint>(0) == nil, nil != new slice<nint>(0, 8));
+    fmt.Println("empty literal:", new nint[]{}.slice() == nil);
+```
+
+The lines print `true true false`, `false true` and `false`, as Go does. GolibTests `NilHeaderEqualityTests`
+checks the operator against Go's answer for every way such a value is made, including a native-backed slice,
+`unsafe.Slice` and a slice header reinterpreted through `unsafe.Pointer`. That proof found one disagreement with
+Go, now fixed in golib: `unsafe.Slice(nil, 0)` built an empty non-nil slice where Go returns the nil slice.
+
+A slice- or map-core type parameter still reads `IsNil` (CS8761, as above).
+
+<!-- parity seat #24 (N1 stage 2), 2026-10-28: converter convBinaryExpr.go (nilComparandRendersNil gains slice, map
+     and chan); golib unsafe.Slice(nil, 0) returns the nil slice (src/core/unsafe/unsafe.cs); guards
+     NilCompareShapes/collections.go (behavioral, Output compared with Go),
+     TestNilCompareRendersNilForSliceMapAndChanOperands and GolibTests NilHeaderEqualityTests. -->
 
 ## A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile
 

@@ -16,12 +16,13 @@ using @unsafe = go.unsafe_package;
 namespace GolibTests;
 
 /// <summary>
-/// The proof 1.26.10.2 parity seat #24 (N1 stage 2) is gated on. Today a Go <c>x == nil</c> on a slice, map or chan
-/// emits <c>x == default</c>, which binds the type's header operator; the seat makes it <c>x == nil</c>, which binds
-/// the <see cref="NilType"/> operator, and for a slice and a map that operator reads <c>IsNil</c>. The two must agree
-/// for every way a value is made, or the seat changes behavior. So each arm builds one construction kind and asserts
-/// both Go's own answer and <c>IsNil == (x == default)</c>; a chan has no <c>IsNil</c> and its nil operator already
-/// defers to the header, so its arms check the two operators against Go's answer.
+/// The proof 1.26.10.2 parity seat #24 (N1 stage 2) is gated on. The seat spells a Go <c>x == nil</c> on a slice, map
+/// or chan as <c>x == nil</c>, which binds the <see cref="NilType"/> operator; for a slice and a map that operator
+/// reads <c>IsNil</c>. (The earlier spelling <c>x == default</c> binds the same operator: <c>NilType</c> converts
+/// implicitly to the type, so C# prefers it for a <c>default</c> literal.) Each arm builds one construction kind and
+/// asserts Go's own answer, and that <c>IsNil</c> agrees with the header compare against <c>default(T)</c> and with
+/// <c>== nil</c>; a chan has no <c>IsNil</c> and its nil operator defers to the header, so its arms check the two
+/// operators against Go's answer.
 /// </summary>
 [TestClass]
 public class NilHeaderEqualityTests
