@@ -55,13 +55,15 @@ type joinRule struct {
 
 // blockRule admits a structural rewrite inside one hunk: a hunk whose removed lines hold OldAnchor and whose added
 // lines hold NewAnchor may delete lines matching Delete and insert lines matching Insert, and may re-indent the
-// lines it keeps.
+// lines it keeps. With Moves, a deleted line and an inserted line of the same canonical text pair as a move (a
+// clause the old form emitted out of source order).
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
 	// Standalone admits a hunk that holds OldAnchor alone: a declaration the seat deletes far from the
 	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
 	Standalone bool
+	Moves      bool
 }
 
 // id is a C# identifier as the converter spells one (Go identifiers, plus the converter's own letters: Ꮡ, ʗ, ᴛ, ǃ, ꓸ).
@@ -285,29 +287,39 @@ var items = []item{
 			m("S1", "tag-temp", `var expr\x{1D1B}\d* =`),
 			m("S1", "do-while-false", `\} while \(false\);`),
 		},
-		// The if-chain over `exprᴛN` (and its do/while(false) wrapper and continueᴛ label) is deleted and a
-		// `switch (tag) { case var ᴛ when ᴛ == L: … }` inserted; the bodies it keeps may re-indent. The new form is
-		// the plan's (§1 #28); its exact case spelling is #28's, so Insert admits any case label.
+		// The if-chain over `exprᴛN` (and its do/while(false) wrapper and continueᴛ label) becomes
+		// `switch (tag) { case …: { … break; } … default: { … } }`, as #28 ruled (R1-R3): one label per Go clause; a
+		// clause the chain tested with `is` keeps its constant pattern (`case A or B: {`), the rest become
+		// `case var ᴛ when ᴛ == A || ᴛ == B: {` (AreEqual and the named-wrapper cast kept); a nested pattern switch
+		// names its variable `ᴛ2`, `ᴛ3`. The canon PAIRS each line that carries a label or the tag with the line that
+		// replaces it, so a label whose value or operator changed is refused; the block only admits the scaffolding
+		// either side, and a default body the chain had moved to the end is admitted back in Go's position as a move.
+		Canon: []rewrite{
+			rw(`^(\s*)\S+ exprᴛ\d+ = (.*);$`, "${1}switch ($2) {"),
+			rw(`^(\s*)(?:else )?if \(exprᴛ\d+ is (.*)\) \{$`, "${1}case $2: {"),
+			rw(`^(\s*)(?:else )?if \((.*\bexprᴛ\d+\b.*)\) \{$`, "${1}case var ᴛ when $2: {"),
+			rw(`\bexprᴛ\d+\b`, "ᴛ"),
+			rw(`(^|[^\p{L}\p{N}_])ᴛ\d+\b`, "${1}ᴛ"),
+			rw(`^(\s*)goto continueᴛ\d+;$`, "${1}continue;"),
+		},
+		Old: rx(`\bexprᴛ\d+\b|goto continueᴛ\d+;`),
 		Block: &blockRule{
-			OldAnchor: rx(`\bvar exprᴛ\d+ = |\} while \(false\);`),
+			OldAnchor: rx(`\b\S+ exprᴛ\d+ = |\} while \(false\);`),
 			NewAnchor: rx(`^\s*switch \(`),
 			Delete: []*regexp.Regexp{
-				rx(`^\s*var exprᴛ\d+ = .*;$`),
-				rx(`^\s*(?:\}\s*)?(?:else )?if \(.*\bexprᴛ\d+\b.*\) \{$`),
-				rx(`^\s*(?:\}\s*)?else \{(?: /\* default: \*/)?$`),
+				rx(`^\s*(?:else )?\{ /\* default: \*/$`),
+				rx(`^\s*else \{$`),
 				rx(`^\s*do \{$`),
 				rx(`^\s*\} while \(false\);$`),
 				rx(`^\s*continueᴛ\d+:;?$`),
-				rx(`^\s*goto continueᴛ\d+;$`),
 				rx(`^\s*[{}]$`),
 			},
 			Insert: []*regexp.Regexp{
-				rx(`^\s*switch \(.*\) \{$`),
-				rx(`^\s*case .*:$`),
-				rx(`^\s*default:$`),
+				rx(`^\s*default: \{$`),
 				rx(`^\s*break;$`),
-				rx(`^\s*[{}]$`),
+				rx(`^\s*\}\}?$`),
 			},
+			Moves: true,
 		},
 	},
 	{

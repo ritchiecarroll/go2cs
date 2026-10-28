@@ -338,31 +338,71 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 	}
 
 	refuse := func(kind, r, a string) { out.refused = append(out.refused, refusal{file, at, kind, r, a}) }
+	// reindented reports the active block whose own canon makes the two lines equal but for indentation: a kept line
+	// the structural rewrite re-indents, or a label line it pairs one level in or out.
+	reindented := func(r, a string) string {
+		for _, it := range blocks {
+			if strings.TrimSpace(canon(it, r)) == strings.TrimSpace(canon(it, a)) &&
+				(strings.TrimSpace(r) == strings.TrimSpace(a) || moves(it, r, a)) {
+				return it.ID
+			}
+		}
+		return ""
+	}
 	pair := func(i, j int) {
 		label, why := c.explain(file, rem[i], add[j], joinOf(i, j))
-		switch {
-		case why == "":
+		if why == "" {
 			out.labels = append(out.labels, label)
-		case strings.TrimSpace(rem[i]) == strings.TrimSpace(add[j]) && len(blocks) > 0:
-			out.labels = append(out.labels, blocks[0].ID) // a kept line the structural rewrite re-indents
-		default:
+		} else if id := reindented(rem[i], add[j]); id != "" {
+			out.labels = append(out.labels, id)
+		} else {
 			refuse(why, rem[i], add[j])
 		}
 	}
-	unpairedRem := func(i int) {
-		if id := block(rem[i], true); id != "" {
-			out.labels = append(out.labels, id)
-		} else {
-			refuse("UNPAIRED", rem[i], "")
+	var lostRem, lostAdd []int // the lines the alignment leaves unpaired, read once the walk is done
+	unpaired := func() {
+		for _, it := range blocks {
+			if !it.Block.Moves {
+				continue
+			}
+			// A line the old form emitted out of source order is deleted in one place and inserted, with the same
+			// canonical text, in another: pair those first, so only the scaffolding is left to Delete and Insert.
+			var kept []int
+			for _, i := range lostRem {
+				moved := false
+				for k, j := range lostAdd {
+					if j >= 0 && rk[i] == ak[j] {
+						out.labels = append(out.labels, it.ID)
+						lostAdd[k], moved = -1, true
+						break
+					}
+				}
+				if !moved {
+					kept = append(kept, i)
+				}
+			}
+			lostRem = kept
+		}
+		for _, i := range lostRem {
+			if id := block(rem[i], true); id != "" {
+				out.labels = append(out.labels, id)
+			} else {
+				refuse("UNPAIRED", rem[i], "")
+			}
+		}
+		for _, j := range lostAdd {
+			if j < 0 {
+				continue
+			}
+			if id := block(add[j], false); id != "" {
+				out.labels = append(out.labels, id)
+			} else {
+				refuse("UNPAIRED", "", add[j])
+			}
 		}
 	}
-	unpairedAdd := func(j int) {
-		if id := block(add[j], false); id != "" {
-			out.labels = append(out.labels, id)
-		} else {
-			refuse("UNPAIRED", "", add[j])
-		}
-	}
+	unpairedRem := func(i int) { lostRem = append(lostRem, i) }
+	unpairedAdd := func(j int) { lostAdd = append(lostAdd, j) }
 
 	i, j := 0, 0
 	for i < n && j < mm {
@@ -384,6 +424,7 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 	for ; j < mm; j++ {
 		unpairedAdd(j)
 	}
+	unpaired()
 	return out
 }
 
