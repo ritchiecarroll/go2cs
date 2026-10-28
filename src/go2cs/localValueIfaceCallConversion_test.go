@@ -169,8 +169,8 @@ func main() {
 	// the corpus-wide churn the change is claiming it does not cause.
 	for _, want := range []string{
 		"((fmt.Stringer)k)",
-		"((unexpIface)new embedWithUnexpMeth(nil))",
-		"((LocalIface)new localImpl(nil))",
+		"((unexpIface)new embedWithUnexpMeth())",
+		"((LocalIface)new localImpl())",
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("a record-only conversion must keep its plain emission; missing %q:\n%s", want, mainCs)
