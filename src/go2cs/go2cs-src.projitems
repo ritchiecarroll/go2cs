@@ -216,6 +216,7 @@
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
+    <None Include="$(MSBuildThisFileDirectory)goDeferConstArgs.go" />
     <None Include="$(MSBuildThisFileDirectory)goDeferConstArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis.go" />

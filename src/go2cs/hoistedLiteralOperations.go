@@ -48,10 +48,12 @@ import (
 // exclusions below do not apply to it. Every slot where a bare C# string would bind the wrong C#
 // type keeps the hoisted (or inline) form: an `any` slot (System.String is the wrong dynamic type),
 // a named string type (no single conversion reaches the wrapper, CS0029), an argument of a generic
-// callee (C# would infer T = string), a go/defer argument (the capture list infers its own type
-// arguments), an sstring twin (a bare C# string binds the twin's sstring overload through a conversion
-// that transcodes on every call, where today's form is a zero-copy view), and a multi-line raw
-// literal (`.Raw()` must strip the checkout's CRs).
+// callee (C# would infer T = string), an sstring twin (a bare C# string binds the twin's sstring
+// overload through a conversion that transcodes on every call, where today's form is a zero-copy
+// view), and a multi-line raw literal (`.Raw()` must strip the checkout's CRs). A go/defer argument
+// claims no field either: it moves into the thunk's call and takes that call's rule there, or, when it
+// stays an eager argument, renders `(@string)"…"` so the capture list infers @string (seat #33,
+// goDeferConstArgs.go).
 
 // packageHoistsLiterals is the literal mode of the package being converted: true hoists exactly as
 // before plain literals existed, false emits plain literals. It is a property of the PACKAGE, never of
@@ -70,6 +72,14 @@ func literalsHoistedFor(packageDir string, options Options) bool {
 // packagePlainLits holds every string-literal NODE that renders as a plain C# literal (see the file
 // comment). convExpr's BasicLit arm consults it through isPlainStringLiteral.
 var packagePlainLits map[*ast.BasicLit]bool
+
+// packageGoDeferLits holds, in plain mode, every string literal that is a direct argument of a go/defer
+// call, which claims no field (seat #33, goDeferConstArgs.go). The value is whether the literal renders
+// as a plain C# literal when it moves into the thunk's call, which is the plain rule of the same literal
+// as an ordinary call's argument. A literal that stays an eager argument renders `(@string)"…"` at
+// the site, so the capture list infers @string. convExpr's BasicLit arm consults it through
+// goDeferArgLiteral.
+var packageGoDeferLits map[*ast.BasicLit]bool
 
 // packageHoistedLits maps every string-literal NODE this pass resolved to the package-scoped
 // static field that stands in for it. convExpr's BasicLit arm consults it; a node absent here
@@ -171,6 +181,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 	packageHoistNames = make(map[string]hoistSeed)
 	packageHoistedLocalConsts = make(map[*types.Const]bool)
 	packagePlainLits = make(map[*ast.BasicLit]bool)
+	packageGoDeferLits = make(map[*ast.BasicLit]bool)
 
 	pkgPath := ""
 
@@ -650,6 +661,16 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 		return
 	}
 
+	// Plain mode, a go/defer call's argument: no field. It moves into the thunk's call when that form
+	// applies (goDeferConstArgs.go), where it takes an ordinary argument's plain rule, recorded here; an
+	// argument that stays eager renders `(@string)"…"` at the site.
+	if !packageHoistsLiterals && isGoDeferArg(lit, stack) && hasBareCSharpForm(lit) {
+		packageGoDeferLits[lit] = kind == hoistUseValue && isPlainStringSlot(slot) && c.plainContextAs(lit, stack, false) ||
+			kind == hoistUseAny && c.interceptableAnyArgAs(lit, stack, false)
+
+		return
+	}
+
 	// Plain mode: a value slot typed exactly `string` takes the bare C# literal and no field. The
 	// empty literal goes plain too; it reads as Go does and converts to the zero @string.
 	if !packageHoistsLiterals && kind == hoistUseValue && isPlainStringSlot(slot) && hasBareCSharpForm(lit) && c.plainContext(lit, stack) {
@@ -961,23 +982,21 @@ func hasBareCSharpForm(lit *ast.BasicLit) bool {
 // whose OTHER arguments use generated members still binds once all generators have run, and the generator
 // resolves it from its one-member method group.
 func (c *hoistCollector) interceptableAnyArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	return c.interceptableAnyArgAs(lit, stack, true)
+}
+
+// interceptableAnyArgAs is interceptableAnyArg with the go/defer exclusion optional: false asks how the
+// literal would render as an ordinary call's argument, which a go/defer constant that moves into the
+// thunk's call is (seat #33).
+func (c *hoistCollector) interceptableAnyArgAs(lit *ast.BasicLit, stack []ast.Node, excludeGoDefer bool) bool {
 	call, ok := stack[len(stack)-1].(*ast.CallExpr)
 
 	if !ok {
 		return false
 	}
 
-	if len(stack) >= 2 {
-		switch owner := stack[len(stack)-2].(type) {
-		case *ast.GoStmt:
-			if owner.Call == call {
-				return false
-			}
-		case *ast.DeferStmt:
-			if owner.Call == call {
-				return false
-			}
-		}
+	if excludeGoDefer && isGoDeferArg(lit, stack) {
+		return false
 	}
 
 	fn := calleeFunc(c.info, call)
@@ -1032,7 +1051,7 @@ func plainLiteralForm(lit *ast.BasicLit) bool {
 // plainContext reports whether a call argument's C# binding is fixed by the callee's declared
 // parameter, which is what a bare C# string needs. Three shapes are not:
 //   - a go/defer argument, which the lowering passes through the capture list's own inferred type
-//     arguments (`defer((ᴛ1) => f(ᴛ1), helloˢ, ref ᒐ)`);
+//     arguments (`defer(ᴛ1 => f(ᴛ1), helloˢ, ref ᒐ)`, the standard library's hoisted form);
 //   - an argument whose callee's ORIGIN parameter mentions a type parameter: the converter emits an
 //     inferred call without type arguments, so C# infers T from the argument, and a plain "key" makes
 //     `Pair("key", 1)` a map<string, nint> that compiles and diverges;
@@ -1042,23 +1061,19 @@ func plainLiteralForm(lit *ast.BasicLit) bool {
 //
 // Every other parent is already a fixed-type slot.
 func (c *hoistCollector) plainContext(lit *ast.BasicLit, stack []ast.Node) bool {
+	return c.plainContextAs(lit, stack, true)
+}
+
+// plainContextAs is plainContext with the go/defer exclusion optional (see interceptableAnyArgAs).
+func (c *hoistCollector) plainContextAs(lit *ast.BasicLit, stack []ast.Node, excludeGoDefer bool) bool {
 	call, ok := stack[len(stack)-1].(*ast.CallExpr)
 
 	if !ok {
 		return true
 	}
 
-	if len(stack) >= 2 {
-		switch owner := stack[len(stack)-2].(type) {
-		case *ast.GoStmt:
-			if owner.Call == call {
-				return false
-			}
-		case *ast.DeferStmt:
-			if owner.Call == call {
-				return false
-			}
-		}
+	if excludeGoDefer && isGoDeferArg(lit, stack) {
+		return false
 	}
 
 	fn := calleeFunc(c.info, call)
@@ -1118,6 +1133,40 @@ func calleeFunc(info *types.Info, call *ast.CallExpr) *types.Func {
 	fn, _ := info.Uses[ident].(*types.Func)
 
 	return fn
+}
+
+// isGoDeferArg reports whether lit is a direct argument of a go or defer statement's call.
+func isGoDeferArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	if len(stack) < 2 {
+		return false
+	}
+
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok || exprIndexOf(call.Args, lit) < 0 {
+		return false
+	}
+
+	switch owner := stack[len(stack)-2].(type) {
+	case *ast.GoStmt:
+		return owner.Call == call
+	case *ast.DeferStmt:
+		return owner.Call == call
+	}
+
+	return false
+}
+
+// goDeferArgLiteral reports whether basicLit is a plain-mode go/defer argument (packageGoDeferLits), and
+// whether it renders plain once it moves into the thunk's call.
+func goDeferArgLiteral(basicLit *ast.BasicLit) (plainIfInlined, ok bool) {
+	if packageGoDeferLits == nil {
+		return false, false
+	}
+
+	plainIfInlined, ok = packageGoDeferLits[basicLit]
+
+	return plainIfInlined, ok
 }
 
 // isPlainStringLiteral reports whether basicLit renders as a plain C# literal (packagePlainLits).

@@ -184,6 +184,11 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		basicLitContext := DefaultBasicLitContext()
 		identContext := DefaultIdentContext()
 
+		// A go/defer call's CONSTANT argument that renders inside the thunk's call (goDeferConstArgs.go)
+		// renders exactly as an ordinary call's argument: none of the capture list's inference casts apply.
+		inlined := callArgs != nil && callContext.inlineConstArgs != nil && i < len(callContext.inlineConstArgs) && callContext.inlineConstArgs[i]
+		eagerArg := callArgs != nil && !inlined
+
 		// A bare `nil` bound for a pointer-to-ARRAY parameter carries the array length that
 		// `array<E>` erases; convCallExpr's params walk recorded the target type per argument index.
 		// Set ON THIS identContext rather than appended as a second one: getExprContext returns the
@@ -195,7 +200,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// Check for call context, such as arguments allows u8 strings or is a pointer type
 		if callContext != nil {
 			// Index out of bounds default to false here, so variadic params are handled correctly
-			basicLitContext.u8StringOK = callContext.u8StringArgOK[i] && callArgs == nil
+			basicLitContext.u8StringOK = callContext.u8StringArgOK[i] && !eagerArg
 			basicLitContext.sourceIsRuneArray = callContext.sourceIsRuneArray
 
 			// The argument slot tolerates a bare span only when the literal itself renders as one:
@@ -204,7 +209,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// type-parameter slot (callArgs != nil) all reject a raw ReadOnlySpan<byte>, so a
 			// literal CONCAT in those positions keeps its plain-string operands. See
 			// BasicLitContext.spanTargetUnsupported.
-			basicLitContext.spanTargetUnsupported = !callContext.u8StringArgOK[i] || callContext.useGoStringArg[i] || callArgs != nil
+			basicLitContext.spanTargetUnsupported = !callContext.u8StringArgOK[i] || callContext.useGoStringArg[i] || eagerArg
 
 			// A DEFERRED call's args feed generic defer type parameters: a u8 span cannot be
 			// a generic type argument (u8StringOK forced off above), so a Go-string literal arg
@@ -220,7 +225,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// inference (A2) once plain literals made the analyzer read converted code: measured on
 			// DeferVariadicCallee, DeferPanicArg and DeferLambdaParam. The cast makes T = @string, Go's
 			// own type for the literal.
-			basicLitContext.castToGoString = callContext.useGoStringArg[i] || callArgs != nil
+			basicLitContext.castToGoString = callContext.useGoStringArg[i] || eagerArg
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]
@@ -247,6 +252,11 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		}
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, lambdaContext, callContext}
+
+		// The string-literal arm reads whether this argument is an inlined go/defer constant
+		// (renderingInlinedGoDeferArg), so it takes an ordinary argument's form, not the at-site cast.
+		savedInlined := v.renderingInlinedGoDeferArg
+		v.renderingInlinedGoDeferArg = inlined
 
 		var resultExpr string
 
@@ -495,6 +505,8 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 		}
 
+		v.renderingInlinedGoDeferArg = savedInlined
+
 		arg := &strings.Builder{}
 
 		// A whole argument needs no parentheses of its own (parityOperatorEmission.go); a spread argument takes a
@@ -553,6 +565,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		}
 
 		if callArgs == nil {
+			result.WriteString(arg.String())
+		} else if inlined {
+			// An inlined constant stays in the thunk's call and takes no eager slot.
 			result.WriteString(arg.String())
 		} else {
 			// A deferred-call argument that is an UNTYPED-constant REFERENCE (`io.SeekStart`,
@@ -618,9 +633,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 				result.WriteString(strings.Join(components, ", "))
 			} else if callContext != nil && callContext.refLoweredTempArgs != nil && callContext.refLoweredTempArgs[i] {
-				result.WriteString(fmt.Sprintf("ref %s%d.DerefOrNull()", TempVarMarker, i+1))
+				result.WriteString(fmt.Sprintf("ref %s.DerefOrNull()", goDeferEagerTemp(callContext.inlineConstArgs, i)))
 			} else {
-				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
+				result.WriteString(goDeferEagerTemp(callContext.inlineConstArgs, i))
 			}
 
 			callArgs[i] = arg.String()

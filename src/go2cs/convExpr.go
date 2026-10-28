@@ -119,6 +119,9 @@ type CallExprContext struct {
 	callArgs              []string
 	replacementArgs       []string
 	castArgToType         map[int]string
+	// inlineConstArgs marks a deferred/spawned call's CONSTANT arguments that render inside the
+	// thunk's call rather than as eager arguments (goDeferInlineConstArgs).
+	inlineConstArgs []bool
 	// suffixArgWith appends a member call to the indexed argument's RENDER — the suffix twin of
 	// castArgToType's prefix cast, for a wrap that must read left-to-right off the value
 	// (`ch.WithDirection(GoChanDir.Recv)`, the channel-direction narrowing at an argument
@@ -317,6 +320,9 @@ type LambdaContext struct {
 	genericResultInferenceTarget bool
 	deferredDecls                *strings.Builder
 	callArgs                     []string
+	// inlineConstArgs marks which of a deferred/spawned call's arguments are constants that render
+	// inside the thunk's call (goDeferInlineConstArgs); their callArgs entries stay empty.
+	inlineConstArgs []bool
 	// isIIFE marks an immediately-invoked, no-argument function literal — emitted as a
 	// `func((defer, recover) => body)` execution-context call so it runs with its OWN
 	// defer/recover scope (a bare C# lambda cannot be invoked directly, and an inner defer
@@ -566,6 +572,19 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		// literal. See hoistedLiteralOperations.go.
 		if isPlainStringLiteral(exprType) {
 			context = plainBasicLitContext()
+		}
+
+		// A plain-mode go/defer argument claims no field (goDeferConstArgs.go). Moved into the thunk's
+		// call it takes an ordinary argument's form; kept as an eager argument it is the at-site
+		// `(@string)"…"`, so the capture list infers @string, Go's own type for the literal.
+		if plainIfInlined, ok := goDeferArgLiteral(exprType); ok {
+			if !v.renderingInlinedGoDeferArg {
+				return "(@string)" + v.convBasicLit(exprType, plainBasicLitContext())
+			}
+
+			if plainIfInlined {
+				context = plainBasicLitContext()
+			}
 		}
 
 		return v.convBasicLit(exprType, context)

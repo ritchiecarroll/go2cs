@@ -51,6 +51,7 @@ func resetPackageState(pkg *packages.Package) {
 	currentPackageGorootVendored = false
 	packageHoistsLiterals = false
 	packagePlainLits = nil
+	packageGoDeferLits = nil
 	packageStackAppendSites = nil
 	packageStackAppendBuffers = nil
 	packageStackAppendMoves = nil

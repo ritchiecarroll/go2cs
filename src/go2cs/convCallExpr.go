@@ -1842,6 +1842,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
 	callExprContext := DefaultCallExprContext()
 	callExprContext.callArgs = context.callArgs
+	callExprContext.inlineConstArgs = context.inlineConstArgs
 	// Hoist a func-literal argument's capture declarations to the enclosing statement (a
 	// `var mʗ1 = m;` statement is invalid inside an argument list). convExprList builds a
 	// LambdaContext from this builder for each argument so the func-literal arg's convFuncLit
@@ -1942,8 +1943,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// MakeTable(uint32) — hash/crc32 TestCastagnoliRace, CS1503). Cast it to the parameter
 				// type. In the lambda form the override is applied ONLY when the parameter differs from
 				// that default type — when they match, the existing default-cast path already yields the
-				// right type, so overriding would only churn the golden (`(nint)x`→`(nint)(x)`).
-				if context.callArgs != nil {
+				// right type, so overriding would only churn the golden (`(nint)x`→`(nint)(x)`). A constant
+				// that moves into the thunk's call (goDeferConstArgs.go) is an ordinary argument and takes
+				// none of these casts.
+				if context.callArgs != nil && !(i < len(context.inlineConstArgs) && context.inlineConstArgs[i]) {
 					deferParamType := params.At(i).Type()
 					if basic, ok := deferParamType.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 						if v.isUntypedNumericConstArg(callExpr.Args[i]) {
