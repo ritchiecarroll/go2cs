@@ -365,6 +365,7 @@ public static partial class TypeExtensions
     //      receiver, and the unification determines all of them.
     //   3. Otherwise it is REFUSED BY NAME, as a Go panic. Never an open method: every consumer of the candidate
     //      list binds what it is handed.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotGuardedJustification)]
     private static MethodInfo CloseGoMethod(MethodInfo open, Type receiverElement, bool pointerReceiver, Type valueElement)
     {
         if (GoMethodSource(valueElement)?.GoMethod(open.Name, pointerReceiver) is { IsGenericMethod: true } closed &&

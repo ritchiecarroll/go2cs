@@ -89,6 +89,7 @@ public static partial class GoReflect
     /// cannot alias (a defined pointer TYPE as the pointee, `**uintptr` as `*T`) -- answers false,
     /// and the caller refuses rather than copying.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     public static bool TryConvertPointer(object? box, Type dstPointerType, out object? result)
     {
         result = null;

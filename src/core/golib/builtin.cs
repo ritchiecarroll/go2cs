@@ -3683,6 +3683,7 @@ public static partial class builtin
     /// disagree about a method set. See docs/phase4/DESIGN-reflection-bridge.md.
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
     public static bool TryTypeAssert(object? target, Type type, [NotNullWhen(true)] out object? value)
     {
         MethodInfo closedAssert = s_tryTypeAssertByType.GetOrAdd(type, static assertedType =>

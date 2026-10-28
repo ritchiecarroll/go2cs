@@ -62,6 +62,12 @@ public interface IGoTypeOps
 
     /// <summary>The canonical typed nil pointer to this ARRAY type carrying its dims (<c>ж&lt;T&gt;.NilBoxOfDims</c>).</summary>
     object NilBoxOfDims(long[] dims);
+
+    /// <summary>
+    /// A pointer to a value of this type at native <paramref name="address"/> (a <see cref="NativeBox{T}"/>): what the
+    /// syscall marshal hands back for a pointer word the callee wrote, without closing a generic method at run time.
+    /// </summary>
+    object NewNativeBox(nuint address);
 }
 
 /// <summary>The operations of <typeparamref name="T"/>: each names its own instantiation, so a compiled reference compiles them.</summary>
@@ -90,6 +96,9 @@ public sealed class GoTypeOps<T> : IGoTypeOps
 
     /// <inheritdoc/>
     public object NilBoxOfDims(long[] dims) => ж<T>.NilBoxOfDims(dims);
+
+    /// <inheritdoc/>
+    public object NewNativeBox(nuint address) => new NativeBox<T>(address);
 }
 
 /// <summary>
@@ -255,6 +264,7 @@ public static class GoTypeOps
     // The one dynamic-code site on these paths (trim stage 3d's boundary): a type no compiled code names the operations of.
     [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "GoTypeOps<T> has no member requirements on T.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "GoTypeOps<T>'s private constructor is kept by its Instance field.")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotTypeOpsFallbackJustification)]
     private static IGoTypeOps dynamicOps(Type type) =>
         (IGoTypeOps)typeof(GoTypeOps<>).MakeGenericType(type).GetField(nameof(GoTypeOps<int>.Instance))!.GetValue(null)!;
 }

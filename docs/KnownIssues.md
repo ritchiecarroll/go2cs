@@ -51,6 +51,33 @@ ever reproduces the fault.
      machine). The same post measured the opt-in at 0/96 BAD against 64/96 BAD for the default on the OSR repro
      (claude/c2-osr-repro); the owner ruled it opt-in, not default, on 2026-09-30. -->
 
+## With the go.* 1.26.10.1 packages, a Native AOT program that uses the network can exit with an error
+
+**Symptom.** A Native AOT executable (`PublishAot`) that references the `go.*` 1.26.10.1 packages exits with code 2
+the first time it passes a pointer to certain Go structs to a system call. It prints
+`System.NotSupportedException: 'System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences[System.UInt16]()' is missing native code`
+(the type in brackets varies). On Windows, a program that uses `net` or `crypto/tls` reaches it while setting up a
+socket, in `syscall.WSAIoctl`. On Linux and macOS, the same system-call marshalling runs for a pointer to a struct that
+holds a pointer, slice, string or array; it is not measured there. The same program run under the JIT (`dotnet run`, or
+the converted project's default ReadyToRun publish) is not affected. Measured on `win-x64`.
+
+**Cause.** The runtime library's system-call marshalling sorted a struct's fields with a generic method it closed at run
+time, and a Native AOT image has no code for such a method.
+
+**Fix.** Move to the `go.*` 1.26.10.2 packages or later.
+
+**Workaround on 1.26.10.1.** Publish without Native AOT: the converted project's default `dotnet publish` (ReadyToRun) and a
+framework-dependent build run the same code under the JIT.
+
+<!-- Found 2026-10-27 by the performance re-baseline's AOT window (PLAN-perf-rebaseline, window 2): both 1.26.10.1
+     PerfTlsHandshake images published on the i9 (the template default and the folding-off build, ILC 10.0.14) exited 2
+     on G-LAPTOP with that exception, the stack running syscall.WSAIoctl -> ж`1.op_Implicit (to uintptr) ->
+     FieldRefBox`1.StorageKind -> CrossesAsItsRoot -> NativeStructMarshal.WidestAtSameAddress -> HasDeepImage ->
+     deepRefusal -> Leaf.containsReferences. golib's NativeStructMarshal closed IsReferenceOrContainsReferences<T>,
+     Unsafe.SizeOf<T>, its leaf copiers and NativeBox<T> over run-time Types with MakeGenericMethod, under file-wide
+     IL3050 pragmas, and golib built without the AOT analyzer. Fixed in 1.26.10.2 seat #18, whose GolibAotProbe
+     scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT. -->
+
 ## A Native AOT publish of a program that references the packages is slow and large
 
 <!-- Measured 2026-10-06 against go.* 1.24.13.4 from nuget.org by C1 (mailbox bdfb01d50d, d543355364,

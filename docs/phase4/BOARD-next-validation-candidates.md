@@ -29785,4 +29785,77 @@ and exited 0. Count the tests a filtered `dotnet test` ran before reading its rc
 
 — H (2026-10-27)
 
+## 2026-10-27 — G (1.26.10.2 seat #18, claude/g-seat18-aot-marshal): Native AOT system-call marshalling no longer closes generics at run time, and golib now builds with the AOT analyzer — DONE on the seat branch
+
+**The defect.** Under Native AOT, both 1.26.10.1 PerfTlsHandshake images (the i9's template-default and folding-off
+builds) exited 2 on G-LAPTOP in the perf re-baseline's AOT window: `IsReferenceOrContainsReferences[System.UInt16]()`
+"is missing native code". The stack ran `syscall.WSAIoctl` -> `ж<T>` to `uintptr` -> `FieldRefBox<T>.StorageKind` ->
+`CrossesAsItsRoot` -> `NativeStructMarshal.WidestAtSameAddress` -> `deepRefusal` -> `Leaf.containsReferences`.
+`NativeStructMarshal` closed four generics over run-time Types with `MakeGenericMethod`: `IsReferenceOrContainsReferences<T>`,
+`Unsafe.SizeOf<T>`, the leaf copiers `write_<T>`/`read_<T>`, and `NativeBox<T>` for a pointer word the callee writes.
+
+**Why no gate saw it.**
+- golib never built with the AOT analyzer.
+- Where the analyzer would have looked, file-wide `#pragma warning disable IL3050` silenced `NativeStructMarshal.cs`,
+  `NativeStructMarshal.Deep.cs` and `GoReflect.MethodSets.cs`.
+- Every AOT check so far verified image hashes; nothing executed the TLS image before the window did.
+
+**The fix (golib only).**
+- `Leaf` copies a scalar's raw bytes (a boxed value's data, as CoreLib's `GetRawData` reaches it), with the unbox check
+  `(T)value` made.
+- `ContainsReferences` is a field walk (a pointer or function pointer field is not a reference, a byref field is).
+- `ClrSizeOf` is `RuntimeHelpers.SizeOf(RuntimeTypeHandle)`.
+- `NewNativeBox` goes through the element's `IGoTypeOps` (a new `NewNativeBox(nuint)` member), which generated code
+  and golib's builtin table answer without closing anything.
+- Both `NativeStructMarshal` files lose their pragmas.
+
+**The hole, closed.** `golib.csproj` sets `EnableAotAnalyzer` (analysis only; `IsAotCompatible` would mark golib
+trimmable). No file-wide IL3050 pragma remains. Each of the 31 remaining sites carries a per-member suppression citing
+its census class (`GoTypeRegistry.Aot*Justification`). A planted `MakeGenericMethod` raises IL3050 by file and line,
+and golib's 0-warning build refuses it.
+
+**The census (36 IL3050 sites: 27 visible, 9 behind the pragmas).**
+
+| class | sites |
+|:--|:--|
+| FIXED | `NativeStructMarshal` `containsReferences`, `sizeOf`, `write_`, `read_`; `NativeStructMarshal.Deep` `NewNativeBox` |
+| GUARDED | `AdapterBinder.BuildGenericShellFactory`; `VariadicRegistry` x2; `TypeExtensions.CloseGoMethod` |
+| REFLECT-ONLY | `GoReflect.FieldAccess` `FieldAliasBox`, `buildFieldAccessor`; `PointerConversions.TryConvertPointer`; `TypeLayout` `MakeGoFuncType`, `makeGoResultType`; `GoStructSynthesis.SharedModule`; `MethodSets` `MakeDelegateType`, `InstantiateFamily` |
+| REFERENCE-TYPE | `builtin.TryTypeAssert` (interfaces); `ExtensionMethodRegistry.GetExtensionMethods` (`ж<P>`); `MethodSets.CompileGoFuncFactory` (`object[]`) |
+| TYPE-ONLY | `TypeLayout.TryFuncShape` (a variadic func's tail slice) |
+| NOT REACHED | `CreateStaticDelegate` (every caller passes a delegate type); `GetExplicitGenericConversionOperator` (archived callers only); `FieldRef<T>.Create` (tests only) |
+| NARROW | `GoTypeOps.dynamicOps`: a type outside the builtin table with no generated `IGoTypeOpsSource`. `fmt %v` reaches it for a nil exported `*T` field whose `T` no package points to. |
+
+Open, not this seat:
+- `dynamicOps`'s narrow gap: go2cs-gen's `TypeOpsScope` grants the source from syntax only.
+- `MethodSets`' two `catch` filters do not catch `NotSupportedException`, so an AOT reflect `Method(i).Type` over a value
+  receiver escapes raw rather than as a Go panic.
+
+**Gates.** On the seat tree (G-LAPTOP, win-x64), one at a time.
+- GolibTests unfiltered: 2,251 passed, 41 skipped, 0 failed.
+- golib Release, with EnableAotAnalyzer on: 0 warnings.
+- `go test -count=1 ./...` in src/go2cs, all green; the `go2cs` package needs `-timeout 30m` here (759 s).
+- repoguard green, after twelve docs provenance notes were re-cited at the golib lines that moved.
+- GolibAotProbe, four arms (JIT and Native AOT, each against master golib and the fix), each from its own copy:
+  - under Native AOT at the base, `marshal`, `roundtrip` and `outword` each exit 2, "missing native code" for
+    `IsReferenceOrContainsReferences[UInt16]`, `[Byte]` and `newNativeBox[Acl]`;
+  - at the fix each exits 0;
+  - the JIT runs at base and fix are byte-identical, and so is the AOT run at the fix against them.
+- Made to fail, then restored byte-identical:
+  - the equivalence test, with a pointer field planted as a reference, went red naming six types, the native struct
+    shapes `NativeIovec` and `NativeUserInfo4` among them;
+  - the analyzer, with a planted `MakeGenericMethod`, raised IL3050 at its file and line.
+- Behavior under the JIT is unchanged for every type the marshal can see. The equivalence arm's census is every value
+  type golib and the tests declare, plus primitives and BCL shapes (over 300). The new answers equal the generic ones
+  for each, and the leaf copiers move the same bytes.
+
+Not run here: the linux and darwin Native AOT legs. Read from the code, both reach the same marshal: linux's syscall
+keystone and darwin's libc funnel call `marshalCall`. This box's WSL lacks clang and zlib, and its sudo needs a password.
+
+
+**Footprint.** golib only, plus GolibTests, the probe and docs. 0 emission by construction: no converter, go2cs-gen or
+converted-file change.
+
+— G (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -181,6 +181,7 @@ public static class GoStructSynthesis
     /// </remarks>
     internal static ModuleBuilder SharedModule
     {
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
         get
         {
             lock (s_mintLock)

@@ -560,6 +560,7 @@ public static partial class GoReflect
     /// neither the accessor's IL nor a generic method closed at run time. The DynamicMethod below remains for a struct with
     /// no table, where only the JIT can run it.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     public static object FieldAliasBox(object parentBox, GoFieldInfo field)
     {
         if (fieldBoxFromTable(parentBox, field) is { } tabled)
@@ -651,6 +652,7 @@ public static partial class GoReflect
     private static bool isReadonlyZeroSizeField(FieldInfo field) =>
         field.IsInitOnly && GoZeroSizeFacts.Classify(field.FieldType);
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Delegate buildFieldAccessor(Type boxType, GoFieldInfo field)
     {
         DynamicMethod method = new(

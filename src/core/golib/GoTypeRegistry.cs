@@ -74,6 +74,44 @@ public static class GoTypeRegistry
         "(GoTypeRegistry), so what a definition asks of its arguments is kept. Native AOT's dynamic-code question " +
         "(IL3050) is separate and is not answered here.";
 
+    // Native AOT's dynamic-code question (IL3050), answered per site. golib builds with the AOT analyzer on
+    // (golib.csproj EnableAotAnalyzer) and with no file-wide IL3050 pragma, so a NEW site that closes a generic over a
+    // run-time type warns, and golib's 0-warning build refuses it. Every site that remains cites one of these. The census
+    // of 1.26.10.2 seat #18 classified each, after NativeStructMarshal's leaf classifier (MakeGenericMethod over a
+    // scalar) made a converted TLS program exit 2 in syscall.WSAIoctl under Native AOT.
+
+    /// <summary>An IL3050 site with an AOT answer of its own.</summary>
+    public const string AotGuardedJustification =
+        "Guarded: generated code answers first, and the run-time instantiation runs only where dynamic code is supported " +
+        "(RuntimeFeature.IsDynamicCodeSupported) or is caught, falling back or refusing by name (seat #18 census).";
+
+    /// <summary>An IL3050 site only Go's reflect reaches.</summary>
+    public const string AotReflectOnlyJustification =
+        "Reached only through Go's reflect (Value.Convert, Value.Field or Method over a type with no generated arm, " +
+        "FuncOf, StructOf, MakeFunc). Under Native AOT a value-type argument with no static code throws " +
+        "NotSupportedException there: a stated limitation of reflect under AOT, not ordinary converted code (seat #18 census).";
+
+    /// <summary>An IL3050 site whose type arguments are reference types.</summary>
+    public const string AotReferenceTypeJustification =
+        "The type arguments are reference types (interfaces, ж<T> boxes, object), whose instantiation runs on Native AOT's " +
+        "shared canonical code, or a type whose MethodTable the live value already carries (seat #18 census).";
+
+    /// <summary>An IL3050 site that constructs a type and compiles no code.</summary>
+    public const string AotTypeOnlyJustification =
+        "Type construction only, for a type a live value's own signature names (a variadic func's tail slice), so its " +
+        "MethodTable is in the image; no generic code is closed (seat #18 census).";
+
+    /// <summary>An IL3050 site no converted or generated code calls.</summary>
+    public const string AotNotReachedJustification =
+        "No converted or generated code calls this; it serves tests and hand-written callers on the JIT (seat #18 census).";
+
+    /// <summary>GoTypeOps' one fallback, for a type no generated code names the operations of.</summary>
+    public const string AotTypeOpsFallbackJustification =
+        "Reached only for a type outside the builtin table with no generated IGoTypeOpsSource: go2cs-gen emits the source " +
+        "for every converted struct whose package spells a pointer to it, and a reference type's instantiation runs on " +
+        "shared canonical code (trim stage 3c-2b). A value type no package points to answers NotSupportedException under " +
+        "Native AOT (seat #18 census, site 2).";
+
     // golib's own Go types. Generic definitions are named open; GolibTests' registry guard lists what a closed
     // instantiation gets under Native AOT (docs/PLAN-golib-full-trim.md, stage 2).
     [ModuleInitializer]

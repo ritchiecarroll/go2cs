@@ -314,6 +314,7 @@ public static partial class TypeExtensions
     /// </summary>
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>
     /// <returns>Enumeration of reflected method metadata of <paramref name="targetType"/> extension methods.</returns>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
     public static MethodInfo[] GetExtensionMethods(this Type targetType)
     {
         return s_typeExtensionMethods.GetOrAdd(targetType, _ =>
@@ -434,6 +435,7 @@ public static partial class TypeExtensions
     /// <param name="delegateType">Specific delegate type to apply; set to <c>null</c> to use an auto-derived Func or Action delegate.</param>
     /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
     /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotNotReachedJustification)]
     public static Delegate? CreateStaticDelegate(this MethodInfo methodInfo, Type? delegateType, out bool isByRef)
     {
         Func<Type[], Type> getMethodType;
