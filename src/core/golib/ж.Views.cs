@@ -108,6 +108,12 @@ public sealed class SlottedStandardBox<T> : StandardBox<T>
 public static class FieldViewCache
 {
     public static volatile bool Disabled;
+
+    /// <summary>
+    /// For the guard only: with it set, the accessor match takes the Native AOT form (Delegate.Equals) under the
+    /// JIT too, so the identity assertions run that form where tests run. Never set outside a test.
+    /// </summary>
+    public static volatile bool CompareByDelegateEquals;
 }
 
 public abstract partial class ж<T>
@@ -188,9 +194,15 @@ public abstract partial class ж<T>
     // delegate type, target and method is Delegate.Equals' own answer; Method is cached on the delegate
     // after its first read, and its handle names the one runtime method, as Delegate.Equals compares. A
     // multicast delegate's Target and Method name only its LAST entry, so one still asks Delegate.Equals.
+    //
+    // Under Native AOT the costs reverse. Delegate.Method is a reflection lookup there, about 0.9 us per read and
+    // not cached, while Delegate.Equals compares function pointers in about 12 ns: with the Method form,
+    // PerfFieldView read 95 s under AOT against 4.8 s with Delegate.Equals (R-LAPTOP, 2026-10-28; the JIT read
+    // 3.4 s against 7.8 s the other way round). IsDynamicCodeSupported is a constant to both compilers, so each
+    // takes its own form and the other folds away. run-fieldview-aot-bound.ps1 is the gate.
     private static bool sameAccessor(Delegate entry, Delegate token) =>
         ReferenceEquals(entry, token) ||
-        (entry.HasSingleTarget && token.HasSingleTarget
+        (RuntimeFeature.IsDynamicCodeSupported && !FieldViewCache.CompareByDelegateEquals && entry.HasSingleTarget && token.HasSingleTarget
             ? ReferenceEquals(entry.Target, token.Target) && entry.Method.MethodHandle.Equals(token.Method.MethodHandle) && entry.GetType() == token.GetType()
             : entry.Equals(token));
 
