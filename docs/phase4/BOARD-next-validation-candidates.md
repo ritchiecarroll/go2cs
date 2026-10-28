@@ -30092,4 +30092,65 @@ samples and the summary's other `default!` prose wait for the regen.
 
 — P1 (2026-10-28)
 
+## 2026-10-28 — P1 (parity seat #21, claude/p1-seat21-struct-new): an empty struct literal `T{}` reads `new T()` — DONE on the seat branch
+
+**What changed (converter only).** Z1: `convCompositeLitAs` wrote the NilType argument for every named type's
+empty literal, so `point{}` read `new point(nil)`. It now writes it only when the named type's underlying is not a
+struct, so a named struct, local or from another package, generic or not, and behind `&`, reads `new T()` as Go
+writes it. go2cs-gen gives every converted struct a parameterless constructor whose body is the
+`T(NilType _)` constructor's (the field initializers and `AppendZeroValueInitializers`), so the zero value is the
+same; the hand-owned NilType constructors (testing's `T`, `M`, `InternalTest`, `B`, `PB`, `F`, `weak.Pointer`,
+unix `SiginfoChild`, golib `EmptyStruct`) assign nothing C#'s default struct lacks. A named struct over another
+struct still constructs the struct it wraps (`new wrapped(new point())`). A named slice or map `T{}` keeps its own
+form. `new T(nil)` remains in the zero value of an address-taken package-level `var x T`
+(`new StaticBox<T>(new T(nil))`, 29 on linux), which is not a literal. No golib, gen or emitted src/core change;
+the comment above testing's NilType constructors is corrected.
+
+**Guards, red first.** Behavioral `EmptyStructLiteralCtor`: Transpile, Compile and Output pass at master
+56e4fba06f and Target differs on 14 lines (18 sites); all four phases pass at the fix. Its Output phase compares
+with Go a struct with an array field written after `T{}`, nested structs, a generic struct and one with an array
+of T, a wrapper, embeds, an empty struct, `&T{}`, `strings.Builder{}`, `time.Time{}` and `==` between zero values;
+`IntSlice{}` and `StrMap{}` are the empty, non-nil controls. Converter test
+`TestEmptyStructLiteralEmitsParameterlessCtor` fails its eight struct rows at master; its slice and map rows are
+controls.
+
+**Corpus footprint, two-seeded `-stdlib -comments` A/B at 56e4fba06f** (windows / linux / darwin): .cs files
+240 / 236 / 234 and .cs.auto 4 / 4 / 4; .cs lines 916 / 880 / 877 and .cs.auto 7 / 7 / 7 (equal -n/+n); sites
+`new T(nil)` to `new T()` .cs 933 / 897 / 894 and .cs.auto 7 / 7 / 7. Every changed line is Z1; 0 other, 0
+`GoPositionMap` lines, no file added or removed, and no `new T(nil)` left on a changed line. pcensus `classify
+-items Z1` reads 923 / 887 / 884 pairs with 0 refused, once this seat lets Z1's canon read a type name that starts
+with `@` (`new Ptr<@void>(nil)` in internal/runtime/gc/internal/gen/val.cs was refused on every target). The
+linux fix emission builds clean (go2cs-stdlib.slnx, 0 errors, 362 assemblies): the named falsifier, CS0121
+between `T()` and the all-optional field constructor, did not fire. Not applied to src/core: the train's end
+regen carries it.
+
+**Prediction, scored.** MECHANISM MET (only Z1 lines, 0 map lines, no compile error). COUNTS MISSED on every
+target: sites .cs 906 / 870 / 867 predicted (plus up to 5), 933 / 897 / 894 measured; lines 889 / 853 / 850
+against 916 / 880 / 877; files 234 / 230 / 228 against 240 / 236 / 234; .cs.auto 8 / 7 / 7 sites and 5 / 4 / 4
+files against 7 / 7 / 7 and 4 / 4 / 4. Reconciled exactly by name, file by file, on all three targets. (1) The
+prediction excluded every `new T(nil)` in a static context as a package-level zero value, "a few of which may be
+literals"; 28 of those 57 per target are literals (`var DeadlineExceeded error = deadlineExceededError{}`,
+`var Reader io.Reader = reader{}`) and moved, adding 28 sites, 28 lines and 7 files that had no other site; the
+29 that stay are the StaticBox zeros above. (2) The census counted a comment in hand-owned testing.cs, because
+its marker test read `[module: GoManualConversion]` and that file spells `[module: go.GoManualConversion]`
+(-1 site, line and file). (3) On windows it counted `internal/syscall/windows/exec_windows_test.cs.auto`, a
+test sibling `-stdlib` does not emit (-1 .cs.auto site and file). 870 − 1 + 28 = 897 on linux, and the same
+arithmetic holds on windows and darwin.
+
+**Goldens.** CNR on linux moved 122 emitted files in 121 projects, every changed line Z1, beside the three held
+drift files (MulticastGroupJoin, re-baselined in #20 by COORD's ruling, and the two `global using syscall…`
+package_info.cs lines, a host-dependent emission COORD routes as a finding). The final commit re-baselines 121
+goldens (each byte-equal, CR-stripped, to its fresh transpile) plus TypeAssertionSource/mid/mid.cs, which has
+no golden; pcensus reads that commit as 607 Z1 pairs, 0 refused. NOT REACHABLE HERE: three windows-exclusive
+goldens keep 7 `new T(nil)` literals until a windows re-baseline: SystemCertVerify (2), PipeSharedFileObject (2),
+FindFirstFileData (3). The guard's golden carries four `default!` compares on three lines that #20 moves;
+whichever of the two seats lands second re-mints them.
+
+**Docs.** struct-types.md has the rule, with samples cited from the guard; ConversionStrategies.md's
+explanations of `new T(nil)` (twelve places) and the Reference's interfaces, slices-and-arrays and
+manual-conversions pages now read `new T()`; docsamples -recite re-copied the 13 golden-sourced sample lines
+these goldens move, every one Z1; two provenance notes re-cited.
+
+— P1 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

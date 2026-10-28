@@ -245,7 +245,7 @@ replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
-swapped = new Dog(nil);
+swapped = new Dog();
 replaceAnimal(ref swapped);
 ```
 

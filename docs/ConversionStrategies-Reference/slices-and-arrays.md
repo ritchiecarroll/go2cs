@@ -32,7 +32,7 @@ internal static void Main() {
 A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
 
 The **empty** composite of such a type is its **zero value**, not a one-element literal: the generic named-composite
-`nil` filler (which gives a named *struct* composite its `new T(nil)` zero-value ctor argument) does not apply inside an
+`nil` filler (a named non-struct composite's NilType constructor argument; a named *struct* reads `new T()`) does not apply inside an
 element literal, where it would put a `NilType` element in a `byte[]` (CS0029). An empty **array** composite emits a
 zeroed *fixed-length* backing — `tmpBuf{}` (`type tmpBuf [32]byte`, runtime `string.go`'s `*buf = tmpBuf{}`) →
 `new tmpBuf(new byte[32].array())` — because Go's `[N]T{}` is a full-length zero array (an empty `{}` literal would
@@ -188,7 +188,7 @@ initializers and each array field gets its `new(N)` backing. (C# 11 auto-default
 initializer; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero value,
 matching Go.) The **NilType constructor preserves the initializers too**: re-assigning
 `this.field = default!` to every plain member would run *after* the field initializers and null an
-array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) would NRE on the first index. The
+array field's fresh `new(N)` backing, so a struct built by `new S(nil)` would NRE on the first index. The
 NilType and parameterless constructor bodies (`AppendZeroValueInitializers`) assign only what C#'s
 implicit zeroing would leave *broken*: the promoted-embed boxes (see
 [Struct Type Embedding](struct-embedding.md#struct-type-embedding)), and — see next paragraph — any plain struct-typed field
@@ -1837,8 +1837,8 @@ read/write vs Go.)
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
 <!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:161-162 -->
 ```csharp
-    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
-    pack = append(pack, (Animal)(new Dog(nil)));
+    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
+    pack = append(pack, (Animal)(new Dog()));
 ```
 (`packᴷ` is the variable's Go stack buffer, which its first append passes —
 see
