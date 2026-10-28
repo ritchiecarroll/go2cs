@@ -30091,5 +30091,36 @@ now quote `default`. The `testdata/markercomments/main.cs` fixture was regenerat
 samples and the summary's other `default!` prose wait for the regen.
 
 — P1 (2026-10-28)
+## 2026-10-28 — C1 (COORD rulings): darwin runtime disclosures — the first halves-as-per-platform-signatures entry; the osx-arm64 oracle is amd64 under Rosetta
+
+**Seat.** `claude/c1-darwin-disclosures` @ `b9f93babb8` (batch 75), one file: `src/core/runtime/go2cs_test_disclosures.json`,
+additions only.
+- `TestNetpollBreak`: darwin joins the platforms. darwin's refusal (`884ea9834`) begins with the entry's signature.
+- `TestSignalM` is a two-half entry: the linux half is the old entry unchanged, and a darwin half pins the test's own
+  `signalM signal not received`. darwin's `signalM` is `pthread_kill` and refuses nothing. The entry's own platforms are
+  (linux, darwin), because `TestEveryCommittedManifestLoadsUnchanged` requires an unscoped entry to apply everywhere.
+
+**Precedent (COORD, ACCEPTED).** This is the FIRST use of halves as per-platform ALTERNATIVE signatures: halves with
+disjoint platforms, exactly one in scope on each target. The only other halves entry (`TestReadMetricsConsistency`) carries
+two reasons on one platform. The schema expresses it, and the loader and the scope guard accept it. The record pin stays the
+entry's on every platform; that is why `TestUnsafePoint` is not entered (below).
+
+**Measured, both states, both mac RIDs** (runtime row, os-matrix sweep-shard, read through the artifact relay):
+- without the entries, master `9e6f0bd664`, run `40611605911`: both tests undisclosed on osx-arm64 and osx-x64;
+- with them, `25a02b109a`, run `40611609031` attempt 2: both absorbed on both RIDs, disclosed 64 -> 66, nothing else moves.
+
+**Not entered (COORD rulings):**
+- `TestUnsafePoint`: darwin prints two records against the entry's pin of one. A per-platform count would weaken a pin
+  the schema refuses on purpose, and runtime cannot bank darwin at .2 anyway.
+- HARNESS ITEM, after .2: the osx-arm64 RID's Go ORACLE is amd64 Go under Rosetta (its own output prints x86
+  instructions, `CMPQ SP, 0x10(R14)`), while the converted host runs native arm64 .NET. Four tests diverge there and
+  match on osx-x64: `TestMemHash32Equality` and `TestMemHash64Equality` (Go skips them, Rosetta exposing AES-NI; the
+  converted amd64 `internal/cpu` sees no AES in a native arm64 process), `TestMemHashGlobalSeed/aes` (C# skips, `No AES`),
+  and `TestMmapErrorSign` (Go fails under Rosetta: `mmap = <nil>, 22, want nil, 12`). The frame is seat #8 (a)'s family:
+  an arch-consistent oracle, or an arch-aware read.
+- STANDING on osx-x64: `TestChanSendBarrier` and `TestChanSendSelectBarrier` hit the 60 m per-test deadline at master as
+  well as at the seat (logged; not this seat).
+
+— C1 (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
