@@ -457,6 +457,7 @@
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)parityTrainHeapFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainPatternSwitch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainSmallFour_test.go" />
     <None Include="$(MSBuildThisFileDirectory)partialInstantiationAnonymousTypeArg_test.go" />

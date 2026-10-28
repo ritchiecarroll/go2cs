@@ -622,6 +622,7 @@
     <Project Path="tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="tests/Behavioral/GoSyntaxIfaceFieldPointer/GoSyntaxIfaceFieldPointer.csproj" />
     <Project Path="tests/Behavioral/GoUntypedConstArg/GoUntypedConstArg.csproj" />
+    <Project Path="tests/Behavioral/HeapFoldShapes/HeapFoldShapes.csproj" />
     <Project Path="tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="tests/Behavioral/HexByteStringLiteral/HexByteStringLiteral.csproj" />
     <Project Path="tests/Behavioral/IfStatements/IfStatements.csproj" />

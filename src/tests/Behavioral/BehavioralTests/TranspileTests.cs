@@ -916,6 +916,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
 
     [TestMethod]
+    public void CheckHeapFoldShapes() => CheckTarget("HeapFoldShapes");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]

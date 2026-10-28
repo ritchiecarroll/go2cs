@@ -916,6 +916,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
 
     [TestMethod]
+    public void CheckHeapFoldShapes() => CheckTarget("HeapFoldShapes");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]
