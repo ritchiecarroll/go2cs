@@ -279,7 +279,8 @@ time a gallery validates the package.
 
 ## 4. Publish to nuget.org (owner; irreversible)
 
-COORD rules sections 1-3 green before this step.
+COORD rules sections 1-3 green before this step. The owner works this step from a sheet, and the sheet passes
+`src/tools/nugetgo/Test-SheetPaste.ps1` before it is handed over (Traps, 11).
 
 1. **Sign** the release candidate with the certificate registered to B1's account, as `release-nuget.ps1` Phase 2
    does: `dotnet nuget sign` with the card. nuget.org rejects an unsigned package from that account.
@@ -418,4 +419,17 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
     there.
     <!-- 2026-10-27: on the S1 sheet of the 1.26.10.1 rebuild wave, the owner's block 0 FIX (run pwsh.exe in THIS
          window) failed in a window that still held the release block's DOTNET_ROOT and PATH; a fresh window ran it. -->
+11. **A sheet that parses can still break when pasted.** An interactive pwsh runs each line as soon as it completes a
+    statement, so an `if` closed with `}` and an `else {` on the next line runs the `if` alone and then fails on
+    "The term 'else' is not recognized". Before a sheet goes to the owner, run
+    `pwsh -NoProfile -File src/tools/nugetgo/Test-SheetPaste.ps1 <sheet.md> [<sheet.md> ...]` from the go2cs clone.
+    It feeds every PowerShell block to the parser line by line, the way the paste arrives. It also refuses a line that
+    starts with `else`, `elseif`, `catch` or `finally` at any depth, and a block that ends inside an unfinished
+    statement. Its exit code is the number of findings, each named by file, line and block. With no argument, it runs
+    its own suite over `testdata/sheet-paste`, which `go test ./...` runs too.
+    <!-- 2026-10-10: COORD found the top-level else in block 3 of the hashset revision-2 sheet, live. The check rode
+         each kit and sheet ref from then (pflag, mousetrap, the 1.26.10.1 wave's S1 and S2 sheets) and landed under
+         src/tools/nugetgo as seat #39 (2026-10-28). Those copies bound -Path as a plain [string[]], so under pwsh -File
+         `-Path a.md b.md` checked a.md alone; measured on the S1 and S2 sheets: "1 file(s), 6 submission(s)" against
+         "2 file(s), 12 submission(s)" for the two positionally. -->
 
