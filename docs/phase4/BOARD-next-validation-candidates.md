@@ -30451,6 +30451,47 @@ The `-tests` samples confirm it: strings, 8 files and 326 pairs; encoding/json, 
   goldens are owed on the i7.
 - pcensus count `-items R5` (golden set): 207 box parameters in 108 files at `56e4fba06f`, 91 in 49 at the seat.
 
+**Reach by class (COORD's reconciliation).** This is a declaration-and-body scan of every non-receiver
+`ж<T> Ꮡname` parameter. "Aliased" means the body binds `ref … <alias> = ref Ꮡname…`, where the alias is
+`name` or its sanitized form (`Δp`, `urlΔ1`).
+
+First, the `-stdlib` emission, reading the files each arm wrote:
+
+| Target | Base total | Aliased | Bodyless | Unaliased at base | Aliased after R5 | Unaliased, not renamed | Receivers |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| windows | 4,007 | 2,101 | 0 | 1,906 | 2,101 | 0 | 3,407 |
+| linux | 3,757 | 2,101 | 0 | 1,656 | 2,101 | 0 | 3,420 |
+| darwin | 3,803 | 2,089 | 0 | 1,714 | 2,089 | 0 | 3,412 |
+
+Every unaliased parameter is renamed and no aliased one is. The alias bindings are identical in both arms:
+1,604 distinct (file, parameter) pairs, compared by diff. The scan was shown to fail first: it counted 12 unaliased-not-renamed
+parameters, all of them aliased under a sanitized name, and a `'{'` character literal threw off its brace match
+once. Both were fixed before the table above was read.
+
+Second, the committed corpus at `56e4fba06f`, read statically. This is what the plan's ~15.4K counted.
+
+| Set | Non-receiver box parameters | Aliased | Bodyless | Unaliased |
+|:--|--:|--:|--:|--:|
+| converted tests | 10,311 | 1,839 | 0 | **8,472** |
+| production | 5,251 | 2,510 | 10 | 2,731 |
+
+- **The 8,472 unaliased test parameters are the END REGEN's R5 share.** `-stdlib` never emits a converted test.
+  The end regen's `-tests` pass moves these parameters through the same `visitFuncDecl` rule (the strings and
+  encoding/json samples above). The expected count is about 8,472 renamed, ±10%, with 0 aliased renamed and every
+  pair classified R5.
+- The production 2,731 splits by file:
+
+  | Shared | Per-flavour windows | Per-flavour linux | Per-flavour darwin | `.cs.auto` siblings | Hand-owned |
+  |--:|--:|--:|--:|--:|--:|
+  | 1,379 | 483 | 243 | 257 | 49 | 320 |
+
+  Shared plus one flavour reads 1,862 / 1,622 / 1,636 against the 1,906 / 1,656 / 1,714 renamed. The
+  remainder is the `.cs.auto` siblings and the drift between committed and fresh emission.
+- The 320 hand-owned parameters keep `Ꮡ` because they are not converter output. Examples are syscall's
+  `Getdirentries(…, ж<uintptr> Ꮡbasep)`, `ForkExec(…, ж<ProcAttr> Ꮡattr)` and
+  `Select(nint nfd, ж<FdSet> Ꮡr, …)`. Whether they should follow the convention by hand is open; it is not this seat's
+  question.
+
 **pcensus canon.** R5's item now compares on the analyzed name. Without that canon, 12 golden pairs and 127, 143 and
 131 census pairs (windows, linux, darwin) are UNCLASSIFIED, all `@`/`Δ` forms; with it, none are. The item still
 requires a pair to lose a box token, so an escape alone stays UNCLASSIFIED (plant).
