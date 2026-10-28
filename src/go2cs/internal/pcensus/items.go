@@ -70,6 +70,11 @@ const generic = `(?:[^<>\n]|<(?:[^<>\n]|<[^<>\n]*>)*>)*`
 // basic is the converted spelling of a basic numeric type (golib aliases the Go names; C# keywords appear too).
 const basic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|double|uintptr|rune|float32|float64)`
 
+// sizedBasic is basic plus golib's sized aliases (int8 … uint64), the spelling the converter writes for a named
+// numeric's underlying. N2's classifier needs it: the converter's hop is `(nint)(int8)lvl`, `(uint64)(uintptr)tk`.
+// The plan's sizing measure keeps basic, so its counts stay comparable with the plan table (§1).
+const sizedBasic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|double|uintptr|rune|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64)`
+
 func rx(s string) *regexp.Regexp { return regexp.MustCompile(s) }
 
 func m(itemID, name, pattern string) measure {
@@ -213,8 +218,22 @@ var items = []item{
 	{
 		ID: "N2", Seat: "#26", Title: "a named numeric converts to a basic numeric in one cast",
 		Measures: []measure{m("N2", "double-cast", `\(`+basic+`\)\(`+basic+`\)`)},
-		Canon:    []rewrite{rw(`\((`+basic+`)\)\(`+basic+`\)`, "($1)")},
-		Old:      rx(`\(` + basic + `\)\(` + basic + `\)`),
+		// The seat drops the INNER cast of a named numeric's hop: right after the outer cast, `(nint)(int8)lvl`,
+		// or opening the outer cast's parenthesized operand, `(uint8)((uintptr)((flag)x))`, and a parenthesized
+		// operand loses a paren pair with it, `(uint8)(uint16)((x >> 8))` -> `(uint8)(x >> 8)`. Both lines drop
+		// every sized cast that directly follows a parenthesis and compare runs of parens as one, so the pair
+		// matches when its only difference is such a cast. Old requires the pair to lose a sized cast (a count
+		// of double casts cannot: `(int64)((float64)(uint64)t` shares its middle cast between two), and a
+		// cast before a rune literal is C1's (`(byte)(rune)'A'`), never dropped here. The drop runs three times: one pass
+		// consumes the parenthesis an adjacent second cast needs.
+		Canon: []rewrite{
+			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
+			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
+			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
+			rw(`\(\(+`, "("),
+			rw(`\)\)+`, ")"),
+		},
+		Old: rx(`\(` + sizedBasic + `\)`),
 	},
 	{
 		ID: "F1", Seat: "#27", Title: "an IIFE reads `func(() => {…})()`",

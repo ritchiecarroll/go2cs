@@ -17,7 +17,7 @@ internal static UntypedInt appErr => /* 1 << 29 */ 536870912;
 internal static handle big => /* appErr + 5 */ 536870917;
 
 internal static nint idx(this handle h) {
-    return (nint)(uintptr)(h - (handle)appErr);
+    return (nint)(h - (handle)appErr);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

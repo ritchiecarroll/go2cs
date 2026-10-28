@@ -401,6 +401,56 @@ internal class InheritedTypeTemplate : TemplateBase
 
         """ : "";
 
+    // Go converts a named numeric to ANY numeric type in one step (`int(k)`, `uint64(off)`, `float64(t)`);
+    // the implicit operator to the underlying reaches only the targets C# widens to implicitly, so a
+    // narrowing, a sign change or a float-to-integer conversion needed the converter to hop through the
+    // underlying (`(nint)(uint8)k`). One explicit operator per basic numeric type makes the Go form a single
+    // cast. Each is the underlying's own C# conversion, so the value is the hop's. The underlying itself is
+    // skipped (its implicit operator is that conversion), and so is `nuint` over `uintptr`, which the bridge
+    // above declares. Explicit operators never take part in an implicit conversion, and a cast to one of
+    // these types binds the exact-target operator, so no existing cast changes meaning.
+    private static readonly string[] s_basicNumericTargets = ["int8", "int16", "int32", "int64", "nint", "uint8", "uint16", "uint32", "uint64", "nuint", "uintptr", "float32", "float64"];
+
+    private static string? BasicNumericName(string typeName) => typeName switch
+    {
+        "sbyte" => "int8",
+        "short" => "int16",
+        "int" or "rune" => "int32",
+        "long" => "int64",
+        "byte" => "uint8",
+        "ushort" => "uint16",
+        "uint" => "uint32",
+        "ulong" => "uint64",
+        "float" => "float32",
+        "double" => "float64",
+        _ => Array.IndexOf(s_basicNumericTargets, typeName) >= 0 ? typeName : null
+    };
+
+    private string BasicNumericConversionOperators
+    {
+        get
+        {
+            if (TypeClass != "Numeric" || BasicNumericName(TypeName) is not { } underlying)
+                return "";
+
+            StringBuilder operators = new();
+
+            foreach (string target in s_basicNumericTargets)
+            {
+                if (target == underlying || target == "nuint" && underlying == "uintptr")
+                    continue;
+
+                operators.Append($"""
+
+                        public static explicit operator {target}({ObjectName} value) => ({target})value.{Value};
+
+                """);
+            }
+
+            return operators.ToString();
+        }
+    }
+
     // The float twin of the bridge above — needed because a Go literal with an EXPONENT (`const
     // gcCPULimiterUpdatePeriod = 10e6`) is a FLOAT literal syntactically even when its value is a
     // whole number, so go/types classifies the untyped constant as UntypedFloat, not UntypedInt.
@@ -752,7 +802,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
         {{UnderlyingConversionOperators}}
-                    {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{UntypedFloatBridgeOperator}}{{ComplexBridgeOperators}}{{StringSurfaceMembers}}
+                    {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{UntypedFloatBridgeOperator}}{{BasicNumericConversionOperators}}{{ComplexBridgeOperators}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => {{NilComparisonExpression}};
         

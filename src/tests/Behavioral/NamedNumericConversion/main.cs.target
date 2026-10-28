@@ -22,7 +22,7 @@ internal static void Main() {
     fmt.Println((nuint)b);
 
     traceGoStatus g = 3;
-    var c = (traceArg)(uint64)(uint8)g;
+    var c = (traceArg)(uint64)g;
     fmt.Println((uint64)c);
 
     uint64 u = 9;
@@ -30,11 +30,11 @@ internal static void Main() {
     fmt.Println((uint64)d);
 
     nameOff s = 7;
-    var e = (uint64)(int32)s;
+    var e = (uint64)s;
     fmt.Println(e);
 
     idx i = 9;
-    nint f = (nint)(nuint)i;
+    nint f = (nint)i;
     fmt.Println(f);
 
     nameOff s2 = 13;

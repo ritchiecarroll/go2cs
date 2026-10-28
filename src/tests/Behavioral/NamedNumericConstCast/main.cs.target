@@ -13,7 +13,7 @@ internal static Big allBig => /* ^Big(0) */ unchecked((Big)18446744073709551615)
 internal static Class small => /* Class(5) */ 5;
 
 internal static void Main() {
-    fmt.Println((uint64)(nuint)allClass);
+    fmt.Println((uint64)allClass);
     fmt.Println((uint64)allBig);
     fmt.Println((nuint)small);
 }

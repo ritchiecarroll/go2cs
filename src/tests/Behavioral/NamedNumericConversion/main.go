@@ -2,13 +2,13 @@ package main
 
 import "fmt"
 
-// Conversions between a NAMED numeric type and a basic numeric type that route through the named
-// type's underlying. Two mirrored directions, both because the [GoType] wrapper only converts
-// between the named type and its EXACT underlying:
+// Conversions between a NAMED numeric type and a basic numeric type. The [GoType] wrapper converts
+// implicitly between the named type and its EXACT underlying, and explicitly to every basic numeric:
 //   - TO a named numeric (`traceArg(procs)`, `arenaIdx(x)`): a plain `(traceArg)int32Expr` is CS0030,
 //     so the converter coerces through the underlying first — `((traceArg)(uint64)procs)`.
-//   - FROM a named numeric to a DIFFERENT basic (`uint64(nameOff)`, `int(idx)`): a plain
-//     `(uint64)nameOff` is CS0030, so it routes through the underlying — `((uint64)(int32)nameOff)`.
+//   - FROM a named numeric to any basic (`uint64(nameOff)`, `int(idx)`): one cast,
+//     `((uint64)nameOff)`, through the wrapper's explicit operator to every basic
+//     numeric type.
 // When the basic IS already the named type's underlying, no extra cast is added.
 
 type traceArg uint64 // underlying uint64
@@ -37,11 +37,11 @@ func main() {
 
 	// FROM a named numeric to a DIFFERENT basic numeric (the mirror direction).
 	var s nameOff = 7
-	e := uint64(s) // nameOff(int32) -> uint64: ((uint64)(int32)s)
+	e := uint64(s) // nameOff(int32) -> uint64: ((uint64)s)
 	fmt.Println(e)
 
 	var i idx = 9
-	f := int(i) // idx(nuint) -> int: ((nint)(nuint)i)
+	f := int(i) // idx(nuint) -> int: ((nint)i)
 	fmt.Println(f)
 
 	// FROM a named numeric to its EXACT underlying basic — no extra cast.

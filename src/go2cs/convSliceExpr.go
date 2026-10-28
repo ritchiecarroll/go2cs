@@ -434,10 +434,10 @@ func (v *Visitor) getRangeIndexer(expr ast.Expr) string {
 }
 
 // intCastOperand wraps an already-converted expression in a C# `(int)` cast (for a slice bound, a
-// shift count, …). When the operand's Go type is a NAMED numeric type (a `[GoType]` struct over a
-// basic), a direct `(int)(x)` is CS0030 — the generated struct only converts to its OWN underlying
-// basic — so it casts through the underlying first: `(int)(nuint)(x)`. A plain basic operand keeps
-// the bare `(int)(x)` form (no churn).
+// shift count, …). A NAMED numeric operand's `num:` wrapper converts to every basic numeric, so it
+// takes the same one cast, `(int)(x)`. A named numeric without those operators (one written over
+// another package's named type, see namedNumericConvertsDirectly) converts only to its own base, so
+// it casts through the underlying first: `(int)(nuint)(x)`.
 // castWideIntegerToNint converts a 3-index slice's bound for the golib `.slice(low, high, max)`
 // method, which takes `nint`. Go `int` (→ C# nint) and the small integer kinds bind directly and are
 // left uncast; an unsigned 32-bit-or-wider or a 64-bit value (uint/uint32/uint64/uintptr/int64) does
@@ -474,9 +474,9 @@ func (v *Visitor) fullValueIndexOperand(expr ast.Expr) string {
 
 	if exprType := v.getType(expr, false); exprType != nil {
 		if basic, ok := exprType.Underlying().(*types.Basic); ok && basic.Kind() == types.Int64 {
-			// A NAMED int64 converts through its OWN underlying first — the generated struct
-			// only converts to that (the intCastOperand rule).
-			if _, isNamed := exprType.(*types.Named); isNamed {
+			// A NAMED int64 without the basic operators converts through its OWN underlying
+			// first; a `num:` wrapper takes the one cast (the intCastOperand rule).
+			if named, isNamed := exprType.(*types.Named); isNamed && !namedNumericConvertsDirectly(named) {
 				return fmt.Sprintf("(nint)(%s)(%s)", v.getCSharpTypeName(basic), converted)
 			}
 
@@ -494,7 +494,7 @@ func (v *Visitor) intCastOperand(expr ast.Expr, converted string) string {
 // numericCastOperand is intCastOperand's rule for a C# integer target of the caller's choosing
 // (`int` for a slice-range bound, `nint` for a 3-index bound).
 func (v *Visitor) numericCastOperand(expr ast.Expr, converted, csType string) string {
-	if named, ok := v.getType(expr, false).(*types.Named); ok {
+	if named, ok := v.getType(expr, false).(*types.Named); ok && !namedNumericConvertsDirectly(named) {
 		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 			return fmt.Sprintf("(%s)(%s)(%s)", csType, v.getCSharpTypeName(basic), converted)
 		}

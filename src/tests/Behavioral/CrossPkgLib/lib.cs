@@ -111,7 +111,7 @@ public static V Pair<K, V>(K k, V v) {
 // type ΔSift is a methodless func type — rendered inline as its base delegate
 
 public static bool Sift(this Sensor s, Func<nint, bool> f) {
-    return f((nint)(float64)s.Temp);
+    return f((nint)s.Temp);
 }
 
 partial struct Node {
@@ -152,7 +152,7 @@ partial struct ΔStatus {
 }
 
 public static nint Status(this Sensor s) {
-    return (nint)(float64)s.Temp;
+    return (nint)s.Temp;
 }
 
 partial struct ΔGrade /*num:nint*/;
@@ -162,7 +162,7 @@ public static nint Grade(this Sensor s) {
 }
 
 public static nint Token(this Sensor s) {
-    return (nint)(float64)s.Temp;
+    return (nint)s.Temp;
 }
 
 public static ΔToken AsToken(nint v) {

@@ -69,7 +69,7 @@ internal static void keyUpdate() {
     mf32[0F] = true;
     mf32[((F32)(float32)negZero)] = true;
     foreach (var (k, _) in mf32) {
-        fmt.Println("defined float32 key after overwrite:", sign((float64)(float32)k), "len", len(mf32));
+        fmt.Println("defined float32 key after overwrite:", sign((float64)k), "len", len(mf32));
     }
     var mc2 = new map<C128, bool>{};
     mc2[((C128)complex(0D, 0D))] = true;

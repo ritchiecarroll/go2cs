@@ -48,7 +48,7 @@ internal static void Main() {
     arm("right int64 by int8", () => fmt.Sprint(big.Rsh((int64)(neg8))));
     arm("left uint32 by int64", () => fmt.Sprint(u32.Lsh((int64)(neg64))));
     arm("right int8", () => fmt.Sprint(i8.Rsh((int64)(neg))));
-    arm("named count", () => fmt.Sprint(big.Lsh((int64)(int8)(c))));
+    arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));
     arm("compound left", () => {
         var x = big;
         x.LshAssign((int64)(neg));

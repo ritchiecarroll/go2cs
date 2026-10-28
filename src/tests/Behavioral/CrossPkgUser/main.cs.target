@@ -276,7 +276,7 @@ internal static void Main() {
         error boom = new CrossPkgLib.Alarmжerror(Ꮡ(new CrossPkgLib.Alarm(Msg: "boom")));
         fmt.Println(boom.Error());
         var tk = (tick)(uintptr)((3 | (nint)gv));
-        fmt.Println((uint64)(uintptr)tk);
+        fmt.Println((uint64)tk);
 
         namedLabel nl = new emblem(name: "gold", rank: 1);
         fmt.Println(CrossPkgLib.Describe(nl), nl.Rank());

@@ -3,10 +3,10 @@ package main
 import "fmt"
 
 // A NAMED numeric type ([GoType] struct over a basic) used where the converter inserts a C# `(int)`
-// cast — a slice bound (`a[lo:hi]`) or a shift count (`1 << sh`) — cannot cast directly: the
-// generated struct only converts to its OWN underlying basic, so `(int)(idxValue)` is CS0030. The
-// converter casts through the underlying first: `(int)(nuint)(lo)`. Mirrors runtime's `chunkIdx`
-// slice bounds (`summary[sc+1:ec]`) and `statDep` shift counts (`1 << (d % 64)`).
+// cast — a slice bound (`a[lo:hi]`) or a shift count (`1 << sh`) — takes that one cast: the
+// generated struct declares an explicit operator to every basic numeric, so `(int)(lo)` binds, the
+// form a plain basic operand takes. Mirrors runtime's `chunkIdx` slice bounds (`summary[sc+1:ec]`)
+// and `statDep` shift counts (`1 << (d % 64)`).
 
 type idx uint // underlying uint -> C# nuint
 
