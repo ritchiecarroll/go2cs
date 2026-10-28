@@ -308,6 +308,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A C# keyword inside a dotted import-path element](struct-types.md#a-c-keyword-inside-a-dotted-import-path-element)
   - [The import-path rewrite rewrites only the PATH, not the constructor in front of it](struct-types.md#the-import-path-rewrite-rewrites-only-the-path-not-the-constructor-in-front-of-it)
   - [A non-canonically-aliased import renders foreign types via the file's alias](struct-types.md#a-non-canonically-aliased-import-renders-foreign-types-via-the-files-alias)
+  - [An empty struct literal `T{}` reads `new T()`](struct-types.md#an-empty-struct-literal-t-reads-new-t)
   - [A ONE-FIELD struct's positional `nil` literal names its field constructor](struct-types.md#a-one-field-structs-positional-nil-literal-names-its-field-constructor)
 - **[Struct Type Embedding](struct-embedding.md)**
   - [An embedded struct is an INLINE field, so a value copy copies it](struct-embedding.md#an-embedded-struct-is-an-inline-field-so-a-value-copy-copies-it)
