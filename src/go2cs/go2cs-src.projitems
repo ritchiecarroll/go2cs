@@ -288,6 +288,13 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\census.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\classify.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\corpus.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\items.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\pcensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\pcensus\testdata\counts-5931bad29b.tsv" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
