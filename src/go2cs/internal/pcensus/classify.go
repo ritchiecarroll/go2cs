@@ -82,7 +82,11 @@ func newClassifier(only string, testOnly bool) (*classifier, error) {
 
 func canon(it *item, s string) string {
 	for _, r := range it.Canon {
-		s = r.re.ReplaceAllString(s, r.repl)
+		if r.fn != nil {
+			s = r.re.ReplaceAllStringFunc(s, r.fn)
+		} else {
+			s = r.re.ReplaceAllString(s, r.repl)
+		}
 	}
 	return s
 }

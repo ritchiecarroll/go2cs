@@ -37,10 +37,11 @@ type item struct {
 	TestOnly        bool
 }
 
-// rewrite is one canonicalizing replacement (Go regexp template syntax).
+// rewrite is one canonicalizing replacement (Go regexp template syntax), or, when fn is set, a function of each match.
 type rewrite struct {
 	re   *regexp.Regexp
 	repl string
+	fn   func(string) string
 }
 
 // joinRule folds a removed two-line form into the one line the seat emits: when line i matches First and line i+1
@@ -75,7 +76,81 @@ func m(itemID, name, pattern string) measure {
 	return measure{Item: itemID, Name: name, Pattern: rx(pattern)}
 }
 
-func rw(pattern, repl string) rewrite { return rewrite{rx(pattern), repl} }
+func rw(pattern, repl string) rewrite { return rewrite{re: rx(pattern), repl: repl} }
+
+// rwf is a rewrite computed from each match: fn receives the regexp's submatches.
+func rwf(pattern string, fn func(sub []string) string) rewrite {
+	re := rx(pattern)
+	return rewrite{re: re, fn: func(match string) string { return fn(re.FindStringSubmatch(match)) }}
+}
+
+// An IIFE's head, in the cast form F1 retires and in the `func(…)` form it emits. Both normalize to one spelling that
+// keeps the attribute, the result type, every parameter type and every parameter name, `func⦃attr|result|T1, T2|a, b⦄
+// =>`, so the two heads of one literal are equal exactly when all of those agree. A variadic `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ`
+// literal never takes the IIFE path, and its head matches neither pattern.
+const (
+	iifeAttr    = `(\[[^\]\n]*\] )?`
+	iifeOldHead = `\(\((Action|Func)(?:<(` + generic + `)>)?\)\(` + iifeAttr + `(\([^()\n]*\)|[^\s()=,]+) =>`
+	iifeNewHead = `func\(` + iifeAttr + `(?:(\([^()\n]*\)|[^\s()]+) )?\(((?:[^()\n]|\([^()\n]*\))*)\) =>`
+)
+
+func iifeNormal(attr, result string, types, names []string) string {
+	return "func⦃" + attr + "|" + result + "|" + strings.Join(types, ", ") + "|" + strings.Join(names, ", ") + "⦄ =>"
+}
+
+// splitTop splits a list at its top-level commas (not those inside <…> or (…)), each element trimmed; "" is empty.
+func splitTop(s string) []string {
+	var parts []string
+	depth, start := 0, 0
+	for i, r := range s {
+		switch r {
+		case '<', '(':
+			depth++
+		case '>', ')':
+			depth--
+		case ',':
+			if depth == 0 {
+				parts = append(parts, strings.TrimSpace(s[start:i]))
+				start = i + 1
+			}
+		}
+	}
+	if last := strings.TrimSpace(s[start:]); last != "" || len(parts) > 0 {
+		parts = append(parts, last)
+	}
+	return parts
+}
+
+// iifeOldNormal reads `((Func<T1, T2, R>)((a, b) => ` or `((Action<T1>)(a => `: the delegate's type arguments are the
+// parameter types (and, for a Func, the result last); the lambda gives the names.
+func iifeOldNormal(sub []string) string {
+	args, params := splitTop(sub[2]), sub[4]
+	result := ""
+	if sub[1] == "Func" && len(args) > 0 {
+		result, args = args[len(args)-1], args[:len(args)-1]
+	}
+	names := []string{params}
+	if strings.HasPrefix(params, "(") {
+		names = splitTop(params[1 : len(params)-1])
+	}
+	if len(names) != len(args) {
+		return sub[0]
+	}
+	return iifeNormal(sub[3], result, args, names)
+}
+
+// iifeNewNormal reads `func(R (T1 a, T2 b) => `, with an optional attribute before the result.
+func iifeNewNormal(sub []string) string {
+	var types, names []string
+	for _, param := range splitTop(sub[3]) {
+		cut := strings.LastIndex(param, " ")
+		if cut < 0 {
+			return sub[0]
+		}
+		types, names = append(types, strings.TrimSpace(param[:cut])), append(names, param[cut+1:])
+	}
+	return iifeNormal(sub[1], sub[2], types, names)
+}
 
 var items = []item{
 	{
@@ -137,13 +212,14 @@ var items = []item{
 	{
 		ID: "F1", Seat: "#27", Title: "an IIFE reads `func(() => {…})()`",
 		Measures: []measure{m("F1", "iife-close", `\}\)\)\(`)},
-		// The value form is #27's question 1; COORD's default `func(nint () => …)()` is the new spelling here.
+		// The value form is #27's question 1, ruled as option A: `func(nint () => …)()`, the parameters typed on the
+		// lambda. Both heads normalize to one spelling (iifeOldNormal, iifeNewNormal).
 		Canon: []rewrite{
-			rw(`\(\(Action\)\(`, "func("),
-			rw(`\(\(Func<(`+generic+`)>\)\(\(\) =>`, "func($1 () =>"),
+			rwf(iifeOldHead, iifeOldNormal),
+			rwf(iifeNewHead, iifeNewNormal),
 			rw(`\}\)\)\(`, "})("),
 		},
-		Old: rx(`\(\((?:Action|Func<` + generic + `>)\)\(|\}\)\)\(`),
+		Old: rx(`\(\((?:Action|Func)(?:<` + generic + `>)?\)\(|\}\)\)\(`),
 	},
 	{
 		ID: "DIR", Seat: "#27", Title: "a channel direction reads `AsSendOnly()`/`AsRecvOnly()`",
