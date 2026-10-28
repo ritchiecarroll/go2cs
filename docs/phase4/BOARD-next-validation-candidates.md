@@ -29974,4 +29974,28 @@ red, fix and docs were replayed, and the BOARD conflict (its append-only tail) w
 
 — H (2026-10-27)
 
+## 2026-10-28 — G (1.26.10.2 parity seat #31, claude/g-p1-field-properties-design): P1's design record — DRAFT, for COORD's rulings on Q2-Q5
+
+**The record.** [`DESIGN-p1-field-properties.md`](DESIGN-p1-field-properties.md) answers seat #31's five design
+questions before any code. Q1 (the property body and its cost) was measured on the P1 micro and ruled on 2026-10-27:
+the specialized body `ref ʗp is NativeBox<T> ? ref ʗp.field(T.Ꮡf) : ref ʗp.Value.f`, with the `ж<T>.Value` fast path
+split out as its own seat (#35). Q2-Q5 are proposals:
+- **Q2:** managed boxes keep `p.Value.f`'s storage and nil text, and native boxes read at the Go offset (a correctness
+  gain).
+- **Q3:** one visible record line per file, because three test projects recompile production files.
+- **Q4:** the existing collision list, the shadow rule, and getters marked as go2cs machinery for tracebacks.
+- **Q5:** a build-time gate of +5% on the stdlib solution.
+
+It also proposes a #32 carry-over from R's FieldView root cause: one `static readonly` accessor token per field,
+emitted on the struct in its own assembly, so the view cache compares by reference on every site the token reaches.
+R's #36 stays the fallback for the rest.
+
+**Routing (owed from seat #18's row).** That row's two "Open, not this seat" items go to seat #34:
+- `GoTypeOps.dynamicOps`' narrow gap (go2cs-gen's `TypeOpsScope` grants the source from syntax only), which must
+  work or panic Go-style;
+- `MethodSets`' two `catch` filters gaining `NotSupportedException`, so an AOT reflect `Method(i).Type` over a value
+  receiver surfaces as a Go panic.
+
+— G (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
