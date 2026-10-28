@@ -34,7 +34,8 @@ namespace GolibTests;
 ///     malloc Go does not make. Each reason cites Go's source for the equivalent construct. The block began
 ///     as V-fix 11's 21 unclassified sites; the follow-on seat routed the real undercounts and the sites
 ///     whose charge the scan could not see, and these five are what remained. The stack-append seat added a
-///     sixth, the buffer of Go's stack backing store for a non-escaping append, which Go keeps in the frame.
+///     sixth, the buffer of Go's stack backing store for a non-escaping append, which Go keeps in the frame,
+///     and parity seat #30 the backing of a slice literal, which Go keeps in the frame when it does not escape.
 ///   </description></item>
 ///   <item><description>
 ///     <see cref="Infrastructure"/>, the (c) block: allocations that are not Go-visible backings at all
@@ -62,6 +63,7 @@ public class NoUncountedBackingAllocationsTests
         ("map.cs|KeyValuePair<TKey, TValue>[] entries = count == 0 ? [] : new KeyValuePair<TKey, TValue>[count];", "the range snapshot: Go's range over a map keeps its iterator in a compiler stack temp (cmd/compile/internal/walk/order.go, Prealloc newTemp)"),
         ("stackAppend.cs|T[] store = new T[capacity];", "the stack backing store: Go 1.25+ gives a non-escaping append's first growth a 32-byte buffer in the function's own frame (cmd/compile/internal/ssagen/ssa.go, getBackingStoreInfo and the append lowering), so the buffer allocates nothing"),
         ("stackAppend.cs|T[] store = buffer.store ??= new T[bufferLength];", "the same stack backing store, taken by a variable whose capacity is observed: Go 1.26's growsliceBuf (runtime/slice.go) grows inside the 32-byte buffer in the function's own frame, and move2heap's copy out of it is the counted allocation, so the buffer allocates nothing"),
+        ("SliceLiteral.cs|public static SliceLiteral<T> Create<T>(ReadOnlySpan<T> items) => new(items.ToArray());", "a slice literal's backing (`slice<T>([…])`): Go's slicelit puts a non-escaping literal's array in a stack temp (cmd/compile/internal/walk/complit.go:356, initStackTemp), so most literals allocate nothing; the earlier `new T[]{…}` form was uncounted too, and charging this copy moved math/big's TestNewIntAllocs from 1 to 2 allocations per run, away from Go's 0 (parity seat #30, ruled uncounted)"),
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.
