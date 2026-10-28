@@ -79,12 +79,14 @@ A slot where a bare C# string would bind the wrong C# type keeps a typed form:
 | an `any` slot go2cs-gen cannot intercept (below), or a non-empty interface slot | hoisted pre-boxed, or `(@string)"text"u8` | the boxed value would be a `System.String`, the wrong dynamic type |
 | a named string type | `((Token)(@string)"x"u8)` | C# applies only one user-defined conversion (CS0029) |
 | an argument whose callee parameter mentions a type parameter | `"text"u8` | C# would infer the type argument as `string` |
-| a `go` or `defer` argument | `(@string)"text"` | the capture list passes each argument through the launcher's type parameters, which would infer `string` |
+| a `go` or `defer` argument that stays in the capture list | `(@string)"text"` | the capture list passes each argument through the launcher's type parameters, which would infer `string` |
 | an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)'s parameter | `"text"u8` | a C# string reaches the `sstring` member through a conversion that transcodes on every call; the `u8` form binds a zero-copy view |
 | a multi-line raw string | `"""…"""u8.Raw()` | `Raw()` must strip the checkout's CRs |
 | a literal with raw non-UTF-8 bytes | the byte-array form | a C# string cannot hold the bytes |
 
 Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` span. A package `var` initialized by an inferred generic call follows the call's argument rule.
+
+A `go` or `defer` statement's constant argument leaves the capture list when the callee is a declared function, and renders inside the thunk's call: `go fmt.Println("First")` is `goǃ(() => fmt.Println("First"))`. There it is an ordinary call's argument and follows the rows above. A builtin, func-literal, method-group or func-value callee keeps its arguments in the capture list ([go/defer constants](defer-panic-recover.md#a-gos-or-defers-constant-argument-renders-inside-the-thunks-call)).
 
 **The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation.
 
@@ -111,12 +113,11 @@ The converter emits the bare literal only where the generator can intercept the 
 
 | Call | Why it keeps the field |
 |:--|:--|
-| a `go` or `defer` argument | the capture list passes it through the launcher's type parameters |
 | a func value | its C# call is a delegate invocation, which no interceptor can replace |
 | a generic function, or a method of a generic type | its interceptor would itself be generic; deferred, and no behavioral fixture has one |
 | a method of a type this package declares, a promoted method, or a method whose receiver is not a plain identifier | the call binds a member go2cs-gen generates in the same compilation (a `ж<T>` receiver forwarder, a promoted forwarder, a field's ref property), and a generator cannot see another generator's output |
 
-A literal outside a call (a `[]any` element, an `any` return, assignment, send or map key) keeps its form too. A function call whose other arguments use generated members is still intercepted: the generator resolves it from its method group, which has one member.
+A `go` or `defer` argument that stays in the capture list claims no field either: it renders `(@string)"text"` at the site, because the capture list passes it through the launcher's type parameters. A literal outside a call (a `[]any` element, an `any` return, assignment, send or map key) keeps its form too. A function call whose other arguments use generated members is still intercepted: the generator resolves it from its method group, which has one member.
 
 **Every gap is a build error.** The generator reports [`GO2CS0005`](../DiagnosticCodes.md) for a call with a bare literal in an `object` slot that it cannot intercept, with the reason, and [`GO2CS0006`](../DiagnosticCodes.md) when another member of the method group (usually one taking `@string`, which C# prefers to `object`) has captured a literal meant for an `any` slot. `GO2CS0004` stays the net: it accepts a boxed literal only when its call is intercepted, so a build in which the generator does not run fails instead of passing `System.String`.
 

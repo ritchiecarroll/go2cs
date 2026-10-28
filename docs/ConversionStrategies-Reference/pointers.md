@@ -305,7 +305,7 @@ public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
 
 **Row 2 — an address-taken local comes home from the heap** (`ForVariants`; two counted objects per unmanaged local removed, and the per-iteration boxing scaffold of a labeled loop collapses to one plain loop variable):
 
-<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs:14-19, 99-101 -->
+<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs:10-15, 95-97 -->
 ```csharp
 nint i = 0;
 

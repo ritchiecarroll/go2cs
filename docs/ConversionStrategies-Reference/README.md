@@ -240,6 +240,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The catch arm returns Go's zero results](defer-panic-recover.md#the-catch-arm-returns-gos-zero-results)
   - [`recover()` is a static call, not a parameter](defer-panic-recover.md#recover-is-a-static-call-not-a-parameter)
   - [`defer` registration: the arity ladder, and no bang](defer-panic-recover.md#defer-registration-the-arity-ladder-and-no-bang)
+  - [A `go`'s or `defer`'s constant argument renders inside the thunk's call](defer-panic-recover.md#a-gos-or-defers-constant-argument-renders-inside-the-thunks-call)
   - [A deferred RECEIVER-FIELD call with no arguments is lowered INTO the frame's `finally`](defer-panic-recover.md#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally)
   - [A VARIADIC deferred/spawned func literal is cast to its golib family delegate](defer-panic-recover.md#a-variadic-deferredspawned-func-literal-is-cast-to-its-golib-family-delegate)
   - [A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`](defer-panic-recover.md#a-zero-arg-deferredspawned-call-of-a-named-variadic-callee-keeps-the-lambda--the-group-carries-params)

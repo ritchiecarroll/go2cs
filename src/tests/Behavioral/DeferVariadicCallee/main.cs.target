@@ -42,11 +42,11 @@ internal static ж<counter> run() {
     try {
         var c = Ꮡ(new counter());
         defer(() => note(), ref ᒐ);
-        defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", (@string)"b", ref ᒐ);
+        defer(() => note("a", "b"), ref ᒐ);
         var cʗ1 = c;
         defer(() => cʗ1.bump(), ref ᒐ);
         var cʗ2 = c;
-        defer((ᴛ1, ᴛ2) => cʗ2.bump(ᴛ1, ᴛ2), 2, 3, ref ᒐ);
+        defer(() => cʗ2.bump(2, 3), ref ᒐ);
         order = append(order, "body"u8);
         return c;
     }

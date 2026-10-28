@@ -288,9 +288,9 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 			hasOld = hasOld || b.OldAnchor.MatchString(l)
 		}
 		for _, l := range add {
-			hasNew = hasNew || b.NewAnchor.MatchString(l)
+			hasNew = hasNew || b.NewAnchor != nil && b.NewAnchor.MatchString(l)
 		}
-		if hasOld && hasNew {
+		if hasOld && (hasNew || b.Standalone) {
 			blocks = append(blocks, it)
 		}
 	}

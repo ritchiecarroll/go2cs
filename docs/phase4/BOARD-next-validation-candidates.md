@@ -30566,4 +30566,74 @@ red-first golden) is among the 17.
 
 — C2 (2026-10-28)
 
+## 2026-10-28 — C2 (1.26.10.2 seat #33, claude/c2-seat33-godefer-const): a go/defer statement's constant argument renders inside the thunk's call — DONE on the seat branch
+
+**The change.** Go evaluates a `go` or `defer` statement's arguments when the statement runs. A constant has the same
+value whenever it is evaluated, so in plain mode it now renders inside the thunk's call, and the statement reads as the
+Go source does:
+
+| Go | Before | After |
+|:--|:--|:--|
+| `go fmt.Println("First")` | `goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` | `goǃ(() => fmt.Println("First"))` |
+| `go fmt.Println("Go thread square:", n*n)` | `goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), goThreadSquareˢ, n * n)` | `goǃ(ᴛ1 => fmt.Println("Go thread square:", ᴛ1), n * n)` |
+| `go worker(5)` | `goǃ(worker, (nint)5)` | `goǃ(() => worker(5))` |
+
+- Every constant go/types reports qualifies (owner rulings 2026-10-27).
+- A package-level function callee with a constant argument takes the thunk form. A method moves its constants only
+  where the statement already takes the thunk form with no receiver snapshot.
+- A method-group, func-value, func-literal, builtin or spread launch keeps its form. A string constant there renders
+  `(@string)"…"` at the site; in plain mode no go/defer argument claims a hoisted field.
+- The standard library keeps its hoisted literals and its eager arguments (`literalsHoistedFor`).
+
+**Prediction, posted before any census (`20261028T050040Z-C2`), and the measurement.**
+1. **-stdlib footprint: 0 files on all three targets. HELD.** Two seeded roots at `56e4fba06f`, `-stdlib -comments`,
+   4,559 seeded `.cs` per arm, both exit 0. Files written per target: windows 1,949, linux 2,024, darwin 2,021, the same in
+   both arms. Between the arms 0 `.cs` files differ; the only differing files are the two run reports (timestamps) and the
+   platform manifest (its own paths). The same binary moved 30 behavioral projects, so the instrument is live.
+2. **Behavioral goldens: 20–35 projects, every pair GD. HELD, after a falsifier fired.** At `50f14bcaf6` (879 projects,
+   master's converter against this seat's): 30 projects move, plus the new guard. 52 files, 240 pairs: GD 219, MAP 21,
+   0 refused.
+   - The 21 `package_info.cs` re-encodes are exactly the 21 projects whose C# lost lines, and the 10 same-line projects
+     carry none (falsifier not fired).
+   - The committed re-baseline classifies the same way: 83 files, 459 pairs (each `.cs.target` and its `.cs` twin),
+     GD 438, MAP 21, 0 refused.
+   - **The falsifier fired first, and that is how this seat's own defect was found.** The first census refused 13 pairs:
+     `goDeferEagerTemp` numbered every eager temp `ᴛ1` when no argument was inlined (`}))(ᴛ1, ᴛ1), a, b`), and the
+     receiver-snapshot split then dropped `ᴛ0` (`Ꮡs.Value.cur.Log(ᴛ1, ᴛ1)`). Fixed in the converter commit, with a
+     no-constant control in the unit test that names it. The other refusals were two shapes GD did not read yet (a method
+     group that takes the thunk with a temp left, and a multi-line statement's continuation line); the item now reads both.
+3. **Behavior.** The 30 moved projects were built and run on linux against `go run`: 27 match exactly. ForVariants and
+   GoCallVariations print more lines than Go, from goroutines `main` never waits for (every Go line is present; neither is
+   `[GoTestMatchingConsoleOutput]`). LineMarkerDeferEndTC0 reports the same wrong line numbers at the base emission (an
+   instrument limit of a linux `dotnet` run, not this seat).
+   - GoDeferConstArgs (new): RED at the base, 9 CS0123 sites (7 `go`, 2 `defer`): the method-group form passes a constant
+     to an `any` parameter, `goǃ(report, (nint)7)` against `report(object)`. Green after; the output matches `go run`.
+     The prediction post said x5; the measurement is 9.
+
+**Guards whose pinned form moves.** sstringTwin, deferredSyscallFunnel (re-proven against its neuter: 3 assertions fail),
+and four plainStringLiterals tests. The go/defer rows of the last move to `TestGoDeferConstantArgumentsMoveIntoTheThunk`,
+whose `-hoist-literals` control keeps the method group and the fields.
+
+**Coverage note.** GoUntypedConstArg no longer reaches convCallExpr's untyped-constant cast on an eager argument: in plain
+mode the constant moves into the thunk. The standard library still exercises it, since `crc32_test.cs` keeps
+`goǃ(ᴛ1 => MakeTable(ᴛ1), (uint32)(Castagnoli))`.
+
+**Open, not this seat.** A NON-constant argument passed to an `any` parameter through the method-group form is CS0123 at
+master and with this seat alike. Probe: `x := 7; go report(x); defer show(x)` emits `goǃ(report, x)` and
+`defer(show, x, ref ᒐ)`, which fail with "No overload for `report(object)` matches delegate `Action<nint>`"; Go prints `7` and
+`deferred 7`.
+
+**Owed on the i7.**
+- The windows golden of SystemCertVerify, which this host cannot mint: `defer syscall.CertCloseStore(store, 0)` should
+  read `defer(ᴛ1 => syscall.CertCloseStore(ᴛ1, 0), store, ref ᒐ)`, one GD pair. RawConnSyncSocketIO launches a
+  func-literal variable and should not move.
+- The new emission built on all three targets, and the behavioral battery.
+
+**Gates here.** Per commit on the seat tree:
+- `go test ./...` in src/go2cs green.
+- pcensus plants green, each GD rewrite failing its plant when reverted.
+- repoguard green, after 26 provenance notes were re-cited at the golden and converter lines that moved.
+- docsamples `-check` clean, after 18 samples were re-copied.
+<!-- Evidence: C2's scratchpad, gd-evidence (stdlib -diffq per target and run logs, behavioral diffs, pcensus outputs, build-and-run log,
+     red and mutation logs), on C2's box. Census binaries: master 50f14bcaf6 and the seat tree at aaa4d7b8c6. -->
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

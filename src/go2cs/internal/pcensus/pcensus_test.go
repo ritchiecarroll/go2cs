@@ -92,6 +92,18 @@ var plants = []plant{
 	one("N2 leaves a rune literal's cast to C1", prodFile, `t.add((byte)(rune)'A');`, `t.add((byte)'A');`, "C1"),
 	one("N2 bad: the inner cast is a different type", prodFile, `fmt.Println((nint)(int8)lvl);`, `fmt.Println((nint)(int16)lvl);`, "UNCLASSIFIED"),
 	one("N2 bad: the outer cast changed", prodFile, `var n = (nint)(byte)k;`, `var n = (long)k;`, "UNCLASSIFIED"),
+	// GD (#33)
+	one("GD good all-constant launch", prodFile, `    goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);`, `    goǃ(() => fmt.Println("First"));`, "GD"),
+	one("GD good mixed arguments renumber", prodFile, `    goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), functionResultˢ, add(3, 4));`, `    goǃ(ᴛ1 => fmt.Println("Function result:", ᴛ1), add(3, 4));`, "GD"),
+	one("GD good a method group keeps its form", prodFile, `    goǃ(bʗ1.say, helloˢ, GoStack.Bounded);`, `    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);`, "GD"),
+	one("GD good a numeric constant", prodFile, `    goǃ(worker, (nint)5);`, `    goǃ(() => worker(5));`, "GD"),
+	one("GD good defer with recover", prodFile, `        defer(@catch, caughtˢ, ref ᒐ, recovers: true);`, `        defer(() => @catch("caught"), ref ᒐ, recovers: true);`, "GD"),
+	one("GD good a method group takes the thunk and keeps a temp", prodFile, `        defer(triple, multiValueEagerˢ, n, ref ᒐ);`, `        defer(ᴛ1 => triple("multi-value/eager", ᴛ1), n, ref ᒐ);`, "GD"),
+	one("GD bad: the eager temps collapse", prodFile, `        defer((ᴛ1, ᴛ2) => syscall.CertCloseStore(ᴛ1, ᴛ2), store, 0, ref ᒐ);`, `        defer((ᴛ1, ᴛ2) => syscall.CertCloseStore(ᴛ1, ᴛ1), store, 0, ref ᒐ);`, "UNCLASSIFIED"),
+	one("GD good a continuation line loses its eager constant", prodFile, `        }), (nint)80, ref ᒐ);`, `        }), ref ᒐ);`, "GD"),
+	one("GD bad: a continuation line loses a variable", prodFile, `        }), x, ref ᒐ);`, `        }), ref ᒐ);`, "UNCLASSIFIED"),
+	one("GD bad: the callee changed", prodFile, `    goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);`, `    goǃ(() => fmt.Print("First"));`, "UNCLASSIFIED"),
+	one("GD bad: not a go/defer statement", prodFile, `    x = firstˢ;`, `    x = "First";`, "UNCLASSIFIED"),
 	// F1, DIR, FOR, SHIFT (#27)
 	one("F1 good open", prodFile, `((Action)(() => {`, `func(() => {`, "F1"),
 	one("F1 good close", prodFile, `}))();`, `})();`, "F1"),
@@ -240,6 +252,23 @@ func TestBlockPlants(t *testing.T) {
 		t.Errorf("S1 bad: a changed body inside the block was not refused by name: %v", tl.refused)
 	}
 
+	// GD's hoisted fields are deleted where they stood, often a hunk of their own (Standalone); a field that is
+	// not a hoisted literal is refused, and a hoisted field without the anchor in its hunk is never at issue.
+	fields := []string{
+		`// Hoisted @string literals (single allocation; Go keeps these in RODATA)`,
+		`private static readonly object firstˢ = (@string)"First"u8;`,
+		`private static readonly @string fifthˢ = "Fifth"u8;`,
+		``,
+	}
+	tl = c.classifyDiff(diffOf(prodFile, fields, nil))
+	if len(tl.refused) != 0 || tl.labels["GD"] == 0 {
+		t.Errorf("GD standalone deletion: wanted every line to read GD, read %v, refused %v", tl.labels, tl.refused)
+	}
+	tl = c.classifyDiff(diffOf(prodFile, append(fields[:2:2], `private static readonly nint countˢ = 5;`), nil))
+	if len(tl.refused) != 1 || !strings.Contains(tl.refused[0].rem, "countˢ") {
+		t.Errorf("GD standalone deletion: a non-literal field was not refused by name: %v", tl.refused)
+	}
+
 	// Without S1's anchors the same deletions are refused: the block rule is not a licence outside its own hunk.
 	tl = c.classifyDiff(diffOf(prodFile, []string{`    do {`, `    } while (false);`}, nil))
 	if len(tl.refused) != 2 {
@@ -306,6 +335,7 @@ func TestCountPlants(t *testing.T) {
 		"P1/deref-select":         "n = (~p).next;\r\nn = (~p);\r\n",
 		"P1/value-select":         "n = p.Value.next;\r\nn = p.Value;\r\n",
 		"P2/of-field":             "o = Ꮡb.of(Buffer.Ꮡoff);\r\no = Ꮡb.of(Buffer.off);\r\n",
+		"GD/hoisted-godefer-arg":  "goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);\r\ngoǃ(() => fmt.Println(\"First\"));\r\n",
 		"E1/else-newline-if":      "} else\r\n    if (x) {}\r\n} else if (x) {}\r\n",
 		"E1/paren-brace-eol":      "if (x){\r\nif (x) {\r\n",
 		"TRa/bounded":             "}, GoStack.Bounded);\r\n});\r\n",

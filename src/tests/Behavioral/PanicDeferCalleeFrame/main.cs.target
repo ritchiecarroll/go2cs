@@ -17,14 +17,11 @@ internal static void show(@string label, bool open) {
 
 internal static bool open;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string unlockˢ = "unlock"u8;
-
 internal static void withLock(Action fn) {
     GoFrame ᒐ = default;
     try {
         note("lock");
-        defer(note, unlockˢ, ref ᒐ);
+        defer(() => note("unlock"), ref ᒐ);
         fn();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -54,26 +51,20 @@ internal static void raw(Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deep3Deferˢ = "deep3 defer"u8;
-
 internal static void deep3() {
     GoFrame ᒐ = default;
     try {
-        defer(note, deep3Deferˢ, ref ᒐ);
+        defer(() => note("deep3 defer"), ref ᒐ);
         note("deep3 body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deep2Deferˢ = "deep2 defer"u8;
-
 internal static void deep2() {
     GoFrame ᒐ = default;
     try {
-        defer(note, deep2Deferˢ, ref ᒐ);
+        defer(() => note("deep2 defer"), ref ᒐ);
         deep3();
         note("deep2 after");
     }
@@ -81,13 +72,10 @@ internal static void deep2() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deep1Deferˢ = "deep1 defer"u8;
-
 internal static void deep1() {
     GoFrame ᒐ = default;
     try {
-        defer(note, deep1Deferˢ, ref ᒐ);
+        defer(() => note("deep1 defer"), ref ᒐ);
         deep2();
         note("deep1 after");
     }

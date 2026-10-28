@@ -11,13 +11,10 @@ internal static partial void where(@string tag) {
     fmt.Printf("%s: %d\n"u8, tag, line);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fallsOffTheEndˢ = "falls off the end"u8;
-
 internal static void fallsOffEnd() {
     GoFrame ᒐ = default;
     try {
-        defer(where, fallsOffTheEndˢ, ref ᒐ);
+        defer(() => where("falls off the end"), ref ᒐ);
         nint x = 1;
         _ = x;
     }
@@ -25,27 +22,21 @@ internal static void fallsOffEnd() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string deferInALoopFallsOffTheˢ = "defer in a loop, falls off the end"u8;
-
 internal static void loopDefer() {
     GoFrame ᒐ = default;
     try {
         for (nint i = 0; i < 1; i++) {
-            defer(where, deferInALoopFallsOffTheˢ, ref ᒐ);
+            defer(() => where("defer in a loop, falls off the end"), ref ᒐ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string endsInReturnControlˢ = "ends in return (control)"u8;
-
 internal static nint endsInReturn() {
     GoFrame ᒐ = default;
     try {
-        defer(where, endsInReturnControlˢ, ref ᒐ);
+        defer(() => where("ends in return (control)"), ref ᒐ);
         nint x = 7;
         return x;
     }
@@ -53,13 +44,10 @@ internal static nint endsInReturn() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string endsInAnAllReturnSwitchˢ = "ends in an all-return switch (control)"u8;
-
 internal static nint endsInSwitch(nint k) {
     GoFrame ᒐ = default;
     try {
-        defer(where, endsInAnAllReturnSwitchˢ, ref ᒐ);
+        defer(() => where("ends in an all-return switch (control)"), ref ᒐ);
         switch (k) {
         case 1: {
             return 10;
@@ -73,16 +61,13 @@ internal static nint endsInSwitch(nint k) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string funcLiteralFallsOffTheˢ = "func literal, falls off the end"u8;
-
 internal static void Main() {
     fallsOffEnd();
     loopDefer();
     func(() => {
         GoFrame ᒐ = default;
         try {
-            defer(where, funcLiteralFallsOffTheˢ, ref ᒐ);
+            defer(() => where("func literal, falls off the end"), ref ᒐ);
             nint y = 2;
             _ = y;
         }

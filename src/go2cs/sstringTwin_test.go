@@ -202,10 +202,11 @@ func TestSStringTwinEmission(t *testing.T) {
 		}
 	}
 
-	// a deferred or go'd twin takes the lambda form (a method group would be CS0123)
+	// a deferred or go'd twin takes the lambda form (a method group would be CS0123); its constant argument
+	// renders inside the thunk's call in the ordinary call's form, `b.write("x"u8)` (seat #33)
 	body := liftFunctionBody(t, emitted, "internal static partial @string use(") // use executes a go: a no-inline carrier
 
-	for _, want := range []string{"defer(ᴛ1 => Ꮡb.ValueSlot.write(ᴛ1),", "defer(ᴛ1 => Count(ᴛ1),", "goǃ(ᴛ1 => Count(ᴛ1),"} {
+	for _, want := range []string{`defer(() => Ꮡb.ValueSlot.write("deferred"u8),`, `defer(() => Count("deferred"u8),`, `goǃ(() => Count("go"u8),`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("use: want the lambda form %q:\n%s", want, body)
 		}

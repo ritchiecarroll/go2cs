@@ -501,6 +501,10 @@ type Visitor struct {
 	// qualify, which is the overwhelming majority — see deferFinallyLowering.go for the gates.
 	loweredDefers     []*loweredDefer
 	loweredDeferIndex map[*ast.DeferStmt]int
+	// renderingInlinedGoDeferArg is set while convExprList renders a go/defer call's constant argument
+	// that stays inside the thunk's call (goDeferConstArgs.go): its string literal takes an ordinary
+	// argument's form rather than the at-site `(@string)` cast an eager argument takes.
+	renderingInlinedGoDeferArg bool
 	// entryAliasBoxPaths maps a parameter's entry deref ALIAS to the box expression it was declared
 	// from (`c` → `Ꮡc.DerefOrNull()`). The alias is declared INSIDE the frame's try, so the finally
 	// cannot name it and a lowered defer's call is re-rooted on the box instead.

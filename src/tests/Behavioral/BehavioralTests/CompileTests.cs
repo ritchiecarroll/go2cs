@@ -862,6 +862,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckGoDeferConstArgs() => CheckTarget("GoDeferConstArgs");
+
+    [TestMethod]
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
 
     [TestMethod]

@@ -1,8 +1,8 @@
-// Guards the converter's untyped-numeric-constant argument cast for a `go` call that
-// takes the LAMBDA form (a value-returning callee forces `goǃ(ᴛ1 => f(ᴛ1), arg)`). The
-// arg's C# type drives ᴛ1's inference, so an untyped const feeding a WIDER/other parameter
-// type must be cast to that PARAMETER type, not its default Go type — otherwise ᴛ1 infers
-// the default (`nint`) and `f(ᴛ1)` fails (CS1503). This is hash/crc32's
+// Guards a `go` call that takes the LAMBDA form (a value-returning callee) with an untyped
+// numeric constant argument. Here the constant renders inside the thunk's call (seat #33):
+// `goǃ(() => compute(poly))`. In the standard library's hoisted mode it stays eager, and the
+// converter casts it to the PARAMETER type, not its default Go type — otherwise ᴛ1 infers
+// the default (`nint`) and `f(ᴛ1)` fails (CS1503). That is hash/crc32's test
 // `go MakeTable(Castagnoli)` (Castagnoli an untyped uint32 poly). See convCallExpr.go's
 // deferred/go untyped-numeric-const branch.
 package main

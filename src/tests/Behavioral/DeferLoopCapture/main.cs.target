@@ -203,15 +203,12 @@ internal static void closureCaptureRange() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object argˢ = (@string)"arg"u8;
-
 internal static void plainArgs() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("-- control: plain args (3-clause) --");
         for (nint i = 0; i < 3; i++) {
-            defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), argˢ, i, ref ᒐ);
+            defer(ᴛ1 => fmt.Println("arg", ᴛ1), i, ref ᒐ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

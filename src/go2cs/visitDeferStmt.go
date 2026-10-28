@@ -190,9 +190,16 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	// costs a closure allocation per defer. Measured and withdrawn 2026-09-02; the overload table
 	// is one grep and settles it, so check it before re-deriving this.
 
+	// A CONSTANT argument renders inside the thunk's call instead of being captured, since it has the same
+	// value whenever it is evaluated: `defer(() => fmt.Println("done"), ref ᒐ)` (goDeferConstArgs.go).
+	var inlineConstArgs []bool
+
+	inlineConstArgs, renderLambdaParams = v.goDeferInlineForm(deferStmt.Call, renderLambdaParams, recvSnapshot)
+
 	if paramCount > 0 {
 		lambdaContext.callArgs = make([]string, paramCount)
 		lambdaContext.renderParams = renderLambdaParams
+		lambdaContext.inlineConstArgs = inlineConstArgs
 	}
 
 	result := strings.Builder{}
@@ -334,6 +341,9 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	} else {
 		result.WriteString("defer(")
 
+		// The thunk's parameters are the arguments that stay eager; inlined constants take none.
+		eagerCount := goDeferEagerCount(inlineConstArgs, paramCount)
+
 		if renderLambdaParams {
 			// A receiver snapshot leads the thunk's parameters as `ᴛ0` (and its eager arguments below).
 			firstParam := 1
@@ -342,11 +352,11 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 				firstParam = 0
 			}
 
-			if paramCount+1-firstParam > 1 {
+			if eagerCount+1-firstParam != 1 {
 				result.WriteRune('(')
 			}
 
-			for i := firstParam; i <= paramCount; i++ {
+			for i := firstParam; i <= eagerCount; i++ {
 				if i > firstParam {
 					result.WriteString(", ")
 				}
@@ -354,7 +364,7 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i))
 			}
 
-			if paramCount+1-firstParam > 1 {
+			if eagerCount+1-firstParam != 1 {
 				result.WriteRune(')')
 			}
 
@@ -368,14 +378,20 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		}
 
 		result.WriteString(callExpr)
-		result.WriteString(", ")
+
+		var eagerArgs []string
 
 		if recvArg != "" {
-			result.WriteString(recvArg)
-			result.WriteString(", ")
+			eagerArgs = append(eagerArgs, recvArg)
 		}
 
-		result.WriteString(strings.Join(lambdaContext.callArgs, ", "))
+		eagerArgs = append(eagerArgs, goDeferEagerArgs(inlineConstArgs, lambdaContext.callArgs)...)
+
+		if len(eagerArgs) > 0 {
+			result.WriteString(", ")
+			result.WriteString(strings.Join(eagerArgs, ", "))
+		}
+
 		result.WriteString(deferTarget)
 	}
 

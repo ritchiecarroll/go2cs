@@ -165,8 +165,8 @@ func TestPlainLiteralsAtStringSlots(t *testing.T) {
 // the wrong C# type keeps today's form. An inferred generic call keeps its field, since C# would infer
 // T = System.String: `Pair("generic map key", 1)` would make a map<string, nint>, which compiles and
 // diverges (G's review, 2026-10-18). So do a generic method on a generic type, a named string slot
-// (CS0029), go and defer arguments (the capture list infers its own type arguments) and a multi-line
-// raw literal (`.Raw()` strips the checkout's CRs).
+// (CS0029) and a multi-line raw literal (`.Raw()` strips the checkout's CRs). A go or defer argument
+// claims no field (TestGoDeferConstantArgumentsMoveIntoTheThunk).
 func TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong(t *testing.T) {
 	emitted := convertPlainLiteralFixture(t, false)
 
@@ -175,8 +175,6 @@ func TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong(t *testing.T) {
 		`Pair(genericMapKeyˢ, `,
 		`b.Set(genericMethodValueˢ);`,
 		`token(namedStringSlotˢ);`,
-		`defer(note, deferredArgumentValueˢ, ref ᒐ);`,
-		`goǃ(note, goroutineArgumentValueˢ, GoStack.Bounded);`,
 		".Raw();",
 	} {
 		if !strings.Contains(emitted, want) {
@@ -226,15 +224,13 @@ func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
 }
 
 // TestAnySlotsGoInterceptorsCannotReachKeepTheHoist: an any slot the generator cannot intercept keeps the
-// pre-boxed field: a go or defer argument (the capture list), a func value (a delegate Invoke), a generic
-// function and a method of a generic type (their interceptor would itself be generic, deferred). A composite
-// element is not a call and keeps its inline Go string.
+// pre-boxed field: a func value (a delegate Invoke), a generic function and a method of a generic type (their
+// interceptor would itself be generic, deferred). A composite element is not a call and keeps its inline Go
+// string. A go or defer argument never reaches a capture list bare (TestGoDeferConstantArgumentsMoveIntoTheThunk).
 func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 	emitted := convertPlainLiteralFixture(t, false)
 
 	for _, want := range []string{
-		`private static readonly object deferredAnyValueˢ = (@string)"deferred any value"u8;`,
-		`private static readonly object goroutineAnyValueˢ = (@string)"goroutine any value"u8;`,
 		`f(funcValueAnyˢ);`,
 		`Tag<nint>(1, genericFunctionAnySlotˢ);`,
 		`b.Note(genericTypeAnySlotˢ);`,
@@ -476,9 +472,47 @@ func TestAStalePackageInitIsRetiredWhenNothingRelocates(t *testing.T) {
 	}
 }
 
-// deferCaptureFixture: string literals in deferred and spawned calls, whose arguments the lowering
-// passes through the registration's generic type parameters. Two-letter literals, because a go/defer
-// argument keeps the hoist, and only a literal whose slug is too short for a field renders inline.
+// TestGoDeferConstantArgumentsMoveIntoTheThunk: in plain mode a go or defer statement's constant argument
+// renders inside the thunk's call and takes that call's own rule there, an interceptable `any` slot included,
+// and claims no field (seat #33, goDeferConstArgs.go). CONTROL: under -hoist-literals, the standard library's
+// mode, the statement keeps its method group and its hoisted fields.
+func TestGoDeferConstantArgumentsMoveIntoTheThunk(t *testing.T) {
+	plain := convertPlainLiteralFixture(t, false)
+
+	for _, want := range []string{
+		`defer(() => note("deferred argument value"), ref ᒐ);`,
+		`goǃ(() => note("goroutine argument value"), GoStack.Bounded);`,
+		`defer(() => show("deferred any value"), ref ᒐ);`,
+		`goǃ(() => show("goroutine any value"), GoStack.Bounded);`,
+	} {
+		if !strings.Contains(plain, want) {
+			t.Errorf("want the constant inside the thunk's call %q:\n%s", want, plain)
+		}
+	}
+
+	for _, unwanted := range []string{"deferredArgumentValueˢ", "goroutineArgumentValueˢ", "deferredAnyValueˢ", "goroutineAnyValueˢ"} {
+		if strings.Contains(plain, unwanted) {
+			t.Errorf("a go/defer constant argument claimed a field (%q):\n%s", unwanted, plain)
+		}
+	}
+
+	hoisted := convertPlainLiteralFixture(t, true)
+
+	for _, want := range []string{
+		`defer(note, deferredArgumentValueˢ, ref ᒐ);`,
+		`goǃ(note, goroutineArgumentValueˢ, GoStack.Bounded);`,
+		`private static readonly object deferredAnyValueˢ = (@string)"deferred any value"u8;`,
+		`private static readonly object goroutineAnyValueˢ = (@string)"goroutine any value"u8;`,
+	} {
+		if !strings.Contains(hoisted, want) {
+			t.Errorf("control: under -hoist-literals want today's form %q:\n%s", want, hoisted)
+		}
+	}
+}
+
+// deferCaptureFixture: string literals in deferred and spawned calls. A builtin callee keeps the capture list,
+// which passes its arguments through the registration's generic type parameters; a declared function takes
+// its constant arguments inside the thunk's call (seat #33).
 const deferCaptureFixture = "package plit\n\n" +
 	"func note(first string, rest ...string) {}\n\n" +
 	"func any1(v any) {}\n\n" +
@@ -493,9 +527,11 @@ const deferCaptureFixture = "package plit\n\n" +
 
 // TestADeferredCaptureListCastsEveryStringLiteral: every string literal in a deferred or spawned
 // call's capture list takes `(@string)`, so the registration's type parameter is Go's string and not
-// System.String (GO2CS0004 A2; measured on DeferVariadicCallee, DeferPanicArg and DeferLambdaParam).
-// The fixed slot, the first variadic element and an `any` slot already did; a variadic element PAST
-// the parameter array (`hh`, `ii`) and a deferred panic's value (`ff`) did not. CONTROL: a direct panic keeps its bare literal, which golib's panic normalizes.
+// System.String (GO2CS0004 A2; measured on DeferVariadicCallee, DeferPanicArg and DeferLambdaParam):
+// here a deferred panic's value (`ff`). A declared function's constant arguments render inside the
+// thunk's call as an ordinary call's do, the fixed slot, the variadic elements inside and past the
+// parameter array and an `any` slot alike (seat #33). CONTROL: a direct panic keeps its bare literal,
+// which golib's panic normalizes.
 func TestADeferredCaptureListCastsEveryStringLiteral(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	root := t.TempDir()
@@ -530,10 +566,20 @@ func TestADeferredCaptureListCastsEveryStringLiteral(t *testing.T) {
 
 	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "plit", "plit.cs")), "\r\n", "\n")
 
-	for _, literal := range []string{"aa", "bb", "hh", "cc", "dd", "ee", "ii", "ff"} {
+	for _, literal := range []string{"ff"} {
 		bare := `, "` + literal + `"`
 		if strings.Contains(emitted, bare) || !strings.Contains(emitted, `(@string)"`+literal+`"`) {
 			t.Errorf("want `(@string)\"%s\"` in the capture list, never a bare C# string:\n%s", literal, emitted)
+		}
+	}
+
+	for _, want := range []string{
+		`defer(() => note("aa", "bb", "hh"), ref ᒐ);`,
+		`defer(() => any1("cc"), ref ᒐ);`,
+		`goǃ(() => note("dd", "ee", "ii"), GoStack.Bounded);`,
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("want the constants inside the thunk's call %q:\n%s", want, emitted)
 		}
 	}
 
@@ -562,10 +608,11 @@ const goCaptureFixture = "package plit\n\n" +
 
 // TestAGoStatementCaptureListCastsEveryStringLiteral: the capture-list cast keys on the argument
 // site both lowerings share (convExprList's callArgs, set by visitGoStmt and visitDeferStmt alike),
-// so a go statement takes `(@string)` exactly as a defer does: a fixed `string` slot, an `any` slot,
-// variadic elements inside and past the parameter array, a two-argument arity, a function literal
-// and a spawned panic, whose value is the thunk's eager argument (convCallExpr.go's panic arm reads
-// the same callArgs).
+// so a go statement takes `(@string)` exactly as a defer does: a function literal's argument and a
+// spawned panic's value, the thunk's eager argument (convCallExpr.go's panic arm reads the same
+// callArgs). A declared function's constant arguments render inside the thunk's call (seat #33): a
+// fixed `string` slot, an `any` slot, variadic elements inside and past the parameter array and a
+// two-argument arity.
 func TestAGoStatementCaptureListCastsEveryStringLiteral(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	root := t.TempDir()
@@ -604,10 +651,21 @@ func TestAGoStatementCaptureListCastsEveryStringLiteral(t *testing.T) {
 		t.Fatalf("want six goǃ launches:\n%s", emitted)
 	}
 
-	for _, literal := range []string{"xx", "yy", "aa", "bb", "cc", "tt", "ll", "pp"} {
+	for _, literal := range []string{"ll", "pp"} {
 		bare := `"` + literal + `"`
 		if strings.Count(emitted, bare) != strings.Count(emitted, `(@string)`+bare) || !strings.Contains(emitted, `(@string)`+bare) {
 			t.Errorf("want `(@string)\"%s\"` in the go statement's capture list, never a bare C# string:\n%s", literal, emitted)
+		}
+	}
+
+	for _, want := range []string{
+		`goǃ(() => f("xx"), GoStack.Bounded);`,
+		`goǃ(() => g("yy"), GoStack.Bounded);`,
+		`goǃ(() => fv("aa", "bb", "cc"), GoStack.Bounded);`,
+		`goǃ(() => two("tt", 1), GoStack.Bounded);`,
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("want the constants inside the thunk's call %q:\n%s", want, emitted)
 		}
 	}
 }

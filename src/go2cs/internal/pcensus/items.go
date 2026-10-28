@@ -59,6 +59,9 @@ type joinRule struct {
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
+	// Standalone admits a hunk that holds OldAnchor alone: a declaration the seat deletes far from the
+	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
+	Standalone bool
 }
 
 // id is a C# identifier as the converter spells one (Go identifiers, plus the converter's own letters: Ꮡ, ʗ, ᴛ, ǃ, ꓸ).
@@ -349,6 +352,38 @@ var items = []item{
 		Measures: []measure{m("P2", "of-field", `\.of\([^()]*\.Ꮡ[\p{L}_]`)},
 		Canon:    []rewrite{rw(`\.of\([^()]*?\.(Ꮡ`+id+`)\)`, ".$1")},
 		Old:      rx(`\.of\([^()]*\.Ꮡ[\p{L}_]`),
+	},
+	{
+		ID: "GD", Seat: "#33", Title: "a go/defer statement's constant argument moves into the thunk's call",
+		Measures: []measure{m("GD", "hoisted-godefer-arg", `\b(?:goǃ|defer)\(.*\wˢ\d*[,)]`)},
+		// The seat rewrites a go/defer statement's argument list: a constant leaves the capture list for the
+		// thunk's call (`goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` -> `goǃ(() => fmt.Println("First"))`), the eager
+		// temps renumber, and a launch that keeps its form spells a string constant `(@string)"…"` in place
+		// of a hoisted field. Both lines reduce to the statement and its callee; the pair must lose a temp or
+		// a hoisted field, or gain a `() =>` thunk or a literal constant inside the thunk's call (a method
+		// group that takes the thunk keeps a temp for each eager argument: `defer(triple, labelˢ, n, ref ᒐ)` ->
+		// `defer(ᴛ1 => triple("label", ᴛ1), n, ref ᒐ)`). The hoisted fields the moved literals claimed, and their
+		// banner, are deleted wherever they stood, often a hunk of their own above the function (Standalone).
+		// A statement whose argument is a multi-line func literal ends on a continuation line, which loses the
+		// eager constants it carried: `}), (nint)80, ref ᒐ);` -> `}), ref ᒐ);`. Such a line reduces to its
+		// indentation, and it must lose a LITERAL constant (a named constant there is refused rather than
+		// read, so a line that loses a variable can never classify).
+		Canon: []rewrite{
+			rw(`^(\s*)(goǃ|defer)\((?:(?:\([^()]*\)|ᴛ\d+) => )?(@?[\p{L}_][\p{L}\p{N}_ʗ.]*)\b.*$`, "$1$2 ⦃$3⦄"),
+			rw(`^(\s*)\}[)}]*(?:, .*)?\);$`, "$1⦃go/defer continuation⦄"),
+		},
+		Guard: rx(`^\s*(?:goǃ|defer)\(|^\s*\}[)}]*(?:, .*)?\);$`),
+		Old:   rx(`ᴛ\d|ˢ\d*[,)]|^\s*\}[)}]*, (?:\([\p{L}\p{N}_<>]+\))?(?:-?\d|"|'|true\b|false\b)`),
+		New:   rx(`\(\) => |=> @?[\p{L}_][\p{L}\p{N}_ʗ.]*\((?:[^()]*, )?(?:\([\p{L}\p{N}_<>]+\))?(?:"|'|-?\d|true\b|false\b)`),
+		Block: &blockRule{
+			OldAnchor:  rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+ˢ\d* = `),
+			Standalone: true,
+			Delete: []*regexp.Regexp{
+				rx(`^\s*(?:private|internal) static readonly (?:object|@string) \w+ˢ\d* = .*;$`),
+				rx(`^\s*// Hoisted @string literals \(single allocation; Go keeps these in RODATA\)$`),
+				rx(`^\s*$`),
+			},
+		},
 	},
 	{
 		ID: "E1", Seat: "#19", Title: "`} else if (` on one line, and `) {` at the end of a line",

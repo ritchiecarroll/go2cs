@@ -862,6 +862,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckGoDeferConstArgs() => CheckTarget("GoDeferConstArgs");
+
+    [TestMethod]
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
 
     [TestMethod]

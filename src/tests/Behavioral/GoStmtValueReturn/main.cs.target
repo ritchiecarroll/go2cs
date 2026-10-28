@@ -30,10 +30,10 @@ internal static void emit(channel<nint> @out) {
 internal static partial void Main() {
     var @out = new channel<nint>(0);
 
-    goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4, GoStack.Bounded);
+    goǃ(ᴛ1 => sum(ᴛ1, 3, 4), @out, GoStack.Bounded);
     fmt.Println("sum:", ᐸꟷ(@out));
 
-    goǃ((ᴛ1, ᴛ2) => pair(ᴛ1, ᴛ2), @out, 6, GoStack.Bounded);
+    goǃ(ᴛ1 => pair(ᴛ1, 6), @out, GoStack.Bounded);
     fmt.Println("pair:", ᐸꟷ(@out));
 
     goǃ(() => nib(), GoStack.Bounded);

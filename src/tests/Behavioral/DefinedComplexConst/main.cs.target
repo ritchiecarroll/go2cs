@@ -52,13 +52,10 @@ internal static @string classify(C128 c) {
     return "other";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferredˢ = (@string)"deferred:"u8;
-
 internal static void deferred() {
     GoFrame ᒐ = default;
     try {
-        defer((ᴛ1, ᴛ2, ᴛ3) => fmt.Println(ᴛ1, ᴛ2, ᴛ3), deferredˢ, takeC128(4D), takeC64(0.5F), ref ᒐ);
+        defer((ᴛ1, ᴛ2) => fmt.Println("deferred:", ᴛ1, ᴛ2), takeC128(4D), takeC64(0.5F), ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

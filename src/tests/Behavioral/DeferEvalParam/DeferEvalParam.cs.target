@@ -8,13 +8,10 @@ internal static void Main() {
     printSquare(5);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferredSquareˢ = (@string)"Deferred square:"u8;
-
 internal static void printSquare(nint n) {
     GoFrame ᒐ = default;
     try {
-        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), deferredSquareˢ, n * n, ref ᒐ);
+        defer(ᴛ1 => fmt.Println("Deferred square:", ᴛ1), n * n, ref ᒐ);
         n++;
         fmt.Println("Immediate n:", n);
     }

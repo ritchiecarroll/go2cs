@@ -6,10 +6,6 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object iFromThreadAndˢ = (@string)"i from thread and"u8;
-private static readonly object xFromThreadˢ = (@string)"x from thread"u8;
-
 internal static partial void Main() {
     nint i = 0;
 
@@ -75,7 +71,7 @@ break_scan:;
 
     nint x = 99;
     fmt.Println("i before thread and", i, "x before thread", x);
-    goǃ((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => fmt.Println(ᴛ1, ᴛ2, ᴛ3, ᴛ4), iFromThreadAndˢ, i, xFromThreadˢ, x);
+    goǃ((ᴛ1, ᴛ2) => fmt.Println("i from thread and", ᴛ1, "x from thread", ᴛ2), i, x);
 
     for (;;) {
         i++;

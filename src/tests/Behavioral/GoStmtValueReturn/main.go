@@ -39,7 +39,7 @@ func emit(out chan int) {
 func main() {
 	out := make(chan int)
 
-	go sum(out, 3, 4) // value-returning, 3 params -> goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), out, 3, 4)
+	go sum(out, 3, 4) // value-returning, 3 params -> goǃ(ᴛ1 => sum(ᴛ1, 3, 4), out)
 	fmt.Println("sum:", <-out)
 
 	go pair(out, 6) // value-returning, 2 params, multi-result

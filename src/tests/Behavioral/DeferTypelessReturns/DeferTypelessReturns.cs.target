@@ -20,13 +20,10 @@ internal static nint idx(this handle h) {
     return (nint)(h - (handle)appErr);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object findDoneˢ = (@string)"find done"u8;
-
 internal static (ж<item>, error) find(slice<item> xs, nint want) {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => fmt.Println(ᴛ1), findDoneˢ, ref ᒐ);
+        defer(() => fmt.Println("find done"), ref ᒐ);
         foreach (var i in range(xs)) {
             if (xs[i].n == want) {
                 return (Ꮡ(xs, i), default);
@@ -59,7 +56,7 @@ internal static uint32 width() {
 internal static (uint32, error) mixedRet(bool ok) {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)4, ref ᒐ);
+        defer(ᴛ1 => closeIt(ᴛ1, 4), nil, ref ᒐ);
         if (!ok) {
             return (0, fmt.Errorf("nope"u8));
         }
@@ -72,7 +69,7 @@ internal static (uint32, error) mixedRet(bool ok) {
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)3, ref ᒐ);
+        defer(ᴛ1 => closeIt(ᴛ1, 3), nil, ref ᒐ);
         ref var h = ref heap<res>(out var Ꮡh);
         h = new res(id: 4);
         var hʗ1 = h;

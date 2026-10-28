@@ -6,26 +6,18 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object firstˢ = (@string)"First"u8;
-private static readonly object secondˢ = (@string)"Second"u8;
-private static readonly object thirdˢ = (@string)"Third"u8;
-private static readonly object fourthˢ = (@string)"Fourth"u8;
-private static readonly @string fifthˢ = "Fifth"u8;
-private static readonly object functionResultˢ = (@string)"Function result:"u8;
-
 internal static partial void Main() {
-    goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);
-    goǃ(ᴛ1 => fmt.Println(ᴛ1), secondˢ);
-    goǃ(ᴛ1 => fmt.Println(ᴛ1), thirdˢ);
+    goǃ(() => fmt.Println("First"));
+    goǃ(() => fmt.Println("Second"));
+    goǃ(() => fmt.Println("Third"));
 
     Funcꓸꓸꓸ<any, (nint, error)> f1 = fmt.Println;
     var f1ʗ1 = f1;
-    goǃ(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ);
+    goǃ(ᴛ1 => f1ʗ1(ᴛ1), (@string)"Fourth");
 
-    goǃ(GetPrintLn(), fifthˢ);
+    goǃ(GetPrintLn(), (@string)"Fifth");
 
-    goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), functionResultˢ, add(3, 4));
+    goǃ(ᴛ1 => fmt.Println("Function result:", ᴛ1), add(3, 4));
 
     printSquare(5);
 
@@ -88,11 +80,8 @@ internal static partial void runPair(channel<EmptyStruct> done) {
     });
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object goThreadSquareˢ = (@string)"Go thread square:"u8;
-
 internal static partial void printSquare(nint n) {
-    goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), goThreadSquareˢ, n * n);
+    goǃ(ᴛ1 => fmt.Println("Go thread square:", ᴛ1), n * n);
     n++;
     fmt.Println("Immediate n:", n);
 }
