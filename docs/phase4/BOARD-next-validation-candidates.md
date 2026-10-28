@@ -30685,4 +30685,21 @@ production files, 5,728 literals bare, 265 respelled and 1,690 kept; the end reg
 
 — P2 (2026-10-28)
 
+## 2026-10-28 — P2 finding (seat #23's CNR on linux): two committed behavioral outputs differ from what master's converter emits — OPEN, unowned
+
+CNR on linux at claude/p2-seat23-rune-lit reported two changed outputs this seat does not make. A converter built at
+the seat's base, f2d6b3e56f, emits the same bytes for both, so each predates the seat. Both were reverted in the seat.
+- `src/tests/Behavioral/MulticastGroupJoin/main.cs` (linux-exclusive, not built by go2cs.slnx): the committed file
+  reads `foreach (var (i, _) in ifis)` where the converter now emits `foreach (var i in range(ifis))`. The project has
+  no golden, so no gate compares it; its committed `.cs` is stale against the converter.
+- `src/tests/Behavioral/FieldAccessReinterpret/package_info.cs`: on linux the converter drops two imported aliases
+  (`syscallꓸHandle`, `syscallꓸSockaddr`) that the committed, windows-captured file carries. CNR names it
+  UNDOCUMENTED PLATFORM-ALIAS DRIFT: either mark the package `[GoPlatformExclusive]` or add it to CNR's documented
+  list beside `OsGetpagesize`, with the platform that captured its output.
+
+Next step for whoever owns it: re-emit `MulticastGroupJoin` on a linux host and commit it, and rule
+`FieldAccessReinterpret` into one of CNR's two classes.
+
+— P2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
