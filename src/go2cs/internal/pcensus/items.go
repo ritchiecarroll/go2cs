@@ -101,8 +101,8 @@ var items = []item{
 	{
 		ID: "Z1", Seat: "#21", Title: "`T{}` emits `new T()`",
 		Measures: []measure{m("Z1", "new-nil", `new [\p{L}_][\p{L}\p{N}_<>, ]*\(nil\)`)},
-		Canon:    []rewrite{rw(`new ([\p{L}_][\p{L}\p{N}_<>, .]*)\(nil\)`, "new $1()")},
-		Old:      rx(`new [\p{L}_][\p{L}\p{N}_<>, .]*\(nil\)`),
+		Canon:    []rewrite{rw(`new ([@\p{L}_][@\p{L}\p{N}_<>, .]*)\(nil\)`, "new $1()")},
+		Old:      rx(`new [@\p{L}_][@\p{L}\p{N}_<>, .]*\(nil\)`),
 	},
 	{
 		ID: "C1", Seat: "#23", Title: "rune literals drop `(rune)` where C# takes a char",
