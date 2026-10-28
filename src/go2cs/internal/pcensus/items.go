@@ -191,10 +191,18 @@ var items = []item{
 		ID: "C1", Seat: "#23", Title: "rune literals drop `(rune)` where C# takes a char",
 		Measures: []measure{m("C1", "rune-cast", `\(rune\)'`)},
 		Canon: []rewrite{
-			rw(`\(\(rune\)('(?:[^'\\]|\\.)*')\)`, "$1"),
+			// A narrowing cast around a cast literal keeps one cast: (byte)((rune)'x') reads (byte)'x'.
+			rw(`(\(`+basic+`\))\(\(rune\)('(?:[^'\\]|\\.)*')\)`, "$1$2"),
+			// A conversion's operand loses its own cast: (byte)(rune)'a' reads (byte)'a', (rune)(rune)'b' reads (rune)'b'.
+			rw(`(\(`+basic+`\))\(rune\)'`, "$1'"),
+			// A byte, int8 or int16 slot spells its one cast as the target (COORD's ruling on #23, Q1): (rune)'q'
+			// reads (byte)'q'. The converter spells those types by their Go names.
+			rw(`\((?:byte|int8|int16)\)'`, "'"),
 			rw(`\(rune\)'`, "'"),
 		},
-		Old: rx(`\(rune\)'`),
+		// Any (rune) cast the pair loses: a conversion's operand, (rune)(rune)'b' -> (rune)'b', keeps one (rune)' on
+		// each side and loses only the inner cast.
+		Old: rx(`\(rune\)`),
 	},
 	{
 		// After #20, a slice, map or chan compared to nil reads `!= default` (D1 dropped the `!`); stage 2 makes it
@@ -230,6 +238,11 @@ var items = []item{
 		// cast before a rune literal is C1's (`(byte)(rune)'A'`), never dropped here. The drop runs three times: one pass
 		// consumes the parenthesis an adjacent second cast needs.
 		Canon: []rewrite{
+			// C1's casts first: every cast in a run that ends at a rune literal is set aside, so the drop below
+			// cannot take the outer cast of (byte)(rune)'a'. Three passes, as for the drop.
+			rw(`\((`+sizedBasic+`)\)((?:⟨[a-z0-9]+⟩)*)'`, "⟨$1⟩$2'"),
+			rw(`\((`+sizedBasic+`)\)((?:⟨[a-z0-9]+⟩)*)'`, "⟨$1⟩$2'"),
+			rw(`\((`+sizedBasic+`)\)((?:⟨[a-z0-9]+⟩)*)'`, "⟨$1⟩$2'"),
 			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
 			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
 			rw(`([()])\(`+sizedBasic+`\)([^'])`, "$1$2"),
