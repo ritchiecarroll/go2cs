@@ -348,13 +348,21 @@ var items = []item{
 	{
 		ID: "H2", Seat: "#29", Title: "the heap declaration and its initializer fold into one statement",
 		Measures: []measure{m("H2", "heap-decl", `ref var `+id+` = ref heap<`+generic+`>\(out var`)},
-		Canon:    []rewrite{rw(`ref heap<`+generic+`>\(`, "ref heap(")},
+		// COORD's R1 keeps the type argument: `ref var x = ref heap<T>(rhs, out var Ꮡx);`, the zero box's own
+		// spelling with the value inserted, so the fold keeps the declaration's <T> and a changed or dropped one
+		// is refused. A value spanning several lines folds its FIRST line into the declaration (the Join, with no
+		// `;` to close it) and closes on its last: `…;` becomes `…, out var Ꮡx);` (the canon pairs the two).
+		Canon: []rewrite{rw(`, out var Ꮡ`+id+`\);$`, ";")},
+		New:   rx(`, out var Ꮡ` + id + `\);$`),
 		Join: &joinRule{
-			First:  rx(`^(\s*)ref var (` + id + `) = ref heap(?:<` + generic + `>)?\(out var Ꮡ(` + id + `)\);$`),
-			Second: rx(`^(\s*)(` + id + `) = (.+);$`),
+			First:  rx(`^(\s*)ref var (` + id + `) = ref heap(<` + generic + `>)\(out var Ꮡ(` + id + `)\);$`),
+			Second: rx(`^(\s*)(` + id + `) = (.+?)(;?)$`),
 			Same:   [][2]int{{1, 1}, {2, 2}},
 			Fold: func(f, s []string) string {
-				return f[1] + "ref var " + f[2] + " = ref heap(" + s[3] + ", out var Ꮡ" + f[3] + ");"
+				if s[4] == "" {
+					return f[1] + "ref var " + f[2] + " = ref heap" + f[3] + "(" + s[3]
+				}
+				return f[1] + "ref var " + f[2] + " = ref heap" + f[3] + "(" + s[3] + ", out var Ꮡ" + f[4] + ");"
 			},
 		},
 	},

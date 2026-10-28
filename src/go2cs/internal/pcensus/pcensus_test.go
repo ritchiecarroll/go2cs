@@ -140,9 +140,13 @@ var plants = []plant{
 	one("FOR bad: the post statement changed", prodFile, `for (nint i = 0; ᐧ ; i++) {`, `for (nint i = 0; ; i--) {`, "UNCLASSIFIED"),
 	one("SHIFT good", prodFile, `x <<= (int)(3);`, `x <<= 3;`, "SHIFT"),
 	one("SHIFT bad: a non-constant count", prodFile, `x <<= (int)(n);`, `x <<= n;`, "UNCLASSIFIED"),
-	// H2 (#29): a join
-	{"H2 good fold", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    a = 10;`}, []string{`    ref var a = ref heap(10, out var Ꮡa);`}, "H2"},
-	{"H2 bad: another variable's assignment", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    b = 10;`}, []string{`    ref var a = ref heap(10, out var Ꮡa);`}, "UNPAIRED"},
+	// H2 (#29): a join, keeping the declaration's type argument (COORD's R1)
+	{"H2 good fold", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    a = 10;`}, []string{`    ref var a = ref heap<nint>(10, out var Ꮡa);`}, "H2"},
+	{"H2 good multi-line value, its first line", prodFile, []string{`    ref var g = ref heap<grid>(out var Ꮡg);`, `    g = new grid(`}, []string{`    ref var g = ref heap<grid>(new grid(`}, "H2"},
+	one("H2 good multi-line value, its last line", prodFile, `        name: "g");`, `        name: "g"), out var Ꮡg);`, "H2"),
+	{"H2 bad: another variable's assignment", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    b = 10;`}, []string{`    ref var a = ref heap<nint>(10, out var Ꮡa);`}, "UNPAIRED"},
+	{"H2 bad: the type argument dropped", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    a = 10;`}, []string{`    ref var a = ref heap(10, out var Ꮡa);`}, "UNCLASSIFIED"},
+	{"H2 bad: the type argument changed", prodFile, []string{`    ref var a = ref heap<nint>(out var Ꮡa);`, `    a = 10;`}, []string{`    ref var a = ref heap<int>(10, out var Ꮡa);`}, "UNCLASSIFIED"},
 	// L1 (#30)
 	one("L1 good argument", prodFile, `f(new nint[]{1, 2, 3}.slice());`, `f([1, 2, 3]);`, "L1"),
 	one("L1 good typed local", prodFile, `var x = new nint[]{1, 2}.slice();`, `slice<nint> x = [1, 2];`, "L1"),
@@ -203,9 +207,11 @@ func TestPlants(t *testing.T) {
 			if !strings.HasPrefix(r.kind, p.want) {
 				t.Errorf("%s: wanted %s, refused as %s", p.name, p.want, r.kind)
 			}
-			// The refusal names its site: the planted text itself.
+			// The refusal names its site: the planted text itself (a refused Join reports its folded old line,
+			// so its added line is what names the site).
 			site := first(p.rem) + first(p.add)
-			if !strings.Contains(r.rem+r.add, strings.TrimSpace(firstNonEmpty(p.rem, p.add))) {
+			if !strings.Contains(r.rem+r.add, strings.TrimSpace(firstNonEmpty(p.rem, p.add))) &&
+				!(len(p.add) > 0 && strings.Contains(r.add, strings.TrimSpace(first(p.add)))) {
 				t.Errorf("%s: the refusal does not name its site %q: -%q +%q", p.name, site, r.rem, r.add)
 			}
 			continue
