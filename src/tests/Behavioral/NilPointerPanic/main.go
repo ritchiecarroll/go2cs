@@ -76,6 +76,12 @@ func main() {
 	real := &node{name: "head"}
 	catch("chain-walk", func() { fmt.Println(real.next.name) })
 
+	// 9. A TYPED nil pointer: `(*T)(nil)` converts to golib's canonical nil box, not a null reference, so its field
+	// read and write reach the box's own nil check (StandardBox.Value) rather than .NET's null dereference.
+	q := (*node)(nil)
+	catch("typed-nil-field-read", func() { fmt.Println(q.name) })
+	catch("typed-nil-field-write", func() { q.name = "x" })
+
 	// NEGATIVE CONTROLS — these must NOT panic.
 	catch("nil-safe-method", func() { fmt.Println(p.isNil()) })
 	catch("real-method", func() { fmt.Println(real.label()) })
