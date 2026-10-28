@@ -219,9 +219,19 @@ func (v *Visitor) runeLiteralCallForm(call *ast.CallExpr, child ast.Node, typedS
 		}
 	}
 
-	switch ast.Unparen(call.Fun).(type) {
+	// A generic call keeps the cast whether its type arguments are written or inferred: the call's own type
+	// is the instantiated signature, and C# would infer char from a bare literal.
+	switch fun := ast.Unparen(call.Fun).(type) {
 	case *ast.IndexExpr, *ast.IndexListExpr:
 		return runeLiteralKeep
+	case *ast.Ident:
+		if _, generic := v.info.Instances[fun]; generic {
+			return runeLiteralKeep
+		}
+	case *ast.SelectorExpr:
+		if _, generic := v.info.Instances[fun.Sel]; generic {
+			return runeLiteralKeep
+		}
 	}
 
 	signature, ok := funTV.Type.Underlying().(*types.Signature)

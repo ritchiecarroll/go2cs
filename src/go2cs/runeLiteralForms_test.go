@@ -35,6 +35,8 @@ const untyped = 'a' - 'A'
 
 func generic[T rune | byte](x T) T { return x }
 
+func show[E any](e E) string { return fmt.Sprint(e) }
+
 func takesRune(r rune) rune     { return r }
 func takesAny(a any) any        { return a }
 func takesMany(rs ...rune) rune { return rs[0] }
@@ -59,6 +61,7 @@ func keepBoxed() any         { return takesAny('k') }
 func keepAnyVar() any        { var a any = 'k'; return a }
 func keepBuiltin(r rune) rune { return max('k', r) }
 func keepGeneric() rune      { return generic[rune]('k') }
+func keepInferred() string   { return show('k') }
 func keepVariadic() rune     { return takesMany('k') }
 func keepNamed() letter      { var l letter = 'k'; return l }
 func keepAstral() rune       { var r rune = '\U0001F600'; return r }
@@ -72,7 +75,7 @@ func main() {
 	fmt.Println(conversion())
 	fmt.Println(narrowAssign(), narrowInt8(), narrowCase('p'), narrowAppend(), narrowReturn())
 	fmt.Println(keepInfer(), keepBoxed(), keepAnyVar(), keepBuiltin('a'), keepGeneric(), keepVariadic(), keepNamed(),
-		keepAstral(), keepConstExpr(), keepAnyCompare('k'))
+		keepAstral(), keepConstExpr(), keepAnyCompare('k'), keepInferred())
 }
 `)
 
@@ -100,6 +103,7 @@ func main() {
 		{"keepAnyVar(", "(rune)'k'"},
 		{"keepBuiltin(", "max((rune)'k', r)"},
 		{"keepGeneric(", "(rune)'k'"},
+		{"keepInferred(", "show((rune)'k')"},
 		{"keepVariadic(", "(rune)'k'"},
 		{"keepNamed(", "(rune)'k'"},
 		{"keepAstral(", "(rune)0x1F600"},
