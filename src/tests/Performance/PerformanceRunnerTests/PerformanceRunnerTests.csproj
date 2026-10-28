@@ -2,7 +2,7 @@
 
   <!--
     Guards for the performance runner's release-leg decisions (docs/PLAN-perf-rebaseline.md, S0): what a release leg
-    refuses before anything is timed. The decisions are pure functions in the runner's ReleaseLegs.cs, LINKED here
+    refuses before anything is timed; and for when it may reuse a completed AOT publish. The decisions are pure functions in the runner's ReleaseLegs.cs, LINKED here
     rather than referenced, so the runner stays dependency-free (as ConverterBuildInputs.cs is linked into it).
   -->
   <PropertyGroup>
@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Compile Include="../PerformanceRunner/ReleaseLegs.cs" Link="ReleaseLegs.cs" />
+    <Compile Include="../PerformanceRunner/AotPublishReuse.cs" Link="AotPublishReuse.cs" />
   </ItemGroup>
 
 </Project>

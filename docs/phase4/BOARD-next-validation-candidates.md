@@ -30122,5 +30122,38 @@ entry's on every platform; that is why `TestUnsafePoint` is not entered (below).
   well as at the seat (logged; not this seat).
 
 — C1 (2026-10-28)
+## 2026-10-28 — P1 (parity train seat #37, claude/p1-seat37-perf-aot-reuse): PerformanceRunner's AOT publish reuse ignored golib, go2cs-gen and the referenced packages — DONE on the seat branch
+
+**The defect.** PerformanceRunner skips a Native AOT publish when `publish.stamp` matches and the binary is newer than
+the program's `.cs`, its csproj and `go2cs.exe`. golib, the go2cs-gen analyzer and the converted packages the program
+references compile into the binary too, and the predicate read none of them. A golib-only change's tip arm reused the
+base arm's binary and timed it. G found it setting up seat #35's A/B. The analyzer was left out on purpose, because
+ordinary builds rewrite its dll's write time; the comment named the source gap and left it to a manual bin purge.
+
+**The fix (tooling only).** The predicate moves out of `Program.cs` into `PerformanceRunner/AotPublishReuse.cs`,
+linked into PerformanceRunnerTests the way `ReleaseLegs.cs` is. `Stamp` now ends in `deps=<16 hex>`: a SHA-256 over
+- every project in the program's ProjectReference closure (`$(go2csPath)` and relative paths followed);
+- the shared projects those import (golib's `core/go2cs`);
+- `Directory.Build.props`/`.targets` and `version.props` from each project's folder up to `src`.
+
+Each folder counts whole except `bin`, `obj`, `Generated*` and nested projects. Files are hashed by src-relative path
+and content with carriage returns dropped, so a windows and a linux checkout of one commit agree. Content, not write
+times: an unchanged build rewrites the analyzer dll's time, and a farm-adopted binary arrives with foreign times.
+
+**Red first.** `AotPublishReuseTests`, 10 cases on a synthetic tree where every edit keeps its file's old write time.
+At the red commit 6 fail: a golib-only, a go2cs-gen-only, a referenced package's, a shared project's and a
+`Directory.Build.props` edit each reuse the publish, and so does a stamp written without `deps=`. 4 pass: an unchanged
+tree reuses; build output under a dependency, an unreferenced package's edit and line endings alone do not move it. At
+the fix all 38 PerformanceRunnerTests pass.
+
+**On the real tree** (linux, at `79aeb62dac`). The identity takes 270 to 620 ms per program. 14 of the 17 programs
+share one identity; PerfSort, PerfStringMatch and PerfTlsHandshake reference more packages and differ. The 14 shared
+`7844cb79166c29c8` at `50f14bcaf6`; batch 74 between the two changed golib and no program file, and all 14 moved.
+
+**Footprint.** PerformanceRunner and PerformanceRunnerTests. 0 emission by construction. Every stamp written before
+this lacks `deps=`, so the first run after it lands re-publishes each AOT column once (accepted by COORD); the next
+perf window budgets for it.
+
+— P1 (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
