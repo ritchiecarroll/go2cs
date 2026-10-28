@@ -101,6 +101,7 @@ const labelPipe label = "pipe"
 // entries.go — compiled first; the initializer folds to the constant "pipe!" in Go
 var pipeLabel = string(labelPipe) + "!"
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // entries.cs — relocated, because the rendered expression READS the labelPipe field
 internal static @string pipeLabel;
@@ -143,6 +144,7 @@ var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.
 go2cs-gen's `LazyHolderGenerator` completes each holder. It gives the package class a `ref` accessor under the var's
 Go name, with the field's accessibility, so every use site reads and writes the var as it would the field:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.mallocScanTable;
 ```

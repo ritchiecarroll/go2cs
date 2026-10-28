@@ -137,6 +137,7 @@ ok := s == "ready"
 bs := []byte("hello")
 rs := []rune("héllo")
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var ok = s == "ready"u8;
 var bs = slice<byte>("hello"u8);
@@ -192,6 +193,7 @@ A C# literal cannot always hold Go's bytes. Go's `\xHH` is exactly one byte, but
 const zipdata = "\x50\x4b\xdb50\xff"
 const octal   = "\377\200A"
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static readonly @string zipdata = ((@string)(new byte[]{0x50, 0x4b, 0xdb, 0x35, 0x30, 0xff}));
 internal static readonly @string octal = ((@string)(new byte[]{0xff, 0x80, 0x41}));
@@ -405,6 +407,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 **Function values name the delegate.** With two members there is no single method group, and converting one to a delegate typed on `@string` is CS0123, even with a cast. So the converter renders a func-value use of a package-level twin as `Nameᶠ` (`FuncValueMarker`):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ["printf"u8] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ)),
 Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;

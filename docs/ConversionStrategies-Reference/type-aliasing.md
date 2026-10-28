@@ -16,6 +16,7 @@ type P = *bool
 type M = map[int]int
 type table = map[string]int
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 global using P = go.ж<bool>;
 global using M = go.map<nint, nint>;
@@ -39,6 +40,7 @@ type nested = map[string][]Header
 type fn = func(string) int
 type rdrs = []io.Reader
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 global using nested = go.map<go.@string, go.slice<go.main_package.Header>>;
 global using fn = System.Func<go.@string, nint>;

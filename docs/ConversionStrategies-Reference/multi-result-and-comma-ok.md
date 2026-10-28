@@ -3,6 +3,7 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#multi-result-values-and-comma-ok-forms)
 Many Go functions return either a single value or a "value, ok"/"value, error" tuple, where only the declared return arity selects the behavior. You cannot differentiate C# overloads by return type alone, so the runtime types expose a second overload distinguished by an extra discard argument. For map access, the "comma-ok" read routes through a two-value indexer using the discard sentinel `ꟷ`:
 
+<!-- illustration: not converter output -->
 ```csharp
 var v1 = m["Answer"];            // single value: zero value if the key is absent
 var (v2, ok) = m["Answer", ꟷ];   // comma-ok: (value, present?)
@@ -10,6 +11,7 @@ var (v2, ok) = m["Answer", ꟷ];   // comma-ok: (value, present?)
 
 These two forms can behave differently — case in point, [type assertions](https://golang.org/ref/spec#Type_assertions): the single-value form panics on failure, while the comma-ok form returns safely with a boolean success result. Type assertions convert similarly, through a generated `_<T>()` accessor:
 
+<!-- illustration: not converter output -->
 ```csharp
 var t = i._<MyType>();              // panics on failure
 var (t, ok) = i._<MyType>(ᐧ);       // comma-ok, safe
@@ -114,6 +116,7 @@ GolibTests' `SSliceSpreadTests`.)
 
 **A named result is DECLARED only when something reads it.**<!-- 2026-08-08 --> Go's named results are ordinary addressable locals, so the converter declared every one of them at function entry. But Go names results for *documentation* far more often than it uses them — `func EncodeRune(r rune) (r1, r2 rune)` never mentions `r1`/`r2` again — and the emitted `rune r1 = default!;` is then dead on arrival. That one shape was nearly every `CS0219` ("assigned but its value is never used") warning in the corpus.<!-- At the change (2026-08-08): 1,218 of the corpus's 1,219 CS0219. --> Nothing is lost by omitting it, because the names survive exactly where a reader reads them — on the C# tuple return type — so the emission moves closer to the Go source, not further from it:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // before
 public static (rune r1, rune r2) EncodeRune(rune r) {
@@ -145,6 +148,7 @@ references and get no box unless their address is genuinely taken. So the gate r
 entirely plain, and every tuple with an interface or func result fell back to the very per-name path
 this branch exists to replace:
 
+<!-- illustration: not converter output -->
 ```csharp
 context.Context ctx = context.WithCancel(context.Background());   // the WHOLE tuple  (CS0029)
 Action cancel = default!;                                          // silently defaulted

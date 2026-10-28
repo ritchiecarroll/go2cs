@@ -51,7 +51,7 @@ partial struct Person {
     internal @string name;
     internal int32 age;
 }
-
+…
 public static bool IsAdult(this Person p) {
     return p.age >= 18;
 }

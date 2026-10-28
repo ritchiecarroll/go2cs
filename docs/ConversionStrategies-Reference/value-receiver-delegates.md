@@ -82,6 +82,7 @@ the `this ref` `ж<T>` extension with a struct **value** receiver: net's six soc
 poll.CloseFunc = sw.Closesocket      // sw is a package-level socktest.Switch
 listenFunc     = sw.Listen
 ```
+<!-- illustration: not converter output -->
 ```csharp
 poll.CloseFunc = Ꮡsw.Closesocket;    // not (syscallꓸHandle p1) => sw.Closesocket(p1)
 listenFunc     = Ꮡsw.Listen;
@@ -130,6 +131,7 @@ parts := []func() string{ x.label, func() string { return x.Name } }
 x.Name = "b"
 fmt.Println(parts[0](), parts[1]())   // Go: a b
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // a live receiver — read from the box at CALL time, printing "b b"
 var parts = new Func<@string>[]{ () => Ꮡx.Value.label(), () => Ꮡx.Value.Name }.slice();
@@ -247,6 +249,7 @@ fieldV := h.p.label
 h.p.Name = "A"
 fmt.Println(fieldV(), h.p.label())  // Go: a A
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // the receiver expression rendered as the box, per call
 var hʗ1 = h;
@@ -299,6 +302,7 @@ for state != nil {
     state = state(l)
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 stateFn state = lexText;
 while (state != default!) {
@@ -342,6 +346,7 @@ The box is also the only one that works. `Pointer` overrides `ж<T>.Equals` to c
 k := LoadPointer(&x.i)
 if k != p { … }            // p ranges over testPointers(), whose first element is nil
 ```
+<!-- illustration: not converter output -->
 ```csharp
 if (k != p) { … }          // NOT k.Value != p.Value — that NREs on the nil element
 ```
@@ -356,6 +361,7 @@ nameOf((*T).pointerMethod)   // main.(*T).pointerMethod
 nameOf(p.pointerMethod)      // main.(*T).pointerMethod-fm   (also (&t).pointerMethod, t.pointerMethod)
 nameOf(s.String)             // fmt.Stringer.String-fm        (s is a fmt.Stringer)
 ```
+<!-- illustration: not converter output -->
 ```csharp
 nameOf(((Func<ж<T>, nint>)(pointerMethod)));   // RecvGenerator's `this ж<T>` forwarder, unbound
 nameOf(p.pointerMethod);                        // the same forwarder, closed over p
@@ -371,6 +377,7 @@ change -->
 
 A VALUE-receiver method value (`t.valueMethod`, Go `main.T.valueMethod-fm`) is the one shape whose emission holds no method to name. It is a lambda over a copy of the receiver (`() => tʗ1.valueMethod()`), so on its own it reads as its enclosing function's literal. The converter therefore **records** it, invisibly: the file's `GoPositionMap` record takes a fifth argument, `<goLine>=<pkg.Recv.Method>` per method value, beside the literal names:
 
+<!-- illustration: not converter output -->
 ```csharp
 [assembly: go.GoPositionMap("main.go", "main.cs", "AA0q…", "41-41:1", "38=main.T.valueMethod;39=main.T.valueMethod;45=main.T.valueMethod;51=main.T.walk")]
 ```

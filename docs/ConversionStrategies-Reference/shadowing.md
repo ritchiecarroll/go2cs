@@ -119,6 +119,7 @@ The three receiver-shadow arms above (`.of()` receiver equals the type, its capt
 <!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:70, 83 -->
 ```csharp
     Ꮡp.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    …
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
 ```
 
@@ -184,6 +185,7 @@ The `-tests` pipeline re-analyzes the package over the **whole variant universe*
 
 The rename registry is **object-keyed** (`testMethodRenames map[types.Object]bool`) — the same-named production type/function keeps its plain emission at every other site — and **session-scoped**, initialized once per `-tests` conversion rather than per variant: both variants come from one `go/packages` load, so the external variant's references to an internal-variant method (the export_test pattern) resolve by object identity to entries registered during the internal pass. The declaration renames in `visitFuncDecl`, and every reference follows through `convIdent` — a METHOD name through its isMethod arm (all selector emissions funnel there), and a package-level **free function** referenced as a call target or function value through the trailing identifier path, which the receiver/first-parameter case above reaches (without it the declarator would rename while its call sites emit the bare name: CS0103). The go2cs-gen `RecvGenerator` reads the emitted name, so generated `ж`-receiver overloads follow automatically. Real emissions from the probes:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static any ΔReplacer(this ж<global::go.strings_package.Replacer> Ꮡr) { … } // strings export_test.go `func (r *Replacer) Replacer() any` — type keeps its name
 @string got = fmt.Sprintf("%T"u8, tc.r.ΔReplacer());     // EXTERNAL-variant call site (replace_test.cs) follows the internal rename
@@ -242,6 +244,7 @@ Narrow on both axes, deliberately — but on the SECOND axis only. Publication i
 
 **A NAMED right-hand side is carried too.** "A named RHS already renders through its own qualified name" does not hold wherever the production conversion declares the alias as a compilation-scoped `global using` in the FILE that declares it, because the renderer then spells the BARE alias name in production and test alike. `html/template`'s `type FuncMap = template.FuncMap` is exactly that shape:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // template.cs, line 4 — the production conversion's own declaration
 global using FuncMap = go.text.template_package.FuncMap;
@@ -576,6 +579,7 @@ A function parameter whose name equals an imported package the function referenc
 ```go
 func emsaPSSEncode(mHash []byte, emBits int, salt []byte, hash hash.Hash) { … hash.Size() … }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static (…) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hashΔ1) { … hashΔ1.Size() … }
 ```
@@ -599,6 +603,7 @@ call path:
 make := func(n int) int { return n * 2 }
 fmt.Println(make(21))
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 nint make(nint n) => n * 2;
 fmt.Println(make(21));            // was: fmt.Println(new nint()) — the argument dropped entirely
@@ -635,6 +640,7 @@ at the box site rather than as a name collision. `internal/trace`'s
 `func heapDebugString(heap []*batchCursor) string`, whose `strings.Builder` local needs a box, was the
 whole of that package's 92-verdict build wall:
 
+<!-- illustration: not converter output -->
 ```csharp
 ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);   // CS0149: Method name expected
 ```
@@ -728,6 +734,7 @@ import (
 … time.Nanosecond …
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 using Δtime = time_package;   // `time` alone would bind the go.time namespace
 …

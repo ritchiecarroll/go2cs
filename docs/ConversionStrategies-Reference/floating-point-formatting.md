@@ -92,6 +92,7 @@ d := 8 * time.Hour
 secondsEastOfUTC := int((8 * time.Hour).Seconds())
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 var d = (time.Duration)(28800000000000L);
 nint secondsEastOfUTC = (nint)((time.Duration)(28800000000000L)).Seconds();

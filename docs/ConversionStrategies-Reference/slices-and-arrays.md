@@ -19,6 +19,7 @@ func main() {
 
 converts to:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static void Main() {
     var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
@@ -314,6 +315,7 @@ sites — *what does a declaration with no initializer put in the slot?* — and
 A named result declared `T name = default!;` at function entry would give a `[N]T` result **length 0**
 and an array-bearing struct result a null backing, so both shapes emit their construction:
 
+<!-- illustration: not converter output -->
 ```csharp
 // src/core/net/netip/netip.cs — func (ip Addr) As16() (a16 [16]byte)
 array<byte> a16 = new(16);
@@ -596,6 +598,7 @@ in `value_impl.cs`; the `ArrayCastDerefClone` golden holds the emission):
 ```go
 return *(*[2]uintptr)(v.ptr)   // reflect/value.go
 ```
+<!-- illustration: not converter output -->
 ```csharp
 return ~(ж<array<uintptr>>)(uintptr)(v.ptr).Clone();    // WRONG — .Clone() reads v.ptr (CS1061)
 return (~(ж<array<uintptr>>)(uintptr)(v.ptr)).Clone();  // emitted — clone the dereferenced array
@@ -1010,6 +1013,7 @@ therefore passes a slice-typed operand whole to golib's `appendꓸꓸꓸ`, whose
 hello.cipherSuites = append(hello.cipherSuites, defaultCipherSuitesTLS13...)
 s2 := append(s[:i], v...)        // in a generic body over S ~[]E
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 hello.Value.cipherSuites = appendꓸꓸꓸ((~hello).cipherSuites, defaultCipherSuitesTLS13);
 var s2 = appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, i), v);
@@ -1123,6 +1127,7 @@ is null, and assigning it would null the initializer's backing, so the field's f
 generated constructor therefore guards exactly the fixed-array members: <!-- history: an unguarded assignment
 was the TestFinderCreation/TestFinderNext blocker, Phase-4 row R8. -->
 
+<!-- illustration: not converter output -->
 ```csharp
 if (badCharSkip.Source is not null) this.badCharSkip = badCharSkip;
 ```
@@ -1159,6 +1164,7 @@ b := [8]byte{1, 2}      // 1, 2, then six zeros
 c := [3]byte{1, 2, 3}   // already full
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 var a = new byte[]{}.array(8);
 var b = new byte[]{1, 2}.array(8);
@@ -1204,6 +1210,7 @@ d := [2][3][4]uint8{}
 c := [2]cell{}          // cell has a [4]uint8 field
 m := [2]named{}         // type named [6]byte
 ```
+<!-- illustration: not converter output -->
 ```csharp
 var n = new array<uint8>[]{}.array(2, () => new(3));
 var d = new array<array<uint8>>[]{}.array(2, () => new(3, () => new(4)));
@@ -1247,6 +1254,7 @@ pm  := []*map[string]int{{}}
 mp  := map[string]*[2]int{"a": {}}     // map VALUE, same elision
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 var pa  = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();
 var psl = new ж<slice<nint>>[]{Ꮡ(new nint[]{}.slice())}.slice();
@@ -1271,6 +1279,7 @@ pnsl := []*nsl{{}}                // type nsl []int
 pnmp := []*nmp{{}}                // type nmp map[string]int
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var pna  = new ж<nb>[]{Ꮡ(new nb(new byte[4].array()))}.slice();
 var pnsl = new ж<nsl>[]{Ꮡ(new nsl(new nint[]{}.slice()))}.slice();
@@ -1306,6 +1315,7 @@ nestedKeyed := [][2][3]int{{1: {7, 8, 9}}}
 structElem  := [][2]withArray{{}}         // withArray has a [2][3]int field
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var nested      = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{}.array(2, () => new(3))}.slice(), 2, 3);
 var nestedShort = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array()}.array(2, () => new(3))}.slice(), 2, 3);
@@ -1409,6 +1419,7 @@ A mixed literal is normalized to an all-keyed one carrying Go's own indices, whi
 sparse-array machinery render it unchanged — and keeps the LENGTH, which is the part a wrong emission
 would get silently wrong rather than loudly:
 
+<!-- illustration: not converter output -->
 ```csharp
 new slice<byte>(16){[0] = 0xfe, [1] = 0x80, [15] = 0x01}
 new array<nint>(8){[0] = 1, [1] = 2, [5] = 9, [6] = 10}
@@ -1458,6 +1469,7 @@ field initializer (`internal array<array<nint>> entries = new(2, () => new(3));`
 var leafCounts [maxBitsLimit][maxBitsLimit]int32   // addressed: copy(leafCounts[i][:i], …)
 f.bits = new([maxNumLit + maxNumDist]int)
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ref var leafCounts = ref heap(new array<array<int32>>(16, () => new(16)), out var ᏑleafCounts);
 f.bits = Ꮡ(new array<nint>(316));
@@ -1586,6 +1598,7 @@ var h Hash                       // type Hash [4]byte
 if h != sum(nil) { … }           // func sum([]byte) [4]byte
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 if (h != ((Hash)(sum(default!)))) { … }
 ```
@@ -1616,6 +1629,7 @@ capped := make([][2]int, 1, 3)
 <!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs.target:99, 105 -->
 ```csharp
 var grid = GoReflect.WithElemDims(new slice<array<int32>>(3, () => new(4)), 4);
+…
 var capped = GoReflect.WithElemDims(new slice<array<nint>>(1, () => new(2), 3), 2);
 ```
 
@@ -1664,6 +1678,7 @@ The converter cannot help here — a `clear` call site has no Go type shape to t
 through, and the C# type `array<E>` is the same for every N — so the shape recovery lives in golib, as
 a single entry point:
 
+<!-- illustration: not converter output -->
 ```csharp
 public static T GoZero<T>(T template)   // builtin.cs
 ```
@@ -1846,7 +1861,9 @@ element type (slice/map/pointer/chan/func) for this one:
 <!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:14, 19, 23 -->
 ```csharp
     lines = append(lines, (slice<nint>)(default!));
+    …
     maps = append(mapsᴷ, maps, (map<@string, nint>)(default!));
+    …
     ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));
 ```
 (The pointer element's `nil` renders in pointer context. `mapsᴷ` and `ptrsᴷ` are the variables' Go stack

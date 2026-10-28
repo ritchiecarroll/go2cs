@@ -62,6 +62,7 @@ The same per-element mechanism handles a destructured element whose **address is
 list, delta := netpoll(0)
 injectglist(&list)
 ```
+<!-- illustration: not converter output -->
 ```csharp
 ref var list = ref heap<gList>(out var Ꮡlist);
 (list, var delta) = netpoll(0);     // list is the box ref-local; delta is newly declared
@@ -165,6 +166,7 @@ The paren-deref fix above closed the *index* form of the target-classification g
 // regexp/onepass.go — makeOnePass: put the empty-match leg in inst.Out
 inst.Out, inst.Arg = inst.Arg, inst.Out
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before — both fields end up holding the ORIGINAL Arg
 inst.Value.Out = inst.Value.Arg;
@@ -190,6 +192,7 @@ reassigned nor declared, no tuple-path gate was satisfied, and the parallel assi
 // internal/trace/internal/tracev1/parser.go (oldtrace before Go 1.26) — Events.Swap, the only mutator sort.Stable calls
 func (l *Events) Swap(i, j int) { *l.Ptr(i), *l.Ptr(j) = *l.Ptr(j), *l.Ptr(i) }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before — the second store re-reads the slot the first just overwrote, so the
 // swap is a NO-OP that duplicates element j over element i
@@ -277,6 +280,7 @@ one slot:
 ```go
 func (b *Writer) flush() (err error) { defer b.handlePanic(&err, "Flush"); … }   // handlePanic: *err = e
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
     heap<error>(out var Ꮡerr);                            // box declared before the try
@@ -603,6 +607,7 @@ func (b *Builder) incrementSectionCount() error {          // vendor/golang.org/
 }
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 // before — count points into a heap copy of b.header; b.header.questions never moves
 count = Ꮡ(b.header).of(dnsmessage_package.Δheader.Ꮡquestions);
@@ -747,6 +752,7 @@ var InitWSA = sync.OnceFunc(func() {          // internal/poll fd_windows.go
     …
 })
 ```
+<!-- illustration: not converter output -->
 ```csharp
 // before — Ꮡ(d) COPY-boxes: WSAStartup filled a copy and the Winsock data was lost (silent)
 Δsyscall.WSAData d = new();
@@ -787,6 +793,7 @@ box:
 c := counter{n: 100}
 sum := applyInt(c.dec, 5, 7)       // (&c).dec — Go: c.n is 88 afterwards
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ref var c = ref heap<counter>(out var Ꮡc);
 c = new counter(n: 100);
@@ -818,6 +825,7 @@ A **blank-identifier element** in a split multi-assign is a C# discard, never a 
 ```go
 _, _, _, _ = fi, fn, gi, gn
 ```
+<!-- illustration: not converter output -->
 ```csharp
 _ = fi;
 _ = fn;

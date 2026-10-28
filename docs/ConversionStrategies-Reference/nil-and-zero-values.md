@@ -14,6 +14,7 @@ themselves, and an operand past `uint32` forces the literal path to emit a bare 
 no implicit conversion to `uint`/`ushort`/`byte`, so the assignment fails **CS0266** even though
 the value fits exactly. The fix folds the whole expression and casts the result:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 //  Go:   *_C_pw_uidp(&sp) = 1<<32 - 2          (_C_uid_t = uint32)
 _C_pw_uidp(Ꮡsp).Value = unchecked((uint32)(4294967294UL));
@@ -98,6 +99,7 @@ write-protected instance per pointer type (`ж<T>.NilBox`; a generated named-poi
 var errorType = reflectlite.TypeOf((*error)(nil)).Elem()
 var x any = (*int)(nil)   // x != nil; %T prints *int
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
 any x = ((ж<nint>)nil);
@@ -226,6 +228,7 @@ A guard written that way takes the wrong branch and the dereference behind it fa
 
 Neither half of the predicate is sufficient alone, which is why the corpus form is a pair:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) { ... }   // and its inverse
 uintptr rusageAddr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeRusage);
@@ -336,6 +339,7 @@ var st struct{ P *AErr }
 sl := make([]*BErr, 1)
 fmt.Printf("%T %T %T\n", ip, st.P, sl[0])   // *int *main.AErr *main.BErr
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ж<nint> ip = default!;
 main_st st = default!;
@@ -378,6 +382,7 @@ func parsePublicKey(…) (any, error) {
     return ecdh.X25519().NewPublicKey(der)   // (*ecdh.PublicKey, error) into (any, error)
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 var (ᴛ1, ᴛ2) = ecdh.X25519().NewPublicKey(der);
 return (ᴛ1.OrTypedNil(), ᴛ2);               // NOT (~ᴛ1, ᴛ2) — that boxes a PublicKey VALUE

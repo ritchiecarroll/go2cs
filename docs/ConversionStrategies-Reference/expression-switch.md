@@ -30,6 +30,7 @@ single-value `is` form is doubly broken there: C# parses `exprᴛ1 is Typ[Untype
 as an array TYPE (CS0246 + CS0270). `canUsePatternMatch` rejects an `*ast.IndexExpr` label the same way
 it rejects a non-constant identifier/selector, so the clause takes the `==`/`AreEqual` comparison the
 multi-value arm already produced:
+<!-- illustration: not converter output -->
 ```csharp
 if (AreEqual(exprᴛ1, Typ[UntypedNil])) {   // NOT `exprᴛ1 is Typ[UntypedNil]`
 ```
@@ -54,6 +55,7 @@ named-string consts). Two converter pieces:
 2. a CONSTANT label that is not an ident/selector/conversion-call (those already render AT the
    wrapper type) casts to the tag type:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var exprᴛ1 = code;
 if (exprᴛ1 == socksStatusSucceeded) {     // named-const label — no cast
@@ -132,6 +134,7 @@ and the identical error for every `[]T`. The default therefore reads the **preco
 built for the mirror shape — the OR of every case condition in the switch, materialized ahead
 of the chain — so it fires only when nothing matches:
 
+<!-- illustration: not converter output -->
 ```csharp
 var exprᴛ1 = v.Kind();
 var matchᴛ2 = exprᴛ1 == reflect.ΔInterface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice);
@@ -216,6 +219,7 @@ target in the if-chain lowering (the case above shows the wrapper). A case endin
 raises a `fallthrough` flag the next clause's guard reads. **A case with both** cannot put the flag
 *after* the wrapper:
 
+<!-- illustration: not converter output -->
 ```csharp
 if (exprᴛ1 == stdISO8601ColonTZ || …) { matchᴛ1 = true;
     do {

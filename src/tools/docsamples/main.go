@@ -17,7 +17,22 @@
 // -base, the ref the sample was written against, and -target, the ref to regenerate from. It never
 // takes a sample's text from anywhere but the target file.
 //
+// A comment that names a ref after its lines reads the file at that ref, at both refs:
+//
+//	<!-- source: src/core/container/list/list.cs:52-55 at 541766413e (before the face lift) -->
+//
+// It shows the code as it was at that commit, so nothing regenerates it; it is only checked.
+//
+// TWO OTHER COMMENTS mark a block the tool does not check. `<!-- source (not checked): <what> -->`
+// names a source the tool cannot read, such as a generator's build output. A label says the block is
+// not an excerpt at all: `<!-- illustration: <why> -->` for code written for the page, and
+// `<!-- attribute-shown: <why> -->` for hand-written code shown for its attributes. Either sits on the
+// line before the fence, or above it with only blank lines and other comments between.
+//
 // HOW A SAMPLE IS TIED TO ITS LINES. The pages use the comment in two ways, and the tool reads both.
+// Either way a run is the sample's lines between two ellipsis lines (a line holding only `…` or
+// `...`), and it is the file's lines exactly, blank lines included; only the blank lines at either end
+// of a run are left out.
 //
 //   - EXPLICIT. The cited ranges are the sample: one run of lines per range, and a line holding only
 //     an ellipsis between two runs. The sample is rewritten from the ranges, so a sample that has
@@ -43,7 +58,13 @@
 //
 // usage, from the repository root:
 //
-//	docsamples [-base REF] [-target REF] [-goroot DIR] [-write] [-recite] [-v] [page ...]
+//	docsamples [-base REF] [-target REF] [-goroot DIR] [-write] [-recite] [-check] [-v] [page ...]
+//
+// -check fails (exit 1) on everything a sample can be wrong in at one ref, each named on a CHECK line:
+// a sample that drifted from its file (it would be rewritten), every refusal but a comment with no
+// fence after it (a note over a table or prose), and a csharp block on a published page with neither a
+// source comment nor a label. It needs -base and -target to be one ref. A moved citation that -recite
+// would correct is left to the RECITED rows.
 //
 // -recite corrects a comment whose lines do not hold its sample: when every run of the sample is in
 // the base file as written, in order, but not inside the cited stretch, the sample is taken where it
@@ -57,7 +78,9 @@
 // REF is a git ref, or WORKTREE for the files on disk. The default for both is HEAD, which rewrites
 // nothing unless a sample has drifted. With no page arguments it reads every tracked page under docs/
 // outside the records (docs/phase3, docs/phase4, docs/doctrine and the release snapshots under
-// docs/validation). Pages are always read from, and with -write written to, the working tree.
+// docs/validation), and the label rule reads the published ones among them (not under an exclude of
+// docs/_config.yml). A page named on the command line is read under every rule. Pages are always read
+// from, and with -write written to, the working tree.
 package main
 
 import (
@@ -77,12 +100,19 @@ import (
 type fileReader func(path string) ([]string, error)
 
 var (
-	sourceComment = regexp.MustCompile(`^(\s*)<!--\s*source:\s*(.*?)\s*-->\s*$`)
-	strictSource  = regexp.MustCompile(`^([A-Za-z0-9_./+\-]+\.[A-Za-z0-9.]+):(\d+(?:-\d+)?(?:\s*(?:,|and)\s*:?\d+(?:-\d+)?)*)((?:\s+at\s+\S+(?:\s+\S+)?)?(?:\s*\(.*\))?)$`)
-	rangeToken    = regexp.MustCompile(`(\d+)(?:-(\d+))?`)
-	fenceOpen     = regexp.MustCompile("^(\\s*)(`{3,}|~{3,})")
-	recordPage    = regexp.MustCompile(`^docs/(phase3|phase4|doctrine)/|^docs/validation/\d+(\.\d+)+/`)
+	sourceComment    = regexp.MustCompile(`^(\s*)<!--\s*source:\s*(.*?)\s*-->\s*$`)
+	uncheckedComment = regexp.MustCompile(`^(\s*)<!--\s*source \(not checked\):\s*(.*?)\s*-->\s*$`)
+	strictSource     = regexp.MustCompile(`^([A-Za-z0-9_./+\-]+\.[A-Za-z0-9.]+):(\d+(?:-\d+)?(?:\s*(?:,|and)\s*:?\d+(?:-\d+)?)*)((?:\s+at\s+\S+(?:\s+\S+)?)?(?:\s*\(.*\))?)$`)
+	atRef            = regexp.MustCompile(`^\s+at\s+([^\s(]+)`)
+	rangeToken       = regexp.MustCompile(`(\d+)(?:-(\d+))?`)
+	fenceOpen        = regexp.MustCompile("^(\\s*)(`{3,}|~{3,})")
+	fenceLanguage    = regexp.MustCompile("^\\s*(?:`{3,}|~{3,})\\s*([A-Za-z#+-]*)")
+	blockLabel       = regexp.MustCompile(`<!--\s*(?:source:|source \(not checked\):|illustration:|attribute-shown:)`)
+	recordPage       = regexp.MustCompile(`^docs/(phase3|phase4|doctrine)/|^docs/validation/\d+(\.\d+)+/`)
 )
+
+// csharpLanguages are the fence languages the label rule reads as C#.
+var csharpLanguages = map[string]bool{"csharp": true, "cs": true, "c#": true}
 
 type span struct{ lo, hi int } // 1-based, inclusive
 
@@ -96,12 +126,14 @@ type sample struct {
 	ranges      []span
 	rangeText   string
 	tail        string
+	ref         string // the ref an `at REF` comment names, read at both refs
+	unchecked   bool   // a `source (not checked):` comment
 }
 
 type outcome struct {
 	page    string
 	line    int
-	class   string // same, rewritten, refused
+	class   string // same, rewritten, refused, unchecked, unlabelled
 	reason  string
 	changed bool // the source file differs between base and target
 	recited bool // the comment's lines were corrected to where the sample is
@@ -121,15 +153,20 @@ func leading(s string) string { return s[:len(s)-len(strings.TrimLeft(s, " \t"))
 func findSamples(lines []string) (samples []sample, loose []int) {
 	for i := 0; i < len(lines); i++ {
 		m := sourceComment.FindStringSubmatch(lines[i])
+		unchecked := false
 
 		if m == nil {
-			continue
+			if m = uncheckedComment.FindStringSubmatch(lines[i]); m == nil {
+				continue
+			}
+
+			unchecked = true
 		}
 
 		j := i + 1
 
 		for j < len(lines) && (strings.TrimSpace(lines[j]) == "" || strings.HasPrefix(strings.TrimSpace(lines[j]), "<!--")) {
-			if sourceComment.MatchString(lines[j]) {
+			if sourceComment.MatchString(lines[j]) || uncheckedComment.MatchString(lines[j]) {
 				break
 			}
 
@@ -162,11 +199,74 @@ func findSamples(lines []string) (samples []sample, loose []int) {
 			continue
 		}
 
-		samples = append(samples, sample{commentLine: i, open: j, close: k, indent: f[1], spec: m[2]})
+		samples = append(samples, sample{commentLine: i, open: j, close: k, indent: f[1], spec: m[2], unchecked: unchecked})
 		i = k
 	}
 
 	return samples, loose
+}
+
+// unlabelledCSharp returns the 0-based fence line of every csharp block that no source comment and no
+// label marks: walking up from the fence over blank lines and comments (a comment may span lines), none
+// of them is one of blockLabel's.
+func unlabelledCSharp(lines []string) []int {
+	var out []int
+	fence := ""
+
+	for i, line := range lines {
+		f := fenceOpen.FindStringSubmatch(line)
+
+		if f == nil {
+			continue
+		}
+
+		if fence != "" {
+			if f[2][0] == fence[0] && len(f[2]) >= len(fence) && strings.TrimSpace(line) == f[2] {
+				fence = ""
+			}
+
+			continue
+		}
+
+		fence = f[2]
+
+		if !csharpLanguages[strings.ToLower(fenceLanguage.FindStringSubmatch(line)[1])] {
+			continue
+		}
+
+		labelled := false
+
+		for k := i - 1; k >= 0 && !labelled; k-- {
+			text := strings.TrimSpace(lines[k])
+
+			if text == "" {
+				continue
+			}
+
+			if !strings.HasSuffix(text, "-->") {
+				break
+			}
+
+			start := k
+
+			for start >= 0 && !strings.Contains(lines[start], "<!--") {
+				start--
+			}
+
+			if start < 0 {
+				break
+			}
+
+			labelled = blockLabel.MatchString(strings.Join(lines[start:k+1], "\n"))
+			k = start
+		}
+
+		if !labelled {
+			out = append(out, i)
+		}
+	}
+
+	return out
 }
 
 // parseSpec reads the strict form of a source comment into the sample.
@@ -178,6 +278,10 @@ func (s *sample) parseSpec() bool {
 	}
 
 	s.path, s.rangeText, s.tail = m[1], m[2], m[3]
+
+	if r := atRef.FindStringSubmatch(s.tail); r != nil {
+		s.ref = r[1]
+	}
 
 	for _, r := range rangeToken.FindAllStringSubmatch(m[2], -1) {
 		lo, _ := strconv.Atoi(r[1])
@@ -198,10 +302,9 @@ func (s *sample) parseSpec() bool {
 }
 
 // runs splits a sample's body into runs, each the body indices of its lines, with the blank lines at
-// either end left out. At level 0 a run ends at an ellipsis line; at level 1 at a blank line too, for
-// a sample that skips lines across a blank line; at level 2 every line is its own run, for a sample
-// that leaves the file's blank lines out.
-func runs(body []string, level int) [][2]int {
+// either end left out. A run ends at an ellipsis line, and only there: a blank line inside a run is the
+// file's blank line, so a sample that skips lines says so with an ellipsis.
+func runs(body []string) [][2]int {
 	var out [][2]int
 	start := 0
 
@@ -222,13 +325,9 @@ func runs(body []string, level int) [][2]int {
 	}
 
 	for i, b := range body {
-		switch {
-		case isEllipsis(b) || (level >= 1 && strings.TrimSpace(b) == ""):
+		if isEllipsis(b) {
 			flush(i)
 			start = i + 1
-		case level >= 2:
-			flush(i)
-			start = i
 		}
 	}
 
@@ -601,14 +700,33 @@ func formatRanges(text string, ranges []span) string {
 	})
 }
 
+// options are the choices one regeneration is made with.
+type options struct {
+	recite bool                        // take a sample found outside its cited lines, and correct the comment
+	labels bool                        // name every csharp block with no source comment and no label
+	at     func(ref string) fileReader // reads an `at REF` comment's file; nil refuses every such comment
+}
+
+// noFence is the reason given for a source comment that no fence follows: a note over a table or
+// prose rather than a sample, and the one refusal -check passes.
+const noFence = "no fenced block follows the source comment"
+
 // regenerate rewrites the sourced samples of one page. It returns the new lines and one outcome per
-// source comment.
-func regenerate(page string, lines []string, base, target fileReader, recite bool) ([]string, []outcome) {
+// source comment, and with opts.labels one per unlabelled csharp block.
+func regenerate(page string, lines []string, base, target fileReader, opts options) ([]string, []outcome) {
 	samples, loose := findSamples(lines)
 	var outcomes []outcome
+	recite := opts.recite
 
 	for _, i := range loose {
-		outcomes = append(outcomes, outcome{page: page, line: i + 1, class: "refused", reason: "no fenced block follows the source comment"})
+		outcomes = append(outcomes, outcome{page: page, line: i + 1, class: "refused", reason: noFence})
+	}
+
+	if opts.labels {
+		for _, i := range unlabelledCSharp(lines) {
+			outcomes = append(outcomes, outcome{page: page, line: i + 1, class: "unlabelled",
+				reason: "a csharp block with no source comment and no label: cite the lines it shows, or mark it <!-- illustration: <why> -->"})
+		}
 	}
 
 	type edit struct {
@@ -625,9 +743,29 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 			outcomes = append(outcomes, o)
 		}
 
+		if s.unchecked {
+			o.class = "unchecked"
+			outcomes = append(outcomes, o)
+			continue
+		}
+
 		if !s.parseSpec() {
 			refuse("the source comment is not in the form FILE:LINES the tool reads: %q", s.spec)
 			continue
+		}
+
+		// A comment that names its ref reads the file there, at both refs: the sample shows that
+		// commit's code, so it is checked and never carried forward.
+		base, target := base, target
+
+		if s.ref != "" {
+			if opts.at == nil {
+				refuse("the comment names the ref %s, and no ref reader was given", s.ref)
+				continue
+			}
+
+			base = opts.at(s.ref)
+			target = base
 		}
 
 		baseFile, err := base(s.path)
@@ -706,18 +844,11 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 			return -1
 		}
 
-		// The coarsest runs that fit are taken: whole runs between ellipsis lines first.
 		alignAny := func(lo, hi int) bool {
-			for level := 0; level <= 2; level++ {
-				rs = runs(body, level)
-				at = make([]span, len(rs))
+			rs = runs(body)
+			at = make([]span, len(rs))
 
-				if len(rs) > 0 && align(lo, hi) < 0 {
-					return true
-				}
-			}
-
-			return false
+			return len(rs) > 0 && align(lo, hi) < 0
 		}
 
 		failed := -1
@@ -726,13 +857,7 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 			// A sample that fits its cited stretch but for a line or two has drifted from its file,
 			// and is rewritten from it.
 			drifted = true
-
-			for level := 0; level <= 1 && !o.drifted; level++ {
-				rs = runs(body, level)
-				at = make([]span, len(rs))
-				o.drifted = len(rs) > 0 && align(lo, hi) < 0
-			}
-
+			o.drifted = alignAny(lo, hi)
 			drifted = false
 		}
 
@@ -744,7 +869,7 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 				s.rangeText = "0-0"
 				o.recited = true
 			} else {
-				rs = runs(body, 0)
+				rs = runs(body)
 				at = make([]span, len(rs))
 				failed = max(align(lo, hi), 0)
 			}
@@ -938,6 +1063,68 @@ func defaultPages() ([]string, error) {
 	return pages, nil
 }
 
+// checkFailure reports whether -check fails an outcome, and why: a drifted sample (one -recite would
+// re-cite is left to its RECITED row), every refusal but a comment with no fence after it, and an
+// unlabelled csharp block.
+func checkFailure(o outcome) (string, bool) {
+	switch {
+	case o.class == "unlabelled", o.class == "refused" && o.reason != noFence:
+		return o.reason, true
+	case o.class == "rewritten" && !o.recited:
+		return "the sample differs from its file by a line or two: re-copy those lines from the file, or mark the lines it skips with an ellipsis (docsamples -write re-copies; read its diff)", true
+	}
+
+	return "", false
+}
+
+// siteExcludes returns the exclude list of docs/_config.yml, each entry a prefix of a page's path
+// under docs/: the pages the site does not publish.
+func siteExcludes() ([]string, error) {
+	data, err := os.ReadFile(filepath.Join("docs", "_config.yml"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var out []string
+	inList := false
+
+	for _, line := range strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n") {
+		text := strings.TrimRight(strings.SplitN(line, "#", 2)[0], " \t")
+
+		switch {
+		case text == "exclude:":
+			inList = true
+		case inList && strings.HasPrefix(strings.TrimSpace(text), "- "):
+			out = append(out, strings.Trim(strings.TrimSpace(strings.TrimSpace(text)[2:]), `'"`))
+		case inList && strings.TrimSpace(text) != "":
+			inList = false
+		}
+	}
+
+	if len(out) == 0 {
+		return nil, fmt.Errorf("docs/_config.yml has no exclude list")
+	}
+
+	return out, nil
+}
+
+func published(page string, excludes []string) bool {
+	rest, ok := strings.CutPrefix(page, "docs/")
+
+	if !ok {
+		return false
+	}
+
+	for _, e := range excludes {
+		if strings.HasPrefix(rest, e) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func main() {
 	baseRef := flag.String("base", "HEAD", "the ref the samples were written against (a git ref, or WORKTREE)")
 	targetRef := flag.String("target", "", "the ref to regenerate from (default: the base ref)")
@@ -945,10 +1132,16 @@ func main() {
 	verbose := flag.Bool("v", false, "list every refusal, not only the errors")
 	recite := flag.Bool("recite", false, "take a sample found in its file outside the cited lines, and correct the comment")
 	goroot := flag.String("goroot", "", "the Go toolchain a GOROOT/<path> comment is read from")
+	check := flag.Bool("check", false, "exit 1 on a drifted or unreadable sample, or an unlabelled csharp block, each on a CHECK line")
 	flag.Parse()
 
 	if *targetRef == "" {
 		*targetRef = *baseRef
+	}
+
+	if *check && *targetRef != *baseRef {
+		fmt.Fprintln(os.Stderr, "-check reads one ref: give -base and -target the same ref, or -base alone")
+		os.Exit(2)
 	}
 
 	// A wrong directory would turn every GOROOT/ comment into a quiet "missing" note.
@@ -960,11 +1153,18 @@ func main() {
 	}
 
 	pages := flag.Args()
+	named := len(pages) > 0
+	var excludes []string
 
-	if len(pages) == 0 {
+	if !named {
 		var err error
 
 		if pages, err = defaultPages(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+
+		if excludes, err = siteExcludes(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
@@ -977,8 +1177,17 @@ func main() {
 		target = gitReader(*targetRef, *goroot)
 	}
 
+	pinned := map[string]fileReader{}
+	at := func(ref string) fileReader {
+		if pinned[ref] == nil {
+			pinned[ref] = gitReader(ref, *goroot)
+		}
+
+		return pinned[ref]
+	}
+
 	count := map[string]int{}
-	var errors, notes, reviews, rewritten []outcome
+	var errors, notes, reviews, rewritten, checks []outcome
 	pagesChanged := 0
 
 	for _, page := range pages {
@@ -997,7 +1206,8 @@ func main() {
 		}
 
 		lines := strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
-		out, outcomes := regenerate(page, lines, base, target, *recite)
+		opts := options{recite: *recite, labels: named || published(page, excludes), at: at}
+		out, outcomes := regenerate(page, lines, base, target, opts)
 		pageChanged := false
 
 		for _, o := range outcomes {
@@ -1011,6 +1221,11 @@ func main() {
 			case o.class == "rewritten":
 				rewritten = append(rewritten, o)
 				pageChanged = true
+			}
+
+			if reason, fails := checkFailure(o); fails {
+				o.reason = reason
+				checks = append(checks, o)
 			}
 
 			if o.review && o.class != "refused" {
@@ -1030,7 +1245,7 @@ func main() {
 		}
 	}
 
-	total := count["same"] + count["rewritten"] + count["refused"]
+	total := count["same"] + count["rewritten"] + count["refused"] + count["unchecked"]
 
 	if total == 0 {
 		fmt.Fprintf(os.Stderr, "VACUOUS: no source comment found in %d page(s)\n", len(pages))
@@ -1069,10 +1284,16 @@ func main() {
 		verb = "changed"
 	}
 
-	fmt.Printf("docsamples: base %s, target %s: %d page(s) read, %d source comment(s): %d the same, %d rewritten, %d refused (%d error(s), %d note(s)); %d page(s) %s\n",
-		*baseRef, *targetRef, len(pages), total, count["same"], count["rewritten"], count["refused"], len(errors), len(notes), pagesChanged, verb)
+	if *check {
+		for _, o := range checks {
+			fmt.Printf("CHECK     %s:%d: %s\n", o.page, o.line, o.reason)
+		}
+	}
 
-	if len(errors) > 0 {
+	fmt.Printf("docsamples: base %s, target %s: %d page(s) read, %d source comment(s): %d the same, %d rewritten, %d refused (%d error(s), %d note(s)), %d not checked; %d unlabelled csharp block(s); %d page(s) %s\n",
+		*baseRef, *targetRef, len(pages), total, count["same"], count["rewritten"], count["refused"], len(errors), len(notes), count["unchecked"], count["unlabelled"], pagesChanged, verb)
+
+	if len(errors) > 0 || *check && len(checks) > 0 {
 		os.Exit(1)
 	}
 }

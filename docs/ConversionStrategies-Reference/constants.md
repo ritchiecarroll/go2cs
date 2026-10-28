@@ -3,12 +3,14 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#constant-values)
 Go constants hold arbitrary-precision literals with expression support, and assignment of a constant to a variable happens at compile time. The converter preserves the constant value (and, in a comment, the original expression). A *typed* Go constant is emitted with its concrete C# type, e.g.:
 
+<!-- illustration: not converter output -->
 ```csharp
 public const nint MaxRetries = 3;
 ```
 
 An *untyped* Go constant is emitted using a golib "untyped" wrapper type — `UntypedInt`, `UntypedFloat`, or `UntypedComplex` — so it can hold a value that does not fit a single primitive and can implicitly adapt to whatever numeric type its use site requires (mirroring how an untyped Go constant takes its type from context). A converted struct is not a legal C# constant type, so the declaration is a get-only **property** rather than a field (see the next subsection for why):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static UntypedInt win => 100;
 public static UntypedInt N => /* 11 + 1 */ 12;
@@ -42,6 +44,7 @@ package (`compress/gzip`, `compress/zlib`).
 A get-only property carries no initialization at all, so declaration order cannot be observed and the
 JIT folds the literal at each use — Go's semantics exactly:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static UntypedInt huffmanNumChunks => /* 1 << huffmanChunkBits */ 512;
 public static ΔKind Uintptr => 12;                        // named-type const
@@ -101,6 +104,7 @@ const (
     folded         = 19.0 / 35.0
 )
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static UntypedFloat C => 5.42857142857142815906e-01;
 internal static UntypedFloat D => -7.05306122448979611050e-01;
@@ -304,6 +308,7 @@ Untyped* wrapper property (`UntypedInt`/`UntypedFloat`/`UntypedComplex`), so `va
 LOCAL to the wrapper type instead of Go's inferred default type, and a later Go conversion like
 `string(codepoint)` fails (CS0030 — no `UntypedInt`→`@string` form; go/types conversions.go). The
 declaration materializes the Go-inferred default type instead — exactly Go's `:=` typing:
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 rune codepoint = replacementChar;    // NOT `var codepoint = …` (binds UntypedInt)
 float64 factor = scale;
@@ -407,6 +412,7 @@ const twoTo53 = 9007199254740992.0
 f <= tenth      // float32: true, tenth rounds to float32 first
 big > twoTo53   // int64 2^53+1: true, compared as integers
 ```
+<!-- illustration: not converter output -->
 ```csharp
 f <= (float32)tenth
 big > (int64)twoTo53

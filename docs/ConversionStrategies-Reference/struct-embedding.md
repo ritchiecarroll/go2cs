@@ -212,6 +212,7 @@ p_A_Other := &p.Inst[pc].Out        // regexp/onepass.go, onePassCopy
 *p_B_Alt = *p_A_Other               // patches the compiled program in place
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 var p_A_Other = Ꮡ((~p).Inst, pc).of(onePassInst.ᏑOut);          // aliases the element
 // NOT: Ꮡ((~p).Inst[pc]).of(onePassInst.ᏑOut)                   // a box over a COPY — write lost
@@ -363,6 +364,7 @@ back a pointer into its own private 251-entry array of zero `semaRoot`s. (Latent
 
 The emission projects through the wrapper's own `Value` getter first:
 
+<!-- illustration: not converter output -->
 ```csharp
 Ꮡ(t.Value, i)      // was: Ꮡ(t, i)
 ```
@@ -412,6 +414,7 @@ The publish becomes an interlocked CAS. Every racing thread allocates, exactly o
 the losers discard their allocation *before* anything can derive an element address from it — which is
 what makes it correct rather than merely narrower:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 private global::System.Runtime.CompilerServices.StrongBox<array<uint64>>? m_value;   // was: array<uint64>?
 
@@ -468,6 +471,7 @@ operator hid it completely, because `EqualityExpression` binds the wrapper's own
 both overrides, delegating to `array<E>`'s element-wise pair so neither depends on the slot's shape
 any more:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 public override bool Equals(object? obj) => obj is Table other && Value.Equals(other.Value);
 
@@ -497,6 +501,7 @@ inside struct `Func`, which C# rejects (CS0542 — a member cannot share its enc
 The `TypeGenerator` Δ-prefixes just that accessor's NAME when its simple name equals the
 `NonGenericStructName` (the field ACCESS on the right keeps the original name), matching the
 `ΔGoType`/`Δslice` collision-rename precedent:
+<!-- illustration: not converter output -->
 ```csharp
 public ref ж<Func> ΔFunc => ref Sym.Value.Func;   // was: `Func => …`, CS0542
 ```
@@ -655,6 +660,7 @@ A chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgU
 
 ## A promotion forwarder's receiver never shares a name with the method's parameters
 go2cs-gen writes a forwarder for every method promoted through an embedded field, and names its receiver `target` (its box form `Ꮡtarget`). A promoted method can have a parameter of that very name: testify's `suite.Suite` promotes `ErrorAs(err error, target any, ...)` from `assert.Assertions`. Sharing the name declares it twice (CS0100), and inside the forwarder it could bind the parameter where the receiver was meant. The receiver therefore takes the converter's `Δ` prefix whenever a parameter already uses the name:
+<!-- illustration: not converter output -->
 ```csharp
 internal static @string Pair(this ByValue Δtarget, @string target) => Δtarget.Base.Pair(target);
 ```
@@ -716,6 +722,7 @@ as **(containing allocation, field token)**, so that encoding is right only whil
 inside the allocation it was handed. A promotion that crosses a pointer does not: the generated
 accessor deref'd on the right,
 
+<!-- illustration: not converter output -->
 ```csharp
 // was — reaches the right storage, but describes the WRONG allocation
 internal static ref FD Ꮡpfd(ref File instance) => ref instance.@file.Value.pfd;
@@ -729,6 +736,7 @@ was, and it was wrong in the one way that cannot be seen locally — `&f.pfd` ta
 The accessor takes the hop **before** the reference is built, handing the inner type's own
 accessor to the inner box:
 
+<!-- illustration: not converter output -->
 ```csharp
 // the pointer is rooted where Go roots it
 internal static ж<FD> Ꮡpfd(ref File instance) => instance.@file.of(global::go.os_package.file.Ꮡpfd);

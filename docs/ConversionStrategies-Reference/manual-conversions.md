@@ -267,6 +267,7 @@ only when a chain is TRUSTED *and* the caller supplied a DNS name.
 
 `[module: go.GoRequiresUnsafe]` closes it. The declaration lives in the file that HAS the requirement, and the emission unions it into the property:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs — the Linux Syscall6 keystone
 [module: go.GoRequiresUnsafe]
@@ -1146,6 +1147,7 @@ func syscall_loadlibrary(filename *uint16) (handle Handle, err Errno)
 
 Left as an ordinary bodyless declaration, it would emit a `partial` that the [`PartialStubGenerator`](source-generators.md#source-generators) turns into a **throwing** stub — dead DLL loading. The converter (`visitFuncDecl.go`) instead recognizes the directive and emits a **forwarder body** that calls the target, bridging any nominal `num:uintptr` type difference through `uintptr` (the linked signatures are structurally identical, so a mismatch is only between two such types):
 
+<!-- illustration: not converter output -->
 ```csharp
 /*linkname*/ internal static partial (ΔHandle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
     var (ᴛ1, ᴛ2) = syscall.loadlibrary(filename);
@@ -1215,6 +1217,7 @@ statement that the two are one function under two names. golang.org/x/sys/unix b
 `Syscall6`, `RawSyscall` and `RawSyscall6` that way (`JMP syscall·Syscall(SB)`), and before this rule each
 was a throwing stub that go-isatty reached inside fatih/color's type initializer:
 
+<!-- illustration: not converter output -->
 ```csharp
 /*linkname*/ public static partial (uintptr r1, uintptr r2, syscall.Errno err) Syscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
     var (ᴛ1, ᴛ2, ᴛ3) = syscall.Syscall((uintptr)trap, (uintptr)a1, (uintptr)a2, (uintptr)a3);
@@ -1535,6 +1538,7 @@ func x509_CFDataCreate_trampoline()
 //go:cgo_import_dynamic x509_CFDataCreate CFDataCreate "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // crypto/x509/internal/macos/darwin/package_info.cs
 [assembly: go.GoCgoImportDynamic("x509_CFDataCreate_trampoline", "CFDataCreate", "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation")]
@@ -2227,6 +2231,7 @@ u = []byte{1, 2, 3}   // legal: []byte is undefined, userDefinedBytes is defined
 `database/sql`'s `TestUserDefinedBytes` is the measured consumer, and its symptom is a data bug
 rather than an error. `convertAssignRows` tries two arms in order:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 if (sv.IsValid() && sv.Type().AssignableTo(dv.Type())) {
     case slice<byte> b: dv.Set(reflect.ValueOf(bytes.Clone(b)));   // arm 1 — CLONES
@@ -2316,6 +2321,7 @@ var recv <-chan int
 var send chan<- int
 var both chan int
 ```
+<!-- illustration: not converter output -->
 ```csharp
 /*<-*/channel<nint> recv;   // all three land on ONE managed type
 channel/*<-*/<nint> send;
@@ -3053,6 +3059,7 @@ hold for COMPLEX, and the counter-example is ordinary: .NET's mixed real/complex
 Go's constant arithmetic and are not even IEEE. `Complex.operator -(double, Complex)` computes the
 imaginary part as `-right.Imaginary` rather than `left.Imaginary - right.Imaginary`, so
 
+<!-- illustration: not converter output -->
 ```csharp
 1230000D - 0D.i()      // imaginary -0
 ```
@@ -3633,6 +3640,7 @@ total to equal `NumGoroutine()`).
 every blocking primitive names its wait around the wait it already performs
 (`docs/phase4/DESIGN-cooperative-scheduler.md` §5.3):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 using (Goroutine.Park(WaitReason.ChanReceive))
     parked.Park.Wait();                       // the EXISTING primitive, untouched

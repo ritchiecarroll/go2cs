@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -137,7 +138,7 @@ func TestSamplesReproduceFromTheirOwnFile(t *testing.T) {
 	)
 
 	src := files(map[string]string{"g/main.cs.target": golden})
-	out, outcomes := regenerate("p.md", in, src, src, false)
+	out, outcomes := regenerate("p.md", in, src, src, options{})
 
 	if got := classes(outcomes); got != "same,same,same,same" {
 		t.Errorf("outcomes %s, want four the same: %+v", got, outcomes)
@@ -161,7 +162,7 @@ func TestADriftedSampleIsRewritten(t *testing.T) {
 	)
 
 	src := files(map[string]string{"g/main.cs.target": golden})
-	out, outcomes := regenerate("p.md", in, src, src, false)
+	out, outcomes := regenerate("p.md", in, src, src, options{})
 
 	if classes(outcomes) != "rewritten" {
 		t.Fatalf("outcomes %+v, want one rewritten", outcomes)
@@ -172,7 +173,7 @@ func TestADriftedSampleIsRewritten(t *testing.T) {
 	}
 
 	// The rewritten page is then stable.
-	again, outcomes := regenerate("p.md", out, src, src, false)
+	again, outcomes := regenerate("p.md", out, src, src, options{})
 
 	if classes(outcomes) != "same" || strings.Join(again, "\n") != strings.Join(out, "\n") {
 		t.Errorf("a second run changed the page again: %+v", outcomes)
@@ -193,7 +194,7 @@ func TestAnotherExcerptOfTheSameShapeIsRefused(t *testing.T) {
 	)
 
 	src := files(map[string]string{"g/main.cs.target": golden})
-	out, outcomes := regenerate("p.md", in, src, src, false)
+	out, outcomes := regenerate("p.md", in, src, src, options{})
 
 	if classes(outcomes) != "refused" || strings.Join(out, "\n") != strings.Join(in, "\n") {
 		t.Errorf("outcomes %+v, want one refused and the page untouched", outcomes)
@@ -212,7 +213,7 @@ func TestAMissingFileIsRefusedByName(t *testing.T) {
 	)
 
 	src := files(map[string]string{"g/main.cs.target": golden})
-	out, outcomes := regenerate("docs/p.md", in, src, src, false)
+	out, outcomes := regenerate("docs/p.md", in, src, src, options{})
 
 	if len(outcomes) != 1 || outcomes[0].class != "refused" {
 		t.Fatalf("outcomes %+v, want one refused", outcomes)
@@ -229,7 +230,7 @@ func TestAMissingFileIsRefusedByName(t *testing.T) {
 	}
 
 	// Present at the base and gone at the target is a stale sample: marked changed, so main exits 1.
-	_, outcomes = regenerate("docs/p.md", in, files(map[string]string{"g/gone.cs.target": "namespace go;\n"}), src, false)
+	_, outcomes = regenerate("docs/p.md", in, files(map[string]string{"g/gone.cs.target": "namespace go;\n"}), src, options{})
 
 	if len(outcomes) != 1 || outcomes[0].class != "refused" || !outcomes[0].changed {
 		t.Errorf("outcomes %+v, want one refused and marked changed", outcomes)
@@ -259,14 +260,14 @@ func TestAGorootCommentIsReadFromTheToolchain(t *testing.T) {
 	)
 
 	src := gitReader("HEAD", goroot)
-	out, outcomes := regenerate("docs/p.md", in, src, src, true)
+	out, outcomes := regenerate("docs/p.md", in, src, src, options{recite: true})
 
 	if classes(outcomes) != "rewritten" || out[0] != "<!-- source: GOROOT/src/pkg/a.go:5 -->" {
 		t.Errorf("with -goroot: outcomes %+v, comment %q; want it re-cited at :5", outcomes, out[0])
 	}
 
 	none := gitReader("HEAD", "")
-	_, outcomes = regenerate("docs/p.md", in, none, none, true)
+	_, outcomes = regenerate("docs/p.md", in, none, none, options{recite: true})
 
 	if classes(outcomes) != "refused" || !strings.Contains(outcomes[0].reason, "missing") {
 		t.Errorf("without -goroot: outcomes %+v, want one refused as missing", outcomes)
@@ -338,7 +339,7 @@ func TestSamplesFollowTheirLinesToTheTarget(t *testing.T) {
 		"```",
 	)
 
-	out, outcomes := regenerate("p.md", in, files(map[string]string{"g/main.cs.target": golden}), files(map[string]string{"g/main.cs.target": lifted}), false)
+	out, outcomes := regenerate("p.md", in, files(map[string]string{"g/main.cs.target": golden}), files(map[string]string{"g/main.cs.target": lifted}), options{})
 
 	if got := classes(outcomes); got != "rewritten,rewritten,rewritten" {
 		t.Errorf("outcomes %s: %+v", got, outcomes)
@@ -368,7 +369,7 @@ func TestARunEndingInsideAResizedStretchIsListedForReview(t *testing.T) {
 
 	// The run's last line, the tag's attribute line, is gone at the target: the run simply ends
 	// before it. Nothing is guessed, so nothing is listed for review.
-	out, outcomes := regenerate("p.md", in, files(map[string]string{"g/main.cs.target": golden}), files(map[string]string{"g/main.cs.target": lifted}), false)
+	out, outcomes := regenerate("p.md", in, files(map[string]string{"g/main.cs.target": golden}), files(map[string]string{"g/main.cs.target": lifted}), options{})
 
 	if len(outcomes) != 1 || outcomes[0].class != "rewritten" || outcomes[0].review {
 		t.Fatalf("outcomes %+v, want one rewritten and not listed for review", outcomes)
@@ -383,7 +384,7 @@ func TestARunEndingInsideAResizedStretchIsListedForReview(t *testing.T) {
 	before := "keep\nalpha one\nbeta two\ngamma three\nend\n"
 	after := "keep\ndelta four\nepsilon five\nzeta six\neta seven\ntheta eight\nend\n"
 	in = page("<!-- source: f.txt:1-3 -->", "```", "keep", "alpha one", "beta two", "```")
-	out, outcomes = regenerate("p.md", in, files(map[string]string{"f.txt": before}), files(map[string]string{"f.txt": after}), false)
+	out, outcomes = regenerate("p.md", in, files(map[string]string{"f.txt": before}), files(map[string]string{"f.txt": after}), options{})
 
 	if len(outcomes) != 1 || outcomes[0].class != "rewritten" || !outcomes[0].review {
 		t.Fatalf("outcomes %+v, want one rewritten and listed for review", outcomes)
@@ -408,7 +409,7 @@ func TestHandEditsAreRefusedAndWrongLinesAreRecited(t *testing.T) {
 	src := files(map[string]string{"g/main.cs.target": golden})
 
 	for _, recite := range []bool{false, true} {
-		if out, outcomes := regenerate("p.md", edited, src, src, recite); classes(outcomes) != "refused" || strings.Join(out, "\n") != strings.Join(edited, "\n") {
+		if out, outcomes := regenerate("p.md", edited, src, src, options{recite: recite}); classes(outcomes) != "refused" || strings.Join(out, "\n") != strings.Join(edited, "\n") {
 			t.Errorf("recite=%v: outcomes %+v, want one refused and the page untouched", recite, outcomes)
 		}
 	}
@@ -422,11 +423,11 @@ func TestHandEditsAreRefusedAndWrongLinesAreRecited(t *testing.T) {
 		"```",
 	)
 
-	if _, outcomes := regenerate("p.md", miscited, src, src, false); classes(outcomes) != "refused" {
+	if _, outcomes := regenerate("p.md", miscited, src, src, options{}); classes(outcomes) != "refused" {
 		t.Errorf("without -recite: outcomes %+v, want one refused", outcomes)
 	}
 
-	out, outcomes := regenerate("p.md", miscited, src, src, true)
+	out, outcomes := regenerate("p.md", miscited, src, src, options{recite: true})
 
 	if classes(outcomes) != "rewritten" || out[0] != "<!-- source: g/main.cs.target:11-14 -->" || strings.Join(out[1:], "\n") != strings.Join(miscited[1:], "\n") {
 		t.Errorf("with -recite: outcomes %+v, comment %q; want the comment corrected and the sample untouched", outcomes, out[0])
@@ -447,7 +448,7 @@ func TestTheFreeFormsAreRefused(t *testing.T) {
 
 	src := files(map[string]string{"g/main.cs.target": golden})
 
-	if _, outcomes := regenerate("p.md", in, src, src, false); classes(outcomes) != "refused,refused" {
+	if _, outcomes := regenerate("p.md", in, src, src, options{}); classes(outcomes) != "refused,refused" {
 		t.Errorf("outcomes %+v, want two refused", outcomes)
 	}
 }
@@ -477,5 +478,138 @@ func TestLineMap(t *testing.T) {
 
 	if same := diffLines(splitLines(golden), splitLines(golden)); !same.same {
 		t.Errorf("a file against itself is not reported the same")
+	}
+}
+
+// PLANT: a run is the file's lines exactly, blank lines included. A sample that skips lines across a
+// blank line, with no ellipsis, is not that stretch of the file; marking the skip makes it one.
+func TestARunIsTheFilesLinesBlankLinesIncluded(t *testing.T) {
+	skipped := page(
+		"<!-- source: g/main.cs.target:5, 11 -->",
+		"```csharp",
+		"[GoType] partial struct Reader {",
+		"",
+		"[GoRecv] public static nint Read(this ref Reader r, slice<byte> p) {",
+		"```",
+	)
+
+	src := files(map[string]string{"g/main.cs.target": golden})
+
+	if _, outcomes := regenerate("p.md", skipped, src, src, options{}); classes(outcomes) == "same" {
+		t.Errorf("a blank line standing for skipped lines read as the file's lines: %+v", outcomes)
+	}
+
+	marked := append(append(append([]string(nil), skipped[:3]...), "…"), skipped[4:]...)
+
+	if _, outcomes := regenerate("p.md", marked, src, src, options{}); classes(outcomes) != "same" {
+		t.Errorf("with the skip marked by an ellipsis: outcomes %+v, want the same", outcomes)
+	}
+}
+
+// A comment that names a ref reads the file at that ref, at both refs, and is never carried forward.
+func TestAnAtRefCommentReadsItsOwnRef(t *testing.T) {
+	in := page(
+		"<!-- source: g/main.cs.target:5 at 0123abc (before the face lift) -->",
+		"```csharp",
+		"[GoType] partial struct Reader {",
+		"```",
+	)
+
+	at := func(ref string) fileReader {
+		if ref != "0123abc" {
+			t.Fatalf("read at %q, want the comment's ref", ref)
+		}
+
+		return files(map[string]string{"g/main.cs.target": golden})
+	}
+
+	// The base and target hold the lifted file, where line 5 reads differently: only the ref is read.
+	lift := files(map[string]string{"g/main.cs.target": lifted})
+	out, outcomes := regenerate("p.md", in, lift, lift, options{at: at})
+
+	if classes(outcomes) != "same" || strings.Join(out, "\n") != strings.Join(in, "\n") {
+		t.Errorf("outcomes %+v, want the same and the page untouched", outcomes)
+	}
+
+	if _, outcomes = regenerate("p.md", in, lift, lift, options{}); classes(outcomes) != "refused" {
+		t.Errorf("with no ref reader: outcomes %+v, want one refused", outcomes)
+	}
+}
+
+// A `source (not checked):` comment marks its block without reading anything, and a label marks a
+// block that is no excerpt. Every other csharp block is named, at its fence, when labels are read.
+func TestTheLabelRuleNamesEachUnmarkedCSharpBlock(t *testing.T) {
+	in := page(
+		"<!-- source (not checked): the generator's output -->", // 1
+		"```csharp",
+		"var generated = 1;",
+		"```",
+		"<!-- illustration: written for the page -->", // 5
+		"<!-- a second comment between the label and the fence -->",
+		"```csharp",
+		"var illustrated = 1;",
+		"```",
+		"<!-- attribute-shown:", // 10
+		"     the label may span lines -->",
+		"",
+		"```cs",
+		"[GoType] partial struct shown {}",
+		"```",
+		"Prose.", // 16
+		"```csharp",
+		"var unmarked = 1;",
+		"```",
+		"<!-- a comment that is not a label -->", // 20
+		"```c#",
+		"var alsoUnmarked = 1;",
+		"```",
+		"```go", // 24
+		"var notCSharp = 1",
+		"```",
+	)
+
+	src := files(map[string]string{})
+	_, outcomes := regenerate("p.md", in, src, src, options{labels: true})
+	var named []int
+
+	for _, o := range outcomes {
+		switch o.class {
+		case "unlabelled":
+			named = append(named, o.line)
+		case "unchecked":
+		default:
+			t.Errorf("unexpected outcome %+v", o)
+		}
+	}
+
+	if fmt.Sprint(named) != "[17 21]" {
+		t.Errorf("unlabelled at %v, want [17 21]", named)
+	}
+
+	if _, outcomes = regenerate("p.md", in, src, src, options{}); classes(outcomes) != "unchecked" {
+		t.Errorf("without labels: outcomes %+v, want only the unchecked comment", outcomes)
+	}
+}
+
+// -check fails a drifted sample, every refusal but a note over prose, and an unlabelled block; it
+// passes a sample that holds, a re-citation (the RECITED rows answer for it), and a marked block.
+func TestCheckFailsWhatASampleCanBeWrongIn(t *testing.T) {
+	cases := []struct {
+		o    outcome
+		fail bool
+	}{
+		{outcome{class: "same"}, false},
+		{outcome{class: "unchecked"}, false},
+		{outcome{class: "rewritten", recited: true}, false},
+		{outcome{class: "refused", reason: noFence}, false},
+		{outcome{class: "rewritten", drifted: true}, true},
+		{outcome{class: "refused", reason: "g/gone.cs.target is missing at the base ref"}, true},
+		{outcome{class: "unlabelled", reason: "x"}, true},
+	}
+
+	for _, c := range cases {
+		if _, fails := checkFailure(c.o); fails != c.fail {
+			t.Errorf("checkFailure(%+v) = %v, want %v", c.o, fails, c.fail)
+		}
 	}
 }

@@ -195,6 +195,7 @@ sealed class CollectingWriter : io.Writer
 }
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var log = new CollectingWriter();
 fmt.Fprintf(log, "%d gophers\n", 3);    // Go calls the C# Write
@@ -234,6 +235,7 @@ anyway.) It converts to and from `System.String` implicitly, transcoding between
 goes wherever Go takes a string, and a `"..."u8` literal goes in as its UTF-8 bytes, with no transcoding. An
 `@string` compares with a C# string literal directly.
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 @string hello = "héllo, 世界";      // System.String converts to @string (UTF-16 to UTF-8)
 string back = hello;                // and back (UTF-8 to UTF-16)
@@ -288,6 +290,7 @@ hits the debugger's evaluation timeout.
 
 `fmt` formats Go values, so give it a `slice<T>` rather than a C# array:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 slice<nint> scores = new nint[] { 7, 8, 9 };
 // fmt.Sprintf("%v", scores) == "[7 8 9]"
@@ -316,6 +319,7 @@ if (err != nil)
 
 Wrapping and matching work as in Go:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var (_, bad) = strconv.Atoi("forty-two");
 error wrapped = fmt.Errorf("reading config: %w", bad);
@@ -401,6 +405,7 @@ sealed class NotReady : fmt.Stringer
 }
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 fmt.Sprint(new NotReady());     // fmt calls the C# String method, under a Go recover()
 // throws the C# InvalidOperationException from NotReady.String()
@@ -431,6 +436,7 @@ foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range wor
 `foreach` gives a slice's `(index, value)` pairs, as Go's `range` does, and LINQ sees the slice as its values. The
 same holds for a Go array and for a named slice or array type:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // words.Count(w => len(w) == 5) == 2
 List<@string> list = new(words);
@@ -528,6 +534,7 @@ counter.Value = 2;
 `goǃ` starts a goroutine, from C# as from converted Go, and a Go channel is `channel<T>`, with `Send` and
 `Receive`:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var results = new channel<nint>(1);
 goǃ(() => results.Send(42));        // Go: go func() { results <- 42 }()
@@ -556,6 +563,7 @@ foreach (var sq in squares) sum += sq;  // Go: for sq := range squares, until it
 (`new channel<T>(0)`) makes the sender wait for a receiver, as in Go, and Go's `select` is available too
 ([Channels and select](ConversionStrategies.md#channels-and-select)).
 
+<!-- illustration: not converter output -->
 ```csharp
 var mailbox = new channel<@string>(1);
 // mailbox.TrySend("hi") is true, and a second TrySend is false: the buffer is full
@@ -614,6 +622,7 @@ uuid.UUID copied = parsed.Clone();  // Go: copied := parsed
 
 uuid's `Version` type is `uuid.ΔVersion`, because the package class also holds the `Version` method:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 uuid.ΔVersion version = parsed.Version();   // Go: uuid.Version
 // version.String() == "VERSION_1"
@@ -642,6 +651,7 @@ slice<int> keys = set.Keys();
 `AsReadOnlySet()` hands any Go map's keys, a plain `map<K,V>` or a named map type like `HashSet<T>`, to C# code
 that takes an `IReadOnlySet<K>`. The view is live and read-only, and a nil map is the empty set:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 IReadOnlySet<int> members = set.AsReadOnlySet();    // a live, read-only view of the keys
 // members.Contains(4) is true

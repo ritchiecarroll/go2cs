@@ -35,6 +35,7 @@ The generated struct wraps the underlying value and implements the comparison an
 var b Flags = 2
 _ = -b            // Go: unsigned unary minus (wraps)
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 Flags b = 2;
 _ = ((Flags)0 - b);   // C#: lowered to (T)0 - x
@@ -114,6 +115,7 @@ The written right-hand side is recovered from `packageTypeSpecRHS` (`writtenUnde
 `testing/fstest`'s own suite sat behind this one CS0030.<!-- Measured at the change: the 7-verdict suite then ran at 6 of 7, the residual being TestShuffledFS's runtime assertion that the returned *shuffledFile satisfies fs.ReadDirFile (the pointer-adapter identity class, unrelated). --> (Guarded by the `DefinedOverNamedComposite` behavioral test: a child package owning the named map/slice/array, defined types over each in both directions plus a same-package one, and the net/mail two-raw-map control in the same program so the hop is proven to still fire.)
 
 **A constant or a basic value converted into a type written over another package's named numeric hops through that base.** logrus' `hooks/slog` declares `type Level logrus.Level` and writes `var _ slog.Leveler = Level(0)`. The wrapper keeps `logrus.Level` in its definition comment, so its operators convert only from that base, and the direct cast `((Level)0)` would need two user-defined conversions (CS0030). The conversion now names the base between the two, one operator per cast:
+<!-- illustration: not converter output -->
 ```csharp
 internal static slog.Leveler _ᴛ2ʗ = ((ΔLevel)(logrus.Level)0);
 fmt.Println((Level)(levellib.Level)(uint32)u);   // a non-constant operand: basic, then base, then target
@@ -204,6 +206,7 @@ The **in-range widened** sibling (from sort's test-suite conversion): a typed-`i
 The same coercion is needed where the converter itself inserts a C# `(int)` cast on a named-numeric value — a **slice bound** (`summary[sc+1:ec]` with `sc`/`ec` of type `chunkIdx`), a **shift count** (`1 << (d % 64)` with `d` of type `statDep`), or the **length of an `unsafe.Pointer`-to-array slice** (`(*[N]T)(ptr)[:n]` → `new slice<T>(new ReadOnlySpan<T>(ptr, (int)n))`, since the `ReadOnlySpan<T>` constructor takes a C# `int` — see *Slicing a pointer-to-array*). A bare `(int)(sc + 1)` is CS0030 for the same reason, so the converter emits `(int)(nuint)(sc + 1)` / `(int)(nint)(d % 64)` — through the named type's underlying basic; a plain `nint`/`nuint` length is narrowed `(int)(n)`. Plain basic operands keep the bare `(int)(x)` form. (Guarded by the `NamedNumericIntCast` behavioral test; the Span length by `StdLibInternalAbi`.)
 
 **Defined types over a struct — forwarded fields.** A Go type definition over a *struct* — `type winlibcall libcall` — makes the underlying struct's fields accessible on the named type (`w.fn`), without promoting its methods. The named type is emitted as `partial struct winlibcall /*libcall*/;` and the `TypeGenerator` wraps the underlying value (`private libcall m_value;`). For the underlying's fields to be reachable, the generator **forwards each as a ref-returning property** over `m_value`:
+<!-- illustration: not converter output -->
 ```csharp
 private libcall m_value;                 // NOT readonly — see below
 [UnscopedRef] public ref nuint fn => ref m_value.fn;
@@ -233,6 +236,7 @@ var a []uint16
 a = append(a, replacementChar)   // replacementChar is an untyped const
 a = append(a, 7, 8)
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 slice<uint16> a = default!;
 a = append(a, (uint16)(replacementChar));
@@ -294,6 +298,7 @@ Relatedly, when the shifted (left) operand of a shift is an untyped constant —
 var u uintptr = 7
 _ = u < 1<<8   // 1<<8 takes type uintptr
 ```
+<!-- illustration: not converter output -->
 ```csharp
 uintptr u = 7;
 _ = u < (uintptr)1 << 8;
@@ -304,11 +309,13 @@ The **narrow-width** shift is a *behavioral* requirement, not just a compile fix
 <!-- source: src/tests/Behavioral/NarrowShiftVarCount/main.go:31, 34 -->
 ```go
 	fmt.Println(cb << k)    // 144: var left operand
+	…
 	fmt.Println(cb << 3)    // 64: constant count, var operand — 1600 wraps at byte width
 ```
 <!-- source: src/tests/Behavioral/NarrowShiftVarCount/main.cs.target:26, 29 -->
 ```csharp
     fmt.Println(cb.Lsh(k));
+    …
     fmt.Println((byte)(cb << 3));
 ```
 
@@ -327,6 +334,7 @@ const two32 = 1 << 32
 var a uint64 = 100
 _ = a*two32 + 3
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static UntypedInt two32 => /* 1 << 32 */ 4294967296;   // the package-level const
 uint64 a = 100;
@@ -349,6 +357,7 @@ const below1e23 = 99999999999999974834176
 var ftoatests = []ftoaTest{{below1e23, 'e', 17, "9.99999999999999748e+22"}}
 _ = x > Two129                     // Two129 = 1<<129
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
     GoBigConst.Parse("99999999999999974834176");
@@ -393,6 +402,7 @@ only unrepresentable operand is the *reference*, which the shift path retyped to
 `constExprHasBeyondUint64UntypedConstRef` — any PROPER subexpression that is a named untyped-const
 reference fitting neither int64 nor uint64 (the `GoBigConst` emission, `isBigIntegerBackedConstRef`):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 GoBigConst mask = /* 0 | (1<<26-1)<<'A' | … */
         maskᶜ;
@@ -432,6 +442,7 @@ func validHeaderFieldByte(c byte) bool {
 	…
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
 private static readonly GoBigConst maskᶜ = GoBigConst.Parse("116972063611741436228934278030836105216");
@@ -526,6 +537,7 @@ A Go defined type whose underlying type is `bool` (`type boolVal bool`) is model
 case boolVal:
     return !y          // y is boolVal, result must be the Value interface
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 case boolVal y: {
     return ((boolVal)(!(bool)y));
@@ -541,6 +553,7 @@ C# parses `(T)-value` as a cast only when `T` is a keyword primitive (`int`, `lo
 lvl := level(-1)          // named conversion
 return -1 << uint(bits)   // int64-typed wide shift (func mask(bits int) int64)
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var lvl = (level)(-1);
 return ((int64)(-1)).Lsh((nuint)bits);
@@ -560,6 +573,7 @@ The named-numeric *identity-constant* arm (convCallExpr — reached when go/type
 rf(3 / 2)                  // type rf float64 -- Go folds 3/2 as untyped INTEGER division: 1
 renamedComplex64(3 + 4i)   // type renamedComplex64 complex64
 ```
+<!-- illustration: not converter output -->
 ```csharp
 ((rf)(3 / 2))                      // was: ((rf)3 / 2)
 ((renamedComplex64)(3F + 4F.i()))  // was: ((renamedComplex64)3F + 4F.i())

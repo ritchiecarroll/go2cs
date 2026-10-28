@@ -66,6 +66,7 @@ An overridden member is untouched (it forwards to the struct's own method, `this
 
 **Pointer-sourced interface values use a generated ADAPTER, not the value-boxing partial struct.**<!-- 2026-07-03 --> A Go interface value created from a pointer — `var s Iface = &t`, `New(new(lockedSource))`, `Rand{src: &runtimeSource{}}` — holds the **pointer**: every call through the interface mutates the original object, `s.(*T)` recovers that same pointer, and interface equality is pointer identity. Dereferencing the box into the C# interface (`~box`) would box a **copy** — an aliasing divergence — and could not serve **direct-ж** receiver methods at all (a method that takes the address of a receiver field is emitted with the box AS its receiver, `this ж<T>`, which a struct's `this` can never bind — math/rand `lockedSource` CS1929). The converter records such casts as `[assembly: GoImplement<T, Iface>(Pointer = true)]`, and `ImplementGenerator` emits a sealed **adapter class** instead:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal sealed class runtimeSourceжSource : go.math.rand_package.Source, IжAdapter
 {
@@ -113,6 +114,7 @@ public partial interface Speaker
 
 **Tier 1 — `ΔI<ΔTTarget>`, delegate-bound, for a REFERENCE-typed dynamic value** (every `ж<X>` receiver box, i.e. every pointer-sourced Go interface value — the dominant case). Each interface method is a *pre-bound delegate*, so a forwarded call costs a delegate invocation, not a reflective one; that matters because a wrapper is obtained once and then called possibly millions of times (a duck-typed `io.Reader` inside `io.Copy`, a wrapped `sort.Interface`'s `Less`/`Swap`). It closes over the **element** type — the pointee — because that is what makes *both* receiver forms bindable, and the dispatch encodes Go's `*T` method-set rule directly:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal sealed class ΔSpeaker<ΔTTarget> : Speaker, IInterfaceAdapter
 {
@@ -146,6 +148,7 @@ internal sealed class ΔSpeaker<ΔTTarget> : Speaker, IInterfaceAdapter
 
 **The forwarder dispatches on ARITY.**<!-- 2026-07-26 --> Building a fresh `object?[args.Length + 1]` on every forwarded call, purely to prepend the receiver, would allocate and zero 32 B per call even for a Go method with no parameters at all, which is the common case (`Len`, `Error`, `String`, `Less`). The bound members are static extension methods, so `MethodInvoker`'s `obj` is always `null` and the receiver occupies the first *argument* slot; the BCL's fixed-arity overloads take up to four arguments, so `GoShellBinding.Invoke` forwards Go arities **0–3** with no array and arity 4+ through the `Span` path. Measured on `PerfIfaceShell` (windows/amd64, .NET 9; one object-tier call per iteration, provisional): JIT **633.7 → 588.0 ms**, Native AOT **760.1 → 727.8 ms** — the AOT column matters more in principle, because the binder's belt degrades *both* shell tiers to this one there, so the cost is paid twice per iteration rather than once. The boxed *return* is not fixable this way: `MethodInvoker` returns `object?` and the shell unboxes, and removing that needs a non-reflective forwarder, which needs a generic instantiation — exactly what this tier exists to avoid. (Guarded by the `ShellForwardArity` behavioral test: one anonymous interface spanning arities 0–5 plus an int-returning and a mixed-parameter shape, every method folding its arguments into the printed result so a dropped, duplicated or reordered argument diverges from `go run` instead of passing silently. An instrumented run confirms all four fixed arms *and* the `Span` fallback are reached.)
 
+<!-- illustration: not converter output -->
 ```csharp
 internal sealed class ΔSpeakerᴛObj : Speaker, IInterfaceAdapter
 {
@@ -219,6 +222,7 @@ An **EXPLICIT pointer-to-interface conversion** — Go's `image.Image(dst)` with
 With the bare name both fail with CS0246 on the base list and one CS0540 per member. The adapter's class NAME is unaffected: it is composed from the simple interface name with the type arguments stripped. Only the generated file's hint name carries the full spelling. For a non-generic interface the two spellings are identical.
 
 <!-- generated: ImplementGenerator output for src/tests/Behavioral/GenericInterfaceCrossPackage, line 26; Generated/ is untracked, read 2026-10-16 -->
+<!-- illustration: not converter output -->
 ```csharp
 internal sealed class decKeyжDecapKey : global::go.GenericInterfaceCrossPackage.keylike_package.DecapKey<global::go.GenericInterfaceCrossPackage.keylike_package.EncapKey>, IжAdapter
 ```
@@ -273,6 +277,7 @@ render without a modifier), so it is still *required* — dropping it is CS0535,
 interface member cannot be implemented cross-assembly at all. Because Go never lets a sealing marker
 be called from outside its package, the adapter satisfies the member with a **no-op / `default!`
 stub** instead of forwarding:
+<!-- illustration: not converter output -->
 ```csharp
 void global::go.go.ast_package.Expr.exprNode() { }                       // void marker
 global::go.…parse_package.Tree global::go.…parse_package.Node.tree() => default!;   // non-void marker
@@ -494,6 +499,7 @@ path, and `MethodInfo`'s own `IMethodSymbol` overload) share one tuple construct
 ref-kind or it matches no member, CS0539). `EscapeCsKeyword` is a no-op for every non-keyword and for
 an already-escaped name, so all other generated output is byte-identical:
 
+<!-- illustration: not converter output -->
 ```csharp
 bool global::go.sync_test_package.mapInterface.CompareAndSwap(object key, object old, object @new)
     => m_box.CompareAndSwap(key, old, @new);
@@ -535,6 +541,7 @@ casting `*parse.RangeNode` to `parse.Node`, where `RangeNode` embeds `BranchNode
 value embeds from metadata (`GetForeignValueEmbeds`: a member whose name equals its type's simple
 name) and, for a still-unbound member the embed's package class declares as a public value/ref-receiver
 extension (`GetForeignValueReceiverMethods`), forwards through the embed's package-class STATIC:
+<!-- illustration: not converter output -->
 ```csharp
 global::go.@string global::go.…parse_package.Stringer.String() =>
     global::go.…parse_package.String(ref m_box.Value.BranchNode);
@@ -643,6 +650,7 @@ such base: the `&`-machinery boxes a COPY (`Ꮡ(x.@object)`, no `.of(` anywhere)
 fall through to the spelled embed hop, `internal` cross-assembly (**CS1061**). A sub-arm recognizes a pointer-typed
 receiver expression that renders as the raw box (pointer-typed and not
 deref-aliased) and calls the promoted member straight on it — the box IS the receiver:
+<!-- illustration: not converter output -->
 ```csharp
 pkg.Scope().Lookup(name)._<ж<types.TypeName>>().Type();   // binds the public Type(this ж<TypeName>)
 ```
@@ -688,6 +696,7 @@ The gate is the Go rule — any direct, non-generic VALUE embed promotes its box
 and the shim keeps its `ж<S>`-only receiver, which is what preserves the narrowing half (a `Uint` VALUE
 must still miss the same anonymous interface):
 
+<!-- illustration: not converter output -->
 ```csharp
 public static ж<BasicType> Basic(this ж<UintType> Ꮡtarget) => Ꮡtarget.of(UintType.ᏑBasicType).Basic();
 ```
@@ -790,6 +799,7 @@ by construction. Promotion through a marker-backed **depth-1** value embed (`pub
 CommonType { get; }` — a hard converter marker the name heuristic is not) resolves BEFORE the
 interface-field arm:
 
+<!-- illustration: not converter output -->
 ```csharp
 ж<CommonType> ΔType.Common() => m_box.of(PtrType.ᏑCommonType).Common();   // not m_box.Value.Type.Common()
 ```
@@ -855,6 +865,7 @@ The unmarked panic text shows the shape: `interface conversion: interface {} is
 colorlike.NRGBA, not colorlike.NRGBA` — `%T` unwraps (through `TryAdapterWrappedType`) where the
 unmarked assert would not. The third marker mirrors the other two exactly:
 
+<!-- illustration: not converter output -->
 ```csharp
 public interface IValueAdapter : IGoAdapter { object? Value { get; } }
 ```
@@ -1314,6 +1325,7 @@ expansion falls back to the enclosing `ExprStmt`'s `v.hoistedDecls` buffer — G
 `registerCover2(deps.InitRuntimeCoverage())` (go2cs's own `testing` is hand-written), where `InitRuntimeCoverage`
 returns three values:
 
+<!-- illustration: not converter output -->
 ```csharp
 var (ᴛ1, ᴛ2, ᴛ3) = deps.InitRuntimeCoverage();
 registerCover2(ᴛ1, ᴛ2, ᴛ3);
@@ -1533,10 +1545,10 @@ partial interface constraints_permitted<T, V> /*dyn*/ {
 }
 partial interface newCounter_R0 : constraints_permitted<ж<counter>, nint> {}
 partial interface newDNS_R0 : constraints_permitted<@string, @string> {}
-
+    …
     internal constraints_permitted<T, V> permitted;
     internal constraints_permitted<T, V> excluded;
-
+…
 internal partial interface newDNS_R0 /*dyn*/ {
     new (@string, bool) query(@string _);
 }
@@ -1778,6 +1790,7 @@ behavioral corpus, 495 behavioral projects at the time --> Guarded by
 
 ## A struct-literal interface field takes a pointer element's adapter
 A composite struct literal whose field is an INTERFACE type, initialized with a POINTER element whose pointer-receiver method set satisfies that interface, must record and route the same `*T`→interface adapter a call argument does — `&handlerWriter{l.Handler(), &logLoggerLevel, capturePC}` (log/slog SetDefault), where field `level` is `Leveler` and `*LevelVar` implements Leveler via a pointer-receiver `Level()`. The struct-field interface routing (`checkStructFields`) records/routes a NAMED VALUE element that satisfies the field (`DecodingError{InvalidIndexError(idx)}`); matching only a `*types.Named` element would let a POINTER element fall through, record no `GoImplement<LevelVar, Leveler>(Pointer = true)`, and pass the box `ᏑlogLoggerLevel` bare to the interface-typed constructor parameter (CS1503). The detection takes the concrete satisfying type from the element OR the pointee of a POINTER element (`types.Implements` tested on the element's own pointer method set, the non-interface guard tested on the pointee), so a pointer element records and routes exactly like the value case:
+<!-- illustration: not converter output -->
 ```csharp
 new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC)
 // [assembly: GoImplement<LevelVar, Leveler>(Pointer = true)]  -- in package_info.cs
@@ -1827,6 +1840,7 @@ generated constructor bare. net `ip_test`'s `[]*struct{ in IP; str string; byt [
 **embedded** `error` field — would hand a `ж<AddrError>` to the `error` parameter with no
 `AddrErrorжerror` wrap (CS1503). The arm makes the same record+route call its two siblings do:
 
+<!-- illustration: not converter output -->
 ```csharp
 Ꮡ(new ipStringTestsᴛ1(new IP(…), "?0123456789abcdef"u8, default!,
     new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: …, Addr: …)))))

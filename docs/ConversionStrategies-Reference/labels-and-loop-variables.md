@@ -17,6 +17,7 @@ OuterLoop:
     }
 ```
 becomes (with `a` a `[][]*int`; the Go label stays in place, and the `break` target is emitted as `break_OuterLoop:;` after the loop):
+<!-- illustration: not converter output -->
 ```csharp
 OuterLoop:
     for (i = 0; i < n; i++) {
@@ -48,6 +49,7 @@ RowLoop:
     }
 ```
 becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — so `goto continue_RowLoop` from the inner loop lands there and the **outer** loop proceeds to its next iteration; `break_RowLoop:;` follows the outer loop):
+<!-- illustration: not converter output -->
 ```csharp
 RowLoop:
     foreach (var (y, row) in rows) {
@@ -86,6 +88,7 @@ for _, r := range s {  // r is a rune
     }
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 foreach (var (_, rᴛ1) in s) {
     var r = rᴛ1;       // mutable local copy
@@ -111,6 +114,7 @@ for _, test := range tests {
     fmt.Println(test.x.String())   // pointer receiver on a FIELD of the range var — CS1655
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var (_, vᴛ1) in tests) {
     var test = vᴛ1;                // mutable, addressable per-iteration copy
@@ -219,6 +223,7 @@ for i := 0; i < 3; i++ {
 }
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;                    // this iteration's own i
@@ -325,6 +330,7 @@ is one, or a variadic parameter that the converter emits as golib's stack-only `
 for i := range s { … }
 for range s { … }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var i in range(s)) { … }
 foreach (var _ᴛ1 in range(s)) { … }
@@ -443,6 +449,7 @@ for i, v := range a {
 
 The range expression is therefore an array value-copy site of its own (see [Array VALUE-COPY at every transfer site](slices-and-arrays.md#array-value-copy-at-every-transfer-site-range-composite-return-send-append--deep-for-nested-arrays), whose `range` entry covers the iteration VARIABLE, not the operand):
 
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var (i, v) in a.ΔRangeSnapshot()) { … }        // array value  — snapshot, Go's copy
 foreach (var (i, v) in h.arr.ΔRangeSnapshot()) { … }    // struct field — likewise a value

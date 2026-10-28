@@ -15,7 +15,7 @@ descriptor carrier stamped `[GoLocalName]`, declared on the package's accessibil
 <!-- source: src/tests/Behavioral/NamedEmptyInterface/main.go:9, 13, 17 -->
 ```go
 type I interface{}
-
+…
 func show(v I) { fmt.Printf("I: %T %v\n", v, v) }
 …
 func back(n int8) I { return n }
@@ -120,6 +120,7 @@ sp := [3]any{1: "sp"}             // sparse-array element
     var m = new map<@string, any>{["k"] = (@string)"mv"u8};
     var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
     var s = new any[]{(@string)"a"u8, (@string)"b"u8}.slice();
+    …
     var sp = new array<any>(3){[1] = (@string)"sp"u8};
 ```
 
@@ -225,6 +226,7 @@ _ = holder{v: 3}             // keyed struct field
 _ = any(7).(int)             // explicit conversion to any
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)8, i);
 fmt.Sprintf("%s%c%03d"u8, d, (int32)(os.PathSeparator), seq);

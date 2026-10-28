@@ -490,3 +490,140 @@ The blocks made real, at their fence line now:
 | `docs/ConversionStrategies-Reference/type-aliasing.md:83` | src/tests/Behavioral/GenericTypeAlias/main.cs.target:15-22, 34 |
 | `docs/ConversionStrategies-Reference/value-receiver-delegates.md:323` | src/tests/Behavioral/BlankIdentifierCollision/main.cs:77-78, 80, 88 |
 | `docs/ConversionStrategies.md:12173` | src/core/sync/atomic/value.cs:6-18, 33-35 |
+
+## 2026-10-28: the guard, the tool and the labels (COORD's rulings R1-R5)
+
+COORD ruled on the guard and the uncited blocks after the audit found that `src/tools/docsamples` already
+regenerates sourced samples and that repoguard's `TestDocsSamplesHoldTheirLines` already runs it:
+
+- **R1, R2: one tool, where it is.** `src/tools/docsamples` is extended, and the guard runs it. Nothing moves into
+  the converter module.
+- **R3: a run is exact.** The sample's lines between `…` lines are the file's lines, blank lines included.
+- **R4: the existing labels.** `<!-- illustration: <why> -->`, and `<!-- attribute-shown: <why> -->` as the second
+  accepted form. No new spelling.
+- **R5:** this branch carries the guard, the tool, the labels and the near-real blocks. The adapted blocks still
+  owed a real excerpt take `<!-- illustration: adapted, owed a real excerpt -->`, are listed below, and go to a
+  follow-up branch after the parity train's end regen, which re-copies every sample anyway.
+
+**What the tool reads now.**
+
+- A run ends only at an ellipsis line. The blank-line run levels are gone, so a sample that skips lines says so
+  with `…`.
+- `<!-- source: <path>:<lines> at <ref> (<note>) -->` reads the file at that ref, at both refs, and is checked,
+  never carried forward. `BeforeAndAfterTheFaceLift.md`'s nine "before" samples use it (`at 541766413e`).
+- `<!-- source (not checked): <what> -->` marks a block whose source the tool cannot read. Two use it: the
+  NoInlining generator's output and the `.csproj` lines a converter test holds as Go strings.
+- The label rule: a csharp block on a published page with no source comment and no label is reported, at its fence.
+- `-check` (one ref only) prints a `CHECK` line and exits 1 for a drifted sample, every refusal except a comment
+  with no fence after it, and an unlabelled csharp block.
+
+**The guard.** `TestDocsSamplesHoldTheirLines` runs `docsamples -recite -check` and fails on every CHECK line, as
+well as on the moved citations it already failed on. `TestDocsSamplesCheckNamesEachPlantedSample` is its positive
+control: a planted page beside a planted source in `testdata/docsamples-planted/`, read from the working tree,
+where each of four planted defects must be named at its line and nothing else. Red-first on the real tree: one
+changed line in `shadowing.md`'s `sumWithLenLocal` sample failed the guard at that sample's comment line
+(`shadowing.md:26`), and the page was restored byte for byte (sha256 equal). Each new rule of the tool was broken
+once in a scratch copy, and its own test failed.
+
+**Not built: multi-file citations.** No sample has one. The 13 comments that name more than one file are notes
+over tables and prose, with no fence after them. `-check` refuses a multi-file sample citation by name, so the
+first one written asks for the reading.
+
+**Fixed under the exact reading.** Seventeen samples skipped lines across a blank line, or had drifted, and passed
+the old blank-line levels:
+
+- Fourteen took an explicit `…` where they skip lines (`empty-interface.md` ×2, `maps-and-channels.md`,
+  `source-generators.md` ×3, `named-numeric-types.md` ×2, `shadowing.md`, `slices-and-arrays.md` ×2,
+  `interfaces.md`, `package-conversion.md`, `README.md`). `maps-and-channels.md`'s citation narrows to
+  `11, 49-51`.
+- Two Go samples were stale and are re-copied: `ConversionStrategies.md`'s `path_test.go` imports (the file imports
+  both `"path"` and `. "path"` at Go 1.26.10, the Go half of the `using Δpath` fix above), and its `ForVariants.go`
+  loop (the indentation the file has).
+- One is not an excerpt: `ConversionStrategies.md`'s `.csproj` lines, which the converter test holds as Go string
+  literals, now cite it as `source (not checked):` with the line quoted.
+
+The tool's own drift repair (`-write` at one ref) rewrote these wrongly: under exact runs, a skip with no ellipsis
+reads as one run, and the near-match it takes can be another stretch of the file (`partial struct Set<T>` became
+`}`). Those writes were reverted and the samples fixed by hand. The CHECK message says to read the diff of a
+`-write`.
+
+**The labels.**
+
+| On the published pages | csharp blocks |
+|:--|--:|
+| cited (`source:`) | 583 |
+| not checked (`source (not checked):`) | 1 |
+| `illustration:`, written for the page | 178 |
+| `illustration: adapted, owed a real excerpt` | 63 |
+| `attribute-shown:` | 10 |
+| **total** | **835** |
+
+The 63 are the adapted blocks, 62 of them labelled here and `pointers.md`'s `newPinnerBits` sample, relabelled
+from `not converter output` (the BOARD's 2026-10-08 entry already names it owed a rewrite). Fence lines at this
+block's commit:
+
+| Block owed a real excerpt |
+|:--|
+| `docs/ConsumingGoFromCSharp.md:199` |
+| `docs/ConsumingGoFromCSharp.md:239` |
+| `docs/ConsumingGoFromCSharp.md:294` |
+| `docs/ConsumingGoFromCSharp.md:323` |
+| `docs/ConsumingGoFromCSharp.md:409` |
+| `docs/ConsumingGoFromCSharp.md:440` |
+| `docs/ConsumingGoFromCSharp.md:538` |
+| `docs/ConsumingGoFromCSharp.md:626` |
+| `docs/ConsumingGoFromCSharp.md:655` |
+| `docs/ConversionStrategies-Reference/constants.md:14` |
+| `docs/ConversionStrategies-Reference/constants.md:312` |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:489` |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:1119` |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:1232` |
+| `docs/ConversionStrategies-Reference/defer-panic-recover.md:1240` |
+| `docs/ConversionStrategies-Reference/expression-switch.md:59` |
+| `docs/ConversionStrategies-Reference/golib-namespace.md:56` |
+| `docs/ConversionStrategies-Reference/labels-and-loop-variables.md:92` |
+| `docs/ConversionStrategies-Reference/manual-conversions.md:271` |
+| `docs/ConversionStrategies-Reference/manual-conversions.md:1542` |
+| `docs/ConversionStrategies-Reference/manual-conversions.md:2235` |
+| `docs/ConversionStrategies-Reference/manual-conversions.md:3644` |
+| `docs/ConversionStrategies-Reference/maps-and-channels.md:11` |
+| `docs/ConversionStrategies-Reference/maps-and-channels.md:256` |
+| `docs/ConversionStrategies-Reference/maps-and-channels.md:353` |
+| `docs/ConversionStrategies-Reference/multi-assignment.md:284` |
+| `docs/ConversionStrategies-Reference/multi-assignment.md:797` |
+| `docs/ConversionStrategies-Reference/multi-result-and-comma-ok.md:120` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:39` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:240` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:361` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:406` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:446` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:541` |
+| `docs/ConversionStrategies-Reference/named-numeric-types.md:557` |
+| `docs/ConversionStrategies-Reference/nil-and-zero-values.md:18` |
+| `docs/ConversionStrategies-Reference/nil-and-zero-values.md:103` |
+| `docs/ConversionStrategies-Reference/nil-and-zero-values.md:232` |
+| `docs/ConversionStrategies-Reference/nil-and-zero-values.md:343` |
+| `docs/ConversionStrategies-Reference/pointers.md:25` |
+| `docs/ConversionStrategies-Reference/pointers.md:245` |
+| `docs/ConversionStrategies-Reference/pointers.md:649` |
+| `docs/ConversionStrategies-Reference/pointers.md:962` |
+| `docs/ConversionStrategies-Reference/pointers.md:985` |
+| `docs/ConversionStrategies-Reference/pointers.md:1349` |
+| `docs/ConversionStrategies-Reference/pointers.md:1613` |
+| `docs/ConversionStrategies-Reference/pointers.md:1979` |
+| `docs/ConversionStrategies-Reference/shadowing.md:248` |
+| `docs/ConversionStrategies-Reference/shadowing.md:607` |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1017` |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1283` |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1319` |
+| `docs/ConversionStrategies-Reference/slices-and-arrays.md:1473` |
+| `docs/ConversionStrategies-Reference/strings.md:141` |
+| `docs/ConversionStrategies-Reference/strings.md:411` |
+| `docs/ConversionStrategies-Reference/struct-embedding.md:418` |
+| `docs/ConversionStrategies-Reference/struct-embedding.md:475` |
+| `docs/ConversionStrategies-Reference/struct-types.md:660` |
+| `docs/ConversionStrategies-Reference/type-aliasing.md:20` |
+| `docs/ConversionStrategies-Reference/type-aliasing.md:44` |
+| `docs/ConversionStrategies-Reference/type-switch.md:67` |
+| `docs/ConversionStrategies-Reference/variable-initialization-order.md:105` |
+| `docs/ConvertingAModule.md:131` |

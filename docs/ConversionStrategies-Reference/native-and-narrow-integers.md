@@ -6,6 +6,7 @@ In Go the `int` and `uint` types are sized according to the platform build targe
 
 **Narrow-integer arithmetic.** A subtle semantic gap: Go evaluates arithmetic on a sub-`int`-width integer (`int8`/`uint8`/`int16`/`uint16`) at that operand's own width, with overflow **wrapping** — `var a, b uint8 = 200, 100; a + b` is `44` (300 mod 256). C#, however, **promotes** arithmetic on `byte`/`sbyte`/`short`/`ushort` to `int`, so `a + b` is `300` and is *not* implicitly assignable back to the narrow type. Where a narrow-arithmetic result is used in a context that requires the narrow type — e.g. passed to a narrow-typed parameter — the converter emits an explicit cast back to that type, which both compiles (the implicit `int`→narrow conversion is rejected, CS1503) and restores Go's wrapping:
 
+<!-- illustration: not converter output -->
 ```csharp
 takeU8((uint8)(a + b));   // Go take(a + b), a/b uint8 → 44 (wraps), not 300
 takeU8((uint8)((uint8)(~a)));   // Go take(^a) → 55
@@ -78,6 +79,7 @@ GolibTests' `GoShiftNegativeCountTests`.)
 
 **A beyond-int32 integer constant takes the width of the type it RESOLVED to, not the untyped default.**<!-- 2026-08-08 --> A Go integer constant outside the C# `int32` range cannot be written bare in a native-width slot — `long` has no implicit conversion to `nint` — so the converter wrapped every one of them in `(nint)…L`. That is right only when the constant really is a Go `int`. When it resolved to `int64` the cast is the wrong type: `int64` **is** C# `long`, so the digits alone denote it exactly, and the `(nint)` both truncates on a 32-bit target and reads nothing like the Go source. The compiler says so — `CS8778`, "constant value may overflow `nint` at runtime" — and most of the corpus's such warnings came from one table, `math/rand`'s `rngCooked [607]int64`:
 
+<!-- illustration: not converter output -->
 ```csharp
 // before — every element carries the untyped-int DEFAULT type
 internal static array<int64> rngCooked = new int64[]{

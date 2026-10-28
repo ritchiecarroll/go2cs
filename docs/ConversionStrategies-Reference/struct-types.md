@@ -587,6 +587,7 @@ type explicitly:
 ```go
 CheckEqual(func(x int) int { return 0 }, func(x int) int32 { return 0 }, nil)
 ```
+<!-- illustration: not converter output -->
 ```csharp
 CheckEqual(nint (nint x) => 0, int32 (nint x) => 0, nil);
 ```
@@ -609,6 +610,7 @@ gone outright:
 ```go
 FuncMap{"die": func() bool { panic("die") }}   // text/template exec_test
 ```
+<!-- illustration: not converter output -->
 ```csharp
 ["die"u8] = bool () => { throw panic("die"); }  // was: () => { throw panic("die"); }
 ```
@@ -631,6 +633,7 @@ the panic-only literal has NO arm to infer from, this has arms that contribute n
 fixes a delegate type, and inference fails outright (CS8917, then CS1662/CS8716 on each return).
 The declared result tuple is stated explicitly through `generateResultSignature`, the same helper
 the generic-inference arm already used:
+<!-- illustration: not converter output -->
 ```csharp
 ["pred"u8] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ꓸꓸꓸany aʗp) => { … }))
 ```
@@ -653,6 +656,7 @@ above:
 fn := func() (interface{}, error) { panic("boom") }
 open := func(name string) (io.ReadCloser, error) { return os.Open(name) }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var fn = (any, error) () => {
     throw panic("boom");
@@ -1054,6 +1058,7 @@ func invoke(f func(int, string) string, n int, s string) string { return f(n, s)
 var h Handler = describe
 invoke(h, 1, "a")
 ```
+<!-- illustration: not converter output -->
 ```csharp
 invoke(new Func<nint, @string, @string>(h), 1, "a");
 ```
@@ -1385,6 +1390,7 @@ renderer — goes through `convertImportPathToNamespace`, which sanitized each `
 `getSanitizedImport`, measuring it **whole**. Whole, `gopkg.in` is not a C# keyword, so it passed
 through bare and the importer emitted
 
+<!-- illustration: not converter output -->
 ```csharp
 using yaml = gopkg.in.yaml_package;   // CS1001/CS1002/CS1022 — `in` is a keyword
 using gopkg.in;
@@ -1528,6 +1534,7 @@ supplies that type, and a generated struct partial offers exactly two one-argume
 nil constructor `T(NilType)` and the field constructor `T(F field = default!)`. `default!` converts
 to both, so a one-field struct's positional literal carrying `nil` is `CS0121 — the call is
 ambiguous`:
+<!-- illustration: not converter output -->
 ```csharp
 new TestWriter_testClose(default!)          // ambiguous: T(NilType) vs T(error)
 new TestWriter_testClose((error)(default!))   // names the field constructor, and only it

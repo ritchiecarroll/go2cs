@@ -93,13 +93,20 @@ The blind spot above is closed at the root without touching a converted `.cs`:<!
 [GoPackage("io")]
 public static partial class io_package
 {
+    …
     // <TypeAccessibility>
     internal partial struct discard {}
+    …
     internal partial struct nopCloser {}
+    …
     public partial interface Closer {}
+    …
     public partial interface Reader {}
+    …
     public partial struct LimitedReader {}
+    …
     // </TypeAccessibility>
+…
 }
 ```
 
@@ -232,6 +239,7 @@ early. A grouped declaration carries the tag once, as Go does.
 ```csharp
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
+    …
     public @string Quoted; /*"a:\"`b`\""*/
 ```
 
@@ -243,7 +251,9 @@ its definition does not spell. Nested arrays list each length in order.
 <!-- source: src/go2cs/testdata/markercomments/main.cs:68, 77, 83 -->
 ```csharp
     internal /*[3]*/ ж<array<nint>> p;
+…
 internal static nint hash(/*[32]*/ array<byte> b) {
+…
 internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) {
 ```
 
@@ -433,6 +443,7 @@ generated module initializer, code .NET runs when the assembly loads, and that i
 package's registration method on golib's `GoDeferredRegistrations`. This is the shape `DeferredRegistration`
 writes, here for the adapters:
 
+<!-- illustration: not converter output -->
 ```csharp
 [global::System.Runtime.CompilerServices.ModuleInitializer]
 internal static void ᴛDeferAdapters() =>

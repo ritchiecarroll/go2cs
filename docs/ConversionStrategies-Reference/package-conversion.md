@@ -1025,6 +1025,7 @@ Gate (2) above keeps a cyclic pull compilable, but "compilable" is the whole of 
 
 The project graph answers it: **storage goes in whichever package the other one already depends on.** `varLinknamePull` always puts it on the right of the two-argument directive, which is correct for a DOWNWARD pull (`math/bits → runtime`) and forms a cycle for an upward one. For the upward case the converter **inverts** rather than degrades — `runtime` keeps the storage (where Go's own write already is) and the isw declaration becomes the forwarding property:
 
+<!-- illustration: not converter output -->
 ```csharp
 // runtime (storage side — publicized by packageVarAccess's alias arm, not by a handle):
 public static bool canUseLongPaths;
@@ -1073,6 +1074,7 @@ type fsOnly struct{ fs.FS }
 <!-- source: src/core/testing/fstest/mapfs.cs:7, 222 -->
 ```csharp
 using fs = go.io.fs_package;
+…
 /*embed*/ public go.io.fs_package.FS FS;
 ```
 
