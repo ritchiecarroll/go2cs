@@ -731,6 +731,12 @@ func TestNonconvergentKeyIsRefused(t *testing.T) {
 		Canon: []rewrite{rw(`[xy]$`, ""), rw(`z`, "zz")},
 		Block: &blockRule{OldAnchor: rx(`^old$`), NewAnchor: rx(`^new$`), Moves: true},
 	}}}
+	if _, ok := c.key("zy"); ok {
+		t.Errorf("key: `zy` grows on every pass, yet read as converged")
+	}
+	if k, ok := c.key("old"); !ok || k != "old" {
+		t.Errorf("key: CONTROL `old` read %q, %v", k, ok)
+	}
 	tl := c.classifyDiff(diffOf(prodFile, []string{"old", "zy"}, []string{"new", "zx"}))
 	nonconvergent := 0
 	for _, r := range tl.refused {

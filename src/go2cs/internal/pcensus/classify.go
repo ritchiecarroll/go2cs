@@ -78,20 +78,24 @@ type filePool struct {
 	oldSeen, newSeen map[*item]bool
 }
 
+// keyPasses caps the canon chain's repeats in key.
+const keyPasses = 8
+
 // key is a line's alignment form: every allowed item's canon applied, trimmed. The chain repeats until the line
 // stops changing, so one item's rewrite is read by an item listed before it (S1's `switch (tag()) {` by N2's
-// `))` collapse) and the form does not depend on the items' order.
-func (c *classifier) key(s string) string {
-	for range 8 {
+// `))` collapse) and the form does not depend on the items' order. A line still changing after keyPasses has no
+// form: ok is false, and the line is refused NONCONVERGENT rather than read at its last pass.
+func (c *classifier) key(s string) (form string, ok bool) {
+	for range keyPasses {
 		prev := s
 		for _, it := range c.allowed {
 			s = canon(it, s)
 		}
 		if s == prev {
-			break
+			return strings.TrimSpace(s), true
 		}
 	}
-	return strings.TrimSpace(s)
+	return "", false
 }
 
 // blocking reports whether any allowed item carries a Block, which makes every file pool what its runs leave.
@@ -157,12 +161,22 @@ func (c *classifier) endFile(t *tally, file string) {
 		}
 		return false
 	}
+	const nonconvergent = "NONCONVERGENT(canon still changing after the key's passes)"
 	took := make([]bool, len(p.add))
+	addKey, addOK := make([]string, len(p.add)), make([]bool, len(p.add))
+	for j, a := range p.add {
+		addKey[j], addOK[j] = c.key(a.line)
+	}
 	for _, r := range p.rem {
 		if active != nil {
-			k, done := c.key(r.line), false
-			for j, a := range p.add {
-				if active.Block.Moves && !took[j] && c.key(a.line) == k {
+			k, ok := c.key(r.line)
+			if !ok {
+				t.refused = append(t.refused, refusal{file, r.at, nonconvergent, r.line, "", '-'})
+				continue
+			}
+			done := false
+			for j := range p.add {
+				if active.Block.Moves && !took[j] && addOK[j] && addKey[j] == k {
 					took[j], done = true, true
 					break
 				}
@@ -177,6 +191,10 @@ func (c *classifier) endFile(t *tally, file string) {
 	for j, a := range p.add {
 		if took[j] {
 			continue // credited with its removed half
+		}
+		if !addOK[j] {
+			t.refused = append(t.refused, refusal{file, a.at, nonconvergent, "", a.line, '+'})
+			continue
 		}
 		if active != nil && matches(active.Block.Insert, a.line) {
 			t.credit(file, active.ID)
