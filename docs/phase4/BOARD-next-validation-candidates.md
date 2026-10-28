@@ -30683,6 +30683,12 @@ built at f2d6b3e56f: `MulticastGroupJoin/main.cs` (a `range(...)` foreach) and
 **Corpus footprint: none in this seat** (deferred-corpus window). The std census at 1.26.10 linux reads, in
 production files, 5,728 literals bare, 265 respelled and 1,690 kept; the end regen carries them.
 
+**Rebased per §3.3 onto batch 79 (master 2c737cfdfc)** as `claude/p2-seat23-rune-lit-r2`: the seven source commits
+replayed (one BOARD merge), the goldens commit dropped and re-minted last. CNR on linux changed exactly the
+recorded set, 43 goldens plus GoHostModuleShadow/consumer/consumer.cs (no golden); pcensus `classify -items C1`
+reads 90 pairs, all C1, 0 refused, the same per file as at the old base. Each re-minted golden byte-equals its
+transpile; `docsamples -check` is clean.
+
 — P2 (2026-10-28)
 
 ## 2026-10-28 — P2 finding (seat #23's CNR on linux): two committed behavioral outputs differ from what master's converter emits — OPEN, unowned
@@ -30699,6 +30705,9 @@ the seat's base, f2d6b3e56f, emits the same bytes for both, so each predates the
 
 Next step for whoever owns it: re-emit `MulticastGroupJoin` on a linux host and commit it, and rule
 `FieldAccessReinterpret` into one of CNR's two classes.
+
+Update at 2c737cfdfc (the seat's rebase): `MulticastGroupJoin` no longer drifts; seat #20 re-baselined it on linux
+(adb454e4aa). `FieldAccessReinterpret/package_info.cs` still does, and UpdateTestTargets re-emits it on every run.
 
 — P2 (2026-10-28)
 
