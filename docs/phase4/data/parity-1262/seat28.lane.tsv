@@ -1,0 +1,38 @@
+# Seat #28 (S1: a tagged switch without fallthrough becomes a C# pattern switch; A2: a string tag keeps its temp under the expressionless governor) -- the LANE's measurement at its branch base, the seat's PREDICTION of record under PLAN-parity-train §3.2; the rung of record is the i7's at landing.
+key	value
+base	e9f05d8c0981184d04882555c9333f41fbecfb0a
+arm_A_commit	e9f05d8c09 (the base converter)
+arm_A_src_go2cs_tree	1c2009e7ed33ff95378a31ec5e0206eb01000fa9
+arm_A_sha256	3cfacc1e75b391b3301d4d98f8a0c98a9fb83958f2e21648c8c59cb9cabae6e7
+arm_B_commit	b038cb1877 (S1 as first cut; superseded by B2, kept as the compile arm's failing evidence)
+arm_B_src_go2cs_tree	5939a2de24b1de9f537038442d3f9b48b6b7d14d
+arm_B_sha256	881275167b6640db5cfba78b3ea8103a7f16a010fff74ac4f70fa143d0261927
+arm_B2_commit	229973e3f1 (S1 with A2, the seat's converter)
+arm_B2_src_go2cs_tree	626b12b953a97c690ff05c11a58d4deaa7871ca5
+arm_B2_sha256	8a06eddbbb0d8737b083daad607ac8237e5a2d47f8f257e820a01985f43d8ceb
+build	go build -trimpath -buildvcs=false, from git archive of each commit's src/go2cs
+go	go1.26.10 windows/amd64
+emission	-stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64, one invocation per arm, each arm its own root seeded by git archive of base (src/core, src/version.props, docs/validation, docs/ValidatedTestPackages.md)
+write_assertions	all arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4559 per target per arm
+classifier	pcensus classify -items S1 at the seat's instrument (file pool, A2 canon), per target
+rebase	after measurement the seat was rebased onto 482caf78e5 (batch 78); its converter delta (visitSwitchStmt.go, visitorState.go) has stable patch-id 3f1dd4653b at both bases, so this measurement stands
+compile_arm	windows go2cs-stdlib.slnx over each arm's windows tree (seat src/ outside src/core): A 0 errors (1 warning, CS9113 testing); B 144 errors, all CS0019 string == ReadOnlySpan<byte> (internal/platform, internal/strconv, internal/coverage, internal/cpu; dependents never compiled); B2 0 errors (the same 1 warning), 363 of 363 projects compiled in the run
+#
+target	files	cs	package_info	auto	added	deleted	S1	MAP	refused	patch_sha256_crlf_stripped_16
+windows	450	331	119	5	9701	7264	10541	270	0	dfcdebc6b8edbc04
+linux	465	345	120	5	9712	7258	10536	283	0	d0e5e329eff00d6e
+darwin	455	337	118	3	9620	7199	10437	277	0	3a2837994d5a8c1c
+union	606	445	161	7	11769	8761	-	-	-	-
+#
+quantity (windows / linux / darwin)	predicted (posted before arm B)	measured (B2)	score
+S1 switches (tag temps gone)	1352 / 1350 / 1337	984 / 985 / 972	MISSED: the predicate counted the seeded *_test.cs the -stdlib run never re-emits; on production the predicate's own count is 984 / 985 / 972 exactly
+fallthrough chains unchanged	29 / 29 / 30	53 / 54 / 54 in both arms, unchanged	falsifier held; the posted number skipped marked files
+wrappers removed	66 / 64 / 64	65 / 63 / 63	MISSED by the predicate (tests counted; comment lines above clause openers not read); post hoc 65 / 63 / 63
+goto continueᴛ -> continue	<= 4	2 / 2 / 2	MET (ceiling)
+continueᴛ labels removed	3 / 3 / 3	1 / 1 / 1	MISSED (tests counted); production 1 / 1 / 1
+break; added	3191 / 3184 / 3159	2364 / 2371 / 2342	MISSED: tests counted, comment-preceded and comment-trailed openers not read, multi-line returns ending `};` read as non-returning; no residue points at the converter
+files (.cs)	487 / 500 / 492	331 / 345 / 337	MISSED (156 / 155 / 155 = every predicted test file); production predicted set == measured set exactly
+GoPositionMap re-encodes	>= 400 / 411 / 405	270 / 283 / 277 (B2)	MISSED as posted (tests); B's 253 / 266 / 261 sat within one of the shifting non-.auto production files
+pcensus -items S1 REFUSED	0	0 / 0 / 0 (after the seat's instrument fix)	MET at the fixed instrument; the instrument as it stood refused 6056 on windows (its plants were single runs)
+#
+post-measurement correction (governing-type rule)	string-tag switches on A2: 204 / 210 / 206; other switches on the pattern switch: 780 / 775 / 766; S1 total unchanged
