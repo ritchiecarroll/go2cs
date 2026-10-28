@@ -146,12 +146,13 @@ var items = []item{
 		Old: rx(`\(\((?:Action|Func<` + generic + `>)\)\(|\}\)\)\(`),
 	},
 	{
-		ID: "DIR", Seat: "#27", Title: "a channel direction reads `SendOnly()`/`RecvOnly()`",
+		ID: "DIR", Seat: "#27", Title: "a channel direction reads `AsSendOnly()`/`AsRecvOnly()`",
 		Measures: []measure{m("DIR", "with-direction", `WithDirection\(`)},
-		// #27's question 2; COORD's default spelling.
+		// #27's question 2, as COORD ruled it: `As…`, since channel<T>'s static `SendOnly`/`RecvOnly` are the
+		// NIL directional channels and an instance method of the same name is CS0102.
 		Canon: []rewrite{
-			rw(`\.WithDirection\(GoChanDir\.Send\)`, ".SendOnly()"),
-			rw(`\.WithDirection\(GoChanDir\.Recv\)`, ".RecvOnly()"),
+			rw(`\.WithDirection\(GoChanDir\.Send\)`, ".AsSendOnly()"),
+			rw(`\.WithDirection\(GoChanDir\.Recv\)`, ".AsRecvOnly()"),
 		},
 		Old: rx(`\.WithDirection\(`),
 	},

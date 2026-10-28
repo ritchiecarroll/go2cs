@@ -1695,10 +1695,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						// never `(int)`-truncated: its full magnitude is what the width comparison needs
 						// (emitGuardedShift's rule).
 						rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
-					} else {
+					} else if !v.literalShiftCount(lhs, rhs, rhsExpr) {
 						// The shift count in a C# compound shift-assignment must be `int`;
 						// casting it to the RHS's own (possibly unsigned or native-width)
-						// type — e.g. `y <<= (nuint)s` — is rejected with CS0019.
+						// type — e.g. `y <<= (nuint)s` — is rejected with CS0019. An integer
+						// literal count already is one (literalShiftCount).
 						binaryTypeName = "int"
 					}
 				} else {
@@ -2010,8 +2011,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
-				// counting loop), so it needs the same `(int)` cast the simple-variable path applies.
-				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded && !shiftAssignWide
+				// counting loop), so it needs the same `(int)` cast the simple-variable path applies, and
+				// drops it on the same integer literal count.
+				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded && !shiftAssignWide &&
+					!v.literalShiftCount(lhs, rhs, rhsExpr)
 
 				// A GUARDED shift-assign (`lhs.RshAssign(`), and a NAMED target's wide operator, take the count
 				// widened to uint64 instead.

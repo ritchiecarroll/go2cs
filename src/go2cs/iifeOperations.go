@@ -99,6 +99,46 @@ func (v *Visitor) isRecoverCall(call *ast.CallExpr) bool {
 	return isBuiltin
 }
 
+// iifeFuncMaxParams is the widest IIFE golib's `func(…)` identity ladder takes (builtin.FuncLiterals.cs),
+// the BCL's 16-parameter Action/Func limit. A wider literal keeps the cast form.
+const iifeFuncMaxParams = 16
+
+// iifeTypedParams renders an IIFE's parameter list WITH its types, for golib's `func(…)` spelling, where
+// nothing else supplies them: `()` for none, `(T1 n1, T2 n2, …)` otherwise. The types are exactly the
+// delegate cast's (iifeDelegateType's element rendering) and the names iifeParamNames's, so the typed
+// lambda's natural type is the delegate the cast named.
+func (v *Visitor) iifeTypedParams(sig *types.Signature) string {
+	params := sig.Params()
+	typed := make([]string, params.Len())
+
+	for i := range params.Len() {
+		typed[i] = v.aliasedElementTypeName(params.At(i).Type()) + " " + v.iifeParamName(params.At(i))
+	}
+
+	return "(" + strings.Join(typed, ", ") + ")"
+}
+
+// iifeResultType renders an IIFE's result as its delegate's TResult: the one result's type, a tuple for
+// several, and "" for none.
+func (v *Visitor) iifeResultType(sig *types.Signature) string {
+	results := sig.Results()
+
+	switch results.Len() {
+	case 0:
+		return ""
+	case 1:
+		return v.aliasedElementTypeName(results.At(0).Type())
+	}
+
+	resultTypes := make([]string, results.Len())
+
+	for i := range results.Len() {
+		resultTypes[i] = v.aliasedElementTypeName(results.At(i).Type())
+	}
+
+	return "(" + strings.Join(resultTypes, ", ") + ")"
+}
+
 // iifeParamNames renders an IIFE's parameter list as names only (the delegate-cast supplies the
 // types): `()` for none, `name` for one, `(n1, n2, …)` for several. Names follow variable
 // analysis (shadow-renames), so the body's references resolve.
@@ -223,21 +263,7 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 		return "Action" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 	}
 
-	var resultType string
-
-	if results.Len() == 1 {
-		resultType = v.aliasedElementTypeName(results.At(0).Type())
-	} else {
-		resultTypes := make([]string, results.Len())
-
-		for i := range results.Len() {
-			resultTypes[i] = v.aliasedElementTypeName(results.At(i).Type())
-		}
-
-		resultType = "(" + strings.Join(resultTypes, ", ") + ")"
-	}
-
-	typeArgs = append(typeArgs, resultType)
+	typeArgs = append(typeArgs, v.iifeResultType(sig))
 
 	return "Func" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 }

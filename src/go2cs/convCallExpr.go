@@ -403,9 +403,17 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if sig, ok := v.info.TypeOf(funcLit).(*types.Signature); ok && !sig.Variadic() {
 			iifeContext := DefaultLambdaContext()
 			iifeContext.isIIFE = true
+			// Go's `func() int {…}()` reads `func(nint () => {…})()`: golib's identity ladder takes the
+			// delegate type from the explicitly typed lambda (visual-parity train #27, F1). A literal past
+			// the ladder's arity keeps the cast form.
+			iifeContext.iifeTyped = sig.Params().Len() <= iifeFuncMaxParams
 
 			lambda := v.convFuncLit(funcLit, iifeContext)
 			args := v.convExprList(callExpr.Args, callExpr.Lparen, DefaultCallExprContext())
+
+			if iifeContext.iifeTyped {
+				return fmt.Sprintf("func(%s)(%s)", lambda, args)
+			}
 
 			return fmt.Sprintf("((%s)(%s))(%s)", v.iifeDelegateType(sig), lambda, args)
 		}

@@ -809,6 +809,31 @@ func (v *Visitor) shiftReceiverRendersAsCast(expr ast.Expr) bool {
 	return ok && v.callExprIsTypeConversion(call)
 }
 
+// literalShiftCount reports whether a compound shift-assign's count is a constant rendered as a plain decimal
+// integer literal within C#'s int range. C# already takes such a literal as the `int` its compound shift wants,
+// so the `(int)(N)` cast is dropped (visual-parity train #27): `x <<= 3`. A NAMED-numeric or type-parameter left
+// operand keeps the cast, for the generated count overloads (batch 43) a bare literal could also bind.
+func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
+	tv, ok := v.info.Types[rhs]
+
+	if !ok || tv.Value == nil {
+		return false
+	}
+
+	value, exact := constant.Int64Val(constant.ToInt(tv.Value))
+
+	if !exact || value < 0 || value > math.MaxInt32 || rendered != strconv.FormatInt(value, 10) {
+		return false
+	}
+
+	switch types.Unalias(v.info.TypeOf(lhs)).(type) {
+	case *types.Named, *types.TypeParam, nil:
+		return false
+	}
+
+	return true
+}
+
 // shiftCountUint64Operand renders the shift count widened for the guard, so its FULL magnitude is seen
 // before the width comparison (a computed count such as `64 - n` that unsigned-wraps stays huge). An
 // unsigned count widens to uint64. A SIGNED count widens to int64 instead (`(int64)(n)`), which binds

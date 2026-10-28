@@ -1102,10 +1102,22 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 	} else if context.isIIFE {
 		// Immediately-invoked function literal: emit `paramNames => BODY` (names only — the
-		// delegate-cast in convCallExpr supplies the types). The transient boxed-param set is
-		// scoped to the name rendering so a boxed param emits its incoming `ʗp` name here too.
+		// delegate-cast in convCallExpr supplies the types), or, for golib's `func(…)` spelling, the
+		// typed form below. The transient boxed-param set is scoped to the name rendering so a boxed
+		// param emits its incoming `ʗp` name here too.
 		v.funcLitHeapBoxParamNames = boxedParamNames
 		iifeParams := v.iifeParamNames(litSig)
+
+		// Spelled through golib's `func(…)` ladder, the lambda carries its own types, Go's way round:
+		// `nint (nint a) => …` for `func(a int) int {…}` (see iifeTypedParams).
+		if context.iifeTyped {
+			iifeParams = v.iifeTypedParams(litSig)
+
+			if resultType := v.iifeResultType(litSig); resultType != "" {
+				iifeParams = resultType + " " + iifeParams
+			}
+		}
+
 		v.funcLitHeapBoxParamNames = nil
 
 		result.WriteString(v.litNoInliningPrefix(funcLit) + iifeParams + " => " + inner)

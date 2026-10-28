@@ -322,6 +322,9 @@ type LambdaContext struct {
 	// defer/recover scope (a bare C# lambda cannot be invoked directly, and an inner defer
 	// must not bind to the enclosing function's wrapper). See convCallExpr / convFuncLit.
 	isIIFE bool
+	// iifeTyped marks an IIFE spelled through golib's `func(…)` ladder: its lambda states its result type
+	// and parameter types (`nint (nint a) => …`), since there is no delegate cast to supply them.
+	iifeTyped bool
 	// deferOrGoCall marks a call that is the target of a defer/go statement. Such a
 	// `defer func(){…}()` / `go func(){…}()` literal must NOT be treated as an IIFE — the
 	// deferred/goroutine body is inlined by visitDeferStmt/visitGoStmt.
