@@ -17,7 +17,7 @@ internal static error checkArg(ж<node> Ꮡp, @string op) {
     if (Ꮡp == nil) {
         return errNilArg;
     }
-    return default!;
+    return default;
 }
 
 internal static ж<node> store(ж<node> Ꮡp) {
@@ -28,7 +28,7 @@ internal static @string guarded(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     {
-        var err = checkArg(Ꮡp, "guarded"); if (err != default!) {
+        var err = checkArg(Ꮡp, "guarded"); if (err != nil) {
             return "guarded: "u8 + err.Error();
         }
     }
@@ -92,7 +92,7 @@ internal static void @try(@string label, Action fn) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s -> panic: %v\n"u8, label, r);
                     return;
                 }
@@ -106,7 +106,7 @@ internal static void @try(@string label, Action fn) {
 }
 
 internal static void Main() {
-    ж<node> nilNode = default!;
+    ж<node> nilNode = default;
 
     fmt.Println("== 1. nil argument, DELEGATED guard: must not panic ==");
     var nilNodeʗ1 = nilNode;

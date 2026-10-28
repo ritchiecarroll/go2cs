@@ -29,7 +29,7 @@ internal static void Main() {
     entropyCapabilitiesJson[0] = (rune)'[';
     fmt.Printf("after write: %c %c\n"u8, entropyCapabilitiesJson[0], capabilitiesJson[0]);
 
-    nint sum = default!;
+    nint sum = default;
     foreach (var (_, b) in capabilitiesJson) {
         sum += (nint)b;
     }

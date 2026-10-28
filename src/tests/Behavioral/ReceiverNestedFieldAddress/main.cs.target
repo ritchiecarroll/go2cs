@@ -21,7 +21,7 @@ internal static void bumpA(this ж<outer> Ꮡo) {
 }
 
 internal static void bumpSelected(this ж<outer> Ꮡo, nint which) {
-    ж<uint16> count = default!;
+    ж<uint16> count = default;
     switch (which) {
     case 0: {
         count = Ꮡo.of(outer.Ꮡin).of(inner.Ꮡa);

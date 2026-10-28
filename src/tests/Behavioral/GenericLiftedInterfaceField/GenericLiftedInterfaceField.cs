@@ -53,7 +53,7 @@ internal static newCounter_R0 newCounter() {
 }
 
 internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
-    if (c.excluded != default!) {
+    if (c.excluded != nil) {
         {
             var (t, found) = c.excluded.query(s); if (found) {
                 T zeroΔ1 = GoZero<T>();
@@ -63,7 +63,7 @@ internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
         }
     }
 
-    if (c.permitted != default!) {
+    if (c.permitted != nil) {
         {
             var (t, found) = c.permitted.query(s); if (found) {
                 return (t, true);
@@ -95,7 +95,7 @@ internal static void Main() {
     fmt.Println("assert:", isShape);
 
     var c = newCounter();
-    var k = new constraints<ж<counter>, nint>("count", c, default!);
+    var k = new constraints<ж<counter>, nint>("count", c, default);
     var (r, ok) = check(k, 1);
     fmt.Println((~r).n, ok);
     (_, _) = c.query(0);

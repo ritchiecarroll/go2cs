@@ -30,9 +30,9 @@ internal static void Main() {
         state ^= (uint64)((state << 17));
         return state;
     }
-    uint64 addSum = default!;
-    uint64 subSum = default!;
-    uint64 mulSum = default!;
+    uint64 addSum = default;
+    uint64 subSum = default;
+    uint64 mulSum = default;
     for (nint i = 0; i < 100000; i++) {
         var (x, y, bit) = (next(), next(), (uint64)(i & 1));
         var (s, c) = bits.Add64(x, y, bit);

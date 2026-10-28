@@ -85,7 +85,7 @@ internal static void shadowedCalls() {
 
 internal static void Main() {
     fmt.Println(sumWithLenLocal(new nint[]{10, 20, 30}.slice()));
-    fmt.Println(sumWithLenLocal(default!));
+    fmt.Println(sumWithLenLocal(default));
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));
     fmt.Println(describeSignal(9));
     fmt.Println(describeSignal(1));

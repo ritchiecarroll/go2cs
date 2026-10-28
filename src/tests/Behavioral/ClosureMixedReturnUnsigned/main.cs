@@ -9,7 +9,7 @@ internal static partial void run() {
     var pcs = new uintptr[]{10, 20, 30}.slice();
     var pcsʗ1 = pcs;
     uintptr casePC(nint casi) {
-        if (pcsʗ1 == default!) {
+        if (pcsʗ1 == default) {
             return (uintptr)(0);
         }
         return pcsʗ1[casi];

@@ -7,11 +7,11 @@ partial class main_package {
 
 internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nint> items) {
     (slice<nint> e, slice<nint> o, error err) classify(slice<nint> vals) {
-        slice<nint> e = default!;
-        slice<nint> o = default!;
+        slice<nint> e = default;
+        slice<nint> o = default;
         foreach (var (_, v) in vals) {
             if (v < 0) {
-                return (default!, default!, errors.New("negative value"));
+                return (default, default, errors.New("negative value"));
             }
             if (v % 2 == 0) {
                 e = append(e, v);
@@ -19,7 +19,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
                 o = append(o, v);
             }
         }
-        return (e, o, default!);
+        return (e, o, default);
     }
 
     return classify(items);

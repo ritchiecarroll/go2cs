@@ -79,7 +79,7 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr) []ExprCo
 // wrapper's backing through the implicit operator uncloned.)
 // appendNilArrayDimsContext carries the ARRAY LENGTH of a pointer-to-array assignment target down
 // to the `nil` on the right-hand side. `*[3]int` converts to `ж<array<nint>>` and `array<E>` is
-// LENGTH-ERASED, so a plain `default!` loses the 3 -- and unlike the conversion position, nothing
+// LENGTH-ERASED, so a plain `default` loses the 3 -- and unlike the conversion position, nothing
 // downstream can recover it: `OrTypedNil()` sees only the erased C# type by the time the value
 // reaches the reflection boundary. The dimension has to ride the value from the one place it is
 // still statically known, which is here.
@@ -1315,7 +1315,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// The untyped `nil` literal has no pointer type of its own, yet `p = nil` on a
 					// pointer variable IS a pointer repoint. Without this the box-reassignment
 					// triggers below missed it, the LHS rendered as the deref'd VALUE alias, and
-					// `p = default!` ZEROED THE POINTEE while leaving the box `Ꮡp` non-nil — so
+					// `p = default` ZEROED THE POINTEE while leaving the box `Ꮡp` non-nil — so
 					// the caller's `p != nil` still passed and it walked a wiped-out struct
 					// (regexp's `makeOnePass`, whose `p = nil` gave compileOnePass an
 					// onePassProg with an empty Inst slice → index-out-of-range in cleanupOnePass).

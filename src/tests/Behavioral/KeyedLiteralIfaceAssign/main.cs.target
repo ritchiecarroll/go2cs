@@ -20,7 +20,7 @@ internal static @string Error(this failure f) {
 }
 
 internal static void Main() {
-    error err = default!;
+    error err = default;
     err = new failure(Code: ((code)7), Msg: "boom");
     fmt.Println(err);
 }

@@ -155,7 +155,7 @@ func (v *Visitor) refLoweredArgReplacement(arg ast.Expr, paramType types.Type, d
 	case refShapeNilLit:
 		// Row 7: the literal nil — bind the null ref; the callee's first use faults (Go's
 		// deferred nil timing for a nil pointer ARGUMENT, per the §3.3 doctrine).
-		return fmt.Sprintf("ref ((%s)default!).DerefOrNull()", v.getCSharpTypeName(paramType))
+		return fmt.Sprintf("ref ((%s)default).DerefOrNull()", v.getCSharpTypeName(paramType))
 
 	default:
 		// refShapeOtherVeto cannot reach a LOWERED position (the two-sided fixed point stripped

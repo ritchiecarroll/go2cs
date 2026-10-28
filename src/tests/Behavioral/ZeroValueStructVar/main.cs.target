@@ -36,7 +36,7 @@ internal static void Main() {
     w.h.tbl[3] = 42;
     fmt.Println(w.id, len(w.h.tbl), w.h.tbl[3]);
 
-    point p = default!;
+    point p = default;
     p.x = 3;
     fmt.Println(p.x + p.y);
 }

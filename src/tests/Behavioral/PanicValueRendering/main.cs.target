@@ -41,12 +41,12 @@ internal static void Main() {
 }
 
 internal static @string /*msg*/ recoverText(Action f) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     msg = fmt.Sprintf("%v"u8, r);
                 }
             }

@@ -20,8 +20,8 @@ internal static ж<loc> get(this ж<loc> Ꮡl) {
 }
 
 internal static (@string name, nint offset) lookup(this ж<loc> Ꮡl, nint sec) {
-    @string name = default!;
-    nint offset = default!;
+    @string name = default;
+    nint offset = default;
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
@@ -54,7 +54,7 @@ internal static @string firstUseReads(this ж<loc> Ꮡl) {
 }
 
 internal static void Main() {
-    ж<loc> nilLoc = default!;
+    ж<loc> nilLoc = default;
     var real = Ꮡ(new loc(name: "MST", offset: -7));
 
     var (ᴛ1, ᴛ2) = nilLoc.lookup(3);
@@ -78,7 +78,7 @@ internal static void Main() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Println("recovered");
                     }
                 }

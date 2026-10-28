@@ -14,13 +14,13 @@ internal static ref T global => ref ((StaticBox<T>)Ꮡglobal).ValueSlot;
 
 internal static uintptr gPtr = (uintptr)Ꮡglobal;
 
-internal static uintptr gNil = (uintptr)(@unsafe.Pointer)default!;
+internal static uintptr gNil = (uintptr)(@unsafe.Pointer)default;
 
 internal static void Main() {
     fmt.Println(gPtr != 0);
     fmt.Println(gNil == 0);
 
-    ж<T> p = default!;
+    ж<T> p = default;
     fmt.Println((uintptr)p == 0);
 
     var q = Ꮡ(new T(x: 5));

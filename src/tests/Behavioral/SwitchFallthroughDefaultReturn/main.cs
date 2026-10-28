@@ -20,7 +20,7 @@ internal static partial @string classify(nint n) {
     if (fallthrough || !matchᴛ1) { /* default: */
         return "many";
     }
-    return default!;
+    return default;
 
 }
 
@@ -60,12 +60,12 @@ internal static partial nint conditionalReturn(nint n) {
 }
 
 internal static partial (nint r, bool ok) namedDefer(nint n) {
-    nint r = default!;
-    bool ok = default!;
+    nint r = default;
+    bool ok = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            if (recover() != default!) {
+            if (recover() != nil) {
                 (r, ok) = (-1, false);
             }
         }, ref ᒐ);

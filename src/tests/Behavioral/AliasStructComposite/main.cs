@@ -27,7 +27,7 @@ internal static alias positional() {
 internal static uint64 sum(/*[4]*/ words w) {
     w = w.Clone();
 
-    uint64 s = default!;
+    uint64 s = default;
     for (nint i = 0; i < len(w); i++) {
         s += w[i];
     }
@@ -37,7 +37,7 @@ internal static uint64 sum(/*[4]*/ words w) {
 internal static uint64 rangeSum(/*[4]*/ words w) {
     w = w.Clone();
 
-    uint64 s = default!;
+    uint64 s = default;
     foreach (var (_, e) in w.ΔRangeSnapshot()) {
         s += e;
     }

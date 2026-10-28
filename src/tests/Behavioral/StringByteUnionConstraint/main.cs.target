@@ -7,7 +7,7 @@ partial class main_package {
 internal static uint32 byteSum<T>(T s)
     where T : /* string | []byte */ IByteSeq<T, byte>, new()
 {
-    uint32 h = default!;
+    uint32 h = default;
     for (nint i = 0; i < len(s); i++) {
         h = h * 31 + (uint32)s[i];
     }
@@ -47,7 +47,7 @@ internal static void Main() {
     fmt.Println("last([]byte):", lastByte(bs));
     fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>("56:78"u8)));
     fmt.Println("head:", headSum(x9876ˢ), headSum(slice<byte>("y10:23"u8)));
-    fmt.Println("appendRun(string):", (@string)appendRun(default!, abcdeˢ));
+    fmt.Println("appendRun(string):", (@string)appendRun(default, abcdeˢ));
     fmt.Println("appendRun([]byte):", (@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8)));
     fmt.Println("whole(string):", (@string)wholeSpan(str), "whole([]byte):", (@string)wholeSpan(bs));
 }

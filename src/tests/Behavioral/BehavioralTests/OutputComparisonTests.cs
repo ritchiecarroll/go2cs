@@ -1496,6 +1496,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
 
     [TestMethod]
+    public void CheckNilCompareShapes() => CheckTarget("NilCompareShapes");
+
+    [TestMethod]
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]

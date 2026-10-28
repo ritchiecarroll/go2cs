@@ -25,8 +25,8 @@ internal static nint combine(Δio.Writer ioΔ1, ref box p) {
 
 internal static void Main() {
     var b = new box(n: 7);
-    fmt.Println(consume(ref b, default!));
-    fmt.Println(combine(default!, ref b));
+    fmt.Println(consume(ref b, default));
+    fmt.Println(combine(default, ref b));
 }
 
 } // end main_package

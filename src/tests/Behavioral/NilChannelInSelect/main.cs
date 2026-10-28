@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 partial class main_package {
 
 internal static partial void Main() {
-    channel<nint> nilCh = default!;
+    channel<nint> nilCh = default;
 
     fmt.Println("nil len:", len(nilCh), "cap:", cap(nilCh));
 

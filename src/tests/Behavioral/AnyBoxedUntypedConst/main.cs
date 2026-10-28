@@ -73,7 +73,7 @@ internal static any retStrL() {
 }
 
 internal static (nint, error) readN() {
-    return (0, default!);
+    return (0, default);
 }
 
 internal static void Main() {

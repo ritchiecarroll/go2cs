@@ -28,11 +28,11 @@ internal static (nint, error) Read(this ref pipe _, slice<byte> p) {
 }
 
 internal static (nint, error) Write(this ref pipe _, slice<byte> p) {
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static error Close(this ref pipe _) {
-    return default!;
+    return default;
 }
 
 internal static @string name(this ref a _) {
@@ -48,7 +48,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: %T: %v\n"u8, what, r, r);
                 } else {
                     fmt.Printf("%s: NO PANIC\n"u8, what);

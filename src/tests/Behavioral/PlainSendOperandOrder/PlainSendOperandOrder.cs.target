@@ -9,11 +9,11 @@ internal static slice<@string> log;
 
 internal static (nint, error) pair() {
     log = append(log, "pair"u8);
-    return (7, default!);
+    return (7, default);
 }
 
 internal static nint must(nint v, error err) {
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return v;
@@ -52,14 +52,14 @@ internal static partial void Main() {
     chanᴛ2.ᐸꟷ(must(ᴛ3, ᴛ4));
     fmt.Println("call:", log, ᐸꟷ(ch));
 
-    log = default!;
-    var chans = new channel<nint>[]{default!, ch}.slice();
+    log = default;
+    var chans = new channel<nint>[]{default, ch}.slice();
     var chanᴛ3 = chans[idx()];
     var (ᴛ5, ᴛ6) = pair();
     chanᴛ3.ᐸꟷ(must(ᴛ5, ᴛ6));
     fmt.Println("index:", log, ᐸꟷ(ch));
 
-    log = default!;
+    log = default;
     var done = new channel<bool>(0);
     var chʗ1 = ch;
     var doneʗ1 = done;
@@ -72,11 +72,11 @@ internal static partial void Main() {
     ᐸꟷ(done);
     fmt.Println("go:", log, ᐸꟷ(ch));
 
-    log = default!;
+    log = default;
     deferredSend(ch);
     fmt.Println("defer:", log, ᐸꟷ(ch));
 
-    log = default!;
+    log = default;
     var (ᴛ9, ᴛ10) = pair();
     ch.ᐸꟷ(must(ᴛ9, ᴛ10));
     fmt.Println("bare:", log, ᐸꟷ(ch));

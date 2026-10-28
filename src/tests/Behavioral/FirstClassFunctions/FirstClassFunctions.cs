@@ -45,8 +45,8 @@ internal static strategy stayAtK(nint k) {
 
 internal static nint play(strategy strategy0, strategy strategy1) {
     var strategies = new strategy[]{strategy0, strategy1}.slice();
-    score s = default!;
-    bool turnIsOver = default!;
+    score s = default;
+    bool turnIsOver = default;
     nint currentPlayer = rand.Intn(2);
     while (s.player + s.thisTurn < win) {
         var action = strategies[currentPlayer](s);
@@ -101,7 +101,7 @@ internal static void Main() {
     }
     var (wins, games) = roundRobin(strategies);
 
-    nint k = default!;
+    nint k = default;
     foreach (var iᴛ1 in range(strategies)) {
         k = iᴛ1;
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
@@ -112,9 +112,9 @@ internal static void Main() {
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
-    var m = new machine(split: (@string s) => (len(s), s + "!", default!));
+    var m = new machine(split: (@string s) => (len(s), s + "!", default));
     var (n, @out, serr) = m.split("hi");
-    fmt.Println(n, @out, serr == default!);
+    fmt.Println(n, @out, serr == nil);
 
     var p = new provider(produce: (nint x) => x * 2);
     var r = new registry(h: new handler(p.produce));
@@ -125,7 +125,7 @@ internal static void Main() {
 
     var wk = Ꮡ(new worker(n: 3));
     {
-        var err = wk.initWorker(0); if (err == default!) {
+        var err = wk.initWorker(0); if (err == nil) {
             fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
         }
     }
@@ -149,7 +149,7 @@ internal static void Main() {
         return (ᴛ1, ᴛ2);
     }
     var (got, gerr) = fetch();
-    fmt.Println("collapse hoist:", got, gerr == default!);
+    fmt.Println("collapse hoist:", got, gerr == nil);
 
     fmt.Println(passThrough());
 }
@@ -160,11 +160,11 @@ internal static @string passThrough() {
 }
 
 internal static (@string, error) fetchPair() {
-    return ("pair", default!);
+    return ("pair", default);
 }
 
 internal static @string joinPair(@string s, error err) {
-    if (err != default!) {
+    if (err != nil) {
         return "err";
     }
     return "got:"u8 + s;
@@ -211,7 +211,7 @@ internal static error /*err*/ initWorker(this ref worker w, nint level) {
         return fmt.Errorf("bad level %d"u8, level);
     }}
 
-    return default!;
+    return default;
 }
 
 internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {

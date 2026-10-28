@@ -131,7 +131,7 @@ internal static void Main() {
     fmt.Println(Sum<num>(1, 2, 3, 4));
     fmt.Println(Min((age)7, (age)3));
 
-    MinSet<age> ms = default!;
+    MinSet<age> ms = default;
     ms.Put(5);
     ms.Put(2);
     ms.Put(8);

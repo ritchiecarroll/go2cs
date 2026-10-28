@@ -43,7 +43,7 @@ internal static partial void Main() {
             var res2ʗ2 = res2ʗ1;
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         res2ʗ2.ᐸꟷ(fmt.Sprintf("sender panicked: %v"u8, r));
                     }
                 }
@@ -91,7 +91,7 @@ internal static partial void Main() {
             var res4ʗ2 = res4ʗ1;
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
                     }
                 }
@@ -120,7 +120,7 @@ internal static partial void Main() {
         close(cc);
     });
     expectPanic("close of nil", () => {
-        channel<nint> nc = default!;
+        channel<nint> nc = default;
         close(nc);
     });
     expectPanic("send on closed", () => {

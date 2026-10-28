@@ -15,11 +15,11 @@ internal static void Main() {
     c["b"] = (nint)2;
     fmt.Printf("%T %d %d\n"u8, c, len(f), len(c));
 
-    Fields nf = default!;
+    Fields nf = default;
     var nc = maps.Clone<Fields, @string, any>(nf);
-    fmt.Printf("%T %v\n"u8, nc, nc == default!);
+    fmt.Printf("%T %v\n"u8, nc, nc == default);
 
-    var t = new Tree(new map<@string, Tree>{["x"] = default!});
+    var t = new Tree(new map<@string, Tree>{["x"] = default});
     var tc = maps.Clone<Tree, @string, Tree>(t);
     tc["y"] = new Tree(new map<@string, Tree>{});
     fmt.Printf("%T %d %d\n"u8, tc, len(t), len(tc));

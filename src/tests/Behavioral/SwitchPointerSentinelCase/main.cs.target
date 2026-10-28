@@ -20,10 +20,10 @@ internal static nint classify(ж<byte> Ꮡp) {
         var exprᴛ1 = Ꮡp;
         if (exprᴛ1 == Ꮡsentinel) {
             result = 1;
-            Ꮡp = default!; p = ref Ꮡp.DerefOrNull();
+            Ꮡp = default; p = ref Ꮡp.DerefOrNull();
             continue;
         }
-        else if (exprᴛ1 == default!) {
+        else if (exprᴛ1 == default) {
             if (result == 0) {
                 result = 2;
             }
@@ -89,9 +89,9 @@ internal static void Main() {
 }
 
 internal static (uintptr declared, uintptr assigned, uintptr highByte) nativeWidthLiterals() {
-    uintptr declared = default!;
-    uintptr assigned = default!;
-    uintptr highByte = default!;
+    uintptr declared = default;
+    uintptr assigned = default;
+    uintptr highByte = default;
 
     uintptr word = (nuint)0x0102030405060708UL;
     declared = word;

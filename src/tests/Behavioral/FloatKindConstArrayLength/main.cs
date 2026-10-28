@@ -78,12 +78,12 @@ internal static void Main() {
     pkgCplxArr[9] = 7;
     fmt.Println("pkg", len(pkgArr), pkgArr[0], len(pkgCplxArr), pkgCplxArr[9], len(pkgExprArr), len(pkgIntArr));
 
-    floatLenArr fl = default!;
+    floatLenArr fl = default;
     fl[9] = 8;
-    cplxLenArr cl = default!;
+    cplxLenArr cl = default;
     cl[9] = 9;
-    exprLenArr el = default!;
-    intLenArr il = default!;
+    exprLenArr el = default;
+    intLenArr il = default;
     fmt.Println("named", len(fl), fl[9], len(cl), cl[9], len(el), len(il));
 
     holder h = new();

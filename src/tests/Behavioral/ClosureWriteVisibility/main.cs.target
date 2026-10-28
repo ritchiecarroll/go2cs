@@ -130,7 +130,7 @@ internal static void probeG1() {
 
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s");
-    slice<Action> fs = default!;
+    slice<Action> fs = default;
     for (nint i = 0; i < 2; i++) {
         fs = append(fsᴷ, fs, () => {
             Ꮡt.Value.total += 10;
@@ -144,7 +144,7 @@ internal static void probeG1() {
 internal static void probeG3() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     foreach (var (_, x) in new nint[]{10, 20, 30}.slice()) {
         fs = append(fsᴷ, fs, () => x);
     }
@@ -260,7 +260,7 @@ internal static void probeQ1() {
 }
 
 internal static void probeQ2() {
-    Func<nint, bool> even = default!;
+    Func<nint, bool> even = default;
     ref var odd = ref heap<Func<nint, bool>>(out var Ꮡodd);
     even = (nint n) => {
         if (n == 0) {

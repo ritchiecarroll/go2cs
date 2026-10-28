@@ -1724,7 +1724,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// An ERASED pointer-core type parameter ([P *T]) reads as an interface (its underlying is
 	// the constraint) but IS a pointer (ж<T>): without this the interface exclusion below
 	// suppressed the box form for `p == nil`, comparing the deref'd value alias against
-	// `default!` (CS0019/CS8761 on an unconstrained T).
+	// `default` (CS0019/CS8761 on an unconstrained T).
 	if v.typeIsErasedPointerCore(lhsType) {
 		lhsIsInterfaceType = false
 	}
@@ -1734,7 +1734,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	}
 
 	// A CONSTRAINED type parameter compared against nil has NO operator to bind (CS8761): C# forbids
-	// a user-defined operator on a type parameter, so the `x == default!` form that every CONCRETE
+	// a user-defined operator on a type parameter, so the `x == default` form that every CONCRETE
 	// site uses — correct there, because those are structs that DEFINE `operator ==` — does not
 	// compile when the operand is the parameter. The family interface's IsNil property carries the
 	// exact check, and the constraint already names that interface (`where M : IMap<K,V>` /
@@ -1785,7 +1785,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// `==`/`!=` operators route through and which is nil-safe by construction (`IsNull ? 0`).
 	// convIdent's pointer-context arm instead emits `x.Value`, the raw uintptr — right by accident
 	// for two non-nil pointers, and a NullReferenceException on a nil one, because a nil
-	// unsafe.Pointer local is `default!`, a C# null reference. sync/atomic's TestLoadPointer /
+	// unsafe.Pointer local is `default`, a C# null reference. sync/atomic's TestLoadPointer /
 	// TestStorePointer / TestSwapPointer each walk `testPointers()`, whose first element is nil,
 	// and died there. Suppressing the pointer context is the whole fix: an unsafe.Pointer ident
 	// then renders bare and the operator binds to the box.
@@ -1800,6 +1800,12 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// the box directly, so the other operand takes the box form exactly as against a `*T`).
 	rhsIsPointer := isPointer(rhsType) || v.typeIsErasedPointerCore(rhsType)
 	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType && !unsafePointerIdentityCompare
+
+	// An untyped nil compared with an interface or a func renders golib's `nil`, as Go writes it
+	// (`nil == err`); see nilComparandRendersNil. The nil ident is the only thing the context reaches.
+	if isEqualityComparison && v.exprIsUniverseNil(binaryExpr.X) && v.nilComparandRendersNil(rhsType) {
+		identContext.isPointer = true
+	}
 
 	// Two element address-ofs compared (`&x[i] == &y[j]`) take golib's Ꮡelem, which compares the element's
 	// storage and index without a box (elementAddressCompare.go). Both operands or neither.
@@ -1817,6 +1823,10 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 	lhsIsPointer := isPointer(lhsType) || v.typeIsErasedPointerCore(lhsType)
 	identContext.isPointer = (lhsIsPointer || rightIsDerefdPtrParam) && !rhsIsInterfaceType && !unsafePointerIdentityCompare
+
+	if isEqualityComparison && v.exprIsUniverseNil(binaryExpr.Y) && v.nilComparandRendersNil(lhsType) {
+		identContext.isPointer = true
+	}
 
 	var rightOperand string
 
@@ -2614,4 +2624,31 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 	take(leading)
 
 	return builder.String()
+}
+
+// nilComparandRendersNil reports whether an untyped nil compared (`==`/`!=`) with an operand of
+// type t renders golib's `nil` rather than the typeless `default`: t is an interface (`error` and
+// `any` included) or a func. Both are C# reference types, so `err != nil` binds golib's
+// `operator !=(object?, NilType)`, which is `obj is not null`: the same test the reference
+// comparison against `default` makes, now spelled as Go spells it.
+//
+// A type parameter keeps its own path, whatever its constraint: a map or slice core reads IsNil
+// above, an erased pointer core is a pointer, and C# binds no user-defined operator on a type
+// parameter (CS8761). Pointers already render `nil` through the pointer context. Slices, maps and
+// chans keep `default` until their own operators are proven against `nil` (stage 2).
+func (v *Visitor) nilComparandRendersNil(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	if _, isTypeParam := types.Unalias(t).(*types.TypeParam); isTypeParam {
+		return false
+	}
+
+	switch t.Underlying().(type) {
+	case *types.Interface, *types.Signature:
+		return true
+	}
+
+	return false
 }

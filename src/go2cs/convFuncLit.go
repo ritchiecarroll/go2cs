@@ -49,7 +49,7 @@ func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
 // the reason CallExprContext.emptyInterfaceArgs marks the `any` argument slot and convKeyValueExpr the
 // keyed value slot, but the other positions reached convFuncLit unmarked. mapstructure's decode_hooks.go
 // returns `func(f, t reflect.Value) (interface{}, error) {…}` through a DecodeHookFunc result: every
-// arm's tuple holds a `default!`, no arm has a natural type, and the bare lambda is CS8917 (then
+// arm's tuple holds a `default`, no arm has a natural type, and the bare lambda is CS8917 (then
 // CS1662/CS8716 per arm) -- 40 of the package's 43 build errors. A single untyped-constant result is
 // the silent half: `return func() int64 { return 1 }` compiled as a Func<int>, so the dynamic type Go
 // asserts back to (func() int64) never matched. The destination is read through the same parent walk
@@ -169,7 +169,7 @@ func (v *Visitor) funcLitReturnArmTypes(funcLit *ast.FuncLit) (armTypes []types.
 }
 
 // funcLitAllReturnArmsAreUntypedNil reports whether the literal returns a single value and EVERY
-// one of its own return arms is the untyped nil — the shape whose arms all render `default!`, so
+// one of its own return arms is the untyped nil — the shape whose arms all render `default`, so
 // none contributes a natural type and C# cannot infer the delegate (CS8917).
 func (v *Visitor) funcLitAllReturnArmsAreUntypedNil(funcLit *ast.FuncLit) bool {
 	_, hasSingleReturn, allArmsUntypedNil := v.funcLitReturnArmTypes(funcLit)
@@ -1045,7 +1045,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		catchReturn := ""
 
 		if litSig != nil && litSig.Results() != nil && litSig.Results().Len() > 0 && !litNamedDefer {
-			catchReturn = "return default!;"
+			catchReturn = "return default;"
 		}
 
 		namedDecls := ""
@@ -1138,7 +1138,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// The MULTI-result twin of the `any`-slot rule below, which was scoped to single
 			// results for want of a demonstrated consumer. html/template's escape_test supplies
 			// one: `FuncMap{"pred": func(a ...any) (any, error) {…}}` renders its arms as C#
-			// tuples whose elements are `default!` on the error arm and `(i - 1, default!)` on
+			// tuples whose elements are `default` on the error arm and `(i - 1, default)` on
 			// the success arm — neither carries a natural type, so NO arm can fix the delegate
 			// and inference fails outright (CS8917, then CS1662/CS8716 on each return). Stating
 			// the declared Go result tuple explicitly is the same remedy the single-result arm
@@ -1173,10 +1173,10 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				//
 				// The OPPOSITE end of the same inference failure: EVERY arm is untyped `nil`
 				// (`client := func(*TCPConn) error { <-serverDone; return nil }`, net_test).
-				// Each renders `default!`, which carries no natural type at all, so NO arm
+				// Each renders `default`, which carries no natural type at all, so NO arm
 				// contributes and the delegate is again uninferable (CS8917). This is the
 				// single-result twin of the multi-result `!hasFullyTypedArm` rule below, and it
-				// is drift-free by construction: an all-`default!` arm set never had an inferable
+				// is drift-free by construction: an all-`default` arm set never had an inferable
 				// natural type to begin with. Assignment position only - an argument/return
 				// literal is target-typed by its delegate, where an explicit return type could
 				// only add an identity-match constraint against the target's own result type.
@@ -1190,12 +1190,12 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				// nilable result kind. It was written for `client := func(*TCPConn) error { …;
 				// return nil }` and lived inside that arm, so a slice / map / pointer / channel /
 				// func result never reached it — reflect's `g := func(in []Value) []Value { …;
-				// return nil }` (TestCallGC) emitted `var g = (slice<Value> @in) => default!;`,
+				// return nil }` (TestCallGC) emitted `var g = (slice<Value> @in) => default;`,
 				// CS8917.
 				//
-				// The reasoning is identical and kind-independent: every arm renders `default!`,
+				// The reasoning is identical and kind-independent: every arm renders `default`,
 				// which carries no natural type, so NO arm contributes one and the delegate is
-				// uninferable. Stating the declared result type target-types each `default!` in
+				// uninferable. Stating the declared result type target-types each `default` in
 				// place. No extra kind test is needed — a literal whose every arm is the untyped
 				// nil necessarily has a nilable result by Go's own rules.
 				//
@@ -1272,7 +1272,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			}
 		} else if results := litSig.Results(); results != nil && results.Len() > 1 && context.isAssignment {
 			// A MULTI-result literal where EVERY return arm carries a typeless element —
-			// `return (default!, err)` on the error arms and `return (b, default!)` on the
+			// `return (default, err)` on the error arms and `return (b, default)` on the
 			// success arm (macho file.go's sectionData, func(s *Section) ([]byte, error)):
 			// a tuple literal with any untyped element has no natural type, so NO arm
 			// contributes to inference (CS8917 + CS8130/CS8716 cascade). State the tuple
@@ -1314,7 +1314,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// Per-result-position tracking for the Go-`int` (C# nint) MIXED-arm conflict below: at a
 			// declared-`int` position, an INT LITERAL arm (`0`) is naturally C# `int` while a
 			// non-literal Go-`int` arm (`i + 1`) is C# `nint`. When both occur — and the other tuple
-			// positions are typeless (`default!`) on the non-literal arms — the ONLY arm with a natural
+			// positions are typeless (`default`) on the non-literal arms — the ONLY arm with a natural
 			// tuple type is a literal one, so C# infers the delegate's first element as `int` and the
 			// `nint` arm then fails to convert to it (CS0029/CS1662; the var's inferred delegate is
 			// also `int`-first, rejected at the invariant use site, CS0407 — bufio ExampleScanner_*'s

@@ -32,7 +32,7 @@ internal static void @catch(@string label, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s panicked: %v\n"u8, label, r);
                     return;
                 }
@@ -56,7 +56,7 @@ internal static partial bool goexits(Action f) {
             var clean = false;
             var doneʗ2 = doneʗ1;
             defer(() => {
-                doneʗ2.ᐸꟷ(recover() == default! && !clean);
+                doneʗ2.ᐸꟷ(recover() == nil && !clean);
             }, ref ᒐ);
             f();
             clean = true;
@@ -98,7 +98,7 @@ internal static iter.Seq<nint> doubleNext() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Printf("double next panicked: %v\n"u8, r);
                     }
                 }

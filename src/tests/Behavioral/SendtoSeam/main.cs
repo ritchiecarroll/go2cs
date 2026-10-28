@@ -6,7 +6,7 @@ using syscall = syscall_package;
 partial class main_package {
 
 internal static void fatal(@string what, error err) {
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println(what, "failed:", err);
         throw panic(what);
     }
@@ -47,7 +47,7 @@ internal static void Main() {
         fmt.Println("addressed sender has a port:", (~first).Port != 0);
 
         fatal("connect", syscall.Connect(sender, new syscall.SockaddrInet4жSockaddr(to)));
-        fatal("sendto(nil-to)", syscall.Sendto(sender, slice<byte>("connected"u8), 0, default!));
+        fatal("sendto(nil-to)", syscall.Sendto(sender, slice<byte>("connected"u8), 0, default));
 
         (n, from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal("recvfrom(nil-to)", err);

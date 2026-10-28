@@ -64,8 +64,8 @@ internal static void unmove(nint pos, nint dir) {
 }
 
 internal static bool solve() {
-    nint last = default!;
-    nint n = default!;
+    nint last = default;
+    nint n = default;
     foreach (var (pos, field) in board) {
         if (field == (rune)'●') {
             foreach (var (_, dir) in new nint[]{-1, -N, +1, +N}.array()) {

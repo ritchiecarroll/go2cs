@@ -9,7 +9,7 @@ partial class main_package {
 
 internal static partial void Main() {
     var (r, w, err) = os.Pipe();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("pipe error:", err);
         return;
     }
@@ -19,7 +19,7 @@ internal static partial void Main() {
     goǃ(() => {
         ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
         var (_, rerr) = rʗ1.Read(buf[..]);
-        if (rerr != default!) {
+        if (rerr != nil) {
             doneʗ1.ᐸꟷ(rerr.Error());
         } else {
             doneʗ1.ᐸꟷ("read returned no error");

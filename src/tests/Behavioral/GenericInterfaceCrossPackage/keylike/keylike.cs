@@ -19,13 +19,13 @@ public static void RoundTrip<E, D>(@string name, Func<(D, error)> generate, Func
     where D : DecapKey<E>
 {
     var (dk, err) = generate();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println(name, "generate:", err);
         return;
     }
     var ek = dk.EncapsulationKey();
     (var ek1, err) = newEncap(ek.Bytes());
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println(name, "newEncap:", err);
         return;
     }

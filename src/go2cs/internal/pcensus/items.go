@@ -81,8 +81,16 @@ var items = []item{
 	{
 		ID: "N1", Seat: "#20", Title: "an interface, error or func compared to nil reads `!= nil`",
 		Measures: []measure{m("N1", "cmp-default", `[!=]= default!`)},
-		Canon:    []rewrite{rw(`([!=]=) (?:default!|nil\b)`, "$1 ⦃nil⦄")},
-		Old:      rx(`[!=]= default!`),
+		// Seat #20 ruled stage 1 per operand: an interface or func compare reads `nil`, while a slice, map or chan
+		// compare on the SAME line keeps `default` (D1 drops its `!`). So a nil compare's literal canonicalizes
+		// whatever its new spelling, the pair must hold a `default!` compare (Guard), and it moves only when a `nil`
+		// compare appears (New): a compare that only lost its `!` stays D1's.
+		Canon: []rewrite{
+			rw(`([!=]=) (?:default!|nil\b)`, "$1 ⦃nil⦄"),
+			rw(`([!=]=) default([^!(\p{L}\p{N}_]|$)`, "$1 ⦃nil⦄$2"),
+		},
+		New:   rx(`[!=]= nil\b`),
+		Guard: rx(`[!=]= default!`),
 	},
 	{
 		ID: "D1", Seat: "#20", Title: "`default!` becomes `default`",

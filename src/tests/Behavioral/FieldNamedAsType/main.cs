@@ -23,7 +23,7 @@ internal static nint localCollision() {
 internal static slice<ж<Node>> buildList() {
     return new ж<Node>[]{
         Ꮡ(new Node(value: 10, ΔNode: nil)),
-        Ꮡ(new Node(value: 20, Nodes: default!))
+        Ꮡ(new Node(value: 20, Nodes: default))
     }.slice();
 }
 

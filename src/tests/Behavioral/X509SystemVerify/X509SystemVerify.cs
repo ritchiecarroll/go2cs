@@ -23,7 +23,7 @@ internal static void Main() {
     var namesᴷ = new stackAppend<@string>();
 
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("generate key error:", err);
         return;
     }
@@ -36,12 +36,12 @@ internal static void Main() {
         DNSNames: new @string[]{"go2cs.example"}.slice()
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("create error:", err);
         return;
     }
     (var self, err) = x509.ParseCertificate(der);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("parse error:", err);
         return;
     }
@@ -52,12 +52,12 @@ internal static void Main() {
     var (leafBlock, _) = pem.Decode(slice<byte>(googleLeaf));
     var (interBlock, _) = pem.Decode(slice<byte>(gtsIntermediate));
     (var leaf, err) = x509.ParseCertificate((~leafBlock).Bytes);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("parse error:", err);
         return;
     }
     (var inter, err) = x509.ParseCertificate((~interBlock).Bytes);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("parse error:", err);
         return;
     }
@@ -68,12 +68,12 @@ internal static void Main() {
         DNSName: "www.google.com",
         CurrentTime: time.Unix(1677615892, 0)
     ));
-    if (err != default!) {
+    if (err != nil) {
         fmt.Printf("public chain: %T: %v\n"u8, err, err);
         return;
     }
     foreach (var (_, chain) in chains) {
-        slice<@string> names = default!;
+        slice<@string> names = default;
         foreach (var (_, c) in chain) {
             names = append(namesᴷ, names, (~c).Subject.CommonName);
         }

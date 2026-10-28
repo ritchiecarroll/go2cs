@@ -36,7 +36,7 @@ internal static void Main() {
     var arr = new array<uint8>(2){[1] = (uint8)(u * 2)};
     fmt.Println("keyed array element:", arr);
 
-    uint8 x = default!;
+    uint8 x = default;
     x = (uint8)(u + u);
     fmt.Println("paren assign:", x);
 

@@ -37,7 +37,7 @@ internal static void Main() {
     fmt.Println(bump(1));
     fmt.Println(g(c.Value));
 
-    dispatcher d = default!;
+    dispatcher d = default;
     var recvʗ1 = new reader(readTen);
     d.compute = (nint p1) => recvʗ1.sum(p1);
     fmt.Println(d.compute(3));

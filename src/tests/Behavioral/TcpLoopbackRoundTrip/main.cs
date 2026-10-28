@@ -19,7 +19,7 @@ internal static slice<byte> makePayload() {
 }
 
 internal static uint32 checksum(slice<byte> b) {
-    uint32 sum = default!;
+    uint32 sum = default;
     foreach (var (_, c) in b) {
         sum = sum * 31 + (uint32)c;
     }
@@ -35,7 +35,7 @@ internal static partial void roundTrip(@string label, @string network, @string a
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen(network, address);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: listen failed\n"u8, label);
             return;
         }
@@ -54,7 +54,7 @@ internal static partial void roundTrip(@string label, @string network, @string a
         });
 
         (var client, err) = Δnet.Dial(network, listener.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: dial failed\n"u8, label);
             return;
         }
@@ -62,7 +62,7 @@ internal static partial void roundTrip(@string label, @string network, @string a
         defer(() => clientʗ1.Close(), ref ᒐ);
 
         var got = ᐸꟷ(accepts);
-        if (got.err != default!) {
+        if (got.err != nil) {
             fmt.Printf("%s: accept failed\n"u8, label);
             return;
         }
@@ -80,12 +80,12 @@ internal static partial void roundTrip(@string label, @string network, @string a
         goǃ(() => {
             var buf = new slice<byte>(payloadSize);
             var (n, errΔ2) = Δio.ReadFull(new net_ConnᴠReader(serverʗ2), buf);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 echoedʗ1.ᐸꟷ(-1);
                 return;
             }
             (var m, errΔ2) = serverʗ2.Write(buf.slice(0, n));
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 echoedʗ1.ᐸꟷ(-2);
                 return;
             }
@@ -93,14 +93,14 @@ internal static partial void roundTrip(@string label, @string network, @string a
         });
 
         (var written, err) = client.Write(payload);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: client write failed\n"u8, label);
             return;
         }
 
         var back = new slice<byte>(payloadSize);
         (var read, err) = Δio.ReadFull(new net_ConnᴠReader(client), back);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: client read failed\n"u8, label);
             return;
         }
@@ -118,7 +118,7 @@ internal static partial void closeBreaksBlockedRead() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("closeRead: listen failed");
             return;
         }
@@ -130,20 +130,20 @@ internal static partial void closeBreaksBlockedRead() {
         var listenerʗ2 = listener;
         goǃ(() => {
             var (conn, errΔ1) = listenerʗ2.Accept();
-            if (errΔ1 != default!) {
-                acceptsʗ1.ᐸꟷ(default!);
+            if (errΔ1 != nil) {
+                acceptsʗ1.ᐸꟷ(default);
                 return;
             }
             acceptsʗ1.ᐸꟷ(conn);
         });
 
         (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("closeRead: dial failed");
             return;
         }
         var server = ᐸꟷ(accepts);
-        if (server == default!) {
+        if (server == nil) {
             fmt.Println("closeRead: accept failed");
             return;
         }
@@ -166,7 +166,7 @@ internal static partial void closeBreaksBlockedRead() {
         var selᴛ2 = time.After((time.Duration)(10000000000L));
         switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out var errΔ3): {
-            fmt.Printf("closeRead: brokeBlockedRead=%v\n"u8, errΔ3 != default!);
+            fmt.Printf("closeRead: brokeBlockedRead=%v\n"u8, errΔ3 != nil);
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -182,7 +182,7 @@ internal static partial void closeBreaksBlockedWrite() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("closeWrite: listen failed");
             return;
         }
@@ -194,20 +194,20 @@ internal static partial void closeBreaksBlockedWrite() {
         var listenerʗ2 = listener;
         goǃ(() => {
             var (conn, errΔ1) = listenerʗ2.Accept();
-            if (errΔ1 != default!) {
-                acceptsʗ1.ᐸꟷ(default!);
+            if (errΔ1 != nil) {
+                acceptsʗ1.ᐸꟷ(default);
                 return;
             }
             acceptsʗ1.ᐸꟷ(conn);
         });
 
         (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("closeWrite: dial failed");
             return;
         }
         var server = ᐸꟷ(accepts);
-        if (server == default!) {
+        if (server == nil) {
             fmt.Println("closeWrite: accept failed");
             return;
         }
@@ -221,7 +221,7 @@ internal static partial void closeBreaksBlockedWrite() {
             var buf = new slice<byte>(64 * 1024);
             while (ᐧ) {
                 {
-                    var (_, errΔ2) = clientʗ1.Write(buf); if (errΔ2 != default!) {
+                    var (_, errΔ2) = clientʗ1.Write(buf); if (errΔ2 != nil) {
                         doneʗ1.ᐸꟷ(errΔ2);
                         return;
                     }
@@ -236,7 +236,7 @@ internal static partial void closeBreaksBlockedWrite() {
         var selᴛ4 = time.After((time.Duration)(20000000000L));
         switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out var errΔ3): {
-            fmt.Printf("closeWrite: brokeBlockedWrite=%v\n"u8, errΔ3 != default!);
+            fmt.Printf("closeWrite: brokeBlockedWrite=%v\n"u8, errΔ3 != nil);
             break;
         }
         case 1 when selᴛ4.ꟷᐳ(out _): {
@@ -252,7 +252,7 @@ internal static void Main() {
     roundTrip("ipv4", "tcp", "127.0.0.1:0");
 
     {
-        var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == default!) {
+        var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == nil) {
             probe.Close();
             fmt.Println("ipv6: available=true");
             roundTrip("ipv6", "tcp", "[::1]:0");

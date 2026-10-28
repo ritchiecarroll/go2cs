@@ -22,7 +22,7 @@ public static void Process(this Processor p, DataProcessor_data data) {
 }
 
 internal static void Main() {
-    DataProcessor p = default!;
+    DataProcessor p = default;
     p = new Processor(nil);
 
     var data = new DataProcessor_data(ID: 1, Name: "Alice", Valid: true);

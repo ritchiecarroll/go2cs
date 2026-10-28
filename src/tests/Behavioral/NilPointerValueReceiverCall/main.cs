@@ -35,7 +35,7 @@ internal static void @try(@string name, Func<@string> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println(name, "panicked:", r);
                 }
             }
@@ -47,7 +47,7 @@ internal static void @try(@string name, Func<@string> f) {
 }
 
 internal static void Main() {
-    ж<T> p = default!;
+    ж<T> p = default;
     var pʗ1 = p;
     @try("value receiver, receiver unused", () => (~pʗ1).Hello());
     var pʗ2 = p;

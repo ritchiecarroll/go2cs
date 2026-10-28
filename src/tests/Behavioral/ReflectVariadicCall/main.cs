@@ -41,7 +41,7 @@ internal static (nint, error) firstNonZero(params ꓸꓸꓸnint valsʗp) {
 
     foreach (var (_, v) in vals) {
         if (v != 0) {
-            return (v, default!);
+            return (v, default);
         }
     }
     return (0, errors.New("all zero"));
@@ -164,20 +164,20 @@ internal static void Main() {
     fmt.Println("pair     :", callString(funcs["pair"], (nint)7, (nint)1, (nint)2));
 
     fmt.Println("toofew   :", recoverText(() => {
-        reflect.ValueOf(join).Call(default!);
+        reflect.ValueOf(join).Call(default);
     }));
     fmt.Println("ok-empty :", recoverText(() => {
-        reflect.ValueOf(sum).Call(default!);
+        reflect.ValueOf(sum).Call(default);
     }));
 }
 
 internal static @string /*msg*/ recoverText(Action f) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     msg = fmt.Sprintf("%v"u8, r);
                 }
             }

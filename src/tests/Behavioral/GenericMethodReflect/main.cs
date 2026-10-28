@@ -79,9 +79,9 @@ partial struct Cell<T> {
 
 public static (any, error) Value<T>(this Cell<T> c) {
     if (!c.Valid) {
-        return (default!, default!);
+        return (default, default);
     }
-    return ((c.V).OrTypedNilOf(), default!);
+    return ((c.V).OrTypedNilOf(), default);
 }
 
 partial interface valuer {
@@ -97,7 +97,7 @@ internal static void @try(@string label, Func<@string> f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%-36s PANIC %v\n"u8, label, r);
                 }
             }
@@ -131,7 +131,7 @@ internal static slice<reflectꓸValue> args(params ꓸꓸꓸany valuesʗp) {
     var values = valuesʗp.sslice();
     var inᴷ = new stackAppend<reflectꓸValue>(moves: true);
 
-    slice<reflectꓸValue> @in = default!;
+    slice<reflectꓸValue> @in = default;
     foreach (var (_, a) in values) {
         @in = append(inᴷ, @in, reflect.ValueOf(a));
     }
@@ -196,7 +196,7 @@ internal static void Main() {
     probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(@string)"u"u8}.slice()});
     probe("Box[[]int]", new Box<slice<nint>>(v: new nint[]{1}.slice()), Ꮡ(new Box<slice<nint>>(v: new nint[]{2}.slice())), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{new nint[]{3, 4}.slice()}.slice()});
     probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = new any[]{(nint)5}.slice()});
-    probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default!);
+    probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default);
 
     @try("fmt generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));
     @try("fmt *generic Stringer", () => fmt.Sprint(Ꮡ(new Pair<@string, nint>(k: "y", v: 25))));

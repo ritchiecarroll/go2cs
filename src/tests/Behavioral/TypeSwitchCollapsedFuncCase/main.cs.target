@@ -24,11 +24,11 @@ internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue
         return f(from, to);
     }
     case Func<nint, nint> f: {
-        return (f(from.Interface()._<nint>()), default!);
+        return (f(from.Interface()._<nint>()), default);
     }
     default: {
         var f = raw;
-        return (default!, errors.New("invalid decode hook signature"));
+        return (default, errors.New("invalid decode hook signature"));
     }}
 }
 
@@ -48,9 +48,9 @@ internal static @string kind(any raw) {
 internal static void Main() {
     var (from, to) = (reflect.ValueOf((nint)21), reflect.ValueOf(""));
     var hooks = new any[]{
-        new Func<reflectꓸType, reflectꓸType, any, (any, error)>((reflectꓸType f, reflectꓸType t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default!)),
-        new Func<reflectꓸKind, reflectꓸKind, any, (any, error)>((reflectꓸKind f, reflectꓸKind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default!)),
-        new Func<reflectꓸValue, reflectꓸValue, (any, error)>((reflectꓸValue f, reflectꓸValue t) => (f.Int() * 2, default!)),
+        new Func<reflectꓸType, reflectꓸType, any, (any, error)>((reflectꓸType f, reflectꓸType t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
+        new Func<reflectꓸKind, reflectꓸKind, any, (any, error)>((reflectꓸKind f, reflectꓸKind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
+        new Func<reflectꓸValue, reflectꓸValue, (any, error)>((reflectꓸValue f, reflectꓸValue t) => (f.Int() * 2, default)),
         nint (nint x) => x + 1,
         (nint)42
     }.slice();

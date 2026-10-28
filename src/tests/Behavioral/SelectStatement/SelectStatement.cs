@@ -134,7 +134,7 @@ internal static partial void Main() {
         }}
     }
 
-    ch1 = default!;
+    ch1 = default;
     close(ch2);
 
     var selᴛ7 = ch1.ᐸꟷ(1, ꓸꓸꓸ);
@@ -220,7 +220,7 @@ internal static @string firstMsg(channel<@string> a, channel<@string> b) {
     case 1 when selᴛ13.ꟷᐳ(out var m): {
         return "b:"u8 + m;
     }}
-    return default!;
+    return default;
 }
 
 internal static @string poll(channel<EmptyStruct> done) {

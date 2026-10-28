@@ -29,7 +29,7 @@ internal static @string classify(any x) {
 }
 
 internal static @string /*result*/ recovered(any v) {
-    @string result = default!;
+    @string result = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {

@@ -45,7 +45,7 @@ internal static array<shape> byKind = new golib.SparseArray<shape>{[(int)((nuint
 internal static void Main() {
     fmt.Println(lookup(kCircle).name());
     fmt.Println(lookup(kSquare).name());
-    fmt.Println(lookup(0) == default!);
+    fmt.Println(lookup(0) == nil);
 
     fmt.Println("registry:", registry[kCircle].name(), registry[kSquare].name(), len(registry));
 

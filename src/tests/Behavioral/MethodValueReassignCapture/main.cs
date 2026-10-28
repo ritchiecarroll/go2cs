@@ -22,7 +22,7 @@ internal static nint bump(this ref counter c, nint by) {
 }
 
 internal static void Main() {
-    Func<nint, nint> fn = default!;
+    Func<nint, nint> fn = default;
 
     var v = new validator(@base: 100);
     var vʗ1 = v;
@@ -44,7 +44,7 @@ internal static void Main() {
         fn = (nint p1) => xʗ1.check(p1);
     fmt.Println(fn(7));
 
-    Func<nint, nint> add = default!;
+    Func<nint, nint> add = default;
     ref var c = ref heap<counter>(out var Ꮡc);
     c = new counter(n: 5);
     add = Ꮡc.bump;

@@ -265,7 +265,7 @@ for i := range size {
 <!-- source: src/tests/Behavioral/RangeIntIndexAppend/main.cs:8-12 -->
 ```csharp
 nint size = 5;
-slice<nint> s = default!;
+slice<nint> s = default;
 foreach (var i in range(size)) {
     s = append(s, i);
 }

@@ -105,7 +105,7 @@ func TestWsaSendtoScanFindsAnInjectedCall(t *testing.T) {
 	declaring := "internal static error /*err*/ wsaSendtoInet4(ΔHandle s) {\n" +
 		"    // wsaSendtoInet4 is named here in prose and must NOT count.\n" +
 		"    /* and wsaSendtoInet4 here too, in a block comment. */\n" +
-		"    return default!;\n}\n"
+		"    return default;\n}\n"
 
 	if err := os.WriteFile(filepath.Join(pkg, "syscall_windows.cs"), []byte(declaring), 0o644); err != nil {
 		t.Fatalf("staging declaration: %v", err)

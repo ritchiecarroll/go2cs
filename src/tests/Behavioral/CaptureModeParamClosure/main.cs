@@ -46,8 +46,8 @@ internal static (nint, @string) closureWrite(Tally tʗp, nint n) {
 }
 
 internal static (nint result, @string log) deferClosure(Tally tʗp, nint n) {
-    nint result = default!;
-    @string log = default!;
+    nint result = default;
+    @string log = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref heap(tʗp, out var Ꮡt);
@@ -65,8 +65,8 @@ internal static (nint result, @string log) deferClosure(Tally tʗp, nint n) {
 }
 
 internal static (nint total, @string log) deferMethodValue(Tally tʗp, nint n) {
-    nint total = default!;
-    @string log = default!;
+    nint total = default;
+    @string log = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref heap(tʗp, out var Ꮡt);

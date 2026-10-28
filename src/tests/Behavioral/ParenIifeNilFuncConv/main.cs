@@ -7,7 +7,7 @@ partial class main_package {
 internal delegate nint handlerFunc(@string _);
 
 internal static nint call(this handlerFunc h, @string s) {
-    if (h == default!) {
+    if (h == nil) {
         return -1;
     }
 
@@ -34,10 +34,10 @@ internal static void Main() {
     fmt.Println(product);
 
     var h = default(handlerFunc)!;
-    fmt.Println(h == default!, h.call("x"));
+    fmt.Println(h == nil, h.call("x"));
 
     h = new handlerFunc((@string s) => len(s));
-    fmt.Println(h == default!, h.call("abcd"));
+    fmt.Println(h == nil, h.call("abcd"));
 
     var table = new handlerFunc[]{default(handlerFunc)!, h}.slice();
     foreach (var (_, entry) in table) {

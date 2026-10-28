@@ -8,7 +8,7 @@ partial class main_package {
 partial struct namedAny /*map[any, nint]*/;
 
 internal static void Main() {
-    var anyKeys = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2, [(nint)7] = 3};
+    var anyKeys = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2, [(nint)7] = 3};
     nint iface = 0;
     nint nils = 0;
     nint invalid = 0;
@@ -32,7 +32,7 @@ internal static void Main() {
     }
     fmt.Println("any:", iface, nils, invalid, sum, reflect.ValueOf(anyKeys).Len());
 
-    var named = new namedAny(new map<any, nint>{[default!] = 4, [(@string)"b"u8] = 5});
+    var named = new namedAny(new map<any, nint>{[default] = 4, [(@string)"b"u8] = 5});
     (iface, nils, invalid, sum) = (0, 0, 0, 0);
     iter = reflect.ValueOf(named).MapRange();
     while (iter.Next()) {
@@ -53,7 +53,7 @@ internal static void Main() {
 
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 9;
-    var ptrKeys = new map<ж<nint>, @string>{[default!] = "nil", [Ꮡn] = "n"};
+    var ptrKeys = new map<ж<nint>, @string>{[default] = "nil", [Ꮡn] = "n"};
     nint ptrs = 0;
     nint pnils = 0;
     nint pinvalid = 0;
@@ -73,7 +73,7 @@ internal static void Main() {
     }
     fmt.Println("ptr:", ptrs, pnils, pinvalid, reflect.ValueOf(ptrKeys).Len());
 
-    var errKeys = new map<error, nint>{[default!] = 6};
+    var errKeys = new map<error, nint>{[default] = 6};
     nint eiface = 0;
     nint enils = 0;
     iter = reflect.ValueOf(errKeys).MapRange();
@@ -112,7 +112,7 @@ internal static void Main() {
         fmt.Println("slice value:", v.Kind() == reflect.ΔSlice, v.Len(), v.IsNil());
     }
 
-    var anyVals = new map<@string, any>{["k"] = default!};
+    var anyVals = new map<@string, any>{["k"] = default};
     iter = reflect.ValueOf(anyVals).MapRange();
     while (iter.Next()) {
         var v = iter.Value();

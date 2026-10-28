@@ -11,7 +11,7 @@ internal static void Main() {
     var (ifs, err) = Δnet.Interfaces();
     fmt.Println("error:", err);
 
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
@@ -30,7 +30,7 @@ internal static void Main() {
     var seenIndex = new map<nint, bool>{};
     var seenName = new map<@string, bool>{};
 
-    Δnet.Interface loopback = default!;
+    Δnet.Interface loopback = default;
 
     foreach (var (_, ifi) in ifs) {
         if (ifi.Index <= 0) {
@@ -98,12 +98,12 @@ internal static void Main() {
 
     foreach (var (_, ifi) in ifs) {
         var (found, errΔ1) = Δnet.InterfaceByIndex(ifi.Index);
-        if (errΔ1 != default! || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
+        if (errΔ1 != nil || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
             byIndexAgrees = false;
         }
 
         (found, errΔ1) = Δnet.InterfaceByName(ifi.Name);
-        if (errΔ1 != default! || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
+        if (errΔ1 != nil || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
             byNameAgrees = false;
         }
     }
@@ -112,14 +112,14 @@ internal static void Main() {
     fmt.Println("InterfaceByName agrees:", byNameAgrees);
 
     (_, err) = Δnet.InterfaceByName("go2cs-no-such-adapter");
-    fmt.Println("unknown name is an error:", err != default!);
+    fmt.Println("unknown name is an error:", err != nil);
 
     fmt.Println("-- net.InterfaceAddrs --");
 
     (var addrs, err) = Δnet.InterfaceAddrs();
     fmt.Println("error:", err);
 
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
 
@@ -144,17 +144,17 @@ internal static void Main() {
                 masksValid = false;
                 continue;
             }
-            if ((~a).IP.To4() != default! && bits != (nint)(8 * Δnet.IPv4len)) {
+            if ((~a).IP.To4() != default && bits != (nint)(8 * Δnet.IPv4len)) {
                 masksValid = false;
             }
-            if ((~a).IP.To4() == default! && bits != (nint)(8 * Δnet.IPv6len)) {
+            if ((~a).IP.To4() == default && bits != (nint)(8 * Δnet.IPv6len)) {
                 masksValid = false;
             }
             if ((~a).IP.IsLoopback()) {
-                if ((~a).IP.To4() != default! && ones == 8) {
+                if ((~a).IP.To4() != default && ones == 8) {
                     loopback4 = true;
                 }
-                if ((~a).IP.To4() == default! && ones == 128) {
+                if ((~a).IP.To4() == default && ones == 128) {
                     loopback6 = true;
                 }
             } else {
@@ -196,13 +196,13 @@ internal static void Main() {
         ifi = vᴛ1;
 
         var (ua, errΔ2) = Ꮡifi.Addrs();
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             perInterfaceErr = true;
         }
         perInterface += len(ua);
 
         (var ma, errΔ2) = Ꮡifi.MulticastAddrs();
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             multicastErr = true;
         }
         multicast += len(ma);

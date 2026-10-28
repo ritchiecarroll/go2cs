@@ -40,11 +40,11 @@ internal static stateFn lexText(nint i) {
 }
 
 internal static stateFn lexNumber(nint i) {
-    return default!;
+    return default;
 }
 
 internal static (@string, error) pair(@string a, nint b) {
-    return (a, default!);
+    return (a, default);
 }
 
 internal static void sink(nint a) {

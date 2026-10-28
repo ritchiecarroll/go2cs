@@ -12,11 +12,11 @@ internal static void Main() {
     fmt.Println(dupmeta.Greeting());
     fmt.Println(dup.Marker());
 
-    dupmeta.Box<@string> b = default!;
+    dupmeta.Box<@string> b = default;
     b.V = "boxed-in-duprenamed";
     fmt.Println(b.Get());
 
-    dupmeta.Widget w = default!;
+    dupmeta.Widget w = default;
     fmt.Println(w.Marker());
 }
 

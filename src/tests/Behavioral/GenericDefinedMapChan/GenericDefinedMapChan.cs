@@ -64,7 +64,7 @@ public static (V, bool) Get<K, V>(this Index<K, V> ix, K key) {
 }
 
 public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
-    if (ix == default!) {
+    if (ix == default) {
         ix = new Index<K, V>(0);
     }
 
@@ -78,7 +78,7 @@ public static void Send<T>(this Pipe<T> p, T value) {
 public static slice<T> Drain<T>(this ref Pipe<T> p) {
     close<T>(p);
 
-    slice<T> @out = default!;
+    slice<T> @out = default;
 
     foreach (var value in p) {
         @out = append(@out, value);
@@ -142,7 +142,7 @@ internal static void Main() {
     var ints = NewSet<nint>(3, 1, 2, 3);
     fmt.Println("Set[int]:", len(ints), ints.Has(2), ints.Has(9), ints.Add(4), ints.Add(4), sortedInts(ints.Keys()));
     ints.Reset();
-    fmt.Println("Set[int] after Reset:", len(ints), ints == default!);
+    fmt.Println("Set[int] after Reset:", len(ints), ints == default);
 
     var words = NewSet<@string>((@string)"go", (@string)"cs");
     fmt.Println("Set[string]:", len(words), words.Has("go"u8), sortedStrings(words.Keys()));
@@ -157,7 +157,7 @@ internal static void Main() {
     names.Put("b"u8);
     fmt.Println("Bag[string]:", sortedStrings(names.Keys()));
 
-    Index<@string, nint> ages = default!;
+    Index<@string, nint> ages = default;
     ages.Put("x"u8, 1);
     ages.Put("y"u8, 2);
     var (age, ok) = ages.Get("y"u8);
@@ -183,7 +183,7 @@ internal static void Main() {
     stack.Push(6);
     fmt.Println("Stack[int]:", len(stack), cap(stack), stack.Peek());
 
-    Stack<@string> tags = default!;
+    Stack<@string> tags = default;
     tags.Push("t"u8);
     fmt.Println("Stack[string]:", tags.Peek(), len(tags));
 }

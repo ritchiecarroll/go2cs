@@ -80,7 +80,7 @@ internal static void Main() {
     n = reflect.Copy(reflect.ValueOf(Ꮡarr).Elem(), reflect.ValueOf(new nint[]{11, 12, 13, 14}.slice()));
     fmt.Println("copy array:", n, arr);
 
-    slice<byte> nilDst = default!;
+    slice<byte> nilDst = default;
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(new byte[]{1, 2}.slice()));
     fmt.Println("copy nil dst:", n);
 

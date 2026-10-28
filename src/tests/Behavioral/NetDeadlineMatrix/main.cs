@@ -10,12 +10,12 @@ using System.Runtime.CompilerServices;
 partial class main_package {
 
 internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, bool ok) pair() {
-    Δnet.Conn client = default!;
-    Δnet.Conn server = default!;
+    Δnet.Conn client = default;
+    Δnet.Conn server = default;
 
     var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-    if (err != default!) {
-        return (default!, default!, () => {
+    if (err != nil) {
+        return (default, default, () => {
         }, false);
     }
 
@@ -24,25 +24,25 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
     var listenerʗ1 = listener;
     goǃ(() => {
         var (conn, errΔ1) = listenerʗ1.Accept();
-        if (errΔ1 != default!) {
-            acceptsʗ1.ᐸꟷ(default!);
+        if (errΔ1 != nil) {
+            acceptsʗ1.ᐸꟷ(default);
             return;
         }
         acceptsʗ1.ᐸꟷ(conn);
     });
 
     (client, err) = Δnet.Dial("tcp", listener.Addr().String());
-    if (err != default!) {
+    if (err != nil) {
         listener.Close();
-        return (default!, default!, () => {
+        return (default, default, () => {
         }, false);
     }
 
     server = ᐸꟷ(accepts);
-    if (server == default!) {
+    if (server == nil) {
         client.Close();
         listener.Close();
-        return (default!, default!, () => {
+        return (default, default, () => {
         }, false);
     }
 
@@ -55,7 +55,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
 }
 
 internal static bool isTimeout(error err) {
-    return err != default! && errors.Is(err, os.ErrDeadlineExceeded);
+    return err != nil && errors.Is(err, os.ErrDeadlineExceeded);
 }
 
 internal static partial void deadlineLifecycle() {
@@ -89,7 +89,7 @@ internal static partial void deadlineLifecycle() {
             serverʗ1.Write(slice<byte>("clear"u8));
         });
         var (n, err3) = client.Read(buf);
-        fmt.Printf("lifecycle: clearedDeadlineWorks=%v bytes=%v\n"u8, err3 == default!, n == 5);
+        fmt.Printf("lifecycle: clearedDeadlineWorks=%v bytes=%v\n"u8, err3 == nil, n == 5);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -141,7 +141,7 @@ internal static partial void replacedWhileBlocked() {
 
         var buf = new slice<byte>(16);
         var (n, err) = client.Read(buf);
-        fmt.Printf("replace: releasedByData=%v bytes=%v notTimeout=%v\n"u8, err == default!, n == 4, !isTimeout(err));
+        fmt.Printf("replace: releasedByData=%v bytes=%v notTimeout=%v\n"u8, err == nil, n == 4, !isTimeout(err));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -163,7 +163,7 @@ internal static partial void modeIndependence() {
             var drain = new slice<byte>(64);
             while (ᐧ) {
                 {
-                    var (_, err) = serverʗ1.Read(drain); if (err != default!) {
+                    var (_, err) = serverʗ1.Read(drain); if (err != nil) {
                         return;
                     }
                 }
@@ -174,7 +174,7 @@ internal static partial void modeIndependence() {
         var buf = new slice<byte>(16);
         var (_, readErr) = client.Read(buf);
         var (_, writeErr) = client.Write(slice<byte>("still writable"u8));
-        fmt.Printf("modes: readExpired=%v writeModeIndependent=%v\n"u8, isTimeout(readErr), writeErr == default!);
+        fmt.Printf("modes: readExpired=%v writeModeIndependent=%v\n"u8, isTimeout(readErr), writeErr == nil);
 
         client.SetDeadline(time.Now().Add(-time.ΔSecond));
         var (_, readErr2) = client.Read(buf);
@@ -203,7 +203,7 @@ internal static void closeBeatsTimeout() {
 
         var (_, err) = client.Read(buf);
         fmt.Printf("order: closeBeatsTimeout=%v notTimeout=%v\n"u8,
-            err != default! && errors.Is(err, Δnet.ErrClosed), !isTimeout(err));
+            err != nil && errors.Is(err, Δnet.ErrClosed), !isTimeout(err));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -230,7 +230,7 @@ internal static partial void deadlineVersusData() {
 
         client.SetReadDeadline(time.Now().Add(2 * time.ΔSecond));
         var (n2, err2) = client.Read(buf);
-        fmt.Printf("race: dataInsideDeadline=%v bytes=%v\n"u8, err2 == default!, n2 == 5);
+        fmt.Printf("race: dataInsideDeadline=%v bytes=%v\n"u8, err2 == nil, n2 == 5);
 
         client.SetReadDeadline(new time.Time(nil));
         var serverʗ1 = server;
@@ -239,7 +239,7 @@ internal static partial void deadlineVersusData() {
             serverʗ1.Write(slice<byte>("after"u8));
         });
         var (n3, err3) = client.Read(buf);
-        fmt.Printf("race: noStaleExpiryAfterwards=%v bytes=%v\n"u8, err3 == default!, n3 == 5);
+        fmt.Printf("race: noStaleExpiryAfterwards=%v bytes=%v\n"u8, err3 == nil, n3 == 5);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

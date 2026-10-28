@@ -22,7 +22,7 @@ internal static void Wait(this closeWaiter cw) {
 partial struct intQueue /*chan nint*/;
 
 internal static partial void Main() {
-    closeWaiter cw = default!;
+    closeWaiter cw = default;
     cw.Init();
     cw.Close();
     cw.Wait();

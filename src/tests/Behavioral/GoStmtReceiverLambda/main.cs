@@ -13,12 +13,12 @@ partial struct counter {
 internal static error bump(this ref counter c, nint delta) {
     c.n += delta;
     c.done.ᐸꟷ(true);
-    return default!;
+    return default;
 }
 
 internal static error report(this ref counter c) {
     c.done.ᐸꟷ(true);
-    return default!;
+    return default;
 }
 
 partial struct engine {

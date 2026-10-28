@@ -19,7 +19,7 @@ internal static void Main() {
     }}
     fmt.Println("delivered:", len(a) + len(b));
 
-    nint got = default!;
+    nint got = default;
     var selᴛ3 = a;
     var selᴛ4 = b;
     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {

@@ -313,7 +313,7 @@ func arrayLengthArgs(lengthExpr string, elemFactory string) string {
 // `/* bufSize */` comment; this types-only form is what a site with no type syntax in hand uses.
 func (v *Visitor) zeroValueInitializer(t types.Type) string {
 	if t == nil {
-		return "default!"
+		return "default"
 	}
 
 	if zero := v.typeParamZero(t); zero != "" {
@@ -328,7 +328,7 @@ func (v *Visitor) zeroValueInitializer(t types.Type) string {
 
 	// A DIRECTIONAL channel's zero value is the nil channel OF THAT TYPE, and its direction is the
 	// one part `default(channel<T>)` cannot express — the same shape as the array length above, and
-	// carried the same way (see chanDirectionCargo.go). Every other channel keeps `default!`.
+	// carried the same way (see chanDirectionCargo.go). Every other channel keeps `default`.
 	if nilChan := v.chanDirNilValue(t); nilChan != "" {
 		return nilChan
 	}
@@ -341,7 +341,7 @@ func (v *Visitor) zeroValueInitializer(t types.Type) string {
 		return "new()"
 	}
 
-	return "default!"
+	return "default"
 }
 
 // typeParamZero renders the zero value of a TYPE PARAMETER, or "" when t is not one. The rungs above

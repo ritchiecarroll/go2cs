@@ -86,6 +86,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Floating-Point Formatting](floating-point-formatting.md)**
   - [A folded constant of a NAMED type carries its type in the fold](floating-point-formatting.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold)
 - **[Nil and Zero Values](nil-and-zero-values.md)**
+  - [`nil` compared with an interface or a func reads `nil`; a typeless zero value reads `default`](nil-and-zero-values.md#nil-compared-with-an-interface-or-a-func-reads-nil-a-typeless-zero-value-reads-default)
   - [A NARROW-UNSIGNED target folds a constant only when nothing else can make it compile](nil-and-zero-values.md#a-narrow-unsigned-target-folds-a-constant-only-when-nothing-else-can-make-it-compile)
   - [The THREE deref accessors of `ж<T>` — when each is needed, and how the converter picks](nil-and-zero-values.md#the-three-deref-accessors-of-жt--when-each-is-needed-and-how-the-converter-picks)
   - [Canonical typed-nil pointer boxing](nil-and-zero-values.md#canonical-typed-nil-pointer-boxing)

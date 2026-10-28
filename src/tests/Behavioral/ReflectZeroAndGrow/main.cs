@@ -57,11 +57,11 @@ internal static void Main() {
     z("[3]string{'','',''}", new @string[]{}.array(3));
     z("[2]NS{'a',''}", new NS[]{(NS)(@string)"a"u8, (NS)(@string)""u8}.array());
 
-    z("NB(nil)", (NB)default!);
+    z("NB(nil)", (NB)default);
     z("NB{}", new NB(new byte[]{}.slice()));
-    z("[]byte(nil)", slice<byte>(default!));
+    z("[]byte(nil)", slice<byte>(default));
     z("[]byte{0}", new byte[]{0}.slice());
-    map<@string, nint> nilMap = default!;
+    map<@string, nint> nilMap = default;
     z("map nil", nilMap);
     z("map empty", new map<@string, nint>{});
     z("*int nil", (ж<nint>)nil);
@@ -96,7 +96,7 @@ internal static void Main() {
     ref var empty = ref heap<slice<byte>>(out var Ꮡempty);
     var re = reflect.ValueOf(Ꮡempty).Elem();
     re.Grow(3);
-    fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == default!);
+    fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == default);
 
     ref var big = ref heap<slice<nint>>(out var Ꮡbig);
     big = new slice<nint>(2, 2);

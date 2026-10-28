@@ -49,16 +49,16 @@ internal static partial void Main() {
     allocLiteral();
     runtime.GC();
 
-    var (n, _) = runtime.MemProfile(default!, true);
+    var (n, _) = runtime.MemProfile(default, true);
     var records = new slice<runtime.MemProfileRecord>(n + 64, () => new());
     (n, _) = runtime.MemProfile(records, true);
 
     var seen = new map<@string, bool>{};
-    slice<@string> lines = default!;
+    slice<@string> lines = default;
     foreach (var (_, vᴛ1) in records.slice(0, n)) {
         var r = vᴛ1.ΔClone();
 
-        slice<@string> names = default!;
+        slice<@string> names = default;
         foreach (var (_, pc) in r.Stack()) {
             var f = runtime.FuncForPC(pc - 1);
             if (f == nil) {

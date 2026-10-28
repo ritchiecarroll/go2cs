@@ -7,7 +7,7 @@ partial class main_package {
 internal partial struct main_named /*[]byte*/;
 
 internal static void Main() {
-    slice<byte> nilBytes = default!;
+    slice<byte> nilBytes = default;
     var emptyBytes = new byte[]{}.slice();
     var text = slice<byte>("ab\n"u8);
     var raw = new byte[]{0xff, 0x00, 0x41}.slice();
@@ -20,7 +20,7 @@ internal static void Main() {
     fmt.Printf("d: %d %d\n"u8, emptyBytes, text);
 
     fmt.Println("sprintf:", fmt.Sprintf("%q"u8, nilBytes), fmt.Sprintf("%q"u8, text));
-    fmt.Printf("named: %q %q\n"u8, (main_named)default!, (main_named)slice<byte>((@string)"hi"u8));
+    fmt.Printf("named: %q %q\n"u8, (main_named)default, (main_named)slice<byte>((@string)"hi"u8));
 }
 
 } // end main_package

@@ -72,21 +72,21 @@ internal partial struct main_i /*dyn*/ {
 }
 
 internal static void Main() {
-    var bytes = reflect.TypeOf(slice<byte>(default!));
-    var named = reflect.TypeOf((myBytes)default!);
-    var ints = reflect.TypeOf(slice<nint>(default!));
-    var namedInts = reflect.TypeOf((myInts)default!);
+    var bytes = reflect.TypeOf(slice<byte>(default));
+    var named = reflect.TypeOf((myBytes)default);
+    var ints = reflect.TypeOf(slice<nint>(default));
+    var namedInts = reflect.TypeOf((myInts)default);
 
     fmt.Println("slice", bytes.ConvertibleTo(named), named.ConvertibleTo(bytes));
     fmt.Println("slice", named.ConvertibleTo(named), bytes.ConvertibleTo(bytes));
     fmt.Println("slice", bytes.ConvertibleTo(namedInts), ints.ConvertibleTo(namedInts));
     fmt.Println("slice", named.ConvertibleTo(ints), ints.ConvertibleTo(bytes));
 
-    map<@string, nint> unnamedMap = default!;
+    map<@string, nint> unnamedMap = default;
     var plain = reflect.TypeOf(unnamedMap);
-    var namedMap = reflect.TypeOf((myMap)default!);
-    var wideMap = reflect.TypeOf((myWideMap)default!);
-    var keyMap = reflect.TypeOf((myKeyMap)default!);
+    var namedMap = reflect.TypeOf((myMap)default);
+    var wideMap = reflect.TypeOf((myWideMap)default);
+    var keyMap = reflect.TypeOf((myKeyMap)default);
     fmt.Println("map", plain.ConvertibleTo(namedMap), namedMap.ConvertibleTo(plain));
     fmt.Println("map", plain.ConvertibleTo(wideMap), plain.ConvertibleTo(keyMap));
     fmt.Println("map", wideMap.ConvertibleTo(keyMap), namedMap.ConvertibleTo(namedMap));
@@ -104,12 +104,12 @@ internal static void Main() {
     fmt.Println("array", arr.ConvertibleTo(wideArr), wideArr.ConvertibleTo(namedArr));
     fmt.Println("array", arr.Len(), namedArr.Len(), wideArr.Len());
 
-    var myChanType = reflect.TypeOf((myChan)default!);
+    var myChanType = reflect.TypeOf((myChan)default);
 
     fmt.Println("elem", named.Elem().Kind(), namedMap.Key().Kind(), namedMap.Elem().Kind());
     fmt.Println("elem", namedPtr.Elem().Kind(), myChanType.Elem().Kind(), namedArr.Elem().Kind());
 
-    var other = reflect.TypeOf((myOtherBytes)default!);
+    var other = reflect.TypeOf((myOtherBytes)default);
     fmt.Println("assign", bytes.AssignableTo(named), named.AssignableTo(bytes));
     fmt.Println("assign", named.AssignableTo(named), bytes.AssignableTo(bytes));
     fmt.Println("assign", named.AssignableTo(other), other.AssignableTo(named));

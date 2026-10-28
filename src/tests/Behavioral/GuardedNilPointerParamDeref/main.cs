@@ -19,7 +19,7 @@ internal static void Main() {
     nint x = 0;
     nint c1 = digits(3, ref x);
     fmt.Println(c1, x);
-    nint c2 = digits(10, ref ((ж<nint>)default!).DerefOrNull());
+    nint c2 = digits(10, ref ((ж<nint>)default).DerefOrNull());
     fmt.Println(c2);
 }
 

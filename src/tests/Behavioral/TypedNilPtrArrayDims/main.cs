@@ -24,7 +24,7 @@ internal static void Main() {
     fmt.Println("same type equal:", AreEqual(a, b));
     fmt.Println("same type, same reflect.Type:", AreEqual(reflect.TypeOf(a), reflect.TypeOf(b)));
 
-    fmt.Println("boxed nil is non-nil interface:", a != default!);
+    fmt.Println("boxed nil is non-nil interface:", a != nil);
     fmt.Printf("dynamic type: %T\n"u8, a);
 
     fmt.Println("package-level named array elem len:", reflect.TypeOf(ж<pkgNamed3>.NilBoxOfDims(3L)).Elem().Len());

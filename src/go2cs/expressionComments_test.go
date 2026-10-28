@@ -97,7 +97,7 @@ func TestOperandCommentsAtTheirGoPosition(t *testing.T) {
 
 	// inline, where Go has them
 	for _, text := range []string{
-		"cipher(default!, false /* not for reading */)",
+		"cipher(default, false /* not for reading */)",
 		"1 + /*sec*/ 8 + /*nsec*/ 4",
 	} {
 		lineContaining(t, lines, text)

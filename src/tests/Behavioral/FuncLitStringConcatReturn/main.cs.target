@@ -69,10 +69,10 @@ internal static void Main() {
     (nint dur, slice<byte> cov, @string errMsg) fuzzish(nint entry) {
         if (entry < 0) {
             @string msg = fmt.Sprintf("bad entry %d"u8, entry);
-            return (entry, default!, msg);
+            return (entry, default, msg);
         }
         if (entry == 0) {
-            return (entry, default!, "");
+            return (entry, default, "");
         }
         return (entry, new byte[]{(byte)entry}.slice(), "");
     }
@@ -88,34 +88,34 @@ internal static void Main() {
         if (!ok) {
             return ("", fmt.Errorf("no string"u8));
         }
-        return ("found", default!);
+        return ("found", default);
     }
 
     var (s1, err1) = sget(false);
-    fmt.Println(s1 == ""u8, err1 != default!);
+    fmt.Println(s1 == ""u8, err1 != nil);
     var (s2, err2) = sget(true);
-    fmt.Println(s2, err2 == default!);
+    fmt.Println(s2, err2 == nil);
 
     error quiet(nint n) {
         if (n > 0) {
-            return default!;
+            return default;
         }
-        return default!;
+        return default;
     }
 
-    fmt.Println(quiet(1) == default!, quiet(0) == default!);
+    fmt.Println(quiet(1) == nil, quiet(0) == nil);
 
-    Func<nint, error> hush = (nint n) => default!;
-    fmt.Println(hush(3) == default!);
+    Func<nint, error> hush = (nint n) => default;
+    fmt.Println(hush(3) == nil);
 
     error mixed(nint n) {
         if (n < 0) {
             return fmt.Errorf("neg %d"u8, n);
         }
-        return default!;
+        return default;
     }
 
-    fmt.Println(mixed(-1) != default!, mixed(1) == default!);
+    fmt.Println(mixed(-1) != nil, mixed(1) == nil);
 }
 
 } // end main_package

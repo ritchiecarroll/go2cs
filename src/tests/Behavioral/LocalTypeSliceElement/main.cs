@@ -10,7 +10,7 @@ internal partial struct process_entry /*dyn*/ {
 }
 
 internal static nint process() {
-    slice<process_entry> entries = default!;
+    slice<process_entry> entries = default;
     entries = append(entries, new process_entry(1, 10));
     entries = append(entries, new process_entry(2, 20));
     entries = append(entries, new process_entry(3, 30));

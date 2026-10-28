@@ -90,7 +90,7 @@ internal static partial uint64 goWrites() {
 }
 
 internal static void Main() {
-    uint64 total = default!;
+    uint64 total = default;
     addTo(ref total, 5);
     addTo(ref total, 7);
     fmt.Println("total:", total);

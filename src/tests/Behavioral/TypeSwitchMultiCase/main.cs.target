@@ -119,7 +119,7 @@ internal static void Main() {
     fmt.Println(ptrKind(Ꮡ(new square(2))));
     fmt.Println(ptrKind(Ꮡ(new dot(nil))));
     fmt.Println(ptrKind((nint)7));
-    fmt.Println(kind(default!));
+    fmt.Println(kind(default));
     fmt.Println(kind(new dot(nil)));
     fmt.Println(kind(new circle(3)));
     fmt.Println(kind(new square(4)));

@@ -76,13 +76,13 @@ internal static void describe(@string label, any v) {
     fmt.Printf("%s: MethodByName(Bump) valid=%v\n"u8, label, m.IsValid());
 
     if (m.IsValid()) {
-        var @out = m.Call(default!);
+        var @out = m.Call(default);
         fmt.Printf("%s: Bump via MethodByName = %d\n"u8, label, @out[0].Int());
     }
 
     for (nint i = 0; i < t.NumMethod(); i++) {
         if (t.Method(i).Name == "Bump"u8) {
-            var @out = rv.Method(i).Call(default!);
+            var @out = rv.Method(i).Call(default);
             fmt.Printf("%s: Bump via Method(%d).Call = %d\n"u8, label, i, @out[0].Int());
         }
     }

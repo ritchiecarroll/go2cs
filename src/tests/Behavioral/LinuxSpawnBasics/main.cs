@@ -21,7 +21,7 @@ internal static void Main() {
     var (@out, err) = cmd.CombinedOutput();
 
     fmt.Print((@string)@out);
-    if (err == default!) {
+    if (err == nil) {
         fmt.Println("parent: unexpected nil error, want exit status 3");
         return;
     }

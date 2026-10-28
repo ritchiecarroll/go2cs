@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    @string a = default!;
+    @string a = default;
 
     a = "Hello World";
 

@@ -14,13 +14,13 @@ internal static (Sum, error) build(/*[4]*/ array<byte> src) {
         return (new Sum(new byte[4].array()), errors.New("B was read before it was initialized"));
     }
 
-    return ((Sum)src, default!);
+    return ((Sum)src, default);
 }
 
 internal static Sum must(Sum s, error err) {
     s = s.Clone();
 
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 

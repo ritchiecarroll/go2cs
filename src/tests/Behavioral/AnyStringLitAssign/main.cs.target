@@ -28,21 +28,21 @@ private static readonly object missingˢ = (@string)"<missing>"u8;
 private static readonly object fieldˢ = (@string)"field"u8;
 
 internal static void Main() {
-    any arg = default!;
+    any arg = default;
     arg = nilˢ;
     fmt.Println(sprint(arg));
 
-    var args = new any[]{(nint)1, default!, (@string)"keep"u8}.slice();
+    var args = new any[]{(nint)1, default, (@string)"keep"u8}.slice();
     foreach (var (i, vᴛ1) in args) {
         var a = vᴛ1;
 
-        if (a == default!) {
+        if (a == nil) {
             a = missingˢ;
         }
         fmt.Println(i, sprint(a));
     }
 
-    holder h = default!;
+    holder h = default;
     h.value = fieldˢ;
     fmt.Println(sprint(h.value));
 }

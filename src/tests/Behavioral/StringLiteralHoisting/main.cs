@@ -54,7 +54,7 @@ internal static void Main() {
 
     fmt.Println(joinAll("variadic element one", "variadic element two"));
 
-    box b = default!;
+    box b = default;
     b.name = "struct field assignment";
     b.tag = "struct field second";
     fmt.Println(b.name, b.tag);

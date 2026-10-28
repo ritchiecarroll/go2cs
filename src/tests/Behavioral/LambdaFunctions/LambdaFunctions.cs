@@ -25,23 +25,23 @@ internal static (nint, error) half(nint n) {
     if (n % 2 != 0) {
         return (0, fmt.Errorf("odd"u8));
     }
-    return (n / 2, default!);
+    return (n / 2, default);
 }
 
 internal static void Main() {
     error probe(nint n, error errΔ1) {
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return errΔ1;
         }
         (var m, errΔ1) = half(n);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return errΔ1;
         }
         (var k, errΔ1) = half(m);
         fmt.Println("halved", m, k);
         return errΔ1;
     }
-    fmt.Println(probe(8, default!), probe(3, default!));
+    fmt.Println(probe(8, default), probe(3, default));
 
     takesAFunction(new Func<@string>(foo));
     Func<@string> f = returnsAFunction();
@@ -49,15 +49,15 @@ internal static void Main() {
     Func<@string> baz = () => "anonymous stringy\n";
     fmt.Print(baz());
     fmt.Println(cached(), cached());
-    loader = (slice<byte>, error) (@string name) => (slice<byte>(name), default!);
+    loader = (slice<byte>, error) (@string name) => (slice<byte>(name), default);
     var (b, err) = loader("zone");
-    fmt.Println(len(b), err == default!);
+    fmt.Println(len(b), err == nil);
 }
 
 internal static Func<@string, (slice<byte>, error)> loader;
 
 internal static Func<nint> cached = memo(() => {
-    nint n = default!;
+    nint n = default;
     for (nint i = 1; i <= 4; i++) {
         n += i;
     }

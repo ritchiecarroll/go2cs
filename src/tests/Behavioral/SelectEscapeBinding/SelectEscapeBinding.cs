@@ -13,7 +13,7 @@ internal static void selectEscape() {
     var ch = new channel<boxedResult>(1);
     ch.ᐸꟷ(new boxedResult(value: 7, tag: "orig"));
 
-    ж<boxedResult> saved = default!;
+    ж<boxedResult> saved = default;
 
     var selᴛ1 = ch;
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
@@ -33,8 +33,8 @@ internal static void selectEscapeCommaOk() {
     var ch = new channel<boxedResult>(1);
     ch.ᐸꟷ(new boxedResult(value: 3, tag: "ok-form"));
 
-    ж<boxedResult> whole = default!;
-    ж<nint> field = default!;
+    ж<boxedResult> whole = default;
+    ж<nint> field = default;
 
     var selᴛ2 = ch;
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
@@ -55,7 +55,7 @@ internal static void selectEscapeMixed() {
     var b = new channel<nint>(1);
     a.ᐸꟷ(new boxedResult(value: 1, tag: "x"));
 
-    ж<boxedResult> keep = default!;
+    ж<boxedResult> keep = default;
 
     var selᴛ3 = a;
     var selᴛ4 = b;

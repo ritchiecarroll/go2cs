@@ -537,7 +537,7 @@ func (v *Visitor) detectNamedReturnDefer(sig *types.Signature, hasDefer, hasReco
 
 // namedResultHeapBoxIdent returns the declaring ident of a heap-box-backed named result — one
 // the capture/escape analyses route to shared storage (see identHasHeapBox), whose render sites
-// reference the box (`Ꮡerr`) — or nil for a plain named result. The plain `T name = default!;`
+// reference the box (`Ꮡerr`) — or nil for a plain named result. The plain `T name = default;`
 // declaration leaves such a box undeclared (CS0103 — internal/poll SendFile's deferred
 // `TestHookDidSendFile(fd, 0, written, err, …)` reads `Ꮡerr.ValueSlot` after `curpos, err :=`
 // escape-marked the named result).
@@ -643,7 +643,7 @@ func (v *Visitor) namedReturnAssignTargets(signature *types.Signature) []string 
 	return mapped
 }
 
-// namedReturnDeclLines renders the `Type name = default!;` declarations for a signature's named
+// namedReturnDeclLines renders the `Type name = default;` declarations for a signature's named
 // results, each on its own line at the given indent level. A heap-box-backed result (see
 // namedResultHeapBoxIdent) declares its box instead: when the decls sit OUTSIDE a func() wrapper
 // (declsOutsideWrapper — the litNamedDefer form), only the box is created here (`heap<T>(out var
@@ -677,7 +677,7 @@ func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int, de
 
 		// A result whose Go zero value is not all-bits-zero — a fixed-size array, a promoted-embed
 		// struct, a struct carrying a fixed array at any depth — must construct rather than take
-		// `default!` (see zeroValueInitializer).
+		// `default` (see zeroValueInitializer).
 		decls.WriteString(fmt.Sprintf("%s%s%s %s = %s;", v.newline, v.indent(indentLevel), v.getCSharpTypeName(param.Type()), v.namedResultName(param), v.zeroValueInitializer(param.Type())))
 	}
 

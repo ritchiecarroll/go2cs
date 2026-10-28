@@ -21,7 +21,7 @@ internal static void Main() {
     var u = new channel<@string>(0);
     fmt.Println(len(u), cap(u));
 
-    channel<nint> n = default!;
+    channel<nint> n = default;
     fmt.Println(len(n), cap(n));
 
     var d = new channel<nint>(2);

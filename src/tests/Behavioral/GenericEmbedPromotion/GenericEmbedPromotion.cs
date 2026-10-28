@@ -25,7 +25,7 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
 }
 
 internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) {
-    return (Ꮡ(new p224(v: (nint)b[0])), default!);
+    return (Ꮡ(new p224(v: (nint)b[0])), default);
 }
 
 internal static ж<p224> newP224() {

@@ -13,7 +13,7 @@ internal static void p1() {
     var ok = true;
     nint calls = 0;
     nint /*x*/ parseUint(@string s, nint min, nint max) {
-        nint x = default!;
+        nint x = default;
         calls++;
         foreach (var (_, cΔ1) in slice<byte>(s)) {
             if (cΔ1 < (rune)'0' || (rune)'9' < cΔ1) {
@@ -77,12 +77,12 @@ internal static void p5() {
 
 internal static void p6() {
     nint /*r*/ guard(nint n) {
-        nint r = default!;
+        nint r = default;
         GoFrame ᒐ = default;
         try {
             defer(() => {
                 {
-                    var e = recover(); if (e != default!) {
+                    var e = recover(); if (e != nil) {
                         r = -1;
                     }
                 }

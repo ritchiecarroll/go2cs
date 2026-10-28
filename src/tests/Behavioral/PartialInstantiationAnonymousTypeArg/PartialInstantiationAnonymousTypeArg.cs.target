@@ -43,7 +43,7 @@ internal static void Main() {
     var (s, okS) = assertAs<main_typeᴛ2, withM>(new withM("w"));
     var (p, okP) = assertAs<main_typeᴛ3, main_typeᴛ3>(new main_typeᴛ3(1, 2));
 
-    fmt.Println(okA, okAPtr, okM, m != default!, okS, s.String(), okP, p.X + p.Y);
+    fmt.Println(okA, okAPtr, okM, m != nil, okS, s.String(), okP, p.X + p.Y);
 }
 
 } // end main_package

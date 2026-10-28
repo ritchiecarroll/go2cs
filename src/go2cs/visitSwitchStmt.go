@@ -52,7 +52,7 @@ func caseBodyHasSwitchBreak(body []ast.Stmt) bool {
 // isTerminatingStmt reports whether a statement is a Go "terminating statement" (spec §Terminating
 // statements) — one after which control cannot fall through. Used to decide whether a switch case can
 // fall OUT of the switch: a non-terminating (and non-`fallthrough`) case means the switch is NOT terminal,
-// so no unreachable trailing `return default!;` may follow it (see visitSwitchStmt). CONSERVATIVE by
+// so no unreachable trailing `return default;` may follow it (see visitSwitchStmt). CONSERVATIVE by
 // design — it returns false for any form it does not fully analyze (`for`/`switch`/`select`), which only
 // forgoes the trailing return (leaving the rarer CS0161), NEVER a false "terminal" that would make the
 // trailing return reachable and silently return the zero value. `fallthrough` is NOT terminating here
@@ -570,10 +570,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		// (below), whose condition C# cannot prove always executes — so if the switch is the last
 		// statement of a value-returning function and every case is terminal, C# reports CS0161 ("not all
 		// code paths return a value") even though the Go `default` makes it exhaustive. Track that form to
-		// emit an (unreachable) trailing `return default!;` after the if-chain — but ONLY when the switch
+		// emit an (unreachable) trailing `return default;` after the if-chain — but ONLY when the switch
 		// is genuinely terminal (allCasesTerminal below). A switch with a case that can fall OUT (a
 		// `break`, or a body that neither returns nor falls through) is NOT terminal: reachable Go code
-		// follows it, so a trailing `return default!;` there would execute and wrongly return the zero value.
+		// follows it, so a trailing `return default;` there would execute and wrongly return the zero value.
 		guardedTerminalDefault := false
 		allCasesTerminal := true
 
@@ -735,9 +735,9 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// A case whose body can fall OUT of the switch — it wraps a switch-`break`, or it is neither a
 			// Go terminating statement list (isTerminatingStmtList — a genuine spec check, so an
 			// `if { return }` WITHOUT an `else` or a possibly-zero-trip loop is correctly NON-terminating)
-			// nor a fallthrough — makes the switch non-terminal, so no trailing `return default!;` may be
+			// nor a fallthrough — makes the switch non-terminal, so no trailing `return default;` may be
 			// added (see guardedTerminalDefault). Using the shallow "last emitted line was a return" flag
-			// here is WRONG: it false-positives on `if { return }` and lets a reachable `return default!;`
+			// here is WRONG: it false-positives on `if { return }` and lets a reachable `return default;`
 			// silently return the zero value.
 			if switchBreakWrap || !(isTerminatingStmtList(caseClause.Body, v.info) || caseHasFallthroughStmt[i]) {
 				allCasesTerminal = false
@@ -783,12 +783,12 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		// A trailing `default:` in the guarded (fallthrough) form is a runtime-conditional `if` that C#
 		// cannot prove exhaustive, so a value-returning function ending in this switch fails CS0161 ("not
 		// all code paths return a value") even though the Go `default` makes it exhaustive. Emit an
-		// unreachable `return default!;` — a guarded-terminal-default switch cannot be legally followed by
+		// unreachable `return default;` — a guarded-terminal-default switch cannot be legally followed by
 		// reachable Go code (the switch always returns/exits), so nothing else can run after it. Skip in
 		// namedReturnDefer mode: there the body sits inside a `void` `func((defer, recover) => …)` wrapper,
-		// so a value `return default!;` is CS8030 — and the void wrapper needs no trailing return anyway.
+		// so a value `return default;` is CS8030 — and the void wrapper needs no trailing return anyway.
 		if guardedTerminalDefault && allCasesTerminal && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
-			v.writeOutputLn("return default!;")
+			v.writeOutputLn("return default;")
 		}
 	} else if allConst && tag != nil {
 		// Most simple scenario when all case values are constant, a common C# switch will suffice
@@ -1065,7 +1065,7 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 			// syntactic screen above: that switch lists Ident/Selector/Index, so an ADDRESS-OF label
 			// (`case &inProgress:` — 1.24 runtime/type.go's GC-mask sentinel) fell through it and
 			// emitted `exprᴛ1 is ᏑinProgress`, a constant pattern over a runtime value: CS9135 at the
-			// pattern operand, while the `case nil` arm ONE LINE DOWN already spelled `== default!`.
+			// pattern operand, while the `case nil` arm ONE LINE DOWN already spelled `== default`.
 			// The sibling screen that forces the whole switch to the if/else form (see the allConst
 			// block) does list UnaryExpr, which is why the chain existed at all and only its operator
 			// was wrong. Screening by TYPE rather than by expression kind keeps the two lists from
@@ -1190,7 +1190,7 @@ func isBitwiseOperator(op token.Token) bool {
 // and compared it against a pointer: CS0019 at the comparison.
 //
 // The quieter half is why this is not merely a compile defect. On a `case nil:` arm the same tag
-// emits `exprᴛ1 == default!`, which compares the POINTEE against its ZERO VALUE and COMPILES — a
+// emits `exprᴛ1 == default`, which compares the POINTEE against its ZERO VALUE and COMPILES — a
 // nil test that silently answers "is the pointee zero". A shape that reads as a wrong answer rather
 // than as an error, and the reason the fix is not scoped to the arms that fail to build.
 //

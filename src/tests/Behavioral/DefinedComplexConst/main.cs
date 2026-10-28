@@ -75,7 +75,7 @@ internal static C64 takeC64(C64 c) {
 internal static C128 takeMany(params ꓸꓸꓸC128 csʗp) {
     var cs = csʗp.sslice();
 
-    C128 sum = default!;
+    C128 sum = default;
     foreach (var (_, c) in cs) {
         sum += c;
     }

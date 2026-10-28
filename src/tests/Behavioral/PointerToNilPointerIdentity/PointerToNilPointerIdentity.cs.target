@@ -54,7 +54,7 @@ internal static void Main() {
     ref var h = ref heap(new holder(), out var Ꮡh);
     var fp = Ꮡh.of(holder.Ꮡp);
     var fs = Ꮡh.of(holder.Ꮡs);
-    fmt.Println("field nil", fp.ValueSlot == nil, fs.ValueSlot == default!, len(fs.ValueSlot));
+    fmt.Println("field nil", fp.ValueSlot == nil, fs.ValueSlot == default, len(fs.ValueSlot));
     var fields = new map<ж<ж<nint>>, @string>{[fp] = "h.p"};
     fmt.Println("field key", fields[fp]);
     h.p = Ꮡv;

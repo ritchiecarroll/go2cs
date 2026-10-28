@@ -377,7 +377,7 @@ func (v *Visitor) markRenderedLocal(ident *ast.Ident) {
 }
 
 // recordConstantInitializedLocal records a local the emission declared as a C# variable whose
-// initializer is a constant (`T x = default!;`, `nint x = unchecked((nint)…);`) — the declarations
+// initializer is a constant (`T x = default;`, `nint x = unchecked((nint)…);`) — the declarations
 // for which C# reports CS0219 when nothing reads them.
 func (v *Visitor) recordConstantInitializedLocal(obj types.Object) {
 	if obj != nil {

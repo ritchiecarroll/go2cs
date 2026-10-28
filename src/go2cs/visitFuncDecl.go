@@ -978,14 +978,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 						// A result whose Go zero value is not all-bits-zero — a fixed-size array,
 						// a promoted-embed struct, a struct carrying a fixed array at any depth —
-						// must construct rather than take `default!` (see zeroValueInitializer).
+						// must construct rather than take `default` (see zeroValueInitializer).
 						zero := v.zeroValueInitializer(param.Type())
 						v.writeString(resultDeclTarget, "%s%s %s = %s;", v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type()), paramName, zero)
 
 						// The CS0219 shape when every reference in the body folded (syscall's
 						// darwin nametomib reads `mib` only as an unsafe.Sizeof operand). A naked
 						// return, and the lowerings liveness is off for, read it by generated code.
-						if zero == "default!" && livenessBody != nil && !bodyHasNakedReturn(livenessBody) {
+						if zero == "default" && livenessBody != nil && !bodyHasNakedReturn(livenessBody) {
 							v.recordConstantInitializedLocal(param)
 						}
 
@@ -1588,7 +1588,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		catchReturn := ""
 
 		if signature.Results().Len() > 0 && !v.namedReturnDeferMode {
-			catchReturn = "return default!;"
+			catchReturn = "return default;"
 		}
 
 		savedIndent := v.indentLevel
@@ -2992,7 +2992,7 @@ func (v *Visitor) writeAdaptedForwarder(signature *types.Signature, alias string
 		pointeeType := v.getCSharpTypeName(bridge.targetPointee)
 
 		pre = append(pre,
-			fmt.Sprintf("%s%s %s = default!;", bodyIndent, boxType, box),
+			fmt.Sprintf("%s%s %s = default;", bodyIndent, boxType, box),
 			fmt.Sprintf("%sif (%s != nil) {", bodyIndent, local),
 			fmt.Sprintf("%sref var %s = ref heap(new %s(), out %s);", innerIndent, value, pointeeType, box))
 

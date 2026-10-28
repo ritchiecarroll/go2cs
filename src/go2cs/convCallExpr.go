@@ -494,7 +494,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// CANONICAL typed nil instance (ж<T>.NilBox / the named wrapper's NilInstance). The boxed
 		// value then carries its Go type: `any((*T)(nil)) != nil`, `%T` prints `*T`, and the
 		// pervasive descriptor idiom `reflect.TypeOf((*T)(nil)).Elem()` resolves — where the old
-		// `default!` rendering erased the type to a bare null reference. Two sites converting the
+		// `default` rendering erased the type to a bare null reference. Two sites converting the
 		// same type reference-compare equal (one shared instance), which object-typed `==`
 		// comparisons of boxed typed nils rely on.
 		if tv, ok := v.info.Types[arg]; ok && tv.IsNil() {
@@ -532,7 +532,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 
 			// A nil→DIRECTIONAL-CHANNEL conversion — `(chan<- string)(nil)` — is the zero value
-			// of the directional type, and the plain cast of `default!` erased the direction the
+			// of the directional type, and the plain cast of `default` erased the direction the
 			// conversion exists to apply, so `reflect.TypeOf((chan<- string)(nil))` read the
 			// bidirectional type (TestAll #12, TestChanOfDir's checkSameType rows). Rendered as
 			// the directional nil factory, the same emission every other zero-value site uses.
@@ -1145,7 +1145,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
 			if _, isSig := named.Underlying().(*types.Signature); isSig {
 				// `T(nil)` for a func type is the TYPED NIL delegate, and delegate CREATION cannot
-				// express it: `new HandlerFunc(default!)` asks for a method group or a delegate value
+				// express it: `new HandlerFunc(default)` asks for a method group or a delegate value
 				// (CS0149) and gives `default` no target type (CS8716) — net/http's server_test.go
 				// writes exactly `HandlerFunc(nil)`. A cast is the whole conversion here, since the
 				// operand carries no delegate to wrap.
@@ -2176,8 +2176,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// call's NORMAL form and the argument DISAPPEARS. `exec(t, db, "INSERT|…", nil)`
 			// (database/sql's sql_test.go, one element: Go reads `nil` as a single `any` value,
 			// since passing the slice itself would need `nil...`) emitted
-			// `exec(…, insertTId10Nameˢ, default!)` against `params ꓸꓸꓸany argsʗp` — and a typeless
-			// `default!` converts to the params ARRAY as readily as to its element, so C#'s
+			// `exec(…, insertTId10Nameˢ, default)` against `params ꓸꓸꓸany argsʗp` — and a typeless
+			// `default` converts to the params ARRAY as readily as to its element, so C#'s
 			// preference for the normal form over the expanded one binds it as a null `any[]`.
 			// The callee then saw `len(args) == 0` and the driver answered
 			// `sql: expected 1 arguments, got 0` — a SILENT divergence, not a compile error, which
@@ -2192,9 +2192,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// conversion is never classified as one and arrives here on the regular call path
 			// with the target signature standing in for a callee. Everything the comment above
 			// argues then inverts: a conversion has no params expansion to disambiguate, its
-			// single operand is the conversion SOURCE, and `default!` already binds
+			// single operand is the conversion SOURCE, and `default` already binds
 			// unambiguously to the one delegate target. Casting it to `paramType` cast the nil
-			// to the func's FIRST PARAMETER — `(Actionꓸꓸꓸ<nint>)((nint)(default!))`, CS0030.
+			// to the func's FIRST PARAMETER — `(Actionꓸꓸꓸ<nint>)((nint)(default))`, CS0030.
 			// The predicate is variadic AND exactly one declared parameter, which is why
 			// `(func(Point, ...Point) int)(nil)` and every non-variadic spelling were unharmed.
 			if calleeTV, isCallee := v.info.Types[callExpr.Fun]; !isCallee || !calleeTV.IsType() {
@@ -2261,7 +2261,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			// An untyped nil bound to a TYPE-PARAMETER parameter of an INFERRED generic call gives C# nothing
 			// to infer from: go/types infer.go's `slices.Contains(inferred, nil)` (new at 1.24) emitted
-			// `slices.Contains(inferred, default!)` and failed CS0411 x2, because a typeless `default!` names
+			// `slices.Contains(inferred, default)` and failed CS0411 x2, because a typeless `default` names
 			// no E (H7 red 2, COORD 89c281d32). Go infers E from the OTHER arguments; the instantiation go/types
 			// records for the call is that answer, so the nil is cast to the INSTANTIATED parameter type through
 			// the castArgToType plumbing the variadic nil above already uses (and replaces its declared-type
@@ -2436,7 +2436,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// (T1, T2))` — puts the lambda in C# type-argument INFERENCE position: C# derives the
 			// type argument from the lambda's own return expressions, ignoring the Go result type
 			// go/types already resolved. Arms that yield no C# type at all (a `panic`-terminated
-			// body, `return nil` → `default!`) infer nothing (CS0411 ×4, sync oncefunc_test), and
+			// body, `return nil` → `default`) infer nothing (CS0411 ×4, sync oncefunc_test), and
 			// arms whose NATURAL C# type merely differs from the Go result (`func() int { return
 			// 42 }` → `Func<int>`, Go says `Func<nint>`) infer the wrong delegate (CS0029). Mark
 			// the argument so convFuncLit states the declared result type explicitly; the lambda
@@ -3067,7 +3067,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			if sliceType := v.info.TypeOf(callExpr.Args[0]); sliceType != nil {
 				if sliceUnder, ok := sliceType.Underlying().(*types.Slice); ok {
-					// A bare `nil` element (untyped nil → `default!`) binds to append's `params`
+					// A bare `nil` element (untyped nil → `default`) binds to append's `params`
 					// parameter as the WHOLE null array — appending ZERO elements — instead of as a
 					// single nil element: `append(b.lines, nil)` on `[][]cell` never grew the slice
 					// (tabwriter addLine, which left b.lines empty and every terminateCell indexing
@@ -4148,7 +4148,7 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 				// A struct POINTER conversion `(*U)(p)` never renders here: convCallExpr routes every such
 				// pair to an aliasing Reinterpret before this point (structPair, namedToNamed), so a pointer
 				// target reaches this arm only from the argument loop, which records and discards expr. The
-				// `(expr?.Value ?? default!)` copy it used to render lost every write through the result
+				// `(expr?.Value ?? default)` copy it used to render lost every write through the result
 				// (PointerConversionAliasing); measured unreachable on the behavioral corpus and the
 				// three-target stdlib before it was removed.
 				argTypeName := v.getCSharpTypeName(argType)
@@ -4265,7 +4265,7 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 					// Dereference target type when casting to pointer types,
 					// in C# implicit casting operator requires the target type
 					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.Value ?? default!)", expr)
+					expr = fmt.Sprintf("(%s?.Value ?? default)", expr)
 				}
 
 				argTypeName := v.getCSharpTypeName(argType)
@@ -5803,7 +5803,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 				// `(*[]byte)(nil)`, `(*struct{ r7 int })(nil)` (gob's bootstrapType table). A
 				// composite target has no types.Object, so the Ident/SelectorExpr arms above
 				// never fire and the shape fell through to the regular call path, where the
-				// cast rendered `default!` and erased the TYPED nil to a bare null reference.
+				// cast rendered `default` and erased the TYPED nil to a bare null reference.
 				// Go keeps the type — `reflect.TypeOf((*[]byte)(nil)).Elem()` is `[]uint8` —
 				// so gob's package init NRE'd on the null descriptor. Claim it, exactly as the
 				// named-target `(*T)(nil)` arm below already does, so the conversion renderer's
@@ -5886,7 +5886,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 			// An untyped-nil operand converting to an unnamed MAP type — `map[string]int(nil)`,
 			// the `reflect.TypeOf(map[K]V(nil))` descriptor idiom. UntypedNil's underlying is
 			// itself, so the identical-underlying guard below rejected the shape and it fell
-			// through to the regular CALL path, which emitted `map<@string, nint>(default!)` —
+			// through to the regular CALL path, which emitted `map<@string, nint>(default)` —
 			// CS1955, since `map<TKey, TValue>` is a type and not a method. The NAMED twin
 			// `myMap(nil)` is already claimed further down (ConvertibleTo holds for it) and casts
 			// correctly, so only the type-LITERAL spelling ever broke.
@@ -5905,7 +5905,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 			// An untyped-nil operand converting to a DIRECTIONAL channel literal —
 			// `(chan<- string)(nil)`, reflect's TypeOf descriptor idiom for a directional type
 			// (TestAll #12, TestChanOfDir). The bidirectional form stays unclaimed per the note
-			// above — its cast of `default!` IS the correct nil — but the directional cast
+			// above — its cast of `default` IS the correct nil — but the directional cast
 			// erased the direction the conversion exists to apply. Claimed exactly as the map
 			// arm is, so the conversion renderer's nil interception (chanDirNilValue) emits the
 			// directional nil factory. chanDirCargoName is the gate: non-empty only for a
@@ -5927,14 +5927,14 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 			// true for 51 of the corpus's 52 channel-type conversions. The 52nd is written BARE:
 			// `chan struct{}(nil)` (hash/maphash's maphash_test.go:259) has no ParenExpr for that
 			// route to peel, falls through to the regular CALL path, and emits
-			// `channel<EmptyStruct>(default!)` — CS1955, a type invoked like a method.
+			// `channel<EmptyStruct>(default)` — CS1955, a type invoked like a method.
 			//
 			// The RULE is the discriminator and the parentheses are not — a CallExpr whose callee
 			// is a ChanType is a conversion either way (G's sweep, 52 sites corpus-wide; COORD's
 			// ruling). ⚠ THE CLAIM IS NARROWED TO THE BARE SPELLING ANYWAY, AND THE REASON IS
 			// FOOTPRINT RATHER THAN CLASSIFICATION: MEASURED, claiming the parenthesised form too
-			// rewrites all 51 working sites from `(channel<EmptyStruct>)(default!)` to
-			// `((channel<EmptyStruct>)default!)` — the same meaning, different bytes, and `net`
+			// rewrites all 51 working sites from `(channel<EmptyStruct>)(default)` to
+			// `((channel<EmptyStruct>)default)` — the same meaning, different bytes, and `net`
 			// alone carries it on three GOOS flavours. The existing route emits those correctly
 			// and this one must not churn them to agree with it. Claimed exactly as the map arm
 			// one block up is; UntypedNil's underlying is itself, so the identical-underlying
@@ -6005,7 +6005,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 	// An untyped-nil operand converting to a POINTER-shaped target — `(*T)(nil)` (isPointer:
 	// targetType resolved to the ELEM type) or `NamedPtr(nil)` — is a conversion the renderer
 	// must claim: ConvertibleTo reports false for the UntypedNil operand, which mis-routed the
-	// star form onto the regular call path, where the cast rendered `default!` and erased the
+	// star form onto the regular call path, where the cast rendered `default` and erased the
 	// typed nil to a bare null. The conversion renderer's nil interception then emits the
 	// canonical typed-nil instance. Other nil-able targets (slice/map/chan/func/interface/
 	// unsafe.Pointer) deliberately keep their existing routes.

@@ -25,7 +25,7 @@ internal static sizer std = new flat(n: 100);
 internal static Func<@string, nint> pickSizer(this ref config c) {
     var f = std.size;
 
-    if (c.s != default!) {
+    if (c.s != nil) {
         f = c.s.size;
     }
 

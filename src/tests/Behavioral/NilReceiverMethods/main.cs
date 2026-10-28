@@ -16,14 +16,14 @@ internal static error checkValid(this ж<File> Ꮡf, @string op) {
     if (Ꮡf == nil) {
         return errInvalid;
     }
-    return default!;
+    return default;
 }
 
 public static error Chdir(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid("chdir"); if (err != default!) {
+        var err = Ꮡf.checkValid("chdir"); if (err != nil) {
             return err;
         }
     }
@@ -63,7 +63,7 @@ internal static void @try(@string label, Action fn) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s -> panic: %v\n"u8, label, r);
                     return;
                 }
@@ -77,7 +77,7 @@ internal static void @try(@string label, Action fn) {
 }
 
 internal static void Main() {
-    ж<File> nilFile = default!;
+    ж<File> nilFile = default;
 
     fmt.Println("== 1. nil receiver, DELEGATED guard: must not panic ==");
     var nilFileʗ1 = nilFile;

@@ -216,7 +216,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 			for i, expr := range caseClause.List {
 				// A `case nil` in a type switch matches a nil interface — emit the C# `case null:`
-				// pattern (which binds nothing), not `case default! x:` (convExpr(nil) → "default!",
+				// pattern (which binds nothing), not `case default x:` (convExpr(nil) → "default",
 				// which is not a valid pattern). The bound variable is the nil value and is rarely
 				// used in such a case.
 				if ident, ok := expr.(*ast.Ident); ok && ident.Name == "nil" {

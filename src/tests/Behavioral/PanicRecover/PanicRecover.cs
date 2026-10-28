@@ -15,7 +15,7 @@ internal static void f() {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println("Recovered in f", r);
                 }
             }
@@ -47,7 +47,7 @@ internal static void g(nint i) {
 }
 
 internal static @string panicValueKind(Action f) {
-    @string @out = default!;
+    @string @out = default;
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {

@@ -34,7 +34,7 @@ internal static I pick(nint which) {
         return new point(1, 2);
     }}
 
-    return default!;
+    return default;
 }
 
 internal static void Main() {
@@ -42,19 +42,19 @@ internal static void Main() {
     any b = (nint)42;
     any c = (@string)"go"u8;
     I d = new point(3, 4);
-    I e = default!;
+    I e = default;
     fmt.Printf("%T %v | %T %v | %T %v | %T %v | %T %v\n"u8, a, a, b, b, c, c, d, d, e, e);
 
     show((int8)7);
     show((nint)9);
     show("s");
     show(new point(5, 6));
-    show(default!);
+    show(default);
     anon((int8)7);
     anon((nint)9);
     anon("s");
     anon(new point(5, 6));
-    anon(default!);
+    anon(default);
 
     fmt.Printf("%T %v\n"u8, back((int8)(-1)), back((int8)(-1)));
     for (nint i = 0; i < 4; i++) {
@@ -62,7 +62,7 @@ internal static void Main() {
     }
 
     e = a;
-    fmt.Println(AreEqual(e, a), AreEqual(e, b), e == default!);
+    fmt.Println(AreEqual(e, a), AreEqual(e, b), e == nil);
     {
         var (n, ok) = b._<nint>(ᐧ); if (ok) {
             fmt.Println("int", n + 1);
@@ -79,7 +79,7 @@ internal static void Main() {
         break;
     }}
 
-    var list = new I[]{(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default!}.slice();
+    var list = new I[]{(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default}.slice();
     fmt.Println(len(list), list);
     var m = new map<@string, I>{["n"] = (nint)1, ["s"] = (@string)"one"u8};
     fmt.Println(m["n"], m["s"]);

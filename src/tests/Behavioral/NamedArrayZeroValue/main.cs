@@ -25,17 +25,17 @@ partial struct holder {
 }
 
 internal static (nn r, ns s) namedResult() {
-    nn r = default!;
-    ns s = default!;
+    nn r = default;
+    ns s = default;
 
     return (r, s);
 }
 
 internal static void Main() {
-    nn d = default!;
-    ns sv = default!;
-    nb b = default!;
-    no o = default!;
+    nn d = default;
+    ns sv = default;
+    nb b = default;
+    no o = default;
     fmt.Println("varNN:", len(d), len(d[0]), d);
     fmt.Println("varNS:", len(sv), len(sv[0].a), sv);
     fmt.Println("varNB:", len(b), b);

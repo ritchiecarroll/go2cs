@@ -99,7 +99,7 @@ internal static void Main() {
         break;
     }}
 
-    reader empty = default!;
+    reader empty = default;
     {
         var (_, ok) = empty._<ж<conn>>(ᐧ); if (ok) {
             fmt.Println("nil interface WRONGLY asserted");

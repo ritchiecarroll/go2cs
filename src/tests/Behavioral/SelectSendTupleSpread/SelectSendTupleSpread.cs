@@ -8,11 +8,11 @@ internal static slice<@string> log;
 
 internal static (nint, error) pair() {
     log = append(log, "pair"u8);
-    return (7, default!);
+    return (7, default);
 }
 
 internal static nint must(nint v, error err) {
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return v;
@@ -50,7 +50,7 @@ internal static void Main() {
         break;
     }}
 
-    log = default!;
+    log = default;
     var selᴛ6 = chanFor(ch);
     var (ᴛ5, ᴛ6) = pair();
     var selᴛ7 = selᴛ6.ᐸꟷ(must(ᴛ5, ᴛ6), ꓸꓸꓸ);

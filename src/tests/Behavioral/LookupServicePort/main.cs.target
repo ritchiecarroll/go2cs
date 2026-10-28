@@ -24,7 +24,7 @@ internal static void Main() {
     foreach (var (_, q) in queries) {
         var (port, err) = Δnet.LookupPort(q.network, q.service);
 
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s/%s -> error\n"u8, q.network, q.service);
             continue;
         }

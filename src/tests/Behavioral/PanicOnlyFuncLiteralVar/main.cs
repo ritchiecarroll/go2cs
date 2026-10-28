@@ -5,13 +5,13 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static (any v, error err) call(Func<(any, error)> fn) {
-    any v = default!;
-    error err = default!;
+    any v = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     err = fmt.Errorf("recovered: %v"u8, r);
                 }
             }

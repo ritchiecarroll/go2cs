@@ -101,7 +101,7 @@ internal static void namedZeroSizeWrites() {
     Carrier.ᏑZ(ref o.C) = side();
     Carrier.ᏑZ(ref s[1]) = side();
 
-    nint n = default!;
+    nint n = default;
     (Carrier.ᏑZ(ref x), n) = (side(), 7);
 
     fmt.Printf("assignments ran %d right sides; n = %d; V: %#x %#x %#x %#x\n"u8, sideCalls, n, x.V, arr[1].V, o.C.V, s[1].V);

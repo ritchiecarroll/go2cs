@@ -34,13 +34,13 @@ internal static (ж<reparse>, error) readReparse(uint32 flags, bool fail) {
     ref var buf = ref heap(new array<byte>(64), out var Ꮡbuf);
 
     if (fail) {
-        return (default!, errors.New("no record"));
+        return (default, errors.New("no record"));
     }
 
     (buf[8], buf[9]) = ((byte)flags, (byte)(flags >> 8));
     buf[12] = (rune)'x';
     var rec = Ꮡbuf.at<byte>(0).Reinterpret<byte, reparse>();
-    return (rec, default!);
+    return (rec, default);
 }
 
 internal static ж<reparse> viewReparse(slice<byte> blob) {

@@ -34,7 +34,7 @@ internal static void doubleList(ж<node> Ꮡp) {
 internal static ж<node> build(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
-    ж<node> head = default!;
+    ж<node> head = default;
     for (nint i = len(vals) - 1; i >= 0; i--) {
         head = Ꮡ(new node(val: vals[i], next: head));
     }
@@ -65,7 +65,7 @@ internal static nint sumEveryOther(ж<node> Ꮡp) {
 internal static void bumpFirstViaTuple(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    nint skipped = default!;
+    nint skipped = default;
     (Ꮡp, skipped) = advance(ref (Ꮡp).DerefOrNull()); p = ref Ꮡp.DerefOrNull();
     _ = skipped;
     if (Ꮡp != nil) {
@@ -77,7 +77,7 @@ internal static partial ж<node> dropIfShort(ж<node> Ꮡp, nint min) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (sumList(Ꮡp) < min) {
-        Ꮡp = default!; p = ref Ꮡp.DerefOrNull();
+        Ꮡp = default; p = ref Ꮡp.DerefOrNull();
     }
     if (Ꮡp != nil) {
         p.val += 1000;

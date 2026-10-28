@@ -28,7 +28,7 @@ internal static (@string, @string) declRedeclare(fmt.Stringer sʗp) {
 }
 
 internal static @string /*result*/ declDeferObserver(fmt.Stringer xʗp, fmt.Stringer y) {
-    @string result = default!;
+    @string result = default;
     GoFrame ᒐ = default;
     try {
         ref var x = ref heap(xʗp, out var Ꮡx);

@@ -29,7 +29,7 @@ internal static void Main() {
     var d = @new<Dog>();
     ref var zoo = ref heap<array<Animal>>(out var Ꮡzoo);
     zoo = new Animal[]{new FrogжAnimal(f), new DogжAnimal(d)}.array();
-    Test t = default!;
+    Test t = default;
 
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], f));
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], zoo[0]));
@@ -42,7 +42,7 @@ internal static void Main() {
     checkErr(0);
     useAndRelease();
 
-    Animal a = default!;
+    Animal a = default;
     fmt.Printf("%T\n"u8, a);
 
     foreach (var (_, aΔ1) in zoo.ΔRangeSnapshot()) {
@@ -71,7 +71,7 @@ internal static error mayFail(nint n) {
     if (n > 0) {
         return errAgain;
     }
-    return default!;
+    return default;
 }
 
 internal static void checkErr(nint n) {
@@ -86,7 +86,7 @@ internal static void checkErr(nint n) {
     if (AreEqual(exprᴛ1, errAgain)) {
         fmt.Println("switch: again");
     }
-    else if (AreEqual(exprᴛ1, default!)) {
+    else if (AreEqual(exprᴛ1, default)) {
         fmt.Println("switch: nil");
     }
     else { /* default: */
@@ -113,7 +113,7 @@ internal static void useAndRelease() {
 public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.DerefOrNull();
 
-    Animal a = default!;
+    Animal a = default;
 
     foreach (var (_, vᴛ1) in zoo.ΔRangeSnapshot()) {
         a = vᴛ1;

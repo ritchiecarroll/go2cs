@@ -30,13 +30,13 @@ internal static any helperRecover() {
 
         return recover(calledByDefer);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static (any got, any outer) helperGetsNil() {
-    any got = default!;
-    any outer = default!;
+    any got = default;
+    any outer = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -60,7 +60,7 @@ internal static (any got, any outer) helperGetsNil() {
 }
 
 internal static any /*got*/ directWorks() {
-    any got = default!;
+    any got = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -80,7 +80,7 @@ internal static void catchError(ж<error> Ꮡerr) {
         ref var err = ref Ꮡerr.DerefOrNull();
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
                 err = fmt.Errorf("caught: %v"u8, e);
             }
         }
@@ -113,7 +113,7 @@ internal static void catchGobError(ref error err) {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
                 var (ge, ok) = e._<gobError>(ᐧ);
                 if (!ok) {
                     throw panic(e);
@@ -169,7 +169,7 @@ internal static void catchTagged(this ж<guard> Ꮡg, @string tag) {
 }
 
 internal static ж<guard> /*g*/ deferMethodValue() {
-    ж<guard> g = default!;
+    ж<guard> g = default;
     GoFrame ᒐ = default;
     try {
         g = Ꮡ(new guard(nil));
@@ -198,7 +198,7 @@ internal static any deferMethodValueWithArgs() {
 }
 
 internal static any /*outer*/ deferRecoverItself() {
-    any outer = default!;
+    any outer = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -221,7 +221,7 @@ internal static any /*outer*/ deferRecoverItself() {
 
 internal static (error inner, any outer) namedFunctionCalledNormally() {
     heap<error>(out var Ꮡinner);
-    any outer = default!;
+    any outer = default;
     GoFrame ᒐ = default;
     try {
         ref var inner = ref Ꮡinner.ValueSlot;

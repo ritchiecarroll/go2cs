@@ -27,7 +27,7 @@ partial interface Both :
 }
 
 internal static void Main() {
-    Fn fn = default!;
+    Fn fn = default;
 
     fmt.Printf("%v\n"u8, (fn).OrTypedNilFunc());
     fmt.Println((fn).OrTypedNilFunc());
@@ -37,14 +37,14 @@ internal static void Main() {
     any x = (fn).OrTypedNilFunc();
 
     var (s, ok) = x._<fmt.Stringer>(ᐧ);
-    fmt.Println("stringer", ok, s != default!);
+    fmt.Println("stringer", ok, s != nil);
 
     if (ok) {
         fmt.Println("string  ", s.String());
     }
 
     (var f2, ok) = x._<Fn>(ᐧ);
-    fmt.Println("concrete", ok, f2 == default!);
+    fmt.Println("concrete", ok, f2 == nil);
 
     switch (x.type()) {
     case {} Δv when Δv._<fmt.Stringer>(out var v): {
@@ -57,7 +57,7 @@ internal static void Main() {
         break;
     }}
 
-    G g = default!;
+    G g = default;
     any y = (g).OrTypedNilFunc();
 
     {
@@ -74,11 +74,11 @@ internal static void Main() {
     (_, ok) = x._<Both>(ᐧ);
     fmt.Println("Fn->Both   ", ok);
 
-    Func<nint> plain = default!;
+    Func<nint> plain = default;
     any z = (plain).OrTypedNilFunc();
 
     (_, ok) = z._<fmt.Stringer>(ᐧ);
-    fmt.Println("plain      ", ok, z != default!);
+    fmt.Println("plain      ", ok, z != nil);
     fmt.Printf("%v|%T\n"u8, (plain).OrTypedNilFunc(), (plain).OrTypedNilFunc());
 }
 

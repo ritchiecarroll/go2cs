@@ -22,7 +22,7 @@ internal static (nint, error) Read(this ref src s, slice<byte> p) {
     }
     nint n = copy(p, s.data.slice(s.pos));
     s.pos += n;
-    return (n, default!);
+    return (n, default);
 }
 
 internal static nint Remaining(this ref src s) {
@@ -32,7 +32,7 @@ internal static nint Remaining(this ref src s) {
 internal static @string viaForeign(Δio.Reader r) {
     var buf = new slice<byte>(4);
     var (n, err) = r.Read(buf);
-    if (err != default!) {
+    if (err != nil) {
         return "err";
     }
     return (@string)(buf.slice(0, n));
@@ -42,7 +42,7 @@ internal static @string viaLocal(Reader r) {
     nint before = r.Remaining();
     var buf = new slice<byte>(3);
     var (n, err) = r.Read(buf);
-    if (err != default!) {
+    if (err != nil) {
         return "err";
     }
     return fmt.Sprintf("%d|%s|%d"u8, before, (@string)(buf.slice(0, n)), r.Remaining());

@@ -23,7 +23,7 @@ internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 
 internal static void Main() {
     badge b = new reservedᴛ1жbadge(reserved);
-    fmt.Println(b != default!);
+    fmt.Println(b != nil);
 
     reserved.Value.badge = new gold(nil);
     fmt.Println(b.label());

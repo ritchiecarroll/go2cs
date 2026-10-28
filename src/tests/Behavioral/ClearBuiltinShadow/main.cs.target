@@ -16,7 +16,7 @@ partial struct box {
 }
 
 internal static void clear(this ref box b) {
-    b.data = default!;
+    b.data = default;
 }
 
 partial struct guard {
@@ -30,7 +30,7 @@ internal static void recover(this ж<guard> Ꮡg) {
         ref var g = ref Ꮡg.DerefOrNull();
 
         {
-            var e = builtin.recover(calledByDefer); if (e != default!) {
+            var e = builtin.recover(calledByDefer); if (e != nil) {
                 g.err = fmt.Errorf("recovered: %v"u8, e);
             }
         }
@@ -71,7 +71,7 @@ internal static void Main() {
     builtin.clear(h);
     fmt.Println(len(h), len(alias));
 
-    header hn = default!;
+    header hn = default;
     builtin.clear(hn);
     fmt.Println(len(hn));
 
@@ -86,7 +86,7 @@ internal static void Main() {
     c[0].v[1] = 3;
     c[0].m = new map<@string, nint>{["x"] = 1};
     builtin.clear(c);
-    fmt.Println(len(c[0].v), c[0].v[1], c[0].m == default!);
+    fmt.Println(len(c[0].v), c[0].v[1], c[0].m == default);
     c[0].v[1] += 4;
     fmt.Println(c[0].v);
 

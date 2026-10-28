@@ -13,7 +13,7 @@ partial struct root {
 internal static void release(this ref root r) {
     r.fd = -r.fd;
 
-    if (r.done != default!) {
+    if (r.done != default) {
         r.done.ᐸꟷ(r.fd);
     }
 }
@@ -23,7 +23,7 @@ partial struct Root {
 }
 
 internal static nint /*seen*/ deferChain<T>(ref Root r, T mark) {
-    nint seen = default!;
+    nint seen = default;
     GoFrame ᒐ = default;
     try {
         defer(r.root.release, ref ᒐ);
@@ -45,7 +45,7 @@ internal static nint immediateChain(ref Root r) {
 }
 
 internal static nint /*before*/ directReceiver(ж<root> Ꮡp) {
-    nint before = default!;
+    nint before = default;
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -66,7 +66,7 @@ internal static nint localChain() {
         defer((~rʗ1).root.release, ref ᒐ);
         return (~(~r).root).fd;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

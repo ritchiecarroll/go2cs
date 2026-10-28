@@ -168,7 +168,7 @@ public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
-        return default!;
+        return default;
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.mcount > 0")), (int)(t.Mcount)));
 }
@@ -177,7 +177,7 @@ public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Xcount == 0) {
-        return default!;
+        return default;
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.xcount > 0")), (int)(t.Xcount)));
 }
@@ -283,7 +283,7 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
-        return default!;
+        return default;
     }
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Struct) {
@@ -341,14 +341,14 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
         return tt.of(SliceType.ᏑElem).Value;
     }
 
-    return default!;
+    return default;
 }
 
 public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔStructType>();
 }
@@ -357,7 +357,7 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Map) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔMapType>();
 }
@@ -366,7 +366,7 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Array) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔArrayType>();
 }
@@ -375,7 +375,7 @@ public static ж<ΔFuncType> FuncType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔFuncType>();
 }
@@ -384,7 +384,7 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Interface) {
-        return default!;
+        return default;
     }
     return Ꮡt.Reinterpret<Type, ΔInterfaceType>();
 }
@@ -410,7 +410,7 @@ partial struct ΔInterfaceType {
 public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
-        return default!;
+        return default;
     }
     return ut.ExportedMethods();
 }
@@ -467,7 +467,7 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
     if (t.Kind() == Map) {
         return (Ꮡt.Reinterpret<Type, ΔMapType>()).Value.Key;
     }
-    return default!;
+    return default;
 }
 
 partial struct SliceType {
@@ -505,7 +505,7 @@ public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
         uadd += /* unsafe.Sizeof(UncommonType{}) */ (uintptr)16;
     }
     if (t.InCount == 0) {
-        return default!;
+        return default;
     }
     return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:551)"));
 }
@@ -515,7 +515,7 @@ public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
 
     var outCount = (uint16)t.NumOut();
     if (outCount == 0) {
-        return default!;
+        return default;
     }
     var uadd = /* unsafe.Sizeof(*t) */ (uintptr)56;
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
@@ -633,7 +633,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     nint nameLenLen = writeVarint(nameLen[..], len(n));
     nint tagLenLen = writeVarint(tagLen[..], len(tag));
 
-    byte bits = default!;
+    byte bits = default;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
         bits |= (byte)((byte)(1 << 0));

@@ -21,12 +21,12 @@ internal static @unsafe.Pointer step(@unsafe.Pointer p, nint n) {
 }
 
 internal static bool clear(@unsafe.Pointer p) {
-    p = default!;
+    p = default;
     return p == nil;
 }
 
 internal static @unsafe.Pointer local(@unsafe.Pointer q) {
-    @unsafe.Pointer p = default!;
+    @unsafe.Pointer p = default;
     p = q;
     return p;
 }

@@ -158,13 +158,13 @@ lit := map[any]int{nil: 1, "b": 2}
 ```csharp
 var m = new map<any, @string>();
 
-m[default!] = "nil-key";
+m[default] = "nil-key";
 …
-var (v, ok) = m[default!, ꟷ];
+var (v, ok) = m[default, ꟷ];
 …
-delete(m, default!);
+delete(m, default);
 …
-var lit = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2};
+var lit = new map<any, nint>{[default] = 1, [(@string)"b"u8] = 2};
 ```
 
 golib's `map<TKey, TValue>` wraps a `Dictionary<TKey, TValue>`, which **rejects a null key** with

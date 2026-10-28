@@ -14,7 +14,7 @@ internal static void Main() {
     AliasImportLibꓸAct a = () => {
         fmt.Println("act");
     };
-    AliasImportLibꓸMulti m = (nint x) => (x * 10, default!);
+    AliasImportLibꓸMulti m = (nint x) => (x * 10, default);
     AliasImportLibꓸVar v = (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         return len(xs);

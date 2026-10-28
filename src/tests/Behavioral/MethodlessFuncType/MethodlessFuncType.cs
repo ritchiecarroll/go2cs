@@ -10,7 +10,7 @@ partial class main_package {
 
 internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
     return (error err) => {
-        if (err != default!) {
+        if (err != nil) {
             Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":"u8 + err.Error());
         } else {
             Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":ok"u8);
@@ -28,25 +28,25 @@ partial struct holder {
 }
 
 internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> Ꮡlog) {
-    return (len(tag), makeReleaser(tag, Ꮡlog), default!);
+    return (len(tag), makeReleaser(tag, Ꮡlog), default);
 }
 
 internal static void Main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
 
     var (n, rel, err) = grab("a", Ꮡlog);
-    consume(rel, default!);
-    fmt.Println("n:", n, "err:", err == default!);
+    consume(rel, default);
+    fmt.Println("n:", n, "err:", err == nil);
 
     var h = new holder(release: makeReleaser("field", Ꮡlog), name: "h");
     h.release(fmt.Errorf("boom"u8));
-    consume(h.release, default!);
+    consume(h.release, default);
 
     Action<error> r = makeReleaser("direct", Ꮡlog);
-    r(default!);
+    r(default);
     consume(r, fmt.Errorf("late"u8));
 
-    Func<@string, (@string, bool)> find = default!;
+    Func<@string, (@string, bool)> find = default;
     find = (@string s) => (s + "!", len(s) > 0);
     var (p, okp) = find("q");
     fmt.Println("lookup:", p, okp);

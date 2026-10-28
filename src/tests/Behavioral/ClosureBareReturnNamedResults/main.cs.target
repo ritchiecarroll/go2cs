@@ -12,8 +12,8 @@ internal static partial void forEach(slice<nint> items, Action<nint> f) {
 }
 
 internal static partial (nint n, bool ok) run() {
-    nint n = default!;
-    bool ok = default!;
+    nint n = default;
+    bool ok = default;
 
     var items = new nint[]{1, 2, 3, -1, 4}.slice();
     forEach(items, (nint x) => {

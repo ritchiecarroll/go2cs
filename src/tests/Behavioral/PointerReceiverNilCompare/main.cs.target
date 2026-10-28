@@ -57,11 +57,11 @@ internal static void Main() {
     e.Value.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());
 
-    ж<box> np = default!;
+    ж<box> np = default;
     fmt.Println(np.isNil(), np.notNil(), np.describe());
     fmt.Println(b.describe());
 
-    ж<embedder> ne = default!;
+    ж<embedder> ne = default;
     fmt.Println(ne.isNil(), ne.checkGuard());
 }
 

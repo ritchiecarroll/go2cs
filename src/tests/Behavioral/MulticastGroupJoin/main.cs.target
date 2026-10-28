@@ -9,13 +9,13 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         var (ifis, err) = Δnet.Interfaces();
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL interfaces:", err);
             return;
         }
 
-        ж<Δnet.Interface> chosen = default!;
-        foreach (var (i, _) in ifis) {
+        ж<Δnet.Interface> chosen = default;
+        foreach (var i in range(ifis)) {
             if ((Δnet.Flags)(ifis[i].Flags & Δnet.FlagUp) != 0 && (Δnet.Flags)(ifis[i].Flags & Δnet.FlagMulticast) != 0) {
                 chosen = Ꮡ(ifis, i);
                 break;
@@ -29,8 +29,8 @@ internal static void Main() {
         var gaddr = Ꮡ(new Δnet.UDPAddr(IP: Δnet.IPv4(224, 0, 0, 254), Port: 0));
 
         (var c, err) = Δnet.ListenMulticastUDP("udp4", chosen, gaddr);
-        fmt.Println("join err is nil  =", err == default!);
-        if (err != default!) {
+        fmt.Println("join err is nil  =", err == nil);
+        if (err != nil) {
             fmt.Println("  join error      =", err);
             return;
         }

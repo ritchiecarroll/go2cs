@@ -50,7 +50,7 @@ internal static void Main() {
     var pq = j._<ж<main_p>>();
     fmt.Println("B1 pointer assertion:", (~pq).X, (~pq).Y);
 
-    main_s s = default!;
+    main_s s = default;
     s.A = "hi";
 
     any k = s;

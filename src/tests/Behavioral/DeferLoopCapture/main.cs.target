@@ -17,7 +17,7 @@ partial struct conn {
 
 internal static error Close(this ref conn c) {
     fmt.Println("close", c.name);
-    return default!;
+    return default;
 }
 
 internal static void Reset(this ref conn c) {
@@ -31,7 +31,7 @@ partial struct valueConn {
 
 internal static error Close(this valueConn a) {
     a.@out.ᐸꟷ(a.name);
-    return default!;
+    return default;
 }
 
 partial struct asyncConn {
@@ -41,7 +41,7 @@ partial struct asyncConn {
 
 internal static error Close(this ref asyncConn a) {
     a.@out.ᐸꟷ(a.name);
-    return default!;
+    return default;
 }
 
 internal static void receiverReassignedNoLoop() {

@@ -93,7 +93,7 @@ internal static void Main() {
     fmt.Println("forward wrote through:", a);
 
     fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));
-    fmt.Println("gather:", gather(new nint[]{0}.slice(), 1, 2), gather(default!, a.ꓸꓸꓸ));
+    fmt.Println("gather:", gather(new nint[]{0}.slice(), 1, 2), gather(default, a.ꓸꓸꓸ));
 
     var d = new slice<nint>(2);
     nint n = fill(d, 8, 9, 10);

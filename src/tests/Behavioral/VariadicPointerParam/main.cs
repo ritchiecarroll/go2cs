@@ -58,7 +58,7 @@ internal static nint deferredLen(params ꓸꓸꓸжbox bsʗp) {
         }, ref ᒐ);
         return len(bs);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -76,7 +76,7 @@ internal static void deferredReplaceFirst(params ꓸꓸꓸжbox bsʗp) {
 }
 
 internal static nint /*n*/ deferredNamedLen(params ꓸꓸꓸжbox bsʗp) {
-    nint n = default!;
+    nint n = default;
     GoFrame ᒐ = default;
     try {
         var bs = bsʗp.sslice();

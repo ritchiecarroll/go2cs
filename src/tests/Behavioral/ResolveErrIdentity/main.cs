@@ -27,7 +27,7 @@ internal static void Main() {
         var (addr, err) = Δnet.ResolveIPAddr(r.network, r.addr);
         fmt.Printf("ResolveIPAddr(%q):\n"u8, r.network);
         fmt.Printf("   addr nil:                  %v\n"u8, addr == nil);
-        fmt.Printf("   err text equal:            %v\n"u8, err != default! && err.Error() == r.want.Error());
+        fmt.Printf("   err text equal:            %v\n"u8, err != nil && err.Error() == r.want.Error());
         fmt.Printf("   err == want:               %v\n"u8, AreEqual(err, r.want));
         fmt.Printf("   DeepEqual(err,want):       %v\n"u8, reflect.DeepEqual(err, r.want));
         fmt.Printf("   TypeOf(err).String():      %v\n"u8, reflect.TypeOf(err).String());

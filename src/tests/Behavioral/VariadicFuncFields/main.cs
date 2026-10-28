@@ -31,7 +31,7 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
 internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
-    if (c.JoinPath != default!) {
+    if (c.JoinPath != nil) {
         return c.JoinPath(elem.ꓸꓸꓸ);
     }
 

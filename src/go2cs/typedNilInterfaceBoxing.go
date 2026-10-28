@@ -39,7 +39,7 @@
 // ⚠ CORRECTED 2026-09-26 (R, seat (c2)): this paragraph said `unsafe.Pointer` "is a Basic and renders
 // as a struct" and so could not be null either, and excluded it on that premise. The premise had gone
 // false without anyone re-reading it: unsafe.Pointer is the hand-owned `class Pointer :
-// StandardBox<uintptr>`, a nil one renders `default!`, and `any(unsafe.Pointer(nil))` reached reflect
+// StandardBox<uintptr>`, a nil one renders `default`, and `any(unsafe.Pointer(nil))` reached reflect
 // as the ZERO Value — reflect's TestIsZero panicked "call of reflect.Value.IsZero on zero Value" at its
 // `{unsafe.Pointer(nil), true}` row, once seat (c) let it run that far. It is now the boundary's third
 // arm (applyTypedNilUnsafePointerBox), with its own canonical nil, since the pointer arm's accessor
@@ -352,7 +352,7 @@ func isExactUnsafePointer(t types.Type) bool {
 
 // applyTypedNilUnsafePointerBox carries unsafe.Pointer's Go type across the empty-interface boundary
 // when the value can be null — the THIRD arm, beside the pointer and func ones. `unsafe.Pointer` is
-// the hand-owned `class Pointer : StandardBox<uintptr>`, so a nil one renders `default!`, a C# null
+// the hand-owned `class Pointer : StandardBox<uintptr>`, so a nil one renders `default`, a C# null
 // that boxes as nothing: `any(unsafe.Pointer(nil))` reached reflect as the ZERO Value, and TestIsZero
 // panicked "call of reflect.Value.IsZero on zero Value" at its `{unsafe.Pointer(nil), true}` row. The
 // pointer arm's `OrTypedNil()` cannot serve it: that extension binds `ж<uintptr>` and would hand back
@@ -371,7 +371,7 @@ func (v *Visitor) applyTypedNilUnsafePointerBox(valueType types.Type, neverNull 
 // provably cannot be null: a CONVERSION FROM A POINTER OR A uintptr constructs a Pointer
 // (`new @unsafe.Pointer(…)` / `FromPinnedBox(…)`), and a nil box or a zero address constructs the
 // structurally-nil one rather than a null reference. Everything else is left conservative: the nil
-// conversion renders a cast of null (`(@unsafe.Pointer)default!`, TestIsZero's row), a conversion of
+// conversion renders a cast of null (`(@unsafe.Pointer)default`, TestIsZero's row), a conversion of
 // an operand that is ALREADY an unsafe.Pointer renders as that operand, and a variable, a field or a
 // call result can each hold null.
 func (v *Visitor) unsafePointerExprNeverRendersNull(expr ast.Expr) bool {
@@ -434,8 +434,8 @@ func (v *Visitor) applyTypedNilFuncBox(valueType types.Type, neverNull bool, ren
 	}
 
 	// PARENTHESIZED, unlike the pointer arm's append. Member access binds tighter than a cast in C#,
-	// so `(Action)(default!).OrTypedNilFunc()` parses as `(Action)((default!).OrTypedNilFunc())` —
-	// the cast lands on the accessor's RESULT and the operand it was meant to type is bare `default!`.
+	// so `(Action)(default).OrTypedNilFunc()` parses as `(Action)((default).OrTypedNilFunc())` —
+	// the cast lands on the accessor's RESULT and the operand it was meant to type is bare `default`.
 	// The pointer arm never meets this because its renderings arrive already parenthesized
 	// (`((ж<T>)nil)`); a func's nil CONVERSION does not, and that is exactly the shape this arm
 	// exists for. Measured on the emitted C#, not reasoned about.
@@ -461,7 +461,7 @@ func (v *Visitor) applyTypedNilFuncBox(valueType types.Type, neverNull bool, ren
 //
 // A nil CONVERSION is NOT exempt, and that is the one place this differs from the pointer twin.
 // `(*T)(nil)` already renders the canonical typed-nil box, so the pointer arm can pass it through;
-// `(func())(nil)` renders `(Action)(default!)` — a cast of null, i.e. precisely the shape that loses
+// `(func())(nil)` renders `(Action)(default)` — a cast of null, i.e. precisely the shape that loses
 // the type word — so it needs the carrier like any other nullable func. Reading that difference off
 // the pointer arm rather than measuring it would have exempted the one expression TestMapOf uses.
 func (v *Visitor) funcExprNeverRendersNull(expr ast.Expr) bool {
@@ -509,7 +509,7 @@ func (v *Visitor) funcExprNeverRendersNull(expr ast.Expr) bool {
 		//
 		// The DIFFERENCE from the pointer twin, and it is the whole reason this file exists: a NIL
 		// conversion is not exempt here. `(*T)(nil)` already renders the canonical typed-nil box, so
-		// the pointer arm passes it through; `(func())(nil)` renders `(Action)(default!)` — a cast of
+		// the pointer arm passes it through; `(func())(nil)` renders `(Action)(default)` — a cast of
 		// null — which is precisely the shape that loses the type word. Recursing into the operand
 		// gives that for free: a nil operand is not provably non-null, so it takes the carrier.
 		if len(expr.Args) == 1 {

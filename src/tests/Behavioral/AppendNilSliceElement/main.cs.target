@@ -9,17 +9,17 @@ internal static void Main() {
     var mapsᴷ = new stackAppend<map<@string, nint>>();
     var ptrsᴷ = new stackAppend<ж<nint>>();
 
-    slice<slice<nint>> lines = default!;
-    lines = append(linesᴷ, lines, (slice<nint>)(default!));
-    lines = append(lines, (slice<nint>)(default!));
+    slice<slice<nint>> lines = default;
+    lines = append(linesᴷ, lines, (slice<nint>)(default));
+    lines = append(lines, (slice<nint>)(default));
     lines[0] = append(lines[0], (nint)7);
-    fmt.Println(len(lines), lines[0], lines[1] == default!);
+    fmt.Println(len(lines), lines[0], lines[1] == default);
 
-    slice<map<@string, nint>> maps = default!;
-    maps = append(mapsᴷ, maps, (map<@string, nint>)(default!));
-    fmt.Println(len(maps), maps[0] == default!);
+    slice<map<@string, nint>> maps = default;
+    maps = append(mapsᴷ, maps, (map<@string, nint>)(default));
+    fmt.Println(len(maps), maps[0] == default);
 
-    slice<ж<nint>> ptrs = default!;
+    slice<ж<nint>> ptrs = default;
     ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));
     fmt.Println(len(ptrs), ptrs[0] == nil);
 }

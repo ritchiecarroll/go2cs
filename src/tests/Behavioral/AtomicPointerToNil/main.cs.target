@@ -17,7 +17,7 @@ internal static void Main() {
     ref var i = ref heap<any>(out var Ꮡi);
     var pi = Ꮡi;
     Ꮡp.Store(pi);
-    fmt.Println("store &nil:", Ꮡp.Load() == nil, Ꮡp.Load() == pi, Ꮡp.Load().ValueSlot == default!);
+    fmt.Println("store &nil:", Ꮡp.Load() == nil, Ꮡp.Load() == pi, Ꮡp.Load().ValueSlot == nil);
 
     pi.ValueSlot = valueˢ;
     fmt.Println("through pointer:", Ꮡp.Load().ValueSlot);
@@ -32,7 +32,7 @@ internal static void Main() {
 
     var a = @new<any>();
     var b = @new<any>();
-    fmt.Println("sentinels:", a == nil, b == nil, a == b, a.ValueSlot == default!);
+    fmt.Println("sentinels:", a == nil, b == nil, a == b, a.ValueSlot == nil);
 
     Ꮡp.Store(a);
     fmt.Println("cas nil:", Ꮡp.CompareAndSwap(nil, b));

@@ -27,11 +27,11 @@ internal static void Main() {
     fmt.Println("elem of chan (<-chan int):", reflect.ChanOf(reflect.BothDir, recv).Elem().String());
     fmt.Println("elem dir                 :", reflect.ChanOf(reflect.BothDir, recv).Elem().ChanDir());
 
-    channel<nint> nilChan = default!;
+    channel<nint> nilChan = default;
     fmt.Println("identity ChanOf(Both,int) == TypeOf((chan int)(nil)):",
         AreEqual(reflect.ChanOf(reflect.BothDir, intT), reflect.TypeOf(nilChan)));
 
-    channel<channel<nint>> nilNested = default!;
+    channel<channel<nint>> nilNested = default;
     fmt.Println("identity ChanOf(Both,chan int) == TypeOf((chan chan int)(nil)):",
         AreEqual(reflect.ChanOf(reflect.BothDir, both), reflect.TypeOf(nilNested)));
 

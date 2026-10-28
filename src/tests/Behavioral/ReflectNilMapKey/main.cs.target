@@ -15,7 +15,7 @@ partial struct holder {
 }
 
 internal static void show(@string label, map<any, any> m) {
-    slice<@string> keys = default!;
+    slice<@string> keys = default;
     foreach (var (k, v) in m) {
         keys = append(keys, fmt.Sprintf("%T(%v)=%v"u8, k, k, v));
     }
@@ -31,19 +31,19 @@ internal static void Main() {
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("nil-key"));
     show("after nil key:", m);
     fmt.Println("MapIndex(nil):", v.MapIndex(reflect.Zero(keyType)));
-    fmt.Println("m[nil]:", m[default!]);
+    fmt.Println("m[nil]:", m[default]);
 
     var h = new holder(nil);
     var pk = reflect.ValueOf(h).Field(0);
     v.SetMapIndex(pk, reflect.ValueOf("typed-nil-key"));
     show("after typed-nil key:", m);
     fmt.Println("m[(*T)(nil)]:", m[((ж<T>)nil)]);
-    fmt.Println("m[nil] still:", m[default!]);
+    fmt.Println("m[nil] still:", m[default]);
     fmt.Println("MapIndex((*T)(nil)):", v.MapIndex(pk));
     fmt.Println("MapIndex(nil) still:", v.MapIndex(reflect.Zero(keyType)));
 
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("again"));
-    fmt.Println("m[nil] after overwrite:", m[default!]);
+    fmt.Println("m[nil] after overwrite:", m[default]);
     v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue(nil));
     show("after delete nil key:", m);
 

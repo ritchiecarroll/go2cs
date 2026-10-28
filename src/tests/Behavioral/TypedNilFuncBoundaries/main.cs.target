@@ -25,7 +25,7 @@ internal static nint declared(nint x) {
 }
 
 internal static void Main() {
-    Func<nint, nint> zero = default!;
+    Func<nint, nint> zero = default;
 
     var argSlot = take((zero).OrTypedNilFunc());
 
@@ -37,27 +37,27 @@ internal static void Main() {
 
     var appendSlot = append(new any[]{}.slice(), (any)((zero).OrTypedNilFunc()));
 
-    fmt.Println("arg    ", argSlot == default!);
-    fmt.Println("elem   ", elemSlot[0] == default!);
-    fmt.Println("field  ", fieldSlot[0].v == default!);
-    fmt.Println("keyed  ", keyedSlot["k"] == default!);
-    fmt.Println("append ", appendSlot[0] == default!);
+    fmt.Println("arg    ", argSlot == nil);
+    fmt.Println("elem   ", elemSlot[0] == nil);
+    fmt.Println("field  ", fieldSlot[0].v == nil);
+    fmt.Println("keyed  ", keyedSlot["k"] == nil);
+    fmt.Println("append ", appendSlot[0] == nil);
 
-    fmt.Println("conv   ", take(((Action)(default!)).OrTypedNilFunc()) == default!);
+    fmt.Println("conv   ", take(((Action)(default)).OrTypedNilFunc()) == nil);
 
-    holder h = default!;
+    holder h = default;
 
-    fmt.Println("declared", take(declared) != default!);
-    fmt.Println("qualified", take(fmt.Sprint) != default!);
+    fmt.Println("declared", take(declared) != nil);
+    fmt.Println("qualified", take(fmt.Sprint) != nil);
     var hʗ1 = h;
-    fmt.Println("methodval", take(() => hʗ1.method()) != default!);
+    fmt.Println("methodval", take(() => hʗ1.method()) != nil);
     fmt.Println("literal ", take(() => {
-    }) != default!);
+    }) != nil);
 
-    fmt.Println("fieldfn ", take((h.fn).OrTypedNilFunc()) == default!);
+    fmt.Println("fieldfn ", take((h.fn).OrTypedNilFunc()) == nil);
 
     h.fn = declared;
-    fmt.Println("fieldset", take((h.fn).OrTypedNilFunc()) == default!);
+    fmt.Println("fieldset", take((h.fn).OrTypedNilFunc()) == nil);
 }
 
 } // end main_package

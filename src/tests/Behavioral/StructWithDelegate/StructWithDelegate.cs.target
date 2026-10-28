@@ -11,7 +11,7 @@ partial struct Person {
 }
 
 internal static void Main() {
-    var person = new Person(work: default!, name: "Michał", age: 29);
+    var person = new Person(work: default, name: "Michał", age: 29);
     fmt.Println(person);
 }
 

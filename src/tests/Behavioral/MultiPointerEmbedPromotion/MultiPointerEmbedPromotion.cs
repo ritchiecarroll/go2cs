@@ -15,16 +15,16 @@ internal static (nint, error) Read(this ж<reader> Ꮡr, slice<byte> p) {
 
     var q = Ꮡr.of(reader.Ꮡpos);
     if (q.Value >= len(r.src)) {
-        return (0, default!);
+        return (0, default);
     }
     nint n = copy(p, r.src.slice(q.Value));
     q.Value += n;
-    return (n, default!);
+    return (n, default);
 }
 
 internal static error Close(this ref reader r) {
     r.pos = len(r.src);
-    return default!;
+    return default;
 }
 
 partial struct writer {
@@ -34,12 +34,12 @@ partial struct writer {
 
 internal static (nint, error) Write(this ref writer w, slice<byte> p) {
     w.@out = appendꓸꓸꓸ(w.@out, p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static error Close(this ref writer w) {
     w.flush++;
-    return default!;
+    return default;
 }
 
 internal static @string String(this ref writer w) {
@@ -53,7 +53,7 @@ partial struct duplex {
 
 internal static error Close(this ref duplex d) {
     {
-        var err = d.reader.Close(); if (err != default!) {
+        var err = d.reader.Close(); if (err != nil) {
             return err;
         }
     }
@@ -90,14 +90,14 @@ internal static void Main() {
 
     var buf = new slice<byte>(5);
     var (n, err) = rwc.Read(buf);
-    fmt.Println("read:", n, (@string)(buf.slice(0, n)), err == default!);
+    fmt.Println("read:", n, (@string)(buf.slice(0, n)), err == nil);
 
     (n, err) = rwc.Write(buf.slice(0, n));
-    fmt.Println("write:", n, err == default!);
+    fmt.Println("write:", n, err == nil);
 
     fmt.Println("aliased:", (~r).pos, w.String());
 
-    fmt.Println("close:", rwc.Close() == default!, (~r).pos, (~w).flush);
+    fmt.Println("close:", rwc.Close() == nil, (~r).pos, (~w).flush);
 
     readWriter rw = d.Value;
     (n, _) = rw.Write(slice<byte>("!"u8));

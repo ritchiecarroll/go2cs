@@ -354,7 +354,7 @@ internal static nint digits(nint @base, ref nint invalid) {
 …
 }
 …
-nint c2 = digits(10, ref ((ж<nint>)default!).DerefOrNull());
+nint c2 = digits(10, ref ((ж<nint>)default).DerefOrNull());
 ```
 
 **The counter-examples are guarded beside the lowered ones** (`RefLoweredParams`), so the boundary is itself under test: a parameter compared to `nil` keeps its box (its *identity* is observed); one used as a func value keeps it (a method group cannot close over a `ref`); a `defer`/`go` site keeps it and derives the ref at invoke time (`defer(ᴛ1 => bump(ref ᴛ1.DerefOrNull()), Ꮡresult, ref ᒐ);`); in-lambda call sites are uniformly boxed-fallback wrapped `.DerefOrNull()`; string/numeric wrapper reinterprets sit outside row 5's family; and a blank or unnamed pointer parameter is never a candidate.
@@ -604,12 +604,12 @@ A literal that **defers or recovers** is no bar: its frame is an ordinary local 
 <!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:79-98 -->
 ```csharp
 nint /*r*/ guard(nint n) {
-    nint r = default!;
+    nint r = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     r = -1;
                 }
             }

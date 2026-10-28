@@ -46,7 +46,7 @@ public static @string Name(this ref Square s) {
 internal static float64 totalArea<S>(slice<S> shapes)
     where S : Shape
 {
-    float64 sum = default!;
+    float64 sum = default;
     foreach (var (_, s) in shapes) {
         sum += s.Area();
     }
@@ -68,7 +68,7 @@ internal static void show(Shape s) {
 internal static @string makeShape<S>(Func<S> factory)
     where S : Shape
 {
-    if (factory == default!) {
+    if (factory == nil) {
         return "no factory";
     }
     var (a, b) = (factory(), factory());
@@ -104,7 +104,7 @@ internal static void Main() {
     walkAll(rounds);
 
     var shared = Ꮡ(new Circle(R: 1D));
-    Func<ж<Circle>> none = default!;
+    Func<ж<Circle>> none = default;
 
     fmt.Println(makeShape<Shape>(widen<ж<Circle>, Shape>(newUnitCircle, elemᴛ0 => new CircleжShape(elemᴛ0))));
     var sharedʗ1 = shared;

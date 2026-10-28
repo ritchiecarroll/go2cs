@@ -11,7 +11,7 @@ partial struct node {
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
     @string describe() => Ꮡc.Value.name;
 
-    slice<ж<node>> toCheck = default!;
+    slice<ж<node>> toCheck = default;
     toCheck = append(toCheck, Ꮡc);
 
     foreach (var (_, cΔ1) in chain) {
@@ -40,7 +40,7 @@ internal static void Main() {
     }
 
     fmt.Println("first:", (~root.firstOr(new ж<node>[]{a, b}.slice())).name);
-    fmt.Println("empty:", (~root.firstOr(default!)).name);
+    fmt.Println("empty:", (~root.firstOr(default)).name);
 }
 
 } // end main_package

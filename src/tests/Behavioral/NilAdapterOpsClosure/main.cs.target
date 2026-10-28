@@ -24,7 +24,7 @@ internal static void @try(@string label, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Println(label, "panicked:", r);
                 }
             }
@@ -37,13 +37,13 @@ internal static void @try(@string label, Action f) {
 
 internal static void Main() {
     @try("equality", () => {
-        var (a, b) = (wrap(default!), wrap(default!));
+        var (a, b) = (wrap(default), wrap(default));
         fmt.Println("a == b:", AreEqual(a, b));
     });
 
     @try("map-hash", () => {
         var m = new map<Greetable, nint>{};
-        m[wrap(default!)] = 1;
+        m[wrap(default)] = 1;
         fmt.Println("stored ok");
     });
 
@@ -51,13 +51,13 @@ internal static void Main() {
         ref var dest = ref heap<Greetable>(out var Ꮡdest);
         var rv = reflect.ValueOf(Ꮡdest).Elem();
         ref var src = ref heap<Greetable>(out var Ꮡsrc);
-        Ꮡsrc.ValueSlot = wrap(default!);
+        Ꮡsrc.ValueSlot = wrap(default);
         rv.Set(reflect.ValueOf(Ꮡsrc).Elem());
-        fmt.Println("set ok, dest == nil:", Ꮡdest.ValueSlot == default!);
+        fmt.Println("set ok, dest == nil:", Ꮡdest.ValueSlot == nil);
     });
 
     @try("method-value-call", () => {
-        var g = wrap(default!);
+        var g = wrap(default);
         var v = reflect.ValueOf(g);
         var mv = v.Method(0);
         fmt.Println("got method value, kind:", mv.Kind());

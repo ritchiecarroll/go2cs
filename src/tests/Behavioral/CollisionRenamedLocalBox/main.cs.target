@@ -44,9 +44,9 @@ internal static nint counter(this tagger _) {
 }
 
 internal static nint usesTypeP() {
-    Δp pv = default!;
+    Δp pv = default;
     pv.id = 1;
-    tagger t = default!;
+    tagger t = default;
     t.p();
     return pv.id;
 }

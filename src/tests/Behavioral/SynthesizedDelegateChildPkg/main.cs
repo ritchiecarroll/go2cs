@@ -17,12 +17,12 @@ internal static void Main() {
         cache: new map<@string, ж<inner.Record>>{},
         load: (map<@string, ж<inner.Record>> cache, @string name, Func<@string, (@string, error)> lookup) => {
             var (suffix, errΔ1) = lookup(name);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             var recΔ1 = Ꮡ(new inner.Record(Name: name + suffix, Hits: 1));
             cache[name] = recΔ1;
-            return (recΔ1, default!);
+            return (recΔ1, default);
         },
         notify: new map<@string, Action<ж<inner.Record>, @string>>{
             ["hit"] = (ж<inner.Record> recΔ2, @string tag) => {
@@ -32,7 +32,7 @@ internal static void Main() {
         }
     );
 
-    var (rec, err) = r.load(r.cache, "alpha", (@string s) => ("-" + s, default!));
+    var (rec, err) = r.load(r.cache, "alpha", (@string s) => ("-" + s, default));
     fmt.Println((~rec).Name, (~rec).Hits, err);
 
     r.notify["hit"](rec, "t1");

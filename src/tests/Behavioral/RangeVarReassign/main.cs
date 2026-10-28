@@ -8,7 +8,7 @@ internal static void Main() {
     var outᴷ = new stackAppend<uint16>();
 
     @string s = "AB\U0001F600\U0001F601C";
-    slice<uint16> @out = default!;
+    slice<uint16> @out = default;
     foreach (var (_, rᴛ1) in s) {
         var r = rᴛ1;
 

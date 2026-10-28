@@ -17,7 +17,7 @@ internal static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
     ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
     ref var pptr = ref heap<ж<ж<nint>>>(out var Ꮡpptr);
-    ж<ж<ж<nint>>> ppptr = default!;
+    ж<ж<ж<nint>>> ppptr = default;
 
     a = 3000;
 
@@ -51,7 +51,7 @@ internal static void Main() {
 }
 
 public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
-    nint n = default!;
+    nint n = default;
 
     b.lastRead = opInvalid;
     b.off += n;
@@ -61,7 +61,7 @@ public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
 
     (Ꮡ(new Buffer(buf: p))).Read(p);
 
-    return (n, default!);
+    return (n, default);
 }
 
 public static ж<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {

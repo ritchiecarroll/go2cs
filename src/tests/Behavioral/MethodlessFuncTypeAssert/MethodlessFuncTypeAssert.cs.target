@@ -12,7 +12,7 @@ internal static Func<nint, nint> lookup(any i) {
             return c;
         }
     }
-    return default!;
+    return default;
 }
 
 internal static void Main() {
@@ -21,7 +21,7 @@ internal static void Main() {
     fmt.Println(c(21));
 
     any j = (nint)7;
-    fmt.Println(lookup(j) == default!);
+    fmt.Println(lookup(j) == nil);
 }
 
 } // end main_package

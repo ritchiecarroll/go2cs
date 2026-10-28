@@ -27,7 +27,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
                     fmt.Printf("%s recovered: %v runtime.Error: %v\n"u8, what, r, isRuntimeError);
                 } else {
@@ -42,7 +42,7 @@ internal static void @catch(@string what, Action f) {
 }
 
 internal static void Main() {
-    ж<node> p = default!;
+    ж<node> p = default;
     var pʗ1 = p;
     @catch("method-call", () => {
         fmt.Println(pʗ1.label());

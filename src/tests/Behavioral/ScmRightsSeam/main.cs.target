@@ -6,7 +6,7 @@ using syscall = syscall_package;
 partial class main_package {
 
 internal static void fatal(@string what, error err) {
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println(what, "failed:", err);
         throw panic(what);
     }
@@ -38,7 +38,7 @@ internal static void Main() {
         var rights = syscall.UnixRights(pipeRead);
         fmt.Println("control image is non-empty:", len(rights) > 0);
 
-        (var sent, err) = syscall.SendmsgN(sender, new byte[]{(rune)'x'}.slice(), rights, default!, 0);
+        (var sent, err) = syscall.SendmsgN(sender, new byte[]{(rune)'x'}.slice(), rights, default, 0);
         fatal("sendmsg", err);
         fmt.Println("payload bytes sent:", sent == 1);
 
@@ -82,7 +82,7 @@ internal static void Main() {
         defer(syscall.Close, receiver2, ref ᒐ);
 
         var rights2 = syscall.UnixRights(pipe2Read);
-        (var sent2, err) = syscall.SendmsgN(sender2, default!, rights2, default!, 0);
+        (var sent2, err) = syscall.SendmsgN(sender2, default, rights2, default, 0);
         fatal("sendmsg (control only)", err);
         fmt.Println("control-only send reports no payload bytes:", sent2 == 0);
 

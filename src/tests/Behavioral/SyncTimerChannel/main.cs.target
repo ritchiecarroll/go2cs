@@ -98,7 +98,7 @@ internal static void Main() {
         nint pending = 0;
         nint stale = 0;
         foreach (var (_, t) in timers) {
-            bool was = default!;
+            bool was = default;
             if (reset) {
                 was = t.Reset(time.ΔHour);
             } else {

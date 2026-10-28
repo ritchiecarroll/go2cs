@@ -19,7 +19,7 @@ internal static (handler, @string, error) makeHandlers(@string prefix) {
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
-    }), "label", default!);
+    }), "label", default);
 }
 
 internal static handler makeSingle(@string tag) {

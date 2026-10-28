@@ -11,7 +11,7 @@ internal static void recovered(@string label, Action fn) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     fmt.Printf("%s: PANIC %v\n"u8, label, r);
                     return;
                 }
@@ -30,11 +30,11 @@ internal static void Main() {
         _ = fd;
     });
     recovered("live then typed-nil, same type", () => {
-        Ꮡv1.Store(((Action<nint>)(default!)).OrTypedNilFunc());
+        Ꮡv1.Store(((Action<nint>)(default)).OrTypedNilFunc());
     });
 
     ref var v2 = ref heap(new atomic.Value(), out var Ꮡv2);
-    Ꮡv2.Store(((Action<nint>)(default!)).OrTypedNilFunc());
+    Ꮡv2.Store(((Action<nint>)(default)).OrTypedNilFunc());
     recovered("typed-nil then live, same type", () => {
         Ꮡv2.Store((nint fd) => {
             _ = fd;
@@ -42,9 +42,9 @@ internal static void Main() {
     });
 
     ref var v3 = ref heap(new atomic.Value(), out var Ꮡv3);
-    Ꮡv3.Store(((Action<nint>)(default!)).OrTypedNilFunc());
+    Ꮡv3.Store(((Action<nint>)(default)).OrTypedNilFunc());
     recovered("typed-nil then typed-nil, DIFFERENT type", () => {
-        Ꮡv3.Store(((Action<@string>)(default!)).OrTypedNilFunc());
+        Ꮡv3.Store(((Action<@string>)(default)).OrTypedNilFunc());
     });
 
     ref var v4 = ref heap(new atomic.Value(), out var Ꮡv4);

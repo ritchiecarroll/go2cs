@@ -52,7 +52,7 @@ partial struct Composed {
 internal static Composed composed = new();
 
 internal static (bool, nint, nint, bool) composedReads() {
-    return (composed.Ptrs[0] == nil, len(composed.Slice), composed.ByKey["absent"].Count, composed.Tagged["absent"] == default!);
+    return (composed.Ptrs[0] == nil, len(composed.Slice), composed.ByKey["absent"].Count, composed.Tagged["absent"] == nil);
 }
 
 internal partial struct reservedIsNil_type /*dyn*/ {

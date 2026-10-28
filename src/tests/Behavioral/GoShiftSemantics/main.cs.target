@@ -58,12 +58,12 @@ internal static void Main() {
 }
 
 internal static @string /*msg*/ namedNegativeShift(halfword x, nint n) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(); if (e != nil) {
                     msg = fmt.Sprint(e);
                 }
             }

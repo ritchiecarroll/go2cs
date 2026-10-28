@@ -55,7 +55,7 @@ internal static void Main() {
     var M = new map<dependency, bool>();
     foreach (var (obj, _) in objMap) {
         {
-            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != default!) {
+            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
                 M[objΔ1] = true;
             }
         }

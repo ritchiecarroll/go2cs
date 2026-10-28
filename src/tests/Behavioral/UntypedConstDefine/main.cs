@@ -65,7 +65,7 @@ internal static void tightenGuards() {
         fmt.Println(shifted.Lsh(k));
 
         const uint16 localMarker = 0xFFFD;
-        slice<uint16> u16 = default!;
+        slice<uint16> u16 = default;
         u16 = append(u16ᴷ, u16, localMarker);
         fmt.Println(u16[0]);
 

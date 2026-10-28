@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void addEdge(map<@string, map<@string, bool>> g, @string from, @string to) {
-    if (g[from] == default!) {
+    if (g[from] == default) {
         g[from] = new map<@string, bool>{};
     }
     g[from].Set(to, true);

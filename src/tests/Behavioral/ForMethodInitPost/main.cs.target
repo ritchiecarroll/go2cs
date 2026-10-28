@@ -22,7 +22,7 @@ internal static void next(this ref iter it) {
 }
 
 internal static void Main() {
-    iter u = default!;
+    iter u = default;
     nint sum = 0;
     for (u.start(3); u.valid(); u.next()) {
         sum += u.i;

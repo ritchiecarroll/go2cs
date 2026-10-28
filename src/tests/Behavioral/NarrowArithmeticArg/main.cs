@@ -52,7 +52,7 @@ internal static void Main() {
     arr[0] = (uint8)(a + b);
     fmt.Println(arr[0]);
 
-    box bx = default!;
+    box bx = default;
     bx.b = (uint8)(a + b);
     fmt.Println(bx.b);
 

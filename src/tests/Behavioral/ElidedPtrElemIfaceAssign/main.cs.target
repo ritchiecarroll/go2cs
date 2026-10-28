@@ -65,7 +65,7 @@ internal static void Main() {
     });
     fmt.Println("assign:", d.Describe());
 
-    Reg c = default!;
+    Reg c = default;
     c = new Reg(new map<@string, ж<Item>>{["a"] = Ꮡ(new Item(Name: "delta"u8, N: 4))});
     fmt.Println("concrete:", c.Describe());
 

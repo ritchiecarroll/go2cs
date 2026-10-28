@@ -119,7 +119,7 @@ internal static void withLit(this ж<box> Ꮡx) {
             GoFrame ᒐ = default;
             try {
                 {
-                    var r = recoverChecked(); if (r != default!) {
+                    var r = recoverChecked(); if (r != nil) {
                         fmt.Println("inner recovered", r);
                     }
                 }
@@ -222,7 +222,7 @@ internal static void Main() {
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         fmt.Println("recovered", r);
                     }
                 }

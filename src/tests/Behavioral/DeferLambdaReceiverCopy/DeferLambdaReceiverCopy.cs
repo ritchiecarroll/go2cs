@@ -11,7 +11,7 @@ partial struct path {
 
 internal static error Close(this path p) {
     fmt.Println("close", p.name);
-    return default!;
+    return default;
 }
 
 internal static void Log(this path p, params ꓸꓸꓸany argsʗp) {

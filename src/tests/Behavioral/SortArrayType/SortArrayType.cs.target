@@ -102,7 +102,7 @@ public static void Swap(this PeopleByShoeSize p, nint i, nint j) {
 }
 
 public static bool /*a*/ Less(this PeopleByShoeSize p, nint i, nint j) {
-    bool a = default!;
+    bool a = default;
 
     a = (p[i].ShoeSize < p[j].ShoeSize);
     return a;
@@ -121,8 +121,8 @@ public static bool Less(this PeopleByAge p, nint i, nint j) {
 }
 
 public static (nint E2, @string p) Testing() {
-    nint E2 = default!;
-    @string p = default!;
+    nint E2 = default;
+    @string p = default;
 
     fmt.Println(E2);
 

@@ -899,7 +899,7 @@ passes it to golib's `append`:
 internal static partial void loopCaps() {
     var xᴷ = new stackAppend<int64>();
 
-    slice<int64> x = default!;
+    slice<int64> x = default;
     for (nint i = 0; i < 5; i++) {
         x = append(xᴷ, x, (int64)i);
         fmt.Print(cap(x), " ");
@@ -1860,9 +1860,9 @@ binding — the interface (`error`) and named-composite branches above for their
 element type (slice/map/pointer/chan/func) for this one:
 <!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:14, 19, 23 -->
 ```csharp
-    lines = append(lines, (slice<nint>)(default!));
+    lines = append(lines, (slice<nint>)(default));
     …
-    maps = append(mapsᴷ, maps, (map<@string, nint>)(default!));
+    maps = append(mapsᴷ, maps, (map<@string, nint>)(default));
     …
     ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));
 ```

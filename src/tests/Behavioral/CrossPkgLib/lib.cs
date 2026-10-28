@@ -121,7 +121,7 @@ partial struct Node {
 // type Resolver is a methodless func type — rendered inline as its base delegate
 
 public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> r, @string path) {
-    return r(default!, path);
+    return r(default, path);
 }
 
 partial struct Probe {

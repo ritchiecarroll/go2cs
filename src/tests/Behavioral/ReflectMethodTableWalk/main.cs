@@ -66,7 +66,7 @@ internal static void Main() {
 
     fmt.Println("ptr NumMethod:", pt.NumMethod(), "Value.NumMethod:", pv.NumMethod());
     fmt.Println("ptr methods:", strings.Join(names(pt), ","));
-    var sorted = appendꓸꓸꓸ(slice<@string>(default!), names(pt));
+    var sorted = appendꓸꓸꓸ(slice<@string>(default), names(pt));
     sort.Strings(sorted);
     fmt.Println("ptr order is sorted:", reflect.DeepEqual(sorted, names(pt)));
 
@@ -89,10 +89,10 @@ internal static void Main() {
 
     var label = pv.MethodByName("Label");
     fmt.Println("Label:", label.Call(new reflectꓸValue[]{reflect.ValueOf("n")}.slice())[0].Interface());
-    fmt.Println("Value:", pv.MethodByName("Value").Call(default!)[0].Interface());
+    fmt.Println("Value:", pv.MethodByName("Value").Call(default)[0].Interface());
 
     var reset = pv.MethodByName("Reset");
-    fmt.Println("Reset outs:", len(reset.Call(default!)), "-> n =", (~c).n);
+    fmt.Println("Reset outs:", len(reset.Call(default)), "-> n =", (~c).n);
 
     var (m, ok) = pt.MethodByName("Value");
     fmt.Println("MethodByName Value:", ok, m.Name, m.Index, pt.Method(m.Index).Name);
@@ -105,13 +105,13 @@ internal static void Main() {
         "call:", addM.Func.Call(new reflectꓸValue[]{reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)4)}.slice())[0].Interface());
 
     fmt.Println("outer methods:", strings.Join(names(reflect.TypeOf(new outer(nil))), ","));
-    fmt.Println("outer Zeta:", reflect.ValueOf(new outer(nil)).MethodByName("Zeta").Call(default!)[0].Interface());
+    fmt.Println("outer Zeta:", reflect.ValueOf(new outer(nil)).MethodByName("Zeta").Call(default)[0].Interface());
 
     ref var s = ref heap<fmt.Stringer>(out var Ꮡs);
     s = ((stringish)(@string)"hi"u8);
     var st = reflect.TypeOf(Ꮡs).Elem();
     fmt.Println("iface NumMethod:", st.NumMethod(), "name:", st.Method(0).Name);
-    fmt.Println("iface dispatch:", reflect.ValueOf(s).MethodByName("String").Call(default!)[0].Interface());
+    fmt.Println("iface dispatch:", reflect.ValueOf(s).MethodByName("String").Call(default)[0].Interface());
 }
 
 partial struct stringish /*@string*/;

@@ -19,7 +19,7 @@ internal static void Main() {
 internal static void g1() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
         fs = append(fsᴷ, fs, () => i);
@@ -30,7 +30,7 @@ internal static void g1() {
 internal static void g2() {
     var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;
         if (i % 2 == 0) {
@@ -51,7 +51,7 @@ internal static void g2() {
 internal static void g3() {
     var psᴷ = new stackAppend<ж<nint>>();
 
-    slice<ж<nint>> ps = default!;
+    slice<ж<nint>> ps = default;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         ref var i = ref heap<nint>(out var Ꮡi);
         i = iᴛ1;
@@ -64,7 +64,7 @@ internal static void g3() {
 internal static void g4() {
     var fsᴷ = new stackAppend<Action>(moves: true);
 
-    slice<Action> fs = default!;
+    slice<Action> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         ref var i = ref heap<nint>(out var Ꮡi);
         i = iᴛ1;
@@ -85,7 +85,7 @@ internal static void g4() {
 internal static void g5() {
     var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
 outer:
     for (nint iᴛ1 = 0; iᴛ1 < 4; iᴛ1++) {
         var i = iᴛ1;
@@ -110,7 +110,7 @@ break_outer:;
 internal static void g6() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 2; iᴛ1++) {
         var i = iᴛ1;
         for (nint iΔ1ᴛ1 = 10; iΔ1ᴛ1 < 12; iΔ1ᴛ1++) {
@@ -127,7 +127,7 @@ internal static void g6() {
 internal static void g7() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     for ((nint iᴛ1, nint j) = (0, 100); iᴛ1 < 3; (iᴛ1, j) = (iᴛ1 + 1, j + 2)) {
         var i = iᴛ1;
         _ = j;
@@ -143,7 +143,7 @@ partial struct pt {
 internal static void g8() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
-    slice<Func<nint>> fs = default!;
+    slice<Func<nint>> fs = default;
     for (var sᴛ1 = (new pt(x: 1)); sᴛ1.x < 4; sᴛ1.x++) {
         ref var s = ref heap<pt>(out var Ꮡs);
         s = sᴛ1;

@@ -6,19 +6,19 @@ partial class main_package {
 
 internal static (nint, nint, error) triple(@string tag, nint n) {
     fmt.Println("ran:", tag, n);
-    return (n, n * 2, default!);
+    return (n, n * 2, default);
 }
 
 internal static error single(@string tag) {
     fmt.Println("ran:", tag);
-    return default!;
+    return default;
 }
 
 internal static uintptr sysConst => 11;
 
 internal static (uintptr, uintptr, error) quad(uintptr a, uintptr b, uintptr c, uintptr d) {
     fmt.Println("ran: quad", a, b, c, d);
-    return (a, b, default!);
+    return (a, b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

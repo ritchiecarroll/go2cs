@@ -32,7 +32,7 @@ internal static @string walkRangeShape(reflectꓸValue v) {
         return "range over send-only channel";
     }
 
-    slice<@string> @out = default!;
+    slice<@string> @out = default;
 
     while (ᐧ) {
         var (elem, ok) = v.Recv();
@@ -58,12 +58,12 @@ internal static partial channel<@string> count(nint n) {
 }
 
 internal static @string /*msg*/ recovered(Action fn) {
-    @string msg = default!;
+    @string msg = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     msg = fmt.Sprint(r);
                 }
             }

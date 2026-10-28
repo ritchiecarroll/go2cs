@@ -15,7 +15,7 @@ private static readonly @string tcpˢ = "tcp"u8;
 
 internal static (ж<nint>, Network) lookup(bool ok) {
     if (!ok) {
-        return (default!, (@string)"");
+        return (default, (@string)"");
     }
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 7;
@@ -55,7 +55,7 @@ internal static void Main() {
     fmt.Println("alias zero:", ((@string)viaAlias(false)) == ""u8);
     fmt.Println("alias set:", (@string)viaAlias(true));
 
-    Network acc = default!;
+    Network acc = default;
     acc = acc + "a"u8;
     acc += "b"u8;
 

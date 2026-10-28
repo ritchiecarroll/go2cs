@@ -9,7 +9,7 @@ partial struct grid {
 }
 
 internal static void addLine(this ref grid g) {
-    g.rows = append(g.rows, (slice<nint>)(default!));
+    g.rows = append(g.rows, (slice<nint>)(default));
 }
 
 internal static void push(this ref grid g, nint v) {
@@ -18,7 +18,7 @@ internal static void push(this ref grid g, nint v) {
 }
 
 internal static void Main() {
-    grid g = default!;
+    grid g = default;
     g.addLine();
     g.push(1);
     g.push(2);

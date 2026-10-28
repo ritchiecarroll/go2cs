@@ -21,7 +21,7 @@ partial struct dep {
 }
 
 internal static void note(this ref dep d, any x) {
-    fmt.Println("note:", d.label, x != default!);
+    fmt.Println("note:", d.label, x != nil);
 }
 
 partial struct stmt {
@@ -42,7 +42,7 @@ internal static void exec(this ж<stmt> Ꮡs) {
         Ꮡs.Value.runWith(() => {
             Ꮡs.Value.d.note(Ꮡs.OrTypedNil());
         });
-        if (Ꮡs.Value.cg != default!) {
+        if (Ꮡs.Value.cg != nil) {
             fmt.Println("cg:", Ꮡs.Value.cg.tag(), Ꮡs.Value.id);
         }
     });

@@ -34,11 +34,11 @@ internal static nint safeA = tupleᴛ3ʗ.Item1;
 internal static nint safeB = tupleᴛ3ʗ.Item2;
 
 internal static (@string, error) makeGreeting() {
-    return (prefix + "-" + suffix, default!);
+    return (prefix + "-" + suffix, default);
 }
 
 internal static (@string, error) fakeGetwd() {
-    return ("/" + prefix + "/" + suffix, default!);
+    return ("/" + prefix + "/" + suffix, default);
 }
 
 internal static (@string, nint, @string) makeTrio() {

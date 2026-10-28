@@ -48,7 +48,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		// it: net/rpc's `func (WriteFailCodec) ReadResponseHeader(*Response) error { select {} }`).
 		if !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
 			v.outputBuilder.WriteString(v.newline)
-			v.writeOutput("return default!;")
+			v.writeOutput("return default;")
 		}
 
 		return
@@ -418,7 +418,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	// `case N when <recv>:` labels — C# cannot prove the switch exhaustive, so a value-returning
 	// function ending in it fails CS0161 even though Go's spec makes such a select (every comm
 	// clause terminating, no select-level break) a terminating statement. Mirror visitSwitchStmt's
-	// guarded-terminal-default emission: an unreachable trailing `return default!;`. A clause that
+	// guarded-terminal-default emission: an unreachable trailing `return default;`. A clause that
 	// can fall OUT (a select-targeting `break`, or a non-terminating body) disqualifies — the
 	// trailing return would be reachable and silently return the zero value. Skip in
 	// namedReturnDefer mode (void wrapper — a value return is CS8030, and none is needed).
@@ -434,7 +434,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 		if allClausesTerminal {
 			v.outputBuilder.WriteString(v.newline)
-			v.writeOutput("return default!;")
+			v.writeOutput("return default;")
 		}
 	}
 }

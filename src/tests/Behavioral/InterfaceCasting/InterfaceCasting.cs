@@ -68,7 +68,7 @@ public static nint Total(this ref Counter c) {
 }
 
 internal static (ж<Counter>, error) makeCounter() {
-    return (Ꮡ(new Counter(n: 5)), default!);
+    return (Ꮡ(new Counter(n: 5)), default);
 }
 
 partial interface Incrementer {
@@ -85,8 +85,8 @@ public static Animal Reversed(Animal a) {
 }
 
 internal static (Animal, @string) pick(nint kind) {
-    Animal a = default!;
-    @string name = default!;
+    Animal a = default;
+    @string name = default;
     switch (kind) {
     case 0: {
         ref var d = ref heap(new Dog(), out var Ꮡd);
@@ -117,7 +117,7 @@ public static Animal Self(this ж<Cat> Ꮡc) {
 internal static void Main() {
     var packᴷ = new stackAppend<Animal>();
 
-    error err = default!;
+    error err = default;
 
     err = new MyError("bar");
 
@@ -157,7 +157,7 @@ internal static void Main() {
     readers[0] = new fileRdr(name: "x");
     fmt.Println(readers[0].read());
 
-    slice<Animal> pack = default!;
+    slice<Animal> pack = default;
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
     pack = append(pack, (Animal)(new Dog(nil)));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
@@ -170,11 +170,11 @@ internal static void Main() {
     replaceAnimal(ref swapped);
     fmt.Println("replaced:", swapped.Speak());
 
-    Incrementer inc2 = default!;
+    Incrementer inc2 = default;
     var (ᴛ1, ᴛ2) = makeCounter();
     (inc2, err) = (new CounterжIncrementer(ᴛ1), ᴛ2);
     inc2.Inc();
-    fmt.Println("deconstructed into iface:", inc2.Total(), err == default!);
+    fmt.Println("deconstructed into iface:", inc2.Total(), err == nil);
 
     Animal makeAnimal(bool feline) {
         if (feline) {
@@ -301,7 +301,7 @@ partial struct sinks /*[]sink*/;
 internal static @string runPlumbing() {
     var p = new plumbing(name: "n1");
     var batch = new sinks(new sink[]{new basin(tag: "x"), new basin(tag: "y")}.slice());
-    slice<sink> all = default!;
+    slice<sink> all = default;
     all = appendꓸꓸꓸ(all, batch);
     return p.name + ":"u8 + all[0].drain() + ","u8 + all[1].drain();
 }

@@ -42,7 +42,7 @@ internal static E total<E>(slice<E> s)
 
 internal static slice<T> drain<T>(channel<T> c) {
     close(c);
-    slice<T> @out = default!;
+    slice<T> @out = default;
     foreach (var v in c) {
         @out = append(@out, v);
     }

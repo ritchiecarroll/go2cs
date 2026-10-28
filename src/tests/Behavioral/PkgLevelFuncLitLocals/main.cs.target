@@ -98,7 +98,7 @@ partial struct entry {
 }; }
 
 internal static slice<nint> inDecl() {
-    slice<nint> @out = default!;
+    slice<nint> @out = default;
 
     ref var a = ref heap(new counter(), out var Ꮡa);
     Ꮡa.inc(3);

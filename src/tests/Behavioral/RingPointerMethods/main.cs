@@ -63,7 +63,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
 
 internal static ж<Ring> makeRing(nint count) {
     if (count <= 0) {
-        return default!;
+        return default;
     }
     var r = Ꮡ(new Ring(Value: 0));
     r.init();

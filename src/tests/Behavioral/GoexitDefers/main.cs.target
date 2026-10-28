@@ -40,7 +40,7 @@ internal static partial void Main() {
 
             var logʗ3 = logʗ1;
             defer(() => {
-                if (recover() == default!) {
+                if (recover() == nil) {
                     logʗ3.ᐸꟷ("recover() during Goexit returned nil");
                 } else {
                     logʗ3.ᐸꟷ("recover() during Goexit returned a value (WRONG)");
