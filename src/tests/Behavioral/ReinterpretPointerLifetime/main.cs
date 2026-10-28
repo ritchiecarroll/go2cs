@@ -18,8 +18,8 @@ partial struct view {
     internal @string name;
 }
 
-internal static partial ж<view> asView(ж<header> Ꮡh) {
-    return Ꮡh.Reinterpret<header, view>();
+internal static partial ж<view> asView(ж<header> h) {
+    return h.Reinterpret<header, view>();
 }
 
 internal static partial void churn() {

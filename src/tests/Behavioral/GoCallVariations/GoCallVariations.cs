@@ -58,8 +58,8 @@ internal static nint add(this ref accum a, nint n) {
     return a.total;
 }
 
-internal static void bindAdd(ж<accum> Ꮡa) {
-    var add = (nint p1) => Ꮡa.add(p1);
+internal static void bindAdd(ж<accum> a) {
+    var add = (nint p1) => a.add(p1);
     fmt.Println("bound add:", add(5), add(7));
 }
 

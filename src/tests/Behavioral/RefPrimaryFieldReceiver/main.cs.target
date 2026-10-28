@@ -52,11 +52,11 @@ internal static nint nBeforeTouch(this ж<counter> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static partial void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δsync.WaitGroup> Ꮡwg) {
+internal static partial void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δsync.WaitGroup> wg) {
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            defer(Ꮡwg.Done, ref ᒐ);
+            defer(wg.Done, ref ᒐ);
             for (nint i = 0; i < times; i++) {
                 Ꮡc.Value.mu.Lock();
                 Ꮡc.Value.n++;

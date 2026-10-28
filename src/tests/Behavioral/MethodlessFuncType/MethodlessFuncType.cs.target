@@ -8,12 +8,12 @@ partial class main_package {
 
 // type lookup is a methodless func type — rendered inline as its base delegate
 
-internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
+internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> log) {
     return (error err) => {
         if (err != nil) {
-            Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":"u8 + err.Error());
+            log.ValueSlot = append(log.ValueSlot, tag + ":"u8 + err.Error());
         } else {
-            Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":ok"u8);
+            log.ValueSlot = append(log.ValueSlot, tag + ":ok"u8);
         }
     };
 }
@@ -27,8 +27,8 @@ partial struct holder {
     internal @string name;
 }
 
-internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> Ꮡlog) {
-    return (len(tag), makeReleaser(tag, Ꮡlog), default);
+internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> log) {
+    return (len(tag), makeReleaser(tag, log), default);
 }
 
 internal static void Main() {

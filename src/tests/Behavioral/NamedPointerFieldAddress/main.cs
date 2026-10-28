@@ -15,8 +15,8 @@ partial struct holder {
     internal pubPtr p;
 }
 
-internal static (ж<nint>, ж<nint>, ж<nint>) viaParam(pubPtr pp, ж<pub> Ꮡq) {
-    return (pp.of(pub.ᏑI), pp.of(pub.ᏑI), Ꮡq.of(pub.ᏑI));
+internal static (ж<nint>, ж<nint>, ж<nint>) viaParam(pubPtr pp, ж<pub> q) {
+    return (pp.of(pub.ᏑI), pp.of(pub.ᏑI), q.of(pub.ᏑI));
 }
 
 internal static void Main() {

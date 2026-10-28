@@ -13,8 +13,8 @@ internal static ж<node> advance(ref node n) {
     return n.next;
 }
 
-internal static ж<node> self(ж<node> Ꮡn) {
-    return Ꮡn;
+internal static ж<node> self(ж<node> n) {
+    return n;
 }
 
 internal static void Main() {

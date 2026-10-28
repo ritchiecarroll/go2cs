@@ -11,8 +11,8 @@ partial struct sync {
     internal int32 hits;
 }
 
-internal static void bump(this ref sync s, ж<atomic.Int32> Ꮡc) {
-    s.hits = Ꮡc.Add(1);
+internal static void bump(this ref sync s, ж<atomic.Int32> c) {
+    s.hits = c.Add(1);
 }
 
 internal static void Main() {

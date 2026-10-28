@@ -25,8 +25,8 @@ partial struct holder {
     internal slot s;
 }
 
-internal static partial ж<holder> get(ж<holder> Ꮡh) {
-    return Ꮡh;
+internal static partial ж<holder> get(ж<holder> h) {
+    return h;
 }
 
 internal static void Main() {

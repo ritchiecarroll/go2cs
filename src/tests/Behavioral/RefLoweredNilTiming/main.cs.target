@@ -29,8 +29,8 @@ internal static void passThrough(ref uint64 p) {
     fmt.Println("value:", p);
 }
 
-internal static @string nilGuard(ж<elem> Ꮡp) {
-    if (Ꮡp == nil) {
+internal static @string nilGuard(ж<elem> p) {
+    if (p == nil) {
         return "nil ok";
     }
     return "non-nil";

@@ -14,8 +14,8 @@ partial struct outer {
     internal uintptr guard;
 }
 
-internal static partial ж<outer> get(ж<outer> Ꮡo) {
-    return Ꮡo;
+internal static partial ж<outer> get(ж<outer> o) {
+    return o;
 }
 
 internal static void Main() {

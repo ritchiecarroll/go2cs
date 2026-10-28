@@ -24,8 +24,8 @@ partial struct box {
     internal holder h;
 }
 
-internal static void viaParam(ж<box> Ꮡb) {
-    Ꮡb.of(box.Ꮡh).of(holder.Ꮡc).inc();
+internal static void viaParam(ж<box> b) {
+    b.of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
 
 partial struct wrapper {

@@ -13,18 +13,18 @@ partial struct conf {
     internal nint depth;
 }
 
-internal static ж<bool> boolFieldAddr(ж<conf> Ꮡc, @string name) {
-    var v = reflect.Indirect(reflect.ValueOf(Ꮡc.OrTypedNil()));
+internal static ж<bool> boolFieldAddr(ж<conf> c, @string name) {
+    var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
     return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 
-internal static ж<@string> stringFieldAddr(ж<conf> Ꮡc, @string name) {
-    var v = reflect.Indirect(reflect.ValueOf(Ꮡc.OrTypedNil()));
+internal static ж<@string> stringFieldAddr(ж<conf> c, @string name) {
+    var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
     return (ж<@string>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 
-internal static ж<nint> intFieldAddr(ж<conf> Ꮡc, @string name) {
-    var v = reflect.Indirect(reflect.ValueOf(Ꮡc.OrTypedNil()));
+internal static ж<nint> intFieldAddr(ж<conf> c, @string name) {
+    var v = reflect.Indirect(reflect.ValueOf(c.OrTypedNil()));
     return (ж<nint>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 

@@ -14,8 +14,8 @@ partial struct counter {
     internal inner sub;
 }
 
-internal static partial ж<counter> get(ж<counter> Ꮡc) {
-    return Ꮡc;
+internal static partial ж<counter> get(ж<counter> c) {
+    return c;
 }
 
 internal static void Main() {

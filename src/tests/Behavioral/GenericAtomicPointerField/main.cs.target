@@ -16,9 +16,9 @@ partial struct Cache<V> {
     internal atomic.Pointer<entry<V>> head;
 }
 
-public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
-    var e = Ꮡ(new entry<V>(key: Ꮡkey));
-    e.of(entry<V>.Ꮡv).Store(Ꮡval);
+public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> key, ж<V> val) {
+    var e = Ꮡ(new entry<V>(key: key));
+    e.of(entry<V>.Ꮡv).Store(val);
     e.Value.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
     Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
 }

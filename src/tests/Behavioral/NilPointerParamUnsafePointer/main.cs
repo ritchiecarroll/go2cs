@@ -8,16 +8,16 @@ partial class main_package {
 
 partial struct Handle /*num:uintptr*/;
 
-internal static partial uintptr addrOfNamed(ж<Handle> Ꮡh) {
-    return (uintptr)Ꮡh;
+internal static partial uintptr addrOfNamed(ж<Handle> h) {
+    return (uintptr)h;
 }
 
-internal static partial uintptr addrOfPtrPtr(ж<ж<uint16>> Ꮡpp) {
-    return (uintptr)Ꮡpp;
+internal static partial uintptr addrOfPtrPtr(ж<ж<uint16>> pp) {
+    return (uintptr)pp;
 }
 
-internal static partial uintptr addrOfBasic(ж<uint16> Ꮡb) {
-    return (uintptr)Ꮡb;
+internal static partial uintptr addrOfBasic(ж<uint16> b) {
+    return (uintptr)b;
 }
 
 internal static partial (uintptr, Handle) liveAlias(ж<Handle> Ꮡh) {
@@ -32,8 +32,8 @@ partial struct node {
     internal ж<node> parent;
 }
 
-internal static partial ж<node> newNode(nint id, ж<node> Ꮡparent) {
-    return Ꮡ(new node(id: id, parent: Ꮡparent));
+internal static partial ж<node> newNode(nint id, ж<node> parent) {
+    return Ꮡ(new node(id: id, parent: parent));
 }
 
 internal static partial nint depth(ref node n) {

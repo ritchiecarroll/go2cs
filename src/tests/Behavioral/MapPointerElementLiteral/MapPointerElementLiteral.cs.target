@@ -15,8 +15,8 @@ internal static map<@string, ж<node>> buildValueMap(ж<node> Ꮡa, ж<node> Ꮡ
     return new map<@string, ж<node>>{["a"] = Ꮡa, ["b"] = Ꮡb};
 }
 
-internal static map<ж<node>, nint> buildKeyMap(ж<node> Ꮡa, ж<node> Ꮡb) {
-    return new map<ж<node>, nint>{[Ꮡa] = 10, [Ꮡb] = 20};
+internal static map<ж<node>, nint> buildKeyMap(ж<node> a, ж<node> b) {
+    return new map<ж<node>, nint>{[a] = 10, [b] = 20};
 }
 
 internal static void Main() {

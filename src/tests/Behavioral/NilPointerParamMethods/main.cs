@@ -13,15 +13,15 @@ partial struct node {
     internal ж<node> next;
 }
 
-internal static error checkArg(ж<node> Ꮡp, @string op) {
-    if (Ꮡp == nil) {
+internal static error checkArg(ж<node> p, @string op) {
+    if (p == nil) {
         return errNilArg;
     }
     return default;
 }
 
-internal static ж<node> store(ж<node> Ꮡp) {
-    return Ꮡ(new node(name: "holder", next: Ꮡp));
+internal static ж<node> store(ж<node> p) {
+    return Ꮡ(new node(name: "holder", next: p));
 }
 
 internal static @string guarded(ж<node> Ꮡp) {
@@ -80,11 +80,11 @@ internal static @string normalize(ж<node> Ꮡp) {
 
 internal static ж<node> fallback = Ꮡ(new node(name: "fallback", n: 7));
 
-internal static ж<node> orDefault(ж<node> Ꮡp) {
-    if (Ꮡp == nil) {
+internal static ж<node> orDefault(ж<node> p) {
+    if (p == nil) {
         return fallback;
     }
-    return Ꮡp;
+    return p;
 }
 
 internal static void @try(@string label, Action fn) {

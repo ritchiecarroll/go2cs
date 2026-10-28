@@ -16,17 +16,17 @@ public static nint Pos(this ref Item i) {
     return i.pos;
 }
 
-internal static (@string, bool) lookup(map<Node, @string> seen, ж<Item> Ꮡit) {
-    var (value, ok) = seen[new ItemжNode(Ꮡit), ꟷ];
+internal static (@string, bool) lookup(map<Node, @string> seen, ж<Item> it) {
+    var (value, ok) = seen[new ItemжNode(it), ꟷ];
     return (value, ok);
 }
 
-internal static void record(map<Node, @string> seen, ж<Item> Ꮡit, @string label) {
-    seen[new ItemжNode(Ꮡit)] = label;
+internal static void record(map<Node, @string> seen, ж<Item> it, @string label) {
+    seen[new ItemжNode(it)] = label;
 }
 
-internal static @string plainRead(map<Node, @string> seen, ж<Item> Ꮡit) {
-    return seen[new ItemжNode(Ꮡit)];
+internal static @string plainRead(map<Node, @string> seen, ж<Item> it) {
+    return seen[new ItemжNode(it)];
 }
 
 internal static void Main() {

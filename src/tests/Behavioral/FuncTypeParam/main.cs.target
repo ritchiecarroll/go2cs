@@ -6,32 +6,32 @@ using sync;
 
 partial class main_package {
 
-internal static nint apply(ж<atomic.Int32> Ꮡv, Func<ж<atomic.Int32>, nint> f) {
-    return f(Ꮡv);
+internal static nint apply(ж<atomic.Int32> v, Func<ж<atomic.Int32>, nint> f) {
+    return f(v);
 }
 
-internal static void consume(ж<atomic.Int32> Ꮡv, Action<ж<atomic.Int32>> sink) {
-    sink(Ꮡv);
+internal static void consume(ж<atomic.Int32> v, Action<ж<atomic.Int32>> sink) {
+    sink(v);
 }
 
 partial struct runner {
     internal Func<ж<atomic.Int32>, nint> gen;
 }
 
-internal static nint invoke(this runner r, ж<atomic.Int32> Ꮡv) {
-    return r.gen(Ꮡv);
+internal static nint invoke(this runner r, ж<atomic.Int32> v) {
+    return r.gen(v);
 }
 
 // type loadFunc is a methodless func type — rendered inline as its base delegate
 
 // type readFunc is a methodless func type — rendered inline as its base delegate
 
-internal static int32 loadTwice(Func<ж<int32>, int32> f, ж<int32> Ꮡp) {
-    return f(Ꮡp) + f(Ꮡp);
+internal static int32 loadTwice(Func<ж<int32>, int32> f, ж<int32> p) {
+    return f(p) + f(p);
 }
 
-internal static nint readPlusOne(ж<atomic.Int32> Ꮡv) {
-    return (nint)Ꮡv.Load() + 1;
+internal static nint readPlusOne(ж<atomic.Int32> v) {
+    return (nint)v.Load() + 1;
 }
 
 internal static void Main() {

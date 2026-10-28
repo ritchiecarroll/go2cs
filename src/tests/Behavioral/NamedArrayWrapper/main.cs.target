@@ -210,8 +210,8 @@ internal static ж<counters> bumpAll(this ж<counters> Ꮡc) {
     return Ꮡc;
 }
 
-internal static int32 bumpVia(ж<counters> Ꮡc, nint i) {
-    return Ꮡc.at<counter2>(i).bump();
+internal static int32 bumpVia(ж<counters> c, nint i) {
+    return c.at<counter2>(i).bump();
 }
 
 } // end main_package

@@ -19,18 +19,18 @@ internal static nint /*n*/ lowered(ref array<nint> p) {
     return n;
 }
 
-internal static nint /*n*/ aliased(/*[6]*/ ж<array<nint>> Ꮡp) {
+internal static nint /*n*/ aliased(/*[6]*/ ж<array<nint>> p) {
     nint n = default;
 
-    report(Ꮡp);
+    report(p);
     foreach (var i in range(6)) {
         n += i;
     }
     return n;
 }
 
-internal static void report(/*[6]*/ ж<array<nint>> Ꮡp) {
-    fmt.Println("aliased nil:", Ꮡp == nil);
+internal static void report(/*[6]*/ ж<array<nint>> p) {
+    fmt.Println("aliased nil:", p == nil);
 }
 
 partial struct words /*[5]uint64*/;

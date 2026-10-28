@@ -17,8 +17,8 @@ partial struct outer {
 internal static readonly ж<outer> Ꮡg = new StaticBox<outer>(default(outer));
 internal static ref outer g => ref ((StaticBox<outer>)Ꮡg).ValueSlot;
 
-internal static partial void keep(ж<outer> Ꮡp) {
-    _ = Ꮡp;
+internal static partial void keep(ж<outer> p) {
+    _ = p;
 }
 
 internal static void mutate() {

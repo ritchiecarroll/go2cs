@@ -6,8 +6,8 @@ partial class main_package {
 
 partial struct Buf /*[]byte*/;
 
-internal static @string fillVia(ж<slice<byte>> Ꮡout) {
-    var p = Ꮡout.Reinterpret<slice<byte>, Buf>();
+internal static @string fillVia(ж<slice<byte>> @out) {
+    var p = @out.Reinterpret<slice<byte>, Buf>();
     p.ValueSlot = append(p.ValueSlot, (byte)((rune)'A'), (byte)((rune)'B'), (byte)((rune)'C'));
     return (@string)(slice<byte>)p.ValueSlot;
 }

@@ -8,8 +8,8 @@ partial class main_package {
 
 // type applyFunc is a methodless func type — rendered inline as its base delegate
 
-internal static int32 run(Func<ж<atomic.Int32>, int32> f, ж<atomic.Int32> Ꮡc) {
-    return f(Ꮡc);
+internal static int32 run(Func<ж<atomic.Int32>, int32> f, ж<atomic.Int32> c) {
+    return f(c);
 }
 
 internal static void Main() {

@@ -30,8 +30,8 @@ partial struct tracer {
 internal static readonly ж<tracer> Ꮡtr = new StaticBox<tracer>(default(tracer));
 internal static ref tracer tr => ref ((StaticBox<tracer>)Ꮡtr).ValueSlot;
 
-internal static partial void keep(ж<tracer> Ꮡt) {
-    _ = Ꮡt;
+internal static partial void keep(ж<tracer> t) {
+    _ = t;
 }
 
 internal static void Main() {

@@ -16,12 +16,12 @@ partial struct view {
     internal nint n;
 }
 
-internal static partial ж<view> viewOf(ж<header> Ꮡhp) {
-    return Ꮡhp.Reinterpret<header, view>();
+internal static partial ж<view> viewOf(ж<header> hp) {
+    return hp.Reinterpret<header, view>();
 }
 
-internal static partial nint readN(ж<view> Ꮡp) {
-    return (~viewOf(Ꮡp.Reinterpret<view, header>())).n;
+internal static partial nint readN(ж<view> p) {
+    return (~viewOf(p.Reinterpret<view, header>())).n;
 }
 
 internal static void Main() {

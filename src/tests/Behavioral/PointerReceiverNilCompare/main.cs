@@ -16,8 +16,8 @@ internal static bool notNil(this ж<box> Ꮡb) {
     return Ꮡb != nil;
 }
 
-internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
-    return Ꮡb == Ꮡother;
+internal static bool same(this ж<box> Ꮡb, ж<box> other) {
+    return Ꮡb == other;
 }
 
 partial struct embedder {

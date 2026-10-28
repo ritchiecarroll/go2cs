@@ -5,8 +5,8 @@ using PromotedValueEmbedLib = PromotedValueEmbedLib_package;
 
 partial class main_package {
 
-internal static @string describe(ж<PromotedValueEmbedLib.Widget> Ꮡw) {
-    if (Ꮡw.Name() == "widget"u8) {
+internal static @string describe(ж<PromotedValueEmbedLib.Widget> w) {
+    if (w.Name() == "widget"u8) {
         return "match";
     }
     return "nomatch";

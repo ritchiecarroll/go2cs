@@ -12,8 +12,8 @@ partial struct point {
 internal static readonly ж<point> Ꮡorigin = new StaticBox<point>(new point(x: 3, y: 4));
 internal static ref point origin => ref ((StaticBox<point>)Ꮡorigin).ValueSlot;
 
-internal static uintptr addrOf(ж<point> Ꮡp) {
-    return (uintptr)Ꮡp;
+internal static uintptr addrOf(ж<point> p) {
+    return (uintptr)p;
 }
 
 internal static void Main() {

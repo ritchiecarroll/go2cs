@@ -9,25 +9,25 @@ partial struct node {
     internal ж<node> next;
 }
 
-internal static ж<node> last(ж<node> Ꮡstart) {
-    var r = Ꮡstart;
+internal static ж<node> last(ж<node> start) {
+    var r = start;
     while ((~r).next != nil) {
         r = r.Value.next;
     }
     return r;
 }
 
-internal static nint length(ж<node> Ꮡstart) {
+internal static nint length(ж<node> start) {
     nint n = 0;
-    for (var r = Ꮡstart; r != nil; r = r.Value.next) {
+    for (var r = start; r != nil; r = r.Value.next) {
         n++;
     }
     return n;
 }
 
-internal static nint sum(ж<node> Ꮡstart) {
+internal static nint sum(ж<node> start) {
     nint total = 0;
-    var p = Ꮡstart;
+    var p = start;
     while (p != nil) {
         total += p.Value.val;
         p = p.Value.next;

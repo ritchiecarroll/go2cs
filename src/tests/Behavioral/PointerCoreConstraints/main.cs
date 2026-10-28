@@ -45,13 +45,13 @@ internal static ж<T> cloneRev<T>(ж<T> Ꮡp)
     return Ꮡc;
 }
 
-internal static ж<T> pick<T>(ж<T> Ꮡa, ж<T> Ꮡb, bool useA)
+internal static ж<T> pick<T>(ж<T> a, ж<T> b, bool useA)
     /* where P : *T (erased: P renders as ж<T>) */
 {
     if (useA) {
-        return Ꮡa;
+        return a;
     }
-    return Ꮡb;
+    return b;
 }
 
 internal static ж<T> cloneChain<T>(ж<T> Ꮡp, nint depth)
@@ -67,10 +67,10 @@ internal static ж<T> cloneChain<T>(ж<T> Ꮡp, nint depth)
     return Ꮡc;
 }
 
-internal static void aliasWrite<T>(ж<T> Ꮡp, T v)
+internal static void aliasWrite<T>(ж<T> p, T v)
     /* where P : *T (erased: P renders as ж<T>) */
 {
-    var q = Ꮡp;
+    var q = p;
     q.ValueSlot = v;
 }
 

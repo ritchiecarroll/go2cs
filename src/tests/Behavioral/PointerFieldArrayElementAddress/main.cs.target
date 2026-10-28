@@ -20,8 +20,8 @@ internal static void bump(ref cycle c) {
     c.n++;
 }
 
-internal static void viaParam(ж<rec> Ꮡp, nint i) {
-    var c = Ꮡp.at(rec.Ꮡfuture, i);
+internal static void viaParam(ж<rec> p, nint i) {
+    var c = p.at(rec.Ꮡfuture, i);
     bump(ref (c).DerefOrNull());
 }
 

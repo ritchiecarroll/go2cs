@@ -130,8 +130,8 @@ internal static void Main() {
     fmt.Println("delete", len(dm), dm[st.P.OrTypedNil()], dm[dp.OrTypedNil()]);
 }
 
-internal static any boxed(ж<BErr> Ꮡp) {
-    return Ꮡp.OrTypedNil();
+internal static any boxed(ж<BErr> p) {
+    return p.OrTypedNil();
 }
 
 internal static @string /*msg*/ panicked() {

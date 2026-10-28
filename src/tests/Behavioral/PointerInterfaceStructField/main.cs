@@ -22,8 +22,8 @@ partial struct holder {
     internal @string label;
 }
 
-internal static void assignDescriber(ref holder h, ж<Setting> Ꮡs) {
-    h.d = new SettingжDescriber(Ꮡs);
+internal static void assignDescriber(ref holder h, ж<Setting> s) {
+    h.d = new SettingжDescriber(s);
 }
 
 internal static readonly ж<Setting> ᏑglobalSetting = new StaticBox<Setting>(new Setting(name: "verbosity", value: 3));
