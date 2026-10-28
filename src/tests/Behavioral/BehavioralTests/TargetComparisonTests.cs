@@ -724,6 +724,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
+    public void CheckFuncTypeVerbs() => CheckTarget("FuncTypeVerbs");
+
+    [TestMethod]
     public void CheckFuncValueMethodClash() => CheckTarget("FuncValueMethodClash");
 
     [TestMethod]
