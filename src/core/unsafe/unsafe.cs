@@ -1013,8 +1013,10 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
 
     if (ptr == nil)
     {
+        // Go's special case: a nil ptr with a zero len is the NIL slice. `[]` built an empty slice over a real
+        // (empty) array, which `== nil` reads as non-nil.
         if (n == 0)
-            return [];
+            return default;
 
         throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.Slice: ptr is nil and len is not zero");
     }
