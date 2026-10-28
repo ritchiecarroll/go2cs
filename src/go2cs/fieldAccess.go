@@ -17,6 +17,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -825,6 +826,12 @@ func (v *Visitor) recordFieldAccessType(pointee types.Type) {
 	}
 
 	packageLock.Lock()
+
+	// A visitor driven outside a package conversion (a unit test) has had no per-package reset.
+	if fieldAccessRecords == nil {
+		fieldAccessRecords = hashset.NewHashSet([]string{})
+	}
+
 	fieldAccessRecords.Add(typeName)
 	packageLock.Unlock()
 }

@@ -193,8 +193,9 @@ func TestRefRootedReceiverChainHoistsIntoATemp(t *testing.T) {
 
 	// The temp holds the receiver VALUE, evaluated outside the lambda -- Go saves the receiver when the
 	// method value is evaluated. A temp initialized from anything still mentioning the lambda would put
-	// the capture back.
-	if !strings.Contains(hoisted, "(~hs.suite).hash") {
+	// the capture back. The field reads through its property since parity seat #31, `hs.suite.hash`, and `var`
+	// still copies the value out of the `ref` it answers.
+	if !strings.Contains(hoisted, "var "+tempName+" = hs.suite.hash;") {
 		t.Fatalf("the temp must be initialized from the receiver chain rendered OUTSIDE lambda context:\nhoist sink was %q", hoisted)
 	}
 }
