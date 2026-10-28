@@ -1,0 +1,32 @@
+# Seat #27 (the small four: F1 IIFEs as func(T () => …)(), channel narrowings as .AsRecvOnly()/.AsSendOnly(), for (;;), literal shift counts uncast) -- the LANE's measurement at its branch base, the seat's PREDICTION of record under PLAN-parity-train §3.2; the rung of record is the i7's at landing.
+key	value
+base	56e4fba06fe577e14d34516055d627375f2283bd
+arm_A_commit	5305411c65 (red; its src/go2cs equals the base's but for tests)
+arm_A_src_go2cs_tree	61a4b4a17b6a0b287910cd587f1f72c9ac6e1baa
+arm_A_sha256	92eff1a78025d72f782a42f103e3804f6882513615b58ebf5064ba5f570e5238
+arm_B_commit	e67d0a233e (the converter change)
+arm_B_src_go2cs_tree	421133552c1f05db39d6bd478eb3dc75c2ed1908
+arm_B_sha256	14fb5a88d98f558edaede714a7477084f98320f0cd1623fbe16bbf8d6d678f6e
+build	go build -trimpath -buildvcs=false, from git archive of each commit's src/go2cs
+go	go1.26.10 windows/amd64
+emission	-stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64, one invocation per arm, each arm its own root seeded by git archive of base (src/core, src/version.props, docs/validation, docs/ValidatedTestPackages.md)
+write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted 0; stage .cs 4559 per target per arm; arm A rewrote 0 files (base fixed point); arm B rewrote 403 .cs
+classifier	pcensus classify -items F1,DIR,FOR,SHIFT (this seat's DIR canon), per target and on the union
+note	measured WITHOUT seat #19 (not yet on master at this base): the A arm's converter is byte-identical to #19's A arm; the composition is the i7's rung
+rebase	the branch was rebased onto 79aeb62dac (batch 74) after measurement; the converter delta (non-test src/go2cs, outside pcensus and projitems) has stable patch-id f17a5b55eb at both bases, and src/core changes are the same two golib files, so this measurement stands
+#
+target	files	added	deleted	auto	package_info	F1	DIR	FOR	SHIFT	refused	patch_sha256_crlf_stripped
+windows	339	888	888	12	0	8	29	611	240	0	c837c14c8bdad833e2760575f543afafbcdab7f128df59acae7ecdad78dabc68
+linux	338	898	898	11	0	10	29	617	242	0	3052cfcf7d8077763f8b4a73ee7027f1c23f485967a2ecb58040164b50509c9a
+darwin	336	892	892	9	0	10	29	613	240	0	4cb0af30eacb472f48c44299e7f4d53863e6b73bbd0c7c4a17f5a5a64f04e177
+union	417	1090	1090	14	0	12	45	785	248	0	-
+#
+quantity	predicted (posted before the run)	measured (union)	score
+F1	6 IIFEs, 12 lines	12 pairs	MET
+DIR	45	45	MET
+FOR	785	785	MET
+SHIFT	<= 257 (ceiling: named-LHS exclusion not visible from text)	248; the 9 left are named left operands (archive/tar Format, encoding/asn1 int64Encoder x2, math/big Word x3, go/constant Word, internal/runtime/maps ctrlGroup x2)	MET (within the ceiling, exclusion named)
+files	<= 419 (14 .cs.auto)	417 (14 .cs.auto); the 2 not moved hold only named-LHS shifts (archive/tar/format.cs, go/constant/value.cs)	MET
+added == deleted, GoPositionMap re-encodes 0	yes, 0	+1090/-1090 on the union and equal on every target; 0 package_info.cs changed	MET
+hand-owned untouched	31 FOR sites	untouched (0 marked file in the diff)	MET
+pcensus refusals	F1 typed-param refusals expected	0 on every target: production holds no typed-parameter IIFE	-

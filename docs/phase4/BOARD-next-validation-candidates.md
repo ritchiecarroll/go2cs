@@ -30092,4 +30092,107 @@ samples and the summary's other `default!` prose wait for the regen.
 
 — P1 (2026-10-28)
 
+---
+
+### 2026-10-28 — H (parity train seat #27, .2): the small four, IIFEs as `func(T () => …)()`, `.AsRecvOnly()`/`.AsSendOnly()`, `for (;;)`, literal shift counts uncast
+
+**Ruled** by COORD as parity train seat #27 (`docs/PLAN-parity-train.md`), with three of its design questions decided
+here:
+- F1 option A, `func(nint () => {…})()`: the result type where Go writes it, the parameters typed on the lambda, the
+  overloads unable to compete, and %T reading the declared type.
+- The direction spelling: `AsRecvOnly()`/`AsSendOnly()`, proposed by H when the plan's `RecvOnly()`/`SendOnly()`
+  proved impossible (below).
+- The shift-assign exclusions: a named-numeric or type-parameter left operand, and any non-constant count.
+
+The deferred-corpus window holds: converter, golib (additive), tests, goldens and docs land; `src/core` is measured
+and recorded, not committed.
+
+**The four.**
+- **F1.** An IIFE was a cast-and-call, `((Func<nint, nint>)(a => {…}))(5)`. It is now
+  `func(nint (nint a) => {…})(5)`, through `builtin.FuncLiterals.cs`, an identity ladder of `func(Action)` and
+  `func<…, TResult>(Func<…, TResult>)` rungs for 0 to 16 parameters. A lambda with an explicit return type converts
+  only to a `Func`, and a void block lambda only to an `Action`, so for one literal exactly one rung applies.
+  - `iifeTypedParams` and `iifeResultType` render exactly the types the cast named (`iifeDelegateType` now shares
+    `iifeResultType`), so the lambda's natural type is that delegate.
+  - Exclusions keep the cast form: more than 16 parameters, and the variadic literal, which never took the IIFE
+    path (`Actionꓸꓸꓸ` with a params span; DeferLambdaParam, DeferMultiValueSpread).
+- **Directions.** `ch.WithDirection(GoChanDir.Recv)` is now `ch.AsRecvOnly()`, and `Send` is now `AsSendOnly()`
+  (`chanDirNarrowedValue`). The plan's default `ch.RecvOnly()` cannot exist: `channel<T>.RecvOnly`/`.SendOnly` are
+  already static properties, the NIL directional channels the corpus emits (`database/sql/sql.cs:3425`), and an
+  instance member of the same name is CS0102. Renaming the statics would move emitted `src/core` inside the window.
+- **Loops.** Go's `for {` (and a loop whose condition spills into the body's prefix) is now `for (;;)` rather than
+  `while (ᐧ)`, and a three-clause loop without a condition is `for (init; ; post)` rather than `for (init; ᐧ ; post)`.
+  `ᐧ` is a const, so C# already read both as never ending; no reachability changes.
+- **Shift-assign.** `literalShiftCount` drops the `(int)(N)` cast on a compound `<<=`/`>>=` whose count is a constant
+  rendered as a decimal literal in int range: `x <<= 3`. This applies on the variable and the field paths. A
+  named-numeric or type-parameter left operand keeps the cast, and a non-constant count keeps its guarded
+  `LshAssign`/`RshAssign`.
+
+**Guards, red first.**
+- `TestSmallFourEmission` was red at master on every new spelling; its three controls (`LshAssign`, `RshAssign`,
+  the named `c <<= (int)(1)`) held. It is green at the seat.
+- The new behavioral `ParitySmallFour` runs every form against Go. That covers each IIFE shape (a generic result, a
+  tuple, typed parameters, one inside a binary expression, and %T of int32/int/uint8), the directions at an
+  assignment, a call argument and a return (each read on a legal direction, with %T of both directional types),
+  both loop forms, and the shifts. It passes Transpile, Compile, Target and Output.
+- pcensus's DIR canon moves to the ruled spelling, red first.
+- pcensus's F1 canon is extended, red first. After the refusals were reported to COORD, a function-valued rewrite
+  normalizes both IIFE heads to one spelling that keeps the attribute, result, every parameter type and every name.
+  Its plants:
+  - good: typed parameters, a typed void parameter, a tuple result, the `[MethodImpl]` attribute, and a tuple
+    inside a parameter type;
+  - bad: a changed parameter type, a changed result, a renamed parameter, and a variadic literal respelled.
+
+**Footprint, the seat's prediction of record** (`data/parity-1262/seat27.lane.tsv`). It was measured at 56e4fba06f,
+before #19 landed; the composition is the i7's rung. The setup:
+- Two seeded roots, one binary per arm, `-stdlib -comments` over windows, linux and darwin.
+- Both arms: rc 0, 0 degraded/failed/misrouted, 4,559 `.cs` per target. Arm A rewrote 0 files.
+
+| Target | Files | +/- | F1 | DIR | FOR | SHIFT | Refused |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| windows | 339 | +888 / -888 | 8 | 29 | 611 | 240 | 0 |
+| linux | 338 | +898 / -898 | 10 | 29 | 617 | 242 | 0 |
+| darwin | 336 | +892 / -892 | 10 | 29 | 613 | 240 | 0 |
+| union | 417 (14 `.auto`) | +1,090 / -1,090 | 12 | 45 | 785 | 248 | 0 |
+
+**The prediction, scored as posted.**
+- F1: 12 lines (MET). DIR: 45 (MET). FOR: 785 (MET). Files: at most 419 (MET, 417).
+- SHIFT: at most 257, a ceiling; 248 measured. The 9 left are all named left operands: `archive/tar`'s `Format`,
+  `encoding/asn1`'s `int64Encoder` ×2, `math/big`'s `Word` ×3, `go/constant`'s `Word`, and
+  `internal/runtime/maps`'s `ctrlGroup` ×2. The two predicted files that did not move hold only those.
+- Added equals deleted on every target, and 0 GoPositionMap re-encodes (no `package_info.cs` moved) (MET).
+- 31 hand-owned loop sites untouched, with no marked file in the diff (MET).
+
+**Behavioral.** CNR at 50f14bcaf6 (after #19 landed, so the goldens re-baseline after E1's) moved 56 tests: `.cs`
+only, 0 `package_info.cs`, inside the at-most-58 prediction. The two predicted tests that did not move are the
+variadic literals above; the `}))(` predicate over-counted them.
+- `UpdateTestTargets --only` re-baselined the 56 (112 files), and every golden byte-equals its emission.
+- pcensus `-items F1,DIR,FOR,SHIFT` on CNR's diff and on the goldens: REFUSED 0 (goldens: 112 files, F1 228, DIR
+  38, FOR 44, SHIFT 4).
+- docsamples re-copied 6 golden-sourced samples. The prose describing the retired spellings was rewritten:
+  - ConversionStrategies.md: the package-var IIFE, the loop text and its reachability note, the ᐧ symbol row, and
+    the channel and select examples;
+  - defer-panic-recover.md, manual-conversions.md and named-numeric-types.md.
+
+**Gates, at the seat's final source tree on master `79aeb62dac` (batch 74), one battery on the box** (the goldens commit as
+first cut, `f821dfb6c7`; this record commit, placed beneath it, touches only `docs/phase4`).
+- `go test -timeout 60m ./...`: 10 packages ok, 0 FAIL (`go2cs` 885 s, `repoguard` 135 s).
+- GenTests 346/346. GolibTests unfiltered: 2,257 passed, 0 failed, 36 skipped.
+- golib Release `--no-incremental`: 0 warnings, 0 errors, and CoreCompile ran csc over the full source list
+  (`builtin.FuncLiterals.cs` included). `go2cs.slnx`: 0 errors (158 warnings, the standing set). `go2cs-stdlib.slnx`:
+  0 warnings, 0 errors.
+- Behavioral, the 56 re-baselined tests plus `ParitySmallFour`: trx total = executed = passed = 226, failed 0
+  (A1 57, B2 57, C3 57, D4 55).
+- The first battery, before the rebase, read two reds in `go test`, both fixed in `83576aae61`: the new converter
+  test was not registered in `go2cs-src.projitems`, and six provenance notes cited lines the seat moved or changed
+  (SelectStatement and ForVariants goldens, three converter lines one down, `channel.cs` `IsClosed` below the new
+  `As…` pair). The cited claims all still hold; only the fingerprints changed.
+- The rebase onto batch 74 was clean: its converter delta (non-test `src/go2cs`, outside pcensus and projitems)
+  has the same stable patch-id as the measured arm B (`f17a5b55eb`), and its `src/core` delta is the same two
+  golib files, so the footprint above stands as measured.
+- The branch was then rebased onto batch 75 (`e9f05d8c09`), which changes only
+  `src/core/runtime/go2cs_test_disclosures.json`, a file the seat does not touch; repoguard re-read green at the final tip.
+
+— H (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
