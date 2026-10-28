@@ -67,6 +67,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A complex constant emits a complex VALUE, rendered from its two exact halves](constants.md#a-complex-constant-emits-a-complex-value-rendered-from-its-two-exact-halves)
   - [`string()` of an untyped constant reference hops through the default type](constants.md#string-of-an-untyped-constant-reference-hops-through-the-default-type)
   - [A `:=` from a named untyped constant materializes the default type](constants.md#a--from-a-named-untyped-constant-materializes-the-default-type)
+  - [A rune literal is a bare C# char where its slot takes one](constants.md#a-rune-literal-is-a-bare-c-char-where-its-slot-takes-one)
   - [A computed untyped float constant materializes at its destination's float width](constants.md#a-computed-untyped-float-constant-materializes-at-its-destinations-float-width)
   - [`complex()` over a NAMED untyped constant pins the element width](constants.md#complex-over-a-named-untyped-constant-pins-the-element-width)
   - [A named untyped integer constant beside a FLOAT operand compares and computes as a float](constants.md#a-named-untyped-integer-constant-beside-a-float-operand-compares-and-computes-as-a-float)

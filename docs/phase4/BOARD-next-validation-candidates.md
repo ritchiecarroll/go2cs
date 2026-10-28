@@ -30636,4 +30636,53 @@ master and with this seat alike. Probe: `x := 7; go report(x); defer show(x)` em
 - docsamples `-check` clean, after 18 samples were re-copied.
 <!-- Evidence: C2's scratchpad, gd-evidence (stdlib -diffq per target and run logs, behavioral diffs, pcensus outputs, build-and-run log,
      red and mutation logs), on C2's box. Census binaries: master 50f14bcaf6 and the seat tree at aaa4d7b8c6. -->
+
+## 2026-10-28 — P2 (1.26.10.2 parity seat #23, C1, claude/p2-seat23-rune-lit): a rune literal is a bare C# char where its slot takes one — DONE on the seat branch
+
+**The rule (COORD's ruling of 2026-10-28, as written; Q1 spelled as the target).** `markRuneLiteralForms` decides
+each rune literal's form from the type go/types records for it and for its slot:
+- bare `'x'`: a comparison or arithmetic against a non-constant basic operand, and a typed slot (assignment, typed
+  var, return, composite element, positional or keyed struct field, value or array/slice index key, send, case
+  label, argument of a non-generic function) whose type is int32, int, int64, uint, uint32, uint64, uint16, float32
+  or float64 and is the slot's own type;
+- one cast spelled as the target in the same slots of byte, int8 or int16, in append's byte elements, and as the
+  operand of a conversion: `(byte)'q'`, `(int8)'A'`, `(int16)'B'`, `(byte)'7'` for `(byte)(rune)'7'`. The converter
+  spells the Go names `int8`/`int16`, not `sbyte`/`short`;
+- `(rune)'x'` everywhere else: inference, interface slots, variadic arguments, builtins, generic calls (type
+  arguments written or inferred), named types, uintptr, index expressions, constant-only expressions, astral runes.
+
+**Red first.** Behavioral `RuneLiteralContexts` (every slot; const and `'a' - 'A'` printed with %T and %v) and
+converter `TestRuneLiteralForms` (each form and each keep arm by function) are red at f2d6b3e56f and green at the tip.
+The output matches `go run` on linux.
+
+**A defect the re-baseline found before any push.** A generic call with INFERRED type arguments, `show('a')` for
+`func show[E any](e E)`, first emitted bare: the call's go/types type is the instantiated signature, which has no
+type parameters, and C# would infer E as char. Fixed in a6e92639f5 (keep the cast when `info.Instances` records
+the callee), with a red `keepInferred` check. `UntypedConstTypeArg` and `GenericUntypedConstInfer` guard it.
+
+**Prediction and score** (posted 01:23Z before any reconvert; a go/types census of the behavioral corpus):
+- predicted 48 goldens and 140 literals. Measured on linux: 43 goldens and 130 literals, plus one non-golden
+  output, `GoHostModuleShadow/consumer/consumer.cs`, a sub-package the census did not load. The census had the same
+  inferred-generic flaw (3 literals in 1 golden it should have kept), and it did not type positional struct fields
+  (3 literals in `BigUntypedConstComparison` the converter correctly respells). The other 4 goldens
+  (`EnvironBlockWalk`, `FindFirstFileData`, `RawConnSyncSocketIO`, `UnsafeStringEmpty`, 10 literals) are
+  windows-exclusive and cannot be minted on linux: they are left as they stand for a windows host to re-baseline.
+- C1's pcensus (seat #22, 8d39ef85ec) with this seat's canon additions reads 89 of 89 golden pairs C1, 0 refused.
+  The additions: a conversion's operand (`(byte)(rune)'a'`), a byte/int8/int16 slot respelled as the target, and
+  N2's canon no longer claims a cast pair on a char literal. They are held as a patch and land on this branch once
+  #22 is on master (COORD: score once #22 lands). The first scoring read 7 pairs UNCLASSIFIED; all 7
+  were C1 by inspection, and the canon was corrected (a call's argument parentheses matched the `((rune)'x')` rule,
+  and a conversion inside a conversion lost no `(rune)'`), each with a plant.
+- `(rune)'` in goldens: 171 in 53 files at the base, 43 in the existing goldens after, 10 of them in the 4
+  windows goldens.
+
+**CNR.** Only the seat's outputs move. Two foreign drifts were reverted, each emitted the same by a base converter
+built at f2d6b3e56f: `MulticastGroupJoin/main.cs` (a `range(...)` foreach) and
+`FieldAccessReinterpret/package_info.cs` (an undocumented platform-alias drift, reported by CNR).
+
+**Corpus footprint: none in this seat** (deferred-corpus window). The std census at 1.26.10 linux reads, in
+production files, 5,728 literals bare, 265 respelled and 1,690 kept; the end regen carries them.
+
+— P2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
