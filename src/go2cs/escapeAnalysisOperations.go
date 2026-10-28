@@ -2030,6 +2030,21 @@ func (v *Visitor) identAddressTaken(obj types.Object) bool {
 	return taken
 }
 
+// heapTypeDeclWithValue turns a zero-valued box declaration from convertToHeapTypeDecl(ident, false)
+// (`ref var x = ref heap<T>(out var Ꮡx);`) into the one that boxes value (`ref var x = ref heap<T>(value,
+// out var Ꮡx)`, golib's `heap<T>(in T, out ж<T>)` overload), with no closing semicolon: the caller ends the
+// statement as it ends an assignment. Every declaration form takes its `out` argument first, so the value
+// goes in ahead of it.
+func heapTypeDeclWithValue(decl, value string) string {
+	at := strings.Index(decl, "(out ")
+
+	if at < 0 {
+		panic("heapTypeDeclWithValue: not a zero-valued heap declaration: " + decl)
+	}
+
+	return decl[:at+1] + value + ", " + strings.TrimSuffix(decl[at+1:], ";")
+}
+
 func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string {
 	identType := v.info.TypeOf(ident)
 
