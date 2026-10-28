@@ -55,6 +55,9 @@ var plants = []plant{
 	one("D1 good", prodFile, `@string s = default!;`, `@string s = default;`, "D1"),
 	one("D1 bad: the value changed", prodFile, `@string s = default!;`, `@string s = "";`, "UNCLASSIFIED"),
 	one("N1+D1 composition", prodFile, `if (err != default!) { x = default!; }`, `if (err != nil) { x = default; }`, "N1+D1"),
+	one("N1 beside a slice compare that keeps default", prodFile, `if (err == default! && s != default!) {`, `if (err == nil && s != default) {`, "N1"),
+	one("D1 on a compare alone", prodFile, `if (s == default!) {`, `if (s == default) {`, "D1"),
+	one("N1 bad: the kept compare changed", prodFile, `if (err == default! && s != default!) {`, `if (err == nil && t != default) {`, "UNCLASSIFIED"),
 	// Z1 (#21)
 	one("Z1 good", prodFile, `var b = new Buffer(nil);`, `var b = new Buffer();`, "Z1"),
 	one("Z1 good generic", prodFile, `var g = new G<nint>(nil);`, `var g = new G<nint>();`, "Z1"),
