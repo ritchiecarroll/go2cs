@@ -22,18 +22,23 @@ becomes (with `a` a `[][]*int`; the Go label stays in place, and the `break` tar
 OuterLoop:
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
-            var exprᴛ1 = a[i][j];
-            if (exprᴛ1 == default!) {
+            switch (a[i][j]) {
+            case var ᴛ when ᴛ == default!: {
                 state = Error;
                 goto break_OuterLoop;
-            }
+                break;
+            }}
 
         }
 continue_OuterLoop:;
     }
 break_OuterLoop:;
 ```
-<!-- probe 2026-10-22 at 1b101a3def: the one-case switch on a pointer lowers to the if-chain form (see expression-switch.md); both synthesized targets are emitted even when only one is used. -->
+<!-- probe 2026-10-22 at 1b101a3def: the one-case switch on a pointer lowers to the if-chain form (see expression-switch.md); both synthesized targets are emitted even when only one is used.
+     seat #28 (2026-10-28): without fallthrough the same switch is a pattern switch; the `break;` after the goto is
+     the unreachable one every C# switch clause gets when its body does not end in a return. -->
+The `nil` label is not a C# constant, so the clause compares in a `when` guard (see
+[Expression Switch Statements](expression-switch.md)).
 
 
 ## Continue Label

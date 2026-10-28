@@ -235,16 +235,19 @@ internal static void Main() {
         rg.Device.Sensor.Calibrate(3D);
         fmt.Println((float64)rg.Device.Sensor.Temp);
 
-        var exprᴛ1 = CrossPkgLib.Precision;
-        if (exprᴛ1 == 1) {
+        switch (CrossPkgLib.Precision) {
+        case var ᴛ when ᴛ == 1: {
             fmt.Println("coarse");
+            break;
         }
-        else if (exprᴛ1 == 2) {
+        case var ᴛ when ᴛ == 2: {
             fmt.Println("fine");
+            break;
         }
-        else { /* default: */
+        default: {
             fmt.Println("unknown");
-        }
+            break;
+        }}
 
         fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 

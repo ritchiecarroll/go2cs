@@ -4,7 +4,9 @@ import "fmt"
 
 // A Go switch lowered to an if/else-if chain wraps any case body holding a
 // switch-targeting `break` in `do { ... } while (false)` so the break has a C#
-// target. That wrapper is itself a C# iteration statement, so a Go `continue`
+// target. Since seat #28 only a switch WITH a `fallthrough` takes that chain: one
+// without is a C# pattern switch, where a break and a continue are emitted bare,
+// so sections (a)-(g) read that form and (h)-(i) keep the wrapper's case. That wrapper is itself a C# iteration statement, so a Go `continue`
 // meaning "continue the enclosing for loop" must NOT be emitted as a bare C#
 // `continue` inside it -- it would continue the wrapper, exit on the false
 // condition, and fall through past the switch. Each section below prints
@@ -128,4 +130,48 @@ outer:
 		fmt.Println("g: after switch", i)
 	}
 	fmt.Println("g: got", got)
+
+	// (h) The defect shape in a switch that also has a `fallthrough`, which
+	// keeps the if/else chain and its wrapper: the wrapped continue must still
+	// reach the loop, and the break must still skip the rest of the case.
+	for i := 0; i < len(words); i++ {
+		switch words[i] {
+		case "skip":
+			if i == 0 {
+				fmt.Println("h: breaking at", i)
+				break
+			}
+			fmt.Println("h: continuing at", i)
+			continue
+		case "stop":
+			fmt.Println("h: stop at", i)
+			fallthrough
+		case "keep":
+			fmt.Println("h: stop-or-keep at", i)
+		}
+		fmt.Println("h: after switch", i)
+	}
+
+	// (i) (g)'s per-iteration capture in a fallthrough switch: the wrapped
+	// continue flows through the carrier copy-back.
+	var gotFt []int
+	for i := 0; i < 6; i++ {
+		f := func() int { return i }
+		switch fmt.Sprint(i % 3) {
+		case "1":
+			if i == 4 {
+				fmt.Println("i: breaking at", i)
+				break
+			}
+			i++
+			gotFt = append(gotFt, f())
+			continue
+		case "2":
+			fallthrough
+		case "0":
+			fmt.Println("i: two-or-zero at", i)
+		}
+		fmt.Println("i: after switch", i)
+	}
+	fmt.Println("i: got", gotFt)
 }

@@ -317,8 +317,8 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:53#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:37#201bcf and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:39#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:15#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:20#4be793, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:33#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:35#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:10#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#2a5223;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:53#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:37#201bcf and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:39#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:107#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:15#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:20#4be793, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:33#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:35#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:10#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:253#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#2a5223;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:44#1baedb; GoCallVariations.cs.target:45#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:305#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:82#c69f13).
@@ -326,7 +326,7 @@ Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.
 /*<-*/: SelectStatement/SelectStatement.cs.target:65#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:70#73a99c (comma-ok: src/core/io/fs/sub.cs:86#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:62#c4196f (goto break_scan;) and :66#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:172-208#3c2428. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:654#e07a2f.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:748#0a8a17 (receive), map.cs:456#629bdd (map index), builtin.cs:3706-3711#ab6e8c (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:198-209#4ddddc), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
-ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:15#e2a6d2.
+ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:40#e2a6d2.
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:193-204#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:14#ee6601).
@@ -2245,7 +2245,7 @@ uintptr i = 2;
 Its use with `unsafe.Pointer` is covered in [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr).
 <!-- uintptr: a distinct golib struct, not an alias of nuint, so an alias cannot erase the uint/uintptr
      difference (src/core/golib/uintptr.cs:16-20#ce6348, :39#d446ed). Goldens:
-     src/tests/Behavioral/SwitchPointerSentinelCase/main.cs.target:96#7511f0;
+     src/tests/Behavioral/SwitchPointerSentinelCase/main.cs.target:98#7511f0;
      src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:80 (`case uintptr:` beside `case nuint:`). -->
 
 **Narrow arithmetic is cast back to its type.** Go computes `int8`, `uint8`, `int16` and `uint16` arithmetic at
@@ -5017,7 +5017,7 @@ func prefix(buf []byte) bool {
 	return string(buf[3:6]) == " /x"
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:211-219 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:215-223 -->
 ```csharp
 internal static bool prefix(slice<byte> buf) {
     if (len(buf) < 6) {
@@ -5043,7 +5043,7 @@ func returnedString() string {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:177-181 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:181-185 -->
 ```csharp
 internal static @string returnedString() {
     var b = slice<byte>("returned"u8);
@@ -7335,7 +7335,7 @@ pause on. golib runs it on a second goroutine and uses its `Coro` handoff type t
 A panic in the iterator is rethrown in the ranging function, where its own defers can recover it
 ([Defer / Panic / Recover](#defer--panic--recover)).
 
-<!-- Labeled switch placement: src/tests/Behavioral/SwitchBreakInCase/main.go:41#d82a26 (Big: switch … break Big) -> main.cs.target:40-58#9a181e, where `break_Big:;` follows the switch's closing brace. -->
+<!-- Labeled switch placement: src/tests/Behavioral/SwitchBreakInCase/main.go:41#d82a26 (Big: switch … break Big) -> main.cs.target:39-57#9a181e, where `break_Big:;` follows the switch's closing brace. -->
 **Labels become `goto` targets.** C# `break` and `continue` cannot name an outer loop. So the converter
 keeps the Go label, adds `continue_L:;` at the end of the labeled loop's body and `break_L:;` just after
 the loop, and turns `continue L` and `break L` into `goto` statements. A labeled `switch` gets the same
@@ -7380,7 +7380,7 @@ break_scan:;
 `new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays).
 
 <!-- Reference gap: labels-and-loop-variables.md has no rule for the if/switch init clause block; add it there, with its guard tests, and extend the Full detail line. -->
-<!-- A switch init clause gets the same block: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:124#43c487 -> ExprSwitch.cs.target:142-144#31d8f1. -->
+<!-- A switch init clause gets the same block: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:124#43c487 -> ExprSwitch.cs.target:145-147#31d8f1. -->
 **An `if` or `switch` init clause opens a block.** C# `if` and `switch` have no init clause. So the
 declaration and the statement share a new pair of braces, which keeps the variable scoped to the
 statement as in Go. That is why the second `a` here can reuse the name:
@@ -7501,13 +7501,16 @@ default:
     }}
 ```
 
-**Other labels become an `if / else if` chain.** Variables, function calls and Go strings take the chain.
-A Go string becomes golib's `@string`, a struct, so it cannot be a C# `const`. Untyped constants take it
-too, including Go's `true` and `false`. So do constants of a named type, such as `time.Saturday`.
+**Other labels become a pattern switch.** Variables, function calls and Go strings are not C# constants.
+A Go string becomes golib's `@string`, a struct, so it cannot be a C# `const`. Untyped constants are not
+either, including Go's `true` and `false`, and nor are constants of a named type, such as `time.Saturday`.
 
-The tag is evaluated once into a temporary, `exprᴛ1`. Each case compares against it with `==`, or with an
-`is` pattern when the label is a C# constant (`exprᴛ1 is 0`). A label list joins with `||`, and `default`
-becomes the final `else`:
+The switch stays a C# `switch` over the tag. Each case binds the tag to `ᴛ` and compares in a `when`
+guard, `case var ᴛ when ᴛ == time.Monday:`, or keeps a constant pattern when every label in it is a C#
+constant (`case 0:`). A label list joins with `||`. C# tries the guards in order and `default` last,
+wherever it is written, which is the order Go evaluates them in. A string tag keeps a temporary under
+`switch (ᐧ)`, `case {} when exprᴛ1 == "get"u8:`, because C# would otherwise switch on a decoded .NET
+`string` ([reference](ConversionStrategies-Reference/expression-switch.md#a-string-tag-keeps-its-temp-under-the-expressionless-governor)):
 
 <!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:72-79 -->
 ```go
@@ -7520,19 +7523,22 @@ default:
 	fmt.Println("It's a weekday")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:76-85 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:76-88 -->
 ```csharp
 …
-    var exprᴛ1 = time.Now().Weekday();
-    if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
+    switch (time.Now().Weekday()) {
+    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Sunday: {
         fmt.Println("It's the weekend");
+        break;
     }
-    else if (exprᴛ1 == time.Monday) {
+    case var ᴛ when ᴛ == time.Monday: {
         fmt.Println("Ugh, it's Monday");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("It's a weekday");
-    }
+        break;
+    }}
 ```
 
 The Go comment is absent because this test is converted without the `-comments` option ([Comments](#comments)).
@@ -7554,7 +7560,7 @@ default: // After noon
 	fmt.Println("It's after noon")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:87-96 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:90-99 -->
 ```csharp
 …
     var t = time.Now();
@@ -7583,7 +7589,7 @@ case v > 2:
 	fmt.Println("unreachable but compiled")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:248-257 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:251-260 -->
 ```csharp
 …
     nint v = 3;
@@ -7630,7 +7636,7 @@ default:
 
 fmt.Println(hour)
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:98-130 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:101-133 -->
 ```csharp
 …
     nint hour = 1;
@@ -7706,7 +7712,7 @@ default:
     fmt.Println("Default case")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:235-246 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:238-249 -->
 ```csharp
 …
     var exprᴛ6 = Foo(2);
@@ -10073,7 +10079,7 @@ func checkErr(n int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-96 -->
+<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-102 -->
 ```csharp
 partial struct errno /*num:uintptr*/;
 
@@ -10098,22 +10104,28 @@ internal static void checkErr(nint n) {
     if (!AreEqual(err, errAgain)) {
         fmt.Println("not again");
     }
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, errAgain)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, errAgain): {
         fmt.Println("switch: again");
+        break;
     }
-    else if (AreEqual(exprᴛ1, default)) {
+    case var ᴛ when AreEqual(ᴛ, default): {
         fmt.Println("switch: nil");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("switch: other");
-    }
+        break;
+    }}
 
 }
+
+internal static error release(errno e) {
+    fmt.Println("released", (uintptr)e);
 ```
 
-`==` becomes `AreEqual(…)` and `!=` becomes `!AreEqual(…)`. The `switch err` becomes an `if`/`else if`
-chain over a temporary, `exprᴛ1`, and each case compares through `AreEqual` in the same way
+`==` becomes `AreEqual(…)` and `!=` becomes `!AreEqual(…)`. The `switch err` becomes a pattern switch,
+and each case compares through `AreEqual` in the same way, `case var ᴛ when AreEqual(ᴛ, errAgain):`
 ([Expression Switch Statements](#expression-switch-statements)).
 
 <!-- adapter unwrap: src/core/golib/builtin.cs:4130-4146#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:34 `AreEqual(zoo[0], f)` -->

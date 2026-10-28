@@ -297,7 +297,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 	// regexp/syntax parseEscape's default-clause commentary migrated into the octal arm above it.
 	// Guarding in place fixes the same defect with no code motion, and keeps the emitted C# in Go's
 	// clause order.
-	if !allConst && tag != nil {
+	//
+	// Only a switch WITH fallthroughs still takes the chain: one without becomes a C# pattern switch
+	// (below), where `default` sits in Go's position and is tried last, as in Go, so nothing moves.
+	if !allConst && tag != nil && hasFallthroughs {
 		for i, caseClause := range caseClauses {
 			if caseClause.List != nil || i == len(caseClauses)-1 {
 				continue
@@ -345,6 +348,45 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 	if hasFallthroughs || (!allConst && tag != nil) {
 		// Most complex scenario with standalone if's, and fallthrough
 		exprVarName := v.getTempVarName("expr")
+
+		// A tagged switch WITHOUT fallthrough becomes a C# pattern switch over the tag: `switch (tag) {
+		// case var ᴛ when ᴛ == L: { … break; } … default: { … } }`. Its labels are not C# constants (the
+		// reason it is here and not in the constant switch below), so each clause binds the tag to `ᴛ`
+		// and tests it in a `when` guard, and C# tries the guards in label order, stops at the first
+		// that holds, and tries `default` last wherever it is written — Go's order, label for label. A
+		// Go `break` then exits the switch and a `continue` the loop, as written, with no wrapper. The
+		// clause conditions are the chain's own, rendered with `ᴛ` as the tag, so each label keeps its
+		// operator: a clause the chain tests with `is` keeps its constant pattern (`case A or B:`).
+		// The tag temp's name is still taken, so the names that follow do not shift; a pattern switch
+		// nested in another's clause names its variable `ᴛ2`, `ᴛ3`, since the outer one is in scope.
+		//
+		// A tag whose Go type is a STRING keeps the temp and switches on the expressionless governor
+		// instead: `var exprᴛ1 = tag; switch (ᐧ) { case {} when exprᴛ1 == L: … }`. C# picks a switch's
+		// governing type through a user-defined implicit conversion when exactly one reaches a classic
+		// governing type, and golib's @string has one, to System.String: `switch (tag)` would bind `ᴛ`
+		// as a decoded .NET string, where `ᴛ == "x"u8` does not compile and `ᴛ == s` compares UTF-16
+		// text, under which two different invalid UTF-8 byte strings are equal. The temp keeps the
+		// tag's own type and golib's byte-wise ==. (A named numeric is re-governed to its underlying
+		// integer, which compares the same values, so it keeps the pattern switch.)
+		patternSwitch := !hasFallthroughs
+		stringTag := false
+
+		if patternSwitch && tag != nil {
+			if tagType := v.info.TypeOf(tag); tagType != nil {
+				stringTag = isStringTyped(tagType)
+			}
+		}
+
+		if patternSwitch && !stringTag {
+			v.patternSwitchDepth++
+			defer func() { v.patternSwitchDepth-- }()
+
+			exprVarName = TempVarMarker
+
+			if v.patternSwitchDepth > 1 {
+				exprVarName = fmt.Sprintf("%s%d", TempVarMarker, v.patternSwitchDepth)
+			}
+		}
 
 		var matchVarName string
 
@@ -397,7 +439,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		nonTrailingDefault := false
 
 		for ci, cc := range caseClauses {
-			if cc.List == nil && ci < len(caseClauses)-1 {
+			if cc.List == nil && ci < len(caseClauses)-1 && !patternSwitch {
 				nonTrailingDefault = true
 			}
 		}
@@ -507,19 +549,23 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			caseConds[ci] = cond.String()
 		}
 
-		if tag != nil {
-			if v.options.preferVarDecl {
-				v.writeOutput("var ")
-			} else {
-				exprType := convertToCSTypeName(v.getExpressionTypeName(tag, false))
-				v.outputBuilder.WriteString(exprType)
-				v.outputBuilder.WriteRune(' ')
+		if patternSwitch {
+			if stringTag {
+				v.writeSwitchTagTemp(tag, exprVarName)
 			}
 
-			v.outputBuilder.WriteString(exprVarName)
-			v.outputBuilder.WriteString(" = ")
-			v.outputBuilder.WriteString(v.convExpr(tag, v.switchTagExprContexts(tag)))
-			v.outputBuilder.WriteString(";" + v.newline)
+			v.writePatternSwitch(tag, caseClauses, caseConds, caseUsesPattern, exprVarName, stringTag)
+
+			if switchStmt.Init != nil {
+				v.indentLevel--
+				v.writeOutputLn("}")
+			}
+
+			return
+		}
+
+		if tag != nil {
+			v.writeSwitchTagTemp(tag, exprVarName)
 		}
 
 		if hasFallthroughs && matchFlagRead {
@@ -943,6 +989,80 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		v.indentLevel--
 		v.writeOutputLn("}")
 	}
+}
+
+// writeSwitchTagTemp declares the temp a switch evaluates its tag into once (`var exprᴛ1 = tag;`).
+func (v *Visitor) writeSwitchTagTemp(tag ast.Expr, name string) {
+	if v.options.preferVarDecl {
+		v.writeOutput("var ")
+	} else {
+		exprType := convertToCSTypeName(v.getExpressionTypeName(tag, false))
+		v.outputBuilder.WriteString(exprType)
+		v.outputBuilder.WriteRune(' ')
+	}
+
+	v.outputBuilder.WriteString(name)
+	v.outputBuilder.WriteString(" = ")
+	v.outputBuilder.WriteString(v.convExpr(tag, v.switchTagExprContexts(tag)))
+	v.outputBuilder.WriteString(";" + v.newline)
+}
+
+// writePatternSwitch emits a tagged switch without fallthrough as a C# pattern switch (see
+// visitSwitchStmtCore), clause for clause in Go's order. caseConds are the chain's conditions over
+// varName: a pattern clause's `ᴛ is A or B` becomes `case A or B:`, any other `case var ᴛ when …:`.
+// Over a string tag (overTemp), varName is the tag temp the caller declared, the switch governs on
+// `ᐧ` and every clause is `case {} when …:`. Each body ends as the constant switch's do: a `break;`
+// unless it ended in a return.
+func (v *Visitor) writePatternSwitch(tag ast.Expr, caseClauses []*ast.CaseClause, caseConds []string, caseUsesPattern []bool, varName string, overTemp bool) {
+	if overTemp {
+		v.writeOutput("switch (%s) {", TrueMarker)
+	} else {
+		v.writeOutput("switch (")
+		v.outputBuilder.WriteString(v.convExpr(tag, v.switchTagExprContexts(tag)))
+		v.outputBuilder.WriteString(") {")
+	}
+
+	v.outputBuilder.WriteString(v.newline)
+
+	for i, caseClause := range caseClauses {
+		if i > 0 {
+			v.outputBuilder.WriteString(v.newline)
+		}
+
+		v.writeAboveLabelComments(caseClause.Colon)
+		v.writeOutput("")
+
+		switch {
+		case caseClause.List == nil:
+			v.outputBuilder.WriteString("default: {")
+		case overTemp:
+			v.outputBuilder.WriteString("case {} when " + caseConds[i] + ": {")
+		case caseUsesPattern[i]:
+			v.outputBuilder.WriteString("case " + strings.TrimPrefix(caseConds[i], varName+" is ") + ": {")
+		default:
+			v.outputBuilder.WriteString("case var " + varName + " when " + caseConds[i] + ": {")
+		}
+
+		v.indentLevel++
+
+		// As in the constant switch: an EMPTY body never calls visitStmt, so the flag would carry the
+		// previous clause's `return` and suppress the mandatory `break;`.
+		v.lastStatementWasReturn = false
+
+		v.visitStatementList(caseClause.Body, caseClause.Colon)
+
+		v.outputBuilder.WriteString(v.newline)
+
+		if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
+			v.writeOutputLn("break;")
+		}
+
+		v.indentLevel--
+		v.writeOutput("}")
+	}
+
+	v.outputBuilder.WriteRune('}')
+	v.outputBuilder.WriteString(v.newline)
 }
 
 func (v *Visitor) containsUntypedExpr(expr ast.Expr) bool {

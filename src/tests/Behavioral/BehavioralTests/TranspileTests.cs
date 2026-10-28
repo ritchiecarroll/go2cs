@@ -2332,6 +2332,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
 
     [TestMethod]
+    public void CheckSwitchLabelSideEffectOrder() => CheckTarget("SwitchLabelSideEffectOrder");
+
+    [TestMethod]
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]

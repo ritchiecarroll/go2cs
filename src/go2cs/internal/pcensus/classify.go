@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -29,9 +30,11 @@ import (
 // mapLabel is the pseudo-item for the GoPositionMap re-encode a line-moving change forces.
 const mapLabel = "MAP"
 
-// refusal is one line pair, or one unpaired line, no mechanism explains.
+// refusal is one line pair, or one unpaired line, no mechanism explains. side is '-' or '+' for an unpaired line
+// (its text may be empty), 0 for a pair.
 type refusal struct {
 	file, at, kind, rem, add string
+	side                     byte
 }
 
 // tally is a classification's reading: pairs per label, per file, and the refusals.
@@ -59,7 +62,146 @@ func (t *tally) credit(file, label string) {
 // classifier holds the items a classification may attribute to.
 type classifier struct {
 	allowed  []*item
-	testOnly bool // every changed file must be a converted test (the test-refresh-1262 rule 2)
+	testOnly bool      // every changed file must be a converted test (the test-refresh-1262 rule 2)
+	pool     *filePool // the current file's unexplained lines, when an allowed item carries a Block (endFile)
+}
+
+// pooled is a line no run explained, held for its file's block resolution, with the refusal it carries otherwise.
+type pooled struct {
+	line, at, why string
+}
+
+// filePool holds, for one file, the lines its runs left unexplained and which Block anchors the file's diff shows.
+type filePool struct {
+	rem, add         []pooled
+	orig             []refusal // the runs' own refusals, reported as they stand when no Block anchors the file
+	oldSeen, newSeen map[*item]bool
+}
+
+// keyPasses caps the canon chain's repeats in key.
+const keyPasses = 8
+
+// key is a line's alignment form: every allowed item's canon applied, trimmed. The chain repeats until the line
+// stops changing, so one item's rewrite is read by an item listed before it (S1's `switch (tag()) {` by N2's
+// `))` collapse) and the form does not depend on the items' order. A line still changing after keyPasses has no
+// form: ok is false, and the line is refused NONCONVERGENT rather than read at its last pass.
+func (c *classifier) key(s string) (form string, ok bool) {
+	for range keyPasses {
+		prev := s
+		for _, it := range c.allowed {
+			s = canon(it, s)
+		}
+		if s == prev {
+			return strings.TrimSpace(s), true
+		}
+	}
+	return "", false
+}
+
+// blocking reports whether any allowed item carries a Block, which makes every file pool what its runs leave.
+func (c *classifier) blocking() bool {
+	for _, it := range c.allowed {
+		if it.Block != nil {
+			return true
+		}
+	}
+	return false
+}
+
+// noteAnchors records which Block anchors a run's lines show.
+func (c *classifier) noteAnchors(rem, add []string) {
+	if c.pool == nil {
+		return
+	}
+	for _, it := range c.allowed {
+		b := it.Block
+		if b == nil {
+			continue
+		}
+		for _, l := range rem {
+			if b.OldAnchor.MatchString(l) {
+				c.pool.oldSeen[it] = true
+			}
+		}
+		for _, l := range add {
+			if b.NewAnchor != nil && b.NewAnchor.MatchString(l) {
+				c.pool.newSeen[it] = true
+			}
+		}
+	}
+}
+
+// endFile reads the file's pool. When the file's diff shows a Block's two anchors, the pooled lines are that
+// rewrite's: a removed and an added line of equal canonical form pair (a line the old form emitted out of source
+// order, a line the rewrite only re-indents, or a label whose replacement git placed in another run), then Delete
+// and Insert admit the scaffolding. Every line left, and every pooled line of a file without both anchors, is
+// refused as its run would have refused it.
+func (c *classifier) endFile(t *tally, file string) {
+	p := c.pool
+	if p == nil {
+		return
+	}
+	c.pool = &filePool{oldSeen: map[*item]bool{}, newSeen: map[*item]bool{}}
+	var active *item
+	for _, it := range c.allowed {
+		if it.Block != nil && p.oldSeen[it] && (p.newSeen[it] || it.Block.Standalone) {
+			active = it
+			break
+		}
+	}
+	if active == nil {
+		t.refused = append(t.refused, p.orig...)
+		return
+	}
+	matches := func(set []*regexp.Regexp, l string) bool {
+		for _, re := range set {
+			if re.MatchString(l) {
+				return true
+			}
+		}
+		return false
+	}
+	const nonconvergent = "NONCONVERGENT(canon still changing after the key's passes)"
+	took := make([]bool, len(p.add))
+	addKey, addOK := make([]string, len(p.add)), make([]bool, len(p.add))
+	for j, a := range p.add {
+		addKey[j], addOK[j] = c.key(a.line)
+	}
+	for _, r := range p.rem {
+		if active != nil {
+			k, ok := c.key(r.line)
+			if !ok {
+				t.refused = append(t.refused, refusal{file, r.at, nonconvergent, r.line, "", '-'})
+				continue
+			}
+			done := false
+			for j := range p.add {
+				if active.Block.Moves && !took[j] && addOK[j] && addKey[j] == k {
+					took[j], done = true, true
+					break
+				}
+			}
+			if done || matches(active.Block.Delete, r.line) {
+				t.credit(file, active.ID)
+				continue
+			}
+		}
+		t.refused = append(t.refused, refusal{file, r.at, r.why, r.line, "", '-'})
+	}
+	for j, a := range p.add {
+		if took[j] {
+			continue // credited with its removed half
+		}
+		if !addOK[j] {
+			t.refused = append(t.refused, refusal{file, a.at, nonconvergent, "", a.line, '+'})
+			continue
+		}
+		if active != nil && matches(active.Block.Insert, a.line) {
+			t.credit(file, active.ID)
+			continue
+		}
+		t.refused = append(t.refused, refusal{file, a.at, a.why, "", a.line, '+'})
+	}
 }
 
 func newClassifier(only string, testOnly bool) (*classifier, error) {
@@ -212,6 +354,8 @@ func (c *classifier) fold(lines []string) ([]string, []string) {
 
 // run classifies one run of changed lines into t.
 func (c *classifier) run(t *tally, file, at string, rem, add []string) {
+	c.noteAnchors(rem, add)
+
 	rf, rby := c.fold(rem)
 	af, aby := c.fold(add)
 	// A join both sides carry is not this diff's change.
@@ -231,7 +375,7 @@ func (c *classifier) run(t *tally, file, at string, rem, add []string) {
 		for i := range rf {
 			label, why := c.explain(file, rf[i], af[i], joinOf(i, i))
 			if why != "" {
-				r.refused = append(r.refused, refusal{file, at, why, rf[i], af[i]})
+				r.refused = append(r.refused, refusal{file, at, why, rf[i], af[i], 0})
 			} else {
 				r.labels = append(r.labels, label)
 			}
@@ -258,7 +402,26 @@ func (c *classifier) run(t *tally, file, at string, rem, add []string) {
 	for _, l := range best.labels {
 		t.credit(file, l)
 	}
-	t.refused = append(t.refused, best.refused...)
+	if c.pool == nil {
+		t.refused = append(t.refused, best.refused...)
+		return
+	}
+	// Under a Block, what the run could not explain is pooled for its file (endFile), keeping the refusal it would
+	// carry: the rewrite's other half may sit in another run.
+	c.pool.orig = append(c.pool.orig, best.refused...)
+	for _, r := range best.refused {
+		switch {
+		case strings.HasPrefix(r.kind, "TOO-LARGE"):
+			t.refused = append(t.refused, r)
+		case r.side == '-':
+			c.pool.rem = append(c.pool.rem, pooled{r.rem, r.at, r.kind})
+		case r.side == '+':
+			c.pool.add = append(c.pool.add, pooled{r.add, r.at, r.kind})
+		default:
+			c.pool.rem = append(c.pool.rem, pooled{r.rem, r.at, r.kind})
+			c.pool.add = append(c.pool.add, pooled{r.add, r.at, r.kind})
+		}
+	}
 }
 
 // aligned reads a run by aligning its lines on every item's canonical form (an LCS), so a structural rewrite's
@@ -277,41 +440,9 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 		}
 		return strings.TrimSpace(s)
 	}
-	var blocks []*item
-	for _, it := range c.allowed {
-		b := it.Block
-		if b == nil {
-			continue
-		}
-		hasOld, hasNew := false, false
-		for _, l := range rem {
-			hasOld = hasOld || b.OldAnchor.MatchString(l)
-		}
-		for _, l := range add {
-			hasNew = hasNew || b.NewAnchor != nil && b.NewAnchor.MatchString(l)
-		}
-		if hasOld && (hasNew || b.Standalone) {
-			blocks = append(blocks, it)
-		}
-	}
-	block := func(line string, del bool) string {
-		for _, it := range blocks {
-			set := it.Block.Insert
-			if del {
-				set = it.Block.Delete
-			}
-			for _, re := range set {
-				if re.MatchString(line) {
-					return it.ID
-				}
-			}
-		}
-		return ""
-	}
-
 	n, mm := len(rem), len(add)
 	if n*mm > 25_000_000 {
-		out.refused = append(out.refused, refusal{file, at, fmt.Sprintf("TOO-LARGE(-%d +%d)", n, mm), "", ""})
+		out.refused = append(out.refused, refusal{file, at, fmt.Sprintf("TOO-LARGE(-%d +%d)", n, mm), "", "", 0})
 		return out
 	}
 	rk, ak := make([]string, n), make([]string, mm)
@@ -337,32 +468,28 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 		}
 	}
 
-	refuse := func(kind, r, a string) { out.refused = append(out.refused, refusal{file, at, kind, r, a}) }
+	refuse := func(kind, r, a string, side byte) {
+		out.refused = append(out.refused, refusal{file, at, kind, r, a, side})
+	}
 	pair := func(i, j int) {
 		label, why := c.explain(file, rem[i], add[j], joinOf(i, j))
-		switch {
-		case why == "":
+		if why == "" {
 			out.labels = append(out.labels, label)
-		case strings.TrimSpace(rem[i]) == strings.TrimSpace(add[j]) && len(blocks) > 0:
-			out.labels = append(out.labels, blocks[0].ID) // a kept line the structural rewrite re-indents
-		default:
-			refuse(why, rem[i], add[j])
-		}
-	}
-	unpairedRem := func(i int) {
-		if id := block(rem[i], true); id != "" {
-			out.labels = append(out.labels, id)
 		} else {
-			refuse("UNPAIRED", rem[i], "")
+			refuse(why, rem[i], add[j], 0)
 		}
 	}
-	unpairedAdd := func(j int) {
-		if id := block(add[j], false); id != "" {
-			out.labels = append(out.labels, id)
-		} else {
-			refuse("UNPAIRED", "", add[j])
+	var lostRem, lostAdd []int // the lines the alignment leaves unpaired, read once the walk is done
+	unpaired := func() {
+		for _, i := range lostRem {
+			refuse("UNPAIRED", rem[i], "", '-')
+		}
+		for _, j := range lostAdd {
+			refuse("UNPAIRED", "", add[j], '+')
 		}
 	}
+	unpairedRem := func(i int) { lostRem = append(lostRem, i) }
+	unpairedAdd := func(j int) { lostAdd = append(lostAdd, j) }
 
 	i, j := 0, 0
 	for i < n && j < mm {
@@ -384,12 +511,17 @@ func (c *classifier) aligned(file, at string, rem, add []string, joinOf func(i, 
 	for ; j < mm; j++ {
 		unpairedAdd(j)
 	}
+	unpaired()
 	return out
 }
 
 // classifyDiff reads a unified diff (git's, any -U) and classifies every changed line.
 func (c *classifier) classifyDiff(diff string) *tally {
 	t := newTally()
+	c.pool = nil
+	if c.blocking() {
+		c.pool = &filePool{oldSeen: map[*item]bool{}, newSeen: map[*item]bool{}}
+	}
 	var file, at, whole string
 	var rem, add []string
 	header := false // between `diff --git` (or a first `---`) and the first `@@`
@@ -397,7 +529,7 @@ func (c *classifier) classifyDiff(diff string) *tally {
 		if len(rem) > 0 || len(add) > 0 {
 			switch {
 			case c.testOnly && !isTestFile(file):
-				t.refused = append(t.refused, refusal{file, at, "NOT-A-TEST-FILE", first(rem), first(add)})
+				t.refused = append(t.refused, refusal{file, at, "NOT-A-TEST-FILE", first(rem), first(add), 0})
 			case whole != "":
 				// A file added or deleted whole is new test source or a removed one, not a mechanism: it is
 				// reported once per file, never paired.
@@ -412,12 +544,14 @@ func (c *classifier) classifyDiff(diff string) *tally {
 		switch {
 		case strings.HasPrefix(ln, "diff --git "):
 			flush()
+			c.endFile(t, file)
 			header, whole = true, ""
 			if _, b, ok := strings.Cut(ln, " b/"); ok {
 				file = b
 			}
 		case (header || at == "") && (strings.HasPrefix(ln, "+++ ") || strings.HasPrefix(ln, "--- ")):
 			flush()
+			c.endFile(t, file)
 			header = true
 			p := ln[4:]
 			switch {
@@ -448,6 +582,7 @@ func (c *classifier) classifyDiff(diff string) *tally {
 		}
 	}
 	flush()
+	c.endFile(t, file)
 	return t
 }
 

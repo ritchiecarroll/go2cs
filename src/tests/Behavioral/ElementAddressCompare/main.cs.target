@@ -143,13 +143,15 @@ internal static void Main() {
     fmt.Println("parens     :", (Ꮡelem(x, 1)) == (Ꮡelem(y, 0)), ((Ꮡelem(x, 0))) != Ꮡelem(y, 0));
 
     fmt.Println("boxed      :", AreEqual(((any)(Ꮡ(x, 1))), ((any)(Ꮡ(y, 0)))), Ꮡ(x, 0) == Ꮡ(y, 0));
-    var exprᴛ1 = Ꮡ(x, 1);
-    if (exprᴛ1 == Ꮡ(y, 0)) {
+    switch (Ꮡ(x, 1)) {
+    case var ᴛ when ᴛ == Ꮡ(y, 0): {
         fmt.Println("switch     : y[0]");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("switch     : default");
-    }
+        break;
+    }}
 
 }
 

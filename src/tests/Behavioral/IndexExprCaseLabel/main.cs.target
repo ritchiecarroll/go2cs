@@ -10,15 +10,16 @@ internal static UntypedInt one => 1;
 
 internal static @string classify(@string s) {
     var exprᴛ1 = s;
-    if (exprᴛ1 == words[0] || exprᴛ1 == words[2]) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == words[0] || exprᴛ1 == words[2]: {
         return "ends";
     }
-    if (exprᴛ1 == words[one]) {
+    case {} when exprᴛ1 == words[one]: {
         return "middle";
     }
-    { /* default: */
+    default: {
         return "none";
-    }
+    }}
 
 }
 

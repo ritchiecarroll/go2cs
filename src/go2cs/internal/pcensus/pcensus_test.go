@@ -228,10 +228,12 @@ func firstNonEmpty(a, b []string) string {
 	return first(b)
 }
 
-// S1 (#28) is structural: the if-chain over exprᴛN is deleted, a pattern switch inserted, and the bodies it keeps
-// re-indent. The bad plant changes a kept body's text inside the same block.
+// S1 (#28) is structural: the if-chain over exprᴛN becomes a pattern switch. The canon PAIRS every line that carries
+// the tag or a label with the line that replaces it (R1-R3), the block admits the scaffolding either side, the kept
+// bodies may re-indent, and a default the chain had moved to the end comes back to Go's position as a move. Each bad
+// plant changes one thing the rewrite must keep, and must be refused by its own text.
 func TestBlockPlants(t *testing.T) {
-	old := []string{
+	weekdayOld := []string{
 		`    var exprᴛ1 = time.Now().Weekday();`,
 		`    if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {`,
 		`        fmt.Println("It's the weekend");`,
@@ -240,28 +242,118 @@ func TestBlockPlants(t *testing.T) {
 		`        fmt.Println("It's a weekday");`,
 		`    }`,
 	}
-	good := []string{
+	weekday := []string{
 		`    switch (time.Now().Weekday()) {`,
-		`    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Sunday:`,
+		`    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Sunday: {`,
 		`        fmt.Println("It's the weekend");`,
 		`        break;`,
-		`    default:`,
+		`    }`,
+		`    default: {`,
 		`        fmt.Println("It's a weekday");`,
 		`        break;`,
-		`    }`,
+		`    }}`,
 	}
-	c, _ := newClassifier("", false)
-	tl := c.classifyDiff(diffOf(prodFile, old, good))
-	if len(tl.refused) != 0 || len(tl.labels) != 1 || tl.labels["S1"] == 0 {
-		t.Errorf("S1 good: wanted every line to read S1, read %v, refused %v", tl.labels, tl.refused)
+	// A leading Go default (the chain moved it to the end), a constant-pattern clause, the do/while(false) wrapper
+	// with its goto continueᴛ and label, under a typed tag temp.
+	loopOld := []string{
+		`        nint exprᴛ1 = x;`,
+		`        if (exprᴛ1 is 3 or 4) {`,
+		`            three();`,
+		`        }`,
+		`        else if (exprᴛ1 == y) {`,
+		`            do {`,
+		`                if (c) {`,
+		`                    break;`,
+		`                }`,
+		`                goto continueᴛ1;`,
+		`            } while (false);`,
+		`        }`,
+		`        else { /* default: */`,
+		`            d();`,
+		`        }`,
+		``,
+		`        after();`,
+		`continueᴛ1:;`,
+	}
+	loop := []string{
+		`        switch (x) {`,
+		`        default: {`,
+		`            d();`,
+		`            break;`,
+		`        }`,
+		`        case 3 or 4: {`,
+		`            three();`,
+		`            break;`,
+		`        }`,
+		`        case var ᴛ when ᴛ == y: {`,
+		`            if (c) {`,
+		`                break;`,
+		`            }`,
+		`            continue;`,
+		`            break;`,
+		`        }}`,
+		``,
+		`        after();`,
+	}
+	// A nested pattern switch (ᴛ2) over an interface tag keeps AreEqual; the chain's bare default block after a
+	// terminating clause.
+	nestedOld := []string{
+		`            var exprᴛ2 = e;`,
+		`            if (AreEqual(exprᴛ2, v)) {`,
+		`                return g();`,
+		`            }`,
+		`            { /* default: */`,
+		`                return h();`,
+		`            }`,
+	}
+	nested := []string{
+		`            switch (e) {`,
+		`            case var ᴛ2 when AreEqual(ᴛ2, v): {`,
+		`                return g();`,
+		`            }`,
+		`            default: {`,
+		`                return h();`,
+		`            }}`,
 	}
 
-	bad := append([]string(nil), good...)
-	bad[5] = `        fmt.Println("It's a weekend day");`
-	tl = c.classifyDiff(diffOf(prodFile, old, bad))
-	if len(tl.refused) == 0 || !strings.Contains(tl.refused[0].rem+tl.refused[0].add, "weekend day") &&
-		!strings.Contains(tl.refused[len(tl.refused)-1].rem+tl.refused[len(tl.refused)-1].add, "weekend day") {
-		t.Errorf("S1 bad: a changed body inside the block was not refused by name: %v", tl.refused)
+	c, _ := newClassifier("", false)
+	for _, g := range []struct {
+		name     string
+		old, new []string
+	}{{"weekday", weekdayOld, weekday}, {"loop", loopOld, loop}, {"nested", nestedOld, nested}} {
+		tl := c.classifyDiff(diffOf(prodFile, g.old, g.new))
+		if len(tl.refused) != 0 || len(tl.labels) != 1 || tl.labels["S1"] == 0 {
+			t.Errorf("S1 good %s: wanted every line to read S1, read %v, refused %v", g.name, tl.labels, tl.refused)
+		}
+	}
+
+	with := func(lines []string, i int, s string) []string {
+		out := append([]string(nil), lines...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		old, new   []string
+	}{
+		{"label value changed", "Monday", weekdayOld,
+			with(weekday, 1, `    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Monday: {`)},
+		{"kept body changed", "weekend day", weekdayOld,
+			with(weekday, 6, `        fmt.Println("It's a weekend day");`)},
+		{"tag changed", "Month", weekdayOld, with(weekday, 0, `    switch (time.Now().Month()) {`)},
+		{"constant pattern respelled ==", "ᴛ == 3", loopOld, with(loop, 5, `        case var ᴛ when ᴛ == 3 || ᴛ == 4: {`)},
+		{"moved default body changed", "d2", loopOld, with(loop, 2, `            d2();`)},
+		{"continue not restored", "goto continue_x", loopOld, with(loop, 13, `            goto continue_x;`)},
+		{"AreEqual dropped", "ᴛ2 == v", nestedOld, with(nested, 1, `            case var ᴛ2 when ᴛ2 == v: {`)},
+	} {
+		tl := c.classifyDiff(diffOf(prodFile, b.old, b.new))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("S1 bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
 	}
 
 	// GD's hoisted fields are deleted where they stood, often a hunk of their own (Standalone); a field that is
@@ -272,7 +364,7 @@ func TestBlockPlants(t *testing.T) {
 		`private static readonly @string fifthˢ = "Fifth"u8;`,
 		``,
 	}
-	tl = c.classifyDiff(diffOf(prodFile, fields, nil))
+	tl := c.classifyDiff(diffOf(prodFile, fields, nil))
 	if len(tl.refused) != 0 || tl.labels["GD"] == 0 {
 		t.Errorf("GD standalone deletion: wanted every line to read GD, read %v, refused %v", tl.labels, tl.refused)
 	}
@@ -285,6 +377,132 @@ func TestBlockPlants(t *testing.T) {
 	tl = c.classifyDiff(diffOf(prodFile, []string{`    do {`, `    } while (false);`}, nil))
 	if len(tl.refused) != 2 {
 		t.Errorf("S1 anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
+	}
+}
+
+// hunkDiff writes one file's diff from lines prefixed ' ', '-' or '+', splitting a hunk at every run of context:
+// unlike diffOf, its changed lines arrive in several runs, as a real diff's do.
+func hunkDiff(file string, lines []string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "diff --git a/%s b/%s\n--- a/%s\n+++ b/%s\n@@ -1 +1 @@\n", file, file, file, file)
+	for _, l := range lines {
+		b.WriteString(l + "\r\n")
+	}
+	return b.String()
+}
+
+// S1 in a real diff: the unchanged bodies are context, so the rewrite's lines land in many runs. The tag temp and
+// its first label can follow the `switch` and `case` lines git placed ahead of them; a default the chain had moved
+// to the end returns to Go's position a whole run away; each appended `break;` and the `}}` closer stand alone; and
+// the loop's continueᴛ label goes where the loop ends, past the switch. Every line of a file whose diff carries the
+// two anchors is read together, and a line that still has no partner is refused by its own text.
+func TestBlockPlantsAcrossRuns(t *testing.T) {
+	good := []string{
+		`     for (nint i = 0; i < n; i++) {`,
+		`+        switch (d.cmd) {`,
+		`+        default: {`,
+		`+            other();`,
+		`+            break;`,
+		`+        }`,
+		`+        case var ᴛ when ᴛ == socksCmdConnect || ᴛ == sockscmdBind: {`,
+		`-        var exprᴛ2 = d.cmd;`,
+		`-        if (exprᴛ2 == socksCmdConnect || exprᴛ2 == sockscmdBind) {`,
+		`-            do {`,
+		`-                if (x) {`,
+		`-                    break;`,
+		`-                }`,
+		`-                goto continueᴛ1;`,
+		`-            } while (false);`,
+		`+            if (x) {`,
+		`+                break;`,
+		`+            }`,
+		`+            continue;`,
+		`+            break;`,
+		`-        }`,
+		`-        else { /* default: */`,
+		`-            other();`,
+		`-        }`,
+		`+        }}`,
+		` `,
+		`         after();`,
+		`-continueᴛ1:;`,
+		`     }`,
+	}
+	c, _ := newClassifier("S1", false)
+	tl := c.classifyDiff(hunkDiff(prodFile, good))
+	if len(tl.refused) != 0 || tl.labels["S1"] == 0 {
+		t.Errorf("S1 across runs: wanted every line to read S1, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	with := func(i int, s string) []string {
+		out := append([]string(nil), good...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		lines      []string
+	}{
+		{"the split label changed", "sockscmdBIND", with(6, `+        case var ᴛ when ᴛ == socksCmdConnect || ᴛ == sockscmdBIND: {`)},
+		{"the moved default body changed", "other2", with(3, `+            other2();`)},
+		{"the re-indented break became a return", "return;", with(16, `+                return;`)},
+		{"a stray line among the scaffolding", "stray", append(append([]string(nil), good...), `+        stray();`)},
+	} {
+		tl := c.classifyDiff(hunkDiff(prodFile, b.lines))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("S1 across runs, bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
+	}
+
+	// A2: a string tag keeps its temp (context) under the expressionless governor; each label becomes
+	// `case {} when exprᴛ1 == L: {`, and a label that changed, or a guard that no longer reads the temp, is refused.
+	str := []string{
+		`     var exprᴛ1 = cmd;`,
+		`+    switch (ᐧ) {`,
+		`-    if (exprᴛ1 == "get"u8) {`,
+		`+    case {} when exprᴛ1 == "get"u8: {`,
+		`         return 1;`,
+		`     }`,
+		`-    if (exprᴛ1 == alt) {`,
+		`+    case {} when exprᴛ1 == alt: {`,
+		`         return 2;`,
+		`-    }`,
+		`+    }}`,
+	}
+	tl = c.classifyDiff(hunkDiff(prodFile, str))
+	if len(tl.refused) != 0 || tl.labels["S1"] == 0 {
+		t.Errorf("S1 A2: wanted every line to read S1, read %v, refused %v", tl.labels, tl.refused)
+	}
+	withStr := func(i int, s string) []string {
+		out := append([]string(nil), str...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		lines      []string
+	}{
+		{"a label changed", "alt2", withStr(7, `+    case {} when exprᴛ1 == alt2: {`)},
+		{"the guard no longer reads the temp", "cmd == alt", withStr(7, `+    case {} when cmd == alt: {`)},
+	} {
+		tl := c.classifyDiff(hunkDiff(prodFile, b.lines))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("S1 A2, bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
+	}
+
+	// A file whose diff lacks the anchors pools nothing for S1: its scaffolding-shaped lines are refused as before.
+	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `+    break;`, `     g();`, `-    do {`}))
+	if len(tl.refused) != 2 {
+		t.Errorf("S1 across runs, anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
 	}
 }
 
@@ -513,5 +731,32 @@ func TestRealGoldenControls(t *testing.T) {
 		if tl.labels[k.label] != k.pairs || len(tl.refused) != k.refused {
 			t.Errorf("%s: %s=%d refused %d, want %d and %d (%v)", k.commit, k.label, tl.labels[k.label], len(tl.refused), k.pairs, k.refused, tl.labels)
 		}
+	}
+}
+
+// A canonical key that does not converge is refused by name, never read at its last pass: an item whose canon
+// grows a line on every pass (`z` -> `zz`) makes `zy` and `zx` agree only after the cap, where the pool would pair
+// them as a move. Both are refused NONCONVERGENT, and the anchors that made the block active are refused as before.
+func TestNonconvergentKeyIsRefused(t *testing.T) {
+	c := &classifier{allowed: []*item{{
+		ID:    "X",
+		Canon: []rewrite{rw(`[xy]$`, ""), rw(`z`, "zz")},
+		Block: &blockRule{OldAnchor: rx(`^old$`), NewAnchor: rx(`^new$`), Moves: true},
+	}}}
+	if _, ok := c.key("zy"); ok {
+		t.Errorf("key: `zy` grows on every pass, yet read as converged")
+	}
+	if k, ok := c.key("old"); !ok || k != "old" {
+		t.Errorf("key: CONTROL `old` read %q, %v", k, ok)
+	}
+	tl := c.classifyDiff(diffOf(prodFile, []string{"old", "zy"}, []string{"new", "zx"}))
+	nonconvergent := 0
+	for _, r := range tl.refused {
+		if strings.HasPrefix(r.kind, "NONCONVERGENT") {
+			nonconvergent++
+		}
+	}
+	if tl.labels["X"] != 0 || nonconvergent != 2 {
+		t.Errorf("a key past the canon cap: wanted no X and 2 NONCONVERGENT refusals, read %v, refused %v", tl.labels, tl.refused)
 	}
 }

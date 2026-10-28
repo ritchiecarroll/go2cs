@@ -2261,6 +2261,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
 
     [TestMethod]
+    public void CheckSwitchLabelSideEffectOrder() => CheckTarget("SwitchLabelSideEffectOrder");
+
+    [TestMethod]
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]

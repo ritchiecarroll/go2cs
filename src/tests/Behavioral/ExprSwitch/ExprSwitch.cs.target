@@ -73,16 +73,19 @@ internal static void Main() {
 
     fmt.Println(x);
 
-    var exprᴛ1 = time.Now().Weekday();
-    if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
+    switch (time.Now().Weekday()) {
+    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Sunday: {
         fmt.Println("It's the weekend");
+        break;
     }
-    else if (exprᴛ1 == time.Monday) {
+    case var ᴛ when ᴛ == time.Monday: {
         fmt.Println("Ugh, it's Monday");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("It's a weekday");
-    }
+        break;
+    }}
 
     var t = time.Now();
     switch (ᐧ) {

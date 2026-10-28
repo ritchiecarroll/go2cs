@@ -30765,5 +30765,191 @@ guard's C# compile fails with the same CS0266, at the fix it compiles and matche
 - Windows-exclusive goldens left to the i7: EnvironBlockWalk, FindFirstFileData, RawConnSyncSocketIO, UnsafeStringEmpty.
 
 — P2 (2026-10-28)
+---
+
+### 2026-10-28 — H (parity train seat #28, .2): S1, a tagged switch without fallthrough is a C# pattern switch; A2, a string tag keeps its temp under the expressionless governor
+
+**Ruled** by COORD as parity train seat #28 (`docs/PLAN-parity-train.md`); the owner ruled the scope (§6.4, every
+non-fallthrough tag switch). The design rulings, all COORD's on 2026-10-28:
+- R1: one label per Go clause, its labels joined with `||` in Go's order (a second `case var ᴛ` label on one
+  section is CS0128/CS0165, probed).
+- R2: each label keeps the chain's operator: a clause the chain tested with `is` keeps its constant pattern
+  (`case A or B:`), any other is `case var ᴛ when ᴛ == A:` (AreEqual for an interface tag, the cast under a
+  named-wrapper tag). A uniform `==` would respell `is` where the two differ (a NaN constant).
+- R3: `ᴛ` outermost, `ᴛ2`, `ᴛ3` for a pattern switch nested in another's clause (CS0136, probed).
+- A2 (below): a tag whose Go underlying type is string keeps its temp under the expressionless governor.
+
+The deferred-corpus window holds: converter, tests, goldens and docs land; `src/core` is measured and recorded,
+not committed.
+
+**The shape.** A tagged switch whose labels are not all C# constants, and which has no `fallthrough`, was lowered to
+an if/else chain over `var exprᴛN = tag;`, with its default moved to the end, a `do { … } while (false)` wrapper
+around any clause holding a switch `break`, and `goto continueᴛN` for a `continue` inside one. It now emits as Go
+writes it: `switch (tag) { case var ᴛ when ᴛ == A || ᴛ == B: { … break; } … default: { … } }`. The default stays
+where Go writes it, with its comments; a Go `break` exits the switch and a `continue` the loop, both bare. A switch
+WITH fallthrough keeps the chain, which is now the only place the default reorder, the wrapper and the
+`goto continueᴛ` survive. The tag temp's name is still taken, so the temps that follow do not shift.
+
+**The order proof** (plan design question 2, COORD's, accepted): a Go program whose labels log every evaluation and
+its hand-written C# twin in the proposed shape. `go run` and `dotnet run` read byte-identical under Debug and
+Release: guards run in label order, stop at the first match, and `default` is tried last wherever it sits, for a
+leading and a middle default, constant arms between side-effecting ones, `case a, b`, and break/continue in a loop.
+Negative control: swapping one guard's operands made the compare fire. The old chain was already lazy and in
+order, so S1 changes no behaviour (a correction H posted before the record: the precomputed any-match flag lives
+only in fallthrough switches, which keep the chain).
+
+**A2, from the compile arm.** COORD required a windows build of the changed corpus, since the emission cannot show
+C# rejecting a shape and the deferred-corpus window makes the end regen the first build otherwise. Arm B (S1 as
+first cut) read 144 CS0019, all `string == ReadOnlySpan<byte>` in internal/platform, internal/strconv,
+internal/coverage and internal/cpu, with every dependent package unbuilt; the control arm (the base emission) read
+0. The cause is C#'s switch GOVERNING-TYPE rule: when exactly one user-defined implicit conversion reaches a
+classic governing type, C# switches on the converted value, pattern switches included. A runtime probe (`switch (x)
+{ case var ᴛ: typeof(ᴛ) }` against golib and a converted package) read:
+- golib `@string` → `System.String`;
+- a generated `num:uint8` wrapper (internal/coverage `CounterMode`) → `Byte`;
+- `uintptr` and `UntypedInt` → themselves;
+- a nullable cast (`(@string?)tag`) is re-governed too (CS8121 on `case @string ᴛ`).
+The hazard is semantic as well: where a label compiles against a decoded string (`ᴛ == s`, `s` an `@string`), two
+different invalid UTF-8 byte strings both decode to U+FFFD and compare equal. COORD ruled A2: a tag whose Go
+underlying type is string (named string types and `sstring` included) keeps `var exprᴛ1 = tag;` and emits
+`switch (ᐧ) { case {} when exprᴛ1 == L: … }`, the shape an expressionless `switch {` already takes, keyed on the
+tag's Go type and never on whether a build fails. Named numerics stay on the pattern switch: the integral
+re-governing compares the same values, and arm B's internal/coverage compiled it (COORD's condition 2).
+
+**Guards, red first.**
+- `TestPatternSwitchEmission`: a leading default with a constant-pattern clause, break and continue in a loop, an
+  interface tag with a nested switch (`ᴛ2`), a fallthrough switch that keeps its chain, and a string tag on A2. Red at
+  the base on every want and refusal, and the A2 wants red at the S1-only converter.
+- The new behavioral `SwitchLabelSideEffectOrder` (the plan's guard, from the probe) logs every label evaluation; its
+  `bytesNotText` switches on `\xff`, `\xfe`, `\xfd`. All four phases passed at the base (the chain was already in
+  order); it turns red at Target only. Planted once against a decoded compare (`(string)exprᴛ1 == (string)y`), its
+  Output phase named exactly the two wrong arms (`matched fe`, `matched fd`); restored, the A2 emission matches Go
+  byte for byte (COORD's condition 1).
+- `SwitchBreakContinueWrapper` gains two fallthrough arms, (h) and (i), so the wrapper's `goto continueᴛ` and the
+  carrier copy-back stay covered now that its other sections no longer reach the chain.
+
+**pcensus S1, fixed red-first in the seat.** The item as it stood admitted any `case …:` and `switch (` line once its
+anchors were in the same run, and its plants were single runs. On the real windows A/B it refused 6,056 lines: a
+real diff keeps the unchanged clause bodies as context, so each appended `break;` and `}}` is a run of its own, git
+may place the `switch`/`case` lines in a run ahead of the temp and `if` they replace, a moved default returns a run
+(or 140 lines) away, and a retired continueᴛ label sits past the switch. The instrument now:
+- pairs each tag and label line with its ruled replacement through canon (a changed label value or operator, a
+  dropped AreEqual, a changed tag are each refused by their own text);
+- pools, per file, what no run explains, and when the file's diff shows S1's two anchors pairs equal canonical
+  forms (moves, re-indents, split labels) before Delete and Insert admit the scaffolding; a file without both
+  anchors reports its runs' refusals unchanged;
+- reads A2's `case {} when exprᴛ1 == L:` (COORD's condition 5).
+On the real diff, three planted defects (a label, a moved default body, a stray line) each read as exactly their two
+halves refused, and nothing else. Text cannot see a tag's type, so which form a switch took is the converter
+test's to hold.
+
+**Footprint, the seat's prediction of record** (`data/parity-1262/seat28.lane.tsv`), measured at `e9f05d8c09`
+(batch 75); the composition is the i7's rung. Two seeded roots per comparison, one binary per arm, `-stdlib
+-comments` over windows, linux and darwin; every arm rc 0, 0 degraded/failed/misrouted, 4,559 `.cs` per target.
+
+| Target | Files | `.cs` | package_info | +/- | S1 | MAP | Refused |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| windows | 450 | 331 (5 `.auto`) | 119 | +9,701 / -7,264 | 10,541 | 270 | 0 |
+| linux | 465 | 345 (5 `.auto`) | 120 | +9,712 / -7,258 | 10,536 | 283 | 0 |
+| darwin | 455 | 337 (3 `.auto`) | 118 | +9,620 / -7,199 | 10,437 | 277 | 0 |
+| union | 606 | 445 (7 `.auto`) | 161 | +11,769 / -8,761 | | | |
+
+Compile arm: arm B2 (the seat's converter) builds `go2cs-stdlib.slnx` on windows with 0 errors, 363 of 363 projects
+compiled in the run (each with a fresh assembly), the one warning the control's own (CS9113, hand-owned `testing`).
+
+**The prediction, scored as posted** (windows / linux / darwin). It MISSED on its totals, and the misses are the
+predicate's; the mechanism held everywhere it can be seen:
+- S1 switches: predicted 1,352 / 1,350 / 1,337, measured 984 / 985 / 972. MISSED: the predicate walked the seeded
+  `*_test.cs`, which `-stdlib` never re-emits (156 / 155 / 155 files, every one a test). On production its own count
+  is 984 / 985 / 972 exactly, and the measured file set equals its predicted production set exactly.
+- Wrappers removed: predicted 66 / 64 / 64, measured 65 / 63 / 63. `goto continueᴛ`: at most 4, measured 2 (MET).
+  Labels: predicted 3, measured 1 (tests counted).
+- `break;` added: predicted 3,191 / 3,184 / 3,159, measured 2,364 / 2,371 / 2,342. MISSED, by four predicate faults,
+  each found in the diff: tests counted; comments above a clause opener; a trailing comment on the opener line; a
+  multi-line `return (…) => { … };` read as non-returning. None points at the converter.
+- Files: predicted 487 / 500 / 492, measured 331 / 345 / 337 (MISSED, tests). GoPositionMap: predicted at least
+  400 / 411 / 405 (MISSED, tests); arm B's 253 / 266 / 261 sat within one of the shifting non-`.auto` production
+  files.
+- Fallthrough chains unchanged: 53 / 54 / 54 in both arms (the falsifier held). pcensus refused 0 (MET at the
+  fixed instrument).
+- **Post-measurement correction (governing-type rule):** of the 984 / 985 / 972, 204 / 210 / 206 string-tag
+  switches take A2 and 780 / 775 / 766 the pattern switch. The S1 total is unchanged; the split is a finding, not a
+  re-scope.
+
+**Behavioral.** CNR at the base moved exactly the 21 predicted tests plus the new guard: 23 `.cs` and 17
+`package_info.cs` (predicted at least 12, at most 21). After the rebase onto batch 78 CNR moved the same 22 and
+`NilCompareShapes` (#20's new test, which holds a switch S1 rewrites).
+- `UpdateTestTargets --only` re-baselined the 23 (65 files), every golden byte-equal to its emission.
+- pcensus `-items S1,D1` on the goldens: S1 392, D1 1 (`log = default!` in this seat's own guard, minted before
+  batch 76, as COORD ruled for #27), and 53 refused, every one new test source: the guard's `bytesNotText` and
+  SwitchBreakContinueWrapper's new (h) and (i) arms, additions and blank lines in two appended hunks.
+- docsamples re-copied the golden-sourced samples; the wrapper section's sample moves to SwitchBreakContinueWrapper's
+  (h), the switch that still has the wrapper. The prose was rewritten in ConversionStrategies.md, expression-switch.md
+  (a new section for A2), labels-and-loop-variables.md and strings.md, and the plan's S1 entry records R1-R3 and A2.
+  The `src/core` excerpt (os `exec_windows`) is left for the train's regeneration, with a note.
+
+**Gates, at the seat's final tree on master `482caf78e5` (batch 78), one battery on the box.**
+- `go test -timeout 60m ./...`: 10 packages ok. The battery's first pass read one red,
+  `TestBodyBlankLinesKeptUnderComments`: three comment-placement checks matched the if-chain's spelling (an empty
+  clause's comment followed by `}`, a header ending `== "z"u8)` / `== w)`). The placements hold under the switch,
+  so each check now accepts both spellings and still refuses a comment written outside its clause; the rerun at the
+  tip is green. The seat's targeted runs had not reached that test, which only the full run did.
+- GenTests 346/346; GolibTests unfiltered 2,257 passed, 0 failed, 36 skipped; golib Release `--no-incremental` 0
+  warnings with csc over the full source list; `go2cs.slnx` 0 errors (158 standing warnings); `go2cs-stdlib.slnx`
+  0/0.
+- Behavioral on the 23 moved tests: trx total = executed = passed = 92, failed 0 (A1, B2, C3, D4 23 each).
+- repoguard green at the tip, after the expression-switch index links and ten provenance re-cites (each a line the
+  goldens moved, the cited text unchanged).
+- The seat was rebased onto batch 78 after measurement: its converter delta has stable patch-id `3f1dd4653b` at
+  both bases, and every other area's delta (pcensus, tests, registrations) is byte-identical across the rebase.
+
+**Rebased onto batch 81 (r2), on COORD's call: `904c363f67`.** The seat's 13 commits were cherry-picked onto the
+batch-81 tip, its goldens dropped and re-minted last; the converter delta (visitSwitchStmt.go, visitorState.go) keeps
+stable patch-id `3f1dd4653b`.
+- Conflicts, each resolved at the code:
+  - `blockRule` holds #33's `Standalone` beside the seat's `Moves`.
+  - #33 extended the per-run block code the seat's file pool replaces; the pool carries `Standalone` (a file is
+    active on OldAnchor alone, and a nil NewAnchor is never matched).
+  - pcensus_test's `tl`, declared by both #33's GD plants and the seat's anchorless plant, re-ordered.
+  - The BOARD row re-appended at the tail.
+  - The pre-rebase re-cite of three ExprSwitch notes came out empty and was dropped; it is made again after the
+    re-mint (104 -> 107, 88 -> 91, 250 -> 253, fingerprints unchanged).
+- A composition defect, found red by the seat's own plant (TestBlockPlants' weekday refused 2 lines after the rebase):
+  the pool's canonical key applied each item's canon once, in list order, and N2 (#26), listed before S1, collapses
+  `))`, which S1's rewrite of `var exprᴛ1 = tag();` into `switch (tag()) {` creates, so the two halves keyed apart.
+  The key now repeats the chain until the line stops changing.
+- COORD's condition on that fixpoint: a line still changing after the key's 8 passes is refused `NONCONVERGENT`, never
+  read at its last pass. TestNonconvergentKeyIsRefused plants an item whose canon grows a line on every pass (`z` ->
+  `zz`): red at the fixpoint alone (`zy` / `zx` paired as a move, X:1, nothing refused), green with the guard (both
+  refused by name), beside the key's own cap and a converging control.
+
+**The r2 footprint, scored against the prediction posted before arm B** (`seat28.lane.tsv`, block r2): EQUAL to the
+`e9f05d8c09` record on all three targets, with REFUSED 0 (MET on every quantity).
+- Two seeded roots at `904c363f67`, one binary per arm (A the base, B the seat's converter), `-stdlib -comments`
+  over windows, linux and darwin; both arms rc 0, 0 degraded/failed/misrouted, 4,560 `.cs` per target.
+- Files 450 / 465 / 455 (`.cs` 331 / 345 / 337, package_info 119 / 120 / 118), +9,701 / -7,264, +9,712 / -7,258,
+  +9,620 / -7,199; S1 10,541 / 10,536 / 10,437, MAP 270 / 283 / 277, REFUSED 0 (pcensus `-items S1` at the seat's
+  instrument, with the guard): the same file set, and the same added and deleted count in every file.
+- The diffs' text differs from the record's in 130 / 124 / 122 line pairs, every one another landed seat's spelling
+  inside an S1 hunk: D1's `default` (94 / 90 / 88), Z1's `new T()` (8 / 8 / 8), R5's un-aliased name (10 / 8 / 8)
+  and N2's single cast (18 / 18 / 18).
+- Compile arm, windows `go2cs-stdlib.slnx` over B's tree: 0 errors, the one standing warning (CS9113, hand-owned
+  `testing`), 363 of 363 projects compiled in the run (362 under `core` and the generator).
+
+**r2 behavioral and goldens.** CNR at the r2 tip moved the same 23 tests as before the rebase. `UpdateTestTargets
+--only` re-minted them (65 files), each golden byte-equal to its emission, SystemCertVerify (windows-exclusive)
+among them; none of the 23 is exclusive to linux or darwin, so no golden is left for another host.
+- pcensus on the goldens, `-items S1,D1`: S1 392, D1 1 (the guard's `log = default!`, minted before D1 landed), and
+  53 refused, by project: SwitchBreakContinueWrapper 40 ((h) and (i)), SwitchLabelSideEffectOrder 13
+  (`bytesNotText`), each new test source. With `-items S1` alone the D1 line's two halves add 2 (55).
+- docsamples: every sample holds its lines at the re-minted goldens (0 to re-copy); repoguard green at the tip.
+
+**r2 gates, at the r2 tip on `904c363f67`, one battery on the box.** `go test -timeout 60m ./...` 10 of 10 packages ok
+(go2cs 979 s, pcensus and repoguard re-run); GenTests 349/349; GolibTests unfiltered 2,257 passed, 0 failed, 36
+skipped; golib Release `--no-incremental` 0 warnings, 0 errors, csc ran; `go2cs.slnx` 0 errors (158 standing
+warnings); `go2cs-stdlib.slnx` 0/0; behavioral on the 23 moved tests: trx total = executed = passed = 92, failed 0
+(A1, B2, C3, D4 23 each).
+
+— H (2026-10-28)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

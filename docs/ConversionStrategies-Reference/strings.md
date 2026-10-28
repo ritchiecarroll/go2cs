@@ -375,7 +375,8 @@ case "get": …
 ```csharp
 if (((sstring)(hdr[..4])) == "ZLIB"u8) { … }
 var exprᴛ1 = ((sstring)cmd);
-if (exprᴛ1 == "get"u8) { … }
+switch (ᐧ) {
+case {} when exprᴛ1 == "get"u8: { … }
 ```
 
 A conversion of a bare, never-written identifier that repeats (two or more uses, or one inside a loop) is hoisted to a single `sstring` temp at function scope (`planSStringHoists`), because the JIT does not hoist a `ref struct` view out of a loop. The behavioral test `SStringElision` covers every eligible and every rejected shape.

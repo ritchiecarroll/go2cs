@@ -296,7 +296,7 @@ See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-num
 
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package Untyped* wrapper property, from which `@string` has no conversion (CS0030).<!-- src/core/unicode/utf8/utf8.cs:17 (`public static UntypedInt RuneError =>`) --> The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:249 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:252 -->
 ```csharp
 fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```

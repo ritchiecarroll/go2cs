@@ -17,22 +17,24 @@ internal static nint classify(ж<byte> Ꮡp) {
     nint result = 0;
 
     for (;;) {
-        var exprᴛ1 = Ꮡp;
-        if (exprᴛ1 == Ꮡsentinel) {
+        switch (Ꮡp) {
+        default: {
+            return result;
+        }
+        case var ᴛ when ᴛ == Ꮡsentinel: {
             result = 1;
             Ꮡp = default; p = ref Ꮡp.DerefOrNull();
             continue;
+            break;
         }
-        else if (exprᴛ1 == default) {
+        case var ᴛ when ᴛ == default: {
             if (result == 0) {
                 result = 2;
             }
             Ꮡp = Ꮡother; p = ref Ꮡp.DerefOrNull();
             continue;
-        }
-        else { /* default: */
-            return result;
-        }
+            break;
+        }}
 
     }
 }
@@ -49,13 +51,13 @@ internal static readonly ж<schedt> ᏑtheSched = new StaticBox<schedt>(default(
 internal static ref schedt theSched => ref ((StaticBox<schedt>)ᏑtheSched).ValueSlot;
 
 internal static bool preferLowLatency(ж<mu> p) {
-    var exprᴛ1 = p;
-    if (exprᴛ1 == ᏑtheSched.of(schedt.Ꮡlock)) {
-        return true;
-    }
-    { /* default: */
+    switch (p) {
+    default: {
         return false;
     }
+    case var ᴛ when ᴛ == ᏑtheSched.of(schedt.Ꮡlock): {
+        return true;
+    }}
 
 }
 

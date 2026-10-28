@@ -1109,6 +1109,7 @@
     <Project Path="tests/Behavioral/SwitchDefaultOrder/SwitchDefaultOrder.csproj" />
     <Project Path="tests/Behavioral/SwitchFallthroughDefault/SwitchFallthroughDefault.csproj" />
     <Project Path="tests/Behavioral/SwitchFallthroughDefaultReturn/SwitchFallthroughDefaultReturn.csproj" />
+    <Project Path="tests/Behavioral/SwitchLabelSideEffectOrder/SwitchLabelSideEffectOrder.csproj" />
     <Project Path="tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
     <Project Path="tests/Behavioral/SwitchPointerSentinelCase/SwitchPointerSentinelCase.csproj" />
     <Project Path="tests/Behavioral/SyscallKeystonePulls/SyscallKeystonePulls.csproj" />
