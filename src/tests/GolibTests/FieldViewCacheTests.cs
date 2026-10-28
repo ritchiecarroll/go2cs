@@ -164,6 +164,26 @@ public class FieldViewCacheTests
     }
 
     [TestMethod]
+    public void TheNativeAotFormOfTheAccessorMatchGivesTheSameAnswers()
+    {
+        // Native AOT takes Delegate.Equals in sameAccessor (RuntimeFeature.IsDynamicCodeSupported is false there),
+        // and tests run under the JIT. The switch makes the JIT take that form, so the same identity assertions
+        // run against it: one field's distinct instances share a view, distinct fields and targets do not, and
+        // a multicast token keeps its own view.
+        FieldViewCache.CompareByDelegateEquals = true;
+
+        try
+        {
+            DistinctDelegateInstancesOfOneAccessorShareOneViewAndDistinctAccessorsDoNot();
+            AMulticastTokenComparesByDelegateEqualsNotByItsLastTarget();
+        }
+        finally
+        {
+            FieldViewCache.CompareByDelegateEquals = false;
+        }
+    }
+
+    [TestMethod]
     public void AMulticastTokenComparesByDelegateEqualsNotByItsLastTarget()
     {
         // No converted site builds a multicast accessor, but should one reach the cache it must keep
