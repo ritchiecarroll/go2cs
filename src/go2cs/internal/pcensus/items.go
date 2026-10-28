@@ -58,7 +58,8 @@ type joinRule struct {
 // line and adds a NewAnchor line, the lines no run explains are read together at the file's end (classifier
 // endFile): a removed and an added line of equal canonical form pair (with Moves, a clause the old form emitted out
 // of source order; a re-indented kept line; a label whose replacement sits in another run), then Delete and Insert
-// admit the scaffolding, and what is left is refused.
+// admit the scaffolding, and what is left is refused. A rule with no OldAnchor only inserts: a file whose
+// added lines hold NewAnchor may insert lines matching Insert, and nothing else (P1's record line).
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
@@ -66,6 +67,40 @@ type blockRule struct {
 	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
 	Standalone bool
 	Moves      bool
+}
+
+// derefSelects respells every `(~X).` as `X.`, X any expression with balanced parentheses: P1's read through a
+// pointer, whose base may be a chain, a call or an index (`(~(~e.prev).next).x` reads `e.prev.next.x`). A `(~X)`
+// not followed by `.` is kept.
+func derefSelects(s string) string {
+	for from := len(s); ; {
+		open := strings.LastIndex(s[:from], "(~")
+
+		if open < 0 {
+			return s
+		}
+
+		depth, close := 0, -1
+
+	scan:
+		for k := open; k < len(s); k++ {
+			switch s[k] {
+			case '(':
+				depth++
+			case ')':
+				if depth--; depth == 0 {
+					close = k
+					break scan
+				}
+			}
+		}
+
+		if close >= 0 && close+1 < len(s) && s[close+1] == '.' {
+			s = s[:open] + s[open+2:close] + s[close+1:]
+		}
+
+		from = open
+	}
 }
 
 // id is a C# identifier as the converter spells one (Go identifiers, plus the converter's own letters: Ꮡ, ʗ, ᴛ, ǃ, ꓸ).
@@ -378,11 +413,20 @@ var items = []item{
 			m("P1", "deref-select", `\(~`+id+`\)\.`),
 			m("P1", "value-select", id+`\.Value\.[\p{L}_]`),
 		},
+		// #31's base is any expression, not an identifier only: a chain, a call or an index (`(~(~e.prev).next).x`,
+		// `(~mk()).Y`, `m["k"].Value.X`). Each file gains one `[GoFieldAccess(…)]` record line, inserted, or extended
+		// where the unsafe.Pointer route already wrote one (G, 2026-10-28).
 		Canon: []rewrite{
-			rw(`\(~(`+id+`)\)\.`, "$1."),
-			rw(`(`+id+`)\.Value\.([\p{L}_])`, "$1.$2"),
+			{re: rx(`^.*$`), fn: derefSelects},
+			rw(`([\p{L}\p{N}_\])])\.Value\.([\p{L}_])`, "$1.$2"),
+			rw(`^(\s*)\[GoFieldAccess\(.*\)\]$`, "$1[GoFieldAccess(…)]"),
 		},
-		Old: rx(`\(~` + id + `\)\.|` + id + `\.Value\.[\p{L}_]`),
+		Old: rx(`\(~|[\p{L}\p{N}_\])]\.Value\.[\p{L}_]`),
+		New: rx(`typeof\(`),
+		Block: &blockRule{
+			NewAnchor: rx(`^\s*\[GoFieldAccess\(`),
+			Insert:    []*regexp.Regexp{rx(`^\s*\[GoFieldAccess\(.*\)\]$`)},
+		},
 	},
 	{
 		ID: "P2", Seat: "#32", Title: "`&b.off` becomes `b.Ꮡoff`",

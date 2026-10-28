@@ -14,6 +14,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -534,6 +535,93 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 	return fmt.Sprintf("%s.%s", expr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
 }
 
+// P1: GO'S `p.f` THROUGH ANY POINTER (parity seat #31, COORD rulings 2026-10-27 and 2026-10-28;
+// docs/phase4/DESIGN-p1-field-properties.md)
+//
+// A field selected through a pointer to a named struct reads and writes as Go spells it, `p.f`, where the read was
+// `(~p).f` (a copy of the whole struct) and the write `p.Value.f`. The site binds the property go2cs-gen emits on the
+// box for each type the file's `[GoFieldAccess(…)]` record lists, the record and the class of the unsafe.Pointer route
+// above. Its body is specialized: `ref ʗp.Value.f` on a managed box, the same storage `p.Value.f` reaches, with
+// Value's own nil check; and `ʗp.field(T.Ꮡf)` on a NativeBox<T>, which answers the field at its GO offset where the
+// struct's CLR slot holds the wrong bytes (a behavior change on native boxes, and a correctness gain).
+//
+// These keep today's spelling, because no property serves them as Go spells them:
+//   - a field named like a member of ж<T> (fieldAccessCollisions.txt), or one that shadows a method an embedded type
+//     promotes (shadowsPromotedMethod): C# would bind the member, or the method group;
+//   - a PROMOTED field: the properties are the struct's own fields, so the site would have to name the embed, `p.E.f`,
+//     which is not Go's text (the unsafe.Pointer route above does, because it must avoid the whole-value read);
+//   - a struct with no generated accessors: one a hand-owned file declares, and one of a package the converter never
+//     emits (nonConvertedStdLibPackages: testing's T and B are golib-side structs);
+//   - a struct shaped as a Go slice or string header (isGoHeaderShaped), whose properties are get/set, not refs;
+//   - an unnamed struct type, which no record can name;
+//   - the plain rendering of a zero-size store target (zeroSizeStorePlain), whose box form names its struct.
+
+// fieldPropertySelector renders a field selection `p.f` through a pointer to pointee as the generated property
+// serves it, recording the struct type for the file's record; ok is false for a selection that keeps today's spelling.
+func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee types.Type, xContexts []ExprContext) (string, bool) {
+	if selectorExpr == v.zeroSizeStorePlain || !fieldPropertyServesType(pointee) {
+		return "", false
+	}
+
+	selection := v.info.Selections[selectorExpr]
+
+	if selection == nil || selection.Kind() != types.FieldVal {
+		return "", false
+	}
+
+	if len(selection.Index()) != 1 || fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name))] ||
+		shadowsPromotedMethod(pointee, selectorExpr.Sel.Name) {
+		return "", false
+	}
+
+	v.recordFieldAccessType(pointee)
+
+	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
+}
+
+// fieldPropertyServesType reports whether go2cs-gen gives pointee's fields their properties: a named struct with
+// generated accessors that is not header-shaped (see the P1 notes above).
+func fieldPropertyServesType(pointee types.Type) bool {
+	named, ok := types.Unalias(pointee).(*types.Named)
+
+	if !ok {
+		return false
+	}
+
+	structType, ok := named.Underlying().(*types.Struct)
+
+	if !ok || isHandOwnedType(named) || isGoHeaderShaped(structType) {
+		return false
+	}
+
+	pkg := named.Obj().Pkg()
+
+	return pkg != nil && !slices.Contains(nonConvertedStdLibPackages, pkg.Path())
+}
+
+// isGoHeaderShaped mirrors go2cs-gen's FieldAccessGenerator.IsHeaderShaped on the Go side: exactly an unsafe.Pointer
+// field and then one or two int fields, Go's slice and string headers, whose generated properties are get/set (the
+// setter commits the header), so they serve no `ref`.
+func isGoHeaderShaped(structType *types.Struct) bool {
+	if structType.NumFields() != 2 && structType.NumFields() != 3 {
+		return false
+	}
+
+	for i := 0; i < structType.NumFields(); i++ {
+		want := types.Int
+
+		if i == 0 {
+			want = types.UnsafePointer
+		}
+
+		if basic, ok := types.Unalias(structType.Field(i).Type()).(*types.Basic); !ok || basic.Kind() != want {
+			return false
+		}
+	}
+
+	return true
+}
+
 // packageHandOwnedTypes holds the types the package's hand-owned files ([module: GoManualConversion]) declare, and
 // packageHandOwnedVars their package-level vars plus the vars manualConversionVars displaces for this target; reset per
 // package and filled by collectHandOwnedDecls in each conversion driver.
@@ -680,6 +768,12 @@ func (v *Visitor) fieldAccessArrayField(selectorExpr *ast.SelectorExpr) (string,
 func (v *Visitor) recordFieldAccessType(pointee types.Type) {
 	typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(pointee, false))
 
+	// A generic struct is listed by its open definition, `typeof(pair<>)`: go2cs-gen reads the definition anyway, and
+	// an instantiation's arguments may be type parameters the package class cannot see.
+	if named, ok := types.Unalias(pointee).(*types.Named); ok && named.TypeArgs().Len() > 0 {
+		typeName = openGenericTypeName(typeName, named.TypeArgs().Len())
+	}
+
 	for _, recorded := range v.fieldAccessTypes {
 		if recorded == typeName {
 			return
@@ -687,6 +781,29 @@ func (v *Visitor) recordFieldAccessType(pointee types.Type) {
 	}
 
 	v.fieldAccessTypes = append(v.fieldAccessTypes, typeName)
+}
+
+// openGenericTypeName respells a rendered generic type's trailing argument list as its open form, `pair<T>` as
+// `pair<>` and `table<K, V>` as `table<,>`.
+func openGenericTypeName(typeName string, arity int) string {
+	if !strings.HasSuffix(typeName, ">") {
+		return typeName
+	}
+
+	depth := 0
+
+	for i := len(typeName) - 1; i >= 0; i-- {
+		switch typeName[i] {
+		case '>':
+			depth++
+		case '<':
+			if depth--; depth == 0 {
+				return typeName[:i] + "<" + strings.Repeat(",", arity-1) + ">"
+			}
+		}
+	}
+
+	return typeName
 }
 
 // fieldAccessRecord renders the file's `[GoFieldAccess(typeof(T), …)]` record, placed on the package class

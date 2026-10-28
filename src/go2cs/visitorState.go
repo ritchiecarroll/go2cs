@@ -393,7 +393,8 @@ type Visitor struct {
 	// fieldAccessResultCache memoizes fieldAccessReturnsReinterpret per callee result (fieldAccess.go).
 	fieldAccessResultCache map[fieldAccessResult]bool
 	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
-	// through a provenance-scoped local, for its `[GoFieldAccess(…)]` record (fieldAccess.go).
+	// through a generated field property (a provenance-scoped local, or any pointer under P1), for its
+	// `[GoFieldAccess(…)]` record (fieldAccess.go).
 	fieldAccessTypes []string
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
@@ -600,7 +601,11 @@ type Visitor struct {
 	// the generated accessor its store is lowered through (see markZeroSizeFieldStores).
 	// convSelectorExpr consults it.
 	zeroSizeFieldStores map[*ast.SelectorExpr]string
-	funcLevelDecls      map[string]*types.Var // Function-level local declarations of the current function (for global-shadow qualification)
+	// zeroSizeStorePlain is the zero-size store target whose PLAIN selector convSelectorExpr is rendering for
+	// zeroSizeFieldStoreTarget, which cuts the field off that rendering to reach its struct; the field property
+	// route (fieldPropertySelector) leaves it to the box form, whose base is that struct.
+	zeroSizeStorePlain *ast.SelectorExpr
+	funcLevelDecls     map[string]*types.Var // Function-level local declarations of the current function (for global-shadow qualification)
 	// funcScopeVarNames holds the Go name of every variable declared ANYWHERE in the current
 	// function — receiver, parameters, results and locals at every nesting depth, including inside
 	// func literals. A bare type name spelled by the EMITTER (the `Type.Ꮡfield` box accessor) binds

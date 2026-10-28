@@ -119,7 +119,7 @@ func (c *classifier) noteAnchors(rem, add []string) {
 			continue
 		}
 		for _, l := range rem {
-			if b.OldAnchor.MatchString(l) {
+			if b.OldAnchor != nil && b.OldAnchor.MatchString(l) {
 				c.pool.oldSeen[it] = true
 			}
 		}
@@ -144,7 +144,8 @@ func (c *classifier) endFile(t *tally, file string) {
 	c.pool = &filePool{oldSeen: map[*item]bool{}, newSeen: map[*item]bool{}}
 	var active *item
 	for _, it := range c.allowed {
-		if it.Block != nil && p.oldSeen[it] && (p.newSeen[it] || it.Block.Standalone) {
+		// An insert-only rule (no OldAnchor) needs no old anchor.
+		if it.Block != nil && (p.oldSeen[it] || it.Block.OldAnchor == nil) && (p.newSeen[it] || it.Block.Standalone) {
 			active = it
 			break
 		}

@@ -1151,7 +1151,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// selector, then route it through the generated accessor so the store lands on the shared slot.
 	if accessor, ok := v.zeroSizeFieldStores[selectorExpr]; ok {
 		delete(v.zeroSizeFieldStores, selectorExpr)
+		v.zeroSizeStorePlain = selectorExpr
 		plain := v.convSelectorExpr(selectorExpr, context)
+		v.zeroSizeStorePlain = nil
 		v.zeroSizeFieldStores[selectorExpr] = accessor
 
 		return v.zeroSizeFieldStoreTarget(selectorExpr, accessor, plain)
@@ -2019,6 +2021,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						// fields → `x.PromotedField` on a `ж<T>` box without a deref → CS1061).
 						if structType, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 							if structFieldReachable(structType, selectorExpr.Sel.Name) {
+								// Go's `p.f`, through the generated field property (fieldPropertySelector).
+								if result, ok := v.fieldPropertySelector(selectorExpr, ptrType.Elem(), xContexts); ok {
+									return result
+								}
+
 								// If the field belongs to the struct, automatically dereference the pointer
 								if context.isAssignment {
 									// Left-hand side of assignment cannot use pointer dereference operator
