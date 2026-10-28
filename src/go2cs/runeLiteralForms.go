@@ -22,11 +22,13 @@ import (
 // C# accepts the char there (seat #23, COORD's ruling of 2026-10-28):
 //
 //	runeLiteralKeep   `(rune)'x'`  inference, boxing, builtins, generics, named types, uintptr,
-//	                               constant-only expressions, and runes beyond the BMP
+//	                               constant-only expressions, runes beyond the BMP, and a func
+//	                               literal's rune return (its lambda infers its type from the body)
 //	runeLiteralBare   `'x'`        comparisons and arithmetic against a non-constant operand, typed
 //	                               slots of an int32/int/int64/uint/uint32/uint64/uint16/float type,
 //	                               and the operand of a conversion to an unnamed basic numeric type
-//	runeLiteralTarget `(byte)'x'`  typed slots of a byte, int8 or int16 type, cast to that type
+//	runeLiteralTarget `(byte)'x'`  typed slots of a byte, int8 or int16 type, cast to that type, and
+//	                               a func literal's return of any other result type
 type runeLiteralForm int
 
 const (
@@ -95,6 +97,7 @@ func (v *Visitor) runeLiteralFormOf(lit *ast.BasicLit, stack []ast.Node) runeLit
 	}
 
 	var child ast.Node = lit
+	var inferredReturn bool
 	i := len(stack) - 1
 
 	for i >= 0 {
@@ -145,7 +148,13 @@ func (v *Visitor) runeLiteralFormOf(lit *ast.BasicLit, stack []ast.Node) runeLit
 			return runeLiteralKeep
 		}
 
-	case *ast.ReturnStmt, *ast.CompositeLit, *ast.SendStmt:
+	case *ast.ReturnStmt:
+		// A func literal is a C# lambda, which infers its return type from its body when no delegate
+		// target fixes it (`var shrink = (rune r) => 'a';` is a Func<rune, char>). So its return
+		// spells the result type, never the bare char.
+		inferredReturn = inFuncLit(stack[:i])
+
+	case *ast.CompositeLit, *ast.SendStmt:
 
 	case *ast.KeyValueExpr:
 		if i == 0 {
@@ -189,6 +198,15 @@ func (v *Visitor) runeLiteralFormOf(lit *ast.BasicLit, stack []ast.Node) runeLit
 	// destination records the literal at its default type, rune, and C# would box the char.
 	if destination := v.narrowDestinationType(lit, stack); destination == nil || !types.Identical(destination, tv.Type) {
 		return runeLiteralKeep
+	}
+
+	// The lambda's return: `(rune)'x'` for a rune result, the result type's cast for any other.
+	if inferredReturn && typedSlot == runeLiteralBare {
+		if basic.Kind() == types.Int32 {
+			return runeLiteralKeep
+		}
+
+		return runeLiteralTarget
 	}
 
 	return typedSlot
@@ -285,6 +303,20 @@ func exprInList(node ast.Node, list []ast.Expr) bool {
 	for _, expr := range list {
 		if expr == node {
 			return true
+		}
+	}
+
+	return false
+}
+
+// inFuncLit reports whether the innermost function enclosing the stack's top is a func literal.
+func inFuncLit(stack []ast.Node) bool {
+	for i := len(stack) - 1; i >= 0; i-- {
+		switch stack[i].(type) {
+		case *ast.FuncLit:
+			return true
+		case *ast.FuncDecl:
+			return false
 		}
 	}
 
