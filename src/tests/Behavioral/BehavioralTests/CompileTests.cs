@@ -2329,6 +2329,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
 
     [TestMethod]
+    public void CheckSwitchLabelSideEffectOrder() => CheckTarget("SwitchLabelSideEffectOrder");
+
+    [TestMethod]
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]
