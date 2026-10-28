@@ -2352,9 +2352,8 @@ type record struct {
 	n := copy(rec.Path[2:], []uint16{0x0c0d})
 	rec.B = 0x1112
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9-10, 51-60 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9, 50-59 -->
 ```csharp
-[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4), typeof(reparse))]
 partial class main_package {
 …
     var blob = new slice<byte>(24);
@@ -2369,26 +2368,41 @@ partial class main_package {
     rec.tail.B = 0x1112;
 ```
 
-`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` over golib's
-`ж<T>.field`:
+`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
+arms:
 
 <!-- illustration: not converter output -->
 ```csharp
 extension(global::go.ж<global::go.main_package.@record> ʗp)
 {
-    public ref uint Kind => ref ʗp.field(global::go.main_package.@record.ᏑKind);
+    public ref uint Kind
+    {
+        [GeneratedCode("go2cs-gen", …), MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => ref ʗp is global::go.NativeBox<global::go.main_package.@record>
+            ? ref ʗp.field(global::go.main_package.@record.ᏑKind)
+            : ref ʗp.Value.Kind;
+    }
     …
 }
 ```
 
-`field` answers the field at its Go offset when the box aliases native memory (the offset resolved once per
-accessor from the struct's Go layout) and `ref` the struct's own slot otherwise. Being a `ref`, one property
-serves a read, a write, a compound assignment, a nested field and a `ref` argument; it allocates nothing.
+On a `NativeBox<T>`, `field` answers the field at its Go offset (the offset resolved once per accessor from the
+struct's Go layout). On any other box the property reaches the struct's own slot directly, `ʗp.Value.Kind`, with no
+accessor delegate and with `Value`'s nil check. Being a `ref`, one property serves a read, a write, a compound
+assignment, a nested field and a `ref` argument; it allocates nothing. The getter is inlined, and where the JIT
+keeps its frame the runtime's frame filter skips it, so a traceback shows the caller. The same property serves
+every field read through a pointer since parity seat #31
+([Implicit Pointer Dereferencing](implicit-dereferencing.md#implicit-pointer-dereferencing)); this section's
+rule decides only the forms below that need the Go offset beyond a field: an array field's elements and a
+collision-named field.
 
-- **The record.** Each file with a site names its struct types in a `[GoFieldAccess(…)]` record on its package
-  class, and go2cs-gen emits one extension block per type into an `internal static class GoFieldAccess` of the
-  USING compilation. The record is per FILE because a test assembly recompiles the production files beside its
-  own; `internal` keeps two packages that extend one foreign type from meeting.
+- **The record.** A package names its struct types in its `package_info.cs`, one
+  `[assembly: GoFieldAccess(typeof(T))]` per type, and go2cs-gen emits one extension block per type into an
+  `internal static class GoFieldAccess` of the USING compilation. A test assembly that recompiles the production
+  files carries their records too: its conversion re-converts them, and its seeded test-info file keeps
+  production's records. `internal` keeps two packages that extend one foreign type from meeting. The
+  committed corpus may still carry an older per-file record on a package class, `[GoFieldAccess(…)]`; go2cs-gen
+  reads both forms.
 - **A foreign type** gets a property for each field whose `Ꮡ` accessor it can see; a type of the same package
   gets one for every declared field, since the type generator emits the accessors in the same run. A generic
   struct gets `extension<T>(ж<G<T>> p)` with its constraints.
@@ -2426,7 +2440,8 @@ over native memory: `field` refuses it by name, `runtime error: cannot read nati
 CLR layout is not its Go layout (field Path is a managed reference where Go stores the value inline)`, as the
 whole-value read did. Over managed memory every field reads as before. A local assigned anything else (a
 `new(T)`, a parameter, a field), a range variable, a multi-value assignment other than the call below, or a
-local whose address is taken keeps the `p.Value.f` / `(~p).f` emission.
+local whose address is taken takes the general form instead: `p.f` for a direct field, and the box form for a
+collision-named field or an array field's element.
 
 **One step across a return, for native bytes only.** A local assigned from a CALL takes the same property form,
 single- or multi-value (the local at position `i` takes result `i`), when the callee lays the struct over BYTE
@@ -2460,7 +2475,7 @@ func readReparse(flags uint32, fail bool) (*reparse, error) {
 	runtime.GC()
 	fmt.Println("returned:", got.Flags, got.Path[0], err)
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:73-80 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:72-79 -->
 ```csharp
     var (got, err) = readReparse(0x0201, false);
 
@@ -2477,8 +2492,9 @@ the native box it returns, so the returned record keeps the callee's array still
 collection. A nil result reads as Go's nil dereference panic. The step is ONE: a callee that returns another
 call, a named-result callee (a bare return or a deferred write reaches its result), a generic or cross-package
 callee, a call through a func value and a callee over any storage that is not bytes (an `unsafe.Pointer`
-parameter, a `uintptr`, a `[]uint64` element) all keep `(~p).f`. Those reinterpret managed storage of another
-Go type, which `(~p).f` already reads correctly, and only a struct laid over raw bytes reaches the refusal.
+parameter, a `uintptr`, a `[]uint64` element) all take the general form. Those reinterpret managed storage of
+another Go type, which the general form reads correctly, and only a struct laid over raw bytes reaches the
+refusal.
 <!-- Ruled 2026-10-24 (COORD, G's amendments, the tight cut). Census of the predicate over std with tests
      (purego, CGO_ENABLED=0), sites the step admits beyond the in-function rule: as first ruled (any
      unsafe.Pointer reinterpret in the callee) windows 328 / linux 327 / darwin 322, 316 of them runtime

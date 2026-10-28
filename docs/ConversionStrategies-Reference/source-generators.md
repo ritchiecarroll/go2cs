@@ -29,8 +29,10 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 * **`ConstraintProxyGenerator`** — publishes the generic constraint proxy (`жLesser<E>`) of every
   self-referential constraint interface a package declares (`where T : Lesser<T>`), driven by the constraint
   clauses alone; see [Generic Constraints](generic-constraints.md#a-self-referential-generic-method-set-constraint-uses-a-box-wrapping-proxy-as-the-type-argument).
-* **`FieldAccessGenerator`** — for every struct type a `[GoFieldAccess(…)]` record lists, emits a field property on
-  `ж<T>`, so a field reached through a pointer reinterpreted from `unsafe.Pointer` reads at its Go offset; see
+* **`FieldAccessGenerator`** — for every struct type a `[GoFieldAccess(…)]` record lists (a package's
+  `package_info.cs` holds one assembly record per type), emits a `ref` field property on `ж<T>`, so a field
+  reached through a pointer reads and writes as Go spells it, `p.f`, at its Go offset over native memory; see
+  [Implicit Pointer Dereferencing](implicit-dereferencing.md#implicit-pointer-dereferencing) and
   [Pointers](pointers.md#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property).
 * **`EscapeRegistryGenerator`** — registers, per package class, golib's operations for every closed container the
   compilation converts to an interface or reaches from a value it converts, so `reflect` reaches a container's

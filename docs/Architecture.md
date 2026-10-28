@@ -101,7 +101,7 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `PartialStubGenerator` | a bodyless `partial` method with no implementing part | A throwing stub, so a Go function with no Go body (assembly or cgo) compiles until a hand-owned companion supplies it. |
 | `StrGenerator` | a method with an `sstring` parameter | The `@string` forwarder (and, for a package-level function, its value delegate) for an `sstring` twin. |
 | `ConstraintProxyGenerator` | a self-referential constraint interface (`where T : Lesser<T>`) | The generic constraint proxy (`жLesser<E>`) other packages bind. |
-| `FieldAccessGenerator` | `[GoFieldAccess(...)]` records | Field properties on `ж<T>`, so a field reached through a pointer reinterpreted from `unsafe.Pointer` reads as Go spells it. |
+| `FieldAccessGenerator` | `[GoFieldAccess(...)]` records (one per struct type, in `package_info.cs`) | `ref` field properties on `ж<T>`, so a field reached through a pointer reads and writes as Go spells it, `p.f`, and at its Go offset over native memory. |
 | `LazyHolderGenerator` | `[GoLazy]` holder classes | The `ref` accessor of a package var built on its first read. |
 | `LiteralInterceptorGenerator` | a bare string literal passed to an `any` slot | An interceptor that passes a cached Go `@string` in place of the C# string. |
 | `NoInliningPartialGenerator` | a no-inline carrier method (an implementing `partial` part with no declaring part) | Its declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]` or `[StackTraceHidden]`. |
