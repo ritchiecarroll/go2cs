@@ -2244,8 +2244,35 @@ $OracleOnlyKillSignatures = @(
     'Unhandled exception'                                   # the CLR's crash banner
     'NotImplementedException'                               # the measured module-init death
     'Test Run Aborted'                                      # an aborted host run
-    'fatal error: '                                         # Go's own runtime crash banner
 )
+
+# Go's own runtime crash banner. It is scanned like the signatures above with ONE exception: a banner inside a
+# NAMED test's event that reached a verdict (pass, fail or skip) is that test's own output, not a crash of the
+# run. runtime's crash tests make a child print it on purpose and read it back (TestRuntimePanic passes on
+# "fatal error: index out of range"), and a failing test quotes a child's stderr; either way the host ran on past
+# it. Everywhere else it still refuses: outside any event, in an event with no verdict, in a package-level event,
+# and in an event the tail window cut (its opening brace is outside the window, so nothing shows it is a verdict
+# event). C1, 2026-10-27: the darwin runtime row (run 40596382419) was misnamed a crash by this banner alone.
+$OracleOnlyCrashBanner = 'fatal error: '
+
+# One COMPLETE, FLAT event object of the host stream: string keys; values a string, a number, a literal, or an
+# array of those (a failing test's "records" is an array of strings). A `{"` inside a JSON string is always
+# escaped (`{\"`), so a match can only start at a real object; an object holding anything nested deeper does not
+# match, and stays scanned -- the safe direction.
+$OracleOnlyEventString = '"(?:[^"\\]|\\.)*"'
+$OracleOnlyEventScalar = "(?:$OracleOnlyEventString|-?[0-9][0-9.eE+-]*|true|false|null)"
+$OracleOnlyEventValue = "(?:$OracleOnlyEventScalar|\[\s*(?:$OracleOnlyEventScalar(?:\s*,\s*$OracleOnlyEventScalar)*)?\s*\])"
+$OracleOnlyEventPattern = "\{\s*$OracleOnlyEventString\s*:\s*$OracleOnlyEventValue(?:\s*,\s*$OracleOnlyEventString\s*:\s*$OracleOnlyEventValue)*\s*\}"
+
+# The tail with every named test's verdict event removed: the text the crash banner is scanned over.
+function Remove-OracleOnlyVerdictEvents([string] $Text) {
+    return [regex]::Replace($Text, $OracleOnlyEventPattern, {
+            param($match)
+            $isVerdict = $match.Value -match '"action"\s*:\s*"(?:pass|fail|skip)"' -and
+                $match.Value -match '"test"\s*:\s*"(?:[^"\\]|\\.)+"'
+            if ($isVerdict) { return '' } else { return $match.Value }
+        })
+}
 
 <#
 .SYNOPSIS
@@ -2316,6 +2343,13 @@ function Test-OracleOnlyFailure {
                 return New-OracleOnlyResult $false @() ("a deadline/crash signature is present (matched '$signature') -- " +
                     'a killed or crashed run is never an oracle flake')
             }
+        }
+    }
+
+    foreach ($text in @(Remove-OracleOnlyVerdictEvents $TailText) + $errorEntries) {
+        if ($text.Contains($OracleOnlyCrashBanner)) {
+            return New-OracleOnlyResult $false @() ("a deadline/crash signature is present (matched '$OracleOnlyCrashBanner' " +
+                "outside any named test's verdict event) -- a killed or crashed run is never an oracle flake")
         }
     }
 
