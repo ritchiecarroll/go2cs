@@ -721,3 +721,24 @@ func TestRealGoldenControls(t *testing.T) {
 		}
 	}
 }
+
+// A canonical key that does not converge is refused by name, never read at its last pass: an item whose canon
+// grows a line on every pass (`z` -> `zz`) makes `zy` and `zx` agree only after the cap, where the pool would pair
+// them as a move. Both are refused NONCONVERGENT, and the anchors that made the block active are refused as before.
+func TestNonconvergentKeyIsRefused(t *testing.T) {
+	c := &classifier{allowed: []*item{{
+		ID:    "X",
+		Canon: []rewrite{rw(`[xy]$`, ""), rw(`z`, "zz")},
+		Block: &blockRule{OldAnchor: rx(`^old$`), NewAnchor: rx(`^new$`), Moves: true},
+	}}}
+	tl := c.classifyDiff(diffOf(prodFile, []string{"old", "zy"}, []string{"new", "zx"}))
+	nonconvergent := 0
+	for _, r := range tl.refused {
+		if strings.HasPrefix(r.kind, "NONCONVERGENT") {
+			nonconvergent++
+		}
+	}
+	if tl.labels["X"] != 0 || nonconvergent != 2 {
+		t.Errorf("a key past the canon cap: wanted no X and 2 NONCONVERGENT refusals, read %v, refused %v", tl.labels, tl.refused)
+	}
+}
