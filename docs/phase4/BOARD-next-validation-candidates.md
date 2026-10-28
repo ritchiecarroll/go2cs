@@ -30766,4 +30766,57 @@ guard's C# compile fails with the same CS0266, at the fix it compiles and matche
 
 — P2 (2026-10-28)
 
+## 2026-10-28 — P2 (parity seat #24, claude/p2-seat24-nil-compare): a slice, map or chan compared with nil reads `nil` — DONE on the seat branch
+
+**What changed (converter).** N1 stage 2: `nilComparandRendersNil` (convBinaryExpr.go) gains `*types.Slice`,
+`*types.Map` and `*types.Chan`, so `s == default` reads `s == nil` as Go writes it, named types, directional
+chans, fields, derefs, variadic parameters and index expressions included. A type parameter keeps `IsNil`. The
+operator does not change: a C# probe with `slice<T>`'s operator set shows `x == default` already bound
+`operator ==(T, NilType)` (NilType converts implicitly to the type, so C# prefers it), and a named type's operator
+is go2cs-gen's. The Reference said the nil compare bound the header-identity operator; corrected.
+
+**golib, its own line (a behavior change).** `unsafe.Slice(nil, 0)` returned an empty slice over a real array,
+which `== nil` reads as non-nil; Go specifies the nil slice. `src/core/unsafe/unsafe.cs` (hand-owned) now returns
+`default` (e0ae87dfb0, red-first in cca4dad72a). Found by the stage-2 proof, GolibTests `NilHeaderEqualityTests`:
+Go's answer, `IsNil`, the header compare against `default(T)` and `== nil` agree for every construction kind of
+slice (managed, native-backed, `unsafe.Slice` over a nil, managed and native pointer, a reinterpreted header view,
+`make`, empty literal, nil), map and chan. Full GolibTests on linux: 2297 passed, 0 failed, 29 skipped.
+
+**Guards, red first (dee0151b76).** `TestNilCompareRendersNilForSliceMapAndChanOperands` (new) and the three
+stage-2 rows of `TestNilCompareRendersNilForInterfaceAndFuncOperands` fail at a4711608e1; the slice-core type
+parameter row is a control and passes. NilCompareShapes gains `collections.go`, every proof kind compared with nil
+against Go: Transpile, Compile and Output pass at the base, Target fails; all four pass at the fix. The full
+converter suite then read one more stage-2 expectation (a chan compare in the paren-func-lit test), updated in
+632a782868 with two unsafe.cs provenance notes the golib fix moved.
+
+**Corpus footprint, two-seeded `-stdlib -comments` A/B at a4711608e1** (windows / linux / darwin, one binary per
+arm, every seed taken before any arm, 1,155 / 1,196 / 1,195 files written per arm): 215 / 214 / 216 files,
+-638/+638, -645/+645, -641/+641 lines; pcensus `classify -items N1b` 638 / 645 / 641 pairs, 0 refused; 0
+`GoPositionMap` lines, 0 `package_info.cs`, 0 `.cs.auto`, no file added or removed. Rung patch SHA-256 (paths
+relative to `src/core`, no index lines): windows 300c60b6…, linux ff699d9a…, darwin ed4818da…. `[!=]= default`
+in written files: 663 / 666 / 660 before (#20's residual count exactly), 9 / 2 / 2 after: windows'
+7 `runtime.stdFunction` compares (a named unsafe.Pointer) and the two `case nil` pointer tags in runtime/type.go and
+time/format.go. The linux fix emission builds clean (go2cs-stdlib.slnx, Release, `GoTargetOS=linux`, 0 errors, 0
+warnings). Not applied to src/core: the end regen carries it.
+
+**Prediction, scored.** Mechanism MET (every changed line N1b, 0 refused, 0 map lines, -n/+n, residual 9 / 2 / 2
+with x = 0). Lines and files MISSED by exactly one file and 8 lines per target: predicted 630 / 637 / 633 lines in
+214 / 213 / 215 files, measured 638 / 645 / 641 in 215 / 214 / 216. Cause, owned: the census excluded runtime/mprof.go's
+9 sites on the strength of `DATA-n1-stage2-residual.tsv`'s note "goroutineProfileWithLabels is hand-converted
+(placeholder): its compare is not emitted", which holds for 1 of them (line 1255); the other 8 are emitted in
+runtime/mprof.cs and flip. Those 8 are also #20's "8 more per target than its census", now attributed. Sites:
+654 / 664 / 658 = census 662 / 672 / 666 less 7 in hand-owned testing and that one placeholder.
+
+**Behavioral goldens.** CNR on linux changed exactly the predicted set: 28 goldens of the census set, 84 pairs, all
+N1b; NilCompareShapes/main.cs (+2, the guard's call) and the new collections.cs. Re-baselined 29 projects, each
+golden byte-equal to its transpile; all 29 pass Transpile, Compile, Target and Output. Kept by design: 5
+type-parameter compares (`IsNil`). Windows-only: WsaSendtoRoundTrip (2 lines) waits for a windows re-baseline.
+The pre-existing linux drift in the `package_info.cs` of FieldAccessReinterpret and OsGetpagesize stays out.
+
+**Docs.** The rule is in `nil-and-zero-values.md` (its index line in the Reference README), with a sample cited from
+NilCompareShapes. `docsamples -recite` re-copied the two golden-sourced samples these goldens move
+(ConversionStrategies.md: SliceNilVsEmpty, NilMapOperations) and their prose reads `nil`.
+
+— P2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
