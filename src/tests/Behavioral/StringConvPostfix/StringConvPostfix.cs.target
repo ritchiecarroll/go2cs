@@ -8,18 +8,18 @@ internal static void Main() {
     var wᴷ = new stackAppend<byte>();
 
     slice<byte> b = default;
-    for (var ch = (rune)(rune)'A'; ch <= (rune)'E'; ch++) {
+    for (var ch = (rune)'A'; ch <= 'E'; ch++) {
         b = append(b, ((@string)ch).ꓸꓸꓸ);
     }
     fmt.Println((@string)b);
 
-    var bs = new byte[]{(rune)'H', (rune)'i'}.slice();
+    var bs = new byte[]{(byte)'H', (byte)'i'}.slice();
     fmt.Println((((@string)bs))[0]);
 
     fmt.Println(len((@string)bs));
 
     slice<byte> m = default;
-    m = append(m, ((@string)(rune)(rune)'世').ꓸꓸꓸ);
+    m = append(m, ((@string)(rune)'世').ꓸꓸꓸ);
     fmt.Println(len(m));
 
     slice<byte> eb = default;
@@ -32,12 +32,12 @@ internal static void Main() {
     fmt.Println((@string)("a" + "b" + "c"));
 
     sink w = default;
-    w = append(wᴷ, w, (byte)((rune)'h'), (byte)((rune)'i'));
+    w = append(wᴷ, w, (byte)'h', (byte)'i');
     fmt.Println((@string)(slice<byte>)w, len(w));
 
     var glyphs = new map<@string, rune>{
         ["frak"] = (rune)0x1D504,
-        ["ae"] = (rune)'\U000000C6'
+        ["ae"] = '\U000000C6'
     };
     fmt.Println(glyphs["frak"], glyphs["ae"], (@string)glyphs["frak"]);
 }

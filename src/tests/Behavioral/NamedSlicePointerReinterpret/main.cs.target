@@ -8,7 +8,7 @@ partial struct Buf /*[]byte*/;
 
 internal static @string fillVia(ж<slice<byte>> @out) {
     var p = @out.Reinterpret<slice<byte>, Buf>();
-    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'A'), (byte)((rune)'B'), (byte)((rune)'C'));
+    p.ValueSlot = append(p.ValueSlot, (byte)'A', (byte)'B', (byte)'C');
     return (@string)(slice<byte>)p.ValueSlot;
 }
 
@@ -29,8 +29,8 @@ internal static void Main() {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
     b = new slice<byte>(0, 8);
     var p = Ꮡb.Reinterpret<slice<byte>, Buf>();
-    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'h'), (byte)((rune)'i'));
-    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'!'));
+    p.ValueSlot = append(p.ValueSlot, (byte)'h', (byte)'i');
+    p.ValueSlot = append(p.ValueSlot, (byte)'!');
     fmt.Println((@string)(slice<byte>)p.ValueSlot);
     fmt.Println(len(p.ValueSlot));
     fmt.Println((@string)b);
@@ -42,7 +42,7 @@ internal static void Main() {
         return Ꮡs.Reinterpret<slice<byte>, Buf>();
     }
     var q = makeBuf();
-    q.ValueSlot = append(q.ValueSlot, (byte)((rune)'x'), (byte)((rune)'y'));
+    q.ValueSlot = append(q.ValueSlot, (byte)'x', (byte)'y');
     fmt.Println((@string)(slice<byte>)q.ValueSlot);
 
     ref var src = ref heap<slice<byte>>(out var Ꮡsrc);

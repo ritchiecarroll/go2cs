@@ -26,7 +26,7 @@ internal static void Main() {
     fmt.Printf("capabilitiesJson: %d bytes, %q\n"u8, len(capabilitiesJson), capabilitiesJson);
     fmt.Println("unrelated:", unrelated);
 
-    entropyCapabilitiesJson[0] = (rune)'[';
+    entropyCapabilitiesJson[0] = (byte)'[';
     fmt.Printf("after write: %c %c\n"u8, entropyCapabilitiesJson[0], capabilitiesJson[0]);
 
     nint sum = default;

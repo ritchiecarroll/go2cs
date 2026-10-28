@@ -38,7 +38,7 @@ internal static void Main() {
         var rights = syscall.UnixRights(pipeRead);
         fmt.Println("control image is non-empty:", len(rights) > 0);
 
-        (var sent, err) = syscall.SendmsgN(sender, new byte[]{(rune)'x'}.slice(), rights, default, 0);
+        (var sent, err) = syscall.SendmsgN(sender, new byte[]{(byte)'x'}.slice(), rights, default, 0);
         fatal("sendmsg", err);
         fmt.Println("payload bytes sent:", sent == 1);
 
@@ -46,7 +46,7 @@ internal static void Main() {
         var oob = new slice<byte>(syscall.CmsgSpace(4));
         (var rn, var oobn, _, _, err) = syscall.Recvmsg(receiver, payload, oob, 0);
         fatal("recvmsg", err);
-        fmt.Println("payload byte received:", rn == 1 && payload[0] == (rune)'x');
+        fmt.Println("payload byte received:", rn == 1 && payload[0] == 'x');
         fmt.Println("control bytes received:", oobn == len(oob));
 
         (var scms, err) = syscall.ParseSocketControlMessage(oob.slice(0, oobn));

@@ -16,11 +16,11 @@ internal static void p1() {
         nint x = default;
         calls++;
         foreach (var (_, cΔ1) in slice<byte>(s)) {
-            if (cΔ1 < (rune)'0' || (rune)'9' < cΔ1) {
+            if (cΔ1 < '0' || '9' < cΔ1) {
                 ok = false;
                 return min;
             }
-            x = x * 10 + (nint)cΔ1 - (rune)'0';
+            x = x * 10 + (nint)cΔ1 - '0';
         }
         if (x < min || max < x) {
             ok = false;

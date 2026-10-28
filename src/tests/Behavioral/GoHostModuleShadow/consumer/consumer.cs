@@ -28,7 +28,7 @@ internal static @string itoa(nint n) {
     }
     @string digits = "";
     for (; n > 0; n /= 10) {
-        digits = ((@string)(rune)((rune)'0' + n % 10)) + digits;
+        digits = ((@string)(rune)('0' + n % 10)) + digits;
     }
     return digits;
 }

@@ -14,16 +14,16 @@ internal static void Main() {
 
     fmt.Println(interned[tmpstring(b)]);
 
-    b[0] = (rune)'X';
+    b[0] = (byte)'X';
     fmt.Println(interned[tmpstring(b)] == "");
 
-    b[0] = (rune)'C';
+    b[0] = (byte)'C';
     var (v, ok) = interned[tmpstring(b), ꟷ];
     fmt.Println(v, ok);
-    b[0] = (rune)'X';
+    b[0] = (byte)'X';
     (v, ok) = interned[tmpstring(b), ꟷ];
     fmt.Println(v == ""u8, ok);
-    b[0] = (rune)'C';
+    b[0] = (byte)'C';
 
     fmt.Println(interned[tmpstring(b[..4])] == "");
     fmt.Println(interned[tmpstring(b[0..])]);
@@ -31,7 +31,7 @@ internal static void Main() {
     var w = new map<@string, nint>{};
     var k = slice<byte>("alpha"u8);
     w[((@string)k)] = 42;
-    k[0] = (rune)'Z';
+    k[0] = (byte)'Z';
     fmt.Println(w["alpha"], len(w));
     var (_, hit) = w[tmpstring(k), ꟷ];
     fmt.Println(hit);

@@ -39,7 +39,7 @@ internal static @string withSuffix(@string suffix) {
 
 internal static nint mutableBytes() {
     var b = slice<byte>("byte slice source literal"u8);
-    b[0] = (rune)'B';
+    b[0] = (byte)'B';
 
     return len(b);
 }

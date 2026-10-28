@@ -184,7 +184,7 @@ internal static void Main() {
     var c1 = (charData)data;
     var c2 = (charData)appendꓸꓸꓸ(slice<byte>(default), data);
     fmt.Println(reflect.DeepEqual(c1, c2));
-    data[1] = (rune)'o';
+    data[1] = (byte)'o';
     fmt.Println(reflect.DeepEqual(c1, c2));
     fmt.Println(reflect.DeepEqual(c1, c1));
     fmt.Println(reflect.DeepEqual((charData)slice<byte>((@string)"ab"u8), (charData)slice<byte>((@string)"ab"u8)));

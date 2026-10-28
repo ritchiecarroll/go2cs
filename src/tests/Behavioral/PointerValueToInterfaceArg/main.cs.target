@@ -45,12 +45,12 @@ internal static void keep(ж<pp> q) {
 
 internal static void Main() {
     var a = newPrinter();
-    a.Value.buf = append((~a).buf, (byte)((rune)'a'));
+    a.Value.buf = append((~a).buf, (byte)'a');
     fmt.Println((@string)(~a).buf, (~a).id);
     a.free();
 
     var b = newPrinter();
-    b.Value.buf = append((~b).buf, (byte)((rune)'b'));
+    b.Value.buf = append((~b).buf, (byte)'b');
     fmt.Println((@string)(~b).buf, (~b).id);
     b.free();
 

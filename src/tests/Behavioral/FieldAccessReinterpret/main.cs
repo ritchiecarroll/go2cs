@@ -38,7 +38,7 @@ internal static (ж<reparse>, error) readReparse(uint32 flags, bool fail) {
     }
 
     (buf[8], buf[9]) = ((byte)flags, (byte)(flags >> 8));
-    buf[12] = (rune)'x';
+    buf[12] = (byte)'x';
     var rec = Ꮡbuf.at<byte>(0).Reinterpret<byte, reparse>();
     return (rec, default);
 }

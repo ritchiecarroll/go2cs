@@ -72,8 +72,8 @@ internal static void Main() {
     fmt.Println("isHost count:", hosts);
     fmt.Println("validHeaderValueByte count:", values);
 
-    fmt.Println("isHost samples:", isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
-    fmt.Println("value samples:", validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
+    fmt.Println("isHost samples:", isHost((byte)'a'), isHost((byte)'Z'), isHost((byte)'9'), isHost((byte)':'), isHost((byte)' '), isHost(200));
+    fmt.Println("value samples:", validHeaderValueByte((byte)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
 
     foreach (var (_, c) in new byte[]{3, 6, 70, 8, 64}.slice()) {
         fmt.Printf("smallHigh(%d) = %d\n"u8, c, smallHigh(c));

@@ -125,7 +125,7 @@ internal static bool hasByte(@string s, byte b) {
 
 internal static partial (bool fwd, bool back) callerSeparators() {
     var (_, @file, _, _) = runtime.Caller(0);
-    return (hasByte(@file, (rune)'/'), hasByte(@file, (rune)'\\'));
+    return (hasByte(@file, (byte)'/'), hasByte(@file, (byte)'\\'));
 }
 
 internal static partial (bool fwd, bool back) framesSeparators() {
@@ -138,8 +138,8 @@ internal static partial (bool fwd, bool back) framesSeparators() {
     for (;;) {
         var (frame, more) = frames.Next();
         if (len(frame.File) > 0) {
-            fwd = fwd || hasByte(frame.File, (rune)'/');
-            back = back || hasByte(frame.File, (rune)'\\');
+            fwd = fwd || hasByte(frame.File, (byte)'/');
+            back = back || hasByte(frame.File, (byte)'\\');
         }
         if (!more) {
             break;
@@ -153,7 +153,7 @@ internal static partial @string callerFileTail() {
     nint cut = 0;
     nint seen = 0;
     for (nint i = len(@file) - 1; i >= 0; i--) {
-        if (@file[i] == (rune)'/') {
+        if (@file[i] == '/') {
             seen++;
             if (seen == 2) {
                 cut = i + 1;
@@ -166,16 +166,16 @@ internal static partial @string callerFileTail() {
 
 internal static partial bool callerFileRooted() {
     var (_, @file, _, _) = runtime.Caller(0);
-    if (len(@file) > 0 && @file[0] == (rune)'/') {
+    if (len(@file) > 0 && @file[0] == '/') {
         return true;
     }
-    return len(@file) > 1 && @file[1] == (rune)':';
+    return len(@file) > 1 && @file[1] == ':';
 }
 
 internal static partial bool stackHasBackslash() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return hasByte((@string)(buf.slice(0, n)), (rune)'\\');
+    return hasByte((@string)(buf.slice(0, n)), (byte)'\\');
 }
 
 internal static bool hasSub(@string s, @string sub) {

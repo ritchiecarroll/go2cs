@@ -84,7 +84,7 @@ internal static void Main() {
     wantValue(0.0D)(f, false);
     wantValue(2.5D)(f, true);
 
-    rune r = (rune)'q';
+    rune r = 'q';
     wantValue((rune)'a')(r, false);
     wantValue((rune)'q')(r, true);
 

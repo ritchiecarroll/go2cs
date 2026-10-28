@@ -16,7 +16,7 @@ internal static @string zone(nint kind, @string s) {
     var matchᴛ1 = false;
     if (exprᴛ1 == isoZone) { matchᴛ1 = true;
         do {
-            if (len(s) > 0 && s[0] == (rune)'Z') {
+            if (len(s) > 0 && s[0] == 'Z') {
                 @out = "utc(" + s[1..] + ")";
                 break;
             }

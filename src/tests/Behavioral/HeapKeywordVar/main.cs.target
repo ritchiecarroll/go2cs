@@ -40,7 +40,7 @@ internal static void Main() {
     fmt.Println(dec.String());
 
     var p = Ꮡnull;
-    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'!'));
+    p.ValueSlot = append(p.ValueSlot, (byte)'!');
     fmt.Println((@string)@null, (@string)(p.ValueSlot));
 }
 

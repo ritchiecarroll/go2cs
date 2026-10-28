@@ -17,7 +17,7 @@ internal static void Main() {
 
     var scratch = slice<byte>("AB"u8);
     @string t = (@string)scratch;
-    scratch[0] = (rune)'X';
+    scratch[0] = (byte)'X';
     if (t == "AB"u8) {
         fmt.Println("copy-safe");
     }

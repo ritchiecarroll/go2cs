@@ -21,7 +21,7 @@ internal static unsafe void Main() {
 
     ref var rb = ref heap(new array<uint16>(8), out var Ꮡrb);
     foreach (var i in range(rb)) {
-        rb[i] = (uint16)((rune)'a' + i);
+        rb[i] = (uint16)('a' + i);
     }
     nint n1 = 2;
     nint n2 = 5;
