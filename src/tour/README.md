@@ -9,7 +9,14 @@ The interface is deliberately parallel:
 
 - The original Tour occupies the left two-thirds of the window.
 - Generated C# occupies the right third, with a draggable divider.
-- **Code** and **Project** tabs show the matching `.cs` and `.csproj`.
+- **Code**, **Package Info** and **Project** tabs show the matching `.cs`,
+  `package_info.cs` and `.csproj`.
+- The **Generated Code** tab browses what go2cs-gen's source generators wrote
+  for the conversion once its build has run: interface implementations,
+  pointer-receiver overloads, embedding forwarders, field properties and
+  literal interceptors. A back/up bar stays above a folder explorer; opening a
+  `.cs` file shows it read-only in the same place, highlighted as the Code tab
+  is, and back or up returns to the folder it came from.
 - Conversion runs with comments on, so a lesson's own commentary crosses over
   with the code it explains: a Go end-of-line comment stays an end-of-line
   comment, on the statement it annotates
@@ -216,6 +223,15 @@ submission (every Tour page converts itself on arrival) cancels an older one's u
 does the expiry of its workspace; should the older conversion still be run, it builds then. Aborting
 the Run request cancels the running program; a background build it was waiting for carries on, so the
 next Run finds it finished.
+
+The Generated Code tab reads `GET /api/generated?conversionId=<id>&path=<folder or file>`. The converted
+project emits its generators' output (`EmitCompilerGeneratedFiles`), and the `Directory.Build.targets` go2cs
+writes beside the converted tree routes it to `.artifacts/gen/<project token>`; the tab adds nothing to the
+build and only reads that folder, labelling each token folder with the project it belongs to. The endpoint
+answers `pending` while the conversion's build runs and `unavailable` before any build has written the folder.
+Nothing outside `.artifacts/gen` is reachable: a path that is absolute, contains a backslash or a `..` segment,
+crosses a symbolic link, or resolves outside the folder is refused with 400. A listing carries folders and
+`.cs` files only, and only a `.cs` file (up to 4 MiB) is served.
 
 ## Integration design
 

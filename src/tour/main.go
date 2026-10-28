@@ -212,6 +212,7 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("POST /api/execute", s.handleExecute)
 	mux.HandleFunc("POST /api/run", s.handleRun)
 	mux.HandleFunc("GET /api/health", s.handleHealth)
+	mux.HandleFunc("GET /api/generated", s.handleGenerated)
 	mux.HandleFunc("GET /assets/go2cs.ico", s.handleImage("go2cs.ico"))
 	mux.HandleFunc("GET /assets/go2cs-small.png", s.handleImage("go2cs-small.png"))
 	mux.HandleFunc("GET /assets/GopherDotNetBotFrisbee.png", s.handleImage("GopherDotNetBotFrisbee.png"))
