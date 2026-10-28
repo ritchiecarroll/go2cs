@@ -90,6 +90,32 @@ func m(itemID, name, pattern string) measure {
 
 func rw(pattern, repl string) rewrite { return rewrite{re: rx(pattern), repl: repl} }
 
+// statementEnd is the index of the `;` that ends the C# statement s begins, or -1 when s does not end it (a value
+// that continues on the next line): the first `;` outside parentheses, brackets, braces and string or character
+// literals, so a lambda body's own statements stay inside the value.
+func statementEnd(s string) int {
+	depth := 0
+	for i := 0; i < len(s); i++ {
+		switch c := s[i]; c {
+		case '"', '\'':
+			for i++; i < len(s) && s[i] != c; i++ {
+				if s[i] == '\\' {
+					i++
+				}
+			}
+		case '(', '[', '{':
+			depth++
+		case ')', ']', '}':
+			depth--
+		case ';':
+			if depth == 0 {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
 // rwf is a rewrite computed from each match: fn receives the regexp's submatches.
 func rwf(pattern string, fn func(sub []string) string) rewrite {
 	re := rx(pattern)
@@ -350,19 +376,26 @@ var items = []item{
 		Measures: []measure{m("H2", "heap-decl", `ref var `+id+` = ref heap<`+generic+`>\(out var`)},
 		// COORD's R1 keeps the type argument: `ref var x = ref heap<T>(rhs, out var Ꮡx);`, the zero box's own
 		// spelling with the value inserted, so the fold keeps the declaration's <T> and a changed or dropped one
-		// is refused. A value spanning several lines folds its FIRST line into the declaration (the Join, with no
-		// `;` to close it) and closes on its last: `…;` becomes `…, out var Ꮡx);` (the canon pairs the two).
-		Canon: []rewrite{rw(`, out var Ꮡ`+id+`\);$`, ";")},
-		New:   rx(`, out var Ꮡ` + id + `\);$`),
+		// is refused. The value is the assignment's, written `x = v;` or, for a local a closure captures,
+		// `Ꮡx.ValueSlot = v;`; it ends at the statement's own `;` (statementEnd), so a trailing comment or an
+		// if-init's condition after it stays where it was. A value spanning several lines folds its FIRST line into
+		// the declaration (no `;` closes it there) and closes on its last: `…;` becomes `…, out var Ꮡx);` (the
+		// canon pairs the two).
+		Canon: []rewrite{rw(`, out var Ꮡ`+id+`\);`, ";")},
+		New:   rx(`, out var Ꮡ` + id + `\);`),
 		Join: &joinRule{
-			First:  rx(`^(\s*)ref var (` + id + `) = ref heap(<` + generic + `>)\(out var Ꮡ(` + id + `)\);$`),
-			Second: rx(`^(\s*)(` + id + `) = (.+?)(;?)$`),
+			// The type argument is taken whole, up to the box's `(out var`: a channel's direction rides in it as a
+			// comment (`heap</*<-*/channel<T>>`), which the bracket-counting `generic` cannot read.
+			First:  rx(`^(\s*)ref var (@?` + id + `) = ref heap(<.+>)\(out var Ꮡ(` + id + `)\);$`),
+			Second: rx(`^(\s*)Ꮡ?(@?` + id + `)(?:\.ValueSlot|\.Value)? = (.*)$`),
 			Same:   [][2]int{{1, 1}, {2, 2}},
 			Fold: func(f, s []string) string {
-				if s[4] == "" {
-					return f[1] + "ref var " + f[2] + " = ref heap" + f[3] + "(" + s[3]
+				head := f[1] + "ref var " + f[2] + " = ref heap" + f[3] + "("
+				end := statementEnd(s[3])
+				if end < 0 {
+					return head + s[3]
 				}
-				return f[1] + "ref var " + f[2] + " = ref heap" + f[3] + "(" + s[3] + ", out var Ꮡ" + f[4] + ");"
+				return head + s[3][:end] + ", out var Ꮡ" + f[4] + ");" + s[3][end+1:]
 			},
 		},
 	},
