@@ -44,7 +44,7 @@ func (e *engine) ping() {
 // valueSender's methods have VALUE receivers: a go-statement's bare method group over such a
 // method is an extension over a struct VALUE — C# forbids delegates over value-type extension
 // receivers (CS1113; net/http/httputil's `go spc.copyToBackend(errc)`, switchProtocolCopier) —
-// so both arities force the lambda form (`goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7)`;
+// so both arities force the lambda form (`goǃ(() => vsʗ1.send(7))`;
 // `goǃ(() => vsʗ2.ping())`). The receiver snapshot still evaluates at go-statement time, and
 // the blocking receives prove both goroutines ran to completion.
 type valueSender struct{ c chan int }

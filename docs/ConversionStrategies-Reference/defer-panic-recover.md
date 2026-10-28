@@ -9,13 +9,13 @@ way out, whatever the way out is. The converted C# says the same thing with stat
 emitted **inline** in the method, wrapped in `try`/`catch`/`finally`, beside a `GoFrame` local that
 holds this call's defer list and nothing else:
 
-<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs:10-19 -->
+<!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs:7-16 -->
 ```csharp
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("Open file");
-        defer(ᴛ1 => fmt.Println(ᴛ1), closeFileˢ, ref ᒐ);
+        defer(() => fmt.Println("Close file"), ref ᒐ);
         fmt.Println("Write data to file");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -135,7 +135,8 @@ its built-in calls qualified as `builtin.recover()`, exactly like every other sh
 ## `defer` registration: the arity ladder, and no bang
 
 Go evaluates a deferred call's ARGUMENTS at the `defer` statement and runs the call later, so every
-argument is captured at registration. `defer` is an arity ladder of generic rungs (`Action` and a
+argument is captured at registration, except a constant, which renders inside the thunk's call
+([below](#a-gos-or-defers-constant-argument-renders-inside-the-thunks-call)). `defer` is an arity ladder of generic rungs (`Action` and a
 result-discarding `Func` twin per arity, 1 through 16, plus a nullary rung) whose last required
 parameter is `ref GoFrame` — the frame to register into (an optional `recovers` flag follows it; see
 [below](#only-the-function-the-defer-calls-directly-recovers)):
@@ -143,7 +144,8 @@ parameter is `ref GoFrame` — the frame to register into (an optional `recovers
 <!-- illustration: not converter output -->
 ```csharp
 defer(Ꮡfd.writeUnlock, ref ᒐ);                      //  Go: defer fd.writeUnlock()
-defer(ᴛ1 => fmt.Println(ᴛ1), closeFileˢ, ref ᒐ);    //  Go: defer fmt.Println("Close file")
+defer(ᴛ1 => fmt.Println(ᴛ1), err, ref ᒐ);           //  Go: defer fmt.Println(err)
+defer(() => fmt.Println("Close file"), ref ᒐ);      //  Go: defer fmt.Println("Close file")
 ```
 
 The rungs are generic rather than `params object[]` so a value argument is captured without boxing on
@@ -154,6 +156,86 @@ Go **keyword**, so no Go identifier can ever be spelled that way, and no C# keyw
 siblings carry a `ǃ` (U+01C3, a legal C# identifier character where `!` is not) for reasons of their
 own: `goǃ` cannot be `go`, which is the root namespace every converted file sits in, and `makeǃ`
 cannot be `make`, which is a predeclared Go identifier a package may shadow.
+
+## A `go`'s or `defer`'s constant argument renders inside the thunk's call
+
+Go evaluates the arguments of a `go` or `defer` statement when the statement runs, and calls later. A
+constant has the same value whenever it is evaluated, so it needs no capture: it renders inside the thunk's
+call, and the statement reads as Go wrote it. Only the arguments that are not constants are passed to `goǃ`
+or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
+
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.go:99-109 -->
+```go
+	n := 3
+	go pair("square:", n*n)
+	n = 100
+	fmt.Println(<-results)
+
+	b := &box{name: "b"}
+	go b.say("hello")
+	fmt.Println(<-results)
+
+	f := report
+	go f("via func value")
+```
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:127-139 -->
+```csharp
+    nint n = 3;
+    goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
+    n = 100;
+    fmt.Println(ᐸꟷ(results));
+
+    var b = Ꮡ(new box(name: "b"));
+    var bʗ1 = b;
+    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);
+    fmt.Println(ᐸꟷ(results));
+
+    var f = report;
+    var fʗ1 = f;
+    goǃ(fʗ1, (@string)"via func value");
+```
+
+`go pair("square:", n*n)` passes only `n * n`, which is computed while `n` is 3, so the goroutine prints 9.
+`go worker(5)` becomes `goǃ(() => worker(5))`: a package-level function with a constant argument takes the
+thunk form, so the constant can stay in its call. Every constant `go/types` reports qualifies: strings,
+numbers, runes, booleans and typed constants such as `Red`. Inside the thunk the constant is an ordinary
+argument, so `report(7)` reads `report((nint)7)` for an `any` parameter, as a direct call does, and the
+callee's type switch sees a Go `int`.
+
+A method moves its constants only when the statement already takes the thunk form, and only without a
+[receiver snapshot](#a-deferred-or-spawned-call-evaluates-an-element-or-field-receiver-at-the-statement).
+A method-group launch (`b.say`), a func value (`f`), a func-literal callee and a builtin keep their form,
+and a string constant there renders `(@string)"…"` at the site, so the launcher's type parameter is Go's
+`string` (see [Strings](strings.md)). `defer` follows the same rule, and argument order holds, side
+effects included:
+
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.go:114-121 -->
+```go
+	x := 1
+	defer showPair("x was", x)
+	defer show("done")
+	defer show(Red)
+	defer show('d')
+	defer trio(next(), "mid", next())
+	x = 2
+	seq = 100
+```
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:146-153 -->
+```csharp
+        nint x = 1;
+        defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
+        defer(() => show("done"), ref ᒐ);
+        defer(() => show(Red), ref ᒐ);
+        defer(() => show((rune)'d'), ref ᒐ);
+        defer((ᴛ1, ᴛ2) => trio(ᴛ1, "mid", ᴛ2), next(), next(), ref ᒐ);
+        x = 2;
+        seq = 100;
+```
+
+`defer trio(next(), "mid", next())` calls `next()` twice at the `defer` statement, in order, and prints
+`1 mid 2`. The standard library keeps the eager form and its hoisted literals (`literalsHoistedFor`). The
+decision is `goDeferInlineForm` in `goDeferConstArgs.go`; `GoDeferConstArgs` is the behavioral guard, and
+`TestGoDeferConstantArgumentsRenderInsideTheThunk` the converter test.
 
 ## A deferred RECEIVER-FIELD call with no arguments is lowered INTO the frame's `finally`
 
@@ -929,7 +1011,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
-<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:41-51 -->
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:38-48 -->
 ```csharp
 var baseʗ1 = @base;
 func(() => {
@@ -1142,7 +1224,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:79 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:76 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
