@@ -83,6 +83,16 @@ func nested(a any, k kind, y kind) string {
 	return "none"
 }
 
+func command(cmd string, alt string) int {
+	switch cmd {
+	case "get":
+		return 1
+	case alt:
+		return 2
+	}
+	return 0
+}
+
 func withFallthrough(t int, y int) int {
 	n := 0
 	switch t {
@@ -100,6 +110,7 @@ func main() {
 	fmt.Println(loop([]int{1, 1, 2, 3}, 2))
 	fmt.Println(nested(1, large, large), nested(1, small, large), nested(2, small, small))
 	fmt.Println(withFallthrough(7, 7), withFallthrough(2, 7))
+	fmt.Println(command("get", "put"), command("put", "put"))
 }
 `
 
@@ -145,10 +156,12 @@ func TestPatternSwitchEmission(t *testing.T) {
 
 	// Each want is one whole emitted line, trimmed.
 	wants := map[string][]string{
-		"classify": {`switch (t) {`, `default: {`, `case 3 or 4: {`, `case var ᴛ when ᴛ == y: {`},
-		"loop":     {`switch (x) {`, `case var ᴛ when ᴛ == label(1): {`, `continue;`},
-		"nested":   {`switch (a) {`, `switch (k) {`, `case var ᴛ2 when ᴛ2 == y: {`},
+		"classify":                    {`switch (t) {`, `default: {`, `case 3 or 4: {`, `case var ᴛ when ᴛ == y: {`},
+		"loop":                        {`switch (x) {`, `case var ᴛ when ᴛ == label(1): {`, `continue;`},
+		"nested":                      {`switch (a) {`, `switch (k) {`, `case var ᴛ2 when ᴛ2 == y: {`},
 		"fallthrough keeps the chain": {`var exprᴛ1 = t;`, `fallthrough = true;`},
+		"a string tag keeps its temp": {`var exprᴛ1 = cmd;`, `switch (ᐧ) {`, `case {} when exprᴛ1 == "get"u8: {`,
+			`case {} when exprᴛ1 == alt: {`},
 	}
 
 	mainCs = strings.ReplaceAll(mainCs, "\r\n", "\n")
@@ -171,10 +184,11 @@ func TestPatternSwitchEmission(t *testing.T) {
 	}
 
 	refusals := map[string]*regexp.Regexp{
-		"the do/while(false) wrapper":        regexp.MustCompile(`\bdo \{|\} while \(false\);`),
+		"the do/while(false) wrapper":         regexp.MustCompile(`\bdo \{|\} while \(false\);`),
 		"a goto to the loop's continue label": regexp.MustCompile(`goto continueᴛ\d+;`),
 		"the chain's default block":           regexp.MustCompile(`/\* default: \*/`),
 		"a second tag temp":                   regexp.MustCompile(`exprᴛ[2-9]`),
+		"a switch governed by a string tag":   regexp.MustCompile(`switch \(cmd\)`),
 	}
 
 	for shape, refusal := range refusals {
@@ -183,8 +197,8 @@ func TestPatternSwitchEmission(t *testing.T) {
 		}
 	}
 
-	if got := strings.Count(mainCs, "var exprᴛ"); got != 1 {
-		t.Errorf("wanted the one tag temp of the fallthrough switch, read %d", got)
+	if got := strings.Count(mainCs, "var exprᴛ"); got != 2 {
+		t.Errorf("wanted the tag temps of the fallthrough switch and the string switch, read %d", got)
 	}
 
 	if t.Failed() {

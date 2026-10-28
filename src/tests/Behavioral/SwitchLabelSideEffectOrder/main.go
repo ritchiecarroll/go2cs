@@ -78,6 +78,19 @@ func iface(v any) {
 	}
 }
 
+// A string tag compares bytes, never decoded text: two different invalid UTF-8
+// strings must not match, though both decode to the same replacement character.
+func bytesNotText(t, y string) {
+	switch t {
+	case y:
+		flush(fmt.Sprintf("bytes %x", t), fmt.Sprintf("matched %x", y))
+	case "\xff":
+		flush(fmt.Sprintf("bytes %x", t), "ff")
+	default:
+		flush(fmt.Sprintf("bytes %x", t), "default")
+	}
+}
+
 // break and continue inside the cases of a loop: break leaves the switch, continue the loop.
 func loop() {
 	for i := 0; i < 5; i++ {
@@ -111,4 +124,7 @@ func main() {
 	iface("one")
 	iface(2.5)
 	loop()
+	bytesNotText("\xff", "\xfe")
+	bytesNotText("\xfe", "\xfd")
+	bytesNotText("\xfe", "\xfe")
 }
