@@ -57,6 +57,12 @@ type joinRule struct {
 // lines hold NewAnchor may delete lines matching Delete and insert lines matching Insert, and may re-indent the
 // lines it keeps. With Moves, a deleted line and an inserted line of the same canonical text pair as a move (a
 // clause the old form emitted out of source order).
+//
+// With Close, the rule's scope is the REGION the rewrite spans rather than one run: a real diff keeps the unchanged
+// lines between as context, so a structural rewrite's scaffolding lands in many runs, and its moved lines in two.
+// The region opens at the run whose added NewAnchor line replaces a removed OldAnchor line, and closes at the added
+// line that is the NewAnchor line's indent followed by Close. The lines its runs leave unpaired are pooled and read
+// together when it closes: moves first, then Delete and Insert, and only what is left is refused.
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
@@ -64,6 +70,7 @@ type blockRule struct {
 	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
 	Standalone bool
 	Moves      bool
+	Close      string
 }
 
 // id is a C# identifier as the converter spells one (Go identifiers, plus the converter's own letters: Ꮡ, ʗ, ᴛ, ǃ, ꓸ).
@@ -296,18 +303,18 @@ var items = []item{
 		// either side, and a default body the chain had moved to the end is admitted back in Go's position as a move.
 		Canon: []rewrite{
 			rw(`^(\s*)\S+ exprᴛ\d+ = (.*);$`, "${1}switch ($2) {"),
-			rw(`^(\s*)(?:else )?if \(exprᴛ\d+ is (.*)\) \{$`, "${1}case $2: {"),
-			rw(`^(\s*)(?:else )?if \((.*\bexprᴛ\d+\b.*)\) \{$`, "${1}case var ᴛ when $2: {"),
+			rw(`^(\s*)(?:else )?if \(exprᴛ\d+ is (.*)\) \{( //.*)?$`, "${1}case $2: {$3"),
+			rw(`^(\s*)(?:else )?if \((.*\bexprᴛ\d+\b.*)\) \{( //.*)?$`, "${1}case var ᴛ when $2: {$3"),
+			rw(`^(\s*)(?:else )?\{ /\* default: \*/( //.*)?$`, "${1}default: {$2"),
 			rw(`\bexprᴛ\d+\b`, "ᴛ"),
 			rw(`(^|[^\p{L}\p{N}_])ᴛ\d+\b`, "${1}ᴛ"),
 			rw(`^(\s*)goto continueᴛ\d+;$`, "${1}continue;"),
 		},
-		Old: rx(`\bexprᴛ\d+\b|goto continueᴛ\d+;`),
+		Old: rx(`\bexprᴛ\d+\b|goto continueᴛ\d+;|/\* default: \*/`),
 		Block: &blockRule{
-			OldAnchor: rx(`\b\S+ exprᴛ\d+ = |\} while \(false\);`),
+			OldAnchor: rx(`^\s*\S+ exprᴛ\d+ = .*;$`),
 			NewAnchor: rx(`^\s*switch \(`),
 			Delete: []*regexp.Regexp{
-				rx(`^\s*(?:else )?\{ /\* default: \*/$`),
 				rx(`^\s*else \{$`),
 				rx(`^\s*do \{$`),
 				rx(`^\s*\} while \(false\);$`),
@@ -315,11 +322,11 @@ var items = []item{
 				rx(`^\s*[{}]$`),
 			},
 			Insert: []*regexp.Regexp{
-				rx(`^\s*default: \{$`),
 				rx(`^\s*break;$`),
 				rx(`^\s*\}\}?$`),
 			},
 			Moves: true,
+			Close: "}}",
 		},
 	},
 	{

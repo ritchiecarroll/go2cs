@@ -352,7 +352,7 @@ func TestBlockPlants(t *testing.T) {
 		`private static readonly @string fifthˢ = "Fifth"u8;`,
 		``,
 	}
-	tl = c.classifyDiff(diffOf(prodFile, fields, nil))
+	tl := c.classifyDiff(diffOf(prodFile, fields, nil))
 	if len(tl.refused) != 0 || tl.labels["GD"] == 0 {
 		t.Errorf("GD standalone deletion: wanted every line to read GD, read %v, refused %v", tl.labels, tl.refused)
 	}
@@ -362,9 +362,94 @@ func TestBlockPlants(t *testing.T) {
 	}
 
 	// Without S1's anchors the same deletions are refused: the block rule is not a licence outside its own hunk.
-	tl := c.classifyDiff(diffOf(prodFile, []string{`    do {`, `    } while (false);`}, nil))
+	tl = c.classifyDiff(diffOf(prodFile, []string{`    do {`, `    } while (false);`}, nil))
 	if len(tl.refused) != 2 {
 		t.Errorf("S1 anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
+	}
+}
+
+// hunkDiff writes one file's diff from lines prefixed ' ', '-' or '+', splitting a hunk at every run of context:
+// unlike diffOf, its changed lines arrive in several runs, as a real diff's do.
+func hunkDiff(file string, lines []string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "diff --git a/%s b/%s\n--- a/%s\n+++ b/%s\n@@ -1 +1 @@\n", file, file, file, file)
+	for _, l := range lines {
+		b.WriteString(l + "\r\n")
+	}
+	return b.String()
+}
+
+// S1 in a real diff: the unchanged bodies are context, so the rewrite's lines land in many runs. The tag temp and
+// its first label can follow the `switch` and `case` lines git placed ahead of them; a default the chain had moved
+// to the end returns to Go's position a whole run away; each appended `break;` and the `}}` closer stand alone; and
+// the loop's continueᴛ label goes where the loop ends, past the switch. Every line of a file whose diff carries the
+// two anchors is read together, and a line that still has no partner is refused by its own text.
+func TestBlockPlantsAcrossRuns(t *testing.T) {
+	good := []string{
+		`     for (nint i = 0; i < n; i++) {`,
+		`+        switch (d.cmd) {`,
+		`+        default: {`,
+		`+            other();`,
+		`+            break;`,
+		`+        }`,
+		`+        case var ᴛ when ᴛ == socksCmdConnect || ᴛ == sockscmdBind: {`,
+		`-        var exprᴛ2 = d.cmd;`,
+		`-        if (exprᴛ2 == socksCmdConnect || exprᴛ2 == sockscmdBind) {`,
+		`-            do {`,
+		`-                if (x) {`,
+		`-                    break;`,
+		`-                }`,
+		`-                goto continueᴛ1;`,
+		`-            } while (false);`,
+		`+            if (x) {`,
+		`+                break;`,
+		`+            }`,
+		`+            continue;`,
+		`+            break;`,
+		`-        }`,
+		`-        else { /* default: */`,
+		`-            other();`,
+		`-        }`,
+		`+        }}`,
+		` `,
+		`         after();`,
+		`-continueᴛ1:;`,
+		`     }`,
+	}
+	c, _ := newClassifier("S1", false)
+	tl := c.classifyDiff(hunkDiff(prodFile, good))
+	if len(tl.refused) != 0 || tl.labels["S1"] == 0 {
+		t.Errorf("S1 across runs: wanted every line to read S1, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	with := func(i int, s string) []string {
+		out := append([]string(nil), good...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		lines      []string
+	}{
+		{"the split label changed", "sockscmdBIND", with(6, `+        case var ᴛ when ᴛ == socksCmdConnect || ᴛ == sockscmdBIND: {`)},
+		{"the moved default body changed", "other2", with(3, `+            other2();`)},
+		{"the re-indented break became a return", "return;", with(16, `+                return;`)},
+		{"a stray line among the scaffolding", "stray", append(append([]string(nil), good...), `+        stray();`)},
+	} {
+		tl := c.classifyDiff(hunkDiff(prodFile, b.lines))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("S1 across runs, bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
+	}
+
+	// A file whose diff lacks the anchors pools nothing for S1: its scaffolding-shaped lines are refused as before.
+	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `+    break;`, `     g();`, `-    do {`}))
+	if len(tl.refused) != 2 {
+		t.Errorf("S1 across runs, anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
 	}
 }
 
