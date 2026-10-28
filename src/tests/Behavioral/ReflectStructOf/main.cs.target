@@ -121,7 +121,7 @@ internal static void Main() {
     fmt.Println("implements Stringer:", first.Implements(stringerT),
         "| implements any:", first.Implements(reflect.TypeOf((ж<any>)nil).Elem()),
         "| comparable:", first.Comparable(),
-        "| declared stringer does:", reflect.TypeOf(new stringer(nil)).Implements(stringerT));
+        "| declared stringer does:", reflect.TypeOf(new stringer()).Implements(stringerT));
 
     var deep = byteT;
     for (nint i = 0; i < 5; i++) {

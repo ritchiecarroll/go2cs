@@ -135,23 +135,23 @@ internal static void Main() {
     ref var bufs = ref heap<Buffers>(out var Ꮡbufs);
     bufs = new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice());
 
-    var tcpSink = Ꮡ(new sink(nil));
+    var tcpSink = Ꮡ(new sink());
     var tcp = Ꮡ(new TCPConn(new conn(fd: tcpSink)));
     Δio.Writer w = new TCPConnжWriter(tcp);
     var (n, err) = Ꮡbufs.WriteTo(w);
     report("TCPConn", ref (tcpSink).DerefOrNull(), n, err);
 
-    var connSink = Ꮡ(new sink(nil));
+    var connSink = Ꮡ(new sink());
     var c = Ꮡ(new conn(fd: connSink));
     (n, err) = Ꮡbufs.WriteTo(new connжWriter(c));
     report("conn", ref (connSink).DerefOrNull(), n, err);
 
-    var vsSink = Ꮡ(new sink(nil));
+    var vsSink = Ꮡ(new sink());
     var vs = new ValueSink(new valueSink(fd: vsSink));
     (n, err) = Ꮡbufs.WriteTo(vs);
     report("ValueSink", ref (vsSink).DerefOrNull(), n, err);
 
-    var plainSink = Ꮡ(new sink(nil));
+    var plainSink = Ꮡ(new sink());
     var p = Ꮡ(new PlainConn(new plainConn(fd: plainSink)));
     (n, err) = Ꮡbufs.WriteTo(new PlainConnжWriter(p));
     report("PlainConn", ref (plainSink).DerefOrNull(), n, err);

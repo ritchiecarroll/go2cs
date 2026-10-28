@@ -51,13 +51,13 @@ internal static partial void Main() {
 
         defer(GetPrintLn(), fifthˢ, ref ᒐ);
 
-        var c = Ꮡ(new acc(nil));
+        var c = Ꮡ(new acc());
         var (s1, e1) = c.add(5);
         fmt.Println(s1, e1);
         var (s2, e2) = c.add(-1);
         fmt.Println(s2, e2, (~c).total);
 
-        var sm = Ꮡ(new sema(nil));
+        var sm = Ꮡ(new sema());
         acquireAndWork(sm);
         fmt.Println("after:", (~sm).held);
 

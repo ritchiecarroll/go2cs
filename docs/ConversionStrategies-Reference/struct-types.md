@@ -1527,6 +1527,51 @@ two packages whose names collide so one import is forced non-canonical, not expr
 single-library behavioral corpus. <!-- GUARD OWED. Cleared cryptobyte's CS0426, which had masked deeper
 Builder.add/slice.Value roots, since banked. -->
 
+## An empty struct literal `T{}` reads `new T()`
+
+An empty composite literal of a named struct, local or from another package, generic or not, and behind `&`,
+emits the parameterless constructor, the way Go writes it:
+
+<!-- source: src/tests/Behavioral/EmptyStructLiteralCtor/main.go:15-18, 53-55 -->
+```go
+type grid struct {
+	cells [3]int
+	name  string
+}
+…
+	g := grid{}
+	g.cells[1] = 7
+	fmt.Println("grid:", g.cells, len(g.cells), g.name == "")
+```
+<!-- source: src/tests/Behavioral/EmptyStructLiteralCtor/main.cs.target:13-16, 54-56 -->
+```csharp
+partial struct grid {
+    internal array<nint> cells = new(3);
+    internal @string name;
+}
+…
+    var g = new grid();
+    g.cells[1] = 7;
+    fmt.Println("grid:", g.cells, len(g.cells), g.name == ""u8);
+```
+
+go2cs-gen gives every converted struct a parameterless constructor whose body is the `T(NilType _)`
+constructor's: the field initializers (`cells = new(3)` above) and `AppendZeroValueInitializers`. So `new T()`
+builds the same zero value `new T(nil)` built, and the write to `g.cells[1]` lands in an allocated array. A
+hand-owned struct with a `T(NilType _)` constructor (testing's `T`, `M`, `B`, `PB` and `F`, for example)
+assigns nothing that C#'s default struct lacks, so its `new T()` is the same value too.
+
+A named struct over another struct still constructs the struct it wraps: `wrapped{}`, where
+`type wrapped point`, reads `new wrapped(new point())`. A named slice or map `T{}` is an empty value, not a
+nil one, and keeps its own form: `new IntSlice(new nint[]{}.slice())`, `new StrMap(new map<@string, nint>{})`.
+
+`new T(nil)` remains where nothing is a literal: the zero value of a package-level `var x T` that is
+address-taken reads `new StaticBox<T>(new T(nil))`.
+
+<!-- parity seat #21 (Z1), 2026-10-28: converter convCompositeLit.go (convCompositeLitAs writes the NilType
+     argument only when the named type's underlying is not a struct); guards EmptyStructLiteralCtor (behavioral,
+     Output compared with Go) and TestEmptyStructLiteralEmitsParameterlessCtor. -->
+
 ## A ONE-FIELD struct's positional `nil` literal names its field constructor
 The universe `nil` renders in a value context as the typeless `default!`, which takes its type from
 whatever it is assigned or returned into. A constructor ARGUMENT is the one position where nothing

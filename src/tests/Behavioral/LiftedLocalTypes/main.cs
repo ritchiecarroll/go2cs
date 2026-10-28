@@ -123,7 +123,7 @@ internal partial interface localInterfaceEmbed_i /*dyn*/ :
 }
 
 internal static void localInterfaceEmbed() {
-    localInterfaceEmbed_i v = new embedImpl(nil);
+    localInterfaceEmbed_i v = new embedImpl();
     fmt.Println(v.x(), v.y(), v.x() + v.y());
 }
 

@@ -37,7 +37,7 @@ public static bool Add<T>(this Set<T> s, T item) {
         }
     }
 
-    s[item] = new @void(nil);
+    s[item] = new @void();
     return true;
 }
 

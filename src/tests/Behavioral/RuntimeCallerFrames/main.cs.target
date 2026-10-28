@@ -106,7 +106,7 @@ internal static partial void Main() {
     fmt.Println("traceback drops pointer receiver:", hasSub(methodTrace, "main.ptrFrame"));
     fmt.Println("traceback drops value receiver:", hasSub(methodTrace, "main.valueFrame"));
 
-    @string genTrace = new genRecv<nint>(nil).genFrame();
+    @string genTrace = new genRecv<nint>().genFrame();
     fmt.Println("traceback names generic receiver:", hasSub(genTrace, "main.genRecv[...].genFrame"));
 
     @string plainTrace = plainFrame();

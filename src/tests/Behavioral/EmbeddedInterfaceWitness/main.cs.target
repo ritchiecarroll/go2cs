@@ -126,7 +126,7 @@ internal static @string Write(this ref pointerOnly p, @string s) {
 }
 
 internal static void checkPointerOnly() {
-    any ptr = Ꮡ(new pointerOnly(nil));
+    any ptr = Ꮡ(new pointerOnly());
 
     {
         var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok) {
@@ -136,7 +136,7 @@ internal static void checkPointerOnly() {
         }
     }
 
-    any val = new pointerOnly(nil);
+    any val = new pointerOnly();
 
     {
         var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok) {

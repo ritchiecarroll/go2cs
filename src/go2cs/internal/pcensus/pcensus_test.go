@@ -61,6 +61,7 @@ var plants = []plant{
 	// Z1 (#21)
 	one("Z1 good", prodFile, `var b = new Buffer(nil);`, `var b = new Buffer();`, "Z1"),
 	one("Z1 good generic", prodFile, `var g = new G<nint>(nil);`, `var g = new G<nint>();`, "Z1"),
+	one("Z1 good escaped type argument", prodFile, `static Word w = new Ptr<@void>(nil);`, `static Word w = new Ptr<@void>();`, "Z1"),
 	one("Z1 bad: the type changed", prodFile, `var b = new Buffer(nil);`, `var b = new Reader();`, "UNCLASSIFIED"),
 	// C1 (#23)
 	one("C1 good", prodFile, `if (c == (rune)'a') {`, `if (c == 'a') {`, "C1"),

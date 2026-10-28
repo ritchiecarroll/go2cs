@@ -25,11 +25,11 @@ internal static void Main() {
     badge b = new reservedᴛ1жbadge(reserved);
     fmt.Println(b != nil);
 
-    reserved.Value.badge = new gold(nil);
+    reserved.Value.badge = new gold();
     fmt.Println(b.label());
 
     var local = @new<reservedᴛ1>();
-    local.Value.badge = new gold(nil);
+    local.Value.badge = new gold();
 
     badge b2 = new reservedᴛ1жbadge(local);
     fmt.Println("local:", b2.label());

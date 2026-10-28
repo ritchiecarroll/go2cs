@@ -39,7 +39,7 @@ internal static void Main() {
     fmt.Println(f("abc"));
     fmt.Println((~c).s.size("abc"));
 
-    var c2 = Ꮡ(new config(nil));
+    var c2 = Ꮡ(new config());
     var g = c2.pickSizer();
     fmt.Println(g("abcd"));
 }

@@ -82,7 +82,7 @@ internal static void blankFuncValues() {
     _ = (Funcꓸꓸꓸ<nint, nint>)(total);
     _ = (Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ);
 
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     
     var cʗ1 = c;
     _ = (Func<nint, nint>)((nint p1) => cʗ1.bump(p1));

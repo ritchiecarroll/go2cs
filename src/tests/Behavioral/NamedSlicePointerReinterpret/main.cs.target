@@ -51,7 +51,7 @@ internal static void Main() {
     fmt.Println((@string)src);
     fmt.Println(len(src));
 
-    var h = Ꮡ(new handler(nil));
+    var h = Ꮡ(new handler());
     h.preformat("alpha=1");
     h.preformat(" beta=2");
     h.preformat(" gamma=3");

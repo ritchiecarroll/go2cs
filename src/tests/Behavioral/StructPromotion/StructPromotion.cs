@@ -61,7 +61,7 @@ internal static void Main() {
     fmt.Println(person);
     fmt.Println(person.IsDr());
 
-    var record = new Record(nil);
+    var record = new Record();
     record.name = "Dr. Michał";
     record.age = 18;
     record.position = "software engineer";
@@ -74,7 +74,7 @@ internal static void Main() {
     fmt.Println(record.IsManager());
     fmt.Println(record.IsDr());
 
-    var l = Ꮡ(new ledger(nil));
+    var l = Ꮡ(new ledger());
     l.Value.tag = "x";
     fmt.Println(l.describe(), l.describe(), (~l).seq);
 }

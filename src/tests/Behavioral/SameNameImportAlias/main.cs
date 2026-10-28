@@ -28,8 +28,8 @@ internal static void Main() {
     var t = new table(new map<@string, bfoo.Other>{["k"] = new(S: "v")});
     fmt.Println(l[0].N, t["k"].S);
 
-    go.SameNameImportAlias.a.foo_package.ΔKind ka = new afoo.S(nil).Kind();
-    go.SameNameImportAlias.b.foo_package.ΔKind kb = new bfoo.S(nil).Kind();
+    go.SameNameImportAlias.a.foo_package.ΔKind ka = new afoo.S().Kind();
+    go.SameNameImportAlias.b.foo_package.ΔKind kb = new bfoo.S().Kind();
     var h = new holder(a: x, b: y, k: kb);
     fmt.Println(ka, kb, h.a.N, h.b.S, h.k);
 }

@@ -83,7 +83,7 @@ partial interface readStringWriter {
 
 internal static void Main() {
     var r = Ꮡ(new reader(src: "hello world"));
-    var w = Ꮡ(new writer(nil));
+    var w = Ꮡ(new writer());
     var d = Ꮡ(new duplex(r, w));
 
     readWriteCloser rwc = new duplexжreadWriteCloser(d);
@@ -103,7 +103,7 @@ internal static void Main() {
     (n, _) = rw.Write(slice<byte>("!"u8));
     fmt.Println("value form:", n, w.String());
 
-    var f = Ꮡ(new foreign(strings.NewReader("abc"), Ꮡ(new strings.Builder(nil))));
+    var f = Ꮡ(new foreign(strings.NewReader("abc"), Ꮡ(new strings.Builder())));
     readStringWriter rsw = new foreignжreadStringWriter(f);
 
     var fbuf = new slice<byte>(3);

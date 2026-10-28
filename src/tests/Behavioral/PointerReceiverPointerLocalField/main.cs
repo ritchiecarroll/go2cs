@@ -30,7 +30,7 @@ internal static partial ж<holder> get(ж<holder> Ꮡh) {
 }
 
 internal static void Main() {
-    var @base = Ꮡ(new holder(nil));
+    var @base = Ꮡ(new holder());
     var h = get(@base);
 
     h.of(holder.Ꮡs).inc();

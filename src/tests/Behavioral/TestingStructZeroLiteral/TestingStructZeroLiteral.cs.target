@@ -6,11 +6,11 @@ using testing = testing_package;
 partial class main_package {
 
 internal static void Main() {
-    var t = Ꮡ(new testing.T(nil));
-    var m = Ꮡ(new testing.M(nil));
-    var f = Ꮡ(new testing.F(nil));
-    var b = new testing.B(nil);
-    var pb = new testing.PB(nil);
+    var t = Ꮡ(new testing.T());
+    var m = Ꮡ(new testing.M());
+    var f = Ꮡ(new testing.F());
+    var b = new testing.B();
+    var pb = new testing.PB();
 
     fmt.Println("T:", t != nil);
     fmt.Println("M:", m != nil);

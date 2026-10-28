@@ -28,7 +28,7 @@ internal static void @try(@string name, Func<ж<nint>> f) {
 internal static void Main() {
     ref var arr = ref heap(new array<nint>(3), out var Ꮡarr);
     var p = Ꮡarr;
-    var ps = Ꮡ(new S(nil));
+    var ps = Ꮡ(new S());
 
     uint64 u64 = 18446744073709551615UL;
     nuint u = unchecked((nuint)(9223372036854775810UL));

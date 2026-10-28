@@ -69,13 +69,13 @@ internal static void visible(@string label, reflectꓸType t) {
 }
 
 internal static void Main() {
-    describe("w", reflect.TypeOf(new w(nil)));
-    describe("Pub", reflect.TypeOf(new Pub(nil)));
-    describe("Named", reflect.TypeOf(new Named(nil)));
-    describe("X", reflect.TypeOf(new X(nil)));
+    describe("w", reflect.TypeOf(new w()));
+    describe("Pub", reflect.TypeOf(new Pub()));
+    describe("Named", reflect.TypeOf(new Named()));
+    describe("X", reflect.TypeOf(new X()));
 
-    visible("Pub", reflect.TypeOf(new Pub(nil)));
-    visible("X", reflect.TypeOf(new X(nil)));
+    visible("Pub", reflect.TypeOf(new Pub()));
+    visible("X", reflect.TypeOf(new X()));
 
     var v = reflect.ValueOf(new w(new E(7)));
     fmt.Println("w.error CanInterface:", v.Field(0).CanInterface());
@@ -95,13 +95,13 @@ internal static void Main() {
 
     var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem(), Anonymous: true)}.slice());
     var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem())}.slice());
-    fmt.Println("Pub -> anonymous twin:", reflect.TypeOf(new Pub(nil)).ConvertibleTo(twin));
-    fmt.Println("Pub -> named twin:", reflect.TypeOf(new Pub(nil)).ConvertibleTo(plain));
-    fmt.Println("Named -> anonymous twin:", reflect.TypeOf(new Named(nil)).ConvertibleTo(twin));
-    fmt.Println("Named -> named twin:", reflect.TypeOf(new Named(nil)).ConvertibleTo(plain));
-    fmt.Println("Pub -> Named:", reflect.TypeOf(new Pub(nil)).ConvertibleTo(reflect.TypeOf(new Named(nil))));
+    fmt.Println("Pub -> anonymous twin:", reflect.TypeOf(new Pub()).ConvertibleTo(twin));
+    fmt.Println("Pub -> named twin:", reflect.TypeOf(new Pub()).ConvertibleTo(plain));
+    fmt.Println("Named -> anonymous twin:", reflect.TypeOf(new Named()).ConvertibleTo(twin));
+    fmt.Println("Named -> named twin:", reflect.TypeOf(new Named()).ConvertibleTo(plain));
+    fmt.Println("Pub -> Named:", reflect.TypeOf(new Pub()).ConvertibleTo(reflect.TypeOf(new Named())));
 
-    foreach (var (_, value) in new any[]{new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub(nil)}.slice()) {
+    foreach (var (_, value) in new any[]{new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub()}.slice()) {
         var (b, err) = json.Marshal(value);
         fmt.Printf("json %T: %s %v\n"u8, value, b, err);
     }

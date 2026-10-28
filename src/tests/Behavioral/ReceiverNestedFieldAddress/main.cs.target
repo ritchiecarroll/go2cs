@@ -63,7 +63,7 @@ internal static uint16 readA(this ж<outer> Ꮡo) {
 }
 
 internal static void Main() {
-    var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner(nil))));
+    var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner())));
 
     o.bumpA();
     o.bumpA();
@@ -76,7 +76,7 @@ internal static void Main() {
     o.bumpViaPtr();
     fmt.Println("through pointer hop:", (~(~o).ptr).b, "value field untouched:", (~o).@in.b);
 
-    var d = Ꮡ(new deep(nil));
+    var d = Ꮡ(new deep());
     d.bumpLeaf();
     d.bumpLeaf();
     fmt.Println("two hops:", (~d).md.lf.n);

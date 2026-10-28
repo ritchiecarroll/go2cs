@@ -172,7 +172,7 @@ internal static ж<guard> /*g*/ deferMethodValue() {
     ж<guard> g = default;
     GoFrame ᒐ = default;
     try {
-        g = Ꮡ(new guard(nil));
+        g = Ꮡ(new guard());
         defer(g.@catch, ref ᒐ, recovers: true);
         throw panic("four");
     }
@@ -182,7 +182,7 @@ internal static ж<guard> /*g*/ deferMethodValue() {
 }
 
 internal static any deferMethodValueWithArgs() {
-    var g = Ꮡ(new guard(nil));
+    var g = Ꮡ(new guard());
     var gʗ1 = g;
     func(() => {
         GoFrame ᒐ = default;

@@ -140,7 +140,7 @@ internal static void Main() {
     fmt.Println(show(new namer("y")));
     fmt.Println(Label(new tagged("t", 7)));
 
-    var b = Ꮡ(new Box<namer>(nil));
+    var b = Ꮡ(new Box<namer>());
     b.Add(new namer("a"));
     b.Add(new namer("b"));
     fmt.Println(b.Names());

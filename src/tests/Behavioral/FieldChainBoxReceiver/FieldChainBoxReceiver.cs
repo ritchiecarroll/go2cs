@@ -54,18 +54,18 @@ internal static void bumpDeep(this ж<deep> Ꮡd) {
 }
 
 internal static void Main() {
-    var b = Ꮡ(new box(nil));
+    var b = Ꮡ(new box());
     viaParam(b);
     viaParam(b);
     fmt.Println((~b).h.c.n);
 
-    var w = Ꮡ(new wrapper(nil));
+    var w = Ꮡ(new wrapper());
     w.bump();
     w.bump();
     w.bump();
     fmt.Println((~w).b.h.c.n);
 
-    var d = Ꮡ(new deep(nil));
+    var d = Ꮡ(new deep());
     d.bumpDeep();
     d.bumpDeep();
     d.bumpDeep();

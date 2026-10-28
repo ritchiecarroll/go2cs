@@ -58,7 +58,7 @@ internal static (@string, @string) classifyVia(any v) {
     }
 
     @string label = "shadow";
-    var other = Ꮡ(new node(nil));
+    var other = Ꮡ(new node());
     other.Value.inner = label;
 
     return (pick(v), pick(other.OrTypedNil()));
@@ -66,7 +66,7 @@ internal static (@string, @string) classifyVia(any v) {
 
 internal static void Main() {
     @string hi = "hi";
-    var sn = Ꮡ(new node(nil));
+    var sn = Ꮡ(new node());
     sn.Value.inner = hi;
 
     fmt.Println(inspect(Ꮡ(new node(inner: (nint)5))));

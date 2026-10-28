@@ -55,7 +55,7 @@ partial interface greetExtra {
 }
 
 internal static void Main() {
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     var m = Ꮡ(new mixed(c, new hello("world")));
 
     greetBumper gb = new mixedжgreetBumper(m);

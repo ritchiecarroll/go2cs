@@ -47,7 +47,7 @@ internal static void takesReader(takesReader_r r) {
 }
 
 internal static void testCompositeLiteral() {
-    var readers = new takesReader_r[]{new fakeReader(nil)}.slice();
+    var readers = new takesReader_r[]{new fakeReader()}.slice();
     var buf = new slice<byte>(4);
     var (n, _) = readers[0].Read(buf);
     fmt.Println("CompositeLiteral: Read =", (@string)(buf.slice(0, n)));
@@ -62,7 +62,7 @@ partial struct WithInlineField {
 }
 
 internal static void testInlineField() {
-    var s = new WithInlineField(R: new fakeReader(nil));
+    var s = new WithInlineField(R: new fakeReader());
     var buf = new slice<byte>(4);
     var (n, _) = s.R.Read(buf);
     fmt.Println("InlineField: Read =", (@string)(buf.slice(0, n)));
@@ -169,14 +169,14 @@ internal static nint checksum(ref frame f) {
 }
 
 internal static void Main() {
-    testTypeSwitch(new fakeError(nil));
-    testTypeAssertion(new fakeError(nil));
-    takesReader(new fakeReader(nil));
+    testTypeSwitch(new fakeError());
+    testTypeAssertion(new fakeError());
+    takesReader(new fakeReader());
     testCompositeLiteral();
     testInlineField();
-    testInterfaceEmbedding(new embeddedImpl(nil));
+    testInterfaceEmbedding(new embeddedImpl());
 
-    var tl = Ꮡ(new tally(nil));
+    var tl = Ꮡ(new tally());
     var (n, err) = tl.fill(new byteRepeatжReader(Ꮡ(new byteRepeat(left: 10))));
     fmt.Println(n, err == nil, (~tl).total);
 

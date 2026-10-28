@@ -44,9 +44,9 @@ public static partial class testing_package
     {
         internal TestExecution? Execution;
 
-        // The zero-value constructor go2cs-gen gives every converted struct. An empty literal of a
-        // foreign struct converts to `new T(nil)` (`&testing.T{}` in testify's require tests), and
-        // these hand-owned structs have no generator behind them, so each declares it by hand.
+        // The zero-value constructor go2cs-gen gives every converted struct, which a package-level
+        // zero value binds (`new StaticBox<T>(new T(nil))`). These hand-owned structs have no generator
+        // behind them, so each declares it by hand. An empty literal `&testing.T{}` reads `new T()`.
         public T(NilType _) { }
 
         // A DETACHED T -- `new(testing.T)`, `&testing.T{}`, never handed to a test -- is a legal Go

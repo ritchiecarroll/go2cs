@@ -175,7 +175,7 @@ partial struct reg {
 }
 
 internal static ж<reg> newReg() {
-    return Ꮡ(new reg(nil));
+    return Ꮡ(new reg());
 }
 
 internal static @string add(this ref reg r, @string name) {
@@ -191,7 +191,7 @@ What to notice:
   rest at compile time: constructors, `==` and a Go-style `ToString()` ([Struct Types](#struct-types)).
   Lower-case Go names become `internal`, and capitalized ones become `public`.
 - **A slice is golib's `slice<T>`.** `[]string` becomes `slice<@string>` ([Slices and Arrays](#slices-and-arrays)).
-- **An empty struct literal passes `nil`.** Go's `reg{}` becomes `new reg(nil)`. It calls the generated
+- **An empty struct literal reads `new T()`.** Go's `reg{}` becomes `new reg()`. It calls the generated
   constructor that builds the zero `reg`, with every field at its zero value ([Struct Types](#struct-types)).
 - **A pointer is golib's heap box `ж<T>`** (read "zhe"). `*reg` becomes `ж<reg>`. In `&reg{}`, the
   function `Ꮡ(…)` takes the address: it boxes the new value on the heap and returns the `ж<reg>`. A name
@@ -252,7 +252,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ClosureSelfShadowCapture/main.cs.target:25#39ef92 · src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:81,98#9f6365 ·
   src/core/math/dim_asm.cs:11#710d59 · src/core/unicode/utf8/utf8.cs:20#83c559 (the Comments row: placement is best effort, see the Comments section)
   Glyph-brief facts: `goǃ` ends in U+01C3 (a Latin letter); `~` on ж<T> is src/core/golib/ж.cs:871#3d6147; `ꟷ`/`ᐧ` uses per the glyph table rows (golib const bool ꟷ = false, ᐧ = true).
-  `new reg(nil)`: the generator's nil constructor builds the zero value, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs (Struct Types section).
+  `new reg()`: the generator's parameterless constructor builds the zero value, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs (Struct Types section).
   License header always kept: Comments section ("Apart from the license header, Go's comments appear only with -comments"). -->
 
 | Section | Go | C# | Provided by |
@@ -317,7 +317,7 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:45#b0efbe and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:45#201bcf and UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
 src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:52#1baedb; GoCallVariations.cs.target:53#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
@@ -403,13 +403,13 @@ fmt.Println("accum total:", acc.total) // 12
 <!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:45-47 -->
 ```csharp
 …
-    var acc = Ꮡ(new accum(nil));
+    var acc = Ꮡ(new accum());
     bindAdd(acc);
     fmt.Println("accum total:", (~acc).total);
 ```
 
-`new accum(nil)` is the empty literal `accum{}`. Its `nil` is golib's `nil` value, and it selects the
-generated constructor that builds the zero value. Elsewhere, Go's `nil` usually becomes C#'s `default!`
+`new accum()` is the empty literal `accum{}`. It calls the generated parameterless constructor, which
+builds the zero value. Go's `nil` usually becomes C#'s `default!`
 ([Nil and Zero Values](#nil-and-zero-values)).
 
 `Ꮡ(…)` is Go's `&`: it puts the value in a `ж<accum>` box. `~acc` reads through the pointer, as Go's `*acc`
@@ -425,7 +425,7 @@ code, and the section that explains it in full.
 | Glyph or pattern | Meaning | Example | Explained in |
 |---|---|---|---|
 | `ж<T>`, `StandardBox<T>` | Go pointer `*T`: a golib heap box (read "zhe"). `StandardBox<T>` is the class a new box is created as when it holds its own value; other box kinds point into existing storage, such as an array element, a struct field or native memory | `ж<accum> Ꮡa`, `new StandardBox<Outer>(default(Outer))` | [Pointers](#pointers) |
-| `Ꮡ` | Address-of `&x`. As a prefix: a variable that holds a box, or a generated field reference that Go's `&s.f` uses | `Ꮡ(new accum(nil))`, `ᏑgOuter`, `Ꮡb.of(Buffer.Ꮡoff)` for `&b.off` | [Pointers](#pointers) |
+| `Ꮡ` | Address-of `&x`. As a prefix: a variable that holds a box, or a generated field reference that Go's `&s.f` uses | `Ꮡ(new accum())`, `ᏑgOuter`, `Ꮡb.of(Buffer.Ꮡoff)` for `&b.off` | [Pointers](#pointers) |
 | `~p` | Reads through a pointer, and panics on nil like Go's `*p` | `(~acc).total` | [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) |
 | `Δ` prefix | A name renamed to avoid a clash with a golib name, a method, `Main` or a namespace. go2cs and golib also use it for members they add themselves | `ΔGoFrame`, `ΔMonth`, `ΔMain`, `using Δio = io_package;` (`go.io` is also a namespace), golib's `array<T>.ΔClone()` | The naming rules in this section |
 | `Δ1` suffix | A second declaration of the same name: a variable that shadows an outer one, or a repeated `init` function | `hourΔ1`, `initΔ1` | [Shadowing](#short-variable-redeclaration-shadowing); repeated `init`: [Functions and Methods](#functions-and-methods) |
@@ -536,7 +536,7 @@ generated half of the `partial` type.
 
 <!-- receiver clamp: src/go2cs/visitFuncDecl.go:870-878#d781c1 (receiverAccess from :1925-1942#fc124b; getAccess at src/go2cs/identifierNaming.go:380#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:134 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:39#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
-<!-- new accum(nil): the generated NilType constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2141#653c7a; "an empty named-type literal passes nil" is the Struct Types section's rule. Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
+<!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2155#ff2b44, whose body is the NilType constructor's (:2141#653c7a); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
 <!-- The glyph tables' intended reference home is a names-and-glyphs reference page (naming.md), which does not exist yet; until it lands, this section links shadowing.md, which is also the Shadowing section's reference page. -->
 **Full detail:** [Reference → Shadowing the names go2cs itself spells](ConversionStrategies-Reference/shadowing.md#shadowing-the-names-go2cs-itself-spells-nil-golib-names-emitter-spelled-type-names-c-keywords) —
@@ -1709,7 +1709,7 @@ partial struct Buffer {
 internal static void Main() {
 …
     ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer(nil);
+    b = new Buffer();
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 …
@@ -1729,7 +1729,7 @@ second prints 1. Reading the C#, line by line:
 - A name starting with `Ꮡ` holds a box ([glyphs](#reading-converted-code-names-and-glyphs)).
   `heap<Buffer>(out var Ꮡb)` creates the box `Ꮡb` and returns a `ref` to the value inside it. So `b`
   reads and writes like the Go local.
-- `b = new Buffer(nil);` is Go's `b := Buffer{}`, kept as its own line. The `nil` argument picks the
+- `b = new Buffer();` is Go's `b := Buffer{}`, kept as its own line. It calls the generated
   constructor that sets every field to its Go zero value ([Nil and Zero Values](#nil-and-zero-values)).
 - A [source generator](#source-generators) adds that constructor. It
   also adds `Buffer.Ꮡoff`, a static accessor that names the `off` field ([Struct Types](#struct-types)).
@@ -2918,14 +2918,14 @@ internal static bool passThrough(ж<node> Ꮡp) {
 …
 internal static void Main() {
     fmt.Println(onlyNilCheck(nil));
-    fmt.Println(onlyNilCheck(Ꮡ(new node(nil))));
+    fmt.Println(onlyNilCheck(Ꮡ(new node())));
     fmt.Println(passThrough(nil));
-    fmt.Println(passThrough(Ꮡ(new node(nil))));
+    fmt.Println(passThrough(Ꮡ(new node())));
 ```
 
 `passThrough` forwards its pointer to `inner`, which only compares it with `nil`. Go's `main` calls
 `onlyNilCheck` and `passThrough` each once with `nil` and once with `&node{}`. Go and C# both print `nil`,
-`set`, `true`, `false`. `&node{}` becomes `Ꮡ(new node(nil))`: `new node(nil)` builds a zero-value `node`,
+`set`, `true`, `false`. `&node{}` becomes `Ꮡ(new node())`: `new node()` builds a zero-value `node`,
 and `Ꮡ(…)` boxes it and takes its address. A
 [source generator](#source-generators) completes the `partial struct`. `"nil"` and `"set"` are plain C# literals,
 returned as Go strings ([Strings](#strings-string-and-sstring)).
@@ -5674,7 +5674,7 @@ the source generator adds for the zero value, which takes golib's `nil` as its a
 ```
 <!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:63-67 -->
 ```csharp
-    var intStack = new Stack<nint>(nil);
+    var intStack = new Stack<nint>();
     intStack.Push(10);
     intStack.Push(20);
     var (val, _) = intStack.Pop();
@@ -9013,11 +9013,11 @@ The [generator template](../src/gen/go2cs-gen/Templates/StructType/StructTypeTem
 exact members.
 
 **A literal without field names passes the values in field order.** An omitted field keeps its zero value,
-and an empty literal `Thing{}` becomes `new Thing(nil)`. A pointer field `*T` is a golib `ж<T>` (read
+and an empty literal `Thing{}` becomes `new Thing()`. A pointer field `*T` is a golib `ж<T>` (read
 "zhe"): a heap box that holds or points at one `T` and plays the role of Go's `*T`
 ([Pointers](#pointers), [glyph table](#reading-converted-code-names-and-glyphs)). A `nil` argument is
 golib's `nil`:
-<!-- empty literal: src/tests/Behavioral/LocalStructFieldAddr/main.go:88 `t := Thing{}` -> main.cs.target:88 `var t = new Thing(nil);` -->
+<!-- empty literal: src/tests/Behavioral/LocalStructFieldAddr/main.go:88 `t := Thing{}` -> main.cs.target:88 `var t = new Thing();` -->
 
 <!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.go:5-20 -->
 ```go
@@ -9428,7 +9428,7 @@ public static bool IsDr(this Record p) {
 …
 internal static void Main() {
 …
-    var record = new Record(nil);
+    var record = new Record();
     record.name = "Dr. Michał";
     record.age = 18;
     record.position = "software engineer";
@@ -9455,9 +9455,9 @@ Some other things in this example that the reader will see throughout converted 
 - `@string` is golib's Go string. A literal in a `string` slot, such as `"Dr. Michał"` or the `"Dr"`
   argument, is a plain C# literal that golib converts once and shares; a literal in a comparison, such as
   `"manager"u8`, is a C# UTF-8 literal compared in place ([Strings](#strings-string-and-sstring)).
-- `new Record(nil)` is Go's empty literal `Record{}`. Every empty struct literal calls the struct's generated
-  constructor, and the `nil` argument only selects the one that builds the zero value. A declared
-  `var r Record` is also built by that constructor, instead of C# `default`, because `Record` embeds
+- `new Record()` is Go's empty literal `Record{}`. Every empty struct literal calls the struct's generated
+  parameterless constructor, which builds the zero value. A declared `var r Record` is built the same
+  way, by the generated `new(nil)` constructor, instead of C# `default`, because `Record` embeds
   ([Struct Types](#struct-types)).
 <!-- Accuracy: not every embedding struct takes this form. A struct that embeds only a same-package interface
 keeps a plain field (reverse below is built as `new reverse(data)`), and a zero value golib makes as
@@ -9978,7 +9978,7 @@ fmt.Println("assert-back:", ok, c.Total(), back == c) // true 11 true
 <!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:131-142 -->
 ```csharp
 …
-var c = Ꮡ(new Counter(nil));
+var c = Ꮡ(new Counter());
 Incrementer inc = new CounterжIncrementer(c);
 inc.Inc();
 inc.Inc();
@@ -9996,7 +9996,7 @@ Reading the C#, line by line:
 
 - The printed labels are plain C# literals, which go2cs-gen boxes as Go strings for `fmt.Println`
   ([Strings](#strings-string-and-sstring)).
-- `new Counter(nil)` is the empty literal `Counter{}`: the `nil` argument picks the constructor that makes
+- `new Counter()` is the empty literal `Counter{}`: it calls the generated constructor that makes
   the zero value ([Struct Types](#struct-types)). `Ꮡ(…)` boxes it, so `c` is a `ж<Counter>`.
 - `c.Value` is the struct inside the box, so `c.Value.n = 10` is Go's `c.n = 10`.
 - Because the adapter holds the box itself, `inc.Inc()` changes the `Counter` that `c` points to, as in Go.
@@ -10197,7 +10197,7 @@ func main() {
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:48-60, 90 -->
 ```csharp
 internal static void Main() {
-    var t = reflect.TypeOf(new record(nil));
+    var t = reflect.TypeOf(new record());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
@@ -10220,7 +10220,7 @@ A few names in that C# need a word:
   `fmt.Println`, whose arguments are Go `any`, as a Go string ([Strings](#strings-string-and-sstring),
   [Empty Interface](#empty-interface-any)).
 - `"…"u8` is a C# UTF-8 literal, which golib reads as a Go string.
-- `new record(nil)` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
+- `new record()` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
   struct for the zero value ([Struct Types](#struct-types)).
 - `fΔ1` is the loop's `f`. It is renamed because the function declares another `f` after the loop, and C#
   does not allow an inner block to reuse a name its enclosing block declares
@@ -11568,7 +11568,7 @@ partial struct Buffer {
 }
 …
     ref var b = ref heap<Buffer>(out var Ꮡb);
-    b = new Buffer(nil);
+    b = new Buffer();
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 …
 public static void PrintValPtr(ж<nint> Ꮡptr) {
@@ -11583,7 +11583,7 @@ Reading the C# line by line:
 
 - Go takes the address of `b.off`, so `b` needs a box. golib's `heap(…)` allocates a box
   `Ꮡb` (a `ж<Buffer>`), and `b` is a C# `ref` to the value inside it ([Pointers](#pointers)).
-- `new Buffer(nil)` is a generated constructor. Passing golib's `nil` asks for the zero value, as Go's
+- `new Buffer()` is a generated constructor. It builds the zero value, as Go's
   `Buffer{}` does. Unlike C#'s `default`, it also allocates what a Go zero value needs, such as the
   storage of an array field ([Nil and Zero Values](#nil-and-zero-values)).
 - `Buffer.Ꮡoff` is a generated field reference: a static accessor that returns a `ref` to the `off`

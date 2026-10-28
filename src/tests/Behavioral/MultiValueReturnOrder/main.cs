@@ -58,13 +58,13 @@ internal static nint raise(ref nint n) {
 }
 
 internal static (nint, nint) throughPointer() {
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     var ᴛ6 = c.bump();
     return ((~c).n, ᴛ6);
 }
 
 internal static (ж<counter>, nint) pointerIdentity() {
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     return (c, c.bump());
 }
 
@@ -141,11 +141,11 @@ internal static void Main() {
     var (va, vb) = valueReceiverCall();
     fmt.Println("valueReceiverCall:", va, vb);
 
-    var nd = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
+    var nd = Ꮡ(new node(pat: Ꮡ(new counter())));
     var (fa, fb) = pointerFieldUnrelated(ref (nd).DerefOrNull());
     fmt.Println("pointerFieldUnrelated:", fa, fb);
 
-    var nd2 = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
+    var nd2 = Ꮡ(new node(pat: Ꮡ(new counter())));
     var (ga, gb) = pointerFieldSame(ref (nd2).DerefOrNull());
     fmt.Println("pointerFieldSame:", ga, gb);
 

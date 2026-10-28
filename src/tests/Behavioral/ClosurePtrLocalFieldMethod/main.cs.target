@@ -27,7 +27,7 @@ internal static partial void run(Action f) {
 }
 
 internal static partial ж<cachelike> alloc() {
-    return Ꮡ(new cachelike(nil));
+    return Ꮡ(new cachelike());
 }
 
 internal static (nint, nint) allocShape() {
@@ -46,7 +46,7 @@ partial struct gauge {
 }
 
 internal static partial ж<gauge> newGauge() {
-    return Ꮡ(new gauge(nil));
+    return Ꮡ(new gauge());
 }
 
 internal static nint namedAfterType() {

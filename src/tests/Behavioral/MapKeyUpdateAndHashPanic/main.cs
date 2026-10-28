@@ -273,7 +273,7 @@ internal static void reflectSide() {
     var nilmʗ2 = nilm;
     var sliceʗ4 = Δslice;
     @try("reflect delete []int on nil map", () => {
-        nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflectꓸValue(nil));
+        nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflectꓸValue());
     });
 
     var fm = reflect.MakeMap(reflect.MapOf(reflect.TypeFor<float64>(), reflect.TypeFor<bool>()));

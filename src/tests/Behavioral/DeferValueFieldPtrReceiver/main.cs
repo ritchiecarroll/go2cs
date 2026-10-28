@@ -35,11 +35,11 @@ internal static void run(this ж<builder> Ꮡb) {
 }
 
 internal static void Main() {
-    var b = Ꮡ(new builder(nil));
+    var b = Ꮡ(new builder());
     b.run();
     fmt.Println("after:", (~b).c.n);
 
-    var x = Ꮡ(new builder(nil));
+    var x = Ꮡ(new builder());
     var xʗ1 = x;
     func(() => {
         GoFrame ᒐ = default;

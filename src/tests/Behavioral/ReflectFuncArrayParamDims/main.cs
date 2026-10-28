@@ -73,7 +73,7 @@ internal static void Main() {
 }
 
 internal static void reportMethod() {
-    var t = reflect.TypeOf(new filler(nil));
+    var t = reflect.TypeOf(new filler());
 
     var (m, ok) = t.MethodByName("FillPtr");
     if (!ok) {
@@ -85,7 +85,7 @@ internal static void reportMethod() {
     fmt.Println("method ptr param: kind =", ptr.Kind(), "elem =", elem, "len =", elem.Len());
 
     var reply = reflect.New(elem);
-    m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), reflect.ValueOf((nint)7), reply}.slice());
+    m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler()), reflect.ValueOf((nint)7), reply}.slice());
     fmt.Println("filled through the pointer:", reply.Elem().Interface());
 
     (var s, ok) = t.MethodByName("SumArray");
@@ -102,7 +102,7 @@ internal static void reportMethod() {
         arg.Index(i).SetInt((int64)(i + 1));
     }
 
-    var @out = s.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), arg}.slice());
+    var @out = s.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler()), arg}.slice());
     fmt.Println("method sum:", @out[0].Int());
 }
 

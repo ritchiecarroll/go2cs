@@ -66,10 +66,10 @@ internal static void Main() {
     var (nd, _) = reflect.TypeOf((ж<Notifier>)nil).Elem().MethodByName("Done");
     fmt.Println("own interface method:", nd.Type, nd.Type.Out(0).ChanDir());
 
-    var (eq, _) = reflect.TypeOf(new R(nil)).MethodByName("Equal");
+    var (eq, _) = reflect.TypeOf(new R()).MethodByName("Equal");
     fmt.Println("value method:", eq.Type, eq.Type.In(1).ChanDir());
 
-    var (feed, _) = reflect.TypeOf(Ꮡ(new S(nil))).MethodByName("Feed");
+    var (feed, _) = reflect.TypeOf(Ꮡ(new S())).MethodByName("Feed");
     fmt.Println("pointer method:", feed.Type, feed.Type.In(1).ChanDir());
 
     fmt.Println("identical:", AreEqual(reflect.TypeOf(recvLocal), reflect.TypeOf(bidiLocal)));

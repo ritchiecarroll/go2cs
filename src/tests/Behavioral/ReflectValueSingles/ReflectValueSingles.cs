@@ -185,8 +185,8 @@ internal static void Main() {
 
     fmt.Println("Name gB[gA]:", reflect.TypeOf(@new<gB<gA>>()).Elem().Name());
     fmt.Println("Name gB[gB[gA]]:", reflect.TypeOf(@new<gB<gB<gA>>>()).Elem().Name());
-    fmt.Println("String gB[gA]:", reflect.TypeOf(new gB<gA>(nil)).String());
-    fmt.Println("Name plain gA:", reflect.TypeOf(new gA(nil)).Name());
+    fmt.Println("String gB[gA]:", reflect.TypeOf(new gB<gA>()).String());
+    fmt.Println("Name plain gA:", reflect.TypeOf(new gA()).Name());
 
     var m5 = new map<Δio.Reader, Δio.Writer>();
     var mv5 = reflect.ValueOf(m5);
@@ -303,7 +303,7 @@ internal static void Main() {
     canRow((IntChanRecv)default, (channel<nint>)(default));
     canRow((IntChanSend)default, /*<-*/channel<nint>.RecvOnly);
     canRow((IntChanRecv)default, (IntChanSend)default);
-    var cst = reflect.TypeOf(new main_chanSlots(nil));
+    var cst = reflect.TypeOf(new main_chanSlots());
     fmt.Println("IntChanRecv identity value/slot/elem:", AreEqual(reflect.TypeOf((IntChanRecv)default), cst.Field(0).Type), AreEqual(reflect.TypeOf((IntChanRecv)default), reflect.TypeOf((ж<IntChanRecv>)nil).Elem()), cst.Field(0).Type.ChanDir());
     fmt.Println("IntChanSend identity value/slot/elem:", AreEqual(reflect.TypeOf((IntChanSend)default), cst.Field(1).Type), AreEqual(reflect.TypeOf((IntChanSend)default), reflect.TypeOf((ж<IntChanSend>)nil).Elem()), cst.Field(1).Type.ChanDir());
     fmt.Println("chan slot zero re-describes:", reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir());
@@ -313,7 +313,7 @@ internal static void Main() {
     canRow((MyBytesArrayPtr0)nil, ж<array<byte>>.NilBoxOfDims(0L));
     canRow((MyBytesArrayPtr)nil, ж<array<byte>>.NilBoxOfDims(4L));
     canRow((MyBytesArrayPtr)nil, (MyBytesArrayPtr0)nil);
-    var pst = reflect.TypeOf(new main_ptrSlots(nil));
+    var pst = reflect.TypeOf(new main_ptrSlots());
     fmt.Println("MyBytesArrayPtr identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4)))), pst.Field(0).Type), AreEqual(reflect.TypeOf((MyBytesArrayPtr)nil), reflect.TypeOf((ж<MyBytesArrayPtr>)nil).Elem()), pst.Field(0).Type.Elem().Len());
     fmt.Println("MyBytesArrayPtr0 identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0)))), pst.Field(1).Type), AreEqual(reflect.TypeOf((MyBytesArrayPtr0)nil), reflect.TypeOf((ж<MyBytesArrayPtr0>)nil).Elem()), pst.Field(1).Type.Elem().Len());
     fmt.Println("ptr slot New re-describes:", reflect.TypeOf(reflect.New(pst.Field(1).Type).Elem().Interface()), reflect.New(pst.Field(0).Type).Elem().Type().Elem().Len());

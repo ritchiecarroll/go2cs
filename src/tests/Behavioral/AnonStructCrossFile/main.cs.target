@@ -21,8 +21,8 @@ internal static void Main() {
         fmt.Println((~q).name, (~q).want);
     }
 
-    fmt.Println(new Bee(nil).probe());
-    fmt.Println(new Why(nil).probe());
+    fmt.Println(new Bee().probe());
+    fmt.Println(new Why().probe());
 }
 
 } // end main_package

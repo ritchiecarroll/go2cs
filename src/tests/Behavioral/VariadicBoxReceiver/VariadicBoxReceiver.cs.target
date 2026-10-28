@@ -20,7 +20,7 @@ internal static void with(ж<sink> Ꮡs, Action<ж<sink>> f) {
 }
 
 internal static void Main() {
-    var s = Ꮡ(new sink(nil));
+    var s = Ꮡ(new sink());
     with(s, (ж<sink> c) => {
         c.add(0xff);
         c.add(1, 2, 3);
@@ -30,7 +30,7 @@ internal static void Main() {
     });
     fmt.Println((~s).buf);
 
-    var t = Ꮡ(new sink(nil));
+    var t = Ꮡ(new sink());
     t.add(7);
     t.add((byte)(rune)'A', (byte)(rune)'B');
     fmt.Println((~t).buf);

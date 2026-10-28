@@ -27,11 +27,11 @@ internal static UntypedInt kSquare => 3;
 internal static UntypedInt kLast => 4;
 
 internal static shape lookup(nint i) {
-    return new golib.SparseArray<shape>{[kCircle] = new circle(nil), [kSquare] = new square(nil)
+    return new golib.SparseArray<shape>{[kCircle] = new circle(), [kSquare] = new square()
     }.array(4)[i];
 }
 
-internal static array<shape> registry = new golib.SparseArray<shape>{[kCircle] = new circle(nil), [kSquare] = new square(nil)
+internal static array<shape> registry = new golib.SparseArray<shape>{[kCircle] = new circle(), [kSquare] = new square()
 }.array(4);
 
 partial struct hashKind /*num:nuint*/;
@@ -39,7 +39,7 @@ partial struct hashKind /*num:nuint*/;
 internal static hashKind hCircle => 5;
 internal static hashKind hSquare => 6;
 
-internal static array<shape> byKind = new golib.SparseArray<shape>{[(int)((nuint)hCircle)] = new circle(nil), [(int)((nuint)hSquare)] = new square(nil)
+internal static array<shape> byKind = new golib.SparseArray<shape>{[(int)((nuint)hCircle)] = new circle(), [(int)((nuint)hSquare)] = new square()
 }.array(7);
 
 internal static void Main() {

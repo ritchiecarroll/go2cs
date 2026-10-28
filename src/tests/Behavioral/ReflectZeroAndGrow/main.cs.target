@@ -66,10 +66,10 @@ internal static void Main() {
     z("map empty", new map<@string, nint>{});
     z("*int nil", (ж<nint>)nil);
 
-    z("inner{}", new inner(nil));
+    z("inner{}", new inner());
     z("inner{S:val}", new inner(S: ((NS)(@string)valˢ)));
     z("inner{N:1}", new inner(N: 1));
-    z("outer{}", new outer(nil));
+    z("outer{}", new outer());
     z("outer{A:NA{0,1}}", new outer(A: new NA(new uint8[]{0, 1}.array())));
     z("outer{I.S:x}", new outer(I: new inner(S: ((NS)(@string)"x"u8))));
     ref var n = ref heap<nint>(out var Ꮡn);
@@ -80,9 +80,9 @@ internal static void Main() {
     fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf((any)((NS)(@string)""u8)).IsZero());
     fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v"u8)).IsZero());
 
-    z("outer{E:nil}", new outer(nil));
+    z("outer{E:nil}", new outer());
     z("outer{E:err}", new outer(E: errors.New("x")));
-    var ev = reflect.ValueOf(Ꮡ(new outer(nil))).Elem().FieldByName("E");
+    var ev = reflect.ValueOf(Ꮡ(new outer())).Elem().FieldByName("E");
     fmt.Println("field E kind:", ev.Kind(), "IsZero:", ev.IsZero());
     var ev2 = reflect.ValueOf(Ꮡ(new outer(E: errors.New("x")))).Elem().FieldByName("E");
     fmt.Println("field E set kind:", ev2.Kind(), "IsZero:", ev2.IsZero());

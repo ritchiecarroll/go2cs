@@ -37,7 +37,7 @@ internal static void Main() {
         ok2 && secondPort > 0, ok1 && ok2 && firstPort != secondPort);
 
     var armErr = first._<ж<Δnet.TCPListener>>().SetDeadline(time.Now().Add(time.ΔHour));
-    var clearErr = first._<ж<Δnet.TCPListener>>().SetDeadline(new time.Time(nil));
+    var clearErr = first._<ж<Δnet.TCPListener>>().SetDeadline(new time.Time());
     fmt.Printf("listener1: deadlineAccepted=%v deadlineClearAccepted=%v\n"u8, armErr == nil, clearErr == nil);
 
     var closeErr = second.Close();

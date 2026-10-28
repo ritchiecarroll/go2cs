@@ -72,12 +72,12 @@ internal static array<byte> resetVia(ж<DeepHash> Ꮡp) {
 }
 
 internal static void Main() {
-    var h = Ꮡ(new Hash(nil));
+    var h = Ꮡ(new Hash());
     h.Write(slice<byte>("go2cs"u8));
     fmt.Println(h.Sum(default));
     fmt.Println((~h).finalized);
 
-    var d = Ꮡ(new DeepHash(nil));
+    var d = Ꮡ(new DeepHash());
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
     ref var @out = ref heap(new array<byte>(4), out var Ꮡout);
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);

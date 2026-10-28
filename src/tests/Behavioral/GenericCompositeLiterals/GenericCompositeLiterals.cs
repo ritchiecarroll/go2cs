@@ -28,7 +28,7 @@ public static nint Size<T>(this ref Queue<T> q) {
 }
 
 internal static void Main() {
-    var intQueue = new Queue<nint>(nil);
+    var intQueue = new Queue<nint>();
     intQueue.Enqueue(10);
     intQueue.Enqueue(20);
     fmt.Printf("Int queue size: %d\n"u8, intQueue.Size());
@@ -44,8 +44,8 @@ internal static void Main() {
     fmt.Printf("Float queue size: %d\n"u8, floatQueue.Size());
 
     var queues = new any[]{
-        new Queue<nint>(nil),
-        new Queue<@string>(nil),
+        new Queue<nint>(),
+        new Queue<@string>(),
         new Queue<bool>(items: new bool[]{true, false}.slice())
     }.slice();
     fmt.Printf("Number of queues: %d\n"u8, len(queues));

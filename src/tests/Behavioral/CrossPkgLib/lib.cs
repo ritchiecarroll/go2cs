@@ -44,7 +44,7 @@ partial interface Labeled {
     @string Label();
 }
 
-internal static Labeled _ᴛ1ʗ = new Sensor(nil);
+internal static Labeled _ᴛ1ʗ = new Sensor();
 
 public static @string Describe(Labeled l) {
     return l.Label();
@@ -64,7 +64,7 @@ public static nint Bump(this ref Meter m) {
 }
 
 public static ж<Meter> NewMeter() {
-    return Ꮡ(new Meter(nil));
+    return Ꮡ(new Meter());
 }
 
 partial interface Reporter {

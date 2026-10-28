@@ -29,7 +29,7 @@ internal static @string f(this embedWithUnexpMeth _) {
     return "f";
 }
 
-internal static unexpIface pinUnexpMethI = ((unexpIface)new embedWithUnexpMeth(nil));
+internal static unexpIface pinUnexpMethI = ((unexpIface)new embedWithUnexpMeth());
 
 partial interface LocalIface {
     @string G();

@@ -50,7 +50,7 @@ internal static void Main() {
     var m = new Managed(s: "managed");
     fmt.Println(c.v, w.v, p.a, p.b, m.s);
 
-    c = new Counter(nil);
+    c = new Counter();
     fmt.Println("cleared:", c.v);
 
     namedZeroSizeWrites();
@@ -71,7 +71,7 @@ internal static nint sideCalls;
 
 internal static nocopy side() {
     sideCalls++;
-    return new nocopy(nil);
+    return new nocopy();
 }
 
 internal static void namedZeroSizeWrites() {
@@ -79,12 +79,12 @@ internal static void namedZeroSizeWrites() {
     x.V = pattern;
     var rx = reflect.ValueOf(Ꮡx).Elem();
 
-    rx.Field(0).Set(reflect.ValueOf(new nocopy(nil)));
+    rx.Field(0).Set(reflect.ValueOf(new nocopy()));
     fmt.Printf("after reflect Set: %#x\n"u8, x.V);
 
     x.V = pattern;
     var rp = rx.Field(0).Addr().Interface()._<ж<nocopy>>();
-    rp.Value = new nocopy(nil);
+    rp.Value = new nocopy();
     fmt.Printf("after write through reflect's pointer: %#x\n"u8, x.V);
 
     fmt.Println("reflect Addr == &x.Z:", (uintptr)rx.Field(0).Addr().UnsafePointer() == @unsafe.Pointer.FromPinnedBox(Ꮡx.of(Carrier.ᏑZ)));

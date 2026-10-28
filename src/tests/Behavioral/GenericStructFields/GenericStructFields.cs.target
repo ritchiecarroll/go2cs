@@ -57,7 +57,7 @@ internal static void Main() {
     Δpool<nint> pl = default;
     pl.items = append(pl.items, (nint)7, (nint)8);
     var (v, ok) = pl.take();
-    fmt.Println(v, ok, new keeper(nil).pool());
+    fmt.Println(v, ok, new keeper().pool());
 
     var w = new wrapped<@string>(tag: new tag<@string>(label: "gen"), count: 2);
     fmt.Println(w.label, w.tag.show(), w.count);

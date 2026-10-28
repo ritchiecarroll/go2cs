@@ -562,6 +562,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
 
     [TestMethod]
+    public void CheckEmptyStructLiteralCtor() => CheckTarget("EmptyStructLiteralCtor");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]

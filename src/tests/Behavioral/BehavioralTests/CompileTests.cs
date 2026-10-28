@@ -559,6 +559,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
 
     [TestMethod]
+    public void CheckEmptyStructLiteralCtor() => CheckTarget("EmptyStructLiteralCtor");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]

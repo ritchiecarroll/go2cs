@@ -57,7 +57,7 @@ partial struct Outer {
 
 internal static nint promotedValueEmbed() {
     ref var o = ref heap<Outer>(out var Ꮡo);
-    o = new Outer(nil);
+    o = new Outer();
     var p = Ꮡo.of(Outer.Ꮡev);
     p.Value = 33;
     return o.ev;
@@ -85,7 +85,7 @@ internal static void Main() {
     fmt.Println(plainFunc());
     fmt.Println(nestedChain());
     fmt.Println(pointerHop());
-    var t = new Thing(nil);
+    var t = new Thing();
     fmt.Println(t.methodBody());
     fmt.Println(promotedValueEmbed());
     fmt.Println(compositePos());

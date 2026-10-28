@@ -35,7 +35,7 @@ internal static void Main() {
         fmt.Println(s.describe());
     }
 
-    var c = Ꮡ(new cfg(nil));
+    var c = Ꮡ(new cfg());
     foreach (var (_, apply) in Appliers) {
         apply(c);
     }

@@ -7,7 +7,7 @@ using go.TypeAssertionSource;
 partial class mid_package {
 
 public static lib.RW Get() {
-    return new lib.ImplжRW(Ꮡ(new lib.Impl(nil)));
+    return new lib.ImplжRW(Ꮡ(new lib.Impl()));
 }
 
 partial struct Other {

@@ -24,7 +24,7 @@ partial struct top {
 }
 
 internal static void Main() {
-    var x = new top(nil);
+    var x = new top();
     x.n = 1;
     x.p = 9;
     x.m = 2;

@@ -76,13 +76,13 @@ internal static void Main() {
     bump(ref (c.of(wrapper.Ꮡa)).DerefOrNull());
     fmt.Println(b.w.a, readBack(Ꮡb));
 
-    var s = new shadowed(nil);
+    var s = new shadowed();
     s.fn = 5;
     s.ctxt.fn = 7;
     s.tag = 9;
     fmt.Println(s.fn, s.ctxt.fn, s.tag);
 
-    var d = new derived(nil);
+    var d = new derived();
     d.id = 5;
     d.tag = 1;
     fmt.Println(d.id, d.tag, d.twice());

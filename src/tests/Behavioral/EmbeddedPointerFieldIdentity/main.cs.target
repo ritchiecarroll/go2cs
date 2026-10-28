@@ -25,7 +25,7 @@ partial struct wrapper {
 }
 
 internal static void Main() {
-    var o = Ꮡ(new outer(nil));
+    var o = Ꮡ(new outer());
     fmt.Println("depth1:", o.of(outer.Ꮡin) == o.of(outer.Ꮡin));
     fmt.Println("depth2:", o.of(outer.Ꮡin).of(inner.Ꮡv) == o.of(outer.Ꮡin).of(inner.Ꮡv));
 
@@ -34,7 +34,7 @@ internal static void Main() {
     m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = "second";
     fmt.Println("map entries:", len(m), m[o.of(outer.Ꮡin).of(inner.Ꮡv)]);
 
-    var h = Ꮡ(new holder(nil));
+    var h = Ꮡ(new holder());
     var w = Ꮡ(new wrapper(holder: h));
     fmt.Println("promoted struct:", w.of(wrapper.Ꮡc) == h.of(holder.Ꮡc));
     fmt.Println("promoted field:", w.of(wrapper.Ꮡc).of(core.Ꮡsema) == h.of(holder.Ꮡc).of(core.Ꮡsema));

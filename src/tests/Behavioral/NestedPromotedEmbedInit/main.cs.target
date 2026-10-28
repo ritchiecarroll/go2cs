@@ -25,7 +25,7 @@ internal static void Main() {
     p.Value.f.pad[0] = 65;
     fmt.Println((~p).f.width, (~p).f.name, (~p).f.pad[0]);
 
-    var r = Ꮡ(new printer(nil));
+    var r = Ꮡ(new printer());
     r.Value.f.width = 9;
     r.Value.f.pad[2] = 90;
     fmt.Println((~r).f.width, (~r).f.pad[2]);

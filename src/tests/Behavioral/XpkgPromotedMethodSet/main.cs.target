@@ -193,34 +193,34 @@ internal partial interface main_typeᴛ4 /*dyn*/ {
 }
 
 internal static void Main() {
-    report("Direct", new Direct(nil));
-    report("PtrDirect", new PtrDirect(nil));
-    report("Outer", new Outer(nil));
-    report("Five", new Five(nil));
-    report("GCounter", new GCounter(nil));
-    report("S6", new S6(nil));
-    report("Within", new Within(nil));
-    report("Shadow", new Shadow(nil));
-    report("Mixed", new Mixed(nil));
-    report("Broken", new Broken(nil));
-    report("Stamp", new Stamp(nil));
-    report("PtrStamp", new PtrStamp(nil));
-    report("BufP", new BufP(nil));
-    report("HideC", new HideC(nil));
-    report("OuterS5", new OuterS5(nil));
-    report("OuterFD", new OuterFD(nil));
-    report("OuterFS", new OuterFS(nil));
-    report("TT", new TT(nil));
+    report("Direct", new Direct());
+    report("PtrDirect", new PtrDirect());
+    report("Outer", new Outer());
+    report("Five", new Five());
+    report("GCounter", new GCounter());
+    report("S6", new S6());
+    report("Within", new Within());
+    report("Shadow", new Shadow());
+    report("Mixed", new Mixed());
+    report("Broken", new Broken());
+    report("Stamp", new Stamp());
+    report("PtrStamp", new PtrStamp());
+    report("BufP", new BufP());
+    report("HideC", new HideC());
+    report("OuterS5", new OuterS5());
+    report("OuterFD", new OuterFD());
+    report("OuterFS", new OuterFS());
+    report("TT", new TT());
 
-    probe("S5 dispatch Tok", () => fmt.Sprint(((any)new OuterS5(nil))._<main_type>().Tok().N));
+    probe("S5 dispatch Tok", () => fmt.Sprint(((any)new OuterS5())._<main_type>().Tok().N));
     probe("TT value has Error", () => {
-        var (_, okΔ1) = ((any)new TT(nil))._<main_typeᴛ1>(ᐧ);
+        var (_, okΔ1) = ((any)new TT())._<main_typeᴛ1>(ᐧ);
         return fmt.Sprint(okΔ1);
     });
 
-    fmt.Println(new Direct(nil), new Outer(nil), new Mixed(nil));
+    fmt.Println(new Direct(), new Outer(), new Mixed());
 
-    any f = new Five(nil);
+    any f = new Five();
 
     {
         var (t, okΔ2) = f._<main_type>(ᐧ); if (okΔ2) {
@@ -228,7 +228,7 @@ internal static void Main() {
         }
     }
 
-    any s6 = new S6(nil);
+    any s6 = new S6();
 
     {
         var (t, okΔ3) = s6._<main_type>(ᐧ); if (okΔ3) {
@@ -236,38 +236,38 @@ internal static void Main() {
         }
     }
 
-    var (_, ok) = ((any)new Stamp(nil))._<json.Unmarshaler>(ᐧ);
+    var (_, ok) = ((any)new Stamp())._<json.Unmarshaler>(ᐧ);
     fmt.Println("Stamp value is json.Unmarshaler:", ok);
-    (_, ok) = ((any)(Ꮡ(new Stamp(nil))))._<json.Unmarshaler>(ᐧ);
+    (_, ok) = ((any)(Ꮡ(new Stamp())))._<json.Unmarshaler>(ᐧ);
     fmt.Println("*Stamp is json.Unmarshaler:", ok);
-    (_, ok) = ((any)new PtrStamp(nil))._<json.Unmarshaler>(ᐧ);
+    (_, ok) = ((any)new PtrStamp())._<json.Unmarshaler>(ᐧ);
     fmt.Println("PtrStamp value is json.Unmarshaler:", ok);
-    (_, ok) = reflect.TypeOf(new Direct(nil)).MethodByName("Set");
+    (_, ok) = reflect.TypeOf(new Direct()).MethodByName("Set");
     fmt.Println("Direct value MethodByName Set:", ok);
-    (_, ok) = reflect.TypeOf(new PtrDirect(nil)).MethodByName("Set");
+    (_, ok) = reflect.TypeOf(new PtrDirect()).MethodByName("Set");
     fmt.Println("PtrDirect value MethodByName Set:", ok);
 
-    any l = new Broken(nil);
+    any l = new Broken();
     (_, ok) = l._<Δsync.Locker>(ᐧ);
     fmt.Println("Broken value is sync.Locker:", ok);
     fmt.Println("Name var:", Name);
 
-    probe("Where direct call", () => fmt.Sprint(new Direct(nil).Inner.Where()));
-    probe("Where via assert Direct", () => fmt.Sprint(((any)new Direct(nil))._<main_typeᴛ2>().Where()));
-    probe("Where via assert Outer", () => fmt.Sprint(((any)new Outer(nil))._<main_typeᴛ2>().Where()));
+    probe("Where direct call", () => fmt.Sprint(new Direct().Inner.Where()));
+    probe("Where via assert Direct", () => fmt.Sprint(((any)new Direct())._<main_typeᴛ2>().Where()));
+    probe("Where via assert Outer", () => fmt.Sprint(((any)new Outer())._<main_typeᴛ2>().Where()));
 
-    var d = Ꮡ(new Direct(nil));
+    var d = Ꮡ(new Direct());
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
     fmt.Println("Direct after Set through *Direct:", (~d).X);
 
-    var pd = new PtrDirect(Ꮡ(new inner.Inner(nil)));
+    var pd = new PtrDirect(Ꮡ(new inner.Inner()));
     ((any)pd)._<main_typeᴛ3>().Set(6);
     fmt.Println("PtrDirect after Set through the value:", pd.X);
 
     probe("SameP value methods", () => methods(reflect.TypeOf(mid.NewSameP())));
-    probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));
-    probe("SameV value methods", () => methods(reflect.TypeOf(new mid.SameV(nil))));
-    probe("SameV ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameV(nil)))));
+    probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP()))));
+    probe("SameV value methods", () => methods(reflect.TypeOf(new mid.SameV())));
+    probe("SameV ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameV()))));
     probe("SameP value Method(0) call", () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default)[0].Int()));
     probe("SameP value assert+call Ping", () => {
         var (p, okΔ4) = ((any)mid.NewSameP())._<main_typeᴛ4>(ᐧ);
@@ -279,12 +279,12 @@ internal static void Main() {
         return fmt.Sprint(p.Ping());
     });
     probe("SameV value assert Ping", () => {
-        var (_, okΔ5) = ((any)new mid.SameV(nil))._<main_typeᴛ4>(ᐧ);
+        var (_, okΔ5) = ((any)new mid.SameV())._<main_typeᴛ4>(ᐧ);
 
         return fmt.Sprint(okΔ5);
     });
     probe("*SameV assert+call Ping", () => {
-        var (p, okΔ6) = ((any)(Ꮡ(new mid.SameV(nil))))._<main_typeᴛ4>(ᐧ);
+        var (p, okΔ6) = ((any)(Ꮡ(new mid.SameV())))._<main_typeᴛ4>(ᐧ);
 
         if (!okΔ6) {
             return "not satisfied";

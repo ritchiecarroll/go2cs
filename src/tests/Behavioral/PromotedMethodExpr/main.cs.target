@@ -41,7 +41,7 @@ internal static void Main() {
     var (n, err) = write(Ꮡm, slice<byte>("expr"u8));
     fmt.Println("(*myType).Write:", n, err, Ꮡm.of(myType.ᏑBuffer).String());
 
-    var m2 = Ꮡ(new myType(nil));
+    var m2 = Ꮡ(new myType());
     
     var m2ʗ1 = m2;
     var wv = (slice<byte> p1) => m2ʗ1.Write(p1);

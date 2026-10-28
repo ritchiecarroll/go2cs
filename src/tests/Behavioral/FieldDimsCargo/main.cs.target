@@ -20,7 +20,7 @@ partial struct Target {
 }
 
 internal static void Main() {
-    var t = reflect.TypeOf(new Target(nil));
+    var t = reflect.TypeOf(new Target());
 
     fmt.Println("-- field types --");
 

@@ -96,7 +96,7 @@ internal static (bool, bool) zeroAgrees<T, Tᴀ>()
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
 internal static void Main() {
-    var ht = reflect.TypeOf(new host(nil));
+    var ht = reflect.TypeOf(new host());
     fmt.Println("fields:", ht.NumField());
     foreach (var (_, name) in new @string[]{"Plain", "inner", "tagged", "Named"}.slice()) {
         var (f, ok) = ht.FieldByName(name);
@@ -136,9 +136,9 @@ internal static void Main() {
     var hv = reflect.ValueOf(Ꮡh).Elem();
     hv.FieldByName("X").SetInt(7);
     var (promoted, promotedOK) = reflect.TypeOf(h).FieldByName("X");
-    var (_, ambiguous) = reflect.TypeOf(new clash(nil)).FieldByName("Y");
+    var (_, ambiguous) = reflect.TypeOf(new clash()).FieldByName("Y");
     fmt.Println("promoted through an unexported embed:", h.inner.X, hv.FieldByName("X").CanSet(), promotedOK, len(promoted.Index), promoted.Name, ambiguous);
-    fmt.Println("embed and plain unexported are read-only:", hv.FieldByName("inner").CanSet(), reflect.ValueOf(Ꮡ(new nested(nil))).Elem().Field(0).CanSet());
+    fmt.Println("embed and plain unexported are read-only:", hv.FieldByName("inner").CanSet(), reflect.ValueOf(Ꮡ(new nested())).Elem().Field(0).CanSet());
 
     var lit = new ж<inner>[]{default}.slice();
     var built = reflect.MakeSlice(reflect.TypeOf(lit), 1, 1);
