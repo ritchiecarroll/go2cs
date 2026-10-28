@@ -30415,4 +30415,62 @@ to the timed tip; the three re-cites are re-resolved against this base. The gate
 
 — G (2026-10-28)
 
+## 2026-10-28 — C2 (1.26.10.2 seat #26 N2, claude/c2-seat26-n2): a named numeric converts to any basic numeric in one cast — DONE on the seat branch
+
+**The change.** Go converts a named numeric to any numeric type in one step. The `num:` wrapper declared
+only its implicit operator to the underlying. C# composes that with an implicit widening, but not with a
+narrowing, a sign change or a float to an integer. So the converter hopped through the underlying:
+`(nint)(uint8)k`, `(int)(nuint)(x)`, `(int64)(int8)(c)`.
+
+- **go2cs-gen (additive).** A `num:` wrapper declares `explicit operator T(W) => (T)value.m_value` for every
+  basic numeric T (`int8` … `uint64`, `nint`, `nuint`, golib's `uintptr`, `float32`, `float64`).
+  - Each operator is the underlying's own C# conversion, so wrap-around and truncation match the hop.
+  - The underlying is skipped, and so is `nuint` over `uintptr` (the bridge declares it). A complex wrapper
+    takes none.
+- **Converter.** `namedNumericConvertsDirectly` holds for a non-generic, non-complex named numeric written
+  over a basic or a same-package named type. Where it holds, six named-to-basic hops drop their inner cast:
+  - a conversion FROM the named type;
+  - the TO branch's inner unwrap, `(hex)(uint64)(int32)off` -> `(hex)(uint64)off`;
+  - a `make` length;
+  - a slice bound;
+  - a shift count;
+  - an `int64` index.
+  A type written over another package's named type keeps its hop.
+
+**Prediction, posted before the reconvert, and the measurement.** Two seeded roots, three targets,
+`-stdlib -comments`, base `56e4fba06f`. 4,559 seeded `.cs` files per arm; both arms exit 0, in 653 s and 646 s.
+
+| Target | Files written per arm | Casts dropped: predicted (band) | Casts dropped: measured | Line pairs: predicted | Line pairs: measured | Files | pcensus N2 | Refused |
+|:--|--:|:--|--:|--:|--:|--:|:--|--:|
+| windows | 1,975 | ~508 (432–584) | 458 | ~432 | 393 | 126 | 393 | 0 |
+| linux | 2,049 | ~512 (435–589) | 471 | ~435 | 405 | 128 | 405 | 0 |
+| darwin | 2,042 | ~503 (428–578) | 465 | ~428 | 398 | 128 | 398 | 0 |
+
+- Mechanism HELD: every pair is N2, 0 refused, and there are 0 `package_info.cs` changes and 0
+  `GoPositionMap` lines, as predicted.
+- The specific numbers came in 8–10% under the point estimates, inside the band. The derivation took the
+  goldens' 92% move rate. Read against the stdlib population (552 / 557 / 547 qualifying double casts),
+  the rate there is 83–85%.
+- The rest of that population are double casts the seat does not touch, Go's own `float64(float32(x))`
+  among them. This is stated, not chased.
+
+**pcensus.** N2's canon and Old needed golib's sized names. The canon drops a sized cast that directly follows
+a parenthesis, in both lines, and compares runs of parens as one. That handles a parenthesized operand and
+an inner cast inside the outer cast's operand. Old requires the pair to lose a sized cast, because a count of
+double casts cannot see a chain that shares its middle cast. A cast before a rune literal stays C1's (plant).
+The measure keeps the plan's alternation, so its counts stay comparable with the plan table.
+
+**Behavioral.** Base vs N2 over 878 projects moves 17 projects: 17 files, 29 pairs, all N2. The 17 goldens
+are re-baselined and equal the N2 emission. Of the goldens' 42 double casts, 34 move. The 8 that stay are
+rune-literal (C1's), Go's own `float64(float32(x))`, and pointer or constant forms. IotaEnum (the plan's
+red-first golden) is among the 17.
+
+**Gates (this box, linux).**
+- GenTests: 349/349 pass. NamedNumericBasicConversionTests is RED at the base: 3 failed on CS0030.
+- `go test -count=1 ./...` in src/go2cs: green, repoguard included, once the goldens commit.
+- OLD-corpus backward gate: go2cs-stdlib.slnx (363 projects, the committed corpus) builds against the new gen with 0 errors and no CS0457, linux flavour, in 611 s.
+- The new emission's three-target build, and the behavioral battery, are the i7's legs.
+
+— C2 (2026-10-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
