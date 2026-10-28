@@ -131,15 +131,15 @@ internal static void walkChain(slice<byte> der) {
     finally { ᒐ.Run(); }
 }
 
-internal static void checkSSLPolicy(ж<syscall.CertChainContext> ᏑchainCtx) {
+internal static void checkSSLPolicy(ж<syscall.CertChainContext> chainCtx) {
     const uint32 allowUnknownCA = 0x00000010;
 
-    fmt.Println("policy match:", sslPolicyError(ᏑchainCtx, "go2cs.example", allowUnknownCA));
-    fmt.Println("policy mismatch:", sslPolicyError(ᏑchainCtx, "other.example", allowUnknownCA));
-    fmt.Println("policy untrusted:", sslPolicyError(ᏑchainCtx, "go2cs.example", 0));
+    fmt.Println("policy match:", sslPolicyError(chainCtx, "go2cs.example", allowUnknownCA));
+    fmt.Println("policy mismatch:", sslPolicyError(chainCtx, "other.example", allowUnknownCA));
+    fmt.Println("policy untrusted:", sslPolicyError(chainCtx, "go2cs.example", 0));
 }
 
-internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx, @string serverName, uint32 flags) {
+internal static @string sslPolicyError(ж<syscall.CertChainContext> chainCtx, @string serverName, uint32 flags) {
     var (servernamep, err) = syscall.UTF16PtrFromString(serverName);
     if (err != nil) {
         return "utf16 error";
@@ -160,7 +160,7 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
     status = new syscall.CertChainPolicyStatus();
     {
-        var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, ᏑchainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
+        var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, chainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
             return "call error: "u8 + errΔ1.Error();
         }
     }

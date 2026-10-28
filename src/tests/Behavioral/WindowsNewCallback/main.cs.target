@@ -58,7 +58,7 @@ internal static void Main() {
     fmt.Println("callback-panic-unwinds:", panicUnwindText(enumTimeFormatsEx));
 }
 
-internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> ᏑenumTimeFormatsEx) {
+internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> enumTimeFormatsEx) {
     @string @out = default;
     GoFrame ᒐ = default;
     try {
@@ -80,7 +80,7 @@ internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> ᏑenumTime
             }}
         }, ref ᒐ);
         uintptr localeNameUserDefault = 0;
-        ᏑenumTimeFormatsEx.Call(syscall.NewCallback(onTimeFormatPanics), localeNameUserDefault, 0, wantLParam);
+        enumTimeFormatsEx.Call(syscall.NewCallback(onTimeFormatPanics), localeNameUserDefault, 0, wantLParam);
         @out = "<no-panic>";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

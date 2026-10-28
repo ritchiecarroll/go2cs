@@ -59,8 +59,8 @@ public static void Set(this ref Lone l, nint d) {
 public static Level Default = new ΔToneжLevel(Ꮡ(new ΔTone(D: 3)));
 public static Level DefaultPlain = new PlainжLevel(Ꮡ(new Plain(D: 4)));
 
-public static Level Describe(ж<ΔTone> Ꮡt) {
-    return new ΔToneжLevel(Ꮡt);
+public static Level Describe(ж<ΔTone> t) {
+    return new ΔToneжLevel(t);
 }
 
 } // end tone_package
