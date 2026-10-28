@@ -56,6 +56,9 @@ P1	value-select	golden	330	123
 P2	of-field	prod	7638	524
 P2	of-field	test	1070	118
 P2	of-field	golden	292	82
+GD	hoisted-godefer-arg	prod	63	3
+GD	hoisted-godefer-arg	test	18	11
+GD	hoisted-godefer-arg	golden	49	20
 E1	else-newline-if	prod	837	325
 E1	else-newline-if	test	408	167
 E1	else-newline-if	golden	5	5
