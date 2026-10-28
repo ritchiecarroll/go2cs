@@ -195,7 +195,7 @@ func TestOwnLineOperandCommentsKeepTheirLines(t *testing.T) {
 		t.Errorf("the own-line comments are not on lines of their own:\n%s", strings.Join(lines[max(0, first-1):min(len(lines), first+3)], "\n"))
 	}
 
-	if next := strings.TrimSpace(lines[second+1]); !strings.HasPrefix(next, "(star && b == (rune)'*')") {
+	if next := strings.TrimSpace(lines[second+1]); !strings.HasPrefix(next, "(star && b == '*')") {
 		t.Errorf("the operand after the comments is %q, want it on the next line", next)
 	}
 
