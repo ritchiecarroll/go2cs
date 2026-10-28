@@ -38,6 +38,11 @@ moves emission across the corpus, so this release carries a **full re-bank**.
 | 12 | Signed release binaries: the release machine downloads the CI-built archives, Authenticode-signs the Windows executables in the release's PIN session, re-packs and re-uploads them, and GPG-signs `SHA256SUMS`; the attestation covers the bytes users download | release ritual + workflow | P1 |
 | 13 | Proof pages show visitor-facing disclosure reasons: each disclosure gains a rendered `reason` in the present tense and a non-rendered history field, and the proof pages are regenerated (the owner's ruling that pages reachable from go2cs.net carry no fleet language) | test tooling + docs | R |
 | 14 | A ReadyToRun publish of a converted program does not run out of memory on golib's nested generic types: the project template passes crossgen2's generic-cycle detection, and the profiles' ReadyToRun workaround comes off, gated on the single-file publish completing inside an 11 GiB memory limit | template + docs | P1 |
+| 15 | A type switch's `case int:` no longer also takes int32/rune, nor `case uint:` uint32 | converter | H (landed) |
+| 16 | A pointer to a native element equals the same element through any other native view | golib | P2 (landed) |
+| 17 | golib names a Go int32 `int32` and a byte `uint8` in its panic texts | golib | H (landed) |
+| 18 | Native AOT: golib's native struct marshalling stops building generic methods at run time, so a windows AOT program using `net` or TLS runs | golib | G |
+| 19-32 | The visual-parity train: all 17 items of the 2026-10-16 review, landed in one deferred-corpus window and regenerated once, per [`PLAN-parity-train.md`](PLAN-parity-train.md) (#19, E1, is the first) | converter + golib + gen | per that plan |
 
 **#1's NEWS text (breaking for compiled C#).** Release day lifts this verbatim into the 1.26.10.2 NEWS entry and the
 release notes:
