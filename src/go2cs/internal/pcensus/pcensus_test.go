@@ -375,7 +375,8 @@ func TestCountsAtPlanBase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(want) != b.String() {
+	// The golden is checked out with CRLF where the tree pins eol=crlf (a windows checkout); compare line content.
+	if strings.ReplaceAll(string(want), "\r\n", "\n") != b.String() {
 		t.Errorf("the census at %s moved from %s:\n%s", base, golden, b.String())
 	}
 

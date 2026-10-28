@@ -1257,7 +1257,7 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
 
-<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1868-1869 -->
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1871-1872 -->
 ```csharp
 private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
 { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
