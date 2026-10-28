@@ -74,6 +74,32 @@ func lambdaPair() func() (rune, bool) { pair := func() (rune, bool) { return 'b'
 func lambdaWide() func() uint16 { wide := func() uint16 { return 'u' }; return wide }
 func lambdaByte() func() byte   { small := func() byte { return 'z' }; return small }
 
+func taglessByte(c byte) int {
+	switch {
+	case c == '_':
+		return 1
+	case '0' <= c && c <= '9':
+		return 2
+	}
+	return 0
+}
+
+func trueTagByte(s string) int {
+	switch c := s[0]; true {
+	case c == '.':
+		return 1
+	}
+	return 0
+}
+
+func taglessRune(r rune) int {
+	switch {
+	case r == 'q':
+		return 1
+	}
+	return 0
+}
+
 func main() {
 	fmt.Println(compare('a', 'b'), arith('7', 1), caseRune('a'), elements(), argument(), untyped)
 	fmt.Println(typed())
@@ -84,6 +110,7 @@ func main() {
 		keepAstral(), keepConstExpr(), keepAnyCompare('k'), keepInferred(), keepVarInfer())
 	fmt.Println(lambdaReturn()(0), lambdaWide()(), lambdaByte()())
 	fmt.Println(lambdaPair()())
+	fmt.Println(taglessByte('_'), taglessRune('q'), trueTagByte("."))
 }
 `)
 
@@ -122,6 +149,12 @@ func main() {
 		{"lambdaPair(", "((rune)'b', true)"},
 		{"lambdaWide(", "=> (uint16)'u'"},
 		{"lambdaByte(", "=> (byte)'z'"},
+		// A tagless switch's case comparison is a C# pattern, whose constant must convert to a byte operand.
+		{"taglessByte(", "(byte)'_'"},
+		{"taglessByte(", "(byte)'0'"},
+		{"taglessByte(", "(byte)'9'"},
+		{"trueTagByte(", "(byte)'.'"},
+		{"taglessRune(", "'q'"},
 	} {
 		if body := funcBody(t, cs, want.fn); !strings.Contains(body, want.form) {
 			t.Errorf("%s does not render its rune literal as %q:\n%s", want.fn, want.form, body)

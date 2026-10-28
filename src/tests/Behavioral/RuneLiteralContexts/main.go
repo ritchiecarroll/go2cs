@@ -124,6 +124,25 @@ func main() {
 	done := make(chan rune)
 	go func(r rune) { done <- r }('g')
 	fmt.Println(tm["a"], tm["b"], tw, <-sel, <-done)
+
+	// A tagless switch's case comparison, which C# writes as a pattern, over byte, int8 and rune operands.
+	for _, c := range []byte("a_7.") {
+		var i8 int8 = int8(c)
+		switch {
+		case c == '_':
+			fmt.Println("underscore")
+		case '0' <= c && c <= '9' && i8 != '0':
+			fmt.Println("digit", c-'0')
+		case i8 == '.' || (c > 'z'):
+			fmt.Println("dot")
+		case rune(c) == 'a':
+			fmt.Println("letter a")
+		}
+		switch d := c; true {
+		case d == '.':
+			fmt.Println("true-tag dot")
+		}
+	}
 }
 
 func ident[T any](v T) T { return v }

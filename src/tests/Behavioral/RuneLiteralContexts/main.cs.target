@@ -133,6 +133,37 @@ internal static partial void Main() {
         doneʗ1.ᐸꟷ(rΔ2);
     }, (rune)'g', GoStack.Bounded);
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
+
+    foreach (var (_, c) in slice<byte>("a_7."u8)) {
+        int8 i8Δ1 = (int8)c;
+        switch (ᐧ) {
+        case {} when c is (byte)'_': {
+            fmt.Println("underscore");
+            break;
+        }
+        case {} when (byte)'0' <= c && c <= (byte)'9' && i8Δ1 != (int8)'0': {
+            fmt.Println("digit", (byte)(c - '0'));
+            break;
+        }
+        case {} when i8Δ1 == (int8)'.' || (c > (byte)'z'): {
+            fmt.Println("dot");
+            break;
+        }
+        case {} when (rune)c is 'a': {
+            fmt.Println("letter a");
+            break;
+        }}
+
+        {
+            var d = c;
+            switch (ᐧ) {
+            case {} when d is (byte)'.': {
+                fmt.Println("true-tag dot");
+                break;
+            }}
+        }
+
+    }
 }
 
 internal static T ident<T>(T v) {
