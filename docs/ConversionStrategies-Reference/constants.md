@@ -333,6 +333,9 @@ the type Go's type checker records for the literal and for its slot:
   too, so `uint16('c')` reads `(uint16)'c'`.
 - **One cast spelled as the target**, `(byte)'x'`, `(int8)'x'` or `(int16)'x'`, in the same typed
   slots of `byte`, `int8` or `int16`, in `append`'s byte elements, and as the operand of `byte('a')`.
+  A case comparison of a switch without a tag (or with the tag `true`) takes this form too, against a
+  `byte`, `int8` or `int16` operand: C# writes the case as a pattern, `c is (byte)'_'`, and a pattern's
+  constant must convert to the operand's type.
 - **`(rune)'x'`** everywhere else, where C# would infer, box or overload on a `char`: a `:=` or `var`
   without a type, an `any` or other interface slot, a variadic argument, a builtin such as `max`, a
   generic call, a named type such as `type letter rune`, `uintptr`, an index expression, and
@@ -451,7 +454,10 @@ and `TestRuneLiteralForms` in `src/go2cs` (each form and each keep arm by functi
      `var shrink = (rune r) => 'a';` (a Func<rune, char>). A func literal's return now spells its result
      type; the RuneLiteralContexts natural-type arms read a stack overflow under the bare form and match
      Go under the fix. Source census at 1.26.10: no production func literal in std returns a rune
-     literal (four test files and one cmd file do). -->
+     literal (four test files and one cmd file do). The same day the three-target build of the -stdlib
+     emission read CS0266 on `case s[i] == '_':` in internal/strconv and `case b >= '0' && …` in
+     internal/cpu (darwin): a tagless switch's case is a C# pattern. With the case rule all three targets
+     build with 0 errors. -->
 
 ## A computed untyped float constant materializes at its destination's float width
 A named untyped constant can still need its `Untyped*` wrapper because another use demands a different
