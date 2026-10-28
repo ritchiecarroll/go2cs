@@ -42,14 +42,14 @@ internal static void Main() {
     fmt.Println("val-assert", v.tag, v.Error());
 
     {
-        var (_, ok) = valueSourced()._<ж<myErr>>(ᐧ); if (ok){
+        var (_, ok) = valueSourced()._<ж<myErr>>(ᐧ); if (ok) {
             fmt.Println("ptr-miss-WRONG");
         } else {
             fmt.Println("ptr-miss-ok");
         }
     }
     {
-        var (_, ok) = pointerSourced()._<valErr>(ᐧ); if (ok){
+        var (_, ok) = pointerSourced()._<valErr>(ᐧ); if (ok) {
             fmt.Println("val-miss-WRONG");
         } else {
             fmt.Println("val-miss-ok");
@@ -74,7 +74,7 @@ internal static void Main() {
     }))();
 
     {
-        var (s, ok) = pointerSourced()._<main_type>(ᐧ); if (ok){
+        var (s, ok) = pointerSourced()._<main_type>(ᐧ); if (ok) {
             fmt.Println("iface-assert", s.Error());
         } else {
             fmt.Println("iface-assert-missed");

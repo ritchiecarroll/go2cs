@@ -12,7 +12,7 @@ internal static void Main() {
     foreach (var (_, rᴛ1) in s) {
         var r = rᴛ1;
 
-        if (r < 0x10000){
+        if (r < 0x10000) {
             @out = append(outᴷ, @out, (uint16)r);
         } else {
             r -= 0x10000;

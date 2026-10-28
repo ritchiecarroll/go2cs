@@ -28,7 +28,7 @@ internal partial interface main_type /*dyn*/ {
 internal static void Main() {
     fooer v = new gadget(1);
     {
-        var (_, ok) = v._<main_type>(ᐧ); if (ok){
+        var (_, ok) = v._<main_type>(ᐧ); if (ok) {
             fmt.Println("value-widened-wrong");
         } else {
             fmt.Println("value-not-widened-ok");
@@ -37,7 +37,7 @@ internal static void Main() {
 
     fooer p = new gadgetжfooer(Ꮡ(new gadget(2)));
     {
-        var (b, ok) = p._<main_type>(ᐧ); if (ok){
+        var (b, ok) = p._<main_type>(ᐧ); if (ok) {
             fmt.Println("pointer-widened-ok", b.Foo(), b.Bar());
         } else {
             fmt.Println("pointer-not-widened-wrong");

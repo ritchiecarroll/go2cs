@@ -43,7 +43,7 @@ internal static void Main() {
     reader r = new readCloserᴠreader(rc);
 
     {
-        var (p, ok) = r._<ж<conn>>(ᐧ); if (ok){
+        var (p, ok) = r._<ж<conn>>(ᐧ); if (ok) {
             p.Value.data = "mutated";
             fmt.Println("chain assert ok:", p.Read());
         } else {
@@ -69,7 +69,7 @@ internal static void Main() {
     reader vr = new readCloserᴠreader(vrc);
 
     {
-        var (_, ok) = vr._<ж<conn>>(ᐧ); if (ok){
+        var (_, ok) = vr._<ж<conn>>(ᐧ); if (ok) {
             fmt.Println("value chain WRONGLY asserted *conn");
         } else {
             fmt.Println("value chain misses *conn:", vr.Read());
@@ -77,7 +77,7 @@ internal static void Main() {
     }
 
     {
-        var (v, ok) = vr._<valConn>(ᐧ); if (ok){
+        var (v, ok) = vr._<valConn>(ᐧ); if (ok) {
             fmt.Println("value chain asserts valConn:", v.tag);
         } else {
             fmt.Println("value chain MISSED valConn");
@@ -101,7 +101,7 @@ internal static void Main() {
 
     reader empty = default!;
     {
-        var (_, ok) = empty._<ж<conn>>(ᐧ); if (ok){
+        var (_, ok) = empty._<ж<conn>>(ᐧ); if (ok) {
             fmt.Println("nil interface WRONGLY asserted");
         } else {
             fmt.Println("nil interface misses");

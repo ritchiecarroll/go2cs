@@ -1,0 +1,42 @@
+# Seat #19 (E1: `} else if (cond) {` on one line, `) {` before a condition's brace) -- the LANE's measurement at its branch base, i.e. the seat's PREDICTION of record under PLAN-parity-train §3.2; the rung of record is the i7's at landing.
+key	value
+base	5931bad29b7da09c17b14d23cb9bfd1d5ff94464
+seat_tip_converter	10cdb08ab13d531da763089064ccc50d4ed1b93e
+arm_A_commit	7516fb9926cbc52204bc7e08061ba0155b293b69
+arm_A_src_go2cs_tree	2117b6585ce52a9c945c14e51f9b47fdc32e4eb4
+arm_A_sha256	92eff1a78025d72f782a42f103e3804f6882513615b58ebf5064ba5f570e5238
+arm_B_src_go2cs_tree	66ba1c761bcaaf9e820d0ce252acd3f7a257eba0
+arm_B_sha256	3cfacc1e75b391b3301d4d98f8a0c98a9fb83958f2e21648c8c59cb9cabae6e7
+build	go build -trimpath -buildvcs=false, from git archive of each commit's src/go2cs
+go	go1.26.10 windows/amd64
+emission	-stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64, one invocation per arm, each arm its own root seeded by git archive of base (src/core, src/version.props, docs/validation, docs/ValidatedTestPackages.md)
+write_assertions	both arms rc 0; degraded 0; failed 0 on each target; misrouted (namespace go.std) 0; stage .cs 4559 per target per arm; arm A rewrote 0 files (the committed tree is the base fixed point); arm B rewrote 852 .cs
+classifier	every differing .cs/.cs.auto equals model(BEFORE) byte for byte (R1 join `} else`+`if (`; R2 join `} else`+`{`; R3 `){`->`) {` except a composite literal's `>(N){`); every differing package_info.cs differs only in GoPositionMap records, each equal to BEFORE's table and per-call half shifted up by its file's joins, Go-line halves unchanged
+unexplained	0 (union and each target; the run reports conversion_report.html and stdlib_conversion_progress.txt differ by run timing only and are excluded)
+#
+target	files	added	deleted	joins	sources	package_info	records	patch_sha256_crlf_stripped
+windows	711	3965	4677	712	600 .cs + 8 .cs.auto	103	272	724b02911a47ef1e30e960d708e8a41f69390d84b379e6f47a9a37ffbb517962
+linux	718	4018	4752	734	609 .cs + 6 .cs.auto	103	281	4f327f03ffbd5dcca364498f6c18ed237fa31fc2c4df7d6c8371ed88052d1334
+darwin	716	3989	4711	722	608 .cs + 5 .cs.auto	103	281	3e249d83b46366eb97647376e0bbc7719513034361ab909cc305a1cd6b579066
+union	861	-	-	892	721 .cs + 9 .cs.auto	131	434	-
+#
+quantity	predicted (posted before the run)	measured (union)	score
+mechanism	AFTER == model(BEFORE), records shifted by joins	0 unexplained	MET
+files	654 .cs + 10 .cs.auto	721 .cs + 9 .cs.auto	MISSED (predicate)
+R1 joins	713 + 1 (.auto)	834 + 1 (.auto)	MISSED (predicate)
+R2 joins	47	57	MISSED (predicate)
+R3 spacings	3191 + 22 (.auto)	3864 + 18 (.auto)	MISSED (predicate)
+GoPositionMap	299 records (files with a join)	434 records over 336 source files	MISSED (predicate, and counted files not records)
+hand-owned untouched	79	12 whole-file hand-owns carrying the old shapes, untouched	MISSED (predicate)
+spacing-only files keep their record	yes	yes (0 records changed without a join)	MET
+#
+# THE MISS, attributed: the prediction's hand-own predicate was a substring test for "[module: GoManualConversion]". It (a) matched 71 CONVERTED files whose generated placeholder comments quote that phrase (reflect/value.cs, runtime/*, syscall/*, ...), excluding them from the prediction, and (b) missed the `[module: go.GoManualConversion]` spelling, predicting 4 whole-file hand-owns (runtime/mfinal.cs, net/windows/lookup_windows.cs, syscall/linux/exec_unix.cs, syscall/windows/exec_windows.cs) to change; it also kept one -tests sibling (internal/syscall/windows/registry/registry_test.cs.auto). Re-run AFTER the measurement with the line-anchored marker the A/B seed check uses, the same model gives 721 .cs + 9 .cs.auto, R1 834 + 1, R2 57, R3 3864 + 18, and a file set equal to the measured one (0 either way). That recount is post hoc and is not a prediction; the posted numbers stand above as missed. 434 records = the 336 source files with a join, each L3 shared file counted once per GOOS package_info.
+# SIDE OBSERVATION (pre-existing, not this seat): go/build/package_info.cs at the package root carries a record for build.cs, which exists only under go/build/{windows,linux,darwin}/; its table reproduces windows/build.cs.
+# Behavioral goldens and CNR: see the seat's BOARD row.
+#
+# Rebased onto 56e4fba06f (batch 72): pcensus (#22) with this seat's E1 extension, classify -items E1
+pcensus	files	E1	MAP	refused
+windows	711	3693	272	0
+linux	718	3737	281	0
+darwin	716	3708	281	0
+goldens	103	162	5	0

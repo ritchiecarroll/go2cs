@@ -41,7 +41,7 @@ internal static partial nint nestedBlockShadow(nint kind) {
     nint total = 0;
     nint Δtrace = acquire(1);
     total += Δtrace;
-    if (kind == 0){
+    if (kind == 0) {
         total = -1;
     } else {
         if (kind > 1) {

@@ -35,7 +35,7 @@ internal static void Main() {
     }
 
     {
-        var (_, err) = syscall.StringToSid("not-a-sid"); if (err == default!){
+        var (_, err) = syscall.StringToSid("not-a-sid"); if (err == default!) {
             fmt.Println("malformed SID rejected: false");
         } else {
             fmt.Println("malformed SID rejected: true");
@@ -51,10 +51,9 @@ internal static void Main() {
     ref var name = ref heap<ж<uint16>>(out var Ꮡname);
     ref var bufType = ref heap(new uint32(), out var ᏑbufType);
     {
-        var err = syscall.NetGetJoinInformation(nil, Ꮡname, ᏑbufType); if (err != default!){
+        var err = syscall.NetGetJoinInformation(nil, Ꮡname, ᏑbufType); if (err != default!) {
             fmt.Println("NetGetJoinInformation error:", err);
-        } else 
-        if (name == nil){
+        } else if (name == nil) {
             fmt.Println("NetGetJoinInformation left its out-parameter nil");
         } else {
             nint n = 0;

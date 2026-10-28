@@ -150,7 +150,7 @@ internal static void Main() {
             if ((~a).IP.To4() == default! && bits != (nint)(8 * Δnet.IPv6len)) {
                 masksValid = false;
             }
-            if ((~a).IP.IsLoopback()){
+            if ((~a).IP.IsLoopback()) {
                 if ((~a).IP.To4() != default! && ones == 8) {
                     loopback4 = true;
                 }

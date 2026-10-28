@@ -49,7 +49,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!){
+                var r = recover(); if (r != default!) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
                     var (_, isError) = r._<error>(ᐧ);
                     fmt.Printf("%s: %T runtime.Error: %v error: %v: %v\n"u8, what, r, isRuntimeError, isError, r);

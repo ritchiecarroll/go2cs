@@ -27,7 +27,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!){
+                var r = recover(); if (r != default!) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
                     fmt.Printf("%s recovered: %v runtime.Error: %v\n"u8, what, r, isRuntimeError);
                 } else {

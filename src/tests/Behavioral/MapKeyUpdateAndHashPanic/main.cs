@@ -114,7 +114,7 @@ internal static void rangeUnderOverwrite() {
     nint before = 0;
     for (nint trial = 0; trial < 400; trial++) {
         var m = new map<float64, nint>{};
-        if (trial % 2 == 0){
+        if (trial % 2 == 0) {
             (m[0D], m[1D]) = (1, 2);
         } else {
             (m[1D], m[0D]) = (2, 1);
@@ -123,7 +123,7 @@ internal static void rangeUnderOverwrite() {
         foreach (var (k, v) in m) {
             if (k == 0D) {
                 @string want = "+0";
-                if (overwritten){
+                if (overwritten) {
                     want = "-0";
                     after++;
                     if (v != 3) {
@@ -147,7 +147,7 @@ internal static void rangeUnderOverwrite() {
     (bad, after, before) = (0, 0, 0);
     for (nint trial = 0; trial < 400; trial++) {
         var m = new map<any, nint>{};
-        if (trial % 2 == 0){
+        if (trial % 2 == 0) {
             (m[0.0D], m[oneˢ]) = (1, 2);
         } else {
             (m[oneˢ], m[0.0D]) = (2, 1);
@@ -157,7 +157,7 @@ internal static void rangeUnderOverwrite() {
             {
                 var (f, ok) = k._<float64>(ᐧ); if (ok) {
                     @string want = "+0";
-                    if (overwritten){
+                    if (overwritten) {
                         want = "-0";
                         after++;
                         if (v != 3) {

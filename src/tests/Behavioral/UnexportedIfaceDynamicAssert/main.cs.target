@@ -157,7 +157,7 @@ internal static void Main() {
     report("PlainConn", ref (plainSink).DerefOrNull(), n, err);
 
     {
-        var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok){
+        var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
             ref var more = ref heap<Buffers>(out var Ꮡmore);
             more = new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice());
             (n, _) = wv.writeBuffers(Ꮡmore);

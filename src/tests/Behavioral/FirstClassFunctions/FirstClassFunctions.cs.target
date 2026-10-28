@@ -64,7 +64,7 @@ internal static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
         for (nint j = i + 1; j < len(strategies); j++) {
             for (nint k = 0; k < gamesPerSeries; k++) {
                 nint winner = play(strategies[i], strategies[j]);
-                if (winner == 0){
+                if (winner == 0) {
                     wins[i]++;
                 } else {
                     wins[j]++;

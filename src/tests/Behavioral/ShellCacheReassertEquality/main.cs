@@ -50,10 +50,9 @@ internal static void Main() {
     for (nint i = 0; i < 100; i++) {
         foreach (var (j, a) in values) {
             foreach (var (k, b) in values) {
-                if (AreEqual(lener(a), lener(b))){
+                if (AreEqual(lener(a), lener(b))) {
                     same++;
-                } else 
-                if (j != k) {
+                } else if (j != k) {
                     different++;
                 }
             }

@@ -29858,4 +29858,120 @@ converted-file change.
 
 — G (2026-10-27)
 
+---
+
+### 2026-10-27 — H (parity train seat #19, .2): an else-if chain emits on Go's lines, `} else if (cond) {`, and a condition's brace gets its space
+
+**Ruled** by COORD as the first seat of the 1.26.10.2 visual-parity train (`docs/PLAN-parity-train.md`, review item E1).
+Under the train's deferred-corpus window (§3.1) this seat lands the converter, its test and the behavioral goldens. It
+MEASURES its `src/core` footprint and records it, but commits no emitted `src/core` file.
+
+**The defect.** `visitIfStmt` wrote `" else"` and recursed, and the recursive call opens with a newline. So an else-if
+read `} else ` on one line and `if (cond) {` on the next. An else-if with an init clause put its scoping `{` on a line
+of its own the same way. And whenever an else followed, `strings.TrimSpace(body)` removed the body's leading space
+along with its trailing newline, giving `if (cond){`. The owner's example is `io.cs` ReadAtLeast.
+
+**The fix** (`visitIfStmt.go`, +23/-9). `visitIfStmtChain` carries an `elseIf` flag. An else-if continues the
+`} else ` line, as Go writes `} else if cond {`. An else-if with an init clause opens its scoping block there
+(`} else {`, then the init and the inner if, unchanged): COORD ruled this R2 join in. The body is trimmed on the right
+only. A condition whose func-literal snapshots hoist still starts its own line; nothing in the corpus takes that path.
+
+**Every `){` at line end, decided from the Go shape.** Only the if-with-else emitted one. The rest are not conditions:
+- composite literals `new array<T>(N){`, which Go writes `[N]T{`. Kept tight, ruled by COORD;
+- whole-file hand-owns, which this seat does not touch (12 carry the old shapes; a later hand pass may align them).
+
+No while, for, switch, catch, using or lambda emits `){`.
+
+**The position map.** The else-if's sentinel now sits mid-line, before the `if`, so it marks the joined line, which
+answers the else-if's Go line; in Go `} else` is on that line too. Every later C# line of the file moves up one per
+join, so a file's record re-encodes exactly when it has a join, and a spacing-only file keeps its record.
+
+**Guards, red first.** `TestElseIfChainEmitsOnGoLines` replaces `TestElseIfRecordLeavesTheEmittedTextUnchanged`,
+which pinned the old split. It was RED at 5931bad29b on all five shapes (red commit 7516fb9926) and is GREEN at the
+fix (10cdb08ab1). `TestElseIfConditionAnswersItsOwnGoLine`, the line-map guard on the same fixture, is green before
+and after.
+
+**Footprint, the seat's prediction of record** (`data/parity-1262/seat19.lane.tsv`; the rung of record is the i7's at
+landing). Two seeded roots from `git archive` of 5931bad29b, one binary per arm (`-trimpath -buildvcs=false`), one
+`-stdlib -comments` invocation per arm over windows, linux and darwin. Both arms: rc 0, 0 degraded, 0 failed, 0
+misrouted, 4,559 `.cs` per target. Arm A rewrote 0 files, so the committed tree is the base fixed point.
+
+| Target | Files | +/- | Joins | Sources | Records |
+|---|--:|--:|--:|--:|--:|
+| windows | 711 | +3,965 / -4,677 | 712 | 600 `.cs` + 8 `.auto` | 272 |
+| linux | 718 | +4,018 / -4,752 | 734 | 609 + 6 | 281 |
+| darwin | 716 | +3,989 / -4,711 | 722 | 608 + 5 | 281 |
+| union | 861 | | 892 | 721 + 9 | 434 |
+
+**Classifier: 0 unexplained**, on the union and on each target. Every differing `.cs` and `.cs.auto` equals
+model(BEFORE) byte for byte, where the model is: R1 join `} else` with `if (`; R2 join `} else` with `{`; R3 `){` to
+`) {` except a composite literal's `>(N){`. Every differing `package_info.cs` differs only in GoPositionMap records,
+and each record equals BEFORE's table and per-call half shifted up by its file's joins, with the Go-line halves
+unchanged. Deleted minus added equals the joins on every target. The run reports differ by timing only.
+
+**The prediction, scored as posted.**
+- MECHANISM: MET (above).
+- COUNTS: MISSED. Posted 654 `.cs` + 10 `.auto` files, R1 713 + 1, R2 47, R3 3,191 + 22, 299 records. Measured 721 +
+  9, R1 834 + 1, R2 57, R3 3,864 + 18, 434 records over 336 source files.
+- The miss is the PREDICATE's, not the change's. My hand-own test was a substring match for
+  `[module: GoManualConversion]`. It excluded 71 converted files whose generated placeholder comments quote that phrase
+  (`reflect/value.cs`, `runtime/*`, `syscall/*`). It missed the `[module: go.GoManualConversion]` spelling, so it
+  predicted 4 hand-owns to change (`runtime/mfinal.cs`, `net/windows/lookup_windows.cs`, `syscall/linux/exec_unix.cs`,
+  `syscall/windows/exec_windows.cs`). And it counted files, not records: an L3 shared file has a record in each GOOS
+  `package_info.cs`.
+- Re-run AFTER the measurement with the line-anchored marker, the same model reproduces the measured file set exactly.
+  That recount is post hoc and is not scored as the prediction.
+
+**Behavioral.** CNR at the fix moved exactly the predicted set: 49 `.cs`, plus 5 `package_info.cs` in exactly the 5
+tests with a join. All are exact to the model. `UpdateTestTargets --createTargetFiles --only` the 49 re-transpiled and
+re-baselined them (103 files; the four `*Tests.cs` unchanged), and every golden byte-equals its emission. The four
+phases for the 49, with `GO2CS_RUN_TIMEOUT=120`, passed 195 of 195, counted from the trx: Transpile 49, Compile 49,
+Target 49, Output 48 (`FirstClassFunctions` has no Output test, as before).
+
+**Gates at the fix**, one battery, sequential:
+- `go test -timeout 60m ./...`: every package ok but `repoguard`, whose provenance guard named one note.
+  `ConversionStrategies.md:245` cites `TypeAssert.cs.target:41,70`, whose `){` the re-baseline spaced. It was
+  re-cited at the same lines (`#bf71f4` to `#b164fa`), and `repoguard` was then green. Its other two reds were the
+  guard's self-tests, which assume an otherwise-clean page.
+- GenTests 346 of 346.
+- GolibTests unfiltered: 2,254 passed, 36 skipped, 0 failed.
+- `go2cs.slnx`: 0 errors, 155 warnings.
+- `go2cs-stdlib.slnx`: 0 warnings, 0 errors.
+
+**Doc samples still quoting the old shapes.** The visitor-doc samples carry `){` and the split else (for example
+`ConversionStrategies.md` 883, 3412, 3420, 3839, 4059-4061, 4337, 4345; `ConversionStrategies-Reference/comments.md`
+449-452, 571-574; `pointers.md` 1030). Per COORD, they are re-copied from the new emission by this seat or by C2's
+`claude/c2-doc-sample-audit`, whichever lands second. Samples whose source is `src/core` match the committed corpus
+until the end regen.
+
+**Side observation, pre-existing.** `go/build/package_info.cs` at the package root carries a record for `build.cs`,
+which exists only under `go/build/{windows,linux,darwin}/`. Its table reproduces `windows/build.cs`.
+
+**Rebased onto batch 72 (56e4fba06f)** at COORD's word, on a new branch `claude/h-seat19-elseif-r2`. The posted
+`claude/h-seat19-elseif` is left as it was, since a posted SHA is never replaced. The goldens commit was dropped,
+red, fix and docs were replayed, and the BOARD conflict (its append-only tail) was resolved by re-appending this row.
+- **CNR** at the rebased fix moved the same 54 files as at 5931bad29b: 49 `.cs` and 5 `package_info.cs`. Master
+  added no project this seat moves. All are exact to the model.
+- **The goldens** were re-baselined again by `UpdateTestTargets --only` (103 files), and every golden equals its
+  emission.
+- **pcensus** (#22, landed in batch 72) scored the seat. Its E1 classifier lacked two shapes of the ruled mechanism:
+  - a condition brace followed by a trailing comment (`if (sr.pos < holeStart){ // In a data fragment`);
+  - the R2 `} else` + `{` join.
+
+  These were the 169 REFUSED pairs on the windows footprint. This seat extends E1's canon and join, red first: the
+  two good plants were refused before and pass after. The census measures and the count golden are unchanged. With
+  it:
+  - windows: 711 files, E1 3,693, MAP 272, REFUSED 0;
+  - linux: 718 files, E1 3,737, MAP 281, REFUSED 0;
+  - darwin: 716 files, E1 3,708, MAP 281, REFUSED 0.
+
+  MAP equals this row's record counts. The goldens diff reads 103 files, E1 162, MAP 5, REFUSED 0.
+- **Doc samples**, under COORD's standing ruling (golden-sourced samples in the seat, `src/core`-sourced at the end
+  regen): `docsamples -base HEAD -target WORKTREE -recite -write` re-copied 4 samples, all in
+  `ConversionStrategies.md`, each one `){` to `) {` line. 939 were unchanged, with 0 errors and 0 unlabelled blocks.
+  The `src/core`-sourced samples listed above wait for the end regen.
+- **go test** `-timeout 60m ./...` at the rebased tip, with the goldens committed: every package ok (repoguard and the docs guards, pcensus included), exit 0.
+
+— H (2026-10-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

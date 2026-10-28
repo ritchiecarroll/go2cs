@@ -104,7 +104,7 @@ internal static void Main() {
     fmt.Println("chan==nil", (ᐸꟷ(ch)) == default!);
 
     {
-        var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok){
+        var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok) {
             fmt.Println("assert-ok", q == nil);
         } else {
             fmt.Println("assert-failed");
@@ -141,7 +141,7 @@ internal static @string /*msg*/ panicked() {
         defer(() => {
             var r = recover();
             {
-                var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok){
+                var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok) {
                     msg = fmt.Sprintf("panic-recovered *AErr nil=%v"u8, q == nil);
                 } else {
                     msg = fmt.Sprintf("panic-recovered other %T %v"u8, r, r == default!);

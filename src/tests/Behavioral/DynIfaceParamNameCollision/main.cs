@@ -32,7 +32,7 @@ internal partial interface serve_type /*dyn*/ {
 
 internal static void serve(any v) {
     {
-        var (p, ok) = v._<serve_type>(ᐧ); if (ok){
+        var (p, ok) = v._<serve_type>(ᐧ); if (ok) {
             fmt.Println("err:", p.Push("/style.css", 7), p.Label());
         } else {
             fmt.Println("not a pusher");
@@ -46,7 +46,7 @@ internal partial interface apply_type /*dyn*/ {
 
 internal static void apply(any v) {
     {
-        var (s, ok) = v._<apply_type>(ᐧ); if (ok){
+        var (s, ok) = v._<apply_type>(ᐧ); if (ok) {
             s.Set("blue");
         } else {
             fmt.Println("not a setter");

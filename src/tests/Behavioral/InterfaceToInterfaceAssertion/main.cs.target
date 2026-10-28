@@ -50,7 +50,7 @@ internal static void Main() {
 
     Stringish s2 = new otherжStringish(Ꮡ(new other(nil)));
     {
-        var (_, ok) = s2._<Marshaler>(ᐧ); if (ok){
+        var (_, ok) = s2._<Marshaler>(ᐧ); if (ok) {
             fmt.Println("unexpected: other is Marshaler");
         } else {
             fmt.Println("other is not Marshaler");

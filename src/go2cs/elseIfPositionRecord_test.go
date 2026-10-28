@@ -21,8 +21,11 @@ import (
 // was written for it. Its emission splits over two C# lines -- `} else ` and `if (cond) {` -- and with
 // no record on the second, the condition's C# line answered the PREVIOUS record's Go line: a panic in
 // an else-if condition reported the line before it. Measured in the IDE-mode spike (SPIKE-ide-mode.md,
-// E9): 17 of strconv's 1,730 statement lines. The record lives in package_info's GoPositionMap only;
-// the visible .cs is unchanged.
+// E9): 17 of strconv's 1,730 statement lines. The record lives in package_info's GoPositionMap only.
+//
+// Seat #19 (visual-parity review E1) then joined the two lines, as Go writes them: `} else if (cond) {`
+// is one C# line, and the sentinel before the `if` now marks that line rather than the next. The
+// record keeps answering the else-if's own Go line, which in Go is the `} else` line too.
 
 const elseIfPositionFixture = `package main
 
@@ -141,12 +144,38 @@ func TestElseIfConditionAnswersItsOwnGoLine(t *testing.T) {
 	}
 }
 
-func TestElseIfRecordLeavesTheEmittedTextUnchanged(t *testing.T) {
+// The else-if chain reads as Go writes it: `} else if (cond) {` on one line, an else-if with an init
+// clause opening its scoping block on the `} else {` line, and a space before every `{` that follows a
+// condition (an `if` followed by an `else` lost it to the body's trim).
+func TestElseIfChainEmitsOnGoLines(t *testing.T) {
 	isolateConverterPathGlobals(t)
-	// The fix is metadata only: the else-if keeps its two-line `} else ` / `if (cond) {` shape.
 	mainCs, _ := convertElseIfPositionFixture(t)
 
-	if !regexp.MustCompile(`\} else \r?\n\s+if \(x == 2\)`).MatchString(mainCs) {
-		t.Fatalf("the else-if emission changed shape:\n%s", mainCs)
+	for _, want := range []string{
+		`if (x == 1) {`,
+		`} else if (x == 2) {`,
+		`nint y = x * 2; if (y == 6) {`,
+		`} else {`,
+	} {
+		if !strings.Contains(mainCs, want) {
+			t.Errorf("no emitted line carries %q", want)
+		}
+	}
+
+	// The init clause's scoping block opens on the `} else` line, never on a line of its own.
+	if !regexp.MustCompile(`\} else \{\r?\n\s+nint y = x \* 2; if \(y == 6\) \{`).MatchString(mainCs) {
+		t.Errorf("the else-if with an init clause does not open its block on the `} else` line")
+	}
+
+	for index, line := range strings.Split(mainCs, "\n") {
+		line = strings.TrimRight(line, "\r")
+
+		if strings.HasSuffix(line, "else") || strings.HasSuffix(line, "else ") || strings.HasSuffix(line, "){") {
+			t.Errorf("C# line %d is split or unspaced: %q", index+1, line)
+		}
+	}
+
+	if t.Failed() {
+		t.Logf("emitted main.cs:\n%s", mainCs)
 	}
 }

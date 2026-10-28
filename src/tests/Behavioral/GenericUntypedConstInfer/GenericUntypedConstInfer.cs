@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static Action<T, bool> wantValue<T>(T want) {
     return (T got, bool ok) => {
-        if (ok && AreEqual(got, want)){
+        if (ok && AreEqual(got, want)) {
             fmt.Println("match", (got).OrTypedNilOf());
         } else {
             fmt.Println("nomatch", (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);

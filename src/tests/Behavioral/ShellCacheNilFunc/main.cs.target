@@ -27,7 +27,7 @@ internal static void Main() {
     for (nint round = 0; round < 3; round++) {
         foreach (var (i, a) in values) {
             {
-                var (v, ok) = a._<main_type>(ᐧ); if (ok){
+                var (v, ok) = a._<main_type>(ᐧ); if (ok) {
                     fmt.Println("round", round, "value", i, "ok", v.Len());
                 } else {
                     fmt.Println("round", round, "value", i, "MISS");

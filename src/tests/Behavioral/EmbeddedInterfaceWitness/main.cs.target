@@ -39,7 +39,7 @@ internal static @string Write(this holder h, @string s) {
 
 internal static void check(@string label, any value) {
     {
-        var (rw, ok) = value._<iolike.ReadWriter>(ᐧ); if (ok){
+        var (rw, ok) = value._<iolike.ReadWriter>(ᐧ); if (ok) {
             fmt.Println(label, "ReadWriter: yes", rw.Read(), rw.Write("x"));
         } else {
             fmt.Println(label, "ReadWriter: no");
@@ -47,7 +47,7 @@ internal static void check(@string label, any value) {
     }
 
     {
-        var (r, ok) = value._<iolike.Reader>(ᐧ); if (ok){
+        var (r, ok) = value._<iolike.Reader>(ᐧ); if (ok) {
             fmt.Println(label, "Reader: yes", r.Read());
         } else {
             fmt.Println(label, "Reader: no");
@@ -77,7 +77,7 @@ public static void LocalPromotion() {
     any v = w;
 
     {
-        var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok){
+        var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
             fmt.Println("local assert:", r.Read());
         } else {
             fmt.Println("local assert: no");
@@ -94,7 +94,7 @@ internal static void checkConflicted() {
     any v = new conflicted(Base: new iolike.Base(Tag: "conf"));
 
     {
-        var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok){
+        var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
             fmt.Println("conflicted Reader: yes");
         } else {
             fmt.Println("conflicted Reader: no");
@@ -129,7 +129,7 @@ internal static void checkPointerOnly() {
     any ptr = Ꮡ(new pointerOnly(nil));
 
     {
-        var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok){
+        var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok) {
             fmt.Println("pointerOnly ptr: yes", rw.Write("x"));
         } else {
             fmt.Println("pointerOnly ptr: no");
@@ -139,7 +139,7 @@ internal static void checkPointerOnly() {
     any val = new pointerOnly(nil);
 
     {
-        var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok){
+        var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok) {
             fmt.Println("pointerOnly val: yes");
         } else {
             fmt.Println("pointerOnly val: no");

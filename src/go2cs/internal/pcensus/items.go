@@ -245,11 +245,13 @@ var items = []item{
 			m("E1", "else-newline-if", `\} else[ \t]*\r?\n[ \t]*if`),
 			m("E1", "paren-brace-eol", `(?m)\)\{\r?$`),
 		},
-		Canon: []rewrite{rw(`\)\{$`, ") {")},
-		Old:   rx(`\)\{$`),
+		// The brace may carry a trailing comment (`if (x){ // why`), and the join takes the scoping `{` of an else-if
+		// with an init clause as well as an else-if's `if (` (COORD's R2 ruling: `} else {` on Go's line).
+		Canon: []rewrite{rw(`\)\{(\s*//.*)?$`, ") {$1")},
+		Old:   rx(`\)\{(\s*//.*)?$`),
 		Join: &joinRule{
 			First:  rx(`^(\s*)\} else[ \t]*$`),
-			Second: rx(`^\s*(if \(.*)$`),
+			Second: rx(`^\s*(if \(.*|\{)$`),
 			Fold:   func(f, s []string) string { return f[1] + "} else " + s[1] },
 		},
 	},

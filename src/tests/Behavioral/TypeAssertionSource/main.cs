@@ -48,7 +48,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!){
+                var r = recover(); if (r != default!) {
                     fmt.Printf("%s: %T: %v\n"u8, what, r, r);
                 } else {
                     fmt.Printf("%s: NO PANIC\n"u8, what);

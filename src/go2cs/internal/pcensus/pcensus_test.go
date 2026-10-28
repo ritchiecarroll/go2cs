@@ -107,6 +107,10 @@ var plants = []plant{
 	one("E1 good brace", prodFile, `if (x > 0){`, `if (x > 0) {`, "E1"),
 	{"E1 good else-if join", prodFile, []string{`    } else`, `    if (x > 0) {`}, []string{`    } else if (x > 0) {`}, "E1"},
 	{"E1 bad: the condition changed", prodFile, []string{`    } else`, `    if (x > 0) {`}, []string{`    } else if (x > 1) {`}, "UNCLASSIFIED"},
+	one("E1 good brace before a comment", prodFile, `if (x > 0){ // why`, `if (x > 0) { // why`, "E1"),
+	{"E1 good init-clause else join", prodFile, []string{`    } else`, `    {`}, []string{`    } else {`}, "E1"},
+	one("E1 bad: the comment changed", prodFile, `if (x > 0){ // why`, `if (x > 0) { // how`, "UNCLASSIFIED"),
+	{"E1 bad: the init-clause join gained code", prodFile, []string{`    } else`, `    {`}, []string{`    } else { f();`}, "UNCLASSIFIED"},
 	// test-refresh-1262: a, b, c, and the position map
 	one("TRa good", testFile, `    });`, `    }, GoStack.Bounded);`, "TRa"),
 	one("TRa good launch", testFile, `        goǃ(Ꮡs.send, (nint)7);`, `        goǃ(Ꮡs.send, (nint)7, GoStack.Bounded);`, "TRa"),

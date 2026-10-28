@@ -38,7 +38,7 @@ internal static void safeAssertions() {
     any i = helloˢ;
 
     {
-        var (s, ok) = i._<@string>(ᐧ); if (ok){
+        var (s, ok) = i._<@string>(ᐧ); if (ok) {
             fmt.Println("Value is a string:", s);
         } else {
             fmt.Println("Value is not a string");
@@ -46,7 +46,7 @@ internal static void safeAssertions() {
     }
 
     {
-        var (n, ok) = i._<nint>(ᐧ); if (ok){
+        var (n, ok) = i._<nint>(ᐧ); if (ok) {
             fmt.Println("Value is an int:", n);
         } else {
             fmt.Println("Value is not an int");
