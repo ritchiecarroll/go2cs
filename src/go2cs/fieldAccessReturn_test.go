@@ -155,7 +155,8 @@ func main() {
 }
 `)
 
-	cs := readGenerated(t, filepath.Join(convertFieldAccessModule(t, root), "main.cs"))
+	out := convertFieldAccessModule(t, root)
+	cs, info := readGenerated(t, filepath.Join(out, "main.cs")), readGenerated(t, filepath.Join(out, PackageInfoFileName))
 	scoped := funcBody(t, cs, "void positives(")
 
 	for _, want := range []string{
@@ -170,8 +171,8 @@ func main() {
 		}
 	}
 
-	if !strings.Contains(cs, "[GoFieldAccess(typeof(buffer))]") {
-		t.Errorf("the file does not carry its [GoFieldAccess] record:\n%s", cs)
+	if got := strings.Join(fieldAccessRecordsOf(info), " "); got != "buffer" {
+		t.Errorf("package_info.cs records %q, want \"buffer\":\n%s", got, info)
 	}
 
 	negative := funcBody(t, cs, "void negatives(")

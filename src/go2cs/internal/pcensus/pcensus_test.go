@@ -158,7 +158,9 @@ var plants = []plant{
 	one("P1 good chain", prodFile, `fmt.Println((~(~c.prev).next).x);`, `fmt.Println(c.prev.next.x);`, "P1"),
 	one("P1 good call and index bases", prodFile, `fmt.Println((~mk()).Y, (~ps[0]).Y);`, `fmt.Println(mk().Y, ps[0].Y);`, "P1"),
 	one("P1 good value after an index", prodFile, `m["k"u8].Value.X = 4;`, `m["k"u8].X = 4;`, "P1"),
-	one("P1 good record extended", prodFile, `[GoFieldAccess(typeof(buffer))]`, `[GoFieldAccess(typeof(buffer), typeof(hdr))]`, "P1"),
+	one("P1 good chain through one-letter fields", prodFile, `cst.Value.c.Value.Timeout = timeout;`, `cst.c.Timeout = timeout;`, "P1"),
+	one("P1 good escaped field", prodFile, `var y = x.Value.@out;`, `var y = x.@out;`, "P1"),
+	one("P1 good read through a box's own Value", prodFile, `n += (~a.of(T.ᏑElem).Value).Size_;`, `n += a.of(T.ᏑElem).Value.Size_;`, "P1"),
 	one("P1 bad: a call's argument changed", prodFile, `fmt.Println((~mk(1)).Y);`, `fmt.Println(mk(2).Y);`, "UNCLASSIFIED"),
 	one("P1 bad: a deref kept that is no selection", prodFile, `var v = (~p);`, `var v = p;`, "UNCLASSIFIED"),
 	one("P2 good", prodFile, `var off = Ꮡb.of(Buffer.Ꮡoff);`, `var off = Ꮡb.Ꮡoff;`, "P2"),
@@ -514,24 +516,44 @@ func TestBlockPlantsAcrossRuns(t *testing.T) {
 	}
 }
 
-// P1 (#31) inserts one `[GoFieldAccess(…)]` record line per file, with no removed partner: an insert-only block. Any
-// other inserted line beside it is still refused, and so is a record line the hunk only deletes.
-func TestInsertOnlyBlockPlants(t *testing.T) {
+// P1 (#31) moves the field-access records into package_info.cs: a block of assembly records, under its two-line prose
+// and over a blank line, inserted with no removed partner, and the per-file class record the unsafe.Pointer route
+// wrote, deleted with no added partner. Each side is gated on its own (a PerSide block): a blank line, or any other
+// line, inserted beside no record is refused, and so is a deleted ASSEMBLY record.
+func TestP1RecordBlockPlants(t *testing.T) {
 	c, _ := newClassifier("", false)
+	const infoFile = "src/core/p/package_info.cs"
 
-	tl := c.classifyDiff(diffOf(prodFile, nil, []string{`[GoFieldAccess(typeof(point), typeof(pair<>))]`}))
-	if len(tl.refused) != 0 || tl.labels["P1"] != 1 {
-		t.Errorf("P1 record inserted: wanted one P1, read %v, refused %v", tl.labels, tl.refused)
+	block := []string{
+		"// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:",
+		"// go2cs-gen emits a field property on the pointer for each of their fields.",
+		`[assembly: global::go.GoFieldAccess(typeof(p_package.point))]`,
+		`[assembly: global::go.GoFieldAccess(typeof(p_package.pair<>))]`,
+		``,
+	}
+	tl := c.classifyDiff(diffOf(infoFile, nil, block))
+	if len(tl.refused) != 0 || tl.labels["P1"] != len(block) {
+		t.Errorf("P1 records inserted: wanted %d P1, read %v, refused %v", len(block), tl.labels, tl.refused)
 	}
 
-	tl = c.classifyDiff(diffOf(prodFile, nil, []string{`[GoFieldAccess(typeof(point))]`, `using static go.fmt_package;`}))
+	tl = c.classifyDiff(diffOf(infoFile, nil, []string{block[2], `using static go.fmt_package;`}))
 	if len(tl.refused) != 1 || !strings.Contains(tl.refused[0].add, "using static") {
 		t.Errorf("P1 record beside another insertion: wanted the other line refused by name, refused %v", tl.refused)
 	}
 
-	tl = c.classifyDiff(diffOf(prodFile, []string{`[GoFieldAccess(typeof(point))]`}, nil))
+	tl = c.classifyDiff(diffOf(infoFile, nil, []string{``}))
 	if len(tl.refused) != 1 {
-		t.Errorf("P1 record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
+		t.Errorf("P1 blank line with no record: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	tl = c.classifyDiff(diffOf(prodFile, []string{`[GoFieldAccess(typeof(point), typeof(buffer))]`}, nil))
+	if len(tl.refused) != 0 || tl.labels["P1"] != 1 {
+		t.Errorf("P1 class record deleted: wanted one P1, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	tl = c.classifyDiff(diffOf(infoFile, []string{block[2]}, nil))
+	if len(tl.refused) != 1 {
+		t.Errorf("P1 assembly record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
 	}
 }
 

@@ -77,6 +77,7 @@ func resetPackageState(pkg *packages.Package) {
 	qualifiedImportedTypeAliases = hashset.NewHashSet([]string{})
 	parsedPackageInfoFiles = hashset.NewHashSet([]string{})
 	interfaceImplementations = make(map[string]hashset.HashSet[string])
+	fieldAccessRecords = hashset.NewHashSet([]string{})
 	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
 	constraintProxies = make(map[string][3]string)
 	importedConstraintProxies = make(map[string]map[string][]string)

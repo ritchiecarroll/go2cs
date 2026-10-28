@@ -7,21 +7,24 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards P1, parity seat #31 (fieldAccess.go, fieldPropertySelector): a field selected through a pointer to a named
-// struct reads and writes as Go spells it, `p.f`, through the generated field property, and the file's
-// `[GoFieldAccess(…)]` record names each struct, a generic one by its open definition. The controls keep today's
-// `(~p).f` / `p.Value.f`: a promoted field, a field named like a member of ж<T>, a field that shadows a promoted method, a header-shaped
-// struct, an unnamed struct, a struct of a package the converter never emits (testing's B), and a zero-size store
-// target, whose accessor form names the struct.
+// struct reads and writes as Go spells it, `p.f`, through the generated field property, and the package's
+// package_info.cs carries one `[assembly: GoFieldAccess(typeof(T))]` record per struct, a generic one by its open
+// definition, while the converted file carries none. The controls keep today's `(~p).f` / `p.Value.f`: a promoted
+// field, a field named like a member of ж<T>, a field that shadows a promoted method, a header-shaped struct, an
+// unnamed struct, a struct of a package the converter never emits (testing's B), and a zero-size store target, whose
+// accessor form names the struct.
 
 package main
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
 
-func convertFieldPropertyFixture(t *testing.T) string {
+// convertFieldPropertyFixture converts the fixture and answers its main.cs and its package_info.cs.
+func convertFieldPropertyFixture(t *testing.T) (string, string) {
 	t.Helper()
 
 	root := t.TempDir()
@@ -125,15 +128,29 @@ func main() {
 }
 `)
 
-	return readGenerated(t, filepath.Join(convertFieldAccessModule(t, root), "main.cs"))
+	out := convertFieldAccessModule(t, root)
+
+	return readGenerated(t, filepath.Join(out, "main.cs")), readGenerated(t, filepath.Join(out, PackageInfoFileName))
 }
 
-// TestFieldPropertyReadsAsGoSpellsIt requires every P1 site to read and write `p.f`, the record to name each struct
-// once, a generic one open, and every control to keep today's spelling.
+// fieldAccessRecordsOf answers the struct types a package_info.cs records, by simple name, in file order.
+func fieldAccessRecordsOf(info string) []string {
+	var names []string
+
+	for _, m := range regexp.MustCompile(`(?m)^\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\((?:[\w.@]*\.)?([\w@]+(?:<,*>)?)\)\)\]\r?$`).FindAllStringSubmatch(info, -1) {
+		names = append(names, m[1])
+	}
+
+	return names
+}
+
+// TestFieldPropertyReadsAsGoSpellsIt requires every P1 site to read and write `p.f`, package_info.cs to record each
+// struct once, sorted, a generic one open, the converted file to carry no record, and every control to keep today's
+// spelling.
 func TestFieldPropertyReadsAsGoSpellsIt(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	cs := convertFieldPropertyFixture(t)
+	cs, info := convertFieldPropertyFixture(t)
 
 	positives := funcBody(t, cs, "void positives(")
 
@@ -159,10 +176,12 @@ func TestFieldPropertyReadsAsGoSpellsIt(t *testing.T) {
 		t.Errorf("a generic struct's field does not read as Go spells it:\n%s", generic)
 	}
 
-	record := "[GoFieldAccess(typeof(point), typeof(node), typeof(pair<>), typeof(outer), typeof(zs))]"
+	if got, want := strings.Join(fieldAccessRecordsOf(info), " "), "node outer pair<> point zs"; got != want {
+		t.Errorf("package_info.cs records %q, want %q:\n%s", got, want, info)
+	}
 
-	if !strings.Contains(cs, record+"\r\npartial class main_package {") && !strings.Contains(cs, record+"\npartial class main_package {") {
-		t.Errorf("the file does not carry the record %s on its package class:\n%s", record, cs)
+	if strings.Contains(cs, "GoFieldAccess") {
+		t.Errorf("the converted file carries a record; package_info.cs holds them:\n%s", cs)
 	}
 
 	controls := funcBody(t, cs, "void controls(")

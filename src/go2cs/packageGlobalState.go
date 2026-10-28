@@ -234,6 +234,11 @@ var parsedPackageInfoFiles hashset.HashSet[string]
 
 var interfaceImplementations map[string]hashset.HashSet[string]
 
+// fieldAccessRecords collects, under packageLock, the struct types whose fields this package's files reach through a
+// generated field property (fieldAccess.go), rendered as record names; packageInfoWriter writes them as the package's
+// `[assembly: GoFieldAccess(typeof(T))]` records. Reset per package.
+var fieldAccessRecords hashset.HashSet[string]
+
 var promotedInterfaceImplementations map[string]hashset.HashSet[string]
 
 // constraintProxies collects the SELF-REFERENTIAL constraint proxies this package needs — a

@@ -580,6 +580,39 @@ public class FieldAccessGeneratorTests
         return (process.ExitCode, stdout + stderr);
     }
 
+    // The converter writes the records in package_info.cs, on the assembly (parity seat #31); the class form above is
+    // the committed corpus's until its regeneration. Both are read, and a type both list gets one block.
+    private const string AssemblyRecords = """
+        [assembly: global::go.GoFieldAccess(typeof(global::go.main_package.point))]
+        [assembly: global::go.GoFieldAccess(typeof(global::go.main_package.pair<>))]
+
+        namespace go;
+
+        partial class main_package
+        {
+            public partial struct point { public int X, Y; }
+
+            public partial struct pair<T> where T : struct { public T First; public int Count; }
+        }
+
+        [GoFieldAccess(typeof(main_package.point))]
+        partial class main_package { }
+        """;
+
+    [TestMethod]
+    public void AnAssemblyRecordGetsItsPropertiesBesideTheClassForm()
+    {
+        string generated = Generate(AssemblyRecords);
+
+        StringAssert.Contains(generated, Ref("int", "X", "global::go.main_package.point"));
+        StringAssert.Contains(generated, Ref("T", "First", "global::go.main_package.pair<T>"));
+        Assert.AreEqual(1, generated.Split("extension(global::go.ж<global::go.main_package.point> ʗp)").Length - 1, "a type both forms list gets one block");
+
+        string assemblyOnly = AssemblyRecords.Replace("[GoFieldAccess(typeof(main_package.point))]", "");
+        Assert.AreNotEqual(AssemblyRecords, assemblyOnly, "the fixture's class record was removed");
+        StringAssert.Contains(Generate(assemblyOnly), Ref("int", "Y", "global::go.main_package.point"), "the assembly record alone generates");
+    }
+
     [TestMethod]
     public void TheClassIsInternalSoTwoPackagesExtendingOneTypeNeverMeet()
     {

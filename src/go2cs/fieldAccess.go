@@ -56,10 +56,11 @@ import (
 // ж.ElemRefBox.TryPinnedReinterpret pins the backing and hands that PinnedBuffer to the NativeBox it
 // returns, with retainedSource: this, so a returned box keeps the byte storage still and alive.
 //
-// Each site's struct type is listed in its FILE's `[GoFieldAccess(typeof(T), …)]` record, on the
-// package class, and go2cs-gen emits one extension block per listed type. A file carries its own
-// record because the files of a package do not all compile together: a test assembly recompiles
-// the production files beside its own, so a per-file record follows its sites into every assembly.
+// Each site's struct type is listed in the package's `[assembly: GoFieldAccess(typeof(T))]` records, in its
+// package_info.cs (packageInfoWriter, parity seat #31), and go2cs-gen emits one extension block per listed type. A
+// test assembly that recompiles the production files carries their records too, because its conversion re-converts
+// those files; one that references the production assembly sees its generated properties through
+// InternalsVisibleTo.
 //
 // These shapes keep a box form, because the property cannot serve them:
 //   - a field named like a member of ж<T> (fieldAccessCollisions.txt): an instance member binds
@@ -461,7 +462,7 @@ func fieldAccessFuncDecl(fn *types.Func, info *types.Info) *ast.FuncDecl {
 }
 
 // fieldAccessSelector renders a field selection `p.f` (or a promoted `p.f` through value embeds) whose base is a
-// local fieldAccessLocal admits, recording the struct type for the file's record; ok is false for a selection this
+// local fieldAccessLocal admits, recording the struct type in the package's records; ok is false for a selection this
 // route does not serve, which then keeps its emission.
 func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee types.Type) (string, bool) {
 	selection := v.info.Selections[selectorExpr]
@@ -540,10 +541,11 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 //
 // A field selected through a pointer to a named struct reads and writes as Go spells it, `p.f`, where the read was
 // `(~p).f` (a copy of the whole struct) and the write `p.Value.f`. The site binds the property go2cs-gen emits on the
-// box for each type the file's `[GoFieldAccess(…)]` record lists, the record and the class of the unsafe.Pointer route
-// above. Its body is specialized: `ref ʗp.Value.f` on a managed box, the same storage `p.Value.f` reaches, with
-// Value's own nil check; and `ʗp.field(T.Ꮡf)` on a NativeBox<T>, which answers the field at its GO offset where the
-// struct's CLR slot holds the wrong bytes (a behavior change on native boxes, and a correctness gain).
+// box for each type the package's `[assembly: GoFieldAccess(…)]` records list, the records and the class of the
+// unsafe.Pointer route above. Its body is specialized: `ref ʗp.Value.f` on a managed box, the same storage
+// `p.Value.f` reaches, with Value's own nil check; and `ʗp.field(T.Ꮡf)` on a NativeBox<T>, which answers the field
+// at its GO offset where the struct's CLR slot holds the wrong bytes (a behavior change on native boxes, and a
+// correctness gain).
 //
 // These keep today's spelling, because no property serves them as Go spells them:
 //   - a field named like a member of ж<T> (fieldAccessCollisions.txt), or one that shadows a method an embedded type
@@ -557,7 +559,7 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 //   - the plain rendering of a zero-size store target (zeroSizeStorePlain), whose box form names its struct.
 
 // fieldPropertySelector renders a field selection `p.f` through a pointer to pointee as the generated property
-// serves it, recording the struct type for the file's record; ok is false for a selection that keeps today's spelling.
+// serves it, recording the struct type in the package's records; ok is false for a selection that keeps today's spelling.
 func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee types.Type, xContexts []ExprContext) (string, bool) {
 	if selectorExpr == v.zeroSizeStorePlain || !fieldPropertyServesType(pointee) {
 		return "", false
@@ -765,22 +767,20 @@ func (v *Visitor) fieldAccessArrayField(selectorExpr *ast.SelectorExpr) (string,
 	return fmt.Sprintf("%s.of(%s)", v.convExpr(selectorExpr.X, nil), v.fieldAccessBoxAccessor(pointee, selectorExpr.Sel, selectorExpr.X)), true
 }
 
+// recordFieldAccessType adds pointee to the package's field-access records (fieldAccessRecords), named as a
+// GoImplement record names a type, so packageInfoWriter qualifies it the same way.
 func (v *Visitor) recordFieldAccessType(pointee types.Type) {
-	typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(pointee, false))
+	typeName := convertToCSTypeName(v.getFullyQualifiedTypeName(pointee, false))
 
 	// A generic struct is listed by its open definition, `typeof(pair<>)`: go2cs-gen reads the definition anyway, and
-	// an instantiation's arguments may be type parameters the package class cannot see.
+	// an instantiation's arguments may be type parameters no record can name.
 	if named, ok := types.Unalias(pointee).(*types.Named); ok && named.TypeArgs().Len() > 0 {
 		typeName = openGenericTypeName(typeName, named.TypeArgs().Len())
 	}
 
-	for _, recorded := range v.fieldAccessTypes {
-		if recorded == typeName {
-			return
-		}
-	}
-
-	v.fieldAccessTypes = append(v.fieldAccessTypes, typeName)
+	packageLock.Lock()
+	fieldAccessRecords.Add(typeName)
+	packageLock.Unlock()
 }
 
 // openGenericTypeName respells a rendered generic type's trailing argument list as its open form, `pair<T>` as
@@ -804,20 +804,4 @@ func openGenericTypeName(typeName string, arity int) string {
 	}
 
 	return typeName
-}
-
-// fieldAccessRecord renders the file's `[GoFieldAccess(typeof(T), …)]` record, placed on the package class
-// declaration so each type is named as the file's own code names it; empty when the file has no site.
-func (v *Visitor) fieldAccessRecord() string {
-	if len(v.fieldAccessTypes) == 0 {
-		return ""
-	}
-
-	types := make([]string, len(v.fieldAccessTypes))
-
-	for i, typeName := range v.fieldAccessTypes {
-		types[i] = fmt.Sprintf("typeof(%s)", typeName)
-	}
-
-	return fmt.Sprintf("[GoFieldAccess(%s)]%s", strings.Join(types, ", "), v.newline)
 }

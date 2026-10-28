@@ -17,7 +17,8 @@ import (
 // test-refresh-1262 class, with everything both halves of the instrument need:
 //   - Measures: what `count` counts (the item's OLD shape, the one its seat removes);
 //   - Canon: rewrites applied to BOTH lines of a pair; the item explains a pair when the two canonical lines are
-//     equal and the pair moves in the item's direction (Old loses an occurrence, or New gains one);
+//     equal and the pair moves in the item's direction (Old, or any one of Olds, loses an occurrence, or New gains
+//     one; Olds keeps shapes apart that one pair can trade, as P1's `(~X).f` read becoming `X.Value.f`'s field);
 //   - Join: a two-line form the seat folds into one line (E1's else-if, H2's declaration and initializer);
 //   - Block: line classes the seat deletes or inserts within a hunk holding both of its anchors (S1);
 //   - Guard: the removed line must match it for the item to explain the pair (a shape that only means something
@@ -31,6 +32,7 @@ type item struct {
 	Measures        []measure
 	Canon           []rewrite
 	Old, New        *regexp.Regexp
+	Olds            []*regexp.Regexp
 	Guard           *regexp.Regexp // when set, the item explains only a pair whose removed line matches it
 	Join            *joinRule
 	Block           *blockRule
@@ -58,8 +60,10 @@ type joinRule struct {
 // line and adds a NewAnchor line, the lines no run explains are read together at the file's end (classifier
 // endFile): a removed and an added line of equal canonical form pair (with Moves, a clause the old form emitted out
 // of source order; a re-indented kept line; a label whose replacement sits in another run), then Delete and Insert
-// admit the scaffolding, and what is left is refused. A rule with no OldAnchor only inserts: a file whose
-// added lines hold NewAnchor may insert lines matching Insert, and nothing else (P1's record line).
+// admit the scaffolding, and what is left is refused. A PerSide rule gates each side on its own anchor instead: a
+// file may delete Delete lines when its removed lines hold OldAnchor, and insert Insert lines when its added lines
+// hold NewAnchor, a nil anchor holding always (P1's records, deleted from a converted file and inserted into
+// package_info.cs).
 type blockRule struct {
 	OldAnchor, NewAnchor *regexp.Regexp
 	Delete, Insert       []*regexp.Regexp
@@ -67,6 +71,7 @@ type blockRule struct {
 	// rewrite that retires it (#33's hoisted fields) shows as a deletion hunk with no NewAnchor.
 	Standalone bool
 	Moves      bool
+	PerSide    bool
 }
 
 // derefSelects respells every `(~X).` as `X.`, X any expression with balanced parentheses: P1's read through a
@@ -100,6 +105,23 @@ func derefSelects(s string) string {
 		}
 
 		from = open
+	}
+}
+
+// valueSelect is one `X.Value.f` of P1's write through a pointer, f possibly `@`-escaped.
+var valueSelect = rx(`([\p{L}\p{N}_\])])\.Value\.([\p{L}_@])`)
+
+// valueSelects respells every `X.Value.f` as `X.f`, to a fixed point: a match consumes the first letter of its field,
+// so a chain through a one-letter field (`cst.Value.c.Value.Timeout`) needs a second pass.
+func valueSelects(s string) string {
+	for {
+		next := valueSelect.ReplaceAllString(s, "$1.$2")
+
+		if next == s {
+			return s
+		}
+
+		s = next
 	}
 }
 
@@ -414,18 +436,24 @@ var items = []item{
 			m("P1", "value-select", id+`\.Value\.[\p{L}_]`),
 		},
 		// #31's base is any expression, not an identifier only: a chain, a call or an index (`(~(~e.prev).next).x`,
-		// `(~mk()).Y`, `m["k"].Value.X`). Each file gains one `[GoFieldAccess(…)]` record line, inserted, or extended
-		// where the unsafe.Pointer route already wrote one (G, 2026-10-28).
+		// `(~mk()).Y`, `m["k"].Value.X`). Its records move into package_info.cs: each record type is an inserted
+		// `[assembly: GoFieldAccess(typeof(T))]` line, under its prose, and the per-file `[GoFieldAccess(…)]` line the
+		// unsafe.Pointer route wrote on a package class is deleted (G, 2026-10-28, the owner's ask).
 		Canon: []rewrite{
 			{re: rx(`^.*$`), fn: derefSelects},
-			rw(`([\p{L}\p{N}_\])])\.Value\.([\p{L}_])`, "$1.$2"),
-			rw(`^(\s*)\[GoFieldAccess\(.*\)\]$`, "$1[GoFieldAccess(…)]"),
+			{re: rx(`^.*$`), fn: valueSelects},
 		},
-		Old: rx(`\(~|[\p{L}\p{N}_\])]\.Value\.[\p{L}_]`),
-		New: rx(`typeof\(`),
+		Olds: []*regexp.Regexp{rx(`\(~`), valueSelect},
 		Block: &blockRule{
-			NewAnchor: rx(`^\s*\[GoFieldAccess\(`),
-			Insert:    []*regexp.Regexp{rx(`^\s*\[GoFieldAccess\(.*\)\]$`)},
+			PerSide:   true,
+			Delete:    []*regexp.Regexp{rx(`^\s*\[GoFieldAccess\(.*\)\]$`)},
+			NewAnchor: rx(`^\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(`),
+			Insert: []*regexp.Regexp{
+				rx(`^\s*\[assembly: (?:global::)?(?:go\.)?GoFieldAccess\(typeof\(.*\)\)\]$`),
+				rx(`^// The struct types whose fields this package reaches through a pointer, as Go spells it, ` + "`p.f`" + `:$`),
+				rx(`^// go2cs-gen emits a field property on the pointer for each of their fields\.$`),
+				rx(`^$`),
+			},
 		},
 	},
 	{

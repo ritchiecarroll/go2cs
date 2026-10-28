@@ -392,10 +392,6 @@ type Visitor struct {
 	fieldAccessLocalCache map[types.Object]types.Type
 	// fieldAccessResultCache memoizes fieldAccessReturnsReinterpret per callee result (fieldAccess.go).
 	fieldAccessResultCache map[fieldAccessResult]bool
-	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
-	// through a generated field property (a provenance-scoped local, or any pointer under P1), for its
-	// `[GoFieldAccess(…)]` record (fieldAccess.go).
-	fieldAccessTypes []string
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
 	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads

@@ -920,6 +920,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// assembly, whose compile set excludes package_info.cs in favor of the seeded test-info file.
 	packageInfoLines = applyGoSourcePositionMaps(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyHoistedLiteralsStamp(packageInfoLines, packageInfoFileName)
+	packageInfoLines = applyFieldAccessRecords(packageInfoLines, packageInfoFileName, mergeExisting, qualifyLocalTypeRef)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 
 	// Remove trailing empty lines
@@ -1007,6 +1008,84 @@ func applyHoistedLiteralsStamp(packageInfoLines []string, packageInfoFileName st
 	block := append(append([]string(nil), prose...), "[assembly: "+globalQualifyRooted("go.GoHoistedLiterals")+"]", "")
 
 	return slices.Concat(kept[:anchor], block, kept[anchor:])
+}
+
+// fieldAccessRecordsProseLines returns the comment above the package's [GoFieldAccess] records.
+func fieldAccessRecordsProseLines() []string {
+	return []string{
+		"// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:",
+		"// go2cs-gen emits a field property on the pointer for each of their fields.",
+	}
+}
+
+// isFieldAccessRecordLine reports whether a line is an assembly-level [GoFieldAccess] record, in any qualification.
+func isFieldAccessRecordLine(line string) bool {
+	trimmed := strings.TrimSpace(line)
+
+	for _, prefix := range []string{"[assembly: GoFieldAccess(", "[assembly: go.GoFieldAccess(", "[assembly: global::go.GoFieldAccess("} {
+		if strings.HasPrefix(trimmed, prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// applyFieldAccessRecords writes the package's field-access records (fieldAccessRecords, parity seat #31), one
+// `[assembly: GoFieldAccess(typeof(T))]` per struct type, sorted, immediately above the <GoSourcePositionMaps> prose,
+// and removes any it held before. Like every record section, a whole-package conversion rebuilds it from this run's
+// records alone, and a merging write (the -tests flow, single-file conversions) keeps the records already there: the
+// seeded test-info file of a recompile-model test assembly is how production's records reach it.
+func applyFieldAccessRecords(packageInfoLines []string, packageInfoFileName string, mergeExisting bool, qualify func(string) string) []string {
+	prose := fieldAccessRecordsProseLines()
+	kept := make([]string, 0, len(packageInfoLines))
+	records := hashset.HashSet[string]{}
+
+	for i := 0; i < len(packageInfoLines); i++ {
+		if !isFieldAccessRecordLine(packageInfoLines[i]) {
+			kept = append(kept, packageInfoLines[i])
+			continue
+		}
+
+		if mergeExisting {
+			records.Add(strings.TrimSpace(packageInfoLines[i]))
+		}
+
+		// The records' prose, written just above the first, and the blank line after the last go with them.
+		if len(kept) >= len(prose) && slices.Equal(kept[len(kept)-len(prose):], prose) {
+			kept = kept[:len(kept)-len(prose)]
+		}
+
+		if i+1 < len(packageInfoLines) && strings.TrimSpace(packageInfoLines[i+1]) == "" {
+			i++
+		}
+	}
+
+	attribute := globalQualifyRooted("go.GoFieldAccess")
+
+	for typeName := range fieldAccessRecords {
+		records.Add(fmt.Sprintf("[assembly: %s(typeof(%s))]", attribute, qualify(typeName)))
+	}
+
+	if records.IsEmpty() {
+		return kept
+	}
+
+	anchor := slices.Index(kept, goSourcePositionMapsProseLines()[0])
+
+	if anchor < 0 {
+		anchor = slices.IndexFunc(kept, func(line string) bool { return strings.Contains(line, "<GoSourcePositionMaps>") })
+	}
+
+	if anchor < 0 {
+		showWarning("Package info file \"%s\" has no <GoSourcePositionMaps> section; its [GoFieldAccess] records were not emitted", packageInfoFileName)
+		return kept
+	}
+
+	lines := records.Keys()
+	sort.Strings(lines)
+
+	return slices.Concat(kept[:anchor], prose, lines, []string{""}, kept[anchor:])
 }
 
 // applyGoSourcePositionMaps rewrites the <GoSourcePositionMaps> section of a package info file with

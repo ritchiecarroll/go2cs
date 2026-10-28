@@ -134,23 +134,33 @@ func (c *classifier) noteAnchors(rem, add []string) {
 // endFile reads the file's pool. When the file's diff shows a Block's two anchors, the pooled lines are that
 // rewrite's: a removed and an added line of equal canonical form pair (a line the old form emitted out of source
 // order, a line the rewrite only re-indents, or a label whose replacement git placed in another run), then Delete
-// and Insert admit the scaffolding. Every line left, and every pooled line of a file without both anchors, is
-// refused as its run would have refused it.
+// and Insert admit the scaffolding. A PerSide Block's Delete and Insert admit lines beside it, each side on its own
+// anchor. Every line left, and every pooled line of a file no Block anchors, is refused as its run would have
+// refused it.
 func (c *classifier) endFile(t *tally, file string) {
 	p := c.pool
 	if p == nil {
 		return
 	}
 	c.pool = &filePool{oldSeen: map[*item]bool{}, newSeen: map[*item]bool{}}
-	var active *item
+	var active, deleter, inserter *item
 	for _, it := range c.allowed {
-		// An insert-only rule (no OldAnchor) needs no old anchor.
-		if it.Block != nil && (p.oldSeen[it] || it.Block.OldAnchor == nil) && (p.newSeen[it] || it.Block.Standalone) {
+		b := it.Block
+		switch {
+		case b == nil:
+		case b.PerSide:
+			// Each side on its own anchor, a nil anchor holding always (blockRule).
+			if deleter == nil && (b.OldAnchor == nil || p.oldSeen[it]) {
+				deleter = it
+			}
+			if inserter == nil && (b.NewAnchor == nil || p.newSeen[it]) {
+				inserter = it
+			}
+		case active == nil && p.oldSeen[it] && (p.newSeen[it] || b.Standalone):
 			active = it
-			break
 		}
 	}
-	if active == nil {
+	if active == nil && deleter == nil && inserter == nil {
 		t.refused = append(t.refused, p.orig...)
 		return
 	}
@@ -187,6 +197,10 @@ func (c *classifier) endFile(t *tally, file string) {
 				continue
 			}
 		}
+		if deleter != nil && matches(deleter.Block.Delete, r.line) {
+			t.credit(file, deleter.ID)
+			continue
+		}
 		t.refused = append(t.refused, refusal{file, r.at, r.why, r.line, "", '-'})
 	}
 	for j, a := range p.add {
@@ -199,6 +213,10 @@ func (c *classifier) endFile(t *tally, file string) {
 		}
 		if active != nil && matches(active.Block.Insert, a.line) {
 			t.credit(file, active.ID)
+			continue
+		}
+		if inserter != nil && matches(inserter.Block.Insert, a.line) {
+			t.credit(file, inserter.ID)
 			continue
 		}
 		t.refused = append(t.refused, refusal{file, a.at, a.why, "", a.line, '+'})
@@ -235,8 +253,10 @@ func canon(it *item, s string) string {
 }
 
 func moves(it *item, rem, add string) bool {
-	if it.Old != nil && len(it.Old.FindAllStringIndex(rem, -1)) > len(it.Old.FindAllStringIndex(add, -1)) {
-		return true
+	for _, old := range append([]*regexp.Regexp{it.Old}, it.Olds...) {
+		if old != nil && len(old.FindAllStringIndex(rem, -1)) > len(old.FindAllStringIndex(add, -1)) {
+			return true
+		}
 	}
 	return it.New != nil && len(it.New.FindAllStringIndex(add, -1)) > len(it.New.FindAllStringIndex(rem, -1))
 }

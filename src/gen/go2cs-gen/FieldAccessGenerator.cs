@@ -32,8 +32,9 @@ namespace go2cs;
 /// (<see cref="ShadowsPromotedMethod"/>).
 /// </para>
 /// <para>
-/// The converter puts a record on the package class of each FILE with a site, naming that file's struct types, and
-/// the properties go into the USING package's own compilation, in an <c>internal</c> class: an extension block may extend a foreign type, an exported field's
+/// The converter writes the package's records in its package_info.cs, one assembly-level attribute per struct type
+/// (an earlier converter put them on the package class of each FILE, which is still read; see
+/// <see cref="RecordedTypes"/>), and the properties go into the USING package's own compilation, in an <c>internal</c> class: an extension block may extend a foreign type, an exported field's
 /// <c>Ꮡ</c> accessor is public, and no other assembly sees the class, so two packages extending one type never meet.
 /// The exception is a test assembly that references its package's assembly: it sees the package's class through
 /// <c>InternalsVisibleTo</c>, so a property that class already declares is not declared again (see
@@ -82,7 +83,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxReceiver is not FieldAccessRecordFinder { Candidates.Count: > 0 } finder)
+        if (context.SyntaxReceiver is not FieldAccessRecordFinder finder || finder.Candidates.Count == 0 && !finder.AssemblyRecords)
             return;
 
         List<INamedTypeSymbol> types = RecordedTypes(context.Compilation, finder.Candidates);
@@ -91,14 +92,16 @@ public class FieldAccessGenerator : ISourceGenerator
             context.AddSource("GoFieldAccess.g.cs", Source(context.Compilation, types));
     }
 
-    // The struct types the records list, each once, generic ones by their open definition. A record sits on a
-    // package class, which is partial across the package's files, so its symbol carries every file's records.
+    // The struct types the records list, each once, generic ones by their open definition. The converter writes the
+    // records on the compilation's assembly, in package_info.cs (parity seat #31). An earlier converter wrote them on
+    // the package class of each file, which is partial across the package's files, so its symbol carries every file's
+    // records; the committed corpus carries that form until its next regeneration, so both are read.
     internal static List<INamedTypeSymbol> RecordedTypes(Compilation compilation, IEnumerable<ClassDeclarationSyntax> candidates)
     {
         List<INamedTypeSymbol> types = [];
         HashSet<INamedTypeSymbol> seen = new(SymbolEqualityComparer.Default);
         HashSet<INamedTypeSymbol> classes = new(SymbolEqualityComparer.Default);
-        List<AttributeData> records = [];
+        List<AttributeData> records = [.. compilation.Assembly.GetAttributes()];
 
         foreach (ClassDeclarationSyntax candidate in candidates)
         {
@@ -419,30 +422,31 @@ public class FieldAccessGenerator : ISourceGenerator
 }
 
 /// <summary>
-/// Collects the class declarations that carry a <c>GoFieldAccess</c> record, by name; the generator confirms the
-/// attribute by symbol.
+/// Collects the class declarations that carry a <c>GoFieldAccess</c> record, and notes whether any assembly-level record
+/// exists, by name; the generator confirms the attribute by symbol.
 /// </summary>
 public sealed class FieldAccessRecordFinder : ISyntaxReceiver
 {
     public List<ClassDeclarationSyntax> Candidates { get; } = [];
 
+    /// <summary>Whether an <c>[assembly: GoFieldAccess(…)]</c> record was seen (package_info.cs).</summary>
+    public bool AssemblyRecords { get; private set; }
+
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
+        if (syntaxNode is AttributeListSyntax { Target.Identifier.ValueText: "assembly" } assemblyList)
+        {
+            AssemblyRecords |= assemblyList.Attributes.Any(IsRecord);
+            return;
+        }
+
         if (syntaxNode is not ClassDeclarationSyntax { AttributeLists.Count: > 0 } declaration)
             return;
 
-        foreach (AttributeListSyntax list in declaration.AttributeLists)
-        {
-            foreach (AttributeSyntax attribute in list.Attributes)
-            {
-                string name = attribute.Name is QualifiedNameSyntax qualified ? qualified.Right.Identifier.ValueText : attribute.Name.ToString();
-
-                if (name is "GoFieldAccess" or "GoFieldAccessAttribute")
-                {
-                    Candidates.Add(declaration);
-                    return;
-                }
-            }
-        }
+        if (declaration.AttributeLists.Any(list => list.Attributes.Any(IsRecord)))
+            Candidates.Add(declaration);
     }
+
+    private static bool IsRecord(AttributeSyntax attribute) =>
+        (attribute.Name is QualifiedNameSyntax qualified ? qualified.Right.Identifier.ValueText : attribute.Name.ToString()) is "GoFieldAccess" or "GoFieldAccessAttribute";
 }
