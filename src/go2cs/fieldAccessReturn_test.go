@@ -15,6 +15,10 @@
 // through a func value, a callee that returns a fresh `&T{}`, and three reinterprets that are not over byte storage:
 // an unsafe.Pointer parameter (runtime's efaceOf shape), a uintptr getter (runtime's puintptr.ptr) and the element
 // address of a []uint64.
+//
+// Each site writes or reads a field named `Value`, like a member of ж<T>, because that is where the two routes still
+// differ since parity seat #31: P1 spells an ordinary field `p.f` through ANY pointer, so only a collision tells the
+// provenance route's explicit `p.of(T.ᏑValue).Value` from the box form every other pointer keeps, `p.Value.Value`.
 
 package main
 
@@ -36,8 +40,9 @@ func TestFieldAccessCrossesOneReturn(t *testing.T) {
 import "unsafe"
 
 type Rec struct {
-	Name string
-	N    uint16
+	Name  string
+	N     uint16
+	Value uint16
 }
 
 func View(blob []byte) *Rec { return (*Rec)(unsafe.Pointer(&blob[0])) }
@@ -56,6 +61,7 @@ type buffer struct {
 	Name   string
 	Offset uint16
 	Flags  uint32
+	Value  uint32
 }
 
 // view returns its reinterpret directly.
@@ -105,6 +111,7 @@ func overWords(u []uint64) *buffer { return (*buffer)(unsafe.Pointer(&u[1])) }
 
 func positives(blob []byte, r *reader) {
 	pa := view(blob)
+	pa.Value = 1
 	pa.Offset = 1
 	pb, err := read(true)
 
@@ -112,33 +119,33 @@ func positives(blob []byte, r *reader) {
 		return
 	}
 
-	fmt.Println(pb.Flags)
+	fmt.Println(pb.Value)
 	pc, _ := r.at()
-	pc.Offset = 2
+	pc.Value = 2
 	var pd, _ = read(true)
-	fmt.Println(pd.Flags)
+	fmt.Println(pd.Value)
 }
 
 func negatives(blob []byte) {
 	n1, _ := named(blob)
-	n1.Offset = 3
+	n1.Value = 3
 	n2 := forwarded(blob)
-	n2.Offset = 4
+	n2.Value = 4
 	n3 := generic[int](blob)
-	n3.Offset = 5
+	n3.Value = 5
 	n4 := sub.View(blob)
-	n4.N = 6
+	n4.Value = 6
 	f := view
 	n5 := f(blob)
-	n5.Offset = 7
+	n5.Value = 7
 	n6 := fresh(blob)
-	n6.Offset = 8
+	n6.Value = 8
 	n7 := overPointer(unsafe.Pointer(&blob[0]))
-	n7.Offset = 9
+	n7.Value = 9
 	n8 := bufptr(uintptr(unsafe.Pointer(&blob[0]))).ptr()
-	n8.Offset = 10
+	n8.Value = 10
 	n9 := overWords(make([]uint64, 4))
-	n9.Offset = 11
+	n9.Value = 11
 }
 
 func main() {
@@ -152,10 +159,11 @@ func main() {
 	scoped := funcBody(t, cs, "void positives(")
 
 	for _, want := range []string{
+		"pa.of(buffer.ᏑValue).Value = 1;",
 		"pa.Offset = 1;",
-		"fmt.Println(pb.Flags);",
-		"pc.Offset = 2;",
-		"fmt.Println(pd.Flags);",
+		"fmt.Println(pb.of(buffer.ᏑValue).Value);",
+		"pc.of(buffer.ᏑValue).Value = 2;",
+		"fmt.Println(pd.of(buffer.ᏑValue).Value);",
 	} {
 		if !strings.Contains(scoped, want) {
 			t.Errorf("a local assigned from a summarized callee does not take the field-access form (want %q):\n%s", want, scoped)
@@ -169,15 +177,15 @@ func main() {
 	negative := funcBody(t, cs, "void negatives(")
 
 	for _, kept := range []string{
-		"n1.Value.Offset = 3;",
-		"n2.Value.Offset = 4;",
-		"n3.Value.Offset = 5;",
-		"n4.Value.N = 6;",
-		"n5.Value.Offset = 7;",
-		"n6.Value.Offset = 8;",
-		"n7.Value.Offset = 9;",
-		"n8.Value.Offset = 10;",
-		"n9.Value.Offset = 11;",
+		"n1.Value.Value = 3;",
+		"n2.Value.Value = 4;",
+		"n3.Value.Value = 5;",
+		"n4.Value.Value = 6;",
+		"n5.Value.Value = 7;",
+		"n6.Value.Value = 8;",
+		"n7.Value.Value = 9;",
+		"n8.Value.Value = 10;",
+		"n9.Value.Value = 11;",
 	} {
 		if !strings.Contains(negative, kept) {
 			t.Errorf("a negative left today's whole-value emission (want %q):\n%s", kept, negative)

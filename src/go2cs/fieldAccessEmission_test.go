@@ -9,8 +9,8 @@
 // Guards the field-access emission (fieldAccess.go): a field reached through a local whose every assignment
 // reinterprets an unsafe.Pointer, over a struct that holds a managed reference, reads as Go spells it,
 // `buf.Offset = off`, through a generated field property, and the file names the struct in its
-// `[GoFieldAccess(…)]` record. The controls keep today's emission: a local that is also assigned a plain pointer,
-// and a struct with no managed reference.
+// `[GoFieldAccess(…)]` record. The controls fall outside the provenance rule: a local that is also assigned a plain
+// pointer, and a struct with no managed reference. Since parity seat #31 P1 serves them, with the same spelling.
 
 package main
 
@@ -183,8 +183,9 @@ func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 		t.Errorf("a scoped field access still reads through the whole value:\n%s", scoped)
 	}
 
-	if !strings.Contains(cs, "[GoFieldAccess(typeof(buffer))]\npartial class main_package {") &&
-		!strings.Contains(cs, "[GoFieldAccess(typeof(buffer))]\r\npartial class main_package {") {
+	// hdr is listed by its P1 site in scalarOnly (fieldPropertyEmission_test.go): one record serves both routes.
+	if !strings.Contains(cs, "[GoFieldAccess(typeof(buffer), typeof(hdr))]\npartial class main_package {") &&
+		!strings.Contains(cs, "[GoFieldAccess(typeof(buffer), typeof(hdr))]\r\npartial class main_package {") {
 		t.Errorf("the file does not carry its [GoFieldAccess] record on the package class:\n%s", cs)
 	}
 
@@ -193,11 +194,13 @@ func TestFieldAccessReadsThroughTheFieldProperty(t *testing.T) {
 		t.Errorf("a field of a hand-owned file's struct does not take the explicit form:\n%s", handOwned)
 	}
 
-	if repointed := funcBody(t, cs, "void repointed("); !strings.Contains(repointed, "buf.Value.Offset = 1;") {
-		t.Errorf("the re-pointed control left today's emission:\n%s", repointed)
+	// The controls are outside the provenance rule, so P1 serves them (parity seat #31): the same spelling, and a field
+	// named like a member of ж<T> keeps today's box form rather than this route's explicit one.
+	if repointed := funcBody(t, cs, "void repointed("); !strings.Contains(repointed, "buf.Offset = 1;") {
+		t.Errorf("the re-pointed control does not take P1's spelling:\n%s", repointed)
 	}
 
-	if scalarOnly := funcBody(t, cs, "void scalarOnly("); !strings.Contains(scalarOnly, "h.Value.Tag = 1;") {
-		t.Errorf("the scalar-only control left today's emission:\n%s", scalarOnly)
+	if scalarOnly := funcBody(t, cs, "void scalarOnly("); !strings.Contains(scalarOnly, "h.Tag = 1;") {
+		t.Errorf("the scalar-only control does not take P1's spelling:\n%s", scalarOnly)
 	}
 }

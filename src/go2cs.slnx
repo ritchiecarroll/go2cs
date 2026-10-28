@@ -912,6 +912,7 @@
     <Project Path="tests/Behavioral/PointerEmbeddingPromotion/PointerEmbeddingPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerFieldArrayElementAddress/PointerFieldArrayElementAddress.csproj" />
     <Project Path="tests/Behavioral/PointerFieldOfBoxedGlobal/PointerFieldOfBoxedGlobal.csproj" />
+    <Project Path="tests/Behavioral/PointerFieldSelectors/PointerFieldSelectors.csproj" />
     <Project Path="tests/Behavioral/PointerInterfaceStructField/PointerInterfaceStructField.csproj" />
     <Project Path="tests/Behavioral/PointerParamCapturedInClosure/PointerParamCapturedInClosure.csproj" />
     <Project Path="tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />

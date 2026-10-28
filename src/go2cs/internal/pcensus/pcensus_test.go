@@ -155,6 +155,12 @@ var plants = []plant{
 	one("P1 good deref", prodFile, `var n = (~p).next;`, `var n = p.next;`, "P1"),
 	one("P1 good value", prodFile, `e.Value.prev.Value.next = x;`, `e.prev.next = x;`, "P1"),
 	one("P1 bad: the field changed", prodFile, `var n = (~p).next;`, `var n = p.prev;`, "UNCLASSIFIED"),
+	one("P1 good chain", prodFile, `fmt.Println((~(~c.prev).next).x);`, `fmt.Println(c.prev.next.x);`, "P1"),
+	one("P1 good call and index bases", prodFile, `fmt.Println((~mk()).Y, (~ps[0]).Y);`, `fmt.Println(mk().Y, ps[0].Y);`, "P1"),
+	one("P1 good value after an index", prodFile, `m["k"u8].Value.X = 4;`, `m["k"u8].X = 4;`, "P1"),
+	one("P1 good record extended", prodFile, `[GoFieldAccess(typeof(buffer))]`, `[GoFieldAccess(typeof(buffer), typeof(hdr))]`, "P1"),
+	one("P1 bad: a call's argument changed", prodFile, `fmt.Println((~mk(1)).Y);`, `fmt.Println(mk(2).Y);`, "UNCLASSIFIED"),
+	one("P1 bad: a deref kept that is no selection", prodFile, `var v = (~p);`, `var v = p;`, "UNCLASSIFIED"),
 	one("P2 good", prodFile, `var off = Ꮡb.of(Buffer.Ꮡoff);`, `var off = Ꮡb.Ꮡoff;`, "P2"),
 	one("R5+P2 composition", prodFile, `var off = Ꮡb.of(Buffer.Ꮡoff);`, `var off = b.Ꮡoff;`, "R5+P2"),
 	one("P2 bad: the field changed", prodFile, `var off = Ꮡb.of(Buffer.Ꮡoff);`, `var off = Ꮡb.Ꮡbuf;`, "UNCLASSIFIED"),
@@ -505,6 +511,27 @@ func TestBlockPlantsAcrossRuns(t *testing.T) {
 	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `+    break;`, `     g();`, `-    do {`}))
 	if len(tl.refused) != 2 {
 		t.Errorf("S1 across runs, anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
+	}
+}
+
+// P1 (#31) inserts one `[GoFieldAccess(…)]` record line per file, with no removed partner: an insert-only block. Any
+// other inserted line beside it is still refused, and so is a record line the hunk only deletes.
+func TestInsertOnlyBlockPlants(t *testing.T) {
+	c, _ := newClassifier("", false)
+
+	tl := c.classifyDiff(diffOf(prodFile, nil, []string{`[GoFieldAccess(typeof(point), typeof(pair<>))]`}))
+	if len(tl.refused) != 0 || tl.labels["P1"] != 1 {
+		t.Errorf("P1 record inserted: wanted one P1, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	tl = c.classifyDiff(diffOf(prodFile, nil, []string{`[GoFieldAccess(typeof(point))]`, `using static go.fmt_package;`}))
+	if len(tl.refused) != 1 || !strings.Contains(tl.refused[0].add, "using static") {
+		t.Errorf("P1 record beside another insertion: wanted the other line refused by name, refused %v", tl.refused)
+	}
+
+	tl = c.classifyDiff(diffOf(prodFile, []string{`[GoFieldAccess(typeof(point))]`}, nil))
+	if len(tl.refused) != 1 {
+		t.Errorf("P1 record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
 	}
 }
 

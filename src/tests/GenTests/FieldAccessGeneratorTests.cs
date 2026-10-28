@@ -34,7 +34,8 @@ public class FieldAccessGeneratorTests
         namespace go;
 
         public delegate ref TField FieldRefFunc<T, TField>(ref T instance);
-        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; }
+        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; public ref T Value => throw null!; }
+        public sealed class NativeBox<T> : ж<T> { }
         public struct array<T> { }
         public sealed class GoFieldAccessAttribute(params System.Type[] types) : System.Attribute { }
         public interface IUnsafePointer { }
@@ -129,21 +130,34 @@ public class FieldAccessGeneratorTests
     // bare. Both spellings compile.
     private const string Record = "global::go.main_package.@record";
 
+    // Every accessor's attributes: go2cs machinery, inlined, and no Go frame where the JIT keeps one (design Q4).
+    private static readonly string Getter =
+        $"[{Common.GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
+
+    // A field's property, with the specialized body (design Q1): the field in place on a managed box, at its Go offset
+    // through the accessor on a NativeBox<T>. `field` is the field's own name where the property's is escaped.
+    private static string Ref(string fieldType, string name, string type, string? field = null) =>
+        $"public ref {fieldType} {name} {{ {Getter} get => ref ʗp is global::go.NativeBox<{type}> ? ref ʗp.field({type}.Ꮡ{field ?? name}) : ref ʗp.Value.{name}; }}";
+
+    // A header-shaped struct's field: get/set over the accessor, the setter committing the header.
+    private static string Header(string fieldType, string name, string type) =>
+        $"public {fieldType} {name} {{ {Getter} get => ʗp.field({type}.Ꮡ{name}); {Getter} set {{ ʗp.field({type}.Ꮡ{name}) = value; ʗp.OnHeaderStore(); }} }}";
+
     [TestMethod]
     public void ARecordedStructGetsARefPropertyPerField()
     {
         string generated = Generate(Package);
 
         StringAssert.Contains(generated, $"extension(global::go.ж<{Record}> ʗp)");
-        StringAssert.Contains(generated, $"public ref uint Kind => ref ʗp.field({Record}.ᏑKind);");
-        StringAssert.Contains(generated, $"public ref global::go.array<ushort> Path => ref ʗp.field({Record}.ᏑPath);");
+        StringAssert.Contains(generated, Ref("uint", "Kind", Record));
+        StringAssert.Contains(generated, Ref("global::go.array<ushort>", "Path", Record));
         Assert.IsFalse(generated.Contains("unrecorded"), "a struct no record lists gets no properties");
     }
 
     [TestMethod]
     public void AKeywordFieldKeepsItsEscapeAndItsAccessorDropsIt()
     {
-        StringAssert.Contains(Generate(Package), $"public ref ushort @base => ref ʗp.field({Record}.Ꮡbase);");
+        StringAssert.Contains(Generate(Package), Ref("ushort", "@base", Record, field: "base"));
     }
 
     [TestMethod]
@@ -151,14 +165,16 @@ public class FieldAccessGeneratorTests
     {
         string generated = Generate(Package);
 
-        Assert.IsFalse(generated.Contains(" Value =>"), "a field named like a ж<T> member would silently bind the member");
-        Assert.IsFalse(generated.Contains(" _ =>"), "a blank field has no address and no accessor");
+        // The control: the shape these negatives look for is the one every property takes.
+        StringAssert.Contains(generated, " Kind { ");
+        Assert.IsFalse(generated.Contains(" Value { "), "a field named like a ж<T> member would silently bind the member");
+        Assert.IsFalse(generated.Contains(" _ { "), "a blank field has no address and no accessor");
     }
 
     [TestMethod]
     public void AnEmbeddedStructGetsItsRefPropertySoAPromotedPathReadsByName()
     {
-        StringAssert.Contains(Generate(Package), $"public ref global::go.main_package.tail tail => ref ʗp.field({Record}.Ꮡtail);");
+        StringAssert.Contains(Generate(Package), Ref("global::go.main_package.tail", "tail", Record));
     }
 
     [TestMethod]
@@ -167,7 +183,103 @@ public class FieldAccessGeneratorTests
         string generated = Generate(Package);
 
         StringAssert.Contains(generated, "extension<T>(global::go.ж<global::go.main_package.pair<T>> ʗp) where T : struct");
-        StringAssert.Contains(generated, "public ref T First => ref ʗp.field(global::go.main_package.pair<T>.ᏑFirst);");
+        StringAssert.Contains(generated, Ref("T", "First", "global::go.main_package.pair<T>"));
+    }
+
+    // A READONLY field is a zero-size layout field, laid over its neighbour at Go's offset: it has no writable slot of
+    // its own, and its accessor answers golib's shared zero-size slot. Its property keeps the accessor's body, since
+    // `ref ʗp.Value.f` would not compile (CS8329).
+    private const string ZeroSize = """
+        namespace go;
+
+        [GoFieldAccess(typeof(counter))]
+        partial class atomic_package
+        {
+            public partial struct counter { internal readonly noCopy _noCopy; public readonly noCopy pad; public int v; }
+
+            public partial struct noCopy { }
+        }
+        """;
+
+    [TestMethod]
+    public void AReadonlyFieldKeepsTheAccessorsBody()
+    {
+        string generated = Generate(ZeroSize);
+        const string Counter = "global::go.atomic_package.counter";
+
+        StringAssert.Contains(generated, $"public ref global::go.atomic_package.noCopy pad {{ {Getter} get => ref ʗp.field({Counter}.Ꮡpad); }}");
+        StringAssert.Contains(generated, Ref("int", "v", Counter), "the writable sibling takes the specialized body");
+    }
+
+    [TestMethod]
+    public void EveryAccessorIsMachineryAndInlined()
+    {
+        string generated = Generate(Package);
+        int properties = generated.Split(" get => ").Length - 1;
+
+        Assert.IsTrue(properties > 0, "the fixture generates properties");
+        Assert.AreEqual(properties, generated.Split($"{Getter} get => ").Length - 1, "every getter carries [GeneratedCode] and [MethodImpl(AggressiveInlining)]");
+    }
+
+    // abi.ArrayType's shape: a field that shadows a method an embedded type promotes. Go selects the field, but the box
+    // carries the promoted method as an extension member, and a property beside it would make every `p.Len` ambiguous;
+    // the converter keeps the box form for such a field (shadowsPromotedMethod), so the property would serve nothing.
+    // The promoted method sits one embed down (Type), two embeds down (through outer's value embed of ArrayType's
+    // shape), and behind a POINTER embed; a sibling field that shadows nothing keeps its property, and so does a field
+    // whose name matches a method of an unrelated type.
+    private const string Shadows = """
+        namespace go;
+
+        [GoFieldAccess(typeof(ArrayType), typeof(deeper), typeof(viaPointer), typeof(unrelated))]
+        partial class abi_package
+        {
+            public partial struct Type { public nint Size_; }
+
+            public partial struct ArrayType
+            {
+                /*embed*/ public Type Type;
+                public nint Len;
+                public nint Elem;
+            }
+
+            public partial struct deeper
+            {
+                /*embed*/ public ArrayType ArrayType;
+                public nint Kind;
+                public nint Cap;
+            }
+
+            public partial struct viaPointer
+            {
+                /*embed*/ public ж<Type> Type;
+                public nint Len;
+            }
+
+            public partial struct other { }
+
+            public partial struct unrelated { public nint Len; }
+
+            public static nint Len(this ж<Type> t) => 0;
+
+            public static nint Kind(this ref Type t) => 0;
+
+            public static nint Len(this ж<other> o) => 0;
+        }
+        """;
+
+    [TestMethod]
+    public void AFieldThatShadowsAPromotedMethodGetsNoProperty()
+    {
+        string generated = Generate(Shadows);
+        const string Package = "global::go.abi_package";
+
+        Assert.IsFalse(generated.Contains($"{Package}.ArrayType.ᏑLen"), "ArrayType.Len shadows the Len its embedded Type promotes");
+        Assert.IsFalse(generated.Contains($"{Package}.deeper.ᏑKind"), "deeper.Kind shadows the Kind promoted two embeds down");
+        Assert.IsFalse(generated.Contains($"{Package}.viaPointer.ᏑLen"), "a pointer embed promotes its type's methods too");
+
+        StringAssert.Contains(generated, Ref("nint", "Elem", $"{Package}.ArrayType"), "a sibling that shadows nothing keeps its property");
+        StringAssert.Contains(generated, Ref("nint", "Cap", $"{Package}.deeper"));
+        StringAssert.Contains(generated, Ref("nint", "Len", $"{Package}.unrelated"), "a method of an unrelated type shadows nothing");
     }
 
     // HEADER-SHAPED structs: an unsafe.Pointer field, then one or two ints, in declaration order. Go's slice and string
@@ -199,10 +311,10 @@ public class FieldAccessGeneratorTests
         const string Slice = "global::go.unsafeheader_package.Slice";
         const string String = "global::go.unsafeheader_package.String";
 
-        StringAssert.Contains(generated, $"public global::go.unsafe_package.Pointer Data {{ get => ʗp.field({Slice}.ᏑData); set {{ ʗp.field({Slice}.ᏑData) = value; ʗp.OnHeaderStore(); }} }}");
-        StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({Slice}.ᏑLen); set {{ ʗp.field({Slice}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
-        StringAssert.Contains(generated, $"public nint Cap {{ get => ʗp.field({Slice}.ᏑCap); set {{ ʗp.field({Slice}.ᏑCap) = value; ʗp.OnHeaderStore(); }} }}");
-        StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({String}.ᏑLen); set {{ ʗp.field({String}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
+        StringAssert.Contains(generated, Header("global::go.unsafe_package.Pointer", "Data", Slice));
+        StringAssert.Contains(generated, Header("nint", "Len", Slice));
+        StringAssert.Contains(generated, Header("nint", "Cap", Slice));
+        StringAssert.Contains(generated, Header("nint", "Len", String));
     }
 
     // The predicate's arity and order checks (G, review of 94ec9ea487): a header is exactly two or three fields, the
@@ -230,10 +342,10 @@ public class FieldAccessGeneratorTests
         string generated = Generate(NearMisses);
         const string Package = "global::go.nearmiss_package";
 
-        StringAssert.Contains(generated, $"public ref nint Extra => ref ʗp.field({Package}.fourWords.ᏑExtra);", "four words: one too many");
-        StringAssert.Contains(generated, $"public ref global::go.unsafe_package.Pointer Data => ref ʗp.field({Package}.pointerSecond.ᏑData);", "the pointer second: the order is checked");
-        StringAssert.Contains(generated, $"public ref global::go.unsafe_package.Pointer Data => ref ʗp.field({Package}.pointerAlone.ᏑData);", "the pointer alone: one too few");
-        StringAssert.Contains(generated, $"public ref global::go.uintptr Len => ref ʗp.field({Package}.uintptrWord.ᏑLen);", "a uintptr word is golib's struct, not an int");
+        StringAssert.Contains(generated, Ref("nint", "Extra", $"{Package}.fourWords"), "four words: one too many");
+        StringAssert.Contains(generated, Ref("global::go.unsafe_package.Pointer", "Data", $"{Package}.pointerSecond"), "the pointer second: the order is checked");
+        StringAssert.Contains(generated, Ref("global::go.unsafe_package.Pointer", "Data", $"{Package}.pointerAlone"), "the pointer alone: one too few");
+        StringAssert.Contains(generated, Ref("global::go.uintptr", "Len", $"{Package}.uintptrWord"), "a uintptr word is golib's struct, not an int");
         Assert.IsFalse(generated.Contains("OnHeaderStore"), "no near miss of the header shape commits anything");
     }
 
@@ -242,9 +354,9 @@ public class FieldAccessGeneratorTests
     {
         string generated = Generate(Headers);
 
-        StringAssert.Contains(generated, "public ref uint Cap => ref ʗp.field(global::go.unsafeheader_package.notHeader.ᏑCap);");
-        StringAssert.Contains(generated, "public ref nint Len => ref ʗp.field(global::go.unsafeheader_package.notHeader.ᏑLen);");
-        StringAssert.Contains(generated, "public ref global::go.ж<byte> Data => ref ʗp.field(global::go.unsafeheader_package.typedHeader.ᏑData);");
+        StringAssert.Contains(generated, Ref("uint", "Cap", "global::go.unsafeheader_package.notHeader"));
+        StringAssert.Contains(generated, Ref("nint", "Len", "global::go.unsafeheader_package.notHeader"));
+        StringAssert.Contains(generated, Ref("global::go.ж<byte>", "Data", "global::go.unsafeheader_package.typedHeader"));
 
         // And every property of an ordinary record is still a ref.
         Assert.IsFalse(Generate(Package).Contains("OnHeaderStore"), "no ordinary struct's property commits anything");
@@ -256,8 +368,8 @@ public class FieldAccessGeneratorTests
         string generated = Generate(User, ForeignReference());
         const string Sockaddr = "global::go.syscall_package.Sockaddr";
 
-        StringAssert.Contains(generated, $"public ref ushort Port => ref ʗp.field({Sockaddr}.ᏑPort);");
-        StringAssert.Contains(generated, $"public ref ushort Family => ref ʗp.field({Sockaddr}.ᏑFamily);");
+        StringAssert.Contains(generated, Ref("ushort", "Port", Sockaddr));
+        StringAssert.Contains(generated, Ref("ushort", "Family", Sockaddr));
         Assert.IsFalse(generated.Contains("NoAccessor"), "a foreign field with no Ꮡ accessor has nothing to reach it through");
         Assert.IsFalse(generated.Contains("hidden"), "an internal foreign field is not accessible here");
     }
@@ -324,8 +436,8 @@ public class FieldAccessGeneratorTests
     {
         string generated = GenerateBeside(RuntimePackage, RuntimeTest);
 
-        StringAssert.Contains(generated, "public ref nint cap => ref ʗp.field(global::go.runtime_package.slice.Ꮡcap);");
-        Assert.IsFalse(generated.Contains(" len =>"), "a second `len` on ж<slice> makes the package's own ambiguous: CS9286 at every site");
+        StringAssert.Contains(generated, Ref("nint", "cap", "global::go.runtime_package.slice"));
+        Assert.IsFalse(generated.Contains(" len { "), "a second `len` on ж<slice> makes the package's own ambiguous: CS9286 at every site");
     }
 
     [TestMethod]
@@ -341,8 +453,8 @@ public class FieldAccessGeneratorTests
 
         string generated = GenerateBeside(package, RuntimeTest);
 
-        StringAssert.Contains(generated, "public ref nint len => ref ʗp.field(global::go.runtime_package.slice.Ꮡlen);");
-        StringAssert.Contains(generated, "public ref nint cap => ref ʗp.field(global::go.runtime_package.slice.Ꮡcap);");
+        StringAssert.Contains(generated, Ref("nint", "len", "global::go.runtime_package.slice"));
+        StringAssert.Contains(generated, Ref("nint", "cap", "global::go.runtime_package.slice"));
     }
 
     // The real thing, end to end: the package's block is a C# 14 extension compiled by the SDK's own compiler, the
