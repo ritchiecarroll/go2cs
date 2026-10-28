@@ -85,11 +85,12 @@ func main() {
 
 	cs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "arrclone", "main.cs"))
 
-	if !strings.Contains(cs, "r = d."+ValueCloneMethod+"();") {
+	// `r := *d` escapes, so its box folds the copy in (H2): `ref var r = ref heap<sum>(d.ΔClone(), out var Ꮡr);`.
+	if !strings.Contains(cs, "(d."+ValueCloneMethod+"(), out var Ꮡr);") {
 		t.Errorf("the copy of a named array that declares Go's Clone is not spelled %s():\n%s", ValueCloneMethod, cs)
 	}
 
-	if strings.Contains(cs, "r = d.Clone();") {
+	if strings.Contains(cs, "d.Clone()") {
 		t.Errorf("the copy binds `.Clone()`, the name the type's own Go method also has:\n%s", cs)
 	}
 
