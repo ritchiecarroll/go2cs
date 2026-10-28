@@ -58,8 +58,8 @@ the first time it passes a pointer to certain Go structs to a system call. It pr
 `System.NotSupportedException: 'System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences[System.UInt16]()' is missing native code`
 (the type in brackets varies). On Windows, a program that uses `net` or `crypto/tls` reaches it while setting up a
 socket, in `syscall.WSAIoctl`. On Linux and macOS, the same system-call marshalling runs for a pointer to a struct that
-holds a pointer, slice, string or array; it is not measured there. The same program run under the JIT (`dotnet run`, or
-the converted project's default ReadyToRun publish) is not affected. Measured on `win-x64`.
+holds a pointer, slice, string or array, and fails the same way. The same program run under the JIT (`dotnet run`, or
+the converted project's default ReadyToRun publish) is not affected. Measured on `win-x64`, `linux-x64` and `osx-arm64`.
 
 **Cause.** The runtime library's system-call marshalling sorted a struct's fields with a generic method it closed at run
 time, and a Native AOT image has no code for such a method.
@@ -76,7 +76,8 @@ framework-dependent build run the same code under the JIT.
      deepRefusal -> Leaf.containsReferences. golib's NativeStructMarshal closed IsReferenceOrContainsReferences<T>,
      Unsafe.SizeOf<T>, its leaf copiers and NativeBox<T> over run-time Types with MakeGenericMethod, under file-wide
      IL3050 pragmas, and golib built without the AOT analyzer. Fixed in 1.26.10.2 seat #18, whose GolibAotProbe
-     scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT. -->
+     scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT on win-x64 (G-LAPTOP),
+     and on linux-x64 (ubuntu) and osx-arm64 (macos-15) hosted runners, run 40611703805, each equal to the JIT run. -->
 
 ## A Native AOT publish of a program that references the packages is slow and large
 
