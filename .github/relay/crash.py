@@ -18,6 +18,9 @@ def esc(text):
 def esc_prop(text):
     return esc(text).replace(':', '%3A').replace(',', '%2C')
 
+probe_file = os.path.join(here, '..', '..', 'relay', 'probe.txt')
+probe_names = [l.rstrip('\n').split('\t', 1)[1] for l in open(probe_file) if '\t' in l] if os.path.exists(probe_file) else []
+
 RUN_RE = re.compile(r'=== RUN|"Action":"run"|"action":"run"')
 
 for pkg in [l.strip() for l in open(crash_file) if l.strip()]:
@@ -31,6 +34,14 @@ for pkg in [l.strip() for l in open(crash_file) if l.strip()]:
         for path in sorted(files):
             lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
             fatal = [i for i, l in enumerate(lines) if 'fatal error' in l]
+            # FIRST, so the chunk cap never drops it: Go's own output for each probed test (go test -json lines): the comparison record holds verdicts only.
+            for name in probe_names:
+                key = '"Test":"' + name + '"'
+                gl = [l for l in lines if key in l and '"Action":"output"' in l]
+                out.append(f'-- Go output for {name}: {len(gl)} line(s)')
+                for l in gl[:8]:
+                    m = re.search(r'"Output":"((?:[^"\\]|\\.)*)"', l)
+                    out.append('   ' + (m.group(1) if m else l)[:240])
             out.append(f'== {os.path.relpath(path, root)}: {len(lines)} lines, fatal-error lines at {fatal[:10]}')
             # One line per match, with the test it sits in: a match inside a test's EXPECTED output (Go's own
             # TestRuntimePanic prints a dump on purpose) is not a crash of the run.
