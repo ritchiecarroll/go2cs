@@ -65,16 +65,16 @@ internal static void Main() {
 
     fmt.Println("-- canonical case --");
     (var rootEval, err) = filepath.EvalSymlinks(root);
-    if (err != default!) {
+    if (err != nil) {
         fatal("EvalSymlinks(root)", err);
     }
     foreach (var (_, f) in files) {
         var (got, errΔ1) = filepath.EvalSymlinks(strings.ToLower(filepath.Join(root, f.rel)));
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             fatal("EvalSymlinks", errΔ1);
         }
         (var rel, errΔ1) = filepath.Rel(rootEval, got);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             fatal("Rel", errΔ1);
         }
         fmt.Println(ascii(rel));
@@ -86,7 +86,7 @@ internal static void Main() {
 internal static void build(@string root) {
     foreach (var (_, d) in dirs) {
         {
-            var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != default!) {
+            var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != nil) {
                 fatal("MkdirAll", err);
             }
         }
@@ -98,7 +98,7 @@ internal static void build(@string root) {
             body[i] = (byte)((rune)'a' + i % 26);
         }
         {
-            var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != default!) {
+            var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != nil) {
                 fatal("WriteFile", err);
             }
         }
@@ -106,14 +106,14 @@ internal static void build(@string root) {
 
     foreach (var (_, f) in files) {
         {
-            var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != default!) {
+            var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != nil) {
                 fatal("Chtimes", err);
             }
         }
     }
     for (nint i = len(dirs) - 1; i >= 0; i--) {
         {
-            var err = os.Chtimes(filepath.Join(root, dirs[i].rel), dirs[i].stamp, dirs[i].stamp); if (err != default!) {
+            var err = os.Chtimes(filepath.Join(root, dirs[i].rel), dirs[i].stamp, dirs[i].stamp); if (err != nil) {
                 fatal("Chtimes", err);
             }
         }
@@ -124,19 +124,19 @@ internal static slice<entry> enumerate(@string dir) {
     GoFrame ᒐ = default;
     try {
         var (pattern, err) = syscall.UTF16PtrFromString(dir + @"\*"u8);
-        if (err != default!) {
+        if (err != nil) {
             fatal("UTF16PtrFromString", err);
         }
 
         ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
 
         (var h, err) = syscall.FindFirstFile(pattern, Ꮡdata);
-        if (err != default!) {
+        if (err != nil) {
             fatal("FindFirstFile", err);
         }
         defer(syscall.FindClose, h, ref ᒐ);
 
-        slice<entry> @out = default!;
+        slice<entry> @out = default;
         while (ᐧ) {
             {
                 var (e, ok) = toEntry(Ꮡdata); if (ok) {
@@ -144,7 +144,7 @@ internal static slice<entry> enumerate(@string dir) {
                 }
             }
             {
-                var errΔ1 = syscall.FindNextFile(h, Ꮡdata); if (errΔ1 != default!) {
+                var errΔ1 = syscall.FindNextFile(h, Ꮡdata); if (errΔ1 != nil) {
                     if (AreEqual(errΔ1, syscall.ERROR_NO_MORE_FILES)) {
                         break;
                     }
@@ -157,13 +157,13 @@ internal static slice<entry> enumerate(@string dir) {
         sort.Slice(@out, (nint i, nint j) => outʗ1[i].name < outʗ1[j].name);
         return @out;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static entry lookup(@string path) {
     var (e, err) = find(path);
-    if (err != default!) {
+    if (err != nil) {
         fatal("FindFirstFile", err);
     }
     return e;
@@ -171,20 +171,20 @@ internal static entry lookup(@string path) {
 
 internal static (entry, error) find(@string path) {
     var (p, err) = syscall.UTF16PtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return (new entry(nil), err);
     }
 
     ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
 
     (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
-    if (err != default!) {
+    if (err != nil) {
         return (new entry(nil), err);
     }
     syscall.FindClose(h);
 
     var (e, _) = toEntry(Ꮡdata);
-    return (e, default!);
+    return (e, default);
 }
 
 internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {

@@ -33,21 +33,21 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
     GoFrame ᒐ = default;
     try {
         var (server, err) = syscall.Socket(family, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: socket failed\n"u8, label);
             return;
         }
         defer(syscall.Closesocket, server, ref ᒐ);
 
         {
-            var errΔ1 = syscall.Bind(server, bindTo); if (errΔ1 != default!) {
+            var errΔ1 = syscall.Bind(server, bindTo); if (errΔ1 != nil) {
                 fmt.Printf("%s: bind failed\n"u8, label);
                 return;
             }
         }
 
         (var bound, err) = syscall.Getsockname(server);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: getsockname failed\n"u8, label);
             return;
         }
@@ -60,28 +60,28 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
         fmt.Printf("%s bound: addr=%s portAssigned=%v\n"u8, label, boundAddr, boundPort > 0);
 
         {
-            var errΔ2 = syscall.Listen(server, 1); if (errΔ2 != default!) {
+            var errΔ2 = syscall.Listen(server, 1); if (errΔ2 != nil) {
                 fmt.Printf("%s: listen failed\n"u8, label);
                 return;
             }
         }
 
         (var client, err) = syscall.Socket(family, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: client socket failed\n"u8, label);
             return;
         }
         defer(syscall.Closesocket, client, ref ᒐ);
 
         {
-            var errΔ3 = syscall.Connect(client, bound); if (errΔ3 != default!) {
+            var errΔ3 = syscall.Connect(client, bound); if (errΔ3 != nil) {
                 fmt.Printf("%s: connect failed\n"u8, label);
                 return;
             }
         }
 
         (var peer, err) = syscall.Getpeername(client);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: getpeername failed\n"u8, label);
             return;
         }
@@ -96,7 +96,7 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
             label, sameAddr(peer, bound) && peerAddr == boundAddr, peerPort == boundPort);
 
         (var local, err) = syscall.Getsockname(client);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Printf("%s: client getsockname failed\n"u8, label);
             return;
         }
@@ -130,7 +130,7 @@ internal static void decodeRawAny(@string label, uint16 family, Action<Action<ni
     });
 
     var (sa, err) = Ꮡrsa.Sockaddr();
-    if (err != default!) {
+    if (err != nil) {
         fmt.Printf("%s decode: err=%v\n"u8, label, err);
         return;
     }
@@ -161,7 +161,7 @@ internal static void Main() {
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
         {
-            var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != default!) {
+            var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != nil) {
                 fmt.Println("WSAStartup failed");
                 return;
             }

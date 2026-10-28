@@ -26,7 +26,7 @@ internal static readonly @string prefix = "GO2CS_ENVPROBE_"u8;
 internal static readonly @string hiddenName = "=GO2CSENVPROBEHIDDEN"u8;
 
 internal static void Main() {
-    var hiddenSet = os.Setenv(hiddenName, "hid") == default!;
+    var hiddenSet = os.Setenv(hiddenName, "hid") == nil;
 
     var before = syscall.Environ();
     if (len(before) == 0) {
@@ -36,7 +36,7 @@ internal static void Main() {
 
     foreach (var (_, s) in sentinels) {
         {
-            var err = os.Setenv(s.name, s.value); if (err != default!) {
+            var err = os.Setenv(s.name, s.value); if (err != nil) {
                 fmt.Println("FATAL Setenv", s.name, err);
                 os.Exit(1);
             }
@@ -74,7 +74,7 @@ internal static void Main() {
     fmt.Printf("stable %v\n"u8, stable);
 
     {
-        var err = os.Unsetenv(sentinels[0].name); if (err != default!) {
+        var err = os.Unsetenv(sentinels[0].name); if (err != nil) {
             fmt.Println("FATAL Unsetenv", err);
             os.Exit(1);
         }
@@ -84,7 +84,7 @@ internal static void Main() {
 }
 
 internal static slice<@string> collect(slice<@string> env) {
-    slice<@string> @out = default!;
+    slice<@string> @out = default;
     foreach (var (_, e) in env) {
         if (strings.HasPrefix(e, prefix)) {
             @out = append(@out, e);

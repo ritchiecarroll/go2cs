@@ -39,7 +39,7 @@ internal static (ж<os.File>, syscallꓸHandle) pipe() {
 
     var (c, err) = syscall.CreateFile(wname, (uint32)((uint32)syscall.GENERIC_READ | (uint32)syscall.GENERIC_WRITE), 0, nil,
         syscall.OPEN_EXISTING, fileFlagOverlapped, 0);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("CreateFile: %v"u8, err));
     }
 
@@ -47,13 +47,13 @@ internal static (ж<os.File>, syscallꓸHandle) pipe() {
 }
 
 internal static @string readLines(ж<os.File> Ꮡr, nint n) {
-    slice<byte> got = default!;
+    slice<byte> got = default;
     var buf = new slice<byte>(256);
 
     while (strings.Count((@string)got, "\n") < n) {
         var (k, err) = Ꮡr.Read(buf);
         got = appendꓸꓸꓸ(got, buf.slice(0, k));
-        if (err != default!) {
+        if (err != nil) {
             return ((sstring)got) + "<"u8 + err.Error() + ">"u8;
         }
     }
@@ -93,7 +93,7 @@ internal static void Main() {
     ref var dup = ref heap(new syscallꓸHandle(), out var Ꮡdup);
     var (self, _) = syscall.GetCurrentProcess();
     {
-        var err = syscall.DuplicateHandle(self, client, self, Ꮡdup, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != default!) {
+        var err = syscall.DuplicateHandle(self, client, self, Ꮡdup, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != nil) {
             throw panic(fmt.Sprintf("DuplicateHandle: %v"u8, err));
         }
     }
@@ -107,7 +107,7 @@ internal static void Main() {
     step("1 stdout, stderr, stdout", () => {
         foreach (var (_, w) in new main_type[]{new(stdoutʗ1, "stdout line\n"), new(stderrʗ1, "stderr line\n"), new(stdoutʗ1, "stdout again\n")}.slice()) {
             {
-                var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != default!) {
+                var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != nil) {
                     return w.f.Name() + " write: "u8 + err.Error();
                 }
             }
@@ -128,7 +128,7 @@ internal static void Main() {
     var stderrʗ3 = stderr;
     step("3 read through stderr", () => {
         {
-            var (_, err) = serverʗ2.Write(slice<byte>("reply\n"u8)); if (err != default!) {
+            var (_, err) = serverʗ2.Write(slice<byte>("reply\n"u8)); if (err != nil) {
                 return "server write: "u8 + err.Error();
             }
         }
@@ -142,13 +142,13 @@ internal static void Main() {
         keep = append(keep, first, second);
 
         {
-            var (_, err) = second.Write(slice<byte>("second line\n"u8)); if (err != default!) {
+            var (_, err) = second.Write(slice<byte>("second line\n"u8)); if (err != nil) {
                 return "second write: "u8 + err.Error();
             }
         }
         var deadline = first.SetWriteDeadline(time.Now().Add(time.ΔHour));
         {
-            var (_, err) = first.Write(slice<byte>("first line\n"u8)); if (err != default!) {
+            var (_, err) = first.Write(slice<byte>("first line\n"u8)); if (err != nil) {
                 return "first write: "u8 + err.Error();
             }
         }
@@ -167,7 +167,7 @@ internal static void Main() {
         var f = os.NewFile((uintptr)client3, "f");
 
         {
-            var (_, err) = f.Write(slice<byte>("before Fd\n"u8)); if (err != default!) {
+            var (_, err) = f.Write(slice<byte>("before Fd\n"u8)); if (err != nil) {
                 return "write before Fd: "u8 + err.Error();
             }
         }
@@ -175,7 +175,7 @@ internal static void Main() {
         f.Fd();
         var after = f.SetDeadline(time.Now().Add(time.ΔHour));
         {
-            var (_, err) = f.Write(slice<byte>("after Fd\n"u8)); if (err != default!) {
+            var (_, err) = f.Write(slice<byte>("after Fd\n"u8)); if (err != nil) {
                 return "write after Fd: "u8 + err.Error();
             }
         }
@@ -187,7 +187,7 @@ internal static void Main() {
     step("6 a handle opened after a close", () => {
         var (server5, other) = pipe();
 
-        @string before = default!;
+        @string before = default;
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         for (nint round = 0; round < 8; round++) {
             var (server4, client4) = pipe();
@@ -197,7 +197,7 @@ internal static void Main() {
 
             if (round == 0) {
                 {
-                    var (_, err) = first.Write(slice<byte>("before close\n"u8)); if (err != default!) {
+                    var (_, err) = first.Write(slice<byte>("before close\n"u8)); if (err != nil) {
                         return "first write: "u8 + err.Error();
                     }
                 }
@@ -207,7 +207,7 @@ internal static void Main() {
             second.Close();
 
             {
-                var err = syscall.DuplicateHandle(self, other, self, Ꮡh, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != default!) {
+                var err = syscall.DuplicateHandle(self, other, self, Ꮡh, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != nil) {
                     return "DuplicateHandle: "u8 + err.Error();
                 }
             }
@@ -220,7 +220,7 @@ internal static void Main() {
         keep = append(keep, f);
 
         {
-            var (_, err) = f.Write(slice<byte>("after close\n"u8)); if (err != default!) {
+            var (_, err) = f.Write(slice<byte>("after close\n"u8)); if (err != nil) {
                 return "write through the new handle: "u8 + err.Error();
             }
         }
@@ -236,7 +236,7 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
     var (server7, client7) = pipe();
     if (skipOnSuccess) {
         {
-            var err = syscall.SetFileCompletionNotificationModes(client7, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS); if (err != default!) {
+            var err = syscall.SetFileCompletionNotificationModes(client7, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS); if (err != nil) {
                 return "SetFileCompletionNotificationModes: "u8 + err.Error();
             }
         }
@@ -245,7 +245,7 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
 
     for (nint i = 1; i <= 8; i++) {
         {
-            var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != default!) {
+            var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != nil) {
                 return fmt.Sprintf("small write %d: %v"u8, i, err);
             }
         }
@@ -264,7 +264,7 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
         while (total < (nint)(large * chunk)) {
             var (k, err) = server7ʗ1.Read(buf);
             total += k;
-            if (err != default!) {
+            if (err != nil) {
                 drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes <%v>"u8, total, err));
                 return;
             }
@@ -274,7 +274,7 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
 
     for (nint i = 1; i <= large; i++) {
         {
-            var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != default! || n != chunk) {
+            var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != nil || n != chunk) {
                 return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
             }
         }

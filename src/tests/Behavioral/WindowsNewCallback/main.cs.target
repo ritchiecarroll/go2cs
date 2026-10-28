@@ -59,7 +59,7 @@ internal static void Main() {
 }
 
 internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> ᏑenumTimeFormatsEx) {
-    @string @out = default!;
+    @string @out = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -89,7 +89,7 @@ internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> ᏑenumTime
 }
 
 internal static @string /*out*/ refusalText() {
-    @string @out = default!;
+    @string @out = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {

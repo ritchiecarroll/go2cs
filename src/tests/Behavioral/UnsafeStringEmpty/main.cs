@@ -29,7 +29,7 @@ internal static void utf16() {
     show("leading NUL", syscall.UTF16ToString(poisoned[..]));
 
     show("empty slice", syscall.UTF16ToString(new uint16[]{}.slice()));
-    show("nil slice", syscall.UTF16ToString(default!));
+    show("nil slice", syscall.UTF16ToString(default));
 }
 
 internal static void unsafeStrings() {
@@ -44,7 +44,7 @@ internal static void unsafeStrings() {
     var body = slice<byte>("hello"u8);
     show("resliced [:0]", @unsafe.String(@unsafe.SliceData(body[..0]), 0));
 
-    slice<byte> nilSlice = default!;
+    slice<byte> nilSlice = default;
     show("nil slice", @unsafe.String(@unsafe.SliceData(nilSlice), 0));
     show("empty string", @unsafe.String(@unsafe.StringData(""u8), 0));
 

@@ -20,7 +20,7 @@ partial class main_package {
 
 internal static void Main() {
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("generate key error:", err);
         return;
     }
@@ -39,14 +39,14 @@ internal static void Main() {
     ));
 
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("create certificate error:", err);
         return;
     }
     fmt.Println("created der:", len(der) > 0);
 
     (var cert, err) = x509.ParseCertificate(der);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Println("parse certificate error:", err);
         return;
     }
@@ -60,7 +60,7 @@ internal static void Main() {
     (_, err) = cert.Verify(new x509.VerifyOptions(DNSName: "go2cs.example"));
     fmt.Println("verify with dnsname error:", err);
 
-    fmt.Println("hostname mismatch:", cert.VerifyHostname("other.example") != default!);
+    fmt.Println("hostname mismatch:", cert.VerifyHostname("other.example") != nil);
 
     walkChain(der);
 }
@@ -69,14 +69,14 @@ internal static void walkChain(slice<byte> der) {
     GoFrame ᒐ = default;
     try {
         var (ctx, err) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(der, 0), (uint32)len(der));
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("create context error:", err);
             return;
         }
         defer(syscall.CertFreeCertificateContext, ctx, ref ᒐ);
 
         (var store, err) = syscall.CertOpenStore(syscall.CERT_STORE_PROV_MEMORY, 0, 0, syscall.CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, 0);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("open store error:", err);
             return;
         }
@@ -84,7 +84,7 @@ internal static void walkChain(slice<byte> der) {
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
         {
-            var errΔ1 = syscall.CertAddCertificateContextToStore(store, ctx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx); if (errΔ1 != default!) {
+            var errΔ1 = syscall.CertAddCertificateContextToStore(store, ctx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx); if (errΔ1 != nil) {
                 fmt.Println("add to store error:", errΔ1);
                 return;
             }
@@ -106,7 +106,7 @@ internal static void walkChain(slice<byte> der) {
 
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
         {
-            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != default!) {
+            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
                 fmt.Println("get chain error:", errΔ2);
                 return;
             }
@@ -141,7 +141,7 @@ internal static void checkSSLPolicy(ж<syscall.CertChainContext> ᏑchainCtx) {
 
 internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx, @string serverName, uint32 flags) {
     var (servernamep, err) = syscall.UTF16PtrFromString(serverName);
-    if (err != default!) {
+    if (err != nil) {
         return "utf16 error";
     }
 
@@ -160,7 +160,7 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
     status = new syscall.CertChainPolicyStatus(nil);
     {
-        var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, ᏑchainCtx, para, Ꮡstatus); if (errΔ1 != default!) {
+        var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, ᏑchainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
             return "call error: "u8 + errΔ1.Error();
         }
     }

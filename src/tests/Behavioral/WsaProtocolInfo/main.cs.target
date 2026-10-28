@@ -11,7 +11,7 @@ internal static void Main() {
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
         {
-            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (errΔ1 != default!) {
+            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (errΔ1 != nil) {
                 fmt.Println("FATAL WSAStartup", errΔ1);
                 return;
             }
@@ -33,7 +33,7 @@ internal static void Main() {
         length = (uint32)/* unsafe.Sizeof(buf) */ (uintptr)20096;
 
         var (n, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡlength);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println("FATAL WSAEnumProtocols", err);
             return;
         }
@@ -81,7 +81,7 @@ internal static void Main() {
         @required = (uint32)0;
 
         (var m, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡrequired);
-        fmt.Println("undersized buffer refused:", m == -1 && err != default!);
+        fmt.Println("undersized buffer refused:", m == -1 && err != nil);
         fmt.Println("required size is whole records:", @required >= record && @required % record == 0);
         fmt.Println("required size matches entry count:", @required == (uint32)n * record);
     }

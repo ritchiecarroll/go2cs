@@ -20,7 +20,7 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
         Ꮡoperr.ValueSlot = syscall.WSASend((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
         return true;
     });
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return operr;
@@ -28,7 +28,7 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
 
 internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
-    nint n = default!;
+    nint n = default;
     var bʗ1 = b;
     var err = c.Read((uintptr s) => {
         ref var read = ref heap(new uint32(), out var Ꮡread);
@@ -40,7 +40,7 @@ internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
         n = (nint)read;
         return true;
     });
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
     return (n, operr);
@@ -50,7 +50,7 @@ internal static partial (ж<Δnet.TCPConn>, ж<Δnet.TCPConn>) pair() {
     GoFrame ᒐ = default;
     try {
         var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             throw panic(fmt.Sprintf("Listen: %v"u8, err));
         }
         var lnʗ1 = ln;
@@ -61,26 +61,26 @@ internal static partial (ж<Δnet.TCPConn>, ж<Δnet.TCPConn>) pair() {
         var lnʗ2 = ln;
         goǃ(() => {
             var (c, errΔ1) = lnʗ2.Accept();
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 throw panic(fmt.Sprintf("Accept: %v"u8, errΔ1));
             }
             acceptedʗ1.ᐸꟷ(c);
         });
 
         (var client, err) = Δnet.Dial("tcp", ln.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             throw panic(fmt.Sprintf("Dial: %v"u8, err));
         }
 
         return (client._<ж<Δnet.TCPConn>>(), (ᐸꟷ(accepted))._<ж<Δnet.TCPConn>>());
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static syscall.RawConn rawOf(ж<Δnet.TCPConn> Ꮡc) {
     var (rc, err) = Ꮡc.SyscallConn();
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("SyscallConn: %v"u8, err));
     }
     return rc;
@@ -89,7 +89,7 @@ internal static syscall.RawConn rawOf(ж<Δnet.TCPConn> Ꮡc) {
 internal static @string readFull(ж<Δnet.TCPConn> Ꮡc, nint n) {
     var b = new slice<byte>(n);
     {
-        var (_, err) = Δio.ReadFull(new net_TCPConnжReader(Ꮡc), b); if (err != default!) {
+        var (_, err) = Δio.ReadFull(new net_TCPConnжReader(Ꮡc), b); if (err != nil) {
             return "<"u8 + err.Error() + ">"u8;
         }
     }
@@ -103,7 +103,7 @@ internal static @string rawReadFull(ж<Δnet.TCPConn> Ꮡc, nint n) {
 
     while (len(got) < n) {
         var (k, err) = readRawConn(rc, b.slice(0, n - len(got)));
-        if (err != default!) {
+        if (err != nil) {
             return ((sstring)got) + "<"u8 + err.Error() + ">"u8;
         }
         if (k == 0) {
@@ -148,7 +148,7 @@ internal static void Main() {
         var serverʗ2 = server;
         step("1 raw write", () => {
             {
-                var err = writeRawConn(rawOf(clientʗ2), slice<byte>("raw hello"u8)); if (err != default!) {
+                var err = writeRawConn(rawOf(clientʗ2), slice<byte>("raw hello"u8)); if (err != nil) {
                     return "write: "u8 + err.Error();
                 }
             }
@@ -159,7 +159,7 @@ internal static void Main() {
         var serverʗ3 = server;
         step("2 raw read", () => {
             {
-                var (_, err) = serverʗ3.Write(slice<byte>("plain reply"u8)); if (err != default!) {
+                var (_, err) = serverʗ3.Write(slice<byte>("plain reply"u8)); if (err != nil) {
                     return "write: "u8 + err.Error();
                 }
             }
@@ -170,13 +170,13 @@ internal static void Main() {
         var serverʗ4 = server;
         step("3 ordinary after raw", () => {
             {
-                var (_, err) = clientʗ4.Write(slice<byte>("ping"u8)); if (err != default!) {
+                var (_, err) = clientʗ4.Write(slice<byte>("ping"u8)); if (err != nil) {
                     return "client write: "u8 + err.Error();
                 }
             }
             @string got = readFull(serverʗ4, 4);
             {
-                var (_, err) = serverʗ4.Write(slice<byte>("pong"u8)); if (err != default!) {
+                var (_, err) = serverʗ4.Write(slice<byte>("pong"u8)); if (err != nil) {
                     return "server write: "u8 + err.Error();
                 }
             }
@@ -208,7 +208,7 @@ internal static void Main() {
                         var msg = new byte[]{tag, tag, tag, tag}.slice();
                         for (nint r = 0; r < rounds; r++) {
                             {
-                                var err = writeRawConn(rawOf(from), msg); if (err != default!) {
+                                var err = writeRawConn(rawOf(from), msg); if (err != nil) {
                                     resultsʗ1[i] = fmt.Sprintf("round %d write: %v"u8, r, err);
                                     return;
                                 }
@@ -235,7 +235,7 @@ internal static void Main() {
 
                 return results[0] + ", " + results[1];
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         });
     }
