@@ -296,6 +296,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureWriteVisibility() => CheckTarget("ClosureWriteVisibility");
 
     [TestMethod]
+    public void CheckCollectionExpressionSlices() => CheckTarget("CollectionExpressionSlices");
+
+    [TestMethod]
     public void CheckCollidingPackageNames() => CheckTarget("CollidingPackageNames");
 
     [TestMethod]

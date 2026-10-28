@@ -304,6 +304,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClosureWriteVisibility() => CheckTarget("ClosureWriteVisibility");
 
     [TestMethod]
+    public void CheckCollectionExpressionSlices() => CheckTarget("CollectionExpressionSlices");
+
+    [TestMethod]
     public void CheckCollidingPackageNames() => CheckTarget("CollidingPackageNames");
 
     [TestMethod]
