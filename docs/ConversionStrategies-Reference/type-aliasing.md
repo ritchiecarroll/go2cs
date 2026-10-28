@@ -16,6 +16,7 @@ type P = *bool
 type M = map[int]int
 type table = map[string]int
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 global using P = go.ж<bool>;
 global using M = go.map<nint, nint>;
@@ -39,6 +40,7 @@ type nested = map[string][]Header
 type fn = func(string) int
 type rdrs = []io.Reader
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 global using nested = go.map<go.@string, go.slice<go.main_package.Header>>;
 global using fn = System.Func<go.@string, nint>;
@@ -79,14 +81,17 @@ type IntMap[V any] = map[int]V
 func swap[T comparable](p P[T, T]) P[T, T] { return P[T, T]{Key: p.Val, Val: p.Key} }
 m := IntMap[string]{1: "one"}
 ```
+<!-- source: src/tests/Behavioral/GenericTypeAlias/main.cs.target:15-22, 34 -->
 ```csharp
 // type P[K comparable, V any] = Pair[K, V]
 // type StrPair[V any] = Pair[string, V]
+// type SP[V any] = StrPair[V]
 // type IntMap[V any] = map[int]V
 
 internal static Pair<T, T> swap<T>(Pair<T, T> p) {
     return new Pair<T, T>(Key: p.Val, Val: p.Key);
 }
+…
 var m = new map<nint, @string>{[1] = "one"};
 ```
 

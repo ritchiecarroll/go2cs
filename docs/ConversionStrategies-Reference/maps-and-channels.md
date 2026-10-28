@@ -7,6 +7,7 @@ Go maps and channels convert to the golib [`map<K,V>`](https://github.com/ritchi
 m := make(map[string]int)
 c := make(chan int, 3)
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var m = new map<@string, nint>();
 var c = new channel<nint>(3);
@@ -75,6 +76,7 @@ for k, v := range m {
     }
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var (k, v) in m) {
     if (len(k) == 1) {
@@ -118,6 +120,7 @@ emits golib's `tmpstring(b)` — a TRANSIENT `@string` windowing the slice's liv
 if v := commonHeader[string(a)]; v != "" { return v, true }
 v, ok := m[string(b)]
 ```
+<!-- illustration: not converter output -->
 ```csharp
 @string v = commonHeader[tmpstring(a)]; if (v != ""u8) { return (v, true); }
 var (v, ok) = m[tmpstring(b), ꟷ];
@@ -151,11 +154,16 @@ v, ok := m[nil]
 delete(m, nil)
 lit := map[any]int{nil: 1, "b": 2}
 ```
+<!-- source: src/tests/Behavioral/NilMapKey/main.cs:16-18, 25, 44, 57 -->
 ```csharp
 var m = new map<any, @string>();
+
 m[default!] = "nil-key";
+…
 var (v, ok) = m[default!, ꟷ];
+…
 delete(m, default!);
+…
 var lit = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2};
 ```
 
@@ -244,6 +252,7 @@ for obj, n := range M {
     for d := range objMap[obj].deps { /* ... */ }   // every key of M IS a key of objMap
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 foreach (var (obj, n) in M) {
     foreach (var (d, _) in (~objMap[obj]).deps) { /* ... */ }
@@ -340,6 +349,7 @@ c := &cat{name: "tom"}
 ps <- c
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var ps = new channel<speaker>(1);
 var c = Ꮡ(new cat(name: "tom"));
@@ -411,10 +421,10 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11-51 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11, 49-51 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
-
+…
 public static void Reset<T>(this ref Set<T> s) {
     s = new Set<T>(0);
 }
@@ -673,11 +683,12 @@ case v := <-fresh():
 }
 ```
 
+<!-- source: src/tests/Behavioral/SelectOperandOnceEval/main.cs:37-39, 41-42 -->
 ```csharp
 var selᴛ1 = fresh();
 switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
 case 0 when selᴛ1.ꟷᐳ(out var v): {
-    ...
+    …
     break;
 }}
 ```
@@ -694,6 +705,7 @@ case took = <-ch:
 }
 ```
 
+<!-- source: src/tests/Behavioral/SelectSendRecvMix/main.cs:33-42 -->
 ```csharp
 var selᴛ3 = ch.ᐸꟷ(8, ꓸꓸꓸ);
 var selᴛ4 = ch;

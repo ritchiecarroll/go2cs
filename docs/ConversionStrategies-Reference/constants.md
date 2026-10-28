@@ -3,12 +3,14 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#constant-values)
 Go constants hold arbitrary-precision literals with expression support, and assignment of a constant to a variable happens at compile time. The converter preserves the constant value (and, in a comment, the original expression). A *typed* Go constant is emitted with its concrete C# type, e.g.:
 
+<!-- illustration: not converter output -->
 ```csharp
 public const nint MaxRetries = 3;
 ```
 
 An *untyped* Go constant is emitted using a golib "untyped" wrapper type — `UntypedInt`, `UntypedFloat`, or `UntypedComplex` — so it can hold a value that does not fit a single primitive and can implicitly adapt to whatever numeric type its use site requires (mirroring how an untyped Go constant takes its type from context). A converted struct is not a legal C# constant type, so the declaration is a get-only **property** rather than a field (see the next subsection for why):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static UntypedInt win => 100;
 public static UntypedInt N => /* 11 + 1 */ 12;
@@ -42,6 +44,7 @@ package (`compress/gzip`, `compress/zlib`).
 A get-only property carries no initialization at all, so declaration order cannot be observed and the
 JIT folds the literal at each use — Go's semantics exactly:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static UntypedInt huffmanNumChunks => /* 1 << huffmanChunkBits */ 512;
 public static ΔKind Uintptr => 12;                        // named-type const
@@ -101,6 +104,7 @@ const (
     folded         = 19.0 / 35.0
 )
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static UntypedFloat C => 5.42857142857142815906e-01;
 internal static UntypedFloat D => -7.05306122448979611050e-01;
@@ -123,9 +127,12 @@ const (
 s := C + r*t
 t *= G + F/(s+E+D/s)
 ```
+<!-- source: src/core/math/cbrt.cs:37, 41, 66-67 -->
 ```csharp
 const float64 C = 5.42857142857142815906e-01; // 19/35     = 0x3FE15F15F15F15F1
+…
 const float64 G = 3.57142857142857150787e-01; // 5/14      = 0x3FD6DB6DB6DB6DB7
+…
 var s = C + r * t;
 t *= G + F / (s + E + D / s);
 ```
@@ -154,6 +161,7 @@ const (
 )
 const c64 complex64 = 1.5 + 2.5i
 ```
+<!-- source: src/tests/Behavioral/ComplexConstContext/main.cs:9-15 -->
 ```csharp
 internal static UntypedComplex cRational => /* 5.5 + 1.5i */ 5.5D + 1.5D.i();
 internal static UntypedComplex cNegImag => /* 2.25 - 0.75i */ 2.25D + -0.75D.i();
@@ -178,6 +186,7 @@ const (
     stateDict
 )
 ```
+<!-- source: src/core/compress/flate/inflate.cs:507-508 -->
 ```csharp
 const nint stateInit = iota; // Zero value must be stateInit
 const nint stateDict = 1;
@@ -191,8 +200,10 @@ A Go untyped *float* constant defaults to `float64`, so its C# literal carries t
 z := 1.0           // untyped float -> float64
 var f float32 = 2.5 // float32 context
 ```
+<!-- source: src/tests/Behavioral/UntypedFloatDefault/main.cs.target:8, 16 -->
 ```csharp
 var z = 1.0D;
+…
 float32 f = 2.5F;
 ```
 
@@ -203,6 +214,7 @@ var c64 complex64 = complex(2.5, -3.5)
 var c64b complex64 = 2.5 - 3.5i
 var a, b float32 = 2.5, -3.5
 ```
+<!-- source: src/tests/Behavioral/UntypedConstFloatContext/UntypedConstFloatContext.cs:12-15 -->
 ```csharp
 complex64 c64 = complex(2.5F, -3.5F);
 complex64 c64b = 2.5F + -3.5F.i();
@@ -234,6 +246,7 @@ The re-render rounds the **exact** constant straight to the literal's resolved w
 
 A native-sized integer constant (`nint`/`nuint`, and golib's `uintptr` struct) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as a get-only property with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
 
+<!-- source: src/core/internal/runtime/math/math.cs:14 -->
 ```csharp
 public static uintptr MaxUintptr => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 ```
@@ -283,6 +296,7 @@ See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-num
 
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package Untyped* wrapper property, from which `@string` has no conversion (CS0030).<!-- src/core/unicode/utf8/utf8.cs:17 (`public static UntypedInt RuneError =>`) --> The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:249 -->
 ```csharp
 fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```
@@ -294,6 +308,7 @@ Untyped* wrapper property (`UntypedInt`/`UntypedFloat`/`UntypedComplex`), so `va
 LOCAL to the wrapper type instead of Go's inferred default type, and a later Go conversion like
 `string(codepoint)` fails (CS0030 — no `UntypedInt`→`@string` form; go/types conversions.go). The
 declaration materializes the Go-inferred default type instead — exactly Go's `:=` typing:
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 rune codepoint = replacementChar;    // NOT `var codepoint = …` (binds UntypedInt)
 float64 factor = scale;
@@ -334,6 +349,7 @@ constructed at float32 width:
 const maxFloat32 = 3.40282346638528859811704183484516925440e+38
 over := complex(maxFloat32*2, maxFloat32*2)     // complex128, 6.805646932770577e+38
 ```
+<!-- source: src/tests/Behavioral/ComplexConstContext/main.cs:52 -->
 ```csharp
 var over = complex((float64)(maxFloat32 * 2D), (float64)(maxFloat32 * 2D));
 ```
@@ -396,6 +412,7 @@ const twoTo53 = 9007199254740992.0
 f <= tenth      // float32: true, tenth rounds to float32 first
 big > twoTo53   // int64 2^53+1: true, compared as integers
 ```
+<!-- illustration: not converter output -->
 ```csharp
 f <= (float32)tenth
 big > (int64)twoTo53
@@ -425,9 +442,10 @@ var quotients = [3]uint64{maxUint64 / 5, maxUint64 / 5 / 5, maxUint64/10 + 1}
 const div1e8m = 0xc767074b22e90e21
 _ = assert[(div1e8m*5*5*5*5*5*5*5*5)%(1<<64)-1]  // a compile-time assert: the index is 0
 ```
+<!-- source: src/tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.cs:15, 26 -->
 ```csharp
 internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
-
+…
 _ = assert[(nint)(/* (div1e8m*5*5*5*5*5*5*5*5)%(1<<64) - 1 */ 0L)];
 ```
 

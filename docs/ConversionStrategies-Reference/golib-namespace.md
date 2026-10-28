@@ -52,6 +52,7 @@ imports only, so the same on-demand load works outside GOROOT. (Guarded by `Synt
 `CrossPkgFuncLib.Picker func(CrossPkgLib.Status) bool` + exported `Hot` matching it; the consumer imports
 only `CrossPkgFuncLib` and passes `Hot` where a `Picker` is expected — the wrap must render
 `new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)`; output-compared vs Go.)
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
 internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
@@ -224,6 +225,7 @@ routes through `foreignAliasedTypeName` — the *same* recorded-alias lookup the
 `Info{…}` and `types.Info{…}` emit the identical `typesꓸInfo`. It is a no-op for a same-package type and for
 any type with no registered alias.
 
+<!-- illustration: not converter output -->
 ```csharp
 var m = new renamedlibꓸMarker(Name: "alpha", Size: 3);            // composite literal  (not: new Marker(…))
 var (got, ok) = Describe("delta", 9)._<renamedlibꓸMarker>(ᐧ);    // type assertion     (not: _<Marker>(ᐧ))

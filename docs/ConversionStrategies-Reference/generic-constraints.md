@@ -53,6 +53,7 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3733-3734 -->
 ```csharp
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
@@ -73,6 +74,7 @@ The breadcrumb is spelled as Go writes the constraint: a foreign term by its pac
 sees the type set at the declaration and the elided-constraint ratchet (repoguard) can tell it from a
 lost constraint:
 
+<!-- source: src/tests/Behavioral/Constraints/Constraints.cs:92-93 -->
 ```csharp
 internal static T firstOf<T>(slice<T> p)
     where T : /* RecordUnion = recordA | recordB | recordC */ new()
@@ -101,6 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
+<!-- source: src/core/go/types/predicates.cs:684-692 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
@@ -186,6 +189,7 @@ declares `IComparable<T>` on the
 **same kind-gate** as `IComparisonOperators` — every numeric kind except complex, which Go orders no
 more than C# does — and `NumericTypeTemplate` emits its single member inside the same gated block:
 
+<!-- illustration: not converter output -->
 ```csharp
 public int CompareTo(fieldElement other) => m_value.CompareTo(other.m_value);
 ```
@@ -313,9 +317,10 @@ interface-typed and interface-inheriting instantiations then satisfy the constra
 (`Stmt : Node` is emitted inheritance).
 
 A **pointer** instantiation (`walkList(v, n.Names)` with `N=*Ident`) cannot: the `ж<Ident>` box
-does not implement the interface — its generated pointer adapter does. The call site projects the
-slice element-wise through the adapter, instantiating `N` as the interface itself:
+does not implement the interface — its generated pointer adapter does. The call site (the last line
+below) projects the slice element-wise through the adapter, instantiating `N` as the interface itself:
 
+<!-- source: src/core/go/ast/walk.cs:18-24, 58 -->
 ```csharp
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
@@ -324,7 +329,7 @@ internal static void walkList<N>(Visitor v, slice<N> list)
         Walk(v, node);
     }
 }
-// call site, N=*Ident:
+…
 walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
 ```
 
@@ -440,6 +445,7 @@ Four coordinated pieces make it convert **and dispatch**:
    and records `[assembly: GoImplement<P224Point, nistPoint<P224Point>>(ConstraintProxy = true)]` (the
    interface's own argument is a placeholder). `ImplementGenerator.EmitConstraintProxy` emits:
 
+   <!-- illustration: not converter output -->
    ```csharp
    internal sealed class P224PointжnistPoint : nistPoint<P224PointжnistPoint>, IжAdapter {
        private readonly ж<P224Point> m_box;
@@ -612,6 +618,7 @@ call site. net/http's suite is written on this shape throughout —
 The remedy is the same principle: **move the conversion to a position C# performs it.** The parameter
 is declared at the proxy under a synthesized name and the body opens with the natural-typed alias:
 
+<!-- illustration: not converter output -->
 ```csharp
 run<TжTBRun>(Ꮡt, (TжTBRun tΔ1Δp, testMode mode) => {
     var tΔ1 = (ж<testing.T>)tΔ1Δp;      // the proxy's own implicit operator
@@ -837,6 +844,7 @@ semantics (raw `EqualityComparer` reports NaN equal to itself, inverting Go — 
 floating-point note above) and typed-null/runtime-type semantics for reference and interface
 instantiations. Real emissions (from the converted stdlib's generated sources):
 
+<!-- illustration: not converter output -->
 ```csharp
 // unique.Handle<T> — ж<T> has pointer-identity == for every T:
 public bool Equals(Handle<T> other) =>
@@ -959,6 +967,7 @@ Two gates therefore retype the constant to the C# spelling of the type Go resolv
 1. **The sibling `~[]E` lock.** `Index[S ~[]E, E comparable](s S, v E)` (slices): Go fixes `E` from `S`'s core type, but `where S : ISlice<E>` carries no such flow, so C# infers `E` from the value alone and `slice<nint>` then fails the `~[]int` constraint.
 2. **An invariant RESULT position** (`typeParamReachesInvariantResult`): the parameter appears inside a func, slice, array, map, chan or pointer result. `internal/concurrent`'s own test suite ships the control pair that isolates this exactly -- `expectMissing[K, V comparable](t, key K, want V) func(got V, ok bool)` called `expectMissing(t, s, 0)` mis-inferred `V` and its returned delegate then rejected the map's `nint` (CS1503 x16), while `expectDeleted(..., 15) func(deleted bool)` -- the same untyped literal, `V` absent from the result -- compiled untouched.
 
+<!-- illustration: not converter output -->
 ```csharp
 wantValue((nint)0)(i, false);        // V reaches func(V, bool) -- retyped
 wantPresent<nint>(15)(true);         // V absent from the result -- explicit type argument (next section)
@@ -1012,6 +1021,7 @@ subtraction under `unchecked` — exactly Go's semantics — so a generic over `
 unsigned type (internal/trace's `dataTable[EI ~uint64, E]` over `type stringID uint64`) satisfies
 the constraint instead of failing CS0315:
 
+<!-- illustration: not converter output -->
 ```csharp
 // generated for `type counter uint64`
 public static counter operator -(counter value) => (counter)unchecked((uint64)((uint64)0 - value.m_value));
@@ -1032,15 +1042,18 @@ The golib `uintptr` struct declares the full generic-math interface set the lift
 
 ## Union-constrained sub-slices ARE the type parameter
 A sub-slice of a `string | []byte` union-constrained value is typed by Go as the type parameter again, so it assigns back to, passes as, and returns as the parameter (time format_rfc3339). The emission is the bare C# range expression:
+<!-- source: src/tests/Behavioral/StringByteUnionConstraint/main.cs:65 -->
 ```csharp
 return parse(s[0..2]) + parse(s[3..5]);
 ```
+<!-- illustration: not converter output -->
 ```csharp
 s = s[19..];                        // Go: s = s[19:]
 ```
 Nothing converts it, because nothing needs to: the constraint is the **self-referential** `IByteSeq<T, byte>` (above), whose `TSelf this[Range]` indexer returns `T` itself, so the range expression already has the type parameter's type. All four bound shapes take this route — `s[..hi]`, `s[lo..hi]`, `s[lo..]` and `s[..]` — and a three-index slice cannot occur on a string-including union (Go forbids it on strings), so `Slice3` never reaches it. Downstream members bind through the constraint on the resulting value directly: `s[i..j].ToGoString()` for Go's `string(s[i:j])` (bytealg's Rabin-Karp), `src[lo..hi].ꓸꓸꓸ` for the variadic spread (below).
 
 Func-literal parameters typed as the union type parameter render as the parameter itself (the enclosing method's type parameter is in scope inside a lambda or local function), matching the Go; `digitSum`'s literal emits as a local function:
+<!-- source: src/tests/Behavioral/StringByteUnionConstraint/main.cs:58 -->
 ```csharp
 nint parse(T part) {
 ```

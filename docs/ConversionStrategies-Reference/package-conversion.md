@@ -906,17 +906,23 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 
 **Exported type aliases cross packages.** A package-level Go type alias that is exported — `type Temperature = Celsius` — is recorded in that package's `package_info.cs` as an assembly attribute in its `<ExportedTypeAliases>` block:
 
+<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 33, 36 -->
 ```csharp
 // <ExportedTypeAliases>
+…
 [assembly: GoTypeAlias("Temperature", "go.CrossPkgLib_package.Celsius")]
+…
 // </ExportedTypeAliases>
 ```
 
 A consumer that imports the package and names `CrossPkgLib.Temperature` cannot use a C# member-access for it (C# has no namespace-level type alias). Instead, the converter parses the imported package's `package_info.cs`, reads its `[GoTypeAlias]` attributes, and emits a corresponding `global using` into the consumer's own `<ImportedTypeAliases>` block — keyed by a package-qualified name whose `.` separator is the extended-Unicode dot `ꓸ` (`ꓸ`, a valid C# identifier character), since `CrossPkgLib.Temperature` is not a legal C# identifier:
 
+<!-- source: src/tests/Behavioral/CrossPkgBox/package_info.cs:12, 16, 19 -->
 ```csharp
 // <ImportedTypeAliases>
+…
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
+…
 // </ImportedTypeAliases>
 ```
 
@@ -924,6 +930,7 @@ The consumer's converted code then refers to the alias as `CrossPkgLibꓸTempera
 
 **A collision-renamed alias chain resolves to its concrete target.** When an exported type's name *collides* with a method name it is `Δ`-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)); and when that type is *also* an empty interface — `type Token any` colliding with a `Token()` method, encoding/json's shape — the producer's `package_info.cs` carries a **two-hop chain**. The collision analysis records `Token → ΔToken`, and `visitTypeSpec` (which renders an empty-interface target as `object`) records the renamed declaration `ΔToken → object`:
 
+<!-- source: src/core/encoding/json/package_info.cs:35-36 -->
 ```csharp
 [assembly: GoTypeAlias("Token", "ΔToken")]
 [assembly: GoTypeAlias("ΔToken", "object")]
@@ -1018,6 +1025,7 @@ Gate (2) above keeps a cyclic pull compilable, but "compilable" is the whole of 
 
 The project graph answers it: **storage goes in whichever package the other one already depends on.** `varLinknamePull` always puts it on the right of the two-argument directive, which is correct for a DOWNWARD pull (`math/bits → runtime`) and forms a cycle for an upward one. For the upward case the converter **inverts** rather than degrades — `runtime` keeps the storage (where Go's own write already is) and the isw declaration becomes the forwarding property:
 
+<!-- illustration: not converter output -->
 ```csharp
 // runtime (storage side — publicized by packageVarAccess's alias arm, not by a handle):
 public static bool canUseLongPaths;
@@ -1066,6 +1074,7 @@ type fsOnly struct{ fs.FS }
 <!-- source: src/core/testing/fstest/mapfs.cs:7, 222 -->
 ```csharp
 using fs = go.io.fs_package;
+…
 /*embed*/ public go.io.fs_package.FS FS;
 ```
 
@@ -1429,13 +1438,12 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
-<!-- illustration: not converter output -->
+<!-- source: src/core/net/http/pprof/package_test_info.cs:61-63, 97-104 -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package
 {
-    // <TypeAccessibility> … </TypeAccessibility>
-    // <ImportInitializers> … </ImportInitializers>
+    …
     // Go runs every `init` in the package under test - the production files' included -
     // before the first test. The production package is a REFERENCED assembly here, whose
     // module constructor .NET would not run until something in it is touched, so that
@@ -1717,6 +1725,7 @@ and every consumer would mint its own `binary_bigEndianᴠByteOrder` adapter. Th
 the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
 pairs the package satisfies. `encoding/binary`'s metadata carries:
 
+<!-- source: src/core/encoding/binary/package_info.cs:43-50 -->
 ```csharp
 // <InterfaceImplementations>
 [assembly: GoImplement<bigEndian, AppendByteOrder>]

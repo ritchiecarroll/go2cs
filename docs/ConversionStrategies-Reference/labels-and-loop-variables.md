@@ -17,6 +17,7 @@ OuterLoop:
     }
 ```
 becomes (with `a` a `[][]*int`; the Go label stays in place, and the `break` target is emitted as `break_OuterLoop:;` after the loop):
+<!-- illustration: not converter output -->
 ```csharp
 OuterLoop:
     for (i = 0; i < n; i++) {
@@ -48,6 +49,7 @@ RowLoop:
     }
 ```
 becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — so `goto continue_RowLoop` from the inner loop lands there and the **outer** loop proceeds to its next iteration; `break_RowLoop:;` follows the outer loop):
+<!-- illustration: not converter output -->
 ```csharp
 RowLoop:
     foreach (var (y, row) in rows) {
@@ -86,6 +88,7 @@ for _, r := range s {  // r is a rune
     }
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 foreach (var (_, rᴛ1) in s) {
     var r = rᴛ1;       // mutable local copy
@@ -111,6 +114,7 @@ for _, test := range tests {
     fmt.Println(test.x.String())   // pointer receiver on a FIELD of the range var — CS1655
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var (_, vᴛ1) in tests) {
     var test = vᴛ1;                // mutable, addressable per-iteration copy
@@ -149,40 +153,47 @@ for i := 0; i < 3; i++ {
 }
 fmt.Println(fs[0](), fs[1](), fs[2]())   // Go 1.22+: 0 1 2
 ```
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:23-26 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
-    var i = iᴛ1;               // fresh per-iteration variable — each closure captures its own
+    var i = iᴛ1;
     fs = append(fsᴷ, fs, () => i);
 }
 ```
 
-(`fsᴷ` is the function's stack buffer for the non-escaping `fs`, declared at its entry; see [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
+`var i = iᴛ1;` is a fresh variable each pass, so each closure captures its own. (`fsᴷ` is the function's stack buffer for the non-escaping `fs`, declared at its entry; see [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
 
 A variable the body (or a closure in it) *writes* adds the copy-backs:
 
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:34-43 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
     var i = iᴛ1;
     if (i % 2 == 0) {
-        iᴛ1 = i;               // an unlabeled continue copies back at its own site
+        iᴛ1 = i;
         continue;
     }
     i++;
     fs = append(fsᴷ, fs, () => i);
-    iᴛ1 = i;                   // end-of-body copy-back feeds the post clause
+    iᴛ1 = i;
 }
 ```
 
+An unlabeled `continue` copies back at its own site, and the copy-back at the end of the body feeds the post clause.
+
 A **heap-boxed** clause variable allocates a *fresh box* each pass — the same rule as the [per-iteration range-variable box](pointers.md#pointers): a stored `&i` must be a distinct pointer per iteration — and always copies back (writes through the pointer are not syntactically detectable):
 
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:55-60 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     ref var i = ref heap<nint>(out var Ꮡi);
     i = iᴛ1;
-    ps = append(psᴷ, ps, Ꮡi);  // three DISTINCT pointers: 0 1 2
+    ps = append(psᴷ, ps, Ꮡi);
     iᴛ1 = i;
 }
 ```
+
+The three stored pointers are distinct, and read 0 1 2.
 
 Loops whose clause variables are neither captured nor boxed keep the plain C# clause — the shared clause variable is then unobservable, so there is no churn. A read-only captured variable skips the copy-backs. Every clause reference (init/cond/post) renders the carrier, so the body keeps the variable's Go name — nested same-name loops compose with shadow renames (`iΔ1` gets carrier `iΔ1ᴛ1`), and a multi-variable clause transforms only the variables that need it. One fallback: a heap-boxed variable that a **clause** func literal references keeps a single box hoisted over the whole loop, since the body-scoped box would not be in scope at the clause. (Guarded by the `ForLoopPerIterationVars` behavioral test — read-only capture, body write + unlabeled `continue`, stored `&i` distinctness, boxed + captured closures, labeled continue with a write, nested same-name loops, a multi-variable clause, a struct-typed clause variable, and an immediately-invoked writing closure — values vs Go. The `EscapedLoopVarSiblingIndex` and `RingPointerMethods` goldens also carry the per-iteration shape.)
 <!-- history: EscapedLoopVarSiblingIndex, ForVariants and RingPointerMethods were re-baselined to the per-iteration
@@ -212,6 +223,7 @@ for i := 0; i < 3; i++ {
 }
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;                    // this iteration's own i
@@ -250,6 +262,7 @@ for i := range size {
     s = append(s, i)
 }
 ```
+<!-- source: src/tests/Behavioral/RangeIntIndexAppend/main.cs:8-12 -->
 ```csharp
 nint size = 5;
 slice<nint> s = default!;
@@ -278,6 +291,7 @@ for range atyp.Len {
 	offset += etyp.Size()
 }
 ```
+<!-- source: src/core/unique/clone.cs:137-141, 149, 152 -->
 ```csharp
 foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     var exprᴛ1 = etyp.Kind();
@@ -286,6 +300,7 @@ foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     }
     …
     offset += etyp.Size();
+…
 }
 ```
 Commented out, the body would leave `unique`'s `cloneSeq` for any array-of-string type **empty** instead of carrying one offset per element. Non-`int` range operands are rare, which makes such a loss hard to notice.
@@ -315,6 +330,7 @@ is one, or a variadic parameter that the converter emits as golib's stack-only `
 for i := range s { … }
 for range s { … }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var i in range(s)) { … }
 foreach (var _ᴛ1 in range(s)) { … }
@@ -388,6 +404,7 @@ for range b.N {
     _ = Size(data)
 }
 ```
+<!-- source: src/core/encoding/binary/binary_test.cs:1373-1375 -->
 ```csharp
 foreach (var _ᴛ1 in range((~bΔ1).N)) {
     _ = Size(dataʗ1);
@@ -432,6 +449,7 @@ for i, v := range a {
 
 The range expression is therefore an array value-copy site of its own (see [Array VALUE-COPY at every transfer site](slices-and-arrays.md#array-value-copy-at-every-transfer-site-range-composite-return-send-append--deep-for-nested-arrays), whose `range` entry covers the iteration VARIABLE, not the operand):
 
+<!-- illustration: not converter output -->
 ```csharp
 foreach (var (i, v) in a.ΔRangeSnapshot()) { … }        // array value  — snapshot, Go's copy
 foreach (var (i, v) in h.arr.ΔRangeSnapshot()) { … }    // struct field — likewise a value

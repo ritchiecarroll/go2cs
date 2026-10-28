@@ -137,6 +137,7 @@ ok := s == "ready"
 bs := []byte("hello")
 rs := []rune("héllo")
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var ok = s == "ready"u8;
 var bs = slice<byte>("hello"u8);
@@ -169,8 +170,9 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
+<!-- source: src/core/net/http/pattern.cs:453-459 -->
 ```csharp
-return fmt.Sprintf("""
+        return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
 But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
@@ -191,6 +193,7 @@ A C# literal cannot always hold Go's bytes. Go's `\xHH` is exactly one byte, but
 const zipdata = "\x50\x4b\xdb50\xff"
 const octal   = "\377\200A"
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static readonly @string zipdata = ((@string)(new byte[]{0x50, 0x4b, 0xdb, 0x35, 0x30, 0xff}));
 internal static readonly @string octal = ((@string)(new byte[]{0xff, 0x80, 0x41}));
@@ -229,11 +232,13 @@ func FormatBool(b bool) string {
 	return "false"
 }
 ```
+<!-- source: src/core/internal/strconv/atob.cs:22-32 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string trueˢ = "true"u8;
 internal static readonly @string falseˢ = "false"u8;
 
+// FormatBool returns "true" or "false" according to the value of b.
 public static @string FormatBool(bool b) {
     if (b) {
         return trueˢ;
@@ -281,13 +286,15 @@ func Atoi(s string) (int, error) {
 	…
 }
 ```
+<!-- source: src/core/internal/strconv/atoi.cs:254-259, 269 -->
 ```csharp
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string fnAtoiᶜ = "Atoi"u8;
 
+// Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
     @string fnAtoi = fnAtoiᶜ;
-    …
+…
 }
 ```
 
@@ -400,6 +407,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 **Function values name the delegate.** With two members there is no single method group, and converting one to a delegate typed on `@string` is CS0123, even with a cast. So the converter renders a func-value use of a package-level twin as `Nameᶠ` (`FuncValueMarker`):
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ["printf"u8] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ)),
 Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
@@ -417,9 +425,12 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 
+<!-- source: src/core/fmt/package_info.cs:61, 67, 69 -->
 ```csharp
 // <SStringTwins>
+…
 [assembly: GoSStringTwin("Sprintf")]
+…
 // </SStringTwins>
 ```
 

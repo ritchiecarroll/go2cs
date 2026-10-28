@@ -46,6 +46,7 @@ Two emission sub-shapes (`writeMovedPackageTupleVarSpec`, `visitValueSpec.go`), 
 
 **One non-blank name** (the edwards25519 shape): the method assigns its component directly from the once-run call; blank siblings keep their uninitialized `_ᴛNʗ` fields — the call now runs in the ctor, so no blank ever carries it (from the `InitOrderTupleSpecs` golden, `var single, _ = makeGreeting()`):
 
+<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:7-9 -->
 ```csharp
 internal static @string single;
 internal static error _ᴛ1ʗ;
@@ -54,6 +55,7 @@ internal static void initᴛsingle() { single = makeGreeting().Item1; }
 
 **Two or more non-blank names** (darwin `os`'s `var initCwd, initCwdErr = Getwd()` shape; golden: `var cwd, cwdErr = fakeGetwd()`): the method evaluates the call **once into a method-local** and assigns each non-blank component from it — the inline path's hidden static tuple holder is unnecessary, because the method body itself sequences the call before its reads. The local reuses the holder's minted `tupleᴛNʗ` name shape so it cannot collide with anything the rendered call expression references:
 
+<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:11-13 -->
 ```csharp
 internal static @string cwd;
 internal static error cwdErr;
@@ -99,6 +101,7 @@ const labelPipe label = "pipe"
 // entries.go — compiled first; the initializer folds to the constant "pipe!" in Go
 var pipeLabel = string(labelPipe) + "!"
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 // entries.cs — relocated, because the rendered expression READS the labelPipe field
 internal static @string pipeLabel;
@@ -141,6 +144,7 @@ var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.
 go2cs-gen's `LazyHolderGenerator` completes each holder. It gives the package class a `ref` accessor under the var's
 Go name, with the field's accessibility, so every use site reads and writes the var as it would the field:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.mallocScanTable;
 ```
@@ -211,7 +215,7 @@ field instead of the var:
 
 <!-- source: src/core/unicode/tables.cs:10-23 -->
 ```csharp
-[GoLazy] partial class lazyᴛCategories { public static map<@string, ж<RangeTable>> Categories = new map<@string, ж<RangeTable>>{
+[GoLazy] partial class lazyᴛCategories { public static readonly ж<map<@string, ж<RangeTable>>> ᏑCategories = new StaticBox<map<@string, ж<RangeTable>>>(new map<@string, ж<RangeTable>>{
     ["C"u8] = lazyᴛC.initial,
 …
     ["Lu"u8] = lazyᴛLu.initial,

@@ -6,6 +6,7 @@ Pointer conversions use the golib heap box [`ж<T>`](https://github.com/ritchiec
 
 The box's value accessors follow one naming scheme <!-- history: unified 2026-07-02; the checked accessor was previously `val`. -->: **`Value`** is the strict dereference (`ref`-returning; panics on a nil pointer, as Go does), **`ValueSlot`** is its no-check twin (the identical real slot — for reads/writes of a held value that may legally be nil), and **`DerefOrNull()`** is the null-box-tolerant extension every pointer ENTRY alias binds through (an *extension method* is the only ref-returning form C# permits on a possibly-null receiver; it returns a NULL ref when nil, so the alias binds and the panic lands at the body's own deref). The same `Value` name is used by the generated named-type wrappers for their underlying-value accessor and by the golib `uintptr` struct for its raw word — converted code has exactly one spelling for "the value behind this thing". A Go struct **field** named `val` still emits as `.val` (it is the user's identifier, not the accessor):
 
+<!-- illustration: not converter output -->
 ```csharp
 ref var a = ref heap(new array<@string>(2), out var Ꮡa);  // escaping local
 var p = Ꮡa.at<@string>(0);                                 // &a[0]
@@ -20,6 +21,7 @@ for i := range s {
     use(p)
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 foreach (var iᴛ1 in range(s)) {
     ref var i = ref heap(new nint(), out var Ꮡi);   // a FRESH box each iteration
@@ -34,6 +36,7 @@ The per-iteration box is required for Go 1.22 loop-variable semantics: each iter
 
 The `at<T>(index)` element-address accessor has `int`, `nint` and `ulong` overloads, and each checks the index at its FULL value against the length before anything narrows it, as Go does (goPanicIndex / goPanicIndexU): an out-of-range index panics with Go's `index out of range [i] with length n`, recoverable. A wide **unsigned** index (`uint`/`uint32`/`uint64`/`uintptr`) takes `(ulong)` and binds the `ulong` overload, so an index at or above 2^63 keeps its value. (A `(nint)` cast read it as negative and reported `[-N]`.) It is a cast rather than bare because the C# expression can be wider than its Go type: `g % 2` for a `uint` g is a C# `long`. Any other non-`int` integer index (`int64`, or a small kind) takes `(nint)`, which loses nothing. An `int` index, or an untyped int constant (which renders as a plain int literal), is emitted as-is:
 
+<!-- illustration: not converter output -->
 ```csharp
 var pi = Ꮡa.at<nint>((ulong)(i));       // &a[i]      where i is a uintptr
 var pe = Ꮡa.at<nint>((ulong)(g % 2));   // &a[g%2]    where g is a uint (g%2 widens to long in C#)
@@ -238,6 +241,7 @@ func p224Sub(out1, arg1, arg2 *p224MontgomeryDomainFieldElement) { ... }
 p224Sub(&e.x, &t1.x, &t2.x)
 ```
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static void p224Sub(ref p224MontgomeryDomainFieldElement out1, ref p224MontgomeryDomainFieldElement arg1, ref p224MontgomeryDomainFieldElement arg2) { ... }
 p224Sub(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
@@ -286,11 +290,12 @@ A lowered parameter forwarded into another lowered position is `ref p` — it al
 
 **Row 1 — the parameter *is* the alias, and it survives generic instantiation** (`GenericReceiverFieldAddress`; the callee's `ж<T> Ꮡp` box and its `DerefOrNull()` preamble are gone, and the caller's 128-byte-per-evaluation field box becomes free):
 
+<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11-13, 19-23 -->
 ```csharp
 internal static void setT<T>(ref T p, T val) {
     p = val;
 }
-
+…
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -300,12 +305,15 @@ public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
 
 **Row 2 — an address-taken local comes home from the heap** (`ForVariants`; two counted objects per unmanaged local removed, and the per-iteration boxing scaffold of a labeled loop collapses to one plain loop variable):
 
+<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs:14-19, 99-101 -->
 ```csharp
 nint i = 0;
+
 while (i < 10) {
     f(ref i);
     i++;
 }
+…
 internal static void f(ref nint y) {
     fmt.Print(y);
 }
@@ -313,10 +321,12 @@ internal static void f(ref nint y) {
 
 **Row 3 — the callee lowers, the call site unwraps** (`PointerFieldArrayElementAddress`; `c` comes from `.at(…)` indexing and so still carries a box — each function makes its own deal and the convention change composes across the boundary):
 
+<!-- source: src/tests/Behavioral/PointerFieldArrayElementAddress/main.cs:19-26 -->
 ```csharp
 internal static void bump(ref cycle c) {
     c.n++;
 }
+
 internal static void viaParam(ж<rec> Ꮡp, nint i) {
     var c = Ꮡp.at(rec.Ꮡfuture, i);
     bump(ref (c).DerefOrNull());
@@ -327,6 +337,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:126-130 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -337,10 +348,12 @@ var ᴛ2 = (nonMont)((sm.s).Value);
 
 **Row 7 — a lowered parameter still accepts Go's `nil`** (`GuardedNilPointerParamDeref`; the synthesized argument binds a null box and defers the fault to the first actual use inside the callee, which is Go's "a nil pointer only panics when dereferenced" timing. `RefLoweredNilTiming` pins it against `go run`):
 
+<!-- source: src/tests/Behavioral/GuardedNilPointerParamDeref/main.cs:7, 12, 22 -->
 ```csharp
 internal static nint digits(nint @base, ref nint invalid) {
-    ...
+…
 }
+…
 nint c2 = digits(10, ref ((ж<nint>)default!).DerefOrNull());
 ```
 
@@ -355,6 +368,7 @@ A package-level global of **pointer type** whose address is taken — `var head 
 
 The full emitted walk:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static ж<ж<node>> Ꮡhead = new StaticBox<ж<node>>(default(ж<node>));
 internal static ref ж<node> head => ref Ꮡhead.ValueSlot;
@@ -372,6 +386,7 @@ A local whose address is taken (`&m`) is heap-boxed: the converter emits `ref va
 
 So a heap-boxed local whose address is taken inside a lambda is marked *box-ref* and the snapshot is suppressed. The box `Ꮡm` is a plain local (a capturable reference), so the C# closure captures it by reference — matching Go's capture-by-reference semantics. Inside the closure the converter then renders every form through the box:
 
+<!-- illustration: not converter output -->
 ```csharp
 ref var n = ref heap(new box(), out var Ꮡn);
 run(() => {
@@ -395,6 +410,7 @@ The converter detects **written-after-capture** per variable during analysis (`v
 
 The routing, by variable shape:
 
+<!-- illustration: not converter output -->
 ```csharp
 // Heap-boxed variable (escaping struct local, aliased int, …) → by-box (boxRefVars):
 ref var t = ref heap<Tally>(out var Ꮡt);
@@ -443,12 +459,14 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
+<!-- source: src/core/regexp/onepass.cs:329, 337, 348, 481 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
+…
 check = (uint32 pc, slice<bool> mΔ1) => {
     …
     ok = Ꮡcheck.ValueSlot((~inst).Out, mΔ1) && Ꮡcheck.ValueSlot((~inst).Arg, mΔ1);
-    …
+…
 };
 ```
 
@@ -457,20 +475,23 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:38-49 -->
 ```csharp
 ref var p = ref heap<payload>(out var Ꮡp);
 p = new payload(vals: new nint[]{1, 2, 3, 4}.slice());
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
-var pʗ1 = p;                   // outer's snapshot (before the outer closure)
+var pʗ1 = p;
 [MethodImpl(MethodImplOptions.NoInlining)] void outer() {
     var outʗ2 = outʗ1;
-    var pʗ2 = pʗ1;             // the goroutine's snapshot reads outer's pʗ1, NOT p
+    var pʗ2 = pʗ1;
     goǃ(() => {
         outʗ2.ᐸꟷ(pʗ2.sum());
-    });
+    }, GoStack.Bounded);
 }
 ```
+
+`pʗ1` is the outer closure's snapshot, taken before the outer closure, and the goroutine's snapshot `pʗ2` reads `pʗ1`, not `p`.
 
 `generateCaptureDeclarations` finds the RHS by walking the conversion stack outward past pass-through levels (a `go`/`defer` statement's own `enterLambdaConversion`, which carries an empty rename map) to the first enclosing lambda that renamed the variable. It skips the capture's OWN owner state — `pendingCaptures` is shared across a function's lambdas, so an outer lambda's snapshot can be generated while converting an inner func-literal argument (`go dnsWaitGroupDone(ch, func(){})`, net/lookup.go), leaving the owner's state on the stack with a rename equal to the name being declared; adopting it would emit a self-reference `var fʗ1 = fʗ1;` (CS0841). <!-- Landing CNR: byte-identical corpus-wide except where a nested closure re-captures a heap-boxed local. --> Guarded by `FuncLitArgCapture` (a heap-boxed struct re-captured in an inner goroutine — CS8175 without the fix — and the `go f(x, func(){})` self-reference shape) and by `DeferValueFieldPtrReceiver` (a defer inside a lambda).
 
@@ -501,12 +522,14 @@ A **MAP** composite literal whose value or key type is a pointer boxes its eleme
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
+<!-- source: src/core/crypto/x509/windows/verify.cs:786-789 -->
 ```csharp
 if (ᏑsigChecks == nil) {
-    ᏑsigChecks = @new<nint>();          // was: … ; sigChecks = ref ᏑsigChecks.DerefOrNull();  (CS8175)
+    ᏑsigChecks = @new<nint>();
 }
 ᏑsigChecks.Value++;
 ```
+Outside a lambda the assignment is followed by `sigChecks = ref ᏑsigChecks.DerefOrNull();`; inside one that line is CS8175, so it is not emitted.
 Every in-lambda and post-lambda dereference of a repointed captured pointer routes through the box `Ꮡp.Value`, so the now-stale value alias is never read — an accepted modeling gap (like the nil-terminated walk's), not a miscompile. The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed). Guarded by `ClosureReassignsPtrParam` (a closure that reassigns a captured `*int` parameter; a non-nil runtime argument keeps the reassignment branch unreached so output stays deterministic).
 
 The same repoint-and-re-alias applies when the parameter is reassigned **from a tuple** — `(left, x, idx) = binarySearchTree(x, idx, n/2)` (runtime `mgcstack.go`) or `pp, _ = pidleget(0)` (`proc.go`). Box-reassignment triggers that matched the RHS **element-wise** would never fire for a tuple *deconstruction* (one call RHS, several LHS) — the ж<T> tuple component would be assigned into the deref'd value alias (CS0029) — and element 0's raw expression type is the whole `*types.Tuple` (never a pointer). So the per-element RHS type comes from the call's result tuple, and the emitted form is the single-assign form verbatim: `(left, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n / 2); x = ref Ꮡx.DerefOrNull();` — the same nil-deferring re-alias every repoint takes (`(Ꮡpp, _) = pidleget(0); pp = ref Ꮡpp.DerefOrNull();`). The triggers are gated to a **reassigned** element: a `:=`-declared pointer element binds the tuple's ж<T> component into a fresh pointer local — which *is* the box — directly, and an inner `:=` local shadowing a parameter's name must not repoint the parameter's box (crypto/x509's `c, _, err := …cert(i)`). (Guarded by the `PointerParamNilWalk` extension — a nil-compared tuple-reassign walk plus a reassign-then-mutate-through probe, values vs Go.)
@@ -519,6 +542,7 @@ if !check(pc, m) { p = nil; break }
 …
 if p != nil { for i := range p.Inst { p.Inst[i].Rune = onePassRunes[i] } }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 if (!check(pc, m)) {
     Ꮡp = default!; p = ref Ꮡp.DerefOrNull();  // the POINTER goes nil; the pointee is untouched
@@ -535,9 +559,11 @@ A pointer **local** assigned nil is unaffected — a local already *is* the box,
 1. **Compare the box, not the value alias.** The loop guard `p != nil` must emit `Ꮡp != nil` (the box). Each binary operand's pointer context is otherwise taken from the *other* operand's pointer-ness, and `nil` is not a pointer type — so the param would convert in value form (`p != nil`, comparing a `node` struct value, the wrong thing). The converter forces the box form for a deref'd pointer *parameter* in a `==`/`!=` comparison. This is safe only for a parameter: a pointer *local* is already the box, and forcing it would emit a non-existent `Ꮡlocal`.
 2. **Nil-deferring re-alias.** On the final step `p.next` is nil, so `Ꮡp = p.next` repoints the box to nil; re-aliasing through the plain `Ꮡp.Value` getter would then throw a nil-pointer dereference before the guard is re-checked. The deref/re-alias instead routes through the golib `ж<T>` extension `Ꮡp.DerefOrNull()`, which binds `Unsafe.NullRef<T>` when the box is nil — legal to HOLD, faulting only on USE — rather than throwing at the bind. The entry alias uses it too, so an empty-list call (`sumList(nil)`) binds without faulting at entry.
 
+<!-- source: src/tests/Behavioral/PointerParamNilWalk/main.cs:14-23 -->
 ```csharp
 internal static nint sumList(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+
     nint total = 0;
     while (Ꮡp != nil) {
         total += p.val;
@@ -555,6 +581,7 @@ A **package-level global** referenced inside a closure is *not* captured at all 
 A C# lambda that captures anything allocates **two** heap objects every time the lambda expression is evaluated: a display class holding the captured variables, and a delegate bound to it. That is charged per call of the *enclosing* function, whether or not the closure is ever invoked. <!-- 88 bytes for the two-word case, measured (platform not recorded). --> Go allocates neither when its escape analysis proves the closure does not outlive the frame, which is why `time`'s `TestUnmarshalTextAllocations` asserts `want 0 allocs`, and why `parseRFC3339`'s `parseUint := func(…)` was charged to that row. <!-- 88 of the row's 216 bytes. -->
 
 A `name := func(…){…}` whose variable is **only ever the callee of a call** is therefore emitted as a C# *local function* instead:
+<!-- illustration: not converter output -->
 ```csharp
 //  Go:   ok := true
 //        parseUint := func(s bytes, min, max int) (x int) { … ok = false … return x }
@@ -574,6 +601,7 @@ Roslyn compiles a local function that is never converted to a delegate with a **
 
 A literal that **defers or recovers** is no bar: its frame is an ordinary local of the local function, declared in the local function's own body like any other, so the whole shape stays allocation-free —
 
+<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:79-98 -->
 ```csharp
 nint /*r*/ guard(nint n) {
     nint r = default!;
@@ -617,6 +645,7 @@ The narrowing direction of an escape rule is the dangerous one — an under-box 
 
 ## Capture-mode methods called through a value field of the receiver
 A pointer-receiver method that takes the address of one of its own fields (`func (c *Counter) Add(d int32) int32 { return bump(&c.n, d) }`) is *capture-mode*: it is emitted with the heap box **as** its receiver (`this ж<Counter> Ꮡc`) so `&c.n` can field-reference the real storage as `Ꮡc.of(Counter.Ꮡn)`. When another struct embeds such a type as a **value field** and drives it through that field — `func (f *Flag) Incr() int32 { return f.c.Add(1) }` — the call needs a `ж<Counter>` aliasing the real `f.c`. The enclosing method is therefore itself promoted to capture-mode (direct-ж), and `f.c.Add(1)` is emitted as `(&f.c).Add(1)`:
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 public static int32 Incr(this ж<Flag> Ꮡf) {
     return Ꮡf.of(Flag.Ꮡc).Add(1);   // f.c.Add(1) — nested field-address box
@@ -634,6 +663,7 @@ A capture-mode method called on a **value local of an inherently-heap type** —
 
 A capture-mode method called on a **value PARAMETER** boxes the parameter **at entry** — go/format's `format(…, cfg printer.Config)` calling `cfg.Fprint(&buf, fset, file)`, where `(*printer.Config).Fprint` is transitively direct-ж (its body calls the defer/recover-wrapped `fprint` on its own receiver), so its only emitted receiver form is the box `ж<Config>` and the raw value parameter cannot bind it (CS1929 ×2). Parameters are deliberately **never** fed through the full escape analysis, so the escape pass runs only narrow, named parameter checks (`markCaptureModeBoxedParams`) rather than the general escape walk — this one being `bodyCallsCaptureModeMethodOn`, the same predicate the local-var arms use. (The companion check for a plain `&param` is `objectAddressTaken` — see [An address-taken VALUE PARAMETER heap-boxes too](multi-assignment.md#an-address-taken-value-parameter-heap-boxes-too).) For a marked param the **signature renames the incoming value to the `ʗp` form** (the variadic-prologue rename convention) and the parameter preamble declares the boxed alias:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static (slice<byte>, error) format(…, printer.Config cfgʗp) {
     ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);
@@ -647,6 +677,7 @@ Entry-time boxing is the load-bearing choice: Go auto-addresses the parameter (`
 When the same function **also contains a func literal or defer that references the boxed parameter**, the in-lambda references must route **through the box** — the capture analysis marks such a param box-ref (the same arm family as a deref'd pointer parameter, whose `ref var p = ref Ꮡp.DerefOrNull()` alias shares the exact shape). The boxed param's Go name is a `ref`-local alias, which a C# lambda cannot capture (CS8175), and the general capture-snapshot fallback (`var tʗ1 = t;` before the lambda) compiles but **divorces the closure from the boxed storage** Go shares between the closure and the direct-ж callee: a closure read misses the callee's writes through the receiver pointer, a closure write is invisible to the callee, and a deferred closure observes entry-time values instead of return-time state. With the box-ref mark, a closure read emits `nint get() => Ꮡt.Value.total;` (a local function — `get` is only ever called), a closure write `Ꮡt.Value.total += 100;`, and a deferred observer `defer(() => { (result, log) = (Ꮡt.Value.total, Ꮡt.Value.log); }, ref ᒐ);` — the box `Ꮡt` is a plain `ж<T>` local, captured by reference, so every reference (body, closure, callee) hits the one boxed storage, matching Go's one-parameter-variable semantics. A **deferred direct-ж method value on the param itself** (`defer t.Add(n)`) routes through the box (`defer(Ꮡt.Add, n, ref ᒐ)`), binding the receiver address at defer time exactly like Go. The composition is user-code-facing. <!-- Whole-stdlib reconvert diff at landing: zero files — no stdlib function composed a capture-mode-boxed param with a closure. --> (Guarded by the `CaptureModeParamClosure` behavioral test — four compositions with write-visibility checks in both directions: a closure read that must see the callee's later write, a closure write the callee must observe (and vice versa), a deferred closure reading return-time state, and a deferred method value whose writes a sibling deferred observer reads; each output-compared vs Go, with the caller's copy proven untouched. Under the pre-fix snapshot emission all four compiled and produced wrong values.)
 
 Entry-time boxing extends to a **function literal's own value parameter** — otherwise `f := func(t Tally, m int) {…; t.Add(m); …}` would render the raw `Tally` value against `Add`'s only `ж<Tally>` receiver form (CS1929). The escape pass marks literal params with the same one-narrow-predicate check as declaration params (walking `FuncLit` nodes **before** the define walk, so a mixed `t, y := …` re-use cannot pre-empt the verdict; a leaked-but-not-capture-mode param keeps its unboxed emission via the same declaring-ident re-verification). The literal's signature takes the incoming value under the `ʗp` name and its **first block statement** is the boxed re-declaration — the exact preamble form, injected before the single-return collapse (which it thereby suppresses, correctly keeping the body a block):
+<!-- illustration: not converter output -->
 ```csharp
 (nint, @string) f(Tally tʗp, nint m) {   // only ever called, so a local function
     ref var t = ref heap(tʗp, out var Ꮡt);
@@ -683,6 +714,7 @@ the original pointer.)
 It has a **second consumer**: `compress/flate`'s `flate_test.go` reaches `dict.availWrite()` through an
 asserted `*decompressor`, which the copy-box fallback would serve as a copy —
 
+<!-- illustration: not converter output -->
 ```csharp
 Ꮡ((~r._<ж<…decompressor>>()).dict).availWrite()                      // copy
 r._<ж<…decompressor>>().of(…decompressor.Ꮡdict).availWrite()         // the real field
@@ -742,9 +774,10 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
+<!-- source: src/core/debug/elf/file.cs:355, 361 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
-// …
+…
 f.Value.Type = (Type)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Type) */ (uintptr)16)..]);
 ```
 
@@ -812,8 +845,14 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
+<!-- source: src/core/unsafe/unsafe.cs:706-715 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
+    // TryGoSizeOf answers derivability separately from the size, which matters here: the old
+    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from
+    // "unknown", and this line then answered with Marshal.SizeOf<T>() -- a DIFFERENT layout
+    // model's number for a type whose Go size was in fact known exactly. The marshalled
+    // fallback now applies only where the Go size genuinely is not derivable.
     return GoReflect.TryGoSizeOf(typeof(T), GoReflect.ArrayDimsOfValue(x), out nuint size)
         ? (uintptr)size
         : (uintptr)Marshal.SizeOf<T>();
@@ -840,6 +879,7 @@ call sites are few against the folded ones. <!-- 7 run-time call sites against 2
 ```go
 func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.value)) }
 ```
+<!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
     return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.of(UnsafePointer.Ꮡvalue)));
@@ -918,6 +958,7 @@ The mint depends on how the pointer argument **renders**. A genuine box — an a
 The **reverse** direction — reinterpreting a raw address *as* a pointer, `(*T)(p)` where `p` is an `unsafe.Pointer` (or `uintptr`) — is the reinterpret pattern referenced above. Its result is the pointer type `ж<T>`. A plain `(ж<T>)p` cast is `CS0030`: because `unsafe.Pointer` is `Pointer : ж<uintptr>`, reaching `ж<T>` needs the two chained user-defined conversions `Pointer → uintptr → ж<T>`, and C# performs at most one user-defined conversion in a cast. The converter routes explicitly through `uintptr` — `(ж<T>)(uintptr)(p)` — which yields a pointer at `p`'s address via golib's `explicit operator ж<T>(uintptr value)` (with `uintptr(Pointer) => Value`, the address the pointer holds) — a native-address box, or the very box a managed pointer's order token names (see [A reinterpreted raw address ALIASES native memory instead of boxing a copy](#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)). <!-- history: the operator boxed a COPY of the T read there when this arm was written. --> The deref `*((*unsafe.Pointer)(k))` then adds `.Value`: `((ж<@unsafe.Pointer>)(uintptr)(k)).Value` — Go's read of the `unsafe.Pointer` stored at `k`. This is the identical routing the *dereference* path (`(*int)(p)` inside `*(...)`) uses via its `isPointerCast` flag, extended to the two shapes that do **not** set that flag: a bare call **argument** `atomicwb((*unsafe.Pointer)(ptr), new)` (runtime `atomic_pointer.go`) and an **extra-paren** deref `*((*unsafe.Pointer)(k))` (`internal/runtime/maps`' indirect key, `*((*unsafe.Pointer)(slotKey))` — `convStarExpr`'s dereference branch sees a `ParenExpr`, not the `CallExpr`, so it never marks the cast). Gated to a **pointer-result** conversion whose **argument** is a raw address (`unsafe.Pointer`/`uintptr` basic); the pointer-to-*named*-type value conversion `(*Base)(defPtr)` (below) has a `*T` argument, is handled earlier, and is not affected. Like every reinterpret through the `uintptr` round-trip, this is memory-layout-dependent code whose runtime values are **not the contract** — golib's own `map<K,V>` is what actually runs; the converted map implementation only needs to compile. (Guarded by the `UnsafePointerReinterpret` behavioral **Compile + Target** test — both the extra-paren deref and the bare-argument shapes.) <!-- cleared all 21 unsafe.Pointer → ж<unsafe.Pointer> CS0030 in runtime, 137 → 114 -->
 
 **A SAME-TYPE reinterpret `(*T)(unsafe.Pointer(p))` where `p` is already `*T` collapses to the pointer itself.** Converting a `*T` to `unsafe.Pointer` and back to the *same* `*T` is a no-op identity in Go — the language spec makes `(*Builder)(abi.NoEscape(unsafe.Pointer(b)))` exactly `b.addr = b` (strings.Builder's copy-by-value guard; the type's own TODO says to revert it to that once escape analysis improves). The `uintptr` round-trip above is **wrong** for this shape: a round-trip that copies would make `b.addr` a fresh box over a *copy* of the receiver, never reference-equal to it — and the guard's own `b.addr != b` self-check would FALSE-PANIC on the second call to any `strings.Builder` method (a `Grow` then a `WriteString`, or `strings.Join`'s repeated `WriteString`): `panic: strings: illegal use of non-zero Builder copied by value`. <!-- It surfaced in the converted fatih/color -recurse sample the moment color was enabled, when golib's ж<T>(uintptr) dereferenced-and-copied. --> `convCallExpr.pointerReinterpretIdentitySource` intercepts this exact shape at the top of the conversion path — a `(*T)(…)` whose source, after peeling an optional escape-analysis identity wrapper (`abi.NoEscape` or a package-local `noescape`, matched by name **and** `unsafe.Pointer→unsafe.Pointer` signature), is `unsafe.Pointer(p)` with `p` of the *identical* pointer type `*T` — and emits `p`'s **box** directly (in the `isPointer` context, so a deref-aliased receiver/param renders `Ꮡb`, not its value alias `b`):
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static void copyCheck(this ж<Builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -932,6 +973,7 @@ This preserves pointer identity AND shared storage (a write through the reinterp
 
 **The identity also collapses when the source pointer is reached DIRECTLY — `*(*T)(p)` / `(*T)(p)` with `p` already `*T`.** This is the same no-op, minus the `unsafe.Pointer` hop: Go's way of re-reading a pointer at a fixed type. Unrecognised, the deref path would make it worse than the round-trip above: `convStarExpr`'s casted-pointer-deref branch sets `isPointerCast`, and taking that flag *alone* as licence to emit the raw-address bridge `(ж<T>)(uintptr)(p)` is wrong, because `isPointerCast` means only "this conversion is the operand of a deref" — it says nothing about the source being an **address**, and the bridge is only ever correct for one that is. A typed Go pointer is a managed **box**, and a deref-aliased pointer parameter renders as that box's *value alias*, so the `(uintptr)` leg has no conversion at all:
 
+<!-- illustration: not converter output -->
 ```csharp
 // Go:  func derefStruct(p *Pt) Pt { return *(*Pt)(p) }
 internal static Pt derefStruct(ж<Pt> Ꮡp) {
@@ -939,6 +981,7 @@ internal static Pt derefStruct(ж<Pt> Ꮡp) {
     return ~(ж<Pt>)(uintptr)(p);           // CS0030: cannot convert 'Pt' to 'uintptr'
 }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static Pt derefStruct(ж<Pt> Ꮡp) {
     return ~Ꮡp;                            // the box, dereferenced in place
@@ -968,10 +1011,11 @@ Passing an `unsafe.Pointer` **argument to an `unsafe.Pointer` parameter** keeps 
 ```go
 r1, _, e1 := SyscallN(procCopySid.Addr(), uintptr(destSidLen), uintptr(unsafe.Pointer(destSid)), uintptr(unsafe.Pointer(srcSid)))
 ```
+<!-- source: src/core/syscall/windows/zsyscall_windows.cs:204-208 -->
 ```csharp
 var ᴋ0 = ᏑdestSid;
 var ᴋ1 = ᏑsrcSid;
-var (r1, _, e1) = SyscallN(procCopySid.Addr(), (uintptr)destSidLen, (uintptr)ᴋ0, (uintptr)ᴋ1);
+    var (r1, _, e1) = SyscallN(procCopySid.Addr(), (uintptr)destSidLen, (uintptr)ᴋ0, (uintptr)ᴋ1);
 System.GC.KeepAlive(ᴋ0);
 System.GC.KeepAlive(ᴋ1);
 ```
@@ -989,6 +1033,7 @@ The SEND is the family's ordinary shape and takes the family's ordinary remedy: 
 
 What is new is the SUBMIT. A Windows datagram send is an *overlapped* operation, and the three helpers it needs (`operationFor`/`Rearm`/`stageBuffers`) are private to `syscall`'s WSA hand-own while the declarations they serve live in `internal/syscall/windows`. Publishing them would put a Go-shaped seam on `syscall`'s public surface, which that file's own header exists to refuse. The resolution (netpoll design §4.7) extends golib's platform-neutral `GoAsyncIO` by two primitives stated without naming Winsock:
 
+<!-- illustration: not converter output -->
 ```csharp
 public static nuint RearmOperation(nuint descriptor, object key, nint mode);   // the native OVERLAPPED, prepared for a new submit
 public static nuint StageOperationBuffer(object key, int byteCount);            // N bytes whose lifetime is the operation's
@@ -1021,6 +1066,7 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 }
 ```
 
+<!-- source: src/core/syscall/darwin/zsyscall_darwin_amd64.cs:236-258 -->
 ```csharp
 internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> Ꮡfrom, ж<_Socklen> Ꮡfromlen) {
     nint n = default!;
@@ -1055,6 +1101,7 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 }
 ```
 
+<!-- source: src/core/runtime/alg.cs:406-412 -->
 ```csharp
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
@@ -1086,6 +1133,7 @@ address-taken, so `x` stays an ordinary parameter or local when that was its onl
 ```go
 func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(&f)) }
 ```
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs:50-52 -->
 ```csharp
 public static uint64 Float64bits(float64 f) {
     return bitcast<float64, uint64>(f);
@@ -1142,6 +1190,7 @@ c := make(chan int, 1)
 p := *(*unsafe.Pointer)(unsafe.Pointer(&c))   // the word is a REFERENCE
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 @unsafe.Pointer q = ~Ꮡ(new @unsafe.Pointer(~Ꮡu));           // exact fidelity: Pointer(value)
 @unsafe.Pointer p = ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡc));   // the source BOX's pin token
@@ -1184,6 +1233,7 @@ func boolFieldAddr(conf *Config, name string) *bool {
 
 which converts to
 
+<!-- source: src/core/go/types/check_test.cs:397-400 -->
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> Ꮡconf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(Ꮡconf.OrTypedNil()));
@@ -1212,6 +1262,7 @@ sslPara := &syscall.SSLExtraCertChainPolicyPara{ AuthType: syscall.AUTHTYPE_SERV
 para := &syscall.CertChainPolicyPara{ ExtraPolicyPara: (syscall.Pointer)(unsafe.Pointer(sslPara)) }
 ```
 
+<!-- illustration: not converter output -->
 ```csharp
 var sslPara = Ꮡ(new syscall.SSLExtraCertChainPolicyPara(AuthType: syscall.AUTHTYPE_SERVER, ServerName: servernamep));
 var para = Ꮡ(new syscall.CertChainPolicyPara(ExtraPolicyPara: ((syscall.Pointer)ManagedPointerTokens.MintOpaque(sslPara))));
@@ -1294,7 +1345,7 @@ A Go conversion `(*Base)(p)` where `p` is a `*Def` and `Base`/`Def` share an *id
 ```go
 func (s *mspan) newPinnerBits() *pinnerBits { return (*pinnerBits)(newMarkBits(s.nelems * 2)) }   // newMarkBits returns *gcBits
 ```
-<!-- illustration: not converter output -->
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
     return Ꮡ((pinnerBits)(~newMarkBits(((uintptr)s.nelems) * 2)));   // deref the ж<gcBits> box, value-convert, re-box
@@ -1340,6 +1391,7 @@ change, and the decoder would return 0 for 23. So all three arms route through g
 reinterpret — `reinterpretManagedEmission`, the same emission this file produces for the identical
 conversion in a deref or raw-address context:
 
+<!-- source: src/core/encoding/gob/gobencdec_test.cs:115-118 -->
 ```csharp
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
@@ -1407,6 +1459,7 @@ Nine coupled rules, each first needed by one of those packages:
   `go.math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
   statement also explains the otherwise surprising spelling:
 
+  <!-- source: src/core/hash/maphash/maphash_purego.cs:104-105 -->
   ```csharp
   // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
   var (hi, lo) = go.math.bits_package.Mul64(a, b);
@@ -1556,6 +1609,7 @@ only writes through its pointer is ref-lowered, and its caller passes `ref Δp.n
 
 ## A capture-mode method on a shadow-renamed heap-boxed local uses the rendered box name
 A capture-mode method — one that escapes its receiver's address, e.g. `cryptobyte.Builder.AddASN1`, which hands `&b` to a callback — called on a heap-boxed VALUE local routes through the receiver box: `var b Builder; b.AddASN1(…)` → `Ꮡb.AddASN1(…)`. Unlike a deref-aliased pointer *parameter* (whose box keeps the RAW name, `Ꮡp`), a heap-boxed value LOCAL keeps its box under the RENDERED name — an escaping local is `ref var b = ref heap(new T(), out var Ꮡb)`, so when the local is SHADOW-renamed its box takes the renamed name. crypto/x509 `marshalCertificate`'s inner `serialiseConstraints` closure declares `var b cryptobyte.Builder`, renamed `bΔ1` to dodge the enclosing method's own `var b` declared LATER (a C# lambda cannot re-declare an enclosing-scope local, CS0136); its box is `ᏑbΔ1`. Emitting the raw-name box `Ꮡb` there both mis-references the outer `b`'s box (declared later in the method → CS0841/CS0103) and, where a same-named outer box does resolve, calls the method on the wrong operand — go/types `conversions.go` called `x.convertibleTo` on the receiver box `Ꮡx` instead of the inner operand box `ᏑxΔ2`:
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
 …
@@ -1565,6 +1619,7 @@ The receiver-box render resolves the box base through `boxBaseName` with the lam
 
 ## Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:33 -->
 ```csharp
 var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
 ```
@@ -1572,6 +1627,7 @@ Guarded by `PointerCastSliceRange` (compile-shape).
 
 ## Function literals returning `unsafe.Pointer` state their return type
 A literal with a single `unsafe.Pointer` result can mix return arms of DIFFERENT C# types (reflect `deepEqual`'s `ptrval`: `(uintptr)v.pointer()` on one arm, the raw `v.ptr` on the other), which defeats C# lambda return-type inference (CS8917). The emitted lambda states its return type explicitly; each arm then converts implicitly through the golib operators:
+<!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:37 -->
 ```csharp
 @unsafe.Pointer pick(bool u) {
 ```
@@ -1596,6 +1652,7 @@ form, plus a mixed-arm control that must KEEP inferring.)
 
 ## Multi-value literals with no fully-typed arm state their return type — named results included
 The single-result inference gaps above generalize to any MULTI-result literal where EVERY return arm carries a typeless element — `return nil, nil, nil, nil, err` on the error arms and `return dnsNames, ips, emails, uriDomains, nil` on the success arm (crypto/x509 `parseNameConstraintsExtension`'s `getValues := func(subtrees) (dnsNames []string, ips []*net.IPNet, emails, uriDomains []string, err error)`). A C# tuple literal with any untyped element has no natural type, so no arm fixes the lambda's return type and delegate-type inference fails (CS8917). The lambda states its tuple return type explicitly, and each `nil` then takes its target element type:
+<!-- illustration: not converter output -->
 ```csharp
 (slice<@string> dnsNames, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains, error err) getValues(cryptobyte.String subtrees) { … }
 ```
@@ -1605,6 +1662,7 @@ NAMED results are included: the trigger — a multi-result literal with a return
 
 ## String-returning literals in assignment position state their return type
 A literal with a single Go `string` result can mix return arms of DIFFERENT C# types even though every arm is a Go string: a bare string literal is a `"…"u8` `ReadOnlySpan<byte>`, a literal+variable concat binds golib's `operator +(@string, @string)` (so it is `@string` regardless of u8 suppression), and a call into a hand-written stub can return C# `string` (the baseline `fmt.Sprintf` does). `@string` and `string` convert implicitly in BOTH directions, so a lambda mixing those arms has no unique best common type and its delegate type is not inferable — CS8917 on `pick := func(v any) string {…}` whose `case string:` arm returns `"string:" + t` alongside `fmt.Sprintf` arms. In assignment position (`var pick = …`, where C# must infer the delegate type), the lambda states its return type explicitly and each arm then converts to `@string` in place:
+<!-- source: src/tests/Behavioral/FuncLitStringConcatReturn/main.cs:11 -->
 ```csharp
 @string pick(any v) {
 ```
@@ -1613,6 +1671,7 @@ value-used literal takes `var pick = @string (any v) => { … };`.)
 Argument/return/composite-element literals are target-typed by their receiving delegate type (no inference to fail — and an explicit return type could only add an identity-match constraint against stub delegate types), so they keep the plain form; the Go `var` declaration form emits an explicit delegate type (`Func<@string, bool, @string> pad = …`) and is likewise immune. Gated to the basic string kind — a named string type would need its own conversions. Guarded by `FuncLitStringConcatReturn` (`:=` literals mixing concat, u8-literal, and stub-`Sprintf` arms — including a type-switch body and a right-side literal concat — plus the `var` form; runtime-verified).
 
 The TUPLE-ELEMENT sibling: in a MULTI-result literal, a bare string literal element is worse than typeless — it is *wrongly* typed. Inside a tuple the literal emits as a bare C# `string` (u8 spans cannot be tuple elements), so an arm with no `nil` and no string variable — internal/fuzz `fuzzOnce`'s `return dur, coverageSnapshot, ""` (`func(entry CorpusEntry) (dur time.Duration, cov []byte, errMsg string)`) — counted as "fully typed" in the multi-result scan above and suppressed the explicit tuple return type, letting inference *succeed with the wrong element type*: the destructured `errMsg` was C# `string`, which has no `!=` against a `"…"u8` span (CS0019 rather than CS8917). A basic-string constant literal element whose declared result element is Go `string` also marks its arm not-fully-typed, so the same explicit-tuple emission fires:
+<!-- illustration: not converter output -->
 ```csharp
 (time.Duration dur, slice<byte> cov, @string errMsg) fuzzOnce(CorpusEntry entry) { … }
 ```
@@ -1621,6 +1680,7 @@ the lambda form is `var fuzzOnce = (time.Duration dur, …) (CorpusEntry entry) 
 and each `""` converts to `@string` in place via target typing. Same assignment-position gate; a literal whose string elements are all variables keeps inferred typing. <!-- Full-stdlib A/B footprint at landing: exactly internal/fuzz worker.cs plus two latent-identity repairs, internal/coverage/decodecounter sget and net ipsock.go addrErr, both re-proven green. --> Guarded by the `FuncLitStringConcatReturn` extensions `fuzzish` (named results, `!= ""` on every destructured element) and `sget` (unnamed `(string, error)`); the pre-fix converter fails them with exactly CS0019 ×4.
 
 The NUMERIC sibling: an untyped numeric constant literal element against a differently-SIZED declared result element is wrongly typed the same way. The literal emits bare, so the arm infers the literal's natural C# type — an INT literal is C# `int`, a FLOAT literal C# `double` — where the Go result is e.g. `int64`: net/http ServeContent's `sizeFunc := func() (int64, error) { …; return 0, errSeeker }` had no `nil`/string-literal element on its error arms, counted "fully typed", and inferred `Func<(int, error errSeeker)>` — rejected at the `serveContent(…, sizeFunc, …)` call because delegate types are invariant (CS1662/CS0029/CS1503, and the leaked `errSeeker` element name rides the inferred tuple). Such an element also marks its arm not-fully-typed, so the same explicit-tuple emission fires:
+<!-- illustration: not converter output -->
 ```csharp
 var sizeFunc = (int64, error) () => { …; return (0, errSeeker); };
 ```
@@ -1630,6 +1690,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 
 ## Numeric-returning literals with untyped-constant arms state their return type
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
+<!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:38 -->
 ```csharp
 var maxFn = rune (rune _) => maxRune;
 ```
@@ -1642,6 +1703,7 @@ isBetter := func(a, b uint16) int { …; return -1; …; return +1; …; return 
 if !slices.IsSortedFunc(prefOrder, isBetter) { … }
 ```
 Every arm rendered as C# `int` against a Go `int` (C# `nint`) result, so the inferred delegate was `Func<ushort, ushort, int>`. Every *call* of the variable accepted it (`int` converts to `nint`); the delegate-VALUED use did not, delegate types being invariant — `CS1503: cannot convert from 'System.Func<ushort, ushort, int>' to 'System.Func<ushort, ushort, nint>'`, one of the package's four build errors. So a third arm joins: when **every** top-level single-result return arm is an INT literal and the declared basic result is an integer type other than `int32`, the declared type is stated:
+<!-- illustration: not converter output -->
 ```csharp
 var isBetter = nint (uint16 a, uint16 b) => { …; return -1; …; return +1; …; return 0; };
 ```
@@ -1684,6 +1746,7 @@ var onceValue = sync.OnceValue(func() int { return 42 })
 f := sync.OnceValue(func() int { calls++; panic("x") })
 g := sync.OnceValues(func() (any, any) { buf[0] = 1; return nil, nil })
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
 var f = Δsync.OnceValue(nint () => { Ꮡcalls.Value++; throw panic("x"); });
@@ -1723,6 +1786,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
     return ctx, func() { stop(); cancel(Canceled) }
 }
 ```
+<!-- source: src/core/context/example_test.cs:325, 333-337 -->
 ```csharp
 (context.Context, Action) mergeCancel(context.Context ctx, context.Context cancelCtx) {
     …
@@ -1781,6 +1845,7 @@ The converter suppresses only the RECORD, which is what makes the rule small: `r
 a pair that reached no record to the unqualified name it would have had, and that name is production's
 own adapter, so the cast site repoints with no other change.
 
+<!-- illustration: not converter output -->
 ```csharp
 !contains((~pc).children, new global::go.context_package.cancelCtxжcanceler(cc))   // production's, not a copy
 ```
@@ -1910,6 +1975,7 @@ The instrument that works is a **nil-DEFERRING** accessor, `DerefOrNull()`, whic
 `Unsafe.NullRef<T>()` for a nil box. A null ref is legal to HOLD and to pass on as `ref T`; it faults
 on USE. So the panic is not discarded and not moved earlier — it lands exactly where Go's does:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
@@ -1992,6 +2058,7 @@ func newIndirectNode[K comparable, V any](parent *indirect[K, V]) *indirect[K, V
 	return &indirect[K, V]{node: node[K, V]{isEntry: false}, parent: parent}
 }
 ```
+<!-- illustration: not converter output -->
 ```csharp
 internal static ж<Δindirect<K, V>> newIndirectNode<K, V>(ж<Δindirect<K, V>> Ꮡparent) {
     return Ꮡ(new Δindirect<K, V>(node: new node<K, V>(isEntry: false), parent: Ꮡparent));
@@ -2077,6 +2144,7 @@ disqualified it). That predicate is gone: the unconditional nil-deferring alias 
 without needing to recognize it, and covers the variants it could not admit (a normalization on the
 SECOND statement, or one nested in an `if`). Both halves read the same way:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<ΔLocation> Ꮡl, int64 sec) {
     …
@@ -2146,6 +2214,7 @@ storage, and the reinterpret fallback produces precisely that: where `(*U)(unsaf
 alias `p`'s storage in the managed model, golib names it by address instead
 (`PointerExtensions.Reinterpret` → `(ж<U>)(uintptr)box`), and the `uintptr` operator's
 
+<!-- illustration: not converter output -->
 ```csharp
 fixed (void* ptr = &value.Value)
     return (uintptr)ptr;
@@ -2164,6 +2233,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
+<!-- source: src/core/os/os_windows_test.cs:266-268 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();
@@ -2275,6 +2345,7 @@ partial class main_package {
 `rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` over golib's
 `ж<T>.field`:
 
+<!-- illustration: not converter output -->
 ```csharp
 extension(global::go.ж<global::go.main_package.@record> ʗp)
 {
@@ -2450,6 +2521,7 @@ one struct as another (`toRType`: `(*rtype)(unsafe.Pointer(t))`). Both pointee t
 there is no native memory anywhere in the expression, so it must not route through the raw-address
 seam:
 
+<!-- illustration: not converter output -->
 ```csharp
 return (ж<view>)(uintptr)(new @unsafe.Pointer(Ꮡh));   // through the address: unsound
 return Ꮡh.Reinterpret<header, view>();                // the emission: aliases the box
@@ -2672,6 +2744,7 @@ alias; the array element type is `ж<CommentGroup>`, so the alias form was CS002
 `CommentMap.addComment` — the sibling `append(list, Ꮡc)` already took the box through the
 call-argument pointer arm). The routing mirrors the struct-field pointer arm: the element index
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
+<!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
 list = new ж<CommentGroup>[]{Ꮡc}.slice();
 ```
@@ -2692,16 +2765,20 @@ program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
 func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
 func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
 ```
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:35-44 -->
 ```csharp
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
-    …
-    poolPut(Ꮡp.OrTypedNil());          // NOT poolPut(p) — a pp VALUE loses pointer identity
+
+    p.buf = p.buf[..0];
+    poolPut(Ꮡp.OrTypedNil());
 }
+
 internal static void keep(ж<pp> Ꮡq) {
     poolPut(Ꮡq.OrTypedNil());
 }
 ```
+The call is `poolPut(Ꮡp.OrTypedNil())`, not `poolPut(p)`: a `pp` value would lose the pointer's identity.
 (The `OrTypedNil()` suffix is the other half of the same boundary — see
 [A pointer crossing into an interface carries its static type](nil-and-zero-values.md#a-pointer-crossing-into-an-interface-carries-its-static-type-however-the-pointer-was-produced),
 which generalized this arm from the call-argument slot to every empty-interface slot.)

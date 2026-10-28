@@ -18,6 +18,7 @@ func do(i interface{}) {
 
 converts to:
 
+<!-- illustration: not converter output -->
 ```csharp
 internal static void @do(any i) {
     switch (i.type()) {
@@ -41,6 +42,7 @@ internal static void @do(any i) {
 
 **Duplicate-mapped cases — the identical-body merge.** Go type distinctions can *vanish* in the C# type map, making a later case unreachable (CS8120). `uint` + `uintptr` does not collide: `uintptr` is golib's distinct `uintptr` struct (see [Constant Values](constants.md#constant-values)), so both cases emit their own labels, each dynamic type routing to its own body exactly as in Go.<!-- history: the canonical example was uint + uintptr under the old System.UIntPtr alias --> The merge machinery serves any pair of Go types that shares a C# type — two methodless named func types with one signature, which both render as their base delegate (`type Left func(bool) bool` and `type Right func(bool) bool` are both `Func<bool, bool>`): a duplicate-mapped case merges **only when its Go body is byte-identical** to the first occurrence's — the earlier label already routes both dynamic types to that shared body, so the merge is exact. A marker comment replaces the duplicate label:
 
+<!-- illustration: not converter output -->
 ```csharp
 switch (raw.type()) {
 case Func<bool, bool>: {
@@ -61,6 +63,7 @@ A multi-type clause emits **stacked labels binding only a discard, over one shar
 re-binds the variable to the guard expression — the same re-bind the `default` arm uses — so the body
 compiles at the interface type exactly as in Go:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 switch (x.typ.type()) {
 case ж<Alias> _:

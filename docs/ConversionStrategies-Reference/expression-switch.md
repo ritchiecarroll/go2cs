@@ -5,6 +5,7 @@ Go expression-based `switch` statements are flexible: cases do not fall through 
 
 ## A switch on a `static readonly` constant tag lowers to if-else
 A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch: the int case labels are not constants OF the wrapper struct type, and the `is` constant-pattern lowering fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` forces the if-else form (wrapper `==` operators) and disables the `is` pattern:
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:238-239 -->
 ```csharp
 var exprᴛ1 = CrossPkgLib.Precision;
 if (exprᴛ1 == 1) {
@@ -13,6 +14,7 @@ A variable tag stays switchable. Guarded by `CrossPkgUser` / `CrossPkgLib`.
 
 ## A leading constant-true case stays opaque to the compiler
 Go's `switch { case true: ... case cond: ... }` (time parseStrictRFC3339 deliberately disabling its strict checks) compiles the LATER cases as dead code; a foldable `when true` makes C# reject them outright (CS8120). A constant-true case condition on a NON-LAST clause therefore emits the golib `ᐧᐧ` marker -- a `static readonly bool` the compiler cannot fold:
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:250 -->
 ```csharp
 case {} when ᐧᐧ: {
 ```
@@ -28,6 +30,7 @@ single-value `is` form is doubly broken there: C# parses `exprᴛ1 is Typ[Untype
 as an array TYPE (CS0246 + CS0270). `canUsePatternMatch` rejects an `*ast.IndexExpr` label the same way
 it rejects a non-constant identifier/selector, so the clause takes the `==`/`AreEqual` comparison the
 multi-value arm already produced:
+<!-- illustration: not converter output -->
 ```csharp
 if (AreEqual(exprᴛ1, Typ[UntypedNil])) {   // NOT `exprᴛ1 is Typ[UntypedNil]`
 ```
@@ -52,6 +55,7 @@ named-string consts). Two converter pieces:
 2. a CONSTANT label that is not an ident/selector/conversion-call (those already render AT the
    wrapper type) casts to the tag type:
 
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var exprᴛ1 = code;
 if (exprᴛ1 == socksStatusSucceeded) {     // named-const label — no cast
@@ -130,6 +134,7 @@ and the identical error for every `[]T`. The default therefore reads the **preco
 built for the mirror shape — the OR of every case condition in the switch, materialized ahead
 of the chain — so it fires only when nothing matches:
 
+<!-- illustration: not converter output -->
 ```csharp
 var exprᴛ1 = v.Kind();
 var matchᴛ2 = exprᴛ1 == reflect.ΔInterface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice);
@@ -214,6 +219,7 @@ target in the if-chain lowering (the case above shows the wrapper). A case endin
 raises a `fallthrough` flag the next clause's guard reads. **A case with both** cannot put the flag
 *after* the wrapper:
 
+<!-- illustration: not converter output -->
 ```csharp
 if (exprᴛ1 == stdISO8601ColonTZ || …) { matchᴛ1 = true;
     do {
@@ -267,27 +273,31 @@ Such a `continue` therefore lowers to a `goto` targeting a labeled empty stateme
 enclosing loop's body**, where control reaches the loop's post-statement and condition exactly as
 `continue` would:
 
+<!-- source: src/tests/Behavioral/SwitchBreakContinueWrapper/main.cs:10-28 -->
 ```csharp
-for (nint i = 0; i < len(words); i++) {
-    var exprᴛ1 = words[i];
-    if (exprᴛ1 == "skip"u8) {
-        do {
-            if (i == 0) {
-                fmt.Println("a: breaking at", i);
-                break;                     // Go break-of-switch — exits the wrapper (its purpose)
-            }
-            fmt.Println("a: continuing at", i);
-            goto continueᴛ1;               // Go continue-of-loop — a bare C# continue would bind the wrapper
-        } while (false);
-    }
-    else if (exprᴛ1 == "stop"u8) {
-        fmt.Println("a: stop at", i);
-    }
+    for (nint i = 0; i < len(words); i++) {
+        var exprᴛ1 = words[i];
+        if (exprᴛ1 == "skip"u8) {
+            do {
+                if (i == 0) {
+                    fmt.Println("a: breaking at", i);
+                    break;
+                }
+                fmt.Println("a: continuing at", i);
+                goto continueᴛ1;
+            } while (false);
+        }
+        else if (exprᴛ1 == "stop"u8) {
+            fmt.Println("a: stop at", i);
+        }
 
-    fmt.Println("a: after switch", i);
+        fmt.Println("a: after switch", i);
 continueᴛ1:;
-}
+    }
 ```
+
+The `break` exits the `do { … } while (false)` wrapper, which is Go's break-of-switch and the wrapper's purpose. The
+`goto continueᴛ1` is Go's continue-of-loop: a bare C# `continue` would bind to the wrapper.
 
 Mechanics, each load-bearing:
 

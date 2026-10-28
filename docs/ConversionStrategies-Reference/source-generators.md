@@ -88,18 +88,25 @@ The deeper remedy — the converter stating the access modifier in source itself
 
 The blind spot above is closed at the root without touching a converted `.cs`:<!-- 2026-07-25 --> `package_info.cs` carries a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
-<!-- source: src/core/io/package_info.cs:94-152 (an excerpt of the section) -->
+<!-- source: src/core/io/package_info.cs:94-96, 103-104, 108, 116, 123, 135, 140, 152 (an excerpt of the section) -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
 {
+    …
     // <TypeAccessibility>
     internal partial struct discard {}
+    …
     internal partial struct nopCloser {}
+    …
     public partial interface Closer {}
+    …
     public partial interface Reader {}
+    …
     public partial struct LimitedReader {}
+    …
     // </TypeAccessibility>
+…
 }
 ```
 
@@ -232,6 +239,7 @@ early. A grouped declaration carries the tag once, as Go does.
 ```csharp
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
+    …
     public @string Quoted; /*"a:\"`b`\""*/
 ```
 
@@ -243,7 +251,9 @@ its definition does not spell. Nested arrays list each length in order.
 <!-- source: src/go2cs/testdata/markercomments/main.cs:68, 77, 83 -->
 ```csharp
     internal /*[3]*/ ж<array<nint>> p;
+…
 internal static nint hash(/*[32]*/ array<byte> b) {
+…
 internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) {
 ```
 
@@ -334,6 +344,7 @@ are the only way to say those things there.
 
 <!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 ```csharp
 [GoRecv] internal static bool rwlock(this ref fdMutex mu, bool read) {
 ```
@@ -432,6 +443,7 @@ generated module initializer, code .NET runs when the assembly loads, and that i
 package's registration method on golib's `GoDeferredRegistrations`. This is the shape `DeferredRegistration`
 writes, here for the adapters:
 
+<!-- illustration: not converter output -->
 ```csharp
 [global::System.Runtime.CompilerServices.ModuleInitializer]
 internal static void ᴛDeferAdapters() =>

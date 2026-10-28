@@ -127,6 +127,7 @@ package variable nothing writes), an `.editorconfig` beside that `.csproj` turns
 ([Conversion Strategies](ConversionStrategies.md#package-conversion)).
 
 _Code converted from `main.go` should look like the following in `main.cs`:_
+<!-- illustration: adapted, owed a real excerpt -->
 ```c#
 namespace go.example.com;
 

@@ -241,8 +241,8 @@ the box:
 
 <!-- source: src/core/path/filepath/linux/path.cs:315-316 -->
 ```csharp
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;                   // for testing
+internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot;                   // for testing
 ```
 
 Three properties make this the right shape rather than a `-tests`-only patch:
@@ -307,16 +307,20 @@ silently losing the recovered value in a `case nil, *bailout:`-style arm that re
 go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is
 HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
 
+<!-- source: src/tests/Behavioral/TypeSwitchImpureTag/main.cs.target:15-16, 20-22, 25-26 -->
 ```csharp
 var switchᴛ1 = next(x);
 switch (switchᴛ1.type()) {
+…
 case @string _:
 case bool _: {
-    var v = switchᴛ1;      // re-bind reads the temp — next() ran exactly once
-    …
+    var v = switchᴛ1;
+…
 default: {
     var v = switchᴛ1;
 ```
+
+Each re-bind reads the temporary, so `next()` runs exactly once.
 
 The hoist is deliberately GATED — only a tag containing a call (conversions hoist
 conservatively; the temp is merely unneeded) or a receive, and only when some arm actually
@@ -344,6 +348,7 @@ rooted `using atomic = go.sync.atomic_package;` / `using go.sync;` binds its lea
 enclosing `go.go` namespace, resolving `go.sync` to the nonexistent `go.go.sync` (CS0234). `rootQualifyIfAmbiguous` routes its rooting returns through `rootQualified`, which emits `global::go.`
 instead of a bare `go.` when the package's namespace second segment is itself `go`:
 
+<!-- source: src/core/go/types/typeparam.cs:8-9 -->
 ```csharp
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
@@ -513,6 +518,7 @@ records an interface pair from a type's *use*, and that use can be entirely impl
 os/signal's test does `cmd.Stdout = &buf`, whose os/exec field type is `io.Writer`, so
 `package_test_info.cs` carries
 
+<!-- source: src/core/flag/package_test_info.cs:45 -->
 ```csharp
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 ```
@@ -581,6 +587,7 @@ type explicitly:
 ```go
 CheckEqual(func(x int) int { return 0 }, func(x int) int32 { return 0 }, nil)
 ```
+<!-- illustration: not converter output -->
 ```csharp
 CheckEqual(nint (nint x) => 0, int32 (nint x) => 0, nil);
 ```
@@ -603,6 +610,7 @@ gone outright:
 ```go
 FuncMap{"die": func() bool { panic("die") }}   // text/template exec_test
 ```
+<!-- illustration: not converter output -->
 ```csharp
 ["die"u8] = bool () => { throw panic("die"); }  // was: () => { throw panic("die"); }
 ```
@@ -625,6 +633,7 @@ the panic-only literal has NO arm to infer from, this has arms that contribute n
 fixes a delegate type, and inference fails outright (CS8917, then CS1662/CS8716 on each return).
 The declared result tuple is stated explicitly through `generateResultSignature`, the same helper
 the generic-inference arm already used:
+<!-- illustration: not converter output -->
 ```csharp
 ["pred"u8] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ꓸꓸꓸany aʗp) => { … }))
 ```
@@ -647,6 +656,7 @@ above:
 fn := func() (interface{}, error) { panic("boom") }
 open := func(name string) (io.ReadCloser, error) { return os.Open(name) }
 ```
+<!-- illustration: adapted, owed a real excerpt -->
 ```csharp
 var fn = (any, error) () => {
     throw panic("boom");
@@ -1048,6 +1058,7 @@ func invoke(f func(int, string) string, n int, s string) string { return f(n, s)
 var h Handler = describe
 invoke(h, 1, "a")
 ```
+<!-- illustration: not converter output -->
 ```csharp
 invoke(new Func<nint, @string, @string>(h), 1, "a");
 ```
@@ -1089,6 +1100,7 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
+<!-- source: src/core/testing/quick/quick.cs:230 -->
 ```csharp
 public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 ```
@@ -1119,8 +1131,10 @@ The lowering targets a golib delegate family carrying a real C# 13 `params Span<
 (`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
 and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
+<!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
 public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+…
 public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
 ```
 
@@ -1243,6 +1257,7 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
 
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1868-1869 -->
 ```csharp
 private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
 { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
@@ -1375,6 +1390,7 @@ renderer — goes through `convertImportPathToNamespace`, which sanitized each `
 `getSanitizedImport`, measuring it **whole**. Whole, `gopkg.in` is not a C# keyword, so it passed
 through bare and the importer emitted
 
+<!-- illustration: not converter output -->
 ```csharp
 using yaml = gopkg.in.yaml_package;   // CS1001/CS1002/CS1022 — `in` is a keyword
 using gopkg.in;
@@ -1518,6 +1534,7 @@ supplies that type, and a generated struct partial offers exactly two one-argume
 nil constructor `T(NilType)` and the field constructor `T(F field = default!)`. `default!` converts
 to both, so a one-field struct's positional literal carrying `nil` is `CS0121 — the call is
 ambiguous`:
+<!-- illustration: not converter output -->
 ```csharp
 new TestWriter_testClose(default!)          // ambiguous: T(NilType) vs T(error)
 new TestWriter_testClose((error)(default!))   // names the field constructor, and only it
