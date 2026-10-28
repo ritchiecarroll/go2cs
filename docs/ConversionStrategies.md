@@ -4987,7 +4987,7 @@ func prefix(buf []byte) bool {
 	return string(buf[3:6]) == " /x"
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:211-219 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:215-223 -->
 ```csharp
 internal static bool prefix(slice<byte> buf) {
     if (len(buf) < 6) {
@@ -5013,7 +5013,7 @@ func returnedString() string {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:177-181 -->
+<!-- source: src/tests/Behavioral/SStringElision/main.cs.target:181-185 -->
 ```csharp
 internal static @string returnedString() {
     var b = slice<byte>("returned"u8);
@@ -7471,13 +7471,16 @@ default:
     }}
 ```
 
-**Other labels become an `if / else if` chain.** Variables, function calls and Go strings take the chain.
-A Go string becomes golib's `@string`, a struct, so it cannot be a C# `const`. Untyped constants take it
-too, including Go's `true` and `false`. So do constants of a named type, such as `time.Saturday`.
+**Other labels become a pattern switch.** Variables, function calls and Go strings are not C# constants.
+A Go string becomes golib's `@string`, a struct, so it cannot be a C# `const`. Untyped constants are not
+either, including Go's `true` and `false`, and nor are constants of a named type, such as `time.Saturday`.
 
-The tag is evaluated once into a temporary, `exprᴛ1`. Each case compares against it with `==`, or with an
-`is` pattern when the label is a C# constant (`exprᴛ1 is 0`). A label list joins with `||`, and `default`
-becomes the final `else`:
+The switch stays a C# `switch` over the tag. Each case binds the tag to `ᴛ` and compares in a `when`
+guard, `case var ᴛ when ᴛ == time.Monday:`, or keeps a constant pattern when every label in it is a C#
+constant (`case 0:`). A label list joins with `||`. C# tries the guards in order and `default` last,
+wherever it is written, which is the order Go evaluates them in. A string tag keeps a temporary under
+`switch (ᐧ)`, `case {} when exprᴛ1 == "get"u8:`, because C# would otherwise switch on a decoded .NET
+`string` ([reference](ConversionStrategies-Reference/expression-switch.md#a-string-tag-keeps-its-temp-under-the-expressionless-governor)):
 
 <!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.go:72-79 -->
 ```go
@@ -7490,19 +7493,22 @@ default:
 	fmt.Println("It's a weekday")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:76-85 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:76-88 -->
 ```csharp
 …
-    var exprᴛ1 = time.Now().Weekday();
-    if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
+    switch (time.Now().Weekday()) {
+    case var ᴛ when ᴛ == time.Saturday || ᴛ == time.Sunday: {
         fmt.Println("It's the weekend");
+        break;
     }
-    else if (exprᴛ1 == time.Monday) {
+    case var ᴛ when ᴛ == time.Monday: {
         fmt.Println("Ugh, it's Monday");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("It's a weekday");
-    }
+        break;
+    }}
 ```
 
 The Go comment is absent because this test is converted without the `-comments` option ([Comments](#comments)).
@@ -7524,7 +7530,7 @@ default: // After noon
 	fmt.Println("It's after noon")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:87-96 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:90-99 -->
 ```csharp
 …
     var t = time.Now();
@@ -7553,7 +7559,7 @@ case v > 2:
 	fmt.Println("unreachable but compiled")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:248-257 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:251-260 -->
 ```csharp
 …
     nint v = 3;
@@ -7600,7 +7606,7 @@ default:
 
 fmt.Println(hour)
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:98-130 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:101-133 -->
 ```csharp
 …
     nint hour = 1;
@@ -7676,7 +7682,7 @@ default:
     fmt.Println("Default case")
 }
 ```
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:235-246 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:238-249 -->
 ```csharp
 …
     var exprᴛ6 = Foo(2);
@@ -10043,7 +10049,7 @@ func checkErr(n int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-96 -->
+<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-99 -->
 ```csharp
 partial struct errno /*num:uintptr*/;
 
@@ -10068,22 +10074,25 @@ internal static void checkErr(nint n) {
     if (!AreEqual(err, errAgain)) {
         fmt.Println("not again");
     }
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, errAgain)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, errAgain): {
         fmt.Println("switch: again");
+        break;
     }
-    else if (AreEqual(exprᴛ1, default)) {
+    case var ᴛ when AreEqual(ᴛ, default!): {
         fmt.Println("switch: nil");
+        break;
     }
-    else { /* default: */
+    default: {
         fmt.Println("switch: other");
-    }
+        break;
+    }}
 
 }
 ```
 
-`==` becomes `AreEqual(…)` and `!=` becomes `!AreEqual(…)`. The `switch err` becomes an `if`/`else if`
-chain over a temporary, `exprᴛ1`, and each case compares through `AreEqual` in the same way
+`==` becomes `AreEqual(…)` and `!=` becomes `!AreEqual(…)`. The `switch err` becomes a pattern switch,
+and each case compares through `AreEqual` in the same way, `case var ᴛ when AreEqual(ᴛ, errAgain):`
 ([Expression Switch Statements](#expression-switch-statements)).
 
 <!-- adapter unwrap: src/core/golib/builtin.cs:4130-4146#3733f1 (IInterfaceAdapter.Value, IжAdapter.Box); interface-vs-pointer example: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.go:29 `zoo[0] == f` -> InterfaceImplementation.cs.target:34 `AreEqual(zoo[0], f)` -->

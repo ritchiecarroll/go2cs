@@ -1,20 +1,45 @@
 # Expression Switch Statements
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#expression-switch-statements)
-Go expression-based `switch` statements are flexible: cases do not fall through automatically (no `break` needed), and the `fallthrough` keyword runs the next case body bypassing its expression. Based on the [Manual Tour of Go Conversions](https://github.com/ritchiecarroll/go2cs/tree/master/src/archived/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to `if / else if / else` is the best choice for most cases. When every case label is a C# **compile-time constant** and there is no `fallthrough`, a traditional C# `switch` works. "Constant" here means a C# `const` — a literal, a computed literal expression (`a + b`), or a *typed* basic-type const — not merely a Go constant. A case label that references a plain variable, a struct field (`case frame.fp`), an *untyped* / named-type / cross-package const emitted as `static readonly` (`case goarch.PtrSize`), or an address-of expression (`case &g`) is **not** a C# constant, so a C# `switch` case label there is invalid (CS9135 / CS0150). Such switches fall back to the `if / else if` form comparing the tag with `==` (a temp captures the tag: `var exprᴛ1 = tag; if (exprᴛ1 == frame.fp) …`). The same constant-vs-runtime-value test also chooses `is` (constant pattern) vs `==` for a single-value case within the if-else form. A Go `break` inside a case exits the *switch* (skipping the rest of the case); in the `if / else if` form there is no enclosing C# switch for it to target (CS0139), so a case body that contains such a break is wrapped in a `do { … } while (false)` — the break exits that one-shot loop, i.e. the case. The wrap is emitted only for a case whose body actually has a switch-targeting `break` (one not caught by a nested loop/switch/select), so every other case is unchanged. (A `break` inside a *nested* loop within the case still targets that loop, as in Go.) For cases that use `fallthrough`, the cases are expanded to standalone `if` statements with a local fall-through flag and `goto` to handle break-style exits — the most complex (and least pretty) scenario. In that if-chain form a **trailing `default:` reached via fallthrough** is emitted as a *guarded* `if (fallthrough || !match) { … }` — the guard is needed so the default does not run after a matched-but-non-fallthrough case, but C# cannot prove it always executes. So when such a guarded-default switch is the last statement of a **value-returning** function and every case is terminal, C# reports CS0161 ("not all code paths return a value") even though the Go `default` makes the switch exhaustive (runtime `startpanic_m`). Because a guarded-terminal-default switch cannot be legally followed by reachable Go code (it always returns/exits), the converter emits an unreachable `return default!;` after the if-chain to satisfy C#'s definite-return analysis — gated on the enclosing function/literal actually returning a value (via its own return signature), so a `void` function or a switch that isn't terminal is unaffected. (Guarded by the `SwitchFallthroughDefaultReturn` behavioral test.) A comparison case may use a C# relational/constant pattern (`case {} when x is < 0`) only when the compared-to operand is a C# compile-time constant; for a variable (`case x == y`) or a `static readonly` const (untyped/cross-package), it falls back to a `when` guard (`case {} when x == y`) — a relational pattern there is invalid (CS9135).
+Go expression-based `switch` statements are flexible: cases do not fall through automatically (no `break` needed), and the `fallthrough` keyword runs the next case body bypassing its expression. Based on the [Manual Tour of Go Conversions](https://github.com/ritchiecarroll/go2cs/tree/master/src/archived/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to `if / else if / else` is the best choice for most cases. When every case label is a C# **compile-time constant** and there is no `fallthrough`, a traditional C# `switch` works. "Constant" here means a C# `const` — a literal, a computed literal expression (`a + b`), or a *typed* basic-type const — not merely a Go constant. A case label that references a plain variable, a struct field (`case frame.fp`), an *untyped* / named-type / cross-package const emitted as `static readonly` (`case goarch.PtrSize`), or an address-of expression (`case &g`) is **not** a C# constant, so a C# `switch` case label there is invalid (CS9135 / CS0150). Such a switch, when it has no `fallthrough`, is still a C# `switch`, a **pattern switch** that binds the tag in each clause and tests it in a `when` guard: `switch (tag) { case var ᴛ when ᴛ == frame.fp: { … break; } … }`. C# tries the guards in label order, stops at the first that holds, and tries `default` last wherever it is written, which is Go's order label for label. A clause's labels join with `||`, and the same constant-vs-runtime-value test chooses each clause's operator: a clause whose labels are all C# constants keeps a constant pattern (`case 3 or 4:`), any other compares with `==` (or `AreEqual` for an interface tag). A pattern switch nested in another's clause names its variable `ᴛ2`, `ᴛ3`, since the outer `ᴛ` is in scope there. A Go `break` in a clause exits the switch and a `continue` the enclosing loop, exactly as written. (Guarded by `SwitchLabelSideEffectOrder`, whose labels log every evaluation, output-compared vs Go.) A **string** tag keeps a temp under the expressionless governor instead, `var exprᴛ1 = tag; switch (ᐧ) { case {} when exprᴛ1 == "get"u8: … }` ([below](#a-string-tag-keeps-its-temp-under-the-expressionless-governor)). A switch **with** `fallthrough` still lowers to an `if / else if` chain over a temp (`var exprᴛ1 = tag; if (exprᴛ1 == frame.fp) …`): its cases are expanded to standalone `if` statements with a local fall-through flag — the most complex (and least pretty) scenario. In that chain a Go `break` inside a case has no enclosing C# switch to target (CS0139), so a case body that contains such a break is wrapped in a `do { … } while (false)` — the break exits that one-shot loop, i.e. the case. The wrap is emitted only for a case whose body actually has a switch-targeting `break` (one not caught by a nested loop/switch/select), so every other case is unchanged. (A `break` inside a *nested* loop within the case still targets that loop, as in Go.) In that if-chain form a **trailing `default:` reached via fallthrough** is emitted as a *guarded* `if (fallthrough || !match) { … }` — the guard is needed so the default does not run after a matched-but-non-fallthrough case, but C# cannot prove it always executes. So when such a guarded-default switch is the last statement of a **value-returning** function and every case is terminal, C# reports CS0161 ("not all code paths return a value") even though the Go `default` makes the switch exhaustive (runtime `startpanic_m`). Because a guarded-terminal-default switch cannot be legally followed by reachable Go code (it always returns/exits), the converter emits an unreachable `return default!;` after the if-chain to satisfy C#'s definite-return analysis — gated on the enclosing function/literal actually returning a value (via its own return signature), so a `void` function or a switch that isn't terminal is unaffected. (Guarded by the `SwitchFallthroughDefaultReturn` behavioral test.) A comparison case may use a C# relational/constant pattern (`case {} when x is < 0`) only when the compared-to operand is a C# compile-time constant; for a variable (`case x == y`) or a `static readonly` const (untyped/cross-package), it falls back to a `when` guard (`case {} when x == y`) — a relational pattern there is invalid (CS9135).
 
-## A switch on a `static readonly` constant tag lowers to if-else
-A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch: the int case labels are not constants OF the wrapper struct type, and the `is` constant-pattern lowering fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` forces the if-else form (wrapper `==` operators) and disables the `is` pattern:
+## A string tag keeps its temp under the expressionless governor
+C# chooses a switch's GOVERNING type through a user-defined implicit conversion whenever exactly one reaches a
+classic governing type (an integer, `char`, `bool`, `string` or an enum), even in a pattern switch. golib's
+`@string` has one, to `System.String`, so `switch (tag)` over a Go string would bind `ᴛ` as a decoded .NET
+string: `ᴛ == "get"u8` does not compile, and where a label does compile (`ᴛ == s`, `s` an `@string`) the guard
+compares UTF-16 text, under which two different invalid UTF-8 byte strings both decode to U+FFFD and compare
+equal. A tag whose Go underlying type is string (a named string type and `sstring` included) therefore keeps its
+temp, which holds the tag's own type, and the switch governs on `ᐧ`, the form an expressionless `switch {` takes:
+<!-- illustration: not converter output -->
+```csharp
+var exprᴛ1 = cmd;
+switch (ᐧ) {
+case {} when exprᴛ1 == "get"u8: {
+    return 1;
+}
+case {} when exprᴛ1 == alt: {
+    return 2;
+}}
+```
+The `==` is golib's byte-wise `@string` equality, as in the chain, and the clauses keep the pattern switch's block
+structure, Go's default position and bare `break`/`continue`. A named numeric is re-governed too, to its
+underlying integer (a `typeof` probe reads `byte` for a `num:uint8` wrapper), which compares the same values, so
+it keeps the pattern switch. Guarded by `SwitchLabelSideEffectOrder`'s `bytesNotText`, which switches on two
+different invalid UTF-8 strings: a decoded compare takes the wrong arm in both, and the Output phase names them.
+
+## A switch on a `static readonly` constant tag compares in `when` guards
+A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch on constant labels: the int case labels are not constants OF the wrapper struct type, and a constant pattern fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` takes the pattern switch with every clause in a `when` guard (the wrapper's `==` operators) and no constant pattern:
 <!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:238-239 -->
 ```csharp
-var exprᴛ1 = CrossPkgLib.Precision;
-if (exprᴛ1 == 1) {
+switch (CrossPkgLib.Precision) {
+case var ᴛ when ᴛ == 1: {
 ```
 A variable tag stays switchable. Guarded by `CrossPkgUser` / `CrossPkgLib`.
 
 ## A leading constant-true case stays opaque to the compiler
 Go's `switch { case true: ... case cond: ... }` (time parseStrictRFC3339 deliberately disabling its strict checks) compiles the LATER cases as dead code; a foldable `when true` makes C# reject them outright (CS8120). A constant-true case condition on a NON-LAST clause therefore emits the golib `ᐧᐧ` marker -- a `static readonly bool` the compiler cannot fold:
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:250 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:253 -->
 ```csharp
 case {} when ᐧᐧ: {
 ```
@@ -26,13 +51,13 @@ A constant expression whose CONTEXTUAL type is a wrapper struct -- golib `uintpt
 ## An index-expression case label falls back to equality
 A case label that INDEXES a package-level array/slice variable (`case Typ[UntypedNil]:` — go/types
 operand.go, where `Typ` is the universe `*Basic` array) is a runtime value, never a C# constant. The
-single-value `is` form is doubly broken there: C# parses `exprᴛ1 is Typ[UntypedNil]` in pattern position
+constant-pattern form is doubly broken there: C# parses `case Typ[UntypedNil]:` in pattern position
 as an array TYPE (CS0246 + CS0270). `canUsePatternMatch` rejects an `*ast.IndexExpr` label the same way
 it rejects a non-constant identifier/selector, so the clause takes the `==`/`AreEqual` comparison the
 multi-value arm already produced:
 <!-- illustration: not converter output -->
 ```csharp
-if (AreEqual(exprᴛ1, Typ[UntypedNil])) {   // NOT `exprᴛ1 is Typ[UntypedNil]`
+case var ᴛ when AreEqual(ᴛ, Typ[UntypedNil]): {   // NOT `case Typ[UntypedNil]:`
 ```
 (Guarded by the `IndexExprCaseLabel` behavioral test — single- and multi-label clauses indexing a
 package-level array var, output-compared vs Go.)
@@ -43,8 +68,8 @@ A tagged switch whose tag type is a NAMED (non-interface) type — net/http's
 `func (code socksReply) String()` switching on `code` — renders the tag as a generated wrapper
 struct. An untyped-LITERAL label adopts the tag's named type in Go (go/types records it on the label
 expression), but its C# render is a bare literal of the UNDERLYING type, which can neither be a
-constant pattern (`exprᴛ1 is 0x01` — CS9135, constant pattern against the wrapper) nor compare bare
-(`exprᴛ1 == 0x01` is ambiguous between the wrapper's `==` and the underlying's built-in `==`, both
+constant pattern (`case 0x01:` — CS9135, constant pattern against the wrapper) nor compare bare
+(`ᴛ == 0x01` is ambiguous between the wrapper's `==` and the underlying's built-in `==`, both
 reachable through the wrapper's two-way implicit operators — the same ambiguity family as the
 named-string consts). Two converter pieces:
 
@@ -57,11 +82,11 @@ named-string consts). Two converter pieces:
 
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
-var exprᴛ1 = code;
-if (exprᴛ1 == socksStatusSucceeded) {     // named-const label — no cast
+switch (code) {
+case var ᴛ when ᴛ == socksStatusSucceeded: {     // named-const label — no cast
     return succeededˢ;
 }
-if (exprᴛ1 == (socksReply)(0x01)) {       // literal label — cast to the tag type
+case var ᴛ when ᴛ == (socksReply)(0x01): {       // literal label — cast to the tag type
     return generalSocksServerˢ;
 }
 ```
@@ -75,9 +100,8 @@ output-compared vs Go.)
 internal/poll and the syscall zsyscall shims. -->
 
 ## A trailing `default` in a switch WITH `fallthrough` is guarded on `!match`
-A Go `switch` with no fallthroughs lowers to a plain `if / else if / … / else { default }` chain, where
-the trailing `else` correctly runs the default only when no case matched. But a `fallthrough` **breaks
-the chain**: the case that `fallthrough` targets is emitted as a SEPARATE, `!match`-guarded `if`
+A Go `switch` with no fallthroughs is a C# switch, whose `default` runs only when no case matched. A
+`fallthrough` takes the `if / else if / … / else { default }` chain, and it also **breaks the chain**: the case that `fallthrough` targets is emitted as a SEPARATE, `!match`-guarded `if`
 (`if (fallthrough || !match && <labels>) { … }`) so it can be entered both by falling through and by a
 direct match. A trailing `default` after such a case cannot be that `if`'s bare `else` — which
 would fire whenever the fallthrough-target `if` is false, i.e. **after any matched NON-fallthrough case**, not
@@ -144,8 +168,9 @@ if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { … }
 ```
 <!-- condensed from src/core/encoding/json/decode.cs (`array`). -->
 
-**Participating in no fallthrough at all.** For a non-constant-label tagged switch the converter
-normalizes this shape by *moving* the default clause to the end. A **constant**-label switch
+**Participating in no fallthrough at all.** A non-constant-label tagged switch with no `fallthrough` at
+all is a pattern switch, where `default` stays in Go's position and C# tries it last. One that has
+fallthroughs elsewhere *moves* such a default clause to the end. A **constant**-label switch
 that has fallthroughs elsewhere also lowers to the chain, outside that reorder gate, and an un-moved
 default emitted as a **bare block** would run unconditionally: `internal/bisect`'s `parsePattern`
 leads with `default: return …parseError`, so every bisect pattern parse would return "invalid pattern
@@ -167,7 +192,9 @@ nested `[2][2]int` and a struct array — including the over-length (truncate) a
 exact error for the targets it genuinely owns, so the guard cannot be an over-broad one.
 
 ## A clause's `else` may only be dropped when EVERY preceding clause terminates
-In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
+Since seat #28 this governs only a switch with `fallthrough`: the shape below has none, so it now
+emits as a pattern switch, and the excerpt from `src/core` shows the chain until the corpus is
+regenerated. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
 ended in a `return` — the chain is then unnecessary, since control cannot reach the later clause
 anyway. Dropping the `else` is sound only when **every** preceding clause terminates; a *shallow* "the
 last statement emitted was a return" flag reports only the **immediately** preceding clause.
@@ -260,6 +287,9 @@ break, a nested-loop `break` that must still fall through, and a break with no f
 output-compared vs Go).
 
 ## A `continue` in a break-wrapped case targets the LOOP, not the wrapper
+A pattern switch needs none of this: its `break` exits the switch and its `continue` binds the loop,
+both emitted bare. The wrapper, and so this rule, remain for a switch with `fallthrough`.
+
 The `do { … } while (false)` switch-break wrapper is itself a C# **iteration statement**, and C# binds
 `continue` to the innermost enclosing one — so a bare C# `continue` for a Go `continue` (meaning:
 continue the enclosing `for`) inside a wrapped case would continue the *wrapper* instead, which exits
@@ -271,33 +301,40 @@ run its case to completion and then fall through into `c.Unparsed = append(c.Unp
 
 Such a `continue` therefore lowers to a `goto` targeting a labeled empty statement at the very **end of the
 enclosing loop's body**, where control reaches the loop's post-statement and condition exactly as
-`continue` would:
+`continue` would. Section (h) of the guard keeps a `fallthrough`, and so the chain:
 
-<!-- source: src/tests/Behavioral/SwitchBreakContinueWrapper/main.cs:10-28 -->
+<!-- source: src/tests/Behavioral/SwitchBreakContinueWrapper/main.cs:136-160 -->
 ```csharp
+
     for (nint i = 0; i < len(words); i++) {
-        var exprᴛ1 = words[i];
-        if (exprᴛ1 == "skip"u8) {
+        var exprᴛ8 = words[i];
+        var matchᴛ1 = false;
+        if (exprᴛ8 == "skip"u8) { matchᴛ1 = true;
             do {
                 if (i == 0) {
-                    fmt.Println("a: breaking at", i);
+                    fmt.Println("h: breaking at", i);
                     break;
                 }
-                fmt.Println("a: continuing at", i);
-                goto continueᴛ1;
+                fmt.Println("h: continuing at", i);
+                goto continueᴛ9;
             } while (false);
         }
-        else if (exprᴛ1 == "stop"u8) {
-            fmt.Println("a: stop at", i);
+        else if (exprᴛ8 == "stop"u8) {
+            fmt.Println("h: stop at", i);
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1 && exprᴛ8 == "keep"u8) { matchᴛ1 = true;
+            fmt.Println("h: stop-or-keep at", i);
         }
 
-        fmt.Println("a: after switch", i);
-continueᴛ1:;
+        fmt.Println("h: after switch", i);
+continueᴛ9:;
     }
 ```
 
 The `break` exits the `do { … } while (false)` wrapper, which is Go's break-of-switch and the wrapper's purpose. The
-`goto continueᴛ1` is Go's continue-of-loop: a bare C# `continue` would bind to the wrapper.
+`goto continueᴛ9` is Go's continue-of-loop: a bare C# `continue` would bind to the wrapper. Section (a) is the same
+switch without the `fallthrough`: there the `break` and the `continue` are emitted bare inside the C# switch.
 
 Mechanics, each load-bearing:
 

@@ -190,6 +190,15 @@ L1 land mostly there.
 - **Changes:** converter, `visitSwitchStmt.go`. The shape is
   `switch (tag) { case var ᴛ when ᴛ == L: … break; … default: … }`. The `exprᴛN` temp goes, and so do the
   `do { } while (false)` wrapper and the `continueᴛN` label. Switches with `fallthrough` keep the if-chain.
+  - **Rulings (COORD, 2026-10-28):** R1 one label per Go clause, joined with `||`; R2 each label keeps the chain's
+    operator, so a constant-pattern clause is `case A or B:`; R3 `ᴛ` outermost, `ᴛ2`, `ᴛ3` by nesting depth.
+  - **A2 (COORD, 2026-10-28, from the seat's compile arm):** a tag whose Go UNDERLYING type is string (named string
+    types and `sstring` included) keeps its temp under the expressionless governor:
+    `var exprᴛ1 = tag; switch (ᐧ) { case {} when exprᴛ1 == L: … }`. C# picks a switch's governing type through a
+    user-defined implicit conversion when exactly one reaches a classic governing type, and golib's `@string`
+    has one, to `System.String`: `switch (tag)` would compare decoded UTF-16 text, under which two different
+    invalid UTF-8 byte strings are equal. A named numeric is re-governed to its underlying integer, which compares
+    the same values, so it keeps the pattern switch.
 - **Footprint:** ≤1.7K tag temps (not all are switches), 120 wrappers and 24 goldens.
 - **Design questions:**
   1. **Scope (owner, §6.4).**

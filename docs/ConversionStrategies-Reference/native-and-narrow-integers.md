@@ -167,7 +167,7 @@ and width, so a guarded shift needs no cast of its own.
 ```go
 var x int8 = (a + a) >> n
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:171 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:173 -->
 ```csharp
 int8 x = (int8)(((int8)(a + a)).Rsh(n));
 ```
