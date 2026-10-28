@@ -29947,6 +29947,31 @@ until the end regen.
 **Side observation, pre-existing.** `go/build/package_info.cs` at the package root carries a record for `build.cs`,
 which exists only under `go/build/{windows,linux,darwin}/`. Its table reproduces `windows/build.cs`.
 
+**Rebased onto batch 72 (56e4fba06f)** at COORD's word, on a new branch `claude/h-seat19-elseif-r2`. The posted
+`claude/h-seat19-elseif` is left as it was, since a posted SHA is never replaced. The goldens commit was dropped,
+red, fix and docs were replayed, and the BOARD conflict (its append-only tail) was resolved by re-appending this row.
+- **CNR** at the rebased fix moved the same 54 files as at 5931bad29b: 49 `.cs` and 5 `package_info.cs`. Master
+  added no project this seat moves. All are exact to the model.
+- **The goldens** were re-baselined again by `UpdateTestTargets --only` (103 files), and every golden equals its
+  emission.
+- **pcensus** (#22, landed in batch 72) scored the seat. Its E1 classifier lacked two shapes of the ruled mechanism:
+  - a condition brace followed by a trailing comment (`if (sr.pos < holeStart){ // In a data fragment`);
+  - the R2 `} else` + `{` join.
+
+  These were the 169 REFUSED pairs on the windows footprint. This seat extends E1's canon and join, red first: the
+  two good plants were refused before and pass after. The census measures and the count golden are unchanged. With
+  it:
+  - windows: 711 files, E1 3,693, MAP 272, REFUSED 0;
+  - linux: 718 files, E1 3,737, MAP 281, REFUSED 0;
+  - darwin: 716 files, E1 3,708, MAP 281, REFUSED 0.
+
+  MAP equals this row's record counts. The goldens diff reads 103 files, E1 162, MAP 5, REFUSED 0.
+- **Doc samples**, under COORD's standing ruling (golden-sourced samples in the seat, `src/core`-sourced at the end
+  regen): `docsamples -base HEAD -target WORKTREE -recite -write` re-copied 4 samples, all in
+  `ConversionStrategies.md`, each one `){` to `) {` line. 939 were unchanged, with 0 errors and 0 unlabelled blocks.
+  The `src/core`-sourced samples listed above wait for the end regen.
+- **go test** `-timeout 60m ./...` at the rebased tip, with the goldens committed: every package ok (repoguard and the docs guards, pcensus included), exit 0.
+
 — H (2026-10-27)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

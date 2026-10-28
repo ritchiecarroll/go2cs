@@ -33,3 +33,10 @@ spacing-only files keep their record	yes	yes (0 records changed without a join)	
 # THE MISS, attributed: the prediction's hand-own predicate was a substring test for "[module: GoManualConversion]". It (a) matched 71 CONVERTED files whose generated placeholder comments quote that phrase (reflect/value.cs, runtime/*, syscall/*, ...), excluding them from the prediction, and (b) missed the `[module: go.GoManualConversion]` spelling, predicting 4 whole-file hand-owns (runtime/mfinal.cs, net/windows/lookup_windows.cs, syscall/linux/exec_unix.cs, syscall/windows/exec_windows.cs) to change; it also kept one -tests sibling (internal/syscall/windows/registry/registry_test.cs.auto). Re-run AFTER the measurement with the line-anchored marker the A/B seed check uses, the same model gives 721 .cs + 9 .cs.auto, R1 834 + 1, R2 57, R3 3864 + 18, and a file set equal to the measured one (0 either way). That recount is post hoc and is not a prediction; the posted numbers stand above as missed. 434 records = the 336 source files with a join, each L3 shared file counted once per GOOS package_info.
 # SIDE OBSERVATION (pre-existing, not this seat): go/build/package_info.cs at the package root carries a record for build.cs, which exists only under go/build/{windows,linux,darwin}/; its table reproduces windows/build.cs.
 # Behavioral goldens and CNR: see the seat's BOARD row.
+#
+# Rebased onto 56e4fba06f (batch 72): pcensus (#22) with this seat's E1 extension, classify -items E1
+pcensus	files	E1	MAP	refused
+windows	711	3693	272	0
+linux	718	3737	281	0
+darwin	716	3708	281	0
+goldens	103	162	5	0
