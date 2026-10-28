@@ -77,6 +77,8 @@ var plants = []plant{
 	one("C1 good conversion inside a conversion", prodFile, `m = append(m, ((@string)(rune)(rune)'世').ꓸꓸꓸ);`, `m = append(m, ((@string)(rune)'世').ꓸꓸꓸ);`, "C1"),
 	one("C1 bad: the cast moved off the literal", prodFile, `if (c == (rune)'a') {`, `if ((rune)c == 'a') {`, "UNCLASSIFIED"),
 	one("C1 bad: a byte slot respelled to another type", prodFile, `byte b = (rune)'q';`, `byte b = (uint16)'q';`, "UNCLASSIFIED"),
+	one("C1 good lambda return", prodFile, `var wide = () => (rune)'u';`, `var wide = () => (uint16)'u';`, "C1"),
+	one("C1 good lambda block return", prodFile, `        return (rune)'m';`, `        return (uint16)'m';`, "C1"),
 	// N1 stage 2 (#24)
 	one("N1b good", prodFile, `if (s == default) {`, `if (s == nil) {`, "N1b"),
 	one("N1b bad: the operand changed", prodFile, `if (s == default) {`, `if (t == nil) {`, "UNCLASSIFIED"),

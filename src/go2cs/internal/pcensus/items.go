@@ -195,6 +195,9 @@ var items = []item{
 			rw(`(\(`+basic+`\))\(\(rune\)('(?:[^'\\]|\\.)*')\)`, "$1$2"),
 			// A conversion's operand loses its own cast: (byte)(rune)'a' reads (byte)'a', (rune)(rune)'b' reads (rune)'b'.
 			rw(`(\(`+basic+`\))\(rune\)'`, "$1'"),
+			// A func literal's return spells its result type, `=> (rune)'u'` reads `=> (uint16)'u'`: the cast that
+			// follows a lambda arrow or a return is the result type's.
+			rw(`(=> |return )\(`+sizedBasic+`\)'`, "$1'"),
 			// A byte, int8 or int16 slot spells its one cast as the target (COORD's ruling on #23, Q1): (rune)'q'
 			// reads (byte)'q'. The converter spells those types by their Go names.
 			rw(`\((?:byte|int8|int16)\)'`, "'"),
