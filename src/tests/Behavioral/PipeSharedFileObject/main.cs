@@ -46,12 +46,12 @@ internal static (ж<os.File>, syscallꓸHandle) pipe() {
     return (os.NewFile(h, name), c);
 }
 
-internal static @string readLines(ж<os.File> Ꮡr, nint n) {
+internal static @string readLines(ж<os.File> r, nint n) {
     slice<byte> got = default;
     var buf = new slice<byte>(256);
 
     while (strings.Count((@string)got, "\n") < n) {
-        var (k, err) = Ꮡr.Read(buf);
+        var (k, err) = r.Read(buf);
         got = appendꓸꓸꓸ(got, buf.slice(0, k));
         if (err != nil) {
             return ((sstring)got) + "<"u8 + err.Error() + ">"u8;

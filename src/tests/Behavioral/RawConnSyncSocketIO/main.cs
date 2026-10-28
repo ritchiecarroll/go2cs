@@ -78,26 +78,26 @@ internal static partial (ж<Δnet.TCPConn>, ж<Δnet.TCPConn>) pair() {
     finally { ᒐ.Run(); }
 }
 
-internal static syscall.RawConn rawOf(ж<Δnet.TCPConn> Ꮡc) {
-    var (rc, err) = Ꮡc.SyscallConn();
+internal static syscall.RawConn rawOf(ж<Δnet.TCPConn> c) {
+    var (rc, err) = c.SyscallConn();
     if (err != nil) {
         throw panic(fmt.Sprintf("SyscallConn: %v"u8, err));
     }
     return rc;
 }
 
-internal static @string readFull(ж<Δnet.TCPConn> Ꮡc, nint n) {
+internal static @string readFull(ж<Δnet.TCPConn> c, nint n) {
     var b = new slice<byte>(n);
     {
-        var (_, err) = Δio.ReadFull(new net_TCPConnжReader(Ꮡc), b); if (err != nil) {
+        var (_, err) = Δio.ReadFull(new net_TCPConnжReader(c), b); if (err != nil) {
             return "<"u8 + err.Error() + ">"u8;
         }
     }
     return (@string)b;
 }
 
-internal static @string rawReadFull(ж<Δnet.TCPConn> Ꮡc, nint n) {
-    var rc = rawOf(Ꮡc);
+internal static @string rawReadFull(ж<Δnet.TCPConn> c, nint n) {
+    var rc = rawOf(c);
     var got = new slice<byte>(0, n);
     var b = new slice<byte>(n);
 
