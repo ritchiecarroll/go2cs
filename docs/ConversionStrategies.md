@@ -880,7 +880,7 @@ internal static void Main() {
 
     foreach (var (_, name) in new @string[]{"jpeglike", "pnglike", "giflike"}.slice()) {
         {
-            var (describe, ok) = registry.Lookup(name); if (ok){
+            var (describe, ok) = registry.Lookup(name); if (ok) {
                 fmt.Println("found:", name, "=>", describe);
             } else {
                 fmt.Println("missing:", name);
@@ -3412,7 +3412,7 @@ internal static void safeAssertions() {
     any i = helloˢ;
 
     {
-        var (s, ok) = i._<@string>(ᐧ); if (ok){
+        var (s, ok) = i._<@string>(ᐧ); if (ok) {
             fmt.Println("Value is a string:", s);
         } else {
             fmt.Println("Value is not a string");
@@ -3420,7 +3420,7 @@ internal static void safeAssertions() {
     }
 
     {
-        var (n, ok) = i._<nint>(ᐧ); if (ok){
+        var (n, ok) = i._<nint>(ᐧ); if (ok) {
             fmt.Println("Value is an int:", n);
         } else {
             fmt.Println("Value is not an int");
@@ -3840,7 +3840,7 @@ func f(x int) int {
 internal static nint f(nint x) {
     if (x >= 2) {
         nint zΔ1 = default!;
-        if (x > 5){
+        if (x > 5) {
             zΔ1 = 100;
         } else {
             zΔ1 = 200;
@@ -4338,7 +4338,7 @@ internal static void safeAssertions() {
     any i = helloˢ;
 
     {
-        var (s, ok) = i._<@string>(ᐧ); if (ok){
+        var (s, ok) = i._<@string>(ᐧ); if (ok) {
             fmt.Println("Value is a string:", s);
         } else {
             fmt.Println("Value is not a string");
@@ -4346,7 +4346,7 @@ internal static void safeAssertions() {
     }
 
     {
-        var (n, ok) = i._<nint>(ᐧ); if (ok){
+        var (n, ok) = i._<nint>(ᐧ); if (ok) {
             fmt.Println("Value is an int:", n);
         } else {
             fmt.Println("Value is not an int");
