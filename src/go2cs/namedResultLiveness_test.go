@@ -127,9 +127,9 @@ func main() {
 
 	// The declarations that must be GONE.
 	for _, gone := range []string{
-		"nint r1 = default!;",
-		"nint r2 = default!;",
-		"nint outerName = default!;",
+		"nint r1 = default;",
+		"nint r2 = default;",
+		"nint outerName = default;",
 	} {
 		if strings.Contains(mainCs, gone) {
 			t.Errorf("dead named-result declaration still emitted (%s):\n%s", gone, mainCs)
@@ -143,11 +143,11 @@ func main() {
 
 	// The declarations that must REMAIN, one per liveness reason.
 	for _, kept := range []string{
-		"nint zero = default!;",       // naked return
-		"nint n = default!;",          // assigned, read by naked return
-		"error err = default!;",       // referenced by an explicit return
-		"nint count = default!;",      // captured by a closure
-		"nint innerNaked = default!;", // naked return inside a function LITERAL
+		"nint zero = default;",       // naked return
+		"nint n = default;",          // assigned, read by naked return
+		"error err = default;",       // referenced by an explicit return
+		"nint count = default;",      // captured by a closure
+		"nint innerNaked = default;", // naked return inside a function LITERAL
 	} {
 		if !strings.Contains(mainCs, kept) {
 			t.Errorf("live named-result declaration was dropped (%s) — this is CS0103:\n%s", kept, mainCs)

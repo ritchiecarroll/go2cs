@@ -771,7 +771,7 @@ var linknamePushTargets = map[string]linknamePush{
 	// internal/reflectlite's siblings are deliberately NOT added here. runtime pushes them too
 	// (reflectlite_resolveNameOff / reflectlite_resolveTypeOff), but reflectlite already answers those
 	// partials from a hand-written `type_impl.cs`, and a converter-emitted body would collide with it —
-	// the exact hazard this registry's header warns about. Those placeholders `return default!`, which
+	// the exact hazard this registry's header warns about. Those placeholders `return default`, which
 	// IS the plausible-wrong-answer shape, so replacing them with real forwarders is a genuine
 	// improvement — but it means REMOVING a hand-own, which is its own change with its own gates.
 	"reflect.addReflectOff":  {source: "runtime.reflect_addReflectOff"},

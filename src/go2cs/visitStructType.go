@@ -1098,7 +1098,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 // embedded field that go2cs-gen's constructors build (StructTypeTemplate's AppendZeroValueInitializers:
 // a value embed by its own `new T(nil)`, a pointer embed as a nil `ж<T>` box). A `default`-valued
 // instance leaves a pointer embed a raw null, so a promoted access throws NullReferenceException where
-// Go panics — an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
+// Go panics — an uninitialized declaration must render `new T(nil)` instead of `default`. The decision
 // follows the embedded-field emission above: an embed is a PROMOTING declared field (go2cs-gen
 // keeps the constructor route for it) unless it is an interface, a builtin non-named embed
 // (`int`), or a pointer to a non-named type. A CROSS-PACKAGE named embed answers true here even
@@ -1181,8 +1181,8 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 // BROKEN — it has a promoted embed (constructor-built) or a fixed-size array field
 // (`= new(N)` field initializer that default(T) skips), directly or through a nested value-struct
 // field — so `var z T` must run the generated parameterless constructor (`new()`) rather than
-// emit `default!`. Mirrors go2cs-gen StructTypeTemplate.NeedsConstruction; a false result keeps the
-// existing `default!`/bare emission. The top-level promoted-embed case is routed to `new(nil)` by
+// emit `default`. Mirrors go2cs-gen StructTypeTemplate.NeedsConstruction; a false result keeps the
+// existing `default`/bare emission. The top-level promoted-embed case is routed to `new(nil)` by
 // the caller's earlier structHasPromotedEmbeds check — this predicate still recurses for it so a
 // NESTED field whose own type carries a promoted embed (or array) also constructs.
 func (v *Visitor) structZeroValueNeedsConstruction(t types.Type) bool {

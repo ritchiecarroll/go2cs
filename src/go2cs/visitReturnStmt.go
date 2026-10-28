@@ -312,7 +312,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					param := signature.Results().At(i)
 
 					if param.Name() == "_" {
-						results.WriteString("default!")
+						results.WriteString("default")
 					} else if param.Name() != "" {
 						ident := v.getVarIdent(param)
 
@@ -468,7 +468,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 						// conversions to get there — C# string → golib `@string` → the type's
 						// `[GoType("@string")]` wrapper — and C# admits only one in a conversion,
 						// so a bare `""` has no conversion to the named type at all (CS0029), and
-						// in a tuple the failed element leaves its `default!` siblings with no
+						// in a tuple the failed element leaves its `default` siblings with no
 						// target type (CS8716). Naming the intermediate makes each step a separate
 						// conversion. os's `getPollFDAndNetwork` is the reached case: its
 						// `return nil, ""` at `(*poll.FD, poll.String)` is the linux corpus's L6.

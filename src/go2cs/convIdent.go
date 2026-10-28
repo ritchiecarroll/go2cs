@@ -20,7 +20,7 @@ import (
 // one that resolves to the universe nil is the literal, and a shadowing object renders as an
 // ordinary identifier. A synthetic ident with no type info keeps the literal reading.
 //
-// Whether that literal then emits golib's `nil` or the typeless `default!` is a matter of RENDER
+// Whether that literal then emits golib's `nil` or the typeless `default` is a matter of RENDER
 // context and belongs to the caller (see convIdent); callers that must know only whether they are
 // looking at a nil — such as the ambiguous one-field constructor argument in convCompositeLit —
 // share this predicate rather than re-deriving it.
@@ -33,6 +33,13 @@ func (v *Visitor) identIsUniverseNil(ident *ast.Ident) bool {
 	_, isUniverseNil := obj.(*types.Nil)
 
 	return isUniverseNil || obj == nil
+}
+
+// exprIsUniverseNil is identIsUniverseNil for an expression, looking through parentheses.
+func (v *Visitor) exprIsUniverseNil(expr ast.Expr) bool {
+	ident, ok := ast.Unparen(expr).(*ast.Ident)
+
+	return ok && v.identIsUniverseNil(ident)
 }
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
@@ -61,7 +68,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	}
 
 	// The Go literal `nil` (see identIsUniverseNil): pointer context renders golib's `nil`, value
-	// context the typeless `default!`. A shadowing object is not the literal and falls through to
+	// context the typeless `default`. A shadowing object is not the literal and falls through to
 	// normal identifier rendering, mirroring the `true`/`false` handling below.
 	if v.identIsUniverseNil(ident) {
 		// A nil bound for a pointer-to-ARRAY target carries the array's LENGTH, which `array<E>`
@@ -78,7 +85,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			return "nil"
 		}
 
-		return "default!"
+		return "default"
 	}
 
 	// `true`/`false` are C# KEYWORDS but Go PREDECLARED identifiers (universe scope). A VALUE

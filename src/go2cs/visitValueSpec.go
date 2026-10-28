@@ -125,7 +125,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 		// 2-tuple in EITHER declaration form (the isTuple check below already accounts for it
 		// correctly). The CallExpr-only gate simply never considered the shape: runtime's
 		// gc_test.go testAssertVar assigned the whole `(error?, bool)` tuple to a bare `error y`
-		// with `ok` left `default!` (CS0029) — same defect this branch exists to prevent, one
+		// with `ok` left `default` (CS0029) — same defect this branch exists to prevent, one
 		// expression kind short of catching it.
 		if !v.inFunction && valueSpec.Type == nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
 			_, isCall := valueSpec.Values[0].(*ast.CallExpr)
@@ -160,7 +160,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// Reading the raw flag rejected every tuple whose results include an interface or
 					// a func — `var ctx, cancel = context.WithCancel(ctx)` (net sendfile_test) — and
 					// the per-name fallback then assigned the WHOLE ValueTuple to the first name with
-					// the rest `default!` (CS0029), the very defect this branch exists to prevent.
+					// the rest `default` (CS0029), the very defect this branch exists to prevent.
 					// It is the trap paramAddressTakenNeedsBox documents: a verdict the box gate then
 					// refuses leaves identEscapesHeap set with no box behind it.
 					allPlain := true
@@ -420,13 +420,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 								// A type ALIAS to a fixed-size array (`type words = [4]uint64`,
 								// *types.Alias in Go 1.22+): the spec's type syntax is an Ident, so
 								// the ast.ArrayType check above misses — resolve the length through
-								// types.Unalias or the local gets `default!` with a null backing
+								// types.Unalias or the local gets `default` with a null backing
 								// array (NRE on first element write).
 								v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, v.arrayZeroValueArgs(strconv.FormatInt(arrayType.Len(), 10), arrayType))
 							} else if v.structHasPromotedEmbeds(def.Type()) {
 								// A struct with a promoted embed must construct through the NilType
 								// ctor, which builds each embed field (a value embed by its own
-								// `new T(nil)`, a pointer embed as a nil `ж<T>` box): `default!` leaves
+								// `new T(nil)`, a pointer embed as a nil `ж<T>` box): `default` leaves
 								// a pointer embed a raw null, so a promoted access NREs where Go panics.
 								v.writeOutput("%s %s = new(nil);", csTypeName, csIDName)
 							} else if v.structZeroValueNeedsConstruction(def.Type()) {
@@ -434,12 +434,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 								// field (its `= new(N)` backing, at any nesting depth) must run
 								// the generated parameterless constructor so those field
 								// initializers (and AppendZeroValueInitializers) execute —
-								// `default!` skips them, leaving a null backing (len 0 / NRE on
+								// `default` skips them, leaving a null backing (len 0 / NRE on
 								// index). Mirrors go2cs-gen's NeedsConstruction.
 								v.writeOutput("%s %s = new();", csTypeName, csIDName)
 							} else if nilChan := v.chanDirNilValue(def.Type()); nilChan != "" {
 								// A DIRECTIONAL channel local (`var left chan<- chan T`): the
-								// direction is part of the Go type and `default!` erases it, so
+								// direction is part of the Go type and `default` erases it, so
 								// the zero value is the directional nil factory — the same arm
 								// zeroValueInitializer carries for the named-result prologues.
 								// This inline ladder is a DELIBERATE copy of that helper (it
@@ -453,7 +453,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 								// this ladder copies, for a type argument whose `default` is broken.
 								v.writeOutput("%s %s = %s;", csTypeName, csIDName, zero)
 							} else {
-								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
+								v.writeOutput("%s %s = default;", csTypeName, csIDName)
 								v.recordConstantInitializedLocal(def)
 							}
 						}

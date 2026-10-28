@@ -14,7 +14,7 @@ import (
 )
 
 // namedResultNeedsDeclaration reports whether a named RESULT still needs its zero-value local
-// declared at function entry (`rune r1 = default!;`).
+// declared at function entry (`rune r1 = default;`).
 //
 // The converter used to declare every named result unconditionally, because Go's named results ARE
 // ordinary addressable locals. But most Go functions name their results for DOCUMENTATION and then

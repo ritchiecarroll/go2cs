@@ -354,7 +354,7 @@ func TestAsmTrampolinesForwardByShape(t *testing.T) {
 		// called, copied back, and a nil pointer passes a nil box. A nested line carries its own extra
 		// indent.
 		"gettimeofday": {
-			"ж<syscall.Timeval> ᴛb1 = default!;",
+			"ж<syscall.Timeval> ᴛb1 = default;",
 			"if (tv != nil) {",
 			"    ref var ᴛv1 = ref heap(new syscall.Timeval(), out ᴛb1);",
 			"    ᴛv1.Sec = tv.Value.Sec;",

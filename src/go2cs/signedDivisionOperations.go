@@ -367,7 +367,7 @@ func (v *Visitor) signedCompoundAssign(assignStmt *ast.AssignStmt) (signedCompou
 	case minusOne && class == signedDivisionTypeParam && quotient && readTwice:
 		return signedCompoundForm{operator: fmt.Sprintf(" = unchecked(-%s)", v.convExpr(lhs, nil)), omitOperand: true}, true
 	case minusOne && class == signedDivisionTypeParam && !quotient:
-		return signedCompoundForm{operator: " = default!", omitOperand: true}, true
+		return signedCompoundForm{operator: " = default", omitOperand: true}, true
 	case minusOne && class == signedDivisionBasic && quotient:
 		return signedCompoundForm{operator: " *= "}, true
 	case minusOne && class == signedDivisionBasic:

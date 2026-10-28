@@ -199,7 +199,7 @@ func recordSamePackageImplements(fset *token.FileSet, packageTypes *types.Packag
 			// true of an all-exported interface and FALSE of one carrying an unexported method,
 			// which is why this arm exists. Go scopes such an interface's implementations to its
 			// declaring package, so a consuming assembly cannot even NAME the unexported member
-			// to forward it: ImplementGenerator emits that arm as `=> default!` (or an empty
+			// to forward it: ImplementGenerator emits that arm as `=> default` (or an empty
 			// body) and the adapter answers a plausible zero forever. The declaring package is
 			// the ONLY place the pair can be realized, so here the record is not an optimization
 			// and withholding it is not conservative — it is the defect.
