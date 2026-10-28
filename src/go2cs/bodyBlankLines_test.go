@@ -358,11 +358,15 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	// A comment that is an empty clause's whole body stays in that clause's block, and a comment above
 	// a case label is written above that clause's header; neither may wait for the next flush, which
 	// writes it inside a statement's argument list.
-	if at := lineContaining(t, lines, "// empty clause body"); !strings.HasSuffix(strings.TrimSpace(lines[at-1]), "{") || !strings.HasPrefix(strings.TrimSpace(lines[at+1]), "}") {
+	// (A C# switch clause closes with the `break;` its block needs, so the closing brace may follow it.)
+	if at := lineContaining(t, lines, "// empty clause body"); !strings.HasSuffix(strings.TrimSpace(lines[at-1]), "{") ||
+		!strings.HasPrefix(strings.TrimSpace(lines[at+1]), "}") &&
+			!(strings.TrimSpace(lines[at+1]) == "break;" && strings.HasPrefix(strings.TrimSpace(lines[at+2]), "}")) {
 		t.Errorf("the comment that is an empty clause's body is not inside its block: %q / %q / %q", strings.TrimSpace(lines[at-1]), strings.TrimSpace(lines[at]), strings.TrimSpace(lines[at+1]))
 	}
 
-	for _, pair := range [][2]string{{"// above case z", "== \"z\"u8)"}} {
+	// The clause header reads `if (… == "z"u8)` in the if-chain and `case … == "z"u8:` in a switch.
+	for _, pair := range [][2]string{{"// above case z", "== \"z\"u8"}} {
 		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
 			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
 		}
@@ -377,7 +381,7 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 
 	// A comment above the case label that follows a moved `default:` belongs to that case, not to the
 	// default: holding it with the default wrote it after the whole switch.
-	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "== w)") {
+	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "== w)") && !strings.Contains(lines[next], "== w:") {
 		t.Errorf("the comment above a case after a moved default is not above that case's header: next line %q", strings.TrimSpace(lines[next]))
 	}
 
