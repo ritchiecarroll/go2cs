@@ -1527,6 +1527,20 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     /// <summary>
+    /// Returns this channel value narrowed to Go's receive-only <c>&lt;-chan T</c>: the converter's spelling of
+    /// <c>WithDirection(GoChanDir.Recv)</c>. (<see cref="RecvOnly"/> is the NIL receive-only channel, so the
+    /// narrowing reads <c>As</c>.)
+    /// </summary>
+    public channel<T> AsRecvOnly() => WithDirection(GoChanDir.Recv);
+
+    /// <summary>
+    /// Returns this channel value narrowed to Go's send-only <c>chan&lt;- T</c>: the converter's spelling of
+    /// <c>WithDirection(GoChanDir.Send)</c>. (<see cref="SendOnly"/> is the NIL send-only channel, so the
+    /// narrowing reads <c>As</c>.)
+    /// </summary>
+    public channel<T> AsSendOnly() => WithDirection(GoChanDir.Send);
+
+    /// <summary>
     /// Gets the Go direction of this value's channel type, or <see cref="GoChanDir.Unstamped"/>
     /// when no source stamped one — which the reflection bridge reports as bidirectional.
     /// </summary>
