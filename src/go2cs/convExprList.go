@@ -114,6 +114,12 @@ func (v *Visitor) lineStartPos(line int, at token.Pos) token.Pos {
 }
 
 func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callContext *CallExprContext) string {
+	// A collection expression's elements are this list's only (see collectionExpressionElements), so it is taken
+	// before anything else converts: a list nested inside an element is a call's arguments or a literal that
+	// sets its own.
+	collectionElements := v.collectionExpressionElements
+	v.collectionExpressionElements = false
+
 	if len(exprs) == 0 {
 		return ""
 	}
@@ -513,6 +519,10 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// member access below, which binds to its first token.
 		if !hasSpreadOperator || i != len(exprs)-1 {
 			resultExpr = v.unparenthesizedWholeExpression(expr, resultExpr)
+		}
+
+		if collectionElements {
+			resultExpr = escapeCollectionWithElement(resultExpr)
 		}
 
 		arg.WriteString(resultExpr)

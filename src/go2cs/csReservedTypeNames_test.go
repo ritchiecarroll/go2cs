@@ -15,9 +15,11 @@
 // its bare spelling: a field, local, parameter, method or selector named `closed` is unaffected, because
 // statements and expressions do not change meaning. Each member of the predicate's reach (a type, an
 // alias, a type parameter) sits in its own package so one cannot mask another. The `with(` rule (a
-// collection-expression element starting `with(` is now the arguments element) needs no code: the
-// converter emits a Go composite literal as an array initializer, never a collection expression, which
-// the control asserts. Emission only -- S1 pins C# 14, so no LangVersion 15 compile runs here.
+// collection-expression element starting `with(` is now the arguments element) bites since parity seat #30
+// made a slice literal a collection expression: an element beginning with a call to a Go `with` is written
+// `@with(…)`, first or later in the list and through the `[]any` boxing path, while a `with(…)` inside an
+// element keeps its bare spelling, which the control asserts. Emission only -- S1 pins C# 14, so no
+// LangVersion 15 compile runs here.
 
 package main
 
@@ -101,12 +103,17 @@ func with() int { return 1 }
 
 func g() int { return 2 }
 
+func inc(n int) int { return n + 1 }
+
 func Run() int {
 	closed := true
 	b := box{closed: closed, union: 7}
 	xs := []int{with(), g()}
+	ys := []int{g(), with()}
+	zs := []any{with(), "z"}
+	ws := []int{inc(with()), g() + with()}
 	if b.closed && !b.safe {
-		return b.union + len(xs)
+		return b.union + len(xs) + len(ys) + len(zs) + len(ws)
 	}
 	return 0
 }
@@ -162,11 +169,25 @@ func Run() int {
 	expect("alias", emitted("s2", "alias", "alias.cs"), []string{"Δclosed"})
 	expect("type parameter", emitted("s2", "tparam", "tparam.cs"), []string{"Pick<Δunion>(Δunion v)"})
 
-	// CONTROL: the bare spelling everywhere else, and the slice literal stays an array initializer.
+	// CONTROL: the bare spelling everywhere else. The one escape is a collection-expression element that begins
+	// with a call to `with`, which C# 15 would read as the collection's arguments.
 	plainCs := emitted("s2", "plain", "plain.cs")
-	expect("control", plainCs, []string{"bool closed;", "nint union;", "bool safe;", "new nint[]{with(), g()}"})
+	expect("control", plainCs, []string{
+		"bool closed;", "nint union;", "bool safe;",
+		"slice<nint>([@with(), g()])", "slice<nint>([g(), @with()])", "slice<nint>([inc(with()), g() + with()])",
+		"internal static nint with()",
+	})
 
-	if strings.Contains(plainCs, "Δclosed") || strings.Contains(plainCs, "Δunion") || strings.Contains(plainCs, "Δsafe") || strings.Contains(plainCs, "[with(") {
+	if strings.Contains(plainCs, "Δclosed") || strings.Contains(plainCs, "Δunion") || strings.Contains(plainCs, "Δsafe") {
 		t.Errorf("control: a package declaring no such type must keep every spelling bare:\n%s", plainCs)
+	}
+
+	// No collection-expression element may begin with a bare `with(`, the `[]any` boxing path included.
+	if bad := regexp.MustCompile(`(\[|, )with\(`).FindString(plainCs); bad != "" {
+		t.Errorf("control: a collection-expression element begins with a bare %q:\n%s", bad, plainCs)
+	}
+
+	if !strings.Contains(plainCs, "@with()") || strings.Count(plainCs, "@with(") != 3 {
+		t.Errorf("control: want exactly the three element-leading calls escaped, got %d:\n%s", strings.Count(plainCs, "@with("), plainCs)
 	}
 }

@@ -201,11 +201,14 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 					return addrOf(fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts))))
 				}
 
-				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
-
 				// An unnamed slice renders through golib's builtin with a collection expression,
 				// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin).
-				if sliceLiteralTakesBuiltin(inferred) {
+				takesBuiltin := sliceLiteralTakesBuiltin(inferred)
+				v.collectionExpressionElements = takesBuiltin
+
+				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
+
+				if takesBuiltin {
 					return addrOf(fmt.Sprintf("slice<%s>([%s])", csElem, elements))
 				}
 
@@ -1141,8 +1144,10 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	// An unnamed `[]T{…}` renders through golib's builtin with a collection expression,
 	// `slice<nint>([1, 2])` (sliceLiteralTakesBuiltin). Only the plain form converts: any other shape this
 	// function decorated (an alias, a wrapper ctor, a sparse or sized backing) keeps its `new` form.
-	if sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !aliasArrayComposite && !namedArrayComposite &&
-		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0 {
+	takesBuiltin := sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !aliasArrayComposite && !namedArrayComposite &&
+		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
+
+	if takesBuiltin {
 		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
 		lbrace, rbrace, compositeSuffix = "[", "]", ")"
 		result.WriteString(fmt.Sprintf("slice<%s>(%s%s", csElementType, lbracePrefix, lbrace))
@@ -1207,10 +1212,15 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				expr = v.convertToInterfaceType(elementType, v.getType(elt, false), v.convExpr(elt, nil))
 			}
 
+			if takesBuiltin {
+				expr = escapeCollectionWithElement(expr)
+			}
+
 			elements.WriteString(expr)
 		}
 		result.WriteString(elements.String())
 	} else {
+		v.collectionExpressionElements = takesBuiltin
 		result.WriteString(v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext))
 
 		// Comments after the last element stay inside the literal, above its closing brace, which a line
@@ -1233,9 +1243,9 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 // sliceLiteralTakesBuiltin reports whether an unkeyed composite literal of type t renders as golib's builtin
 // over a C# collection expression: Go's `[]int{1, 2, 3}` is `slice<nint>([1, 2, 3])` (1.26.10.2 parity seat
-// #30, L1). The collection expression targets builtin.slice<T>(ReadOnlySpan<T>), which copies it into a fresh
-// backing array, so the result keeps Go's literal semantics in every position: never nil (`slice<nint>([])` is
-// empty, not nil), len == cap, and no two evaluations share elements. T is always written, so nothing is
+// #30, L1). The collection expression targets builtin.slice<T>(SliceLiteral<T>), whose builder copies it into a
+// fresh backing array, so the result keeps Go's literal semantics in every position: never nil (`slice<nint>([])`
+// is empty, not nil), len == cap, and no two evaluations share elements. T is always written, so nothing is
 // inferred from the elements (an untyped `1` would infer System.Int32 where Go's []int is nint).
 //
 // A collection expression cannot target slice<T> itself: C# takes a collection's element type from its public
@@ -1253,6 +1263,19 @@ func sliceLiteralTakesBuiltin(t types.Type) bool {
 	_, elemIsArray := slice.Elem().Underlying().(*types.Array)
 
 	return !elemIsArray
+}
+
+// escapeCollectionWithElement writes a collection-expression element spelled `with(…)` as `@with(…)`. From C# 15,
+// such an element is the collection's construction ARGUMENTS, not a call ("Compiler Breaking Changes - DotNet 11"):
+// a Go function named `with` in `[]int{with(), g()}` would drop out of the literal, or fail to compile when it takes
+// arguments. `@with` names the function in every language version, so only an element that begins with the call is
+// escaped, and a `with(…)` inside an element (a call's argument, a later operand) keeps its bare spelling.
+func escapeCollectionWithElement(element string) string {
+	if strings.HasPrefix(element, "with(") {
+		return "@" + element
+	}
+
+	return element
 }
 
 // compositeLitIsKeyed reports whether a composite literal's elements are index/key keyed

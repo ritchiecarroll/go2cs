@@ -47,6 +47,12 @@ and no other argument converts to `SliceLiteral<T>`, so every other `slice<T>(�
 charged to `testing.AllocsPerRun`'s counter, like the `new T[]{…}` array the earlier form allocated: a counted copy
 moved math/big's `TestNewIntAllocs` from 1 to 2 allocations per run, away from Go's 0.
 
+An element that begins with a call to a Go function named `with` is written `@with(…)`: from C# 15, a
+collection-expression element spelled `with(…)` is the collection's construction arguments, not a call, so
+`[]int{with(), g()}` → `slice<nint>([@with(), g()])`. Only the element's leading call is escaped; a `with(…)` inside an
+element, such as a call's argument, keeps its bare spelling. (Guarded by the converter test
+`TestCSharp15ReservedTypeNamesAreRenamedWhereTheyBite`.)
+
 A keyed literal keeps its sparse form, a fixed array its `.array()` projection, a slice of arrays its
 `GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named or
 aliased slice type its own constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices` and by

@@ -90,8 +90,9 @@ var keywords = hashset.NewHashSet([]string{
 // RESIDUAL, not covered: a Go PACKAGE so named used as a qualifier at member start (`closed.T f;`) --
 // no std or behavioral package is. And as with emitterSpelledTypeNames, a type declared only in a
 // `_test.go` file renames the test side's uses of a same-named production field (the B2 coherence class);
-// the corpus declares none. C# 15's `with(` collection-element rule needs nothing: a Go composite literal
-// is emitted as an array initializer, never a collection expression.
+// the corpus declares none. C# 15's `with(` collection-element rule is position-scoped, not a rename: since
+// parity seat #30 a slice literal is a collection expression (`slice<nint>([…])`), and an element beginning
+// with a call to a Go `with` is written `@with(…)` (escapeCollectionWithElement); every other use stays bare.
 var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe"})
 
 // collectCSReservedTypeNameDecls records every name in file that a C# 15 reserved TYPE-position keyword
