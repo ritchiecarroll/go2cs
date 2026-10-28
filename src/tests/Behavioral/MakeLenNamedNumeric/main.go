@@ -1,9 +1,9 @@
 // Regression test: a `make(T, len)` whose length/capacity argument is a NAMED numeric type
-// (`type Size uint`) must compile. Such a type renders as a [GoType] wrapper struct with implicit
-// conversions only to/from its UNDERLYING, so the make-length nint cast the converter inserts —
-// `(nint)(size)` — has no direct conversion (CS0030, crypto's `make([]func() hash.Hash, maxHash)`
-// where maxHash is `type Hash uint`). The cast must route through the underlying numeric:
-// `(nint)(nuint)(size)`.
+// (`type Size uint`) must compile. Such a type renders as a [GoType] wrapper struct, crypto's
+// `make([]func() hash.Hash, maxHash)` where maxHash is `type Hash uint`. The wrapper declares an
+// explicit operator to every basic numeric, so the make-length nint cast the converter inserts
+// is the one cast
+// `(nint)(size)`.
 package main
 
 import "fmt"

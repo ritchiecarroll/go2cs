@@ -117,6 +117,35 @@ func foreignWrittenBase(named *types.Named) *types.Named {
 	return base
 }
 
+// namedNumericConvertsDirectly reports whether a conversion FROM `named` to a basic numeric type binds in
+// one cast, `(nint)k` for Go's `int(k)`: the type's `num:` wrapper declares an explicit operator to every
+// basic numeric type (go2cs-gen's InheritedTypeTemplate, BasicNumericConversionOperators). That holds for a
+// defined integer or float type written over a basic type or over a same-package named numeric. A type
+// written over ANOTHER package's named type keeps that base in its [GoType] and has no such operators, a
+// complex or generic type takes none, and a type whose declaration the loader holds no syntax for is not
+// known; each keeps the hop through the underlying.
+func namedNumericConvertsDirectly(named *types.Named) bool {
+	basic, ok := named.Underlying().(*types.Basic)
+
+	if !ok || basic.Info()&types.IsNumeric == 0 || basic.Info()&types.IsComplex != 0 || named.TypeParams().Len() > 0 || named.TypeArgs().Len() > 0 {
+		return false
+	}
+
+	rhs, ok := packageTypeSpecRHS[named.Obj()]
+
+	if !ok {
+		rhs, ok = foreignTypeSpecRHS(named.Obj())
+	}
+
+	if !ok || rhs == nil {
+		return false
+	}
+
+	base, isNamed := types.Unalias(rhs).(*types.Named)
+
+	return !isNamed || base.Obj().Pkg() == named.Obj().Pkg()
+}
+
 var foreignTypeSpecRHSLock sync.Mutex
 
 // foreignTypeSpecRHSByPackage caches, per IMPORTED package, the written RHS of each of its defined

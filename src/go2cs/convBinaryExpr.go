@@ -840,8 +840,9 @@ func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
 // golib's signed-count GoShift overloads: a count below zero raises Go's runtime error "negative shift
 // amount", as runtime.panicshift does, where a uint64 widening would read it as huge and yield 0. A
 // count already typed uint64 or native uint widens implicitly and is passed through unwrapped; a NAMED
-// numeric count converts only to its own underlying basic, so it is routed through it
-// (`(int64)(sbyte)(c)`) and a numeric TYPE PARAMETER through the ConvertToUInt64 bridge — both mirroring
+// numeric count's `num:` wrapper converts to every basic numeric, so it takes the one cast `(int64)(c)`,
+// while one without those operators (namedNumericConvertsDirectly) is routed through its underlying,
+// `(int64)(sbyte)(c)`; a numeric TYPE PARAMETER goes through the ConvertToUInt64 bridge — all mirroring
 // intCastOperand. A type-parameter count stays unsigned-widened: its sign is not known when converting.
 func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) string {
 	if !v.shiftCountNeedsWiden(expr) {
@@ -854,7 +855,7 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 		width = "int64"
 	}
 
-	if named, ok := v.getType(expr, false).(*types.Named); ok {
+	if named, ok := v.getType(expr, false).(*types.Named); ok && !namedNumericConvertsDirectly(named) {
 		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 			return fmt.Sprintf("(%s)(%s)(%s)", width, v.getCSharpTypeName(basic), converted)
 		}

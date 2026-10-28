@@ -1560,8 +1560,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// the intermediate `(uint64)NameOff` cast is itself CS0030 (the [GoType] wrapper only
 					// converts NameOff↔int32). Unwrap the arg through ITS underlying first, so the chain
 					// is named→argUnderlying (operator) → targetUnderlying (numeric) → target (operator):
-					// `((hex)(uint64)(int32)off)`. (types.Unalias resolves the runtime's aliased offsets.)
-					if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
+					// `((hex)(uint64)(int32)off)`. (types.Unalias resolves the runtime's aliased offsets.) A
+					// `num:` wrapper with the operator to every basic numeric (namedNumericConvertsDirectly)
+					// reaches the target's underlying in one cast: `((hex)(uint64)off)`.
+					if argNamed, ok := types.Unalias(argType).(*types.Named); ok && !namedNumericConvertsDirectly(argNamed) {
 						if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 && !types.Identical(argBasic, basic) {
 							if v.needsParentheses(arg) {
 								inner = castOf(v.getCSharpTypeName(argBasic), expr)
@@ -1599,13 +1601,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// and its EXACT underlying (`NameOff ↔ int32`), so a plain `(ulong)NameOff` / `(nint)idx` is
 		// CS0030. Route through the underlying first — `((ulong)(int)t.Str)` / `((nint)(nuint)idx)` — the
 		// named→basic [GoType] operator followed by a numeric C# cast (exactly Go's conversion semantics).
-		// Skipped when the target basic IS the named type's underlying (the exact operator binds → no churn)
-		// and when the arg is not a named numeric (a plain basic→basic cast already works).
+		// Skipped when the target basic IS the named type's underlying (the exact operator binds → no churn),
+		// when the arg is not a named numeric (a plain basic→basic cast already works), and when the named
+		// type's `num:` wrapper declares the operator to every basic numeric (namedNumericConvertsDirectly):
+		// Go's one conversion is then one cast, `(nint)idx`, and falls through to the plain form below.
 		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsNumeric != 0 {
 			// types.Unalias resolves a Go type alias (`type nameOff = abi.NameOff`) to the named type it
 			// aliases — in Go 1.23 `TypeOf` returns a `*types.Alias`, so a bare `.(*types.Named)` would
 			// miss the runtime's aliased `abi` offset types (`nameOff`/`typeOff`/`textOff`).
-			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok {
+			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok && !namedNumericConvertsDirectly(argNamed) {
 				if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 {
 					if !types.Identical(argBasic, targetBasic) {
 						underlyingCS := v.getCSharpTypeName(argBasic)
@@ -5135,11 +5139,13 @@ func (v *Visitor) makeLenArgs(args []ast.Expr) string {
 
 		if v.makeLenArgNeedsNintCast(arg) {
 			// A NAMED numeric type (`type Hash uint`, crypto's maxHash in `make([]T, maxHash)`) renders
-			// as a [GoType] wrapper struct with implicit conversions only to/from its UNDERLYING, so a
-			// direct `(nint)(Hash)` has no conversion (CS0030). Route the cast through the underlying
+			// as a [GoType] wrapper struct. Its `num:` wrapper converts to every basic numeric, so the
+			// cast is the plain `(nint)(maxHash)`. A wrapper without those operators (written over another
+			// package's named type, see namedNumericConvertsDirectly) converts only to its base, so a
+			// direct `(nint)(Hash)` has no conversion (CS0030) and the cast routes through the underlying
 			// numeric so the wrapper's implicit operator applies first: `(nint)(nuint)(maxHash)`.
 			if argType := v.info.TypeOf(arg); argType != nil {
-				if _, isNamed := types.Unalias(argType).(*types.Named); isNamed {
+				if named, isNamed := types.Unalias(argType).(*types.Named); isNamed && !namedNumericConvertsDirectly(named) {
 					underlyingCS := convertToCSTypeName(v.getAliasQualifiedTypeName(argType.Underlying(), false))
 					argStr = fmt.Sprintf("(nint)(%s)(%s)", underlyingCS, argStr)
 				} else {

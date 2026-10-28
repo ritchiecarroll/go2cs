@@ -77,6 +77,15 @@ var plants = []plant{
 	one("R5+N1 composition", testFile, `if (Ꮡt.err != default!) {`, `if (t.err != nil) {`, "N1+R5"),
 	// N2 (#26)
 	one("N2 good", prodFile, `var n = (nint)(byte)k;`, `var n = (nint)k;`, "N2"),
+	one("N2 good sized underlying", prodFile, `fmt.Println((nint)(int8)lvl);`, `fmt.Println((nint)lvl);`, "N2"),
+	one("N2 good golib uintptr", prodFile, `fmt.Println((uint64)(uintptr)tk);`, `fmt.Println((uint64)tk);`, "N2"),
+	one("N2 good into a named target", prodFile, `var c = (traceArg)(uint64)(uint8)g;`, `var c = (traceArg)(uint64)g;`, "N2"),
+	one("N2 good parenthesized operand", prodFile, `y[0] = (uint8)(uint16)((sigAlgo >> 8));`, `y[0] = (uint8)(sigAlgo >> 8);`, "N2"),
+	one("N2 good inner cast in the outer cast's operand", prodFile, `return (abiꓸKind)(uint8)((uintptr)((flag)(f & flagKindMask)));`, `return (abiꓸKind)(uint8)((flag)(f & flagKindMask));`, "N2"),
+	one("N2 good chain sharing a cast", prodFile, `return (ΔTime)(int64)((float64)(uint64)t * (float64)f);`, `return (ΔTime)(int64)((float64)t * (float64)f);`, "N2"),
+	one("N2 bad: a dropped cast that follows no parenthesis", prodFile, `var n = x + (int64)y;`, `var n = x + y;`, "UNCLASSIFIED"),
+	one("N2 leaves a rune literal's cast to C1", prodFile, `t.add((byte)(rune)'A');`, `t.add((byte)'A');`, "C1"),
+	one("N2 bad: the inner cast is a different type", prodFile, `fmt.Println((nint)(int8)lvl);`, `fmt.Println((nint)(int16)lvl);`, "UNCLASSIFIED"),
 	one("N2 bad: the outer cast changed", prodFile, `var n = (nint)(byte)k;`, `var n = (long)k;`, "UNCLASSIFIED"),
 	// F1, DIR, FOR, SHIFT (#27)
 	one("F1 good open", prodFile, `((Action)(() => {`, `func(() => {`, "F1"),
