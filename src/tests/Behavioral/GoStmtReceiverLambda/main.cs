@@ -63,7 +63,7 @@ internal static partial void Main() {
     ref var vs = ref heap<valueSender>(out var Ꮡvs);
     vs = new valueSender(c: new channel<nint>(0));
     var vsʗ1 = vs;
-    goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7, GoStack.Bounded);
+    goǃ(() => vsʗ1.send(7), GoStack.Bounded);
     fmt.Println("value-recv go:", ᐸꟷ(vs.c));
     var vsʗ2 = vs;
     goǃ(() => vsʗ2.ping(), GoStack.Bounded);

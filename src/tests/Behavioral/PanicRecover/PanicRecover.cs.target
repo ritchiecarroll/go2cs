@@ -28,9 +28,6 @@ internal static void f() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferInGˢ = (@string)"Defer in g"u8;
-
 internal static void g(nint i) {
     GoFrame ᒐ = default;
     try {
@@ -38,7 +35,7 @@ internal static void g(nint i) {
             fmt.Println("Panicking!");
             throw panic(fmt.Sprintf("%v"u8, i));
         }
-        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), deferInGˢ, i, ref ᒐ);
+        defer(ᴛ1 => fmt.Println("Defer in g", ᴛ1), i, ref ᒐ);
         fmt.Println("Printing in g", i);
         g(i + 1);
     }

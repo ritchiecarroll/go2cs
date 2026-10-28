@@ -4,14 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object byeˢ = (@string)"bye"u8;
-
 internal static Action makeGreeter(@string name) {
     return () => {
         GoFrame ᒐ = default;
         try {
-            defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), byeˢ, name, ref ᒐ);
+            defer(ᴛ1 => fmt.Println("bye", ᴛ1), name, ref ᒐ);
             fmt.Println("hi", name);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -19,16 +16,11 @@ internal static Action makeGreeter(@string name) {
     };
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferredˢ = (@string)"deferred"u8;
-private static readonly object argClosureDeferredˢ = (@string)"arg-closure deferred"u8;
-private static readonly object fetchDeferredˢ = (@string)"fetch deferred"u8;
-
 internal static void Main() {
     void f() {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => fmt.Println(ᴛ1), deferredˢ, ref ᒐ);
+            defer(() => fmt.Println("deferred"), ref ᒐ);
             fmt.Println("body");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -99,7 +91,7 @@ internal static void Main() {
     run(() => {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => fmt.Println(ᴛ1), argClosureDeferredˢ, ref ᒐ);
+            defer(() => fmt.Println("arg-closure deferred"), ref ᒐ);
             fmt.Println("arg-closure body");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -124,7 +116,7 @@ internal static void Main() {
     (nint, error) fetch() {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => fmt.Println(ᴛ1), fetchDeferredˢ, ref ᒐ);
+            defer(() => fmt.Println("fetch deferred"), ref ᒐ);
             return (42, default);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

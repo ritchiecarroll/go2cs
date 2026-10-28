@@ -15,23 +15,16 @@ internal static Action makeStop(@string tag, channel/*<-*/<@string> @out) {
     };
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object firstˢ = (@string)"First"u8;
-private static readonly object secondˢ = (@string)"Second"u8;
-private static readonly object thirdˢ = (@string)"Third"u8;
-private static readonly object fourthˢ = (@string)"Fourth"u8;
-private static readonly @string fifthˢ = "Fifth"u8;
-
 internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => fmt.Println(ᴛ1), firstˢ, ref ᒐ);
-        defer(ᴛ1 => fmt.Println(ᴛ1), secondˢ, ref ᒐ);
-        defer(ᴛ1 => fmt.Println(ᴛ1), thirdˢ, ref ᒐ);
+        defer(() => fmt.Println("First"), ref ᒐ);
+        defer(() => fmt.Println("Second"), ref ᒐ);
+        defer(() => fmt.Println("Third"), ref ᒐ);
 
         Funcꓸꓸꓸ<any, (nint, error)> f1 = fmt.Println;
         var f1ʗ1 = f1;
-        defer(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ, ref ᒐ);
+        defer(ᴛ1 => f1ʗ1(ᴛ1), (@string)"Fourth", ref ᒐ);
 
         var msgs = new channel<@string>(2);
         var cancel = makeStop("stopped", msgs.AsSendOnly());
@@ -49,7 +42,7 @@ internal static partial void Main() {
         }, ref ᒐ);
         defer(ᴛ1 => close(ᴛ1), drained, ref ᒐ);
 
-        defer(GetPrintLn(), fifthˢ, ref ᒐ);
+        defer(GetPrintLn(), (@string)"Fifth", ref ᒐ);
 
         var c = Ꮡ(new acc());
         var (s1, e1) = c.add(5);
@@ -116,15 +109,12 @@ internal static void acquireAndWork(ж<sema> Ꮡs) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notifiedˢ = (@string)"notified"u8;
-
 internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
     GoFrame ᒐ = default;
     try {
         var vals = valsʗp.sslice();
 
-        defer(ᴛ1 => fmt.Println(ᴛ1), notifiedˢ, ref ᒐ);
+        defer(() => fmt.Println("notified"), ref ᒐ);
         nint total = 0;
         foreach (var (_, v) in vals) {
             total += v;

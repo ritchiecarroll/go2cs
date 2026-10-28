@@ -35,16 +35,13 @@ internal static @string label(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     return t.m[Ꮡc];
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closedˢ = (@string)"closed"u8;
-
 internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), closedˢ, c.id, ref ᒐ);
+        defer(ᴛ1 => fmt.Println("closed", ᴛ1), c.id, ref ᒐ);
         {
             var (_, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
                 delete(t.m, Ꮡc);

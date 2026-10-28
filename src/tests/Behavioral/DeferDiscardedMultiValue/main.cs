@@ -21,10 +21,6 @@ internal static (uintptr, uintptr, error) quad(uintptr a, uintptr b, uintptr c, 
     return (a, b, default);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string multiValueEagerˢ = "multi-value/eager"u8;
-private static readonly @string singleResultˢ = "single-result"u8;
-
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
@@ -33,9 +29,9 @@ internal static void Main() {
         var @base = (uintptr)4;
         var off = (uintptr)2;
 
-        defer(triple, multiValueEagerˢ, n, ref ᒐ);
-        defer(single, singleResultˢ, ref ᒐ);
-        defer(quad, sysConst, @base + off, (uintptr)65536, (uintptr)0, ref ᒐ);
+        defer(ᴛ1 => triple("multi-value/eager", ᴛ1), n, ref ᒐ);
+        defer(() => single("single-result"), ref ᒐ);
+        defer(ᴛ1 => quad(sysConst, ᴛ1, 65536, 0), @base + off, ref ᒐ);
 
         n = 99;
         fmt.Println("body done, n =", n);

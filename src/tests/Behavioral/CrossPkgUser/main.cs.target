@@ -177,7 +177,7 @@ internal static void Main() {
         var bbufᴷ = new stackAppend<byte>();
         var rbufᴷ = new stackAppend<rune>();
 
-        defer(note, (nint)(CrossPkgLib.Precision), ref ᒐ);
+        defer(() => note(CrossPkgLib.Precision), ref ᒐ);
 
         var b = CrossPkgLib.Boiling();
         var r = b.Add(10D);

@@ -4,14 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object manyDeferˢ = (@string)"many defer"u8;
-
 internal static void manyDefers() {
     GoFrame ᒐ = default;
     try {
         for (nint i = 1; i <= 6; i++) {
-            defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), manyDeferˢ, i, ref ᒐ);
+            defer(ᴛ1 => fmt.Println("many defer", ᴛ1), i, ref ᒐ);
         }
         fmt.Println("many body");
     }
@@ -19,14 +16,11 @@ internal static void manyDefers() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object loopDeferˢ = (@string)"loop defer"u8;
-
 internal static void loopDefers(nint n) {
     GoFrame ᒐ = default;
     try {
         for (nint i = 0; i < n; i++) {
-            defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), loopDeferˢ, i, ref ᒐ);
+            defer(ᴛ1 => fmt.Println("loop defer", ᴛ1), i, ref ᒐ);
         }
         fmt.Println("loop body", n);
     }
@@ -73,40 +67,32 @@ internal static (@string label, nint score) classify(nint n) {
     ᒐdone: return (label, score);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object outerDefer1ˢ = (@string)"outer defer 1"u8;
-private static readonly object innerDeferˢ = (@string)"  inner defer"u8;
-private static readonly object outerDefer2ˢ = (@string)"outer defer 2"u8;
-
 internal static void nestedDeferScopes() {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => fmt.Println(ᴛ1), outerDefer1ˢ, ref ᒐ);
+        defer(() => fmt.Println("outer defer 1"), ref ᒐ);
         defer(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => fmt.Println(ᴛ1), innerDeferˢ, ref ᒐ);
+                defer(() => fmt.Println("  inner defer"), ref ᒐ);
                 fmt.Println("  closure body");
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        defer(ᴛ1 => fmt.Println(ᴛ1), outerDefer2ˢ, ref ᒐ);
+        defer(() => fmt.Println("outer defer 2"), ref ᒐ);
         fmt.Println("nested body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mixedDeferTotalˢ = (@string)"mixed defer, total ="u8;
-
 internal static nint mixedScopes() {
     GoFrame ᒐ = default;
     try {
         nint total = 0;
 
-        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), mixedDeferTotalˢ, total, ref ᒐ);
+        defer(ᴛ1 => fmt.Println("mixed defer, total =", ᴛ1), total, ref ᒐ);
 
         nint add(nint n) => n * 2;
         var addʗ1 = add;
@@ -136,14 +122,11 @@ internal static nint mixedScopes() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object guardedCleanupˢ = (@string)"guarded cleanup"u8;
-
 internal static @string /*msg*/ guarded(bool boom) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => fmt.Println(ᴛ1), guardedCleanupˢ, ref ᒐ);
+        defer(() => fmt.Println("guarded cleanup"), ref ᒐ);
         defer(() => {
             {
                 var r = recover(); if (r != nil) {

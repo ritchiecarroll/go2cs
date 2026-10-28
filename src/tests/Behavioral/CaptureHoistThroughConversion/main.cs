@@ -39,16 +39,16 @@ internal static Handler makeHandler(slice<@string> g) {
 internal static partial void Main() {
     var a = new @string[]{"a="}.slice();
     var aʗ1 = a;
-    goǃ(serve, new HandlerᴠIface(new Handler((nint i) => {
+    goǃ(ᴛ1 => serve(ᴛ1, 10), new HandlerᴠIface(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(aʗ1[0], i));
-    })), (nint)10);
+    })));
     fmt.Println(ᐸꟷ(@out));
 
     var b = new @string[]{"b="}.slice();
     var bʗ1 = b;
-    goǃ(run, new Handler((nint i) => {
+    goǃ(ᴛ1 => run(ᴛ1, 20), new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(bʗ1[0], i));
-    }), (nint)20);
+    }));
     fmt.Println(ᐸꟷ(@out));
 
     var hc = new channel<Handler>(1);
@@ -94,9 +94,9 @@ internal static partial void Main() {
         GoFrame ᒐ = default;
         try {
             var hʗ2 = hʗ1;
-            defer(run, new Handler((nint i) => {
+            defer(ᴛ1 => run(ᴛ1, 80), new Handler((nint i) => {
                 @out.ᐸꟷ(fmt.Sprint(hʗ2[0], i));
-            }), (nint)80, ref ᒐ);
+            }), ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -113,9 +113,9 @@ internal static partial void Main() {
 
     var j = new @string[]{"j="}.slice();
     var jʗ1 = j;
-    goǃ(runBare, (nint i) => {
+    goǃ(ᴛ1 => runBare(ᴛ1, 100), (nint i) => {
         @out.ᐸꟷ(fmt.Sprint(jʗ1[0], i));
-    }, (nint)100);
+    });
     fmt.Println(ᐸꟷ(@out));
 }
 

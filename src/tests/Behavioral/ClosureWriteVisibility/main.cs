@@ -105,7 +105,7 @@ internal static void probeE2() {
     try {
         ref var t = ref heap<Tally>(out var Ꮡt);
         t = new Tally(5, "s");
-        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), (@string)"E2:", t.total, ref ᒐ);
+        defer(ᴛ1 => fmt.Println("E2:", ᴛ1), t.total, ref ᒐ);
         t.total = 42;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -31,9 +31,6 @@ internal static void report(@string prefix, Tally tʗp, nint n) {
     fmt.Println(prefix, t.total, t.log);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string namedˢ = "named:"u8;
-
 internal static void Main() {
     ref var @base = ref heap<Tally>(out var Ꮡbase);
     @base = new Tally(total: 2, log: "d");
@@ -54,7 +51,7 @@ internal static void Main() {
     func(() => {
         GoFrame ᒐ = default;
         try {
-            defer(report, namedˢ, baseʗ2, (nint)5, ref ᒐ);
+            defer(ᴛ1 => report("named:", ᴛ1, 5), baseʗ2, ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

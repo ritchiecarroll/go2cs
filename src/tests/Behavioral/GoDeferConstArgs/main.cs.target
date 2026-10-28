@@ -96,70 +96,59 @@ internal static void @catch(@string tag) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object firstˢ = (@string)"First"u8;
-private static readonly @string squareˢ = "square:"u8;
-private static readonly @string helloˢ = "hello"u8;
-private static readonly object viaFuncValueˢ = (@string)"via func value"u8;
-
 internal static partial void spawned() {
-    goǃ(report, firstˢ);
+    goǃ(() => report("First"));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, (nint)7);
+    goǃ(() => report((nint)7));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, (rune)'r');
+    goǃ(() => report((rune)'r'));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, 2.5D);
+    goǃ(() => report(2.5D));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, (bool)true);
+    goǃ(() => report(true));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, Red);
+    goǃ(() => report(Red));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, big);
+    goǃ(() => report(big));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(report, (@string)greeting);
+    goǃ(() => report(greeting));
     fmt.Println(ᐸꟷ(results));
 
-    goǃ(worker, (nint)5);
+    goǃ(() => worker(5));
     fmt.Println(ᐸꟷ(results));
 
     nint n = 3;
-    goǃ(pair, squareˢ, n * n);
+    goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
     n = 100;
     fmt.Println(ᐸꟷ(results));
 
     var b = Ꮡ(new box(name: "b"));
     var bʗ1 = b;
-    goǃ(bʗ1.say, helloˢ, GoStack.Bounded);
+    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);
     fmt.Println(ᐸꟷ(results));
 
     var f = report;
     var fʗ1 = f;
-    goǃ(fʗ1, viaFuncValueˢ);
+    goǃ(fʗ1, (@string)"via func value");
     fmt.Println(ᐸꟷ(results));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string xWasˢ = "x was"u8;
-private static readonly object doneˢ = (@string)"done"u8;
-private static readonly @string midˢ = "mid"u8;
 
 internal static void deferred() {
     GoFrame ᒐ = default;
     try {
         nint x = 1;
-        defer(showPair, xWasˢ, x, ref ᒐ);
-        defer(show, doneˢ, ref ᒐ);
-        defer(show, Red, ref ᒐ);
-        defer(show, (rune)'d', ref ᒐ);
-        defer(trio, next(), midˢ, next(), ref ᒐ);
+        defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
+        defer(() => show("done"), ref ᒐ);
+        defer(() => show(Red), ref ᒐ);
+        defer(() => show((rune)'d'), ref ᒐ);
+        defer((ᴛ1, ᴛ2) => trio(ᴛ1, "mid", ᴛ2), next(), next(), ref ᒐ);
         x = 2;
         seq = 100;
     }
@@ -167,13 +156,10 @@ internal static void deferred() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string caughtˢ = "caught"u8;
-
 internal static void panicky() {
     GoFrame ᒐ = default;
     try {
-        defer(@catch, caughtˢ, ref ᒐ, recovers: true);
+        defer(() => @catch("caught"), ref ᒐ, recovers: true);
         throw panic("boom");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

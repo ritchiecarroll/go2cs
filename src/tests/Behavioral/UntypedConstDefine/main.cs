@@ -89,7 +89,7 @@ internal static void tightenGuards() {
         }
 
         const nint localDefer = 42;
-        defer(ᴛ1 => fmt.Println(ᴛ1), (nint)(localDefer), ref ᒐ);
+        defer(() => fmt.Println((nint)(localDefer)), ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

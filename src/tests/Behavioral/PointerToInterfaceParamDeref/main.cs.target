@@ -20,16 +20,13 @@ internal static void handle(@string label, ref error err) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string doitˢ = "doit"u8;
-
 internal static error /*err*/ doit() {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer((ᴛ1, ᴛ2) => handle(ᴛ1, ref ᴛ2.DerefOrNull()), doitˢ, Ꮡerr, ref ᒐ, recovers: true);
+        defer(ᴛ1 => handle("doit", ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         throw panic("boom");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -103,7 +103,7 @@ internal static error release(errno e) {
 internal static void useAndRelease() {
     GoFrame ᒐ = default;
     try {
-        defer(release, errAgain, ref ᒐ);
+        defer(() => release(errAgain), ref ᒐ);
         fmt.Println("using");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

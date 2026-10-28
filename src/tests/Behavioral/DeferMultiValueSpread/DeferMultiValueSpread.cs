@@ -133,14 +133,11 @@ internal static void deferLoopSpread() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string elevenˢ = "eleven"u8;
-
 internal static void deferControlPlain() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("deferControlPlain: enter");
-        defer(show, (nint)11, elevenˢ, ref ᒐ);
+        defer(() => show(11, "eleven"), ref ᒐ);
         fmt.Println("deferControlPlain: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
