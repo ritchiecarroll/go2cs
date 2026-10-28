@@ -40,7 +40,7 @@ internal static partial void Main() {
     var @out = new channel<nint>(workers);
 
     for (nint i = 1; i <= workers; i++) {
-        goǃ(produce, i, @out.WithDirection(GoChanDir.Send), GoStack.Bounded);
+        goǃ(produce, i, @out.AsSendOnly(), GoStack.Bounded);
     }
 
     nint sum = 0;

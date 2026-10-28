@@ -879,6 +879,7 @@
     <Project Path="tests/Behavioral/ParenthesizedTypeAssertion/ParenthesizedTypeAssertion.csproj" />
     <Project Path="tests/Behavioral/ParenTypeConversionCall/ParenTypeConversionCall.csproj" />
     <Project Path="tests/Behavioral/ParityOperatorPrecedence/ParityOperatorPrecedence.csproj" />
+    <Project Path="tests/Behavioral/ParitySmallFour/ParitySmallFour.csproj" />
     <Project Path="tests/Behavioral/PartialInstantiationAnonymousTypeArg/PartialInstantiationAnonymousTypeArg.csproj" />
     <Project Path="tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="tests/Behavioral/Phase5Breakpoint/Phase5Breakpoint.csproj" />

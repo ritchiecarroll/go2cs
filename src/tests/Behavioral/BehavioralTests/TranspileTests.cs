@@ -1663,6 +1663,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
 
     [TestMethod]
+    public void CheckParitySmallFour() => CheckTarget("ParitySmallFour");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]

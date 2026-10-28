@@ -161,7 +161,7 @@ internal static partial void modeIndependence() {
         var serverʗ1 = server;
         goǃ(() => {
             var drain = new slice<byte>(64);
-            while (ᐧ) {
+            for (;;) {
                 {
                     var (_, err) = serverʗ1.Read(drain); if (err != nil) {
                         return;

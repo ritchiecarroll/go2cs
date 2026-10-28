@@ -2375,7 +2375,7 @@ nothing narrowed. That is what keeps the change additive: only directional sites
 
 A NARROWING is carried too, though it has no construction to hook: `var s chan<- int = ch` makes a
 value of a new Go type out of one that already exists, so at var-init, assignment, call argument and
-return the converter re-stamps the copy — `ch.WithDirection(GoChanDir.Send)`, sharing the same core
+return the converter re-stamps the copy — `ch.AsSendOnly()` (or `ch.AsRecvOnly()`), golib's spelling of `ch.WithDirection(GoChanDir.Send)`, sharing the same core
 (`chanDirNarrowedValue`, `chanDirectionCargo.go`). It was first left out for want of a consumer; reflect's
 `TestMakeFuncInvalidReturnAssignments` measured one (Go refuses to widen a narrowed `<-chan int` back
 into a `chan int` result), and the `ReflectChanNarrowing` behavioral test guards all four positions.

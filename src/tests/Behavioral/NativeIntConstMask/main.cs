@@ -36,7 +36,7 @@ internal static void Main() {
     fmt.Println((uint64)align(0b11011));
     fmt.Println((uint64)fieldAddr(0x1000));
     uintptr addr = 1;
-    addr <<= (int)(47);
+    addr <<= 47;
     addr |= (uintptr)(0xABCD);
     fmt.Println((uint64)maskAddr(addr));
     fmt.Println((uint64)alignSmall(27));

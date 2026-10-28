@@ -7,7 +7,7 @@ partial class main_package {
 internal static nint compute(nint n) {
     nint total = 0;
     nint count = 0;
-    while (ᐧ) {
+    for (;;) {
         for (nint offΔ1 = 0; offΔ1 < n; offΔ1++) {
             total += offΔ1;
         }

@@ -42,7 +42,7 @@ internal static (any got, any outer) helperGetsNil() {
         defer(() => {
             outer = recover();
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
@@ -52,7 +52,7 @@ internal static (any got, any outer) helperGetsNil() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -184,7 +184,7 @@ internal static ж<guard> /*g*/ deferMethodValue() {
 internal static any deferMethodValueWithArgs() {
     var g = Ꮡ(new guard(nil));
     var gʗ1 = g;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             var gʗ2 = gʗ1;
@@ -193,7 +193,7 @@ internal static any deferMethodValueWithArgs() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     return (~g).got;
 }
 
@@ -204,7 +204,7 @@ internal static any /*outer*/ deferRecoverItself() {
         defer(() => {
             outer = recover();
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => recover(calledByDefer: false), ref ᒐ);
@@ -212,7 +212,7 @@ internal static any /*outer*/ deferRecoverItself() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -229,7 +229,7 @@ internal static (error inner, any outer) namedFunctionCalledNormally() {
         defer(() => {
             outer = recover();
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
@@ -239,7 +239,7 @@ internal static (error inner, any outer) namedFunctionCalledNormally() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

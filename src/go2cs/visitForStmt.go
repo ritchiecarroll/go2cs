@@ -127,11 +127,12 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			v.outputBuilder.WriteString(v.newline)
 		}
 
-		v.writeOutput("while (")
-
+		// Go's `for {` reads `for (;;)` (visual-parity train #27); a spilled condition is tested in the
+		// body's prefix, so its loop header is the same unconditional one.
 		if forStmt.Cond == nil || condSpilled {
-			v.outputBuilder.WriteString(TrueMarker)
+			v.writeOutput("for (;;")
 		} else {
+			v.writeOutput("while (")
 			v.outputBuilder.WriteString(cond)
 		}
 	} else {
@@ -255,10 +256,8 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		v.outputBuilder.WriteString("; ")
 
-		if forStmt.Cond == nil || condSpilled {
-			v.outputBuilder.WriteString(TrueMarker)
-			v.outputBuilder.WriteRune(' ')
-		} else {
+		// An absent (or spilled) condition is an empty clause, `for (init; ; post)`, as Go leaves it out.
+		if forStmt.Cond != nil && !condSpilled {
 			v.outputBuilder.WriteString(cond)
 		}
 

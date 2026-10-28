@@ -570,7 +570,7 @@ never closed, a receive or send on it blocks forever, and in a `select` with a `
 is simply not chosen — so every probe must *report* "not ready" rather than dereference the absent
 core: `IsClosed` is `false`, `Length` and `Capacity` are 0, and the non-blocking send and receive
 report not-ready.
-<!-- src/core/golib/channel.cs:1610 `public bool IsClosed => m_core is not null && m_core.Closed;`.
+<!-- src/core/golib/channel.cs:1624 `public bool IsClosed => m_core is not null && m_core.Closed;`.
 history: the pre-hchan channel null-checked its backing fields in SendIsReady / ReceiveIsReady / Receiving, but
 IsClosed did not, so asking whether a nil channel was closed threw a NullReferenceException; that crashed every
 child process os/exec launched through a background context and was the last blocker on math/rand's

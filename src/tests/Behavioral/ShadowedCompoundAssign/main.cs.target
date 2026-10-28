@@ -18,13 +18,13 @@ internal static void Main() {
     nint i = 50;
     _ = sum;
     _ = i;
-    nint total = ((Func<nint>)(() => {
+    nint total = func(nint () => {
         nint sumΔ1 = 0;
         for (nint iΔ1 = 1; iΔ1 <= 4; iΔ1++) {
             sumΔ1 += iΔ1;
         }
         return sumΔ1;
-    }))();
+    })();
     fmt.Println(total);
     fmt.Println(sum);
 

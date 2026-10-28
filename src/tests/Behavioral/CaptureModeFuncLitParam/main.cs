@@ -49,11 +49,11 @@ internal static void Main() {
     fmt.Println("assigned:", total, log);
     fmt.Println("caller copy untouched:", seed.total, seed.log);
 
-    var (total2, log2) = ((Func<Tally, (nint, @string)>)(tʗp => {
+    var (total2, log2) = func((nint, @string) (Tally tʗp) => {
         ref var t = ref heap(tʗp, out var Ꮡt);
         Ꮡt.Add(7);
         return (t.total, t.log);
-    }))(new Tally(total: 1, log: "i"));
+    })(new Tally(total: 1, log: "i"));
     fmt.Println("iife:", total2, log2);
 
     var @base = new Tally(total: 2, log: "d");

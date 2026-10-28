@@ -76,7 +76,7 @@ internal static iter.Seq<nint> panicSeq() {
 
 internal static iter.Seq<nint> panicCleanupSeq() {
     return (Func<nint, bool> yield) => {
-        while (ᐧ) {
+        for (;;) {
             if (!yield(55)) {
                 throw panic("cleanup boom");
             }
@@ -114,7 +114,7 @@ internal static iter.Seq<nint> doubleNext() {
 internal static void Main() {
     var (next, stop) = iter.Pull(count(3));
 
-    while (ᐧ) {
+    for (;;) {
         var (vΔ1, okΔ1) = next();
         fmt.Println("pull:", vΔ1, okΔ1);
 
@@ -132,7 +132,7 @@ internal static void Main() {
 
     var (next2, stop2) = iter.Pull2(squares(3));
 
-    while (ᐧ) {
+    for (;;) {
         var (k, v2, ok2) = next2();
         fmt.Println("pull2:", k, v2, ok2);
 

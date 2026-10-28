@@ -26,7 +26,7 @@ internal static void sum(slice<nint> s, channel<nint> c) {
 internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
-    while (ᐧ) {
+    for (;;) {
         var selᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
         var selᴛ2 = quit;
         switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
@@ -57,7 +57,7 @@ public static Action<Func<nint, bool>> All(this IntSlice s) {
 }
 
 internal static void generate(channel/*<-*/<nint> ch) {
-    for (nint i = 2; ᐧ ; i++) {
+    for (nint i = 2; ; i++) {
         ch.ᐸꟷ(i);
     }
 }
@@ -72,12 +72,12 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
 
 internal static partial void sieve() {
     var ch = new channel<nint>(0);
-    goǃ(generate, ch.WithDirection(GoChanDir.Send), GoStack.Bounded);
-    while (ᐧ) {
+    goǃ(generate, ch.AsSendOnly(), GoStack.Bounded);
+    for (;;) {
         nint prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(0);
-        goǃ(filter, ch.WithDirection(GoChanDir.Recv), ch1.WithDirection(GoChanDir.Send), prime, GoStack.Bounded);
+        goǃ(filter, ch.AsRecvOnly(), ch1.AsSendOnly(), prime, GoStack.Bounded);
         ch = ch1;
 
         if (prime > 40) {
@@ -188,7 +188,7 @@ internal static partial void Main() {
 
     var mychanl = new channel<@string>(0);
 
-    goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send), GoStack.Bounded);
+    goǃ(sendOnly, mychanl.AsSendOnly(), GoStack.Bounded);
 
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);

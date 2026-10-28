@@ -244,7 +244,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:60,66#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#b164fa +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:42#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:11-18#b54186 +
-  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#416bab ·
+  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,39#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:75#3d4175 ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:11,32,74,77#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:56#64aa80 + src/core/reflect/type.cs:1258#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
@@ -440,7 +440,7 @@ code, and the section that explains it in full.
 | `/*<-*/` | A channel's direction, kept as a comment: `/*<-*/channel<T>` is `<-chan T`, `channel/*<-*/<T>` is `chan<- T` | `/*<-*/channel<nint> src` | [Channels and `select`](#channels-and-select) |
 | `goǃ` | The `go` statement; the `ǃ` keeps the method's name apart from `go`, the namespace every converted file lives in | `goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` | [Goroutines](#goroutines) |
 | `ꟷ` | golib's `const bool ꟷ = false`. As an extra argument it picks the overload that returns `(value, ok)`, for a comma-ok receive or map lookup; its value is not used | `var (v, ok) = ᐸꟷ(d, ꟷ);`, `var (_, before) = seen[memo, ꟷ];` | [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
-| `ᐧ` | golib's `const bool ᐧ = true`. It is the `true` of a tagless switch or endless loop, and the extra argument of a comma-ok type assertion | `switch (ᐧ)`, `while (ᐧ)`, `err._<ж<PathError>>(ᐧ)` | [Expression Switch](#expression-switch-statements); [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
+| `ᐧ` | golib's `const bool ᐧ = true`. It is the `true` of a tagless switch, and the extra argument of a comma-ok type assertion | `switch (ᐧ)`, `err._<ж<PathError>>(ᐧ)` | [Expression Switch](#expression-switch-statements); [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
 | `._<T>()` | Type assertion `x.(T)`; with `ᐧ`, its comma-ok form | `i._<@string>()`, `err._<ж<PathError>>(ᐧ)` | [Empty Interface (`any`)](#empty-interface-any) |
 | `ᒐ` | The `GoFrame` local that runs a function's deferred calls; names that start with `ᒐ`, such as the label `ᒐdone`, belong to the same frame | `GoFrame ᒐ = default;`, `ᒐdone: return (@out, label);` | [Defer / Panic / Recover](#defer--panic--recover) |
 | `break_L`, `continue_L` | `goto` targets for Go's labeled `break L` and `continue L` | `goto break_scan;`, `continue_scan:;` | [Loops, Range and Labels](#loops-range-and-labels) |
@@ -1198,8 +1198,9 @@ internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
 `slice<@string>` is golib's form of Go's `[]string` ([Slices and Arrays](#slices-and-arrays)).
 
 **A func literal called in an initializer counts the same way.** `computed` calls a func literal whose
-body reads `base`, declared in `main.go`, so `computed` moves. The literal becomes a C# lambda, cast to
-`Func<nint>` and called at once ([Function Values and Closures](#function-values-and-closures)).
+body reads `base`, declared in `main.go`, so `computed` moves. The literal becomes a C# lambda that states its
+result type, passed to golib's `func` and called at once: `func(nint () => {…})()` reads like Go's
+`func() int {…}()` ([Function Values and Closures](#function-values-and-closures)).
 
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/entries.go:21 -->
 ```go
@@ -1208,9 +1209,9 @@ var computed = func() int { return base * 2 }()
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/entries.cs.target:14-17 -->
 ```csharp
 internal static nint computed;
-internal static void initᴛcomputed() { computed = ((Func<nint>)(() => {
+internal static void initᴛcomputed() { computed = func(nint () => {
     return @base * 2;
-}))(); }
+})(); }
 ```
 
 **A string constant counts as a dependency.** Most Go constants have no initialization order in C#
@@ -6952,12 +6953,12 @@ reader: a loop variable is sometimes copied so that each iteration gets its own,
 `continue` becomes a `goto`. The small glyphs in these names (`ᐧ`, `Δ`, `ᴛ`, `ᴷ`, `Ꮡ`) are explained where
 they first appear here, and all of them are listed in [Reading Converted Code](#reading-converted-code-names-and-glyphs).
 
-<!-- Inline forms from src/tests/Behavioral/ForVariants/ForVariants.go:12#bc28dc, :22#cd38ed, :78#c027f4 -> ForVariants.cs.target:16#ca4701, :24#baeefa, :80#3e658c -->
-<!-- The constant matters for reachability: golib builtin.cs documents that an infinite loop relies on ᐧ folding to avoid CS0161 (not all code paths return a value). -->
+<!-- Inline forms from src/tests/Behavioral/ForVariants/ForVariants.go:12#bc28dc, :22#cd38ed, :78#c027f4 -> ForVariants.cs.target:16#ca4701, :24#baeefa, :80#810daf -->
+<!-- Reachability: C# treats a loop with no condition as never ending, so `for (;;)` needs no trailing return (no CS0161, not all code paths return a value). Before visual-parity seat #27 (2026-10-28) the loop read `while (ᐧ)`, which C# read the same way only because golib's ᐧ is a const (builtin.cs). -->
 **A `for` keeps its shape.** A three-clause loop stays a C# `for`. A loop with only a condition,
-`for i < 10 {`, becomes `while (i < 10) {`. An endless `for {` becomes `while (ᐧ) {`, where `ᐧ` is the
-constant `true` from [golib](#the-golib-runtime-library), go2cs's runtime library. Because it is a
-constant, C# knows the loop never ends, so the function needs no trailing `return`, just as in Go.
+`for i < 10 {`, becomes `while (i < 10) {`. An endless `for {` becomes `for (;;) {`, and a three-clause
+loop without a condition keeps the empty clause, `for i := 0; ; i++ {` as `for (nint i = 0; ; i++) {`. A loop
+with no condition never ends as far as C# knows, so the function needs no trailing `return`, just as in Go.
 
 This example shows two things: the endless loop, and two loop variables that the converter renames.
 
@@ -6987,7 +6988,7 @@ func compute(n int) int {
 internal static nint compute(nint n) {
     nint total = 0;
     nint count = 0;
-    while (ᐧ) {
+    for (;;) {
         for (nint offΔ1 = 0; offΔ1 < n; offΔ1++) {
             total += offΔ1;
         }
@@ -7101,8 +7102,8 @@ foreach (var (iᴛ1, vᴛ1) in nums) {
 `new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), Go's `int` becomes `nint`, and
 `default!` is Go's zero value ([Nil and Zero Values](#nil-and-zero-values)).
 
-<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:413#c54fd4);
-the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:429#8ec6f5; golden
+<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:412#c54fd4);
+the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:428#8ec6f5; golden
 src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:56-59#b74efc, where the body only takes &i). -->
 **Loop variables are per-iteration.** Go gives each iteration of `for i := …` its own `i`. A C# `for`
 shares one variable across all iterations, so closures made in the loop would all see its last value.
@@ -8617,7 +8618,7 @@ go produce(i, out)
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/main.cs.target:43 -->
 ```csharp
-goǃ(produce, i, @out.WithDirection(GoChanDir.Send), GoStack.Bounded);
+goǃ(produce, i, @out.AsSendOnly(), GoStack.Bounded);
 ```
 
 Anything the proof cannot follow keeps the full stack, unmarked. That includes a call through an interface or a
@@ -8770,7 +8771,9 @@ internal static void sendOnly(channel/*<-*/<@string> s) {
 ```
 
 **Passing a channel where a directional one is expected keeps the direction in the value.** The call
-wraps the argument in `WithDirection`, so the channel value knows its direction, as a Go value does.
+re-stamps the argument with `AsSendOnly()` (`AsRecvOnly()` for a receive-only parameter), so the channel
+value knows its direction, as a Go value does. Go converts implicitly; C# needs the call because both sides
+are `channel<T>`.
 `goǃ` is the [`go` statement](#goroutines). Go comments are dropped unless the converter runs with
 `-comments` ([Comments](#comments)), so the Go comment here has no C# line:
 
@@ -8785,7 +8788,7 @@ go sendOnly(mychanl)
 ```csharp
 var mychanl = new channel<@string>(0);
 
-goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send), GoStack.Bounded);
+goǃ(sendOnly, mychanl.AsSendOnly(), GoStack.Bounded);
 ```
 
 **`range` over a channel becomes `foreach`.** The loop receives each value and ends when the channel
@@ -8830,8 +8833,7 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
    reversed. For the chosen case the guard is always true. It exists so the received value can be handed
    to that case alone; `out _` discards it.
 
-In this example, `while (ᐧ)` is Go's endless `for`, where `ᐧ` is golib's constant `true`
-([Loops](#loops-range-and-labels)). `"quit"` stays a plain C# literal: `fmt.Println` takes Go's `any`, so
+In this example, `for (;;)` is Go's endless `for` ([Loops](#loops-range-and-labels)). `"quit"` stays a plain C# literal: `fmt.Println` takes Go's `any`, so
 [go2cs-gen](#source-generators) intercepts the call and passes it as a boxed Go string ([Empty Interface](#empty-interface-any)).
 The closing `}}` ends the last case and the `switch` together:
 
@@ -8855,7 +8857,7 @@ func fibonacci(f, quit chan int) {
 internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
-    while (ᐧ) {
+    for (;;) {
         var selᴛ1 = f.ᐸꟷ(x, ꓸꓸꓸ);
         var selᴛ2 = quit;
         switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
@@ -11191,7 +11193,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3835-3856#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3843-3864#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.

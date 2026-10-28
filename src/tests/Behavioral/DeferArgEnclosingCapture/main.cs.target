@@ -39,7 +39,7 @@ internal static void Main() {
     @base = new Tally(total: 2, log: "d");
 
     var baseʗ1 = @base;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer((Tally t) => {
@@ -48,29 +48,29 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     var baseʗ2 = @base;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(report, namedˢ, baseʗ2, (nint)5, ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     var done = new channel<bool>(0);
 
     var baseʗ3 = @base;
     var doneʗ1 = done;
-    ((Action)([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    func([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var doneʗ2 = doneʗ1;
         goǃ((Tally t) => {
             report("goroutine:", t, 7);
             doneʗ2.ᐸꟷ(true);
         }, baseʗ3);
-    }))();
+    })();
 
     ᐸꟷ(done);
 

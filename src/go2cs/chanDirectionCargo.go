@@ -283,5 +283,14 @@ func (v *Visitor) chanDirNarrowedValue(dst, src types.Type, rendered string) str
 		return ""
 	}
 
+	// golib's `AsRecvOnly()`/`AsSendOnly()` spell the two narrowings (visual-parity train #27); the bare
+	// `RecvOnly`/`SendOnly` names are taken by channel<T>'s static NIL directional channels.
+	switch dstDir {
+	case "GoChanDir.Recv":
+		return rendered + ".AsRecvOnly()"
+	case "GoChanDir.Send":
+		return rendered + ".AsSendOnly()"
+	}
+
 	return fmt.Sprintf("%s.WithDirection(%s)", rendered, dstDir)
 }

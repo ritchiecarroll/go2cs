@@ -77,7 +77,7 @@ break_scan:;
     fmt.Println("i before thread and", i, "x before thread", x);
     goǃ((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => fmt.Println(ᴛ1, ᴛ2, ᴛ3, ᴛ4), iFromThreadAndˢ, i, xFromThreadˢ, x);
 
-    while (ᐧ) {
+    for (;;) {
         i++;
         x++;
         f(ref i);

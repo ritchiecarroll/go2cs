@@ -13,13 +13,13 @@ internal static partial @string here() {
 
 internal static @string direct = here();
 
-internal static @string viaClosure = ((Func<@string>)([MethodImpl(MethodImplOptions.NoInlining)] () => {
+internal static @string viaClosure = func([MethodImpl(MethodImplOptions.NoInlining)] @string () => {
     return here();
-}))();
+})();
 
-internal static @string viaClosure2 = ((Func<@string>)([MethodImpl(MethodImplOptions.NoInlining)] () => {
+internal static @string viaClosure2 = func([MethodImpl(MethodImplOptions.NoInlining)] @string () => {
     return here();
-}))();
+})();
 
 [GoInit] internal static void initΔ1() {
     fmt.Println("main.go init 1:", here());

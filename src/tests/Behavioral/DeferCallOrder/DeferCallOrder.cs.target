@@ -34,11 +34,11 @@ internal static partial void Main() {
         defer(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ, ref ᒐ);
 
         var msgs = new channel<@string>(2);
-        var cancel = makeStop("stopped", msgs.WithDirection(GoChanDir.Send));
+        var cancel = makeStop("stopped", msgs.AsSendOnly());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         var msgsʗ1 = msgs;
-        goǃ(() => makeStop("go-stopped", msgsʗ1.WithDirection(GoChanDir.Send))());
+        goǃ(() => makeStop("go-stopped", msgsʗ1.AsSendOnly())());
         fmt.Println(ᐸꟷ(msgs));
 
         var drained = new channel<nint>(1);

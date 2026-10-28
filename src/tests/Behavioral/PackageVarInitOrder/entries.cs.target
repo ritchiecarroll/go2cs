@@ -12,9 +12,9 @@ internal static @string stdinName;
 internal static void initᴛstdinName() { stdinName = describe(0); }
 
 internal static nint computed;
-internal static void initᴛcomputed() { computed = ((Func<nint>)(() => {
+internal static void initᴛcomputed() { computed = func(nint () => {
     return @base * 2;
-}))(); }
+})(); }
 
 internal static ж<table> sizedTable = newTable(tableSize);
 

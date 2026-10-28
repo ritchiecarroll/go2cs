@@ -15,22 +15,22 @@ internal static nint call(this handlerFunc h, @string s) {
 }
 
 internal static void Main() {
-    ((Action)(() => {
+    func(() => {
         fmt.Println("paren iife");
-    }))();
+    })();
 
-    nint sum = ((Func<nint, nint, nint>)((a, b) => {
+    nint sum = func(nint (nint a, nint b) => {
         return a + b;
-    }))(3, 4);
+    })(3, 4);
     fmt.Println(sum);
 
-    ((Action)(() => {
+    func(() => {
         fmt.Println("bare iife");
-    }))();
+    })();
 
-    nint product = ((Func<nint, nint, nint>)((a, b) => {
+    nint product = func(nint (nint a, nint b) => {
         return a * b;
-    }))(3, 4);
+    })(3, 4);
     fmt.Println(product);
 
     var h = default(handlerFunc)!;

@@ -18,11 +18,11 @@ internal static reflectꓸChanDir takesSend(channel/*<-*/<nint> c) {
 }
 
 internal static /*<-*/channel<nint> returnsRecv() {
-    return new channel<nint>(0).WithDirection(GoChanDir.Recv);
+    return new channel<nint>(0).AsRecvOnly();
 }
 
 internal static channel/*<-*/<nint> returnsSend() {
-    return new channel<nint>(0).WithDirection(GoChanDir.Send);
+    return new channel<nint>(0).AsSendOnly();
 }
 
 internal static channel<nint> returnsBoth() {
@@ -30,18 +30,18 @@ internal static channel<nint> returnsBoth() {
 }
 
 internal static void Main() {
-    /*<-*/channel<nint> vr = new channel<nint>(0).WithDirection(GoChanDir.Recv);
-    channel/*<-*/<nint> vs = new channel<nint>(0).WithDirection(GoChanDir.Send);
+    /*<-*/channel<nint> vr = new channel<nint>(0).AsRecvOnly();
+    channel/*<-*/<nint> vs = new channel<nint>(0).AsSendOnly();
     fmt.Println("var-init recv:", dirOf(vr), "| send:", dirOf(vs));
 
     /*<-*/channel<nint> ar = /*<-*/channel<nint>.RecvOnly;
     channel/*<-*/<nint> @as = channel/*<-*/<nint>.SendOnly;
     var bidi = new channel<nint>(0);
-    ar = bidi.WithDirection(GoChanDir.Recv);
-    @as = bidi.WithDirection(GoChanDir.Send);
+    ar = bidi.AsRecvOnly();
+    @as = bidi.AsSendOnly();
     fmt.Println("assign recv:", dirOf(ar), "| send:", dirOf(@as));
 
-    fmt.Println("arg recv:", takesRecv(new channel<nint>(0).WithDirection(GoChanDir.Recv)), "| send:", takesSend(new channel<nint>(0).WithDirection(GoChanDir.Send)));
+    fmt.Println("arg recv:", takesRecv(new channel<nint>(0).AsRecvOnly()), "| send:", takesSend(new channel<nint>(0).AsSendOnly()));
 
     fmt.Println("return recv:", dirOf(returnsRecv()), "| send:", dirOf(returnsSend()));
 
@@ -52,7 +52,7 @@ internal static void Main() {
     fmt.Println("control recv<-recv:", dirOf(again));
 
     var src = new channel<nint>(1);
-    /*<-*/channel<nint> narrowed = src.WithDirection(GoChanDir.Recv);
+    /*<-*/channel<nint> narrowed = src.AsRecvOnly();
     src.ᐸꟷ(99);
     var (got, ok) = reflect.ValueOf(narrowed).Recv();
     fmt.Println("identity: same channel ->", got.Int(), ok, "| len now:", reflect.ValueOf(src).Len());
