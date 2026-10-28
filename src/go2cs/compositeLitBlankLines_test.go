@@ -97,13 +97,13 @@ func TestCompositeLitBlankLinesKeptUnderComments(t *testing.T) {
 		{"a: 1,", false, "no blank line after a nested literal's opening parenthesis"},
 		{"b: 2", true, "a blank line between two fields of a nested literal"},
 		{"// the list", true, "a blank line before a comment that leads a field"},
-		{"list: new nint[]{5, 6}", false, "a leading comment stays on its field"},
+		{"list: slice<nint>([5, 6])", false, "a leading comment stays on its field"},
 		{`["one"] = 1,`, false, "no blank line after the opening brace"},
 		{"// two follows", false, "no blank line in Go"},
 		{`["two"] = 2,`, true, "a blank line between a comment and the element after it"},
 		{`["three"] = 3`, false, "no blank line in Go"},
 		{"// ends the first row", false, "no blank line in Go"},
-		{"new nint[]{9}.slice()", false, "a comment trailing a nested literal's last element adds no blank line"},
+		{"slice<nint>([9])", false, "a comment trailing a nested literal's last element adds no blank line"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)
@@ -124,10 +124,10 @@ func TestCompositeLitBlankLinesKeptWithoutComments(t *testing.T) {
 		{"44", false, "no blank line in Go"},
 		{"inner: new pair(", true, "a blank line between two keyed fields"},
 		{"b: 2", true, "a blank line between two fields of a nested literal"},
-		{"list: new nint[]{5, 6}", true, "a blank line above an omitted comment is still a blank line"},
+		{"list: slice<nint>([5, 6])", true, "a blank line above an omitted comment is still a blank line"},
 		{`["two"] = 2,`, true, "a blank line after an omitted comment"},
 		{`["three"] = 3`, false, "no blank line in Go"},
-		{"new nint[]{9}.slice()", false, "no blank line in Go"},
+		{"slice<nint>([9])", false, "no blank line in Go"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)

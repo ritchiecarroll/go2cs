@@ -148,7 +148,7 @@ func TestLiteralInCallKeepsItsComments(t *testing.T) {
 
 	loop := lineContaining(t, lines, "foreach (var (_, n) in")
 
-	if !strings.Contains(lines[loop], "{1, 2}.slice()) {") {
+	if !strings.Contains(lines[loop], "slice<nint>([1, 2])) {") {
 		t.Errorf("the literal left its line: %q", lines[loop])
 	}
 
