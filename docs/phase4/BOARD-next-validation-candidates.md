@@ -30137,14 +30137,15 @@ its marker test read `[module: GoManualConversion]` and that file spells `[modul
 test sibling `-stdlib` does not emit (-1 .cs.auto site and file). 870 − 1 + 28 = 897 on linux, and the same
 arithmetic holds on windows and darwin.
 
-**Goldens.** CNR on linux moved 122 emitted files in 121 projects, every changed line Z1, beside the three held
-drift files (MulticastGroupJoin, re-baselined in #20 by COORD's ruling, and the two `global using syscall…`
-package_info.cs lines, a host-dependent emission COORD routes as a finding). The final commit re-baselines 121
-goldens (each byte-equal, CR-stripped, to its fresh transpile) plus TypeAssertionSource/mid/mid.cs, which has
-no golden; pcensus reads that commit as 607 Z1 pairs, 0 refused. NOT REACHABLE HERE: three windows-exclusive
-goldens keep 7 `new T(nil)` literals until a windows re-baseline: SystemCertVerify (2), PipeSharedFileObject (2),
-FindFirstFileData (3). The guard's golden carries four `default!` compares on three lines that #20 moves;
-whichever of the two seats lands second re-mints them.
+**Goldens (rebased onto `a4711608e1`, after #20).** CNR on linux moved 123 emitted files in 122 projects, beside
+the two held `package_info.cs` drift files (the `global using syscall…` lines, a host-dependent emission COORD
+routes as a finding): the 122 files from before the rebase, and the guard's `main.cs`, whose committed form still
+carried the four `default!` compares (three lines) that #20 moves. The final commit re-mints 122 goldens with
+`UpdateTestTargets --createTargetFiles --only` on linux (each byte-equal, CR-stripped, to its fresh transpile), plus
+the guard's `main.cs` and TypeAssertionSource/mid/mid.cs, which has no golden. pcensus built from this tree reads
+that commit as 607 Z1 pairs and 6 D1 pairs (the guard's three lines, in `main.cs` and its golden), 0 refused; the
+607 equal the pre-rebase commit's. NOT REACHABLE HERE: three windows-exclusive goldens keep 7 `new T(nil)` literals
+until a windows re-baseline: SystemCertVerify (2), PipeSharedFileObject (2), FindFirstFileData (3).
 
 **Docs.** struct-types.md has the rule, with samples cited from the guard; ConversionStrategies.md's
 explanations of `new T(nil)` (twelve places) and the Reference's interfaces, slices-and-arrays and
