@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -26,7 +27,7 @@ internal static byte retByte() {
     return (byte)'z';
 }
 
-internal static void Main() {
+internal static partial void Main() {
     var bsᴷ = new stackAppend<byte>();
 
     fmt.Println((rune)'a');
@@ -94,6 +95,52 @@ internal static void Main() {
     var ch = new channel<rune>(1);
     ch.ᐸꟷ('s');
     fmt.Println(ᐸꟷ(ch));
+
+    var shrink = (rune rΔ1) => (rune)'a';
+    var pair = () => ((rune)'b', true);
+    var wide = () => (uint16)'u';
+    var widest = () => (nint)'w';
+    var small = () => (byte)'z';
+    fmt.Printf("%T %v\n"u8, (shrink).OrTypedNilFunc(), shrink(1));
+    var (pr, pok) = pair();
+    fmt.Printf("%T %v %v\n"u8, (pair).OrTypedNilFunc(), pr, pok);
+    fmt.Printf("%T %v %T %v %T %v\n"u8, (wide).OrTypedNilFunc(), wide(), (widest).OrTypedNilFunc(), widest(), (small).OrTypedNilFunc(), small());
+    rune inferred = (rune)'v';
+    fmt.Printf("%T %v %T %v\n"u8, inferred, inferred, ident((rune)'i'), ident((rune)'i'));
+    var got = apply(rune () => (rune)'g');
+    fmt.Printf("%T %v\n"u8, got, got);
+    uint16 tx = default;
+    uint16 ty = default;
+    (tx, ty) = ('x', 'y');
+    fmt.Printf("%T %v %v\n"u8, tx, tx, ty);
+
+    var tm = new map<@string, rune>{};
+    (tm["a"], tm["b"]) = ('a', 'b');
+    var tw = new uint16[]{0, 0}.slice();
+    (tw[0], tw[1]) = ('x', 'y');
+    var sel = new channel<rune>(1);
+    var selᴛ1 = sel.ᐸꟷ('s', ꓸꓸꓸ);
+    switch (trySelect(selᴛ1)) {
+    case 0: {
+        break;
+    }
+    default: {
+        break;
+    }}
+    var done = new channel<rune>(0);
+    var doneʗ1 = done;
+    goǃ((rune rΔ2) => {
+        doneʗ1.ᐸꟷ(rΔ2);
+    }, (rune)'g', GoStack.Bounded);
+    fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
+}
+
+internal static T ident<T>(T v) {
+    return v;
+}
+
+internal static T apply<T>(Func<T> f) {
+    return f();
 }
 
 } // end main_package

@@ -8,8 +8,8 @@
 
 // Guards the forms of a rune literal (markRuneLiteralForms): a bare C# char where the slot fixes a type C#
 // reaches from char implicitly, one cast spelled as the target for a byte, int8 or int16 slot, and `(rune)'x'`
-// kept for every slot where C# would infer, box or overload on a char. Each keep arm has its own function, so a
-// failure names the arm.
+// kept for every slot where C# would infer, box or overload on a char, a func literal's return among them (its
+// lambda infers its type from the body). Each keep arm has its own function, so a failure names the arm.
 
 package main
 
@@ -67,6 +67,12 @@ func keepNamed() letter      { var l letter = 'k'; return l }
 func keepAstral() rune       { var r rune = '\U0001F600'; return r }
 func keepConstExpr() rune    { var r rune = 'a' + 1; return r }
 func keepAnyCompare(a any) bool { return a == 'k' }
+func keepVarInfer() rune     { var v = 'v'; return v }
+
+func lambdaReturn() func(rune) rune { shrink := func(r rune) rune { return 'a' }; return shrink }
+func lambdaPair() func() (rune, bool) { pair := func() (rune, bool) { return 'b', true }; return pair }
+func lambdaWide() func() uint16 { wide := func() uint16 { return 'u' }; return wide }
+func lambdaByte() func() byte   { small := func() byte { return 'z' }; return small }
 
 func main() {
 	fmt.Println(compare('a', 'b'), arith('7', 1), caseRune('a'), elements(), argument(), untyped)
@@ -75,7 +81,9 @@ func main() {
 	fmt.Println(conversion())
 	fmt.Println(narrowAssign(), narrowInt8(), narrowCase('p'), narrowAppend(), narrowReturn())
 	fmt.Println(keepInfer(), keepBoxed(), keepAnyVar(), keepBuiltin('a'), keepGeneric(), keepVariadic(), keepNamed(),
-		keepAstral(), keepConstExpr(), keepAnyCompare('k'), keepInferred())
+		keepAstral(), keepConstExpr(), keepAnyCompare('k'), keepInferred(), keepVarInfer())
+	fmt.Println(lambdaReturn()(0), lambdaWide()(), lambdaByte()())
+	fmt.Println(lambdaPair()())
 }
 `)
 
@@ -108,6 +116,12 @@ func main() {
 		{"keepNamed(", "(rune)'k'"},
 		{"keepAstral(", "(rune)0x1F600"},
 		{"keepAnyCompare(", "(rune)'k'"},
+		{"keepVarInfer(", "(rune)'v'"},
+		// A func literal's return decides its lambda's inferred type: never the bare char.
+		{"lambdaReturn(", "=> (rune)'a'"},
+		{"lambdaPair(", "((rune)'b', true)"},
+		{"lambdaWide(", "=> (uint16)'u'"},
+		{"lambdaByte(", "=> (byte)'z'"},
 	} {
 		if body := funcBody(t, cs, want.fn); !strings.Contains(body, want.form) {
 			t.Errorf("%s does not render its rune literal as %q:\n%s", want.fn, want.form, body)

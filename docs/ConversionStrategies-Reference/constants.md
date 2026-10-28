@@ -354,7 +354,7 @@ Bare, in `rune` slots:
 	digit := byte('7')
 	fmt.Println(digit-'0', int(digit-'0'))
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:67-78 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:68-79 -->
 ```csharp
     fmt.Println(takesRune('y'), retRune());
     if (r == 'a' && r < 'z') {
@@ -387,7 +387,7 @@ Cast to the target, in `byte`, `int8` and `int16` slots:
 	var i8 int8 = 'A'
 	var i16 int16 = 'B'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:46-59 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:47-60 -->
 ```csharp
     byte b = (byte)'q';
     switch (b) {
@@ -417,7 +417,7 @@ Kept, where C# would box or infer a `char`:
 	// Inferred locals stay int32.
 	r := 'a'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:32-37 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:33-38 -->
 ```csharp
     fmt.Println((rune)'a');
     fmt.Printf("%T %v\n"u8, (rune)'a', (rune)'a');

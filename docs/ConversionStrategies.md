@@ -1933,7 +1933,7 @@ C# would keep the `char` as its own type, as with `var` or a value passed as `an
 	fmt.Println(takesRune('y'), retRune())
 	if r == 'a' && r < 'z' {
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:37-39 and :46 and :67-68 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:38-40 and :47 and :68-69 -->
 ```csharp
     var r = (rune)'a';
     fmt.Printf("%T %v\n"u8, r, r);

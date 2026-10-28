@@ -91,4 +91,41 @@ func main() {
 	ch := make(chan rune, 1)
 	ch <- 's'
 	fmt.Println(<-ch)
+
+	// Natural-type positions: the literal decides the type C# infers, so it keeps a cast. A func
+	// literal's return types its lambda; an inferred local and a generic argument type themselves.
+	shrink := func(r rune) rune { return 'a' }
+	pair := func() (rune, bool) { return 'b', true }
+	wide := func() uint16 { return 'u' }
+	widest := func() int { return 'w' }
+	small := func() byte { return 'z' }
+	fmt.Printf("%T %v\n", shrink, shrink(1))
+	pr, pok := pair()
+	fmt.Printf("%T %v %v\n", pair, pr, pok)
+	fmt.Printf("%T %v %T %v %T %v\n", wide, wide(), widest, widest(), small, small())
+	var inferred = 'v'
+	fmt.Printf("%T %v %T %v\n", inferred, inferred, ident('i'), ident('i'))
+	got := apply(func() rune { return 'g' })
+	fmt.Printf("%T %v\n", got, got)
+	var tx, ty uint16
+	tx, ty = 'x', 'y'
+	fmt.Printf("%T %v %v\n", tx, tx, ty)
+
+	// A tuple assignment, a select send and a goroutine's argument.
+	tm := map[string]rune{}
+	tm["a"], tm["b"] = 'a', 'b'
+	tw := []uint16{0, 0}
+	tw[0], tw[1] = 'x', 'y'
+	sel := make(chan rune, 1)
+	select {
+	case sel <- 's':
+	default:
+	}
+	done := make(chan rune)
+	go func(r rune) { done <- r }('g')
+	fmt.Println(tm["a"], tm["b"], tw, <-sel, <-done)
 }
+
+func ident[T any](v T) T { return v }
+
+func apply[T any](f func() T) T { return f() }
