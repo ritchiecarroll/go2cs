@@ -8,7 +8,7 @@ partial class main_package {
 internal static nint f(nint x) {
     if (x >= 2) {
         nint zΔ1 = default!;
-        if (x > 5){
+        if (x > 5) {
             zΔ1 = 100;
         } else {
             zΔ1 = 200;

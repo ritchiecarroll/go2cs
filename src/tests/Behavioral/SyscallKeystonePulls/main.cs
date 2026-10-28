@@ -13,7 +13,7 @@ partial class main_package {
 
 internal static void Main() {
     var (p, err) = exec.LookPath("go");
-    if (err != default!){
+    if (err != default!) {
         fmt.Println("LookPath(go): error:", err);
     } else {
         fmt.Println("LookPath(go):", strings.TrimSuffix(filepath.Base(p), ".exe"), "absolute:", filepath.IsAbs(p));

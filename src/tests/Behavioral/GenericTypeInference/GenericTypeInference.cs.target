@@ -231,7 +231,7 @@ internal static (nint, bool) bsearchLike<S, E>(S s, E v)
     nint j = n;
     while (i < j) {
         nint h = i + ((j - i) >> 1);
-        if (s[h] < v){
+        if (s[h] < v) {
             i = h + 1;
         } else {
             j = h;

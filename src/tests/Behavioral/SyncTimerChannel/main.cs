@@ -99,7 +99,7 @@ internal static void Main() {
         nint stale = 0;
         foreach (var (_, t) in timers) {
             bool was = default!;
-            if (reset){
+            if (reset) {
                 was = t.Reset(time.ΔHour);
             } else {
                 was = t.Stop();

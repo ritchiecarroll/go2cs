@@ -19,7 +19,7 @@ internal static void Main() {
 
     foreach (var (_, name) in new @string[]{"jpeglike", "pnglike", "giflike"}.slice()) {
         {
-            var (describe, ok) = registry.Lookup(name); if (ok){
+            var (describe, ok) = registry.Lookup(name); if (ok) {
                 fmt.Println("found:", name, "=>", describe);
             } else {
                 fmt.Println("missing:", name);

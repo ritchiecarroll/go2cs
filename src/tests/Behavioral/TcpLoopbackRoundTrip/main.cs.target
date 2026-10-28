@@ -252,7 +252,7 @@ internal static void Main() {
     roundTrip("ipv4", "tcp", "127.0.0.1:0");
 
     {
-        var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == default!){
+        var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == default!) {
             probe.Close();
             fmt.Println("ipv6: available=true");
             roundTrip("ipv6", "tcp", "[::1]:0");

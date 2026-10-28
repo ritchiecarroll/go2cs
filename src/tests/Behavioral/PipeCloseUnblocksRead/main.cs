@@ -19,7 +19,7 @@ internal static partial void Main() {
     goǃ(() => {
         ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
         var (_, rerr) = rʗ1.Read(buf[..]);
-        if (rerr != default!){
+        if (rerr != default!) {
             doneʗ1.ᐸꟷ(rerr.Error());
         } else {
             doneʗ1.ᐸꟷ("read returned no error");

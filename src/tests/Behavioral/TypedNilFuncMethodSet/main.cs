@@ -61,7 +61,7 @@ internal static void Main() {
     any y = (g).OrTypedNilFunc();
 
     {
-        var (gg, okΔ1) = y._<Getter>(ᐧ); if (okΔ1){
+        var (gg, okΔ1) = y._<Getter>(ᐧ); if (okΔ1) {
             fmt.Println("getter  ", gg.Get());
         } else {
             fmt.Println("getter   miss");

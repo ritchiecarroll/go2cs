@@ -68,7 +68,7 @@ internal static void Main() {
 
         (var handle, err) = os.OpenFile(@file, (nint)(os.O_APPEND | os.O_WRONLY), 420);
 
-        if (err == default!){
+        if (err == default!) {
             var (_, werr) = handle.WriteString("!");
             var cerr = handle.Close();
             fmt.Println("append:", werr == default!, cerr == default!);

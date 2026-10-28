@@ -40,7 +40,7 @@ internal static void Main() {
 
     foreach (var (_, it) in items) {
         {
-            var (t, ok) = it._<Tagger>(ᐧ); if (ok){
+            var (t, ok) = it._<Tagger>(ᐧ); if (ok) {
                 fmt.Println(t.Describe(), t.Tag());
             } else {
                 fmt.Println("not a Tagger");

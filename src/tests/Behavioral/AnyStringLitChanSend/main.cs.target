@@ -78,7 +78,7 @@ internal static void Main() {
     rt.ᐸꟷ(assertˢ);
     var got = ᐸꟷ(rt);
     {
-        var (s, ok) = got._<@string>(ᐧ); if (ok){
+        var (s, ok) = got._<@string>(ᐧ); if (ok) {
             fmt.Println("assert string:", s);
         } else {
             fmt.Println("assert missed");

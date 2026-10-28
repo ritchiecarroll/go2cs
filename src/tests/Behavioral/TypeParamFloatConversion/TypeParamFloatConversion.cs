@@ -22,7 +22,7 @@ internal static @string csv<T>(@string name, slice<T> values)
 {
     @string @out = name;
     foreach (var (_, v) in values) {
-        if (Δmath.IsInf(ConvertToFloat64<T>(v), +1)){
+        if (Δmath.IsInf(ConvertToFloat64<T>(v), +1)) {
             @out += ",inf"u8;
         } else {
             @out += fmt.Sprintf(",%v"u8, ConvertToFloat64<T>(v));

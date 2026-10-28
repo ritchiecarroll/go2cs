@@ -13,7 +13,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
             if (v < 0) {
                 return (default!, default!, errors.New("negative value"));
             }
-            if (v % 2 == 0){
+            if (v % 2 == 0) {
                 e = append(e, v);
             } else {
                 o = append(o, v);

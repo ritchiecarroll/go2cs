@@ -31,7 +31,7 @@ internal static void Main() {
     }
 
     {
-        var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok){
+        var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok) {
             fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
         } else {
             fmt.Println("Not a string box");

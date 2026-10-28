@@ -10,7 +10,7 @@ partial class main_package {
 
 internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
     return (error err) => {
-        if (err != default!){
+        if (err != default!) {
             Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":"u8 + err.Error());
         } else {
             Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":ok"u8);

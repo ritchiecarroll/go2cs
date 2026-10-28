@@ -22,10 +22,9 @@ internal static void premultiplyLike(slice<byte> dst, slice<byte> src) {
     for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
         var d = Ꮡ(array<byte>.Alias(dst, 4));
         var s = Ꮡ(array<byte>.Alias(src, 4));
-        if (s.Value[3] == 0x00){
+        if (s.Value[3] == 0x00) {
             (d.Value[0], d.Value[1], d.Value[2], d.Value[3]) = (0, 0, 0, 0);
-        } else 
-        if (s.Value[3] == 0xff){
+        } else if (s.Value[3] == 0xff) {
             copy(d.slice(), s.slice());
         } else {
             d.Value[0] = (byte)(s.Value[0] / 2);

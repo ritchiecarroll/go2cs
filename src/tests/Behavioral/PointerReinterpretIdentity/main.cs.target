@@ -18,10 +18,9 @@ partial struct builder {
 internal static void copyCheck(this ж<builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (b.addr == nil){
+    if (b.addr == nil) {
         b.addr = Ꮡb;
-    } else 
-    if (b.addr != Ꮡb) {
+    } else if (b.addr != Ꮡb) {
         throw panic("builder: illegal use of non-zero builder copied by value");
     }
 }

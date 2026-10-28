@@ -65,7 +65,7 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
 }
 
 internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> Ꮡp) {
-    if (len(list) == 0){
+    if (len(list) == 0) {
         list = new ж<node>[]{Ꮡp}.slice();
     } else {
         list = append(list, Ꮡp);
