@@ -11,8 +11,8 @@
 // package_info.cs carries one `[assembly: GoFieldAccess(typeof(T))]` record per struct, a generic one by its open
 // definition, while the converted file carries none. The controls keep today's `(~p).f` / `p.Value.f`: a promoted
 // field, a field named like a member of ж<T>, a field that shadows a promoted method, a header-shaped struct, an
-// unnamed struct, a struct of a package the converter never emits (testing's B), and a zero-size store target, whose
-// accessor form names the struct.
+// unnamed struct, a struct of a package the converter never emits (testing's B), a struct the package defines over
+// another named struct (its fields are generated), and a zero-size store target, whose accessor form names the struct.
 
 package main
 
@@ -80,6 +80,9 @@ type zs struct {
 	b int32
 }
 
+// A struct defined over another named struct: an inherited wrapper whose fields are generated.
+type wrapped point
+
 func mk() *point { return &point{1, 2} }
 
 func positives(p *point, c *node, m map[string]*point) {
@@ -115,7 +118,9 @@ func controls(o *outer, v *boxed, s *sized, h *header, a *struct{ n int }, z *zs
 	zz := z
 	zz.z = struct{}{}
 	zz.b = 5
-	fmt.Println(w.Value, t.Len, hh.Len, aa.n, zz.b)
+	ww := new(wrapped)
+	ww.X = 6
+	fmt.Println(w.Value, t.Len, hh.Len, aa.n, zz.b, ww.X)
 	run(func(b *testing.B) { fmt.Println(b.N) })
 }
 
@@ -196,6 +201,7 @@ func TestFieldPropertyReadsAsGoSpellsIt(t *testing.T) {
 		"aa.Value.n = 4;",     // an unnamed struct, which no record can name
 		"zs.Ꮡz(ref zz.Value)", // a zero-size store target's accessor names the struct
 		"zz.b = 5;",           // ... while its sibling field is an ordinary P1 site
+		"ww.Value.X = 6;",     // a wrapper over another named struct: its fields are generated
 		"(~b).N",              // testing's B has no generated accessors
 	} {
 		if !strings.Contains(controls, want) {

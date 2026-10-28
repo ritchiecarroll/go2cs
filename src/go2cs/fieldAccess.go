@@ -554,6 +554,7 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 //     which is not Go's text (the unsafe.Pointer route above does, because it must avoid the whole-value read);
 //   - a struct with no generated accessors: one a hand-owned file declares, and one of a package the converter never
 //     emits (nonConvertedStdLibPackages: testing's T and B are golib-side structs);
+//   - a struct this package defines over another named type (isLocalStructWrapper), whose fields are generated;
 //   - a struct shaped as a Go slice or string header (isGoHeaderShaped), whose properties are get/set, not refs;
 //   - an unnamed struct type, which no record can name;
 //   - the plain rendering of a zero-size store target (zeroSizeStorePlain), whose box form names its struct.
@@ -582,7 +583,8 @@ func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee 
 }
 
 // fieldPropertyServesType reports whether go2cs-gen gives pointee's fields their properties: a named struct with
-// generated accessors that is not header-shaped (see the P1 notes above).
+// generated accessors that is not header-shaped, and not a wrapper this package defines over another named type (see
+// the P1 notes above).
 func fieldPropertyServesType(pointee types.Type) bool {
 	named, ok := types.Unalias(pointee).(*types.Named)
 
@@ -592,13 +594,57 @@ func fieldPropertyServesType(pointee types.Type) bool {
 
 	structType, ok := named.Underlying().(*types.Struct)
 
-	if !ok || isHandOwnedType(named) || isGoHeaderShaped(structType) {
+	if !ok || isHandOwnedType(named) || isGoHeaderShaped(structType) || isLocalStructWrapper(named) {
 		return false
 	}
 
 	pkg := named.Obj().Pkg()
 
 	return pkg != nil && !slices.Contains(nonConvertedStdLibPackages, pkg.Path())
+}
+
+// The struct types the package being converted DEFINES over another named type, built once per loaded package from
+// the syntax its driver handed collectCaptureModeMethods (currentLoadedPackage), test variants included.
+var (
+	fieldAccessWrappersOf *packages.Package
+	fieldAccessWrappers   map[*types.TypeName]bool
+)
+
+// isLocalStructWrapper reports whether named is a type of the package being converted defined over another named type,
+// `type winlibcall windows.StdCallInfo`. The converter declares such a type field-less, an inherited [GoType] wrapper
+// whose fields go2cs-gen's InheritedTypeTemplate generates; FieldAccessGenerator runs in the same compilation and
+// cannot see generated members, so it would emit no property and the site would not compile (CS1061). The same type
+// read from another package's metadata has its generated fields, so only the package's own wrappers are refused.
+func isLocalStructWrapper(named *types.Named) bool {
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	loaded := currentLoadedPackage
+
+	if loaded == nil || loaded.TypesInfo == nil {
+		return false
+	}
+
+	if fieldAccessWrappersOf != loaded {
+		fieldAccessWrappersOf = loaded
+		fieldAccessWrappers = map[*types.TypeName]bool{}
+
+		for _, file := range loaded.Syntax {
+			ast.Inspect(file, func(n ast.Node) bool {
+				if spec, ok := n.(*ast.TypeSpec); ok && !spec.Assign.IsValid() {
+					if _, isStruct := ast.Unparen(spec.Type).(*ast.StructType); !isStruct {
+						if typeName, ok := loaded.TypesInfo.Defs[spec.Name].(*types.TypeName); ok {
+							fieldAccessWrappers[typeName] = true
+						}
+					}
+				}
+
+				return true
+			})
+		}
+	}
+
+	return fieldAccessWrappers[named.Origin().Obj()]
 }
 
 // isGoHeaderShaped mirrors go2cs-gen's FieldAccessGenerator.IsHeaderShaped on the Go side: exactly an unsafe.Pointer
