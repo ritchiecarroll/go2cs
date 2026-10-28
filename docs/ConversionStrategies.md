@@ -6953,7 +6953,7 @@ reader: a loop variable is sometimes copied so that each iteration gets its own,
 `continue` becomes a `goto`. The small glyphs in these names (`ᐧ`, `Δ`, `ᴛ`, `ᴷ`, `Ꮡ`) are explained where
 they first appear here, and all of them are listed in [Reading Converted Code](#reading-converted-code-names-and-glyphs).
 
-<!-- Inline forms from src/tests/Behavioral/ForVariants/ForVariants.go:12#bc28dc, :22#cd38ed, :78#c027f4 -> ForVariants.cs.target:16#ca4701, :24#baeefa, :80#3e658c -->
+<!-- Inline forms from src/tests/Behavioral/ForVariants/ForVariants.go:12#bc28dc, :22#cd38ed, :78#c027f4 -> ForVariants.cs.target:16#ca4701, :24#baeefa, :80#810daf -->
 <!-- Reachability: C# treats a loop with no condition as never ending, so `for (;;)` needs no trailing return (no CS0161, not all code paths return a value). Before visual-parity seat #27 (2026-10-28) the loop read `while (ᐧ)`, which C# read the same way only because golib's ᐧ is a const (builtin.cs). -->
 **A `for` keeps its shape.** A three-clause loop stays a C# `for`. A loop with only a condition,
 `for i < 10 {`, becomes `while (i < 10) {`. An endless `for {` becomes `for (;;) {`, and a three-clause
@@ -7102,8 +7102,8 @@ foreach (var (iᴛ1, vᴛ1) in nums) {
 `new nint[]{…}.slice()` builds a golib [slice](#slices-and-arrays), Go's `int` becomes `nint`, and
 `default!` is Go's zero value ([Nil and Zero Values](#nil-and-zero-values)).
 
-<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:413#c54fd4);
-the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:429#8ec6f5; golden
+<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:412#c54fd4);
+the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:428#8ec6f5; golden
 src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:56-59#b74efc, where the body only takes &i). -->
 **Loop variables are per-iteration.** Go gives each iteration of `for i := …` its own `i`. A C# `for`
 shares one variable across all iterations, so closures made in the loop would all see its last value.
@@ -11193,7 +11193,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3835-3856#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3843-3864#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
