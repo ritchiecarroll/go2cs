@@ -37,7 +37,7 @@ internal static void Main() {
     var (x, ok) = a._<lib.Ord2<lib.жLesser<elem.Node>>>(ᐧ);
     fmt.Println(w.Below(Ꮡ(new elem.Node(K: 3))), ok, x.Below(Ꮡ(new elem.Node(K: 1))));
     fmt.Printf("%T\n"u8, v);
-    fmt.Println(AreEqual(reflect.TypeOf(v), reflect.TypeOf(new lib.Ord2<lib.жLesser<elem.Node>>(nil))));
+    fmt.Println(AreEqual(reflect.TypeOf(v), reflect.TypeOf(new lib.Ord2<lib.жLesser<elem.Node>>())));
 
     var vi = b1.MakeInline(2);
     lib.Ord<lib.жOrd_T<elem.Node>> wi = vi;
@@ -45,7 +45,7 @@ internal static void Main() {
     var (xi, oki) = ai._<lib.Ord<lib.жOrd_T<elem.Node>>>(ᐧ);
     fmt.Println(wi.Below(Ꮡ(new elem.Node(K: 3))), oki, xi.Below(Ꮡ(new elem.Node(K: 1))));
     fmt.Printf("%T\n"u8, vi);
-    fmt.Println(AreEqual(reflect.TypeOf(vi), reflect.TypeOf(new lib.Ord<lib.жOrd_T<elem.Node>>(nil))));
+    fmt.Println(AreEqual(reflect.TypeOf(vi), reflect.TypeOf(new lib.Ord<lib.жOrd_T<elem.Node>>())));
 
     var z = reflect.New(reflect.TypeOf(v)).Elem();
     z.Field(0).Set(reflect.ValueOf(Ꮡ(new elem.Node(K: 9))));

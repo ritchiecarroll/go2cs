@@ -29,9 +29,9 @@ internal static nint usesValue(ref node p) {
 
 internal static void Main() {
     fmt.Println(onlyNilCheck(nil));
-    fmt.Println(onlyNilCheck(Ꮡ(new node(nil))));
+    fmt.Println(onlyNilCheck(Ꮡ(new node())));
     fmt.Println(passThrough(nil));
-    fmt.Println(passThrough(Ꮡ(new node(nil))));
+    fmt.Println(passThrough(Ꮡ(new node())));
     var ᴛ1 = new node(val: 9);
     fmt.Println(usesValue(ref ᴛ1));
 }

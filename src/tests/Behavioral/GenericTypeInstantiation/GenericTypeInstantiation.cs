@@ -60,13 +60,13 @@ private static readonly @string worldˢ = "world"u8;
 private static readonly @string fourˢ = "four"u8;
 
 internal static void Main() {
-    var intStack = new Stack<nint>(nil);
+    var intStack = new Stack<nint>();
     intStack.Push(10);
     intStack.Push(20);
     var (val, _) = intStack.Pop();
     fmt.Printf("Popped from int stack: %d\n"u8, val);
 
-    var stringStack = new Stack<@string>(nil);
+    var stringStack = new Stack<@string>();
     stringStack.Push(helloˢ);
     stringStack.Push(worldˢ);
     var (text, _) = stringStack.Pop();

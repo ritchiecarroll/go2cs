@@ -46,7 +46,7 @@ partial struct outer {
 }
 
 internal static void Main() {
-    var t = reflect.TypeOf(new record(nil));
+    var t = reflect.TypeOf(new record());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
@@ -84,7 +84,7 @@ internal static void Main() {
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(new byte[]{1, 2}.slice()));
     fmt.Println("copy nil dst:", n);
 
-    foreach (var (_, vΔ1) in new any[]{new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record(nil)}.slice()) {
+    foreach (var (_, vΔ1) in new any[]{new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record()}.slice()) {
         var rt = reflect.TypeOf(vΔ1);
         fmt.Printf("named %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }
@@ -97,13 +97,13 @@ internal static void Main() {
     @string nm = reflect.TypeOf(new intSET(new nint[]{}.slice())).Name();
     fmt.Println("SET suffix:", len(nm) >= 3 && nm.slice(len(nm) - 3) == "SET");
 
-    var lt = reflect.TypeOf(new layout(nil));
+    var lt = reflect.TypeOf(new layout());
     for (nint i = 0; i < lt.NumField(); i++) {
         var fΔ2 = lt.Field(i);
         fmt.Printf("offset %-6s %d\n"u8, fΔ2.Name, fΔ2.Offset);
     }
 
-    var (of, _) = reflect.TypeOf(new outer(nil)).FieldByName("Y");
+    var (of, _) = reflect.TypeOf(new outer()).FieldByName("Y");
     fmt.Printf("promoted Y offset=%d index=%v\n"u8, of.Offset, of.Index);
 }
 

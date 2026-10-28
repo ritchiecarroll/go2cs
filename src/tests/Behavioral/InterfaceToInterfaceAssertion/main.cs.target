@@ -48,7 +48,7 @@ internal static void Main() {
         }
     }
 
-    Stringish s2 = new otherжStringish(Ꮡ(new other(nil)));
+    Stringish s2 = new otherжStringish(Ꮡ(new other()));
     {
         var (_, ok) = s2._<Marshaler>(ᐧ); if (ok) {
             fmt.Println("unexpected: other is Marshaler");

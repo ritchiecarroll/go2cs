@@ -39,7 +39,7 @@ partial struct SameV {
 }
 
 public static SameP NewSameP() {
-    return new SameP(Ꮡ(new r1(nil)));
+    return new SameP(Ꮡ(new r1()));
 }
 
 partial struct wrap {

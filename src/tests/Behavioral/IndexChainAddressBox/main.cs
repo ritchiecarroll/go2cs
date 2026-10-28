@@ -99,7 +99,7 @@ internal static void Main() {
     fmt.Println("nestedFieldArrayMethod:", nestedFieldArrayMethod());
     fmt.Println("localArrayMethod:", localArrayMethod());
     fmt.Println("explicitAddress:", explicitAddress());
-    fmt.Println("paramAddress:", paramAddress(new hist(nil)));
+    fmt.Println("paramAddress:", paramAddress(new hist()));
     fmt.Println("methodValue:", methodValue());
     fmt.Println("localTypeCall:", localTypeCall());
     fmt.Println("sliceFieldAddress:", sliceFieldAddress());

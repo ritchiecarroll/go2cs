@@ -21,7 +21,7 @@ internal static void apply(this ж<State> Ꮡs, nint x) {
 }
 
 internal static void Main() {
-    var s = Ꮡ(new State(nil));
+    var s = Ꮡ(new State());
     s.apply(5);
     s.apply(3);
     fmt.Println((~s).sum);

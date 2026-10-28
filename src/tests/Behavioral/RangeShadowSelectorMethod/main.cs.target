@@ -19,7 +19,7 @@ internal static void typ(this ref writer w, @string typ) {
 }
 
 internal static void Main() {
-    var w = Ꮡ(new writer(nil));
+    var w = Ꮡ(new writer());
     w.typ("top");
 
     foreach (var (_, line) in (~w).@out) {

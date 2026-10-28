@@ -25,14 +25,14 @@ internal static @string Label(this ref thing t) {
 partial interface _ᴛ1 /*dyn*/ {
     bool Equal(any x);
 }
-internal static _ᴛ1 _ᴛ1ʗ = new thingж_ᴛ1(Ꮡ(new thing(nil)));
+internal static _ᴛ1 _ᴛ1ʗ = new thingж_ᴛ1(Ꮡ(new thing()));
 
 
 partial interface _ᴛ2 /*dyn*/ {
     any Public();
     bool Equal(any x);
 }
-internal static _ᴛ2 _ᴛ2ʗ = new thingж_ᴛ2(Ꮡ(new thing(nil)));
+internal static _ᴛ2 _ᴛ2ʗ = new thingж_ᴛ2(Ꮡ(new thing()));
 
 
 partial interface labelerᴛ1 /*dyn*/ {

@@ -123,12 +123,12 @@ internal static void Main() {
 
     fmt.Printf("%v %v\n"u8, f(), err);
 
-    var animals = new Animal[]{new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(nil), new JavaProgrammer(nil)}.slice();
+    var animals = new Animal[]{new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(), new JavaProgrammer()}.slice();
     foreach (var (_, animal) in animals) {
         fmt.Println(animal.Speak());
     }
 
-    var c = Ꮡ(new Counter(nil));
+    var c = Ꮡ(new Counter());
     Incrementer inc = new CounterжIncrementer(c);
     inc.Inc();
     inc.Inc();
@@ -141,7 +141,7 @@ internal static void Main() {
     back.Inc();
     fmt.Println("assert-back:", ok, c.Total(), back == c);
 
-    var r = Reversed(new Dog(nil));
+    var r = Reversed(new Dog());
     fmt.Println("promoted via pointer adapter:", r.Speak());
 
     for (nint k = 0; k < 3; k++) {
@@ -149,24 +149,24 @@ internal static void Main() {
         fmt.Println("picked:", name, a.Speak());
     }
 
-    rdr rd = new strRdr(nil);
+    rdr rd = new strRdr();
     fmt.Println(rd.read());
     var rc = open("data");
     fmt.Println(rc.read(), rc.close());
-    var readers = new rdr[]{new strRdr(nil)}.slice();
+    var readers = new rdr[]{new strRdr()}.slice();
     readers[0] = new fileRdr(name: "x");
     fmt.Println(readers[0].read());
 
     slice<Animal> pack = default;
-    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
-    pack = append(pack, (Animal)(new Dog(nil)));
+    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
+    pack = append(pack, (Animal)(new Dog()));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
-    var cp = Ꮡ(new Cat(nil));
+    var cp = Ꮡ(new Cat());
     fmt.Println(cp.Self().Speak());
 
     ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
-    swapped = new Dog(nil);
+    swapped = new Dog();
     replaceAnimal(ref swapped);
     fmt.Println("replaced:", swapped.Speak());
 
@@ -178,15 +178,15 @@ internal static void Main() {
 
     Animal makeAnimal(bool feline) {
         if (feline) {
-            return new CatжAnimal(Ꮡ(new Cat(nil)));
+            return new CatжAnimal(Ꮡ(new Cat()));
         }
-        return new Dog(nil);
+        return new Dog();
     }
     fmt.Println("made:", makeAnimal(true).Speak(), makeAnimal(false).Speak());
 
     fmt.Println("plumbed:", runPlumbing());
 
-    speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
+    speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog())));
     fmt.Println(ss.Speak(), ss.Shut());
 
     labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id", num: 9)));
@@ -226,7 +226,7 @@ internal static nint @int(this ref badge b) {
 }
 
 internal static void replaceAnimal(ref Animal a) {
-    a = new CatжAnimal(Ꮡ(new Cat(nil)));
+    a = new CatжAnimal(Ꮡ(new Cat()));
 }
 
 partial interface speakShutter {

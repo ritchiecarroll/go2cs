@@ -69,9 +69,9 @@ internal static ref T gr => ref ((StaticBox<T>)Ꮡgr).ValueSlot;
 internal static readonly ж<T> Ꮡgw = new StaticBox<T>(default(T));
 internal static ref T gw => ref ((StaticBox<T>)Ꮡgw).ValueSlot;
 internal static T gv;
-internal static ж<T> gpp = Ꮡ(new T(nil));
+internal static ж<T> gpp = Ꮡ(new T());
 internal static slice<T> gs = new slice<T>(1);
-internal static E ge = new E(Ꮡ(new T(nil)));
+internal static E ge = new E(Ꮡ(new T()));
 
 [GoLazy] partial class lazyᴛlz { internal static readonly ж<Tab> Ꮡlz = new StaticBox<Tab>(new Tab(vals: new nint[]{1, 2, 3, 4, 5, 6, 7, 8 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1}.array())); }
 internal static ref Tab lz => ref ((StaticBox<Tab>)Ꮡlz).ValueSlot;

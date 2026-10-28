@@ -35,11 +35,11 @@ partial struct Pair {
 }
 
 public static ж<Meter> NewMeter() {
-    return Ꮡ(new Meter(nil));
+    return Ꮡ(new Meter());
 }
 
 public static ж<Pair> NewPair() {
-    return Ꮡ(new Pair(Meter: Ꮡ(new Meter(nil)), Gauge: Ꮡ(new Gauge(nil))));
+    return Ꮡ(new Pair(Meter: Ꮡ(new Meter()), Gauge: Ꮡ(new Gauge())));
 }
 
 } // end ForeignPtrEmbedIfaceLib_package

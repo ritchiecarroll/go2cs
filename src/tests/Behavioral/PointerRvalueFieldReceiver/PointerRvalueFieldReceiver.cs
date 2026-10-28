@@ -16,7 +16,7 @@ partial struct node {
     internal slot s;
 }
 
-internal static ж<node> theNode = Ꮡ(new node(nil));
+internal static ж<node> theNode = Ꮡ(new node());
 
 internal static ж<node> getNode() {
     return theNode;
@@ -34,8 +34,8 @@ internal static void Main() {
     getNode().of(node.Ꮡs).set(42);
     fmt.Println((~theNode).s.v);
 
-    var a = Ꮡ(new node(nil));
-    var b = Ꮡ(new node(nil));
+    var a = Ꮡ(new node());
+    var b = Ꮡ(new node());
     var nodes = new ж<node>[]{a, b}.slice();
     nodes[0].of(node.Ꮡs).set(7);
     nodes[1].of(node.Ꮡs).set(9);

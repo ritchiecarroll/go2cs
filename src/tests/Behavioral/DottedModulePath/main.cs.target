@@ -13,13 +13,13 @@ using Δio = io_package;
 partial class main_package {
 
 internal static void Main() {
-    fmt.Println(reflect.TypeOf(new dotted.T(nil)).PkgPath());
-    fmt.Println(reflect.TypeOf(Ꮡ(new dotted.T(nil))).Elem().String());
+    fmt.Println(reflect.TypeOf(new dotted.T()).PkgPath());
+    fmt.Println(reflect.TypeOf(Ꮡ(new dotted.T())).Elem().String());
 
     fmt.Println(dotted.Where());
     fmt.Println(runtime.FuncForPC(reflect.ValueOf(dotted.F).Pointer()).Name());
 
-    gob.Register(new dotted.T(nil));
+    gob.Register(new dotted.T());
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     ref var @in = ref heap<any>(out var Ꮡin);

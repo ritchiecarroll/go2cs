@@ -45,7 +45,7 @@ internal static void Main() {
         fmt.Println("parse error:", err);
         return;
     }
-    (_, err) = self.Verify(new x509.VerifyOptions(nil));
+    (_, err) = self.Verify(new x509.VerifyOptions());
     ref var unknown = ref heap(new x509.UnknownAuthorityError(), out var Ꮡunknown);
     fmt.Printf("self-signed: %T, UnknownAuthorityError %v\n"u8, err, errors.As(err, Ꮡunknown));
 

@@ -8,7 +8,7 @@ using RootedUsingCapture;
 partial class main_package {
 
 internal static void Main() {
-    var t = reflect.TypeOf(new lib.Guarded(nil));
+    var t = reflect.TypeOf(new lib.Guarded());
     var f = t.Field(0);
     fmt.Println("embed:", f.Name, f.Anonymous);
     fmt.Println("type:", f.Type.String());

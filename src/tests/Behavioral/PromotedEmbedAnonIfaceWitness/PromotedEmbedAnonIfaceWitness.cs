@@ -50,7 +50,7 @@ internal partial interface main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    var u = Ꮡ(new Uint(nil));
+    var u = Ꮡ(new Uint());
     u.Value.Label = "uint";
     Node n = new UintжNode(u);
 
@@ -65,7 +65,7 @@ internal static void Main() {
 
     fmt.Println("uint after write through promoted pointer:", (~u).BitSize, (~u).Label, n.String());
 
-    var i = Ꮡ(new Int(nil));
+    var i = Ꮡ(new Int());
     i.Value.Label = "int";
     Node ni = new IntжNode(i);
     {
@@ -86,11 +86,11 @@ internal static void Main() {
         break;
     }}
 
-    any anyValue = new Uint(nil);
+    any anyValue = new Uint();
     var (_, valueOK) = anyValue._<main_type>(ᐧ);
     fmt.Println("uint VALUE asserts to anon Basic:", valueOK);
 
-    var inner = Ꮡ(new Uint(nil));
+    var inner = Ꮡ(new Uint());
     inner.Value.Label = "inner";
     inner.Value.ByteSize = 8;
 
@@ -102,7 +102,7 @@ internal static void Main() {
     fmt.Println("ptr Common through embed:", (~np.Common()).Label, (~np.Common()).ByteSize);
     fmt.Println("ptr String through embed:", np.String());
 
-    var empty = Ꮡ(new Ptr(nil));
+    var empty = Ꮡ(new Ptr());
     empty.Value.Label = "empty";
     empty.Value.ByteSize = 2;
     Node ne = new PtrжNode(empty);

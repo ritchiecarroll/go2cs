@@ -20,7 +20,7 @@ internal static @string take(any v) {
 }
 
 internal static void Main() {
-    var h = new Holder(nil);
+    var h = new Holder();
     var hv = reflect.ValueOf(h);
 
     for (nint i = 0; i < hv.NumField(); i++) {

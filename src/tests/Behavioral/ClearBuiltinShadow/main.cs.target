@@ -62,7 +62,7 @@ internal static void Main() {
     builtin.clear(m);
     fmt.Println(len(m));
 
-    var g = Ꮡ(new guard(nil));
+    var g = Ꮡ(new guard());
     g.run();
     fmt.Println((~g).err);
 

@@ -29,7 +29,7 @@ public static entry Run(deps d) {
 }
 
 internal static void Main() {
-    var r = Run(new impl(nil));
+    var r = Run(new impl());
     fmt.Println(r.ID, r.Name);
 }
 

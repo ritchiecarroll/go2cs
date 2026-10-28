@@ -29,7 +29,7 @@ internal static void Main() {
     fmt.Println((uintptr)q - (uintptr)p == 16);
     fmt.Println((uintptr)r == (uintptr)p);
 
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     c.add(3);
     c.add(4);
     fmt.Println((~c).n);

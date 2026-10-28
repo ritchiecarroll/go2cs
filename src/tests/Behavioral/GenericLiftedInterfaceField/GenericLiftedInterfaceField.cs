@@ -49,7 +49,7 @@ internal partial interface newCounter_R0 /*dyn*/ {
 }
 
 internal static newCounter_R0 newCounter() {
-    return new counterжnewCounter_R0(Ꮡ(new counter(nil)));
+    return new counterжnewCounter_R0(Ꮡ(new counter()));
 }
 
 internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {

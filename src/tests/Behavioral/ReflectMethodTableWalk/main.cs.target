@@ -60,7 +60,7 @@ internal static slice<@string> names(reflectꓸType t) {
 }
 
 internal static void Main() {
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     var pv = reflect.ValueOf(c.OrTypedNil());
     var pt = pv.Type();
 
@@ -104,8 +104,8 @@ internal static void Main() {
     fmt.Println("unbound Func numIn:", addM.Type.NumIn(),
         "call:", addM.Func.Call(new reflectꓸValue[]{reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)4)}.slice())[0].Interface());
 
-    fmt.Println("outer methods:", strings.Join(names(reflect.TypeOf(new outer(nil))), ","));
-    fmt.Println("outer Zeta:", reflect.ValueOf(new outer(nil)).MethodByName("Zeta").Call(default)[0].Interface());
+    fmt.Println("outer methods:", strings.Join(names(reflect.TypeOf(new outer())), ","));
+    fmt.Println("outer Zeta:", reflect.ValueOf(new outer()).MethodByName("Zeta").Call(default)[0].Interface());
 
     ref var s = ref heap<fmt.Stringer>(out var Ꮡs);
     s = ((stringish)(@string)"hi"u8);

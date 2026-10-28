@@ -40,7 +40,7 @@ internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
 internal static ж<counter> run() {
     GoFrame ᒐ = default;
     try {
-        var c = Ꮡ(new counter(nil));
+        var c = Ꮡ(new counter());
         defer(() => note(), ref ᒐ);
         defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", (@string)"b", ref ᒐ);
         var cʗ1 = c;

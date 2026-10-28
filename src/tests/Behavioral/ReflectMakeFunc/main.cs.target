@@ -56,7 +56,7 @@ internal static void Main() {
     fmt.Println("events:", events);
 
     ref var h = ref heap<traceHooks>(out var Ꮡh);
-    h = new traceHooks(nil);
+    h = new traceHooks();
     var hv = reflect.ValueOf(Ꮡh).Elem();
     var sumField = hv.Field(1);
     var made = reflect.MakeFunc(sumField.Type(), (slice<reflectꓸValue> args) => {

@@ -74,7 +74,7 @@ internal static void Main() {
     (s, ok) = pmslib.TrySpeak(pm.OrTypedNil());
     report("Mixed-pointer  ", s, ok);
 
-    (s, ok) = pmslib.TrySpeak(new WrongSig(nil));
+    (s, ok) = pmslib.TrySpeak(new WrongSig());
     report("WrongSig       ", s, ok);
 
     (s, ok) = pmslib.TrySpeak((nint)42);

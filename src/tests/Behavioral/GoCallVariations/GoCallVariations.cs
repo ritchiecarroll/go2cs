@@ -42,7 +42,7 @@ internal static partial void Main() {
     runPair(done);
     ᐸꟷ(done);
 
-    var acc = Ꮡ(new accum(nil));
+    var acc = Ꮡ(new accum());
     bindAdd(acc);
     fmt.Println("accum total:", (~acc).total);
 

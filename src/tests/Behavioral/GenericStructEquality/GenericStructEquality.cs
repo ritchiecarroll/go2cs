@@ -32,7 +32,7 @@ internal static void Main() {
     ref var y = ref heap<nint>(out var Ꮡy);
     y = 5;
     var (h1, h2, h3) = (new handle<nint>(Ꮡx), new handle<nint>(Ꮡx), new handle<nint>(Ꮡy));
-    fmt.Println(h1 == h2, h1 == h3, h1 == new handle<nint>(nil));
+    fmt.Println(h1 == h2, h1 == h3, h1 == new handle<nint>());
 
     var b1 = new box<@string>("go");
     fmt.Println(b1 == new box<@string>("go"), b1 == new box<@string>("cs"));

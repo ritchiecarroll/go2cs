@@ -82,7 +82,7 @@ internal static partial void deadlineLifecycle() {
         var stickyFor = time.Since(start);
         fmt.Printf("lifecycle: timeoutIsSticky=%v immediate=%v\n"u8, isTimeout(err2), stickyFor < 150 * time.Millisecond);
 
-        client.SetReadDeadline(new time.Time(nil));
+        client.SetReadDeadline(new time.Time());
         var serverʗ1 = server;
         goǃ(() => {
             time.Sleep(50 * time.Millisecond);
@@ -232,7 +232,7 @@ internal static partial void deadlineVersusData() {
         var (n2, err2) = client.Read(buf);
         fmt.Printf("race: dataInsideDeadline=%v bytes=%v\n"u8, err2 == nil, n2 == 5);
 
-        client.SetReadDeadline(new time.Time(nil));
+        client.SetReadDeadline(new time.Time());
         var serverʗ1 = server;
         goǃ(() => {
             time.Sleep(50 * time.Millisecond);

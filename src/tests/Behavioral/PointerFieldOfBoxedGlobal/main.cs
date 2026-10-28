@@ -56,12 +56,12 @@ internal static nint viaLocal(ref holder h) {
 }
 
 internal static void Main() {
-    cpuprof.log = Ꮡ(new profBuf(nil));
+    cpuprof.log = Ꮡ(new profBuf());
     run();
     fmt.Println(cpuprof.count);
     fmt.Println(cpuprof.log.sum());
 
-    var h = Ꮡ(new holder(span: Ꮡ(new cpuProfile(log: Ꮡ(new profBuf(nil))))));
+    var h = Ꮡ(new holder(span: Ꮡ(new cpuProfile(log: Ꮡ(new profBuf())))));
     fmt.Println(viaLocal(ref (h).DerefOrNull()));
 }
 

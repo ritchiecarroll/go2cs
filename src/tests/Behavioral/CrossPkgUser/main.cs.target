@@ -30,7 +30,7 @@ partial struct Holder<T> {
     internal T item;
 }
 
-internal static ж<Holder<ж<CrossPkgLib.Sensor>>> sensorHolder = Ꮡ(new Holder<ж<CrossPkgLib.Sensor>>(nil));
+internal static ж<Holder<ж<CrossPkgLib.Sensor>>> sensorHolder = Ꮡ(new Holder<ж<CrossPkgLib.Sensor>>());
 
 partial struct sensorBox {
     /*embed*/ public Holder<ж<CrossPkgLib_package.Sensor>> Holder;
@@ -305,11 +305,11 @@ internal static void Main() {
         CrossPkgLib.Rated rt = ct;
         fmt.Println(sd.Label(), rt.Rating());
 
-        var pr = Ꮡ(new CrossPkgLib.Probe(nil));
+        var pr = Ꮡ(new CrossPkgLib.Probe());
         CrossPkgLib.Sampler sam = new CrossPkgLib.ProbeжSampler(pr);
         fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
 
-        var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"));
+        var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>()), name: "h"));
         fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
 
         var mk = CrossPkgLib.MakeMarker("tag");

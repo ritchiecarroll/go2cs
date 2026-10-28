@@ -35,7 +35,7 @@ internal static void run(ж<machine> Ꮡm) {
 }
 
 internal static void Main() {
-    var m = Ꮡ(new machine(nil));
+    var m = Ꮡ(new machine());
     run(m);
     fmt.Println((~m).steps);
 }

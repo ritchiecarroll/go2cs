@@ -90,7 +90,7 @@ internal static void Main() {
     show(false, "pkgSum", pkgSum);
     show(false, "pkgStructs", pkgStructs);
 
-    (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1");
+    (Ꮡ(new chain())).Add(1).Add(2).Add(3).Done("S1");
 
     show(false, "S2", three(line(),
         line(),

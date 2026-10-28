@@ -62,7 +62,7 @@ internal static @string fromInit;
 }
 
 internal static partial void Main() {
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     var b = Ꮡ(new box<nint>(v: 1));
 
     var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();

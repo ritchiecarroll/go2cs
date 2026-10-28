@@ -19,7 +19,7 @@ partial struct allExported {
 }
 
 internal static void Main() {
-    var t = reflect.TypeOf(new mixed(nil));
+    var t = reflect.TypeOf(new mixed());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);

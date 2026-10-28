@@ -92,7 +92,7 @@ internal static partial void Main() {
     fmt.Printf("new <-chan: %v -> %v | dir=%v\n"u8, reflect.TypeOf(pr.OrTypedNil()), reflect.TypeOf(pr.OrTypedNil()).Elem(), reflect.TypeOf(pr.OrTypedNil()).Elem().ChanDir());
     fmt.Printf("elem of new: %v | %v\n"u8, reflect.ValueOf(ps.OrTypedNil()).Elem().Type(), reflect.ValueOf(pr.OrTypedNil()).Elem().Type());
 
-    var ht = reflect.TypeOf(new holder(nil));
+    var ht = reflect.TypeOf(new holder());
     for (nint i = 0; i < ht.NumField(); i++) {
         var f = ht.Field(i);
         fmt.Printf("field %s: %v | dir=%v\n"u8, f.Name, f.Type, f.Type.ChanDir());

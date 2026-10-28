@@ -50,7 +50,7 @@ internal static void Main() {
     fmt.Println("slots:", show(f), "|", show(h), "|", show(g[0]), "|", show(g[1]), "|", show(retAny()));
 
     Func<@string> e = Run;
-    fmt.Println("control:", e(), use(Run), new T(nil).Run());
+    fmt.Println("control:", e(), use(Run), new T().Run());
 }
 
 } // end main_package

@@ -66,7 +66,7 @@ internal partial interface main_anon /*dyn*/ {
 }
 
 internal static void Main() {
-    namer n = new aжnamer(Ꮡ(new a(nil)));
+    namer n = new aжnamer(Ꮡ(new a()));
     var nʗ1 = n;
     @catch("namer-to-*b", () => {
         _ = nʗ1._<namer, ж<b>>();
@@ -78,7 +78,7 @@ internal static void Main() {
         _ = rʗ1._<ж<bytes.Buffer>>();
     });
 
-    Δio.ReadWriter rw = new bytes_BufferжReadWriter(Ꮡ(new bytes.Buffer(nil)));
+    Δio.ReadWriter rw = new bytes_BufferжReadWriter(Ꮡ(new bytes.Buffer()));
     var rwʗ1 = rw;
     @catch("io.ReadWriter-to-*pipe", () => {
         _ = rwʗ1._<ж<pipe>>();
@@ -90,7 +90,7 @@ internal static void Main() {
         _ = rcʗ1._<ж<pipe>>();
     });
 
-    main_anon anon = new aжmain_anon(Ꮡ(new a(nil)));
+    main_anon anon = new aжmain_anon(Ꮡ(new a()));
     var anonʗ1 = anon;
     @catch("anonymous-to-*b", () => {
         _ = anonʗ1._<ж<b>>();

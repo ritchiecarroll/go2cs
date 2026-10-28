@@ -25,7 +25,7 @@ internal static void Main() {
 
     addrlib.Addr z = new();
     fmt.Println(z.Capacity());
-    var empty = Ꮡ(new addrlib.Addr(nil));
+    var empty = Ꮡ(new addrlib.Addr());
     fmt.Println(empty.Capacity());
 }
 

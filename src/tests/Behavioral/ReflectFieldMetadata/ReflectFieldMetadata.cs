@@ -81,25 +81,25 @@ internal static void Main() {
     fmt.Println("CanSet via unexported:", reflect.ValueOf(new holds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println("CanSet via Slice     :", reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Slice(0, 1).Index(0).Field(0).CanSet());
 
-    var (_, foundTwice) = reflect.TypeOf(new twice(nil)).FieldByName("B");
-    var (fOnce, foundOnce) = reflect.TypeOf(new once(nil)).FieldByName("B");
-    var (fD, foundD) = reflect.TypeOf(new twice(nil)).FieldByName("D");
+    var (_, foundTwice) = reflect.TypeOf(new twice()).FieldByName("B");
+    var (fOnce, foundOnce) = reflect.TypeOf(new once()).FieldByName("B");
+    var (fD, foundD) = reflect.TypeOf(new twice()).FieldByName("D");
     fmt.Println("twice.B  found:", foundTwice);
     fmt.Println("once.B   found:", foundOnce, "index:", fOnce.Index);
     fmt.Println("twice.D  found:", foundD, "index:", fD.Index);
-    fmt.Println("twice.B  value valid:", reflect.ValueOf(new twice(nil)).FieldByName("B").IsValid());
-    var (_, foundDeeperB) = reflect.TypeOf(new deeper(nil)).FieldByName("B");
-    var (fDeeperD, foundDeeperD) = reflect.TypeOf(new deeper(nil)).FieldByName("D");
-    fmt.Println("deeper.B found:", foundDeeperB, " value valid:", reflect.ValueOf(new deeper(nil)).FieldByName("B").IsValid());
-    fmt.Println("deeper.D found:", foundDeeperD, "index:", fDeeperD.Index, " value:", reflect.ValueOf(new deeper(nil)).FieldByName("D").IsValid());
+    fmt.Println("twice.B  value valid:", reflect.ValueOf(new twice()).FieldByName("B").IsValid());
+    var (_, foundDeeperB) = reflect.TypeOf(new deeper()).FieldByName("B");
+    var (fDeeperD, foundDeeperD) = reflect.TypeOf(new deeper()).FieldByName("D");
+    fmt.Println("deeper.B found:", foundDeeperB, " value valid:", reflect.ValueOf(new deeper()).FieldByName("B").IsValid());
+    fmt.Println("deeper.D found:", foundDeeperD, "index:", fDeeperD.Index, " value:", reflect.ValueOf(new deeper()).FieldByName("D").IsValid());
 
-    var (_, mTwice) = reflect.TypeOf(new twice(nil)).MethodByName("M");
-    var (_, mDeeper) = reflect.TypeOf(new deeper(nil)).MethodByName("M");
-    var (_, mOnce) = reflect.TypeOf(new once(nil)).MethodByName("M");
+    var (_, mTwice) = reflect.TypeOf(new twice()).MethodByName("M");
+    var (_, mDeeper) = reflect.TypeOf(new deeper()).MethodByName("M");
+    var (_, mOnce) = reflect.TypeOf(new once()).MethodByName("M");
     fmt.Println("M promoted -- twice:", mTwice, " deeper:", mDeeper, " once:", mOnce);
 
-    var lt = reflect.TypeOf(new local(new fieldlib.Outer(nil)));
-    var ot = reflect.TypeOf(new fieldlib.Outer(nil));
+    var lt = reflect.TypeOf(new local(new fieldlib.Outer()));
+    var ot = reflect.TypeOf(new fieldlib.Outer());
     @string mine = reflect.TypeOf(new main_i()).Field(0).PkgPath;
     fmt.Println("local.Field(0) exported, PkgPath empty:", lt.Field(0).IsExported(), lt.Field(0).PkgPath == ""u8);
     fmt.Println("local.Field(1) exported:", lt.Field(1).IsExported());
@@ -111,10 +111,10 @@ internal static void Main() {
         var f = t.Field(0);
         fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);
     }
-    anon("struct{ int }", reflect.TypeOf(new embedsInt(nil)));
-    anon("struct{ *int }", reflect.TypeOf(new embedsIntPtr(nil)));
-    anon("struct{ n T }", reflect.TypeOf(new holdsNamed(nil)));
-    anon("struct{ myInt }", reflect.TypeOf(new embedsNamed(nil)));
+    anon("struct{ int }", reflect.TypeOf(new embedsInt()));
+    anon("struct{ *int }", reflect.TypeOf(new embedsIntPtr()));
+    anon("struct{ n T }", reflect.TypeOf(new holdsNamed()));
+    anon("struct{ myInt }", reflect.TypeOf(new embedsNamed()));
 }
 
 } // end main_package

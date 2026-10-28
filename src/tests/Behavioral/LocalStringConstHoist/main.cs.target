@@ -136,7 +136,7 @@ internal static void Main() {
     fmt.Println(classify("matched"), classify("other"));
     fmt.Println(bytesConst());
     fmt.Println(genericLabel<nint>(7), genericLabel((@string)"x"));
-    var p = Ꮡ(new parser(nil));
+    var p = Ꮡ(new parser());
     fmt.Println(p.name(), p.name());
     fmt.Println(loop());
     fmt.Println(initValue);

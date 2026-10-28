@@ -68,8 +68,8 @@ internal static void nonCaptureControl() {
 
 internal static void Main() {
     localStruct();
-    valueParam(new holder(nil));
-    typeSwitchCase(new holder(nil));
+    valueParam(new holder());
+    typeSwitchCase(new holder());
     anonStruct();
     nonCaptureControl();
 }

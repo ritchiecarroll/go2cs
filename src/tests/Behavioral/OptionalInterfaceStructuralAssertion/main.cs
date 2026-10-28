@@ -36,7 +36,7 @@ internal static void Main() {
     var d = newDescriber("alpha");
     fmt.Println(d.Describe());
 
-    var items = new any[]{new widget(name: "beta"), new plain(nil)}.slice();
+    var items = new any[]{new widget(name: "beta"), new plain()}.slice();
 
     foreach (var (_, it) in items) {
         {

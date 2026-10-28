@@ -74,7 +74,7 @@ private static readonly object looksDeliciousˢ = (@string)"looks delicious"u8;
 private static readonly object litˢ = (@string)"lit"u8;
 
 internal static void Main() {
-    var e = Ꮡ(new E(nil));
+    var e = Ꮡ(new E());
     nint l = default;
 
     e.Info(looksDeliciousˢ);

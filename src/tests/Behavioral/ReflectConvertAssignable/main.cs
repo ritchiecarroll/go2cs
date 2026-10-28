@@ -118,20 +118,20 @@ internal static void Main() {
 
     var stringerType = reflect.TypeOf((ж<fmt.Stringer>)nil).Elem();
     var emptyType = reflect.TypeOf((ж<any>)nil).Elem();
-    fmt.Println("iface", reflect.TypeOf(new speaker(nil)).AssignableTo(stringerType));
-    fmt.Println("iface", reflect.TypeOf(new mute(nil)).AssignableTo(stringerType));
+    fmt.Println("iface", reflect.TypeOf(new speaker()).AssignableTo(stringerType));
+    fmt.Println("iface", reflect.TypeOf(new mute()).AssignableTo(stringerType));
     fmt.Println("iface", named.AssignableTo(emptyType), stringerType.AssignableTo(emptyType));
 
-    var structA = reflect.TypeOf(new fieldsA(nil));
-    var structWideElem = reflect.TypeOf(new fieldsWideElem(nil));
-    var structRenamed = reflect.TypeOf(new fieldsRenamed(nil));
-    var structShort = reflect.TypeOf(new fieldsShort(nil));
-    var namedStructA = reflect.TypeOf(new namedFieldsA(nil));
+    var structA = reflect.TypeOf(new fieldsA());
+    var structWideElem = reflect.TypeOf(new fieldsWideElem());
+    var structRenamed = reflect.TypeOf(new fieldsRenamed());
+    var structShort = reflect.TypeOf(new fieldsShort());
+    var namedStructA = reflect.TypeOf(new namedFieldsA());
     fmt.Println("struct", structA.ConvertibleTo(structA), structA.ConvertibleTo(structWideElem));
     fmt.Println("struct", structA.ConvertibleTo(structRenamed), structA.ConvertibleTo(structShort));
     fmt.Println("struct", structA.AssignableTo(namedStructA), namedStructA.AssignableTo(structA));
     fmt.Println("struct", structWideElem.AssignableTo(namedStructA), structShort.AssignableTo(namedStructA));
-    var structTagged = reflect.TypeOf(new fieldsTagged(nil));
+    var structTagged = reflect.TypeOf(new fieldsTagged());
     var unnamedStruct = reflect.TypeOf(new main_i());
     fmt.Println("struct", structA.ConvertibleTo(structTagged), structTagged.ConvertibleTo(structA));
     fmt.Println("struct", unnamedStruct.AssignableTo(structA), unnamedStruct.AssignableTo(structTagged));

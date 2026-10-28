@@ -67,7 +67,7 @@ internal static void Main() {
     var ptr = reflect.ArrayOf(2, reflect.PointerTo(byteT));
     fmt.Println("pointer elem:", ptr, "| elem:", ptr.Elem(), "| identical:", AreEqual(ptr, reflect.TypeOf(new ж<uint8>[]{}.array(2))));
 
-    var structs = reflect.ArrayOf(2, reflect.TypeOf(new pair(nil)));
+    var structs = reflect.ArrayOf(2, reflect.TypeOf(new pair()));
     fmt.Println("struct elem:", structs, "| len:", structs.Len(), "| size:", structs.Size(),
         "| identical:", AreEqual(structs, reflect.TypeOf(new pair[]{}.array(2, () => new()))));
 

@@ -51,7 +51,7 @@ internal static void Main() {
     var other = new map<@string, any>{};
     fmt.Println("different maps equal:", reflect.ValueOf(m) == reflect.ValueOf(other));
 
-    fmt.Println("zero equal:", new reflectꓸValue(nil) == new reflectꓸValue(nil));
+    fmt.Println("zero equal:", new reflectꓸValue() == new reflectꓸValue());
 }
 
 } // end main_package

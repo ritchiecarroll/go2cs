@@ -8,7 +8,7 @@ partial struct reg {
 }
 
 internal static ж<reg> newReg() {
-    return Ꮡ(new reg(nil));
+    return Ꮡ(new reg());
 }
 
 internal static @string add(this ref reg r, @string name) {

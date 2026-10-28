@@ -20,7 +20,7 @@ partial interface storer {
 }
 
 internal static storer newDirect() {
-    return new sync_Mapжstorer(Ꮡ(new Δsync.Map(nil)));
+    return new sync_Mapжstorer(Ꮡ(new Δsync.Map()));
 }
 
 internal static void Main() {

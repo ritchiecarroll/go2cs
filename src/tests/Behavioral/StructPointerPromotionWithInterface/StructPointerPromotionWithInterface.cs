@@ -180,7 +180,7 @@ internal static void Main() {
 
     fmt.Println(probeRig(new rig(dev: new Device(name: "r", hits: 42))));
 
-    var ck = Ꮡ(new counterKind(nil));
+    var ck = Ꮡ(new counterKind());
     ck.Value.label = "k9";
     stamper st = new counterKindжstamper(ck);
     fmt.Println(st.Stamp(), st.Stamp(), st.Hits());

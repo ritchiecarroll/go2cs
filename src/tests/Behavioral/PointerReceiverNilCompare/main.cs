@@ -48,11 +48,11 @@ internal static @string describe(this ж<box> Ꮡb) {
 }
 
 internal static void Main() {
-    var b = Ꮡ(new box(nil));
+    var b = Ꮡ(new box());
     fmt.Println(b.isNil(), b.notNil());
-    fmt.Println(b.same(b), b.same(Ꮡ(new box(nil))));
+    fmt.Println(b.same(b), b.same(Ꮡ(new box())));
 
-    var e = Ꮡ(new embedder(nil));
+    var e = Ꮡ(new embedder());
     e.Value.val = 7;
     e.Value.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());

@@ -84,7 +84,7 @@ internal static partial void Main() {
     UntypedInt workers = 8;
     UntypedInt each = 2000;
 
-    var c = Ꮡ(new counter(nil));
+    var c = Ꮡ(new counter());
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < workers; i++) {
         Ꮡwg.Add(1);
@@ -121,7 +121,7 @@ internal static partial void Main() {
     c.of(counter.Ꮡmu).Unlock();
     fmt.Println("cross-goroutine unlock: ok");
 
-    var p = Ꮡ(new counter(nil));
+    var p = Ꮡ(new counter());
     var q = p;
     q.of(counter.Ꮡmu).Lock();
     q.Value.n = 42;

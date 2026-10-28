@@ -33,7 +33,7 @@ internal static void Main() {
     fmt.Println("MapIndex(nil):", v.MapIndex(reflect.Zero(keyType)));
     fmt.Println("m[nil]:", m[default]);
 
-    var h = new holder(nil);
+    var h = new holder();
     var pk = reflect.ValueOf(h).Field(0);
     v.SetMapIndex(pk, reflect.ValueOf("typed-nil-key"));
     show("after typed-nil key:", m);
@@ -44,7 +44,7 @@ internal static void Main() {
 
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("again"));
     fmt.Println("m[nil] after overwrite:", m[default]);
-    v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue(nil));
+    v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue());
     show("after delete nil key:", m);
 
     var keys = v.MapKeys();
