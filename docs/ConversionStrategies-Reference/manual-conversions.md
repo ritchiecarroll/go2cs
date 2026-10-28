@@ -2749,6 +2749,16 @@ descended into.** `KindOf` reports `Pointer` for it, which is both finite and Go
 target language rather than the source one: only `Struct` and `Array` recurse, `Struct` is answered
 for value types alone, and C# forbids a value type from containing itself transitively (CS0523).
 
+The CLR's own primitives are the one exception to CS0523: each is a struct holding one field of its
+own type (`System.Char` holds `char m_value`, `System.Int32` holds `int m_value`). So every primitive
+must classify as a scalar before the `Struct` arm is reached. `System.Char` was the one that did not.
+No Go type converts to it, but a C# lambda whose body returns a bare `'a'` infers `Func<int, char>`,
+and a converter defect that dropped a rune literal's cast emitted exactly that (P2, seat #23 r2).
+`fmt`'s `%v` of such a value then died in `IsComparable` with an uncatchable `Stack overflow.`.
+`KindOf` now reports a `char` as `Uint16`, a UTF-16 code unit, and `GoTypeName` spells it `uint16`.
+`GolibTests.ClrPrimitiveKindTests` holds all fourteen primitives to a scalar kind, and checks the
+list against the primitives the runtime itself exports.
+
 Two consequences worth carrying:
 
 - **A legal self-referential Go type still gets a real size, not a bail-out.** `type node struct {
