@@ -87,4 +87,6 @@ func main() {
 	fmt.Println(describe(nil))
 	fmt.Println(describe(m))
 	fmt.Println(describe(typedNilErr()))
+
+	collections()
 }

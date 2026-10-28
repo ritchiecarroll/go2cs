@@ -10,7 +10,8 @@
 // golib's `nil`, as Go writes it, and every other typeless zero emits `default` (no `!`). A type
 // parameter keeps its own path whatever its constraint: C# binds no user-defined operator on a type
 // parameter (CS8761), so a map or slice core reads IsNil and an erased pointer core is a pointer.
-// Slices, maps and chans keep `default` until stage 2 proves their operators against `nil`.
+// Stage 2 (seat #24) widened the rule to slices, maps and chans once golib's proof showed their nil
+// operators agree with Go for every construction kind (GolibTests NilHeaderEqualityTests).
 
 package main
 
@@ -92,9 +93,9 @@ func main() {
 		"return err != nil && nil != a;", // interfaces, either side
 		"return f == nil || nil == h;",   // funcs, named or not, either side
 		"return p == nil;",               // pointers already took the pointer context; an un-aliased pointer parameter keeps its Go name (seat #25 R5)
-		"return s == default;",           // slices, maps and chans: stage 2
-		"return m == default;",
-		"return c == default;",
+		"return s == nil;",               // slices, maps and chans: stage 2 (seat #24)
+		"return m == nil;",
+		"return c == nil;",
 		"return m.IsNil;", // a map-core type parameter keeps IsNil
 		"return default;", // D1: the typeless zero carries no `!`
 	} {

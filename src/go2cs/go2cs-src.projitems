@@ -421,6 +421,7 @@
     <None Include="$(MSBuildThisFileDirectory)nativeIntConstWidth_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedArgScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedMapPointerValue_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nilCompareCollections_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareOperands_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
