@@ -138,6 +138,7 @@ public static partial class TypeExtensions
     /// <param name="genericType">Generic type to search.</param>
     /// <param name="targetType">Target type of generic type.</param>
     /// <returns>Explicit conversion operator, if found; otherwise <c>null</c>.</returns>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotNotReachedJustification)]
     public static MethodInfo GetExplicitGenericConversionOperator(this Type genericType, Type targetType)
     {
         Type genericOfType = genericType.MakeGenericType(targetType);

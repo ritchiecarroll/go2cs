@@ -35,6 +35,13 @@
          assembly-binding redirects that cannot fire on net10.0; 660/661 were bare numbers. -->
     <NoWarn>CS0660;CS0661;CS8500;CS8981;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- The Native AOT analyzer: a member that closes a generic over a run-time Type (MakeGenericMethod,
+         MakeGenericType) or emits code warns IL3050, and golib builds with 0 warnings, so a new one is refused at the
+         build. Analysis only: IsAotCompatible would also mark golib trimmable, which a consumer's partial trim must not
+         see. Every site that remains carries a per-member suppression citing its census class
+         (GoTypeRegistry.Aot*Justification). Without this, NativeStructMarshal's leaf classifier went unflagged and a
+         converted TLS program exited 2 under Native AOT (1.26.10.2 seat #18). -->
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">

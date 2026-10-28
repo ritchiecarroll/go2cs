@@ -199,3 +199,14 @@ the default is this tree) and compare the two stdouts byte for byte. It was writ
 dotnet publish src/tests/PackageTests/GolibAotProbe -c Release -r win-x64 -o <out dir outside the tree>
 <out dir>\GolibAotProbe.exe > probe.out
 ```
+
+Seat #18 (1.26.10.2) added the syscall marshal's three shapes (scenarios 9 to 12), which must run under Native AOT:
+`marshal` (a struct viewed as bytes and passed as a `uintptr`, net's shape before `WSAIoctl`), `roundtrip` (a
+reference-bearing struct copied to a native buffer and decoded back) and `outword` (a pointer word the callee writes).
+The probe runs every scenario by default, and `GolibAotProbe.exe <name>` runs one of those three alone, so each site
+reads red or green by itself. At the seat's base each exits 2 with `... is missing native code`; at the fix all three
+exit 0, and the whole run's stdout equals the JIT's. The probe now publishes with `TrimMode=partial`, as a converted
+program does, since golib reads a Go struct's layout from its fields; `-p:TrimMode=full` still selects the full trim.
+Build each arm from a copy of the probe in its own folder: a `BaseIntermediateOutputPath` passed on the command line
+also lands on the golib project reference, the two restores then share one assets file, and the Native AOT publish
+silently falls back to an IL one.

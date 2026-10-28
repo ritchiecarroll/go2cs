@@ -11,6 +11,9 @@
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PublishAot>true</PublishAot>
+    <!-- What a converted program publishes with (the csproj template; go.lib.targets for a package consumer): golib
+         reads a Go struct's layout from its fields, so the SDK's full trim would strip the probe's own structs. -->
+    <TrimMode>partial</TrimMode>
     <InvariantGlobalization>true</InvariantGlobalization>
     <NoWarn>CS8981</NoWarn>
     <GolibProj Condition="'$(GolibProj)'==''">$(MSBuildThisFileDirectory)../../../core/golib/golib.csproj</GolibProj>

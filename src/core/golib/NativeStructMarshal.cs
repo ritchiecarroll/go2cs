@@ -14,12 +14,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static go.GoReflect;
 
-// The leaf copiers are closed over runtime Types with MakeGenericMethod, as the rest of GoReflect's
-// machinery is (GoReflect.MethodSets.cs carries the same set); the leaf types are unmanaged scalars.
-#pragma warning disable IL2060
-#pragma warning disable IL2071
-#pragma warning disable IL3050
-
 namespace go;
 
 /// <summary>
@@ -508,7 +502,7 @@ public static unsafe partial class NativeStructMarshal
 
     // ---- a leaf: one unmanaged value whose managed size IS its Go size, copied as raw bytes ----
 
-    private sealed class Leaf
+    internal sealed class Leaf
     {
         public required nint Size { get; init; }
         public required Action<object, nint> WriteRaw { get; init; }
@@ -522,37 +516,97 @@ public static unsafe partial class NativeStructMarshal
 
         // A scalar kind (a named Go type over a scalar included) whose managed type holds no reference
         // and occupies exactly Go's size; anything else has no raw image to copy.
+        //
+        // Nothing here is closed over the leaf type. A Native AOT image has no code for a generic instantiation that
+        // nothing made statically, and the copiers used to be MakeGenericMethod over each scalar leaf type: a converted
+        // TLS program exited 2 in syscall.WSAIoctl, IsReferenceOrContainsReferences<ushort> "missing native code"
+        // (1.26.10.2 seat #18). The raw copy moves the same bytes Unsafe.WriteUnaligned/ReadUnaligned<T> did, since the
+        // type holds no reference and its managed size is Go's.
         public static Leaf? Of(Type type) => s_leaves.GetOrAdd(type, static t =>
         {
-            if (KindOf(t) is < GoReflect.Bool or > GoReflect.Complex128 || !t.IsValueType || containsReferences(t))
+            if (KindOf(t) is < GoReflect.Bool or > GoReflect.Complex128 || !t.IsValueType || ContainsReferences(t))
                 return null;
 
             nint goSize = GoSizeOf(t);
 
-            if (goSize <= 0 || sizeOf(t) != goSize)
+            if (goSize <= 0 || ClrSizeOf(t) != goSize)
                 return null;
 
-            MethodInfo write = typeof(Leaf).GetMethod(nameof(write_), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(t);
-            MethodInfo read = typeof(Leaf).GetMethod(nameof(read_), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(t);
+            uint size = (uint)goSize;
 
             return new Leaf
             {
                 Size = goSize,
-                WriteRaw = write.CreateDelegate<Action<object, nint>>(),
-                ReadRaw = read.CreateDelegate<Func<nint, object>>()
+                WriteRaw = (value, destination) => Unsafe.CopyBlockUnaligned(ref *(byte*)destination, ref RawData(Unboxable(value, t)), size),
+                ReadRaw = source =>
+                {
+                    object box = ZeroBox(t);
+                    Unsafe.CopyBlockUnaligned(ref RawData(box), ref *(byte*)source, size);
+                    return box;
+                }
             };
         });
 
-        private static void write_<T>(object value, nint destination) where T : unmanaged =>
-            Unsafe.WriteUnaligned((void*)destination, (T)value);
+        // A boxed zero of the leaf type, to copy the native bytes into.
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067",
+            Justification = "A leaf is a Go scalar value type, and GetUninitializedObject boxes its zero without running " +
+                            "a constructor, so the constructors the annotation asks to keep are never called.")]
+        private static object ZeroBox(Type t) => RuntimeHelpers.GetUninitializedObject(t);
 
-        private static object read_<T>(nint source) where T : unmanaged =>
-            Unsafe.ReadUnaligned<T>((void*)source);
+        // The first byte of a boxed value type's data, the way CoreLib's RuntimeHelpers.GetRawData reaches it: a box is
+        // its type pointer followed by the value.
+        private sealed class RawBox
+        {
+            public byte Data;
+        }
 
-        private static bool containsReferences(Type t) =>
-            (bool)typeof(RuntimeHelpers).GetMethod(nameof(RuntimeHelpers.IsReferenceOrContainsReferences))!.MakeGenericMethod(t).Invoke(null, null)!;
+        private static ref byte RawData(object box) => ref Unsafe.As<RawBox>(box).Data;
 
-        private static int sizeOf(Type t) =>
-            (int)typeof(Unsafe).GetMethod(nameof(Unsafe.SizeOf))!.MakeGenericMethod(t).Invoke(null, null)!;
+        // The check `(T)value` made as an unbox: the box is a T, or an enum and a primitive over the same underlying type.
+        private static object Unboxable(object value, Type t)
+        {
+            Type actual = value.GetType();
+
+            if (actual == t || (actual.IsEnum || t.IsEnum) && underlying(actual) == underlying(t))
+                return value;
+
+            throw new InvalidCastException($"Unable to cast object of type '{actual}' to type '{t}'.");
+
+            static Type underlying(Type type) => type.IsEnum ? Enum.GetUnderlyingType(type) : type;
+        }
     }
+
+    private static readonly ConcurrentDictionary<Type, bool> s_containsReferences = new();
+
+    /// <summary>
+    /// <see cref="RuntimeHelpers.IsReferenceOrContainsReferences{T}"/>'s answer for a runtime <see cref="Type"/>, from its
+    /// fields: a reference type, or a value type with a reference anywhere in its instance fields. A pointer or function
+    /// pointer field is not a reference; a byref field (a ref struct's) is.
+    /// </summary>
+    internal static bool ContainsReferences(Type type) => s_containsReferences.GetOrAdd(type, static t => containsReferences(t));
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static bool containsReferences(Type type)
+    {
+        if (type.IsPointer || type.IsFunctionPointer || type.IsPrimitive || type.IsEnum)
+            return false;
+
+        if (!type.IsValueType)
+            return true;
+
+        foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            if (field.FieldType.IsByRef || containsReferences(field.FieldType))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// <see cref="Unsafe.SizeOf{T}"/>'s answer for a runtime <see cref="Type"/>: the managed size of a value of it (a
+    /// reference type's is a reference's).
+    /// </summary>
+    internal static int ClrSizeOf(Type type) =>
+        type.IsValueType ? RuntimeHelpers.SizeOf(type.TypeHandle) : IntPtr.Size;
 }

@@ -20,7 +20,6 @@ using static go2cs.Symbols;
 #pragma warning disable IL2026
 #pragma warning disable IL2060
 #pragma warning disable IL2070
-#pragma warning disable IL3050
 
 namespace go;
 
@@ -656,6 +655,7 @@ public static partial class GoReflect
 
     // Compiles the ONE-per-delegate-type wrapper factory: an outer lambda taking the invoker, whose
     // body IS the typed delegate boxing its arguments through to that invoker.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
     private static Func<Func<object?[], object?>, Delegate> CompileGoFuncFactory(Type delegateType)
     {
         MethodInfo? invoke = typeof(Delegate).IsAssignableFrom(delegateType) ? delegateType.GetMethod("Invoke") : null;
@@ -861,6 +861,7 @@ public static partial class GoReflect
     // anyway, and a type that exists but cannot be bound is worse than the refusal this has always
     // been. The `Span<T>` variadic tail is the ONE exception, and it is not a shape the mint invents:
     // the variadic families carry it themselves and InvokeVariadic's typed trampolines consume it.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Type MakeDelegateType(Type[] parameterTypes, Type returnType)
     {
         bool isAction = returnType == typeof(void);
@@ -915,6 +916,7 @@ public static partial class GoReflect
     // One family rung instantiated, with the SAME loud refusal the BCL arm raises — a parameter a
     // generic family cannot take is exactly what MakeGenericType rejects here.
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Type InstantiateFamily(Type family, Type[] arguments, Type[] parameterTypes, Type returnType)
     {
         try

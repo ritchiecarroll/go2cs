@@ -468,7 +468,7 @@ queued after a run is run by the next miss.
      (`Native AOT is unchanged`). Each consumer runs its queue on a miss, then looks again:
      src/core/golib/AdapterRegistry.cs:116 (`GoDeferredRegistrations.Adapters.Run()`),
      src/core/golib/builtin.cs:1632 (`GoDeferredRegistrations.ZeroFactories.Run()`),
-     src/core/golib/GoTypeOps.cs:224 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
+     src/core/golib/GoTypeOps.cs:233 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :63
      (`GoDeferredRegistrations.NativeArrayOpeners.Run()`). Guard: src/tests/GolibTests/DeferredRegistrationTests.cs:212

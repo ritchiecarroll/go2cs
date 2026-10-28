@@ -14,10 +14,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using static go.GoReflect;
 
-#pragma warning disable IL2060
-#pragma warning disable IL2071
-#pragma warning disable IL3050
-
 namespace go;
 
 public static unsafe partial class NativeStructMarshal
@@ -530,12 +526,9 @@ public static unsafe partial class NativeStructMarshal
         }
     }
 
-    // A native-address box over an element type known only at run time (the kernel-returned kind).
-    private static object NewNativeBox(Type element, nuint address) =>
-        typeof(NativeStructMarshal).GetMethod(nameof(newNativeBox), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(element).Invoke(null, [address])!;
-
-    private static object newNativeBox<T>(nuint address) => new NativeBox<T>(address);
+    // A native-address box over an element type known only at run time (the kernel-returned kind), from the element's
+    // type operations: a closed generic method made at run time has no Native AOT code (1.26.10.2 seat #18).
+    private static object NewNativeBox(Type element, nuint address) => GoTypeOps.Of(element).NewNativeBox(address);
 }
 
 /// <summary>

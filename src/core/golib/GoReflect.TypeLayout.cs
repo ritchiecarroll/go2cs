@@ -1474,6 +1474,7 @@ public static partial class GoReflect
     /// one result. A golib variadic family delegate (<c>Funcꓸꓸꓸ</c>/<c>Actionꓸꓸꓸ</c>, whose tail
     /// is <c>params Span&lt;T&gt;</c>) reports variadic with the tail as Go's <c>[]T</c>.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotTypeOnlyJustification)]
     public static bool TryFuncShape(Type delegateType, [NotNullWhen(true)] out Type[]? ins, [NotNullWhen(true)] out Type[]? outs, out bool isVariadic)
     {
         ins = null;
@@ -1547,6 +1548,7 @@ public static partial class GoReflect
     /// composed rather than reconstructed, the same substitution ChanOf and MapOf make.
     /// </para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     public static Type MakeGoFuncType(Type[] ins, Type[] outs, bool isVariadic)
     {
         Type[] parameters = (Type[])ins.Clone();
@@ -1574,6 +1576,7 @@ public static partial class GoReflect
     // Go's result list as ONE managed return type: none is void, one is itself, and several are the
     // ValueTuple the converter already returns from a multi-result func.
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Type makeGoResultType(Type[] outs)
     {
         // Each definition is named by `typeof` AT its MakeGenericType call: the trim analyzer can

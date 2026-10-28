@@ -133,6 +133,7 @@ public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemb
     /// <exception cref="InvalidOperationException">
     /// Field <paramref name="fieldName"/> not found in type <typeparamref name="T"/>.
     /// </exception>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotNotReachedJustification)]
     public static FieldRefFunc<TElem> Create<TElem>(string fieldName)
     {
         // Get the FieldInfo for fieldName in struct T referenced by ж<T>

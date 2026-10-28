@@ -308,6 +308,7 @@ public static class AdapterBinder
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2059", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotGuardedJustification)]
     private static Func<object, object>? BuildGenericShellFactory(Type valueType, GoInterfaceShellAttribute spec)
     {
         GoTypeExtensions.ResolveReceiverElement(valueType, out Type element, out bool isPointer);

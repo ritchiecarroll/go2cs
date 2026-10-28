@@ -58,6 +58,7 @@ public static partial class GoReflect
     // The family instantiation of a variadic signature. Under Native AOT a value-type instantiation exists only when some
     // compiled code constructed it (a registration does); one that does not is refused by name.
     [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotGuardedJustification)]
     private static Type variadicFamilyType(Type delegateType, Type familyDefinition, Type[] typeArguments)
     {
         try
@@ -74,6 +75,7 @@ public static partial class GoReflect
     // only over reference types, whose shared code exists. A value-type family is refused by name there, as a Go panic
     // naming the family and the registry, never the runtime's missing-native-code exception.
     [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotGuardedJustification)]
     private static TDelegate closeVariadicTrampoline<TDelegate>(Type delegateType, Type familyDefinition, string trampoline, Type[] typeArguments)
         where TDelegate : Delegate
     {
