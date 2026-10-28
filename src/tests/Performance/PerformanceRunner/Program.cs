@@ -547,15 +547,15 @@ namespace PerformanceRunner
             // version disables skipping for the whole run rather than matching stamps vacuously.
             ProcResult sdkProbe = Exec("dotnet", "--version", s_perfDir, 60_000, env);
             string sdkVersion = sdkProbe.ExitCode == 0 ? sdkProbe.StdOut.Trim() : "";
-            string currentStamp = sdkVersion.Length > 0 ? $"sdk={sdkVersion};config={Config};rid=win-x64;mode=PerfAot" : "";
 
             foreach (string p in projects)
             {
                 string csproj = Path.Combine(s_perfDir, p, $"{p}.csproj");
                 string outDir = Path.GetDirectoryName(GetExePath(p, Variant.Aot))!;
                 string stampPath = Path.Combine(outDir, "publish.stamp");
+                string currentStamp = AotPublishReuse.Stamp(sdkVersion, Config, csproj, s_srcRoot);
 
-                if (currentStamp.Length > 0 && AotPublishUpToDate(p, stampPath, currentStamp, out string upToDateWhy))
+                if (currentStamp.Length > 0 && AotPublishReuse.IsUpToDate(GetExePath(p, Variant.Aot), stampPath, currentStamp, Path.Combine(s_perfDir, p), csproj, s_go2csExe, out string upToDateWhy))
                 {
                     results[p].Variants[Variant.Aot].BuildOk = true;
                     Console.WriteLine($"           {p}... SKIPPED (publish up to date: {upToDateWhy})");
@@ -611,59 +611,6 @@ namespace PerformanceRunner
                     Console.WriteLine("FAILED (column reported as n/a)");
                 }
             }
-        }
-
-        private static bool AotPublishUpToDate(string p, string stampPath, string currentStamp, out string why)
-        {
-            why = "";
-            string exe = GetExePath(p, Variant.Aot);
-
-            if (!File.Exists(exe) || !File.Exists(stampPath))
-                return false;
-
-            if (!string.Equals(File.ReadAllText(stampPath).Trim(), currentStamp, StringComparison.Ordinal))
-                return false;
-
-            DateTime exeTime = File.GetLastWriteTimeUtc(exe);
-
-            if (exeTime <= File.GetLastWriteTimeUtc(s_go2csExe))
-                return false;
-
-            string projPath = Path.Combine(s_perfDir, p);
-
-            if (exeTime <= File.GetLastWriteTimeUtc(Path.Combine(projPath, $"{p}.csproj")))
-                return false;
-
-            foreach (string cs in Directory.GetFiles(projPath, "*.cs", SearchOption.AllDirectories))
-            {
-                // bin holds the publish outputs themselves (and obj the intermediates); neither is
-                // an input, and the output can never be newer than a file the publish itself wrote.
-                // Generated holds the source generators' EmitCompilerGeneratedFiles copies -- also
-                // OUTPUT, refreshed by any compile of the project, so counting it as an input made
-                // the predicate self-invalidating: the run's own JIT build phase re-emitted them
-                // and every publish older than that build spuriously republished (measured
-                // 2026-08-25, PerfIfaceCall -- a farm-adopted row re-paid 3.3h for a .g.cs whose
-                // real inputs had not moved). The generators' true upstream is the analyzer
-                // assembly, checked explicitly below.
-                string rel = Path.GetRelativePath(projPath, cs);
-
-                if (rel.StartsWith("bin", StringComparison.OrdinalIgnoreCase) || rel.StartsWith("obj", StringComparison.OrdinalIgnoreCase) || rel.StartsWith("Generated", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (exeTime <= File.GetLastWriteTimeUtc(cs))
-                    return false;
-            }
-
-            // Deliberately NOT an input: the go2cs-gen analyzer assembly. Its mtime is rewritten
-            // by ordinary dependency builds of UNCHANGED sources (measured 2026-08-25: a
-            // benchmark's publish re-touched bin/Release/.../go2cs-gen.dll while nothing in the
-            // analyzer moved), so as a signal it is the same self-poisoning class as Generated.
-            // The accepted gap: an analyzer-SOURCE change can alter emitted C# with no
-            // project-local input moving -- such a change owes a manual bin purge (or a stamp
-            // scheme bump) before the next measured run, the same discipline a converter change
-            // already owes the corpus.
-            why = $"output newer than all inputs, stamp matches [{currentStamp}]";
-            return true;
         }
 
         // ---- Measurement configuration guard ----
