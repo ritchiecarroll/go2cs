@@ -559,6 +559,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
 
     [TestMethod]
+    public void CheckEmptyStructLiteralCtor() => CheckTarget("EmptyStructLiteralCtor");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]

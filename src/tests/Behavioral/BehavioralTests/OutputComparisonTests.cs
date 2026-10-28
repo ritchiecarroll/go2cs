@@ -536,6 +536,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckEmptyIfaceImplementRecord() => CheckTarget("EmptyIfaceImplementRecord");
 
     [TestMethod]
+    public void CheckEmptyStructLiteralCtor() => CheckTarget("EmptyStructLiteralCtor");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]
