@@ -2346,7 +2346,7 @@ internal static uint32 lowestSetBit(uint32 x) {
 ```
 
 Here `((uint32)0 - x)` is the negation. Both operands of `&` are `uint32`, so the `&` has no cast.
-<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1294-1300#05e413; golden
+<!-- unsigned negation: src/go2cs/convUnaryExpr.go:1306-1312#05e413; golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:19
      `fmt.Println(z & ((uint64)0 - z));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
      C# spec: unary minus on uint converts to long, on byte/ushort promotes to int, on ulong/nuint
@@ -6451,7 +6451,7 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
+    (Ꮡc.Ꮡn).Value = v;
 }
 
 public static int32 Get(this ref Counter c) {
@@ -9087,10 +9087,10 @@ boxed value, and `Ꮡblue` is the box itself, which is what `&blue` gives ([Poin
 <!-- &T{…}: src/tests/Behavioral/IncDecPointerField/main.go:21#d20362 -> main.cs.target:22 `var @base = Ꮡ(new counter(n: 5));` -->
 
 **`&s.f` points into the struct's box.** The generator's accessor `Thing.Ꮡval` is a static method that
-returns a `ref` to the `val` field of a given `Thing`. The box method `.of(…)` applies it, so
-`Ꮡx.of(Thing.Ꮡval)` is a `ж<nint>` pointing at `val` inside the box that holds `x`. `p.Value` is Go's
-`*p`, so the write reaches `x`:
-<!-- accessor shape: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2121 `static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => {target};`; of: src/core/golib/ж.cs:217-228#2a847a -->
+returns a `ref` to the `val` field of a given `Thing`. The field's generated address property applies it
+through the box method `.of(…)`, so `Ꮡx.Ꮡval` is a `ж<nint>` pointing at `val` inside the box that holds
+`x`. `p.Value` is Go's `*p`, so the write reaches `x`:
+<!-- accessor shape: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2122 `static ref {typeName} {accessor}(ref {StructName} instance) => {target};`; of: src/core/golib/ж.cs:217-228#2a847a -->
 
 <!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.go:10-25 -->
 ```go
@@ -10457,7 +10457,7 @@ At a glance:
 | `*p = v` | `p.Value = v` | Writes the real storage. |
 | `&s[i]` | `Ꮡ(s, i)` | The address of a slice element. |
 | `&a[i]` | `Ꮡa.at<T>(i)` | The address of an array element. |
-| `&x.f` | `Ꮡx.of(T.Ꮡf)` | The address of a struct field. |
+| `&x.f` | `Ꮡx.Ꮡf` | The address of a struct field, through its generated address property. |
 
 <!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#451253 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:22#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); AddressOfParamWrite/main.cs.target:159#3e49fc ((~rq)) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 (`Ꮡa.at<nint>(2)`); PointerToPointer.cs.target:47#8e2aa1 (Ꮡb.of(Buffer.Ꮡoff)). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:871#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:120-134#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#575444; `return nil` -> `return default`: same file :20#25320b -->
 
@@ -10657,8 +10657,8 @@ partial struct grid /*[3]row*/;
 
 `populate` takes a `*row` and writes through it, so its writes land in `g`'s rows. `len` of an array is a
 constant, so `len(g)` is written `3` ([Built-in Functions](#built-in-functions)). For an array local `a`
-that lives in a box, the same address is `Ꮡa.at<T>(i)`. A field's address, `&x.f`, is `Ꮡx.of(T.Ꮡf)`; the
-pointer-receiver rule in this section shows that form. <!-- array element: PointerToArrayElementAddress/main.go:29#2e99e7 -> main.cs.target:22#e5ae00; populate: main.go:18-22#b085a9 -> main.cs.target:11-17#efc9a6; boxed array local: ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 `Ꮡa.at<nint>(2)`; field: src/tests/Behavioral/ReceiverFieldAddress/main.go:17#519acf -> main.cs.target:23#93a4cc; field-reference accessors such as Counter.Ꮡn come from the struct template, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:140#4d06a7 ({{FieldReferences}}) -->
+that lives in a box, the same address is `Ꮡa.at<T>(i)`. A field's address, `&x.f`, is `Ꮡx.Ꮡf`, the field's
+generated address property; the pointer-receiver rule in this section shows that form. <!-- array element: PointerToArrayElementAddress/main.go:29#2e99e7 -> main.cs.target:22#e5ae00; populate: main.go:18-22#b085a9 -> main.cs.target:11-17#efc9a6; boxed array local: ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 `Ꮡa.at<nint>(2)`; field: src/tests/Behavioral/ReceiverFieldAddress/main.go:17#519acf -> main.cs.target:23#93a4cc; field-reference accessors such as Counter.Ꮡn come from the struct template, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:140#4d06a7 ({{FieldReferences}}) -->
 
 **A pointer parameter keeps the box and binds a `ref` alias.** The box parameter is named with the `Ꮡ`
 prefix. When the body dereferences it, the first line binds the Go name to the value with `DerefOrNull()`,
@@ -10781,7 +10781,7 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
+    (Ꮡc.Ꮡn).Value = v;
 }
 
 public static int32 Get(this ref Counter c) {
@@ -10971,6 +10971,17 @@ A few fields keep a box form, because no property can serve them as Go spells th
 member of `ж<T>` (`p.Value.Value`), a field promoted from an embedded struct (`(~o).Z`), and a field of a
 struct declared in a hand-written file. The [reference](ConversionStrategies-Reference/implicit-dereferencing.md#implicit-pointer-dereferencing)
 lists them all.
+
+**A field's address is a property too, `p.Ꮡf`.** Go's `&p.f` is `p.Ꮡf`: go2cs-gen emits a second property beside
+each field's, a `ж<F>` that points at the field in the real storage, so the address reads as the field does with
+the address glyph in front of the name. The base is whatever the pointer already is: `Ꮡb.Ꮡoff` through a
+receiver's box, `q.ᏑX` through a pointer local, `Ꮡs.ᏑY` through a value that lives in a box. Every site in every
+package hands golib the struct's one accessor for the field, so `&p.f == &p.f` holds across packages and the view
+is cached once per box and field. A field that keeps a box form for reads keeps `p.of(T.Ꮡf)` for its address too,
+and so does the field an element address goes through, `&p.arr[i]`, which is `p.at(T.Ꮡarr, i)`.
+<!-- the rule: src/go2cs/fieldAccess.go `// P2 (parity seat #32)`; the property and its token:
+     src/gen/go2cs-gen/FieldAccessGenerator.cs AddAddress and Templates/StructType/StructTypeTemplate.cs FieldReferences;
+     guard: src/tests/Behavioral/FieldAddressProperties. -->
 
 This complete program shows reads and writes. `Ꮡ(new counter(n: 5))` is Go's `&counter{n: 5}`: `new counter(n: 5)`
 builds the struct value ([Struct Types](#struct-types)), and `Ꮡ(…)` boxes it.

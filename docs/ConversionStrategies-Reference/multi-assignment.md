@@ -534,11 +534,11 @@ return x.val;
 
 It returns 99: the pointer aliases `x`'s box.
 
-Multi-hop chains chain the accessors (`&w.inner.val` → `Ꮡw.of(Wrap.Ꮡinner).of(Thing.Ꮡval)`),
+Multi-hop chains chain the address properties (`&w.inner.val` → `Ꮡw.Ꮡinner.Ꮡval`),
 and a field promoted through a VALUE embed roots at the local too (`&o.ev` →
 `Ꮡo.of(Outer.Ꮡev)`). A hop that crosses a POINTER — an explicit `w.ptr.val` deref or a field
 promoted through an embedded pointer (both are `Selection.Indirect()`) — aliases the
-POINTEE's storage instead, so the root deliberately stays unboxed: `w.ptr.of(Thing.Ꮡval)`
+POINTEE's storage instead, so the root deliberately stays unboxed: `w.ptr.Ꮡval`
 already writes through the held box. (Guarded by `LocalStructFieldAddr` — plain, nested,
 method-body, value-embed-promoted, composite-literal, and return positions plus the
 pointer-hop negative control, all output-compared vs Go; the one churned golden
@@ -685,6 +685,16 @@ correctness is identical on both paths (the same view comes back), only the COST
 across a process's early life. Guarded by `GolibTests/FieldViewCacheTests.cs` (identity, the byte split
 by type, the chain hop, the fallback, the nil box, the negative arm, and concurrent first calls).
 <!-- The concurrent-first-calls arm caught a publish race before the cut was announced. -->
+
+Since parity seat #32 the emitted spelling is the field's address property, `Ꮡrecv.Ꮡfield.Method()` (`&x.f` is
+`Ꮡx.Ꮡf`; [the rule](pointers.md)), and the property hands `of()` the struct's ONE accessor token for the field,
+`T.Ꮡf‿`, a `static readonly FieldRefFunc<T, F>` on `T` in `T`'s own assembly. Before it, each `&x.f` site
+converted the accessor method group to its own delegate, so one field reached a box as several delegate objects and
+the cache matched them by their method: under Native AOT that is `Delegate.Equals` on every lookup that misses the
+reference compare. With the token every site passes the same object, and the lookup's first compare,
+`ReferenceEquals`, answers it. A site that still passes the accessor (an assembly built before the token, or a
+field the property does not serve) reaches the same view by its method, as before; `FieldViewCacheTests` guards
+the two meeting under both forms of the match.
 
 ## A TYPE-SWITCH BINDING is escape-analyzed like any other local
 Every rule above reached a variable through `info.Defs` — and a type-switch guard has no object
