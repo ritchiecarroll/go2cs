@@ -426,7 +426,7 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 
-<!-- source: src/core/fmt/package_info.cs:61, 67, 69 -->
+<!-- source: src/core/fmt/package_info.cs:53-61 -->
 ```csharp
 // <SStringTwins>
 …
