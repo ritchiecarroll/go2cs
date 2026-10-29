@@ -42,10 +42,10 @@ internal static void Main() {
     delete(m, "a"u8);
     fmt.Println("delete ok");
 
-    fmt.Println(m == default);
+    fmt.Println(m == nil);
 
     var e = new map<@string, nint>{};
-    fmt.Println(e == default);
+    fmt.Println(e == nil);
     fmt.Println(len(e));
 
     tryWrite(m);

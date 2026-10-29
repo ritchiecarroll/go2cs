@@ -144,17 +144,17 @@ internal static void Main() {
                 masksValid = false;
                 continue;
             }
-            if ((~a).IP.To4() != default && bits != (nint)(8 * Δnet.IPv4len)) {
+            if ((~a).IP.To4() != nil && bits != (nint)(8 * Δnet.IPv4len)) {
                 masksValid = false;
             }
-            if ((~a).IP.To4() == default && bits != (nint)(8 * Δnet.IPv6len)) {
+            if ((~a).IP.To4() == nil && bits != (nint)(8 * Δnet.IPv6len)) {
                 masksValid = false;
             }
             if ((~a).IP.IsLoopback()) {
-                if ((~a).IP.To4() != default && ones == 8) {
+                if ((~a).IP.To4() != nil && ones == 8) {
                     loopback4 = true;
                 }
-                if ((~a).IP.To4() == default && ones == 128) {
+                if ((~a).IP.To4() == nil && ones == 128) {
                     loopback6 = true;
                 }
             } else {

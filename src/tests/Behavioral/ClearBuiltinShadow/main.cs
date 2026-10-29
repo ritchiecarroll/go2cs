@@ -86,7 +86,7 @@ internal static void Main() {
     c[0].v[1] = 3;
     c[0].m = new map<@string, nint>{["x"] = 1};
     builtin.clear(c);
-    fmt.Println(len(c[0].v), c[0].v[1], c[0].m == default);
+    fmt.Println(len(c[0].v), c[0].v[1], c[0].m == nil);
     c[0].v[1] += 4;
     fmt.Println(c[0].v);
 

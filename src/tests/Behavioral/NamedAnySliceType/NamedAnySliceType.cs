@@ -46,7 +46,7 @@ internal static void Main() {
     fmt.Println(len(ops), ops, ops[1..2]);
 
     SE zero = default;
-    fmt.Println(zero == default, len(zero), zero, new SE(new any[]{}.slice()) == default);
+    fmt.Println(zero == nil, len(zero), zero, new SE(new any[]{}.slice()) == nil);
 }
 
 } // end main_package

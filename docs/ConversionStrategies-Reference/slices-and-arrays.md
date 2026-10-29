@@ -753,10 +753,11 @@ and every observation and construction path keeps it:
 - **`operator ==(slice<T>, NilType)`** tests `m_array is null` (`IsNil`) — representation nilness — so
   a zero-length zero-capacity view (`[]byte{}`, `[]byte("")`, `x[len(x):]`) is not nil.
 - **`operator ==(slice<T>, slice<T>)`** is Go slice-**header identity** (same backing array reference
-  and native base, offset, length, capacity). Go forbids comparing two slices, so the *only* converted
-  code binding this operator is the nil comparison `s == nil`, which renders as `s == default!` (the nil
-  literal renders `default!` in value contexts), and against the default header `(null, 0, 0, 0)`
-  identity is exactly the nil test. Structural equality is on the `Equals` overloads for C#-side
+  and native base, offset, length, capacity). Go forbids comparing two slices, and the nil comparison
+  `s == nil` binds the `NilType` operator above, so no converted code binds this one. (Neither did the
+  earlier spelling `s == default!`: `NilType` converts implicitly to `slice<T>`, so C# prefers the
+  `NilType` operand for a `default` literal. Against the default header `(null, 0, 0, 0)` identity is the
+  nil test anyway, which GolibTests `NilHeaderEqualityTests` checks for every construction kind.) Structural equality is on the `Equals` overloads for C#-side
   collection use, and the generated named-type wrappers bind `Equals`, not this operator.
 - **`Reslice`** (every `s[a:b]`/`s[a:b:c]`) returns `default` for a nil source, never a fresh empty
   array: reslicing nil is legal only within zero bounds, and Go's `nil[0:0]` **is** the nil slice (the
@@ -1085,8 +1086,8 @@ green while leaving the storage-free path unsound for the next consumer.)
 
 **Named slice/map/channel wrappers (defined types).** The distinction extends to DEFINED types
 (`type S []int`, generated as go2cs-gen `InheritedTypeTemplate` wrappers). The comparison Go permits on
-a named slice/map/channel is `x == nil`; the converter renders it as `s == default!` (nil literal in
-value context) or `s == nil` (pointer context), and — verified against the emitted C# — **both bind the
+a named slice/map/channel is `x == nil`; the converter renders it as `s == nil` (before parity seat #24,
+`s == default!` in value context), and — verified against the emitted C# — **both spellings bind the
 wrapper's `operator ==(S, NilType)` overload**, not the same-type `operator ==(S, S)` (reverting the
 latter has no observable effect; reverting the former flips the result). For a **slice** wrapper that
 overload delegates to `slice<T>`'s own `== NilType` — REPRESENTATION nilness (null backing array) — via

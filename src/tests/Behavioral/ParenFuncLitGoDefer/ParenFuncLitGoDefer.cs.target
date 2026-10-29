@@ -34,7 +34,7 @@ internal static void later(channel<bool> done) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println("defer sees the reassigned channel:", done == default);
+            fmt.Println("defer sees the reassigned channel:", done == nil);
         }, ref ᒐ);
         done = default;
     }

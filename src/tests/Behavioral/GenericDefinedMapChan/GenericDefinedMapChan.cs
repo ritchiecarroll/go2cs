@@ -64,7 +64,7 @@ public static (V, bool) Get<K, V>(this Index<K, V> ix, K key) {
 }
 
 public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
-    if (ix == default) {
+    if (ix == nil) {
         ix = new Index<K, V>(0);
     }
 
@@ -142,7 +142,7 @@ internal static void Main() {
     var ints = NewSet<nint>(3, 1, 2, 3);
     fmt.Println("Set[int]:", len(ints), ints.Has(2), ints.Has(9), ints.Add(4), ints.Add(4), sortedInts(ints.Keys()));
     ints.Reset();
-    fmt.Println("Set[int] after Reset:", len(ints), ints == default);
+    fmt.Println("Set[int] after Reset:", len(ints), ints == nil);
 
     var words = NewSet<@string>((@string)"go", (@string)"cs");
     fmt.Println("Set[string]:", len(words), words.Has("go"u8), sortedStrings(words.Keys()));

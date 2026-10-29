@@ -16,7 +16,7 @@ internal static void Main() {
     fmt.Println(reflect.TypeOf((map<Key, Header>)default));
 
     var nilMap = (map<@string, nint>)default;
-    fmt.Println("len:", len(nilMap), "isNil:", nilMap == default);
+    fmt.Println("len:", len(nilMap), "isNil:", nilMap == nil);
     fmt.Println("read:", nilMap["absent"]);
 
     fmt.Println(reflect.TypeOf((myMap)default));

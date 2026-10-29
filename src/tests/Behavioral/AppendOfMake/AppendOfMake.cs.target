@@ -55,7 +55,7 @@ internal static void Main() {
     slice<nint> none = default;
     var n = extend(none, 3);
     fmt.Println("nil:", len(n), cap(n), n);
-    fmt.Println("zero:", len(extend(s, 0)), extend(default, 0) == default);
+    fmt.Println("zero:", len(extend(s, 0)), extend(default, 0) == nil);
 
     var g = Grow(new nint[]{1, 2}.slice(), 5);
     fmt.Println("Grow:", len(g), cap(g) >= 7, g);

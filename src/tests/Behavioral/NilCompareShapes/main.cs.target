@@ -100,6 +100,8 @@ internal static void Main() {
     fmt.Println(describe(default));
     fmt.Println(describe(m));
     fmt.Println(describe(typedNilErr()));
+
+    collections();
 }
 
 } // end main_package

@@ -183,7 +183,7 @@ internal static void Main() {
         fmt.Println(k, v);
     }
     Grades nilG = default;
-    fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == default);
+    fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == nil);
     var cl = CloneOrNil<Grades, @string, nint>(g1);
     fmt.Println(len(cl), cl["a"]);
     DropKey<Grades, @string, nint>(g1, (@string)"a");

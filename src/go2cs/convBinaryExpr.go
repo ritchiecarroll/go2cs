@@ -1827,8 +1827,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	rhsIsPointer := isPointer(rhsType) || v.typeIsErasedPointerCore(rhsType)
 	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType && !unsafePointerIdentityCompare
 
-	// An untyped nil compared with an interface or a func renders golib's `nil`, as Go writes it
-	// (`nil == err`); see nilComparandRendersNil. The nil ident is the only thing the context reaches.
+	// An untyped nil compared with an interface, a func, a slice, a map or a chan renders golib's
+	// `nil`, as Go writes it (`nil == err`); see nilComparandRendersNil. The nil ident is the only
+	// thing the context reaches.
 	if isEqualityComparison && v.exprIsUniverseNil(binaryExpr.X) && v.nilComparandRendersNil(rhsType) {
 		identContext.isPointer = true
 	}
@@ -2654,14 +2655,16 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 
 // nilComparandRendersNil reports whether an untyped nil compared (`==`/`!=`) with an operand of
 // type t renders golib's `nil` rather than the typeless `default`: t is an interface (`error` and
-// `any` included) or a func. Both are C# reference types, so `err != nil` binds golib's
-// `operator !=(object?, NilType)`, which is `obj is not null`: the same test the reference
-// comparison against `default` makes, now spelled as Go spells it.
+// `any` included), a func, a slice, a map or a chan. An interface or a func is a C# reference type,
+// so `err != nil` binds golib's `operator !=(object?, NilType)`, which is `obj is not null`: the
+// same test the reference comparison against `default` makes, now spelled as Go spells it. A slice,
+// a map or a chan binds its own `operator ==(T, NilType)` (a named one's comes from go2cs-gen), the
+// overload `x == default` already resolved to, so the spelling is all that changes; GolibTests
+// NilHeaderEqualityTests proves that operator gives Go's answer for every way such a value is made.
 //
 // A type parameter keeps its own path, whatever its constraint: a map or slice core reads IsNil
 // above, an erased pointer core is a pointer, and C# binds no user-defined operator on a type
-// parameter (CS8761). Pointers already render `nil` through the pointer context. Slices, maps and
-// chans keep `default` until their own operators are proven against `nil` (stage 2).
+// parameter (CS8761). Pointers already render `nil` through the pointer context.
 func (v *Visitor) nilComparandRendersNil(t types.Type) bool {
 	if t == nil {
 		return false
@@ -2672,7 +2675,7 @@ func (v *Visitor) nilComparandRendersNil(t types.Type) bool {
 	}
 
 	switch t.Underlying().(type) {
-	case *types.Interface, *types.Signature:
+	case *types.Interface, *types.Signature, *types.Slice, *types.Map, *types.Chan:
 		return true
 	}
 

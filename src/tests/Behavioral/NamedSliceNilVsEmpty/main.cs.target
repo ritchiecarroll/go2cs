@@ -16,34 +16,34 @@ internal static void probe(@string name, bool isNil) {
 
 internal static void Main() {
     IntSlice zeroSlice = default;
-    probe("sliceZero", zeroSlice == default);
+    probe("sliceZero", zeroSlice == nil);
 
     var emptySlice = new IntSlice(new nint[]{}.slice());
-    probe("sliceEmptyLiteral", emptySlice == default);
+    probe("sliceEmptyLiteral", emptySlice == nil);
 
     var madeSlice = new IntSlice(0);
-    probe("sliceMakeZero", madeSlice == default);
+    probe("sliceMakeZero", madeSlice == nil);
 
     var filledSlice = new IntSlice(new nint[]{1, 2}.slice());
-    probe("sliceFilled", filledSlice == default);
+    probe("sliceFilled", filledSlice == nil);
 
     var tail = filledSlice[2..2];
-    probe("sliceResliceTailCapZero", tail == default);
+    probe("sliceResliceTailCapZero", tail == nil);
 
     var nilReslice = zeroSlice[0..0];
-    probe("sliceNilReslice", nilReslice == default);
+    probe("sliceNilReslice", nilReslice == nil);
 
     StrIntMap zeroMap = default;
-    probe("mapZero", zeroMap == default);
+    probe("mapZero", zeroMap == nil);
 
     var emptyMap = new StrIntMap(new map<@string, nint>{});
-    probe("mapEmptyLiteral", emptyMap == default);
+    probe("mapEmptyLiteral", emptyMap == nil);
 
     IntChan zeroChan = default;
-    probe("chanZero", zeroChan == default);
+    probe("chanZero", zeroChan == nil);
 
     var madeChan = new IntChan(0);
-    probe("chanMade", madeChan == default);
+    probe("chanMade", madeChan == nil);
 }
 
 } // end main_package
