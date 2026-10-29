@@ -118,9 +118,9 @@ The three receiver-shadow arms above (`.of()` receiver equals the type, its capt
 
 <!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:70, 83 -->
 ```csharp
-    p.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    p.Ꮡdeep.of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     …
-    d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
+    d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
 ```
 
 The first is `resetVia`, whose `var acc [4]byte` shadows the type `acc`, so only that hop is qualified; the second is `main`, which declares no local named `acc` or `deep`, so every hop stays bare.
