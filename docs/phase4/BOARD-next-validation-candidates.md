@@ -31425,5 +31425,98 @@ main.go under `go run`).
 traceback (managed_impl.cs), unconfirmed.
 
 — G (2026-10-29)
+---
+
+### 2026-10-29 — H (1.26.10.2 seat #34, claude/h-seat34-aot-gaps): seat #18's two open Native AOT gaps in golib — a foreign struct's operations now registered by go2cs-gen (gap 1, fixed, red to green under Native AOT); reflect's method func types served from the generated method set (gap 2, defensive hardening)
+
+**Ruled** by COORD (seat #34, moved from G; G's brief): both gaps routed from seat #18's row ("Open, not this seat")
+and G's 2026-10-28 routing note. Working like Go is the target for both ("behavior fidelity outranks size"); a
+recoverable Go panic is the floor. H has no Native AOT (no VS C++ Build Tools, the 2026-10-26 ruling stands), so H
+made the fixes, the JIT and trimmed probes and the gates, and the i7 ran every Native AOT arm from H's pushed branches
+(win-x64).
+
+**The probe** (`src/tests/Behavioral/AotReflectGaps`, a behavioral row with a sub-package `lib`; each scenario under
+its own `recover()`, and an argument selects one group, so a raw .NET exception in one cannot hide another):
+- `1` (lines 1a-1g): `lib.Hidden`'s only pointer is spelled in package main, so `lib` gives it no `IGoTypeOpsSource`;
+  fmt `%v` / `%+v` over the nil `*lib.Hidden` field, its element type, `reflect.New` / `reflect.Zero` of it, and a
+  field set through `New`.
+- `2` (2a-2d): `Method(i).Type` over value-receiver methods through `Num` and `*Num`, and a `Method(0).Call`.
+- `3` (3a): an interface method's `Method(0).Type` whose signature is spelled nowhere else.
+- `4` (4a-4b): `Method(0).Type` through `Ghost` and `*Ghost`, a struct reached only through a nil `*Ghost`.
+- Under the JIT, and under self-contained trimmed publishes at `TrimMode=partial` and `full`, every selection equals
+  `go run`: neither gap reproduces off Native AOT, so each red is the i7's AOT arm at the base. The AOT recipe (a
+  behavioral project has no AOT gate, and a global `-p:PublishAot=true` reaches the netstandard go2cs-gen analyzer,
+  NETSDK1207): a copy of the probe beside a `Directory.Build.targets` gating `PublishAot` on `ProbeAot=true` and
+  `OutputType=Exe`, as the perf tree's `PerfAot`.
+
+**Gap 1, fixed (go2cs-gen).** At the base (`35b4d717fc`) Native AOT ended the process at line 1a: a raw
+`NotSupportedException`, `` 'go.GoTypeOps`1[...lib_package+Hidden]' is missing native code or metadata ``, from fmt's
+`printValue` through `reflect.valueInterface` and `GoReflect.CanonicalNilPointer` into `GoTypeOps.dynamicOps`. A
+struct's operations face is generated only in its own compilation, and only when that compilation spells a pointer to
+it (`TypeOpsScope`), so a pointer spelled in another package reached the dynamic fallback, which Native AOT cannot run
+for a value type.
+- The fix: go2cs-gen's `EscapeRegistryGenerator` registers `GoTypeOps<X>` where its walk crosses `ж<X>` for a
+  converted struct X of another assembly that lacks the face. The rule rides the escape walk (a pointer reached from a
+  value the package converts to an interface, the exact reach of reflect), not every syntactic `ж<X>`. A struct with
+  the face is not registered again, nor the compilation's own struct (its face is generated beside it); a neutral
+  package registers a per-OS assembly's struct whatever its face, so its registry stays OS-invariant (a second
+  registration of the same instance is a `TryAdd` no-op).
+- Red first: GenTests `AForeignStructWithoutTheFaceIsRegisteredWhereItsPointerEscapes`, red at the base (nothing
+  registered), with the no-duplicate control COORD asked for.
+- At the fix (`29c21185c8` and `66671142cf`) Native AOT reads `1` equal to `go run` (1a-1g), and every other selection
+  too.
+- Remainder, named: a struct of THIS compilation reached only through `var` inference still has no face
+  (TypeOpsScope's syntax read), and still falls to the fallback under Native AOT.
+
+**Gap 2, defensive hardening (golib).** G's gap 2 was found by reading; **no Native AOT reproduction in 4 shapes on
+win-x64** (2, 3, 4 at `c3abec0c0d`, and 2 at `35b4d717fc`): go2cs-gen's `IGoMethodSet` arms name each concrete
+method's delegate types in compiled code, and ILC closed the interface method's and the never-built struct's families
+too. The change converts a reachable raw crash into a Go panic and serves the generated delegate's type:
+- `MakeDelegateType`'s two filters take `NotSupportedException` (G's item), so `FuncOf` re-raises it as a panic;
+- where no family closes, `DelegateTypeOrGenerated` takes the receiver type's generated delegate's type (the same
+  family, closed in compiled code); the binders already take that delegate when its type matches, so `Method(i).Type`,
+  `Func` and `Call` work; the method value's type is read from the `*T` arm with a nil box, which the arm only casts;
+- a method no generated set answers is a Go panic naming it (`go2cs: reflect: no func type for method M of T`), never
+  the raw exception. On the JIT nothing changes: the family closes first.
+- Proof: GolibTests `AotMethodTypeFallbackTests` through a seam that refuses the family as Native AOT does
+  (`GoReflect.RefuseFamiliesForTest`; serial MSTest, as `GoFieldMetadata.WithheldForTest`). With the fallback disabled
+  the first test fails, with the panic wrappers disabled the second fails too; restored byte-identical.
+- No KnownIssues entry (COORD): nothing user-visible is known to fail. Selections 3 and 4 stay in the probe as
+  regression rows.
+
+**Footprint.** golib and go2cs-gen only: the converter is unchanged, so no `src/core` or behavioral emission moves (by
+construction; CNR not run). The generator's output is compile-time, never committed: the escape registries, measured
+by building `go2cs-stdlib.slnx` per `GoTargetOS` at the base (`6341102e53`) and at the fix, gain 23 / 20 / 21 distinct
+types (windows / linux / darwin; 30 / 25 / 26 registrations, a type named in more than one package registry counted
+per package), among them `crypto/x509.Certificate` and `CertPool`, three `crypto/x509/pkix` structs,
+`crypto/tls.ConnectionState`, `net.IPNet`, `os.File`, `sync.Pool`, `time.Timer`, five
+`internal/trace/traceviewer/format` args, and per-OS `syscall` structs (windows `Rusage`, `Win32FileAttributeData`,
+`internal/runtime/syscall/windows.MemoryBasicInformation`; darwin `RawSockaddr`), and lose none. The fix's three
+builds are the stdlib emission compile arm: windows, linux and darwin each 0 errors, 362 of 362 `core` projects
+compiled in the run, with only the standing warnings (CS9113; on linux also the standing CS0219 `is64bit`).
+
+**Gates** on H (win-x64), at the seat tree, one battery on the box (and the targeted re-run below).
+- `go test -timeout 60m ./...` (src/go2cs): the first pass read repoguard red on three provenance notes the gap-1
+  rule's 20 lines moved (EscapeRegistryGenerator.cs 394, 373, 388-423), re-cited with the cited text unchanged;
+  repoguard green at the re-run, and the other nine packages ok (go2cs 967 s).
+- GenTests 350/350 (EscapeRegistry 7/7, the new test among them).
+- GolibTests unfiltered: the first pass read 1 red, `AnUnbindableMethodFuncIsAGoPanicNamingTheMethod`: the binder read
+  the method's type through the public `GoMethodFuncType`, whose new panic displaced `GoMethodFunc`'s own text; the
+  binder now reads the internal route. Re-run: 2,270 passed, 0 failed, 36 skipped.
+- golib Release `--no-incremental` 0 warnings, 0 errors, csc ran; with `EnableAotAnalyzer` 0 warnings (0 IL3050).
+- `go2cs.slnx` 0 errors (158 standing warnings); `go2cs-stdlib.slnx` 0 / 0, at both passes.
+- Behavioral, the 70 projects that import `reflect` (AotReflectGaps among them): 280 tests, A1, B2, C3, D4 70 each;
+  the first pass read 279, AotReflectGaps' Output exiting 0x80008096 (the .NET host could not start it: my own
+  self-contained trimmed publish in the probe's folder had left a `win-x64` restore in its `obj`, the cross-pollution
+  the perf tree documents); with the probe's `bin`/`obj` removed it reads 4/4.
+- Native AOT (the i7, win-x64, publish rc 0 at every arm): base `35b4d717fc` `1` RED (exit 2, the raw exception
+  above), `2` green; base `c3abec0c0d` `3` and `4` green; fix `29c21185c8` `1`, `2` and none, and fix `66671142cf`
+  `1`-`4` and none, every line equal to `go run`.
+- Rebased onto `340ba0cc78` (batch 89) as `claude/h-seat34-aot-gaps-r2`: the seat's delta, the BOARD row aside, has
+  stable patch-id `e7e3c8206d` at both bases; the probe's `package_info.cs` drops eight unused imported aliases under
+  #41's rule (its `main.cs` equals the golden unchanged); repoguard, GenTests 350/350, AotReflectGaps 4/4 and every JIT
+  selection green at the r2 tip.
+
+— H (2026-10-29)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

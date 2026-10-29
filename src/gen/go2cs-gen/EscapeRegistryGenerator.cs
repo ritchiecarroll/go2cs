@@ -40,7 +40,9 @@ namespace go2cs;
 /// <item>a container reachable only through a PER-OS assembly's non-exported surface from a platform-NEUTRAL package (see
 /// Fields and <see cref="IsPerOS"/>: the neutral registry must be the same in every OS flavor; what a neutral package
 /// reaches through a per-OS assembly's EXPORTED structs, that assembly registers itself);</item>
-/// <item>a struct that carries no face of its own (its compilation never spells a pointer to it; TypeOpsScope).</item>
+/// <item>a struct of THIS compilation that carries no face (it never spells a pointer to it, TypeOpsScope's syntax read;
+/// one reached only through <c>var</c> inference). A struct of another assembly without the face is registered where the
+/// walk crosses a pointer to it (seat #34).</item>
 /// </list>
 /// <para>
 /// MEASURED (2026-10-10, the stage-3 table's row G+(iii), win-x64 Native AOT): the container probe's reflect.New / Zero(*C)
@@ -223,9 +225,14 @@ public class EscapeRegistryGenerator : ISourceGenerator
             return;
         }
 
-        // ж<T>, Go's pointer: its target is reachable through Elem.
+        // ж<T>, Go's pointer: its target is reachable through Elem. A foreign struct target without the operations face
+        // is registered itself (seat #34): its face is generated only in its own compilation, and only when that one
+        // spells a pointer to it (TypeOpsScope), so a pointer spelled here would reach golib's dynamic fallback.
         if (named.Name == "ж" && named.TypeArguments.Length == 1)
         {
+            if (ForeignWithoutFace(compilation, package, named.TypeArguments[0], walkPerOS))
+                registered.Add(named.TypeArguments[0]);
+
             Reach(compilation, package, named.TypeArguments[0], registered, visited, depth + 1, walkPerOS, exportedOnly);
             return;
         }
@@ -251,6 +258,19 @@ public class EscapeRegistryGenerator : ISourceGenerator
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst && (!exportedOnly || !own || field.DeclaredAccessibility == Accessibility.Public)))
             Reach(compilation, package, field.Type, registered, visited, depth + 1, walkPerOS, exportedOnly);
     }
+
+    // A pointer target whose operations only a registry can name: a closed converted struct of ANOTHER assembly (not golib)
+    // that does not carry golib's IGoTypeOpsSource. The compilation's own structs get the face beside them, which this
+    // generator cannot see, so they are left to TypeOpsScope. A neutral package registers a per-OS assembly's struct
+    // whatever its face, which may differ by OS flavor: the neutral registry stays OS-invariant, and a second registration
+    // of the same GoTypeOps<X>.Instance is a no-op (GoTypeOps.Register is TryAdd).
+    private static bool ForeignWithoutFace(Compilation compilation, INamedTypeSymbol package, ITypeSymbol target, bool walkPerOS) =>
+        target is INamedTypeSymbol { TypeKind: TypeKind.Struct, ContainingNamespace: { } ns } named &&
+        (ns.ToDisplayString() == "go" || ns.ToDisplayString().StartsWith("go.", System.StringComparison.Ordinal)) &&
+        named.ContainingAssembly is { Name: not "golib" } assembly &&
+        !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly) &&
+        !ContainsTypeParameter(named) && Nameable(compilation, package, named) &&
+        ((!walkPerOS && IsPlatformVariant(assembly)) || !named.AllInterfaces.Any(face => face.ToDisplayString() == "go.IGoTypeOpsSource"));
 
     // Every non-generic struct this compilation exports (public, inside public types) under a go.* namespace.
     private static IEnumerable<INamedTypeSymbol> ExportedStructs(INamespaceSymbol ns)

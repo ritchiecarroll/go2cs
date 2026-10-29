@@ -108,9 +108,11 @@ public static class GoTypeRegistry
     /// <summary>GoTypeOps' one fallback, for a type no generated code names the operations of.</summary>
     public const string AotTypeOpsFallbackJustification =
         "Reached only for a type outside the builtin table with no generated IGoTypeOpsSource: go2cs-gen emits the source " +
-        "for every converted struct whose package spells a pointer to it, and a reference type's instantiation runs on " +
-        "shared canonical code (trim stage 3c-2b). A value type no package points to answers NotSupportedException under " +
-        "Native AOT (seat #18 census, site 2).";
+        "for every converted struct whose package spells a pointer to it, the escape registry registers the operations of " +
+        "another assembly's struct without it where a pointer to it escapes (seat #34), and a reference type's " +
+        "instantiation runs on shared canonical code (trim stage 3c-2b). A value type no code names the operations of (a " +
+        "struct whose own package reaches its pointer only through inference) answers NotSupportedException under Native " +
+        "AOT (seat #18 census, site 2).";
 
     // golib's own Go types. Generic definitions are named open; GolibTests' registry guard lists what a closed
     // instantiation gets under Native AOT (docs/PLAN-golib-full-trim.md, stage 2).

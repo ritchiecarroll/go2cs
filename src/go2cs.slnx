@@ -316,6 +316,8 @@
     <Project Path="tests/Behavioral/AnyStringLitAssign/AnyStringLitAssign.csproj" />
     <Project Path="tests/Behavioral/AnyStringLitChanSend/AnyStringLitChanSend.csproj" />
     <Project Path="tests/Behavioral/AnyStringLitComposite/AnyStringLitComposite.csproj" />
+    <Project Path="tests/Behavioral/AotReflectGaps/AotReflectGaps.csproj" />
+    <Project Path="tests/Behavioral/AotReflectGaps/lib/AotReflectGaps.lib.csproj" />
     <Project Path="tests/Behavioral/AppendNamedSliceElement/AppendNamedSliceElement.csproj" />
     <Project Path="tests/Behavioral/AppendNilSliceElement/AppendNilSliceElement.csproj" />
     <Project Path="tests/Behavioral/AppendOfMake/AppendOfMake.csproj" />

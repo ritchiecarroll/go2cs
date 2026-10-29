@@ -193,6 +193,21 @@ public static partial class GoReflect
     /// <returns>Delegate type describing the method's Go signature.</returns>
     public static Type GoMethodFuncType(Type? t, int index)
     {
+        // A signature with no delegate form here is a GO panic naming the type and the method, as GoMethodFunc raises,
+        // never a CLR exception that ends the process (seat #34: under Native AOT the family closed over a value type
+        // escaped as a raw NotSupportedException).
+        try
+        {
+            return MethodFuncType(t, index);
+        }
+        catch (Exception ex) when (ex is NotSupportedException or NotImplementedException)
+        {
+            throw builtin.panic($"go2cs: reflect: no func type for method {MethodAt(t, index).GoName} of {GoTypeName(t)}: {ex.Message}");
+        }
+    }
+
+    private static Type MethodFuncType(Type? t, int index)
+    {
         MethodInfo method = MethodAt(t, index).Method;
         ParameterInfo[] parameters = method.GetParameters();
 
@@ -220,7 +235,7 @@ public static partial class GoReflect
             {
                 Type[] ins = [.. key.Method.GetParameters().Select(static p => p.ParameterType)];
                 ins[0] = key.Receiver;
-                return MakeDelegateType(ins, key.Method.ReturnType);
+                return DelegateTypeOrGenerated(ins, key.Method.ReturnType, key, static key => GeneratedMethod(key.Receiver, key.Method, false, null));
             });
         }
 
@@ -234,8 +249,29 @@ public static partial class GoReflect
             if (golib.TypeExtensions.IsCopyBoundReceiver(m, out Type valueReceiver))
                 ins[0] = valueReceiver;
 
-            return MakeDelegateType(ins, m.ReturnType);
+            // An interface method's parameters carry no receiver, and no generated method set answers for it.
+            Type? receiver = m.DeclaringType is { IsInterface: true } || ins.Length == 0 ? null : ins[0];
+
+            return DelegateTypeOrGenerated(ins, m.ReturnType, (Receiver: receiver, Method: m),
+                static key => key.Receiver is null ? null : GeneratedMethod(key.Receiver, key.Method, false, null));
         });
+    }
+
+    // A method's delegate type: the Func/Action family closed over its signature, the route on every runtime. Where Native
+    // AOT cannot close the family (one over a value type it never compiled: NotSupportedException, which MakeDelegateType
+    // reports as its NotImplementedException), the receiver type's generated method set (go2cs-gen's IGoMethodSet) answers
+    // with a delegate compiled code created, whose type is that same family closed in compiled code (seat #34). The
+    // binders already take that delegate when its type matches; this is the type they compare against.
+    private static Type DelegateTypeOrGenerated<TState>(Type[] parameterTypes, Type returnType, TState state, Func<TState, Delegate?> generated)
+    {
+        try
+        {
+            return MakeDelegateType(parameterTypes, returnType);
+        }
+        catch (Exception ex) when (ex is NotSupportedException or NotImplementedException && generated(state) is { } compiled)
+        {
+            return compiled.GetType();
+        }
     }
 
     /// <summary>
@@ -339,7 +375,7 @@ public static partial class GoReflect
         if (entry.Method.DeclaringType is { IsInterface: true })
             return null;
 
-        Type funcType = GoMethodFuncType(t, index);
+        Type funcType = MethodFuncType(t, index);
 
         // The type's generated method set (IGoMethodSet) answers with a delegate compiled code created, which Native AOT
         // can always hand out; the binders below remain the route for a method it has no arm for.
@@ -505,10 +541,35 @@ public static partial class GoReflect
     /// <param name="t">Managed type standing for the Go type.</param>
     /// <param name="index">Method index.</param>
     /// <returns>Delegate type describing the method value's Go signature.</returns>
-    public static Type GoMethodValueType(Type? t, int index) => MethodValueType(MethodAt(t, index).Method);
+    public static Type GoMethodValueType(Type? t, int index)
+    {
+        // As GoMethodFuncType: no delegate form is a Go panic naming the method, never a raw CLR exception.
+        try
+        {
+            return MethodValueType(MethodAt(t, index).Method);
+        }
+        catch (Exception ex) when (ex is NotSupportedException or NotImplementedException)
+        {
+            throw builtin.panic($"go2cs: reflect: no method value type for method {MethodAt(t, index).GoName} of {GoTypeName(t)}: {ex.Message}");
+        }
+    }
 
+    // The method value's type does not depend on the receiver bound into it, so the generated set's arm through *X with a
+    // nil box answers it for a value- and a pointer-receiver method alike: the arm only casts the box (DelegateTypeOrGenerated).
     private static Type MethodValueType(MethodInfo method) =>
-        s_methodValueTypes.GetOrAdd(method, static m => MakeDelegateType([.. m.GetParameters().Skip(1).Select(static p => p.ParameterType)], m.ReturnType));
+        s_methodValueTypes.GetOrAdd(method, static m => DelegateTypeOrGenerated([.. m.GetParameters().Skip(1).Select(static p => p.ParameterType)], m.ReturnType, m,
+            static m => m.DeclaringType is { IsInterface: true } || m.GetParameters().Length == 0 ? null : GeneratedMethodValue(m)));
+
+    private static Delegate? GeneratedMethodValue(MethodInfo method)
+    {
+        golib.TypeExtensions.IsCopyBoundReceiver(method, out Type receiverType);
+
+        if ((KindOf(receiverType) == Pointer ? ElementType(receiverType) : receiverType) is not { IsValueType: true } element)
+            return null;
+
+        return s_generatedMethodSets.GetOrAdd(element, static type => GoTypeOps.Uninitialized(type) as IGoMethodSet)?
+            .ᴛMethod(method.Name, true, true, null);
+    }
 
     /// <summary>
     /// Binds <paramref name="receiver"/> to the <paramref name="index"/>'th method of
@@ -889,16 +950,20 @@ public static partial class GoReflect
 
         // The BCL family, through its own ceiling — the route every signature the corpus has ever
         // produced takes, unchanged, and the one whose loud refusal a by-ref or pointer parameter
-        // meets.
+        // meets. Native AOT refuses a family over a value type it never compiled with
+        // NotSupportedException, which takes the same refusal (seat #34): a method's type then comes
+        // from its generated method set (DelegateTypeOrGenerated), and FuncOf re-raises it as a panic.
         if (BclDeclaresFamily(parameterTypes.Length, isAction))
         {
             try
             {
+                RefuseFamilyIfTesting();
+
                 return isAction
                     ? Expression.GetActionType(parameterTypes)
                     : Expression.GetFuncType([.. parameterTypes, returnType]);
             }
-            catch (Exception ex) when (ex is ArgumentException or TypeLoadException)
+            catch (Exception ex) when (ex is ArgumentException or TypeLoadException or NotSupportedException)
             {
                 throw NoDelegateForm(parameterTypes, returnType, ex);
             }
@@ -914,19 +979,33 @@ public static partial class GoReflect
     }
 
     // One family rung instantiated, with the SAME loud refusal the BCL arm raises — a parameter a
-    // generic family cannot take is exactly what MakeGenericType rejects here.
+    // generic family cannot take is exactly what MakeGenericType rejects here, and so is a family
+    // Native AOT cannot close (NotSupportedException).
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Type InstantiateFamily(Type family, Type[] arguments, Type[] parameterTypes, Type returnType)
     {
         try
         {
+            RefuseFamilyIfTesting();
+
             return family.MakeGenericType(arguments);
         }
-        catch (Exception ex) when (ex is ArgumentException or TypeLoadException)
+        catch (Exception ex) when (ex is ArgumentException or TypeLoadException or NotSupportedException)
         {
             throw NoDelegateForm(parameterTypes, returnType, ex);
         }
+    }
+
+    // GolibTests' seam: while set, closing a delegate family fails as Native AOT fails it for a value type it never compiled,
+    // so the JIT can drive the routes that answer then (DelegateTypeOrGenerated, the Go panic floor). MSTest runs that
+    // assembly serially, which is what makes a static switch safe for the length of an arm.
+    internal static bool RefuseFamiliesForTest;
+
+    private static void RefuseFamilyIfTesting()
+    {
+        if (RefuseFamiliesForTest)
+            throw new NotSupportedException("a delegate family closed at run time (refused for test, as Native AOT refuses it)");
     }
 
     // The refusal, unchanged in text: a signature that reaches it has no delegate form the bridge can
