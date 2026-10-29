@@ -10,18 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using machoꓸSection = go.debug.macho_package.ΔSection;
 global using machoꓸSegment = go.debug.macho_package.ΔSegment;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using peꓸSection = go.debug.pe_package.ΔSection;
-global using plan9objꓸSection = go.debug.plan9obj_package.ΔSection;
-global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
 // </ImportedTypeAliases>
 
 using go;
