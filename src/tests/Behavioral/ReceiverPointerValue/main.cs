@@ -30,7 +30,7 @@ internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
 internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
     var nodesᴷ = new stackAppend<ж<ring>>(moves: true);
 
-    var nodes = new ж<ring>[]{Ꮡr}.slice();
+    var nodes = slice<ж<ring>>([Ꮡr]);
     var p = Ꮡr;
     for (nint i = 0; i < n; i++) {
         p = p.next;

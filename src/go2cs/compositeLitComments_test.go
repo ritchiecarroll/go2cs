@@ -12,7 +12,7 @@
 // Go labels the rows of a table with a comment at the end of each row, and heads a run of rows with a
 // comment on its own line. The converted literal keeps each one where Go has it: a row's comment ends
 // that row, with no blank line after it; a heading stays on its own line, inside the literal, above
-// its row; a comment after the last element stays above the closing brace. Before, a package-level
+// its row; a comment after the last element stays above the closing bracket. Before, a package-level
 // literal's comments were all written above the declaration, and a function-level literal's row
 // comments were each followed by a blank line.
 
@@ -166,12 +166,12 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 		t.Errorf("the literal's heading was written above the declaration's doc comment")
 	}
 
-	// A comment after the last element stays inside the literal, above its closing brace, and the
-	// brace is not commented out.
+	// A comment after the last element stays inside the literal, above its closing bracket (the slice
+	// literal is a collection expression, `slice<nint>([…])`), and the bracket is not commented out.
 	at := lineContaining(t, lines, "// after the last element")
 
-	if next := strings.TrimSpace(lines[at+1]); !strings.HasPrefix(next, "}") {
-		t.Errorf("the comment after the last element is not directly above the closing brace: the next line reads %q", next)
+	if next := strings.TrimSpace(lines[at+1]); next != "]);" {
+		t.Errorf("the comment after the last element is not directly above the closing bracket: the next line reads %q", next)
 	}
 
 	if t.Failed() {

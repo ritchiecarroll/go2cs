@@ -25,7 +25,7 @@ internal static slice<pair> build(slice<nint> lengths) {
 }
 
 internal static void Main() {
-    var pairs = build(new nint[]{5, 3, 8}.slice());
+    var pairs = build(slice<nint>([5, 3, 8]));
     foreach (var (_, p) in pairs) {
         fmt.Println(p.value, p.length);
     }

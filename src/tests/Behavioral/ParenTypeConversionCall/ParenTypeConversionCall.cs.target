@@ -24,10 +24,10 @@ internal static void Main() {
     fmt.Println("A2 paren, existing pointer, non-nil:", q != nil);
     fmt.Println("A3 round-trips to the same value:", ~(ж<nint>)(uintptr)(q));
 
-    var table = new main_table[]{
+    var table = slice<main_table>([
         new(@unsafe.Pointer.FromPinnedBox(@new<nint>()), false),
         new(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default), true)
-    }.slice();
+    ]);
     foreach (var (i, row) in table) {
         fmt.Println("A4 row", i, "isNil:", AreEqual(row.v, ((any)@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default))), "want:", row.want);
     }
@@ -50,8 +50,8 @@ internal static void Main() {
     var i2 = (int64)5;
     fmt.Println("C3 builtin both spellings:", i1 == i2, i1);
 
-    @string b1 = ((@string)new byte[]{104, 105}.slice());
-    @string b2 = ((@string)new byte[]{104, 105}.slice());
+    @string b1 = (@string)slice<byte>([104, 105]);
+    @string b2 = (@string)slice<byte>([104, 105]);
     fmt.Println("C4 string both spellings:", b1 == b2, b1);
 
     ref var f = ref heap(new float64(), out var Ꮡf);

@@ -46,7 +46,7 @@ internal static partial void Main() {
 
         ref var bufs = ref heap<Δnet.Buffers>(new Δnet.Buffers(new slice<byte>[]{}.slice()), out var Ꮡbufs);
         for (nint i = 0; i < 10; i++) {
-            bufs = append(bufs, new byte[]{(byte)i}.slice());
+            bufs = append(bufs, slice<byte>([(byte)i]));
         }
 
         (var n, err) = Ꮡbufs.WriteTo(new net_ConnᴠWriter(c));

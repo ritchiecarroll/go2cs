@@ -26,19 +26,19 @@ internal static void Main() {
         }
     }
     fmt.Println("insert visited:", visited);
-    fmt.Println("insert final:", dump(insert, new @string[]{"a", "a!", "b", "b!", "c", "c!"}.slice()));
+    fmt.Println("insert final:", dump(insert, slice<@string>(["a", "a!", "b", "b!", "c", "c!"])));
 
     var update = new map<@string, nint>{["x"] = 1, ["y"] = 2};
     foreach (var (k, v) in update) {
         update[k] = v + 100;
     }
-    fmt.Println("update final:", dump(update, new @string[]{"x", "y"}.slice()));
+    fmt.Println("update final:", dump(update, slice<@string>(["x", "y"])));
 
     var del = new map<@string, nint>{["p"] = 1, ["q"] = 2, ["r"] = 3};
     foreach (var (k, _) in del) {
         delete(del, k);
     }
-    fmt.Println("delete final:", dump(del, new @string[]{"p", "q", "r"}.slice()));
+    fmt.Println("delete final:", dump(del, slice<@string>(["p", "q", "r"])));
 
     var mix = new map<@string, nint>{["m"] = 1, ["n"] = 2};
     foreach (var (k, v) in mix) {
@@ -47,14 +47,14 @@ internal static void Main() {
             delete(mix, k);
         }
     }
-    fmt.Println("mix final:", dump(mix, new @string[]{"m", "mm", "n", "nn"}.slice()));
+    fmt.Println("mix final:", dump(mix, slice<@string>(["m", "mm", "n", "nn"])));
 
     var src = new map<@string, nint>{["s"] = 5};
     var dst = new map<@string, nint>{};
     foreach (var (k, v) in src) {
         dst[k + "-copy"u8] = v;
     }
-    fmt.Println("control final:", dump(dst, new @string[]{"s-copy"}.slice()));
+    fmt.Println("control final:", dump(dst, slice<@string>(["s-copy"])));
 
     var zero = 0.0D;
     var nan = new map<float64, nint>{};

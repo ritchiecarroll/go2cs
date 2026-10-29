@@ -15,7 +15,7 @@ internal static partial (nint n, bool ok) run() {
     nint n = default;
     bool ok = default;
 
-    var items = new nint[]{1, 2, 3, -1, 4}.slice();
+    var items = slice<nint>([1, 2, 3, -1, 4]);
     forEach(items, (nint x) => {
         if (x < 0) {
             return;

@@ -91,7 +91,7 @@ internal static void zeroLengthDatagram() {
         defer(() => clientʗ1.Close(), ref ᒐ);
 
         {
-            (_, err) = client.WriteTo(new byte[]{}.slice(), server.LocalAddr()); if (err != nil) {
+            (_, err) = client.WriteTo(slice<byte>([]), server.LocalAddr()); if (err != nil) {
                 fmt.Println("zerolen: WriteTo failed");
                 return;
             }

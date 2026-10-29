@@ -43,7 +43,7 @@ internal partial struct table_rows /*dyn*/ {
 
 internal static partial void table() {
         var recvʗ1 = ~(Ꮡ(new T()));
-    var rows = new table_rows[]{
+    var rows = slice<table_rows>([
         new(() => {
         }, "literal in the table"),
         new(() => new T().valueMethod(), "value method value, composite receiver"),
@@ -52,7 +52,7 @@ internal static partial void table() {
         new((Ꮡ(new T())).pointerMethod, "pointer method value (control)"),
         new((Ꮡ(new W())).Write, "promoted method value"),
         new(nint () => 2, "second literal in the table")
-    }.slice();
+    ]);
 
     foreach (var (_, row) in rows) {
         fmt.Printf("%-48s %s\n"u8, row.label + ":", nameOf(row.fn));

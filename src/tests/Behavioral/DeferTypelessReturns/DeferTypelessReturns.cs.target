@@ -77,7 +77,7 @@ internal static void Main() {
         fmt.Println(w, werr == nil);
         var (_, werr2) = mixedRet(false);
         fmt.Println(werr2);
-        var xs = new item[]{new(1), new(2)}.slice();
+        var xs = slice<item>([new(1), new(2)]);
         var (p, err) = find(xs, 2);
         fmt.Println(p != nil, err == nil);
         (_, err) = find(xs, 9);

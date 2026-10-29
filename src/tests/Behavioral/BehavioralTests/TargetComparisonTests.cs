@@ -310,6 +310,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckClosureWriteVisibility() => CheckTarget("ClosureWriteVisibility");
 
     [TestMethod]
+    public void CheckCollectionExpressionSlices() => CheckTarget("CollectionExpressionSlices");
+
+    [TestMethod]
     public void CheckCollidingPackageNames() => CheckTarget("CollidingPackageNames");
 
     [TestMethod]

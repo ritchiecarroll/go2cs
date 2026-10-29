@@ -3809,6 +3809,21 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Builds a Go slice from a slice literal written as a C# collection expression: Go's <c>[]int{1, 2, 3}</c>
+    /// is <c>slice&lt;nint&gt;([1, 2, 3])</c>, never nil, <c>len == cap</c>, over its own fresh backing array.
+    /// </summary>
+    /// <remarks>
+    /// A collection expression converts to <c>T[]</c>, to <see cref="ReadOnlySpan{T}"/> and to
+    /// <see cref="SliceLiteral{T}"/> alike; the priority makes it bind this overload, and no other argument
+    /// converts to <see cref="SliceLiteral{T}"/>, so every existing call resolves as before.
+    /// </remarks>
+    [OverloadResolutionPriority(1)]
+    public static slice<T> slice<T>(SliceLiteral<T> items)
+    {
+        return items.Items;
+    }
+
+    /// <summary>
     /// Converts a C# read-only <paramref name="source"/> span to a Go <see cref="go.slice{T}"/> over a
     /// detached copy of its elements.
     /// </summary>

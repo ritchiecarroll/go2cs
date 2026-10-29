@@ -70,7 +70,7 @@ internal static void Main() {
     fmt.Println("ptr shared h1:", h1.n);
     fmt.Println("ptr shared h3:", h3.n);
 
-    var arr = new mid[]{new(inner: new inner(n: 11, tag: "e0"), extra: 1), new(inner: new inner(n: 12, tag: "e1"), extra: 2)}.slice();
+    var arr = slice<mid>([new(inner: new inner(n: 11, tag: "e0"), extra: 1), new(inner: new inner(n: 12, tag: "e1"), extra: 2)]);
     var e = arr[0];
     e.n = 111;
     e.tag = "elem";

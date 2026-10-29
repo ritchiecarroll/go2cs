@@ -204,7 +204,7 @@ internal static void Main() {
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
-                        var msg = new byte[]{tag, tag, tag, tag}.slice();
+                        var msg = slice<byte>([tag, tag, tag, tag]);
                         for (nint r = 0; r < rounds; r++) {
                             {
                                 var err = writeRawConn(rawOf(from), msg); if (err != nil) {

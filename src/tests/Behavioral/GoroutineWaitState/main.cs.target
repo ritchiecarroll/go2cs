@@ -13,12 +13,12 @@ internal static UntypedInt dumpSize => /* 1 << 18 */ 262144;
 
 internal static UntypedInt pollLimit => 2000;
 
-internal static slice<@string> parked = new @string[]{
+internal static slice<@string> parked = slice<@string>([
     "sync.Mutex.Lock",
     "chan receive",
     "select",
     "semacquire"
-}.slice();
+]);
 
 internal static bool present(@string dump, @string state) {
     return strings.Contains(dump, "["u8 + state + "]:"u8);

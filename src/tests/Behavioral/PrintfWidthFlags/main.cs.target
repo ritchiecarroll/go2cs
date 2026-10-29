@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    foreach (var (_, v) in new nint[]{5, 99, 999, 1234, -5, -999}.slice()) {
+    foreach (var (_, v) in slice<nint>([5, 99, 999, 1234, -5, -999])) {
         fmt.Printf("k =% 4d;\n"u8, v);
     }
 
@@ -60,12 +60,12 @@ internal static void Main() {
 
     fmt.Printf("[%x] [%X] [%#x] [%#X]\n"u8, "abc", "abc", "abc", "abc");
     fmt.Printf("[% x] [% X] [% #x]\n"u8, "abc", "abc", "abc");
-    fmt.Printf("[%x] [%#x] [% x]\n"u8, slice<byte>("abc"u8), slice<byte>("abc"u8), new byte[]{1, 2}.slice());
+    fmt.Printf("[%x] [%#x] [% x]\n"u8, slice<byte>("abc"u8), slice<byte>("abc"u8), slice<byte>([1, 2]));
     fmt.Printf("[%x] [%.2x] [%.2x] [%#.2x]\n"u8, "äb", "äb", "abcd", "abcd");
 
     fmt.Printf("[%6x] [%-6x] [%06x] [%#08x] [%-08x]\n"u8, "ab", "ab", "ab", "ab", "ab");
     fmt.Printf("[% 08x] [%12x] [%10.3x]\n"u8, "ab", "abc", "abcdef");
-    fmt.Printf("[%x] [%#x] [%8x] [%08x] [%#x]\n"u8, "", "", "", "", new byte[]{}.slice());
+    fmt.Printf("[%x] [%#x] [%8x] [%08x] [%#x]\n"u8, "", "", "", "", slice<byte>([]));
 
     fmt.Printf("[%b] [%b] [%b] [%b] [%#b] [%#b] [%#b]\n"u8, (nint)5, (nint)255, (nint)(-255), (nint)0, (nint)5, (nint)(-5), (nint)0);
     fmt.Printf("[%+b] [% b] [% #b] [%12b] [%-12b] [%012b] [%012b]\n"u8, (nint)5, (nint)5, (nint)5, (nint)255, (nint)255, (nint)255, (nint)(-255));

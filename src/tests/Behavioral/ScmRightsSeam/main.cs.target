@@ -38,7 +38,7 @@ internal static void Main() {
         var rights = syscall.UnixRights(pipeRead);
         fmt.Println("control image is non-empty:", len(rights) > 0);
 
-        (var sent, err) = syscall.SendmsgN(sender, new byte[]{(byte)'x'}.slice(), rights, default, 0);
+        (var sent, err) = syscall.SendmsgN(sender, slice<byte>([(byte)'x']), rights, default, 0);
         fatal("sendmsg", err);
         fmt.Println("payload bytes sent:", sent == 1);
 

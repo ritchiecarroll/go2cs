@@ -24,18 +24,18 @@ internal static void Main() {
     var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3);
     fmt.Println("7 TypeOf([][2][3]int).Elem().Elem().Len() == 3:   ", reflect.TypeOf(nested).Elem().Elem().Len() == 3);
 
-    var ptrs = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();
+    var ptrs = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);
     fmt.Println("8 TypeOf([]*[4]byte).Elem().Elem().Len() == 4:    ", reflect.TypeOf(ptrs).Elem().Elem().Len() == 4);
 
     fmt.Println("9 DeepEqual([][6]uint8, [][8]uint8) == false:     ", !reflect.DeepEqual(sixes, eights));
-    var m1 = new map<@string, slice<@string>>{["a"] = new @string[]{"x"}.slice()};
-    var m2 = new map<@string, slice<@string>>{["b"] = new @string[]{"x", "y"}.slice()};
+    var m1 = new map<@string, slice<@string>>{["a"] = slice<@string>(["x"])};
+    var m2 = new map<@string, slice<@string>>{["b"] = slice<@string>(["x", "y"])};
     fmt.Println("10 TypeOf(map[string][]string{len1}) == TypeOf(map[string][]string{len2}):", AreEqual(reflect.TypeOf(m1), reflect.TypeOf(m2)));
-    var s1 = new slice<nint>[]{new nint[]{1}.slice()}.slice();
-    var s2 = new slice<nint>[]{new nint[]{1, 2}.slice()}.slice();
+    var s1 = slice<slice<nint>>([slice<nint>([1])]);
+    var s2 = slice<slice<nint>>([slice<nint>([1, 2])]);
     fmt.Println("11 TypeOf([][]int{len1}) == TypeOf([][]int{len2}):", AreEqual(reflect.TypeOf(s1), reflect.TypeOf(s2)));
-    var h1 = new map<@string, slice<@string>>{["k"] = new @string[]{"x", "y"}.slice(), ["j"] = new @string[]{"z"}.slice()};
-    var h2 = new map<@string, slice<@string>>{["j"] = new @string[]{"z"}.slice(), ["k"] = new @string[]{"x", "y"}.slice()};
+    var h1 = new map<@string, slice<@string>>{["k"] = slice<@string>(["x", "y"]), ["j"] = slice<@string>(["z"])};
+    var h2 = new map<@string, slice<@string>>{["j"] = slice<@string>(["z"]), ["k"] = slice<@string>(["x", "y"])};
     fmt.Println("12 DeepEqual(same map, different insertion order):", reflect.DeepEqual(h1, h2));
 }
 

@@ -74,7 +74,7 @@ internal static void Main() {
         if (entry == 0) {
             return (entry, default, "");
         }
-        return (entry, new byte[]{(byte)entry}.slice(), "");
+        return (entry, slice<byte>([(byte)entry]), "");
     }
 
     var (d1, c1, e1) = fuzzish(-1);

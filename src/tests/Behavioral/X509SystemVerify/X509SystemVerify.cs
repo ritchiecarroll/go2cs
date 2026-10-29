@@ -33,7 +33,7 @@ internal static void Main() {
         Subject: new pkix.Name(CommonName: "go2cs.example"),
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
-        DNSNames: new @string[]{"go2cs.example"}.slice()
+        DNSNames: slice<@string>(["go2cs.example"])
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
     if (err != nil) {

@@ -85,7 +85,7 @@ internal static void reportMethod() {
     fmt.Println("method ptr param: kind =", ptr.Kind(), "elem =", elem, "len =", elem.Len());
 
     var reply = reflect.New(elem);
-    m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler()), reflect.ValueOf((nint)7), reply}.slice());
+    m.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(new filler()), reflect.ValueOf((nint)7), reply]));
     fmt.Println("filled through the pointer:", reply.Elem().Interface());
 
     (var s, ok) = t.MethodByName("SumArray");
@@ -102,7 +102,7 @@ internal static void reportMethod() {
         arg.Index(i).SetInt((int64)(i + 1));
     }
 
-    var @out = s.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler()), arg}.slice());
+    var @out = s.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(new filler()), arg]));
     fmt.Println("method sum:", @out[0].Int());
 }
 
@@ -132,7 +132,7 @@ internal static slice<any> generateAndCall(reflectꓸValue fn) {
         arg.Index(i).SetUint((uint64)(i % 251));
     }
 
-    var @out = fn.Call(new reflectꓸValue[]{arg}.slice());
+    var @out = fn.Call(slice<reflectꓸValue>([arg]));
     var results = new slice<any>(len(@out));
 
     foreach (var (i, r) in @out) {

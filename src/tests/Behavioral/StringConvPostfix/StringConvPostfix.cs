@@ -13,7 +13,7 @@ internal static void Main() {
     }
     fmt.Println((@string)b);
 
-    var bs = new byte[]{(byte)'H', (byte)'i'}.slice();
+    var bs = slice<byte>([(byte)'H', (byte)'i']);
     fmt.Println((((@string)bs))[0]);
 
     fmt.Println(len((@string)bs));

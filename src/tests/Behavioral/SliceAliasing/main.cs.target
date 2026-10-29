@@ -12,7 +12,7 @@ internal static partial void run() {
 
     var @base = new slice<uint32>(6);
     var d = @base[2..5];
-    copy(d, new uint32[]{7, 8, 9}.slice());
+    copy(d, slice<uint32>([7, 8, 9]));
     fmt.Println(@base, d, len(d), cap(d));
 
     d[0] = 42;

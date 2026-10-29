@@ -65,7 +65,7 @@ internal static void Main() {
     var (y, m) = pairConstParen();
     fmt.Println(x, n, y, m);
 
-    var elems = new @string[]{a + "-g"u8, (a + "-h"u8)}.slice();
+    var elems = slice<@string>([a + "-g"u8, (a + "-h"u8)]);
     fmt.Println(elems);
 }
 

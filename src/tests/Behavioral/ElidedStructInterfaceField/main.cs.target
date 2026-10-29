@@ -31,19 +31,19 @@ internal partial struct main_ptrCases /*dyn*/ {
 }
 
 internal static void Main() {
-    var cases = new main_cases[]{
+    var cases = slice<main_cases>([
         new(new pointerErrжerror(Ꮡ(new pointerErr("pointer-receiver"))), "pointer-receiver"),
         new(new valueErr("value-receiver"), "value-receiver")
-    }.slice();
+    ]);
 
     foreach (var (_, c) in cases) {
         fmt.Printf("%s | %s\n"u8, c.err.Error(), c.want);
     }
 
-    var ptrCases = new ж<main_ptrCases>[]{
+    var ptrCases = slice<ж<main_ptrCases>>([
         Ꮡ(new main_ptrCases("embedded-pointer"u8, new pointerErrжerror(Ꮡ(new pointerErr("embedded-pointer"))))),
         Ꮡ(new main_ptrCases("embedded-value"u8, new valueErr("embedded-value")))
-    }.slice();
+    ]);
 
     foreach (var (_, c) in ptrCases) {
         fmt.Printf("%s | %s\n"u8, (~c).error.Error(), (~c).want);

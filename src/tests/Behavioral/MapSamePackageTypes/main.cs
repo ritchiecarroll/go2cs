@@ -22,10 +22,10 @@ partial struct Description {
     public @string ΔDescription;
 }
 
-internal static slice<Description> allDesc = new Description[]{
+internal static slice<Description> allDesc = slice<Description>([
     new(Name: "a", ΔDescription: "first"),
     new(Name: "b", ΔDescription: "second")
-}.slice();
+]);
 
 internal static Description describe() {
     return new Description(Name: "c", ΔDescription: "third");

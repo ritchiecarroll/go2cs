@@ -56,7 +56,7 @@ internal static void Main() {
     var strs = new @string[]{"a"}.array(3);
     fmt.Println("strs", len(strs), strs[0], strs[2] == "");
 
-    fmt.Println("slice ctl", len(new byte[]{}.slice()), len(new byte[]{1, 2}.slice()));
+    fmt.Println("slice ctl", len(slice<byte>([])), len(slice<byte>([1, 2])));
 
     var w = new byte[]{1}.array(8);
     w[7] = 42;

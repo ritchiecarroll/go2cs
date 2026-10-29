@@ -37,14 +37,14 @@ internal static Handler makeHandler(slice<@string> g) {
 }
 
 internal static partial void Main() {
-    var a = new @string[]{"a="}.slice();
+    var a = slice<@string>(["a="]);
     var aʗ1 = a;
     goǃ(ᴛ1 => serve(ᴛ1, 10), new HandlerᴠIface(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(aʗ1[0], i));
     })));
     fmt.Println(ᐸꟷ(@out));
 
-    var b = new @string[]{"b="}.slice();
+    var b = slice<@string>(["b="]);
     var bʗ1 = b;
     goǃ(ᴛ1 => run(ᴛ1, 20), new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(bʗ1[0], i));
@@ -52,7 +52,7 @@ internal static partial void Main() {
     fmt.Println(ᐸꟷ(@out));
 
     var hc = new channel<Handler>(1);
-    var c = new @string[]{"c="}.slice();
+    var c = slice<@string>(["c="]);
     var cʗ1 = c;
     hc.ᐸꟷ(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(cʗ1[0], i));
@@ -61,7 +61,7 @@ internal static partial void Main() {
     fmt.Println(ᐸꟷ(@out));
 
     var fc = new channel<Action<nint>>(1);
-    var d = new @string[]{"d="}.slice();
+    var d = slice<@string>(["d="]);
     var dʗ1 = d;
     fc.ᐸꟷ((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(dʗ1[0], i));
@@ -70,7 +70,7 @@ internal static partial void Main() {
     fmt.Println(ᐸꟷ(@out));
 
     var ic = new channel<Iface>(1);
-    var e = new @string[]{"e="}.slice();
+    var e = slice<@string>(["e="]);
     var eʗ1 = e;
     ic.ᐸꟷ(new HandlerᴠIface(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(eʗ1[0], i));
@@ -78,17 +78,17 @@ internal static partial void Main() {
     (ᐸꟷ(ic)).Do(50);
     fmt.Println(ᐸꟷ(@out));
 
-    var f = new @string[]{"f="}.slice();
+    var f = slice<@string>(["f="]);
     var fʗ1 = f;
     run(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(fʗ1[0], i));
     }), 60);
     fmt.Println(ᐸꟷ(@out));
 
-    makeHandler(new @string[]{"g="}.slice())(70);
+    makeHandler(slice<@string>(["g="]))(70);
     fmt.Println(ᐸꟷ(@out));
 
-    var h = new @string[]{"h="}.slice();
+    var h = slice<@string>(["h="]);
     var hʗ1 = h;
     func(() => {
         GoFrame ᒐ = default;
@@ -103,7 +103,7 @@ internal static partial void Main() {
     })();
     fmt.Println(ᐸꟷ(@out));
 
-    var i9 = new @string[]{"i="}.slice();
+    var i9 = slice<@string>(["i="]);
     var i9ʗ1 = i9;
     var hv = new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(i9ʗ1[0], i));
@@ -111,7 +111,7 @@ internal static partial void Main() {
     hv(90);
     fmt.Println(ᐸꟷ(@out));
 
-    var j = new @string[]{"j="}.slice();
+    var j = slice<@string>(["j="]);
     var jʗ1 = j;
     goǃ(ᴛ1 => runBare(ᴛ1, 100), (nint i) => {
         @out.ᐸꟷ(fmt.Sprint(jʗ1[0], i));

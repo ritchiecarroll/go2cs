@@ -46,15 +46,15 @@ internal static void Main() {
 
     b = a;
     var s = new map<@string, EmptyStruct>{["x"] = new()};
-    var l = new nint[]{1, 2, 3}.slice();
+    var l = slice<nint>([1, 2, 3]);
     Func<nint, nint> f = (nint x) => x * 2;
     ж<lib.Box<nint>> ptr = Ꮡb;
     ptr.Set(7);
     var n = new lib.Box<float64>(V: 1.5D);
     fmt.Println("cross:", a.Get(), b.Get(), len(s), l, f(4), lib.Twice(f, 3), n.Get());
-    fmt.Println("generic:", lib.Sum<nint>(l), lib.Sum<float64>(new float64[]{0.5D, 0.25D}.slice()), wrap((@string)"w").Get());
+    fmt.Println("generic:", lib.Sum<nint>(l), lib.Sum<float64>(slice<float64>([0.5D, 0.25D])), wrap((@string)"w").Get());
 
-    Pairs ps = new Pair<@string, nint>[]{new(Key: "k", Val: 9)}.slice();
+    Pairs ps = slice<Pair<@string, nint>>([new(Key: "k", Val: 9)]);
     GenericTypeAliasLibꓸIntBox ib = lib.NewBox<nint>(8);
     fmt.Println("plain:", ps, lib.Label("w"), lib.Unbox(ib));
 

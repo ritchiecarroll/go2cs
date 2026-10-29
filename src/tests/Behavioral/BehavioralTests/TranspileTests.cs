@@ -307,6 +307,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClosureWriteVisibility() => CheckTarget("ClosureWriteVisibility");
 
     [TestMethod]
+    public void CheckCollectionExpressionSlices() => CheckTarget("CollectionExpressionSlices");
+
+    [TestMethod]
     public void CheckCollidingPackageNames() => CheckTarget("CollidingPackageNames");
 
     [TestMethod]

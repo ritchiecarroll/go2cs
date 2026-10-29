@@ -98,13 +98,13 @@ private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = 
 internal static void Main() {
     var ht = reflect.TypeOf(new host());
     fmt.Println("fields:", ht.NumField());
-    foreach (var (_, name) in new @string[]{"Plain", "inner", "tagged", "Named"}.slice()) {
+    foreach (var (_, name) in slice<@string>(["Plain", "inner", "tagged", "Named"])) {
         var (f, ok) = ht.FieldByName(name);
         fmt.Printf("field %s found=%v anonymous=%v tag=%q exported=%v type=%s\n"u8, name, ok, f.Anonymous, (@string)f.Tag, f.IsExported(), f.Type);
     }
 
     handler named = (nint _Δp0) => default;
-    foreach (var (_, f) in new any[]{noArgs, oneIn, oneOut, twoOut, (Actionꓸꓸꓸ<@string, nint>)(variadic), mixed, (named).OrTypedNilFunc()}.slice()) {
+    foreach (var (_, f) in slice<any>([noArgs, oneIn, oneOut, twoOut, (Actionꓸꓸꓸ<@string, nint>)(variadic), mixed, (named).OrTypedNilFunc()])) {
         var t = reflect.TypeOf(f);
         fmt.Printf("func %-34s name=%q variadic=%v\n"u8, t.String(), t.Name(), t.IsVariadic());
     }
@@ -115,7 +115,7 @@ internal static void Main() {
     var got = cv.Bytes();
     fmt.Printf("bytes(definedBytes)=%q len=%d cap=%d\n"u8, (@string)got, len(got), cap(got));
     got[2] = (byte)'?';
-    fmt.Printf("alias write visible in source: %q\n"u8, ((@string)new byte[]{(byte)custom[0], (byte)custom[1], (byte)custom[2]}.slice()));
+    fmt.Printf("alias write visible in source: %q\n"u8, (@string)slice<byte>([(byte)custom[0], (byte)custom[1], (byte)custom[2]]));
 
     var plain = (namedPlainBytes)slice<byte>((@string)"ok"u8);
     fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, (@string)reflect.ValueOf(plain).Bytes());
@@ -139,11 +139,11 @@ internal static void Main() {
     fmt.Println("promoted through an unexported embed:", h.inner.X, hv.FieldByName("X").CanSet(), promotedOK, len(promoted.Index), promoted.Name, ambiguous);
     fmt.Println("embed and plain unexported are read-only:", hv.FieldByName("inner").CanSet(), reflect.ValueOf(Ꮡ(new nested())).Elem().Field(0).CanSet());
 
-    var lit = new ж<inner>[]{default}.slice();
+    var lit = slice<ж<inner>>([default]);
     var built = reflect.MakeSlice(reflect.TypeOf(lit), 1, 1);
     fmt.Printf("nil element: %v %v deepequal=%v\n"u8, lit, built.Interface(), reflect.DeepEqual(built.Interface(), lit));
 
-    var want = new holder(Ps: new ж<inner>[]{Ꮡ(new inner(X: 1)), default}.slice());
+    var want = new holder(Ps: slice<ж<inner>>([Ꮡ(new inner(X: 1)), default]));
     ref var target = ref heap(new holder(), out var Ꮡtarget);
     var tv = reflect.ValueOf(Ꮡtarget).Elem().Field(0);
     var grown = reflect.MakeSlice(tv.Type(), 2, 2);
@@ -197,7 +197,7 @@ internal static void Main() {
     var mv = reflect.ValueOf(backing);
     seen[@unsafe.Pointer.OrTypedNil((uintptr)mv.UnsafePointer())] = new EmptyStruct();
     var (_, again) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(backing).UnsafePointer()), ꟷ];
-    var sl = new nint[]{1, 2, 3}.slice();
+    var sl = slice<nint>([1, 2, 3]);
     var sv = reflect.ValueOf(sl);
     seen[@unsafe.Pointer.OrTypedNil((uintptr)sv.UnsafePointer())] = new EmptyStruct();
     var (_, slAgain) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(sl).UnsafePointer()), ꟷ];

@@ -349,7 +349,7 @@ internal static void Main() {
 
         var bbuf = slice<byte>("key"u8);
         bbuf = append(bbufᴷ, bbuf, (byte)(CrossPkgLib.Sep));
-        var rbuf = new rune[]{'a'}.slice();
+        var rbuf = slice<rune>(['a']);
         rbuf = append(rbufᴷ, rbuf, (rune)(CrossPkgLib.Precision));
         fmt.Println((@string)bbuf, len(rbuf), rbuf[1]);
 

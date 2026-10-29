@@ -123,7 +123,7 @@ func main() {
 		{"typed(", "rune r = 'a';"},
 		{"typed(", "u = 'u';"},
 		{"caseRune(", "case 'a' or 'b':"},
-		{"elements(", "{'x', 'y'}"},
+		{"elements(", "slice<rune>(['x', 'y'])"},
 		{"indexKeys(", "['a'] = true"},
 		{"argument(", "takesRune('q')"},
 		{"conversion(", "(byte)'a'"},

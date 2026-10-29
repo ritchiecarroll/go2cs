@@ -11,7 +11,7 @@ partial struct halfword /*num:uint32*/;
 partial struct signedword /*num:int64*/;
 
 internal static void Main() {
-    var c = new nuint[]{0, 1, 63, 64, 65, 200}.slice();
+    var c = slice<nuint>([0, 1, 63, 64, 65, 200]);
     uint64 u = 0x8000000000000001UL;
 
     foreach (var (_, k) in c) {
@@ -23,7 +23,7 @@ internal static void Main() {
     fmt.Println(neg.Rsh(c[3]), neg.Rsh(c[5]), pos.Rsh(c[3]));
 
     uint32 u32 = 0xDEADBEEFU;
-    foreach (var (_, k) in new nuint[]{31, 32, 40}.slice()) {
+    foreach (var (_, k) in slice<nuint>([31, 32, 40])) {
         fmt.Println(u32.Rsh(k));
     }
 
@@ -39,7 +39,7 @@ internal static void Main() {
     }
 
     halfword hw = 0xDEADBEEFU;
-    foreach (var (_, k) in new nuint[]{31, 32, 40}.slice()) {
+    foreach (var (_, k) in slice<nuint>([31, 32, 40])) {
         fmt.Println((uint32)(hw >> k));
     }
 
@@ -47,7 +47,7 @@ internal static void Main() {
     signedword swp = (signedword)(1099511627776L);
     fmt.Println((int64)(sw >> c[3]), (int64)(sw >> c[5]), (int64)(swp >> c[3]));
 
-    var far = new nuint[]{(nuint)1 << 32, (nuint)(4294967296L + 1)}.slice();
+    var far = slice<nuint>([(nuint)1 << 32, (nuint)(4294967296L + 1)]);
     foreach (var (_, k) in far) {
         fmt.Println((uint32)(hw << k), (uint32)(hw >> k));
     }

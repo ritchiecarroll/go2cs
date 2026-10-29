@@ -8,9 +8,9 @@ internal partial struct main_named /*[]byte*/;
 
 internal static void Main() {
     slice<byte> nilBytes = default;
-    var emptyBytes = new byte[]{}.slice();
+    var emptyBytes = slice<byte>([]);
     var text = slice<byte>("ab\n"u8);
-    var raw = new byte[]{0xff, 0x00, 0x41}.slice();
+    var raw = slice<byte>([0xff, 0x00, 0x41]);
 
     fmt.Printf("q: %q %q %q\n"u8, nilBytes, emptyBytes, text);
     fmt.Printf("s: %s|%s|%s|\n"u8, nilBytes, emptyBytes, text);

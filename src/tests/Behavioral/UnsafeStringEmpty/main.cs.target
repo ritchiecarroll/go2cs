@@ -28,7 +28,7 @@ internal static void utf16() {
     var poisoned = new uint16[]{0, 'x', 'y', 'z'}.array();
     show("leading NUL", syscall.UTF16ToString(poisoned[..]));
 
-    show("empty slice", syscall.UTF16ToString(new uint16[]{}.slice()));
+    show("empty slice", syscall.UTF16ToString(slice<uint16>([])));
     show("nil slice", syscall.UTF16ToString(default));
 }
 
@@ -37,7 +37,7 @@ internal static void unsafeStrings() {
 
     var empty = new slice<byte>(0);
     show("make len 0", @unsafe.String(@unsafe.SliceData(empty), 0));
-    show("literal {}", @unsafe.String(@unsafe.SliceData(new byte[]{}.slice()), 0));
+    show("literal {}", @unsafe.String(@unsafe.SliceData(slice<byte>([])), 0));
 
     show("make cap 8", @unsafe.String(@unsafe.SliceData(new slice<byte>(0, 8)), 0));
 

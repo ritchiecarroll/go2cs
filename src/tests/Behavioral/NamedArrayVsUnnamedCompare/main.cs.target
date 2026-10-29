@@ -23,8 +23,8 @@ internal static void Main() {
 
     fmt.Println("equal");
 
-    var g = (Hash)sum(new byte[]{1, 2, 3, 4}.slice());
-    fmt.Println(g == ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))), ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))) == g);
+    var g = (Hash)sum(slice<byte>([1, 2, 3, 4]));
+    fmt.Println(g == ((Hash)(sum(slice<byte>([1, 2, 3, 4])))), ((Hash)(sum(slice<byte>([1, 2, 3, 4])))) == g);
     fmt.Println(g != ((Hash)(sum(default))), ((Hash)(sum(default))) != g, ((Hash)(sum(default))) == h);
 }
 

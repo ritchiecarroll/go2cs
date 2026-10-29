@@ -123,7 +123,7 @@ internal static void Main() {
 
     fmt.Printf("%v %v\n"u8, f(), err);
 
-    var animals = new Animal[]{new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(), new JavaProgrammer()}.slice();
+    var animals = slice<Animal>([new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(), new JavaProgrammer()]);
     foreach (var (_, animal) in animals) {
         fmt.Println(animal.Speak());
     }
@@ -153,7 +153,7 @@ internal static void Main() {
     fmt.Println(rd.read());
     var rc = open("data");
     fmt.Println(rc.read(), rc.close());
-    var readers = new rdr[]{new strRdr()}.slice();
+    var readers = slice<rdr>([new strRdr()]);
     readers[0] = new fileRdr(name: "x");
     fmt.Println(readers[0].read());
 

@@ -116,7 +116,7 @@ internal static void Main() {
     fmt.Println(total());
     fmt.Println(total(a));
 
-    var boxes = new ж<box>[]{a, b, c, Ꮡ(new box(v: 4))}.slice();
+    var boxes = slice<ж<box>>([a, b, c, Ꮡ(new box(v: 4))]);
     fmt.Println(total(boxes.ꓸꓸꓸ));
     replaceFirst(boxes.ꓸꓸꓸ);
     fmt.Println(boxes[0].v);

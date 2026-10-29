@@ -26,9 +26,9 @@ internal static void Main() {
 
     var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName("Equal");
     fmt.Println("assignable:", m.Type.In(0).AssignableTo(m.Type.In(1)));
-    fmt.Println("Equal via Call:", m.Func.Call(new reflectꓸValue[]{reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())}.slice())[0].Bool());
+    fmt.Println("Equal via Call:", m.Func.Call(slice<reflectꓸValue>([reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())]))[0].Bool());
 
-    fmt.Println("apply via Call:", reflect.ValueOf(apply).Call(new reflectꓸValue[]{reflect.ValueOf((a).OrTypedNilFunc())}.slice())[0].Int());
+    fmt.Println("apply via Call:", reflect.ValueOf(apply).Call(slice<reflectꓸValue>([reflect.ValueOf((a).OrTypedNilFunc())]))[0].Int());
 
     ref var f = ref heap<Func<nint>>(out var Ꮡf);
     reflect.ValueOf(Ꮡf).Elem().Set(reflect.ValueOf((a).OrTypedNilFunc()));

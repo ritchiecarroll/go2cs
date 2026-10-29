@@ -32,8 +32,8 @@ internal static void Main() {
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
         KeyUsage: (x509.KeyUsage)(x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign),
-        ExtKeyUsage: new x509.ExtKeyUsage[]{x509.ExtKeyUsageServerAuth}.slice(),
-        DNSNames: new @string[]{"go2cs.example"}.slice(),
+        ExtKeyUsage: slice<x509.ExtKeyUsage>([x509.ExtKeyUsageServerAuth]),
+        DNSNames: slice<@string>(["go2cs.example"]),
         IsCA: true,
         BasicConstraintsValid: true
     ));
@@ -96,7 +96,7 @@ internal static void walkChain(slice<byte> der) {
         fmt.Println("store context der length:", (nint)storeCtx.Length == len(der));
 
         var serverAuth = slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8);
-        var oids = new ж<byte>[]{Ꮡ(serverAuth, 0)}.slice();
+        var oids = slice<ж<byte>>([Ꮡ(serverAuth, 0)]);
 
         var para = @new<syscall.CertChainPara>();
         para.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;

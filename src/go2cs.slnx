@@ -384,6 +384,7 @@
     <Project Path="tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
     <Project Path="tests/Behavioral/ClosureWriteVisibility/ClosureWriteVisibility.csproj" />
     <Project Path="tests/Behavioral/CloseWakesBlocked/CloseWakesBlocked.csproj" />
+    <Project Path="tests/Behavioral/CollectionExpressionSlices/CollectionExpressionSlices.csproj" />
     <Project Path="tests/Behavioral/CollidingPackageNames/CollidingPackageNames.csproj" />
     <Project Path="tests/Behavioral/CollidingPackageNames/duprenamed/collidea.dup.csproj" />
     <Project Path="tests/Behavioral/CollidingPackageNames/dupplain/collideb.dup.csproj" />

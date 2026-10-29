@@ -22,7 +22,7 @@ internal static void Main() {
 
     nint matched = 0;
     foreach (var (k, _) in keys) {
-        foreach (var (_, field) in new @string[]{"Vstring", "Vint", "Vbool"}.slice()) {
+        foreach (var (_, field) in slice<@string>(["Vstring", "Vint", "Vbool"])) {
             if (strings.EqualFold(k.Interface()._<@string>(), field)) {
                 matched++;
             }

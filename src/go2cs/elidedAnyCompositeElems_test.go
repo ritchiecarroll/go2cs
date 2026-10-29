@@ -79,10 +79,10 @@ func main() {
 	for _, want := range []string{
 		`new any[]{(nint)1, (nint)2}.array()`,
 		`new any[]{(@string)"a"u8, (@string)"b"u8}.array()`,
-		`new any[]{1.5D, (rune)'x'}.slice()`,
-		`new any[]{(@string)("c"u8 + "d"u8), true}.slice()`,
+		`slice<any>([1.5D, (rune)'x'])`,
+		`slice<any>([(@string)("c"u8 + "d"u8), true])`,
 		`Ꮡ(new any[]{(nint)1, (@string)"p"u8}.array())`,
-		`new any[]{p.OrTypedNil()}.slice()`,
+		`slice<any>([p.OrTypedNil()])`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q: an elided empty-interface element boxes at its Go type:\n%s", want, mainCs)
@@ -91,9 +91,9 @@ func main() {
 
 	// CONTROLS: an elided literal of a concrete element type, and a typed `[]any` literal, keep their emission.
 	for _, want := range []string{
-		`new nint[]{1, 2}.slice()`,
-		`new @string[]{"x"}.slice()`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
-		`new any[]{(@string)"flat"u8, (nint)3}.slice()`,
+		`slice<nint>([1, 2])`,
+		`slice<@string>(["x"])`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
+		`slice<any>([(@string)"flat"u8, (nint)3])`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

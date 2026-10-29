@@ -13,7 +13,7 @@ public static nint Value(this ref Node n) {
 }
 
 internal static slice<slice<ж<Node>>> group(this ж<Node> Ꮡn) {
-    return new slice<ж<Node>>[]{new ж<Node>[]{Ꮡn}.slice()}.slice();
+    return slice<slice<ж<Node>>>([slice<ж<Node>>([Ꮡn])]);
 }
 
 internal static void Main() {

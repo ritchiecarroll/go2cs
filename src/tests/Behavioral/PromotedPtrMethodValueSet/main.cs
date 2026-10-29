@@ -126,7 +126,7 @@ internal static void Main() {
     var (_, hasReadString) = rt.MethodByName("ReadString");
     fmt.Println("bufio.ReadWriter value has ReadString:", hasReadString);
 
-    var @out = reflect.ValueOf(rw).MethodByName("ReadString").Call(new reflectꓸValue[]{reflect.ValueOf((byte)'\n')}.slice());
+    var @out = reflect.ValueOf(rw).MethodByName("ReadString").Call(slice<reflectꓸValue>([reflect.ValueOf((byte)'\n')]));
     fmt.Printf("ReadString via reflect = %q\n"u8, @out[0].String());
 
     any x = rw;

@@ -50,7 +50,7 @@ internal static void Main() {
     fmt.Println(len(rankNames));
     fmt.Println(errNames[eBig - errBase], errNames[eAcces - errBase]);
     fmt.Println(asciiSpace[(rune)'\t'], asciiSpace[(rune)'\n'], asciiSpace[(rune)' '], asciiSpace[(rune)'A'], len(asciiSpace));
-    var data = new byte[]{10, 20, 30}.slice();
+    var data = slice<byte>([10, 20, 30]);
     int64 cur = 2;
     uint32 u32 = 1;
     fmt.Println(data[(nint)(cur)], data[u32]);

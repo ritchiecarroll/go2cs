@@ -116,7 +116,7 @@ internal static void callArgument() {
 }
 
 internal static void sliceElement() {
-    var es = new ж<Employee>[]{Ꮡ(new Employee(Name: "ivy"u8, Age: 11))}.slice();
+    var es = slice<ж<Employee>>([Ꮡ(new Employee(Name: "ivy"u8, Age: 11))]);
     var p = es[0].Reinterpret<Employee, Person>();
 
     p.Age = 12;

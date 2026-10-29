@@ -40,7 +40,7 @@ internal static void Main() {
     strs.Sort();
     fmt.Println("StringSlice.Sort:", strs);
 
-    var names = new @string[]{"carol", "alice", "bob"}.slice();
+    var names = slice<@string>(["carol", "alice", "bob"]);
     sort.Sort((sort.Interface)((sort.StringSlice)names));
     fmt.Println("sort.Sort(sort.StringSlice(v)):", names);
 

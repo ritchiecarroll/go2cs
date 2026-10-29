@@ -29,8 +29,8 @@ partial struct Named /*[]nint*/;
 
 internal static void Main() {
     slice<nint> nilSlice = default;
-    var emptyNotNil = new nint[]{}.slice();
-    var filled = new nint[]{3, 1, 2}.slice();
+    var emptyNotNil = slice<nint>([]);
+    var filled = slice<nint>([3, 1, 2]);
 
     fmt.Println(isNilSlice<slice<nint>, nint>(nilSlice), isNilSlice<slice<nint>, nint>(emptyNotNil), isNilSlice<slice<nint>, nint>(filled));
     fmt.Println(isSetSlice<slice<nint>, nint>(nilSlice), isSetSlice<slice<nint>, nint>(emptyNotNil), isSetSlice<slice<nint>, nint>(filled));

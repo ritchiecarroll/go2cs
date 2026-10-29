@@ -135,10 +135,10 @@ internal static void Main() {
     ж<Blob> np2 = default;
     var sp = new main_sp(P: np2);
     var pf = reflect.ValueOf(sp).Field(0);
-    fmt.Printf("call-into-any: %s\n"u8, reflect.ValueOf(sink).Call(new reflectꓸValue[]{pf}.slice())[0].String());
+    fmt.Printf("call-into-any: %s\n"u8, reflect.ValueOf(sink).Call(slice<reflectꓸValue>([pf]))[0].String());
 
     var concrete = reflect.ValueOf(@string (ж<Blob> b) => fmt.Sprintf("concrete nil=%v"u8, b == nil));
-    fmt.Printf("call-into-concrete: %s\n"u8, concrete.Call(new reflectꓸValue[]{pf}.slice())[0].String());
+    fmt.Printf("call-into-concrete: %s\n"u8, concrete.Call(slice<reflectꓸValue>([pf]))[0].String());
 
     ж<Stamp> stamp = default;
     var sh = new main_sh(S: stamp);

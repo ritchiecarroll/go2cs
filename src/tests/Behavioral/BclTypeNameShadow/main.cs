@@ -24,7 +24,7 @@ internal static void Main() {
     fmt.Println(len(sub));
     fmt.Println(v[0]);
 
-    var raw = new byte[]{120, 121, 122, 119}.slice();
+    var raw = slice<byte>([120, 121, 122, 119]);
     var b = (byteView)raw;
     var bs = b.slice(r.Start, r.End);
     fmt.Println(len(bs));

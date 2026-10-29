@@ -55,7 +55,7 @@ internal static void Main() {
     rec.Off = 7;
     rec.Off += 1;
     rec.of(record.ᏑPath).ElementRef(1) = 0x0a0b;
-    nint n = copy(rec.of(record.ᏑPath).slice(2), new uint16[]{0x0c0d}.slice());
+    nint n = copy(rec.of(record.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
     rec.tail.B = 0x1112;
 
     var p = rec.of(record.ᏑLength);

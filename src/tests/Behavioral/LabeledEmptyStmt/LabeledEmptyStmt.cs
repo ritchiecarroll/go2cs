@@ -44,9 +44,9 @@ skip:;
 }
 
 internal static void Main() {
-    fmt.Println(scan(new nint[]{3, -1, 7, 2, -5, 5}.slice()));
+    fmt.Println(scan(slice<nint>([3, -1, 7, 2, -5, 5])));
     fmt.Println(gotoEndOfFunc(3), gotoEndOfFunc(20));
-    fmt.Println(nestedGotoEnd(new slice<nint>[]{new nint[]{1, 2, 3}.slice(), new nint[]{4, 0, 6}.slice(), new nint[]{7, 8}.slice()}.slice()));
+    fmt.Println(nestedGotoEnd(slice<slice<nint>>([slice<nint>([1, 2, 3]), slice<nint>([4, 0, 6]), slice<nint>([7, 8])])));
 }
 
 } // end main_package

@@ -27,7 +27,7 @@ internal static any assign<E>(E e) {
 }
 
 internal static slice<any> slot<E>(E e) {
-    return new any[]{(e).OrTypedNilOf()}.slice();
+    return slice<any>([(e).OrTypedNilOf()]);
 }
 
 internal static any send<E>(E e) {

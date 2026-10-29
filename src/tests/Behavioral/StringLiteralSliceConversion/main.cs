@@ -9,10 +9,10 @@ partial struct vector {
     internal slice<byte> key;
 }
 
-internal static slice<vector> vectors = new vector[]{
+internal static slice<vector> vectors = slice<vector>([
     new("split", slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
     new("plain", slice<byte>("single"u8))
-}.slice();
+]);
 
 internal static void Main() {
     var bs = slice<byte>("hello"u8);

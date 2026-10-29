@@ -50,7 +50,7 @@ internal static partial nint Line(this impl _Δp0) {
 }
 
 internal static slice<nint> three(nint a, nint b, nint c) {
-    return new nint[]{a, b, c}.slice();
+    return slice<nint>([a, b, c]);
 }
 
 internal static slice<nint> recorded;
@@ -60,10 +60,10 @@ internal static bool rec(nint l) {
     return true;
 }
 
-internal static slice<nint> pkgSlice = new nint[]{line(),
+internal static slice<nint> pkgSlice = slice<nint>([line(),
     line(), line(),
     line()
-}.slice();
+]);
 
 internal static nint pkgSum = line() + line() + line();
 
@@ -71,13 +71,13 @@ internal static nint pkgSum = line() + line() + line();
 partial struct pkgStructsᴛ1 /*dyn*/ {
     internal nint a, b;
 }
-internal static slice<pkgStructsᴛ1> pkgStructs = new pkgStructsᴛ1[]{
+internal static slice<pkgStructsᴛ1> pkgStructs = slice<pkgStructsᴛ1>([
     new(line(), line()),
     new(
         line(),
         line()
     )
-}.slice();
+]);
 
 internal static partial slice<nint> ret() {
     return three(line(),
@@ -111,9 +111,9 @@ internal static void Main() {
         show(true, "S6", recorded);
     }
 
-    var local = new nint[]{line(),
+    var local = slice<nint>([line(),
         line()
-    }.slice();
+    ]);
     show(false, "S7", local);
 
     show(false, "S8", ret());

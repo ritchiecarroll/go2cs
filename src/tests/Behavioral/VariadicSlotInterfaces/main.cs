@@ -81,7 +81,7 @@ internal static void Main() {
 
     fmt.Println(totalArea(3));
 
-    var shapes = new Shape[]{new RectжShape(Ꮡ(new Rect(w: 2, h: 2))), new CircleжShape(Ꮡ(new Circle(r: 1)))}.slice();
+    var shapes = slice<Shape>([new RectжShape(Ꮡ(new Rect(w: 2, h: 2))), new CircleжShape(Ꮡ(new Circle(r: 1)))]);
     fmt.Println(totalArea(1, shapes.ꓸꓸꓸ));
 
     var (ᴛ1, ᴛ2) = countArgs((any)(default));
@@ -103,7 +103,7 @@ internal static void Main() {
     slice<Shape> none = default;
     fmt.Println(describe(none.ꓸꓸꓸ));
 
-    var anys = new any[]{(nint)1, (@string)"two"u8, default}.slice();
+    var anys = slice<any>([(nint)1, (@string)"two"u8, default]);
     var (ᴛ13, ᴛ14) = countArgs((any)(anys));
     fmt.Println(ᴛ13, ᴛ14);
     fmt.Println(nest((any)(anys)));

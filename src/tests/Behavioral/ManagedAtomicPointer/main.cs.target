@@ -35,7 +35,7 @@ internal static void identity() {
 
     fmt.Println(@unsafe.Pointer.FromPinnedBox(Ꮡa) == pa);
 
-    var table = new @unsafe.Pointer[]{default, pa, pb}.slice();
+    var table = slice<@unsafe.Pointer>([default, pa, pb]);
     nint same = 0;
     nint diff = 0;
     foreach (var (_, p) in table) {

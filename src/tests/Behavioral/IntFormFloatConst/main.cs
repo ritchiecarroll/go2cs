@@ -29,11 +29,11 @@ internal static float64 directSmall = 42D;
 internal static float64 decimalControl = 339.7784D;
 
 internal static void Main() {
-    var samples = new sample[]{
+    var samples = slice<sample>([
         new("big", 123456789123456789123456789D, 5F),
         new("decimal", 339.7784D, 3.5F),
         new("small", 33909D, 8F)
-    }.slice();
+    ]);
     foreach (var (_, s) in samples) {
         fmt.Println(s.name, s.value, s.small);
     }

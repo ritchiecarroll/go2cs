@@ -114,7 +114,7 @@ func main() {
 		"return int64 () => 1;",             // return through interface{}
 		"any declared = int64 () => 2;",     // declared variable
 		"(Hook)(int64 () => 3)",             // conversion
-		"new any[]{int64 () => 4}",          // unkeyed composite element
+		"slice<any>([int64 () => 4])",       // unkeyed composite element
 		"new holder(int64 () => 5)",         // positional struct field
 		"ꟷ(int64 () => 6)",                  // channel send
 		"any first = int64 () => 7;",        // multi-name var

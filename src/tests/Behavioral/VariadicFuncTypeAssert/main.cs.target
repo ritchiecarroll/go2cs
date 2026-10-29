@@ -75,7 +75,7 @@ internal static void Main() {
         }
     }
 
-    var slots = new any[]{(Funcꓸꓸꓸ<any, @string>)(escaper)}.slice();
+    var slots = slice<any>([(Funcꓸꓸꓸ<any, @string>)(escaper)]);
     {
         var (f, ok) = slots[0]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
             fmt.Println("element:", f((@string)"y"u8));

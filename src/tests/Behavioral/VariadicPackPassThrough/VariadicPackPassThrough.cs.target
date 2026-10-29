@@ -57,7 +57,7 @@ internal static slice<nint> into(params ꓸꓸꓸnint xsʗp) {
 internal static nint copyInto(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.slice();
 
-    return copy(xs, new nint[]{7, 7}.slice());
+    return copy(xs, slice<nint>([7, 7]));
 }
 
 internal static slice<nint> keep(params ꓸꓸꓸnint xsʗp) {
@@ -88,12 +88,12 @@ internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
 }
 
 internal static void Main() {
-    var a = new nint[]{1, 2, 3}.slice();
+    var a = slice<nint>([1, 2, 3]);
     forward(a.ꓸꓸꓸ);
     fmt.Println("forward wrote through:", a);
 
     fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));
-    fmt.Println("gather:", gather(new nint[]{0}.slice(), 1, 2), gather(default, a.ꓸꓸꓸ));
+    fmt.Println("gather:", gather(slice<nint>([0]), 1, 2), gather(default, a.ꓸꓸꓸ));
 
     var d = new slice<nint>(2);
     nint n = fill(d, 8, 9, 10);

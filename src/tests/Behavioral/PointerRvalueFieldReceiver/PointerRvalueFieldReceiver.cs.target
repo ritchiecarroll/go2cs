@@ -36,7 +36,7 @@ internal static void Main() {
 
     var a = Ꮡ(new node());
     var b = Ꮡ(new node());
-    var nodes = new ж<node>[]{a, b}.slice();
+    var nodes = slice<ж<node>>([a, b]);
     nodes[0].of(node.Ꮡs).set(7);
     nodes[1].of(node.Ꮡs).set(9);
     fmt.Println(a.s.v, b.s.v);

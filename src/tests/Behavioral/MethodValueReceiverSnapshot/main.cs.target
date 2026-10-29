@@ -45,10 +45,10 @@ internal static void Main() {
     ref var a = ref heap<frame>(new frame(Name: "a"), out var Ꮡa);
 
         var aʗ1 = a;
-    var typed = new Func<@string>[]{
+    var typed = slice<Func<@string>>([
         () => aʗ1.label(),
         () => Ꮡa.Value.Name
-    }.slice();
+    ]);
 
     a.Name = "A";
 
@@ -57,10 +57,10 @@ internal static void Main() {
     ref var b = ref heap<frame>(new frame(Name: "b", Inlined: true), out var Ꮡb);
 
         var bʗ1 = b;
-    var boxed = new any[]{
+    var boxed = slice<any>([
         () => bʗ1.label(),
         bool () => Ꮡb.Value.Inlined
-    }.slice();
+    ]);
 
     b.Name = "B";
 

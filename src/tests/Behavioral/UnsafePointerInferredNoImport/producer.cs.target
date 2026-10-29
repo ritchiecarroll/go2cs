@@ -14,7 +14,7 @@ internal static partial bool isNil(@unsafe.Pointer p) {
 }
 
 internal static partial slice<@unsafe.Pointer> makePtrs(ж<int64> x) {
-    return new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(x)}.slice();
+    return slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(x)]);
 }
 
 } // end main_package

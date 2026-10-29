@@ -25,22 +25,22 @@ partial struct dirsᴛ1 /*dyn*/ {
     internal @string rel;
     internal time.Time stamp;
 }
-internal static slice<dirsᴛ1> dirs = new dirsᴛ1[]{
+internal static slice<dirsᴛ1> dirs = slice<dirsᴛ1>([
     new("", time.Date(2021, time.February, 3, 4, 5, 6, 0, time.ΔUTC)),
     new("LongDirectoryNameWellBeyondEightDotThree", time.Date(2021, time.February, 3, 5, 6, 7, 0, time.ΔUTC)),
     new("ÜnicödeDir", time.Date(2021, time.February, 3, 6, 7, 8, 0, time.ΔUTC))
-}.slice();
+]);
 
 partial struct filesᴛ1 /*dyn*/ {
     internal @string rel;
     internal nint size;
     internal time.Time stamp;
 }
-internal static slice<filesᴛ1> files = new filesᴛ1[]{
+internal static slice<filesᴛ1> files = slice<filesᴛ1>([
     new("ReadMe.txt", 7, time.Date(2022, time.March, 4, 5, 6, 7, 0, time.ΔUTC)),
     new("LongDirectoryNameWellBeyondEightDotThree\\Payload.bin", 300, time.Date(2023, time.April, 5, 6, 7, 8, 0, time.ΔUTC)),
     new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
-}.slice();
+]);
 
 internal static void Main() {
     @string root = filepath.Join(os.TempDir(), fmt.Sprintf("go2cs_findfirstfile_%d"u8, os.Getpid()));

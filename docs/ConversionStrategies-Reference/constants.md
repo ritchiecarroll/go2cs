@@ -403,7 +403,7 @@ Cast to the target, in `byte`, `int8` and `int16` slots:
     }}
 
     fmt.Println(isByte((byte)'x'), retByte());
-    var bs = new byte[]{(byte)'h', (byte)'i'}.slice();
+    var bs = slice<byte>([(byte)'h', (byte)'i']);
     bs[0] = (byte)'H';
     bs = append(bsᴷ, bs, (byte)'!');
     fmt.Println((@string)bs);

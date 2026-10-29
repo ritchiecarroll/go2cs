@@ -32,7 +32,7 @@ internal static void Main() {
     arg = nilˢ;
     fmt.Println(sprint(arg));
 
-    var args = new any[]{(nint)1, default, (@string)"keep"u8}.slice();
+    var args = slice<any>([(nint)1, default, (@string)"keep"u8]);
     foreach (var (i, vᴛ1) in args) {
         var a = vᴛ1;
 

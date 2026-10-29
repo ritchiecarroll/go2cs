@@ -71,7 +71,7 @@ internal static void Main() {
     fmt.Println("named chan:", drain<nint>(feed));
 
     Func<nint, bool> even = (nint v) => v % 2 == 0;
-    fmt.Println("named func:", count(new nint[]{1, 2, 4}.slice(), even));
+    fmt.Println("named func:", count(slice<nint>([1, 2, 4]), even));
 
     var grid = new Grid(new nint[]{4, 5}.array());
     fmt.Println("named array:", first<nint>(grid));

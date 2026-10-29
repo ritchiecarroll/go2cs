@@ -31,7 +31,7 @@ internal static void Main() {
     }
     fmt.Println(forward(10, 20, 30));
 
-    var values = new nint[]{1, 2, 3}.slice();
+    var values = slice<nint>([1, 2, 3]);
     void mutate(params ꓸꓸꓸnint numsʗp) {
         GoFrame ᒐ = default;
         try {

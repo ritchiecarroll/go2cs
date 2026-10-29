@@ -11,7 +11,7 @@ internal partial struct main_queries /*dyn*/ {
 }
 
 internal static void Main() {
-    var queries = new main_queries[]{
+    var queries = slice<main_queries>([
         new("tcp", "http"),
         new("tcp", "https"),
         new("tcp", "domain"),
@@ -19,7 +19,7 @@ internal static void Main() {
         new("tcp4", "https"),
         new("tcp6", "https"),
         new("tcp", "go2cs-no-such-service")
-    }.slice();
+    ]);
 
     foreach (var (_, q) in queries) {
         var (port, err) = Δnet.LookupPort(q.network, q.service);

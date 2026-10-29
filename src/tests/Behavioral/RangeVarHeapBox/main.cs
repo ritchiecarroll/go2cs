@@ -82,7 +82,7 @@ internal static slice<Func<nint>> chanClosures(channel<nint> ch) {
 }
 
 internal static void Main() {
-    var s = new nint[]{10, 20, 30}.slice();
+    var s = slice<nint>([10, 20, 30]);
     fmt.Println(sumWithinIter(s));
 
     var ptrs = collectPointers(s);

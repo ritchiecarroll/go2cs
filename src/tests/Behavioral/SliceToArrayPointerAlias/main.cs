@@ -58,11 +58,11 @@ internal static void Main() {
 
     fmt.Println("element identity:", p.Ꮡelem<byte>(0) == Ꮡelem(buf, 1), "windowed identity:", p.Ꮡelem<byte>(2) == Ꮡelem(buf, 3));
 
-    var src = new byte[]{
+    var src = slice<byte>([
         0x10, 0x20, 0x30, 0x00,
         0x40, 0x50, 0x60, 0xff,
         0x80, 0x90, 0xa0, 0x40
-    }.slice();
+    ]);
     var dst = new slice<byte>(len(src));
     premultiplyLike(dst, src);
     fmt.Println("windowed loop:", dst);

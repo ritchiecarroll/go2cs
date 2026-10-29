@@ -62,7 +62,7 @@ internal partial struct main_x /*dyn*/ {
 }
 
 internal static void Main() {
-    var b = new byte[]{}.slice();
+    var b = slice<byte>([]);
 
     for (nint ch = 32; ch < 80; ch++) {
         b = append(b, ((@string)(rune)ch).ꓸꓸꓸ);

@@ -43,7 +43,7 @@ internal static partial void addressTakenCap() {
 }
 
 internal static partial void spreadCap() {
-    var src = new int64[]{7}.slice();
+    var src = slice<int64>([7]);
     slice<int64> x = default;
     x = appendꓸꓸꓸ(x, src);
     fmt.Println(cap(x));
@@ -171,7 +171,7 @@ internal static partial slice<byte> movedBytes(nint n) {
 }
 
 internal static void movedCaps() {
-    foreach (var (_, n) in new nint[]{1, 3, 9, 17, 25, 33}.slice()) {
+    foreach (var (_, n) in slice<nint>([1, 3, 9, 17, 25, 33])) {
         fmt.Print(cap(movedBytes(n)), " ");
     }
     fmt.Println();
@@ -190,7 +190,7 @@ internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
 
 internal static void movedPtrCaps() {
     ref var r = ref heap<slice<ж<nint>>>(out var Ꮡr);
-    foreach (var (_, n) in new nint[]{1, 2, 3, 4, 5, 9}.slice()) {
+    foreach (var (_, n) in slice<nint>([1, 2, 3, 4, 5, 9])) {
         movedPtrs(n, ref r);
         fmt.Print(cap(r), " ");
     }

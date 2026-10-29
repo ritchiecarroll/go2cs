@@ -18,10 +18,10 @@ internal static void bumpAll(ж<byte> p) {
 
 internal static void Main() {
     var dst = new slice<uint16>(8);
-    nint n = readInto(Ꮡ(dst, 0), 4, new uint16[]{1, 2, 3, 4}.slice());
+    nint n = readInto(Ꮡ(dst, 0), 4, slice<uint16>([1, 2, 3, 4]));
     fmt.Println("copied:", n, "dst:", dst);
 
-    n = readInto(Ꮡ(dst, 4), 3, new uint16[]{7, 8, 9}.slice());
+    n = readInto(Ꮡ(dst, 4), 3, slice<uint16>([7, 8, 9]));
     fmt.Println("copied:", n, "dst:", dst);
 
     var p = array<uint16>.AliasPointer(Ꮡ(dst, 2), 4);
@@ -55,7 +55,7 @@ internal static void Main() {
     bumpAll(Ꮡraw.at<byte>(3));
     fmt.Println("fixed array:", raw);
 
-    var buf = new byte[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
+    var buf = slice<byte>([0, 1, 2, 3, 4, 5, 6, 7]);
     var tail = buf[4..];
     bumpAll(Ꮡ(tail, 0));
     fmt.Println("resliced view:", buf);

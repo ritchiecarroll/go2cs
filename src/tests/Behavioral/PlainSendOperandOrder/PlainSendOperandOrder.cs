@@ -53,7 +53,7 @@ internal static partial void Main() {
     fmt.Println("call:", log, ᐸꟷ(ch));
 
     log = default;
-    var chans = new channel<nint>[]{default, ch}.slice();
+    var chans = slice<channel<nint>>([default, ch]);
     var chanᴛ3 = chans[idx()];
     var (ᴛ5, ᴛ6) = pair();
     chanᴛ3.ᐸꟷ(must(ᴛ5, ᴛ6));

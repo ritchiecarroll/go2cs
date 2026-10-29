@@ -15,7 +15,7 @@ internal static handler wrap(handler h) {
 }
 
 internal static (handler, @string, error) makeHandlers(@string prefix) {
-    var allowed = new @string[]{prefix + "-a"u8, prefix + "-b"u8}.slice();
+    var allowed = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
@@ -31,7 +31,7 @@ internal static handler makeSingle(@string tag) {
 }
 
 internal static handler makePlain(nint n) {
-    var limits = new nint[]{n, n * 2}.slice();
+    var limits = slice<nint>([n, n * 2]);
     var limitsʗ1 = limits;
     return wrap((@string msg) => {
         fmt.Println(limitsʗ1[1], msg);

@@ -10,7 +10,7 @@ internal static void Main() {
         fmt.Println(i, (int32)r, (int32)s[i]);
     }
 
-    @string bad = "x"u8 + ((sstring)new byte[]{0xED, 0xA0, 0x80}.slice()) + ((@string)new byte[]{0xC0, 0xAF}.slice()) + "y"u8 + ((@string)new byte[]{0xE2, 0x98}.slice());
+    @string bad = "x"u8 + ((sstring)slice<byte>([0xED, 0xA0, 0x80])) + ((@string)slice<byte>([0xC0, 0xAF])) + "y"u8 + ((@string)slice<byte>([0xE2, 0x98]));
     foreach (var (i, r) in bad) {
         fmt.Println(i, (int32)r);
     }

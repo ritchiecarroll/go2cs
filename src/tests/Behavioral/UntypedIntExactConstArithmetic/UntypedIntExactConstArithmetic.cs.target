@@ -14,7 +14,7 @@ internal static UntypedInt wordMask => /* 1<<64 - 1 */ 18446744073709551615;
 
 internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
 
-internal static slice<word> words = new word[]{0, 1, unchecked((nuint)(/* wordMask / 4 */ 4611686018427387903UL)), unchecked((nuint)(/* wordMask / 2 */ 9223372036854775807UL)), wordMask - 1, wordMask}.slice();
+internal static slice<word> words = slice<word>([0, 1, unchecked((nuint)(/* wordMask / 4 */ 4611686018427387903UL)), unchecked((nuint)(/* wordMask / 2 */ 9223372036854775807UL)), wordMask - 1, wordMask]);
 
 internal static nint trimmed() {
     UntypedInt div1e8m = 0xc767074b22e90e21;

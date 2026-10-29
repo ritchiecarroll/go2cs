@@ -62,7 +62,7 @@ internal static nint len(this ref box b) {
 }
 
 internal static nint freeLen() {
-    var s = new nint[]{1, 2, 3}.slice();
+    var s = slice<nint>([1, 2, 3]);
     return builtin.len(s);
 }
 
@@ -100,7 +100,7 @@ internal static nint viewLen(slice<byte> b) {
 
 internal static void Main() {
     var a = new Δany(x: 1);
-    var vals = new any[]{(nint)1, (@string)"two"u8, 3.5D}.slice();
+    var vals = slice<any>([(nint)1, (@string)"two"u8, 3.5D]);
     var c = (rune)'x';
     c++;
     var r = new Δrune(r: 2);
@@ -110,7 +110,7 @@ internal static void Main() {
     var rq = new @required(c: 3);
     var sc = new @scoped(b: 2);
     var rc = new record(a: 1);
-    var bx = new box(items: new nint[]{4, 5}.slice());
+    var bx = new box(items: slice<nint>([4, 5]));
     fmt.Println(a.x, builtin.len(vals), vals[1], (nint)c, r.r, n.d, bi.z, sv.n, rq.c, sc.b, rc.a);
     var (pd, es) = predeclLocals();
     fmt.Println(freeLen(), bx.len(), nilShadow(), keywordLocals(), pd, es, viewLen(slice<byte>("xyz"u8)), deferInShadowedPackage());

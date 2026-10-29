@@ -44,7 +44,7 @@ internal static strategy stayAtK(nint k) {
 }
 
 internal static nint play(strategy strategy0, strategy strategy1) {
-    var strategies = new strategy[]{strategy0, strategy1}.slice();
+    var strategies = slice<strategy>([strategy0, strategy1]);
     score s = default;
     bool turnIsOver = default;
     nint currentPlayer = rand.Intn(2);
@@ -126,7 +126,7 @@ internal static void Main() {
     var wk = Ꮡ(new worker(n: 3));
     {
         var err = wk.initWorker(0); if (err == nil) {
-            fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
+            fmt.Println(wk.run(slice<byte>([1, 2])), lastN.Value);
         }
     }
 

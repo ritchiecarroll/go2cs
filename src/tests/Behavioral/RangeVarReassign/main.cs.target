@@ -26,7 +26,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("len", len(@out));
 
-    var pts = new point[]{new(1, 2), new(3, 4)}.slice();
+    var pts = slice<point>([new(1, 2), new(3, 4)]);
     nint total = 0;
     foreach (var (_, vᴛ1) in pts) {
         var p = vᴛ1;
@@ -36,7 +36,7 @@ internal static void Main() {
     fmt.Println("total", total);
     fmt.Println("orig", pts[0].x, pts[1].x);
 
-    var tags = new point[]{new(10, 1), new(20, 2)}.slice();
+    var tags = slice<point>([new(10, 1), new(20, 2)]);
     nint sum = 0;
     foreach (var (_, vᴛ2) in tags) {
         var t = vᴛ2;
@@ -46,7 +46,7 @@ internal static void Main() {
     }
     fmt.Println("fieldwrite", sum, tags[0].x, tags[1].y);
 
-    var rows = new row[]{new(new point(1, 2), Ꮡ(new point(10, 0))), new(new point(3, 4), Ꮡ(new point(20, 0)))}.slice();
+    var rows = slice<row>([new(new point(1, 2), Ꮡ(new point(10, 0))), new(new point(3, 4), Ꮡ(new point(20, 0)))]);
     foreach (var (_, vᴛ3) in rows) {
         var r = vᴛ3;
 

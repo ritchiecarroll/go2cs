@@ -57,15 +57,15 @@ internal static void Main() {
     fmt.Println("nil:", len(n), cap(n), n);
     fmt.Println("zero:", len(extend(s, 0)), extend(default, 0) == nil);
 
-    var g = Grow(new nint[]{1, 2}.slice(), 5);
+    var g = Grow(slice<nint>([1, 2]), 5);
     fmt.Println("Grow:", len(g), cap(g) >= 7, g);
 
     var b = growGeneric<slice<byte>, byte>(slice<byte>("ab"u8), 2);
     fmt.Println("generic:", len(b), b);
-    var p = growGeneric<slice<point>, point>(new point[]{new(1, 2)}.slice(), 1);
+    var p = growGeneric<slice<point>, point>(slice<point>([new(1, 2)]), 1);
     fmt.Println("generic struct:", p);
 
-    fmt.Println("refused:", withCap(new nint[]{1}.slice(), 2), named(new nint[]{1}.slice(), 1), arrays(default, 2));
+    fmt.Println("refused:", withCap(slice<nint>([1]), 2), named(slice<nint>([1]), 1), arrays(default, 2));
 
     var sʗ1 = s;
     func(() => {

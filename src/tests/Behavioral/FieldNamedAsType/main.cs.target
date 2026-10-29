@@ -21,10 +21,10 @@ internal static nint localCollision() {
 }
 
 internal static slice<ж<Node>> buildList() {
-    return new ж<Node>[]{
+    return slice<ж<Node>>([
         Ꮡ(new Node(value: 10, ΔNode: nil)),
         Ꮡ(new Node(value: 20, Nodes: default))
-    }.slice();
+    ]);
 }
 
 internal static void Main() {
@@ -33,7 +33,7 @@ internal static void Main() {
     ref var b = ref heap<Node>(new Node(value: 3), out var Ꮡb);
 
     root.ΔNode = Ꮡa;
-    root.Nodes = new Node[]{a, b}.slice();
+    root.Nodes = slice<Node>([a, b]);
     a.ΔNode = Ꮡb;
 
     fmt.Println(root.value);

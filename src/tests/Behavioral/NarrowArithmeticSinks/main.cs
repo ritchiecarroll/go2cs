@@ -76,7 +76,7 @@ internal static void Main() {
     arm("any return", () => show(ret(a)));
     arm("variadic any", () => variadic((int8)(a + a), (uint8)(u + u)));
     arm("composite any", () => {
-        var s = new any[]{(int8)(a + a), (uint8)(u + u)}.slice();
+        var s = slice<any>([(int8)(a + a), (uint8)(u + u)]);
         var m = new map<@string, any>{["k"] = (int16)(w + w)};
         var hΔ1 = new holder(v: (uint16)(z + z));
         return fmt.Sprint(s, m, hΔ1.v, (any)((int8)(a + a)));
@@ -201,7 +201,7 @@ internal static void Main() {
     arm("invariant", () => fmt.Sprint((int8)(u + u), " ", (int8)(a + a + a), " ", (uint8)(w + w)));
 
     arm("builtin arg", () => {
-        var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
+        var b = append(slice<byte>([]), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
         return fmt.Sprint(min((int8)(a + a), (int8)0), " ", max((uint8)(u + u), (uint8)0), " ", b);
     });
 

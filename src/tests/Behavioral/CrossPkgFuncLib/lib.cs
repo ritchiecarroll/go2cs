@@ -13,7 +13,7 @@ public static bool Hot(CrossPkgLibꓸStatus st) {
 public static nint Count(Func<CrossPkgLibꓸStatus, bool> pick) {
     nint n = 0;
 
-    foreach (var (_, st) in new CrossPkgLibꓸStatus[]{new(Code: 5), new(Code: 15), new(Code: 25)}.slice()) {
+    foreach (var (_, st) in slice<CrossPkgLibꓸStatus>([new(Code: 5), new(Code: 15), new(Code: 25)])) {
         if (pick(st)) {
             n++;
         }

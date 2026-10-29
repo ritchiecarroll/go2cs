@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var rs = new rune[]{'a', 0xD800, 0xDFFF, 0x110000, -1, 0x4E16}.slice();
+    var rs = slice<rune>(['a', 0xD800, 0xDFFF, 0x110000, -1, 0x4E16]);
 
     @string s = (@string)rs;
     fmt.Println(len(s));

@@ -156,9 +156,8 @@ func main() {
 	}
 
 	// ...and the local composite literal builds the adopted package-level struct (the two
-	// package vars plus the local = three constructions; the local is `var`-typed so the
-	// slice<T> spelling itself appears only on the package vars).
-	if got := strings.Count(mainCs, "new implementsTests"+TempVarMarker+"1[]"); got != 3 {
+	// package vars plus the local = three constructions, each `slice<implementsTestsᴛ1>([…])`).
+	if got := strings.Count(mainCs, "slice<implementsTests"+TempVarMarker+"1>(["); got != 3 {
 		t.Errorf("the function-local composite must construct the adopted package-level struct, found %d constructions:\n%s", got, mainCs)
 	}
 }

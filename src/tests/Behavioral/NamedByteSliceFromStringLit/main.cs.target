@@ -16,10 +16,10 @@ internal static void Main() {
     var sig = (htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8);
     fmt.Println(len(sig), (@string)(slice<byte>)sig);
 
-    var sigs = new htmlSig[]{
+    var sigs = slice<htmlSig>([
         (htmlSig)slice<byte>((@string)"<HTML"u8),
         (htmlSig)slice<byte>((@string)"<!--"u8)
-    }.slice();
+    ]);
     foreach (var (_, s) in sigs) {
         fmt.Println(len(s), (@string)(slice<byte>)s);
     }

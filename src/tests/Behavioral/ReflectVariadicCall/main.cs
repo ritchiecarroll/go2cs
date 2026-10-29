@@ -114,9 +114,9 @@ internal static void Main() {
     fmt.Println("firstA   :", callString(firstNonZero, (nint)0, (nint)0, (nint)9));
     fmt.Println("firstB   :", callString(firstNonZero));
 
-    fmt.Println("recordN  :", len(reflect.ValueOf(record).Call(new reflectꓸValue[]{
+    fmt.Println("recordN  :", len(reflect.ValueOf(record).Call(slice<reflectꓸValue>([
         reflect.ValueOf("a"), reflect.ValueOf("x"), reflect.ValueOf("y")
-    }.slice())));
+    ]))));
     fmt.Println("recorded :", recorded);
 
     fmt.Println("between  :", callString(between, (nint)2, (nint)4, (nint)1, (nint)2, (nint)3, (nint)4, (nint)5));

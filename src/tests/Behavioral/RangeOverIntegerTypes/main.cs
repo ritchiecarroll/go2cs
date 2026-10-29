@@ -16,7 +16,7 @@ internal static void Main() {
 
     uintptr stride = 16;
     uintptr offset = default;
-    var offsets = new uintptr[]{}.slice();
+    var offsets = slice<uintptr>([]);
     foreach (var _ᴛ2 in range<uintptr>(n)) {
         offsets = append(offsets, offset);
         offset += stride;

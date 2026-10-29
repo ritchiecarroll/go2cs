@@ -89,10 +89,10 @@ internal static Figure newFigure() {
 }
 
 internal static void Main() {
-    var circles = new ж<Circle>[]{Ꮡ(new Circle(R: 1D)), Ꮡ(new Circle(R: 2D))}.slice();
-    var squares = new ж<Square>[]{Ꮡ(new Square(S: 3D))}.slice();
-    var shapes = new Shape[]{new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))}.slice();
-    var rounds = new Round[]{new CircleжRound(Ꮡ(new Circle(R: 4D)))}.slice();
+    var circles = slice<ж<Circle>>([Ꮡ(new Circle(R: 1D)), Ꮡ(new Circle(R: 2D))]);
+    var squares = slice<ж<Square>>([Ꮡ(new Square(S: 3D))]);
+    var shapes = slice<Shape>([new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))]);
+    var rounds = slice<Round>([new CircleжRound(Ꮡ(new Circle(R: 4D)))]);
 
     fmt.Printf("circles: %.2f\n"u8, totalArea(widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0))));
     fmt.Printf("squares: %.2f\n"u8, totalArea(widen<ж<Square>, Shape>(squares, elemᴛ0 => new SquareжShape(elemᴛ0))));

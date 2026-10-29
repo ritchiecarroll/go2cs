@@ -147,24 +147,24 @@ internal static partial @string waitShape(nint s) {
 }
 
 internal static void Main() {
-    foreach (var (_, n) in new nint[]{0, 1, 2, 3}.slice()) {
+    foreach (var (_, n) in slice<nint>([0, 1, 2, 3])) {
         fmt.Println(classify(n));
     }
-    foreach (var (_, n) in new nint[]{0, 1, 2, 3, 4}.slice()) {
+    foreach (var (_, n) in slice<nint>([0, 1, 2, 3, 4])) {
         fmt.Println(leadingDefault(n));
     }
     fmt.Println(keepAlive(-1, 5), keepAlive(-1, -1), keepAlive(3, 5));
-    foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {
+    foreach (var (_, n) in slice<nint>([0, 1, 2])) {
         fmt.Println(nonTerminal(n));
     }
-    foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {
+    foreach (var (_, n) in slice<nint>([0, 1, 2])) {
         fmt.Println(conditionalReturn(n));
     }
-    foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {
+    foreach (var (_, n) in slice<nint>([0, 1, 2])) {
         var (r, ok) = namedDefer(n);
         fmt.Println(r, ok);
     }
-    foreach (var (_, s) in new nint[]{0, -1, 258}.slice()) {
+    foreach (var (_, s) in slice<nint>([0, -1, 258])) {
         fmt.Println(waitShape(s));
     }
 }

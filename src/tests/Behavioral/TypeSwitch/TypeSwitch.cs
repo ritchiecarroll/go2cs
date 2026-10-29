@@ -108,7 +108,7 @@ internal static void Main() {
     fmt.Println(probe(true), probe((nint)7), probe("ab"));
 
     marker mk = default;
-    fmt.Println(mk.tag(new byte[]{7, 8}.slice()));
+    fmt.Println(mk.tag(slice<byte>([7, 8])));
 }
 
 internal static @string probe(any x) {

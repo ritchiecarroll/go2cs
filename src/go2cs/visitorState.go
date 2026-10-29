@@ -230,6 +230,12 @@ type Visitor struct {
 	// lazy var there renders its holder's initial-value snapshot (convIdent), the value Go's init-time build saw.
 	inLazyInitializer bool
 
+	// collectionExpressionElements is set while a slice literal writes its elements into a C# collection
+	// expression (`slice<nint>([1, 2])`, sliceLiteralTakesBuiltin): convExprList takes it for that one list and
+	// escapes an element spelled `with(…)` (escapeCollectionWithElement). It is cleared for every list nested
+	// inside an element, so a call's arguments keep their bare spelling.
+	collectionExpressionElements bool
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

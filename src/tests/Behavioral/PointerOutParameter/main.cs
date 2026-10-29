@@ -6,12 +6,12 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static slice<@string> wellKnown = new @string[]{
+internal static slice<@string> wellKnown = slice<@string>([
     "S-1-5-18",
     "S-1-5-32-544",
     "S-1-1-0",
     "S-1-0-0"
-}.slice();
+]);
 
 internal static void Main() {
     foreach (var (_, s) in wellKnown) {

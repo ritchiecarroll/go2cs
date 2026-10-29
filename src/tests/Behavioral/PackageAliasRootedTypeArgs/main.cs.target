@@ -61,30 +61,30 @@ internal static nint Zed(this zed z) {
 }
 
 internal static void Main() {
-    names a = new @string[]{"x", "y"}.slice();
+    names a = slice<@string>(["x", "y"]);
     sizes b = new sizes{["k"] = 7};
-    grid c = new slice<@string>[]{new @string[]{"g"}.slice()}.slice();
-    errs d = new error[]{default}.slice();
-    cplx e = new complex64[]{complex(1F, 2F)}.slice();
-    cplx2 e2 = new complex128[]{complex(3D, 4D)}.slice();
+    grid c = slice<slice<@string>>([slice<@string>(["g"])]);
+    errs d = slice<error>([default]);
+    cplx e = slice<complex64>([complex(1F, 2F)]);
+    cplx2 e2 = slice<complex128>([complex(3D, 4D)]);
     chans f = new chans(1);
     arr g = new @string[]{"a", "b", "c"}.array();
-    hdrs h = new Header[]{new(Name: "n", Size: 1)}.slice();
-    rdrs i = new Δio.Reader[]{default}.slice();
-    ptrs j = new ж<Header>[]{default}.slice();
+    hdrs h = slice<Header>([new(Name: "n", Size: 1)]);
+    rdrs i = slice<Δio.Reader>([default]);
+    ptrs j = slice<ж<Header>>([default]);
     fn k = (@string sΔ1) => len(sΔ1);
     fn2 k2 = (Header x) => (x.Name, default);
     fn0 k0 = () => {
         fmt.Println("fn0 ran");
     };
-    nested l = new nested{["z"] = new Header[]{new(Name: "q", Size: 2)}.slice()};
+    nested l = new nested{["z"] = slice<Header>([new(Name: "q", Size: 2)])};
     hmap m = new hmap{["z"] = new(Name: "hm", Size: 3)};
-    u8s n = new uint8[]{7, 8}.slice();
-    ifs o = new any[]{(nint)1, (@string)"two"u8}.slice();
+    u8s n = slice<uint8>([7, 8]);
+    ifs o = slice<any>([(nint)1, (@string)"two"u8]);
     direct p = new direct(Name: "dir", Size: 4);
-    aliasOfAlias q = new Header[]{new(Name: "aoa", Size: 5)}.slice();
+    aliasOfAlias q = slice<Header>([new(Name: "aoa", Size: 5)]);
     anon r = new anon(A: 9);
-    iface s = new Stringish[]{new Header(Name: "if", Size: 6)}.slice();
+    iface s = slice<Stringish>([new Header(Name: "if", Size: 6)]);
     anonI t = new zed(v: 11);
 
     var sendCh = new channel<Header>(1);

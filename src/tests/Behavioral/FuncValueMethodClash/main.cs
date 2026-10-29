@@ -46,7 +46,7 @@ internal static void Main() {
     any f = (Func<@string>)(Run);
     any h = default;
     h = (Func<time.Duration, /*<-*/channel<time.Time>>)(time.After);
-    var g = new any[]{(Func<time.Duration, /*<-*/channel<time.Time>>)(time.After), (Func<@string>)(Run)}.slice();
+    var g = slice<any>([(Func<time.Duration, /*<-*/channel<time.Time>>)(time.After), (Func<@string>)(Run)]);
     fmt.Println("slots:", show(f), "|", show(h), "|", show(g[0]), "|", show(g[1]), "|", show(retAny()));
 
     Func<@string> e = Run;

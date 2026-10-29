@@ -86,7 +86,7 @@ internal static void pointerArray() {
 }
 
 internal static void sliceValue() {
-    var s = new nint[]{1, 2, 3, 4}.slice();
+    var s = slice<nint>([1, 2, 3, 4]);
 
     foreach (var (i, v) in s) {
         if (i == 0) {
@@ -160,7 +160,7 @@ internal static void aliasedElement() {
 }
 
 internal static void arrayOfNamedSlices() {
-    var rows = new Digits[]{new nint[]{1, 2}.slice(), new nint[]{3, 4}.slice(), new nint[]{5, 6}.slice()}.array();
+    var rows = new Digits[]{slice<nint>([1, 2]), slice<nint>([3, 4]), slice<nint>([5, 6])}.array();
 
     foreach (var (i, r) in rows.ΔRangeSnapshot()) {
         if (i == 0) {

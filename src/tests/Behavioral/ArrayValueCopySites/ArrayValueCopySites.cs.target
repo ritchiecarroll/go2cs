@@ -185,7 +185,7 @@ internal static void compositeSparseAndAny() {
     fmt.Println("sparse:", sp[2]);
 
     var b = new nint[]{7, 8, 9}.array();
-    var lst = new any[]{b.Clone()}.slice();
+    var lst = slice<any>([b.Clone()]);
     b[0] = 99;
     var got = lst[0]._<array<nint>>();
     fmt.Println("anyBoxed:", got);

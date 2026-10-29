@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var words = new @string[]{"skip", "stop", "keep", "skip", "keep"}.slice();
+    var words = slice<@string>(["skip", "stop", "keep", "skip", "keep"]);
 
     for (nint i = 0; i < len(words); i++) {
         var exprᴛ1 = words[i];
@@ -95,7 +95,7 @@ continue_outer:;
     }
 break_outer:;
 
-    foreach (var (idx, w) in new @string[]{"go", "brk", "go", "end"}.slice()) {
+    foreach (var (idx, w) in slice<@string>(["go", "brk", "go", "end"])) {
         var exprᴛ6 = w;
         switch (ᐧ) {
         case {} when exprᴛ6 == "go"u8 || exprᴛ6 == "brk"u8: {

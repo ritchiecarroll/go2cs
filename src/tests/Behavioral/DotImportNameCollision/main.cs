@@ -20,7 +20,7 @@ internal static T first<T>(slice<T> xs) {
 internal static void Main() {
     ж<global::go.DotImportNameCollision.a.keys_package.Key> k = NewKey("dot");
     global::go.DotImportNameCollision.a.keys_package.Count v = 3;
-    var ks = new ж<global::go.DotImportNameCollision.a.keys_package.Key>[]{k, NewKey("second")}.slice();
+    var ks = slice<ж<global::go.DotImportNameCollision.a.keys_package.Key>>([k, NewKey("second")]);
     var m = new map<@string, global::go.DotImportNameCollision.a.keys_package.Count>{["x"] = v};
     var h = new holder(k: k, v: v);
     global::go.DotImportNameCollision.a.keys_package.Box<ж<global::go.DotImportNameCollision.a.keys_package.Key>> b = Wrap<ж<global::go.DotImportNameCollision.a.keys_package.Key>>(k);
