@@ -6044,7 +6044,7 @@ In the library's own project each alias is an ordinary `global using`, such as
 `global using IntFn = System.Func<nint, nint>;`. The library also lists each exported alias in its generated
 `package_info.cs` file, as an assembly attribute:
 
-<!-- source: src/tests/Behavioral/AliasImportLib/package_info.cs:37 -->
+<!-- source: src/tests/Behavioral/AliasImportLib/package_info.cs:34 -->
 ```csharp
 [assembly: GoTypeAlias("IntFn", "System.Func<nint, nint>")]
 ```
