@@ -38,8 +38,8 @@ internal static void Main() {
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var local = c.LocalAddr()._<ж<Δnet.UDPAddr>>();
-        fmt.Println("local ip is unset =", (~local).IP.IsUnspecified());
-        fmt.Println("local port bound  =", (~local).Port != 0);
+        fmt.Println("local ip is unset =", local.IP.IsUnspecified());
+        fmt.Println("local port bound  =", local.Port != 0);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

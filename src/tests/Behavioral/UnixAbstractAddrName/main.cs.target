@@ -49,9 +49,9 @@ internal static partial void Main() {
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var la = c.LocalAddr()._<ж<Δnet.UnixAddr>>();
-        fmt.Println("net       =", (~la).Net);
-        fmt.Println("name len  =", len((~la).Name));
-        fmt.Println("name is @ =", (~la).Name == "@"u8);
+        fmt.Println("net       =", la.Net);
+        fmt.Println("name len  =", len(la.Name));
+        fmt.Println("name is @ =", la.Name == "@"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
