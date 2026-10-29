@@ -330,14 +330,16 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 		if targetPos > token.NoPos {
 			padding := int(comment.Slash - targetPos)
 
-			if padding < 1 {
+			// A trailing comment's column is set once the file is finished, by its gofmt-aligned run
+			// (trailingCommentAlignment.go); Go's padding was computed for Go's line lengths.
+			if _, trailing := v.trailingRuns[comment.Slash]; padding < 1 || trailing {
 				padding = 1
 			}
 
 			builder.WriteString(strings.Repeat(" ", padding))
 		}
 
-		builder.WriteString(carriedComment(comment.Text))
+		builder.WriteString(v.markTrailingComment(comment.Slash, carriedComment(comment.Text)))
 	}
 }
 

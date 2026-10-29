@@ -389,8 +389,8 @@ its `global using` line then has none.
 
 ### A trailing comment stays on its statement's line
 
-**Rule.** A comment written on the same source line as a statement's end is written after one space on that
-statement's last emitted C# line.
+**Rule.** A comment written on the same source line as a statement's end is written on that statement's last
+emitted C# line: after one space, or at the column of its gofmt-aligned run (below).
 
 <!-- source: GOROOT/src/strings/strings.go:1139-1141 -->
 ```go
@@ -415,9 +415,14 @@ statement's last emitted C# line.
   init clause of an `if`, `for` or `switch` is excluded, because the rest of the header follows it on the same
   line and a `//` there would comment the header out.
 - **A multi-line `/* … */` is not inlined.** It keeps its own lines.
-- **One space, not Go's column.** Go aligned its comments for Go's line lengths; the converted lines are
-  different lengths, so the padding is not replayed. A struct field's or a spec's attached comment does keep
-  Go's source-column padding.
+- **Aligned as gofmt aligned them.** A run of consecutive Go lines whose trailing comments gofmt put in one
+  column keeps one column in C#: the longest code of the run plus one space, counted in runes. Go's own padding
+  is not replayed, because it was computed for Go's line lengths. The runs are read from the Go source, so C#
+  breaks a run exactly where gofmt did: at a blank line, a change of indentation, a statement spanning lines, or
+  a composite-literal key much longer than its neighbours. A run the converter splits with lines of its own (a
+  func literal lowered to a local function) still shares one column, and a comment alone in its run gets one
+  space. The same holds for struct fields, specs and literal elements. The converter's own trailing comments
+  (`// end main_package`) are never padded (`trailingCommentAlignment.go`).
 - **A function literal keeps its block body when its one `return` carries a comment.** Such a literal
   normally collapses to an expression-bodied lambda, but a collapsed body sits inside the enclosing
   expression, where a `//` would comment out the rest of the line. The literal collapses only when the

@@ -32,10 +32,8 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged; the
-	// `first` table's row comments, end-of-line again since F, follow rows `@as` widens)
-	"eol:misaligned":    3,
-	"eol:cs-ragged-run": 3,
+	// J: end-of-line alignment is at zero since seat #38 (trailingCommentAlignment.go): the RuneError run and the
+	// `first` table's row comments, ragged before it, pad to the column gofmt gave them.
 	// The Go 1.26 hop's H5 (2026-10-15): go1.26.9 rewrote Valid around word-sized reads (ptrSize, hiBits,
 	// word[T]), and the converter's reading of that new code is one site per class -- a blank line the C#
 	// adds before `hiBits` (utf8.go:460), the blank line before `for len(p) > 0 {` it drops (utf8.go:476),

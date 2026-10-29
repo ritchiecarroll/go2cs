@@ -986,7 +986,7 @@ func (v *Visitor) brokenByteArrayConst(spec *ast.ValueSpec, value ast.Expr, fold
 		line := v.file.Line(leaf.End())
 
 		for next < len(comments) && v.file.Line(comments[next].Pos()) == line {
-			fmt.Fprintf(builder, " %s", comments[next].Text)
+			fmt.Fprintf(builder, " %s", v.markTrailingComment(comments[next].Slash, comments[next].Text))
 			next++
 		}
 	}
