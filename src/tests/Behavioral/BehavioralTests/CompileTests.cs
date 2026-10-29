@@ -592,6 +592,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFieldAccessReinterpret() => CheckTarget("FieldAccessReinterpret");
 
     [TestMethod]
+    public void CheckFieldAddressProperties() => CheckTarget("FieldAddressProperties");
+
+    [TestMethod]
     public void CheckFieldChainBoxReceiver() => CheckTarget("FieldChainBoxReceiver");
 
     [TestMethod]

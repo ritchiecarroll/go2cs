@@ -600,6 +600,19 @@ func TestP1RecordBlockPlants(t *testing.T) {
 	if len(tl.refused) != 1 {
 		t.Errorf("P1 assembly record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
 	}
+
+	// P2 (#32) records a struct whose fields only its address sites reach, in the same block: a seat check that admits
+	// P2 alone reads them as P2, and a class record deleted (P1's own move) is refused under it.
+	p2, _ := newClassifier("P2", false)
+	tl = p2.classifyDiff(diffOf(infoFile, nil, block))
+	if len(tl.refused) != 0 || tl.labels["P2"] != len(block) {
+		t.Errorf("P2 records inserted: wanted %d P2, read %v, refused %v", len(block), tl.labels, tl.refused)
+	}
+
+	tl = p2.classifyDiff(diffOf(prodFile, []string{`[GoFieldAccess(typeof(point), typeof(buffer))]`}, nil))
+	if len(tl.refused) != 1 {
+		t.Errorf("P2 class record deleted: wanted it refused, read %v, refused %v", tl.labels, tl.refused)
+	}
 }
 
 // L1 in a real diff: a cast over a MULTI-LINE literal (dnsmessage's printPaddedUint8) composes as the one-line cast

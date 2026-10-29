@@ -183,6 +183,45 @@ public class FieldViewCacheTests
         }
     }
 
+    // Parity seat #32: a field's ONE accessor token, the TypeGenerator's `static readonly FieldRefFunc<T, F> Ꮡf‿ = Ꮡf;`
+    // on T in T's own assembly, is what every `p.Ꮡf` site in every assembly passes, so their lookups hit by reference.
+    // An assembly built before the token passes its own method-group delegate for the same field, and must reach the
+    // SAME view: `&s.f == &s.f` holds across the two, under both forms of the match.
+    private struct tokened
+    {
+        public inner F;
+        internal static ref inner ᏑF(ref tokened t) => ref t.F;
+        internal static readonly FieldRefFunc<tokened, inner> ᏑF‿ = ᏑF;
+    }
+
+    [TestMethod]
+    public void TheFieldsTokenFromTwoSitesAndAnOlderSitesDelegateShareOneView()
+    {
+        FieldViewCache.Disabled = false;
+
+        foreach (bool aotForm in new[] { false, true })
+        {
+            FieldViewCache.CompareByDelegateEquals = aotForm;
+
+            try
+            {
+                ж<tokened> box = Ꮡ(new tokened());
+                ж<inner> view = box.of(tokened.ᏑF‿);
+
+                Assert.IsTrue(ReferenceEquals(view, box.of(tokened.ᏑF‿)), $"two sites passing the token share one view (AOT form: {aotForm})");
+                Assert.IsTrue(ReferenceEquals(view, box.of(new FieldRefFunc<tokened, inner>(tokened.ᏑF))),
+                    $"an older site's own delegate for the field reaches the token's view (AOT form: {aotForm})");
+
+                view.Value.pad = 7;
+                Assert.AreEqual(7, box.Value.F.pad, "the token's view aliases the field");
+            }
+            finally
+            {
+                FieldViewCache.CompareByDelegateEquals = false;
+            }
+        }
+    }
+
     [TestMethod]
     public void AMulticastTokenComparesByDelegateEqualsNotByItsLastTarget()
     {

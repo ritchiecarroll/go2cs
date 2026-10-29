@@ -34,7 +34,7 @@ public class FieldAccessGeneratorTests
         namespace go;
 
         public delegate ref TField FieldRefFunc<T, TField>(ref T instance);
-        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; public ref T Value => throw null!; }
+        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; public ж<TF> of<TF>(FieldRefFunc<T, TF> f) => throw null!; public ref T Value => throw null!; }
         public sealed class NativeBox<T> : ж<T> { }
         public struct array<T> { }
         public sealed class GoFieldAccessAttribute(params System.Type[] types) : System.Attribute { }
@@ -113,10 +113,10 @@ public class FieldAccessGeneratorTests
         return result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "";
     }
 
-    private static MetadataReference ForeignReference()
+    private static MetadataReference ForeignReference(string source = Foreign)
     {
         CSharpCompilation foreign = CSharpCompilation.Create("syscall",
-            [CSharpSyntaxTree.ParseText(Foreign)],
+            [CSharpSyntaxTree.ParseText(source)],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -138,6 +138,12 @@ public class FieldAccessGeneratorTests
     // through the accessor on a NativeBox<T>. `field` is the field's own name where the property's is escaped.
     private static string Ref(string fieldType, string name, string type, string? field = null) =>
         $"public ref {fieldType} {name} {{ {Getter} get => ref ʗp is global::go.NativeBox<{type}> ? ref ʗp.field({type}.Ꮡ{field ?? name}) : ref ʗp.Value.{name}; }}";
+
+    // A field's ADDRESS property (parity seat #32, P2: `&p.f` reads `p.Ꮡf`): the field's view over the struct's own
+    // per-field token `T.Ꮡf‿` (FieldAccessorTokenTests), one delegate object for every site in every assembly, so
+    // golib's view cache compares by reference. `token` is the accessor itself where no token is visible.
+    private static string Address(string fieldType, string name, string type, string? token = null) =>
+        $"public global::go.ж<{fieldType}> Ꮡ{name} {{ {Getter} get => ʗp.of({type}.{token ?? $"Ꮡ{name}‿"}); }}";
 
     // A header-shaped struct's field: get/set over the accessor, the setter committing the header.
     private static string Header(string fieldType, string name, string type) =>
@@ -401,6 +407,70 @@ public class FieldAccessGeneratorTests
         Assert.IsFalse(generated.Contains("hidden"), "an internal foreign field is not accessible here");
     }
 
+    [TestMethod]
+    public void EachPropertyFieldGetsAnAddressPropertyOverItsToken()
+    {
+        string generated = Generate(Package);
+
+        StringAssert.Contains(generated, Address("uint", "Kind", Record));
+        StringAssert.Contains(generated, Address("global::go.array<ushort>", "Path", Record));
+        StringAssert.Contains(generated, Address("ushort", "base", Record), "the accessor's name drops the field's escape");
+        StringAssert.Contains(generated, Address("global::go.main_package.tail", "tail", Record), "an embedded struct's address too");
+        StringAssert.Contains(generated, Address("T", "First", "global::go.main_package.pair<T>"), "a generic struct's token is its instantiation's");
+        Assert.IsFalse(generated.Contains(" ᏑValue { "), "a field the converter keeps on the box form gets neither property");
+        Assert.IsFalse(generated.Contains(" Ꮡ_ { "), "a blank field has no address");
+    }
+
+    [TestMethod]
+    public void AReadonlyOrHeaderFieldsAddressIsItsTokensViewToo()
+    {
+        StringAssert.Contains(Generate(ZeroSize), Address("global::go.atomic_package.noCopy", "pad", "global::go.atomic_package.counter"));
+        StringAssert.Contains(Generate(Headers), Address("nint", "Len", "global::go.unsafeheader_package.Slice"));
+    }
+
+    // A Go field named `elem` keeps its `p.elem` property, but `p.Ꮡelem` would bind ж<T>'s own Ꮡelem method (an
+    // instance member wins over an extension), so the collision list's `Ꮡelem` denies the address property alone.
+    private const string Elem = """
+        namespace go;
+
+        [GoFieldAccess(typeof(node))]
+        partial class list_package
+        {
+            public partial struct node { public int elem; public int next; }
+        }
+        """;
+
+    [TestMethod]
+    public void AnAddressPropertyNamedLikeABoxMemberIsNotDeclared()
+    {
+        string generated = Generate(Elem);
+        const string Node = "global::go.list_package.node";
+
+        StringAssert.Contains(generated, Ref("int", "elem", Node), "the field property is not the collision");
+        StringAssert.Contains(generated, Address("int", "next", Node));
+        Assert.IsFalse(generated.Contains(" Ꮡelem { "), "`p.Ꮡelem` would bind ж<T>.Ꮡelem");
+    }
+
+    [TestMethod]
+    public void AForeignStructsAddressUsesItsTokenOnlyWhereItsMetadataHasOne()
+    {
+        // An assembly built before seat #32 carries the accessors but no tokens: its address property passes the
+        // accessor's method group, today's `.of(T.Ꮡf)` delegate, which golib's cache still matches by its method.
+        string generated = Generate(User, ForeignReference());
+        const string Sockaddr = "global::go.syscall_package.Sockaddr";
+
+        StringAssert.Contains(generated, Address("ushort", "Port", Sockaddr, token: "ᏑPort"));
+
+        string tokened = Generate(User, ForeignReference(Foreign.Replace(
+            "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;",
+            "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;\n" +
+            "                public static readonly FieldRefFunc<Sockaddr, ushort> ᏑPort‿ = ᏑPort;") +
+            "\npublic delegate ref TField FieldRefFunc<T, TField>(ref T instance);\n"));
+
+        StringAssert.Contains(tokened, Address("ushort", "Port", Sockaddr));
+        StringAssert.Contains(tokened, Address("ushort", "Family", Sockaddr, token: "ᏑFamily"), "token presence is read per field");
+    }
+
     // A test assembly that REFERENCES its package's assembly sees the package's internal GoFieldAccess class through
     // InternalsVisibleTo. Two extension properties of one name on one receiver are ambiguous, which C# reports as no
     // member at all (CS9286): runtime's export_test.cs MemclrBytes, `s.Δarray` on a ж<Δsliceᴛ> that alg.cs records
@@ -468,6 +538,20 @@ public class FieldAccessGeneratorTests
     }
 
     [TestMethod]
+    public void AnAddressPropertyTheReferencedPackageAlreadyGivesIsNotDeclaredAgain()
+    {
+        string package = RuntimePackage.Replace(
+            "public static ref nint get_len(ж<runtime_package.slice> ʗp) => throw null!;",
+            "public static ref nint get_len(ж<runtime_package.slice> ʗp) => throw null!;\n" +
+            "    public static ж<nint> get_Ꮡcap(ж<runtime_package.slice> ʗp) => throw null!;");
+
+        string generated = GenerateBeside(package, RuntimeTest);
+
+        StringAssert.Contains(generated, Address("nint", "len", "global::go.runtime_package.slice", token: "Ꮡlen"));
+        Assert.IsFalse(generated.Contains(" Ꮡcap { "), "a second `Ꮡcap` on ж<slice> would be CS9286 at every `&s.cap`");
+    }
+
+    [TestMethod]
     public void APropertyTheReferencedPackageHidesIsDeclared()
     {
         // The control: with no InternalsVisibleTo grant the package's class is out of reach, so nothing is shadowed.
@@ -528,12 +612,12 @@ public class FieldAccessGeneratorTests
 
                 static class site
                 {
-                    static nint read(ж<runtime_package.slice> s) => s.len + s.cap;
+                    static nint read(ж<runtime_package.slice> s) => s.len + s.cap + s.Ꮡcap.Value;
                 }
                 """);
 
             (code, output) = Compile(compiler, directory, "test.dll", ["test.cs", "generated.cs", "site.cs"], ["runtime.dll"]);
-            Assert.AreEqual(0, code, $"`s.len` and `s.cap` bind in the test assembly:\n{output}");
+            Assert.AreEqual(0, code, $"`s.len`, `s.cap` and `s.Ꮡcap` bind in the test assembly:\n{output}");
         }
         finally
         {
