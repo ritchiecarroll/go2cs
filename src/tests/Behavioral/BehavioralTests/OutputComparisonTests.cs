@@ -416,6 +416,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferSimple() => CheckTarget("DeferSimple");
 
     [TestMethod]
+    public void CheckDeferThunkFrames() => CheckTarget("DeferThunkFrames");
+
+    [TestMethod]
     public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
 
     [TestMethod]
