@@ -101,8 +101,8 @@ internal static @string read(Node root) {
 
 internal static ж<ValueSpec> newSpec() {
     return Ꮡ(new ValueSpec(
-        Names: new @string[]{"Typ"}.slice(),
-        Values: new Node[]{new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a")))}.slice()
+        Names: slice<@string>(["Typ"]),
+        Values: slice<Node>([new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a")))])
     ));
 }
 
@@ -112,8 +112,8 @@ internal static void Main() {
     fmt.Println("fixSpec:", (~(~spec).Values[0]._<ж<Lit>>()).Len);
 
     var multi = Ꮡ(new ValueSpec(
-        Names: new @string[]{"Typ", "Other"}.slice(),
-        Values: new Node[]{new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a"))), new LitжNode(Ꮡ(new Lit(Len: 2, Name: "b"))), new LitжNode(Ꮡ(new Lit(Len: 3, Name: "c")))}.slice()
+        Names: slice<@string>(["Typ", "Other"]),
+        Values: slice<Node>([new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a"))), new LitжNode(Ꮡ(new Lit(Len: 2, Name: "b"))), new LitжNode(Ꮡ(new Lit(Len: 3, Name: "c")))])
     ));
     nint outer = renumber(new ValueSpecжNode(multi), 7);
     fmt.Println("renumber outer:", outer);

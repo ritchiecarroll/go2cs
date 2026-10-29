@@ -104,7 +104,7 @@ internal static void indexCopy() {
     f.bump();
     fmt.Println("index:      ", arr[0].show(), "|", f.show());
 
-    var s = new digest[]{d.ΔClone()}.slice();
+    var s = slice<digest>([d.ΔClone()]);
     var g = s[0].ΔClone();
     g.bump();
     fmt.Println("sliceIndex: ", s[0].show(), "|", g.show());

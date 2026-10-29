@@ -33,7 +33,7 @@ internal static partial @string forward(slice<byte> b, nint i) {
 }
 
 internal static void Main() {
-    var b = new byte[]{7, 9}.slice();
+    var b = slice<byte>([7, 9]);
     var c = Ꮡ(new counter());
 
     for (nint i = 0; i < 200; i++) {

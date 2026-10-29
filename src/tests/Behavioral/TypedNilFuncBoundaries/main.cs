@@ -29,13 +29,13 @@ internal static void Main() {
 
     var argSlot = take((zero).OrTypedNilFunc());
 
-    var elemSlot = new any[]{(zero).OrTypedNilFunc()}.slice();
+    var elemSlot = slice<any>([(zero).OrTypedNilFunc()]);
 
-    var fieldSlot = new row[]{new((zero).OrTypedNilFunc(), true)}.slice();
+    var fieldSlot = slice<row>([new((zero).OrTypedNilFunc(), true)]);
 
     var keyedSlot = new map<@string, any>{["k"] = (zero).OrTypedNilFunc()};
 
-    var appendSlot = append(new any[]{}.slice(), (any)((zero).OrTypedNilFunc()));
+    var appendSlot = append(slice<any>([]), (any)((zero).OrTypedNilFunc()));
 
     fmt.Println("arg    ", argSlot == nil);
     fmt.Println("elem   ", elemSlot[0] == nil);

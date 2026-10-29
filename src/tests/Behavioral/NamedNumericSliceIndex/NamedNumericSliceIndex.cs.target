@@ -25,16 +25,16 @@ internal static (@string, @string) pick(slice<@string> spans, PID p) {
 }
 
 internal static void Main() {
-    var dense = new @string[]{"a", "b", "c", "d", "e", "f"}.slice();
+    var dense = slice<@string>(["a", "b", "c", "d", "e", "f"]);
     var (x, y) = lookup(dense, (uint64)5);
     fmt.Println(x, y);
     fmt.Println(bitset((uint64)3), bitset((uint64)10));
 
-    var spans = new @string[]{"zero", "one", "two", "three"}.slice();
+    var spans = slice<@string>(["zero", "one", "two", "three"]);
     var (a, b) = pick(spans, (PID)3);
     fmt.Println(a, b);
 
-    var names = new @string[]{"lo", "mid", "hi"}.slice();
+    var names = slice<@string>(["lo", "mid", "hi"]);
     rank r = 2;
     fmt.Println(names[r]);
 }

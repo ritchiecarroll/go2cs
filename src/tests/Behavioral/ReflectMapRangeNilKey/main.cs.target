@@ -105,7 +105,7 @@ internal static void Main() {
     }
     fmt.Println("plain:", strs, snils, psum, reflect.ValueOf(plain).Len());
 
-    var slices = new map<@string, slice<nint>>{["k"] = new nint[]{1, 2, 3}.slice()};
+    var slices = new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2, 3])};
     iter = reflect.ValueOf(slices).MapRange();
     while (iter.Next()) {
         var v = iter.Value();

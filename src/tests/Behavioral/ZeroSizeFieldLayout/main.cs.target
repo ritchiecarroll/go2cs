@@ -93,7 +93,7 @@ internal static void namedZeroSizeWrites() {
     var p = Ꮡx;
     var arr = new Carrier[]{new(V: pattern), new(V: pattern)}.array();
     var o = new Outer(C: new Carrier(V: pattern));
-    var s = new Carrier[]{new(V: pattern), new(V: pattern)}.slice();
+    var s = slice<Carrier>([new(V: pattern), new(V: pattern)]);
 
     Carrier.ᏑZ(ref x) = side();
     Carrier.ᏑZ(ref p.Value) = side();

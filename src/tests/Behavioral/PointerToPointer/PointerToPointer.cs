@@ -104,7 +104,7 @@ internal static void derefElements() {
     a1 = 10;
     ref var a2 = ref heap<nint>(out var Ꮡa2);
     a2 = 20;
-    var boxes = new ж<nint>[]{Ꮡa1, Ꮡa2}.slice();
+    var boxes = slice<ж<nint>>([Ꮡa1, Ꮡa2]);
     boxes[0].Value = boxes[0].Value + 5;
     boxes[1].Value = readBox(boxes, 1) * 3;
     fmt.Println(a1, a2, boxes[0].Value);

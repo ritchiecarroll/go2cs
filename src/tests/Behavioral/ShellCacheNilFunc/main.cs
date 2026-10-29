@@ -22,7 +22,7 @@ internal static void Main() {
     fn none = default;
     var seven = new fn(() => 7);
     var eight = new fn(() => 8);
-    var values = new any[]{(none).OrTypedNilFunc(), (seven).OrTypedNilFunc(), (eight).OrTypedNilFunc(), (none).OrTypedNilFunc()}.slice();
+    var values = slice<any>([(none).OrTypedNilFunc(), (seven).OrTypedNilFunc(), (eight).OrTypedNilFunc(), (none).OrTypedNilFunc()]);
 
     for (nint round = 0; round < 3; round++) {
         foreach (var (i, a) in values) {

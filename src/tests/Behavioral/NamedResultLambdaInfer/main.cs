@@ -26,7 +26,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
 }
 
 internal static void Main() {
-    var (e, o, err) = parse(new nint[]{1, 2, 3, 4, 5, 6}.slice());
+    var (e, o, err) = parse(slice<nint>([1, 2, 3, 4, 5, 6]));
     fmt.Println(e, o, err);
 }
 

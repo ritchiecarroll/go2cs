@@ -62,9 +62,9 @@ internal static void Main() {
     assertString("assert uint8", (uint8)1);
     assertString("assert int", (nint)5);
 
-    hashKey("hash []int32", new int32[]{1}.slice());
-    hashKey("hash []byte", new byte[]{1}.slice());
-    hashKey("hash []int", new nint[]{1}.slice());
+    hashKey("hash []int32", slice<int32>([1]));
+    hashKey("hash []byte", slice<byte>([1]));
+    hashKey("hash []int", slice<nint>([1]));
 }
 
 } // end main_package

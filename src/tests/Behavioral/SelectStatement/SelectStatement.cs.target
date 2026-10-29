@@ -164,7 +164,7 @@ internal static partial void Main() {
         break;
     }}
 
-    var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
+    var s = slice<nint>([7, 2, 8, -9, 4, 0]);
 
     var c = new channel<nint>(0);
     goǃ(sum, s.slice(0, len(s) / 2), c, GoStack.Bounded);

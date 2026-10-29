@@ -66,7 +66,7 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
 
 internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> p) {
     if (len(list) == 0) {
-        list = new ж<node>[]{p}.slice();
+        list = slice<ж<node>>([p]);
     } else {
         list = append(list, p);
     }
@@ -93,7 +93,7 @@ internal static void Main() {
     fmt.Println("chain:", walkChain(x));
 
     var dup = Ꮡ(new node(val: 5));
-    fmt.Println("visitLocal:", visitLocal(new ж<node>[]{dup, dup, x}.slice()));
+    fmt.Println("visitLocal:", visitLocal(slice<ж<node>>([dup, dup, x])));
 
     slice<ж<node>> list = default;
     list = collect(list, a);

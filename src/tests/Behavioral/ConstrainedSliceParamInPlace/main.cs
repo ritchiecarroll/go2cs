@@ -41,7 +41,7 @@ partial struct numbers /*[]nint*/;
 partial struct sortedMap /*[]nint*/;
 
 internal static void Main() {
-    var a = new nint[]{1, 2, 3, 4, 5}.slice();
+    var a = slice<nint>([1, 2, 3, 4, 5]);
     reverseSeq<slice<nint>, nint>(a);
     fmt.Println(a);
 
@@ -49,11 +49,11 @@ internal static void Main() {
     reverseSeq<numbers, nint>(b);
     fmt.Println(b);
 
-    var s = new @string[]{"go", "2", "cs"}.slice();
+    var s = slice<@string>(["go", "2", "cs"]);
     reverseSeq<slice<@string>, @string>(s);
     fmt.Println(s);
 
-    var c = new nint[]{6, 7, 8, 9}.slice();
+    var c = slice<nint>([6, 7, 8, 9]);
     explicitReverseSeq<slice<nint>, nint>(c);
     fmt.Println(c);
 

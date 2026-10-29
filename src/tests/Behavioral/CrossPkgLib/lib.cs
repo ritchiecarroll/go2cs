@@ -101,7 +101,7 @@ public static nint Bump<T>(this ref Cache<T> c) {
 }
 
 public static slice<T> Wrap<T>(T v) {
-    return new T[]{v}.slice();
+    return slice<T>([v]);
 }
 
 public static V Pair<K, V>(K k, V v) {

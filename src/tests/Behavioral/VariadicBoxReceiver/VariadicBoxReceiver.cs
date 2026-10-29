@@ -25,7 +25,7 @@ internal static void Main() {
         c.add(0xff);
         c.add(1, 2, 3);
         c.add();
-        var more = new byte[]{9, 8}.slice();
+        var more = slice<byte>([9, 8]);
         c.add(more.ꓸꓸꓸ);
     });
     fmt.Println((~s).buf);

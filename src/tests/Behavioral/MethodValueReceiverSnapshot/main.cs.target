@@ -46,10 +46,10 @@ internal static void Main() {
     a = new frame(Name: "a");
 
         var aʗ1 = a;
-    var typed = new Func<@string>[]{
+    var typed = slice<Func<@string>>([
         () => aʗ1.label(),
         () => Ꮡa.Value.Name
-    }.slice();
+    ]);
 
     a.Name = "A";
 
@@ -59,10 +59,10 @@ internal static void Main() {
     b = new frame(Name: "b", Inlined: true);
 
         var bʗ1 = b;
-    var boxed = new any[]{
+    var boxed = slice<any>([
         () => bʗ1.label(),
         bool () => Ꮡb.Value.Inlined
-    }.slice();
+    ]);
 
     b.Name = "B";
 

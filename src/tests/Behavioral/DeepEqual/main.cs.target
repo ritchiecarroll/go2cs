@@ -51,27 +51,27 @@ partial struct guarded {
 }
 
 internal static void Main() {
-    fmt.Println(reflect.DeepEqual(new @string[]{"a", "bc"}.slice(), new @string[]{"a", "bc"}.slice()));
-    fmt.Println(reflect.DeepEqual(new @string[]{"a"}.slice(), new @string[]{"b"}.slice()));
-    fmt.Println(reflect.DeepEqual(new nint[]{1, 2, 3}.slice(), new nint[]{1, 2, 3}.slice()));
-    fmt.Println(reflect.DeepEqual(new nint[]{1, 2, 3}.slice(), new nint[]{1, 2, 4}.slice()));
-    fmt.Println(reflect.DeepEqual(new slice<byte>[]{slice<byte>("ab"u8), default}.slice(), new slice<byte>[]{slice<byte>("ab"u8), default}.slice()));
-    fmt.Println(reflect.DeepEqual(new slice<byte>[]{slice<byte>("ab"u8)}.slice(), new slice<byte>[]{slice<byte>("ac"u8)}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<@string>(["a", "bc"]), slice<@string>(["a", "bc"])));
+    fmt.Println(reflect.DeepEqual(slice<@string>(["a"]), slice<@string>(["b"])));
+    fmt.Println(reflect.DeepEqual(slice<nint>([1, 2, 3]), slice<nint>([1, 2, 3])));
+    fmt.Println(reflect.DeepEqual(slice<nint>([1, 2, 3]), slice<nint>([1, 2, 4])));
+    fmt.Println(reflect.DeepEqual(slice<slice<byte>>([slice<byte>("ab"u8), default]), slice<slice<byte>>([slice<byte>("ab"u8), default])));
+    fmt.Println(reflect.DeepEqual(slice<slice<byte>>([slice<byte>("ab"u8)]), slice<slice<byte>>([slice<byte>("ac"u8)])));
 
-    fmt.Println(reflect.DeepEqual(slice<byte>(default), new byte[]{}.slice()));
-    fmt.Println(reflect.DeepEqual(new byte[]{}.slice(), new byte[]{}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<byte>(default), slice<byte>([])));
+    fmt.Println(reflect.DeepEqual(slice<byte>([]), slice<byte>([])));
     slice<nint> nilInts = default;
     fmt.Println(reflect.DeepEqual(nilInts, nilInts));
-    fmt.Println(reflect.DeepEqual(nilInts, new nint[]{}.slice()));
+    fmt.Println(reflect.DeepEqual(nilInts, slice<nint>([])));
 
     var zero = 0.0D;
-    var nan = new float64[]{zero / zero}.slice();
+    var nan = slice<float64>([zero / zero]);
     fmt.Println(reflect.DeepEqual(nan, nan));
-    fmt.Println(reflect.DeepEqual(nan, new float64[]{nan[0]}.slice()));
+    fmt.Println(reflect.DeepEqual(nan, slice<float64>([nan[0]])));
 
-    var p1 = new point(1, 2, new @string[]{"n"}.slice());
-    var p2 = new point(1, 2, new @string[]{"n"}.slice());
-    var p3 = new point(1, 3, new @string[]{"n"}.slice());
+    var p1 = new point(1, 2, slice<@string>(["n"]));
+    var p2 = new point(1, 2, slice<@string>(["n"]));
+    var p3 = new point(1, 3, slice<@string>(["n"]));
     fmt.Println(reflect.DeepEqual(p1, p2));
     fmt.Println(reflect.DeepEqual(p1, p3));
 
@@ -107,7 +107,7 @@ internal static void Main() {
     c.Value.next = c;
     fmt.Println(reflect.DeepEqual(a.OrTypedNil(), c.OrTypedNil()));
 
-    fmt.Println(reflect.DeepEqual(new nint[]{1}.slice(), new @string[]{"1"}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<nint>([1]), slice<@string>(["1"])));
     fmt.Println(reflect.DeepEqual(default, default));
 
     var n1 = new named(new map<@string, nint>{["a"] = 1, ["b"] = 2});
@@ -125,9 +125,9 @@ internal static void Main() {
 
     fmt.Println(reflect.DeepEqual(new wrap(n1), new wrap(n2)));
     fmt.Println(reflect.DeepEqual(new wrap(n1), new wrap(n3)));
-    var s1 = new namedSlices(new map<@string, slice<nint>>{["k"] = new nint[]{1, 2}.slice()});
-    var s2 = new namedSlices(new map<@string, slice<nint>>{["k"] = new nint[]{1, 2}.slice()});
-    var s3 = new namedSlices(new map<@string, slice<nint>>{["k"] = new nint[]{1, 3}.slice()});
+    var s1 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])});
+    var s2 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])});
+    var s3 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 3])});
     fmt.Println(reflect.DeepEqual(s1, s2));
     fmt.Println(reflect.DeepEqual(s1, s3));
 
@@ -154,9 +154,9 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(h1, h3));
     fmt.Println(reflect.DeepEqual(h3, h3));
     fmt.Println(reflect.DeepEqual(new hooks(name: "a"), new hooks(name: "b")));
-    fmt.Println(reflect.DeepEqual(new Action[]{default, default}.slice(), new Action[]{default, default}.slice()));
-    fmt.Println(reflect.DeepEqual(new Action[]{default}.slice(), new Action[]{() => {
-    }}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<Action>([default, default]), slice<Action>([default, default])));
+    fmt.Println(reflect.DeepEqual(slice<Action>([default]), slice<Action>([() => {
+    }])));
     fmt.Println(reflect.DeepEqual(new map<@string, Action>{["k"] = default}, new map<@string, Action>{["k"] = default}));
     Action nilFn = default;
     fmt.Println(reflect.DeepEqual((nilFn).OrTypedNilFunc(), (nilFn).OrTypedNilFunc()));
@@ -173,7 +173,7 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), g1.OrTypedNil()));
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), Ꮡ(new guarded(n: 2, name: "a"))));
     fmt.Println(reflect.DeepEqual(g1.OrTypedNil(), Ꮡ(new guarded(n: 1, name: "b"))));
-    fmt.Println(reflect.DeepEqual(new ж<guarded>[]{g1}.slice(), new ж<guarded>[]{g2}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<ж<guarded>>([g1]), slice<ж<guarded>>([g2])));
     fmt.Println(reflect.DeepEqual(new map<@string, ж<guarded>>{["k"] = g1}, new map<@string, ж<guarded>>{["k"] = g2}));
     var g3 = Ꮡ(new guarded(n: 1, name: "a"));
     g3.of(guarded.Ꮡonce).Do(() => {
@@ -196,7 +196,7 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(tok1, tok2));
     tok2 = (any)((charData)data);
     fmt.Println(reflect.DeepEqual(tok1, tok2));
-    fmt.Println(reflect.DeepEqual(new charData[]{(charData)slice<byte>((@string)"ab"u8)}.slice(), new charData[]{(charData)slice<byte>((@string)"ac"u8)}.slice()));
+    fmt.Println(reflect.DeepEqual(slice<charData>([(charData)slice<byte>((@string)"ab"u8)]), slice<charData>([(charData)slice<byte>((@string)"ac"u8)])));
     fmt.Println(reflect.DeepEqual(new map<@string, charData>{["k"] = ((charData)slice<byte>((@string)"ab"u8))}, new map<@string, charData>{["k"] = ((charData)slice<byte>((@string)"ac"u8))}));
 
     charData nilCD = default;

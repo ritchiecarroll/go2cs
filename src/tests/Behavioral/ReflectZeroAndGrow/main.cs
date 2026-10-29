@@ -61,7 +61,7 @@ internal static void Main() {
     z("NB(nil)", (NB)default);
     z("NB{}", new NB(new byte[]{}.slice()));
     z("[]byte(nil)", slice<byte>(default));
-    z("[]byte{0}", new byte[]{0}.slice());
+    z("[]byte{0}", slice<byte>([0]));
     map<@string, nint> nilMap = default;
     z("map nil", nilMap);
     z("map empty", new map<@string, nint>{});
@@ -76,7 +76,7 @@ internal static void Main() {
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 0;
     z("outer{P:&n}", new outer(P: Ꮡn));
-    z("outer{Sl:[]}", new outer(Sl: new nint[]{}.slice()));
+    z("outer{Sl:[]}", new outer(Sl: slice<nint>([])));
 
     fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf((any)((NS)(@string)""u8)).IsZero());
     fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v"u8)).IsZero());
@@ -89,7 +89,7 @@ internal static void Main() {
     fmt.Println("field E set kind:", ev2.Kind(), "IsZero:", ev2.IsZero());
 
     ref var s = ref heap<slice<byte>>(out var Ꮡs);
-    s = new byte[]{1, 2, 3, 4}.slice();
+    s = slice<byte>([1, 2, 3, 4]);
     var rv = reflect.ValueOf(Ꮡs).Elem();
     rv.Grow(1);
     fmt.Println("Grow(1) len/cap:", rv.Len(), rv.Cap() >= 5, len(s), cap(s) >= 5);
@@ -108,7 +108,7 @@ internal static void Main() {
     fmt.Println("Grow+SetLen:", len(big), big[2], cap(big) >= 10);
 
     ref var keep = ref heap<slice<nint>>(out var Ꮡkeep);
-    keep = new nint[]{7, 8}.slice();
+    keep = slice<nint>([7, 8]);
     var rk = reflect.ValueOf(Ꮡkeep).Elem();
     rk.Grow(0);
     fmt.Println("Grow(0):", len(keep), keep[0], keep[1]);

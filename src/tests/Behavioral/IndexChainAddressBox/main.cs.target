@@ -33,7 +33,7 @@ internal static uint64 closureLocal() {
         }
         return Ꮡh.at(hist.Ꮡcounts, 1).Load();
     }
-    return record(new nint[]{1, 5, 2, 9}.slice());
+    return record(slice<nint>([1, 5, 2, 9]));
 }
 
 internal static uint64 fieldArrayMethod() {

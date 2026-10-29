@@ -121,9 +121,9 @@ internal static void Main() {
     fmt.Println("string:", eq("go", "go"), eq("go", "c#"));
     fmt.Println("float and complex:", eq(Δmath.NaN(), Δmath.NaN()), eq(1.0D, 1.0D), eq(complex(Δmath.NaN(), 0D), complex(Δmath.NaN(), 0D)), eq((complex64)1F.i(), (complex64)1F.i()));
 
-    fmt.Println("uncomparable:", panicText(new nint[]{1}.slice(), new nint[]{1}.slice()));
+    fmt.Println("uncomparable:", panicText(slice<nint>([1]), slice<nint>([1])));
     fmt.Println("uncomparable field:", panicText(new pathError("x", "y", default), new main_b()));
-    fmt.Println("uncomparable in struct:", panicText(new main_a(new nint[]{1}.slice()), new main_a(new nint[]{1}.slice())));
+    fmt.Println("uncomparable in struct:", panicText(new main_a(slice<nint>([1])), new main_a(slice<nint>([1]))));
 
     thunk none = default;
     var seven = new thunk(() => 7);

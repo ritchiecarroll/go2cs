@@ -28,7 +28,7 @@ internal partial struct writeOps_opClose /*dyn*/ {
 }
 
 internal static void writeOps() {
-    var ops = new writeOps_testFnc[]{new writeOps_opWrite("abc"), new writeOps_opClose("eof"), new writeOps_opWrite("de")}.slice();
+    var ops = slice<writeOps_testFnc>([new writeOps_opWrite("abc"), new writeOps_opClose("eof"), new writeOps_opWrite("de")]);
 
     foreach (var (_, op) in ops) {
         switch (op.type()) {
@@ -55,8 +55,8 @@ internal partial struct fileOps_makeSparse /*dyn*/ {
 }
 
 internal static void fileOps() {
-    var makers = new fileOps_fileMaker[]{new fileOps_makeReg(4), new fileOps_makeSparse(8, 2)}.slice();
-    var tests = new fileOps_testFnc[]{new fileOps_makeReg(1), new fileOps_makeSparse(3, 1), new fileOps_makeReg(2)}.slice();
+    var makers = slice<fileOps_fileMaker>([new fileOps_makeReg(4), new fileOps_makeSparse(8, 2)]);
+    var tests = slice<fileOps_testFnc>([new fileOps_makeReg(1), new fileOps_makeSparse(3, 1), new fileOps_makeReg(2)]);
 
     var total = (int64)0;
 

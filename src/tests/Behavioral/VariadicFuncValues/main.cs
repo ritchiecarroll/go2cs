@@ -22,7 +22,7 @@ internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
     fmt.Println(f("loose"u8, 1, 2, 3));
     fmt.Println(f("empty"u8));
 
-    var nums = new nint[]{4, 5}.slice();
+    var nums = slice<nint>([4, 5]);
     fmt.Println(f("spread"u8, nums.ꓸꓸꓸ));
 }
 
@@ -58,7 +58,7 @@ internal static void swapEmitter(ж<logger> l, bool swap) {
     emit("two %d %d", (nint)2, (nint)3);
     emit("none");
 
-    var rest = new any[]{(nint)4, (nint)5}.slice();
+    var rest = slice<any>([(nint)4, (nint)5]);
     emit("spread %d %d"u8, rest.ꓸꓸꓸ);
 }
 

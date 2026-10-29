@@ -89,15 +89,15 @@ internal static void Main() {
 
     var sl = reflect.SliceOf(byteT);
     describeSlice("SliceOf(uint8)", sl);
-    fmt.Println("slice identical:", AreEqual(sl, reflect.TypeOf(new uint8[]{}.slice())), "| elem identical:", AreEqual(sl.Elem(), byteT));
+    fmt.Println("slice identical:", AreEqual(sl, reflect.TypeOf(slice<uint8>([]))), "| elem identical:", AreEqual(sl.Elem(), byteT));
 
     var slArr = reflect.SliceOf(reflect.ArrayOf(3, byteT));
     fmt.Println("slice of array identical to declared:", AreEqual(slArr, reflect.TypeOf(GoReflect.WithElemDims(new array<uint8>[]{}.slice(), 3))));
 
     fmt.Println("array of slice:", reflect.ArrayOf(2, sl),
         "| identical:", AreEqual(reflect.ArrayOf(2, sl), reflect.TypeOf(new slice<uint8>[]{}.array(2))),
-        "| slice of slice:", AreEqual(reflect.SliceOf(sl), reflect.TypeOf(new slice<uint8>[]{}.slice())),
-        "| slice of pointer:", AreEqual(reflect.SliceOf(reflect.PointerTo(byteT)), reflect.TypeOf(new ж<uint8>[]{}.slice())));
+        "| slice of slice:", AreEqual(reflect.SliceOf(sl), reflect.TypeOf(slice<slice<uint8>>([]))),
+        "| slice of pointer:", AreEqual(reflect.SliceOf(reflect.PointerTo(byteT)), reflect.TypeOf(slice<ж<uint8>>([]))));
 
     var sv = reflect.MakeSlice(sl, 2, 4);
     sv.Index(0).SetUint(5);

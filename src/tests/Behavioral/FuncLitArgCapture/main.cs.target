@@ -36,7 +36,7 @@ internal static nint sum(this payload p) {
 
 internal static nint nestedStructCapture() {
     ref var p = ref heap<payload>(out var Ꮡp);
-    p = new payload(vals: new nint[]{1, 2, 3, 4}.slice());
+    p = new payload(vals: slice<nint>([1, 2, 3, 4]));
     var @out = new channel<nint>(1);
     var outʗ1 = @out;
     var pʗ1 = p;
@@ -82,7 +82,7 @@ internal static nint nestedArgLiteralCapture() {
     var total = new channel<nint>(1);
     var totalʗ1 = total;
     run([MethodImpl(MethodImplOptions.NoInlining)] () => {
-        var items = new nint[]{1, 2, 3}.slice();
+        var items = slice<nint>([1, 2, 3]);
         var done = new channel<nint>(len(items));
         foreach (var i in range(items)) {
             nint iΔ1 = i;
@@ -144,19 +144,19 @@ internal static void Main() {
     });
     fmt.Println("6:", e.x);
 
-    var vals = new nint[]{5}.slice();
+    var vals = slice<nint>([5]);
     var valsʗ1 = vals;
     nint adder(nint k) => k + valsʗ1[0];
     fmt.Println("7:", adder(10));
 
-    var @base = new nint[]{3}.slice();
+    var @base = slice<nint>([3]);
         var baseʗ1 = @base;
-    var handlers = new Func<nint, nint>[]{
+    var handlers = slice<Func<nint, nint>>([
         (nint k) => k + baseʗ1[0]
-    }.slice();
+    ]);
     fmt.Println("8:", handlers[0](100));
 
-    var seed = new nint[]{2}.slice();
+    var seed = slice<nint>([2]);
 
     var seedʗ1 = seed;
     Func<nint, nint> mul = (nint k) => k * seedʗ1[0];

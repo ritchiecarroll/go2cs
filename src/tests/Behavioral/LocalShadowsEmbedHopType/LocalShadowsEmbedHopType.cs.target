@@ -83,7 +83,7 @@ internal static void Main() {
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
     fmt.Println(@out);
     fmt.Println(d.Verify(@out[..]));
-    fmt.Println(d.Verify(new byte[]{0, 0}.slice()));
+    fmt.Println(d.Verify(slice<byte>([0, 0])));
     fmt.Println(resetVia(d));
 }
 

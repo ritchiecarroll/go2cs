@@ -22,14 +22,14 @@ public partial struct cfg {
     [0x0002] = () => Ꮡ(new hkdfState("sha512", 64))
 }; }
 
-[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
+[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = slice<Action<ж<cfg>>>([
     (ж<cfg> c) => {
         c.Value.verbose = true;
     }
-}.slice(); }
+]); }
 
 internal static void Main() {
-    foreach (var (_, id) in new uint16[]{0x0001, 0x0002}.slice()) {
+    foreach (var (_, id) in slice<uint16>([0x0001, 0x0002])) {
         var ctor = SupportedStates[id];
         var s = ctor();
         fmt.Println(s.describe());

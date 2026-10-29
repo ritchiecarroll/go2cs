@@ -37,7 +37,7 @@ internal static void Main() {
 
     fmt.Println("len:", len(seen));
 
-    foreach (var (_, k) in new nint[]{1, 3, 5, 7}.slice()) {
+    foreach (var (_, k) in slice<nint>([1, 3, 5, 7])) {
         fmt.Printf("contains(%d) = %t\n"u8, k, contains(seen, k));
     }
 
@@ -48,7 +48,7 @@ internal static void Main() {
     lit["c"] = new EmptyStruct();
     fmt.Println("lit len:", len(lit));
 
-    foreach (var (_, s) in new @string[]{"a", "b", "c", "d"}.slice()) {
+    foreach (var (_, s) in slice<@string>(["a", "b", "c", "d"])) {
         var (_, ok) = lit[s, ꟷ];
         fmt.Printf("lit[%s] = %t\n"u8, s, ok);
     }

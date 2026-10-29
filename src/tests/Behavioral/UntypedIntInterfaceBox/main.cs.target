@@ -42,7 +42,7 @@ internal static void Main() {
 
     fmt.Println(ret()._<nint>());
 
-    var s = new any[]{(nint)5}.slice();
+    var s = slice<any>([(nint)5]);
     fmt.Println(s[0]._<nint>());
 
     var m = new map<@string, any>{["k"] = (nint)9};

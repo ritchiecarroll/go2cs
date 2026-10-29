@@ -13,10 +13,10 @@ partial struct Request {
 }
 
 internal static void Main() {
-    var req = Ꮡ(new Request(Header: new Header(new map<@string, slice<@string>>{}), Count: new map<@string, nint>{}, Body: new @string[]{"a", "b"}.slice()));
+    var req = Ꮡ(new Request(Header: new Header(new map<@string, slice<@string>>{}), Count: new map<@string, nint>{}, Body: slice<@string>(["a", "b"])));
 
-    req.Value.Header["Accept"] = new @string[]{"text/html", "text/plain"}.slice();
-    req.Value.Header["X-Tag"] = new @string[]{"a"}.slice();
+    req.Value.Header["Accept"] = slice<@string>(["text/html", "text/plain"]);
+    req.Value.Header["X-Tag"] = slice<@string>(["a"]);
 
     req.Value.Count["hits"] = (~req).Count["hits"] + 1;
 

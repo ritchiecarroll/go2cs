@@ -47,7 +47,7 @@ internal static void Main() {
     fmt.Println("two:", two(ref (s).DerefOrNull(), ref (u).DerefOrNull()));
     fmt.Println("pair, unnamed struct into the second parameter:", pair(new S(1), new main_b(2)));
     fmt.Println("tail, variadic pointers:", tail(new S(1), u, u));
-    fmt.Println("tail, expanded slice:", tail(new S(1), new ж<U>[]{u}.slice().ꓸꓸꓸ));
+    fmt.Println("tail, expanded slice:", tail(new S(1), slice<ж<U>>([u]).ꓸꓸꓸ));
     fmt.Println("spread, variadic values:", spread(new V(1), new V(2)));
 }
 

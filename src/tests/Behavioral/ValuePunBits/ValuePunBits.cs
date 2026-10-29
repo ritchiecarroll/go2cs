@@ -28,7 +28,7 @@ internal static float32 orBits(float32 xʗp, float32 y) {
 }
 
 internal static void Main() {
-    foreach (var (_, f) in new float64[]{0D, 1.5D, -2.25D, Δmath.Inf(1), Δmath.Inf(-1), Δmath.MaxFloat64, Δmath.SmallestNonzeroFloat64}.slice()) {
+    foreach (var (_, f) in slice<float64>([0D, 1.5D, -2.25D, Δmath.Inf(1), Δmath.Inf(-1), Δmath.MaxFloat64, Δmath.SmallestNonzeroFloat64])) {
         fmt.Printf("%v %#016x %v\n"u8, f, Δmath.Float64bits(f), Δmath.Float64frombits(Δmath.Float64bits(f)) == f);
     }
 
@@ -38,7 +38,7 @@ internal static void Main() {
     var nan = Δmath.Float64frombits(0x7FF8000000000123UL);
     fmt.Printf("nan payload %#016x %v\n"u8, Δmath.Float64bits(nan), Δmath.IsNaN(nan));
 
-    foreach (var (_, f) in new float32[]{0F, 1.5F, -2.25F, (float32)Δmath.Inf(1), Δmath.MaxFloat32}.slice()) {
+    foreach (var (_, f) in slice<float32>([0F, 1.5F, -2.25F, (float32)Δmath.Inf(1), Δmath.MaxFloat32])) {
         fmt.Printf("%v %#08x %v\n"u8, f, Δmath.Float32bits(f), Δmath.Float32frombits(Δmath.Float32bits(f)) == f);
     }
 

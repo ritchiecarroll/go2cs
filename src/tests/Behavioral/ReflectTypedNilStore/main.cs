@@ -33,9 +33,9 @@ internal static void Main() {
         var m = new map<@string, any>{};
         reflect.ValueOf(m).SetMapIndex(reflect.ValueOf("k"), f);
 
-        var s = reflect.Append(reflect.ValueOf(new any[]{}.slice()), f).Interface()._<slice<any>>();
+        var s = reflect.Append(reflect.ValueOf(slice<any>([])), f).Interface()._<slice<any>>();
 
-        var @out = reflect.ValueOf(take).Call(new reflectꓸValue[]{f}.slice())[0].Interface();
+        var @out = reflect.ValueOf(take).Call(slice<reflectꓸValue>([f]))[0].Interface();
 
         var ch = new channel<any>(1);
         reflect.ValueOf(ch).Send(f);

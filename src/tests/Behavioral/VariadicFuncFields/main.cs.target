@@ -52,7 +52,7 @@ internal static void Main() {
 
     fmt.Println(ctxt.JoinPath() == ""u8);
 
-    var parts = new @string[]{"x", "y"}.slice();
+    var parts = slice<@string>(["x", "y"]);
     fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
 
     ctxt.JoinPath = @string (params ꓸꓸꓸstring elemʗp) => {

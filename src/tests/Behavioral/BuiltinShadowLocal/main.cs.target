@@ -84,7 +84,7 @@ internal static void shadowedCalls() {
 }
 
 internal static void Main() {
-    fmt.Println(sumWithLenLocal(new nint[]{10, 20, 30}.slice()));
+    fmt.Println(sumWithLenLocal(slice<nint>([10, 20, 30])));
     fmt.Println(sumWithLenLocal(default));
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));
     fmt.Println(describeSignal(9));
@@ -92,7 +92,7 @@ internal static void Main() {
 
     shadowedCalls();
 
-    fmt.Println("heap", sumHeap(new nint[]{4, 5, 6}.slice()), scaleHeap(7, 6));
+    fmt.Println("heap", sumHeap(slice<nint>([4, 5, 6])), scaleHeap(7, 6));
 
     var (l, c) = unshadowed();
     fmt.Println("builtin", l, c);

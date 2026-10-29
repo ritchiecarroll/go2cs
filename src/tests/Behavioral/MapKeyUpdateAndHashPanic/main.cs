@@ -230,7 +230,7 @@ internal static void hashPanic() {
     });
     var fullʗ2 = full;
     @try("full map assign []int", () => {
-        fullʗ2[new @string[]{"x"}.slice()] = true;
+        fullʗ2[slice<@string>(["x"])] = true;
     });
     var nilMapʗ1 = nilMap;
     var sliceʗ4 = Δslice;

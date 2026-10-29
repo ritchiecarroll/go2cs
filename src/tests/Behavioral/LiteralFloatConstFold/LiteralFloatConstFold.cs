@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var q = new float64[]{0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D}.slice();
+    var q = slice<float64>([0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D]);
     var x = /* 0.1 + 0.2 */ 0.3D;
     var y = 1.5D * 2.0D;
     var z = 7 / 2 + .5D;

@@ -84,11 +84,11 @@ internal static void Main() {
 
     fmt.Println("\n=== In-Function var Slice of Anonymous Struct ===");
 
-    slice<main_type> sects = new main_type[]{
+    slice<main_type> sects = slice<main_type>([
         new("text", 100),
         new("data", 200),
         new("syms", 300)
-    }.slice();
+    ]);
 
     var total = (uint32)0;
 

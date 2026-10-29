@@ -29,7 +29,7 @@ internal static T bareResult<T>(T v) {
 }
 
 internal static slice<T> sliceOf<T>(T v) {
-    return new T[]{v}.slice();
+    return slice<T>([v]);
 }
 
 internal static map<K, V> mapTo<K, V>(K k, V v) {

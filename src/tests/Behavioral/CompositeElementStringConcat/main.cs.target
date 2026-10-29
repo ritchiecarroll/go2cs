@@ -15,17 +15,17 @@ internal partial struct main_rec /*dyn*/ {
 internal static void Main() {
     @string prefix = "go";
 
-    var typedSlice = new @string[]{prefix + "-a"u8, prefix + "-b"u8}.slice();
+    var typedSlice = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);
 
     var typedArray = new @string[]{prefix + "-c"u8, prefix + "-d"u8}.array();
 
-    var elided = new slice<@string>[]{new @string[]{prefix + "-e"u8}.slice()}.slice();
+    var elided = slice<slice<@string>>([slice<@string>([prefix + "-e"u8])]);
 
-    var parens = new @string[]{(prefix + "-f"u8)}.slice();
+    var parens = slice<@string>([(prefix + "-f"u8)]);
 
-    var bare = new @string[]{"lit", "x"u8 + "y"u8}.slice();
+    var bare = slice<@string>(["lit", "x"u8 + "y"u8]);
 
-    var viaCall = take(new @string[]{prefix + "-g"u8}.slice());
+    var viaCall = take(slice<@string>([prefix + "-g"u8]));
 
     var inMap = new map<@string, @string>{["k"] = prefix + "-h"u8};
     var inStruct = new main_rec(prefix + "-i"u8, "plain");

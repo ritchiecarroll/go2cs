@@ -166,7 +166,7 @@ internal static void Main() {
     @string x = "Hello, 世界 \u0053\u004a3";
     fmt.Println(x);
 
-    var people = new Person[]{
+    var people = slice<Person>([
         new(
             Name: "Person1",
             Age: 26,
@@ -192,7 +192,7 @@ internal static void Main() {
             Age: 25,
             ShoeSize: 8.5F
         )
-    }.slice();
+    ]);
 
     fmt.Println(people);
 

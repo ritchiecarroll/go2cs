@@ -19,13 +19,13 @@ partial struct ftoaTest {
     internal @string s;
 }
 
-internal static slice<ftoaTest> ftoatests = new ftoaTest[]{
+internal static slice<ftoaTest> ftoatests = slice<ftoaTest>([
     new((float64)below1e23, (byte)'e', 17, "9.99999999999999748e+22"),
     new((float64)above1e23, (byte)'f', 17, "100000000000000008388608.00000000000000000"),
     new(small, (byte)'g', -1, "1000")
-}.slice();
+]);
 
-internal static slice<float64> floats = new float64[]{(float64)below1e23, (float64)above1e23, small}.slice();
+internal static slice<float64> floats = slice<float64>([(float64)below1e23, (float64)above1e23, small]);
 
 internal static array<float64> floatArr = new float64[]{(float64)below1e23, (float64)above1e23}.array();
 
@@ -33,7 +33,7 @@ internal static map<@string, float64> byName = new map<@string, float64>{["below
 
 internal static ftoaTest keyed = new ftoaTest(f: (float64)below1e23, fmtc: (byte)'g', prec: -1, s: "keyed");
 
-internal static slice<slice<float64>> nested = new slice<float64>[]{new float64[]{(float64)below1e23}.slice(), new float64[]{(float64)above1e23}.slice()}.slice();
+internal static slice<slice<float64>> nested = slice<slice<float64>>([slice<float64>([(float64)below1e23]), slice<float64>([(float64)above1e23])]);
 
 internal static float32 asFloat32 = (float32)below1e23;
 
@@ -64,7 +64,7 @@ internal static void Main() {
     v = (float64)below1e23;
     fmt.Println(v);
 
-    var local = new float64[]{(float64)below1e23, small}.slice();
+    var local = slice<float64>([(float64)below1e23, small]);
     fmt.Println(local[0], local[1]);
 
     var ch = new channel<float64>(1);
@@ -73,11 +73,11 @@ internal static void Main() {
 
     fmt.Println(take(small), (nint)(small * 2), (float64)((float64)small / 4D));
 
-    foreach (var (_, u) in new uint64[]{0, 999, 1000, 1001, (uint64)1 << 62, (uint64)1 << 63, 18446744073709551615UL}.slice()) {
+    foreach (var (_, u) in slice<uint64>([0, 999, 1000, 1001, (uint64)1 << 62, (uint64)1 << 63, 18446744073709551615UL])) {
         fmt.Println(u, u < small, u <= small, u > small, u >= small, u == small, u != small);
     }
 
-    foreach (var (_, i) in new int64[]{-9223372036854775808L, -1, 0, 1000, 9223372036854775807L}.slice()) {
+    foreach (var (_, i) in slice<int64>([-9223372036854775808L, -1, 0, 1000, 9223372036854775807L])) {
         fmt.Println(i, i < small, i > small, i == small);
     }
 

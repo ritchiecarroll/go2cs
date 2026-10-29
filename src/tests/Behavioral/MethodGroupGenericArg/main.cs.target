@@ -89,17 +89,17 @@ internal static bool rowsEqual(slice<row> a, slice<row> b) {
 }
 
 internal static void Main() {
-    var nums = new nint[]{1, 2, 3, 4}.slice();
+    var nums = slice<nint>([1, 2, 3, 4]);
     nint sum = foldSlice<slice<nint>, nint>(nums, addInt);
     fmt.Println(sum);
 
-    fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 3, 4}.slice(), equalPair<nint>));
-    fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 9, 4}.slice(), equalPair<nint>));
+    fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, slice<nint>([1, 2, 3, 4]), equalPair<nint>));
+    fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, slice<nint>([1, 2, 9, 4]), equalPair<nint>));
 
     fmt.Println(insertAt<slice<nint>, nint>(nums, 1));
     fmt.Println(insertAt(nums, 1, (nint)7, (nint)8));
 
-    var plain = new nint[]{1, 2, 3}.slice();
+    var plain = slice<nint>([1, 2, 3]);
     applyTo<slice<nint>>(plain, reverse<slice<nint>, nint>);
     fmt.Println(plain);
 
@@ -107,8 +107,8 @@ internal static void Main() {
     applyTo<namedInts>(named, reverse<namedInts, nint>);
     fmt.Println(named);
 
-    fmt.Println(rowsEqual(new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice(), new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice()));
-    fmt.Println(rowsEqual(new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice(), new row[]{new nint[]{1, 2}.slice(), new nint[]{4}.slice()}.slice()));
+    fmt.Println(rowsEqual(slice<row>([slice<nint>([1, 2]), slice<nint>([3])]), slice<row>([slice<nint>([1, 2]), slice<nint>([3])])));
+    fmt.Println(rowsEqual(slice<row>([slice<nint>([1, 2]), slice<nint>([3])]), slice<row>([slice<nint>([1, 2]), slice<nint>([4])])));
 }
 
 } // end main_package

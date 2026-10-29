@@ -92,7 +92,7 @@ internal static void Main() {
 
     fmt.Println("returned==nil", boxed(sl[0]) == nil);
 
-    var anys = new any[]{dp.OrTypedNil(), st.P.OrTypedNil()}.slice();
+    var anys = slice<any>([dp.OrTypedNil(), st.P.OrTypedNil()]);
     var holder = new main_holder(V: dp.OrTypedNil());
     var byName = new map<@string, any>{["p"] = dp.OrTypedNil()};
     var byKey = new map<any, nint>{[dp.OrTypedNil()] = 7};
@@ -113,14 +113,14 @@ internal static void Main() {
 
     fmt.Println(panicked());
 
-    var acc = append(new any[]{}.slice(), (any)(dp.OrTypedNil()), (any)(st.P.OrTypedNil()));
+    var acc = append(slice<any>([]), (any)(dp.OrTypedNil()), (any)(st.P.OrTypedNil()));
     fmt.Printf("append %T %T %v %v\n"u8, acc[0], acc[1], acc[0] == nil, acc[1] == nil);
 
-    var rows = new main_rows[]{
+    var rows = slice<main_rows>([
         new(dp.OrTypedNil(), true),
         new(st.P.OrTypedNil(), true),
         new((nint)7, false)
-    }.slice();
+    ]);
     foreach (var (_, r) in rows) {
         fmt.Printf("row %T %v %v\n"u8, r.value, r.value == nil, r.want);
     }

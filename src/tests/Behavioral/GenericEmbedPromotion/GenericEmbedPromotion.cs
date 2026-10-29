@@ -62,7 +62,7 @@ internal static @string Fresh<Point>(this ref curve<Point> c)
     where Point : point<Point>
 {
     var p = c.newPoint();
-    var (r, _) = p.restore(new byte[]{7}.slice());
+    var (r, _) = p.restore(slice<byte>([7]));
     return r.label();
 }
 

@@ -193,7 +193,7 @@ internal static void closureCaptureRange() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("-- control: closure capture (range) --");
-        foreach (var (_, v) in new @string[]{"x", "y", "z"}.slice()) {
+        foreach (var (_, v) in slice<@string>(["x", "y", "z"])) {
             defer(() => {
                 fmt.Println("range", v);
             }, ref ᒐ);

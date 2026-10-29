@@ -7,7 +7,7 @@ using go;
 partial class inner_package {
 
 public static slice<nint> SortThree() {
-    var s = new nint[]{3, 1, 2}.slice();
+    var s = slice<nint>([3, 1, 2]);
     sort.Ints(s);
     return s;
 }

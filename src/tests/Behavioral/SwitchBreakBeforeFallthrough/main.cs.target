@@ -57,7 +57,7 @@ internal partial struct main_cases /*dyn*/ {
 }
 
 internal static void Main() {
-    var cases = new main_cases[]{
+    var cases = slice<main_cases>([
         new(isoZone, "Z07:00"),
         new(isoZone, "Z"),
         new(isoZone, "+08:00"),
@@ -66,7 +66,7 @@ internal static void Main() {
         new(nameZone, ""),
         new(nameZone, "MST"),
         new(9, "?")
-    }.slice();
+    ]);
 
     foreach (var (_, c) in cases) {
         fmt.Printf("%d %q -> %s\n"u8, c.kind, c.s, zone(c.kind, c.s));

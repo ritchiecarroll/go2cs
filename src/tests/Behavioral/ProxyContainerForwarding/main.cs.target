@@ -38,7 +38,7 @@ public static nint Count<N>(N n)
 public static slice<@string> Labels<N>(N n)
     where N : Tree<N>
 {
-    var @out = new @string[]{n.Label()}.slice();
+    var @out = slice<@string>([n.Label()]);
 
     foreach (var (_, kid) in n.Children()) {
         @out = appendꓸꓸꓸ(@out, Labels(kid));
@@ -134,7 +134,7 @@ public static slice<@string> Names<N>(N n)
 }
 
 internal static void Main() {
-    var root = new Leaf(name: "root", kids: new Leaf[]{new(name: "a"), new(name: "b", kids: new Leaf[]{new(name: "c")}.slice())}.slice());
+    var root = new Leaf(name: "root", kids: slice<Leaf>([new(name: "a"), new(name: "b", kids: slice<Leaf>([new(name: "c")]))]));
 
     fmt.Println(Count(root));
     fmt.Println(Labels(root));

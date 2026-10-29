@@ -31,11 +31,11 @@ internal static void Main() {
     ));
     fmt.Printf("Option value: %s, valid: %t\n"u8, (~optionPtr).value, (~optionPtr).valid);
 
-    var options = new Option<nint>[]{
+    var options = slice<Option<nint>>([
         NewOption<nint>(42),
         NewEmptyOption<nint>(),
         NewOption<nint>(100)
-    }.slice();
+    ]);
     fmt.Printf("Options count: %d\n"u8, len(options));
 
     var cache = new map<@string, Option<float64>>{

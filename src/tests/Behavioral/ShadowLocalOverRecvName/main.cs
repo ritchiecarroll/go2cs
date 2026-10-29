@@ -75,7 +75,7 @@ public static nint ValShadowField(this ж<Thing> Ꮡt) {
 
 public static nint SliceShadowIndex(this ref Thing t) {
     {
-        var tΔ1 = new nint[]{10, 20, 30}.slice();
+        var tΔ1 = slice<nint>([10, 20, 30]);
         var p = Ꮡ(tΔ1, 1);
         p.Value = 55;
         return tΔ1[1];

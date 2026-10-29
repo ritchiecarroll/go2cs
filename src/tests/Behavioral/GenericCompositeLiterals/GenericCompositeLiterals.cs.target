@@ -34,20 +34,20 @@ internal static void Main() {
     fmt.Printf("Int queue size: %d\n"u8, intQueue.Size());
 
     var stringQueue = new Queue<@string>(
-        items: new @string[]{"hello", "world"}.slice()
+        items: slice<@string>(["hello", "world"])
     );
     fmt.Printf("String queue size: %d\n"u8, stringQueue.Size());
 
     Queue<float64> floatQueue = new Queue<float64>(
-        items: new float64[]{3.14D, 2.71D, 1.618D}.slice()
+        items: slice<float64>([3.14D, 2.71D, 1.618D])
     );
     fmt.Printf("Float queue size: %d\n"u8, floatQueue.Size());
 
-    var queues = new any[]{
+    var queues = slice<any>([
         new Queue<nint>(),
         new Queue<@string>(),
-        new Queue<bool>(items: new bool[]{true, false}.slice())
-    }.slice();
+        new Queue<bool>(items: slice<bool>([true, false]))
+    ]);
     fmt.Printf("Number of queues: %d\n"u8, len(queues));
 }
 

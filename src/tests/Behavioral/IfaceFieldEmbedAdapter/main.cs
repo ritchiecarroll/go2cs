@@ -51,7 +51,7 @@ partial interface conn {
 
 internal static void Main() {
     var @out = Ꮡ(new dst());
-    var d = Ꮡ(new duplex(source: new srcжsource(Ꮡ(new src(items: new @string[]{"alpha", "beta"}.slice()))), sink: new dstжsink(@out)));
+    var d = Ꮡ(new duplex(source: new srcжsource(Ꮡ(new src(items: slice<@string>(["alpha", "beta"])))), sink: new dstжsink(@out)));
     conn c = new duplexжconn(d);
     c.Push(c.Pull());
     c.Push(c.Pull());

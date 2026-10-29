@@ -1,3 +1,5 @@
+global using strs = go.slice<go.@string>;
+
 namespace go;
 
 using fmt = fmt_package;
@@ -11,6 +13,7 @@ partial struct box {
 }
 
 partial struct IntSlice /*[]nint*/;
+// type List[T any] = []T
 
 internal static nint sum(slice<nint> xs) {
     nint total = 0;
@@ -40,9 +43,9 @@ internal static void Main() {
     fmt.Println(x, len(x), cap(x), y);
 
     var e = slice<nint>([]);
-    slice<nint> n = default!;
-    fmt.Printf("empty: %v nil=%v len=%d cap=%d\n"u8, e, e == default!, len(e), cap(e));
-    fmt.Printf("nil:   %v nil=%v len=%d cap=%d\n"u8, n, n == default!, len(n), cap(n));
+    slice<nint> n = default;
+    fmt.Printf("empty: %v nil=%v len=%d cap=%d\n"u8, e, e == default, len(e), cap(e));
+    fmt.Printf("nil:   %v nil=%v len=%d cap=%d\n"u8, n, n == default, len(n), cap(n));
 
     var (a, b) = (pair(), pair());
     a[0] = 99;
@@ -73,6 +76,12 @@ internal static void Main() {
     fmt.Println(count(slice<nint>([1, 2, 3]).ꓸꓸꓸ));
     var named = new IntSlice(new nint[]{3, 1}.slice());
     fmt.Println("named:", named, len(named));
+
+    strs ss = slice<@string>(["a", "b"]);
+    var ls = slice<nint>([4, 5, 6]);
+    var rows = new IntSlice[]{slice<nint>([1, 2]), slice<nint>([3])}.array();
+    var list = slice<IntSlice>([slice<nint>([7]), slice<nint>([8, 9])]);
+    fmt.Printf("alias: %v %T %v %T %v %T %v %T\n"u8, ss, ss, ls, ls, rows, rows[1], list, list[0]);
 
     var keyed = new slice<nint>(3){[2] = 5};
     var arr = new nint[]{1, 2, 3}.array();

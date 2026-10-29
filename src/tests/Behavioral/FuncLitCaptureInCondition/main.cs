@@ -14,7 +14,7 @@ internal static bool anyMatch(slice<nint> vals, Func<nint, bool> f) {
 }
 
 internal static void Main() {
-    var vals = new nint[]{1, 2, 3}.slice();
+    var vals = slice<nint>([1, 2, 3]);
     var lookup = new map<nint, bool>{[2] = true, [5] = true};
 
     var lookupʗ1 = lookup;

@@ -47,7 +47,7 @@ internal static void takesReader(takesReader_r r) {
 }
 
 internal static void testCompositeLiteral() {
-    var readers = new takesReader_r[]{new fakeReader()}.slice();
+    var readers = slice<takesReader_r>([new fakeReader()]);
     var buf = new slice<byte>(4);
     var (n, _) = readers[0].Read(buf);
     fmt.Println("CompositeLiteral: Read =", (@string)(buf.slice(0, n)));

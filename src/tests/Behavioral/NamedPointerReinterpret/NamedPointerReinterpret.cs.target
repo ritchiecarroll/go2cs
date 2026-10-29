@@ -33,7 +33,7 @@ internal static @string consume(@string sʗp) {
     var t = Ꮡs.Reinterpret<@string, tail>();
     var b1 = t.chop();
     var b2 = t.chop();
-    return ((@string)new byte[]{b1, b2}.slice()) + ((@string)(t.Value));
+    return ((@string)slice<byte>([b1, b2])) + ((@string)(t.Value));
 }
 
 internal static nint sliceToArray(slice<byte> s) {
@@ -64,7 +64,7 @@ internal static void Main() {
 
     fmt.Println(consume("abcd"));
 
-    fmt.Println(sliceToArray(new byte[]{1, 2, 3, 4}.slice()));
+    fmt.Println(sliceToArray(slice<byte>([1, 2, 3, 4])));
 
     var v2 = new view(new @base(a: 5, b: 6));
     fmt.Println(v2.a + v2.b);

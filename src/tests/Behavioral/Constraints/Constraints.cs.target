@@ -102,9 +102,9 @@ internal static T firstOf<T>(slice<T> p)
 }
 
 public static nint UseRecordUnion() {
-    var a = firstOf(new recordA[]{new(1)}.slice());
-    var b = firstOf(new recordB[]{new(2)}.slice());
-    var c = firstOf(new recordC[]{new(4)}.slice());
+    var a = firstOf(slice<recordA>([new(1)]));
+    var b = firstOf(slice<recordB>([new(2)]));
+    var c = firstOf(slice<recordC>([new(4)]));
 
     return a.n + b.n + c.n;
 }

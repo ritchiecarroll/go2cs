@@ -13,13 +13,13 @@ partial struct sentinelsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string value;
 }
-internal static slice<sentinelsᴛ1> sentinels = new sentinelsᴛ1[]{
+internal static slice<sentinelsᴛ1> sentinels = slice<sentinelsᴛ1>([
     new("GO2CS_ENVPROBE_A_PLAIN", "plain-value"),
     new("GO2CS_ENVPROBE_B_EQUALS", "k1=v1=v2"),
     new("GO2CS_ENVPROBE_C_EMPTY", ""),
     new("GO2CS_ENVPROBE_D_LONG", strings.Repeat("abcdefghij", 40)),
     new("GO2CS_ENVPROBE_E_UNICODE", "über-日本語-\U0001f600")
-}.slice();
+]);
 
 internal static readonly @string prefix = "GO2CS_ENVPROBE_"u8;
 

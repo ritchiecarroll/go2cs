@@ -39,7 +39,7 @@ internal static void Main() {
     h = new handlerFunc((@string s) => len(s));
     fmt.Println(h == nil, h.call("abcd"));
 
-    var table = new handlerFunc[]{default(handlerFunc)!, h}.slice();
+    var table = slice<handlerFunc>([default(handlerFunc)!, h]);
     foreach (var (_, entry) in table) {
         fmt.Println(entry.call("zz"));
     }

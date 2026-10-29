@@ -61,14 +61,14 @@ internal static void Main() {
     v("x", "y");
     fmt.Println("B2 void lambda ran");
 
-    slice<Value> r() => new Value[]{new(N: 7)}.slice();
+    slice<Value> r() => slice<Value>([new(N: 7)]);
     fmt.Println("B3 slice result non-nil:", r()[0].N);
 
     slice<Value> mix(bool b) {
         if (b) {
             return default;
         }
-        return new Value[]{new(N: 3)}.slice();
+        return slice<Value>([new(N: 3)]);
     }
     fmt.Println("B4 mixed arms:", mix(true) == default, mix(false)[0].N);
 

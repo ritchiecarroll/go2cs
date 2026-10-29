@@ -66,7 +66,7 @@ partial struct ΔSet /*map[@string, nint]*/;
 partial struct Hdr /*map[@string, slice<@string>]*/;
 
 public static void Set(this Hdr h, @string k, @string v) {
-    h[strings.ToUpper(k)] = new @string[]{v}.slice();
+    h[strings.ToUpper(k)] = slice<@string>([v]);
 }
 
 internal partial struct main_named /*dyn*/ {

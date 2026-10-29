@@ -52,7 +52,7 @@ internal static partial void Main() {
     }}
 
     fmt.Println(isByte((byte)'x'), retByte());
-    var bs = new byte[]{(byte)'h', (byte)'i'}.slice();
+    var bs = slice<byte>([(byte)'h', (byte)'i']);
     bs[0] = (byte)'H';
     bs = append(bsᴷ, bs, (byte)'!');
     fmt.Println((@string)bs);
@@ -78,7 +78,7 @@ internal static partial void Main() {
     var digit = (byte)'7';
     fmt.Println((byte)(digit - '0'), (nint)((byte)(digit - '0')));
 
-    var rs = new rune[]{'x', 'y'}.slice();
+    var rs = slice<rune>(['x', 'y']);
     rs[1] = 'Y';
     var m = new map<@string, rune>{["a"] = 'A'};
     var keys = new array<bool>(128){['a'] = true, ['e'] = true};
@@ -116,7 +116,7 @@ internal static partial void Main() {
 
     var tm = new map<@string, rune>{};
     (tm["a"], tm["b"]) = ('a', 'b');
-    var tw = new uint16[]{0, 0}.slice();
+    var tw = slice<uint16>([0, 0]);
     (tw[0], tw[1]) = ('x', 'y');
     var sel = new channel<rune>(1);
     var selᴛ1 = sel.ᐸꟷ('s', ꓸꓸꓸ);

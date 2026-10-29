@@ -27,7 +27,7 @@ internal static void Main() {
     fmt.Println(s.span());
     fmt.Println(s);
 
-    var sv = new Sieve(vals: new nint[]{1, 2, 3, 4, 5, 6}.slice());
+    var sv = new Sieve(vals: slice<nint>([1, 2, 3, 4, 5, 6]));
     Func<nint, bool> even = (nint n) => n % 2 == 0;
     fmt.Println(sv.Filter(even));
 }

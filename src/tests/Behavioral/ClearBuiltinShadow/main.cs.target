@@ -50,11 +50,11 @@ internal static void run(this ж<guard> Ꮡg) {
 }
 
 internal static void Main() {
-    var s = new nint[]{1, 2, 3}.slice();
+    var s = slice<nint>([1, 2, 3]);
     builtin.clear(s);
     fmt.Println(s[0], s[1], s[2]);
 
-    var b = Ꮡ(new box(data: new nint[]{4, 5}.slice()));
+    var b = Ꮡ(new box(data: slice<nint>([4, 5])));
     b.clear();
     fmt.Println(len((~b).data));
 
@@ -66,7 +66,7 @@ internal static void Main() {
     g.run();
     fmt.Println((~g).err);
 
-    var h = new header(new map<@string, slice<@string>>{["a"] = new @string[]{"1"}.slice(), ["b"] = new @string[]{"2"}.slice()});
+    var h = new header(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"]), ["b"] = slice<@string>(["2"])});
     var alias = h;
     builtin.clear(h);
     fmt.Println(len(h), len(alias));

@@ -105,7 +105,7 @@ internal static void Main() {
     fmt.Println("asn rune lit  :", AreEqual(ar, ((any)r)));
     fmt.Println("asn float lit :", AreEqual(af, ((any)f)));
 
-    var sl = new any[]{(nint)7, (rune)'A', 2.5D, (nint)(namedInt)}.slice();
+    var sl = slice<any>([(nint)7, (rune)'A', 2.5D, (nint)(namedInt)]);
     fmt.Println("slc lit       :", AreEqual(sl[0], ((any)i)));
     fmt.Println("slc rune lit  :", AreEqual(sl[1], ((any)r)));
     fmt.Println("slc float lit :", AreEqual(sl[2], ((any)f)));
@@ -158,7 +158,7 @@ internal static void Main() {
     any sc = (@string)("se" + "ed");
     fmt.Println("str asn lit   :", AreEqual(sv, ((any)s)), AreEqual(sc, ((any)s)));
 
-    var ssl = new any[]{(@string)"seed"u8, (@string)("se" + "ed")}.slice();
+    var ssl = slice<any>([(@string)"seed"u8, (@string)("se" + "ed")]);
     fmt.Println("str slc       :", AreEqual(ssl[0], ((any)s)), AreEqual(ssl[1], ((any)s)));
 
     var smk = new map<any, @string>{[(@string)"seed"u8] = "hit"};

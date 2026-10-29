@@ -42,8 +42,8 @@ internal static void Main() {
     fmt.Println(min((@string)("banana"u8), (@string)("apple"u8), (@string)("cherry"u8)));
     fmt.Println(max((@string)("banana"u8), (@string)("apple"u8), (@string)("cherry"u8)));
 
-    var x = new byte[]{1, 2, 3}.slice();
-    var y = new byte[]{1, 2, 3, 4, 5}.slice();
+    var x = slice<byte>([1, 2, 3]);
+    var y = slice<byte>([1, 2, 3, 4, 5]);
     nint n = min(len(x), len(y));
     fmt.Println(n);
 

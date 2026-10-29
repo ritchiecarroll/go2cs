@@ -82,7 +82,7 @@ internal static void Main() {
         @string second = deep + sep + "another.dat"u8;
 
         {
-            var errΔ3 = os.WriteFile(second, new byte[]{1, 2, 3}.slice(), 420); if (errΔ3 != nil) {
+            var errΔ3 = os.WriteFile(second, slice<byte>([1, 2, 3]), 420); if (errΔ3 != nil) {
                 fmt.Println("second writefile failed:", errΔ3);
             }
         }
@@ -97,12 +97,12 @@ internal static void Main() {
         sort.Strings(names);
         fmt.Println("readdir:", err == nil, len(names), strings.Join(names, ","));
 
-        var probes = new main_probes[]{
+        var probes = slice<main_probes>([
             new("dot-segment", deep + sep + "."u8 + sep + name),
             new("dotdot-segment", deep + sep + "nope"u8 + sep + ".."u8 + sep + name),
             new("double-separator", deep + sep + sep + name),
             new("trailing-dot", @file + "."u8)
-        }.slice();
+        ]);
 
         foreach (var (_, probe) in probes) {
             var (probeInfo, probeErr) = os.Stat(probe.path);

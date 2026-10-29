@@ -79,7 +79,7 @@ internal static void Main() {
         break;
     }}
 
-    var list = new I[]{(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default}.slice();
+    var list = slice<I>([(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default]);
     fmt.Println(len(list), list);
     var m = new map<@string, I>{["n"] = (nint)1, ["s"] = (@string)"one"u8};
     fmt.Println(m["n"], m["s"]);

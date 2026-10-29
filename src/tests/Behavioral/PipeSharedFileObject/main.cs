@@ -105,7 +105,7 @@ internal static void Main() {
     var stderrʗ1 = stderr;
     var stdoutʗ1 = stdout;
     step("1 stdout, stderr, stdout", () => {
-        foreach (var (_, w) in new main_type[]{new(stdoutʗ1, "stdout line\n"), new(stderrʗ1, "stderr line\n"), new(stdoutʗ1, "stdout again\n")}.slice()) {
+        foreach (var (_, w) in slice<main_type>([new(stdoutʗ1, "stdout line\n"), new(stderrʗ1, "stderr line\n"), new(stdoutʗ1, "stdout again\n")])) {
             {
                 var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != nil) {
                     return w.f.Name() + " write: "u8 + err.Error();

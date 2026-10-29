@@ -53,7 +53,7 @@ internal static ж<cell> fresh() {
 
 internal static slice<nint> ints() {
     calls++;
-    return new nint[]{Δmath.MinInt, 7}.slice();
+    return slice<nint>([Δmath.MinInt, 7]);
 }
 
 internal static T div<T>(T a, T b)
@@ -154,7 +154,7 @@ internal static void Main() {
         return fmt.Sprint(v);
     });
     arm("compound index expression", () => {
-        var sl = new int32[]{0, Δmath.MinInt32, Δmath.MinInt32}.slice();
+        var sl = slice<int32>([0, Δmath.MinInt32, Δmath.MinInt32]);
         nint j = 0;
         sl[j + 1].QuoAssign((int32)m1);
         sl[len(sl) - 1].RemAssign((int32)m1);
@@ -162,7 +162,7 @@ internal static void Main() {
     });
     arm("compound call index", () => {
         calls = 0;
-        var sl = new nint[]{0, Δmath.MinInt}.slice();
+        var sl = slice<nint>([0, Δmath.MinInt]);
         sl[counted(1)].QuoAssign(m1);
         return fmt.Sprint(sl[1], " calls ", calls);
     });
@@ -200,18 +200,18 @@ internal static void Main() {
     });
     arm("constant -1 of an effectful dividend", () => {
         calls = 0;
-        var sl = new nint[]{Δmath.MinInt}.slice();
+        var sl = slice<nint>([Δmath.MinInt]);
         nint rΔ2 = ints()[counted(0)] * 0;
         nint q = unchecked(-ints()[counted(0)]);
         return fmt.Sprint(rΔ2, " ", q == Δmath.MinInt, " ", sl[0] * 0, " calls ", calls);
     });
     arm("constant -1 remainder out of range", () => {
-        var sl = new nint[]{1}.slice();
+        var sl = slice<nint>([1]);
         nint j = 3;
         return fmt.Sprint(sl[j] * 0);
     });
     arm("compound constant -1", () => {
-        var sl = new int64[]{Δmath.MinInt64, 5}.slice();
+        var sl = slice<int64>([Δmath.MinInt64, 5]);
         nint j = 0;
         sl[j + 0] *= -1;
         sl[j + 1] = 0;

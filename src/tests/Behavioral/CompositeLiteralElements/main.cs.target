@@ -32,43 +32,43 @@ internal partial struct main_sa /*dyn*/ {
 }
 
 internal static void Main() {
-    var pa = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();
+    var pa = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);
     fmt.Println("pa:", len(pa), len(pa[0].Value), pa[0].Value);
     pa[0].Value[1] = 9;
     fmt.Printf("pa written: %v\n"u8, pa[0].Value);
 
-    var paExplicit = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();
+    var paExplicit = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);
     fmt.Println("paExplicit:", len(paExplicit), len(paExplicit[0].Value), paExplicit[0].Value);
 
-    var paPop = new ж<array<byte>>[]{Ꮡ(new byte[]{1, 2, 3, 4}.array())}.slice();
+    var paPop = slice<ж<array<byte>>>([Ꮡ(new byte[]{1, 2, 3, 4}.array())]);
     fmt.Println("paPop:", len(paPop[0].Value), paPop[0].Value);
 
-    var paShort = new ж<array<byte>>[]{Ꮡ(new byte[]{1, 2}.array(4))}.slice();
+    var paShort = slice<ж<array<byte>>>([Ꮡ(new byte[]{1, 2}.array(4))]);
     fmt.Println("paShort:", len(paShort[0].Value), paShort[0].Value);
 
-    var pna = new ж<nb>[]{Ꮡ(new nb(new byte[4].array()))}.slice();
-    var pnaExplicit = new ж<nb>[]{Ꮡ(new nb(new byte[4].array()))}.slice();
+    var pna = slice<ж<nb>>([Ꮡ(new nb(new byte[4].array()))]);
+    var pnaExplicit = slice<ж<nb>>([Ꮡ(new nb(new byte[4].array()))]);
     fmt.Println("pna:", len(pna[0].Value), pna[0].Value);
     fmt.Println("pnaExplicit:", len(pnaExplicit[0].Value), pnaExplicit[0].Value);
     pna[0].Value[2] = 7;
     fmt.Printf("pna written: %v\n"u8, pna[0].Value);
 
-    var pnsl = new ж<nsl>[]{Ꮡ(new nsl(new nint[]{}.slice()))}.slice();
-    var pnslExplicit = new ж<nsl>[]{Ꮡ(new nsl(new nint[]{}.slice()))}.slice();
+    var pnsl = slice<ж<nsl>>([Ꮡ(new nsl(new nint[]{}.slice()))]);
+    var pnslExplicit = slice<ж<nsl>>([Ꮡ(new nsl(new nint[]{}.slice()))]);
     fmt.Println("pnsl:", len(pnsl[0].ValueSlot), pnsl[0].ValueSlot == default, pnsl[0].ValueSlot);
     fmt.Println("pnslExplicit:", len(pnslExplicit[0].ValueSlot), pnslExplicit[0].ValueSlot);
 
-    var pnmp = new ж<nmp>[]{Ꮡ(new nmp(new map<@string, nint>{}))}.slice();
-    var pnmpExplicit = new ж<nmp>[]{Ꮡ(new nmp(new map<@string, nint>{}))}.slice();
+    var pnmp = slice<ж<nmp>>([Ꮡ(new nmp(new map<@string, nint>{}))]);
+    var pnmpExplicit = slice<ж<nmp>>([Ꮡ(new nmp(new map<@string, nint>{}))]);
     fmt.Println("pnmp:", len(pnmp[0].ValueSlot), pnmp[0].ValueSlot == default, pnmp[0].ValueSlot);
     fmt.Println("pnmpExplicit:", len(pnmpExplicit[0].ValueSlot), pnmpExplicit[0].ValueSlot);
 
-    var pnaPop = new ж<nb>[]{Ꮡ(new nb(new byte[]{1, 2, 3, 4}.array()))}.slice();
+    var pnaPop = slice<ж<nb>>([Ꮡ(new nb(new byte[]{1, 2, 3, 4}.array()))]);
     fmt.Println("pnaPop:", len(pnaPop[0].Value), pnaPop[0].Value);
 
-    var pnn = new ж<nn>[]{Ꮡ(new nn(new array<array<nint>>(2, () => new(3))))}.slice();
+    var pnn = slice<ж<nn>>([Ꮡ(new nn(new array<array<nint>>(2, () => new(3))))]);
     fmt.Println("pnn:", len(pnn[0].Value), len((pnn[0].Value)[0]), pnn[0].Value);
-    var pnnExplicit = new ж<nn>[]{Ꮡ(new nn(new array<array<nint>>(2, () => new(3))))}.slice();
+    var pnnExplicit = slice<ж<nn>>([Ꮡ(new nn(new array<array<nint>>(2, () => new(3))))]);
     fmt.Println("pnnExplicit:", len(pnnExplicit[0].Value), len((pnnExplicit[0].Value)[0]), pnnExplicit[0].Value);
 
     var mpn = new map<@string, ж<nb>>{["a"] = Ꮡ(new nb(new byte[4].array()))};
@@ -76,18 +76,18 @@ internal static void Main() {
     var apn = new ж<nb>[]{Ꮡ(new nb(new byte[4].array())), Ꮡ(new nb(new byte[4].array()))}.array();
     fmt.Println("apn:", len(apn), len(apn[0].Value), apn[0].Value, apn[1].Value);
 
-    var pnest = new ж<array<array<nint>>>[]{Ꮡ(new array<nint>[]{}.array(2, () => new(3)))}.slice();
+    var pnest = slice<ж<array<array<nint>>>>([Ꮡ(new array<nint>[]{}.array(2, () => new(3)))]);
     fmt.Println("pnest:", len(pnest[0].Value), len(pnest[0].Value[0]), pnest[0].Value);
 
-    var ps = new ж<S>[]{Ꮡ(new S())}.slice();
+    var ps = slice<ж<S>>([Ꮡ(new S())]);
     fmt.Println("ps:", len(ps), ps[0].Value);
-    var ps2 = new ж<S>[]{Ꮡ(new S(A: 7, B: "x"u8))}.slice();
+    var ps2 = slice<ж<S>>([Ꮡ(new S(A: 7, B: "x"u8))]);
     fmt.Println("ps2:", ps2[0].Value);
 
-    var psl = new ж<slice<nint>>[]{Ꮡ(new nint[]{}.slice())}.slice();
+    var psl = slice<ж<slice<nint>>>([Ꮡ(slice<nint>([]))]);
     fmt.Println("psl:", len(psl), len(psl[0].ValueSlot), psl[0].ValueSlot == default, psl[0].ValueSlot);
 
-    var pm = new ж<map<@string, nint>>[]{Ꮡ(new map<@string, nint>{})}.slice();
+    var pm = slice<ж<map<@string, nint>>>([Ꮡ(new map<@string, nint>{})]);
     fmt.Println("pm:", len(pm), len(pm[0].ValueSlot), pm[0].ValueSlot == default, pm[0].ValueSlot);
 
     var mp = new map<@string, ж<array<nint>>>{["a"] = Ꮡ(new nint[]{}.array(2))};
@@ -119,10 +119,10 @@ internal static void Main() {
     var mapNested = new map<@string, array<array<nint>>>{["k"] = new array<nint>[]{}.array(2, () => new(3))};
     fmt.Println("mapNested:", len(mapNested["k", () => new array<array<nint>>(2, () => new(3))]), len(mapNested["k", () => new array<array<nint>>(2, () => new(3))][0]), mapNested["k", () => new array<array<nint>>(2, () => new(3))]);
 
-    var sa = new main_sa[]{new()}.slice();
+    var sa = slice<main_sa>([new()]);
     fmt.Println("sa:", len(sa), len(sa[0].A), len(sa[0].A[0]), sa[0]);
 
-    var san = new withArray[]{new()}.slice();
+    var san = slice<withArray>([new()]);
     fmt.Println("san:", len(san[0].A), len(san[0].A[0]), san[0]);
 
     var nnLit = new nn(new array<array<nint>>(2, () => new(3)));

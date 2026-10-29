@@ -26,17 +26,17 @@ internal static S appendAll<S, E>(S s, params Span<E> vʗp)
 partial struct numbers /*[]nint*/;
 
 internal static void Main() {
-    var ints = new nint[]{10, 20, 30, 40}.slice();
+    var ints = slice<nint>([10, 20, 30, 40]);
     fmt.Println(Index(ints, (nint)20));
     fmt.Println(Index(ints, (nint)99));
 
     var ns = new numbers(new nint[]{5, 6, 7}.slice());
     fmt.Println(Index(ns, (nint)7));
 
-    var bs = new byte[]{1, 2, 3}.slice();
+    var bs = slice<byte>([1, 2, 3]);
     fmt.Println(Index(bs, (byte)2));
 
-    var rs = new int32[]{100, 200, 300}.slice();
+    var rs = slice<int32>([100, 200, 300]);
     fmt.Println(Index(rs, (int32)200));
 
     fmt.Println(appendAll(ints, (nint)50, (nint)60));

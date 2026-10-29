@@ -13,7 +13,7 @@ internal static void Main() {
     var e2 = new innerꓸEntry(Name: "beta", Data: slice<byte>("xy"u8), Count: 5);
     fmt.Println(e2.Name, len(e2.Data), e2.Count);
 
-    fmt.Println(inner.Total(new innerꓸEntry[]{e, e2}.slice()));
+    fmt.Println(inner.Total(slice<innerꓸEntry>([e, e2])));
 }
 
 } // end main_package

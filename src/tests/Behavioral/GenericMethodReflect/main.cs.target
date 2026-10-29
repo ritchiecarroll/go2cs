@@ -158,7 +158,7 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
         var vʗ3 = v;
         @try(fmt.Sprintf("%s T.Method(%d).Func"u8, name, i), () => {
             var m = vʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(new reflectꓸValue[]{vʗ3}.slice(), args(inʗ2[n].ꓸꓸꓸ))));
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflectꓸValue>([vʗ3]), args(inʗ2[n].ꓸꓸꓸ))));
         });
         var inʗ3 = @in;
         var vʗ4 = v;
@@ -173,7 +173,7 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
         var pvʗ3 = pv;
         @try(fmt.Sprintf("%s *T.Method(%d).Func"u8, name, i), () => {
             var m = pvʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(new reflectꓸValue[]{pvʗ3}.slice(), args(inʗ5[n].ꓸꓸꓸ))));
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflectꓸValue>([pvʗ3]), args(inʗ5[n].ꓸꓸꓸ))));
         });
     }
 
@@ -182,20 +182,20 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
 }
 
 [GoLazy] partial class lazyᴛgoSets { internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
-    ["Plain"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
-    ["Box[int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
-    ["Box[string]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
-    ["Box[[]int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
-    ["Pair[string,int]"] = new slice<@string>[]{new @string[]{"Key", "String"}.slice(), new @string[]{"Key", "String", "Swap"}.slice()}.array(),
-    ["Ord2[age]"] = new slice<@string>[]{new @string[]{"Less"}.slice(), new @string[]{"Less"}.slice()}.array()
+    ["Plain"] = new slice<@string>[]{slice<@string>(["Describe", "Get"]), slice<@string>(["Describe", "Get", "Set"])}.array(),
+    ["Box[int]"] = new slice<@string>[]{slice<@string>(["Describe", "Get"]), slice<@string>(["Describe", "Get", "Set"])}.array(),
+    ["Box[string]"] = new slice<@string>[]{slice<@string>(["Describe", "Get"]), slice<@string>(["Describe", "Get", "Set"])}.array(),
+    ["Box[[]int]"] = new slice<@string>[]{slice<@string>(["Describe", "Get"]), slice<@string>(["Describe", "Get", "Set"])}.array(),
+    ["Pair[string,int]"] = new slice<@string>[]{slice<@string>(["Key", "String"]), slice<@string>(["Key", "String", "Swap"])}.array(),
+    ["Ord2[age]"] = new slice<@string>[]{slice<@string>(["Less"]), slice<@string>(["Less"])}.array()
 }; }
 
 internal static void Main() {
-    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"p="u8}.slice(), ["Set"] = new any[]{(nint)9}.slice()});
-    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(nint)9}.slice()});
-    probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(@string)"u"u8}.slice()});
-    probe("Box[[]int]", new Box<slice<nint>>(v: new nint[]{1}.slice()), Ꮡ(new Box<slice<nint>>(v: new nint[]{2}.slice())), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{new nint[]{3, 4}.slice()}.slice()});
-    probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = new any[]{(nint)5}.slice()});
+    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"p="u8]), ["Set"] = slice<any>([(nint)9])});
+    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([(nint)9])});
+    probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([(@string)"u"u8])});
+    probe("Box[[]int]", new Box<slice<nint>>(v: slice<nint>([1])), Ꮡ(new Box<slice<nint>>(v: slice<nint>([2]))), new map<@string, slice<any>>{["Describe"] = slice<any>([(@string)"b="u8]), ["Set"] = slice<any>([slice<nint>([3, 4])])});
+    probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = slice<any>([(nint)5])});
     probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default);
 
     @try("fmt generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));

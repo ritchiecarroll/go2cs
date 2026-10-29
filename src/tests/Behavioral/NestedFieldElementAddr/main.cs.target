@@ -53,7 +53,7 @@ internal static void Main() {
     bumpInt(ref (cache.at(cacheT.Ꮡentries, 1).at<nint>(2)).DerefOrNull());
     fmt.Println((~cache).entries[1][2], (~cache).entries[0][0]);
 
-    var st = Ꮡ(new store(id: 5, data: new uintptr[]{11, 22, 33}.slice()));
+    var st = Ꮡ(new store(id: 5, data: slice<uintptr>([11, 22, 33])));
     bump(ref (Ꮡ(st.stk(), 0)).DerefOrNull());
     fmt.Println((~st).data[0], st.stk()[0]);
     bump(ref (Ꮡ(st.stk(), 2)).DerefOrNull());

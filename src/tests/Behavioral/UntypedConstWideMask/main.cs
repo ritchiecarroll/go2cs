@@ -75,10 +75,10 @@ internal static void Main() {
     fmt.Println("isHost samples:", isHost((byte)'a'), isHost((byte)'Z'), isHost((byte)'9'), isHost((byte)':'), isHost((byte)' '), isHost(200));
     fmt.Println("value samples:", validHeaderValueByte((byte)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
 
-    foreach (var (_, c) in new byte[]{3, 6, 70, 8, 64}.slice()) {
+    foreach (var (_, c) in slice<byte>([3, 6, 70, 8, 64])) {
         fmt.Printf("smallHigh(%d) = %d\n"u8, c, smallHigh(c));
     }
-    foreach (var (_, c) in new byte[]{7, 65, 126, 8, 64}.slice()) {
+    foreach (var (_, c) in slice<byte>([7, 65, 126, 8, 64])) {
         fmt.Printf("nativeWidth(%d) = %d\n"u8, c, nativeWidth(c));
     }
 }

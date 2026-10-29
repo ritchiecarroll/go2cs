@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var nums = new nint[]{2, 3, 4}.slice();
+    var nums = slice<nint>([2, 3, 4]);
     nint sum = 0;
 
     nint i = default;

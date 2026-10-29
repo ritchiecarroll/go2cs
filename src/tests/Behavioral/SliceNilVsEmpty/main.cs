@@ -13,7 +13,7 @@ internal static void Main() {
     slice<byte> zero = default;
     probe("zeroValue", zero == default, len(zero), cap(zero));
 
-    var emptyLit = new byte[]{}.slice();
+    var emptyLit = slice<byte>([]);
     probe("emptyLiteral", emptyLit == default, len(emptyLit), cap(emptyLit));
 
     var emptyStr = slice<byte>(""u8);
@@ -28,7 +28,7 @@ internal static void Main() {
     var made = new slice<byte>(0);
     probe("makeZero", made == default, len(made), cap(made));
 
-    var x = new byte[]{1, 2}.slice();
+    var x = slice<byte>([1, 2]);
     probe("resliceToEmpty", x[..0] == default, len(x[..0]), cap(x[..0]));
 
     var tail = x[2..2];
@@ -37,10 +37,10 @@ internal static void Main() {
     var appendNilNothing = append(slice<byte>(default));
     probe("appendNilNothing", appendNilNothing == default, len(appendNilNothing), cap(appendNilNothing));
 
-    var appendEmptyNothing = append(new byte[]{}.slice());
+    var appendEmptyNothing = append(slice<byte>([]));
     probe("appendEmptyNothing", appendEmptyNothing == default, len(appendEmptyNothing), cap(appendEmptyNothing));
 
-    var cloneShape = appendꓸꓸꓸ(new byte[]{}.slice(), x[..0]);
+    var cloneShape = appendꓸꓸꓸ(slice<byte>([]), x[..0]);
     probe("cloneShape", cloneShape == default, len(cloneShape), cap(cloneShape));
 
     var trim = x;
@@ -51,7 +51,7 @@ internal static void Main() {
 
     slice<@string> zs = default;
     probe("stringSliceZero", zs == default, len(zs), cap(zs));
-    probe("stringSliceEmpty", new @string[]{}.slice() == default, len(new @string[]{}.slice()), cap(new @string[]{}.slice()));
+    probe("stringSliceEmpty", slice<@string>([]) == default, len(slice<@string>([])), cap(slice<@string>([])));
 
     variadic("packZeroArgs");
     variadic("packOneArg", 1);
@@ -59,7 +59,7 @@ internal static void Main() {
 
     slice<byte> nilPack = default;
     variadic("spreadNil"u8, nilPack.ꓸꓸꓸ);
-    variadic("spreadEmptyLiteral"u8, new byte[]{}.slice().ꓸꓸꓸ);
+    variadic("spreadEmptyLiteral"u8, slice<byte>([]).ꓸꓸꓸ);
     variadic("spreadMakeZero"u8, new slice<byte>(0).ꓸꓸꓸ);
     variadic("spreadResliceTailCapZero"u8, x[2..2].ꓸꓸꓸ);
     variadic("spreadNonEmpty"u8, x.ꓸꓸꓸ);

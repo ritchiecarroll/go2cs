@@ -104,7 +104,7 @@ internal static void Main() {
     (before, after) = litRedeclare(a);
     fmt.Println("litRedeclare:", before, after);
 
-    var (x, y) = declSliceRedeclare(new nint[]{1, 2, 3}.slice());
+    var (x, y) = declSliceRedeclare(slice<nint>([1, 2, 3]));
     fmt.Println("declSliceRedeclare:", x, y);
 }
 

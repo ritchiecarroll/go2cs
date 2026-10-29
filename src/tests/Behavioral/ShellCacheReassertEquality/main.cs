@@ -30,7 +30,7 @@ internal static lener_R0 lener(any a) {
 internal static void Main() {
     var p = Ꮡ(new box(n: 1));
     var q = Ꮡ(new box(n: 1));
-    var values = new any[]{p.OrTypedNil(), q.OrTypedNil(), (counter)3, (counter)3, (counter)4}.slice();
+    var values = slice<any>([p.OrTypedNil(), q.OrTypedNil(), (counter)3, (counter)3, (counter)4]);
 
     fmt.Println("pointer, same any twice:", AreEqual(lener(values[0]), lener(values[0])));
     fmt.Println("pointer, same box in a new any:", AreEqual(lener(values[0]), lener((any)p.OrTypedNil())));

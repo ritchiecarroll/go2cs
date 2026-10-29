@@ -62,9 +62,9 @@ internal static void Main() {
 
     fmt.Println(widen<byte, namedByte>(slice<byte>((@string)ns), elemᴛ0 => (namedByte)elemᴛ0));
 
-    fmt.Println(((@string)widen<namedByte, byte>(new namedByte[]{104, 105}.slice(), elemᴛ0 => (byte)elemᴛ0)));
+    fmt.Println(((@string)widen<namedByte, byte>(slice<namedByte>([104, 105]), elemᴛ0 => (byte)elemᴛ0)));
     fmt.Println(((@string)widen<namedByte, byte>((slice<namedByte>)nbs, elemᴛ0 => (byte)elemᴛ0)));
-    fmt.Println(((@string)widen<namedRune, rune>(new namedRune[]{104, 233, 105}.slice(), elemᴛ0 => (rune)elemᴛ0)));
+    fmt.Println(((@string)widen<namedRune, rune>(slice<namedRune>([104, 233, 105]), elemᴛ0 => (rune)elemᴛ0)));
     fmt.Println(((@string)widen<namedRune, rune>((slice<namedRune>)nrs, elemᴛ0 => (rune)elemᴛ0)));
 
     @string src = "abc";

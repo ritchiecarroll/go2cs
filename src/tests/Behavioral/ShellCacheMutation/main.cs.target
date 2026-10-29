@@ -33,7 +33,7 @@ internal partial interface main_type /*dyn*/ {
 internal static void Main() {
     var p = Ꮡ(new box(n: 1));
     var q = Ꮡ(new box(n: 10));
-    var values = new any[]{p.OrTypedNil(), q.OrTypedNil(), (counter)3, (counter)4}.slice();
+    var values = slice<any>([p.OrTypedNil(), q.OrTypedNil(), (counter)3, (counter)4]);
 
     var (first, ok) = values[0]._<main_type>(ᐧ);
     fmt.Println("first assert:", ok, first.Len());

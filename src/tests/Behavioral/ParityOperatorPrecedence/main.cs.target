@@ -396,7 +396,7 @@ internal static void Main() {
     tableUint64(29, 5, 3, 7, 3);
     tableInt(29, 5, 3, 7, 3);
     tableInt(-29, 5, 3, -7, 2);
-    var b = new byte[]{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}.slice();
+    var b = slice<byte>([0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88]);
     fmt.Printf("%#x %#x\n"u8, le32(b), le64(b));
     widths(0xFFFFFFFFU, 0xFFFFFFFFFFFFFFFFUL, 3);
 }

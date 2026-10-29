@@ -31,7 +31,7 @@ internal static void Main() {
     }
     var cmd = exec.Command(exe);
     cmd.Value.Path = exe;
-    cmd.Value.Args = new @string[]{token, "-marker", "x"}.slice();
+    cmd.Value.Args = slice<@string>([token, "-marker", "x"]);
     cmd.Value.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
     (var @out, err) = cmd.CombinedOutput();
     fmt.Print((@string)@out);

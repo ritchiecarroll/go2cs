@@ -61,7 +61,7 @@ internal static void Main() {
         var v = reflect.ValueOf(g);
         var mv = v.Method(0);
         fmt.Println("got method value, kind:", mv.Kind());
-        mv.Call(new reflectꓸValue[]{reflect.ValueOf("world")}.slice());
+        mv.Call(slice<reflectꓸValue>([reflect.ValueOf("world")]));
         fmt.Println("called ok");
     });
 }

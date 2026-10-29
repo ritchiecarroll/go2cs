@@ -101,7 +101,7 @@ internal static void Main() {
         _ = AreEqual(mʗ1, mʗ1);
     });
 
-    any s = new nint[]{1, 2}.slice();
+    any s = slice<nint>([1, 2]);
     var sʗ1 = s;
     check("slice", () => {
         _ = AreEqual(sʗ1, sʗ1);
@@ -132,7 +132,7 @@ internal static void Main() {
         _ = AreEqual(nfʗ1, nfʗ1);
     });
 
-    any ws = new withSlice(1, new nint[]{2}.slice());
+    any ws = new withSlice(1, slice<nint>([2]));
     var wsʗ1 = ws;
     check("struct w/ slice", () => {
         _ = AreEqual(wsʗ1, wsʗ1);
@@ -160,7 +160,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== array length is part of the reported type ==");
 
-    any aos = new slice<nint>[]{new nint[]{1}.slice()}.array();
+    any aos = new slice<nint>[]{slice<nint>([1])}.array();
     var aosʗ1 = aos;
     check("array of slice", () => {
         _ = AreEqual(aosʗ1, aosʗ1);
@@ -193,7 +193,7 @@ internal static void Main() {
         _ = AreEqual(waʗ1, waʗ1);
     });
 
-    any wa2 = new withAny(1, new nint[]{1}.slice());
+    any wa2 = new withAny(1, slice<nint>([1]));
     var wa2ʗ1 = wa2;
     check("struct w/ any=slice", () => {
         _ = AreEqual(wa2ʗ1, wa2ʗ1);
@@ -207,7 +207,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== non-empty interface ==");
 
-    error e = new sliceErr(new nint[]{1}.slice());
+    error e = new sliceErr(slice<nint>([1]));
     var eʗ1 = e;
     check("error w/ slice", () => {
         _ = AreEqual(eʗ1, eʗ1);

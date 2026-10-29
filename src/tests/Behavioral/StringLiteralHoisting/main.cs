@@ -82,12 +82,12 @@ internal static void Main() {
 
     fmt.Println(echo("") == ""u8);
 
-    var parts = new @string[]{"composite element one", "composite element two"}.slice();
+    var parts = slice<@string>(["composite element one", "composite element two"]);
     var boxed = new box("struct composite element", "struct composite tag");
     var table = new map<@string, @string>{["composite key"] = "composite value"};
     fmt.Println(parts[0], parts[1], boxed.name, boxed.tag, table["composite key"]);
 
-    var anys = new any[]{(@string)"any composite element"u8, (nint)7}.slice();
+    var anys = slice<any>([(@string)"any composite element"u8, (nint)7]);
     fmt.Println(anys[0], anys[1]);
 
     fmt.Println(pkgLevelLiteral);

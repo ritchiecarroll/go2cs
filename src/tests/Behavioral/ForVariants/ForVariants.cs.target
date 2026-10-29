@@ -51,7 +51,7 @@ break_out:;
     fmt.Println("i =", i);
     fmt.Println();
 
-    var nums = new nint[]{1, 2, 3, 4}.slice();
+    var nums = slice<nint>([1, 2, 3, 4]);
 scan:
     foreach (var (_, n) in nums) {
         foreach (var (_, m) in nums) {

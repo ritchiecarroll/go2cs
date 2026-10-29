@@ -26,10 +26,10 @@ internal static void Main() {
     uintptr wide = ((uintptr)1 << 40);
     fmt.Println(wide);
 
-    var rows = new main_rows[]{
+    var rows = slice<main_rows>([
         new((uintptr)1 << (int)(4 * ptrSize), (uintptr)1 << (int)(4 * ptrSize)),
         new((uintptr)(4294967296L - 1), (uintptr)(4294967296L - 1))
-    }.slice();
+    ]);
     fmt.Println(rows[0].a, rows[0].b);
     fmt.Println(rows[1].a, rows[1].b);
 }

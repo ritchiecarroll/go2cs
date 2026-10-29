@@ -80,7 +80,7 @@ internal static void Main() {
     fmt.Println("named recv to param:", reflect.TypeOf((AssignD)default).AssignableTo(ad.Type.In(1)));
 
     Func</*<-*/channel<nint>> h = default;
-    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflectꓸValue> _Δp0) => new reflectꓸValue[]{reflect.ValueOf(new channel<nint>(0))}.slice()).Interface()._<Func</*<-*/channel<nint>>>();
+    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflectꓸValue> _Δp0) => slice<reflectꓸValue>([reflect.ValueOf(new channel<nint>(0))])).Interface()._<Func</*<-*/channel<nint>>>();
     fmt.Println("makefunc:", h() != default);
     _ = (Action<channel/*<-*/</*<-*/channel<nint>>>)(nestedDir);
 }

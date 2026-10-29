@@ -39,10 +39,10 @@ internal static void Main() {
             Value: "success",
             Error: default
         ),
-        FloatValues: new Result<float64>[]{
+        FloatValues: slice<Result<float64>>([
             new(Value: 3.14D, Error: default),
             new(Value: 2.71D, Error: default)
-        }.slice(),
+        ]),
         Mappings: new map<@string, Result<bool>>{
             ["completed"] = new(Value: true, Error: default),
             ["verified"] = new(Value: false, Error: fmt.Errorf("verification pending"u8))

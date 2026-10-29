@@ -10,10 +10,10 @@ partial struct Outer /*[]Inner*/;
 
 internal static Outer build() {
     Outer o = default;
-    var s = new nint[]{1, 2}.slice();
+    var s = slice<nint>([1, 2]);
     o = append(o, (Inner)(s));
-    o = append(o, (Inner)(new nint[]{3, 4, 5}.slice()));
-    Inner inner = new nint[]{6}.slice();
+    o = append(o, (Inner)(slice<nint>([3, 4, 5])));
+    Inner inner = slice<nint>([6]);
     o = append(o, inner);
     return o;
 }

@@ -93,20 +93,20 @@ internal static void Main() {
     fmt.Printf("%#v\n"u8, new Pub(new S(3)));
     fmt.Printf("%#v\n"u8, new Named(new S(3)));
 
-    var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem(), Anonymous: true)}.slice());
-    var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem())}.slice());
+    var twin = reflect.StructOf(slice<reflect.StructField>([new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem(), Anonymous: true)]));
+    var plain = reflect.StructOf(slice<reflect.StructField>([new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem())]));
     fmt.Println("Pub -> anonymous twin:", reflect.TypeOf(new Pub()).ConvertibleTo(twin));
     fmt.Println("Pub -> named twin:", reflect.TypeOf(new Pub()).ConvertibleTo(plain));
     fmt.Println("Named -> anonymous twin:", reflect.TypeOf(new Named()).ConvertibleTo(twin));
     fmt.Println("Named -> named twin:", reflect.TypeOf(new Named()).ConvertibleTo(plain));
     fmt.Println("Pub -> Named:", reflect.TypeOf(new Pub()).ConvertibleTo(reflect.TypeOf(new Named())));
 
-    foreach (var (_, value) in new any[]{new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub()}.slice()) {
+    foreach (var (_, value) in slice<any>([new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub()])) {
         var (b, err) = json.Marshal(value);
         fmt.Printf("json %T: %s %v\n"u8, value, b, err);
     }
 
-    foreach (var (_, value) in new any[]{new X(new E(7), 1), new Pub(new S(3)), new Named(new S(3))}.slice()) {
+    foreach (var (_, value) in slice<any>([new X(new E(7), 1), new Pub(new S(3)), new Named(new S(3))])) {
         var (b, err) = xml.Marshal(value);
         fmt.Printf("xml %T: %s %v\n"u8, value, b, err);
     }

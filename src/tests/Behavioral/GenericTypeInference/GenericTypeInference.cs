@@ -153,7 +153,7 @@ public static void DropKey<M, K, V>(M m, K key)
 
 internal static void Main() {
     Point p = default;
-    p = new int32[]{1, 2, 3}.slice();
+    p = slice<int32>([1, 2, 3]);
     ScaleAndPrint(p);
     fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), (int32)2).String());
     var (dst2, src2) = (new Point(new int32[]{0, 0, 0}.slice()), new Point(new int32[]{7, 8, 9}.slice()));
@@ -188,8 +188,8 @@ internal static void Main() {
     fmt.Println(len(cl), cl["a"]);
     DropKey<Grades, @string, nint>(g1, (@string)"a");
     fmt.Println(len(g1));
-    var (i16, ok16) = bsearchLike(new uint16[]{2, 4, 8}.slice(), (uint16)4);
-    var (i32, ok32) = bsearchLike(new uint32[]{10, 20, 30}.slice(), (uint32)25);
+    var (i16, ok16) = bsearchLike(slice<uint16>([2, 4, 8]), (uint16)4);
+    var (i32, ok32) = bsearchLike(slice<uint32>([10, 20, 30]), (uint32)25);
     fmt.Println(i16, ok16, i32, ok32, halve((uint16)6), halve((uint32)100));
     fmt.Println(halveN((int32)10), halveN((int64)(-3)));
     var ssum = (int64)0;

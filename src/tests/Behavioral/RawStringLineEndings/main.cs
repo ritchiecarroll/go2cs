@@ -48,7 +48,7 @@ tail
     @string oneLine = @"C:\no\newline\here";
     @string interpreted = "keeps\r\nits CR";
 
-    foreach (var (_, s) in new @string[]{plain, trailing, pemBlock, describe("p"), chain, oneLine, interpreted}.slice()) {
+    foreach (var (_, s) in slice<@string>([plain, trailing, pemBlock, describe("p"), chain, oneLine, interpreted])) {
         fmt.Println(len(s));
         fmt.Printf("%q\n"u8, s);
     }

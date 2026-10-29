@@ -11,13 +11,13 @@ partial struct sname /*@string*/;
 internal static readonly sname typed = "t1"u8;
 
 internal static void Main() {
-    var values = new any[]{
+    var values = slice<any>([
         (any)((@string)("lit"u8)),
         (any)((@string)("paren"u8)),
         (any)((@string)(named)),
         (any)(typed),
         (any)(@string)("control"u8)
-    }.slice();
+    ]);
     foreach (var (_, v) in values) {
         fmt.Printf("%v %T\n"u8, v, v);
     }

@@ -86,12 +86,12 @@ internal static void Main() {
         return (x * 7, default);
     }
     );
-    var elements = new any[]{(any, error) (nint x) => {
+    var elements = slice<any>([(any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 8, default);
-    }, int64 () => 2}.slice();
+    }, int64 () => 2]);
     var converted = (any)((any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
@@ -119,9 +119,9 @@ internal static void Main() {
     var byName = new map<@string, any>{["seven"] = int64 () => 7};
     any named = (scaled(12)).OrTypedNilFunc();
 
-    var all = new any[]{retMulti(), retNamed(), retConst(), declared, assigned, argument, keyed.h,
+    var all = slice<any>([retMulti(), retNamed(), retConst(), declared, assigned, argument, keyed.h,
         elements[0], elements[1], converted, namedConverted, sent, positional.h, first, second,
-        declaredConst, byName["seven"], named}.slice();
+        declaredConst, byName["seven"], named]);
 
     foreach (var (i, f) in all) {
         fmt.Printf("%2d: %s\n"u8, i, call(f));
