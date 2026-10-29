@@ -74,9 +74,17 @@ const id = `[\p{L}_][\p{L}\p{N}_]*`
 // generic is a type-argument list body nested up to three deep (ж<slice<map<K, V>>>).
 const generic = `(?:[^<>\n]|<(?:[^<>\n]|<[^<>\n]*>)*>)*`
 
+// dirMark is the converter's channel-direction comment inside a type name (`channel/*<-*/<T>`): one token, whose `<`
+// opens no type-argument list.
+const dirMark = `/\*<-\*/`
+
 // sliceLitElem is a slice literal's C# element type in `new T[]{` or `slice<T>(`: no bracket, brace, paren or space
-// outside its generic arguments, which may hold spaces and nest three deep (`ж<array<array<nint>>>`).
-const sliceLitElem = `(?:[^\[\]\s(){}<>]|<(?:[^<>\n]|<(?:[^<>\n]|<[^<>\n]*>)*>)*>)+`
+// outside its generic arguments, which may hold spaces and nest three deep (`ж<array<array<nint>>>`), and a channel's
+// direction comment at any depth.
+const sliceLitElem = `(?:` + dirMark + `|[^\[\]\s(){}<>]|<(?:` + dirMark + `|[^<>\n]|<(?:` + dirMark + `|[^<>\n]|<[^<>\n]*>)*>)*>)+`
+
+// castName is the type a conversion names in its `(T)` prefix.
+const castName = `@?[\p{L}_][\p{L}\p{N}_.]*`
 
 // basic is the converted spelling of a basic numeric type (golib aliases the Go names; C# keywords appear too).
 const basic = `(?:nint|nuint|int|uint|long|ulong|short|ushort|byte|sbyte|float|double|uintptr|rune|float32|float64)`
@@ -370,13 +378,22 @@ var items = []item{
 		// 2])`, and a local keeps `var`. The element type may carry spaced generic arguments (`map<@string, nint>`),
 		// nested three deep (`ж<array<array<nint>>>`). A cast over the literal composes: its operand is now a CALL,
 		// so the conversion takes the single-paren form every call operand already takes, `(@string)f()` --
-		// `((@string)new byte[]{1}.slice())` becomes `(@string)slice<byte>([1])`.
+		// `((@string)new byte[]{1}.slice())` becomes `(@string)slice<byte>([1])`. Over a MULTI-LINE literal the open
+		// line drops its paren by the canon, and the close line `}.slice())` -> `])` is the Block's: alone it cannot
+		// tell a cast's close from a call's `]))`, so it reads L1 only in a file whose diff shows the cast's two opens.
 		Canon: []rewrite{
 			rw(`new (`+sliceLitElem+`)\[\]\{`, "slice<$1>(["),
 			rw(`\}\.slice\(\)`, "])"),
-			rw(`\(\((@?[\p{L}_][\p{L}\p{N}_.]*)\)(slice<`+sliceLitElem+`>\(\[[^\n]*?\]\))\)`, "($1)$2"),
+			rw(`\(\((`+castName+`)\)(slice<`+sliceLitElem+`>\(\[[^\n]*?\]\))\)`, "($1)$2"),
+			rw(`\(\((`+castName+`)\)(slice<`+sliceLitElem+`>\(\[)$`, "($1)$2"),
 		},
 		Old: rx(`\[\]\{|\}\.slice\(\)`),
+		Block: &blockRule{
+			OldAnchor: rx(`\(\(` + castName + `\)new ` + sliceLitElem + `\[\]\{$`),
+			NewAnchor: rx(`\(` + castName + `\)slice<` + sliceLitElem + `>\(\[$`),
+			Delete:    []*regexp.Regexp{rx(`^\s*\}\.slice\(\)\)[;,]?$`)},
+			Insert:    []*regexp.Regexp{rx(`^\s*\]\)[;,]?$`)},
+		},
 	},
 	{
 		ID: "P1", Seat: "#31", Title: "`p.f` through the generated extension properties",

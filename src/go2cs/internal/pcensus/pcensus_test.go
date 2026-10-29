@@ -152,6 +152,8 @@ var plants = []plant{
 	one("L1 good three-deep generic element", prodFile, `p = new ж<array<array<nint>>>[]{Ꮡ(x)}.slice();`, `p = slice<ж<array<array<nint>>>>([Ꮡ(x)]);`, "L1"),
 	one("L1 good cast over the literal", prodFile, `@string b = ((@string)new byte[]{104, (byte)c[0]}.slice());`, `@string b = (@string)slice<byte>([104, (byte)c[0]]);`, "L1"),
 	one("L1 bad: the cast type changed", prodFile, `@string b = ((@string)new byte[]{104}.slice());`, `@string b = (sstring)slice<byte>([104]);`, "UNCLASSIFIED"),
+	one("L1 good channel element with its direction comment", prodFile, `c = Ꮡ(new call(chans: new channel/*<-*/<Result>[]{ch}.slice()));`, `c = Ꮡ(new call(chans: slice<channel/*<-*/<Result>>([ch])));`, "L1"),
+	one("L1 good nested direction comment", prodFile, `s = new slice<channel/*<-*/<nint>>[]{}.slice();`, `s = slice<slice<channel/*<-*/<nint>>>([]);`, "L1"),
 	one("L1 good multi-line open", testFile, `var tests = new testCase[]{`, `var tests = slice<testCase>([`, "L1"),
 	one("L1 good multi-line close", testFile, `}.slice();`, `]);`, "L1"),
 	one("L1 bad: an element changed", prodFile, `f(new nint[]{1, 2, 3}.slice());`, `f(slice<nint>([1, 2, 4]));`, "UNCLASSIFIED"),
@@ -510,6 +512,56 @@ func TestBlockPlantsAcrossRuns(t *testing.T) {
 	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `+    break;`, `     g();`, `-    do {`}))
 	if len(tl.refused) != 2 {
 		t.Errorf("S1 across runs, anchorless: wanted both lines refused, refused %d (%v)", len(tl.refused), tl.labels)
+	}
+}
+
+// L1 in a real diff: a cast over a MULTI-LINE literal (dnsmessage's printPaddedUint8) composes as the one-line cast
+// does, `((@string)new byte[]{` ... `}.slice())` -> `(@string)slice<byte>([` ... `])`, but its open and close lines
+// land in runs apart. The close line alone cannot tell a cast's `])` from a call's `]))`, so it is admitted only in a
+// file whose diff carries the cast's two open lines.
+func TestL1CastOverAMultiLineLiteral(t *testing.T) {
+	good := []string{
+		` internal static @string printPaddedUint8(uint8 i) {`,
+		`-    return ((@string)new byte[]{`,
+		`+    return (@string)slice<byte>([`,
+		`         (byte)(b / 100 + (rune)'0'),`,
+		`         (byte)(b % 10 + (rune)'0'),`,
+		`-    }.slice());`,
+		`+    ]);`,
+		` }`,
+	}
+	c, _ := newClassifier("L1", false)
+	tl := c.classifyDiff(hunkDiff(prodFile, good))
+	if len(tl.refused) != 0 || tl.labels["L1"] == 0 {
+		t.Errorf("L1 multi-line cast: wanted every line to read L1, read %v, refused %v", tl.labels, tl.refused)
+	}
+
+	with := func(i int, s string) []string {
+		out := append([]string(nil), good...)
+		out[i] = s
+		return out
+	}
+	for _, b := range []struct {
+		name, mark string
+		lines      []string
+	}{
+		{"the cast type changed", "sstring", with(2, `+    return (sstring)slice<byte>([`)},
+		{"the close line changed", "+ x", with(6, `+    ]) + x;`)},
+	} {
+		tl := c.classifyDiff(hunkDiff(prodFile, b.lines))
+		named := false
+		for _, r := range tl.refused {
+			named = named || strings.Contains(r.rem+r.add, b.mark)
+		}
+		if !named {
+			t.Errorf("L1 multi-line cast, bad %s: no refusal names %q (labels %v, refused %v)", b.name, b.mark, tl.labels, tl.refused)
+		}
+	}
+
+	// A close pair with no cast's open lines in its file is a call's `]))` read short, and is refused.
+	tl = c.classifyDiff(hunkDiff(prodFile, []string{`     f();`, `-    }.slice());`, `+    ]);`}))
+	if len(tl.refused) == 0 {
+		t.Errorf("L1 multi-line cast, anchorless: wanted the close pair refused, read %v", tl.labels)
 	}
 }
 
