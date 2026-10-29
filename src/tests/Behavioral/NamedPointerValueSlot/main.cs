@@ -29,7 +29,7 @@ internal static void unnamedMap() {
 }
 
 internal static void Δslice() {
-    ref var s = ref heap<slice<nint>>(new nint[]{1, 2, 3}.slice(), out var Ꮡs);
+    ref var s = ref heap<slice<nint>>(slice<nint>([1, 2, 3]), out var Ꮡs);
     var p = new PS(Ꮡs);
     p.ValueSlot = append(p.ValueSlot, (nint)4);
     fmt.Println("slice:", len(p.ValueSlot), (p.ValueSlot)[3], len(s));

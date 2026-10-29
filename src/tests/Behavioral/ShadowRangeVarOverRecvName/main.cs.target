@@ -35,11 +35,11 @@ internal static void Main() {
     var a = Ꮡ(new node(name: "a"));
     var b = Ꮡ(new node(name: "b"));
 
-    foreach (var (_, n) in root.collect(new ж<node>[]{a, b}.slice())) {
+    foreach (var (_, n) in root.collect(slice<ж<node>>([a, b]))) {
         fmt.Println("got:", n.name);
     }
 
-    fmt.Println("first:", root.firstOr(new ж<node>[]{a, b}.slice()).name);
+    fmt.Println("first:", root.firstOr(slice<ж<node>>([a, b])).name);
     fmt.Println("empty:", root.firstOr(default).name);
 }
 

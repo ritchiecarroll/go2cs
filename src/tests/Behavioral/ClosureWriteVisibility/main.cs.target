@@ -138,7 +138,7 @@ internal static void probeG3() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
     slice<Func<nint>> fs = default;
-    foreach (var (_, x) in new nint[]{10, 20, 30}.slice()) {
+    foreach (var (_, x) in slice<nint>([10, 20, 30])) {
         fs = append(fsᴷ, fs, () => x);
     }
     fmt.Println("G3:", fs[0](), fs[1](), fs[2]());
@@ -156,7 +156,7 @@ internal static void probeH1() {
 }
 
 internal static void probeI1() {
-    ref var s = ref heap<slice<nint>>(new nint[]{1}.slice(), out var Ꮡs);
+    ref var s = ref heap<slice<nint>>(slice<nint>([1]), out var Ꮡs);
     void app() {
         Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (nint)2);
     }
@@ -288,7 +288,7 @@ internal static void Main() {
     probeN2();
     probeQ1();
     probeQ2();
-    var (v, n) = probeP1(new nint[]{10, 20, 30}.slice());
+    var (v, n) = probeP1(slice<nint>([10, 20, 30]));
     fmt.Println("P1:", v, n);
 }
 

@@ -93,7 +93,7 @@ internal partial struct main_ptrSlots /*dyn*/ {
 }
 
 internal static void Main() {
-    ref var xs = ref heap<slice<nint>>(new nint[]{1, 2, 3, 4, 5, 6, 7, 8}.slice(), out var Ꮡxs);
+    ref var xs = ref heap<slice<nint>>(slice<nint>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡxs);
     ref var xa = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50, 60, 70, 80}.array(), out var Ꮡxa);
     ref var vs = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
     var vsʗ1 = vs;
@@ -146,7 +146,7 @@ internal static void Main() {
         reflect.ValueOf((nint)0).Bytes();
     });
     expectPanic("Bytes []string", "of non-byte slice", () => {
-        reflect.ValueOf(new @string[]{}.slice()).Bytes();
+        reflect.ValueOf(slice<@string>([])).Bytes();
     });
     var x = new main_S(new byte[]{1, 2, 3, 4}.slice());
     var y = reflect.ValueOf(x).Bytes();
@@ -162,7 +162,7 @@ internal static void Main() {
     var b = reflect.ValueOf(Ꮡa).Elem().Bytes();
     b[1] = 43;
     fmt.Println("A bytes:", b, "aliases a:", a[1] == 43);
-    fmt.Println("[]B   bytes:", reflect.ValueOf(new main_B[]{1, 2, 3, 4}.slice()).Bytes());
+    fmt.Println("[]B   bytes:", reflect.ValueOf(slice<main_B>([1, 2, 3, 4])).Bytes());
     fmt.Println("*[4]B bytes:", reflect.ValueOf(Ꮡ(new array<main_B>(4))).Elem().Bytes());
     fmt.Println("SB    bytes:", reflect.ValueOf(new main_SB(new main_B[]{1, 2, 3, 4}.slice())).Bytes());
     fmt.Println("*AB   bytes:", reflect.ValueOf(@new<main_AB>()).Elem().Bytes());
@@ -217,12 +217,12 @@ internal static void Main() {
     fmt.Println("same field twice:", fp == @unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp)), " field vs other box:", fp == @unsafe.Pointer.FromPinnedBox(n), " map: same field twice found:", foundField);
 
     convRow("[]byte(nil) -> *[0]byte", slice<byte>(default), ж<array<byte>>.NilBoxOfDims(0L));
-    convRow("[]byte{} -> *[0]byte", new byte[]{}.slice(), Ꮡ(new array<byte>(0)));
-    convRow("[]byte{7} -> *[1]byte", new byte[]{7}.slice(), Ꮡ(new byte[]{7}.array()));
-    convRow("MyBytes{9} -> *[1]byte", (MyBytes)new byte[]{9}.slice(), Ꮡ(new byte[]{9}.array()));
-    convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", new byte[]{1, 2, 3, 4}.slice(), new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())));
+    convRow("[]byte{} -> *[0]byte", slice<byte>([]), Ꮡ(new array<byte>(0)));
+    convRow("[]byte{7} -> *[1]byte", slice<byte>([7]), Ꮡ(new byte[]{7}.array()));
+    convRow("MyBytes{9} -> *[1]byte", (MyBytes)slice<byte>([9]), Ꮡ(new byte[]{9}.array()));
+    convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", slice<byte>([1, 2, 3, 4]), new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())));
     convRow("[]byte(nil) -> MyBytesArrayPtr0", slice<byte>(default), (MyBytesArrayPtr0)nil);
-    convRow("[]byte{1,2,3,4} -> *MyBytesArray", new byte[]{1, 2, 3, 4}.slice(), Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())));
+    convRow("[]byte{1,2,3,4} -> *MyBytesArray", slice<byte>([1, 2, 3, 4]), Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())));
     convRow("[]byte(nil) -> *MyBytesArray0", slice<byte>(default), ж<MyBytesArray0>.NilBoxOfDims(0L));
     convRow("new([0]byte) -> *MyBytesArray0", Ꮡ(new array<byte>(0)), @new<MyBytesArray0>());
     convRow("new(MyBytesArray0) -> *[0]byte", @new<MyBytesArray0>(), Ꮡ(new array<byte>(0)));
@@ -231,11 +231,11 @@ internal static void Main() {
     convRow("new(int) -> *integer", @new<nint>(), @new<integer>());
     convRow("new(integer) -> *int", @new<integer>(), @new<nint>());
     convRow("*MyBuffer -> *bytes.Buffer", @new<main_MyBuffer>(), @new<bytes.Buffer>());
-    var src = new byte[]{1, 2, 3, 4}.slice();
+    var src = slice<byte>([1, 2, 3, 4]);
     var ap = reflect.ValueOf(src).Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(4L))).Interface()._<ж<array<byte>>>();
     ap.Value[2] = 99;
     fmt.Println("array pointer aliases the slice:", src[2] == 99);
-    ref var sh = ref heap<reflectꓸValue>(reflect.ValueOf(new byte[]{1, 2, 3, 4}.slice()), out var Ꮡsh);
+    ref var sh = ref heap<reflectꓸValue>(reflect.ValueOf(slice<byte>([1, 2, 3, 4])), out var Ꮡsh);
     var shʗ1 = sh;
     expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", () => {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));

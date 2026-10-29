@@ -62,7 +62,7 @@ internal static void direct() {
     fmt.Println("direct missing:", v == nil, ok);
 
     delete(d, 3);
-    var keys = new nint[]{}.slice();
+    var keys = slice<nint>([]);
     foreach (var (k, _) in d) {
         keys = append(keys, k);
     }
@@ -98,7 +98,7 @@ internal static void viaArray() {
 }
 
 internal static void viaSlice() {
-    var s = new ViaSlice(new map<nint, slice<ViaSlice>>{[1] = new ViaSlice[]{new ViaSlice(new map<nint, slice<ViaSlice>>{[2] = default}), default}.slice()});
+    var s = new ViaSlice(new map<nint, slice<ViaSlice>>{[1] = slice<ViaSlice>([new ViaSlice(new map<nint, slice<ViaSlice>>{[2] = default}), default])});
     fmt.Println("viaSlice:", len(s), len(s[1]), len(s[1][0]), s[1][1] == nil);
 }
 

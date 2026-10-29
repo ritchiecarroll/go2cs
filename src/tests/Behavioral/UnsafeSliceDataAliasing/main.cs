@@ -32,7 +32,7 @@ internal static void show(@string label, slice<item> items) {
 }
 
 internal static void Main() {
-    var items = new item[]{new("a", 1), new("b", 2), new("c", 3)}.slice();
+    var items = slice<item>([new("a", 1), new("b", 2), new("c", 3)]);
 
     var g = newGroup(items);
     show("round trip", g.items());
@@ -46,11 +46,11 @@ internal static void Main() {
     fmt.Println("tail identity:", @unsafe.SliceData(tail) == Ꮡ(items, 1));
     fmt.Println("tail head:", @unsafe.SliceData(tail).key);
 
-    var nums = new int64[]{10, 20, 30}.slice();
+    var nums = slice<int64>([10, 20, 30]);
     fmt.Println("int64 head:", @unsafe.SliceData(nums).Value);
     fmt.Println("int64 tail head:", @unsafe.SliceData(nums[2..]).Value);
 
-    var ptrs = new ж<item>[]{Ꮡ(items, 0), Ꮡ(items, 2)}.slice();
+    var ptrs = slice<ж<item>>([Ꮡ(items, 0), Ꮡ(items, 2)]);
     fmt.Println("ptr elem:", @unsafe.Slice(@unsafe.SliceData(ptrs), len(ptrs))[1].key);
 
     var b = slice<byte>("hello"u8);

@@ -10,7 +10,7 @@ partial struct probe {
 }
 
 internal static void Main() {
-    var vals = new nint[]{3, 1, 4, 1, 5}.slice();
+    var vals = slice<nint>([3, 1, 4, 1, 5]);
     var counts = new map<@string, nint>{["a"] = 2, ["b"] = 7};
     nint total = 0;
 
@@ -19,7 +19,7 @@ internal static void Main() {
         var valsʗ2 = vals;
 
         var countsʗ1 = counts;
-    foreach (var (_, p) in new probe[]{
+    foreach (var (_, p) in slice<probe>([
         new(name: "sum", run: () => {
             nint t = 0;
             foreach (var (_, v) in valsʗ1) {
@@ -29,7 +29,7 @@ internal static void Main() {
         }),
         new(name: "len", run: () => len(valsʗ2)),
         new(name: "map", run: () => countsʗ1["a"] + countsʗ1["b"])
-    }.slice()) {
+    ])) {
         nint n = p.run();
         total += n;
         fmt.Println(p.name, n);
@@ -38,16 +38,16 @@ internal static void Main() {
     fmt.Println("total", total);
 
     for (nint round = 0; round < 2; round++) {
-        ref var seen = ref heap<slice<@string>>(new @string[]{}.slice(), out var Ꮡseen);
+        ref var seen = ref heap<slice<@string>>(slice<@string>([]), out var Ꮡseen);
 
-        foreach (var (_, add) in new Action<@string>[]{
+        foreach (var (_, add) in slice<Action<@string>>([
             (@string s) => {
                 Ꮡseen.ValueSlot = append(Ꮡseen.ValueSlot, s + "!"u8);
             },
             (@string s) => {
                 Ꮡseen.ValueSlot = append(Ꮡseen.ValueSlot, s + "?"u8);
             }
-        }.slice()) {
+        ])) {
             add(fmt.Sprint(round));
         }
         fmt.Println(round, seen);

@@ -35,7 +35,7 @@ internal static void Main() {
     ref var plain = ref heap<reflectꓸValue>(reflect.ValueOf("abcdef"), out var Ꮡplain);
     show("plain [1:4]", plain.Slice(1, 4));
 
-    var full = new nint[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
+    var full = slice<nint>([0, 1, 2, 3, 4, 5, 6, 7]);
     ref var rf = ref heap<reflectꓸValue>(reflect.ValueOf(full), out var Ꮡrf);
     var t3 = rf.Slice3(2, 5, 6);
     fmt.Printf("slice3 slice: len=%d cap=%d val=%v\n"u8, t3.Len(), t3.Cap(), t3.Interface());
