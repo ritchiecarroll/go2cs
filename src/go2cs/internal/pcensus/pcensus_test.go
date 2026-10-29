@@ -212,6 +212,17 @@ var plants = []plant{
 	one("TRc bad: defer became goǃ", testFile, `        defer(() => srv.Close(), ref ᒐ);`, `        goǃ(ᴛ0 => ᴛ0.Close(), srv, ref ᒐ);`, "UNCLASSIFIED"),
 	one("TRc bad: in a production file", prodFile, `        defer(() => srv.Close(), ref ᒐ);`, `        defer(ᴛ0 => ᴛ0.Close(), srv, ref ᒐ);`, "TEST-ONLY(TRc)"),
 	one("MAP good", testFile, `[assembly: GoPositionMap("AAA")]`, `[assembly: GoPositionMap("AAB")]`, "MAP"),
+	// J (#38): a Go trailing comment pads to the column gofmt gave its run, so only the spaces between a line's code
+	// and its comment change.
+	one("J good: padded to its run", prodFile, `    internal nint x; // the x coordinate`, `    internal nint x;        // the x coordinate`, "J"),
+	one("J good: padding removed", prodFile, `    nint n = 3;    // a count`, `    nint n = 3; // a count`, "J"),
+	one("J good in a converted test", testFile, `        f(x); // first`, `        f(x);      // first`, "J"),
+	one("J good past a string holding //", prodFile, `    s = "http://x"; // a link`, `    s = "http://x";   // a link`, "J"),
+	one("J bad: the code changed too", prodFile, `    internal nint x; // c`, `    internal nint y;    // c`, "UNCLASSIFIED"),
+	one("J bad: the comment changed", prodFile, `    x = 1; // a`, `    x = 1;   // b`, "UNCLASSIFIED"),
+	one("J bad: spaces inside a string", prodFile, `    s = "a //b";`, `    s = "a   //b";`, "UNCLASSIFIED"),
+	one("J bad: a comment joined the line", prodFile, `    x = 1;`, `    x = 1; // c`, "UNCLASSIFIED"),
+	one("J bad: the indentation changed", prodFile, `    x = 1; // c`, `        x = 1;  // c`, "UNCLASSIFIED"),
 	// A change no item makes, and a removal with nothing beside it.
 	one("bad: an unrelated rewrite", prodFile, `return x + 1;`, `return x + 2;`, "UNCLASSIFIED"),
 	{"bad: a lone removal", prodFile, []string{`    x = 1;`}, nil, "UNPAIRED"},

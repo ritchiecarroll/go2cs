@@ -37,6 +37,9 @@ type item struct {
 	Join            *joinRule
 	Block           *blockRule
 	TestOnly        bool
+	// Respaces marks an item whose change is the spacing its Canon removes, with no shape that appears or goes:
+	// a pair its Canon makes equal moves whenever the two lines differ.
+	Respaces bool
 }
 
 // rewrite is one canonicalizing replacement (Go regexp template syntax), or, when fn is set, a function of each match.
@@ -200,6 +203,47 @@ const (
 	iifeOldHead = `\(\((Action|Func)(?:<(` + generic + `)>)?\)\(` + iifeAttr + `(\([^()\n]*\)|[^\s()=,]+) =>`
 	iifeNewHead = `func\(` + iifeAttr + `(?:(\([^()\n]*\)|[^\s()]+) )?\(((?:[^()\n]|\([^()\n]*\))*)\) =>`
 )
+
+// trailingCommentStart is the index of the `//` that opens a line's trailing comment: the first one outside string
+// and character literals (a verbatim string's doubled quote included), or -1 when the line has none.
+func trailingCommentStart(s string) int {
+	for i := 0; i < len(s); i++ {
+		switch c := s[i]; {
+		case c == '@' && i+1 < len(s) && s[i+1] == '"':
+			for i += 2; i < len(s); i++ {
+				if s[i] == '"' {
+					if i+1 < len(s) && s[i+1] == '"' {
+						i++
+						continue
+					}
+					break
+				}
+			}
+		case c == '"' || c == '\'':
+			for i++; i < len(s) && s[i] != c; i++ {
+				if s[i] == '\\' {
+					i++
+				}
+			}
+		case c == '/' && i+1 < len(s) && s[i+1] == '/':
+			return i
+		}
+	}
+	return -1
+}
+
+// padTrailingComment respells the spaces between a line's code and its trailing comment as one.
+func padTrailingComment(line string) string {
+	at := trailingCommentStart(line)
+	if at <= 0 {
+		return line
+	}
+	code := strings.TrimRight(line[:at], " ")
+	if code == "" || len(code) == at {
+		return line
+	}
+	return code + " " + line[at:]
+}
 
 func iifeNormal(attr, result string, types, names []string) string {
 	return "func⦃" + attr + "|" + result + "|" + strings.Join(types, ", ") + "|" + strings.Join(names, ", ") + "⦄ =>"
@@ -561,6 +605,13 @@ var items = []item{
 				rx(`^\s*$`),
 			},
 		},
+	},
+	{
+		// A Go trailing comment pads to the column gofmt gave its run (docs/PLAN-comment-and-spacing-parity.md, class
+		// J): only the spaces between a line's code and its comment change, so the item has no count of its own.
+		ID: "J", Seat: "#38", Title: "a Go trailing comment pads to the column gofmt gave its run",
+		Canon:    []rewrite{{re: rx(`^.*$`), fn: padTrailingComment}},
+		Respaces: true,
 	},
 	{
 		ID: "E1", Seat: "#19", Title: "`} else if (` on one line, and `) {` at the end of a line",

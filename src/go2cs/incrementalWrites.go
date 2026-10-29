@@ -47,6 +47,13 @@ var alwaysWriteSources atomic.Bool
 func writeSourceIfChanged(fileName string, content []byte) (written bool, err error) {
 	content = uniformLineEndings(content)
 
+	// A trailing comment's alignment sentinel is stripped where the file's text is finished
+	// (alignEmittedTrailingComments); one that reaches a writer is a path that skipped it, so name the file and strip it.
+	if bytes.Contains(content, []byte(alignSentinelMark)) {
+		showWarning("Trailing-comment alignment sentinels reached \"%s\" unaligned; stripped (trailingCommentAlignment.go)", fileName)
+		content = []byte(stripAlignSentinels(string(content)))
+	}
+
 	if !alwaysWriteSources.Load() && !needToWriteFile(fileName, content) {
 		return false, nil
 	}

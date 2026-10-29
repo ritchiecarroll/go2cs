@@ -90,6 +90,10 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 			}
 		}
 
+		// A resolved name changes the width of the code ahead of a trailing comment, so pad the
+		// file's aligned comment runs again (trailingCommentAlignment.go).
+		content = repadAlignedRuns(fileName, content)
+
 		// This pass runs AFTER the file was written, so it is the one rewrite the position map
 		// cannot see. Its replacements are type NAMES and cannot span lines, and the map's C#
 		// line numbers are only valid while that stays true — so say so loudly rather than let a

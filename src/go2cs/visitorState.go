@@ -142,6 +142,8 @@ type Visitor struct {
 	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
 	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
+	trailingRuns       map[token.Pos]int // each Go trailing // comment's gofmt-aligned run (trailingCommentAlignment.go)
+	alignedRuns        []alignedRun      // the runs alignEmittedTrailingComments padded in the finished text
 	newline            string
 	indentLevel        int
 	options            Options

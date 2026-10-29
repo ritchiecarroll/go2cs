@@ -782,6 +782,11 @@ func (v *Visitor) writeOutputFile(outputFileName string) error {
 	// emitted source (positionMapOperations).
 	v.finalizePositionMap(outputFileName)
 
+	// Pad Go's trailing comments into the columns gofmt gave them, now that the text is final; the runs are kept for
+	// the marker passes that rewrite this file after it is written (trailingCommentAlignment.go).
+	v.alignEmittedTrailingComments()
+	registerAlignedRuns(outputFileName, v.alignedRuns, 0)
+
 	content := []byte(v.outputBuilder.String())
 
 	// A file still holding DEFERRED MARKERS is rewritten by the marker passes once the package is visited, so its text

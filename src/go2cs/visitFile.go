@@ -89,10 +89,14 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.commentGroups = file.Comments
 
 	if v.options.includeComments {
+		// The gofmt-aligned run of each trailing comment, which the text of the comment carries to the alignment
+		// pass (trailingCommentAlignment.go)
+		v.trailingRuns = trailingCommentRuns(v.fset, file)
+
 		// Create standalone comments map
 		for _, commentGroup := range file.Comments {
 			for _, comment := range commentGroup.List {
-				v.standAloneComments[comment.Slash] = carriedComment(comment.Text)
+				v.standAloneComments[comment.Slash] = v.markTrailingComment(comment.Slash, carriedComment(comment.Text))
 			}
 		}
 

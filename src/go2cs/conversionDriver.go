@@ -609,8 +609,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// state (the part its sibling files depend on); emit the auto conversion to the
 					// non-compiled `<name>.cs.auto` review sibling, leaving the marked `.cs` untouched.
 					visitor.finalizePositionMap(outputFileName)
+					visitor.alignEmittedTrailingComments()
 
-					if err := writeAutoConversionSibling(outputFileName, baseName, visitor.outputBuilder.String()); err != nil {
+					if err := writeAutoConversionSibling(outputFileName, baseName, visitor.outputBuilder.String(), visitor.alignedRuns); err != nil {
 						showWarning("%s", err)
 					}
 				} else if err := visitor.writeOutputFile(outputFileName); err != nil {
